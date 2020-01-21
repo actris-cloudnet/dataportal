@@ -109,3 +109,6 @@ data
 # Python virtual env
 .venv/
 .venv-dev/
+
+# Visual studio code project files
+.vscode
