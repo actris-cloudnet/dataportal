@@ -103,5 +103,9 @@ dist
 # TernJS port file
 .tern-port
 
-# Ignore data dir
-data/
+# Data for testing
+data
+
+# Python virtual env
+.venv/
+.venv-dev/
