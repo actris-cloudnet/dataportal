@@ -106,6 +106,9 @@ dist
 # Data for testing
 data
 
+# Build data
+build
+
 # Python virtual env
 .venv/
 .venv-dev/
