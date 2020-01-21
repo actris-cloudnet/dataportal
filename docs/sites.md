@@ -1,5 +1,7 @@
 # ACTRIS-Cloudnet sites
 
+Empty fields for instruments means instrument missing or not known.
+
 | Name              | Folder name      | Country     | Radar  | Lidar  | MWR    | Model     | Raw data to FMI | Contact                     |
 | ----------------- | ---------------- | ----------- | ------ | ------ | ------ | --------- | --------------- | --------------------------- |
 | Bucharest         | bucharest        | Romania     | RPG    | CHM15K |        | ECMWF     | Yes             |                             |
