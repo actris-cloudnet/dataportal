@@ -1,27 +1,35 @@
 {
-  "name": "dataportal",
-  "version": "0.0.1",
-  "description": "Actris cloud remote sensing data portal",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
-  "dependencies": {
-    "@types/xml2js": "^0.4.5",
-    "xml2js": "^0.4.23"
-  },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/actris-cloudnet/dataportal.git"
-  },
-  "author": "",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/actris-cloudnet/dataportal/issues"
-  },
-  "homepage": "https://github.com/actris-cloudnet/dataportal#readme"
+   "name": "dataportal",
+   "version": "0.0.1",
+   "description": "Actris cloud remote sensing data portal",
+   "main": "index.js",
+   "directories": {
+      "doc": "docs"
+   },
+   "dependencies": {
+      "@types/node": "^13.1.8",
+      "@types/xml2js": "^0.4.5",
+      "pg": "^7.17.1",
+      "reflect-metadata": "^0.1.10",
+      "typeorm": "0.2.22",
+      "xml2js": "^0.4.23"
+   },
+   "devDependencies": {
+      "ts-node": "3.3.0",
+      "typescript": "3.3.3333"
+   },
+   "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "start": "ts-node src/index.ts"
+   },
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/actris-cloudnet/dataportal.git"
+   },
+   "author": "",
+   "license": "MIT",
+   "bugs": {
+      "url": "https://github.com/actris-cloudnet/dataportal/issues"
+   },
+   "homepage": "https://github.com/actris-cloudnet/dataportal#readme"
 }
