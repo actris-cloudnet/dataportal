@@ -6,10 +6,18 @@ import { File } from "./entity/File"
 
 interface NetCDFXML {
     netcdf: {
-        attribute: Array<object>
+        attribute: Array<{
+            '$': {
+                name: string
+                value: string
+            }
+        }>
+        '$': { location: string }
     }
+
 }
 
+// Cloudnet NC file header specification
 const ncObjectSpec: Array<string> = [
     'title',
     'location',
@@ -22,10 +30,10 @@ const ncObjectSpec: Array<string> = [
     'day',
 ]
 
-const getMissingFields = (obj): Array<string> =>
+const getMissingFields = (obj: any): Array<string> =>
     ncObjectSpec.filter(field => typeof obj[field] !== 'string')
 
-const stringify = (obj): string =>
+const stringify = (obj: any): string =>
     JSON.stringify(obj, null, 2)
 
 function obj2File(obj: any, filename: string): File {
@@ -58,7 +66,7 @@ async function readStdin() {
     if(missingFields.length > 0) {
         throw TypeError(`
         Invalid header fields at ${filename}:\n
-        Missing: ${stringify(missingFields)}\n
+        Missing or invalid: ${stringify(missingFields)}\n
         ${stringify(ncObj)}`)
     }
     return obj2File(ncObj, filename)
@@ -68,9 +76,9 @@ Promise.all([
     readStdin(),
     createConnection()
 ])
-.then(([file, connection]) => {
+.then(([file, connection]) => 
     connection.manager.save(file).then(_ =>
         connection.close()
     )
-})
-.catch(err => console.error(`Failed to import NetCDF XML to DB: `, err))
+)
+.catch((err: Error) => console.error(`Failed to import NetCDF XML to DB: `, err))

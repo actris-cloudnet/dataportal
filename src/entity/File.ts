@@ -22,38 +22,38 @@ export enum FilePublicity {
 export class File {
 
     @PrimaryColumn("uuid")
-    uuid: string;
+    uuid!: string;
 
     @Column()
-    title: string;
+    title!: string;
 
     @Column()
-    date: Date;
+    date!: Date;
 
     @Column()
-    location: string;
+    location!: string;
 
     @Column()
-    history: string;
+    history!: string;
 
     @Column()
-    filepath: string
+    filepath!: string
 
     @Column({
         type: "enum",
         enum: FilePublicity,
         default: FilePublicity.PUBLIC
     })
-    publicity: FilePublicity
+    publicity!: FilePublicity
 
     @Column({
         type: "enum",
         enum: CloudnetFileType
     })
-    type: CloudnetFileType
+    type!: CloudnetFileType
 
 
 
     @CreateDateColumn()
-    createdAt: Date;
+    createdAt!: Date;
 }
