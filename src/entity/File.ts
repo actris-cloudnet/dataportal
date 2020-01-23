@@ -1,4 +1,5 @@
-import {Entity, Column, PrimaryColumn, CreateDateColumn} from "typeorm";
+/* eslint-disable no-unused-vars */
+import {Entity, Column, PrimaryColumn, CreateDateColumn} from 'typeorm'
 
 export enum CloudnetFileType {
     LIDAR = 'lidar',
@@ -13,15 +14,15 @@ export enum CloudnetFileType {
 }
 
 export enum FilePublicity {
-    PUBLIC = "public",
-    NO_DL = "nodl",
-    HIDDEN = "hidden"
+    PUBLIC = 'public',
+    NO_DL = 'nodl',
+    HIDDEN = 'hidden'
 }
 
 @Entity()
 export class File {
 
-    @PrimaryColumn("uuid")
+    @PrimaryColumn('uuid')
     uuid!: string;
 
     @Column()
@@ -40,14 +41,14 @@ export class File {
     filepath!: string
 
     @Column({
-        type: "enum",
+        type: 'enum',
         enum: FilePublicity,
         default: FilePublicity.PUBLIC
     })
     publicity!: FilePublicity
 
     @Column({
-        type: "enum",
+        type: 'enum',
         enum: CloudnetFileType
     })
     type!: CloudnetFileType
