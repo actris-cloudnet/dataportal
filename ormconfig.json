@@ -1,10 +1,7 @@
 {
-   "type": "mysql",
+   "type": "postgres",
    "host": "localhost",
-   "port": 3306,
-   "username": "test",
-   "password": "test",
-   "database": "test",
+   "database": "dataportal",
    "synchronize": true,
    "logging": false,
    "entities": [
