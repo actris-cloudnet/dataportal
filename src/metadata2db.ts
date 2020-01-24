@@ -1,5 +1,6 @@
 import { parseStringPromise } from 'xml2js'
-import { readFileSync } from 'fs'
+import { readFileSync, createReadStream, statSync } from 'fs'
+import { createHash } from 'crypto'
 import 'reflect-metadata'
 import { createConnection } from 'typeorm'
 import { File } from './entity/File'
@@ -36,7 +37,7 @@ const getMissingFields = (obj: any): Array<string> =>
 const stringify = (obj: any): string =>
     JSON.stringify(obj, null, 2)
 
-function obj2File(obj: any, filename: string): File {
+function obj2File(obj: any, filename: string, chksum: string, filesize: number): File {
     const file = new File()
     file.date = new Date(
         parseInt(obj.year),
@@ -48,35 +49,70 @@ function obj2File(obj: any, filename: string): File {
     file.history = obj.history
     file.type = obj.cloudnet_file_type
     file.uuid = obj.file_uuid
-    file.filepath = filename
+    file.path = filename
+    file.checksum = chksum
+    file.size = filesize
     return file
 }
 
-async function readStdin() {
+async function computeFileChecksum(filename: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        try {
+            const hash = createHash('sha256')
+            const input = createReadStream(filename)
+            input.on('readable', () => {
+                const data = input.read()
+                if (data)
+                    hash.update(data)
+                else {
+                    const chksum = hash.digest('hex')
+                    resolve(chksum)
+                }
+            })
+        } catch(err) {
+            reject(err)
+        }
+    })
+}
+
+async function computeFileSize(filename: string) {
+    return await statSync(filename).size
+}
+
+async function parseXmlFromStdin(): Promise<[any, string]> {
     const xml: string = await readFileSync(0, 'utf-8')
 
     const { netcdf }: NetCDFXML = await parseStringPromise(xml)
-    const filename: string = netcdf['$'].location
+    const filename = netcdf['$'].location
     const ncObj: any = netcdf.attribute
         .map((a) => a['$'])
         .map(({ name, value }) => ({ [name]: value }))
         .reduce((acc, cur) => Object.assign(acc, cur))
 
-    const missingFields = getMissingFields(ncObj)         
+    const missingFields = getMissingFields(ncObj)
     if (missingFields.length > 0) {
         throw TypeError(`
         Invalid header fields at ${filename}:\n
         Missing or invalid: ${stringify(missingFields)}\n
         ${stringify(ncObj)}`)
     }
-    return obj2File(ncObj, filename)
+
+    return [ncObj, filename]
 }
 
-Promise.all([
-    readStdin(),
-    createConnection()
-]).then(([file, connection]) =>
-    connection.manager.save(file).then(_ =>
-        connection.close()
+parseXmlFromStdin()
+    .then(([ncObj, filename]) =>
+        Promise.all([
+            filename,
+            computeFileChecksum(filename),
+            computeFileSize(filename),
+            createConnection(),
+            ncObj
+        ])
     )
-).catch((err: Error) => console.error('Failed to import NetCDF XML to DB: ', err))
+    .then(([filename, chksum, filesize, connection, ncObj]) => {
+        const file = obj2File(ncObj, filename, chksum, filesize)
+        connection.manager.save(file)
+            .then(_ => connection.close())
+    })
+    .catch(err => console.error('Failed to import NetCDF XML to DB: ', err))
