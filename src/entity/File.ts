@@ -23,22 +23,19 @@ export enum FilePublicity {
 export class File {
 
     @PrimaryColumn('uuid')
-    uuid!: string;
+    uuid!: string
 
     @Column()
-    title!: string;
+    title!: string
 
     @Column()
-    date!: Date;
+    date!: Date
 
     @Column()
-    location!: string;
+    location!: string
 
     @Column()
-    history!: string;
-
-    @Column()
-    filepath!: string
+    history!: string
 
     @Column({
         type: 'enum',
@@ -53,8 +50,15 @@ export class File {
     })
     type!: CloudnetFileType
 
-
-
     @CreateDateColumn()
-    createdAt!: Date;
+    createdAt!: Date
+
+    @Column()
+    path!: string
+
+    @Column()
+    checksum!: string
+
+    @Column()
+    size!: number
 }
