@@ -103,8 +103,9 @@ dist
 # TernJS port file
 .tern-port
 
-# Data for testing
+# Data
 data
+inbox
 
 # Build data
 build
