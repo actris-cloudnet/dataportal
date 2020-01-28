@@ -1,3 +1,7 @@
 #!/bin/bash
+N_PROCS=${1:-1}
+FILES=$(find data/ -maxdepth 5 -mindepth 5 -name "*.nc")
+N_FILES=$(printf "%s\n" "${FILES[@]}" | wc -l)
 
-find data/ -maxdepth 5 -mindepth 5 -name "*.nc"|xargs -tn1 scripts/ncdump2node.sh
+printf "%s\n" "${FILES[@]}" | xargs -tn1 -P$N_PROCS scripts/ncdump2node.sh 2>&1 | awk '{printf "%d/%d\r",NR,'$N_FILES'}'
+echo
