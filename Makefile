@@ -18,3 +18,10 @@ purge:
 clean:
 	$(current_dir)/node_modules/typeorm/cli.js schema:drop
 	$(current_dir)/node_modules/typeorm/cli.js schema:sync
+
+start:
+	( \
+		scripts/listen-inbox.sh & \
+		echo $! > .listen-inbox.pid \
+	)
+	npm start
