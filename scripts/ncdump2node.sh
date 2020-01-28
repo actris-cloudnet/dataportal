@@ -1,5 +1,7 @@
 #!/bin/bash
 
-file=$1
+FILE=$1
+ERROUT=${2-/dev/stderr}
+STDOUT=${2-/dev/stdout}
 
-ncdump -xh $file | node build/metadata2db.js
+ncdump -xh $FILE | node build/metadata2db.js > $STDOUT 2> $ERROUT
