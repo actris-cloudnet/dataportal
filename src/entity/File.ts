@@ -2,15 +2,15 @@
 import {Entity, Column, PrimaryColumn, CreateDateColumn} from 'typeorm'
 
 export enum CloudnetFileType {
+    CATEGORIZE = 'categorize',
+    CLASSIFICATION = 'classification',
+    DRIZZLE = 'drizzle',
+    IWC = 'iwc',
     LIDAR = 'lidar',
-    RADAR = 'radar',
+    LWC = 'lwc',
     MODEL = 'model',
     MWR = 'mwr',
-    CATEGORIZE = 'categorize',
-    LWC = 'lwc',
-    IWC = 'iwc',
-    DRIZZLE = 'drizzle',
-    CLASSIFICATION = 'classification'
+    RADAR = 'radar'
 }
 
 export enum FilePublicity {
