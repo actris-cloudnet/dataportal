@@ -82,6 +82,6 @@ parseXmlFromStdin()
     .then(([ncObj, filename, chksum, filesize, connection]) => {
         const file = new File(ncObj, filename, chksum, filesize)
         return connection.manager.save(file)
-            .then(_ => connection.close())
+            .finally(() => connection.close())
     })
     .catch(err => console.error('Failed to import NetCDF XML to DB: ', err))
