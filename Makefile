@@ -7,7 +7,7 @@ createdb:
 
 install:
 	npm install
-	$(current_dir)/node_modules/typeorm/cli.js schema:sync
+	npx typeorm schema:sync
 	tsc --build tsconfig.json
 
 purge: 
@@ -16,8 +16,8 @@ purge:
 	-rm -r node_modules
 
 clean:
-	$(current_dir)/node_modules/typeorm/cli.js schema:drop
-	$(current_dir)/node_modules/typeorm/cli.js schema:sync
+	npx typeorm schema:drop
+	npx typeorm schema:sync
 
 start:
 	( \
