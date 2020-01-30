@@ -37,7 +37,7 @@
             "error",
             "never"
         ],
-        "no-unused-vars": [2, {"args": "after-used", "argsIgnorePattern": "^_"}],
+        "no-unused-vars": [1, {"args": "after-used", "argsIgnorePattern": "^_"}],
         "no-trailing-spaces": 2,
         "eol-last": ["error", "never"]
     }
