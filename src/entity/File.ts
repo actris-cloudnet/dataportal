@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import {Entity, Column, PrimaryColumn, CreateDateColumn} from 'typeorm'
+import { NetCDFObject } from './NetCDFObject'
 
 export enum CloudnetFileType {
     CATEGORIZE = 'categorize',
@@ -18,6 +19,7 @@ export enum FilePublicity {
     NO_DL = 'nodl',
     HIDDEN = 'hidden'
 }
+
 
 @Entity()
 export class File {
@@ -61,4 +63,23 @@ export class File {
 
     @Column()
     size!: number
+
+    constructor(obj: NetCDFObject, filename: string, chksum: string, filesize: number) {
+        // A typeorm hack, see https://github.com/typeorm/typeorm/issues/3903
+        if(typeof obj == 'undefined') return
+
+        this.date = new Date(
+            parseInt(obj.year),
+            parseInt(obj.month),
+            parseInt(obj.day)
+        )
+        this.title = obj.title
+        this.location = obj.location
+        this.history = obj.history
+        this.type = obj.cloudnet_file_type as CloudnetFileType
+        this.uuid = obj.file_uuid
+        this.path = filename
+        this.checksum = chksum
+        this.size = filesize
+    }
 }
