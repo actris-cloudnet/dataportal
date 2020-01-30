@@ -4,6 +4,7 @@ import { createHash } from 'crypto'
 import 'reflect-metadata'
 import { createConnection } from 'typeorm'
 import { File } from './entity/File'
+import { isNetCDFObject, getMissingFields, NetCDFObject } from './entity/NetCDFObject'
 
 interface NetCDFXML {
     netcdf: {
@@ -18,42 +19,8 @@ interface NetCDFXML {
 
 }
 
-// Cloudnet NC file header specification
-const ncObjectSpec: Array<string> = [
-    'title',
-    'location',
-    'history',
-    'cloudnet_file_type',
-    'file_uuid',
-    'Conventions',
-    'year',
-    'month',
-    'day',
-]
-
-const getMissingFields = (obj: any): Array<string> =>
-    ncObjectSpec.filter(field => typeof obj[field] !== 'string')
-
 const stringify = (obj: any): string =>
     JSON.stringify(obj, null, 2)
-
-function obj2File(obj: any, filename: string, chksum: string, filesize: number): File {
-    const file = new File()
-    file.date = new Date(
-        parseInt(obj.year),
-        parseInt(obj.month),
-        parseInt(obj.day)
-    )
-    file.title = obj.title
-    file.location = obj.location
-    file.history = obj.history
-    file.type = obj.cloudnet_file_type
-    file.uuid = obj.file_uuid
-    file.path = filename
-    file.checksum = chksum
-    file.size = filesize
-    return file
-}
 
 async function computeFileChecksum(filename: string): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -76,10 +43,10 @@ async function computeFileChecksum(filename: string): Promise<string> {
 }
 
 async function computeFileSize(filename: string) {
-    return await statSync(filename).size
+    return statSync(filename).size
 }
 
-async function parseXmlFromStdin(): Promise<[any, string]> {
+async function parseXmlFromStdin(): Promise<[NetCDFObject, string]> {
     const xml: string = await readFileSync(0, 'utf-8')
 
     const { netcdf }: NetCDFXML = await parseStringPromise(xml)
@@ -89,8 +56,8 @@ async function parseXmlFromStdin(): Promise<[any, string]> {
         .map(({ name, value }) => ({ [name]: value }))
         .reduce((acc, cur) => Object.assign(acc, cur))
 
-    const missingFields = getMissingFields(ncObj)
-    if (missingFields.length > 0) {
+    if(!isNetCDFObject(ncObj)) {
+        const missingFields = getMissingFields(ncObj)
         throw TypeError(`
         Invalid header fields at ${filename}:\n
         Missing or invalid: ${stringify(missingFields)}\n
@@ -103,15 +70,15 @@ async function parseXmlFromStdin(): Promise<[any, string]> {
 parseXmlFromStdin()
     .then(([ncObj, filename]) =>
         Promise.all([
+            ncObj,
             filename,
             computeFileChecksum(filename),
             computeFileSize(filename),
-            createConnection(),
-            ncObj
+            createConnection()
         ])
     )
-    .then(([filename, chksum, filesize, connection, ncObj]) => {
-        const file = obj2File(ncObj, filename, chksum, filesize)
+    .then(([ncObj, filename, chksum, filesize, connection]) => {
+        const file = new File(ncObj, filename, chksum, filesize)
         return connection.manager.save(file)
             .then(_ => connection.close())
     })
