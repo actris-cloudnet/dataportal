@@ -6,6 +6,8 @@ import { createConnection } from 'typeorm'
 import { File } from './entity/File'
 import { isNetCDFObject, getMissingFields, NetCDFObject } from './entity/NetCDFObject'
 
+const connName: string = process.env.NODE_ENV == 'test' ? 'test' : 'default'
+
 interface NetCDFXML {
     netcdf: {
         attribute: Array<{
@@ -74,7 +76,7 @@ parseXmlFromStdin()
             filename,
             computeFileChecksum(filename),
             computeFileSize(filename),
-            createConnection()
+            createConnection(connName)
         ])
     )
     .then(([ncObj, filename, chksum, filesize, connection]) => {

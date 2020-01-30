@@ -4,6 +4,7 @@ current_dir = $(shell pwd)
 
 createdb:
 	createdb dataportal
+	createdb dataportal-test
 
 install:
 	npm install
@@ -12,6 +13,7 @@ install:
 
 purge: 
 	-dropdb dataportal
+	-dropdb dataportal-test
 	-rm -r build
 	-rm -r node_modules
 

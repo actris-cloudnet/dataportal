@@ -28,7 +28,7 @@
       "typescript": "3.3.3333"
    },
    "scripts": {
-      "test": "npx jest",
+      "test": "export NODE_ENV=test && npx jest && unset NODE_ENV",
       "start": "nodemon build/server.js"
    },
    "repository": {
