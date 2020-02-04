@@ -1,0 +1,76 @@
+#!/bin/zsh
+
+if [ -z $1 ]; then
+    echo "Action not specified"
+    exit 1
+fi
+
+action=$1
+
+backend_port=3000
+frontend_port=8000
+pid_dir='.'
+inbox_dir='inbox'
+
+if [[ "$NODE_ENV" == 'test' ]]; then
+    backend_port=3001
+    frontend_port=8001
+    pid_dir='tests'
+    inbox_dir='tests/data/inbox'
+fi
+
+typeset -A targets=(
+    ["$pid_dir/.python.pid"]="python3 -m http.server --directory public --bind localhost $frontend_port"
+    ["$pid_dir/.listen-inbox.pid"]="scripts/listen-inbox.sh $inbox_dir"
+    ["$pid_dir/.node.pid"]="npx nodemon build/server.js $backend_port"
+)
+
+
+case "$action" in
+    start)
+    for target cmd in ${(kv)targets}; do
+        if [[ ! -f $target ]]; then
+            eval "${cmd} >> logs/all.log 2>&1 &"
+            echo $! > $target
+        fi
+    done
+
+    while ! nc -z localhost $backend_port; do sleep 0.5; done
+    while ! nc -z localhost $frontend_port; do sleep 0.5; done
+    ;;
+
+    stop)
+    for target cmd in ${(kv)targets}; do
+        pkill -F $target && rm $target
+    done
+    truncate --size 0 logs/all.log
+    ;;
+
+    purge)
+    dropdb dataportal
+    dropdb dataportal-test
+    rm -r build
+    rm -r node_modules
+    ;;
+
+    clean)
+    npx typeorm schema:drop
+    npx typeorm schema:sync
+    for target cmd in ${(kv)targets}; do
+        rm -f $target
+    done
+    ;;
+
+    postinstall)
+    createdb dataportal
+    createdb dataportal-test
+    npx typeorm schema:sync
+    tsc --build tsconfig.json
+    ;;
+
+    *)
+    echo "Unknown action $action"
+    exit 1
+    ;;
+esac
+

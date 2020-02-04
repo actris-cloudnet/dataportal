@@ -28,8 +28,12 @@
       "typescript": "3.3.3333"
    },
    "scripts": {
-      "test": "export NODE_ENV=test && npx jest && unset NODE_ENV",
-      "start": "nodemon build/server.js"
+      "test": "export NODE_ENV='test' && npm start && npx jest tests/integration && unset NODE_ENV",
+      "start": "scripts/control start",
+      "stop": "scripts/control stop",
+      "install": "scripts/control postinstall",
+      "purge": "scripts/control purge",
+      "clean": "scripts/control clean"
    },
    "repository": {
       "type": "git",

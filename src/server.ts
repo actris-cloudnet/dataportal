@@ -4,12 +4,12 @@ import { Request, Response } from 'express'
 import { File } from './entity/File'
 import * as express from 'express'
 
+const port = process.argv[2]
+
 async function init() {
     const app = express()
-    const port = 3000
 
     const conn = await createConnection()
-
 
     app.get('/file/:uuid', async (req: Request, res: Response) => {
         const repo = conn.getRepository(File)
