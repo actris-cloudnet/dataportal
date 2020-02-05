@@ -30,7 +30,8 @@ case "$action" in
     start)
     for target cmd in ${(kv)targets}; do
         if [[ ! -f $target ]]; then
-            eval "${cmd} >> logs/all.log 2>&1 &"
+            echo $cmd
+            eval "${cmd} >> $pid_dir/all.log 2>&1 &"
             echo $! > $target
         fi
     done
@@ -43,7 +44,7 @@ case "$action" in
     for target cmd in ${(kv)targets}; do
         pkill -F $target && rm $target
     done
-    truncate --size 0 logs/all.log
+    truncate --size 0 $pid_dir/all.log
     ;;
 
     purge)
