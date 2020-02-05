@@ -19,16 +19,20 @@
    },
    "devDependencies": {
       "@types/jest": "^25.1.0",
+      "@types/request-promise-native": "^1.0.17",
       "@typescript-eslint/eslint-plugin": "^2.17.0",
       "@typescript-eslint/parser": "^2.17.0",
       "eslint": "^6.8.0",
       "jest": "^25.1.0",
+      "request": "^2.88.0",
+      "request-promise-native": "^1.0.8",
       "ts-jest": "^25.0.0",
       "ts-node": "3.3.0",
       "typescript": "3.3.3333"
    },
    "scripts": {
       "test": "export NODE_ENV='test' && npm start && npx jest tests/integration && unset NODE_ENV",
+      "e2e-test": "export NODE_ENV='test' && npm start && npx jest tests/e2e && unset NODE_ENV",
       "start": "scripts/control start",
       "stop": "scripts/control stop",
       "install": "scripts/control postinstall",
