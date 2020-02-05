@@ -4,12 +4,13 @@ import { Request, Response } from 'express'
 import { File } from './entity/File'
 import * as express from 'express'
 
-const port = process.argv[2]
+const port = parseInt(process.argv[2])
+const connName: string = process.env.NODE_ENV == 'test' ? 'test' : 'default'
 
 async function init() {
     const app = express()
 
-    const conn = await createConnection()
+    const conn = await createConnection(connName)
 
     app.get('/file/:uuid', async (req: Request, res: Response) => {
         const repo = conn.getRepository(File)
