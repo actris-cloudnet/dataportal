@@ -33,11 +33,10 @@
    "scripts": {
       "test": "export NODE_ENV='test' && npm start && npx jest tests/integration && unset NODE_ENV",
       "e2e-test": "export NODE_ENV='test' && npm start && npx jest tests/e2e && unset NODE_ENV",
-      "start": "scripts/control start",
-      "stop": "scripts/control stop",
-      "install": "scripts/control postinstall",
-      "purge": "scripts/control purge",
-      "clean": "scripts/control clean"
+      "start": "./scripts/control start",
+      "stop": "./scripts/control stop",
+      "purge": "./scripts/control purge",
+      "clean": "./scripts/control clean"
    },
    "repository": {
       "type": "git",

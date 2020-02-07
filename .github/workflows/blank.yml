@@ -1,0 +1,50 @@
+name: Node.js CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [12.x]
+        python-version: [3.6]
+
+    steps:
+    - name: Install Ubuntu dependencies
+      run: sudo apt-get install fswatch zsh postgresql netcdf-bin
+    - name: Print versions
+      run: |
+        fswatch --version
+        zsh --version
+        psql --version
+        ncdump
+    - name: Configure postgresql
+      run: |
+        sudo -u postgres createuser -d -r -s -w runner
+        sudo cat /etc/postgresql/10/main/pg_hba.conf|sed 's/md5/trust/' > pg_hba.tmp
+        sudo mv pg_hba.tmp /etc/postgresql/10/main/pg_hba.conf
+        sudo service postgresql restart
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Use Python ${{ matrix.python-version }} 
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }} 
+    - name: Checkout  
+      uses: actions/checkout@v2
+    - name: Install project
+      run: |
+        npm ci
+        scripts/control postinstall
+    - name: Run integration tests
+      run: npm test
+    - name: Run e2e tests
+      run: npm run e2e-test
+    - name: Print logs
+      if: failure()
+      run: cat tests/all.log

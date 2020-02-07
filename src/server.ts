@@ -19,7 +19,7 @@ async function init() {
             .catch(_ => res.sendStatus(404))
     })
 
-    app.listen(port, () => console.log(`App listening on port ${port}!`))
+    app.listen(port, () => console.log(`App listening on port ${port} with ${connName} connection!`))
 }
 
 init()

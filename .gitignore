@@ -106,7 +106,6 @@ dist
 # Data
 /data
 inbox
-/tests/data
 
 # Build data
 build

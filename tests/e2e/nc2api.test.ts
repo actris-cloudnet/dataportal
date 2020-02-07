@@ -19,7 +19,7 @@ afterAll(async () => {
 
 describe('after moving a valid NC file to inbox', () => {
     beforeAll(async () => {
-        fs.copyFileSync('data/bucharest/products/classification/2019/20190723_bucharest_classification.nc', path.join(dir, '20190723_bucharest_classification.nc'))
+        fs.copyFileSync('tests/data/20190723_bucharest_classification.nc', path.join(dir, '20190723_bucharest_classification.nc'))
         return new Promise((resolve, _) => setTimeout(resolve, 2000))
     })
 

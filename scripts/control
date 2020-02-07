@@ -1,4 +1,5 @@
 #!/bin/zsh
+set -e
 
 if [ -z $1 ]; then
     echo "Action not specified"
@@ -19,12 +20,11 @@ if [[ "$NODE_ENV" == 'test' ]]; then
     inbox_dir='tests/data/inbox'
 fi
 
-typeset -A targets=(
-    ["$pid_dir/.python.pid"]="python3 -m http.server --directory public --bind localhost $frontend_port"
-    ["$pid_dir/.listen-inbox.pid"]="scripts/listen-inbox.sh $inbox_dir"
-    ["$pid_dir/.node.pid"]="npx nodemon build/server.js $backend_port"
-)
+typeset -A targets
 
+targets[$pid_dir/.python.pid]="python -m http.server --verbose --directory public --bind localhost $frontend_port"
+targets[$pid_dir/.listen-inbox.pid]="scripts/listen-inbox.sh $inbox_dir"
+targets[$pid_dir/.node.pid]="npx nodemon -w build build/server.js $backend_port"
 
 case "$action" in
     start)
@@ -36,8 +36,8 @@ case "$action" in
         fi
     done
 
+    #while ! nc -z localhost $frontend_port; do sleep 0.5; cat $pid_dir/all.log; done
     while ! nc -z localhost $backend_port; do sleep 0.5; done
-    while ! nc -z localhost $frontend_port; do sleep 0.5; done
     ;;
 
     stop)
@@ -63,6 +63,8 @@ case "$action" in
     ;;
 
     postinstall)
+    mkdir -p tests/data/inbox
+    mkdir -p inbox
     createdb dataportal
     createdb dataportal-test
     npx typeorm schema:sync
