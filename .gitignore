@@ -109,6 +109,7 @@ inbox
 
 # Build data
 build
+public/css
 
 # Python virtual env
 .venv/

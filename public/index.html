@@ -1,0 +1,75 @@
+<DOCTYPE html>
+<html>
+<head>
+  <title>Cloudnet data portal</title>
+  <meta charset='utf-8' />
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <link href="https://fonts.googleapis.com/css?family=Oxygen|Montserrat&display=swap" rel="stylesheet"> 
+  <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+  <header class="global">
+    <h1>Cloudnet data portal</h1>
+  </header>
+  <section class="content">
+    <div class="headerwrapper">
+      <header>
+          <h2>Cloudnet data object</h2>
+          <span>Categorize data from Hyytiälä on 31.1.2020.</span>
+      </header>
+      <div class="actions">
+        <button class="download">Download file</button>
+      </div>
+    </div>
+
+    <section class="info">
+      <section id="file">
+        <header>File information</header>
+        <section class="details">
+          <dl>
+            <dt>Identifier</dt>
+            <dd>http://uri.com/uriuri</dd>
+            <dt>File name</dt>
+            <dd>qwerty.nc</dd>
+            <dt>Type</dt>
+            <dd>NetCDF4</dd>
+            <dt>Size</dt>
+            <dd>304004 bytes (304kB)</dd>
+            <dt>Checksum</dt>
+            <dd>8239f9assf8as9f87f7a9</dd>
+          </dl>
+        </section>
+      </section>
+
+    </section>
+
+  </section>
+
+  <div id="vapp">
+      <colored-box class="red" v-show="display == 'redbox'"></colored-box>
+      <colored-box class="green" v-show="display == 'greenbox'"></colored-box>
+  </div>
+<!-- Our View App goes at the end of the document
+<script>Vue.component('ColoredBox', {
+  template: "<div class=\"box\"><button v-on:click=\"toggleMe()\">Toggle Now</button></div>",
+  methods: {
+    toggleMe() {
+      this.$root.toggleBox()
+    }
+  }
+})
+const vueApp = new Vue({
+  el: '#vapp',
+  data: {
+   display: 'redbox'
+  },
+  methods: {
+    toggleBox() {
+      this.display == 'redbox' ? this.display = 'greenbox' : this.display = 'redbox'
+    }
+  }
+})
+</script> -->
+</body>
+
+</html>
