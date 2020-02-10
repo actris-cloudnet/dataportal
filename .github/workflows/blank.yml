@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         node-version: [10.16.3]
-        python-version: [3.6]
+        python-version: [3.7]
 
     steps:
     - name: Install Ubuntu dependencies
@@ -36,7 +36,9 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }} 
     - name: Symlink Python 3
-      run: sudo ln -s `which python` /usr/local/bin/python3
+      run: |
+        sudo ln -s `which python` /usr/local/bin/python3
+        export PATH=/usr/local/bin$PATH
     - name: Checkout  
       uses: actions/checkout@v2
     - name: Install project
@@ -48,5 +50,5 @@ jobs:
     - name: Run e2e tests
       run: npm run e2e-test
     - name: Print logs
-      if: failure()
+      if: always()
       run: cat tests/all.log
