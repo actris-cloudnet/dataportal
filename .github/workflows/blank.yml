@@ -35,6 +35,8 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }} 
+    - name: Symlink Python 3
+      run: sudo ln -s `which python` /usr/local/bin/python3
     - name: Checkout  
       uses: actions/checkout@v2
     - name: Install project
