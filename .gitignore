@@ -117,3 +117,5 @@ public/css
 
 # Visual studio code project files
 .vscode
+
+.DS_Store
