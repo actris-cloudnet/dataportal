@@ -2,7 +2,7 @@
    "name": "dataportal",
    "version": "0.0.1",
    "description": "Actris cloud remote sensing data portal",
-   "main": "index.js",
+   "main": "build/server.js",
    "directories": {
       "doc": "docs"
    },
@@ -32,8 +32,8 @@
       "typescript": "3.3.3333"
    },
    "scripts": {
-      "test": "export NODE_ENV='test' && npm start && npx jest tests/integration && unset NODE_ENV",
-      "e2e-test": "export NODE_ENV='test' && npm start && npx jest tests/e2e && unset NODE_ENV",
+      "test": "export NODE_ENV='test' &&  npx jest tests/integration && unset NODE_ENV",
+      "e2e-test": "export NODE_ENV='test' && npx jest tests/e2e && unset NODE_ENV",
       "start": "./scripts/control start",
       "stop": "./scripts/control stop",
       "purge": "./scripts/control purge",

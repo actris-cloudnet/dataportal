@@ -1,0 +1,141 @@
+#!/bin/zsh
+set -e
+
+
+if [ -z $1 ]; then
+    echo "Action not specified"
+    exit 1
+fi
+
+action=$1
+
+backend_port=3000
+frontend_port=8000
+pid_dir='.'
+inbox_dir='inbox'
+
+if [[ "$NODE_ENV" == 'test' ]]; then
+    backend_port=3001
+    frontend_port=8001
+    pid_dir='tests'
+    inbox_dir='tests/data/inbox'
+fi
+
+# Ensure that dirs exist
+mkdir -p $pid_dir $inbox_dir
+
+typeset -A backend_targets
+typeset -A frontend_targets
+
+backend_targets[$pid_dir/.listen-inbox.pid]="scripts/listen-inbox.sh $inbox_dir"
+backend_targets[$pid_dir/.tsc.pid]="npx tsc --build tsconfig.json -w "
+backend_targets[$pid_dir/.node.pid]="npx nodemon -w build -- $backend_port"
+frontend_targets[$pid_dir/.vue.pid]="npx vue-cli-service serve --host localhost --port $frontend_port"
+
+waitport () {
+    timeout=10
+    interval=0.5
+    i=0
+    while ! nc -z localhost $1; do
+        if [[ "$i" -ge $timeout ]]; then
+            echo "Timeout"
+            exit 2
+        fi
+        sleep $interval
+        i=$((i+$interval))
+    done
+}
+
+backend_postinstall () {
+    mkdir -p tests/data/inbox
+    createdb dataportal
+    createdb dataportal-test
+    npx typeorm schema:sync
+}
+
+case "$action" in
+    start)
+
+
+    echo "Starting backend..."
+    cd backend
+    for target cmd in ${(kv)backend_targets}; do
+        if [[ ! -f $target ]]; then
+            echo $cmd
+            eval "${cmd} >> $pid_dir/all.log 2>&1 &"
+            echo $! > $target
+        fi
+    done
+    echo
+    echo "Starting frontend..."
+    cd ../frontend
+    for target cmd in ${(kv)frontend_targets}; do
+        if [[ ! -f $target ]]; then
+            echo $cmd
+            eval "${cmd} >> $pid_dir/all.log 2>&1 &"
+            echo $! > $target
+        fi
+    done
+    cd ..
+    echo
+    waitport $backend_port
+    waitport $frontend_port
+    ;;
+
+    stop)
+    for pid in */.*.pid; do
+        echo $pid
+        pkill -F $pid
+        rm -f $pid
+    done
+    truncate --size 0 */$pid_dir/all.log
+    ;;
+
+    purge)
+    dropdb dataportal
+    dropdb dataportal-test
+    rm -r */build
+    rm -r */dist
+    rm -r */node_modules
+    ;;
+
+    clean)
+    rm -vf */.*.pid
+    ;;
+
+    install)
+    echo "Installing backend..."
+    cd backend
+    npm install
+    backend_postinstall
+    echo
+    echo "Installing frontend..."
+    cd ../frontend
+    npm install
+    cd ..
+    ;;
+
+    ci)
+    echo "Installing backend..."
+    cd backend
+    npm ci
+    backend_postinstall
+    echo
+    echo "Installing frontend..."
+    cd ../frontend
+    npm ci
+    cd ..
+    ;;
+
+    build)
+    echo "Building backend..."
+    cd backend
+    npx tsc --build tsconfig.json
+    ;;
+
+    *)
+    echo "Unknown action $action"
+    exit 1
+    ;;
+esac
+
