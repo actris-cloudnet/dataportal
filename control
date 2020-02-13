@@ -33,7 +33,7 @@ backend_targets[$pid_dir/.node.pid]="npx nodemon -w build -- $backend_port"
 frontend_targets[$pid_dir/.vue.pid]="npx vue-cli-service serve --host localhost --port $frontend_port"
 
 waitport () {
-    timeout=10
+    timeout=20
     interval=0.5
     i=0
     while ! nc -z localhost $1; do
