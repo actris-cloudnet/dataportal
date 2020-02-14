@@ -1,8 +1,9 @@
 {
    "compilerOptions": {
       "lib": [
-         "es5",
-         "es6"
+	"es2018.promise",
+        "es5",
+        "es6"
       ],
       "target": "es5",
       "module": "commonjs",
