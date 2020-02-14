@@ -44,10 +44,11 @@ jobs:
     - name: Checkout  
       uses: actions/checkout@v2
     - name: Install project
-      run: |
-        ./control ci
-        ./control build
-        ./control start
+      run: ./control ci
+    - name: Build project
+      run: ./control build
+    - name: Start backend and frontend
+      run: ./control start
     - name: Run integration tests
       run: cd backend && npm test && cd ..
     - name: Run e2e tests

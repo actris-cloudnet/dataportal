@@ -34,10 +34,9 @@
    "scripts": {
       "test": "export NODE_ENV='test' &&  npx jest tests/integration && unset NODE_ENV",
       "e2e-test": "export NODE_ENV='test' && npx jest tests/e2e && unset NODE_ENV",
-      "start": "./scripts/control start",
-      "stop": "./scripts/control stop",
-      "purge": "./scripts/control purge",
-      "clean": "./scripts/control clean"
+      "start": "echo 'Use ./control script at project root'",
+      "stop": "echo 'Use ./control script at project root'",
+      "build": "tsc --build tsconfig.json"
    },
    "repository": {
       "type": "git",

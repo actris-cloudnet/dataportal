@@ -1,7 +1,6 @@
 #!/bin/zsh
 set -e
 
-
 if [ -z $1 ]; then
     echo "Action not specified"
     exit 1
@@ -28,12 +27,11 @@ typeset -A backend_targets
 typeset -A frontend_targets
 
 backend_targets[$pid_dir/.listen-inbox.pid]="scripts/listen-inbox.sh $inbox_dir"
-backend_targets[$pid_dir/.tsc.pid]="npx tsc --build tsconfig.json -w "
 backend_targets[$pid_dir/.node.pid]="npx nodemon -w build -- $backend_port"
-frontend_targets[$pid_dir/.vue.pid]="npx vue-cli-service serve --host localhost --port $frontend_port"
+frontend_targets[$pid_dir/.python.pid]="python3 -m http.server --directory dist $frontend_port"
 
 waitport () {
-    timeout=20
+    timeout=10
     interval=0.5
     i=0
     while ! nc -z localhost $1; do
@@ -55,8 +53,6 @@ backend_postinstall () {
 
 case "$action" in
     start)
-
-
     echo "Starting backend..."
     cd backend
     for target cmd in ${(kv)backend_targets}; do
@@ -130,7 +126,11 @@ case "$action" in
     build)
     echo "Building backend..."
     cd backend
-    npx tsc --build tsconfig.json
+    npm run build
+    echo "Building frontend..."
+    cd ../frontend
+    npm run build
+    cd ..
     ;;
 
     *)
