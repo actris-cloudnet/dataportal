@@ -86,6 +86,7 @@ main.landing
           <h2>Cloudnet data object</h2>
           <span>Categorize data from Hyytiälä on 31.1.2020.</span>
           {{ uuid }}
+          {{ metadata }}
       </div>
       <div class="actions">
         <button class="download">Download file</button>
@@ -156,10 +157,19 @@ main.landing
 
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue } from 'vue-property-decorator'
+import axios from 'axios'
 
 @Component
 export default class File extends Vue {
   @Prop() uuid!: string
+  @Prop() metadata!: any
+
+  mounted () {
+    axios
+      .get(`http://localhost:3000/file/${this.uuid}`)
+      .then(response => (this.metadata = response))
+      .catch(({response}) => console.dir(response))
+  }
 }
 </script>
