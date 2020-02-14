@@ -20,9 +20,6 @@ if [[ "$NODE_ENV" == 'test' ]]; then
     inbox_dir='tests/data/inbox'
 fi
 
-# Ensure that dirs exist
-mkdir -p $pid_dir $inbox_dir
-
 typeset -A backend_targets
 typeset -A frontend_targets
 
@@ -45,6 +42,7 @@ waitport () {
 }
 
 backend_postinstall () {
+    mkdir -p inbox
     mkdir -p tests/data/inbox
     createdb dataportal
     createdb dataportal-test
