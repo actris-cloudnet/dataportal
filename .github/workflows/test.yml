@@ -19,7 +19,7 @@ jobs:
     - name: Install Ubuntu dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install fswatch zsh postgresql netcdf-bin nginx-light
+        sudo apt-get install fswatch zsh postgresql netcdf-bin nginx-light inotify-tools
     - name: Print versions
       run: |
         fswatch --version
@@ -27,6 +27,7 @@ jobs:
         psql --version
         ncdump
         nginx -v
+        inotifywait -h
     - name: Add local bin to PATH
       run: export PATH=/usr/local/bin:$PATH
     - name: Setup geckodriver
