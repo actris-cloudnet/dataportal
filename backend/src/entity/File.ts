@@ -30,8 +30,8 @@ export class File {
     @Column()
     title!: string
 
-    @Column()
-    date!: Date
+    @Column({type: 'date'})
+    measurementDate!: Date
 
     @Column()
     location!: string
@@ -53,7 +53,7 @@ export class File {
     type!: CloudnetFileType
 
     @Column({nullable: true})
-    cloudnetpy_version!: string
+    cloudnetpyVersion!: string
 
     @CreateDateColumn()
     createdAt!: Date
@@ -71,7 +71,7 @@ export class File {
         // A typeorm hack, see https://github.com/typeorm/typeorm/issues/3903
         if(typeof obj == 'undefined') return
 
-        this.date = new Date(
+        this.measurementDate = new Date(
             parseInt(obj.year),
             parseInt(obj.month),
             parseInt(obj.day)
@@ -80,7 +80,7 @@ export class File {
         this.location = obj.location
         this.history = obj.history
         this.type = obj.cloudnet_file_type as CloudnetFileType
-        this.cloudnetpy_version = obj.cloudnetpy_version
+        this.cloudnetpyVersion = obj.cloudnetpy_version
         this.uuid = obj.file_uuid
         this.filename = filename
         this.checksum = chksum
