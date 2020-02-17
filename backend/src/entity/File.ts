@@ -52,14 +52,14 @@ export class File {
     })
     type!: CloudnetFileType
 
-    @Column()
+    @Column({nullable: true})
     cloudnetpy_version!: string
 
     @CreateDateColumn()
     createdAt!: Date
 
     @Column()
-    path!: string
+    filename!: string
 
     @Column()
     checksum!: string
@@ -82,7 +82,7 @@ export class File {
         this.type = obj.cloudnet_file_type as CloudnetFileType
         this.cloudnetpy_version = obj.cloudnetpy_version
         this.uuid = obj.file_uuid
-        this.path = filename
+        this.filename = filename
         this.checksum = chksum
         this.size = filesize
     }

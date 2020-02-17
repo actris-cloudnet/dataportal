@@ -1,5 +1,6 @@
 import { parseStringPromise } from 'xml2js'
 import { readFileSync, createReadStream, statSync } from 'fs'
+import { basename } from 'path'
 import { createHash } from 'crypto'
 import 'reflect-metadata'
 import { createConnection } from 'typeorm'
@@ -73,14 +74,14 @@ parseXmlFromStdin()
     .then(([ncObj, filename]) =>
         Promise.all([
             ncObj,
-            filename,
+            basename(filename),
             computeFileChecksum(filename),
             computeFileSize(filename),
             createConnection(connName)
         ])
     )
-    .then(([ncObj, filename, chksum, filesize, connection]) => {
-        const file = new File(ncObj, filename, chksum, filesize)
+    .then(([ncObj, baseFilename, chksum, filesize, connection]) => {
+        const file = new File(ncObj, baseFilename, chksum, filesize)
         return connection.manager.save(file)
             .finally(() => connection.close())
     })
