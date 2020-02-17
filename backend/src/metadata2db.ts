@@ -50,7 +50,7 @@ function computeFileSize(filename: string) {
 }
 
 function linkFile(filename: string) {
-    return fsp.symlink(filename, join('public', basename(filename)))
+    return fsp.symlink(join('..', filename), join('public', basename(filename)))
 }
 
 async function parseXmlFromStdin(): Promise<[NetCDFObject, string]> {
