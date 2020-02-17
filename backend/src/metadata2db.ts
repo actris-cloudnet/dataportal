@@ -19,7 +19,6 @@ interface NetCDFXML {
         }>
         '$': { location: string }
     }
-
 }
 
 const stringify = (obj: any): string =>
