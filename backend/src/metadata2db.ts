@@ -1,6 +1,7 @@
 import { parseStringPromise } from 'xml2js'
 import { readFileSync, createReadStream, statSync } from 'fs'
-import { basename } from 'path'
+import { promises as fsp }  from 'fs'
+import { basename, join } from 'path'
 import { createHash } from 'crypto'
 import 'reflect-metadata'
 import { createConnection } from 'typeorm'
@@ -44,12 +45,16 @@ async function computeFileChecksum(filename: string): Promise<string> {
     })
 }
 
-async function computeFileSize(filename: string) {
-    return statSync(filename).size
+function computeFileSize(filename: string) {
+    return fsp.stat(filename)
+}
+
+function linkFile(filename: string) {
+    return fsp.symlink(filename, join('public', basename(filename)))
 }
 
 async function parseXmlFromStdin(): Promise<[NetCDFObject, string]> {
-    const xml: string = await readFileSync(0, 'utf-8')
+    const xml: string = readFileSync(0, 'utf-8')
 
     const { netcdf }: NetCDFXML = await parseStringPromise(xml)
     const filename = netcdf['$'].location
@@ -76,11 +81,12 @@ parseXmlFromStdin()
             basename(filename),
             computeFileChecksum(filename),
             computeFileSize(filename),
-            createConnection(connName)
+            createConnection(connName),
+            linkFile(filename)
         ])
     )
-    .then(([ncObj, baseFilename, chksum, filesize, connection]) => {
-        const file = new File(ncObj, baseFilename, chksum, filesize)
+    .then(([ncObj, baseFilename, chksum, {size}, connection]) => {
+        const file = new File(ncObj, baseFilename, chksum, size)
         return connection.manager.save(file)
             .finally(() => connection.close())
     })
