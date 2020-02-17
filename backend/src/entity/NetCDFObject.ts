@@ -17,7 +17,6 @@ const ncObjectSpec: Array<string> = [
     'location',
     'history',
     'cloudnet_file_type',
-    'cloudnetpy_version',
     'file_uuid',
     'Conventions',
     'year',
