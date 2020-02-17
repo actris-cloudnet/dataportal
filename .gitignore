@@ -105,6 +105,7 @@ dist
 
 # Data
 /backend/data
+/backend/data-fixed
 inbox
 
 # Build data
