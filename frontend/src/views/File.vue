@@ -12,8 +12,11 @@ main.landing
       color: $section-title
       margin: 0px
     span 
+      display: block
       color: grey
       font-style: italic
+    span::first-letter
+      text-transform: capitalize
   div.actions
     margin-top: 5px
     margin-bottom: 5px
@@ -80,6 +83,9 @@ main.landing
     section#history > section
       white-space: pre-wrap
       font-family: monospace
+
+.capitalize
+  text-transform: capitalize
 </style>
 
 
@@ -88,7 +94,7 @@ main.landing
     <header>
       <div class="summary">
           <h2>Cloudnet data object</h2>
-          <span>{{ response.type }} data from {{ response.location }} on {{ response.date }}.</span>
+          <span>{{ response.type }} data from {{ response.location }} on {{ formatDateString(response.measurementDate) }}.</span>
       </div>
       <div class="actions">
         <button class="download" v-on:click="navigate(fileserverUrl + response.filename)">Download file</button>
@@ -106,7 +112,7 @@ main.landing
             <dt>Type</dt>
             <dd>TODO</dd>
             <dt>Size</dt>
-            <dd>{{ response.size }} bytes</dd>
+            <dd>{{ response.size }} bytes ({{ humanReadableSize(response.size) }})</dd>
             <dt>Checksum</dt>
             <dd>{{ response.checksum }}</dd>
           </dl>
@@ -114,7 +120,7 @@ main.landing
       </section>
       <section id="data">
         <header>Data information</header>
-        <section class="details">
+        <section class="details capitalize">
           <dl>
             <dt>Type</dt>
             <dd>TODO</dd>
@@ -122,14 +128,14 @@ main.landing
             <dd>TODO</dd>
             <dt>Cloudnet file type</dt>
             <dd>{{ response.type }}</dd>
-            <dt>Cloudnetpy version</dt>
-            <dd>{{ response.cloudnetpy_version }}</dd>
+            <dt v-if="response.cloudnetpyVersion">Cloudnetpy version</dt>
+            <dd v-if="response.cloudnetpyVersion">{{ response.cloudnetpyVersion }}</dd>
           </dl>
         </section>
       </section>
       <section id="measurement">
         <header>Measurement info</header>
-        <section class="details">
+        <section class="details capitalize">
           <dl>
             <dt>Site</dt>
             <dd>{{ response.location }}</dd>
@@ -140,7 +146,7 @@ main.landing
             <dt>Altitude</dt>
             <dd>TODO</dd>
             <dt>Date</dt>
-            <dd>{{ response.date }}</dd>
+            <dd>{{ formatDateString(response.measurementDate) }}</dd>
           </dl>
         </section>
       </section>
@@ -164,7 +170,6 @@ main.landing
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import axios from 'axios'
-import router from '../router'
 
 @Component
 export default class File extends Vue {
@@ -186,8 +191,17 @@ export default class File extends Vue {
 
   }
 
-  navigate (url) {
-    window.location.href=url
+  navigate (url: string) {
+    window.location.href = url
+  }
+
+  formatDateString (date: string) {
+    return new Date(date).toLocaleDateString('fi-FI')
+  }
+
+  humanReadableSize (size: number) {
+    const i = Math.floor( Math.log(size) / Math.log(1024) )
+    return ( size / Math.pow(1024, i) ).toFixed(1) + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i]
   }
 }
 </script>
