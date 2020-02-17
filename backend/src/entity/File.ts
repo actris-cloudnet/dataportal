@@ -52,6 +52,9 @@ export class File {
     })
     type!: CloudnetFileType
 
+    @Column()
+    cloudnetpy_version!: string
+
     @CreateDateColumn()
     createdAt!: Date
 
@@ -77,6 +80,7 @@ export class File {
         this.location = obj.location
         this.history = obj.history
         this.type = obj.cloudnet_file_type as CloudnetFileType
+        this.cloudnetpy_version = obj.cloudnetpy_version
         this.uuid = obj.file_uuid
         this.path = filename
         this.checksum = chksum

@@ -76,17 +76,18 @@ main.landing
         justify-content: center
         text-align: left
         margin: 0
+    section#history > section
+      white-space: pre-wrap
+      font-family: monospace
 </style>
 
 
 <template>
-  <main class="landing">
+  <main class="landing" v-if="!error">
     <header>
       <div class="summary">
           <h2>Cloudnet data object</h2>
-          <span>Categorize data from Hyytiälä on 31.1.2020.</span>
-          {{ uuid }}
-          {{ metadata }}
+          <span>{{ response.type }} data from {{ response.location }} on {{ response.date }}.</span>
       </div>
       <div class="actions">
         <button class="download">Download file</button>
@@ -98,15 +99,15 @@ main.landing
         <section class="details">
           <dl>
             <dt>Identifier</dt>
-            <dd>http://uri.com/uriuri</dd>
+            <dd>{{ response.uuid }}</dd>
             <dt>File name</dt>
-            <dd>qwerty.nc</dd>
+            <dd>{{ response.path }}</dd>
             <dt>Type</dt>
-            <dd>NetCDF4</dd>
+            <dd>TODO</dd>
             <dt>Size</dt>
-            <dd>304004 bytes (304kB)</dd>
+            <dd>{{ response.size }} bytes</dd>
             <dt>Checksum</dt>
-            <dd>8239f9assf8as9f87f7a9</dd>
+            <dd>{{ response.checksum }}</dd>
           </dl>
         </section>
       </section>
@@ -115,44 +116,47 @@ main.landing
         <section class="details">
           <dl>
             <dt>Type</dt>
-            <dd>NRT</dd>
+            <dd>TODO</dd>
             <dt>Level</dt>
-            <dd>2</dd>
+            <dd>TODO</dd>
             <dt>Cloudnet file type</dt>
-            <dd><span>Categorize</span></dd>
-            <dt>Cloudnet version</dt>
-            <dd>1.4</dd>
+            <dd>{{ response.type }}</dd>
+            <dt>Cloudnetpy version</dt>
+            <dd>{{ response.cloudnetpy_version }}</dd>
           </dl>
         </section>
       </section>
-      <section id="data">
+      <section id="measurement">
         <header>Measurement info</header>
         <section class="details">
           <dl>
             <dt>Site</dt>
-            <dd>Hyytiälä, Finland</dd>
+            <dd>{{ response.location }}</dd>
             <dt>Latitude</dt>
-            <dd>128.3494848</dd>
+            <dd>TODO</dd>
             <dt>Longitude</dt>
-            <dd>28.349489</dd>
+            <dd>TODO</dd>
             <dt>Altitude</dt>
-            <dd>39m</dd>
+            <dd>TODO</dd>
             <dt>Date</dt>
-            <dd>31.1.2020</dd>
+            <dd>{{ response.date }}</dd>
           </dl>
         </section>
       </section>
-      <section id="data">
+      <section id="preview">
         <header>Preview</header>
         <section class="details">
           Quicklook image not available
         </section>
       </section>
-      <section id="data">
+      <section id="history">
         <header>History</header>
+        <section class="details">{{ response.history.trim() }}
+        </section>
       </section>
     </main>
   </main>
+  <app-error v-else :response="response"></app-error>
 </template>
 
 
@@ -163,13 +167,20 @@ import axios from 'axios'
 @Component
 export default class File extends Vue {
   @Prop() uuid!: string
-  @Prop() metadata!: any
+  response = {}
+  error = false
 
-  mounted () {
+  created () {
     axios
       .get(`http://localhost:3000/file/${this.uuid}`)
-      .then(response => (this.metadata = response))
-      .catch(({response}) => console.dir(response))
+      .then(response => {
+        this.response = response.data
+        })
+      .catch(({response}) => {
+        this.error = true
+        this.response = response
+      })
+
   }
 }
 </script>

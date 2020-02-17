@@ -33,7 +33,7 @@ header
     letter-spacing: .3em
 </style>
 
-<template>
+<template functional>
   <header class="global">
     <div class="portal_name">
       <h1>Cloudnet</h1>
