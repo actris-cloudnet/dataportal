@@ -42,6 +42,7 @@ waitport () {
 }
 
 backend_postinstall () {
+    mkdir -p public
     mkdir -p inbox
     mkdir -p tests/data/inbox
     createdb dataportal
