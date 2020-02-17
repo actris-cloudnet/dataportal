@@ -91,7 +91,7 @@ main.landing
           <span>{{ response.type }} data from {{ response.location }} on {{ response.date }}.</span>
       </div>
       <div class="actions">
-        <button class="download">Download file</button>
+        <button class="download" v-on:click="navigate(fileserverUrl + response.filename)">Download file</button>
       </div>
     </header>
     <main class="info">
@@ -102,7 +102,7 @@ main.landing
             <dt>Identifier</dt>
             <dd>{{ response.uuid }}</dd>
             <dt>File name</dt>
-            <dd>{{ response.path }}</dd>
+            <dd>{{ response.filename }}</dd>
             <dt>Type</dt>
             <dd>TODO</dd>
             <dt>Size</dt>
@@ -164,12 +164,14 @@ main.landing
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import axios from 'axios'
+import router from '../router'
 
 @Component
 export default class File extends Vue {
   @Prop() uuid!: string
   response = {}
   error = false
+  fileserverUrl = 'http://localhost:4000/'
 
   created () {
     axios
@@ -182,6 +184,10 @@ export default class File extends Vue {
         this.response = response
       })
 
+  }
+
+  navigate (url) {
+    window.location.href=url
   }
 }
 </script>
