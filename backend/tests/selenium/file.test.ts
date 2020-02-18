@@ -75,6 +75,5 @@ describe('file landing page', () => {
     const response = await axios.head(downloadUrl)
     expect(response.status).toBe(200)
     return expect(response.headers['content-length']).toBe('139021')
-
   })
 })
