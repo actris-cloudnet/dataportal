@@ -86,6 +86,9 @@ main.landing
 
 .capitalize
   text-transform: capitalize
+
+.na
+  color: grey
 </style>
 
 
@@ -158,7 +161,9 @@ main.landing
       </section>
       <section id="history">
         <header>History</header>
-        <section class="details">{{ response.history.trim() }}
+        <section class="details" v-if="response.history">{{ response.history.trim() }}
+        </section>
+        <section class="details na" v-else>N/A
         </section>
       </section>
     </main>
