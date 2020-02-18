@@ -105,6 +105,16 @@ case "$action" in
     rm -vf */$pid_dir/.*.pid
     ;;
 
+    reset)
+    cd backend
+    rm -r public
+    mkdir public
+    npx typeorm schema:drop
+    npx typeorm schema:sync
+    cd ..
+    ;;
+
+
     install)
     echo "Installing backend..."
     cd backend
