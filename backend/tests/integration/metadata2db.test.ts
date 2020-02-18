@@ -29,7 +29,7 @@ afterAll(async () => {
 function readXmlIn(filename: string, logErrors: boolean): Promise<string> {
     return new Promise((resolve, _) => {
         const xml: string = readFileSync(filename, 'utf-8')
-        const proc = spawn('node', ['build/metadata2db.js'])
+        const proc = spawn('node', ['--no-warnings', 'build/metadata2db.js'])
         let out: string
         proc.stderr.on('data', data => {
             if(logErrors) console.error(data.toString())
