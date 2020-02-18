@@ -3,19 +3,11 @@ import * as fs from 'fs'
 import { join } from 'path'
 import axios from 'axios'
 import { createConnection } from 'typeorm'
+import { clearDir, inboxDir, publicDir, clearDb } from '../lib'
  
 let driver: WebDriver
-const inboxDir = 'tests/data/inbox'
-const publicDir = 'tests/data/public'
 
 jest.setTimeout(30000)
-
-function clearDir(dir: string) {
-  const files = fs.readdirSync(dir)
-  for(const file of files) {
-      fs.unlinkSync(join(dir, file))
-  }
-}
 
 async function awaitAndFind(by: By) {
   await driver.wait(until.elementLocated(by))
@@ -25,10 +17,8 @@ async function awaitAndFind(by: By) {
 beforeAll(async () => {
   clearDir(inboxDir)
   clearDir(publicDir)
-  const conn = await createConnection('test')
-  await conn.synchronize(true) // Clean db
+  clearDb()
   driver = await new Builder().forBrowser('firefox').build()
-  return conn.close()
 })
 
 afterAll(async () => {
