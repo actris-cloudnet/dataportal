@@ -10,13 +10,16 @@ let conn: Connection
 let repo: Repository<File>
 const linkDir = 'tests/data/public'
 beforeAll(async () => {
+    conn = await createConnection('test')
+    await conn.synchronize(true) // Clean db
+    repo = conn.getRepository(File)
+})
+
+beforeEach(() => {
     const files = readdirSync(linkDir)
     for(const file of files) {
         unlinkSync(join(linkDir, file))
     }
-    conn = await createConnection('test')
-    await conn.synchronize(true) // Clean db
-    repo = conn.getRepository(File)
 })
 
 afterAll(async () => {
@@ -47,6 +50,7 @@ test('errors on missing XML fields', async () =>  {
 
 describe('after reading a valid XML', () => {
     beforeAll(async () => readXmlIn(bucharestXml, true))
+
 
     afterAll(async () =>
         repo.clear()
