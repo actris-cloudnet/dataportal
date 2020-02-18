@@ -20,7 +20,10 @@ main#landing
   div.actions
     margin-top: 5px
     margin-bottom: 5px
-  button.download
+  .download
+    appearance: button
+    text-decoration: none
+    color: initial
     background-color: $blue-sapphire
     border-radius: 3px
     color: white
@@ -100,7 +103,7 @@ main#landing
           <span>{{ response.type }} data from {{ response.location }} on {{ formatDateString(response.measurementDate) }}.</span>
       </div>
       <div class="actions">
-        <button class="download" v-on:click="navigate(fileserverUrl + response.filename)">Download file</button>
+        <a class="download" :href="fileserverUrl + response.filename">Download file</a>
       </div>
     </header>
     <main class="info">
