@@ -197,11 +197,6 @@ export default class File extends Vue {
         this.error = true
         this.response = response
       })
-
-  }
-
-  navigate (url: string) {
-    window.location.href = url
   }
 
   formatDateString (date: string) {
