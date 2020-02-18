@@ -101,6 +101,7 @@ case "$action" in
     cd backend
     rm -r public
     mkdir public
+    rm -r inbox/*
     npx typeorm schema:drop
     npx typeorm schema:sync
     cd ..
