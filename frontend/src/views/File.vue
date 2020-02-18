@@ -1,7 +1,7 @@
 <style scoped lang="sass">
 @import "../sass/variables.sass"
 
-main.landing
+main#landing
   >header
     margin-bottom: 3em
     display: flex
@@ -93,7 +93,7 @@ main.landing
 
 
 <template>
-  <main class="landing" v-if="!error">
+  <main id="landing" v-if="!error">
     <header>
       <div class="summary">
           <h2>Cloudnet data object</h2>

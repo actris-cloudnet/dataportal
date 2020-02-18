@@ -1,5 +1,5 @@
 <template>
-    <main class="error">
+    <main id="error">
         <h2>Error {{ response.status }} - {{ response.data }}</h2>
     </main>
 </template>
