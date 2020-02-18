@@ -85,7 +85,7 @@ case "$action" in
     ;;
 
     stop)
-    for pid in */.*.pid; do
+    for pid in */$pid_dir/.*.pid; do
         echo $pid
         pkill -F $pid
         rm -f $pid
@@ -102,7 +102,7 @@ case "$action" in
     ;;
 
     clean)
-    rm -vf */.*.pid
+    rm -vf */$pid_dir/.*.pid
     ;;
 
     install)
