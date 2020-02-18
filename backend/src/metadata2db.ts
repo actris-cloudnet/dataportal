@@ -1,7 +1,7 @@
 import { parseStringPromise } from 'xml2js'
 import { readFileSync, createReadStream, statSync } from 'fs'
 import { promises as fsp }  from 'fs'
-import { basename, join } from 'path'
+import { basename, join, resolve as pathResolve } from 'path'
 import { createHash } from 'crypto'
 import 'reflect-metadata'
 import { createConnection } from 'typeorm'
@@ -52,7 +52,7 @@ function computeFileSize(filename: string) {
 
 function linkFile(filename: string) {
     const linkPath = connName === 'test' ? 'tests/data/public' : 'public'
-    return fsp.symlink(join('..', filename), join(linkPath, basename(filename)))
+    return fsp.symlink(pathResolve(filename), join(linkPath, basename(filename)))
 }
 
 function getFileFormat(filename: string): Promise<string> {
