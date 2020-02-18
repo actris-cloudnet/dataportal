@@ -1,13 +1,19 @@
 import { File } from '../../src/entity/File'
 import { createConnection, Repository, Connection } from 'typeorm'
-import { readFileSync } from 'fs'
+import { readFileSync, unlinkSync, readdirSync } from 'fs'
+import { join } from 'path'
 import { spawn } from 'child_process'
 
 const bucharestXml = 'tests/data/20190723_bucharest_classification.xml'
 const bucharestXmlMissing = 'tests/data/20190723_bucharest_classification_missing_fields.xml'
 let conn: Connection
 let repo: Repository<File>
+const linkDir = 'tests/data/public'
 beforeAll(async () => {
+    const files = readdirSync(linkDir)
+    for(const file of files) {
+        unlinkSync(join(linkDir, file))
+    }
     conn = await createConnection('test')
     await conn.synchronize(true) // Clean db
     repo = conn.getRepository(File)
