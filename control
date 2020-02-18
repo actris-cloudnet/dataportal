@@ -9,16 +9,14 @@ fi
 action=$1
 
 fileserver_port=4000
-backend_port=3000
 frontend_port=8000
+backend_port=3000
 pid_dir='.'
 inbox_dir='inbox'
 fileserver_dir='public'
 
 if [[ "$NODE_ENV" == 'test' ]]; then
-    fileserver_port=4001
     backend_port=3001
-    frontend_port=8001
     pid_dir='tests'
     inbox_dir='tests/data/inbox'
     fileserver_dir='tests/data/public'
@@ -29,8 +27,6 @@ typeset -A frontend_targets
 
 backend_targets[$pid_dir/.listen-inbox.pid]="scripts/listen-inbox.sh $inbox_dir"
 backend_targets[$pid_dir/.node.pid]="npx nodemon -w build -- $backend_port"
-backend_targets[$pid_dir/.python.pid]="python3 -m http.server --directory $fileserver_dir $fileserver_port"
-frontend_targets[$pid_dir/.python.pid]="python3 -m http.server --directory dist $frontend_port"
 
 waitport () {
     timeout=10
@@ -68,28 +64,23 @@ case "$action" in
         fi
     done
     echo
-    echo "Starting frontend..."
-    cd ../frontend
-    for target cmd in ${(kv)frontend_targets}; do
-        if [[ ! -f $target ]]; then
-            echo $cmd
-            eval "${cmd} >> $pid_dir/all.log 2>&1 &"
-            echo $! > $target
-        fi
-    done
     cd ..
-    echo
+    echo "Starting nginx..."
+    nginx -p . -c .nginx.conf
+
     waitport $backend_port
     waitport $fileserver_port
     waitport $frontend_port
     ;;
 
     stop)
-    for pid in */$pid_dir/.*.pid; do
+    for pid in backend/$pid_dir/.*.pid; do
         echo $pid
         pkill -F $pid
         rm -f $pid
     done
+    echo .nginx.pid
+    pkill -F .nginx.pid && rm .nginx.pid
     truncate --size 0 */$pid_dir/all.log
     ;;
 
@@ -102,7 +93,8 @@ case "$action" in
     ;;
 
     clean)
-    rm -vf */$pid_dir/.*.pid
+    rm -vf backend/$pid_dir/.*.pid
+    rm -vf .nginx.pid
     ;;
 
     reset)
