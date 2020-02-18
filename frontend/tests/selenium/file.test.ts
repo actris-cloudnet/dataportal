@@ -1,10 +1,20 @@
 import {Builder, By, until, WebDriver} from 'selenium-webdriver'
 import * as fs from 'fs'
 import { join } from 'path'
+import axios from 'axios'
  
 let driver: WebDriver
 const inboxDir = '../backend/tests/data/inbox'
+const publicDir = '../backend/tests/data/public'
+
 jest.setTimeout(30000)
+
+function clearDir(dir: string) {
+  const files = fs.readdirSync(dir)
+  for(const file of files) {
+      fs.unlinkSync(join(dir, file))
+  }
+}
 
 async function awaitAndFind(by: By) {
   await driver.wait(until.elementLocated(by))
@@ -12,6 +22,8 @@ async function awaitAndFind(by: By) {
 }
 
 beforeAll(async () => {
+  clearDir(inboxDir)
+  clearDir(publicDir)
   driver = await new Builder().forBrowser('firefox').build()
 })
 
