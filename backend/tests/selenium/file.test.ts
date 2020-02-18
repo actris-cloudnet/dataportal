@@ -70,14 +70,11 @@ describe('file landing page', () => {
 
   it('should start download when clicking download button', async () => {
     await driver.get('http://localhost:8000/file/15506ea8d3574c7baf8c95dfcc34fc7d')
-    await driver.wait(until.elementLocated(By.id('landing')))
-    const button = await driver.findElement(By.className('download'))
-    button.click()
-    await driver.wait(until.urlContains('.nc'))
-    const url = (await driver.getCurrentUrl())
-    const response = await axios.head(url)
+    const button = await awaitAndFind(By.className('download'))
+    const downloadUrl = await button.getAttribute('href')
+    const response = await axios.head(downloadUrl)
     expect(response.status).toBe(200)
-    return expect(response.headers['Content-Length']).toBe(139021)
+    return expect(response.headers['content-length']).toBe('139021')
 
   })
 })
