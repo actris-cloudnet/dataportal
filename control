@@ -107,7 +107,6 @@ case "$action" in
     cd ..
     ;;
 
-
     install)
     echo "Installing backend..."
     cd backend
@@ -139,6 +138,14 @@ case "$action" in
     echo "Building frontend..."
     cd ../frontend
     npm run build
+    cd ..
+    ;;
+
+    selenium-test)
+    cd frontend
+    npx vue-cli-service build --mode e2e
+    cd ../backend
+    npx jest tests/selenium
     cd ..
     ;;
 
