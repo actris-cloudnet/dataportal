@@ -7,6 +7,7 @@ import 'reflect-metadata'
 import { createConnection } from 'typeorm'
 import { File } from './entity/File'
 import { isNetCDFObject, getMissingFields, NetCDFObject } from './entity/NetCDFObject'
+import { spawn } from 'child_process'
 
 const connName: string = process.env.NODE_ENV == 'test' ? 'test' : 'default'
 
@@ -50,7 +51,27 @@ function computeFileSize(filename: string) {
 }
 
 function linkFile(filename: string) {
-    return fsp.symlink(join('..', filename), join('public', basename(filename)))
+    const linkPath = connName === 'test' ? 'tests/data/public' : 'public'
+    return fsp.symlink(join('..', filename), join(linkPath, basename(filename)))
+}
+
+function getFileFormat(filename: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const proc = spawn('file', [filename])
+
+        let out: string
+        proc.stdout.on('data', data => out += data);
+        proc.on('close', () => {
+            if(out.includes('NetCDF Data Format data')) {
+                resolve('NetCDF3')
+            } else if(out.includes('Hierarchical Data Format (version 5) data')) {
+                resolve('HDF5 (NetCDF4)')
+            } else {
+                reject('Unknown file type ' + out)
+            }
+        })
+    })
+
 }
 
 async function parseXmlFromStdin(): Promise<[NetCDFObject, string]> {

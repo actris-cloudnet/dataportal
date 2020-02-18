@@ -107,10 +107,10 @@ main.landing
           <dl>
             <dt>Identifier</dt>
             <dd>{{ response.uuid }}</dd>
-            <dt>File name</dt>
+            <dt>Filename</dt>
             <dd>{{ response.filename }}</dd>
-            <dt>Type</dt>
-            <dd>TODO</dd>
+            <dt>Format</dt>
+            <dd>{{ response.format }}</dd>
             <dt>Size</dt>
             <dd>{{ response.size }} bytes ({{ humanReadableSize(response.size) }})</dd>
             <dt>Checksum</dt>

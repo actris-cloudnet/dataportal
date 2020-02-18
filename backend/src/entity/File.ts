@@ -67,7 +67,10 @@ export class File {
     @Column()
     size!: number
 
-    constructor(obj: NetCDFObject, filename: string, chksum: string, filesize: number) {
+    @Column()
+    format!: string
+
+    constructor(obj: NetCDFObject, filename: string, chksum: string, filesize: number, format: string) {
         // A typeorm hack, see https://github.com/typeorm/typeorm/issues/3903
         if(typeof obj == 'undefined') return
 
@@ -85,5 +88,6 @@ export class File {
         this.filename = filename
         this.checksum = chksum
         this.size = filesize
+        this.format = format
     }
 }
