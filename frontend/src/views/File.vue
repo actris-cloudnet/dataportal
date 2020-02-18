@@ -181,11 +181,12 @@ export default class File extends Vue {
   @Prop() uuid!: string
   response = {}
   error = false
-  fileserverUrl = 'http://localhost:4000/'
+  fileserverUrl = process.env.VUE_APP_FILESERVERURL
+  apiUrl = process.env.VUE_APP_BACKENDURL
 
   created () {
     axios
-      .get(`http://localhost:3000/file/${this.uuid}`)
+      .get(`${this.apiUrl}file/${this.uuid}`)
       .then(response => {
         this.response = response.data
         })
