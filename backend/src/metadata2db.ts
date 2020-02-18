@@ -74,20 +74,24 @@ async function parseXmlFromStdin(): Promise<[NetCDFObject, string]> {
     return [ncObj, filename]
 }
 
-parseXmlFromStdin()
-    .then(([ncObj, filename]) =>
-        Promise.all([
-            ncObj,
-            basename(filename),
-            computeFileChecksum(filename),
-            computeFileSize(filename),
-            createConnection(connName),
-            linkFile(filename)
-        ])
-    )
-    .then(([ncObj, baseFilename, chksum, {size}, connection]) => {
-        const file = new File(ncObj, baseFilename, chksum, size)
-        return connection.manager.save(file)
-            .finally(() => connection.close())
-    })
-    .catch(err => console.error('Failed to import NetCDF XML to DB: ', err))
+(async function () {
+    let connection = await createConnection(connName)
+
+    parseXmlFromStdin()
+        .then(([ncObj, filename]) =>
+            Promise.all([
+                ncObj,
+                basename(filename),
+                computeFileChecksum(filename),
+                computeFileSize(filename),
+                getFileFormat(filename),
+                linkFile(filename),
+            ])
+        )
+        .then(([ncObj, baseFilename, chksum, {size}, format]) => {
+            const file = new File(ncObj, baseFilename, chksum, size, format)
+            return connection.manager.save(file)
+        })
+        .catch(err => console.error('Failed to import NetCDF XML to DB: ', err))
+        .finally(() => connection.close())
+ })()
