@@ -2,7 +2,7 @@ import {Builder, By, until, WebDriver} from 'selenium-webdriver'
 import * as fs from 'fs'
 import { join } from 'path'
 import axios from 'axios'
-import { clearDir, inboxDir, publicDir, clearDb } from '../lib'
+import { clearDir, inboxDir, publicDir, clearRepo } from '../lib'
  
 let driver: WebDriver
 
@@ -16,7 +16,7 @@ async function awaitAndFind(by: By) {
 beforeAll(async () => {
   clearDir(inboxDir)
   clearDir(publicDir)
-  clearDb()
+  clearRepo('file')
   driver = await new Builder().forBrowser('firefox').build()
 })
 

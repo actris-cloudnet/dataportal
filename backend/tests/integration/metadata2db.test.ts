@@ -9,10 +9,11 @@ const bucharestXmlMissing = 'tests/data/20190723_bucharest_classification_missin
 let conn: Connection
 let repo: Repository<File>
 const linkDir = 'tests/data/public'
+
 beforeAll(async () => {
   conn = await createConnection('test')
-  await conn.synchronize(true) // Clean db
   repo = conn.getRepository(File)
+  return repo.clear()
 })
 
 beforeEach(() => {

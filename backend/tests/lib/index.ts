@@ -9,10 +9,9 @@ export function clearDir(dir: string) {
   }
 }
 
-
-export async function clearDb() {
+export async function clearRepo(repo: string) {
   const conn = await createConnection('test')
-  await conn.synchronize(true) // Clean db
+  await conn.getRepository(repo).clear()
   return conn.close()
 }
 

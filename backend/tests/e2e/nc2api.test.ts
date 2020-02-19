@@ -1,12 +1,12 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import axios from 'axios'
-import { clearDir, inboxDir, publicDir, clearDb } from '../lib'
+import { clearDir, inboxDir, publicDir, clearRepo } from '../lib'
 
 beforeAll(async () => {
   clearDir(inboxDir)
   clearDir(publicDir)
-  return clearDb()
+  return clearRepo('file')
 })
 
 afterAll(async () => {
