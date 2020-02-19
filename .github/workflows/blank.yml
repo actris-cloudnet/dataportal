@@ -23,12 +23,16 @@ jobs:
         zsh --version
         psql --version
         ncdump
+        nginx -v
     - name: Configure postgresql
       run: |
         sudo -u postgres createuser -d -r -s -w runner
         sudo cat /etc/postgresql/10/main/pg_hba.conf|sed 's/md5/trust/' > pg_hba.tmp
         sudo mv pg_hba.tmp /etc/postgresql/10/main/pg_hba.conf
         sudo service postgresql restart
+    - name: Configure nginx
+      run: |
+        sudo chown -R runner /var/log/nginx
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
