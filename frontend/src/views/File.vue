@@ -144,13 +144,11 @@ main#landing
         <section class="details capitalize">
           <dl>
             <dt>Site</dt>
-            <dd>{{ response.location }}</dd>
-            <dt>Latitude</dt>
-            <dd>TODO</dd>
-            <dt>Longitude</dt>
-            <dd>TODO</dd>
+            <dd>{{ response.site.humanReadableName }}, {{ response.site.country }}</dd>
+            <dt>Coordinates</dt>
+            <dd>{{ response.site.latitude }}&deg;N, {{ response.site.longitude }}&deg;E</dd>
             <dt>Altitude</dt>
-            <dd>TODO</dd>
+            <dd>{{ response.site.elevation }}m</dd>
             <dt>Date</dt>
             <dd>{{ formatDateString(response.measurementDate) }}</dd>
           </dl>

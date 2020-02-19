@@ -4,8 +4,9 @@ import { promises as fsp }  from 'fs'
 import { basename, join, resolve as pathResolve } from 'path'
 import { createHash } from 'crypto'
 import 'reflect-metadata'
-import { createConnection } from 'typeorm'
+import { createConnection, Connection } from 'typeorm'
 import { File } from './entity/File'
+import { Site } from './entity/Site'
 import { isNetCDFObject, getMissingFields, NetCDFObject } from './entity/NetCDFObject'
 import { spawn } from 'child_process'
 
@@ -25,6 +26,9 @@ interface NetCDFXML {
 
 const stringify = (obj: any): string =>
     JSON.stringify(obj, null, 2)
+
+const checkSiteExists = (conn: Connection, site: string): Promise<Site> =>
+    conn.getRepository(Site).findOneOrFail(site.toLowerCase().replace(/\W/g, ''))
 
 async function computeFileChecksum(filename: string): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -71,7 +75,6 @@ function getFileFormat(filename: string): Promise<string> {
             }
         })
     })
-
 }
 
 async function parseXmlFromStdin(): Promise<[NetCDFObject, string]> {
@@ -106,12 +109,13 @@ async function parseXmlFromStdin(): Promise<[NetCDFObject, string]> {
                 computeFileChecksum(filename),
                 computeFileSize(filename),
                 getFileFormat(filename),
-                linkFile(filename),
+                checkSiteExists(connection, ncObj.location),
+                linkFile(filename)
             ])
         )
-        .then(([ncObj, baseFilename, chksum, {size}, format]) => {
-            const file = new File(ncObj, baseFilename, chksum, size, format)
-            return connection.manager.save(file)
+        .then(([ncObj, baseFilename, chksum, {size}, format, site]) => {
+                const file = new File(ncObj, baseFilename, chksum, size, format, site)
+                return connection.manager.save(file)
         })
         .catch(err => console.error('Failed to import NetCDF XML to DB: ', err))
         .finally(() => connection.close())

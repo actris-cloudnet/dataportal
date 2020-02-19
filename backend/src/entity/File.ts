@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
-import {Entity, Column, PrimaryColumn, CreateDateColumn} from 'typeorm'
+import {Entity, Column, PrimaryColumn, CreateDateColumn, ManyToOne} from 'typeorm'
 import { NetCDFObject } from './NetCDFObject'
+import { Site } from './Site'
 
 export enum CloudnetFileType {
     CATEGORIZE = 'categorize',
@@ -20,7 +21,6 @@ export enum FilePublicity {
     HIDDEN = 'hidden'
 }
 
-
 @Entity()
 export class File {
 
@@ -33,8 +33,8 @@ export class File {
     @Column({type: 'date'})
     measurementDate!: Date
 
-    @Column()
-    location!: string
+    @ManyToOne(type => Site, site => site.files)
+    site!: Site
 
     @Column()
     history!: string
@@ -70,7 +70,7 @@ export class File {
     @Column()
     format!: string
 
-    constructor(obj: NetCDFObject, filename: string, chksum: string, filesize: number, format: string) {
+    constructor(obj: NetCDFObject, filename: string, chksum: string, filesize: number, format: string, site: Site) {
         // A typeorm hack, see https://github.com/typeorm/typeorm/issues/3903
         if(typeof obj == 'undefined') return
 
@@ -80,8 +80,8 @@ export class File {
             parseInt(obj.day)
         )
         this.title = obj.title
-        this.location = obj.location
         this.history = obj.history
+        this.site = site
         this.type = obj.cloudnet_file_type as CloudnetFileType
         this.cloudnetpyVersion = obj.cloudnetpy_version
         this.uuid = obj.file_uuid

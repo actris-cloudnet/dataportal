@@ -41,13 +41,13 @@ describe('file landing page', () => {
     const targetArray = [
       "15506ea8-d357-4c7b-af8c-95dfcc34fc7d",
       "23.8.2019",
-      "Bucharest",
       "Classification",
       "1.0.4",
       "20190723_bucharest_classification.nc",
       "b77b731aaae54f403aae6765ad1d20e1603b4454e2bc0d461aab4985a4a82ca4",
       139021,
-      "HDF5 (NetCDF4)"
+      "HDF5 (NetCDF4)",
+      "Bucharest, Romania"
     ]
     await driver.get('http://localhost:8000/file/15506ea8d3574c7baf8c95dfcc34fc7d')
     const content = await (await awaitAndFind(By.id('landing'))).getText()

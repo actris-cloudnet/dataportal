@@ -22,7 +22,7 @@ async function init() {
 
     app.get('/file/:uuid', async (req: Request, res: Response) => {
         const repo = conn.getRepository(File)
-        repo.findOneOrFail(req.params.uuid)
+        repo.findOneOrFail(req.params.uuid, { relations: ['site']})
             .then(result => res.send(result))
             .catch(_ => res.sendStatus(404))
     })

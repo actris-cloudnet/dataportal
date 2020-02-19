@@ -50,6 +50,7 @@ backend_postinstall () {
     createdb dataportal
     createdb dataportal-test
     npx typeorm schema:sync
+    scripts/prepare-db.js
 }
 
 case "$action" in
@@ -104,6 +105,7 @@ case "$action" in
     rm -r inbox/*
     npx typeorm schema:drop
     npx typeorm schema:sync
+    scripts/prepare-db.js
     cd ..
     ;;
 
