@@ -2,7 +2,6 @@ import {Builder, By, until, WebDriver} from 'selenium-webdriver'
 import * as fs from 'fs'
 import { join } from 'path'
 import axios from 'axios'
-import { createConnection } from 'typeorm'
 import { clearDir, inboxDir, publicDir, clearDb } from '../lib'
  
 let driver: WebDriver
