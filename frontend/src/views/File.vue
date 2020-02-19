@@ -131,7 +131,7 @@ main#landing
             <dt>Quality</dt>
             <dd>Near Real Time (NRT)</dd>
             <dt>Level</dt>
-            <dd>TODO</dd>
+            <dd>{{ response.level }}</dd>
             <dt>Cloudnet file type</dt>
             <dd>{{ response.type }}</dd>
             <dt v-if="response.cloudnetpyVersion">Cloudnetpy version</dt>
