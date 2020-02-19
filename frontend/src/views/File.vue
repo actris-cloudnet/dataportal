@@ -128,8 +128,8 @@ main#landing
         <header>Data information</header>
         <section class="details capitalize">
           <dl>
-            <dt>Type</dt>
-            <dd>TODO</dd>
+            <dt>Quality</dt>
+            <dd>Near Real Time (NRT)</dd>
             <dt>Level</dt>
             <dd>TODO</dd>
             <dt>Cloudnet file type</dt>
