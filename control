@@ -75,6 +75,7 @@ case "$action" in
     ;;
 
     stop)
+    set +e
     for pid in backend/$pid_dir/.*.pid; do
         echo $pid
         pkill -F $pid
@@ -94,17 +95,20 @@ case "$action" in
     ;;
 
     clean)
+    set +e
     rm -vf backend/$pid_dir/.*.pid
     rm -vf .nginx.pid
     ;;
 
     reset)
+    set +e
     cd backend
+    rm -r build
     rm -r public
     mkdir public
     rm -r inbox/*
     npx typeorm schema:drop
-    npx typeorm schema:sync
+    npx tsc --build tsconfig.json
     scripts/prepare-db.js
     cd ..
     ;;
