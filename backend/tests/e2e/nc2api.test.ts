@@ -42,6 +42,9 @@ describe('after moving a valid NC file to inbox', () => {
   it('should serve the file', async () => {
     return axios
       .head('http://localhost:4001/' + expectedJson.filename)
-      .then(response => expect(parseInt(response.headers['content-length'])).toEqual(expectedJson.size))
+      .then(response => {
+        expect(response.status).toEqual(200)
+        expect(parseInt(response.headers['content-length'])).toEqual(expectedJson.size)
+      })
   })
 })
