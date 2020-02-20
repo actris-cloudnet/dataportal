@@ -84,7 +84,7 @@ case "$action" in
         rm -f $pid
     done
     echo .nginx.pid
-    pkill -F .nginx.pid && rm .nginx.pid
+    pkill -F .nginx.pid
     truncate --size 0 */$pid_dir/all.log
     ;;
 
