@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import {Entity, Column, PrimaryColumn, CreateDateColumn, ManyToOne} from 'typeorm'
 import { NetCDFObject } from './NetCDFObject'
 import { Site } from './Site'

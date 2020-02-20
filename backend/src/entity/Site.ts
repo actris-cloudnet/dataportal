@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import {Entity, Column, PrimaryColumn, OneToMany} from 'typeorm'
 import {File} from './File'
 
