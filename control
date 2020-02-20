@@ -108,7 +108,6 @@ case "$action" in
     rm -r build
     rm -r public
     mkdir public
-    rm -r inbox/*
     npx typeorm schema:drop
     npx tsc --build tsconfig.json
     scripts/prepare-db.js
