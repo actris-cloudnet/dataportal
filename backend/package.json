@@ -35,8 +35,8 @@
       "typescript": "3.3.3333"
    },
    "scripts": {
-      "test": "export NODE_ENV='test' &&  npx jest tests/integration && unset NODE_ENV",
-      "e2e-test": "export NODE_ENV='test' && npx jest tests/e2e && unset NODE_ENV",
+      "test": "npx jest tests/integration",
+      "e2e-test": "npx jest tests/e2e",
       "start": "echo 'Use ./control script at project root'",
       "stop": "echo 'Use ./control script at project root'",
       "build": "tsc --build tsconfig.json"
