@@ -67,7 +67,9 @@ case "$action" in
     echo
     cd ..
     echo "Starting nginx..."
-    nginx -p . -c .nginx.conf
+    if [[ ! -f .nginx.pid ]]; then
+        nginx -p . -c .nginx.conf
+    fi
 
     waitport $backend_port
     waitport $fileserver_port
