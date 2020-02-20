@@ -22,15 +22,15 @@ export enum FilePublicity {
 }
 
 export const level: {[key in CloudnetFileType]: number} = {
- 'categorize': 2,
- 'classification': 2,
- 'drizzle': 2,
- 'iwc': 1,
- 'lidar': 1,
- 'lwc': 1,
- 'model': 1,
- 'mwr': 1,
- 'radar': 1
+  'categorize': 2,
+  'classification': 2,
+  'drizzle': 2,
+  'iwc': 1,
+  'lidar': 1,
+  'lwc': 1,
+  'model': 1,
+  'mwr': 1,
+  'radar': 1
 }
 
 @Entity()
@@ -45,22 +45,22 @@ export class File {
     @Column({type: 'date'})
     measurementDate!: Date
 
-    @ManyToOne(type => Site, site => site.files)
+    @ManyToOne(_ => Site, site => site.files)
     site!: Site
 
     @Column()
     history!: string
 
     @Column({
-        type: 'enum',
-        enum: FilePublicity,
-        default: FilePublicity.PUBLIC
+      type: 'enum',
+      enum: FilePublicity,
+      default: FilePublicity.PUBLIC
     })
     publicity!: FilePublicity
 
     @Column({
-        type: 'enum',
-        enum: CloudnetFileType
+      type: 'enum',
+      enum: CloudnetFileType
     })
     type!: CloudnetFileType
 
@@ -86,26 +86,26 @@ export class File {
     level!: number
 
     constructor(obj: NetCDFObject, filename: string, chksum: string, filesize: number, format: string, site: Site) {
-        // A typeorm hack, see https://github.com/typeorm/typeorm/issues/3903
-        if(typeof obj == 'undefined') return
+      // A typeorm hack, see https://github.com/typeorm/typeorm/issues/3903
+      if(typeof obj == 'undefined') return
 
-        const cloudnetType = obj.cloudnet_file_type as CloudnetFileType
+      const cloudnetType = obj.cloudnet_file_type as CloudnetFileType
 
-        this.measurementDate = new Date(
-            parseInt(obj.year),
-            parseInt(obj.month),
-            parseInt(obj.day)
-        )
-        this.title = obj.title
-        this.history = obj.history
-        this.site = site
-        this.type = cloudnetType
-        this.cloudnetpyVersion = obj.cloudnetpy_version
-        this.uuid = obj.file_uuid
-        this.filename = filename
-        this.checksum = chksum
-        this.size = filesize
-        this.format = format
-        this.level = level[cloudnetType]
+      this.measurementDate = new Date(
+        parseInt(obj.year),
+        parseInt(obj.month),
+        parseInt(obj.day)
+      )
+      this.title = obj.title
+      this.history = obj.history
+      this.site = site
+      this.type = cloudnetType
+      this.cloudnetpyVersion = obj.cloudnetpy_version
+      this.uuid = obj.file_uuid
+      this.filename = filename
+      this.checksum = chksum
+      this.size = filesize
+      this.format = format
+      this.level = level[cloudnetType]
     }
 }

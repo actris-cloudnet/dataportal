@@ -3,9 +3,9 @@ import * as path from 'path'
 import { createConnection } from 'typeorm'
 
 export function clearDir(dir: string) {
-  const files = fs.readdirSync(dir);
+  const files = fs.readdirSync(dir)
   for (const file of files) {
-    fs.unlinkSync(path.join(dir, file));
+    fs.unlinkSync(path.join(dir, file))
   }
 }
 
