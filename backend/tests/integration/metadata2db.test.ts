@@ -1,14 +1,14 @@
 import { File } from '../../src/entity/File'
 import { createConnection, Repository, Connection } from 'typeorm'
-import { readFileSync, unlinkSync, readdirSync } from 'fs'
-import { join } from 'path'
+import { readFileSync } from 'fs'
 import { spawn } from 'child_process'
+import { publicDir, clearDir } from '../lib'
 
 const bucharestXml = 'tests/data/20190723_bucharest_classification.xml'
 const bucharestXmlMissing = 'tests/data/20190723_bucharest_classification_missing_fields.xml'
+const bucharestXmlInvalidLocation = 'tests/data/20190723_bucharest_classification_invalid_location.xml'
 let conn: Connection
 let repo: Repository<File>
-const linkDir = 'tests/data/public'
 
 beforeAll(async () => {
   conn = await createConnection('test')
@@ -17,10 +17,7 @@ beforeAll(async () => {
 })
 
 beforeEach(() => {
-  const files = readdirSync(linkDir)
-  for (const file of files) {
-    unlinkSync(join(linkDir, file))
-  }
+  clearDir(publicDir)
 })
 
 afterAll(async () => {
@@ -49,9 +46,16 @@ test('errors on missing XML fields', async () => {
   return expect(out).toMatch('file_uuid')
 })
 
-describe('after reading a valid XML', () => {
-  beforeAll(async () => readXmlIn(bucharestXml, true))
+test('errors on invalid location', async () => {
+  const out = await readXmlIn(bucharestXmlInvalidLocation, false)
+  return expect(out).toMatch('Failed to import NetCDF XML to DB:')
+})
 
+describe('after reading a valid XML', () => {
+  beforeAll(async () => {
+    clearDir(publicDir)
+    return readXmlIn(bucharestXml, true)
+  })
 
   afterAll(async () =>
     repo.clear()
