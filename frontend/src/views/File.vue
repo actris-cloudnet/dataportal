@@ -100,7 +100,7 @@ main#landing
     <header>
       <div class="summary">
           <h2>Cloudnet data object</h2>
-          <span>{{ response.type }} data from {{ response.site.humanReadableName }} on {{ formatDateString(response.measurementDate) }}.</span>
+          <span>{{ response.type }} data from {{ response.site.humanReadableName }} on {{ humanReadableDate(response.measurementDate) }}.</span>
       </div>
       <div class="actions">
         <a class="download" :href="fileserverUrl + response.filename">Download file</a>
@@ -197,8 +197,8 @@ export default class File extends Vue {
       })
   }
 
-  formatDateString (date: string) {
-    return new Date(date).toLocaleDateString('fi-FI')
+  humanReadableDate (date: string) {
+    return new Date(date).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })
   }
 
   humanReadableSize (size: number) {
