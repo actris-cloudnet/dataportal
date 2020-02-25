@@ -100,7 +100,7 @@ main#landing
     <header>
       <div class="summary">
           <h2>Cloudnet data object</h2>
-          <span>{{ response.type }} data from {{ response.location }} on {{ formatDateString(response.measurementDate) }}.</span>
+          <span>{{ response.type }} data from {{ response.site.humanReadableName }} on {{ formatDateString(response.measurementDate) }}.</span>
       </div>
       <div class="actions">
         <a class="download" :href="fileserverUrl + response.filename">Download file</a>
