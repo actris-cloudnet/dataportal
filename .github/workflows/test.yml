@@ -16,7 +16,9 @@ jobs:
       NODE_ENV: 'test' 
     steps:
     - name: Install Ubuntu dependencies
-      run: sudo apt-get install fswatch zsh postgresql netcdf-bin nginx-light
+      run: |
+        sudo apt-get update
+        sudo apt-get install fswatch zsh postgresql netcdf-bin nginx-light
     - name: Print versions
       run: |
         fswatch --version
