@@ -52,7 +52,7 @@ jobs:
     - name: Install project
       run: ./control ci
     - name: Build project
-      run: ./control build
+      run: cd frontend && npx vue-cli-service build --mode e2e && cd ..
     - name: Start backend and frontend
       run: ./control start
     - name: Run integration tests

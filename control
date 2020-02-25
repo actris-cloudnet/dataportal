@@ -47,6 +47,7 @@ backend_postinstall () {
     mkdir -p tests/data/public
     createdb dataportal
     createdb dataportal-test
+    npm run build
     npx typeorm schema:sync
     scripts/prepare-db.js
 }
