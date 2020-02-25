@@ -60,7 +60,7 @@ main#landing
       > *
         padding: 10px
       > header
-        background: #f5f7f8
+        background: #f3f7f9
         border-bottom: 1px solid grey
         font-size: 1.1em
       dl
