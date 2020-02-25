@@ -28,8 +28,8 @@ const expectedJson = {
   'site': {
     'id': 'bucharest',
     'humanReadableName': 'Bucharest',
-    'latitude': 44.35,
-    'longitude': 26.03,
+    'latitude': 44.348,
+    'longitude': 26.029,
     'elevation': 93,
     'gaw': 'Unknown',
     'country': 'Romania'
