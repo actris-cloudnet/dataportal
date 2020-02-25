@@ -21,12 +21,12 @@ export enum FilePublicity {
 }
 
 export const level: {[key in CloudnetFileType]: number} = {
-  'categorize': 2,
+  'categorize': 1,
   'classification': 2,
   'drizzle': 2,
-  'iwc': 1,
+  'iwc': 2,
   'lidar': 1,
-  'lwc': 1,
+  'lwc': 2,
   'model': 1,
   'mwr': 1,
   'radar': 1
