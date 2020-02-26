@@ -72,9 +72,9 @@ main#landing
         column-gap: 0.5em
         row-gap: 0.5em
       dt 
-        text-align: right
+        text-align: left
         font-weight: 600
-        max-width: 10em
+        max-width: 11em
       dt::after
         content: ": "
       dd 
@@ -119,38 +119,38 @@ main#landing
             <dd>{{ response.format }}</dd>
             <dt>Size</dt>
             <dd>{{ response.size }} bytes ({{ humanReadableSize(response.size) }})</dd>
-            <dt>Checksum</dt>
+            <dt>Hash (SHA-256)</dt>
             <dd>{{ response.checksum }}</dd>
           </dl>
         </section>
       </section>
       <section id="data">
-        <header>Data information</header>
-        <section class="details capitalize">
+        <header>Product information</header>
+        <section class="details">
           <dl>
-            <dt>Quality</dt>
-            <dd>Near Real Time (NRT)</dd>
+            <dt>Product</dt>
+            <dd class="capitalize">{{ response.type }}</dd>
             <dt>Level</dt>
             <dd>{{ response.level }}</dd>
-            <dt>Cloudnet file type</dt>
-            <dd>{{ response.type }}</dd>
+            <dt>Quality</dt>
+            <dd>Near Real Time (NRT)</dd>
             <dt v-if="response.cloudnetpyVersion">Cloudnetpy version</dt>
             <dd v-if="response.cloudnetpyVersion">{{ response.cloudnetpyVersion }}</dd>
+            <dt>Data from</dt>
+            <dd>{{ response.measurementDate }}</dd>
           </dl>
         </section>
       </section>
       <section id="measurement">
-        <header>Measurement info</header>
-        <section class="details capitalize">
+        <header>Station information</header>
+        <section class="details">
           <dl>
-            <dt>Site</dt>
+            <dt>Location</dt>
             <dd>{{ response.site.humanReadableName }}, {{ response.site.country }}</dd>
             <dt>Coordinates</dt>
             <dd>{{ response.site.latitude }}&deg;N, {{ response.site.longitude }}&deg;E</dd>
-            <dt>Altitude</dt>
+            <dt>Station altitude</dt>
             <dd>{{ response.site.elevation }}m</dd>
-            <dt>Date</dt>
-            <dd>{{ formatDateString(response.measurementDate) }}</dd>
           </dl>
         </section>
       </section>
