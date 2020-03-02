@@ -45,6 +45,6 @@
           "argsIgnorePattern": "^_"
         }],
         "no-trailing-spaces": 2,
-        "eol-last": ["error", "never"]
+        "eol-last": ["error", "always"]
     }
 }
