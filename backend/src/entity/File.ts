@@ -21,15 +21,15 @@ export enum FilePublicity {
 }
 
 export const level: {[key in CloudnetFileType]: number} = {
+  'radar': 1,
+  'lidar': 1,
+  'mwr': 1,
+  'model': 1,
   'categorize': 1,
   'classification': 2,
   'drizzle': 2,
   'iwc': 2,
-  'lidar': 1,
-  'lwc': 2,
-  'model': 1,
-  'mwr': 1,
-  'radar': 1
+  'lwc': 2
 }
 
 @Entity()
