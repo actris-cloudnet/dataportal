@@ -134,7 +134,7 @@ main#landing
             <dd>{{ response.level }}</dd>
             <dt>Quality</dt>
             <dd>Near Real Time (NRT)</dd>
-            <dt v-if="response.cloudnetpyVersion">Cloudnetpy version</dt>
+            <dt v-if="response.cloudnetpyVersion">CloudnetPy version</dt>
             <dd v-if="response.cloudnetpyVersion">{{ response.cloudnetpyVersion }}</dd>
             <dt>Data from</dt>
             <dd>{{ response.measurementDate }}</dd>
