@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         node-version: [10.16.3]
-        python-version: [3.7]
+        python-version: [3.6]
 
     env:
       NODE_ENV: 'test' 
