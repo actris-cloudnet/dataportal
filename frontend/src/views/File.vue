@@ -148,9 +148,9 @@ main#landing
             <dt>Location</dt>
             <dd>{{ response.site.humanReadableName }}, {{ response.site.country }}</dd>
             <dt>Coordinates</dt>
-            <dd>{{ response.site.latitude }}&deg;N, {{ response.site.longitude }}&deg;E</dd>
+            <dd>{{ response.site.latitude }}&deg; N, {{ response.site.longitude }}&deg; E</dd>
             <dt>Site altitude</dt>
-            <dd>{{ response.site.elevation }}m</dd>
+            <dd>{{ response.site.elevation }} m</dd>
           </dl>
         </section>
       </section>
