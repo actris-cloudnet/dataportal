@@ -67,7 +67,7 @@ export class File {
     cloudnetpyVersion!: string
 
     @CreateDateColumn()
-    createdAt!: Date
+    releasedAt!: Date
 
     @Column()
     filename!: string
