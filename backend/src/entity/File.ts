@@ -61,7 +61,7 @@ export class File {
       type: 'enum',
       enum: CloudnetFileType
     })
-    type!: CloudnetFileType
+    product!: CloudnetFileType
 
     @Column({nullable: true})
     cloudnetpyVersion!: string
@@ -98,7 +98,7 @@ export class File {
       this.title = obj.title
       this.history = obj.history
       this.site = site
-      this.type = cloudnetType
+      this.product = cloudnetType
       this.cloudnetpyVersion = obj.cloudnetpy_version
       this.uuid = obj.file_uuid
       this.filename = filename

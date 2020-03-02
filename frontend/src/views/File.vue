@@ -100,7 +100,7 @@ main#landing
     <header>
       <div class="summary">
           <h2>Cloudnet data object</h2>
-          <span>{{ response.type }} data from {{ response.site.humanReadableName }} on {{ humanReadableDate(response.measurementDate) }}.</span>
+          <span>{{ response.product }} data from {{ response.site.humanReadableName }} on {{ humanReadableDate(response.measurementDate) }}.</span>
       </div>
       <div class="actions">
         <a class="download" :href="fileserverUrl + response.filename">Download file</a>
@@ -129,7 +129,7 @@ main#landing
         <section class="details">
           <dl>
             <dt>Product</dt>
-            <dd class="capitalize">{{ response.type }}</dd>
+            <dd class="capitalize">{{ response.product }}</dd>
             <dt>Level</dt>
             <dd>{{ response.level }}</dd>
             <dt>Quality</dt>

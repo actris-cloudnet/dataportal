@@ -18,7 +18,7 @@ const expectedJson = {
   'measurementDate': '2019-08-23',
   'history': '2019-09-16 11:21:13 - classification file created\n2019-09-16 11:21:02 - categorize file created\n2019-09-16 11:20:30 - radar file created\nLidar backscatter derived from raw values in arbitrary units: calibrated by user Ewan O\'Connor <ewan.oconnor@fmi.fi> on 25-Jul-2019.',
   'publicity': 'public',
-  'type': 'classification',
+  'product': 'classification',
   'level': 2,
   'cloudnetpyVersion': '1.0.4',
   'filename': '20190723_bucharest_classification.nc',
