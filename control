@@ -90,9 +90,9 @@ case "$action" in
     purge)
     dropdb dataportal
     dropdb dataportal-test
-    rm -r */build
-    rm -r */dist
-    rm -r */node_modules
+    rm -rf */build
+    rm -rf */dist
+    rm -rf */node_modules
     ;;
 
     clean)
@@ -104,8 +104,8 @@ case "$action" in
     reset)
     set +e
     cd backend
-    rm -r build
-    rm -r public
+    rm -rf build
+    rm -rf public
     mkdir public
     npx typeorm schema:drop
     npx tsc --build tsconfig.json
