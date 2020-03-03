@@ -8,9 +8,9 @@
 <style lang="sass">
 @import "@/sass/variables.sass"
 
-body 
+body
     margin: 0
-#app > main 
+#app > main
     max-width: 100em
     margin-left: auto
     margin-right: auto

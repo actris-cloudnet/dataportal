@@ -11,7 +11,7 @@ main#landing
     h2
       color: $section-title
       margin: 0px
-    span 
+    span
       display: block
       color: grey
       font-style: italic
@@ -37,14 +37,14 @@ main#landing
     font-size: 1em
     cursor: pointer
     font-family: $content-font
-    &:hover 
+    &:hover
       background-color: $blue-sapphire-light
       border-color: $blue-sapphire-light
-    &:active 
+    &:active
       border-style: inset
       background-color: $blue-sapphire
       border-color: $blue-sapphire
-  main    
+  main
     margin: -1em
     display: flex
     justify-content: center
@@ -71,13 +71,13 @@ main#landing
         grid-template-columns: auto 4fr
         column-gap: 0.5em
         row-gap: 0.5em
-      dt 
+      dt
         text-align: left
         font-weight: 600
         max-width: 11em
       dt::after
         content: ": "
-      dd 
+      dd
         display: flex
         flex-direction: column
         justify-content: center
@@ -190,7 +190,7 @@ export default class File extends Vue {
       .get(`${this.apiUrl}file/${this.uuid}`)
       .then(response => {
         this.response = response.data
-        })
+      })
       .catch(({response}) => {
         this.error = true
         this.response = response
