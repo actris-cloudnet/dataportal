@@ -1,6 +1,7 @@
 import { File } from '../../src/entity/File'
 import { createConnection, Repository, Connection } from 'typeorm'
-import { readFileSync } from 'fs'
+import { readFileSync, openSync, closeSync, statSync } from 'fs'
+import { join } from 'path'
 import { spawn } from 'child_process'
 import { publicDir, clearDir } from '../lib'
 
@@ -49,6 +50,15 @@ test('errors on missing XML fields', async () => {
 test('errors on invalid location', async () => {
   const out = await readXmlIn(bucharestXmlInvalidLocation, false)
   return expect(out).toMatch('Failed to import NetCDF XML to DB:')
+})
+
+test('does not overwrite existing files', async () => {
+  await repo.clear()
+  const file = join(publicDir, '20190723_bucharest_classification.nc')
+  closeSync(openSync(file, 'w'))
+  const out = await readXmlIn(bucharestXml, false)
+  expect(out).toMatch('Failed to import NetCDF XML to DB:')
+  expect(statSync(file).size).toBe(0)
 })
 
 describe('after reading a valid XML', () => {
