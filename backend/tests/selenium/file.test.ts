@@ -1,4 +1,5 @@
 import {Builder, By, until, WebDriver} from 'selenium-webdriver'
+import * as firefox from 'selenium-webdriver/firefox'
 import * as fs from 'fs'
 import { join } from 'path'
 import axios from 'axios'
@@ -14,10 +15,15 @@ async function awaitAndFind(by: By) {
 }
 
 beforeAll(async () => {
+  const options = new firefox.Options()
+  if(process.env.CI) options.addArguments('-headless') // Run in headless on CI
   clearDir(inboxDir)
   clearDir(publicDir)
   clearRepo('file')
-  driver = await new Builder().forBrowser('firefox').build()
+  driver = await new Builder()
+    .forBrowser('firefox')
+    .setFirefoxOptions(options)
+    .build()
 })
 
 afterAll(async () => {

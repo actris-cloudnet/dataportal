@@ -14,6 +14,7 @@ jobs:
 
     env:
       NODE_ENV: 'test' 
+      CI: true
     steps:
     - name: Install Ubuntu dependencies
       run: |
@@ -26,6 +27,13 @@ jobs:
         psql --version
         ncdump
         nginx -v
+    - name: Add local bin to PATH
+      run: export PATH=/usr/local/bin:$PATH
+    - name: Setup geckodriver
+      run: |
+          wget https://github.com/mozilla/geckodriver/releases/download/v0.26.0/geckodriver-v0.26.0-linux64.tar.gz 
+          tar xvzf geckodriver-v0.26.0-linux64.tar.gz
+          sudo ln -s geckodriver /usr/local/bin/geckodriver
     - name: Configure postgresql
       run: |
         sudo -u postgres createuser -d -r -s -w runner
@@ -44,9 +52,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }} 
     - name: Symlink Python 3
-      run: |
-        sudo ln -s `which python` /usr/local/bin/python3
-        export PATH=/usr/local/bin$PATH
+      run: sudo ln -s `which python` /usr/local/bin/python3
     - name: Checkout  
       uses: actions/checkout@v2
     - name: Install project
@@ -59,6 +65,8 @@ jobs:
       run: cd backend && npm test && cd ..
     - name: Run e2e tests
       run: cd backend && npm run e2e-test && cd ..
+    - name: Run selenium tests
+      run: ./control selenium-test
     - name: Print logs
       if: always()
       run: cat */tests/all.log
