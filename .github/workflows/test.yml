@@ -19,10 +19,9 @@ jobs:
     - name: Install Ubuntu dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install fswatch zsh postgresql netcdf-bin nginx-light inotify-tools
+        sudo apt-get install zsh postgresql netcdf-bin nginx-light inotify-tools
     - name: Print versions
       run: |
-        fswatch --version
         zsh --version
         psql --version
         ncdump
