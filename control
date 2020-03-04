@@ -1,0 +1,163 @@
+#!/bin/zsh
+set -e
+
+if [ -z $1 ]; then
+    echo "Action not specified"
+    exit 1
+fi
+
+action=$1
+
+fileserver_port=4000
+frontend_port=8000
+backend_port=3000
+pid_dir='.'
+inbox_dir='inbox'
+
+if [[ "$NODE_ENV" == 'test' ]]; then
+    backend_port=3001
+    pid_dir='tests'
+    inbox_dir='tests/data/inbox'
+fi
+
+typeset -A backend_targets
+typeset -A frontend_targets
+
+backend_targets[$pid_dir/.listen-inbox.pid]="scripts/listen-inbox.sh $inbox_dir"
+backend_targets[$pid_dir/.node.pid]="npx nodemon -w build -- $backend_port"
+
+waitport () {
+    timeout=10
+    interval=0.5
+    i=0
+    while ! nc -z localhost $1; do
+        if [[ "$i" -ge $timeout ]]; then
+            echo "Timeout"
+            exit 2
+        fi
+        sleep $interval
+        i=$((i+$interval))
+    done
+}
+
+backend_postinstall () {
+    mkdir -p public
+    mkdir -p inbox
+    mkdir -p tests/data/inbox
+    mkdir -p tests/data/public
+    createdb dataportal
+    createdb dataportal-test
+    npm run build
+    npx typeorm schema:sync
+    scripts/prepare-db.js
+}
+
+case "$action" in
+    start)
+    echo "Starting backend..."
+    cd backend
+    for target cmd in ${(kv)backend_targets}; do
+        if [[ ! -f $target ]]; then
+            echo $cmd
+            eval "${cmd} >> $pid_dir/all.log 2>&1 &"
+            echo $! > $target
+        fi
+    done
+    echo
+    cd ..
+    echo "Starting nginx..."
+    if [[ ! -f .nginx.pid ]]; then
+        nginx -p . -c .nginx.conf
+    fi
+
+    waitport $backend_port
+    waitport $fileserver_port
+    waitport $frontend_port
+    ;;
+
+    stop)
+    set +e
+    for pid in backend/$pid_dir/.*.pid; do
+        echo $pid
+        pkill -F $pid
+        rm -f $pid
+    done
+    echo .nginx.pid
+    pkill -F .nginx.pid
+    truncate --size 0 */$pid_dir/all.log
+    ;;
+
+    purge)
+    dropdb dataportal
+    dropdb dataportal-test
+    rm -rf */build
+    rm -rf */dist
+    rm -rf */node_modules
+    ;;
+
+    clean)
+    set +e
+    rm -vf backend/$pid_dir/.*.pid
+    rm -vf .nginx.pid
+    ;;
+
+    reset)
+    set +e
+    cd backend
+    rm -rf build
+    rm -rf public
+    mkdir public
+    npx typeorm schema:drop
+    npx tsc --build tsconfig.json
+    scripts/prepare-db.js
+    cd ..
+    ;;
+
+    install)
+    echo "Installing backend..."
+    cd backend
+    npm install
+    backend_postinstall
+    echo
+    echo "Installing frontend..."
+    cd ../frontend
+    npm install
+    cd ..
+    ;;
+
+    ci)
+    echo "Installing backend..."
+    cd backend
+    npm ci
+    backend_postinstall
+    echo
+    echo "Installing frontend..."
+    cd ../frontend
+    npm ci
+    cd ..
+    ;;
+
+    build)
+    echo "Building backend..."
+    cd backend
+    npm run build
+    echo "Building frontend..."
+    cd ../frontend
+    npm run build
+    cd ..
+    ;;
+
+    selenium-test)
+    cd frontend
+    npx vue-cli-service build --mode e2e
+    cd ../backend
+    npx jest tests/selenium
+    cd ..
+    ;;
+
+    *)
+    echo "Unknown action $action"
+    exit 1
+    ;;
+esac
+

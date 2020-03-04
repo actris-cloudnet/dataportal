@@ -1,0 +1,72 @@
+name: Node.js CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [10.16.3]
+        python-version: [3.6]
+
+    env:
+      NODE_ENV: 'test' 
+      CI: true
+    steps:
+    - name: Install Ubuntu dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install fswatch zsh postgresql netcdf-bin nginx-light
+    - name: Print versions
+      run: |
+        fswatch --version
+        zsh --version
+        psql --version
+        ncdump
+        nginx -v
+    - name: Add local bin to PATH
+      run: export PATH=/usr/local/bin:$PATH
+    - name: Setup geckodriver
+      run: |
+          wget https://github.com/mozilla/geckodriver/releases/download/v0.26.0/geckodriver-v0.26.0-linux64.tar.gz 
+          tar xvzf geckodriver-v0.26.0-linux64.tar.gz
+          sudo ln -s geckodriver /usr/local/bin/geckodriver
+    - name: Configure postgresql
+      run: |
+        sudo -u postgres createuser -d -r -s -w runner
+        sudo cat /etc/postgresql/10/main/pg_hba.conf|sed 's/md5/trust/' > pg_hba.tmp
+        sudo mv pg_hba.tmp /etc/postgresql/10/main/pg_hba.conf
+        sudo service postgresql restart
+    - name: Configure nginx
+      run: |
+        sudo chown -R runner /var/log/nginx
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Use Python ${{ matrix.python-version }} 
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }} 
+    - name: Symlink Python 3
+      run: sudo ln -s `which python` /usr/local/bin/python3
+    - name: Checkout  
+      uses: actions/checkout@v2
+    - name: Install project
+      run: ./control ci
+    - name: Build project
+      run: cd frontend && npx vue-cli-service build --mode e2e && cd ..
+    - name: Start backend and frontend
+      run: ./control start
+    - name: Run integration tests
+      run: cd backend && npm test && cd ..
+    - name: Run e2e tests
+      run: cd backend && npm run e2e-test && cd ..
+    - name: Run selenium tests
+      run: ./control selenium-test
+    - name: Print logs
+      if: always()
+      run: cat */tests/all.log

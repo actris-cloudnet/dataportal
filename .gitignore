@@ -38,7 +38,7 @@ bower_components
 build/Release
 
 # Dependency directories
-node_modules/
+node_modules
 jspm_packages/
 
 # TypeScript v1 declaration files
@@ -102,3 +102,23 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Data
+/backend/public
+/backend/tests/data/public
+inbox
+
+# Build data
+build
+public/css
+
+# Python virtual env
+.venv/
+.venv-dev/
+
+# Visual studio code project files
+.vscode
+*.code-workspace
+
+.DS_Store
+
