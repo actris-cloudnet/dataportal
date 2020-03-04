@@ -26,7 +26,7 @@ jobs:
         psql --version
         ncdump
         nginx -v
-        inotifywait -h
+        inotifywait -h || true
     - name: Add local bin to PATH
       run: export PATH=/usr/local/bin:$PATH
     - name: Setup geckodriver
