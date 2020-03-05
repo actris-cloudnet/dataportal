@@ -24,7 +24,7 @@ async function init() {
 
   const filesValidator: RequestHandler = (req, _res, next) => {
     const errors: Array<string> = []
-    if(Object.entries(req.query).length == 0) {
+    if(Object.keys(req.query).length == 0) {
       errors.push('No search parameters given')
     }
     if(errors.length > 0) {
