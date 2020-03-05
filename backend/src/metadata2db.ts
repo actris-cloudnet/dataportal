@@ -9,6 +9,7 @@ import { File } from './entity/File'
 import { Site } from './entity/Site'
 import { isNetCDFObject, getMissingFields, NetCDFObject } from './entity/NetCDFObject'
 import { spawn } from 'child_process'
+import { stringify } from './lib'
 
 const connName: string = process.env.NODE_ENV == 'test' ? 'test' : 'default'
 
@@ -23,9 +24,6 @@ interface NetCDFXML {
         '$': { location: string }
     }
 }
-
-const stringify = (obj: any): string =>
-  JSON.stringify(obj, null, 2)
 
 const checkSiteExists = (conn: Connection, site: string): Promise<Site> =>
   conn.getRepository(Site).findOneOrFail(site.toLowerCase().replace(/\W/g, ''))

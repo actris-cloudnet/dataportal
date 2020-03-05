@@ -3,6 +3,7 @@ import { createConnection } from 'typeorm'
 import { Request, Response, RequestHandler, ErrorRequestHandler } from 'express'
 import { File } from './entity/File'
 import { RequestError } from './entity/RequestError'
+import { stringify } from './lib'
 import * as express from 'express'
 
 const port = parseInt(process.argv[2])
@@ -47,7 +48,7 @@ async function init() {
   })
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, _req, res, next) => {
-    console.log(`Error in path ${_req.path}:`, JSON.stringify(err, null, 2))
+    console.log(`Error in path ${_req.path}:`, stringify(err))
     res.status(err.status)
     res.send(err)
     next()
