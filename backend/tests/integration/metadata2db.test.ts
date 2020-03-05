@@ -14,7 +14,6 @@ let repo: Repository<File>
 beforeAll(async () => {
   conn = await createConnection('test')
   repo = conn.getRepository(File)
-  return repo.clear()
 })
 
 beforeEach(() => {
@@ -62,8 +61,10 @@ test('does not overwrite existing files', async () => {
 })
 
 describe('after reading a valid XML', () => {
+  let rowN: number;
   beforeAll(async () => {
     clearDir(publicDir)
+    rowN = (await repo.find()).length
     return readXmlIn(bucharestXml, true)
   })
 
@@ -72,7 +73,7 @@ describe('after reading a valid XML', () => {
   )
 
   test('inserts a row to db', async () => {
-    return expect(repo.find()).resolves.toHaveLength(1)
+    return expect(repo.find()).resolves.toHaveLength(rowN + 1)
   })
 
   test('errors when inserting XML with same UUID', async () => {

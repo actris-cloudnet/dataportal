@@ -36,8 +36,9 @@
       "typescript": "3.3.3333"
    },
    "scripts": {
-      "test": "npx jest tests/integration",
-      "e2e-test": "npx jest tests/e2e",
+      "populate-testdb": "fixtures ./fixtures --connection=test --sync",
+      "test": "npm run populate-testdb && jest tests/integration",
+      "e2e-test": "npm run populate-testdb && jest tests/e2e",
       "start": "echo 'Use ./control script at project root'",
       "stop": "echo 'Use ./control script at project root'",
       "build": "tsc --build tsconfig.json",
