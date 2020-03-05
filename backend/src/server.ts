@@ -1,7 +1,8 @@
 import 'reflect-metadata'
 import { createConnection } from 'typeorm'
-import { Request, Response } from 'express'
+import { Request, Response, RequestHandler, ErrorRequestHandler } from 'express'
 import { File } from './entity/File'
+import { RequestError } from './entity/RequestError'
 import * as express from 'express'
 
 const port = parseInt(process.argv[2])
@@ -20,12 +21,39 @@ async function init() {
     })
   }
 
+  const filesValidator: RequestHandler = (req, _res, next) => {
+    const errors: Array<string> = []
+    if(Object.entries(req.params).length == 0) {
+      errors.push('No search parameters given')
+    }
+    if(errors.length > 0) {
+      next({status: 400, errors})
+    } else {
+      next()
+    }
+  }
+
   app.get('/file/:uuid', async (req: Request, res: Response) => {
     const repo = conn.getRepository(File)
     repo.findOneOrFail(req.params.uuid, { relations: ['site']})
       .then(result => res.send(result))
       .catch(_ => res.sendStatus(404))
   })
+  app.get('/files', filesValidator, async (req: Request, res: Response, next) => {
+    const repo = conn.getRepository(File)
+    repo.find({...req.params, ...{ relations: ['site'] }})
+      .then(result => res.send(result))
+      .catch(_ => next({status: 404, errors: 'Not found'}))
+  })
+
+  const errorHandler: ErrorRequestHandler = (err: RequestError, _req, res, next) => {
+    console.log(`Error in path ${_req.path}:`, JSON.stringify(err, null, 2))
+    res.status(err.status)
+    res.send(err)
+    next()
+  }
+
+  app.use(errorHandler)
 
   app.listen(port, () => console.log(`App listening on port ${port} with ${connName} connection!`))
 }
