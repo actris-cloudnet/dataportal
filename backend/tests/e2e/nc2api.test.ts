@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import axios from 'axios'
-import { clearDir, inboxDir, publicDir, clearRepo } from '../lib'
+import { clearDir, inboxDir, publicDir, clearRepo, backendUrl, fileServerUrl } from '../lib'
 
 beforeAll(async () => {
   clearDir(inboxDir)
@@ -44,13 +44,13 @@ describe('after moving a valid NC file to inbox', () => {
 
   it('should respond with a corresponding metadata JSON', async () => {
     return axios
-      .get('http://localhost:3001/file/' + expectedJson.uuid)
+      .get(`${backendUrl}file/${expectedJson.uuid}`)
       .then(response => expect(response.data).toMatchObject(expectedJson))
   })
 
   it('should serve the file', async () => {
     return axios
-      .head('http://localhost:4001/' + expectedJson.filename)
+      .head(`${fileServerUrl}${expectedJson.filename}`)
       .then(response => {
         expect(response.status).toEqual(200)
         expect(parseInt(response.headers['content-length'])).toEqual(expectedJson.size)

@@ -17,3 +17,5 @@ export async function clearRepo(repo: string) {
 
 export const inboxDir = 'tests/data/inbox'
 export const publicDir = 'tests/data/public'
+export const backendUrl = 'http://localhost:3001/'
+export const fileServerUrl = 'http://localhost:4001/'
