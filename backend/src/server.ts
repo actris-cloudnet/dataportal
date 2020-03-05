@@ -24,7 +24,7 @@ async function init() {
 
   const filesValidator: RequestHandler = (req, _res, next) => {
     const errors: Array<string> = []
-    if(Object.entries(req.params).length == 0) {
+    if(Object.entries(req.query).length == 0) {
       errors.push('No search parameters given')
     }
     if(errors.length > 0) {
@@ -42,9 +42,17 @@ async function init() {
   })
   app.get('/files', filesValidator, async (req: Request, res: Response, next) => {
     const repo = conn.getRepository(File)
-    repo.find({...req.params, ...{ relations: ['site'] }})
-      .then(result => res.send(result))
-      .catch(_ => next({status: 404, errors: 'Not found'}))
+    repo.find({ where: { site: {id: req.query.siteId } }, relations: ['site'] })
+      .then(result => {
+        if(result.length == 0) {
+          next({status: 404, errors: 'Not found'})
+          return
+        }
+        res.send(result)
+      })
+      .catch(err=> {
+        next({status: 500, errors: err})
+      })
   })
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, _req, res, next) => {
