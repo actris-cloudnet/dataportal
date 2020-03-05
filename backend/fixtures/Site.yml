@@ -1,0 +1,26 @@
+entity: Site
+items:
+  site1:
+    id: bucharest
+    humanReadableName: Bucharest
+    latitude: 44.348
+    longitude: 26.029
+    elevation: 93
+    gaw: Unknown
+    country: Romania
+  site2:
+    id: macehead
+    humanReadableName: Mace Head
+    latitude: 53.326
+    longitude: -9.9
+    elevation: 16
+    gaw: Unknown
+    country: Ireland
+  site3:
+    id: hyytiala
+    humanReadableName: Hyytiälä
+    latitude: 61.844
+    longitude: 24.288
+    elevation: 174
+    gaw: SMR
+    country: Finland

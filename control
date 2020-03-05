@@ -49,7 +49,7 @@ backend_postinstall () {
     createdb dataportal-test
     npm run build
     npx typeorm schema:sync
-    scripts/prepare-db.js
+    if [[ "$NODE_ENV" != 'production' ]]; then npx fixtures ./fixtures/Site.yml --connection=default --connection=test; fi
 }
 
 case "$action" in
