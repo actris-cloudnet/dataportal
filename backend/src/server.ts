@@ -87,6 +87,13 @@ async function init() {
       })
   })
 
+  app.get('/sites', async (_req: Request, res: Response, next) => {
+    const siteRepo = conn.getRepository(Site)
+    siteRepo.find()
+      .then(result => res.send(result))
+      .catch(err => next({status: 500, errors: err}))
+  })
+
   const errorHandler: ErrorRequestHandler = (err: RequestError, _req, res, next) => {
     console.log(`Error in path ${_req.path}:`, stringify(err))
     delete err.params

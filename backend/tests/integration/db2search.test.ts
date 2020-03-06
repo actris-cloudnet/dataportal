@@ -48,3 +48,13 @@ describe('/files', () => {
     return expect(axios.get(`${backendUrl}files/`, payload)).rejects.toMatchObject({response: {status: expectedBody404.status, data: expectedBody404}})
   })
 })
+
+describe('/sites', () => {
+  it('should respond with a list of all sites', async () => {
+    const sites = ['macehead', 'hyytiala', 'bucharest']
+    const res = await axios.get(`${backendUrl}sites/`)
+    expect(res.data).toHaveLength(3)
+    const siteList = res.data.map((d: any) => d.id)
+    sites.forEach(site => expect(siteList).toContain(site))
+  })
+})
