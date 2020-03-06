@@ -2,6 +2,7 @@ import 'reflect-metadata'
 import { createConnection } from 'typeorm'
 import { Request, Response, RequestHandler, ErrorRequestHandler } from 'express'
 import { File } from './entity/File'
+import { Site } from './entity/Site'
 import { RequestError, RequestErrorArray } from './entity/RequestError'
 import { stringify } from './lib'
 import * as express from 'express'
@@ -59,13 +60,21 @@ async function init() {
   })
 
   app.get('/files', filesValidator, async (req: Request, res: Response, next) => {
-    const repo = conn.getRepository(File)
+    const fileRepo = conn.getRepository(File)
+    const siteRepo = conn.getRepository(Site)
     const query = req.query
     const queryLocationToArray = (obj: string | Array<string>): Array<string> =>
       (typeof obj == 'string') ? [ obj ] : obj
 
-    const where = queryLocationToArray(query.location).map(site => ({site: {id: site}}))
-    repo.find({ where, relations: ['site'] })
+    const locations = queryLocationToArray(query.location)
+
+    siteRepo.findByIds(locations)
+      .then(res => {
+        if(res.length != locations.length) throw {status: 404, errors: 'One or more of the specified locations were not found', params: req.query}
+      })
+      .catch(next)
+    const where = locations.map(site => ({site: {id: site}}))
+    fileRepo.find({ where, relations: ['site'] })
       .then(result => {
         if(result.length == 0) {
           next({status: 404, errors: 'Not found', params: req.query})
