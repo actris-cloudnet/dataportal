@@ -1,4 +1,3 @@
-
 <template>
   <section id="tableContainer">
   <div v-if="listLength > 0" id="fileTable">
@@ -10,18 +9,18 @@
       hover
       sort-icon-left
       :items="response.data"
-      :fields="[{ key: 'title', label: 'File type', sortable: true, tdClass: 'titleCol'},
-                { key: 'measurementDate', label: 'Date', sortable: true}, ]"
+      :fields="[
+                { key: 'title', label: 'Title', sortable: true, tdClass: 'titleCol'},
+                { key: 'measurementDate', label: 'Date', sortable: true, tdClass: 'dateCol'}, 
+                { key: 'product', label: 'Type', sortable: false, tdClass: styleMe},
+                ]"
       :current-page="currentPage"
       :per-page="perPage"
-      :sort-by.sync="sortBy"
-      :sort-desc.sync="sortDesc"
       @row-clicked="clickRow"
       :caption="listCaption"
     ></b-table>
     <b-pagination id="pagi" v-if="listLength > perPage"
       v-model="currentPage"
-      pills
       align="center"
       :total-rows="listLength"
       :per-page="perPage"
@@ -43,7 +42,7 @@ export default class Search extends Vue {
   currentPage = 1
   perPage = 25
   apiUrl = process.env.VUE_APP_BACKENDURL
-  response = {'data': [{'uuid': ''}]}
+  response = {'data': [{'uuid': '', 'product': ''}]}
   error = false
 
   fetchData( query: string ) {
@@ -68,7 +67,7 @@ export default class Search extends Vue {
 
   get listCaption () {
     const nFiles = this.listLength
-    return 'Found ' + nFiles + ' digital objects:'
+    return 'Found ' + nFiles + ' results'
   }
 
   clickRow( _: number, index: number) {
@@ -78,6 +77,12 @@ export default class Search extends Vue {
   @Watch('response')
   onPropertyChanged() {
     this.currentPage = 1
+  }
+
+  styleMe(product: string) {
+    if (product === 'classification') {
+      return "iconColu"
+    }
   }
 
 }
@@ -97,10 +102,13 @@ export default class Search extends Vue {
     text-align: left;
 
   .titleCol
-    width: 500px;
+    width: 400px;
+
+  .dateCol
+    width: 150px;
 
   #fileTable caption
-    font-size: 140%;
+    font-size: 80%;
 
   #pagi
     margin-top: 30px;
@@ -111,14 +119,23 @@ export default class Search extends Vue {
 
   .table-striped > tbody > tr:nth-child(2n+1) > td, .table-striped > tbody > tr:nth-child(2n+1) > th
     background-color: $blue-dust;
-    
+
   .table-hover tbody tr:hover td, .table-hover tbody tr:hover th
     background-color: lightsteelblue;
 
-  .table-striped > tbody > tr > td 
+  .table-striped > tbody > tr > td
     padding: 7px;
 
   .page-link
     color: $blue-sapphire;
+
+  .iconColu
+    background-color: white;
+    background-image: url(../assets/radar_icon_small.png);
+    background-repeat: no-repeat;
+    background-size: 25%;
+    background-position: left;
+    color: transparent; 
+
 
 </style>>
