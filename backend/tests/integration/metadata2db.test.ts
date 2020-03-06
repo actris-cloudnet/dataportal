@@ -52,7 +52,7 @@ test('errors on invalid location', async () => {
 })
 
 test('does not overwrite existing files', async () => {
-  await repo.clear()
+  await repo.delete('15506ea8d3574c7baf8c95dfcc34fc7d') // Delete corresponding db row
   const file = join(publicDir, '20190723_bucharest_classification.nc')
   closeSync(openSync(file, 'w'))
   const out = await readXmlIn(bucharestXml, false)
@@ -61,16 +61,12 @@ test('does not overwrite existing files', async () => {
 })
 
 describe('after reading a valid XML', () => {
-  let rowN: number;
+  let rowN: number
   beforeAll(async () => {
     clearDir(publicDir)
     rowN = (await repo.find()).length
     return readXmlIn(bucharestXml, true)
   })
-
-  afterAll(async () =>
-    repo.clear()
-  )
 
   test('inserts a row to db', async () => {
     return expect(repo.find()).resolves.toHaveLength(rowN + 1)
