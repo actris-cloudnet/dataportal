@@ -75,6 +75,6 @@ describe('after reading a valid XML', () => {
   test('errors when inserting XML with same UUID', async () => {
     const out = await readXmlIn(bucharestXml, false)
     expect(out).toMatch('Failed to import NetCDF XML to DB:')
-    return expect(repo.find()).resolves.toHaveLength(1)
+    return expect(repo.find()).resolves.toHaveLength(rowN + 1)
   })
 })
