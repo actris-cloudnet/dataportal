@@ -1,18 +1,26 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
 
+Vue.use(BootstrapVue)
+Vue.use(IconsPlugin)
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/file/:uuid',
     name: 'File',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "file" */ '../views/File.vue'),
+    component: () => import('../views/File.vue'),
     props: true
-  }
+  },
+  {
+    path: '/search',
+    name: 'search',
+    component: () => import('../views/Search.vue'),
+    props: true
+  },
 ]
 
 const router = new VueRouter({
