@@ -45,7 +45,7 @@ async function init() {
     repo.find({ where: { site: {id: req.query.siteId } }, relations: ['site'] })
       .then(result => {
         if(result.length == 0) {
-          next({status: 404, errors: 'Not found'})
+          next({status: 404, errors: 'Not found', params: req.query})
           return
         }
         res.send(result)
@@ -57,6 +57,7 @@ async function init() {
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, _req, res, next) => {
     console.log(`Error in path ${_req.path}:`, stringify(err))
+    delete err.params
     res.status(err.status)
     res.send(err)
     next()
