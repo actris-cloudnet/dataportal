@@ -8,9 +8,6 @@ describe('/files', () => {
     status: 404,
     errors: 'Not found'
   }
-  const payload: AxiosRequestConfig = {
-    params: {}
-  }
 
   it('should respond with 400 if no query parameters are given', async () => {
     const expectedBody: RequestError = {
@@ -21,7 +18,7 @@ describe('/files', () => {
   })
 
   it('should respond with an array of 3 objects when searching for macehead', async () => {
-    payload.params.location = 'macehead'
+    const payload = {params: {location: 'macehead'}}
     const res = await axios.get(url, payload)
     expect(res).toHaveProperty('data')
     expect(res.data).toHaveLength(3)
@@ -29,7 +26,7 @@ describe('/files', () => {
   })
 
   it('should respond with an array of 4 objects when searching for macehead and hyytiala', async () => {
-    payload.params.location = ['macehead', 'hyytiala']
+    const payload = {params: {location: ['macehead', 'hyytiala']}}
     const res = await axios.get(url, payload)
     expect(res).toHaveProperty('data')
     expect(res.data).toHaveLength(4)
@@ -38,13 +35,13 @@ describe('/files', () => {
 
 
   it('should respond with 404 if location was not found', async () => {
-    payload.params.location = 'kilpikonna'
+    const payload = {params: {location: ['kilpikonna']}}
     expectedBody404.errors = ['One or more of the specified locations were not found']
     return expect(axios.get(url, payload)).rejects.toMatchObject({response: {status: expectedBody404.status, data: expectedBody404}})
   })
 
   it('should respond 404 if one of many locations was not found', async () => {
-    payload.params.location = ['macehead', 'kilpikonna']
+    const payload = {params: {location: ['macehead', 'kilpikonna']}}
     expectedBody404.errors = ['One or more of the specified locations were not found']
     return expect(axios.get(url, payload)).rejects.toMatchObject({response: {status: expectedBody404.status, data: expectedBody404}})
   })
