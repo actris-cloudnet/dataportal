@@ -2,7 +2,7 @@ import 'reflect-metadata'
 import { createConnection } from 'typeorm'
 import { Request, Response, RequestHandler, ErrorRequestHandler } from 'express'
 import { File } from './entity/File'
-import { RequestError } from './entity/RequestError'
+import { RequestError, RequestErrorArray } from './entity/RequestError'
 import { stringify } from './lib'
 import * as express from 'express'
 import validator from 'validator'
@@ -24,17 +24,28 @@ async function init() {
   }
 
   const filesValidator: RequestHandler = (req, _res, next) => {
-    const errors: Array<string> = []
+    const requestError: RequestErrorArray = {status: 400, errors: []}
     const query = req.query
+
+    const isArrayWithElements = (obj: any) => Array.isArray(obj) && obj.length > 0
+    const pushAndReturn = (err: RequestErrorArray, el: string) => {
+      err.errors.push(el)
+      return err
+    }
+
     if(Object.keys(query).length == 0) {
-      errors.push('No search parameters given')
+      return next(pushAndReturn(requestError, 'No search parameters given'))
     } else {
-      if(!validator.isAlphanumeric(query.location)) {
-        errors.push('Malformed location')
+      if(!('location' in query)) {
+        return next(pushAndReturn(requestError, 'Property "location" is mandatory'))
+      }
+      if(!((typeof query.location == 'string' && validator.isAlphanumeric(query.location))
+      || isArrayWithElements(query.location))) {
+        requestError.errors.push('Malformed location')
       }
     }
-    if(errors.length > 0) {
-      next({status: 400, errors})
+    if(requestError.errors.length > 0) {
+      next(requestError)
     } else {
       next()
     }
@@ -49,7 +60,12 @@ async function init() {
 
   app.get('/files', filesValidator, async (req: Request, res: Response, next) => {
     const repo = conn.getRepository(File)
-    repo.find({ where: { site: { id: req.query.location } }, relations: ['site'] })
+    const query = req.query
+    const queryLocationToArray = (obj: string | Array<string>): Array<string> =>
+      (typeof obj == 'string') ? [ obj ] : obj
+
+    const where = queryLocationToArray(query.location).map(site => ({site: {id: site}}))
+    repo.find({ where, relations: ['site'] })
       .then(result => {
         if(result.length == 0) {
           next({status: 404, errors: 'Not found', params: req.query})
