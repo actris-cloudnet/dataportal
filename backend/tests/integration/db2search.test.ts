@@ -38,13 +38,13 @@ describe('/files', () => {
 
   it('should respond with 404 if location was not found', async () => {
     payload.params.location = 'kilpikonna'
-    expectedBody404.errors = 'One or more of the specified locations were not found'
+    expectedBody404.errors = ['One or more of the specified locations were not found']
     return expect(axios.get(`${backendUrl}files/`, payload)).rejects.toMatchObject({response: {status: expectedBody404.status, data: expectedBody404}})
   })
 
   it('should respond 404 if one of many locations was not found', async () => {
     payload.params.location = ['macehead', 'kilpikonna']
-    expectedBody404.errors = 'One or more of the specified locations were not found'
+    expectedBody404.errors = ['One or more of the specified locations were not found']
     return expect(axios.get(`${backendUrl}files/`, payload)).rejects.toMatchObject({response: {status: expectedBody404.status, data: expectedBody404}})
   })
 })

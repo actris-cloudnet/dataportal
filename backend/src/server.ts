@@ -70,14 +70,14 @@ async function init() {
 
     siteRepo.findByIds(locations)
       .then(res => {
-        if(res.length != locations.length) throw {status: 404, errors: 'One or more of the specified locations were not found', params: req.query}
+        if(res.length != locations.length) throw {status: 404, errors: ['One or more of the specified locations were not found'], params: req.query}
       })
       .catch(next)
     const where = locations.map(site => ({site: {id: site}}))
     fileRepo.find({ where, relations: ['site'] })
       .then(result => {
         if(result.length == 0) {
-          next({status: 404, errors: 'Not found', params: req.query})
+          next({status: 404, errors: ['The search yielded zero results'], params: req.query})
           return
         }
         res.send(result)
