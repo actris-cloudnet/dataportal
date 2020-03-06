@@ -15,7 +15,7 @@ describe('/files', () => {
   it('should respond with an array of 3 objects when searching for macehead', async () => {
     const payload: AxiosRequestConfig = {
       params: {
-        siteId: 'macehead'
+        location: 'macehead'
       }
     }
     const res = await axios.get(`${backendUrl}files/`, payload)
@@ -30,7 +30,7 @@ describe('/files', () => {
     }
     const payload: AxiosRequestConfig = {
       params: {
-        siteId: 'kilpikonna'
+        location: 'kilpikonna'
       }
     }
     return expect(axios.get(`${backendUrl}files/`, payload)).rejects.toMatchObject({response: {status: expectedBody.status, data: expectedBody}})

@@ -7,6 +7,7 @@
       "doc": "docs"
    },
    "dependencies": {
+      "@types/validator": "^12.0.1",
       "express": "^4.17.1",
       "nodemon": "^2.0.2",
       "pg": "^7.17.1",

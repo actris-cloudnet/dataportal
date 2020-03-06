@@ -5,6 +5,7 @@ import { File } from './entity/File'
 import { RequestError } from './entity/RequestError'
 import { stringify } from './lib'
 import * as express from 'express'
+import validator from 'validator'
 
 const port = parseInt(process.argv[2])
 const connName: string = process.env.NODE_ENV == 'test' ? 'test' : 'default'
@@ -24,8 +25,13 @@ async function init() {
 
   const filesValidator: RequestHandler = (req, _res, next) => {
     const errors: Array<string> = []
-    if(Object.keys(req.query).length == 0) {
+    const query = req.query
+    if(Object.keys(query).length == 0) {
       errors.push('No search parameters given')
+    } else {
+      if(!validator.isAlphanumeric(query.location)) {
+        errors.push('Malformed location')
+      }
     }
     if(errors.length > 0) {
       next({status: 400, errors})
@@ -40,9 +46,10 @@ async function init() {
       .then(result => res.send(result))
       .catch(_ => res.sendStatus(404))
   })
+
   app.get('/files', filesValidator, async (req: Request, res: Response, next) => {
     const repo = conn.getRepository(File)
-    repo.find({ where: { site: {id: req.query.siteId } }, relations: ['site'] })
+    repo.find({ where: { site: { id: req.query.location } }, relations: ['site'] })
       .then(result => {
         if(result.length == 0) {
           next({status: 404, errors: 'Not found', params: req.query})
