@@ -1,5 +1,5 @@
 import { backendUrl } from '../lib'
-import axios, { AxiosRequestConfig } from 'axios'
+import axios from 'axios'
 import { RequestError } from '../../src/entity/RequestError'
 
 describe('/files', () => {
@@ -9,7 +9,7 @@ describe('/files', () => {
     errors: 'Not found'
   }
 
-  it('should respond with 400 if no query parameters are given', async () => {
+  it('should respond with 400 if no query parameters are given', () => {
     const expectedBody: RequestError = {
       status: 400,
       errors: [ 'No search parameters given' ]
@@ -34,13 +34,13 @@ describe('/files', () => {
   })
 
 
-  it('should respond with 404 if location was not found', async () => {
+  it('should respond with 404 if location was not found', () => {
     const payload = {params: {location: ['kilpikonna']}}
     expectedBody404.errors = ['One or more of the specified locations were not found']
     return expect(axios.get(url, payload)).rejects.toMatchObject({response: {status: expectedBody404.status, data: expectedBody404}})
   })
 
-  it('should respond 404 if one of many locations was not found', async () => {
+  it('should respond 404 if one of many locations was not found', () => {
     const payload = {params: {location: ['macehead', 'kilpikonna']}}
     expectedBody404.errors = ['One or more of the specified locations were not found']
     return expect(axios.get(url, payload)).rejects.toMatchObject({response: {status: expectedBody404.status, data: expectedBody404}})
