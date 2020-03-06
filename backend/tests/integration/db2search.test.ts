@@ -20,7 +20,8 @@ describe('/files', () => {
     }
     const res = await axios.get(`${backendUrl}files/`, payload)
     expect(res).toHaveProperty('data')
-    return expect(res.data).toHaveLength(3)
+    expect(res.data).toHaveLength(3)
+    return expect(res.data.map((d: any) => d.site.id)).toEqual(['macehead', 'macehead', 'macehead'])
   })
 
   it('should respond with an array of 4 objects when searching for macehead and hyytiala', async () => {
