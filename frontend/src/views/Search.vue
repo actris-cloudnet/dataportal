@@ -1,13 +1,7 @@
 <template>
   <section id="fileTableContainer">
   <div v-if="listLength > 0" id="fileTable">
-    <b-table
-      borderless
-      small
-      caption-top
-      striped
-      hover
-      sort-icon-left
+    <b-table borderless small caption-top striped hover sort-icon-left
       :items="response.data"
       :fields="[{ key: 'title', label: 'Data object', sortable: true, tdClass: 'titleCol'},
                 { key: 'measurementDate', label: 'Date', sortable: true, tdClass: 'dateCol'},
@@ -16,8 +10,14 @@
       :current-page="currentPage"
       :per-page="perPage"
       :caption="listCaption"
-      @row-clicked="clickRow"
-    ></b-table>
+      :busy="isBusy"
+      @row-clicked="clickRow">
+      <template v-slot:table-busy>
+        <div class="text-center text-danger">
+          <b-spinner class="align-middle"></b-spinner>
+        </div>
+      </template>
+    </b-table>
     <b-pagination id="pagi" v-if="listLength > perPage"
       v-model="currentPage"
       :total-rows="listLength"
@@ -36,21 +36,29 @@ import axios from 'axios'
 @Component
 export default class Search extends Vue {
 
+  isBusy = false
   currentPage = 1
   perPage = 25
   apiUrl = process.env.VUE_APP_BACKENDURL
   response = {'data': [{'uuid': '', 'product': ''}]}
 
   created () {
-    this.fetchData('?siteId=macehead')
+    this.fetchData('?siteId=macefhead')
   }
 
   fetchData( query: string ) {
+    this.isBusy = true
     axios
       .get(`${this.apiUrl}files/` + query)
       .then(response => {
         this.response = response
+        this.isBusy = false
       })
+      .catch(({response}) => {
+        this.response = response
+        this.isBusy = false
+      })
+
   }
 
   get listLength() {
@@ -62,7 +70,7 @@ export default class Search extends Vue {
     return 'Found ' + nFiles + ' results'
   }
 
-  clickRow( _: number, index: number) {
+  clickRow(_: number, index: number) {
     this.$router.push('file/' + this.response.data[index].uuid)
   }
 
@@ -72,7 +80,9 @@ export default class Search extends Vue {
   }
 
   setIcon(product: string) {
-    return {'style': 'background-image: url(' + require('../assets/icons/' + product + '.png') + ')'}
+    if (product) {
+      return {'style': 'background-image: url(' + require('../assets/icons/' + product + '.png') + ')'}
+    }
   }
 
 }
@@ -119,10 +129,10 @@ export default class Search extends Vue {
     text-align: center;
 
   .icon
-    background-color: white;
     background-repeat: no-repeat;
     background-size: 20px;
     background-position: center;
     color: transparent;
+    font-size: 0;
 
   </style>>
