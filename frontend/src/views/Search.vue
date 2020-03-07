@@ -11,24 +11,22 @@
       :items="response.data"
       :fields="[{ key: 'title', label: 'Data object', sortable: true, tdClass: 'titleCol'},
                 { key: 'measurementDate', label: 'Date', sortable: true, tdClass: 'dateCol'},
-                { key: 'product', label: 'Type', sortable: false, thClass: 'typeHead', tdClass: iconStyle}
+                { key: 'product', label: 'Type', thClass: 'typeHead', tdClass: 'icon', tdAttr: setIcon}
                 ]"
       :current-page="currentPage"
       :per-page="perPage"
-      @row-clicked="clickRow"
       :caption="listCaption"
+      @row-clicked="clickRow"
     ></b-table>
     <b-pagination id="pagi" v-if="listLength > perPage"
       v-model="currentPage"
-      align="center"
       :total-rows="listLength"
       :per-page="perPage"
       aria-controls="fileTable"
+      align="center"
     ></b-pagination>
   </div>
-
   </section>
-
 </template>
 
 <script lang="ts">
@@ -42,7 +40,6 @@ export default class Search extends Vue {
   perPage = 25
   apiUrl = process.env.VUE_APP_BACKENDURL
   response = {'data': [{'uuid': '', 'product': ''}]}
-  error = false
 
   created () {
     this.fetchData('?siteId=macehead')
@@ -52,10 +49,6 @@ export default class Search extends Vue {
     axios
       .get(`${this.apiUrl}files/` + query)
       .then(response => {
-        this.response = response
-      })
-      .catch(({response}) => {
-        this.error = true
         this.response = response
       })
   }
@@ -78,8 +71,8 @@ export default class Search extends Vue {
     this.currentPage = 1
   }
 
-  iconStyle(product: string) {
-    return 'icon ' + product + 'Icon'
+  setIcon(product: string) {
+    return {'style': 'background-image: url(' + require('../assets/icons/' + product + '.png') + ')'}
   }
 
 }
@@ -125,30 +118,11 @@ export default class Search extends Vue {
   .typeHead
     text-align: center;
 
-  $iconPath: "../assets/icons/" ;
   .icon
     background-color: white;
     background-repeat: no-repeat;
     background-size: 20px;
     background-position: center;
     color: transparent;
-  .radarIcon
-    background-image: url(#{$iconPath}radar.png);
-  .lidarIcon
-    background-image: url(#{$iconPath}lidar.png);
-  .mwrIcon
-    background-image: url(#{$iconPath}mwr.png);
-  .modelIcon
-    background-image: url(#{$iconPath}model.png);
-  .categorizeIcon
-    background-image: url(#{$iconPath}categorize.png);
-  .classificationIcon
-    background-image: url(#{$iconPath}classification.png);
-  .drizzleIcon
-    background-image: url(#{$iconPath}drizzle.png);
-  .lwcIcon
-    background-image: url(#{$iconPath}lwc.png);
-  .iwcIcon
-    background-image: url(#{$iconPath}iwc.png);
 
-</style>>
+  </style>>
