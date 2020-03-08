@@ -1,13 +1,24 @@
 <template>
-
   <section id="fileTableContainer">
+   <div id="sideBar">
+     <span class="listTitle">Filter options</span>
+      <multiselect id="siteSelect"
+      v-model="selectedSites"
+      placeholder="Location"
+      :options="siteOptions"
+      :show-labels="false"
+      :multiple="true"
+      :hideSelected="false"
+      ></multiselect>
+  </div>
   <div id="fileTable">
-    <span id="listTitle"> {{ captionText }} </span>
+    <span class="listTitle"> {{ captionText }} </span>
     <b-table id="tableContent" borderless small striped hover sort-icon-left
       :items="response.data"
-      :fields="[{ key: 'title', label: 'Data object', sortable: true},
+      :fields="[
+                { key: 'product', label: '', tdClass: 'icon', tdAttr: setIcon},
+                { key: 'title', label: 'Data object', sortable: true},
                 { key: 'measurementDate', label: 'Date', sortable: true},
-                { key: 'product', label: 'Type', tdClass: 'icon', tdAttr: setIcon}
                 ]"
       :current-page="currentPage"
       :per-page="perPage"
@@ -33,18 +44,28 @@
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import axios from 'axios'
+import Multiselect from 'vue-multiselect'
+
+Vue.component('multiselect', Multiselect)
 
 @Component
 export default class Search extends Vue {
 
+  // api call
+  apiUrl = process.env.VUE_APP_BACKENDURL
+  response = this.resetList()
+
+  // file list
   isBusy = false
   currentPage = 1
   perPage = 25
-  apiUrl = process.env.VUE_APP_BACKENDURL
-  response = {'data': [{'uuid': '', 'product': ''}]}
+
+  // site selector
+  selectedSites = null
+  siteOptions = ['macehead', 'bucharest', 'kumpula']
 
   created () {
-    this.fetchData('?siteId=macehead')
+    this.fetchData('?siteId=' + this.defaultSites())
   }
 
   // Just for testing
@@ -54,48 +75,61 @@ export default class Search extends Vue {
 
   fetchData( query: string ) {
     this.isBusy = true
-    this.sleep(750).then(() => { // remove me for production
+    this.sleep(500).then(() => { // remove me for production
       axios
         .get(`${this.apiUrl}files/` + query)
         .then(response => {
           this.response = response
           this.isBusy = false
         })
-        .catch(({response}) => {
-          this.response = response
+        .catch(() => {
+          this.response = this.resetList()
           this.isBusy = false
         })
     }
     )}
 
   get listLength() {
-    return this.response['data'].length
+    return this.response['data'][0]['uuid'] ? this.response['data'].length : 0
   }
 
   get captionText () {
     if (this.isBusy) return 'Searching...'
-    const nFiles = this.listLength
-    return (nFiles > 0 ? 'Found ' + nFiles + ' results' : 'No results')
+    return this.listLength > 0 ? 'Found ' + this.listLength + ' results' : 'No results'
+  }
+
+  defaultSites() {
+    return 'macehead'
+  }
+
+  resetList() {
+    return {'data': [{'uuid': null, 'product': null}]}
   }
 
   clickRow(_: number, index: number) {
     this.$router.push('file/' + this.response.data[index].uuid)
   }
 
+  setIcon(product: string) {
+    if (product) return {'style': 'background-image: url(' + require('../assets/icons/' + product + '.png') + ')'}
+  }
+
   @Watch('response')
-  onPropertyChanged() {
+  onListGenerated() {
     this.currentPage = 1
   }
 
-  setIcon(product: string) {
-    if (product) {
-      return {'style': 'background-image: url(' + require('../assets/icons/' + product + '.png') + ')'}
-    }
+  @Watch('selectedSites')
+  onSiteSelected () {
+    // Need support for multiple sites
+    const sites = this.selectedSites.length > 0 ? this.selectedSites : this.defaultSites()
+    this.fetchData('?siteId=' + sites)
   }
 
 }
 </script>
 
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style lang="sass">
   @import "../sass/variables.sass"
@@ -103,6 +137,7 @@ export default class Search extends Vue {
   #fileTableContainer
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
 
   #fileTable
     margin-top: 30px;
@@ -112,7 +147,7 @@ export default class Search extends Vue {
   #tableContent
     margin-top: 10px;
 
-  #listTitle
+  .listTitle
     color: gray;
     font-size: 85%;
 
@@ -126,12 +161,12 @@ export default class Search extends Vue {
 
   .table-striped
     th:nth-child(1)
-      width: 500px;
-    th:nth-child(2)
-      width: 150px;
-    th:nth-child(3)
-      width: 20px;
+      width: 50px;
       text-align: center;
+    th:nth-child(2)
+      width: 400px;
+    th:nth-child(3)
+      width: 150px;      
     td
       padding: 9px;
     tr:nth-child(2n+1) > td
@@ -142,9 +177,28 @@ export default class Search extends Vue {
 
   .icon
     background-repeat: no-repeat;
-    background-size: 20px;
     background-position: center;
-    color: transparent;
+    background-size: 20px;
     font-size: 0;
+
+  #sideBar
+    margin-top: 30px;
+    margin-right: 100px;
+    width: 300px;
+
+  $blueShade: lightskyblue;
+
+  .multiselect__tags-wrap
+    span, span i:hover
+      background-color: $blueShade;
+
+  .multiselect__tag-icon i:hover
+    background-color: $blueShade;
+
+  .multiselect__element
+    .multiselect__option--highlight
+      background-color: $blueShade;
+      span
+        background-color: $blueShade;
 
 </style>>
