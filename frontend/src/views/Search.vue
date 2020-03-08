@@ -1,15 +1,16 @@
 <template>
+
   <section id="fileTableContainer">
-  <div v-if="listLength > 0" id="fileTable">
-    <b-table borderless small caption-top striped hover sort-icon-left
+  <div id="fileTable">
+    <span id="listTitle"> {{ captionText }} </span>
+    <b-table id="tableContent" borderless small striped hover sort-icon-left
       :items="response.data"
-      :fields="[{ key: 'title', label: 'Data object', sortable: true, tdClass: 'titleCol'},
-                { key: 'measurementDate', label: 'Date', sortable: true, tdClass: 'dateCol'},
-                { key: 'product', label: 'Type', thClass: 'typeHead', tdClass: 'icon', tdAttr: setIcon}
+      :fields="[{ key: 'title', label: 'Data object', sortable: true},
+                { key: 'measurementDate', label: 'Date', sortable: true},
+                { key: 'product', label: 'Type', tdClass: 'icon', tdAttr: setIcon}
                 ]"
       :current-page="currentPage"
       :per-page="perPage"
-      :caption="listCaption"
       :busy="isBusy"
       @row-clicked="clickRow">
       <template v-slot:table-busy>
@@ -43,31 +44,38 @@ export default class Search extends Vue {
   response = {'data': [{'uuid': '', 'product': ''}]}
 
   created () {
-    this.fetchData('?siteId=macefhead')
+    this.fetchData('?siteId=macehead')
+  }
+
+  // Just for testing
+  sleep (time: number) {
+    return new Promise((resolve) => setTimeout(resolve, time))
   }
 
   fetchData( query: string ) {
     this.isBusy = true
-    axios
-      .get(`${this.apiUrl}files/` + query)
-      .then(response => {
-        this.response = response
-        this.isBusy = false
-      })
-      .catch(({response}) => {
-        this.response = response
-        this.isBusy = false
-      })
-
-  }
+    this.sleep(750).then(() => { // remove me for production
+      axios
+        .get(`${this.apiUrl}files/` + query)
+        .then(response => {
+          this.response = response
+          this.isBusy = false
+        })
+        .catch(({response}) => {
+          this.response = response
+          this.isBusy = false
+        })
+    }
+    )}
 
   get listLength() {
     return this.response['data'].length
   }
 
-  get listCaption () {
+  get captionText () {
+    if (this.isBusy) return 'Searching...'
     const nFiles = this.listLength
-    return 'Found ' + nFiles + ' results'
+    return (nFiles > 0 ? 'Found ' + nFiles + ' results' : 'No results')
   }
 
   clickRow(_: number, index: number) {
@@ -100,14 +108,13 @@ export default class Search extends Vue {
     margin-top: 30px;
     padding-bottom: 100px;
     text-align: left;
-    caption
-      font-size: 85%;
 
-  .titleCol
-    width: 400px;
+  #tableContent
+    margin-top: 10px;
 
-  .dateCol
-    width: 150px;
+  #listTitle
+    color: gray;
+    font-size: 85%;
 
   #pagi
     margin-top: 30px;
@@ -118,15 +125,20 @@ export default class Search extends Vue {
       color: $blue-sapphire;
 
   .table-striped
+    th:nth-child(1)
+      width: 500px;
+    th:nth-child(2)
+      width: 150px;
+    th:nth-child(3)
+      width: 20px;
+      text-align: center;
     td
       padding: 9px;
     tr:nth-child(2n+1) > td
       background-color: $blue-dust;
     tr:hover td
-      background-color: lightsteelblue;
-
-  .typeHead
-    text-align: center;
+      cursor: pointer;
+      background-color: #e4eff7;
 
   .icon
     background-repeat: no-repeat;
@@ -135,4 +147,4 @@ export default class Search extends Vue {
     color: transparent;
     font-size: 0;
 
-  </style>>
+</style>>
