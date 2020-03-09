@@ -30,7 +30,7 @@ describe('/files', () => {
     const res = await axios.get(url, payload)
     expect(res).toHaveProperty('data')
     expect(res.data).toHaveLength(4)
-    return expect(res.data.map((d: any) => d.site.id)).toEqual(['macehead', 'macehead', 'macehead', 'hyytiala'])
+    return expect(new Set(res.data.map((d: any) => d.site.id))).toEqual(new Set(['macehead', 'macehead', 'macehead', 'hyytiala']))
   })
 
 
