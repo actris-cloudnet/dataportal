@@ -45,6 +45,37 @@ describe('/files', () => {
     expectedBody404.errors = ['One or more of the specified locations were not found']
     return expect(axios.get(url, payload)).rejects.toMatchObject({response: {status: expectedBody404.status, data: expectedBody404}})
   })
+
+  it('should respond with an array of objects with dates between [ dateFrom, dateTo [, in descending order', async () => {
+    const payload = {params: {dateFrom: new Date('2018-07-09'), dateTo: new Date('2019-10-01')}}
+    const res = await axios.get(url, payload)
+    return expect(res.data.map((d: any) => d.measurementDate)).toEqual(['2019-08-15', '2018-12-15', '2018-07-09'])
+  })
+
+  it('should respond with correct objects if dateFrom, dateTo and location are specified', async () => {
+    const payload = {params: {dateFrom: new Date('2018-07-09'), dateTo: new Date('2019-10-01'), location: 'macehead'}}
+    const res = await axios.get(url, payload)
+    expect(res.data.map((d: any) => d.site.id)).toEqual(['macehead', 'macehead'])
+    return expect(res.data.map((d: any) => d.measurementDate)).toEqual(['2018-12-15', '2018-07-09'])
+  })
+
+  it('should respond with 400 on malformed dateFrom', () => {
+    let expectedBody: RequestError = {
+      status: 400,
+      errors: [ 'Malformed date in property "dateFrom"' ]
+    }
+    const payload1 = {params: {dateFrom: 'turku'}}
+    return expect(axios.get(url, payload1)).rejects.toMatchObject({response: {status: expectedBody.status, data: expectedBody}})
+  })
+
+  it('should respond with 400 on malformed dateTo', () => {
+    let expectedBody: RequestError = {
+      status: 400,
+      errors: [ 'Malformed date in property "dateTo"' ]
+    }
+    const payload = {params: {dateFrom: new Date('2020-02-20'), dateTo: 'turku'}}
+    return expect(axios.get(url, payload)).rejects.toMatchObject({response: {status: expectedBody.status, data: expectedBody}})
+  })
 })
 
 describe('/sites', () => {
