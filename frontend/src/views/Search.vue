@@ -140,10 +140,10 @@ export default class Search extends Vue {
 }
 </script>
 
-<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style lang="sass">
   @import "../sass/variables.sass"
+  @import "~vue-multiselect/dist/vue-multiselect.min.css"
 
   #fileTableContainer
     display: flex;
