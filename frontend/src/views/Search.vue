@@ -1,25 +1,31 @@
 <template>
   <section id="fileTableContainer">
+
    <div id="sideBar">
      <span class="listTitle">Filter options</span>
       <multiselect id="siteSelect"
       v-model="selectedSites"
       placeholder="Location"
       :options="siteOptions"
+      track-by="id"
+      label="humanReadableName"
       :show-labels="false"
       :multiple="true"
       :hideSelected="false"
       ></multiselect>
   </div>
+
   <div id="fileTable">
     <span class="listTitle"> {{ captionText }} </span>
     <b-table id="tableContent" borderless small striped hover sort-icon-left
-      :items="response.data"
+      :items="apiResponse.data"
       :fields="[
                 { key: 'product', label: '', tdClass: 'icon', tdAttr: setIcon},
                 { key: 'title', label: 'Data object', sortable: true},
                 { key: 'measurementDate', label: 'Date', sortable: true},
                 ]"
+      :sort-by.sync="sortBy"
+      :sort-desc.sync="sortDesc"
       :current-page="currentPage"
       :per-page="perPage"
       :busy="isBusy"
@@ -53,44 +59,53 @@ export default class Search extends Vue {
 
   // api call
   apiUrl = process.env.VUE_APP_BACKENDURL
-  response = this.resetList()
+  apiResponse = this.resetResponse()
 
   // file list
+  sortBy = 'title'
+  sortDesc = false
   isBusy = false
   currentPage = 1
   perPage = 25
 
   // site selector
-  selectedSites = null
-  siteOptions = ['macehead', 'bucharest', 'kumpula']
+  siteOptions = []
+  selectedSites = []
+  allSiteIds = []
 
   created () {
-    this.fetchData('?siteId=' + this.defaultSites())
+    this.initView()
   }
 
-  // Just for testing
-  sleep (time: number) {
-    return new Promise((resolve) => setTimeout(resolve, time))
+  async initView() {
+    const res = await axios.get(`${this.apiUrl}sites/`)
+    this.siteOptions = res.data
+    this.allSiteIds = res.data.map((d: any) => d.id)
+    this.fetchData({params: {location: this.allSiteIds}})
   }
 
-  fetchData( query: string ) {
+  fetchData(payload: any) {
     this.isBusy = true
     this.sleep(500).then(() => { // remove me for production
       axios
-        .get(`${this.apiUrl}files/` + query)
-        .then(response => {
-          this.response = response
+        .get(`${this.apiUrl}files/`, payload)
+        .then(res => {
+          this.apiResponse = res
           this.isBusy = false
         })
         .catch(() => {
-          this.response = this.resetList()
+          this.apiResponse = this.resetResponse()
           this.isBusy = false
         })
     }
     )}
 
+  sleep (time: number) {
+    return new Promise((resolve) => setTimeout(resolve, time))
+  }
+
   get listLength() {
-    return this.response['data'][0]['uuid'] ? this.response['data'].length : 0
+    return this.apiResponse['data'][0]['uuid'] ? this.apiResponse['data'].length : 0
   }
 
   get captionText () {
@@ -98,16 +113,12 @@ export default class Search extends Vue {
     return this.listLength > 0 ? 'Found ' + this.listLength + ' results' : 'No results'
   }
 
-  defaultSites() {
-    return 'macehead'
-  }
-
-  resetList() {
+  resetResponse() {
     return {'data': [{'uuid': null, 'product': null}]}
   }
 
   clickRow(_: number, index: number) {
-    this.$router.push('file/' + this.response.data[index].uuid)
+    this.$router.push('file/' + this.apiResponse.data[index].uuid)
   }
 
   setIcon(product: string) {
@@ -121,9 +132,8 @@ export default class Search extends Vue {
 
   @Watch('selectedSites')
   onSiteSelected () {
-    // Need support for multiple sites
-    const sites = this.selectedSites.length > 0 ? this.selectedSites : this.defaultSites()
-    this.fetchData('?siteId=' + sites)
+    const sites = this.selectedSites.length > 0 ? this.selectedSites.map((d: any) => d.id) : this.allSiteIds
+    this.fetchData({params: {location: sites}})
   }
 
 }
@@ -166,7 +176,7 @@ export default class Search extends Vue {
     th:nth-child(2)
       width: 400px;
     th:nth-child(3)
-      width: 150px;      
+      width: 110px;
     td
       padding: 9px;
     tr:nth-child(2n+1) > td
