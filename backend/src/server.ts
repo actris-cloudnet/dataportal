@@ -22,6 +22,13 @@ async function init() {
       res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
       next()
     })
+
+    app.get('/allfiles', async (req: Request, res: Response, next) => {
+      const fileRepo = conn.getRepository(File)
+      fileRepo.find({ relations: ['site'] })
+        .then(result => res.send(result))
+        .catch(err=> next({status: 500, errors: err}))
+    })
   }
 
   const filesValidator: RequestHandler = (req, _res, next) => {
