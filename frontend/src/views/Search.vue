@@ -1,9 +1,9 @@
 <template>
-  <section id="fileTableContainer">
+<section id="fileTableContainer">
 
-   <div id="sideBar">
-     <span class="listTitle">Filter options</span>
-      <multiselect id="siteSelect"
+  <div id="sideBar">
+    <span class="listTitle">Filter options</span>
+    <multiselect id="siteSelect"
       v-model="selectedSites"
       placeholder="Location"
       :options="siteOptions"
@@ -12,7 +12,7 @@
       :show-labels="false"
       :multiple="true"
       :hideSelected="false"
-      ></multiselect>
+    ><span id="noRes" slot="noResult">Not found</span></multiselect>
   </div>
 
   <div id="fileTable">
@@ -44,7 +44,7 @@
       align="center"
     ></b-pagination>
   </div>
-  </section>
+</section>
 </template>
 
 <script lang="ts">
@@ -140,76 +140,89 @@ export default class Search extends Vue {
 }
 </script>
 
-
 <style lang="sass">
   @import "../sass/variables.sass"
   @import "~vue-multiselect/dist/vue-multiselect.min.css"
 
   #fileTableContainer
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
+    display: flex
+    justify-content: center
+    flex-wrap: wrap
 
   #fileTable
-    margin-top: 30px;
-    padding-bottom: 100px;
-    text-align: left;
+    margin-top: 30px
+    padding-bottom: 100px
+    text-align: left
 
   #tableContent
-    margin-top: 10px;
+    margin-top: 10px
 
   .listTitle
     color: gray;
-    font-size: 85%;
+    font-size: 85%
 
   #pagi
-    margin-top: 30px;
+    margin-top: 30px
     .page-item.active .page-link
-      background-color: lightskyblue;
-      border-color: lightsteelblue;
+      background-color: lightskyblue
+      border-color: lightsteelblue
     .page-link
-      color: $blue-sapphire;
+      color: $blue-sapphire
 
   .table-striped
     th:nth-child(1)
-      width: 50px;
-      text-align: center;
+      width: 50px
+      text-align: center
     th:nth-child(2)
-      width: 400px;
+      width: 400px
     th:nth-child(3)
-      width: 110px;
+      width: 110px
     td
-      padding: 9px;
+      padding: 9px
     tr:nth-child(2n+1) > td
-      background-color: $blue-dust;
+      background-color: $blue-dust
     tr:hover td
-      cursor: pointer;
-      background-color: #e4eff7;
+      cursor: pointer
+      background-color: #e4eff7
 
   .icon
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 20px;
-    font-size: 0;
+    background-repeat: no-repeat
+    background-position: center
+    background-size: 20px
+    font-size: 0
 
   #sideBar
-    margin-top: 30px;
-    margin-right: 100px;
-    width: 300px;
+    margin-top: 30px
+    margin-right: 100px
+    width: 300px
 
-  $blueShade: lightskyblue;
+  .multiselect
+    margin-bottom: 50px
+    margin-top: 20px
 
   .multiselect__tags-wrap
     span, span i:hover
-      background-color: $blueShade;
-
-  .multiselect__tag-icon i:hover
-    background-color: $blueShade;
+      color: black;
+      background-color: $steel-warrior
 
   .multiselect__element
+    font-size: 90%
+    span:hover
+      color: black
     .multiselect__option--highlight
-      background-color: $blueShade;
+      color: black
+      background-color: $steel-warrior
       span
-        background-color: $blueShade;
+        background-color: $steel-warrior
+    .multiselect__option--selected
+      background-color: #eeeeee
+      span
+        background-color: #eeeeee
+        font-weight: normal
+        color: #bbbbbb
+
+  #noRes
+    font-size: 90%
+    color: gray
 
 </style>>
