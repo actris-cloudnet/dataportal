@@ -5,7 +5,7 @@ items:
     humanReadableName: Bucharest
     latitude: 44.348
     longitude: 26.029
-    elevation: 93
+    altitude: 93
     gaw: Unknown
     country: Romania
   site2:
@@ -13,7 +13,7 @@ items:
     humanReadableName: Mace Head
     latitude: 53.326
     longitude: -9.9
-    elevation: 16
+    altitude: 16
     gaw: Unknown
     country: Ireland
   site3:
@@ -21,6 +21,6 @@ items:
     humanReadableName: Hyytiälä
     latitude: 61.844
     longitude: 24.288
-    elevation: 174
+    altitude: 174
     gaw: SMR
     country: Finland

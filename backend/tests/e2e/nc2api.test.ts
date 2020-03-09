@@ -30,7 +30,7 @@ const expectedJson = {
     'humanReadableName': 'Bucharest',
     'latitude': 44.348,
     'longitude': 26.029,
-    'elevation': 93,
+    'altitude': 93,
     'gaw': 'Unknown',
     'country': 'Romania'
   }

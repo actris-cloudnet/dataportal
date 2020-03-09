@@ -150,7 +150,7 @@ main#landing
             <dt>Coordinates</dt>
             <dd>{{ response.site.latitude }}&deg; N, {{ response.site.longitude }}&deg; E</dd>
             <dt>Site altitude</dt>
-            <dd>{{ response.site.elevation }} m</dd>
+            <dd>{{ response.site.altitude }} m</dd>
           </dl>
         </section>
       </section>
