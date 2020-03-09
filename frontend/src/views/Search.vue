@@ -49,8 +49,9 @@
 
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator'
-import axios from 'axios'
+import axios, { AxiosRequestConfig } from 'axios'
 import Multiselect from 'vue-multiselect'
+import { Site } from '../../../backend/src/entity/Site'
 
 Vue.component('multiselect', Multiselect)
 
@@ -80,11 +81,11 @@ export default class Search extends Vue {
   async initView() {
     const res = await axios.get(`${this.apiUrl}sites/`)
     this.siteOptions = res.data
-    this.allSiteIds = res.data.map((d: any) => d.id)
+    this.allSiteIds = res.data.map((d: Site) => d.id)
     this.fetchData({params: {location: this.allSiteIds}})
   }
 
-  fetchData(payload: any) {
+  fetchData(payload: AxiosRequestConfig) {
     this.isBusy = true
     this.sleep(500).then(() => { // remove me for production
       axios
@@ -132,7 +133,7 @@ export default class Search extends Vue {
 
   @Watch('selectedSites')
   onSiteSelected () {
-    const sites = this.selectedSites.length > 0 ? this.selectedSites.map((d: any) => d.id) : this.allSiteIds
+    const sites = this.selectedSites.length > 0 ? this.selectedSites.map((d: Site) => d.id) : this.allSiteIds
     this.fetchData({params: {location: sites}})
   }
 
