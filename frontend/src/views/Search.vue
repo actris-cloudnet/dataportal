@@ -6,13 +6,14 @@
     <multiselect id="siteSelect"
       v-model="selectedSites"
       placeholder="Location"
-      :options="siteOptions"
       track-by="id"
       label="humanReadableName"
+      :options="siteOptions"
       :show-labels="false"
       :multiple="true"
       :hideSelected="false"
-    ><span id="noRes" slot="noResult">Not found</span></multiselect>
+    ><span id="noRes" slot="noResult">Not found</span>
+    </multiselect>
   </div>
 
   <div id="fileTable">
@@ -150,6 +151,9 @@ export default class Search extends Vue {
     flex-wrap: wrap
 
   #fileTable
+    padding-left: 30px
+    padding-right: 30px
+    flex-grow: 0.2
     margin-top: 30px
     padding-bottom: 100px
     text-align: left
@@ -158,14 +162,14 @@ export default class Search extends Vue {
     margin-top: 10px
 
   .listTitle
-    color: gray;
+    color: gray
     font-size: 85%
 
   #pagi
     margin-top: 30px
     .page-item.active .page-link
-      background-color: lightskyblue
-      border-color: lightsteelblue
+      background-color: $steel-warrior
+      border-color: $steel-warrior
     .page-link
       color: $blue-sapphire
 
