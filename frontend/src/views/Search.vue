@@ -1,11 +1,11 @@
 <template>
 <section id="fileTableContainer">
-
   <div id="sideBar">
-    <span class="listTitle">Filter options</span>
-    <multiselect id="siteSelect"
+    <span class="listTitle">Filter options</span><br>
+    <label for="siteSelect">Locations</label>
+    <multiselect name="siteSelect" id="siteSelect"
       v-model="selectedSites"
-      placeholder="Location"
+      placeholder="Select"
       track-by="id"
       label="humanReadableName"
       :options="siteOptions"
@@ -14,6 +14,38 @@
       :hideSelected="false"
     ><span id="noRes" slot="noResult">Not found</span>
     </multiselect>
+
+<div class="date">
+  <div class="dateform">
+    <label for="dateFrom">Date from</label><br>
+    <input class="date" v-bind:class="{ 'error': dateFromError }" name="dateFrom" type="text" v-bind:value="dateFromString" @change="setDateFrom($event.target.value)" @focus="$event.target.select()">
+    <v-date-picker locale="en" v-model="dateFrom" :popover="{ placement: 'bottom', visibility: 'click' }" :input-debounce="100" value="dateFrom" :available-dates="{end: dateTo}">
+      <button class="calendar">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          class="w-4 h-4 fill-current">
+          <path d="M1 4c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V4zm2 2v12h14V6H3zm2-6h2v2H5V0zm8 0h2v2h-2V0zM5 9h2v2H5V9zm0 4h2v2H5v-2zm4-4h2v2H9V9zm0 4h2v2H9v-2zm4-4h2v2h-2V9zm0 4h2v2h-2v-2z" />
+        </svg>
+      </button>
+    </v-date-picker>
+  </div>
+
+  <div class="dateform">
+    <label for="dateTo">Date to</label><br>
+    <input class="date" v-bind:class="{ 'error': dateToError }" name="dateTo" type="text" v-bind:value="dateToString" @change="setDateTo($event.target.value)" @focus="$event.target.select()">
+    <v-date-picker locale="en" v-model="dateTo" :popover="{ placement: 'bottom', visibility: 'click' }" :input-debounce="100" :available-dates="{start: dateFrom, end: today}">
+      <button class="calendar">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          class="w-4 h-4 fill-current">
+          <path d="M1 4c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V4zm2 2v12h14V6H3zm2-6h2v2H5V0zm8 0h2v2h-2V0zM5 9h2v2H5V9zm0 4h2v2H5v-2zm4-4h2v2H9V9zm0 4h2v2H9v-2zm4-4h2v2h-2V9zm0 4h2v2h-2v-2z" />
+        </svg>
+      </button>
+    </v-date-picker>
+  </div>
+  </div>
   </div>
 
   <div id="fileTable">
@@ -25,8 +57,6 @@
                 { key: 'title', label: 'Data object', sortable: true},
                 { key: 'measurementDate', label: 'Date', sortable: true},
                 ]"
-      :sort-by.sync="sortBy"
-      :sort-desc.sync="sortDesc"
       :current-page="currentPage"
       :per-page="perPage"
       :busy="isBusy"
@@ -50,11 +80,13 @@
 
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator'
+import VCalendar from 'v-calendar'
 import axios, { AxiosRequestConfig } from 'axios'
 import Multiselect from 'vue-multiselect'
 import { Site } from '../../../backend/src/entity/Site'
 
 Vue.component('multiselect', Multiselect)
+Vue.use(VCalendar)
 
 @Component
 export default class Search extends Vue {
@@ -75,7 +107,18 @@ export default class Search extends Vue {
   selectedSites = []
   allSiteIds = []
 
+  today = new Date()
+  dateFrom = new Date('2019-02-02')
+  dateTo = this.today
+  dateFromError = false
+  dateToError = false
+
+  dateFromString = ''
+  dateToString = ''
+
   created () {
+    this.dateFromString = this.dateString(this.dateFrom)
+    this.dateToString = this.dateString(this.dateTo)
     this.initView()
   }
 
@@ -83,7 +126,7 @@ export default class Search extends Vue {
     const res = await axios.get(`${this.apiUrl}sites/`)
     this.siteOptions = res.data
     this.allSiteIds = res.data.map((d: Site) => d.id)
-    this.fetchData({params: {location: this.allSiteIds}})
+    this.fetchData({params: {location: this.allSiteIds, dateFrom: this.dateFrom, dateTo: this.dateTo}})
   }
 
   fetchData(payload: AxiosRequestConfig) {
@@ -102,6 +145,18 @@ export default class Search extends Vue {
 
   sleep (time: number) {
     return new Promise((resolve) => setTimeout(resolve, time))
+  }
+
+  dateString (date: Date) {
+    return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().substring(0,10)
+  }
+  setDateFrom (date: string) {
+    this.dateFromString = date
+    this.dateFrom = new Date(date)
+  }
+  setDateTo (date: string) {
+    this.dateToString = date
+    this.dateTo = new Date(date)
   }
 
   get listLength() {
@@ -125,6 +180,9 @@ export default class Search extends Vue {
     if (product) return {'style': 'background-image: url(' + require('../assets/icons/' + product + '.png') + ')'}
   }
 
+  isValidDate = (obj: Date) => !isNaN(obj.getDate())
+  dateIsAfter = (a: Date, b: Date) => a > b
+
   @Watch('response')
   onListGenerated() {
     this.currentPage = 1
@@ -133,7 +191,24 @@ export default class Search extends Vue {
   @Watch('selectedSites')
   onSiteSelected () {
     const sites = this.selectedSites.length > 0 ? this.selectedSites.map((d: Site) => d.id) : this.allSiteIds
-    this.fetchData({params: {location: sites}})
+    this.fetchData({params: {location: sites, dateFrom: this.dateFrom, dateTo: this.dateTo}})
+  }
+
+  @Watch('dateFrom')
+  onDateFromChanged () {
+    console.log(this.dateFrom)
+    this.dateFromError = !this.isValidDate(this.dateFrom) || this.dateIsAfter(this.dateFrom, this.dateTo)
+    if(this.dateFromError) return
+    this.dateFromString = this.dateString(this.dateFrom)
+    this.fetchData({params: {location: this.selectedSites.map((d: Site) => d.id), dateFrom: this.dateFrom, dateTo: this.dateTo}})
+  }
+
+  @Watch('dateTo')
+  onDateToChanged () {
+    this.dateToError = !this.isValidDate(this.dateTo) || this.dateIsAfter(this.dateFrom, this.dateTo)
+    if(this.dateToError) return
+    this.dateToString = this.dateString(this.dateTo)
+    this.fetchData({params: {location: this.selectedSites.map((d: Site) => d.id), dateFrom: this.dateFrom, dateTo: this.dateTo}})
   }
 
 }
@@ -162,6 +237,8 @@ export default class Search extends Vue {
   .listTitle
     color: gray
     font-size: 85%
+    margin-bottom: 5px
+    display: block
 
   #pagi
     margin-top: 30px
@@ -200,7 +277,6 @@ export default class Search extends Vue {
 
   .multiselect
     margin-bottom: 50px
-    margin-top: 20px
 
   .multiselect__tags-wrap
     span, span i:hover
@@ -222,6 +298,51 @@ export default class Search extends Vue {
         background-color: #eeeeee
         font-weight: normal
         color: #bbbbbb
+
+  div.date
+    display: grid
+    grid-template-columns: 1fr 1fr
+    column-gap: 1em
+    max-width: 100%
+
+  button.calendar
+    width: 2em
+    height: 2em
+    background-color: $blue-dust
+    color: white
+    border-style: solid
+    border-width: 1px
+    border-color: $steel-warrior
+    border-radius: 2px
+    font-size: 1em
+    cursor: pointer
+    font-family: $content-font
+    &:hover
+      background-color: $steel-warrior
+    &:active
+      border-style: inset
+    &>svg
+      color: black
+
+  .dateform
+    width: 100%
+    overflow: hidden
+    white-space: nowrap
+  input.date
+    width: 7.5em
+    font-size: 0.9em
+
+  input.error
+    border-style: solid
+    border-color: red
+    border-width: 1px
+
+  label
+    font-size: 0.9em
+    margin-bottom: 0
+  label::after
+    content: ':'
+
 
   #noRes
     font-size: 90%
