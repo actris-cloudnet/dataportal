@@ -204,7 +204,7 @@ export default class Search extends Vue {
 
   .multiselect__tags-wrap
     span, span i:hover
-      color: black;
+      color: black
       background-color: $steel-warrior
 
   .multiselect__element
@@ -226,5 +226,4 @@ export default class Search extends Vue {
   #noRes
     font-size: 90%
     color: gray
-
-</style>>
+</style>
