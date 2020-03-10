@@ -88,19 +88,17 @@ export default class Search extends Vue {
 
   fetchData(payload: AxiosRequestConfig) {
     this.isBusy = true
-    this.sleep(500).then(() => { // remove me for production
-      axios
-        .get(`${this.apiUrl}files/`, payload)
-        .then(res => {
-          this.apiResponse = res
-          this.isBusy = false
-        })
-        .catch(() => {
-          this.apiResponse = this.resetResponse()
-          this.isBusy = false
-        })
-    }
-    )}
+    axios
+      .get(`${this.apiUrl}files/`, payload)
+      .then(res => {
+        this.apiResponse = res
+        this.isBusy = false
+      })
+      .catch(() => {
+        this.apiResponse = this.resetResponse()
+        this.isBusy = false
+      })
+  }
 
   sleep (time: number) {
     return new Promise((resolve) => setTimeout(resolve, time))
