@@ -290,17 +290,17 @@ export default class Search extends Vue {
 
   .multiselect__element
     font-size: 90%
-    span:hover
-      color: black
+    color: black
     .multiselect__option--highlight
       color: black
       background-color: $steel-warrior
       span
         background-color: $steel-warrior
     .multiselect__option--selected
-      background-color: #eeeeee
+      background-color: white
+      pointer-events: none
       span
-        background-color: #eeeeee
+        background-color: white
         font-weight: normal
         color: #bbbbbb
 
