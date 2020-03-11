@@ -103,12 +103,12 @@ export default class Search extends Vue {
   selectedSites = []
   allSiteIds = []
 
+  // date selectors
   today = new Date()
   dateFrom = new Date('2019-02-02')
   dateTo = this.today
   dateFromError = false
   dateToError = false
-
   dateFromString = ''
   dateToString = ''
 
@@ -138,10 +138,6 @@ export default class Search extends Vue {
         this.apiResponse = this.resetResponse()
         this.isBusy = false
       })
-  }
-
-  sleep (time: number) {
-    return new Promise((resolve) => setTimeout(resolve, time))
   }
 
   dateString (date: Date) {
@@ -182,11 +178,6 @@ export default class Search extends Vue {
   isValidDate = (obj: Date) => !isNaN(obj.getDate())
   dateIsAfter = (a: Date, b: Date) => a > b
 
-  @Watch('response')
-  onListGenerated() {
-    this.currentPage = 1
-  }
-
   @Watch('selectedSites')
   onSiteSelected () {
     const sites = this.selectedSites.length > 0 ? this.selectedSites.map((d: Site) => d.id) : this.allSiteIds
@@ -195,7 +186,6 @@ export default class Search extends Vue {
 
   @Watch('dateFrom')
   onDateFromChanged () {
-    console.log(this.dateFrom)
     this.dateFromError = !this.isValidDate(this.dateFrom) || this.dateIsAfter(this.dateFrom, this.dateTo)
     if(this.dateFromError) return
     this.dateFromString = this.dateString(this.dateFrom)
@@ -347,7 +337,6 @@ export default class Search extends Vue {
     margin-bottom: 0
   label::after
     content: ':'
-
 
   #noRes
     font-size: 90%
