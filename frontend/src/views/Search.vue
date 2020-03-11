@@ -66,6 +66,7 @@
       v-model="currentPage"
       :total-rows="listLength"
       :per-page="perPage"
+      :disabled="isBusy"
       aria-controls="fileTable"
       align="center"
     ></b-pagination>
