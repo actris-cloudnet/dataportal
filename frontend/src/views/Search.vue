@@ -61,11 +61,6 @@
       :per-page="perPage"
       :busy="isBusy"
       @row-clicked="clickRow">
-      <template v-slot:table-busy>
-        <div class="text-center text-danger">
-          <b-spinner class="align-middle"></b-spinner>
-        </div>
-      </template>
     </b-table>
     <b-pagination id="pagi" v-if="listLength > perPage"
       v-model="currentPage"
@@ -260,6 +255,7 @@ export default class Search extends Vue {
       padding: 9px
     tr:nth-child(2n+1) > td
       background-color: $blue-dust
+  .table-striped[aria-busy="false"]
     tr:hover td
       cursor: pointer
       background-color: #e4eff7
