@@ -1,7 +1,9 @@
 <template>
   <div id="app">
     <app-header/>
-    <router-view/>
+    <keep-alive include="Search">
+      <router-view/>
+    </keep-alive>
   </div>
 </template>
 
