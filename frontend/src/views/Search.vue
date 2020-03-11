@@ -1,7 +1,7 @@
 <template>
 <section id="fileTableContainer">
   <div id="sideBar">
-    <span class="listTitle">Filter options</span><br>
+    <h4 class="filterOptions">Filter search</h4>
     <label for="siteSelect">Locations</label>
     <multiselect name="siteSelect" id="siteSelect"
       v-model="selectedSites"
@@ -235,6 +235,11 @@ export default class Search extends Vue {
     margin-bottom: 5px
     display: block
 
+  .filterOptions
+    font-size: 1.2em
+    margin-bottom: 30px
+
+
   #pagi
     margin-top: 30px
     .page-item.active .page-link
@@ -316,12 +321,12 @@ export default class Search extends Vue {
     &:hover
       background-color: $steel-warrior
     &:active
-      border-style: inset
+      background-color: $steel-warrior
+      border-color: $blue-dust
     &>svg
       color: black
 
   .dateform
-    width: 100%
     overflow: hidden
     white-space: nowrap
   input.date
