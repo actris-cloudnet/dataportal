@@ -244,6 +244,8 @@ export default class Search extends Vue {
     .page-item.active .page-link
       background-color: $steel-warrior
       border-color: $steel-warrior
+    .page-link:hover
+      background-color: $blue-dust
     .page-link
       color: $blue-sapphire
 
