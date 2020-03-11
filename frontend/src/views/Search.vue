@@ -105,7 +105,7 @@ export default class Search extends Vue {
 
   // date selectors
   today = new Date()
-  dateFrom = new Date('2019-02-02')
+  dateFrom = new Date(new Date().getFullYear().toString())
   dateTo = this.today
   dateFromError = false
   dateToError = false
