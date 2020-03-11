@@ -212,6 +212,7 @@ export default class Search extends Vue {
 <style lang="sass">
   @import "../sass/variables.sass"
   @import "~vue-multiselect/dist/vue-multiselect.min.css"
+  $filter-margin: 2em
 
   main#search
     display: flex
@@ -236,8 +237,7 @@ export default class Search extends Vue {
 
   .filterOptions
     font-size: 1.2em
-    margin-bottom: 30px
-
+    margin-bottom: $filter-margin
 
   #pagi
     margin-top: 30px
@@ -275,7 +275,7 @@ export default class Search extends Vue {
     width: 300px
 
   .multiselect
-    margin-bottom: 50px
+    margin-bottom: $filter-margin
 
   .multiselect__tags-wrap
     span, span i:hover
