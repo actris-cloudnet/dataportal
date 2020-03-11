@@ -145,15 +145,17 @@ export default class Search extends Vue {
   }
 
   dateString (date: Date) {
-    return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().substring(0,10)
+    return date.toISOString().substring(0,10)
   }
   setDateFrom (date: string) {
     this.dateFromString = date
-    this.dateFrom = new Date(date)
+    const newDate = new Date(date)
+    this.dateFrom = new Date(new Date(newDate.getTime() - newDate.getTimezoneOffset() * 60000))
   }
   setDateTo (date: string) {
     this.dateToString = date
-    this.dateTo = new Date(date)
+    const newDate = new Date(date)
+    this.dateTo = new Date(new Date(newDate.getTime() - newDate.getTimezoneOffset() * 60000))
   }
 
   get listLength() {
