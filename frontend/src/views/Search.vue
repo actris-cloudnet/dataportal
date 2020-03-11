@@ -125,6 +125,7 @@ export default class Search extends Vue {
   }
 
   fetchData(payload: AxiosRequestConfig) {
+    this.currentPage = 1
     this.isBusy = true
     axios
       .get(`${this.apiUrl}files/`, payload)
