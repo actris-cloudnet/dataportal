@@ -1,7 +1,7 @@
 <template>
-<section id="fileTableContainer">
-  <div id="sideBar">
-    <h4 class="filterOptions">Filter search</h4>
+<main id="search">
+  <section id="sideBar">
+    <header class="filterOptions">Filter search</header>
     <label for="siteSelect">Locations</label>
     <multiselect name="siteSelect" id="siteSelect"
       v-model="selectedSites"
@@ -46,9 +46,9 @@
     </v-date-picker>
   </div>
   </div>
-  </div>
+  </section>
 
-  <div id="fileTable">
+  <section id="fileTable">
     <span class="listTitle"> {{ captionText }} </span>
     <b-table id="tableContent" borderless small striped hover sort-icon-left
       :items="apiResponse.data"
@@ -69,8 +69,8 @@
       aria-controls="fileTable"
       align="center"
     ></b-pagination>
-  </div>
-</section>
+  </section>
+</main>
 </template>
 
 <script lang="ts">
@@ -213,16 +213,15 @@ export default class Search extends Vue {
   @import "../sass/variables.sass"
   @import "~vue-multiselect/dist/vue-multiselect.min.css"
 
-  #fileTableContainer
+  main#search
     display: flex
     justify-content: center
     flex-wrap: wrap
 
-  #fileTable
+  section#fileTable
     padding-left: 30px
     padding-right: 30px
     flex-grow: 0.2
-    margin-top: 30px
     padding-bottom: 100px
     text-align: left
 
@@ -271,8 +270,7 @@ export default class Search extends Vue {
     background-size: 20px
     font-size: 0
 
-  #sideBar
-    margin-top: 30px
+  section#sideBar
     margin-right: 100px
     width: 300px
 
