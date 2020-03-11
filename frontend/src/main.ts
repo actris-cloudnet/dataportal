@@ -11,5 +11,10 @@ Vue.component('app-error', ApiError)
 
 new Vue({
   router,
-  render: h => h(App)
+  render: h => h(App),
+  watch: {
+    '$route' (to, _from) {
+      document.title = to.meta.title || 'Cloudnet Data Portal'
+    }
+  }
 }).$mount('#app')

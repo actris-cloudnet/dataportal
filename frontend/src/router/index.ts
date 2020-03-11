@@ -10,15 +10,21 @@ const routes = [
   {
     path: '/file/:uuid',
     name: 'File',
+    meta: {
+      title: 'Cloudnet Data Object'
+    },
     component: () => import('../views/File.vue'),
-    props: true
+    props: true,
   },
   {
     path: '/search',
-    name: 'search',
+    name: 'Search',
+    meta: {
+      title: 'Cloudnet Search'
+    },
     component: () => import('../views/Search.vue'),
     props: true
-  },
+  }
 ]
 
 const router = new VueRouter({
