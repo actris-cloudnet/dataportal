@@ -9,7 +9,8 @@ header
   height: 4.5em
   padding-left: 1em
   padding-right: 1em
-  background-image: url('../assets/clouds2.jpg')
+  background-image: linear-gradient(to left, rgba(0,0,0,0.0), $header-background-color 70%), url('../assets/clouds3.jpg')
+  opacity: 0.7
   background-position: right 0px top 20%
   background-repeat: no-repeat
   background-size: cover
