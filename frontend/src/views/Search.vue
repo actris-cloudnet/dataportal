@@ -298,6 +298,9 @@ export default class Search extends Vue {
         font-weight: normal
         color: #bbbbbb
 
+  .multiselect__tag-icon:after
+    color: gray
+
   div.date
     display: grid
     grid-template-columns: 1fr 1fr
