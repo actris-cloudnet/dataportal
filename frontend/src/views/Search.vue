@@ -141,7 +141,8 @@ export default class Search extends Vue {
   }
 
   dateString (date: Date) {
-    return date.toISOString().substring(0,10)
+    const utcTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000 ))
+    return utcTime.toISOString().substring(0,10)
   }
   setDateFrom (date: string) {
     this.dateFromString = date
