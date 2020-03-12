@@ -80,8 +80,10 @@ import VCalendar from 'v-calendar'
 import axios, { AxiosRequestConfig } from 'axios'
 import Multiselect from 'vue-multiselect'
 import { Site } from '../../../backend/src/entity/Site'
+import { BTable } from 'bootstrap-vue'
 
 Vue.component('multiselect', Multiselect)
+Vue.component('b-table', BTable)
 Vue.use(VCalendar)
 
 @Component
