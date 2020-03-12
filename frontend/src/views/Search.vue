@@ -161,7 +161,7 @@ export default class Search extends Vue {
 
   get captionText () {
     if (this.isBusy) return 'Searching...'
-    return this.listLength > 0 ? 'Found ' + this.listLength + ' results' : 'No results'
+    return this.listLength > 0 ? `Found ${this.listLength} results` : 'No results'
   }
 
   resetResponse() {
@@ -169,11 +169,11 @@ export default class Search extends Vue {
   }
 
   clickRow(_: number, index: number) {
-    this.$router.push('file/' + this.apiResponse.data[index].uuid)
+    if (this.listLength > 0) this.$router.push(`file/${this.apiResponse.data[index].uuid}`)
   }
 
   setIcon(product: string) {
-    if (product) return {'style': 'background-image: url(' + require('../assets/icons/' + product + '.png') + ')'}
+    if (product) return {'style': `background-image: url(${require(`../assets/icons/${product}.png`)})`}
   }
 
   isValidDate = (obj: Date) => {

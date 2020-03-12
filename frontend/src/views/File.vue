@@ -203,7 +203,7 @@ export default class File extends Vue {
 
   humanReadableSize (size: number) {
     const i = Math.floor( Math.log(size) / Math.log(1024) )
-    return ( size / Math.pow(1024, i) ).toFixed(1) + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i]
+    return `${( size / Math.pow(1024, i) ).toFixed(1)  } ${  ['B', 'kB', 'MB', 'GB', 'TB'][i]}`
   }
 }
 </script>
