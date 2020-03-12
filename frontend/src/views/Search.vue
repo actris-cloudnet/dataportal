@@ -176,7 +176,10 @@ export default class Search extends Vue {
     if (product) return {'style': 'background-image: url(' + require('../assets/icons/' + product + '.png') + ')'}
   }
 
-  isValidDate = (obj: Date) => !isNaN(obj.getDate())
+  isValidDate = (obj: Date) => {
+    const now = new Date()
+    return !isNaN(obj.getDate()) && obj < new Date(now.getTime() - (now.getTimezoneOffset() * 60000 ))
+  }
   dateIsAfter = (a: Date, b: Date) => a > b
 
   @Watch('selectedSites')
