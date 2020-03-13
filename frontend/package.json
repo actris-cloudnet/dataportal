@@ -34,6 +34,7 @@
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.1.2",
     "jest": "^25.1.0",
+    "jest-transform-stub": "^2.0.0",
     "node-sass": "^4.12.0",
     "sass-loader": "^8.0.2",
     "selenium-webdriver": "^4.0.0-alpha.5",
@@ -51,7 +52,8 @@
     ],
     "transform": {
       "^.+\\.tsx?$": "ts-jest",
-      ".*\\.(vue)$": "vue-jest"
+      ".*\\.(vue)$": "vue-jest",
+      ".+\\.(css|styl|less|sass|scss|png|jpg|svg|ttf|woff|woff2)$": "jest-transform-stub"
     },
     "testRegex": "(/tests/.*(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
     "testURL": "http://localhost/"
