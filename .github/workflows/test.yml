@@ -61,6 +61,8 @@ jobs:
       run: cd frontend && npx vue-cli-service build --mode e2e && cd ..
     - name: Start backend and frontend
       run: ./control start
+    - name: Run frontend unit tests
+      run: cd frontend && npm test && cd ..
     - name: Run integration tests
       run: cd backend && npm test && cd ..
     - name: Run e2e tests
