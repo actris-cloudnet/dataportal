@@ -169,3 +169,5 @@ export const allSites = [
 ]
 
 export const dateToISOString = (date: Date) => date.toISOString().substring(0,10)
+
+export const tomorrow = () => new Date(new Date().setDate(new Date().getDate() + 1))
