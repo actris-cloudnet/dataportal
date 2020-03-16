@@ -1,6 +1,8 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import { createConnection } from 'typeorm'
+import * as firefox from 'selenium-webdriver/firefox'
+import { Builder } from 'selenium-webdriver'
 
 export function clearDir(dir: string) {
   const files = fs.readdirSync(dir)
@@ -14,6 +16,19 @@ export async function clearRepo(repo: string) {
   await conn.getRepository(repo).clear()
   return conn.close()
 }
+
+export const prepareSelenium = async () => {
+  const options = new firefox.Options()
+  if(process.env.CI) options.addArguments('-headless') // Run in headless on CI
+  clearDir(inboxDir)
+  clearDir(publicDir)
+  clearRepo('file')
+  return await new Builder()
+    .forBrowser('firefox')
+    .setFirefoxOptions(options)
+    .build()
+}
+
 
 export const inboxDir = 'tests/data/inbox'
 export const publicDir = 'tests/data/public'
