@@ -40,11 +40,6 @@ const getMockedAxiosLastCallSecondArgument = () => {
 
 describe('Search.vue', () => {
 
-  test('Should include text "Filter search"', () => {
-    const wrapper = mount(Search)
-    return expect(wrapper.text()).toContain('Filter search')
-  })
-
   describe('date selectors', () => {
     let wrapper: Wrapper<Vue>
 
