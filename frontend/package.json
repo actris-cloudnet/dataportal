@@ -45,7 +45,8 @@
     "ts-jest": "^25.2.0",
     "typescript": "^3.7.5",
     "vue-jest": "^3.0.5",
-    "vue-template-compiler": "^2.6.11"
+    "vue-template-compiler": "^2.6.11",
+    "webpack-bundle-analyzer": "^3.6.1"
   },
   "jest": {
     "moduleFileExtensions": [
@@ -63,7 +64,7 @@
     "testRegex": "(/tests/.*(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
     "testURL": "http://localhost/",
     "transformIgnorePatterns": [
-      "/node_modules/(?!vuelidate-property-decorators/)"
+      "/node_modules/(?!(vuelidate-property-decorators|bootstrap-vue/esm)/)"
     ]
   }
 }
