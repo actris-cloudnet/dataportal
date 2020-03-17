@@ -16,38 +16,11 @@
     </multiselect>
 
 <div class="date">
-  <div class="dateform" id="dateFrom" :class="{ 'error': $v.dateFromString.$error }">
-    <label for="dateFrom">Date from</label><br>
-    <input class="date" name="dateFrom" type="text" v-model.lazy="$v.dateFromString.$model" @focus="$event.target.select()">
-    <v-date-picker locale="en" v-model="dateFrom" :popover="{ placement: 'bottom', visibility: 'click' }" :input-debounce="100" value="dateFrom" :available-dates="{end: dateTo}">
-      <button class="calendar">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 20 20"
-          class="w-4 h-4 fill-current">
-          <path d="M1 4c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V4zm2 2v12h14V6H3zm2-6h2v2H5V0zm8 0h2v2h-2V0zM5 9h2v2H5V9zm0 4h2v2H5v-2zm4-4h2v2H9V9zm0 4h2v2H9v-2zm4-4h2v2h-2V9zm0 4h2v2h-2v-2z" />
-        </svg>
-      </button>
-    </v-date-picker>
-  </div>
-
-  <div class="dateform" id="dateTo" :class="{ 'error': $v.dateToString.$error }">
-    <label for="dateTo">Date to</label><br>
-    <input class="date" name="dateTo" type="text" v-model.lazy="$v.dateToString.$model" @focus="$event.target.select()">
-    <v-date-picker locale="en" v-model="dateTo" :popover="{ placement: 'bottom', visibility: 'click' }" :input-debounce="100" :available-dates="{start: dateFrom, end: today}">
-      <button class="calendar">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 20 20"
-          class="w-4 h-4 fill-current">
-          <path d="M1 4c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V4zm2 2v12h14V6H3zm2-6h2v2H5V0zm8 0h2v2h-2V0zM5 9h2v2H5V9zm0 4h2v2H5v-2zm4-4h2v2H9V9zm0 4h2v2H9v-2zm4-4h2v2h-2V9zm0 4h2v2h-2v-2z" />
-        </svg>
-      </button>
-    </v-date-picker>
-  </div>
-  <div v-if="isFalseOnEitherDateField('isValidDate')" class="errormsg">Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.</div>
-  <div v-if="!isFalseOnEitherDateField('isValidDate') && isFalseOnEitherDateField('isNotInFuture')" class="errormsg">Provided date is in the future.</div>
-  <div v-if="!isFalseOnEitherDateField('isValidDate') && isFalseOnEitherDateField('dateFromIsBeforeDateTo')" class="errormsg">Date from must be before date to.</div>
+  <datepicker name="dateFrom" v-model="dateFrom" :start="beginningOfHistory" :end="dateTo" label="Date from" v-on:error="dateFromError = $event"></datepicker>
+  <datepicker name="dateTo" v-model="dateTo" :start="dateFrom" :end="today" label="Date to" v-on:error="dateToError = $event"></datepicker>
+  <div v-if="!isTrueOnBothDateFields('isValidDate')" class="errormsg">Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.</div>
+  <div v-if="isTrueOnBothDateFields('isValidDate') && !isTrueOnBothDateFields('isNotInFuture')" class="errormsg">Provided date is in the future.</div>
+  <div v-if="isTrueOnBothDateFields('isValidDate') && (!dateFromError.isBeforeEnd || !dateToError.isAfterStart)" class="errormsg">Date from must be before date to.</div>
   </div>
   </section>
 
@@ -85,21 +58,16 @@ import Multiselect from 'vue-multiselect'
 import { Site } from '../../../backend/src/entity/Site'
 import { BTable } from 'bootstrap-vue/esm/components/table'
 import { BPagination } from 'bootstrap-vue/esm/components/pagination'
-import Vuelidate from 'vuelidate'
-import { Validate } from 'vuelidate-property-decorators'
-import { helpers } from 'vuelidate/lib/validators'
+import Datepicker from '../components/Datepicker.vue'
 
+Vue.component('datepicker', Datepicker)
+
+Vue.component('multiselect', Multiselect)
 Vue.component('b-table', BTable)
 Vue.component('b-pagination', BPagination)
 Vue.component('multiselect', Multiselect)
 Vue.use(VCalendar)
-Vue.use(Vuelidate)
 
-// date validation
-const isValidDate = (obj: string) => !isNaN(new Date(obj).getDate())
-const isNotInFuture = (obj: string) => new Date(obj) < new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000 ))
-const dateFromIsBeforeDateTo = (obj: string, vm: Vue) => helpers.ref('dateFrom', Vuelidate, vm) < helpers.ref('dateTo', Vuelidate, vm)
-const dateValidator = { isValidDate, isNotInFuture, dateFromIsBeforeDateTo }
 
 @Component
 export default class Search extends Vue {
@@ -120,37 +88,16 @@ export default class Search extends Vue {
   selectedSites = []
   allSiteIds = []
 
-  // date selectors
+  // dates
+  beginningOfHistory = new Date('1970-01-01')
   today = new Date()
-  @Validate(dateValidator)
-  dateFromString = this.dateString(new Date(new Date().getFullYear().toString()))
+  dateFrom = new Date(new Date().getFullYear().toString())
+  dateTo = this.today
+  dateFromError: { [key: string]: boolean } = {}
+  dateToError: { [key: string]: boolean } = {}
 
-  @Validate(dateValidator)
-  dateToString = this.dateString(this.today)
-
-  set dateFrom(date: Date | null) {
-    if(date == null) return
-    this.dateFromString = this.dateString(date)
-  }
-
-  get dateFrom(): Date | null {
-    if(!isValidDate(this.dateFromString)) return null
-    return new Date(this.dateFromString)
-  }
-
-  set dateTo(date: Date | null) {
-    if(date == null) return
-    this.dateToString = this.dateString(date)
-  }
-
-  get dateTo(): Date | null {
-    if(!isValidDate(this.dateToString)) return null
-    return new Date(this.dateToString)
-  }
-
-  isFalseOnEitherDateField(errorId: string) {
-    if(!this.$v.dateFromString || !this.$v.dateToString) return true // Stop TS complaining
-    return !this.$v.dateFromString[errorId] || !this.$v.dateToString[errorId]
+  isTrueOnBothDateFields(errorId: string) {
+    return this.dateFromError[errorId] && this.dateToError[errorId]
   }
 
   created () {
@@ -179,10 +126,6 @@ export default class Search extends Vue {
       })
   }
 
-  dateString (date: Date) {
-    const utcTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000 ))
-    return utcTime.toISOString().substring(0,10)
-  }
 
   get listLength() {
     return this.apiResponse['data'][0]['uuid'] ? this.apiResponse['data'].length : 0
@@ -214,13 +157,11 @@ export default class Search extends Vue {
 
   @Watch('dateFrom')
   onDateFromChanged () {
-    if(this.$v.$anyError) return
     this.fetchData({params: {location: this.selectedSites.map((d: Site) => d.id), dateFrom: this.dateFrom, dateTo: this.dateTo}})
   }
 
   @Watch('dateTo')
   onDateToChanged () {
-    if(this.$v.$anyError) return
     this.fetchData({params: {location: this.selectedSites.map((d: Site) => d.id), dateFrom: this.dateFrom, dateTo: this.dateTo}})
   }
 
