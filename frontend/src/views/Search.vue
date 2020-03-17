@@ -127,19 +127,23 @@ export default class Search extends Vue {
   @Validate(dateValidator)
   dateToString = this.dateString(this.today)
 
-  set dateFrom(date: Date) {
+  set dateFrom(date: Date | null) {
+    if(date == null) return
     this.dateFromString = this.dateString(date)
   }
 
-  get dateFrom() {
+  get dateFrom(): Date | null {
+    if(!isValidDate(this.dateFromString)) return null
     return new Date(this.dateFromString)
   }
 
-  set dateTo(date: Date) {
+  set dateTo(date: Date | null) {
+    if(date == null) return
     this.dateToString = this.dateString(date)
   }
 
-  get dateTo() {
+  get dateTo(): Date | null {
+    if(!isValidDate(this.dateToString)) return null
     return new Date(this.dateToString)
   }
 
