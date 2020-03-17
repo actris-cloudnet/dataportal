@@ -22,6 +22,7 @@
     "vuelidate-property-decorators": "^1.0.28"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.8.7",
     "@types/jest": "^25.1.2",
     "@types/selenium-webdriver": "^4.0.8",
     "@types/vuelidate": "^0.7.11",
@@ -55,10 +56,14 @@
     ],
     "transform": {
       "^.+\\.tsx?$": "ts-jest",
+      "^.+\\.js$": "babel-jest",
       ".*\\.(vue)$": "vue-jest",
       ".+\\.(css|styl|less|sass|scss|png|jpg|svg|ttf|woff|woff2)$": "jest-transform-stub"
     },
     "testRegex": "(/tests/.*(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
-    "testURL": "http://localhost/"
+    "testURL": "http://localhost/",
+    "transformIgnorePatterns": [
+      "/node_modules/(?!vuelidate-property-decorators/)"
+    ]
   }
 }
