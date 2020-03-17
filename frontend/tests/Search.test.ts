@@ -49,6 +49,7 @@ describe('Search.vue', () => {
     let wrapper: Wrapper<Vue>
 
     const findInputByName = (inputName: string) => wrapper.find(`input[name="${inputName}"]`)
+    const findElementById = (id: string) => wrapper.find(`#${id}`)
 
     const changeInputAndNextTick = async (inputName: string, newValue: string) => {
       const input = findInputByName(inputName)
@@ -81,27 +82,27 @@ describe('Search.vue', () => {
       const newValue = filesSortedByDate[1].measurementDate
       await changeInputAndNextTick('dateFrom', newValue)
       const secondArg = getMockedAxiosLastCallSecondArgument()
-      expect(dateToISOString(secondArg.params.dateFrom)).toEqual(newValue)
+      return expect(dateToISOString(secondArg.params.dateFrom)).toEqual(newValue)
     })
 
-    it('should fetch updated list of files from api on dateFrom change', async () => {
+    it('should fetch updated list of files from api on dateTo change', async () => {
       const newValue = filesSortedByDate[3].measurementDate
       await changeInputAndNextTick('dateTo', newValue)
       const secondArg = getMockedAxiosLastCallSecondArgument()
-      expect(dateToISOString(secondArg.params.dateTo)).toEqual(newValue)
+      return expect(dateToISOString(secondArg.params.dateTo)).toEqual(newValue)
     })
 
     it('should update table based on api response', async () => {
       mocked(axios.get).mockImplementationOnce((_1, _2) => Promise.resolve(augmentAxiosResponse(allFiles.slice(1))))
-      const newValue = filesSortedByDate[1].measurementDate
-      await changeInputAndNextTick('dateTo', newValue)
+      const newValue = filesSortedByDate[0].measurementDate
+      await changeInputAndNextTick('dateFrom', newValue)
       // Contains the dates of all files except the first
       allFiles
         .slice(1)
         .map(file => file.measurementDate).forEach(date =>
           expect(wrapper.text()).toContain(date)
         )
-      expect(wrapper.text()).not.toContain(allFiles[0].measurementDate)
+      return expect(wrapper.text()).not.toContain(allFiles[0].measurementDate)
     })
 
     it('should not touch API on invalid input', async () => {
@@ -110,15 +111,15 @@ describe('Search.vue', () => {
       await changeInputAndNextTick('dateTo', newValue)
       await changeInputAndNextTick('dateFrom', newValue)
       const numberOfCallsAfter = mocked(axios.get).mock.calls.length
-      expect(numberOfCallsBefore).toEqual(numberOfCallsAfter)
+      return expect(numberOfCallsBefore).toEqual(numberOfCallsAfter)
     })
 
     it('should display error when inserting invalid input', async () => {
       const newValue = 'asdf'
       await changeInputAndNextTick('dateTo', newValue)
       await changeInputAndNextTick('dateFrom', newValue)
-      expect(findInputByName('dateTo').classes()).toContain('error')
-      expect(findInputByName('dateFrom').classes()).toContain('error')
+      expect(findElementById('dateTo').classes()).toContain('error')
+      return expect(findElementById('dateFrom').classes()).toContain('error')
     })
 
     it('should reset error when replacing invalid input with valid', async () => {
@@ -127,22 +128,22 @@ describe('Search.vue', () => {
       await changeInputAndNextTick('dateFrom', newValue)
       await changeInputAndNextTick('dateFrom', '2018-09-01')
       await changeInputAndNextTick('dateTo', '2018-09-02')
-      expect(findInputByName('dateTo').classes()).not.toContain('error')
-      expect(findInputByName('dateFrom').classes()).not.toContain('error')
+      expect(findElementById('dateTo').classes()).not.toContain('error')
+      return expect(findElementById('dateFrom').classes()).not.toContain('error')
     })
 
-    it('should display error if dateFrom is later than dateFrom', async () => {
+    it('should display error if dateFrom is later than dateTo', async () => {
       await changeInputAndNextTick('dateFrom', '2018-09-02')
       await changeInputAndNextTick('dateTo', '2018-09-01')
-      expect(findInputByName('dateFrom').classes()).not.toContain('error')
-      expect(findInputByName('dateTo').classes()).toContain('error')
+      expect(findElementById('dateFrom').classes()).toContain('error')
+      return expect(findElementById('dateTo').classes()).toContain('error')
     })
 
     it('should display error if date is in the future', async () => {
       await changeInputAndNextTick('dateFrom', dateToISOString(tomorrow()))
       await changeInputAndNextTick('dateTo', dateToISOString(tomorrow()))
-      expect(findInputByName('dateFrom').classes()).toContain('error')
-      expect(findInputByName('dateTo').classes()).toContain('error')
+      expect(findElementById('dateFrom').classes()).toContain('error')
+      return expect(findElementById('dateTo').classes()).toContain('error')
     })
 
   })

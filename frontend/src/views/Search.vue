@@ -16,7 +16,7 @@
     </multiselect>
 
 <div class="date">
-  <div class="dateform" :class="{ 'form-group--error': $v.dateFromString.$error }">
+  <div class="dateform" id="dateFrom" :class="{ 'error': $v.dateFromString.$error }">
     <label for="dateFrom">Date from</label><br>
     <input class="date" name="dateFrom" type="text" v-model.lazy="$v.dateFromString.$model" @focus="$event.target.select()">
     <v-date-picker locale="en" v-model="dateFrom" :popover="{ placement: 'bottom', visibility: 'click' }" :input-debounce="100" value="dateFrom" :available-dates="{end: dateTo}">
@@ -31,7 +31,7 @@
     </v-date-picker>
   </div>
 
-  <div class="dateform" :class="{ 'form-group--error': $v.dateToString.$error }">
+  <div class="dateform" id="dateTo" :class="{ 'error': $v.dateToString.$error }">
     <label for="dateTo">Date to</label><br>
     <input class="date" name="dateTo" type="text" v-model.lazy="$v.dateToString.$model" @focus="$event.target.select()">
     <v-date-picker locale="en" v-model="dateTo" :popover="{ placement: 'bottom', visibility: 'click' }" :input-debounce="100" :available-dates="{start: dateFrom, end: today}">
@@ -45,9 +45,9 @@
       </button>
     </v-date-picker>
   </div>
-  <div v-if="isFalseOnEitherDateField('isValidDate')" class="error">Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.</div>
-  <div v-if="!isFalseOnEitherDateField('isValidDate') && isFalseOnEitherDateField('isNotInFuture')" class="error">Provided date is in the future.</div>
-  <div v-if="!isFalseOnEitherDateField('isValidDate') && isFalseOnEitherDateField('dateFromIsBeforeDateTo')" class="error">Date from must be before date to.</div>
+  <div v-if="isFalseOnEitherDateField('isValidDate')" class="errormsg">Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.</div>
+  <div v-if="!isFalseOnEitherDateField('isValidDate') && isFalseOnEitherDateField('isNotInFuture')" class="errormsg">Provided date is in the future.</div>
+  <div v-if="!isFalseOnEitherDateField('isValidDate') && isFalseOnEitherDateField('dateFromIsBeforeDateTo')" class="errormsg">Date from must be before date to.</div>
   </div>
   </section>
 
@@ -353,11 +353,11 @@ export default class Search extends Vue {
     border: 1px solid #e8e8e8
     border-radius: 2px
 
-  div.error, input.error, .form-group--error>input
+  div.errormsg, input.error, .error>input
     border-color: grey
     background: #f2d7d5
 
-  div.error
+  div.errormsg
     border: 1px solid grey
     border-radius: 2px
     grid-column: 1 / 3
