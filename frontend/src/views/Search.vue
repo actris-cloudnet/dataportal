@@ -86,7 +86,7 @@ import { Site } from '../../../backend/src/entity/Site'
 import { BTable } from 'bootstrap-vue/esm/components/table'
 import { BPagination } from 'bootstrap-vue/esm/components/pagination'
 import Vuelidate from 'vuelidate'
-import {Validate} from 'vuelidate-property-decorators'
+import { Validate } from 'vuelidate-property-decorators'
 import { helpers } from 'vuelidate/lib/validators'
 
 Vue.component('b-table', BTable)
@@ -228,8 +228,13 @@ export default class Search extends Vue {
 </script>
 
 <style lang="sass">
+
   @import "../sass/variables.sass"
+  @import "~bootstrap/dist/css/bootstrap.min.css"
+  @import "~bootstrap-vue/dist/bootstrap-vue.min.css"
   @import "~vue-multiselect/dist/vue-multiselect.min.css"
+
+
   $filter-margin: 2em
 
   main#search
