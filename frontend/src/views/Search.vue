@@ -18,7 +18,7 @@
 <div class="date">
   <div class="dateform" :class="{ 'form-group--error': $v.dateFromString.$error }">
     <label for="dateFrom">Date from</label><br>
-    <input class="date" v-bind:class="{ 'error': dateFromError }" name="dateFrom" type="text" v-model.lazy="$v.dateFromString.$model" @focus="$event.target.select()">
+    <input class="date" name="dateFrom" type="text" v-model.lazy="$v.dateFromString.$model" @focus="$event.target.select()">
     <v-date-picker locale="en" v-model="dateFrom" :popover="{ placement: 'bottom', visibility: 'click' }" :input-debounce="100" value="dateFrom" :available-dates="{end: dateTo}">
       <button class="calendar">
         <svg
@@ -33,7 +33,7 @@
 
   <div class="dateform" :class="{ 'form-group--error': $v.dateToString.$error }">
     <label for="dateTo">Date to</label><br>
-    <input class="date" v-bind:class="{ 'error': dateToError }" name="dateTo" type="text" v-model.lazy="$v.dateToString.$model" @focus="$event.target.select()">
+    <input class="date" name="dateTo" type="text" v-model.lazy="$v.dateToString.$model" @focus="$event.target.select()">
     <v-date-picker locale="en" v-model="dateTo" :popover="{ placement: 'bottom', visibility: 'click' }" :input-debounce="100" :available-dates="{start: dateFrom, end: today}">
       <button class="calendar">
         <svg
