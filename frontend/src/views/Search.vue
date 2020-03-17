@@ -83,16 +83,17 @@ import VCalendar from 'v-calendar'
 import axios, { AxiosRequestConfig } from 'axios'
 import Multiselect from 'vue-multiselect'
 import { Site } from '../../../backend/src/entity/Site'
-import { BTable } from 'bootstrap-vue'
+import { BTable } from 'bootstrap-vue/esm/components/table'
+import { BPagination } from 'bootstrap-vue/esm/components/pagination'
 import Vuelidate from 'vuelidate'
 import {Validate} from 'vuelidate-property-decorators'
 import { helpers } from 'vuelidate/lib/validators'
 
-Vue.use(Vuelidate)
-
-Vue.component('multiselect', Multiselect)
 Vue.component('b-table', BTable)
+Vue.component('b-pagination', BPagination)
+Vue.component('multiselect', Multiselect)
 Vue.use(VCalendar)
+Vue.use(Vuelidate)
 
 // date validation
 const isValidDate = (obj: string) => !isNaN(new Date(obj).getDate())
