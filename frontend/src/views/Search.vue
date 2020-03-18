@@ -268,6 +268,13 @@ export default class Search extends Vue {
   .multiselect
     margin-bottom: $filter-margin
 
+  .multiselect__input
+    padding: 2px
+    padding-left: 0px
+    &::placeholder
+      font-size: 88%
+      color: gray
+
   .multiselect__tags-wrap
     span, span i:hover
       color: black
