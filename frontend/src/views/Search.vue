@@ -76,6 +76,7 @@ import VCalendar from 'v-calendar'
 import axios, { AxiosRequestConfig } from 'axios'
 import Multiselect from 'vue-multiselect'
 import { Site } from '../../../backend/src/entity/Site'
+import { File } from '../../../backend/src/entity/File'
 import { BTable } from 'bootstrap-vue/esm/components/table'
 import { BPagination } from 'bootstrap-vue/esm/components/pagination'
 import Datepicker from '../components/Datepicker.vue'
@@ -121,11 +122,11 @@ export default class Search extends Vue {
     return this.dateFromError[errorId] && this.dateToError[errorId]
   }
 
-  created () {
+  created() {
     this.initView()
   }
 
-  mounted () {
+  mounted() {
     // Wait until all child components have rendered
     this.$nextTick(() => (this.renderComplete = true))
   }
@@ -156,7 +157,7 @@ export default class Search extends Vue {
     return this.apiResponse['data'][0]['uuid'] ? this.apiResponse['data'].length : 0
   }
 
-  get captionText () {
+  get captionText() {
     if (this.isBusy) return 'Searching...'
     return this.listLength > 0 ? `Found ${this.listLength} results` : 'No results'
   }
@@ -165,8 +166,8 @@ export default class Search extends Vue {
     return {'data': [{'uuid': null, 'product': null}]}
   }
 
-  clickRow(_: number, index: number) {
-    if (this.listLength > 0) this.$router.push(`file/${this.apiResponse.data[index].uuid}`)
+  clickRow(record: File) {
+    if (this.listLength > 0) this.$router.push(`file/${record.uuid}`)
   }
 
   setIcon(product: string) {
