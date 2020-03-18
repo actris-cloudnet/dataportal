@@ -96,12 +96,19 @@ export default class Search extends Vue {
   dateFromError: { [key: string]: boolean } = {}
   dateToError: { [key: string]: boolean } = {}
 
+  renderComplete = false
+
   isTrueOnBothDateFields(errorId: string) {
     return this.dateFromError[errorId] && this.dateToError[errorId]
   }
 
   created () {
     this.initView()
+  }
+
+  mounted () {
+    // Wait until all child components have rendered
+    this.$nextTick(() => (this.renderComplete = true))
   }
 
   async initView() {
@@ -157,11 +164,13 @@ export default class Search extends Vue {
 
   @Watch('dateFrom')
   onDateFromChanged () {
+    if(!this.renderComplete) return
     this.fetchData({params: {location: this.selectedSites.map((d: Site) => d.id), dateFrom: this.dateFrom, dateTo: this.dateTo}})
   }
 
   @Watch('dateTo')
   onDateToChanged () {
+    if(!this.renderComplete) return
     this.fetchData({params: {location: this.selectedSites.map((d: Site) => d.id), dateFrom: this.dateFrom, dateTo: this.dateTo}})
   }
 

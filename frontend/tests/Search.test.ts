@@ -59,6 +59,11 @@ describe('Search.vue', () => {
       wrapper = mount(Search)
     })
 
+    it('should make exactly two api request on mount', () => {
+      // files and sites
+      expect(mocked(axios.get).mock.calls.length).toBe(2)
+    })
+
     it('should have the first day of the current year as the default dateFrom', () => {
       expect((wrapper.find('input[name="dateFrom"]').element as HTMLInputElement).value).toBe('2020-01-01')
     })
