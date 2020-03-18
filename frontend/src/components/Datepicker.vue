@@ -1,8 +1,21 @@
 <template>
   <div class="dateform" :id="name" :class="{ 'error': $v.dateString.$error }">
     <label :for="name">{{ label }}</label><br>
-    <input class="date" :name="name" type="text" v-model.lazy="$v.dateString.$model" @focus="$event.target.select()">
-    <v-date-picker locale="en" v-model="value" :popover="{ placement: 'bottom', visibility: 'click' }" :input-debounce="100" :value="value" :available-dates="{end, start}">
+    <input
+      class="date"
+      :name="name"
+      type="text"
+      v-model.lazy="$v.dateString.$model"
+      @focus="$event.target.select()"
+    >
+    <v-date-picker
+      locale="en"
+      v-model="value"
+      :popover="{ placement: 'bottom', visibility: 'click' }"
+      :input-debounce="100"
+      :value="value"
+      :available-dates="{end, start}"
+    >
       <button class="calendar">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -23,9 +36,12 @@ import {Validate} from 'vuelidate-property-decorators'
 import { helpers } from 'vuelidate/lib/validators'
 import { Prop } from 'vue-property-decorator'
 
+// helpers
+const dateToUTC = (date: Date) => new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
+
 // date validation
 const isValidDate = (obj: string) => !isNaN(new Date(obj).getDate())
-const isNotInFuture = (obj: string) => new Date(obj) < new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000 ))
+const isNotInFuture = (obj: string) => new Date(obj) < dateToUTC(new Date())
 const isBeforeEnd = (obj: string, parentVm: Vue) => new Date(obj) < helpers.ref('end', validationMixin, parentVm)
 const isAfterStart = (obj: string, parentVm: Vue) => new Date(obj) > helpers.ref('start', validationMixin, parentVm)
 
@@ -37,13 +53,12 @@ export default class Datepicker extends mixins(validationMixin, Vue) {
   @Prop() end!: Date
 
   dateToString(date: Date) {
-    const utcTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000 ))
+    const utcTime = dateToUTC(date)
     return utcTime.toISOString().substring(0,10)
   }
 
   @Validate({ isValidDate, isNotInFuture, isBeforeEnd, isAfterStart })
   dateString = this.$attrs.value
-
 
   set value(date: Date) {
     if(this.$v.$anyError) return

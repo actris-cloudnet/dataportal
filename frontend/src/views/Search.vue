@@ -15,13 +15,33 @@
     ><span id="noRes" slot="noResult">Not found</span>
     </multiselect>
 
-<div class="date">
-  <datepicker name="dateFrom" v-model="dateFrom" :start="beginningOfHistory" :end="dateTo" label="Date from" v-on:error="dateFromError = $event"></datepicker>
-  <datepicker name="dateTo" v-model="dateTo" :start="dateFrom" :end="today" label="Date to" v-on:error="dateToError = $event"></datepicker>
-  <div v-if="!isTrueOnBothDateFields('isValidDate')" class="errormsg">Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.</div>
-  <div v-if="isTrueOnBothDateFields('isValidDate') && !isTrueOnBothDateFields('isNotInFuture')" class="errormsg">Provided date is in the future.</div>
-  <div v-if="isTrueOnBothDateFields('isValidDate') && (!dateFromError.isBeforeEnd || !dateToError.isAfterStart)" class="errormsg">Date from must be before date to.</div>
-  </div>
+    <div class="date">
+      <datepicker
+        name="dateFrom"
+        v-model="dateFrom"
+        :start="beginningOfHistory"
+        :end="dateTo"
+        label="Date from"
+        v-on:error="dateFromError = $event"
+      ></datepicker>
+      <datepicker
+        name="dateTo"
+        v-model="dateTo"
+        :start="dateFrom"
+        :end="today"
+        label="Date to"
+        v-on:error="dateToError = $event"
+      ></datepicker>
+      <div v-if="!isTrueOnBothDateFields('isValidDate')" class="errormsg">
+        Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.
+      </div>
+      <div v-if="isTrueOnBothDateFields('isValidDate') && !isTrueOnBothDateFields('isNotInFuture')" class="errormsg">
+        Provided date is in the future.
+      </div>
+      <div v-if="isTrueOnBothDateFields('isValidDate') && (!dateFromError.isBeforeEnd || !dateToError.isAfterStart)" class="errormsg">
+        Date from must be before date to.
+      </div>
+    </div>
   </section>
 
   <section id="fileTable">
@@ -61,13 +81,12 @@ import { BPagination } from 'bootstrap-vue/esm/components/pagination'
 import Datepicker from '../components/Datepicker.vue'
 
 Vue.component('datepicker', Datepicker)
-
 Vue.component('multiselect', Multiselect)
 Vue.component('b-table', BTable)
 Vue.component('b-pagination', BPagination)
 Vue.component('multiselect', Multiselect)
-Vue.use(VCalendar)
 
+Vue.use(VCalendar)
 
 @Component
 export default class Search extends Vue {
@@ -133,7 +152,6 @@ export default class Search extends Vue {
       })
   }
 
-
   get listLength() {
     return this.apiResponse['data'][0]['uuid'] ? this.apiResponse['data'].length : 0
   }
@@ -154,7 +172,6 @@ export default class Search extends Vue {
   setIcon(product: string) {
     if (product) return {'style': `background-image: url(${require(`../assets/icons/${product}.png`)})`}
   }
-
 
   @Watch('selectedSites')
   onSiteSelected () {
@@ -178,12 +195,10 @@ export default class Search extends Vue {
 </script>
 
 <style lang="sass">
-
   @import "../sass/variables.sass"
   @import "~bootstrap/dist/css/bootstrap.min.css"
   @import "~bootstrap-vue/dist/bootstrap-vue.min.css"
   @import "~vue-multiselect/dist/vue-multiselect.min.css"
-
 
   $filter-margin: 2em
 
@@ -313,7 +328,7 @@ export default class Search extends Vue {
     border: 1px solid #e8e8e8
     border-radius: 2px
 
-  div.errormsg, input.error, .error>input
+  div.errormsg, .error>input
     border-color: grey
     background: #f2d7d5
 
