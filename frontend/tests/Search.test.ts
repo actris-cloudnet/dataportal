@@ -113,6 +113,7 @@ describe('Search.vue', () => {
       const newValue = 'asdf'
       await changeInputAndNextTick('dateTo', newValue)
       await changeInputAndNextTick('dateFrom', newValue)
+      expect(wrapper.text()).toContain('Invalid input')
       expect(findElementById('dateTo').classes()).toContain('error')
       return expect(findElementById('dateFrom').classes()).toContain('error')
     })
@@ -123,23 +124,25 @@ describe('Search.vue', () => {
       await changeInputAndNextTick('dateFrom', newValue)
       await changeInputAndNextTick('dateFrom', '2018-09-01')
       await changeInputAndNextTick('dateTo', '2018-09-02')
+      expect(wrapper.text()).not.toContain('Invalid input')
       expect(findElementById('dateTo').classes()).not.toContain('error')
       return expect(findElementById('dateFrom').classes()).not.toContain('error')
-    })
-
-    it('should display error if dateFrom is later than dateTo', async () => {
-      await changeInputAndNextTick('dateFrom', '2018-09-02')
-      await changeInputAndNextTick('dateTo', '2018-09-01')
-      expect(findElementById('dateFrom').classes()).toContain('error')
-      return expect(findElementById('dateTo').classes()).toContain('error')
     })
 
     it('should display error if date is in the future', async () => {
       await changeInputAndNextTick('dateFrom', dateToISOString(tomorrow()))
       await changeInputAndNextTick('dateTo', dateToISOString(tomorrow()))
+      expect(wrapper.text()).toContain('Provided date is in the future.')
       expect(findElementById('dateFrom').classes()).toContain('error')
       return expect(findElementById('dateTo').classes()).toContain('error')
     })
 
+    it('should display error if dateFrom is later than dateTo', async () => {
+      await changeInputAndNextTick('dateFrom', '2018-09-02')
+      await changeInputAndNextTick('dateTo', '2018-09-01')
+      expect(wrapper.text()).toContain('Date from must be before date to.')
+      expect(findElementById('dateFrom').classes()).toContain('error')
+      return expect(findElementById('dateTo').classes()).toContain('error')
+    })
   })
 })
