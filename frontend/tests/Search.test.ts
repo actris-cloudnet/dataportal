@@ -38,38 +38,42 @@ const getMockedAxiosLastCallSecondArgument = () => {
   return secondArg
 }
 
+const dateFromDefault = '2020-01-01'
+const dateToDefault = new Date().toISOString().substring(0,10)
+
 describe('Search.vue', () => {
+  let wrapper: Wrapper<Vue>
+
+  const findInputByName = (inputName: string) => wrapper.find(`input[name="${inputName}"]`)
+  const findElementById = (id: string) => wrapper.find(`#${id}`)
+  const getInputValueByName = (inputName: string) => (wrapper.find(`input[name="${inputName}"]`).element as HTMLInputElement).value
+
+  const changeInputAndNextTick = async (inputName: string, newValue: string) => {
+    const input = findInputByName(inputName)
+    const inputElement = (input.element as HTMLInputElement)
+    inputElement.value = newValue
+    input.trigger('change')
+    await Vue.nextTick()
+  }
+
+  beforeAll(() => {
+    mocked(axios.get).mockImplementation(defaultAxiosMock)
+    wrapper = mount(Search)
+  })
+
+  it('should make exactly two api request on mount', () => {
+    // files and sites
+    expect(mocked(axios.get).mock.calls.length).toBe(2)
+  })
 
   describe('date selectors', () => {
-    let wrapper: Wrapper<Vue>
-
-    const findInputByName = (inputName: string) => wrapper.find(`input[name="${inputName}"]`)
-    const findElementById = (id: string) => wrapper.find(`#${id}`)
-
-    const changeInputAndNextTick = async (inputName: string, newValue: string) => {
-      const input = findInputByName(inputName)
-      const inputElement = (input.element as HTMLInputElement)
-      inputElement.value = newValue
-      input.trigger('change')
-      await Vue.nextTick()
-    }
-
-    beforeAll(() => {
-      mocked(axios.get).mockImplementation(defaultAxiosMock)
-      wrapper = mount(Search)
-    })
-
-    it('should make exactly two api request on mount', () => {
-      // files and sites
-      expect(mocked(axios.get).mock.calls.length).toBe(2)
-    })
 
     it('should have the first day of the current year as the default dateFrom', () => {
-      expect((wrapper.find('input[name="dateFrom"]').element as HTMLInputElement).value).toBe('2020-01-01')
+      expect(getInputValueByName('dateFrom')).toBe(dateFromDefault)
     })
 
     it('should have today as the default dateTo', () => {
-      expect((wrapper.find('input[name="dateTo"]').element as HTMLInputElement).value).toBe(new Date().toISOString().substring(0,10))
+      expect(getInputValueByName('dateTo')).toBe(dateToDefault)
     })
 
     it('should display data objects between dateFrom and dateTo by default', () => {
