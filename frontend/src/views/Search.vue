@@ -42,6 +42,8 @@
         Date from must be before date to.
       </div>
     </div>
+
+    <a @click="reset" id="reset">Reset filter</a>
   </section>
 
   <section id="fileTable">
@@ -174,6 +176,10 @@ export default class Search extends Vue {
     if (product) return {'style': `background-image: url(${require(`../assets/icons/${product}.png`)})`}
   }
 
+  reset() {
+    this.$router.go(0)
+  }
+
   @Watch('selectedSites')
   onSiteSelected () {
     const sites = this.selectedSites.length > 0 ? this.selectedSites.map((d: Site) => d.id) : this.allSiteIds
@@ -302,6 +308,7 @@ export default class Search extends Vue {
     column-gap: 1em
     row-gap: 0.5em
     max-width: 100%
+    margin-bottom: $filter-margin
 
   button.calendar
     width: 2em
@@ -355,4 +362,9 @@ export default class Search extends Vue {
   #noRes
     font-size: 90%
     color: gray
+
+  #reset
+    cursor: pointer
+    text-decoration: underline
+    color: #bcd2e2
 </style>
