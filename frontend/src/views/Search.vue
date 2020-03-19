@@ -339,11 +339,12 @@ export default class Search extends Vue {
     border-radius: 2px
 
   div.errormsg, .error>input
-    border-color: grey
-    background: #f2d7d5
+    border-color: #e4c7c7
+    background: #f9ebea
 
   div.errormsg
-    border: 1px solid grey
+    border-style: solid
+    border-width: 1px
     border-radius: 2px
     grid-column: 1 / 3
     padding: 0.5em
