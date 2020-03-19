@@ -126,7 +126,7 @@ case "$action" in
     mkdir public
     npx typeorm schema:drop
     npx tsc --build tsconfig.json
-    scripts/prepare-db.js
+    if [[ "$NODE_ENV" != 'production' ]]; then npx fixtures ./fixtures/Site.yml --connection=default --connection=test; fi
     cd ..
     ;;
 
