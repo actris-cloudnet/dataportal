@@ -197,9 +197,6 @@ export default class Search extends Vue {
 
 <style lang="sass">
   @import "../sass/variables.sass"
-  @import "~bootstrap/dist/css/bootstrap.min.css"
-  @import "~bootstrap-vue/dist/bootstrap-vue.min.css"
-  @import "~vue-multiselect/dist/vue-multiselect.min.css"
 
   $filter-margin: 2em
 
