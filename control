@@ -49,7 +49,7 @@ backend_postinstall () {
     createdb dataportal-test
     npm run build
     npx typeorm schema:sync
-    if [[ "$NODE_ENV" != 'production' ]]; then npx fixtures ./fixtures/Site.yml --connection=default --connection=test; fi
+    if [[ "$NODE_ENV" != 'production' ]]; then npx fixtures ./fixtures/Site.yml; fi
 }
 
 case "$action" in
@@ -126,7 +126,7 @@ case "$action" in
     mkdir public
     npx typeorm schema:drop
     npx tsc --build tsconfig.json
-    if [[ "$NODE_ENV" != 'production' ]]; then npx fixtures ./fixtures/Site.yml --connection=default --connection=test; fi
+    if [[ "$NODE_ENV" != 'production' ]]; then npx fixtures ./fixtures/Site.yml; fi
     cd ..
     ;;
 
