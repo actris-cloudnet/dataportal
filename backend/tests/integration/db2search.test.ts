@@ -47,16 +47,16 @@ describe('/files', () => {
   })
 
   it('should respond with an array of objects with dates between [ dateFrom, dateTo [, in descending order', async () => {
-    const payload = {params: {dateFrom: new Date('2018-07-09'), dateTo: new Date('2019-10-01')}}
+    const payload = {params: {dateFrom: new Date('2018-06-09'), dateTo: new Date('2019-09-01')}}
     const res = await axios.get(url, payload)
-    return expect(res.data.map((d: any) => d.measurementDate)).toEqual(['2019-08-15', '2018-12-15', '2018-07-09'])
+    return expect(res.data.map((d: any) => d.measurementDate)).toEqual(['2019-07-15', '2018-11-15', '2018-06-09'])
   })
 
   it('should respond with correct objects if dateFrom, dateTo and location are specified', async () => {
-    const payload = {params: {dateFrom: new Date('2018-07-09'), dateTo: new Date('2019-10-01'), location: 'macehead'}}
+    const payload = {params: {dateFrom: new Date('2018-06-09'), dateTo: new Date('2019-09-01'), location: 'macehead'}}
     const res = await axios.get(url, payload)
     expect(res.data.map((d: any) => d.site.id)).toEqual(['macehead', 'macehead'])
-    return expect(res.data.map((d: any) => d.measurementDate)).toEqual(['2018-12-15', '2018-07-09'])
+    return expect(res.data.map((d: any) => d.measurementDate)).toEqual(['2018-11-15', '2018-06-09'])
   })
 
   it('should respond with 400 on malformed dateFrom', () => {

@@ -35,7 +35,7 @@ describe('file landing page', () => {
   it('should contain correct information', async () => {
     const targetArray = [
       '15506ea8-d357-4c7b-af8c-95dfcc34fc7d',
-      '2019-08-23',
+      '2019-07-23',
       'Classification',
       '1.0.4',
       '20190723_bucharest_classification.nc',

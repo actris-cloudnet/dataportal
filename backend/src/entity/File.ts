@@ -92,7 +92,7 @@ export class File {
 
       this.measurementDate = new Date(
         parseInt(obj.year),
-        parseInt(obj.month),
+        parseInt(obj.month) - 1,
         parseInt(obj.day)
       )
       this.title = obj.title

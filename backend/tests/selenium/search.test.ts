@@ -29,14 +29,14 @@ describe('search page', () => {
     await driver.actions().sendKeys('bucharest' + Key.ENTER).perform()
     const dateFrom = await awaitAndFind(By.name('dateFrom'))
     await driver.actions().sendKeys(Key.TAB).perform()
-    await dateFrom.sendKeys('2019-08-23')
+    await dateFrom.sendKeys('2019-07-23')
     await driver.actions().sendKeys(Key.TAB).perform()
   })
 
   it('should show correct information when searching for an inserted file', async () => {
     const content = await (await awaitAndFind(By.tagName('html'))).getText()
     expect(content).toContain('Found 1 results')
-    expect(content).toContain('2019-08-23')
+    expect(content).toContain('2019-07-23')
     expect(content).toContain('Classification file from Bucharest')
   })
 

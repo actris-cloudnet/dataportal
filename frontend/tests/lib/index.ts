@@ -19,7 +19,7 @@ export const allFiles = [
   {
     'uuid': '38092c00-161d-4ca2-a29d-628cf8e960f6',
     'title': 'Radar file from Mace-Head',
-    'measurementDate': '2018-12-15',
+    'measurementDate': '2018-11-15',
     'history': '2019-09-14 22:56:17 - radar file created',
     'publicity': 'public',
     'product': 'radar',
@@ -43,7 +43,7 @@ export const allFiles = [
   {
     'uuid': 'bde7a35f-03aa-4bff-acfb-b4974ea9f217',
     'title': 'Classification file from Mace-Head',
-    'measurementDate': '2018-07-09',
+    'measurementDate': '2018-06-09',
     'history': '2019-09-14 14:02:22 - classification file created\n2019-09-14 14:02:07 - categorize file created\n2019-09-14 14:01:28 - radar file created\n2019-09-14 14:01:47 - ceilometer file created',
     'publicity': 'public',
     'product': 'classification',
@@ -91,7 +91,7 @@ export const allFiles = [
   {
     'uuid': 'd21d6a9b-6804-4465-a026-74ec429fe17d',
     'title': 'Radar file from Hyytiala',
-    'measurementDate': '2019-10-01',
+    'measurementDate': '2019-09-01',
     'history': '2019-09-30 10:56:08 - radar file created',
     'publicity': 'public',
     'product': 'radar',
@@ -115,7 +115,7 @@ export const allFiles = [
   {
     'uuid': '6cb32746-faf0-4057-9076-ed2e698dcf36',
     'title': 'Categorize file from Bucharest',
-    'measurementDate': '2019-08-15',
+    'measurementDate': '2019-07-15',
     'history': '2019-09-16 11:10:33 - categorize file created\n2019-09-16 11:10:10 - radar file created\nLidar backscatter derived from raw values in arbitrary units: calibrated by user Ewan O\'Connor <ewan.oconnor@fmi.fi> on 17-Jul-2019.',
     'publicity': 'public',
     'product': 'categorize',
