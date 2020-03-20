@@ -8,6 +8,8 @@ import { publicDir, clearDir } from '../lib'
 const bucharestXml = 'tests/data/20190723_bucharest_classification.xml'
 const bucharestXmlMissing = 'tests/data/20190723_bucharest_classification_missing_fields.xml'
 const bucharestXmlInvalidLocation = 'tests/data/20190723_bucharest_classification_invalid_location.xml'
+const uuid = '15506ea8d3574c7baf8c95dfcc34fc7d'
+
 let conn: Connection
 let repo: Repository<File>
 
@@ -52,7 +54,7 @@ test('errors on invalid location', async () => {
 })
 
 test('does not overwrite existing files', async () => {
-  await repo.delete('15506ea8d3574c7baf8c95dfcc34fc7d') // Delete corresponding db row
+  await repo.delete(uuid) // Delete corresponding db row
   const file = join(publicDir, '20190723_bucharest_classification.nc')
   closeSync(openSync(file, 'w'))
   const out = await readXmlIn(bucharestXml, false)
@@ -67,6 +69,8 @@ describe('after reading a valid XML', () => {
     rowN = (await repo.find()).length
     return readXmlIn(bucharestXml, true)
   })
+
+  afterAll(() => repo.delete(uuid))
 
   test('inserts a row to db', async () => {
     return expect(repo.find()).resolves.toHaveLength(rowN + 1)
