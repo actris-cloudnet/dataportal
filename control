@@ -155,11 +155,11 @@ case "$action" in
     ;;
 
     build)
-    echo "Building backend..."
-    cd backend
-    npm run build
     echo "Building frontend..."
-    cd ../frontend
+    cd frontend
+    npm run build
+    echo "Building backend..."
+    cd ../backend
     npm run build
     cd ..
     ;;
