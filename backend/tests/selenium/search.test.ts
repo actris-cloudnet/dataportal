@@ -75,26 +75,51 @@ describe('search page', () => {
 
   it('should forward to correct landing page after sorting and clicking certain row', async () => {
     const inputs = await initSearch()
-    const sortIcon = await awaitAndFind(By.className('b-table-sort-icon-left'))
     await inputs['dateFrom'].sendKeys('2010')
     await driver.actions().sendKeys(Key.TAB).perform()
-    await sortIcon.click()
+    await (await awaitAndFind(By.className('b-table-sort-icon-left'))).click()
     await driver.actions().sendKeys(Key.TAB).perform()
     driver.actions().click()
-    const searchResult =  await awaitAndFind(By.xpath('//*[contains(text(), "2019-07-25")]'))
-    await searchResult.click()
+    await (await awaitAndFind(By.xpath('//*[contains(text(), "2019-07-25")]'))).click()
     expect(await driver.getCurrentUrl()).toContain('20c03d8f-c9c5-4cb1-8bf8-48d275d621ff')
     expect(await awaitAndFind(By.id('landing'))).toBeTruthy()
   })
 
-  it ('should reset the search after pressing the reset button', async () => {
+  it('should reset the search after clicking the reset button', async () => {
     const inputs = await initSearch()
     await inputs['dateFrom'].sendKeys('2010')
     await driver.actions().sendKeys(Key.TAB).perform()
-    const resetButton = await awaitAndFind(By.id('reset'))
-    await resetButton.click()
+    await (await awaitAndFind(By.id('reset'))).click()
     const content = await getContent()
     expect(content).toContain('No results')
+  })
+
+  it('should work when clicking the calendar', async () => {
+    await initSearch()
+    driver.findElement(By.xpath('//html')).click()
+    await (await awaitAndFind(By.className('calendar'))).click()
+    await (await awaitAndFind(By.className('vc-title'))).click()
+    await (await awaitAndFind(By.className('vc-nav-title'))).click()
+    await (await awaitAndFind(By.className('vc-w-12'))).click()
+    await (await awaitAndFind(By.className('vc-w-12'))).click()
+    await (await awaitAndFind(By.className('day-1'))).click()
+    const content = await getContent()
+    expect(content).toContain('Found 5 results')
+  })
+
+  it('correct calendar input should override incorrect keyboard input', async () => {
+    const inputs = await initSearch()
+    await inputs['dateFrom'].sendKeys('2023')
+    await driver.actions().sendKeys(Key.TAB).perform()
+    driver.findElement(By.xpath('//html')).click()
+    await (await awaitAndFind(By.className('calendar'))).click()
+    await (await awaitAndFind(By.className('vc-title'))).click()
+    await (await awaitAndFind(By.className('vc-nav-title'))).click()
+    await (await awaitAndFind(By.className('vc-w-12'))).click()
+    await (await awaitAndFind(By.className('vc-w-12'))).click()
+    await (await awaitAndFind(By.className('day-1'))).click()
+    const content = await getContent()
+    expect(content).toContain('Found 5 results')
   })
 
 })
