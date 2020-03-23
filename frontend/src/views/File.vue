@@ -2,6 +2,7 @@
 @import "../sass/variables.sass"
 
 main#landing
+
   >header
     margin-bottom: 3em
     display: flex
@@ -17,9 +18,11 @@ main#landing
       font-style: italic
     span::first-letter
       text-transform: capitalize
+
   div.actions
     margin-top: 5px
     margin-bottom: 5px
+
   .download
     appearance: button
     text-decoration: none
@@ -44,11 +47,13 @@ main#landing
       border-style: inset
       background-color: $blue-sapphire
       border-color: $blue-sapphire
+
   main
     margin: -1em
     display: flex
     justify-content: center
     flex-wrap: wrap
+
     > section
       flex-grow: 0.5
       border: 1px solid grey
@@ -57,12 +62,15 @@ main#landing
       margin: 1em
       min-width: 20em
       word-wrap: anywhere
+
       > *
         padding: 10px
+
       > header
         background: $blue-dust
         border-bottom: 1px solid grey
         font-size: 1.1em
+
       dl
         margin-top: 5px
         margin-bottom: 5px
@@ -71,18 +79,21 @@ main#landing
         grid-template-columns: auto 4fr
         column-gap: 0.5em
         row-gap: 0.5em
+
       dt
         text-align: left
         font-weight: 600
         max-width: 11em
       dt::after
         content: ": "
+
       dd
         display: flex
         flex-direction: column
         justify-content: center
         text-align: left
         margin: 0
+
     section#history > section
       white-space: pre-wrap
       font-family: monospace

@@ -25,6 +25,7 @@
 
 body
     margin: 0
+
 #app > main
     max-width: 100em
     margin-left: auto
@@ -33,6 +34,7 @@ body
     padding-left: 5em
     padding-right: 5em
     font-family: $content-font
+
 h1, h2, h3, h4, h5, h6
   line-height: 1
   font-weight: normal
