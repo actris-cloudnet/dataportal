@@ -14,7 +14,7 @@ items:
     latitude: 53.326
     longitude: -9.9
     altitude: 16
-    gaw: Unknown
+    gaw: MHD
     country: Ireland
   site3:
     id: hyytiala
