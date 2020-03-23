@@ -1,3 +1,171 @@
+<style lang="sass">
+  @import "../sass/variables.sass"
+
+  $filter-margin: 2em
+
+  main#search
+    display: flex
+    justify-content: center
+    flex-wrap: wrap
+
+  section#fileTable
+    padding-left: 30px
+    padding-right: 30px
+    flex-grow: 0.2
+    padding-bottom: 100px
+    text-align: left
+
+  #tableContent
+    margin-top: 10px
+
+  .listTitle
+    color: gray
+    font-size: 85%
+    margin-bottom: 5px
+    display: block
+
+  .filterOptions
+    font-size: 1.2em
+    margin-bottom: $filter-margin
+
+  #pagi
+    margin-top: 30px
+    .page-item.active .page-link
+      background-color: $steel-warrior
+      border-color: $steel-warrior
+    .page-link:hover
+      background-color: $blue-dust
+    .page-link
+      color: $blue-sapphire
+
+  .table-striped
+    th:nth-child(1)
+      width: 50px
+      text-align: center
+    th:nth-child(2)
+      width: 400px
+    th:nth-child(3)
+      width: 110px
+    td
+      padding: 9px
+    tr:nth-child(2n+1) > td
+      background-color: $blue-dust
+  .table-striped[aria-busy="false"]
+    tr:hover td
+      cursor: pointer
+      background-color: #e4eff7
+
+  .icon
+    background-repeat: no-repeat
+    background-position: center
+    background-size: 20px
+    font-size: 0
+
+  section#sideBar
+    margin-right: 100px
+    width: 300px
+
+  .multiselect
+    margin-bottom: $filter-margin
+
+  .multiselect__input
+    padding: 2px
+    padding-left: 0px
+    &::placeholder
+      font-size: 88%
+      color: gray
+
+  .multiselect__tags-wrap
+    span, span i:hover
+      color: black
+      background-color: $steel-warrior
+
+  .multiselect__element
+    font-size: 90%
+    color: black
+    .multiselect__option--highlight
+      color: black
+      background-color: $steel-warrior
+      span
+        background-color: $steel-warrior
+    .multiselect__option--selected
+      background-color: white
+      pointer-events: none
+      span
+        background-color: white
+        font-weight: normal
+        color: #bbbbbb
+
+  .multiselect__tag-icon:after
+    color: gray
+
+  div.date
+    display: grid
+    grid-template-columns: 1fr 1fr
+    column-gap: 1em
+    row-gap: 0.5em
+    max-width: 100%
+    margin-bottom: $filter-margin
+
+  button.calendar
+    width: 2em
+    height: 2em
+    background-color: $blue-dust
+    color: white
+    border-style: solid
+    border-width: 1px
+    border-color: $steel-warrior
+    border-radius: 2px
+    font-size: 1em
+    cursor: pointer
+    font-family: $content-font
+    &:hover
+      background-color: $steel-warrior
+    &:active
+      background-color: $steel-warrior
+      border-color: $blue-dust
+    &>svg
+      color: black
+
+  .dateform
+    overflow: hidden
+    white-space: nowrap
+
+  input.date
+    box-sizing: content-box
+    height: 2em
+    width: 7em
+    font-size: 0.9em
+    border: 1px solid #e8e8e8
+    border-radius: 2px
+
+  div.errormsg, .error>input
+    border-color: #e4c7c7
+    background: #f9ebea
+
+  div.errormsg
+    border-style: solid
+    border-width: 1px
+    border-radius: 2px
+    grid-column: 1 / 3
+    padding: 0.5em
+
+  label
+    font-size: 0.9em
+    margin-bottom: 0
+  label::after
+    content: ':'
+
+  #noRes
+    font-size: 90%
+    color: gray
+
+  #reset
+    cursor: pointer
+    text-decoration: underline
+    color: #bcd2e2
+</style>
+
 <template>
 <main id="search">
   <section id="sideBar">
@@ -200,171 +368,3 @@ export default class Search extends Vue {
 
 }
 </script>
-
-<style lang="sass">
-  @import "../sass/variables.sass"
-
-  $filter-margin: 2em
-
-  main#search
-    display: flex
-    justify-content: center
-    flex-wrap: wrap
-
-  section#fileTable
-    padding-left: 30px
-    padding-right: 30px
-    flex-grow: 0.2
-    padding-bottom: 100px
-    text-align: left
-
-  #tableContent
-    margin-top: 10px
-
-  .listTitle
-    color: gray
-    font-size: 85%
-    margin-bottom: 5px
-    display: block
-
-  .filterOptions
-    font-size: 1.2em
-    margin-bottom: $filter-margin
-
-  #pagi
-    margin-top: 30px
-    .page-item.active .page-link
-      background-color: $steel-warrior
-      border-color: $steel-warrior
-    .page-link:hover
-      background-color: $blue-dust
-    .page-link
-      color: $blue-sapphire
-
-  .table-striped
-    th:nth-child(1)
-      width: 50px
-      text-align: center
-    th:nth-child(2)
-      width: 400px
-    th:nth-child(3)
-      width: 110px
-    td
-      padding: 9px
-    tr:nth-child(2n+1) > td
-      background-color: $blue-dust
-  .table-striped[aria-busy="false"]
-    tr:hover td
-      cursor: pointer
-      background-color: #e4eff7
-
-  .icon
-    background-repeat: no-repeat
-    background-position: center
-    background-size: 20px
-    font-size: 0
-
-  section#sideBar
-    margin-right: 100px
-    width: 300px
-
-  .multiselect
-    margin-bottom: $filter-margin
-
-  .multiselect__input
-    padding: 2px
-    padding-left: 0px
-    &::placeholder
-      font-size: 88%
-      color: gray
-
-  .multiselect__tags-wrap
-    span, span i:hover
-      color: black
-      background-color: $steel-warrior
-
-  .multiselect__element
-    font-size: 90%
-    color: black
-    .multiselect__option--highlight
-      color: black
-      background-color: $steel-warrior
-      span
-        background-color: $steel-warrior
-    .multiselect__option--selected
-      background-color: white
-      pointer-events: none
-      span
-        background-color: white
-        font-weight: normal
-        color: #bbbbbb
-
-  .multiselect__tag-icon:after
-    color: gray
-
-  div.date
-    display: grid
-    grid-template-columns: 1fr 1fr
-    column-gap: 1em
-    row-gap: 0.5em
-    max-width: 100%
-    margin-bottom: $filter-margin
-
-  button.calendar
-    width: 2em
-    height: 2em
-    background-color: $blue-dust
-    color: white
-    border-style: solid
-    border-width: 1px
-    border-color: $steel-warrior
-    border-radius: 2px
-    font-size: 1em
-    cursor: pointer
-    font-family: $content-font
-    &:hover
-      background-color: $steel-warrior
-    &:active
-      background-color: $steel-warrior
-      border-color: $blue-dust
-    &>svg
-      color: black
-
-  .dateform
-    overflow: hidden
-    white-space: nowrap
-
-  input.date
-    box-sizing: content-box
-    height: 2em
-    width: 7em
-    font-size: 0.9em
-    border: 1px solid #e8e8e8
-    border-radius: 2px
-
-  div.errormsg, .error>input
-    border-color: #e4c7c7
-    background: #f9ebea
-
-  div.errormsg
-    border-style: solid
-    border-width: 1px
-    border-radius: 2px
-    grid-column: 1 / 3
-    padding: 0.5em
-
-  label
-    font-size: 0.9em
-    margin-bottom: 0
-  label::after
-    content: ':'
-
-  #noRes
-    font-size: 90%
-    color: gray
-
-  #reset
-    cursor: pointer
-    text-decoration: underline
-    color: #bcd2e2
-</style>
