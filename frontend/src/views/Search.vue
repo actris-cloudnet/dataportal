@@ -293,14 +293,19 @@ export default class Search extends Vue {
     const res = await axios.get(`${this.apiUrl}sites/`)
     this.siteOptions = res.data
     this.allSiteIds = res.data.map((d: Site) => d.id)
-    this.fetchData({params: {location: this.allSiteIds, dateFrom: this.dateFrom, dateTo: this.dateTo}})
+    this.fetchData()
   }
 
-  fetchData(payload: AxiosRequestConfig) {
+  get payload() {
+    const sites = this.selectedSites.length > 0 ? this.selectedSites.map((d: Site) => d.id) : this.allSiteIds
+    return {params: {location: sites, dateFrom: this.dateFrom, dateTo: this.dateTo}}
+  }
+
+  fetchData() {
     this.currentPage = 1
     this.isBusy = true
     axios
-      .get(`${this.apiUrl}files/`, payload)
+      .get(`${this.apiUrl}files/`, this.payload)
       .then(res => {
         this.apiResponse = res
         this.isBusy = false
@@ -338,20 +343,19 @@ export default class Search extends Vue {
 
   @Watch('selectedSites')
   onSiteSelected () {
-    const sites = this.selectedSites.length > 0 ? this.selectedSites.map((d: Site) => d.id) : this.allSiteIds
-    this.fetchData({params: {location: sites, dateFrom: this.dateFrom, dateTo: this.dateTo}})
+    this.fetchData()
   }
 
   @Watch('dateFrom')
   onDateFromChanged () {
     if(!this.renderComplete) return
-    this.fetchData({params: {location: this.selectedSites.map((d: Site) => d.id), dateFrom: this.dateFrom, dateTo: this.dateTo}})
+    this.fetchData()
   }
 
   @Watch('dateTo')
   onDateToChanged () {
     if(!this.renderComplete) return
-    this.fetchData({params: {location: this.selectedSites.map((d: Site) => d.id), dateFrom: this.dateFrom, dateTo: this.dateTo}})
+    this.fetchData()
   }
 
 }
