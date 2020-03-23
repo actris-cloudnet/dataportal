@@ -231,7 +231,7 @@
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import VCalendar from 'v-calendar'
-import axios, { AxiosRequestConfig } from 'axios'
+import axios from 'axios'
 import Multiselect from 'vue-multiselect'
 import { Site } from '../../../backend/src/entity/Site'
 import { File } from '../../../backend/src/entity/File'
