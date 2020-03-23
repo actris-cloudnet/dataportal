@@ -42,6 +42,7 @@ waitport () {
         sleep $interval
         i=$((i+$interval))
     done
+    exit 0
 }
 
 backend_postinstall () {
@@ -79,6 +80,7 @@ case "$action" in
     fi
 
     waitport $backend_port
+    exit $?
     ;;
 
     stop)
