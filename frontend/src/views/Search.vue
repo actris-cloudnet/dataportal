@@ -127,28 +127,16 @@
     &>svg
       color: black
 
-  .dateform
-    overflow: hidden
-    white-space: nowrap
-
-  input.date
-    box-sizing: content-box
-    height: 2em
-    width: 7em
-    font-size: 0.9em
-    border: 1px solid #e8e8e8
-    border-radius: 2px
-
-  div.errormsg, .error>input
-    border-color: #e4c7c7
-    background: #f9ebea
-
   div.errormsg
     border-style: solid
     border-width: 1px
     border-radius: 2px
     grid-column: 1 / 3
     padding: 0.5em
+
+  div.errormsg, .error>input
+    border-color: #e4c7c7
+    background: #f9ebea
 
   label
     font-size: 0.9em

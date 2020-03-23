@@ -1,3 +1,17 @@
+<style scoped lang="sass">
+  .dateform
+    overflow: hidden
+    white-space: nowrap
+
+  input.date
+    box-sizing: content-box
+    height: 2em
+    width: 7em
+    font-size: 0.9em
+    border: 1px solid #e8e8e8
+    border-radius: 2px
+</style>
+
 <template>
   <div class="dateform" :id="name" :class="{ 'error': $v.dateString.$error }">
     <label :for="name">{{ label }}</label><br>
