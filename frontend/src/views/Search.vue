@@ -32,13 +32,13 @@
         label="Date to"
         v-on:error="dateToError = $event"
       ></datepicker>
-      <div v-if="!isTrueOnBothDateFields('isValidDate')" class="errormsg">
+      <div v-if="!isTrueOnBothDateFields('isValidDateString')" class="errormsg">
         Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.
       </div>
-      <div v-if="isTrueOnBothDateFields('isValidDate') && !isTrueOnBothDateFields('isNotInFuture')" class="errormsg">
+      <div v-if="isTrueOnBothDateFields('isValidDateString') && !isTrueOnBothDateFields('isNotInFuture')" class="errormsg">
         Provided date is in the future.
       </div>
-      <div v-if="isTrueOnBothDateFields('isValidDate') && (!dateFromError.isBeforeEnd || !dateToError.isAfterStart)" class="errormsg">
+      <div v-if="isTrueOnBothDateFields('isValidDateString') && (!dateFromError.isBeforeEnd || !dateToError.isAfterStart)" class="errormsg">
         Date from must be before date to.
       </div>
     </div>

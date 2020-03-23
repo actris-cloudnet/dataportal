@@ -40,7 +40,8 @@ import { Prop } from 'vue-property-decorator'
 const dateToUTC = (date: Date) => new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
 
 // date validation
-const isValidDate = (obj: string) => !isNaN(new Date(obj).getDate())
+const isValidDate = (obj: Date) => !isNaN(obj.getDate())
+const isValidDateString = (obj: string) => isValidDate(new Date(obj))
 const isNotInFuture = (obj: string) => new Date(obj) < dateToUTC(new Date())
 const isBeforeEnd = (obj: string, parentVm: Vue) => new Date(obj) < helpers.ref('end', validationMixin, parentVm)
 const isAfterStart = (obj: string, parentVm: Vue) => new Date(obj) > helpers.ref('start', validationMixin, parentVm)
@@ -57,11 +58,11 @@ export default class Datepicker extends mixins(validationMixin, Vue) {
     return utcTime.toISOString().substring(0,10)
   }
 
-  @Validate({ isValidDate, isNotInFuture, isBeforeEnd, isAfterStart })
+  @Validate({ isValidDateString, isNotInFuture, isBeforeEnd, isAfterStart })
   dateString = this.$attrs.value
 
   set value(date: Date) {
-    if(this.$v.$anyError) return
+    if(!isValidDate(date)) return
     this.dateString = this.dateToString(date)
     this.$emit('input', date)
     this.$emit('error', this.$v.dateString)
