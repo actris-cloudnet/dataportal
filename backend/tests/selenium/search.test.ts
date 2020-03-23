@@ -51,6 +51,10 @@ describe('search page', () => {
       let fname = `201907${i}_bucharest_classification.nc`
       fs.copyFileSync(join('tests/data/', fname), join(inboxDir, fname))
     }
+    for (let i = 23; i <= 24; i++) {
+      let fname = `201907${i}_mace-head_iwc-Z-T-method.nc`
+      fs.copyFileSync(join('tests/data/', fname), join(inboxDir, fname))
+    }
     await wait(3000)
   })
 
@@ -116,5 +120,17 @@ describe('search page', () => {
     const content = await getContent()
     expect(content).toContain('Found 5 results')
   })
+
+  it('should work with different site selectors', async () => {
+    await initSearch()
+    await sendInput('dateFrom', '1980')
+    await clickClass('multiselect')
+    await driver.actions().sendKeys(`mace${Key.ENTER}`).perform()
+    const content = await getContent()
+    expect(content).toContain('Found 7 results')
+    expect(content).toContain('Classification file from Bucharest')
+    expect(content).toContain('Ice water content file from Mace-Head')
+  })
+
 
 })
