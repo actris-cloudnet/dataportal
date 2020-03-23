@@ -185,7 +185,7 @@ export default class File extends Vue {
   fileserverUrl = process.env.VUE_APP_FILESERVERURL
   apiUrl = process.env.VUE_APP_BACKENDURL
 
-  created () {
+  created() {
     axios
       .get(`${this.apiUrl}file/${this.uuid}`)
       .then(response => {
@@ -197,11 +197,11 @@ export default class File extends Vue {
       })
   }
 
-  humanReadableDate (date: string) {
+  humanReadableDate(date: string) {
     return new Date(date).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })
   }
 
-  humanReadableSize (size: number) {
+  humanReadableSize(size: number) {
     const i = Math.floor( Math.log(size) / Math.log(1024) )
     return `${( size / Math.pow(1024, i) ).toFixed(1)  } ${  ['B', 'kB', 'MB', 'GB', 'TB'][i]}`
   }

@@ -25,6 +25,12 @@ module.exports = {
     }],
     'prefer-template': 'error',
     'no-trailing-spaces': 2,
-    'eol-last': ['error', 'always']
+    'eol-last': ['error', 'always'],
+    'space-before-function-paren': ['error', {
+       'anonymous': 'never',
+       'named': 'never',
+       'asyncArrow': 'always'
+    }],
+    'keyword-spacing': 'error'
   }
 }

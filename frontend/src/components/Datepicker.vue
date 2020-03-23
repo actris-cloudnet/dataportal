@@ -76,7 +76,7 @@ export default class Datepicker extends mixins(validationMixin, Vue) {
   dateString = this.$attrs.value
 
   set value(date: Date) {
-    if(!isValidDate(date)) return
+    if (!isValidDate(date)) return
     this.dateString = this.dateToString(date)
     this.$emit('input', date)
     this.$emit('error', this.$v.dateString)

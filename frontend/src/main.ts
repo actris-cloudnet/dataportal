@@ -13,7 +13,7 @@ new Vue({
   router,
   render: h => h(App),
   watch: {
-    '$route' (to, _from) {
+    '$route'(to, _from) {
       document.title = to.meta.title || 'Cloudnet Data Portal'
     }
   }

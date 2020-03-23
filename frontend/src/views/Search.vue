@@ -342,19 +342,19 @@ export default class Search extends Vue {
   }
 
   @Watch('selectedSites')
-  onSiteSelected () {
+  onSiteSelected() {
     this.fetchData()
   }
 
   @Watch('dateFrom')
-  onDateFromChanged () {
-    if(!this.renderComplete) return
+  onDateFromChanged() {
+    if (!this.renderComplete) return
     this.fetchData()
   }
 
   @Watch('dateTo')
-  onDateToChanged () {
-    if(!this.renderComplete) return
+  onDateToChanged() {
+    if (!this.renderComplete) return
     this.fetchData()
   }
 
