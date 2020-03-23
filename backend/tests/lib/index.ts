@@ -29,6 +29,7 @@ export const prepareSelenium = async () => {
     .build()
 }
 
+export const wait = async (ms: number) => new Promise((resolve, _) => setTimeout(resolve, ms))
 
 export const inboxDir = 'tests/data/inbox'
 export const publicDir = 'tests/data/public'

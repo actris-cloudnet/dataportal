@@ -1,7 +1,7 @@
 import { By, until, WebDriver, Key } from 'selenium-webdriver'
 import * as fs from 'fs'
 import { join } from 'path'
-import { inboxDir, prepareSelenium } from '../lib'
+import { inboxDir, prepareSelenium, wait } from '../lib'
 
 let driver: WebDriver
 
@@ -20,7 +20,7 @@ describe('search page', () => {
       let fname = `201907${i}_bucharest_classification.nc`
       fs.copyFileSync(join('tests/data/', fname), join(inboxDir, fname))
     }
-    await new Promise((resolve, _) => setTimeout(resolve, 3000))
+    await wait(3000)
   })
 
   it('should initially contain no files', async () => {
@@ -66,7 +66,7 @@ describe('search page', () => {
     await initSearch()
     await sendInput('dateFrom', '2010')
     await clickId('reset')
-    await new Promise((resolve, _) => setTimeout(resolve, 1000))
+    await wait(1000)
     const content = await getContent()
     expect(content).toContain('No results')
   })

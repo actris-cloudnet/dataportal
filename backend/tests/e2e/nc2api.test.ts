@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import axios from 'axios'
-import { clearDir, inboxDir, publicDir, clearRepo, backendUrl, fileServerUrl } from '../lib'
+import { clearDir, inboxDir, publicDir, clearRepo, backendUrl, fileServerUrl, wait } from '../lib'
 
 beforeAll(async () => {
   clearDir(inboxDir)
@@ -39,7 +39,7 @@ const expectedJson = {
 describe('after moving a valid NC file to inbox', () => {
   beforeAll(async () => {
     fs.copyFileSync('tests/data/20190723_bucharest_classification.nc', path.join(inboxDir, '20190723_bucharest_classification.nc'))
-    return new Promise((resolve, _) => setTimeout(resolve, 4000))
+    return wait(4000)
   })
 
   it('should respond with a corresponding metadata JSON', async () => {
