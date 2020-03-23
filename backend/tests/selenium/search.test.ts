@@ -7,6 +7,37 @@ let driver: WebDriver
 
 jest.setTimeout(30000)
 
+const getContent = async () => await (await findElement(By.tagName('html'))).getText()
+const clickTab = async () => await driver.actions().sendKeys(Key.TAB).perform()
+const clickId = async (key: string) => await (await findElement(By.id(key))).click()
+const clickClass = async (key: string) => await (await findElement(By.className(key))).click()
+const clickXpath = async (key: string) => await (await findElement(By.xpath(key))).click()
+
+async function initSearch() {
+  await driver.get('http://localhost:8000/search')
+  await clickClass('multiselect')
+  await driver.actions().sendKeys(`bucharest${Key.ENTER}`).perform()
+}
+
+async function setDateFromPast() {
+  await clickXpath('//html')
+  const sequence = ['calendar', 'vc-title', 'vc-nav-title', 'vc-w-12', 'vc-w-12', 'day-1']
+  for (let i=0; i < sequence.length; i++) {
+    await clickClass(sequence[i])
+  }
+}
+
+async function sendInput(key: string, input: string) {
+  const element = await findElement(By.name(key))
+  await element.sendKeys(input)
+  await clickTab()
+}
+
+async function findElement(by: By) {
+  await driver.wait(until.elementLocated(by))
+  return driver.findElement(by)
+}
+
 beforeAll(async () => driver = await prepareSelenium())
 
 afterAll(async () => {
@@ -87,38 +118,3 @@ describe('search page', () => {
   })
 
 })
-
-async function initSearch() {
-  await driver.get('http://localhost:8000/search')
-  await clickClass('multiselect')
-  await driver.actions().sendKeys(`bucharest${Key.ENTER}`).perform()
-}
-
-async function setDateFromPast() {
-  await clickXpath('//html')
-  const sequence = ['calendar', 'vc-title', 'vc-nav-title', 'vc-w-12', 'vc-w-12', 'day-1']
-  for (let i=0; i < sequence.length; i++) {
-    await clickClass(sequence[i])
-  }
-}
-
-async function sendInput(key: string, input: string) {
-  const element = await findElement(By.name(key))
-  await element.sendKeys(input)
-  await clickTab()
-}
-
-async function findElement(by: By) {
-  await driver.wait(until.elementLocated(by))
-  return driver.findElement(by)
-}
-
-const getContent = async () => await (await findElement(By.tagName('html'))).getText()
-
-const clickTab = async () => await driver.actions().sendKeys(Key.TAB).perform()
-
-const clickId = async (key: string) => await (await findElement(By.id(key))).click()
-
-const clickClass = async (key: string) => await (await findElement(By.className(key))).click()
-
-const clickXpath = async (key: string) => await (await findElement(By.xpath(key))).click()
