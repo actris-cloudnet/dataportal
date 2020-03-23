@@ -66,6 +66,7 @@ describe('search page', () => {
     await initSearch()
     await sendInput('dateFrom', '2010')
     await clickId('reset')
+    await new Promise((resolve, _) => setTimeout(resolve, 1000))
     const content = await getContent()
     expect(content).toContain('No results')
   })
