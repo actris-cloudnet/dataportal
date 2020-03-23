@@ -7,10 +7,19 @@ const routes = [
   {
     path: '/file/:uuid',
     name: 'File',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "file" */ '../views/File.vue'),
+    meta: {
+      title: 'Cloudnet Data Object'
+    },
+    component: () => import('../views/File.vue'),
+    props: true,
+  },
+  {
+    path: '/search',
+    name: 'Search',
+    meta: {
+      title: 'Cloudnet Search'
+    },
+    component: () => import('../views/Search.vue'),
     props: true
   }
 ]

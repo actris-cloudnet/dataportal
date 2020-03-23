@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import axios from 'axios'
-import { clearDir, inboxDir, publicDir, clearRepo } from '../lib'
+import { clearDir, inboxDir, publicDir, clearRepo, backendUrl, fileServerUrl, wait } from '../lib'
 
 beforeAll(async () => {
   clearDir(inboxDir)
@@ -15,7 +15,7 @@ afterAll(async () => {
 const expectedJson = {
   'uuid': '15506ea8-d357-4c7b-af8c-95dfcc34fc7d',
   'title': 'Classification file from Bucharest',
-  'measurementDate': '2019-08-23',
+  'measurementDate': '2019-07-23',
   'history': '2019-09-16 11:21:13 - classification file created\n2019-09-16 11:21:02 - categorize file created\n2019-09-16 11:20:30 - radar file created\nLidar backscatter derived from raw values in arbitrary units: calibrated by user Ewan O\'Connor <ewan.oconnor@fmi.fi> on 25-Jul-2019.',
   'publicity': 'public',
   'product': 'classification',
@@ -30,7 +30,7 @@ const expectedJson = {
     'humanReadableName': 'Bucharest',
     'latitude': 44.348,
     'longitude': 26.029,
-    'elevation': 93,
+    'altitude': 93,
     'gaw': 'Unknown',
     'country': 'Romania'
   }
@@ -39,18 +39,18 @@ const expectedJson = {
 describe('after moving a valid NC file to inbox', () => {
   beforeAll(async () => {
     fs.copyFileSync('tests/data/20190723_bucharest_classification.nc', path.join(inboxDir, '20190723_bucharest_classification.nc'))
-    return new Promise((resolve, _) => setTimeout(resolve, 3000))
+    return wait(4000)
   })
 
   it('should respond with a corresponding metadata JSON', async () => {
     return axios
-      .get('http://localhost:3001/file/' + expectedJson.uuid)
+      .get(`${backendUrl}file/${expectedJson.uuid}`)
       .then(response => expect(response.data).toMatchObject(expectedJson))
   })
 
   it('should serve the file', async () => {
     return axios
-      .head('http://localhost:4001/' + expectedJson.filename)
+      .head(`${fileServerUrl}${expectedJson.filename}`)
       .then(response => {
         expect(response.status).toEqual(200)
         expect(parseInt(response.headers['content-length'])).toEqual(expectedJson.size)

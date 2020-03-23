@@ -17,7 +17,7 @@ export class Site {
     longitude!: number
 
     @Column()
-    elevation!: number
+    altitude!: number
 
     @Column()
     gaw!: string

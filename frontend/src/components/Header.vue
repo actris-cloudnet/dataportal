@@ -6,15 +6,15 @@ header
   justify-content: space-between
   box-sizing: border-box
   width: 100%
-  height: 4em
+  height: 4.5em
   padding-left: 1em
   padding-right: 1em
-  background-color: $header-background-color
-  background-image: linear-gradient(to left, rgba(0,0,0,0.0), $header-background-color),url('../assets/clouds.jpg')
+  background-image: linear-gradient(to left, rgba(0,0,0,0.0), $header-background-color 70%), url('../assets/clouds3.jpg')
+  opacity: 0.7
   background-position: right 0px top 20%
   background-repeat: no-repeat
-  background-size: 60% auto
-  box-shadow: 0 1px 3px rgba(0,0,0,0.7)
+  background-size: cover
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3)
 .portal_name
   display: flex
   flex-direction: column

@@ -23,6 +23,7 @@ module.exports = {
       'ignoreRestSiblings': false,
       'argsIgnorePattern': '^_'
     }],
+    'prefer-template': 'error',
     'no-trailing-spaces': 2,
     'eol-last': ['error', 'always']
   }

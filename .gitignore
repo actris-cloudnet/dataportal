@@ -122,3 +122,5 @@ public/css
 
 .DS_Store
 
+# Pycharm settings
+.idea

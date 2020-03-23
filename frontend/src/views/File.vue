@@ -60,7 +60,7 @@ main#landing
       > *
         padding: 10px
       > header
-        background: #f3f7f9
+        background: $blue-dust
         border-bottom: 1px solid grey
         font-size: 1.1em
       dl
@@ -150,7 +150,7 @@ main#landing
             <dt>Coordinates</dt>
             <dd>{{ response.site.latitude }}&deg; N, {{ response.site.longitude }}&deg; E</dd>
             <dt>Site altitude</dt>
-            <dd>{{ response.site.elevation }} m</dd>
+            <dd>{{ response.site.altitude }} m</dd>
           </dl>
         </section>
       </section>
@@ -203,7 +203,7 @@ export default class File extends Vue {
 
   humanReadableSize (size: number) {
     const i = Math.floor( Math.log(size) / Math.log(1024) )
-    return ( size / Math.pow(1024, i) ).toFixed(1) + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i]
+    return `${( size / Math.pow(1024, i) ).toFixed(1)  } ${  ['B', 'kB', 'MB', 'GB', 'TB'][i]}`
   }
 }
 </script>

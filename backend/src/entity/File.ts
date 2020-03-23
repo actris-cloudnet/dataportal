@@ -92,14 +92,16 @@ export class File {
 
       this.measurementDate = new Date(
         parseInt(obj.year),
-        parseInt(obj.month),
+        parseInt(obj.month) - 1,
         parseInt(obj.day)
       )
       this.title = obj.title
       this.history = obj.history
       this.site = site
       this.product = cloudnetType
-      this.cloudnetpyVersion = obj.cloudnetpy_version
+      if(typeof obj.cloudnetpy_version == 'string') {
+        this.cloudnetpyVersion = obj.cloudnetpy_version
+      }
       this.uuid = obj.file_uuid
       this.filename = filename
       this.checksum = chksum

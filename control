@@ -49,7 +49,7 @@ backend_postinstall () {
     createdb dataportal-test
     npm run build
     npx typeorm schema:sync
-    scripts/prepare-db.js
+    if [[ "$NODE_ENV" != 'production' ]]; then npx fixtures ./fixtures/Site.yml; fi
 }
 
 case "$action" in
@@ -87,6 +87,23 @@ case "$action" in
     truncate --size 0 */$pid_dir/all.log
     ;;
 
+    restart)
+    ./control stop
+    ./control start
+    ;;
+
+    test-start)
+    export NODE_ENV='test' && ./control start && unset NODE_ENV
+    ;;
+
+    test-stop)
+    export NODE_ENV='test' && ./control stop && unset NODE_ENV
+    ;;
+
+    test-restart)
+    export NODE_ENV='test' && ./control restart && unset NODE_ENV
+    ;;
+
     purge)
     dropdb dataportal
     dropdb dataportal-test
@@ -109,7 +126,7 @@ case "$action" in
     mkdir public
     npx typeorm schema:drop
     npx tsc --build tsconfig.json
-    scripts/prepare-db.js
+    if [[ "$NODE_ENV" != 'production' ]]; then npx fixtures ./fixtures/Site.yml; fi
     cd ..
     ;;
 

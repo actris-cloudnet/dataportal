@@ -8,13 +8,14 @@ import { publicDir, clearDir } from '../lib'
 const bucharestXml = 'tests/data/20190723_bucharest_classification.xml'
 const bucharestXmlMissing = 'tests/data/20190723_bucharest_classification_missing_fields.xml'
 const bucharestXmlInvalidLocation = 'tests/data/20190723_bucharest_classification_invalid_location.xml'
+const uuid = '15506ea8d3574c7baf8c95dfcc34fc7d'
+
 let conn: Connection
 let repo: Repository<File>
 
 beforeAll(async () => {
   conn = await createConnection('test')
   repo = conn.getRepository(File)
-  return repo.clear()
 })
 
 beforeEach(() => {
@@ -53,7 +54,7 @@ test('errors on invalid location', async () => {
 })
 
 test('does not overwrite existing files', async () => {
-  await repo.clear()
+  await repo.delete(uuid) // Delete corresponding db row
   const file = join(publicDir, '20190723_bucharest_classification.nc')
   closeSync(openSync(file, 'w'))
   const out = await readXmlIn(bucharestXml, false)
@@ -62,22 +63,22 @@ test('does not overwrite existing files', async () => {
 })
 
 describe('after reading a valid XML', () => {
+  let rowN: number
   beforeAll(async () => {
     clearDir(publicDir)
+    rowN = (await repo.find()).length
     return readXmlIn(bucharestXml, true)
   })
 
-  afterAll(async () =>
-    repo.clear()
-  )
+  afterAll(() => repo.delete(uuid))
 
   test('inserts a row to db', async () => {
-    return expect(repo.find()).resolves.toHaveLength(1)
+    return expect(repo.find()).resolves.toHaveLength(rowN + 1)
   })
 
   test('errors when inserting XML with same UUID', async () => {
     const out = await readXmlIn(bucharestXml, false)
     expect(out).toMatch('Failed to import NetCDF XML to DB:')
-    return expect(repo.find()).resolves.toHaveLength(1)
+    return expect(repo.find()).resolves.toHaveLength(rowN + 1)
   })
 })

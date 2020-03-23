@@ -1,9 +1,8 @@
-import {Builder, By, until, WebDriver} from 'selenium-webdriver'
-import * as firefox from 'selenium-webdriver/firefox'
+import { By, until, WebDriver } from 'selenium-webdriver'
 import * as fs from 'fs'
 import { join } from 'path'
 import axios from 'axios'
-import { clearDir, inboxDir, publicDir, clearRepo } from '../lib'
+import { inboxDir, prepareSelenium, wait } from '../lib'
 
 let driver: WebDriver
 
@@ -14,17 +13,7 @@ async function awaitAndFind(by: By) {
   return driver.findElement(by)
 }
 
-beforeAll(async () => {
-  const options = new firefox.Options()
-  if(process.env.CI) options.addArguments('-headless') // Run in headless on CI
-  clearDir(inboxDir)
-  clearDir(publicDir)
-  clearRepo('file')
-  driver = await new Builder()
-    .forBrowser('firefox')
-    .setFirefoxOptions(options)
-    .build()
-})
+beforeAll(async () => driver = await prepareSelenium())
 
 afterAll(async () => {
   return driver.close()
@@ -33,7 +22,7 @@ afterAll(async () => {
 describe('file landing page', () => {
   beforeAll(async () => {
     fs.copyFileSync('tests/data/20190723_bucharest_classification.nc', join(inboxDir, '20190723_bucharest_classification.nc'))
-    return new Promise((resolve, _) => setTimeout(resolve, 3000))
+    return wait(3000)
   })
 
   it('should return 404 when the file is not found', async () => {
@@ -46,7 +35,7 @@ describe('file landing page', () => {
   it('should contain correct information', async () => {
     const targetArray = [
       '15506ea8-d357-4c7b-af8c-95dfcc34fc7d',
-      '2019-08-23',
+      '2019-07-23',
       'Classification',
       '1.0.4',
       '20190723_bucharest_classification.nc',
