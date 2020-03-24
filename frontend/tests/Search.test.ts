@@ -47,7 +47,8 @@ describe('Search.vue', () => {
 
   const findInputByName = (inputName: string) => wrapper.find(`input[name="${inputName}"]`)
   const findElementById = (id: string) => wrapper.find(`#${id}`)
-  const getInputValueByName = (inputName: string) => (wrapper.find(`input[name="${inputName}"]`).element as HTMLInputElement).value
+  const getInputValueByName = (inputName: string) =>
+    (wrapper.find(`input[name="${inputName}"]`).element as HTMLInputElement).value
 
   const changeInputAndNextTick = async (inputName: string, newValue: string) => {
     const input = findInputByName(inputName)

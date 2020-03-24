@@ -31,6 +31,11 @@ module.exports = {
        'named': 'never',
        'asyncArrow': 'always'
     }],
-    'keyword-spacing': 'error'
+    'keyword-spacing': 'error',
+    'max-len': ['error', {
+      'code': 128,
+      'ignoreUrls': true,
+      'ignoreStrings': true
+    }]
   }
 }
