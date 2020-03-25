@@ -44,8 +44,8 @@
       "start": "echo 'Use ./control script at project root'",
       "stop": "echo 'Use ./control script at project root'",
       "build": "tsc --build tsconfig.json",
-      "lint": "eslint .",
-      "lint-fix": "eslint --fix ."
+      "lint": "eslint . --ext .js,.ts",
+      "lint-fix": "eslint . --ext .js,.ts --fix"
    },
    "repository": {
       "type": "git",

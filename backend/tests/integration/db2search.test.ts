@@ -2,6 +2,8 @@ import { backendUrl } from '../lib'
 import axios from 'axios'
 import { RequestError } from '../../src/entity/RequestError'
 
+const genResponse = (status, data) => ({response: {status, data}})
+
 describe('/files', () => {
   const url = `${backendUrl}files/`
   const expectedBody404: RequestError = {
@@ -14,7 +16,7 @@ describe('/files', () => {
       status: 400,
       errors: [ 'No search parameters given' ]
     }
-    return expect(axios.get(`${backendUrl}files/`)).rejects.toMatchObject({response: {status: expectedBody.status, data: expectedBody}})
+    return expect(axios.get(`${backendUrl}files/`)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
 
   it('should respond with an array of 3 objects when searching for macehead', async () => {
@@ -37,13 +39,13 @@ describe('/files', () => {
   it('should respond with 404 if location was not found', () => {
     const payload = {params: {location: ['kilpikonna']}}
     expectedBody404.errors = ['One or more of the specified locations were not found']
-    return expect(axios.get(url, payload)).rejects.toMatchObject({response: {status: expectedBody404.status, data: expectedBody404}})
+    return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody404.status, expectedBody404))
   })
 
   it('should respond 404 if one of many locations was not found', () => {
     const payload = {params: {location: ['macehead', 'kilpikonna']}}
     expectedBody404.errors = ['One or more of the specified locations were not found']
-    return expect(axios.get(url, payload)).rejects.toMatchObject({response: {status: expectedBody404.status, data: expectedBody404}})
+    return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody404.status, expectedBody404))
   })
 
   it('should respond with an array of objects with dates between [ dateFrom, dateTo [, in descending order', async () => {
@@ -65,7 +67,7 @@ describe('/files', () => {
       errors: [ 'Malformed date in property "dateFrom"' ]
     }
     const payload1 = {params: {dateFrom: 'turku'}}
-    return expect(axios.get(url, payload1)).rejects.toMatchObject({response: {status: expectedBody.status, data: expectedBody}})
+    return expect(axios.get(url, payload1)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
 
   it('should respond with 400 on malformed dateTo', () => {
@@ -74,7 +76,7 @@ describe('/files', () => {
       errors: [ 'Malformed date in property "dateTo"' ]
     }
     const payload = {params: {dateFrom: new Date('2020-02-20'), dateTo: 'turku'}}
-    return expect(axios.get(url, payload)).rejects.toMatchObject({response: {status: expectedBody.status, data: expectedBody}})
+    return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
 })
 

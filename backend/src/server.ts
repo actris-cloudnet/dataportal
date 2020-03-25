@@ -16,7 +16,7 @@ async function init() {
 
   const conn = await createConnection(connName)
 
-  if(process.env.NODE_ENV != 'production') {
+  if (process.env.NODE_ENV != 'production') {
     app.use(function(req, res, next) {
       res.header('Access-Control-Allow-Origin', '*') // update to match the domain you will make the request from
       res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
@@ -84,9 +84,9 @@ async function init() {
     const defaultDateTo = tomorrow
 
     // Set defaults
-    if(!('location' in query)) query.location = await defaultLocation()
-    if(!('dateFrom' in query)) query.dateFrom = defaultDateFrom()
-    if(!('dateTo' in query)) query.dateTo = defaultDateTo()
+    if (!('location' in query)) query.location = await defaultLocation()
+    if (!('dateFrom' in query)) query.dateFrom = defaultDateFrom()
+    if (!('dateTo' in query)) query.dateTo = defaultDateTo()
 
     query.location = queryLocationToArray(query.location)
 
@@ -107,7 +107,7 @@ async function init() {
 
     siteRepo.findByIds(query.location)
       .then(res => {
-        if(res.length != query.location.length) throw {status: 404, errors: ['One or more of the specified locations were not found'], params: req.query}
+        if (res.length != query.location.length) throw {status: 404, errors: ['One or more of the specified locations were not found'], params: req.query}
       })
       .catch(next)
     fileRepo.createQueryBuilder('file')
@@ -117,7 +117,7 @@ async function init() {
       .orderBy('file.measurementDate', 'DESC')
       .getMany()
       .then(result => {
-        if(result.length == 0) {
+        if (result.length == 0) {
           next({status: 404, errors: ['The search yielded zero results'], params: req.query})
           return
         }

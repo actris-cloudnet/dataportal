@@ -86,7 +86,7 @@ export class File {
 
     constructor(obj: NetCDFObject, filename: string, chksum: string, filesize: number, format: string, site: Site) {
       // A typeorm hack, see https://github.com/typeorm/typeorm/issues/3903
-      if(typeof obj == 'undefined') return
+      if (typeof obj == 'undefined') return
 
       const cloudnetType = obj.cloudnet_file_type as CloudnetFileType
 
@@ -99,7 +99,7 @@ export class File {
       this.history = obj.history
       this.site = site
       this.product = cloudnetType
-      if(typeof obj.cloudnetpy_version == 'string') {
+      if (typeof obj.cloudnetpy_version == 'string') {
         this.cloudnetpyVersion = obj.cloudnetpy_version
       }
       this.uuid = obj.file_uuid

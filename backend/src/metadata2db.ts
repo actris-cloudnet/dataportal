@@ -42,7 +42,7 @@ async function computeFileChecksum(filename: string): Promise<string> {
           resolve(chksum)
         }
       })
-    } catch(err) {
+    } catch (err) {
       reject(err)
     }
   })
@@ -64,12 +64,12 @@ function getFileFormat(filename: string): Promise<string> {
     let out: string
     proc.stdout.on('data', data => out += data)
     proc.on('close', () => {
-      if(out.includes('NetCDF Data Format data')) {
+      if (out.includes('NetCDF Data Format data')) {
         resolve('NetCDF3')
-      } else if(out.includes('Hierarchical Data Format (version 5) data')) {
+      } else if (out.includes('Hierarchical Data Format (version 5) data')) {
         resolve('HDF5 (NetCDF4)')
       } else {
-        reject('Unknown file type ' + out)
+        reject(`Unknown file type ${  out}`)
       }
     })
   })
@@ -85,7 +85,7 @@ async function parseXmlFromStdin(): Promise<[NetCDFObject, string]> {
     .map(({ name, value }) => ({ [name]: value }))
     .reduce((acc, cur) => Object.assign(acc, cur))
 
-  if(!isNetCDFObject(ncObj)) {
+  if (!isNetCDFObject(ncObj)) {
     const missingFields = getMissingFields(ncObj)
     throw TypeError(`
         Invalid header fields at ${filename}:\n
@@ -96,7 +96,7 @@ async function parseXmlFromStdin(): Promise<[NetCDFObject, string]> {
   return [ncObj, filename]
 }
 
-(async function () {
+(async function() {
   let connection = await createConnection(connName)
 
   parseXmlFromStdin()

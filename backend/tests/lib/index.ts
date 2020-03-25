@@ -19,7 +19,7 @@ export async function clearRepo(repo: string) {
 
 export const prepareSelenium = async () => {
   const options = new firefox.Options()
-  if(process.env.CI) options.addArguments('-headless') // Run in headless on CI
+  if (process.env.CI) options.addArguments('-headless') // Run in headless on CI
   clearDir(inboxDir)
   clearDir(publicDir)
   clearRepo('file')
