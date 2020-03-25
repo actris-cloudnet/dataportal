@@ -24,3 +24,11 @@ items:
     altitude: 174
     gaw: SMR
     country: Finland
+  site4:
+    id: granada
+    humanReadableName: Granada
+    latitude: 37.164
+    longitude: -3.605
+    altitude: 680
+    gaw: Unknown
+    country: Spain
