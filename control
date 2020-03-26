@@ -27,7 +27,7 @@ backend_targets[$pid_dir/.listen-inbox.pid]="scripts/listen-inbox.sh $inbox_dir"
 backend_targets[$pid_dir/.node.pid]="npx nodemon -w build -- $backend_port"
 
 is_production () {
-    return [[ "$NODE_ENV" == 'production' ]]
+    [ "$NODE_ENV" '==' 'production' ]
 }
 
 waitport () {
@@ -70,7 +70,7 @@ case "$action" in
     done
     echo
     cd ..
-    if [ ! is_production ]; then
+    if ! is_production; then
         echo "Starting nginx..."
         if [[ ! -f .nginx.pid ]]; then
             nginx -p . -c .nginx.conf
@@ -90,7 +90,7 @@ case "$action" in
         pkill -F $pid
         rm -f $pid
     done
-    if [ ! is_production ]; then
+    if ! is_production; then
         echo .nginx.pid
         pkill -F .nginx.pid
         truncate --size 0 */$pid_dir/all.log
@@ -144,7 +144,7 @@ case "$action" in
     echo "Installing backend..."
     cd backend
     npm install
-    [ ! is_production ] && backend_postinstall
+    ! is_production && backend_postinstall
     echo
     echo "Installing frontend..."
     cd ../frontend
