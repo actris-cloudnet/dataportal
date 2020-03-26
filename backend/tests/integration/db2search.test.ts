@@ -2,7 +2,7 @@ import { backendUrl } from '../lib'
 import axios from 'axios'
 import { RequestError } from '../../src/entity/RequestError'
 
-const genResponse = (status, data) => ({response: {status, data}})
+const genResponse = (status: any, data: any) => ({response: {status, data}})
 
 describe('/files', () => {
   const url = `${backendUrl}files/`
