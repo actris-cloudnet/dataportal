@@ -12,6 +12,7 @@ import { spawn } from 'child_process'
 import { stringify } from './lib'
 
 const connName: string = process.env.NODE_ENV == 'test' ? 'test' : 'default'
+let filename: string
 
 interface NetCDFXML {
     netcdf: {
@@ -75,11 +76,11 @@ function getFileFormat(filename: string): Promise<string> {
   })
 }
 
-async function parseXmlFromStdin(): Promise<[NetCDFObject, string]> {
+async function parseXmlFromStdin(): Promise<NetCDFObject> {
   const xml: string = readFileSync(0, 'utf-8')
 
   const { netcdf }: NetCDFXML = await parseStringPromise(xml)
-  const filename = netcdf['$'].location
+  filename = netcdf['$'].location
   const ncObj: any = netcdf.attribute
     .map((a) => a['$'])
     .map(({ name, value }) => ({ [name]: value }))
@@ -88,19 +89,19 @@ async function parseXmlFromStdin(): Promise<[NetCDFObject, string]> {
   if (!isNetCDFObject(ncObj)) {
     const missingFields = getMissingFields(ncObj)
     throw TypeError(`
-        Invalid header fields at ${filename}:\n
+        Invalid header fields\n
         Missing or invalid: ${stringify(missingFields)}\n
         ${stringify(ncObj)}`)
   }
 
-  return [ncObj, filename]
+  return ncObj
 }
 
 (async function() {
   let connection = await createConnection(connName)
 
   parseXmlFromStdin()
-    .then(([ncObj, filename]) =>
+    .then((ncObj) =>
       Promise.all([
         ncObj,
         basename(filename),
@@ -115,6 +116,6 @@ async function parseXmlFromStdin(): Promise<[NetCDFObject, string]> {
       const file = new File(ncObj, baseFilename, chksum, size, format, site)
       return connection.manager.save(file)
     })
-    .catch(err => console.error('Failed to import NetCDF XML to DB: ', err))
+    .catch(err => console.error('Failed to import NetCDF XML to DB: ', filename, '\n', err))
     .finally(() => connection.close())
 })()
