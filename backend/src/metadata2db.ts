@@ -10,8 +10,9 @@ import { Site } from './entity/Site'
 import { isNetCDFObject, getMissingFields, NetCDFObject } from './entity/NetCDFObject'
 import { spawn } from 'child_process'
 import { stringify } from './lib'
+import config from '../config'
 
-const connName: string = process.env.NODE_ENV == 'test' ? 'test' : 'default'
+const connName = config.connectionName
 let filename: string
 
 interface NetCDFXML {
@@ -54,7 +55,7 @@ function computeFileSize(filename: string) {
 }
 
 function linkFile(filename: string) {
-  const linkPath = connName === 'test' ? 'tests/data/public' : 'public'
+  const linkPath = config.publicDir
   return fsp.symlink(pathResolve(filename), join(linkPath, basename(filename)))
 }
 
