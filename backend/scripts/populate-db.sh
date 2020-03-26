@@ -1,7 +1,7 @@
 #!/bin/bash
 INDIR=${1:-"data/"}
 N_PROCS=${2:-1}
-FILES=$(find $INDIR -maxdepth 5 -mindepth 5 -name "*.nc" | sort)
+FILES=$(find $INDIR -name "*.nc" | sort)
 N_FILES=$(printf "%s\n" "${FILES[@]}" | wc -l)
 
 printf "%s\n" "${FILES[@]}" \
