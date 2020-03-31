@@ -8,6 +8,20 @@
     justify-content: center
     flex-wrap: wrap
 
+  .betanote
+    border: 1px #ffeecf solid
+    border-radius: 2px
+    background: #fdfce5
+    width: 100%
+    padding: 0.5em
+    margin-bottom: 2em
+
+  .close
+    float: right
+    font-weight: bold
+    color: lightgrey
+    cursor: pointer
+
   section#fileTable
     padding-left: 30px
     padding-right: 30px
@@ -156,6 +170,12 @@
 
 <template>
 <main id="search">
+  <div v-if="displayBetaNotification" class="betanote">
+    This is the beta version of Cloudnet data portal.
+    Click <a href="http://devcloudnet.fmi.fi/">here</a> to visit the devcloudnet data portal, or
+    <a href="http://legacy.cloudnet.fmi.fi/">here</a> to navigate to the legacy cloudnet site.
+    <span class="close" @click="displayBetaNotification = !displayBetaNotification">&#10005;</span>
+  </div>
   <section id="sideBar">
     <header class="filterOptions">Filter search</header>
     <label for="siteSelect">Locations</label>
@@ -279,6 +299,8 @@ export default class Search extends Vue {
   dateToError: { [key: string]: boolean } = {}
 
   renderComplete = false
+
+  displayBetaNotification = true
 
   isTrueOnBothDateFields(errorId: string) {
     return this.dateFromError[errorId] && this.dateToError[errorId]
