@@ -174,9 +174,11 @@ case "$action" in
     build)
     echo "Building frontend..."
     cd frontend
+    [ -d dist ] && rm -rf dist
     npm run build
     echo "Building backend..."
     cd ../backend
+    [ -d build ] && rm -rf build
     npm run build
     cd ..
     ;;
