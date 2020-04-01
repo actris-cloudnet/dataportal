@@ -23,6 +23,6 @@ module.exports = {
   'plugins': [
     '@typescript-eslint'
   ],
-  'ignorePatterns': ['dist/', 'node_modules/', 'build/', 'public/'],
+  'ignorePatterns': ['dist/', 'node_modules/', 'build/', 'public/', 'src/migration/'],
   rules: { ...commonRules }
 }
