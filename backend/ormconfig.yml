@@ -3,6 +3,7 @@
   host: localhost
   database: dataportal
   synchronize: false
+  migrationsRun: true
   logging: false
   entities:
   - build/entity/**/*.js

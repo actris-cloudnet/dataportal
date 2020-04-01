@@ -53,7 +53,6 @@ backend_postinstall () {
     createdb dataportal
     createdb dataportal-test
     npm run build
-    npx typeorm schema:sync
     npx fixtures ./fixtures/Site.yml
 }
 
