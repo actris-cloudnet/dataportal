@@ -63,9 +63,9 @@ describe('Search.vue', () => {
     wrapper = mount(Search)
   })
 
-  it('should make exactly two api request on mount', () => {
+  it('should make less than four api request on mount', () => {
     // files and sites
-    expect(mocked(axios.get).mock.calls.length).toBe(2)
+    expect(mocked(axios.get).mock.calls.length).toBeLessThan(4)
   })
 
   describe('date selectors', () => {
