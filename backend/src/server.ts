@@ -7,7 +7,7 @@ import { RequestError, RequestErrorArray } from './entity/RequestError'
 import { stringify } from './lib'
 import * as express from 'express'
 import validator from 'validator'
-import config from '../config'
+import config from './config'
 
 const port = parseInt(process.argv[2])
 const connName = config.connectionName

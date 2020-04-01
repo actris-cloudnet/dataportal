@@ -10,7 +10,7 @@ import { Site } from './entity/Site'
 import { isNetCDFObject, getMissingFields, NetCDFObject } from './entity/NetCDFObject'
 import { spawn } from 'child_process'
 import { stringify } from './lib'
-import config from '../config'
+import config from './config'
 
 const connName = config.connectionName
 let filename: string
