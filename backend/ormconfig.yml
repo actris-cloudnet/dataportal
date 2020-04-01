@@ -2,7 +2,7 @@
   type: postgres
   host: localhost
   database: dataportal
-  synchronize: true
+  synchronize: false
   logging: false
   entities:
   - build/entity/**/*.js
