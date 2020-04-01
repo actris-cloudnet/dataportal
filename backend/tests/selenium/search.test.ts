@@ -11,14 +11,14 @@ const getContent = async () => await (await findElement(By.tagName('html'))).get
 const clickTab = async () => await driver.actions().sendKeys(Key.TAB).perform()
 const getById = async (key: string) => await findElement(By.id(key))
 const clickId = async (key: string) => (await getById(key)).click()
+const clickGrandparentById = async (key: string) => (await (await getById(key)).findElement(By.xpath('../..'))).click()
 const clickClass = async (key: string) => await (await findElement(By.className(key))).click()
 const clickXpath = async (key: string) => await (await findElement(By.xpath(key))).click()
 
 async function initSearch() {
   await driver.get('http://localhost:8000/search')
-  await clickClass('multiselect')
-  await driver.actions().sendKeys(`bucharest${Key.ENTER}`).perform()
-  return wait(100)
+  await clickGrandparentById('siteSelect')
+  return driver.actions().sendKeys(`bucharest${Key.ENTER}`).perform()
 }
 
 async function setDateFromPast() {
@@ -60,14 +60,14 @@ describe('search page', () => {
     await wait(3000)
   })
 
+  beforeEach(initSearch)
+
   it('should initially contain no files', async () => {
-    await initSearch()
     const content = await getContent()
     expect(content).toContain('No results')
   })
 
   it('should contain all files with large date span', async () => {
-    await initSearch()
     await sendInput('dateFrom', '2010')
     const content = await getContent()
     expect(content).toContain('Found 5 results')
@@ -78,7 +78,6 @@ describe('search page', () => {
   })
 
   it('should contain correct number of files after setting a date range', async () => {
-    await initSearch()
     await sendInput('dateFrom', '2019-07-23')
     await sendInput('dateTo', '2019-07-26')
     const content = await getContent()
@@ -89,7 +88,6 @@ describe('search page', () => {
   })
 
   it('should forward to correct landing page after sorting and clicking certain row', async () => {
-    await initSearch()
     await sendInput('dateFrom', '2010')
     await clickClass('b-table-sort-icon-left')
     await clickTab()
@@ -100,7 +98,6 @@ describe('search page', () => {
   })
 
   it('should reset the search after clicking the reset button', async () => {
-    await initSearch()
     await sendInput('dateFrom', '2010')
     await clickId('reset')
     await wait(1000)
@@ -109,14 +106,12 @@ describe('search page', () => {
   })
 
   it('should work when clicking the calendar', async () => {
-    await initSearch()
     await setDateFromPast()
     const content = await getContent()
     expect(content).toContain('Found 5 results')
   })
 
   it('correct calendar input should override incorrect keyboard input', async () => {
-    await initSearch()
     await sendInput('dateFrom', '2023')
     await setDateFromPast()
     const content = await getContent()
@@ -124,9 +119,8 @@ describe('search page', () => {
   })
 
   it('should work with different site selectors', async () => {
-    await initSearch()
-    await sendInput('dateFrom', '1980');
-    (await (await getById('siteSelect')).findElement(By.xpath('..'))).click() // click parent
+    await sendInput('dateFrom', '1980')
+    await clickGrandparentById('siteSelect')
     await driver.actions().sendKeys(`mace${Key.ENTER}`).perform()
     await wait(100)
     const content = await getContent()
@@ -136,11 +130,10 @@ describe('search page', () => {
   })
 
   it('should work with different product selectors', async () => {
-    await initSearch()
     await sendInput('dateFrom', '1980')
-    await clickClass('multiselect')
-    await driver.actions().sendKeys(`bucharest${Key.ENTER}`).perform();
-    (await (await getById('productSelect')).findElement(By.xpath('..'))).click() // click parent
+    await clickGrandparentById('siteSelect')
+    await driver.actions().sendKeys(`bucharest${Key.ENTER}`).perform()
+    await clickGrandparentById('productSelect')
     await driver.actions().sendKeys(`ice${Key.ENTER}`).perform()
     const content = await getContent()
     expect(content).toContain('Found 2 results')
