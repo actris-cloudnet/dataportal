@@ -235,7 +235,7 @@
     <b-table id="tableContent" borderless small striped hover sort-icon-left
       :items="apiResponse.data"
       :fields="[
-                { key: 'product', label: '', tdClass: 'icon', tdAttr: setIcon},
+                { key: 'product.id', label: '', tdClass: 'icon', tdAttr: setIcon},
                 { key: 'title', label: 'Data object', sortable: true},
                 { key: 'measurementDate', label: 'Date', sortable: true},
                 ]"

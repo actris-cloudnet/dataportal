@@ -1,35 +1,12 @@
 import {Entity, Column, PrimaryColumn, CreateDateColumn, ManyToOne} from 'typeorm'
 import { NetCDFObject } from './NetCDFObject'
 import { Site } from './Site'
-
-export enum CloudnetFileType {
-    CATEGORIZE = 'categorize',
-    CLASSIFICATION = 'classification',
-    DRIZZLE = 'drizzle',
-    IWC = 'iwc',
-    LIDAR = 'lidar',
-    LWC = 'lwc',
-    MODEL = 'model',
-    MWR = 'mwr',
-    RADAR = 'radar'
-}
+import { Product } from './Product'
 
 export enum FilePublicity {
     PUBLIC = 'public',
     NO_DL = 'nodl',
     HIDDEN = 'hidden'
-}
-
-export const level: {[key in CloudnetFileType]: number} = {
-  'radar': 1,
-  'lidar': 1,
-  'mwr': 1,
-  'model': 1,
-  'categorize': 1,
-  'classification': 2,
-  'drizzle': 2,
-  'iwc': 2,
-  'lwc': 2
 }
 
 @Entity()
@@ -57,11 +34,8 @@ export class File {
     })
     publicity!: FilePublicity
 
-    @Column({
-      type: 'enum',
-      enum: CloudnetFileType
-    })
-    product!: CloudnetFileType
+    @ManyToOne(_ => Product, product => product.files)
+    product!: Product
 
     @Column({nullable: true})
     cloudnetpyVersion!: string
@@ -81,14 +55,17 @@ export class File {
     @Column()
     format!: string
 
-    @Column()
-    level!: number
-
-    constructor(obj: NetCDFObject, filename: string, chksum: string, filesize: number, format: string, site: Site) {
+    constructor(
+      obj: NetCDFObject,
+      filename: string,
+      chksum: string,
+      filesize: number,
+      format: string,
+      site: Site,
+      product: Product
+    ) {
       // A typeorm hack, see https://github.com/typeorm/typeorm/issues/3903
       if (typeof obj == 'undefined') return
-
-      const cloudnetType = obj.cloudnet_file_type as CloudnetFileType
 
       this.measurementDate = new Date(
         parseInt(obj.year),
@@ -98,7 +75,7 @@ export class File {
       this.title = obj.title
       this.history = obj.history
       this.site = site
-      this.product = cloudnetType
+      this.product = product
       if (typeof obj.cloudnetpy_version == 'string') {
         this.cloudnetpyVersion = obj.cloudnetpy_version
       }
@@ -107,6 +84,5 @@ export class File {
       this.checksum = chksum
       this.size = filesize
       this.format = format
-      this.level = level[cloudnetType]
     }
 }

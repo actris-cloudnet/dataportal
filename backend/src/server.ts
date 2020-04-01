@@ -96,7 +96,7 @@ async function init() {
 
   app.get('/file/:uuid', async (req: Request, res: Response) => {
     const repo = conn.getRepository(File)
-    repo.findOneOrFail(req.params.uuid, { relations: ['site']})
+    repo.findOneOrFail(req.params.uuid, { relations: ['site', 'product']})
       .then(result => res.send(result))
       .catch(_ => res.sendStatus(404))
   })
@@ -113,6 +113,7 @@ async function init() {
       .catch(next)
     fileRepo.createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
+      .leftJoinAndSelect('file.product', 'product')
       .where('site.id IN (:...location)', query)
       .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate < :dateTo', query)
       .orderBy('file.measurementDate', 'DESC')

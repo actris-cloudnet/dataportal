@@ -18,13 +18,16 @@ const expectedJson = {
   'measurementDate': '2019-07-23',
   'history': '2019-09-16 11:21:13 - classification file created\n2019-09-16 11:21:02 - categorize file created\n2019-09-16 11:20:30 - radar file created\nLidar backscatter derived from raw values in arbitrary units: calibrated by user Ewan O\'Connor <ewan.oconnor@fmi.fi> on 25-Jul-2019.',
   'publicity': 'public',
-  'product': 'classification',
-  'level': 2,
   'cloudnetpyVersion': '1.0.4',
   'filename': '20190723_bucharest_classification.nc',
   'checksum': 'b77b731aaae54f403aae6765ad1d20e1603b4454e2bc0d461aab4985a4a82ca4',
   'size': 139021,
   'format': 'HDF5 (NetCDF4)',
+  'product': {
+    'humanReadableName': 'Classification',
+    'id': 'classification',
+    'level': '2',
+  },
   'site': {
     'id': 'bucharest',
     'humanReadableName': 'Bucharest',

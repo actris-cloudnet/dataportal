@@ -112,7 +112,7 @@ main#landing
       <div class="summary">
           <h2>Cloudnet data object</h2>
           <span>
-            {{ response.product }} data from
+            {{ response.product.humanReadableName }} data from
             {{ response.site.humanReadableName }} on
             {{ humanReadableDate(response.measurementDate) }}.
           </span>
@@ -144,9 +144,9 @@ main#landing
         <section class="details">
           <dl>
             <dt>Product</dt>
-            <dd class="capitalize">{{ response.product }}</dd>
+            <dd class="capitalize">{{ response.product.humanReadableName }}</dd>
             <dt>Level</dt>
-            <dd>{{ response.level }}</dd>
+            <dd>{{ response.product.level }}</dd>
             <dt>Quality</dt>
             <dd>Near Real Time (NRT)</dd>
             <dt v-if="response.cloudnetpyVersion">CloudnetPy version</dt>

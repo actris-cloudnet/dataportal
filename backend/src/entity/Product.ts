@@ -1,4 +1,4 @@
-import {Entity, Column, PrimaryColumn, OneToMany} from 'typeorm'
+import { Entity, PrimaryColumn, Column, OneToMany } from 'typeorm'
 import { File } from './File'
 
 @Entity()
@@ -14,5 +14,5 @@ export class Product {
     level!: string
 
     @OneToMany(_ => File, file => file.site)
-    files!: File[];
+    files!: File[]
 }
