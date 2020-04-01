@@ -9,7 +9,8 @@ jest.setTimeout(30000)
 
 const getContent = async () => await (await findElement(By.tagName('html'))).getText()
 const clickTab = async () => await driver.actions().sendKeys(Key.TAB).perform()
-const clickId = async (key: string) => await (await findElement(By.id(key))).click()
+const getById = async (key: string) => await findElement(By.id(key))
+const clickId = async (key: string) => (await getById(key)).click()
 const clickClass = async (key: string) => await (await findElement(By.className(key))).click()
 const clickXpath = async (key: string) => await (await findElement(By.xpath(key))).click()
 
@@ -124,8 +125,8 @@ describe('search page', () => {
 
   it('should work with different site selectors', async () => {
     await initSearch()
-    await sendInput('dateFrom', '1980')
-    await clickClass('multiselect')
+    await sendInput('dateFrom', '1980');
+    (await (await getById('siteSelect')).findElement(By.xpath('..'))).click() // click parent
     await driver.actions().sendKeys(`mace${Key.ENTER}`).perform()
     await wait(100)
     const content = await getContent()
@@ -134,5 +135,15 @@ describe('search page', () => {
     expect(content).toContain('Ice water content file from Mace-Head')
   })
 
-
+  it('should work with different product selectors', async () => {
+    await initSearch()
+    await sendInput('dateFrom', '1980')
+    await clickClass('multiselect')
+    await driver.actions().sendKeys(`bucharest${Key.ENTER}`).perform();
+    (await (await getById('productSelect')).findElement(By.xpath('..'))).click() // click parent
+    await driver.actions().sendKeys(`ice${Key.ENTER}`).perform()
+    const content = await getContent()
+    expect(content).toContain('Found 2 results')
+    expect(content).toContain('Ice water content file from Mace-Head')
+  })
 })

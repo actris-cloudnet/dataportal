@@ -227,6 +227,19 @@
       </div>
     </div>
 
+    <label for="productSelect">Products</label>
+    <multiselect name="productSelect" id="productSelect"
+      v-model="selectedProducts"
+      placeholder="Select"
+      track-by="id"
+      label="humanReadableName"
+      :options="allProducts"
+      :show-labels="false"
+      :multiple="true"
+      :hideSelected="false"
+    ><span id="noRes" slot="noResult">Not found</span>
+    </multiselect>
+
     <a @click="reset" id="reset">Reset filter</a>
   </section>
 
@@ -266,6 +279,7 @@ import { File } from '../../../backend/src/entity/File'
 import { BTable } from 'bootstrap-vue/esm/components/table'
 import { BPagination } from 'bootstrap-vue/esm/components/pagination'
 import Datepicker from '../components/Datepicker.vue'
+import { Product } from '../../../backend/src/entity/Product'
 
 Vue.component('datepicker', Datepicker)
 Vue.component('multiselect', Multiselect)
@@ -302,6 +316,10 @@ export default class Search extends Vue {
   dateFromError: { [key: string]: boolean } = {}
   dateToError: { [key: string]: boolean } = {}
 
+  // products
+  selectedProducts = []
+  allProducts = []
+
   renderComplete = false
 
   displayBetaNotification = true
@@ -323,12 +341,14 @@ export default class Search extends Vue {
     const res = await axios.get(`${this.apiUrl}sites/`)
     this.siteOptions = res.data
     this.allSiteIds = res.data.map((d: Site) => d.id)
+    this.allProducts = (await axios.get(`${this.apiUrl}products/`)).data
     this.fetchData()
   }
 
   get payload() {
     const sites = this.selectedSites.length > 0 ? this.selectedSites.map((d: Site) => d.id) : this.allSiteIds
-    return {params: {location: sites, dateFrom: this.dateFrom, dateTo: this.dateTo}}
+    const productIds = this.selectedProducts.map((d: Product) => d.id)
+    return {params: {location: sites, dateFrom: this.dateFrom, dateTo: this.dateTo, product: productIds}}
   }
 
   fetchData() {
@@ -388,5 +408,9 @@ export default class Search extends Vue {
     this.fetchData()
   }
 
+  @Watch('selectedProducts')
+  onProductSelected() {
+    this.fetchData()
+  }
 }
 </script>

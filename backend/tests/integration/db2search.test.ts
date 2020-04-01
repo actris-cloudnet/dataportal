@@ -54,11 +54,18 @@ describe('/files', () => {
     return expect(res.data.map((d: any) => d.measurementDate)).toEqual(['2019-07-15', '2018-11-15', '2018-06-09'])
   })
 
-  it('should respond with correct objects if dateFrom, dateTo and location are specified', async () => {
-    const payload = {params: {dateFrom: new Date('2018-06-09'), dateTo: new Date('2019-09-01'), location: 'macehead'}}
+  it('should respond with correct objects if product is specified', async () => {
+    const payload = {params: {product: 'radar'}}
     const res = await axios.get(url, payload)
-    expect(res.data.map((d: any) => d.site.id)).toEqual(['macehead', 'macehead'])
-    return expect(res.data.map((d: any) => d.measurementDate)).toEqual(['2018-11-15', '2018-06-09'])
+    return expect(res.data.map((d: any) => d.product.id)).toEqual(['radar', 'radar'])
+  })
+
+  it('should respond with correct objects if dateFrom, dateTo, location, and product are specified', async () => {
+    const payload = {params: {dateFrom: new Date('2018-06-09'), dateTo: new Date('2019-09-01'), location: 'macehead', product: 'classification'}}
+    const res = await axios.get(url, payload)
+    expect(res.data.map((d: any) => d.site.id)).toEqual(['macehead'])
+    expect(res.data.map((d: any) => d.product.id)).toEqual(['classification'])
+    return expect(res.data.map((d: any) => d.measurementDate)).toEqual(['2018-06-09'])
   })
 
   it('should respond with 400 on malformed dateFrom', () => {
