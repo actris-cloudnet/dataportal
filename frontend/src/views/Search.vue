@@ -86,37 +86,6 @@
   .multiselect
     margin-bottom: $filter-margin
 
-  .multiselect__input
-    padding: 2px
-    padding-left: 0px
-    &::placeholder
-      font-size: 88%
-      color: gray
-
-  .multiselect__tags-wrap
-    span, span i:hover
-      color: black
-      background-color: $steel-warrior
-
-  .multiselect__element
-    font-size: 90%
-    color: black
-    .multiselect__option--highlight
-      color: black
-      background-color: $steel-warrior
-      span
-        background-color: $steel-warrior
-    .multiselect__option--selected
-      background-color: white
-      pointer-events: none
-      span
-        background-color: white
-        font-weight: normal
-        color: #bbbbbb
-
-  .multiselect__tag-icon:after
-    color: gray
-
   div.date
     display: grid
     grid-template-columns: 1fr 1fr
@@ -182,18 +151,8 @@
   </div>
   <section id="sideBar">
     <header class="filterOptions">Filter search</header>
-    <label for="siteSelect">Locations</label>
-    <multiselect name="siteSelect" id="siteSelect"
-      v-model="selectedSites"
-      placeholder="Select"
-      track-by="id"
-      label="humanReadableName"
-      :options="siteOptions"
-      :show-labels="false"
-      :multiple="true"
-      :hideSelected="false"
-    ><span id="noRes" slot="noResult">Not found</span>
-    </multiselect>
+    <custom-multiselect label="Location" v-model="selectedSites" :options="allSites" id="selectedSites" :icons="false">
+    </custom-multiselect>
 
     <div class="date">
       <datepicker
@@ -227,18 +186,14 @@
       </div>
     </div>
 
-    <label for="productSelect">Products</label>
-    <multiselect name="productSelect" id="productSelect"
+    <custom-multiselect
+      label="Product"
       v-model="selectedProducts"
-      placeholder="Select"
-      track-by="id"
-      label="humanReadableName"
       :options="allProducts"
-      :show-labels="false"
-      :multiple="true"
-      :hideSelected="false"
-    ><span id="noRes" slot="noResult">Not found</span>
-    </multiselect>
+      id="selectedProducts"
+      :icons="true"
+      :getIconUrl="getIconUrl">
+    </custom-multiselect>
 
     <a @click="reset" id="reset">Reset filter</a>
   </section>
@@ -273,19 +228,18 @@
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import VCalendar from 'v-calendar'
 import axios from 'axios'
-import Multiselect from 'vue-multiselect'
 import { Site } from '../../../backend/src/entity/Site'
 import { File } from '../../../backend/src/entity/File'
 import { BTable } from 'bootstrap-vue/esm/components/table'
 import { BPagination } from 'bootstrap-vue/esm/components/pagination'
 import Datepicker from '../components/Datepicker.vue'
 import { Product } from '../../../backend/src/entity/Product'
+import CustomMultiselect from '../components/Multiselect.vue'
 
 Vue.component('datepicker', Datepicker)
-Vue.component('multiselect', Multiselect)
 Vue.component('b-table', BTable)
 Vue.component('b-pagination', BPagination)
-Vue.component('multiselect', Multiselect)
+Vue.component('custom-multiselect', CustomMultiselect)
 
 Vue.use(VCalendar)
 
@@ -304,7 +258,7 @@ export default class Search extends Vue {
   perPage = 25
 
   // site selector
-  siteOptions = []
+  allSites = []
   selectedSites = []
   allSiteIds = []
 
@@ -339,7 +293,7 @@ export default class Search extends Vue {
 
   async initView() {
     const res = await axios.get(`${this.apiUrl}sites/`)
-    this.siteOptions = res.data
+    this.allSites = res.data
     this.allSiteIds = res.data.map((d: Site) => d.id)
     this.allProducts = (await axios.get(`${this.apiUrl}products/`)).data
     this.fetchData()
@@ -383,8 +337,12 @@ export default class Search extends Vue {
     if (this.listLength > 0) this.$router.push(`file/${record.uuid}`)
   }
 
+  getIconUrl(product: string) {
+    return require(`../assets/icons/${product}.png`)
+  }
+
   setIcon(product: string) {
-    if (product) return {'style': `background-image: url(${require(`../assets/icons/${product}.png`)})`}
+    if (product) return {'style': `background-image: url(${this.getIconUrl(product)})`}
   }
 
   reset() {
