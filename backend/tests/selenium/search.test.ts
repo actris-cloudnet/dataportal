@@ -5,7 +5,7 @@ import { inboxDir, prepareSelenium, wait } from '../lib'
 
 let driver: WebDriver
 
-jest.setTimeout(30000)
+jest.setTimeout(60000)
 
 const getContent = async () => await (await findElement(By.tagName('html'))).getText()
 const clickTab = async () => await driver.actions().sendKeys(Key.TAB).perform()
