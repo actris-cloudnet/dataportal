@@ -17,6 +17,7 @@ async function initSearch() {
   await driver.get('http://localhost:8000/search')
   await clickClass('multiselect')
   await driver.actions().sendKeys(`bucharest${Key.ENTER}`).perform()
+  return wait(100)
 }
 
 async function setDateFromPast() {
@@ -126,6 +127,7 @@ describe('search page', () => {
     await sendInput('dateFrom', '1980')
     await clickClass('multiselect')
     await driver.actions().sendKeys(`mace${Key.ENTER}`).perform()
+    await wait(100)
     const content = await getContent()
     expect(content).toContain('Found 7 results')
     expect(content).toContain('Classification file from Bucharest')
