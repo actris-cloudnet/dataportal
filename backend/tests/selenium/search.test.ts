@@ -17,8 +17,7 @@ const clickXpath = async (key: string) => await (await findElement(By.xpath(key)
 
 async function initSearch() {
   await driver.get('http://localhost:8000/search')
-  await clickGrandparentById('siteSelect')
-  return driver.actions().sendKeys(`bucharest${Key.ENTER}`).perform()
+  return sendInputToMultiselect('siteSelect', 'bucharest')
 }
 
 async function setDateFromPast() {
@@ -33,6 +32,13 @@ async function sendInput(key: string, input: string) {
   const element = await findElement(By.name(key))
   await element.sendKeys(input)
   await clickTab()
+  return wait(100)
+}
+
+async function sendInputToMultiselect(key: string, input: string) {
+  await clickGrandparentById(key)
+  await driver.actions().sendKeys(`${input}${Key.ENTER}`).perform()
+  return wait(100)
 }
 
 async function findElement(by: By) {
@@ -120,9 +126,7 @@ describe('search page', () => {
 
   it('should work with different site selectors', async () => {
     await sendInput('dateFrom', '1980')
-    await clickGrandparentById('siteSelect')
-    await driver.actions().sendKeys(`mace${Key.ENTER}`).perform()
-    await wait(100)
+    await sendInputToMultiselect('siteSelect', 'mace')
     const content = await getContent()
     expect(content).toContain('Found 7 results')
     expect(content).toContain('Classification file from Bucharest')
@@ -131,10 +135,8 @@ describe('search page', () => {
 
   it('should work with different product selectors', async () => {
     await sendInput('dateFrom', '1980')
-    await clickGrandparentById('siteSelect')
-    await driver.actions().sendKeys(`bucharest${Key.ENTER}`).perform()
-    await clickGrandparentById('productSelect')
-    await driver.actions().sendKeys(`ice${Key.ENTER}`).perform()
+    await sendInputToMultiselect('siteSelect', 'bucharest')
+    await sendInputToMultiselect('productSelect', 'ice')
     const content = await getContent()
     expect(content).toContain('Found 2 results')
     expect(content).toContain('Ice water content file from Mace-Head')
