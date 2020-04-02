@@ -79,23 +79,33 @@ import Multiselect from 'vue-multiselect'
 
 Vue.component('multiselect', Multiselect)
 
+interface Selection {
+  id: string;
+  humanReadableName: string;
+}
+
 @Component
 export default class CustomMultiselect extends Vue {
   @Prop() id!: string
   @Prop() label!: string
-  @Prop() options!: []
+  @Prop() options!: Selection[]
   @Prop() icons!: boolean
   @Prop() getIconUrl!: Function
 
-  selection: [] = []
+  selection: Selection[] = []
 
-  set value(selection: []) {
+  set value(selection) {
     this.selection = selection
-    this.$emit('input', selection)
+    this.$emit('input', this.getSelectionIds())
   }
 
-  get value(): [] {
+  get value() {
     return this.selection
+  }
+
+  getSelectionIds() {
+    // Return all options by default
+    return this.selection.length > 0 ? this.selection.map(d => d.id) : this.options.map(d => d.id)
   }
 }
 </script>

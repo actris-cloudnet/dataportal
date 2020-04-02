@@ -151,7 +151,7 @@
   </div>
   <section id="sideBar">
     <header class="filterOptions">Filter search</header>
-    <custom-multiselect label="Location" v-model="selectedSites" :options="allSites" id="selectedSites" :icons="false">
+    <custom-multiselect label="Location" v-model="selectedSiteIds" :options="allSites" id="siteSelect" :icons="false">
     </custom-multiselect>
 
     <div class="date">
@@ -188,9 +188,9 @@
 
     <custom-multiselect
       label="Product"
-      v-model="selectedProducts"
+      v-model="selectedProductIds"
       :options="allProducts"
-      id="selectedProducts"
+      id="productSelect"
       :icons="true"
       :getIconUrl="getIconUrl">
     </custom-multiselect>
@@ -228,12 +228,10 @@
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import VCalendar from 'v-calendar'
 import axios from 'axios'
-import { Site } from '../../../backend/src/entity/Site'
 import { File } from '../../../backend/src/entity/File'
 import { BTable } from 'bootstrap-vue/esm/components/table'
 import { BPagination } from 'bootstrap-vue/esm/components/pagination'
 import Datepicker from '../components/Datepicker.vue'
-import { Product } from '../../../backend/src/entity/Product'
 import CustomMultiselect from '../components/Multiselect.vue'
 
 Vue.component('datepicker', Datepicker)
@@ -259,8 +257,7 @@ export default class Search extends Vue {
 
   // site selector
   allSites = []
-  selectedSites = []
-  allSiteIds = []
+  selectedSiteIds = []
 
   // dates
   beginningOfHistory = new Date('1970-01-01')
@@ -271,8 +268,8 @@ export default class Search extends Vue {
   dateToError: { [key: string]: boolean } = {}
 
   // products
-  selectedProducts = []
   allProducts = []
+  selectedProductIds = []
 
   renderComplete = false
 
@@ -292,17 +289,20 @@ export default class Search extends Vue {
   }
 
   async initView() {
-    const res = await axios.get(`${this.apiUrl}sites/`)
-    this.allSites = res.data
-    this.allSiteIds = res.data.map((d: Site) => d.id)
-    this.allProducts = (await axios.get(`${this.apiUrl}products/`)).data
-    this.fetchData()
+    Promise.all([
+      axios.get(`${this.apiUrl}sites/`),
+      axios.get(`${this.apiUrl}products/`)
+    ]).then(([sites, products]) => {
+      this.allSites = sites.data
+      this.allProducts = products.data
+      this.fetchData()
+    })
   }
 
   get payload() {
-    const sites = this.selectedSites.length > 0 ? this.selectedSites.map((d: Site) => d.id) : this.allSiteIds
-    const productIds = this.selectedProducts.map((d: Product) => d.id)
-    return {params: {location: sites, dateFrom: this.dateFrom, dateTo: this.dateTo, product: productIds}}
+    return {params:
+      {location: this.selectedSiteIds, dateFrom: this.dateFrom, dateTo: this.dateTo, product: this.selectedProductIds}
+    }
   }
 
   fetchData() {
@@ -349,7 +349,7 @@ export default class Search extends Vue {
     this.$router.go(0)
   }
 
-  @Watch('selectedSites')
+  @Watch('selectedSiteIds')
   onSiteSelected() {
     this.fetchData()
   }
@@ -366,7 +366,7 @@ export default class Search extends Vue {
     this.fetchData()
   }
 
-  @Watch('selectedProducts')
+  @Watch('selectedProductIds')
   onProductSelected() {
     this.fetchData()
   }
