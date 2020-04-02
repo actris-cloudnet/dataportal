@@ -28,6 +28,8 @@
         background-color: white
         font-weight: normal
         color: #bbbbbb
+        img
+          opacity: 0.5
 
   .multiselect__tag-icon:after
     color: gray
