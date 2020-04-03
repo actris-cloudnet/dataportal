@@ -13,7 +13,10 @@
     border-radius: 2px
     background: #fdfce5
     width: 100%
-    padding: 0.5em
+    padding-top: 0.5em
+    padding-bottom: 0.5em
+    padding-left: 1em
+    padding-right: 1em
     margin-bottom: 2em
 
   .close
@@ -21,6 +24,7 @@
     font-weight: bold
     color: lightgrey
     cursor: pointer
+    margin-left: 1em
 
   section#fileTable
     padding-left: 30px
