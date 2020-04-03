@@ -21,6 +21,20 @@ const routes = [
     },
     component: () => import('../views/Search.vue'),
     props: true
+  },
+  {
+    path: '*',
+    name: 'ApiError',
+    meta: {
+      title: 'Not Found'
+    },
+    component: () => import('../views/ApiError.vue'),
+    props: {
+      response: {
+        status: 404,
+        data: 'Not Found'
+      }
+    }
   }
 ]
 

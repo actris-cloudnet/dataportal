@@ -124,3 +124,6 @@ public/css
 
 # Pycharm settings
 .idea
+
+# Config
+config.prod.ts

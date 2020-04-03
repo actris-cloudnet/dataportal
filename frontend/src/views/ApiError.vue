@@ -1,6 +1,29 @@
+<style scoped lang="sass">
+h1
+  font-size: 4em
+  text-align: center
+
+h2
+  text-align: center
+
+section
+  margin-top: 2em
+  margin-left: auto
+  margin-right: auto
+  width: 35em
+  text-align: center
+  display: block
+</style>
+
 <template>
     <main id="error">
-        <h2>Error {{ response.status }} - {{ response.data }}</h2>
+        <h1>{{ response.status }}</h1>
+        <h2>{{ response.data }}</h2>
+        <section v-if="response.status == 404">
+        The file you are looking for does not exist.<br>
+        If you are looking for the old devcloudnet data portal, click <a href="http://devcloudnet.fmi.fi">here</a>.<br>
+        If you are looking for the legacy cloudnet site, click <a href="http://legacy.cloudnet.fmi.fi">here</a>.
+        </section>
     </main>
 </template>
 

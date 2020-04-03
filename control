@@ -26,6 +26,10 @@ typeset -A frontend_targets
 backend_targets[$pid_dir/.listen-inbox.pid]="scripts/listen-inbox.sh $inbox_dir"
 backend_targets[$pid_dir/.node.pid]="npx nodemon -w build -- $backend_port"
 
+is_production () {
+    [ "$NODE_ENV" '==' 'production' ]
+}
+
 waitport () {
     timeout=10
     interval=0.5
@@ -33,11 +37,12 @@ waitport () {
     while ! nc -z localhost $1; do
         if [[ "$i" -ge $timeout ]]; then
             echo "Timeout"
-            exit 2
+            return 2
         fi
         sleep $interval
         i=$((i+$interval))
     done
+    return 0
 }
 
 backend_postinstall () {
@@ -48,8 +53,7 @@ backend_postinstall () {
     createdb dataportal
     createdb dataportal-test
     npm run build
-    npx typeorm schema:sync
-    if [[ "$NODE_ENV" != 'production' ]]; then npx fixtures ./fixtures/Site.yml; fi
+    npx fixtures ./fixtures/Site.yml
 }
 
 case "$action" in
@@ -59,20 +63,23 @@ case "$action" in
     for target cmd in ${(kv)backend_targets}; do
         if [[ ! -f $target ]]; then
             echo $cmd
-            eval "${cmd} >> $pid_dir/all.log 2>&1 &"
+            eval "nohup ${cmd} >> $pid_dir/all.log 2>&1 &"
             echo $! > $target
         fi
     done
     echo
     cd ..
-    echo "Starting nginx..."
-    if [[ ! -f .nginx.pid ]]; then
-        nginx -p . -c .nginx.conf
+    if ! is_production; then
+        echo "Starting nginx..."
+        if [[ ! -f .nginx.pid ]]; then
+            nginx -p . -c .nginx.conf
+        fi
+        waitport $fileserver_port
+        waitport $frontend_port
     fi
 
     waitport $backend_port
-    waitport $fileserver_port
-    waitport $frontend_port
+    exit $?
     ;;
 
     stop)
@@ -82,9 +89,11 @@ case "$action" in
         pkill -F $pid
         rm -f $pid
     done
-    echo .nginx.pid
-    pkill -F .nginx.pid
-    truncate --size 0 */$pid_dir/all.log
+    if ! is_production; then
+        echo .nginx.pid
+        pkill -F .nginx.pid
+        truncate --size 0 */$pid_dir/all.log
+    fi
     ;;
 
     restart)
@@ -126,7 +135,7 @@ case "$action" in
     mkdir public
     npx typeorm schema:drop
     npx tsc --build tsconfig.json
-    if [[ "$NODE_ENV" != 'production' ]]; then npx fixtures ./fixtures/Site.yml; fi
+    npx fixtures ./fixtures/Site.yml
     cd ..
     ;;
 
@@ -134,7 +143,7 @@ case "$action" in
     echo "Installing backend..."
     cd backend
     npm install
-    backend_postinstall
+    ! is_production && backend_postinstall
     echo
     echo "Installing frontend..."
     cd ../frontend
@@ -154,12 +163,22 @@ case "$action" in
     cd ..
     ;;
 
+    lint)
+    cd frontend
+    npm run lint
+    cd ../backend
+    npm run lint
+    cd ..
+    ;;
+
     build)
-    echo "Building backend..."
-    cd backend
-    npm run build
     echo "Building frontend..."
-    cd ../frontend
+    cd frontend
+    [ -d dist ] && rm -rf dist
+    npm run build
+    echo "Building backend..."
+    cd ../backend
+    [ -d build ] && rm -rf build
     npm run build
     cd ..
     ;;

@@ -7,9 +7,10 @@ import { RequestError, RequestErrorArray } from './entity/RequestError'
 import { stringify } from './lib'
 import * as express from 'express'
 import validator from 'validator'
+import config from './config'
 
 const port = parseInt(process.argv[2])
-const connName: string = process.env.NODE_ENV == 'test' ? 'test' : 'default'
+const connName = config.connectionName
 
 async function init() {
   const app = express()
