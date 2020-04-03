@@ -4,7 +4,7 @@ import { Request, Response, RequestHandler, ErrorRequestHandler } from 'express'
 import { File } from './entity/File'
 import { Site } from './entity/Site'
 import { RequestError, RequestErrorArray } from './entity/RequestError'
-import { stringify } from './lib'
+import { stringify, dateToUTCString } from './lib'
 import * as express from 'express'
 import validator from 'validator'
 import config from './config'
@@ -32,6 +32,37 @@ async function init() {
         .catch(err=> next({status: 500, errors: err}))
     })
   }
+
+  app.get('/status', async (_req: Request, res: Response, next) => {
+    const fileRepo = conn.getRepository(File)
+    fileRepo.createQueryBuilder('file') .leftJoin('file.site', 'site')
+      .select('site.id')
+      .addSelect('MAX(file.releasedAt)', 'last_update')
+      .addSelect('MAX(file.measurementDate)', 'last_measurement')
+      .groupBy('site.id')
+      .orderBy('site.id')
+      .getRawMany()
+      .then(result => {
+        let resultTable =
+          result.map(res => `${res.site_id}\t${dateToUTCString(res.last_update)}\t${dateToUTCString(res.last_measurement)}`)
+        resultTable.unshift(Object.keys(result[0]).join('\t\t'))
+        res.send(`
+          <html>
+          <head>
+          <style>body {background:#222;color:#eee}</style>
+          <meta http-equiv="refresh" content="10">
+          </head>
+          <body>
+          <pre>Status on ${dateToUTCString(new Date())}</pre>
+          <pre>${resultTable.join('\n')}</pre>
+          </body>
+          </html>
+        `)
+      })
+      .catch(err=> {
+        next({status: 500, errors: err})
+      })
+  })
 
   const fetchAll = <T>(schema: Function): Promise<T[]> => {
     const repo = conn.getRepository(schema)
