@@ -40,7 +40,7 @@ async function init() {
       .addSelect('MAX(file.releasedAt)', 'last_update')
       .addSelect('MAX(file.measurementDate)', 'last_measurement')
       .groupBy('site.id')
-      .orderBy('site.id')
+      .orderBy('last_update', 'DESC')
       .getRawMany()
       .then(result => {
         let resultTable =
