@@ -37,12 +37,12 @@ waitport () {
     while ! nc -z localhost $1; do
         if [[ "$i" -ge $timeout ]]; then
             echo "Timeout"
-            exit 2
+            return 2
         fi
         sleep $interval
         i=$((i+$interval))
     done
-    exit 0
+    return 0
 }
 
 backend_postinstall () {
