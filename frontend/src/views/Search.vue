@@ -241,6 +241,11 @@ Vue.component('custom-multiselect', CustomMultiselect)
 
 Vue.use(VCalendar)
 
+export interface Selection {
+  id: string;
+  humanReadableName: string;
+}
+
 @Component
 export default class Search extends Vue {
 
@@ -293,8 +298,8 @@ export default class Search extends Vue {
       axios.get(`${this.apiUrl}sites/`),
       axios.get(`${this.apiUrl}products/`)
     ]).then(([sites, products]) => {
-      this.allSites = sites.data
-      this.allProducts = products.data
+      this.allSites = sites.data.sort((a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName)
+      this.allProducts = products.data.sort((a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName)
       this.fetchData()
     })
   }

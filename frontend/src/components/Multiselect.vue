@@ -78,13 +78,9 @@ import Component from 'vue-class-component'
 import Vue from 'vue'
 import { Prop } from 'vue-property-decorator'
 import Multiselect from 'vue-multiselect'
+import { Selection } from '../views/Search.vue'
 
 Vue.component('multiselect', Multiselect)
-
-interface Selection {
-  id: string;
-  humanReadableName: string;
-}
 
 @Component
 export default class CustomMultiselect extends Vue {
