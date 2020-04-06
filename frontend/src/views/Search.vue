@@ -86,37 +86,6 @@
   .multiselect
     margin-bottom: $filter-margin
 
-  .multiselect__input
-    padding: 2px
-    padding-left: 0px
-    &::placeholder
-      font-size: 88%
-      color: gray
-
-  .multiselect__tags-wrap
-    span, span i:hover
-      color: black
-      background-color: $steel-warrior
-
-  .multiselect__element
-    font-size: 90%
-    color: black
-    .multiselect__option--highlight
-      color: black
-      background-color: $steel-warrior
-      span
-        background-color: $steel-warrior
-    .multiselect__option--selected
-      background-color: white
-      pointer-events: none
-      span
-        background-color: white
-        font-weight: normal
-        color: #bbbbbb
-
-  .multiselect__tag-icon:after
-    color: gray
-
   div.date
     display: grid
     grid-template-columns: 1fr 1fr
@@ -182,18 +151,8 @@
   </div>
   <section id="sideBar">
     <header class="filterOptions">Filter search</header>
-    <label for="siteSelect">Locations</label>
-    <multiselect name="siteSelect" id="siteSelect"
-      v-model="selectedSites"
-      placeholder="Select"
-      track-by="id"
-      label="humanReadableName"
-      :options="siteOptions"
-      :show-labels="false"
-      :multiple="true"
-      :hideSelected="false"
-    ><span id="noRes" slot="noResult">Not found</span>
-    </multiselect>
+    <custom-multiselect label="Location" v-model="selectedSiteIds" :options="allSites" id="siteSelect" :icons="false">
+    </custom-multiselect>
 
     <div class="date">
       <datepicker
@@ -227,6 +186,15 @@
       </div>
     </div>
 
+    <custom-multiselect
+      label="Product"
+      v-model="selectedProductIds"
+      :options="allProducts"
+      id="productSelect"
+      :icons="true"
+      :getIconUrl="getIconUrl">
+    </custom-multiselect>
+
     <a @click="reset" id="reset">Reset filter</a>
   </section>
 
@@ -235,7 +203,7 @@
     <b-table id="tableContent" borderless small striped hover sort-icon-left
       :items="apiResponse.data"
       :fields="[
-                { key: 'product', label: '', tdClass: 'icon', tdAttr: setIcon},
+                { key: 'product.id', label: '', tdClass: 'icon', tdAttr: setIcon},
                 { key: 'title', label: 'Data object', sortable: true},
                 { key: 'measurementDate', label: 'Date', sortable: true},
                 ]"
@@ -260,20 +228,23 @@
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import VCalendar from 'v-calendar'
 import axios from 'axios'
-import Multiselect from 'vue-multiselect'
-import { Site } from '../../../backend/src/entity/Site'
 import { File } from '../../../backend/src/entity/File'
 import { BTable } from 'bootstrap-vue/esm/components/table'
 import { BPagination } from 'bootstrap-vue/esm/components/pagination'
 import Datepicker from '../components/Datepicker.vue'
+import CustomMultiselect from '../components/Multiselect.vue'
 
 Vue.component('datepicker', Datepicker)
-Vue.component('multiselect', Multiselect)
 Vue.component('b-table', BTable)
 Vue.component('b-pagination', BPagination)
-Vue.component('multiselect', Multiselect)
+Vue.component('custom-multiselect', CustomMultiselect)
 
 Vue.use(VCalendar)
+
+export interface Selection {
+  id: string;
+  humanReadableName: string;
+}
 
 @Component
 export default class Search extends Vue {
@@ -290,9 +261,8 @@ export default class Search extends Vue {
   perPage = 25
 
   // site selector
-  siteOptions = []
-  selectedSites = []
-  allSiteIds = []
+  allSites = []
+  selectedSiteIds = []
 
   // dates
   beginningOfHistory = new Date('1970-01-01')
@@ -301,6 +271,10 @@ export default class Search extends Vue {
   dateTo = this.today
   dateFromError: { [key: string]: boolean } = {}
   dateToError: { [key: string]: boolean } = {}
+
+  // products
+  allProducts = []
+  selectedProductIds = []
 
   renderComplete = false
 
@@ -320,15 +294,20 @@ export default class Search extends Vue {
   }
 
   async initView() {
-    const res = await axios.get(`${this.apiUrl}sites/`)
-    this.siteOptions = res.data
-    this.allSiteIds = res.data.map((d: Site) => d.id)
-    this.fetchData()
+    Promise.all([
+      axios.get(`${this.apiUrl}sites/`),
+      axios.get(`${this.apiUrl}products/`)
+    ]).then(([sites, products]) => {
+      this.allSites = sites.data.sort((a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName)
+      this.allProducts = products.data.sort((a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName)
+      this.fetchData()
+    })
   }
 
   get payload() {
-    const sites = this.selectedSites.length > 0 ? this.selectedSites.map((d: Site) => d.id) : this.allSiteIds
-    return {params: {location: sites, dateFrom: this.dateFrom, dateTo: this.dateTo}}
+    return {params:
+      {location: this.selectedSiteIds, dateFrom: this.dateFrom, dateTo: this.dateTo, product: this.selectedProductIds}
+    }
   }
 
   fetchData() {
@@ -363,15 +342,19 @@ export default class Search extends Vue {
     if (this.listLength > 0) this.$router.push(`file/${record.uuid}`)
   }
 
+  getIconUrl(product: string) {
+    return require(`../assets/icons/${product}.png`)
+  }
+
   setIcon(product: string) {
-    if (product) return {'style': `background-image: url(${require(`../assets/icons/${product}.png`)})`}
+    if (product) return {'style': `background-image: url(${this.getIconUrl(product)})`}
   }
 
   reset() {
     this.$router.go(0)
   }
 
-  @Watch('selectedSites')
+  @Watch('selectedSiteIds')
   onSiteSelected() {
     this.fetchData()
   }
@@ -388,5 +371,9 @@ export default class Search extends Vue {
     this.fetchData()
   }
 
+  @Watch('selectedProductIds')
+  onProductSelected() {
+    this.fetchData()
+  }
 }
 </script>

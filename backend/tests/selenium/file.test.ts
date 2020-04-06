@@ -6,7 +6,7 @@ import { inboxDir, prepareSelenium, wait } from '../lib'
 
 let driver: WebDriver
 
-jest.setTimeout(30000)
+jest.setTimeout(60000)
 
 async function awaitAndFind(by: By) {
   await driver.wait(until.elementLocated(by))

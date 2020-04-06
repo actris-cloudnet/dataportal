@@ -11,6 +11,7 @@ import { isNetCDFObject, getMissingFields, NetCDFObject } from './entity/NetCDFO
 import { spawn } from 'child_process'
 import { stringify } from './lib'
 import config from './config'
+import { Product } from './entity/Product'
 
 const connName = config.connectionName
 let filename: string
@@ -29,6 +30,9 @@ interface NetCDFXML {
 
 const checkSiteExists = (conn: Connection, site: string): Promise<Site> =>
   conn.getRepository(Site).findOneOrFail(site.toLowerCase().replace(/\W/g, ''))
+
+const checkProductExists = (conn: Connection, product: string): Promise<Product> =>
+  conn.getRepository(Product).findOneOrFail(product)
 
 async function computeFileChecksum(filename: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -110,11 +114,12 @@ async function parseXmlFromStdin(): Promise<NetCDFObject> {
         computeFileSize(filename),
         getFileFormat(filename),
         checkSiteExists(connection, ncObj.location),
+        checkProductExists(connection, ncObj.cloudnet_file_type),
         linkFile(filename)
       ])
     )
-    .then(([ncObj, baseFilename, chksum, {size}, format, site]) => {
-      const file = new File(ncObj, baseFilename, chksum, size, format, site)
+    .then(([ncObj, baseFilename, chksum, {size}, format, site, product]) => {
+      const file = new File(ncObj, baseFilename, chksum, size, format, site, product)
       return connection.manager.save(file)
     })
     .catch(err => console.error('Failed to import NetCDF XML to DB: ', filename, '\n', err))

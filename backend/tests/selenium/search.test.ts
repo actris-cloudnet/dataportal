@@ -5,19 +5,19 @@ import { inboxDir, prepareSelenium, wait } from '../lib'
 
 let driver: WebDriver
 
-jest.setTimeout(30000)
+jest.setTimeout(60000)
 
 const getContent = async () => await (await findElement(By.tagName('html'))).getText()
 const clickTab = async () => await driver.actions().sendKeys(Key.TAB).perform()
-const clickId = async (key: string) => await (await findElement(By.id(key))).click()
+const getById = async (key: string) => await findElement(By.id(key))
+const clickId = async (key: string) => (await getById(key)).click()
+const clickGrandparentById = async (key: string) => (await (await getById(key)).findElement(By.xpath('../..'))).click()
 const clickClass = async (key: string) => await (await findElement(By.className(key))).click()
 const clickXpath = async (key: string) => await (await findElement(By.xpath(key))).click()
 
 async function initSearch() {
   await driver.get('http://localhost:8000/search')
-  await clickClass('multiselect')
-  await driver.actions().sendKeys(`bucharest${Key.ENTER}`).perform()
-  return wait(100)
+  return sendInputToMultiselect('siteSelect', 'bucharest')
 }
 
 async function setDateFromPast() {
@@ -32,6 +32,13 @@ async function sendInput(key: string, input: string) {
   const element = await findElement(By.name(key))
   await element.sendKeys(input)
   await clickTab()
+  return wait(100)
+}
+
+async function sendInputToMultiselect(key: string, input: string) {
+  await clickGrandparentById(key)
+  await driver.actions().sendKeys(`${input}${Key.ENTER}`).perform()
+  return wait(100)
 }
 
 async function findElement(by: By) {
@@ -59,14 +66,14 @@ describe('search page', () => {
     await wait(3000)
   })
 
+  beforeEach(initSearch)
+
   it('should initially contain no files', async () => {
-    await initSearch()
     const content = await getContent()
     expect(content).toContain('No results')
   })
 
   it('should contain all files with large date span', async () => {
-    await initSearch()
     await sendInput('dateFrom', '2010')
     const content = await getContent()
     expect(content).toContain('Found 5 results')
@@ -77,7 +84,6 @@ describe('search page', () => {
   })
 
   it('should contain correct number of files after setting a date range', async () => {
-    await initSearch()
     await sendInput('dateFrom', '2019-07-23')
     await sendInput('dateTo', '2019-07-26')
     const content = await getContent()
@@ -88,7 +94,6 @@ describe('search page', () => {
   })
 
   it('should forward to correct landing page after sorting and clicking certain row', async () => {
-    await initSearch()
     await sendInput('dateFrom', '2010')
     await clickClass('b-table-sort-icon-left')
     await clickTab()
@@ -99,7 +104,6 @@ describe('search page', () => {
   })
 
   it('should reset the search after clicking the reset button', async () => {
-    await initSearch()
     await sendInput('dateFrom', '2010')
     await clickId('reset')
     await wait(1000)
@@ -108,14 +112,12 @@ describe('search page', () => {
   })
 
   it('should work when clicking the calendar', async () => {
-    await initSearch()
     await setDateFromPast()
     const content = await getContent()
     expect(content).toContain('Found 5 results')
   })
 
   it('correct calendar input should override incorrect keyboard input', async () => {
-    await initSearch()
     await sendInput('dateFrom', '2023')
     await setDateFromPast()
     const content = await getContent()
@@ -123,16 +125,20 @@ describe('search page', () => {
   })
 
   it('should work with different site selectors', async () => {
-    await initSearch()
     await sendInput('dateFrom', '1980')
-    await clickClass('multiselect')
-    await driver.actions().sendKeys(`mace${Key.ENTER}`).perform()
-    await wait(100)
+    await sendInputToMultiselect('siteSelect', 'mace')
     const content = await getContent()
     expect(content).toContain('Found 7 results')
     expect(content).toContain('Classification file from Bucharest')
     expect(content).toContain('Ice water content file from Mace-Head')
   })
 
-
+  it('should work with different product selectors', async () => {
+    await sendInput('dateFrom', '1980')
+    await sendInputToMultiselect('siteSelect', 'bucharest')
+    await sendInputToMultiselect('productSelect', 'ice')
+    const content = await getContent()
+    expect(content).toContain('Found 2 results')
+    expect(content).toContain('Ice water content file from Mace-Head')
+  })
 })

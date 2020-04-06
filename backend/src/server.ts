@@ -8,6 +8,7 @@ import { stringify } from './lib'
 import * as express from 'express'
 import validator from 'validator'
 import config from './config'
+import { Product } from './entity/Product'
 
 const port = parseInt(process.argv[2])
 const connName = config.connectionName
@@ -26,15 +27,15 @@ async function init() {
 
     app.get('/allfiles', async (req: Request, res: Response, next) => {
       const fileRepo = conn.getRepository(File)
-      fileRepo.find({ relations: ['site'] })
+      fileRepo.find({ relations: ['site', 'product'] })
         .then(result => res.send(result))
         .catch(err=> next({status: 500, errors: err}))
     })
   }
 
-  const fetchAllSites = () => {
-    const siteRepo = conn.getRepository(Site)
-    return siteRepo.find()
+  const fetchAll = <T>(schema: Function): Promise<T[]> => {
+    const repo = conn.getRepository(schema)
+    return repo.find() as Promise<T[]>
   }
   const filesValidator: RequestHandler = (req, _res, next) => {
     const requestError: RequestErrorArray = {status: 400, errors: []}
@@ -47,14 +48,28 @@ async function init() {
     }
     const isValidDate = (obj: any) => !isNaN(new Date(obj).getDate())
 
+
     if (Object.keys(query).length == 0) {
       return next(pushAndReturn(requestError, 'No search parameters given'))
+    }
+
+    const validKeys = ['location', 'product', 'dateFrom', 'dateTo']
+    const unknownFields = Object.keys(query).filter(key => !validKeys.includes(key))
+    console.log(unknownFields)
+    if (unknownFields.length > 0) {
+      requestError.errors.push(`Unknown query parameters: ${unknownFields}`)
     }
 
     // Validate location
     if ('location' in query && !((typeof query.location == 'string' && validator.isAlphanumeric(query.location))
       || isArrayWithElements(query.location))) {
       requestError.errors.push('Malformed location')
+    }
+
+    // Validate product
+    if ('product' in query && !((typeof query.product == 'string' && validator.isAlphanumeric(query.product))
+      || isArrayWithElements(query.product))) {
+      requestError.errors.push('Malformed product')
     }
 
     // Validate dates
@@ -73,37 +88,41 @@ async function init() {
 
   const filesQueryAugmenter: RequestHandler = async (req, _res, next) => {
     const query = req.query
-    const queryLocationToArray = (obj: string | Array<string>): Array<string> =>
+    const toArray = (obj: string | Array<string>): Array<string> =>
       (typeof obj == 'string') ? [ obj ] : obj
     const tomorrow = () => {
       const tomorrow = new Date()
       tomorrow.setDate(tomorrow.getDate() + 1)
       return tomorrow
     }
-    const defaultLocation = async () => (await fetchAllSites()).map(site => site.id)
+    const defaultLocation = async () => (await fetchAll<Site>(Site)).map(site => site.id)
+    const defaultProduct = async () => (await fetchAll<Product>(Product)).map(product => product.id)
     const defaultDateFrom = () => new Date('1970-01-01')
     const defaultDateTo = tomorrow
 
     // Set defaults
     if (!('location' in query)) query.location = await defaultLocation()
+    if (!('product' in query)) query.product = await defaultProduct()
     if (!('dateFrom' in query)) query.dateFrom = defaultDateFrom()
     if (!('dateTo' in query)) query.dateTo = defaultDateTo()
 
-    query.location = queryLocationToArray(query.location)
+    query.location = toArray(query.location)
+    query.product = toArray(query.product)
 
     next()
   }
 
-  app.get('/file/:uuid', async (req: Request, res: Response) => {
+  app.get('/file/:uuid', async (req: Request, res: Response, next) => {
     const repo = conn.getRepository(File)
-    repo.findOneOrFail(req.params.uuid, { relations: ['site']})
+    repo.findOneOrFail(req.params.uuid, { relations: ['site', 'product']})
       .then(result => res.send(result))
-      .catch(_ => res.sendStatus(404))
+      .catch(_ =>  next({status: 404, errors: [ 'No files match this UUID' ]}))
   })
 
   app.get('/files', filesValidator, filesQueryAugmenter, async (req: Request, res: Response, next) => {
     const fileRepo = conn.getRepository(File)
     const siteRepo = conn.getRepository(Site)
+    const productRepo = conn.getRepository(Product)
     const query = req.query
 
     siteRepo.findByIds(query.location)
@@ -111,9 +130,18 @@ async function init() {
         if (res.length != query.location.length) throw {status: 404, errors: ['One or more of the specified locations were not found'], params: req.query}
       })
       .catch(next)
+
+    productRepo.findByIds(query.product)
+      .then(res => {
+        if (res.length != query.product.length) throw {status: 404, errors: ['One or more of the specified products were not found'], params: req.query}
+      })
+      .catch(next)
+
     fileRepo.createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
+      .leftJoinAndSelect('file.product', 'product')
       .where('site.id IN (:...location)', query)
+      .andWhere('product.id IN (:...product)', query)
       .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate < :dateTo', query)
       .orderBy('file.measurementDate', 'DESC')
       .getMany()
@@ -130,7 +158,13 @@ async function init() {
   })
 
   app.get('/sites', async (_req: Request, res: Response, next) => {
-    fetchAllSites()
+    fetchAll<Site>(Site)
+      .then(result => res.send(result))
+      .catch(err => next({status: 500, errors: err}))
+  })
+
+  app.get('/products', async (_req: Request, res: Response, next) => {
+    fetchAll<Product>(Product)
       .then(result => res.send(result))
       .catch(err => next({status: 500, errors: err}))
   })
