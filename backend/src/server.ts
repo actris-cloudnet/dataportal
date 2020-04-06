@@ -48,8 +48,16 @@ async function init() {
     }
     const isValidDate = (obj: any) => !isNaN(new Date(obj).getDate())
 
+
     if (Object.keys(query).length == 0) {
       return next(pushAndReturn(requestError, 'No search parameters given'))
+    }
+
+    const validKeys = ['location', 'product', 'dateFrom', 'dateTo']
+    const unknownFields = Object.keys(query).filter(key => !validKeys.includes(key))
+    console.log(unknownFields)
+    if (unknownFields.length > 0) {
+      requestError.errors.push(`Unknown query parameters: ${unknownFields}`)
     }
 
     // Validate location

@@ -19,6 +19,16 @@ describe('/files', () => {
     return expect(axios.get(`${backendUrl}files/`)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
 
+  it('should respond with 400 if invalid query parameters are given', () => {
+    const payload = {params: {location: 'macehead', x: '', y: 'kissa'}}
+    const expectedBody: RequestError = {
+      status: 400,
+      errors: [ 'Unknown query parameters: x,y' ]
+    }
+    return expect(axios.get(`${backendUrl}files/`, payload))
+      .rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
+  })
+
   it('should respond with an array of 3 objects when searching for macehead', async () => {
     const payload = {params: {location: 'macehead'}}
     const res = await axios.get(url, payload)
