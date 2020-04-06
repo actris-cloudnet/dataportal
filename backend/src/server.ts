@@ -112,11 +112,11 @@ async function init() {
     next()
   }
 
-  app.get('/file/:uuid', async (req: Request, res: Response) => {
+  app.get('/file/:uuid', async (req: Request, res: Response, next) => {
     const repo = conn.getRepository(File)
     repo.findOneOrFail(req.params.uuid, { relations: ['site', 'product']})
       .then(result => res.send(result))
-      .catch(_ => res.sendStatus(404))
+      .catch(_ =>  next({status: 404, errors: [ 'No files match this UUID' ]}))
   })
 
   app.get('/files', filesValidator, filesQueryAugmenter, async (req: Request, res: Response, next) => {
