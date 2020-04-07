@@ -18,7 +18,7 @@ let config: Config
 switch (process.env.NODE_ENV) {
 case 'production':
   try {
-    config = require('config.prod.js')
+    config = require('./config.prod').default
   } catch (ex) {
     throw new Error('FATAL: Production configuration not found.')
   }
