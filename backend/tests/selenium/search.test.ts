@@ -24,6 +24,7 @@ async function setDateFromPast() {
   await clickXpath('//html')
   const sequence = ['calendar', 'vc-title', 'vc-nav-title', 'vc-w-12', 'vc-w-12', 'day-1']
   for (let i=0; i < sequence.length; i++) {
+    await wait(50)
     await clickClass(sequence[i])
   }
 }
