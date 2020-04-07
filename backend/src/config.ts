@@ -18,10 +18,9 @@ let config: Config
 switch (process.env.NODE_ENV) {
 case 'production':
   try {
-    config = require('config.prod.ts')
+    config = require('config.prod.js')
   } catch (ex) {
-    console.error('WARN: Production config not found, using dev config instead.')
-    config = devConfig
+    throw new Error('FATAL: Production configuration not found.')
   }
   break
 case 'test':
