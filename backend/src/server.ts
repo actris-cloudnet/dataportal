@@ -18,6 +18,10 @@ async function init() {
 
   const conn = await createConnection(connName)
 
+  const fileRepo = conn.getRepository(File)
+  const siteRepo = conn.getRepository(Site)
+  const productRepo = conn.getRepository(Product)
+
   if (process.env.NODE_ENV != 'production') {
     app.use(function(req, res, next) {
       res.header('Access-Control-Allow-Origin', '*') // update to match the domain you will make the request from
@@ -26,7 +30,6 @@ async function init() {
     })
 
     app.get('/allfiles', async (req: Request, res: Response, next) => {
-      const fileRepo = conn.getRepository(File)
       fileRepo.find({ relations: ['site', 'product'] })
         .then(result => res.send(result))
         .catch(err=> next({status: 500, errors: err}))
@@ -34,7 +37,6 @@ async function init() {
   }
 
   app.get('/status', async (_req: Request, res: Response, next) => {
-    const fileRepo = conn.getRepository(File)
     fileRepo.createQueryBuilder('file') .leftJoin('file.site', 'site')
       .select('site.id')
       .addSelect('MAX(file.releasedAt)', 'last_update')
@@ -151,9 +153,6 @@ async function init() {
   })
 
   app.get('/files', filesValidator, filesQueryAugmenter, async (req: Request, res: Response, next) => {
-    const fileRepo = conn.getRepository(File)
-    const siteRepo = conn.getRepository(Site)
-    const productRepo = conn.getRepository(Product)
     const query = req.query
 
     siteRepo.findByIds(query.location)
@@ -189,8 +188,7 @@ async function init() {
   })
 
   app.get('/sites', async (_req: Request, res: Response, next) => {
-    const repo = conn.getRepository(Site)
-    repo.createQueryBuilder('site')
+    siteRepo.createQueryBuilder('site')
       .select()
       .where('not test')
       .getMany()
