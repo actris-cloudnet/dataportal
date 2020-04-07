@@ -26,5 +26,5 @@ export class Site {
     country!: string
 
     @OneToMany(_ => File, file => file.site)
-    files!: File[];
+    files!: File[]
 }
