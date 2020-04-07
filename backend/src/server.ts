@@ -189,7 +189,11 @@ async function init() {
   })
 
   app.get('/sites', async (_req: Request, res: Response, next) => {
-    fetchAll<Site>(Site)
+    const repo = conn.getRepository(Site)
+    repo.createQueryBuilder('site')
+      .select()
+      .where('not test')
+      .getMany()
       .then(result => res.send(result))
       .catch(err => next({status: 500, errors: err}))
   })
