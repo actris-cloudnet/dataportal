@@ -100,9 +100,9 @@ describe('/files', () => {
 describe('/sites', () => {
   const url = `${backendUrl}sites/`
   it('should respond with a list of all sites', async () => {
-    const sites = ['macehead', 'hyytiala', 'bucharest']
+    const sites = ['macehead', 'hyytiala', 'bucharest', 'granada']
     const res = await axios.get(url)
-    expect(res.data).toHaveLength(3)
+    expect(res.data).toHaveLength(sites.length)
     const siteList = res.data.map((d: any) => d.id)
     sites.forEach(site => expect(siteList).toContain(site))
   })

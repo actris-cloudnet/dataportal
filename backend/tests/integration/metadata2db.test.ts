@@ -9,8 +9,10 @@ const bucharestXmlMissing = 'tests/data/20190723_bucharest_classification_missin
 const bucharestXmlInvalidLocation = 'tests/data/20190723_bucharest_classification_invalid_location.xml'
 const partialLidarXml = 'tests/data/partial_lidar.xml'
 const fullLidarXml = 'tests/data/full_lidar.xml'
+const granadaXml = 'tests/data/20200126_granada_ecmwf.xml'
 const uuid = '15506ea8d3574c7baf8c95dfcc34fc7d'
 const lidarUuid = '04ddd0c2f74e481198465c33b95f06af'
+const granadaUuid = '9e04d8ef0f2b4823835d33e458403c67'
 
 let conn: Connection
 let repo: Repository<File>
@@ -64,6 +66,16 @@ test('does not overwrite existing stable files', async () => {
   const out = await readXmlIn(bucharestXml, false)
   expect(out).toMatch('Failed to import NetCDF XML to DB:')
   return expect(out).toMatch('Cannot update a stable file')
+})
+
+test('overwrites existing stable files on test site', async () => {
+  await readXmlIn(granadaXml, true)
+  const now = new Date()
+  const oldRelease = (await repo.findOneOrFail(granadaUuid))
+  await repo.update(granadaUuid, { releasedAt: new Date(new Date(now.setDate(now.getDate() - 2))) })
+  await readXmlIn(granadaXml, true)
+  const newRelease = (await repo.findOneOrFail(granadaUuid))
+  return expect(oldRelease.releasedAt.getTime()).toBeLessThan(newRelease.releasedAt.getTime())
 })
 
 describe('after reading a valid XML', () => {

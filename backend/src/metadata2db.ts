@@ -30,11 +30,11 @@ interface NetCDFXML {
 
 const findVolatileFile = (conn: Connection, uuid: string): Promise<File|null> =>
   new Promise((resolve, reject) =>
-    conn.getRepository(File).findOneOrFail(uuid)
+    conn.getRepository(File).findOneOrFail(uuid, { relations: [ 'site' ]})
       .then(file => {
         const now = new Date()
         const yesterday = new Date(now.setDate(now.getDate() - 1))
-        if (file.releasedAt < yesterday)
+        if (!file.site.test && file.releasedAt < yesterday)
           reject(`Cannot update a stable file. File last updated on ${file.releasedAt}.`)
         else
           resolve(file)

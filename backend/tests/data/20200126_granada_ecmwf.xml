@@ -1,0 +1,488 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2" location="tests/data/20200126_granada_ecmwf.nc">
+  <dimension name="time" length="25" />
+  <dimension name="level" length="137" />
+  <dimension name="flux_level" length="138" />
+  <dimension name="frequency" length="2" />
+  <attribute name="Conventions" value="CF-1.0" />
+  <attribute name="title" value="Model file from Granada" />
+  <attribute name="location" value="Granada" />
+  <attribute name="source" value="ECMWF Integrated Forecast System (IFS)" />
+  <attribute name="institution" value="European Centre for Medium-Range Weather Forecasting" />
+  <attribute name="initialization_time" value="2020-01-26 00:00:00 +00:00" />
+  <attribute name="history" value="2020-03-25 16:23:35 - global attributes fixed using attribute_modifier 0.0.1&#xA;Wed Jan 29 21:34:06 EET 2020 - NetCDF generated from original data by Ewan O'Connor &lt;ewan.oconnor@fmi.fi&gt; using cnmodel2nc on cloudnet.fmi.fi" />
+  <attribute name="file_uuid" value="9e04d8ef0f2b4823835d33e458403c67" />
+  <attribute name="cloudnet_file_type" value="model" />
+  <attribute name="year" value="2020" />
+  <attribute name="month" value="01" />
+  <attribute name="day" value="26" />
+  <variable name="latitude" type="float">
+    <attribute name="units" value="degrees_N" />
+    <attribute name="long_name" value="Latitude of model gridpoint" />
+    <attribute name="standard_name" value="latitude" />
+  </variable>
+  <variable name="longitude" type="float">
+    <attribute name="units" value="degrees_E" />
+    <attribute name="long_name" value="Longitude of model gridpoint" />
+    <attribute name="standard_name" value="longitude" />
+  </variable>
+  <variable name="horizontal_resolution" type="float">
+    <attribute name="units" value="km" />
+    <attribute name="long_name" value="Horizontal resolution of model" />
+  </variable>
+  <variable name="time" shape="time" type="float">
+    <attribute name="units" value="hours since 2020-01-26 00:00:00 +00:00" />
+    <attribute name="long_name" value="Hours UTC" />
+    <attribute name="standard_name" value="time" />
+    <attribute name="axis" value="T" />
+  </variable>
+  <variable name="forecast_time" shape="time" type="float">
+    <attribute name="units" value="hours" />
+    <attribute name="long_name" value="Time since initialization of forecast" />
+    <attribute name="comments" value="For each profile in the file this variable contains the time elapsed since the initialization time of the forecast from which it was taken. Note that the profiles in this file may be taken from more than one forecast." />
+  </variable>
+  <variable name="level" shape="level" type="short">
+    <attribute name="units" value="1" />
+    <attribute name="long_name" value="Model level" />
+    <attribute name="standard_name" value="model_level_number" />
+    <attribute name="axis" value="Z" />
+    <attribute name="positive" value="down" />
+  </variable>
+  <variable name="flux_level" shape="flux_level" type="short">
+    <attribute name="units" value="1" />
+    <attribute name="long_name" value="Model flux level" />
+    <attribute name="axis" value="Z" />
+    <attribute name="positive" value="down" />
+  </variable>
+  <variable name="pressure" shape="time level" type="float">
+    <attribute name="units" value="Pa" />
+    <attribute name="long_name" value="Pressure" />
+    <attribute name="standard_name" value="air_pressure" />
+    <attribute name="C_format" value="%.0f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="uwind" shape="time level" type="float">
+    <attribute name="units" value="m s-1" />
+    <attribute name="long_name" value="Zonal wind" />
+    <attribute name="standard_name" value="eastward_wind" />
+    <attribute name="C_format" value="%.6f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="vwind" shape="time level" type="float">
+    <attribute name="units" value="m s-1" />
+    <attribute name="long_name" value="Meridional wind" />
+    <attribute name="standard_name" value="northward_wind" />
+    <attribute name="C_format" value="%.6f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="omega" shape="time level" type="float">
+    <attribute name="units" value="Pa s-1" />
+    <attribute name="long_name" value="Vertical wind in pressure coordinates" />
+    <attribute name="standard_name" value="omega" />
+    <attribute name="C_format" value="%.6f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="temperature" shape="time level" type="float">
+    <attribute name="units" value="K" />
+    <attribute name="long_name" value="Temperature" />
+    <attribute name="standard_name" value="air_temperature" />
+    <attribute name="C_format" value="%.2f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="q" shape="time level" type="float">
+    <attribute name="units" value="1" />
+    <attribute name="long_name" value="Specific humidity" />
+    <attribute name="standard_name" value="specific_humidity" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="rh" shape="time level" type="float">
+    <attribute name="units" value="1" />
+    <attribute name="long_name" value="Relative humidity" />
+    <attribute name="standard_name" value="relative_humidity" />
+    <attribute name="comment" value="With respect to liquid above 0 degrees C and with respect to ice below 0 degrees C." />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="ql" shape="time level" type="float">
+    <attribute name="units" value="1" />
+    <attribute name="long_name" value="Gridbox-mean liquid water mixing ratio" />
+    <attribute name="standard_name" value="mass_fraction_of_cloud_liquid_water_in_air" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="qi" shape="time level" type="float">
+    <attribute name="units" value="1" />
+    <attribute name="long_name" value="Gridbox-mean ice water mixing ratio" />
+    <attribute name="standard_name" value="mass_fraction_of_cloud_ice_in_air" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="cloud_fraction" shape="time level" type="float">
+    <attribute name="units" value="1" />
+    <attribute name="long_name" value="Cloud fraction" />
+    <attribute name="standard_name" value="cloud_area_fraction" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="flx_net_sw" shape="time flux_level" type="float">
+    <attribute name="units" value="W m-2" />
+    <attribute name="long_name" value="Net shortwave flux" />
+    <attribute name="standard_name" value="net_downward_shortwave_flux_in_air" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="flx_net_lw" shape="time flux_level" type="float">
+    <attribute name="units" value="W m-2" />
+    <attribute name="long_name" value="Net longwave flux" />
+    <attribute name="standard_name" value="net_downward_longwave_flux_in_air" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="flx_down_sens_heat" shape="time flux_level" type="float">
+    <attribute name="units" value="W m-2" />
+    <attribute name="long_name" value="Sensible heat flux" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="flx_turb_moist" shape="time flux_level" type="float">
+    <attribute name="units" value="kg m-2 s-1" />
+    <attribute name="long_name" value="Turbulent moisture flux" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="flx_ls_rain" shape="time flux_level" type="float">
+    <attribute name="units" value="kg m-2 s-1" />
+    <attribute name="long_name" value="Large-scale rainfall flux" />
+    <attribute name="standard_name" value="large_scale_rainfall_flux" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="flx_ls_snow" shape="time flux_level" type="float">
+    <attribute name="units" value="kg m-2 s-1" />
+    <attribute name="long_name" value="Large-scale snowfall flux" />
+    <attribute name="standard_name" value="large_scale_snowfall_flux" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="flx_conv_rain" shape="time flux_level" type="float">
+    <attribute name="units" value="kg m-2 s-1" />
+    <attribute name="long_name" value="Convective rainfall flux" />
+    <attribute name="standard_name" value="convective_rainfall_flux" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="flx_conv_snow" shape="time flux_level" type="float">
+    <attribute name="units" value="kg m-2 s-1" />
+    <attribute name="long_name" value="Convective snowfall flux" />
+    <attribute name="standard_name" value="convective_snowfall_flux" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="flx_turb_mom_u" shape="time flux_level" type="float">
+    <attribute name="units" value="kg m-1 s-2" />
+    <attribute name="long_name" value="Zonal turbulent momentum flux" />
+    <attribute name="standard_name" value="downward_eastward_momentum_flux_in_air" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="flx_turb_mom_v" shape="time flux_level" type="float">
+    <attribute name="units" value="kg m-1 s-2" />
+    <attribute name="long_name" value="Meridional turbulent momentum" />
+    <attribute name="standard_name" value="downward_northward_momentum_flux_in_air" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_pressure" shape="time" type="float">
+    <attribute name="units" value="Pa" />
+    <attribute name="long_name" value="Surface pressure" />
+    <attribute name="standard_name" value="surface_pressure" />
+    <attribute name="C_format" value="%.0f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_net_sw" shape="time" type="float">
+    <attribute name="units" value="W m-2" />
+    <attribute name="long_name" value="Surface net downward shortwave flux" />
+    <attribute name="standard_name" value="surface_net_downward_shortwave_flux" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_net_lw" shape="time" type="float">
+    <attribute name="units" value="W m-2" />
+    <attribute name="long_name" value="Surface net downward longwave flux" />
+    <attribute name="standard_name" value="surface_net_downward_longwave_flux" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_down_sw" shape="time" type="float">
+    <attribute name="units" value="W m-2" />
+    <attribute name="long_name" value="Surface downwelling shortwave flux" />
+    <attribute name="standard_name" value="surface_downwelling_shortwave_flux" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_down_lw" shape="time" type="float">
+    <attribute name="units" value="W m-2" />
+    <attribute name="long_name" value="Surface downwelling longwave flux" />
+    <attribute name="standard_name" value="surface_downwelling_longwave_flux" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_cs_down_sw" shape="time" type="float">
+    <attribute name="units" value="W m-2" />
+    <attribute name="long_name" value="Clear sky downwelling shortwave flux" />
+    <attribute name="standard_name" value="surface_downwelling_shortwave_flux_in_air_assuming_clear_sky" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_cs_down_lw" shape="time" type="float">
+    <attribute name="units" value="W m-2" />
+    <attribute name="long_name" value="Clear sky downwelling longwave flux" />
+    <attribute name="standard_name" value="surface_downwelling_longwave_flux_in_air_assuming_clear_sky" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_down_lat_heat_flx" shape="time" type="float">
+    <attribute name="units" value="W m-2" />
+    <attribute name="long_name" value="Latent heat flux" />
+    <attribute name="standard_name" value="surface_downward_latent_heat_flux" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_down_sens_heat_flx" shape="time" type="float">
+    <attribute name="units" value="W m-2" />
+    <attribute name="long_name" value="Sensible heat flux" />
+    <attribute name="standard_name" value="surface_downward_sensible_heat_flux" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_ls_rain" shape="time" type="float">
+    <attribute name="units" value="kg m-2" />
+    <attribute name="long_name" value="Large-scale rainfall amount" />
+    <attribute name="standard_name" value="large_scale_rainfall_amount" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_conv_rain" shape="time" type="float">
+    <attribute name="units" value="kg m-2" />
+    <attribute name="long_name" value="Convective rainfall amount" />
+    <attribute name="standard_name" value="convective_rainfall_amount" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_ls_snow" shape="time" type="float">
+    <attribute name="units" value="kg m-2" />
+    <attribute name="long_name" value="Large-scale snowfall amount" />
+    <attribute name="standard_name" value="large_scale_snowfall_amount" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_conv_snow" shape="time" type="float">
+    <attribute name="units" value="kg m-2" />
+    <attribute name="long_name" value="Convective snowfall amount" />
+    <attribute name="standard_name" value="convective_snowfall_amount" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_ls_precip_fraction" shape="time" type="float">
+    <attribute name="units" value="1" />
+    <attribute name="long_name" value="Large-scale precipitation fraction" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_cloud_fraction" shape="time" type="float">
+    <attribute name="units" value="1" />
+    <attribute name="long_name" value="Surface total cloud fraction" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_bl_height" shape="time" type="float">
+    <attribute name="units" value="m" />
+    <attribute name="long_name" value="Boundary layer height" />
+    <attribute name="C_format" value="%.3f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_albedo" shape="time" type="float">
+    <attribute name="units" value="1" />
+    <attribute name="long_name" value="Surface albedo" />
+    <attribute name="standard_name" value="surface_albedo" />
+    <attribute name="C_format" value="%.6f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_temp_2m" shape="time" type="float">
+    <attribute name="units" value="K" />
+    <attribute name="long_name" value="Temperature at 2m" />
+    <attribute name="C_format" value="%.2f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_q_2m" shape="time" type="float">
+    <attribute name="units" value="1" />
+    <attribute name="long_name" value="Specific humidity at 2m" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_rough_mom" shape="time" type="float">
+    <attribute name="units" value="m" />
+    <attribute name="long_name" value="Surface roughness for momentum" />
+    <attribute name="C_format" value="%.6f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_rough_heat" shape="time" type="float">
+    <attribute name="units" value="m" />
+    <attribute name="long_name" value="Surface roughness for heat" />
+    <attribute name="C_format" value="%.6f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_skin_temp" shape="time" type="float">
+    <attribute name="units" value="K" />
+    <attribute name="long_name" value="Skin temperature" />
+    <attribute name="C_format" value="%.2f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_wind_u_10m" shape="time" type="float">
+    <attribute name="units" value="m s-1" />
+    <attribute name="long_name" value="Zonal wind at 10m" />
+    <attribute name="C_format" value="%.6f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_wind_v_10m" shape="time" type="float">
+    <attribute name="units" value="m s-1" />
+    <attribute name="long_name" value="Meridional wind at 10m" />
+    <attribute name="C_format" value="%.6f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_geopotential" shape="time" type="float">
+    <attribute name="units" value="m2 s-2" />
+    <attribute name="long_name" value="Geopotential" />
+    <attribute name="standard_name" value="geopotential" />
+    <attribute name="C_format" value="%.6f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="height" shape="time level" type="float">
+    <attribute name="units" value="m" />
+    <attribute name="long_name" value="Height above ground" />
+    <attribute name="standard_name" value="height" />
+    <attribute name="comment" value="The heights have been calculated using pressure, temperature and specific humidity." />
+    <attribute name="C_format" value="%.3f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="sfc_height_amsl" shape="time" type="float">
+    <attribute name="units" value="m" />
+    <attribute name="long_name" value="Surface height above mean sea level" />
+    <attribute name="comment" value="The heights have been calculated from the geopotential." />
+    <attribute name="C_format" value="%.3f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="flx_height" shape="time flux_level" type="float">
+    <attribute name="units" value="m" />
+    <attribute name="long_name" value="Height above ground" />
+    <attribute name="C_format" value="%.3f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="wwind" shape="time level" type="float">
+    <attribute name="units" value="m s-1" />
+    <attribute name="long_name" value="Vertical wind" />
+    <attribute name="standard_name" value="upward_wind" />
+    <attribute name="comment" value="The vertical wind has been calculated from omega (Pa s-1), height and pressure using: w=omega*dz/dp" />
+    <attribute name="C_format" value="%.6f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="frequency" shape="frequency" type="float">
+    <attribute name="units" value="GHz" />
+    <attribute name="long_name" value="Microwave frequency" />
+    <attribute name="C_format" value="%.6f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="gas_atten" shape="frequency time level" type="float">
+    <attribute name="units" value="dB" />
+    <attribute name="long_name" value="Two-way attenuation from the ground due to atmospheric gases" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="specific_gas_atten" shape="frequency time level" type="float">
+    <attribute name="units" value="dB km-1" />
+    <attribute name="long_name" value="Specific one-way attenuation due to atmospheric gases" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="specific_saturated_gas_atten" shape="frequency time level" type="float">
+    <attribute name="units" value="dB km-1" />
+    <attribute name="long_name" value="Specific one-way attenuation due to atmospheric gases for saturated air (saturated with respect to ice below 0 degrees C)" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="specific_dry_gas_atten" shape="frequency time level" type="float">
+    <attribute name="units" value="dB km-1" />
+    <attribute name="long_name" value="Specific one-way attenuation due to atmospheric gases for dry air (no water vapour)" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="K2" shape="frequency time level" type="float">
+    <attribute name="units" value="dB km-1" />
+    <attribute name="long_name" value="Dielectric parameter (|K|^2) of liquid water" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+  <variable name="specific_liquid_atten" shape="frequency time level" type="float">
+    <attribute name="units" value="(dB km-1)/(g m-3)" />
+    <attribute name="long_name" value="Specific one-way attenuation due to liquid water, per unit liquid water content" />
+    <attribute name="C_format" value="%.8f" />
+    <attribute name="_FillValue" type="float" value="-999." />
+    <attribute name="missing_value" type="float" value="-999." />
+  </variable>
+</netcdf>
