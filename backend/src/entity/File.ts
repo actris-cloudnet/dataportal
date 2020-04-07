@@ -1,4 +1,4 @@
-import {Entity, Column, PrimaryColumn, CreateDateColumn, ManyToOne} from 'typeorm'
+import {Entity, Column, PrimaryColumn, ManyToOne, BeforeUpdate, BeforeInsert} from 'typeorm'
 import { NetCDFObject } from './NetCDFObject'
 import { Site } from './Site'
 import { Product } from './Product'
@@ -40,7 +40,7 @@ export class File {
     @Column({nullable: true})
     cloudnetpyVersion!: string
 
-    @CreateDateColumn()
+    @Column()
     releasedAt!: Date
 
     @Column()
@@ -54,6 +54,16 @@ export class File {
 
     @Column()
     format!: string
+
+    @BeforeInsert()
+    updateDateCreation() {
+      this.releasedAt = new Date()
+    }
+
+    @BeforeUpdate()
+    updateDateUpdate() {
+      this.releasedAt = new Date()
+    }
 
     constructor(
       obj: NetCDFObject,
