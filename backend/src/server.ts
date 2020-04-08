@@ -154,7 +154,7 @@ async function init() {
   app.get('/file/:uuid', async (req: Request, res: Response, next) => {
     const repo = conn.getRepository(File)
     repo.findOneOrFail(req.params.uuid, { relations: ['site', 'product']})
-      .then(result => res.send(result))
+      .then(result => res.send(augmentFiles([result])[0]))
       .catch(_ =>  next({status: 404, errors: [ 'No files match this UUID' ]}))
   })
 
