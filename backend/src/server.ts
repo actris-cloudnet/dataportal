@@ -22,6 +22,12 @@ async function init() {
   const siteRepo = conn.getRepository(Site)
   const productRepo = conn.getRepository(Product)
 
+  const augmentFiles = (files: File[]) => {
+    const now = new Date()
+    const yesterday = new Date(new Date(now.setDate(now.getDate() - 1)))
+    return files.map(entry => ({ ...entry, ...{ volatile: entry.releasedAt > yesterday } }))
+  }
+
   if (process.env.NODE_ENV != 'production') {
     app.use(function(req, res, next) {
       res.header('Access-Control-Allow-Origin', '*') // update to match the domain you will make the request from
@@ -31,7 +37,7 @@ async function init() {
 
     app.get('/allfiles', async (req: Request, res: Response, next) => {
       fileRepo.find({ relations: ['site', 'product'] })
-        .then(result => res.send(result))
+        .then(result => res.send(augmentFiles(result)))
         .catch(err=> next({status: 500, errors: err}))
     })
   }
@@ -180,7 +186,7 @@ async function init() {
           next({status: 404, errors: ['The search yielded zero results'], params: req.query})
           return
         }
-        res.send(result)
+        res.send(augmentFiles(result))
       })
       .catch(err=> {
         next({status: 500, errors: err})

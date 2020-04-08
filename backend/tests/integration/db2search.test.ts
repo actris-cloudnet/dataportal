@@ -1,8 +1,17 @@
 import { backendUrl } from '../lib'
 import axios from 'axios'
 import { RequestError } from '../../src/entity/RequestError'
+import { createConnection } from 'typeorm'
+import { File } from '../../src/entity/File'
 
 const genResponse = (status: any, data: any) => ({response: {status, data}})
+
+const volatileUuid = '6cb32746-faf0-4057-9076-ed2e698dcf36'
+beforeAll(async () => {
+  // Make one of the files volatile
+  const conn = await createConnection('test')
+  return conn.getRepository(File).update(volatileUuid, { releasedAt: new Date() })
+})
 
 describe('/files', () => {
   const url = `${backendUrl}files/`
@@ -94,6 +103,12 @@ describe('/files', () => {
     }
     const payload = {params: {dateFrom: new Date('2020-02-20'), dateTo: 'turku'}}
     return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
+  })
+
+  it('should have exactly one volatile file', async () => {
+    const payload = {params: {location: 'bucharest'}}
+    const res = await axios.get(url, payload)
+    expect(res.data.filter((file: any) => file.volatile)).toHaveLength(1)
   })
 })
 
