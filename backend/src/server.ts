@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { createConnection } from 'typeorm'
+import { createConnection, SelectQueryBuilder } from 'typeorm'
 import { Request, Response, RequestHandler, ErrorRequestHandler } from 'express'
 import { File } from './entity/File'
 import { Site } from './entity/Site'
@@ -21,6 +21,9 @@ async function init() {
   const fileRepo = conn.getRepository(File)
   const siteRepo = conn.getRepository(Site)
   const productRepo = conn.getRepository(Product)
+
+  const hideTestDataFromNormalUsers = <T>(dbQuery: SelectQueryBuilder<T>, req: Request): SelectQueryBuilder<T> =>
+    req.query.developer !== undefined ? dbQuery : dbQuery.andWhere('not site.test')
 
   const augmentFiles = (files: File[]) => {
     const now = new Date()
@@ -93,7 +96,7 @@ async function init() {
       return next(pushAndReturn(requestError, 'No search parameters given'))
     }
 
-    const validKeys = ['location', 'product', 'dateFrom', 'dateTo']
+    const validKeys = ['location', 'product', 'dateFrom', 'dateTo', 'developer']
     const unknownFields = Object.keys(query).filter(key => !validKeys.includes(key))
     if (unknownFields.length > 0) {
       requestError.errors.push(`Unknown query parameters: ${unknownFields}`)
@@ -152,9 +155,11 @@ async function init() {
   }
 
   app.get('/file/:uuid', async (req: Request, res: Response, next) => {
-    const repo = conn.getRepository(File)
-    repo.findOneOrFail(req.params.uuid, { relations: ['site', 'product']})
-      .then(result => res.send(augmentFiles([result])[0]))
+    const qb = fileRepo.createQueryBuilder('file')
+      .select()
+    hideTestDataFromNormalUsers<File>(qb, req)
+      .getMany()
+      .then(result => res.send(augmentFiles(result)[0]))
       .catch(_ =>  next({status: 404, errors: [ 'No files match this UUID' ]}))
   })
 
@@ -173,13 +178,14 @@ async function init() {
       })
       .catch(next)
 
-    fileRepo.createQueryBuilder('file')
+    const qb = fileRepo.createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
       .leftJoinAndSelect('file.product', 'product')
       .where('site.id IN (:...location)', query)
       .andWhere('product.id IN (:...product)', query)
       .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate < :dateTo', query)
       .orderBy('file.measurementDate', 'DESC')
+    hideTestDataFromNormalUsers(qb, req)
       .getMany()
       .then(result => {
         if (result.length == 0) {
@@ -193,10 +199,10 @@ async function init() {
       })
   })
 
-  app.get('/sites', async (_req: Request, res: Response, next) => {
-    siteRepo.createQueryBuilder('site')
+  app.get('/sites', async (req: Request, res: Response, next) => {
+    const qb = siteRepo.createQueryBuilder('site')
       .select()
-      .where('not test')
+    hideTestDataFromNormalUsers(qb, req)
       .getMany()
       .then(result => res.send(result))
       .catch(err => next({status: 500, errors: err}))
