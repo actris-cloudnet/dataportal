@@ -79,6 +79,13 @@
     background-size: 20px
     font-size: 0
 
+  .volatile
+    background: #cad7ff
+    padding-left: 0.5em
+    padding-right: 0.5em
+    padding-top: 0.1em
+    padding-bottom: 0.1em
+
   section#sideBar
     margin-right: 100px
     width: 300px
@@ -205,12 +212,21 @@
       :fields="[
                 { key: 'product.id', label: '', tdClass: 'icon', tdAttr: setIcon},
                 { key: 'title', label: 'Data object', sortable: true},
+                { key: 'volatile', label: '' },
                 { key: 'measurementDate', label: 'Date', sortable: true},
                 ]"
       :current-page="currentPage"
       :per-page="perPage"
       :busy="isBusy"
       @row-clicked="clickRow">
+    <template v-slot:cell(volatile)="data">
+      <span
+        v-if="data.item.volatile"
+        class="volatile"
+        title="The data for this day may be incomplete. This file is updating in real time.">
+        volatile
+      </span>
+    </template>
     </b-table>
     <b-pagination id="pagi" v-if="listLength > perPage"
       v-model="currentPage"
