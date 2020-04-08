@@ -6,11 +6,12 @@ import { File } from '../../src/entity/File'
 
 const genResponse = (status: any, data: any) => ({response: {status, data}})
 
-const volatileUuid = '6cb32746-faf0-4057-9076-ed2e698dcf36'
+const volatileUuid = '38092c00-161d-4ca2-a29d-628cf8e960f6'
 beforeAll(async () => {
   // Make one of the files volatile
   const conn = await createConnection('test')
-  return conn.getRepository(File).update(volatileUuid, { releasedAt: new Date() })
+  const now = new Date()
+  return conn.getRepository(File).update(volatileUuid, { releasedAt: new Date(new Date(now.setDate(now.getDate() - 2))) })
 })
 
 describe('/files', () => {
@@ -105,10 +106,10 @@ describe('/files', () => {
     return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
 
-  it('should have exactly one volatile file', async () => {
-    const payload = {params: {location: 'bucharest'}}
+  it('should have exactly one stable file', async () => {
+    const payload = {params: {location: 'macehead'}}
     const res = await axios.get(url, payload)
-    expect(res.data.filter((file: any) => file.volatile)).toHaveLength(1)
+    expect(res.data.filter((file: any) => !file.volatile)).toHaveLength(1)
   })
 })
 
