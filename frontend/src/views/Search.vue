@@ -246,7 +246,7 @@ export interface Selection {
   humanReadableName: string;
 }
 
-@Component
+@Component({name: 'app-search'})
 export default class Search extends Vue {
 
   // api call

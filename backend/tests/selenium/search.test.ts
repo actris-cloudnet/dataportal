@@ -142,4 +142,16 @@ describe('search page', () => {
     expect(content).toContain('Found 2 results')
     expect(content).toContain('Ice water content file from Mace-Head')
   })
+
+  it('should preserve search state after visiting a landing page', async () => {
+    await sendInput('dateFrom', '2010')
+    await clickClass('b-table-sort-icon-left')
+    await clickTab()
+    await clickXpath('//*[contains(text(), "2019-07-25")]')
+    await wait(100)
+    await driver.navigate().back()
+    await wait(100)
+    const content = await getContent()
+    expect(content).toContain('Found 5 results')
+  })
 })
