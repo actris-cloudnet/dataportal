@@ -5,6 +5,10 @@ Vue.use(VueRouter)
 
 const routes = [
   {
+    path: '/',
+    redirect: '/search'
+  },
+  {
     path: '/file/:uuid',
     name: 'File',
     meta: {
