@@ -86,7 +86,6 @@ async function init() {
 
     const validKeys = ['location', 'product', 'dateFrom', 'dateTo']
     const unknownFields = Object.keys(query).filter(key => !validKeys.includes(key))
-    console.log(unknownFields)
     if (unknownFields.length > 0) {
       requestError.errors.push(`Unknown query parameters: ${unknownFields}`)
     }
