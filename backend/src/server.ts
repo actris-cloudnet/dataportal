@@ -43,10 +43,11 @@ async function init() {
       .orderBy('last_update', 'DESC')
       .getRawMany()
       .then(result => {
-        let resultTable =
-          result.map(res => `${res.site_id}\t${dateToUTCString(res.last_update)}\t${dateToUTCString(res.last_measurement)}`)
-        resultTable.unshift(Object.keys(result[0]).join('\t\t'))
-        res.send(`
+        const pad = (str: string) => str.padEnd(21, ' ')
+        let resultTable = result.map(res =>
+          `${pad(res.site_id)}${pad(dateToUTCString(res.last_update))}${dateToUTCString(res.last_measurement)}`)
+        resultTable.unshift(Object.keys(result[0]).map(pad).join(''))
+        return res.send(`
           <html>
           <head>
           <style>body {background:#222;color:#eee}</style>
