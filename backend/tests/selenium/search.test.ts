@@ -42,6 +42,12 @@ async function sendInputToMultiselect(key: string, input: string) {
   return wait(100)
 }
 
+async function clearMultiSelect(key: string) {
+  await clickGrandparentById(key)
+  await driver.actions().sendKeys(`${Key.BACK_SPACE}${Key.BACK_SPACE}${Key.BACK_SPACE}`).perform()
+  return wait(100)
+}
+
 async function findElement(by: By) {
   await driver.wait(until.elementLocated(by))
   return driver.findElement(by)
@@ -135,8 +141,8 @@ describe('search page', () => {
   })
 
   it('should work with different product selectors', async () => {
+    await clearMultiSelect('siteSelect')
     await sendInput('dateFrom', '1980')
-    await sendInputToMultiselect('siteSelect', 'bucharest')
     await sendInputToMultiselect('productSelect', 'ice')
     const content = await getContent()
     expect(content).toContain('Found 2 results')

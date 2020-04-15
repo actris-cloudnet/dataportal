@@ -281,6 +281,8 @@ export default class Search extends Vue {
 
   displayBetaNotification = true
 
+  getIconUrl = getIconUrl
+
   isTrueOnBothDateFields(errorId: string) {
     return this.dateFromError[errorId] && this.dateToError[errorId]
   }
