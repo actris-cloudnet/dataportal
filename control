@@ -20,6 +20,10 @@ if [[ "$NODE_ENV" == 'test' ]]; then
     inbox_dir='tests/data/inbox'
 fi
 
+if [ -f backend/listen-path ]; then
+    read -r inbox_dir < backend/listen-path
+fi
+
 typeset -A backend_targets
 typeset -A frontend_targets
 
