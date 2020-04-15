@@ -107,7 +107,7 @@ main#landing
 
 
 <template>
-  <main id="landing" v-if="!error">
+  <main id="landing" v-if="!error && response">
     <header>
       <div class="summary">
           <h2>Cloudnet data object</h2>
@@ -184,7 +184,7 @@ main#landing
       </section>
     </main>
   </main>
-  <app-error v-else :response="response"></app-error>
+  <app-error v-else-if="error" :response="response"></app-error>
 </template>
 
 
@@ -195,7 +195,7 @@ import axios from 'axios'
 @Component
 export default class File extends Vue {
   @Prop() uuid!: string
-  response = {}
+  response = null
   error = false
   fileserverUrl = process.env.VUE_APP_FILESERVERURL
   apiUrl = process.env.VUE_APP_BACKENDURL
