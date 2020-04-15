@@ -88,9 +88,6 @@ main#landing
         content: ": "
 
       dd
-        display: flex
-        flex-direction: column
-        justify-content: center
         text-align: left
         margin: 0
 
@@ -103,6 +100,11 @@ main#landing
 
 .na
   color: grey
+
+img.product
+  height: auto
+  width: 1em
+  margin-right: 0.3em
 </style>
 
 
@@ -144,7 +146,10 @@ main#landing
         <section class="details">
           <dl>
             <dt>Product</dt>
-            <dd class="capitalize">{{ response.product.humanReadableName }}</dd>
+            <dd class="capitalize">
+              <img :src="getIconUrl(response.product.id)" class="product">
+              {{ response.product.humanReadableName }}
+            </dd>
             <dt>Level</dt>
             <dd>{{ response.product.level }}</dd>
             <dt>Quality</dt>
@@ -191,6 +196,7 @@ main#landing
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import axios from 'axios'
+import { getIconUrl } from '../lib'
 
 @Component
 export default class File extends Vue {
@@ -199,6 +205,7 @@ export default class File extends Vue {
   error = false
   fileserverUrl = process.env.VUE_APP_FILESERVERURL
   apiUrl = process.env.VUE_APP_BACKENDURL
+  getIconUrl = getIconUrl
 
   created() {
     axios

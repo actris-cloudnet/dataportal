@@ -233,6 +233,7 @@ import { BTable } from 'bootstrap-vue/esm/components/table'
 import { BPagination } from 'bootstrap-vue/esm/components/pagination'
 import Datepicker from '../components/Datepicker.vue'
 import CustomMultiselect from '../components/Multiselect.vue'
+import { getIconUrl } from '../lib'
 
 Vue.component('datepicker', Datepicker)
 Vue.component('b-table', BTable)
@@ -342,12 +343,9 @@ export default class Search extends Vue {
     if (this.listLength > 0) this.$router.push(`file/${record.uuid}`)
   }
 
-  getIconUrl(product: string) {
-    return require(`../assets/icons/${product}.png`)
-  }
 
   setIcon(product: string) {
-    if (product) return {'style': `background-image: url(${this.getIconUrl(product)})`}
+    if (product) return {'style': `background-image: url(${getIconUrl(product)})`}
   }
 
   reset() {
