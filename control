@@ -90,6 +90,7 @@ case "$action" in
     set +e
     for pid in backend/$pid_dir/.*.pid; do
         echo $pid
+        pkill -P $(< $pid)
         pkill -F $pid
         rm -f $pid
     done
