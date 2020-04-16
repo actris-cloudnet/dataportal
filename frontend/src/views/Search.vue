@@ -341,9 +341,10 @@ export default class Search extends Vue {
   }
 
   async initView() {
+    const payload = { params: { developer: this.devMode.activated || undefined } }
     Promise.all([
-      axios.get(`${this.apiUrl}sites/`),
-      axios.get(`${this.apiUrl}products/`)
+      axios.get(`${this.apiUrl}sites/`, payload),
+      axios.get(`${this.apiUrl}products/`, payload)
     ]).then(([sites, products]) => {
       this.allSites = sites.data.sort((a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName)
       this.allProducts = products.data.sort((a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName)
@@ -428,7 +429,7 @@ export default class Search extends Vue {
 
   @Watch('devMode.activated')
   onDevModeToggled() {
-    this.fetchData()
+    this.initView()
   }
 }
 </script>
