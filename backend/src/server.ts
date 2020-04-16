@@ -161,8 +161,11 @@ async function init() {
       .where('file.uuid = :uuid', req.params)
     hideTestDataFromNormalUsers<File>(qb, req)
       .getMany()
-      .then(result => res.send(augmentFiles(result)[0]))
-      .catch(_ => next({status: 404, errors: [ 'No files match this UUID' ]}))
+      .then(result => {
+        if (result.length == 0) throw new Error()
+        res.send(augmentFiles(result)[0])
+      })
+      .catch(_err => next({status: 404, errors: [ 'No files match this UUID' ]}))
   })
 
   app.get('/files', filesValidator, filesQueryAugmenter, async (req: Request, res: Response, next) => {
