@@ -211,6 +211,7 @@ img.product
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import axios from 'axios'
 import { getIconUrl } from '../lib'
+import { DevMode } from '../lib/DevMode'
 
 @Component
 export default class File extends Vue {
@@ -221,9 +222,12 @@ export default class File extends Vue {
   apiUrl = process.env.VUE_APP_BACKENDURL
   getIconUrl = getIconUrl
 
+  devMode = new DevMode()
+
   created() {
+    const payload = { params: { developer: this.devMode.activated || undefined}}
     axios
-      .get(`${this.apiUrl}file/${this.uuid}`)
+      .get(`${this.apiUrl}file/${this.uuid}`, payload)
       .then(response => {
         this.response = response.data
       })
