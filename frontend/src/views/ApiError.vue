@@ -29,10 +29,11 @@ section
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import { AxiosResponse } from 'axios'
 
 @Component
 export default class ApiError extends Vue {
-  @Prop() response!: Response
+  @Prop() response!: AxiosResponse
 
   message = typeof this.response.data == 'string' ? this.response.data : this.response.data.errors.join('<br>')
 }
