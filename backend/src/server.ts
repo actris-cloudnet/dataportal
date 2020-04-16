@@ -156,11 +156,13 @@ async function init() {
 
   app.get('/file/:uuid', async (req: Request, res: Response, next) => {
     const qb = fileRepo.createQueryBuilder('file')
-      .select()
+      .leftJoinAndSelect('file.site', 'site')
+      .leftJoinAndSelect('file.product', 'product')
+      .where('file.uuid = :uuid', req.params)
     hideTestDataFromNormalUsers<File>(qb, req)
       .getMany()
       .then(result => res.send(augmentFiles(result)[0]))
-      .catch(_ =>  next({status: 404, errors: [ 'No files match this UUID' ]}))
+      .catch(_ => next({status: 404, errors: [ 'No files match this UUID' ]}))
   })
 
   app.get('/files', filesValidator, filesQueryAugmenter, async (req: Request, res: Response, next) => {
