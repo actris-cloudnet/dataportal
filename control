@@ -53,6 +53,7 @@ backend_postinstall () {
     mkdir -p public
     mkdir -p inbox
     mkdir -p tests/data/inbox
+    mkdir -p tests/data/inbox/inbox
     mkdir -p tests/data/public
     createdb dataportal
     createdb dataportal-test

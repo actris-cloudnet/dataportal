@@ -7,7 +7,10 @@ import { Builder } from 'selenium-webdriver'
 export function clearDir(dir: string) {
   const files = fs.readdirSync(dir)
   for (const file of files) {
-    fs.unlinkSync(path.join(dir, file))
+    const full_path = path.join(dir, file)
+    if (!fs.lstatSync(full_path).isDirectory()) {
+      fs.unlinkSync(full_path)
+    }
   }
 }
 
@@ -32,6 +35,7 @@ export const prepareSelenium = async () => {
 export const wait = async (ms: number) => new Promise((resolve, _) => setTimeout(resolve, ms))
 
 export const inboxDir = 'tests/data/inbox'
+export const inboxSubDir = 'tests/data/inbox/inbox'
 export const publicDir = 'tests/data/public'
 export const backendUrl = 'http://localhost:3001/'
 export const fileServerUrl = 'http://localhost:4001/'

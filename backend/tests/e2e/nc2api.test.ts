@@ -1,10 +1,11 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import axios from 'axios'
-import { clearDir, inboxDir, publicDir, clearRepo, backendUrl, fileServerUrl, wait } from '../lib'
+import { clearDir, inboxDir, inboxSubDir, publicDir, clearRepo, backendUrl, fileServerUrl, wait } from '../lib'
 
 beforeAll(async () => {
   clearDir(inboxDir)
+  clearDir(inboxSubDir)
   clearDir(publicDir)
   return clearRepo('file')
 })
@@ -39,6 +40,9 @@ const expectedJson = {
   }
 }
 
+
+const expectedUuidFromSubFolder = '926ba5cb-19e2-4153-8d87-9d97596f5574'
+
 describe('after moving a valid NC file to inbox', () => {
   beforeAll(async () => {
     fs.copyFileSync('tests/data/20190723_bucharest_classification.nc', path.join(inboxDir, '20190723_bucharest_classification.nc'))
@@ -59,4 +63,20 @@ describe('after moving a valid NC file to inbox', () => {
         expect(parseInt(response.headers['content-length'])).toEqual(expectedJson.size)
       })
   })
+
+})
+
+
+describe('after moving a valid NC file to inbox subfolder', () => {
+  beforeAll(async () => {
+    fs.copyFileSync('tests/data/20190724_bucharest_classification.nc', path.join(inboxSubDir, '20190724_bucharest_classification.nc'))
+    return wait(4000)
+  })
+
+  it('should respond with correct uuid in metadata JSON', async () => {
+    return axios
+      .get(`${backendUrl}file/${expectedUuidFromSubFolder}`)
+      .then(response => expect(response.data.uuid).toMatch(expectedUuidFromSubFolder))
+  })
+
 })
