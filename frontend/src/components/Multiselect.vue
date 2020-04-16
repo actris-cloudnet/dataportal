@@ -54,6 +54,7 @@
     :show-labels="false"
     :multiple="true"
     :hideSelected="false"
+    @search-change="isIddqd"
   >
     <template slot="tag" slot-scope="props" v-if="icons">
       <span class="multiselect__tag">
@@ -79,6 +80,7 @@ import Vue from 'vue'
 import { Prop } from 'vue-property-decorator'
 import Multiselect from 'vue-multiselect'
 import { Selection } from '../views/Search.vue'
+import { DevMode } from '../lib/DevMode'
 
 Vue.component('multiselect', Multiselect)
 
@@ -89,6 +91,7 @@ export default class CustomMultiselect extends Vue {
   @Prop() options!: Selection[]
   @Prop() icons!: boolean
   @Prop() getIconUrl!: Function
+  @Prop() devMode!: DevMode
 
   selection: Selection[] = []
 
@@ -104,6 +107,10 @@ export default class CustomMultiselect extends Vue {
   getSelectionIds() {
     // Return all options by default
     return this.selection.length > 0 ? this.selection.map(d => d.id) : this.options.map(d => d.id)
+  }
+
+  isIddqd(target: string, _: string) {
+    if (target == 'iddqd') this.devMode.enable()
   }
 }
 </script>
