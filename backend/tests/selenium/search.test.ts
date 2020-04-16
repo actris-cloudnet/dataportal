@@ -70,6 +70,8 @@ describe('search page', () => {
       let fname = `201907${i}_mace-head_iwc-Z-T-method.nc`
       fs.copyFileSync(join('tests/data/', fname), join(inboxDir, fname))
     }
+    const granada = '20200126_granada_ecmwf.nc'
+    fs.copyFileSync(join('tests/data', granada), join(inboxDir, granada))
     await wait(3000)
   })
 
@@ -159,5 +161,21 @@ describe('search page', () => {
     await wait(100)
     const content = await getContent()
     expect(content).toContain('Found 5 results')
+  })
+
+  it('should enable developer mode', async () => {
+    await sendInputToMultiselect('siteSelect', 'iddqd')
+    await sendInputToMultiselect('siteSelect', 'granada')
+    const content = await getContent()
+    expect(content).toContain('developer mode')
+    expect(content).toContain('Model file from Granada')
+  })
+
+  it('should disable developer mode', async () => {
+    await clickId('disableDevMode')
+    await sendInputToMultiselect('siteSelect', 'granada')
+    const content = await getContent()
+    expect(content).not.toContain('developer mode')
+    expect(content).not.toContain('Model file from Granada')
   })
 })

@@ -173,7 +173,7 @@
   </div>
   <div v-if="devMode.activated" class="rednote">
     You are using the dataportal in developer mode. Files from sites in testing mode are now visible.
-    <span class="close" @click="devMode.disable()">Deactivate</span>
+    <span class="close" id="disableDevMode" @click="devMode.disable()">Deactivate</span>
   </div>
   <section id="sideBar">
     <header class="filterOptions">Filter search</header>
