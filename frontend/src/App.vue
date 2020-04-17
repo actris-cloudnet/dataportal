@@ -34,7 +34,7 @@ h1, h2, h3, h4, h5, h6
 <template>
   <div id="app">
     <app-header/>
-    <keep-alive include="Search">
+    <keep-alive include="app-search">
       <router-view/>
     </keep-alive>
   </div>
