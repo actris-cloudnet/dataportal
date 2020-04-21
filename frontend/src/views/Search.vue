@@ -85,6 +85,8 @@
       padding: 9px
     tr:nth-child(2n+1) > td
       background-color: $blue-dust
+    td:nth-child(3)
+      text-align: center
   .table-striped[aria-busy="false"]
     tr:hover td
       cursor: pointer
