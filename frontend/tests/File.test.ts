@@ -42,5 +42,5 @@ describe('File.vue', () => {
       await Vue.nextTick()
       return expect(wrapper.text()).not.toContain('This is a volatile file.')
     })
-})
+  })
 })
