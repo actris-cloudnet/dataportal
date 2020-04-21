@@ -23,7 +23,7 @@ async function init() {
   const productRepo = conn.getRepository(Product)
 
   const hideTestDataFromNormalUsers = <T>(dbQuery: SelectQueryBuilder<T>, req: Request): SelectQueryBuilder<T> =>
-    req.query.developer !== undefined ? dbQuery : dbQuery.andWhere('not site.test')
+    req.query.developer !== undefined ? dbQuery : dbQuery.andWhere('not site.isTestSite')
 
   const augmentFiles = (files: File[]) => {
     const now = new Date()

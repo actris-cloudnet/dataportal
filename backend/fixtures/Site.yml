@@ -32,4 +32,4 @@ items:
     altitude: 680
     gaw: UGR
     country: Spain
-    test: true
+    isTestSite: true

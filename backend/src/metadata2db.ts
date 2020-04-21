@@ -34,7 +34,7 @@ const findVolatileFile = (conn: Connection, uuid: string): Promise<File|null> =>
       .then(file => {
         const now = new Date()
         const yesterday = new Date(now.setDate(now.getDate() - 1))
-        if (!file.site.test && file.releasedAt < yesterday)
+        if (!file.site.isTestSite && file.releasedAt < yesterday)
           reject(`Cannot update a stable file. File last updated on ${file.releasedAt}.`)
         else
           resolve(file)

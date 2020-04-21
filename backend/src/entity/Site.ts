@@ -26,7 +26,7 @@ export class Site {
     country!: string
 
     @Column({ default: false })
-    test!: boolean
+    isTestSite!: boolean
 
     @OneToMany(_ => File, file => file.site)
     files!: File[]
