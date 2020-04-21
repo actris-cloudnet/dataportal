@@ -76,8 +76,10 @@
       width: 50px
       text-align: center
     th:nth-child(2)
-      width: 400px
+      width: 300px
     th:nth-child(3)
+      width: 100px
+    th:nth-child(4)
       width: 110px
     td
       padding: 9px
