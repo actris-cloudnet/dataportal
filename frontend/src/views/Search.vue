@@ -63,6 +63,7 @@
 
   #pagi
     margin-top: 30px
+    float: left
     .page-item.active .page-link
       background-color: $steel-warrior
       border-color: $steel-warrior
@@ -165,6 +166,40 @@
     cursor: pointer
     text-decoration: underline
     color: #bcd2e2
+
+  .downloadinfo
+    float: right
+    margin-top: 30px
+  .download
+    appearance: button
+    text-decoration: none
+    color: initial
+    background-color: $blue-sapphire
+    border-radius: 3px
+    color: white
+    border-style: outset
+    border-width: 2px
+    border-color: $blue-sapphire
+    padding-top: 5px
+    padding-bottom: 5px
+    padding-left: 10px
+    padding-right: 10px
+    font-size: 1em
+    cursor: pointer
+    font-family: $content-font
+    &:hover
+      background-color: $blue-sapphire-light
+      border-color: $blue-sapphire-light
+    &:active
+      border-style: inset
+      background-color: $blue-sapphire
+      border-color: $blue-sapphire
+
+  .dlcount
+    color: gray
+    font-size: 85%
+    text-align: center
+    display: block
 </style>
 
 <template>
@@ -266,6 +301,13 @@
       aria-controls="fileTable"
       align="center"
     ></b-pagination>
+    <div class="downloadinfo">
+      <button class="download">
+        Download all results
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path stroke="none" fill="white" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+      </button><br>
+      <span class="dlcount">{{ listLength }} files (~{{ humanReadableSize(combinedFileSize) }})</span><br>
+    </div>
   </section>
 </main>
 </template>
@@ -306,7 +348,7 @@ export default class Search extends Vue {
   sortDesc = false
   isBusy = false
   currentPage = 1
-  perPage = 25
+  perPage = 15
 
   // site selector
   allSites = []
@@ -407,6 +449,11 @@ export default class Search extends Vue {
 
   setIcon(product: string) {
     if (product) return {'style': `background-image: url(${getIconUrl(product)})`}
+  }
+
+  humanReadableSize(size: number) {
+    const i = Math.floor( Math.log(size) / Math.log(1024) )
+    return `${( size / Math.pow(1024, i) ).toFixed(1)  } ${  ['B', 'kB', 'MB', 'GB', 'TB'][i]}`
   }
 
   reset() {
