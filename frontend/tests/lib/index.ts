@@ -41,7 +41,8 @@ export const allFiles = [
       'id': 'classification',
       'humanReadableName': 'Classification',
       'level': '2'
-    }
+    },
+    'volatile': true
   },
   {
     'uuid': '6cb32746-faf0-4057-9076-ed2e698dcf36',

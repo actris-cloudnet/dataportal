@@ -156,4 +156,12 @@ describe('Search.vue', () => {
       return expect(findElementById('dateTo').classes()).toContain('error')
     })
   })
+
+  describe('volatility', () => {
+
+    it('should display text "volatile" only next to volatile items', async () => {
+      expect(findElementById('tableContent').text()).toContain('volatile')
+      return expect(findElementById('tableContent').text().match('volatile')).toHaveLength(1)
+    })
+  })
 })

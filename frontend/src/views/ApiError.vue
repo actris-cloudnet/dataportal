@@ -18,7 +18,7 @@ section
 <template>
     <main id="error">
         <h1>{{ response.status }}</h1>
-        <h2>{{ response.data }}</h2>
+        <h2>{{ message }}</h2>
         <section v-if="response.status == 404">
         The file you are looking for does not exist.<br>
         If you are looking for the old devcloudnet data portal, click <a href="http://devcloudnet.fmi.fi">here</a>.<br>
@@ -29,9 +29,12 @@ section
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import { AxiosResponse } from 'axios'
 
 @Component
 export default class ApiError extends Vue {
-  @Prop() response!: Response
+  @Prop() response!: AxiosResponse
+
+  message = typeof this.response.data == 'string' ? this.response.data : this.response.data.errors.join('<br>')
 }
 </script>

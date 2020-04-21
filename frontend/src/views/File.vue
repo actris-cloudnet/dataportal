@@ -48,6 +48,17 @@ main#landing
       background-color: $blue-sapphire
       border-color: $blue-sapphire
 
+  .volatilenote
+    border: 1px #cad7ff solid
+    border-radius: 2px
+    background: #eef2ff
+    width: 100%
+    padding-top: 0.5em
+    padding-bottom: 0.5em
+    padding-left: 1em
+    padding-right: 1em
+    margin-bottom: 2em
+
   main
     margin: -1em
     display: flex
@@ -123,6 +134,9 @@ img.product
         <a class="download" :href="fileserverUrl + response.filename">Download file</a>
       </div>
     </header>
+    <div v-if="response.volatile" class="volatilenote">
+      This is a volatile file. The data in this file may be incomplete and update in real time.
+    </div>
     <main class="info">
       <section id="file">
         <header>File information</header>
@@ -197,6 +211,7 @@ img.product
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import axios from 'axios'
 import { getIconUrl } from '../lib'
+import { DevMode } from '../lib/DevMode'
 
 @Component
 export default class File extends Vue {
@@ -207,9 +222,12 @@ export default class File extends Vue {
   apiUrl = process.env.VUE_APP_BACKENDURL
   getIconUrl = getIconUrl
 
+  devMode = new DevMode()
+
   created() {
+    const payload = { params: { developer: this.devMode.activated || undefined}}
     axios
-      .get(`${this.apiUrl}file/${this.uuid}`)
+      .get(`${this.apiUrl}file/${this.uuid}`, payload)
       .then(response => {
         this.response = response.data
       })

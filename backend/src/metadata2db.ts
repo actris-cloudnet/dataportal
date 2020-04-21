@@ -28,6 +28,20 @@ interface NetCDFXML {
     }
 }
 
+const findVolatileFile = (conn: Connection, uuid: string): Promise<File|null> =>
+  new Promise((resolve, reject) =>
+    conn.getRepository(File).findOneOrFail(uuid, { relations: [ 'site' ]})
+      .then(file => {
+        const now = new Date()
+        const yesterday = new Date(now.setDate(now.getDate() - 1))
+        if (!file.site.isTestSite && file.releasedAt < yesterday)
+          reject(`Cannot update a stable file. File last updated on ${file.releasedAt}.`)
+        else
+          resolve(file)
+      })
+      .catch(_ => resolve(null))
+  )
+
 const checkSiteExists = (conn: Connection, site: string): Promise<Site> =>
   conn.getRepository(Site).findOneOrFail(site.toLowerCase().replace(/\W/g, ''))
 
@@ -105,22 +119,43 @@ async function parseXmlFromStdin(): Promise<NetCDFObject> {
 (async function() {
   let connection = await createConnection(connName)
 
-  parseXmlFromStdin()
-    .then((ncObj) =>
-      Promise.all([
-        ncObj,
-        basename(filename),
-        computeFileChecksum(filename),
-        computeFileSize(filename),
-        getFileFormat(filename),
-        checkSiteExists(connection, ncObj.location),
-        checkProductExists(connection, ncObj.cloudnet_file_type),
-        linkFile(filename)
-      ])
-    )
-    .then(([ncObj, baseFilename, chksum, {size}, format, site, product]) => {
+  const insert = (ncObj: NetCDFObject) =>
+    Promise.all([
+      ncObj,
+      basename(filename),
+      computeFileChecksum(filename),
+      computeFileSize(filename),
+      getFileFormat(filename),
+      checkSiteExists(connection, ncObj.location),
+      checkProductExists(connection, ncObj.cloudnet_file_type),
+      linkFile(filename)
+    ]).then(([ncObj, baseFilename, chksum, { size }, format, site, product]) => {
       const file = new File(ncObj, baseFilename, chksum, size, format, site, product)
       return connection.manager.save(file)
+    })
+
+  const update = (file: File) =>
+    Promise.all([
+      computeFileChecksum(filename),
+      computeFileSize(filename),
+      getFileFormat(filename)
+    ]).then(([checksum, { size }, format]) => {
+      const repo = connection.getRepository(File)
+      return repo.save({ uuid: file.uuid, checksum, size, format, releasedAt: new Date() })
+    })
+
+  parseXmlFromStdin()
+    .then((ncObj: NetCDFObject) =>
+      Promise.all([
+        Promise.resolve(ncObj),
+        findVolatileFile(connection, ncObj.file_uuid)
+      ])
+    )
+    .then(([ncObj, existingFile]): Promise<unknown> => {
+      // A hack to bypass a TypeScript bug: https://github.com/microsoft/TypeScript/issues/33752
+      if (existingFile) return update(existingFile)
+      else if (ncObj) return insert(ncObj)
+      return Promise.reject('Unknown error. This should not happen.')
     })
     .catch(err => console.error('Failed to import NetCDF XML to DB: ', filename, '\n', err))
     .finally(() => connection.close())

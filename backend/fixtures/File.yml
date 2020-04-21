@@ -75,4 +75,17 @@ items:
     format: "HDF5 (NetCDF4)"
     level: 2
     site: '@site1'
-    
+  file6:
+    uuid: "9e04d8ef-0f2b-4823-835d-33e458403c67"
+    title: "Model file from Granada"
+    measurementDate: "2020-01-26"
+    history: "2020-03-25 16:23:35 - global attributes fixed using attribute_modifier 0.0.1\nWed Jan 29 21:34:06 EET 2020 - NetCDF generated from original data by Ewan O'Connor <ewan.oconnor@fmi.fi> using cnmodel2nc on cloudnet.fmi.fi"
+    publicity: "public"
+    cloudnetpyVersion: null
+    releasedAt: "2020-04-08T13:33:31.012Z"
+    filename: "20200126_granada_ecmwf.nc"
+    checksum: "c46e4c7fe4be5b38670b86f3ffc3101c6de8465eabf5c470226c733e69586031"
+    size: 501452
+    format: "NetCDF3"
+    product: "model"
+    site: '@site4' 

@@ -1,12 +1,3 @@
-<template>
-  <div id="app">
-    <app-header/>
-    <keep-alive include="app-search">
-      <router-view/>
-    </keep-alive>
-  </div>
-</template>
-
 <style lang="sass">
 
 // Import external css first to prevent overriding styles later
@@ -39,3 +30,12 @@ h1, h2, h3, h4, h5, h6
   line-height: 1
   font-weight: normal
 </style>
+
+<template>
+  <div id="app">
+    <app-header/>
+    <keep-alive include="app-search">
+      <router-view/>
+    </keep-alive>
+  </div>
+</template>

@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { createConnection } from 'typeorm'
+import { createConnection, SelectQueryBuilder } from 'typeorm'
 import { Request, Response, RequestHandler, ErrorRequestHandler } from 'express'
 import { File } from './entity/File'
 import { Site } from './entity/Site'
@@ -18,6 +18,19 @@ async function init() {
 
   const conn = await createConnection(connName)
 
+  const fileRepo = conn.getRepository(File)
+  const siteRepo = conn.getRepository(Site)
+  const productRepo = conn.getRepository(Product)
+
+  const hideTestDataFromNormalUsers = <T>(dbQuery: SelectQueryBuilder<T>, req: Request): SelectQueryBuilder<T> =>
+    req.query.developer !== undefined ? dbQuery : dbQuery.andWhere('not site.isTestSite')
+
+  const augmentFiles = (files: File[]) => {
+    const now = new Date()
+    const yesterday = new Date(new Date(now.setDate(now.getDate() - 1)))
+    return files.map(entry => ({ ...entry, ...{ volatile: entry.releasedAt > yesterday } }))
+  }
+
   if (process.env.NODE_ENV != 'production') {
     app.use(function(req, res, next) {
       res.header('Access-Control-Allow-Origin', '*') // update to match the domain you will make the request from
@@ -26,15 +39,13 @@ async function init() {
     })
 
     app.get('/allfiles', async (req: Request, res: Response, next) => {
-      const fileRepo = conn.getRepository(File)
       fileRepo.find({ relations: ['site', 'product'] })
-        .then(result => res.send(result))
+        .then(result => res.send(augmentFiles(result)))
         .catch(err=> next({status: 500, errors: err}))
     })
   }
 
   app.get('/status', async (_req: Request, res: Response, next) => {
-    const fileRepo = conn.getRepository(File)
     fileRepo.createQueryBuilder('file') .leftJoin('file.site', 'site')
       .select('site.id')
       .addSelect('MAX(file.releasedAt)', 'last_update')
@@ -85,7 +96,7 @@ async function init() {
       return next(pushAndReturn(requestError, 'No search parameters given'))
     }
 
-    const validKeys = ['location', 'product', 'dateFrom', 'dateTo']
+    const validKeys = ['location', 'product', 'dateFrom', 'dateTo', 'developer']
     const unknownFields = Object.keys(query).filter(key => !validKeys.includes(key))
     if (unknownFields.length > 0) {
       requestError.errors.push(`Unknown query parameters: ${unknownFields}`)
@@ -144,16 +155,20 @@ async function init() {
   }
 
   app.get('/file/:uuid', async (req: Request, res: Response, next) => {
-    const repo = conn.getRepository(File)
-    repo.findOneOrFail(req.params.uuid, { relations: ['site', 'product']})
-      .then(result => res.send(result))
-      .catch(_ =>  next({status: 404, errors: [ 'No files match this UUID' ]}))
+    const qb = fileRepo.createQueryBuilder('file')
+      .leftJoinAndSelect('file.site', 'site')
+      .leftJoinAndSelect('file.product', 'product')
+      .where('file.uuid = :uuid', req.params)
+    hideTestDataFromNormalUsers<File>(qb, req)
+      .getMany()
+      .then(result => {
+        if (result.length == 0) throw new Error()
+        res.send(augmentFiles(result)[0])
+      })
+      .catch(_err => next({status: 404, errors: [ 'No files match this UUID' ]}))
   })
 
   app.get('/files', filesValidator, filesQueryAugmenter, async (req: Request, res: Response, next) => {
-    const fileRepo = conn.getRepository(File)
-    const siteRepo = conn.getRepository(Site)
-    const productRepo = conn.getRepository(Product)
     const query = req.query
 
     siteRepo.findByIds(query.location)
@@ -168,28 +183,32 @@ async function init() {
       })
       .catch(next)
 
-    fileRepo.createQueryBuilder('file')
+    const qb = fileRepo.createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
       .leftJoinAndSelect('file.product', 'product')
       .where('site.id IN (:...location)', query)
       .andWhere('product.id IN (:...product)', query)
       .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate < :dateTo', query)
       .orderBy('file.measurementDate', 'DESC')
+    hideTestDataFromNormalUsers(qb, req)
       .getMany()
       .then(result => {
         if (result.length == 0) {
           next({status: 404, errors: ['The search yielded zero results'], params: req.query})
           return
         }
-        res.send(result)
+        res.send(augmentFiles(result))
       })
       .catch(err=> {
         next({status: 500, errors: err})
       })
   })
 
-  app.get('/sites', async (_req: Request, res: Response, next) => {
-    fetchAll<Site>(Site)
+  app.get('/sites', async (req: Request, res: Response, next) => {
+    const qb = siteRepo.createQueryBuilder('site')
+      .select()
+    hideTestDataFromNormalUsers(qb, req)
+      .getMany()
       .then(result => res.send(result))
       .catch(err => next({status: 500, errors: err}))
   })

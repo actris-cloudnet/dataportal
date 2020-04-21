@@ -19,12 +19,27 @@
     padding-right: 1em
     margin-bottom: 2em
 
+  .rednote
+    border: 1px #ffcfcf solid
+    border-radius: 2px
+    background: #fde5e5
+    width: 100%
+    padding-top: 0.5em
+    padding-bottom: 0.5em
+    padding-left: 1em
+    padding-right: 1em
+    margin-bottom: 2em
+
   .close
     float: right
     font-weight: bold
     color: lightgrey
     cursor: pointer
     margin-left: 1em
+
+  .rednote>.close
+    color: grey
+    font-weight: normal
 
   section#fileTable
     padding-left: 30px
@@ -61,8 +76,10 @@
       width: 50px
       text-align: center
     th:nth-child(2)
-      width: 400px
+      width: 300px
     th:nth-child(3)
+      width: 100px
+    th:nth-child(4)
       width: 110px
     td
       padding: 9px
@@ -78,6 +95,13 @@
     background-position: center
     background-size: 20px
     font-size: 0
+
+  .volatile
+    background: #cad7ff
+    padding-left: 0.5em
+    padding-right: 0.5em
+    padding-top: 0.1em
+    padding-bottom: 0.1em
 
   section#sideBar
     margin-right: 100px
@@ -149,9 +173,19 @@
     <a href="http://legacy.cloudnet.fmi.fi/">here</a> to navigate to the legacy cloudnet site.
     <span class="close" @click="displayBetaNotification = !displayBetaNotification">&#10005;</span>
   </div>
+  <div v-if="devMode.activated" class="rednote">
+    You are using the dataportal in developer mode. Files from sites in testing mode are now visible.
+    <span class="close" id="disableDevMode" @click="devMode.disable()">Deactivate</span>
+  </div>
   <section id="sideBar">
     <header class="filterOptions">Filter search</header>
-    <custom-multiselect label="Location" v-model="selectedSiteIds" :options="allSites" id="siteSelect" :icons="false">
+    <custom-multiselect
+      label="Location"
+      v-model="selectedSiteIds"
+      :options="allSites"
+      id="siteSelect"
+      :icons="false"
+      :devMode="devMode">
     </custom-multiselect>
 
     <div class="date">
@@ -192,7 +226,8 @@
       :options="allProducts"
       id="productSelect"
       :icons="true"
-      :getIconUrl="getIconUrl">
+      :getIconUrl="getIconUrl"
+      :devMode="devMode">
     </custom-multiselect>
 
     <a @click="reset" id="reset">Reset filter</a>
@@ -205,12 +240,21 @@
       :fields="[
                 { key: 'product.id', label: '', tdClass: 'icon', tdAttr: setIcon},
                 { key: 'title', label: 'Data object', sortable: true},
+                { key: 'volatile', label: '' },
                 { key: 'measurementDate', label: 'Date', sortable: true},
                 ]"
       :current-page="currentPage"
       :per-page="perPage"
       :busy="isBusy"
       @row-clicked="clickRow">
+    <template v-slot:cell(volatile)="data">
+      <span
+        v-if="data.item.volatile"
+        class="volatile"
+        title="The data for this day may be incomplete. This file is updating in real time.">
+        volatile
+      </span>
+    </template>
     </b-table>
     <b-pagination id="pagi" v-if="listLength > perPage"
       v-model="currentPage"
@@ -234,6 +278,7 @@ import { BPagination } from 'bootstrap-vue/esm/components/pagination'
 import Datepicker from '../components/Datepicker.vue'
 import CustomMultiselect from '../components/Multiselect.vue'
 import { getIconUrl } from '../lib'
+import { DevMode } from '../lib/DevMode'
 
 Vue.component('datepicker', Datepicker)
 Vue.component('b-table', BTable)
@@ -282,6 +327,7 @@ export default class Search extends Vue {
   displayBetaNotification = true
 
   getIconUrl = getIconUrl
+  devMode = new DevMode()
 
   isTrueOnBothDateFields(errorId: string) {
     return this.dateFromError[errorId] && this.dateToError[errorId]
@@ -297,9 +343,10 @@ export default class Search extends Vue {
   }
 
   async initView() {
+    const payload = { params: { developer: this.devMode.activated || undefined } }
     Promise.all([
-      axios.get(`${this.apiUrl}sites/`),
-      axios.get(`${this.apiUrl}products/`)
+      axios.get(`${this.apiUrl}sites/`, payload),
+      axios.get(`${this.apiUrl}products/`, payload)
     ]).then(([sites, products]) => {
       this.allSites = sites.data.sort((a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName)
       this.allProducts = products.data.sort((a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName)
@@ -308,8 +355,14 @@ export default class Search extends Vue {
   }
 
   get payload() {
-    return {params:
-      {location: this.selectedSiteIds, dateFrom: this.dateFrom, dateTo: this.dateTo, product: this.selectedProductIds}
+    return {
+      params: {
+        location: this.selectedSiteIds,
+        dateFrom: this.dateFrom,
+        dateTo: this.dateTo,
+        product: this.selectedProductIds,
+        developer: this.devMode.activated || undefined
+      }
     }
   }
 
@@ -374,6 +427,11 @@ export default class Search extends Vue {
   @Watch('selectedProductIds')
   onProductSelected() {
     this.fetchData()
+  }
+
+  @Watch('devMode.activated')
+  onDevModeToggled() {
+    this.initView()
   }
 }
 </script>

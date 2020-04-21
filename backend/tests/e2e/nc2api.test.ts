@@ -37,7 +37,8 @@ const expectedJson = {
     'altitude': 93,
     'gaw': 'Unknown',
     'country': 'Romania'
-  }
+  },
+  'volatile': true
 }
 
 
