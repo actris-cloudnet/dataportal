@@ -1,5 +1,6 @@
 <style lang="sass">
   @import "../sass/variables.sass"
+  @import "../sass/global.sass"
 
   $filter-margin: 2em
 
@@ -170,30 +171,6 @@
   .downloadinfo
     float: right
     margin-top: 30px
-  .download
-    appearance: button
-    text-decoration: none
-    color: initial
-    background-color: $blue-sapphire
-    border-radius: 3px
-    color: white
-    border-style: outset
-    border-width: 2px
-    border-color: $blue-sapphire
-    padding-top: 5px
-    padding-bottom: 5px
-    padding-left: 10px
-    padding-right: 10px
-    font-size: 1em
-    cursor: pointer
-    font-family: $content-font
-    &:hover
-      background-color: $blue-sapphire-light
-      border-color: $blue-sapphire-light
-    &:active
-      border-style: inset
-      background-color: $blue-sapphire
-      border-color: $blue-sapphire
 
   .dlcount
     color: gray
@@ -304,7 +281,7 @@
     <div class="downloadinfo">
       <button class="download">
         Download all results
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path stroke="none" fill="white" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
       </button><br>
       <span class="dlcount">{{ listLength }} files (~{{ humanReadableSize(combinedFileSize) }})</span><br>
     </div>
