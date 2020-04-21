@@ -238,7 +238,7 @@
   <section id="fileTable">
     <span class="listTitle"> {{ captionText }} </span>
     <b-table id="tableContent" borderless small striped hover sort-icon-left
-      :items="apiResponse.data"
+      :items="apiResponse"
       :fields="[
                 { key: 'product.id', label: '', tdClass: 'icon', tdAttr: setIcon},
                 { key: 'title', label: 'Data object', sortable: true},
@@ -299,7 +299,7 @@ export default class Search extends Vue {
 
   // api call
   apiUrl = process.env.VUE_APP_BACKENDURL
-  apiResponse = this.resetResponse()
+  apiResponse: File[] = this.resetResponse()
 
   // file list
   sortBy = 'title'
@@ -374,7 +374,7 @@ export default class Search extends Vue {
     axios
       .get(`${this.apiUrl}files/`, this.payload)
       .then(res => {
-        this.apiResponse = res
+        this.apiResponse = res.data
         this.isBusy = false
       })
       .catch(() => {
@@ -384,7 +384,11 @@ export default class Search extends Vue {
   }
 
   get listLength() {
-    return this.apiResponse['data'][0]['uuid'] ? this.apiResponse['data'].length : 0
+    return this.apiResponse.length
+  }
+
+  get combinedFileSize() {
+    return this.apiResponse.map(file => file.size).reduce((prev, cur) => cur + prev)
   }
 
   get captionText() {
@@ -393,7 +397,7 @@ export default class Search extends Vue {
   }
 
   resetResponse() {
-    return {'data': [{'uuid': null, 'product': null}]}
+    return []
   }
 
   clickRow(record: File) {
