@@ -360,10 +360,18 @@ export default class Search extends Vue {
 
   mounted() {
     // Wait until all child components have rendered
-    this.$nextTick(() => (this.renderComplete = true))
+    this.$nextTick(() => {
+      window.addEventListener('resize', this.adjustPerPageAccordingToWindowHeight)
+      this.renderComplete = true
+    })
+  }
+
+  beforeDestroy() {
+    window.removeEventListener('resize', this.adjustPerPageAccordingToWindowHeight)
   }
 
   async initView() {
+    this.adjustPerPageAccordingToWindowHeight()
     const payload = { params: { developer: this.devMode.activated || undefined } }
     Promise.all([
       axios.get(`${this.apiUrl}sites/`, payload),
@@ -435,6 +443,10 @@ export default class Search extends Vue {
 
   reset() {
     this.$router.go(0)
+  }
+
+  adjustPerPageAccordingToWindowHeight() {
+    this.perPage = Math.max(Math.floor(document.documentElement.clientHeight / 70), 10)
   }
 
   @Watch('selectedSiteIds')
