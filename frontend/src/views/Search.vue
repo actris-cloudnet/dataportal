@@ -415,7 +415,7 @@ export default class Search extends Vue {
   }
 
   get combinedFileSize() {
-    return this.apiResponse.map(file => file.size).reduce((prev, cur) => cur + prev)
+    return this.apiResponse.map(file => file.size).reduce((prev, cur) => cur + prev, 0)
   }
 
   get captionText() {
