@@ -177,6 +177,9 @@
     font-size: 85%
     text-align: center
     display: block
+
+  .opaque
+    opacity: 0.5
 </style>
 
 <template>
@@ -279,11 +282,13 @@
       align="center"
     ></b-pagination>
     <div class="downloadinfo">
-      <button class="download">
+      <button class="download" :disabled="isBusy">
         Download all results
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
       </button><br>
-      <span class="dlcount">{{ listLength }} files (~{{ humanReadableSize(combinedFileSize) }})</span><br>
+      <span class="dlcount" v-bind:class="{ opaque: isBusy }">
+        {{ listLength }} files (~{{ humanReadableSize(combinedFileSize) }})
+      </span><br>
     </div>
   </section>
 </main>
