@@ -287,7 +287,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
       </button><br>
       <span class="dlcount" v-bind:class="{ opaque: isBusy }">
-        {{ listLength }} files (~{{ humanReadableSize(combinedFileSize) }})
+        {{ listLength }} files (~{{ humanReadableSize(combinedFileSize(apiResponse)) }})
       </span><br>
     </div>
   </section>
@@ -303,7 +303,7 @@ import { BTable } from 'bootstrap-vue/esm/components/table'
 import { BPagination } from 'bootstrap-vue/esm/components/pagination'
 import Datepicker from '../components/Datepicker.vue'
 import CustomMultiselect from '../components/Multiselect.vue'
-import { getIconUrl } from '../lib'
+import { getIconUrl, humanReadableSize, combinedFileSize } from '../lib'
 import { DevMode } from '../lib/DevMode'
 
 Vue.component('datepicker', Datepicker)
@@ -353,6 +353,8 @@ export default class Search extends Vue {
   displayBetaNotification = true
 
   getIconUrl = getIconUrl
+  humanReadableSize = humanReadableSize
+  combinedFileSize = combinedFileSize
   devMode = new DevMode()
 
   isTrueOnBothDateFields(errorId: string) {
@@ -419,10 +421,6 @@ export default class Search extends Vue {
     return this.apiResponse.length
   }
 
-  get combinedFileSize() {
-    return this.apiResponse.map(file => file.size).reduce((prev, cur) => cur + prev, 0)
-  }
-
   get captionText() {
     if (this.isBusy) return 'Searching...'
     return this.listLength > 0 ? `Found ${this.listLength} results` : 'No results'
@@ -439,11 +437,6 @@ export default class Search extends Vue {
 
   setIcon(product: string) {
     if (product) return {'style': `background-image: url(${getIconUrl(product)})`}
-  }
-
-  humanReadableSize(size: number) {
-    const i = Math.floor( Math.log(size) / Math.log(1024) )
-    return `${( size / Math.pow(1024, i) ).toFixed(1)  } ${  ['B', 'kB', 'MB', 'GB', 'TB'][i]}`
   }
 
   reset() {

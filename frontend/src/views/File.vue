@@ -189,7 +189,7 @@ img.product
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import axios from 'axios'
-import { getIconUrl } from '../lib'
+import { getIconUrl, humanReadableSize, humanReadableDate } from '../lib'
 import { DevMode } from '../lib/DevMode'
 
 @Component
@@ -199,6 +199,9 @@ export default class File extends Vue {
   error = false
   fileserverUrl = process.env.VUE_APP_FILESERVERURL
   apiUrl = process.env.VUE_APP_BACKENDURL
+
+  humanReadableSize = humanReadableSize
+  humanReadableDate = humanReadableDate
   getIconUrl = getIconUrl
 
   devMode = new DevMode()
@@ -214,15 +217,6 @@ export default class File extends Vue {
         this.error = true
         this.response = response
       })
-  }
-
-  humanReadableDate(date: string) {
-    return new Date(date).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })
-  }
-
-  humanReadableSize(size: number) {
-    const i = Math.floor( Math.log(size) / Math.log(1024) )
-    return `${( size / Math.pow(1024, i) ).toFixed(1)  } ${  ['B', 'kB', 'MB', 'GB', 'TB'][i]}`
   }
 }
 </script>
