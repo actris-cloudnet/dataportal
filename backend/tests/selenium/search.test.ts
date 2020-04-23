@@ -1,6 +1,7 @@
 import { By, until, WebDriver, Key } from 'selenium-webdriver'
 import * as fs from 'fs'
 import { join } from 'path'
+import axios from 'axios'
 import { inboxDir, prepareSelenium, wait } from '../lib'
 
 let driver: WebDriver
@@ -14,6 +15,11 @@ const clickId = async (key: string) => (await getById(key)).click()
 const clickGrandparentById = async (key: string) => (await (await getById(key)).findElement(By.xpath('../..'))).click()
 const clickClass = async (key: string) => await (await findElement(By.className(key))).click()
 const clickXpath = async (key: string) => await (await findElement(By.xpath(key))).click()
+
+async function awaitAndFind(by: By) {
+  await driver.wait(until.elementLocated(by))
+  return driver.findElement(by)
+}
 
 async function initSearch() {
   await driver.get('http://localhost:8000/search')
@@ -178,4 +184,13 @@ describe('search page', () => {
     expect(content).not.toContain('developer mode')
     expect(content).not.toContain('Model file from Granada')
   })
+
+  it('should start download when clicking download button', async () => {
+    await sendInput('dateFrom', '1980')
+    const button = await awaitAndFind(By.className('download'))
+    const downloadUrl = await button.getAttribute('href')
+    const response = await axios.head(downloadUrl)
+    expect(response.status).toBe(200)
+  })
+
 })
