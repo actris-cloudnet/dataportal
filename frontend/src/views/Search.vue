@@ -181,36 +181,10 @@
 
   .disabled
     opacity: 0.5
-
-  .downloadOverlay
-    position: absolute
-    overflow: hidden
-    width: 100%
-    height: 100%
-    background: rgba(255,255,255,0.9)
-    z-index: 10
-    text-align: center
-    padding: 2em
-    box-sizing: border-box
-
-  .blur > *:not(.downloadOverlay)
-    filter: blur(6px)
-
-  .paragraph
-    margin-top: 1em
-
-  a.link
-    cursor: pointer
-    color: #007bff
-    text-decoration: none
-    background-color: transparent
-    &:hover
-      color: #0056b3
-      text-decoration: underline
 </style>
 
 <template>
-<main id="search" v-bind:class="{ blur: downloadInProgress }">
+<main id="search">
   <div v-if="displayBetaNotification" class="betanote">
     This is the beta version of Cloudnet data portal.
     Click <a href="http://devcloudnet.fmi.fi/">here</a> to visit the devcloudnet data portal, or
@@ -311,7 +285,6 @@
     <div class="downloadinfo" v-if="listLength > 0">
       <a class="download"
         v-bind:class="{ disabled: isBusy }"
-        @click="isBusy || (downloadInProgress = true)"
         :href="isBusy? '#' : downloadUri" download>
         Download all
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
@@ -321,12 +294,6 @@
       </span><br>
     </div>
   </section>
-  <div v-if="downloadInProgress" class="downloadOverlay">
-    <h2>Your download is being prepared.</h2>
-    You are about about to download <strong>{{ humanReadableSize(combinedFileSize(apiResponse)) }}</strong> of files.
-    <p class="paragraph">Your download will begin shortly.<br>
-    <a class="link" @click="downloadInProgress = false">Continue browsing &rarr;</a></p>
-  </div>
 </main>
 </template>
 
@@ -374,7 +341,7 @@ export default class Search extends Vue {
 
   // dates
   beginningOfHistory = new Date('1970-01-01')
-  today = new Date()
+today = new Date()
   dateFrom = new Date(new Date().getFullYear().toString())
   dateTo = this.today
   dateFromError: { [key: string]: boolean } = {}
@@ -387,7 +354,6 @@ export default class Search extends Vue {
   renderComplete = false
 
   displayBetaNotification = true
-  downloadInProgress = false
 
   getIconUrl = getIconUrl
   humanReadableSize = humanReadableSize
