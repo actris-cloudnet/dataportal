@@ -5,6 +5,7 @@
   $filter-margin: 2em
 
   main#search
+    position: relative
     display: flex
     justify-content: center
     flex-wrap: wrap
@@ -180,10 +181,36 @@
 
   .opaque
     opacity: 0.5
+
+  .downloadOverlay
+    position: absolute
+    overflow: hidden
+    width: 100%
+    height: 100%
+    background: rgba(255,255,255,0.9)
+    z-index: 10
+    text-align: center
+    padding: 2em
+    box-sizing: border-box
+
+  .blur > *:not(.downloadOverlay)
+    filter: blur(6px)
+
+  .paragraph
+    margin-top: 1em
+
+  a.link
+    cursor: pointer
+    color: #007bff
+    text-decoration: none
+    background-color: transparent
+    &:hover
+      color: #0056b3
+      text-decoration: underline
 </style>
 
 <template>
-<main id="search">
+<main id="search" v-bind:class="{ blur: downloadInProgress }">
   <div v-if="displayBetaNotification" class="betanote">
     This is the beta version of Cloudnet data portal.
     Click <a href="http://devcloudnet.fmi.fi/">here</a> to visit the devcloudnet data portal, or
@@ -282,15 +309,21 @@
       align="center"
     ></b-pagination>
     <div class="downloadinfo">
-      <button class="download" :disabled="isBusy">
+      <a class="download" :disabled="isBusy" @click="downloadInProgress = true" :href="downloadUri" download>
         Download all results
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-      </button><br>
+      </a><br>
       <span class="dlcount" v-bind:class="{ opaque: isBusy }">
         {{ listLength }} files (~{{ humanReadableSize(combinedFileSize(apiResponse)) }})
       </span><br>
     </div>
   </section>
+  <div v-if="downloadInProgress" class="downloadOverlay">
+    <h2>Your download is being prepared.</h2>
+    You are about about to download <strong>{{ humanReadableSize(combinedFileSize(apiResponse)) }}</strong> of files.
+    <p class="paragraph">Your download will begin shortly.<br>
+    <a class="link" @click="downloadInProgress = false">Continue browsing &rarr;</a></p>
+  </div>
 </main>
 </template>
 
@@ -351,6 +384,7 @@ export default class Search extends Vue {
   renderComplete = false
 
   displayBetaNotification = true
+  downloadInProgress = false
 
   getIconUrl = getIconUrl
   humanReadableSize = humanReadableSize
@@ -424,6 +458,10 @@ export default class Search extends Vue {
   get captionText() {
     if (this.isBusy) return 'Searching...'
     return this.listLength > 0 ? `Found ${this.listLength} results` : 'No results'
+  }
+
+  get downloadUri() {
+    return axios.getUri({...{ method: 'post', url: `${this.apiUrl}download/`}, ...this.payload })
   }
 
   resetResponse() {
