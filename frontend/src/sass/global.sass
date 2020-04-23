@@ -15,18 +15,20 @@
   cursor: pointer
   font-family: $content-font
   display: inline-block
-  &:hover:not([disabled])
+  &:hover:not(.disabled)
     color: white
     text-decoration: none
     background-color: $blue-sapphire-light
     border-color: $blue-sapphire-light
-  &:active:not([disabled])
+  &:active:not(.disabled)
     border-style: inset
     background-color: $blue-sapphire
     border-color: $blue-sapphire
-  &:disabled
+  &.disabled
     cursor: default
-    opacity: 0.5
+  &.disabled:hover
+    color: white
+    text-decoration: none
   > svg
     vertical-align: middle
     width: auto

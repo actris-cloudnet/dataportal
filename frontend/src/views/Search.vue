@@ -179,7 +179,7 @@
     text-align: center
     display: block
 
-  .opaque
+  .disabled
     opacity: 0.5
 
   .downloadOverlay
