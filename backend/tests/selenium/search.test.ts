@@ -102,8 +102,8 @@ describe('search page', () => {
     await sendInput('dateFrom', '2019-07-23')
     await sendInput('dateTo', '2019-07-26')
     const content = await getContent()
-    expect(content).toContain('Found 3 results')
-    for (let i = 23; i <= 25; i++) {
+    expect(content).toContain('Found 4 results')
+    for (let i = 23; i <= 26; i++) {
       expect(content).toContain(`2019-07-${i}`)
     }
   })

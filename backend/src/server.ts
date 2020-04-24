@@ -164,7 +164,7 @@ async function init() {
       .leftJoinAndSelect('file.product', 'product')
       .where('site.id IN (:...location)', query)
       .andWhere('product.id IN (:...product)', query)
-      .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate < :dateTo', query)
+      .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate <= :dateTo', query)
       .orderBy('file.measurementDate', 'DESC')
 
   const allFilesAreReadable = (filepaths: string[]) =>

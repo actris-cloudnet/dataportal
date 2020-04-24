@@ -71,10 +71,10 @@ describe('/files', () => {
     expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody404.status, expectedBody404))
   })
 
-  it('should respond with an array of objects with dates between [ dateFrom, dateTo [, in descending order', async () => {
+  it('should respond with an array of objects with dates between [ dateFrom, dateTo ], in descending order', async () => {
     const payload = {params: {dateFrom: new Date('2018-06-09'), dateTo: new Date('2019-09-01')}}
     const res = await axios.get(url, payload)
-    return expect(res.data.map((d: any) => d.measurementDate)).toEqual(['2019-07-15', '2018-11-15', '2018-06-09'])
+    return expect(res.data.map((d: any) => d.measurementDate)).toEqual(['2019-09-01', '2019-07-15', '2018-11-15', '2018-06-09'])
   })
 
   it('should respond with correct objects if product is specified', async () => {
@@ -84,7 +84,7 @@ describe('/files', () => {
   })
 
   it('should respond with correct objects if dateFrom, dateTo, location, and product are specified', async () => {
-    const payload = {params: {dateFrom: new Date('2018-06-09'), dateTo: new Date('2019-09-01'), location: 'macehead', product: 'classification'}}
+    const payload = {params: {dateFrom: new Date('2018-06-09'), dateTo: new Date('2019-09-02'), location: 'macehead', product: 'classification'}}
     const res = await axios.get(url, payload)
     expect(res.data.map((d: any) => d.site.id)).toEqual(['macehead'])
     expect(res.data.map((d: any) => d.product.id)).toEqual(['classification'])
