@@ -1,0 +1,36 @@
+.download
+  appearance: button
+  text-decoration: none
+  background-color: $blue-sapphire
+  border-radius: 3px
+  color: white
+  border-style: outset
+  border-width: 2px
+  border-color: $blue-sapphire
+  padding-top: 4px
+  padding-bottom: 4px
+  padding-left: 10px
+  padding-right: 10px
+  font-size: 1em
+  cursor: pointer
+  font-family: $content-font
+  display: inline-block
+  &:hover:not(.disabled)
+    color: white
+    text-decoration: none
+    background-color: $blue-sapphire-light
+    border-color: $blue-sapphire-light
+  &:active:not(.disabled)
+    border-style: inset
+    background-color: $blue-sapphire
+    border-color: $blue-sapphire
+  &.disabled
+    cursor: default
+  &.disabled:hover
+    color: white
+    text-decoration: none
+  > svg
+    vertical-align: middle
+    width: auto
+    height: 1.3em
+    fill: white

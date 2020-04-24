@@ -9,9 +9,13 @@ import * as express from 'express'
 import validator from 'validator'
 import config from './config'
 import { Product } from './entity/Product'
+import * as archiver from 'archiver'
+import { createReadStream, promises as fsp, constants as fsconst } from 'fs'
+import { join, basename } from 'path'
 
 const port = parseInt(process.argv[2])
 const connName = config.connectionName
+const publicDir = config.publicDir
 
 async function init() {
   const app = express()
@@ -154,6 +158,18 @@ async function init() {
     next()
   }
 
+  const filesQueryBuilder = (query: any) =>
+    fileRepo.createQueryBuilder('file')
+      .leftJoinAndSelect('file.site', 'site')
+      .leftJoinAndSelect('file.product', 'product')
+      .where('site.id IN (:...location)', query)
+      .andWhere('product.id IN (:...product)', query)
+      .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate < :dateTo', query)
+      .orderBy('file.measurementDate', 'DESC')
+
+  const allFilesAreReadable = (filepaths: string[]) =>
+    Promise.all(filepaths.map(filepath => fsp.access(filepath, fsconst.R_OK)))
+
   app.get('/file/:uuid', async (req: Request, res: Response, next) => {
     const qb = fileRepo.createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
@@ -183,13 +199,7 @@ async function init() {
       })
       .catch(next)
 
-    const qb = fileRepo.createQueryBuilder('file')
-      .leftJoinAndSelect('file.site', 'site')
-      .leftJoinAndSelect('file.product', 'product')
-      .where('site.id IN (:...location)', query)
-      .andWhere('product.id IN (:...product)', query)
-      .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate < :dateTo', query)
-      .orderBy('file.measurementDate', 'DESC')
+    const qb = filesQueryBuilder(query)
     hideTestDataFromNormalUsers(qb, req)
       .getMany()
       .then(result => {
@@ -219,11 +229,49 @@ async function init() {
       .catch(err => next({status: 500, errors: err}))
   })
 
+  app.get('/download', filesValidator, filesQueryAugmenter, (req: Request, res: Response, next) => {
+    const qb = filesQueryBuilder(req.query)
+    hideTestDataFromNormalUsers(qb, req)
+      .select('file.filename')
+      .getMany()
+      .then(async result => {
+        if (result.length == 0) {
+          next({status: 400, errors: ['No files match the query'], params: req.query})
+          return
+        }
+        const filepaths = result
+          .map(file => file.filename)
+          .map(filename => join(publicDir, filename))
+        await allFilesAreReadable(filepaths)
+        const archive = archiver('zip', { store: true })
+        archive.on('warning', console.error)
+        archive.on('error', console.error)
+        const receiverFilename = `cloudnet-collection-${new Date().getTime()}.zip`
+        res.set('Content-Type', 'application/octet-stream')
+        res.set('Content-Disposition', `attachment; filename="${receiverFilename}"`)
+        archive.pipe(res)
+        filepaths.map(filepath => {
+          const fileStream = createReadStream(filepath)
+          fileStream.on('warning', console.error)
+          fileStream.on('error', console.error)
+          archive.append(fileStream, { name: basename(filepath) })
+        })
+        archive.finalize()
+      })
+      .catch(err => {
+        res.sendStatus(500)
+        next(err)
+      })
+  })
+
   const errorHandler: ErrorRequestHandler = (err: RequestError, _req, res, next) => {
     console.log(`Error in path ${_req.path}:`, stringify(err))
-    delete err.params
-    res.status(err.status)
-    res.send(err)
+    if (!res.headersSent) {
+      delete err.params
+      const status = err.status || 500
+      res.status(status)
+      res.send(err)
+    }
     next()
   }
 

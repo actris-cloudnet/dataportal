@@ -2,6 +2,8 @@ import * as fs from 'fs'
 import * as path from 'path'
 import axios from 'axios'
 import { clearDir, inboxDir, inboxSubDir, publicDir, clearRepo, backendUrl, fileServerUrl, wait } from '../lib'
+import * as AdmZip from 'adm-zip'
+import { createHash } from 'crypto'
 
 beforeAll(async () => {
   clearDir(inboxDir)
@@ -65,19 +67,30 @@ describe('after moving a valid NC file to inbox', () => {
       })
   })
 
-})
+  describe('after moving a another valid NC file to inbox subfolder', () => {
+    beforeAll(async () => {
+      fs.copyFileSync('tests/data/20190724_bucharest_classification.nc', path.join(inboxSubDir, '20190724_bucharest_classification.nc'))
+      return wait(4000)
+    })
 
+    it('should respond with correct uuid in metadata JSON', async () => {
+      return axios
+        .get(`${backendUrl}file/${expectedUuidFromSubFolder}`)
+        .then(response => expect(response.data.uuid).toMatch(expectedUuidFromSubFolder))
+    })
 
-describe('after moving a valid NC file to inbox subfolder', () => {
-  beforeAll(async () => {
-    fs.copyFileSync('tests/data/20190724_bucharest_classification.nc', path.join(inboxSubDir, '20190724_bucharest_classification.nc'))
-    return wait(4000)
+    it('hashes of /download zipped files should match originals', async () => {
+      const tmpZip = 'tests/data/tmp.zip'
+      const shas = await (await axios.get(`${backendUrl}files/`, { params: { location: 'bucharest' } })).data.map((file: any) => file.checksum)
+      const receivedFile = await axios.get(`${backendUrl}download/`, { responseType: 'arraybuffer', params: { location: 'bucharest' } })
+      fs.writeFileSync(tmpZip, receivedFile.data)
+      new AdmZip(tmpZip).getEntries().map((entry, i) => {
+        const hash = createHash('sha256')
+        hash.update(entry.getData())
+        expect(hash.digest('hex')).toEqual(shas[i])
+      })
+      fs.unlinkSync(tmpZip)
+    }
+    )
   })
-
-  it('should respond with correct uuid in metadata JSON', async () => {
-    return axios
-      .get(`${backendUrl}file/${expectedUuidFromSubFolder}`)
-      .then(response => expect(response.data.uuid).toMatch(expectedUuidFromSubFolder))
-  })
-
 })
