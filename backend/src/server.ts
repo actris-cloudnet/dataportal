@@ -10,7 +10,7 @@ import validator from 'validator'
 import config from './config'
 import { Product } from './entity/Product'
 import * as archiver from 'archiver'
-import { createReadStream, promises as fsp, constants as fsconst } from 'fs'
+import { createReadStream, promises as fsp, constants as fsconst } from 'graceful-fs'
 import { join, basename } from 'path'
 
 const port = parseInt(process.argv[2])
