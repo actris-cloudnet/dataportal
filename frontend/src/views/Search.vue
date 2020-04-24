@@ -95,6 +95,9 @@
       cursor: pointer
       background-color: #e4eff7
 
+  .text-center.my-2
+    display: none
+
   .icon
     background-repeat: no-repeat
     background-position: center
@@ -264,6 +267,7 @@
       :current-page="currentPage"
       :per-page="perPage"
       :busy="isBusy"
+      :show-empty="true"
       @row-clicked="clickRow">
     <template v-slot:cell(volatile)="data">
       <span
