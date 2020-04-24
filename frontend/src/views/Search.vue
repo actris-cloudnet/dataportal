@@ -341,7 +341,7 @@ export default class Search extends Vue {
 
   // dates
   beginningOfHistory = new Date('1970-01-01')
-today = new Date()
+  today = new Date()
   dateFrom = new Date(new Date().getFullYear().toString())
   dateTo = this.today
   dateFromError: { [key: string]: boolean } = {}
