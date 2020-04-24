@@ -243,20 +243,25 @@ async function init() {
           .map(file => file.filename)
           .map(filename => join(publicDir, filename))
         await allFilesAreReadable(filepaths)
+
         const archive = archiver('zip', { store: true })
         archive.on('warning', console.error)
         archive.on('error', console.error)
+        req.on('close', () => archive.abort)
+
         const receiverFilename = `cloudnet-collection-${new Date().getTime()}.zip`
         res.set('Content-Type', 'application/octet-stream')
         res.set('Content-Disposition', `attachment; filename="${receiverFilename}"`)
         archive.pipe(res)
-        filepaths.map(filepath => {
-          const fileStream = createReadStream(filepath)
-          fileStream.on('warning', console.error)
-          fileStream.on('error', console.error)
-          archive.append(fileStream, { name: basename(filepath) })
-        })
-        archive.finalize()
+
+        let i = 1
+        const appendFile = (idx: number) => {
+          const fileStream = createReadStream(filepaths[idx])
+          archive.append(fileStream, { name: basename(filepaths[idx]) })
+          if (idx == (filepaths.length - 1)) archive.finalize()
+        }
+        archive.on('entry', () => i < filepaths.length ? appendFile(i++) : null)
+        appendFile(0)
       })
       .catch(err => {
         res.sendStatus(500)
