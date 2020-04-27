@@ -120,29 +120,22 @@ case "$action" in
     ;;
 
     purge)
-    dropdb dataportal
-    dropdb dataportal-test
-    rm -rf */build
-    rm -rf */dist
-    rm -rf */node_modules
+    if ! is_production; then
+        dropdb dataportal
+        dropdb dataportal-test
+        rm -rf */build
+        rm -rf */dist
+        rm -rf */node_modules
+    else
+        echo "This action cannot be run in production."
+        exit 2
+    fi
     ;;
 
     clean)
     set +e
     rm -vf backend/$pid_dir/.*.pid
     rm -vf .nginx.pid
-    ;;
-
-    reset)
-    set +e
-    cd backend
-    rm -rf build
-    rm -rf public
-    mkdir public
-    npx typeorm schema:drop
-    npx tsc --build tsconfig.json
-    npx fixtures ./fixtures/Site.yml
-    cd ..
     ;;
 
     install)
