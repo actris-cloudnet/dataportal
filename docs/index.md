@@ -52,7 +52,7 @@ Fetch information on the products served in the data portal. Responds with an ar
 
 Example query:
 
-`GET https://altocumulus.fmi.fi/api/sites`
+`GET https://altocumulus.fmi.fi/api/products`
 
 Response body:
 ```json
@@ -139,7 +139,7 @@ Note: one or more of the parameters *must* be issued. A query without any valid 
 
 Example query for fetching metadata for all model files from Bucharest starting at 24. April 2020 and ending at the current date:
 
-`GET /api/files?location=bucharest&dateFrom=24-04-2020&product=classification`
+`GET https://altocumulus.fmi.fi/api/files?location=bucharest&dateFrom=2020-04-24&product=classification`
 
 Response body:
 
@@ -189,7 +189,7 @@ The API responds to errors with the appropriate HTTP status code and an `Error` 
 
 Example query:
 
-`GET /api/files?product=sausage`
+`GET https://altocumulus.fmi.fi/api/files?product=sausage`
 
 Response body:
 
@@ -210,16 +210,16 @@ The following examples use the `curl` and `jq` applications. They can be install
 
 Fetch all model and classification products from Mace Head and Hyytiälä:
 
-`curl "https://altocumulus.fmi.fi/api/files?location[]=macehead&location[]=hyytiala&product[]=model&product[]=classification"`
+`curl "https://altocumulus.fmi.fi/api/files?location=macehead&location=hyytiala&product=model&product=classification"`
 
 ### Using the API to download all data objects matching a criteria
 
 Download all data since 24. April 2020, saving them to the current working directory:
 
-`curl "https://altocumulus.fmi.fi/api/files?dateFrom=2020-04-24" | jq '.[]["url"]'| xargs -n1 curl -O`
+`curl "https://altocumulus.fmi.fi/api/files?dateFrom=2020-04-24" | jq '.[]["url"]' | xargs -n1 curl -O`
 
 That is, get the filtered list of file metadata, pick the `url` properties from each of the `File` objects and pass them on to `curl` again to download.
 
 ## Notes
 
-The API provides `gzip` compression of responses where applicable. We recommend using the compression for large queries. The compression can be enabled effortlessly in `curl` with the `--compressed` switch.
+The API provides `gzip` compression of responses where applicable. We recommend using the compression for large queries to reduce transmitted response size. The compression can be enabled effortlessly in `curl` with the `--compressed` switch.
