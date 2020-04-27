@@ -107,7 +107,7 @@ img.product
           </span>
       </div>
       <div class="actions">
-        <a class="download" :href="fileserverUrl + response.filename">
+        <a class="download" :href="response.url">
           Download file
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
         </a>
@@ -197,7 +197,6 @@ export default class File extends Vue {
   @Prop() uuid!: string
   response = null
   error = false
-  fileserverUrl = process.env.VUE_APP_FILESERVERURL
   apiUrl = process.env.VUE_APP_BACKENDURL
 
   humanReadableSize = humanReadableSize

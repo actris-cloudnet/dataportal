@@ -16,6 +16,7 @@ import { join, basename } from 'path'
 const port = parseInt(process.argv[2])
 const connName = config.connectionName
 const publicDir = config.publicDir
+const fileServerUrl = config.fileServerUrl
 
 async function init() {
   const app = express()
@@ -32,7 +33,9 @@ async function init() {
   const augmentFiles = (files: File[]) => {
     const now = new Date()
     const yesterday = new Date(new Date(now.setDate(now.getDate() - 1)))
-    return files.map(entry => ({ ...entry, ...{ volatile: entry.releasedAt > yesterday } }))
+    return files.map(entry =>
+      ({ ...entry, ...{ volatile: entry.releasedAt > yesterday, url: `${fileServerUrl}${entry.filename}` } })
+    )
   }
 
   if (process.env.NODE_ENV != 'production') {

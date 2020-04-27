@@ -1,15 +1,18 @@
 interface Config {
   connectionName: string
+  fileServerUrl: string
   publicDir: string
 }
 
 const testConfig = {
   connectionName: 'test',
+  fileServerUrl: 'http://localhost:4001/',
   publicDir: 'tests/data/public'
 }
 
 const devConfig = {
   connectionName: 'default',
+  fileServerUrl: 'http://localhost:4000/',
   publicDir: 'public'
 }
 
