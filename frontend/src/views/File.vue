@@ -4,6 +4,14 @@
 
 main#landing
 
+  #preview
+    max-width: 300px
+    img
+      width: 100%
+
+  .missing
+    max-width: 200px
+
   >header
     margin-bottom: 3em
     display: flex
@@ -169,8 +177,8 @@ img.product
       </section>
       <section id="preview">
         <header>Preview</header>
-        <section class="details">
-          Quicklook image not available
+        <section class="details" :class="{ 'missing' : this.missing == true}">
+          <img :src="getQuicklook()" />
         </section>
       </section>
       <section id="history">
@@ -204,6 +212,17 @@ export default class File extends Vue {
   getIconUrl = getIconUrl
 
   devMode = new DevMode()
+  missing = false
+
+  getQuicklook() {
+    try {
+      this.missing = false
+      return require(`../../../backend/quicklooks/${this.response.filename.replace('.nc', '.png')}`)
+    } catch (e) {
+      this.missing = true
+      return require('../assets/missing.png')
+    }
+ }
 
   created() {
     const payload = { params: { developer: this.devMode.activated || undefined}}
