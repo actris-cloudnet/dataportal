@@ -5,12 +5,9 @@
 main#landing
 
   #preview
-    max-width: 300px
+    max-width: 400px
     img
       width: 100%
-
-  .missing
-    max-width: 200px
 
   >header
     margin-bottom: 3em
@@ -177,8 +174,8 @@ img.product
       </section>
       <section id="preview">
         <header>Preview</header>
-        <section class="details" :class="{ 'missing' : this.missing == true}">
-          <img :src="getQuicklook()" />
+        <section class="details" :class="{ 'missing' : missing == true}">
+          <img v-if="!missing" :src="getQuicklook()" />
         </section>
       </section>
       <section id="history">
@@ -220,9 +217,8 @@ export default class File extends Vue {
       return require(`../../../backend/quicklooks/${this.response.filename.replace('.nc', '.png')}`)
     } catch (e) {
       this.missing = true
-      return require('../assets/missing.png')
     }
- }
+  }
 
   created() {
     const payload = { params: { developer: this.devMode.activated || undefined}}
