@@ -213,7 +213,6 @@ export default class File extends Vue {
 
   getQuicklook() {
     try {
-      this.missing = false
       return require(`../../../backend/quicklooks/${this.response.filename.replace('.nc', '.png')}`)
     } catch (e) {
       this.missing = true
