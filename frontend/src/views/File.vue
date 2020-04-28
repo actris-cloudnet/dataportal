@@ -174,7 +174,7 @@ img.product
       </section>
       <section id="preview">
         <header>Preview</header>
-        <section class="details" :class="{ 'missing' : missing == true}">
+        <section class="details">
           <img v-if="!missing" :src="getQuicklook()" />
         </section>
       </section>
