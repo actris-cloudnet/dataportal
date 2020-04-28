@@ -14,7 +14,7 @@ FILEREAL=`realpath $FILE`
 
 if [[ `file --mime-type -b $FILE` == image/*g ]]; then
     rm -f public/$FILEBASE
-    ln -s $FILEREAL public/$FILEBASE
+    ln -s $FILEREAL quicklooks/$FILEBASE
     exit 0
 fi
 
