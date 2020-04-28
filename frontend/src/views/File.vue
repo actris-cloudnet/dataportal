@@ -175,7 +175,7 @@ img.product
       <section id="preview">
         <header>Preview</header>
         <section class="details">
-          <img :src="getQuicklook()" alt="Preview not available" />
+          <img v-bind:src="`/download/quicklook/${imgName}`" alt="Preview not available" />
         </section>
       </section>
       <section id="history">
@@ -207,15 +207,8 @@ export default class File extends Vue {
   humanReadableSize = humanReadableSize
   humanReadableDate = humanReadableDate
   getIconUrl = getIconUrl
-
   devMode = new DevMode()
-
-  getQuicklook() {
-    try {
-      return require(`../../../backend/quicklooks/${this.response.filename.replace('.nc', '.png')}`)
-    } catch (e) {
-    }
-  }
+  imgName = ''
 
   created() {
     const payload = { params: { developer: this.devMode.activated || undefined}}
@@ -223,6 +216,7 @@ export default class File extends Vue {
       .get(`${this.apiUrl}file/${this.uuid}`, payload)
       .then(response => {
         this.response = response.data
+        this.imgName = this.response.filename.replace('.nc', '.png')
       })
       .catch(({response}) => {
         this.error = true

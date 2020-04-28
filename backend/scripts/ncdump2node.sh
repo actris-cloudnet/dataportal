@@ -11,7 +11,7 @@ STDOUT=${2-/dev/stdout}
 
 FILEBASE=`basename $FILE`
 FILEREAL=`realpath $FILE`
-IMGPATH="quicklooks"
+IMGPATH="public/quicklook"
 
 FILEPATH=$IMGPATH/$FILEBASE
 
