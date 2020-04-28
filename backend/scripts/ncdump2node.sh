@@ -11,10 +11,13 @@ STDOUT=${2-/dev/stdout}
 
 FILEBASE=`basename $FILE`
 FILEREAL=`realpath $FILE`
+IMGPATH="quicklooks"
+
+FILEPATH=$IMGPATH/$FILEBASE
 
 if [[ `file --mime-type -b $FILE` == image/*g ]]; then
-    rm -f public/$FILEBASE
-    ln -s $FILEREAL quicklooks/$FILEBASE
+    rm -f $FILEPATH
+    ln -s $FILEREAL $FILEPATH
     exit 0
 fi
 
