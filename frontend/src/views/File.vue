@@ -175,7 +175,7 @@ img.product
       <section id="preview">
         <header>Preview</header>
         <section class="details">
-          <img v-if="!missing" :src="getQuicklook()" />
+          <img :src="getQuicklook()" alt="Preview not available" />
         </section>
       </section>
       <section id="history">
@@ -209,13 +209,11 @@ export default class File extends Vue {
   getIconUrl = getIconUrl
 
   devMode = new DevMode()
-  missing = false
 
   getQuicklook() {
     try {
       return require(`../../../backend/quicklooks/${this.response.filename.replace('.nc', '.png')}`)
     } catch (e) {
-      this.missing = true
     }
   }
 
