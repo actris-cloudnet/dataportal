@@ -22,6 +22,7 @@ afterAll(async () => {
 describe('file landing page', () => {
   beforeAll(async () => {
     fs.copyFileSync('tests/data/20190723_bucharest_classification.nc', join(inboxDir, '20190723_bucharest_classification.nc'))
+    fs.copyFileSync('tests/data/20190723_bucharest_classification.png', join(inboxDir, '20190723_bucharest_classification.png'))
     return wait(3000)
   })
 
@@ -60,5 +61,14 @@ describe('file landing page', () => {
     const response = await axios.head(downloadUrl)
     expect(response.status).toBe(200)
     return expect(response.headers['content-length']).toBe('139021')
+  })
+
+  it('should show a preview image', async () => {
+    await driver.get('http://localhost:8000/file/15506ea8d3574c7baf8c95dfcc34fc7d')
+    const button = await awaitAndFind(By.id('previewImg'))
+    const downloadUrl = await button.getAttribute('src')
+    const response = await axios.head(downloadUrl)
+    expect(response.status).toBe(200)
+    return expect(response.headers['content-length']).toBe('163576')
   })
 })

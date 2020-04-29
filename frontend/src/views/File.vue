@@ -82,6 +82,17 @@ main#landing
       white-space: pre-wrap
       font-family: monospace
 
+  #preview
+    max-width: 45em
+    img
+      width: 100%
+      height: auto
+
+  .linkNotImplemented
+    text-decoration: underline
+    cursor: default
+    color: #a0a9aa
+
 .capitalize
   text-transform: capitalize
 
@@ -170,7 +181,11 @@ img.product
       <section id="preview">
         <header>Preview</header>
         <section class="details">
-          Quicklook image not available
+          <img id="previewImg" v-show="imgExists" v-bind:src="`${quicklookUrl}${imgName}`" @load="imgExists = true">
+          <span v-if="imgExists" title="This feature is not yet implemented." class="linkNotImplemented">
+            See all plots &rarr;
+          </span>
+          <span v-else>Preview not available</span>
         </section>
       </section>
       <section id="history">
@@ -191,19 +206,27 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import axios from 'axios'
 import { getIconUrl, humanReadableSize, humanReadableDate } from '../lib'
 import { DevMode } from '../lib/DevMode'
+import { File } from '../../../backend/src/entity/File'
 
 @Component
-export default class File extends Vue {
+export default class FileView extends Vue {
   @Prop() uuid!: string
-  response = null
+  response: File | null = null
   error = false
+  quicklookUrl = process.env.VUE_APP_QUICKLOOKURL
   apiUrl = process.env.VUE_APP_BACKENDURL
 
   humanReadableSize = humanReadableSize
   humanReadableDate = humanReadableDate
   getIconUrl = getIconUrl
-
   devMode = new DevMode()
+
+  get imgName() {
+    if (!this.response) return ''
+    return this.response.filename.replace('.nc', '.png')
+  }
+
+  imgExists = false
 
   created() {
     const payload = { params: { developer: this.devMode.activated || undefined}}

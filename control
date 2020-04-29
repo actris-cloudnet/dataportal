@@ -51,10 +51,11 @@ waitport () {
 
 backend_postinstall () {
     mkdir -p public
+    mkdir -p public/quicklook
     mkdir -p inbox
     mkdir -p tests/data/inbox
     mkdir -p tests/data/inbox/inbox
-    mkdir -p tests/data/public
+    mkdir -p tests/data/public/quicklook
     createdb dataportal
     createdb dataportal-test
     npm run build
