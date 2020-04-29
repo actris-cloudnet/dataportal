@@ -87,10 +87,11 @@ main#landing
     img
       width: 100%
       height: auto
-    span
-      text-decoration: underline
-      cursor: default
-      color: #a0a9aa
+
+  .linkNotImplemented
+    text-decoration: underline
+    cursor: default
+    color: #a0a9aa
 
 .capitalize
   text-transform: capitalize
@@ -180,8 +181,9 @@ img.product
       <section id="preview">
         <header>Preview</header>
         <section class="details">
-          <img v-bind:src="`${quicklookUrl}${imgName}`" alt="Preview not available" @load="imgExists = true">
-          <span v-if="imgExists" title="This feature is not yet implemented.">See all plots &rarr;</span>
+          <img v-show="imgExists" v-bind:src="`${quicklookUrl}${imgName}`" @load="imgExists = true">
+          <span v-if="imgExists" title="This feature is not yet implemented." class="linkNotImplemented">See all plots &rarr;</span>
+          <span v-else>Preview not available</span>
         </section>
       </section>
       <section id="history">
