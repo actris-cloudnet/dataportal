@@ -181,8 +181,10 @@ img.product
       <section id="preview">
         <header>Preview</header>
         <section class="details">
-          <img v-show="imgExists" v-bind:src="`${quicklookUrl}${imgName}`" @load="imgExists = true">
-          <span v-if="imgExists" title="This feature is not yet implemented." class="linkNotImplemented">See all plots &rarr;</span>
+          <img id="previewImg" v-show="imgExists" v-bind:src="`${quicklookUrl}${imgName}`" @load="imgExists = true">
+          <span v-if="imgExists" title="This feature is not yet implemented." class="linkNotImplemented">
+            See all plots &rarr;
+          </span>
           <span v-else>Preview not available</span>
         </section>
       </section>
