@@ -14,7 +14,7 @@ FILEREAL=`realpath $FILE`
 IMGPATH="public/quicklook"
 if [ $NODE_ENV == 'test' ]; then
     IMGPATH="tests/data/public/quicklook"
-else if [ -f quicklook-path ]; then
+elif [ -f quicklook-path ]; then
     read -r IMGPATH < quicklook-path
 fi
 
