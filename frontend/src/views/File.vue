@@ -4,11 +4,6 @@
 
 main#landing
 
-  #preview
-    max-width: 400px
-    img
-      width: 100%
-
   >header
     margin-bottom: 3em
     display: flex
@@ -86,6 +81,16 @@ main#landing
     section#history > section
       white-space: pre-wrap
       font-family: monospace
+
+  #preview
+    max-width: 45em
+    img
+      width: 100%
+      height: auto
+    span
+      text-decoration: underline
+      cursor: default
+      color: #a0a9aa
 
 .capitalize
   text-transform: capitalize
@@ -175,7 +180,8 @@ img.product
       <section id="preview">
         <header>Preview</header>
         <section class="details">
-          <img v-bind:src="`/download/quicklook/${imgName}`" alt="Preview not available" />
+          <img v-bind:src="`${quicklookUrl}${imgName}`" alt="Preview not available" @load="imgExists = true">
+          <span v-if="imgExists" title="This feature is not yet implemented.">See all plots &rarr;</span>
         </section>
       </section>
       <section id="history">
@@ -209,7 +215,13 @@ export default class File extends Vue {
   humanReadableDate = humanReadableDate
   getIconUrl = getIconUrl
   devMode = new DevMode()
-  imgName = ''
+
+  get imgName() {
+    if (!this.response) return ''
+    return this.response.filename.replace('.nc', '.png')
+  }
+
+  imgExists = false
 
   created() {
     const payload = { params: { developer: this.devMode.activated || undefined}}
@@ -217,7 +229,6 @@ export default class File extends Vue {
       .get(`${this.apiUrl}file/${this.uuid}`, payload)
       .then(response => {
         this.response = response.data
-        this.imgName = this.response.filename.replace('.nc', '.png')
       })
       .catch(({response}) => {
         this.error = true
