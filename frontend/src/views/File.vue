@@ -202,11 +202,12 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import axios from 'axios'
 import { getIconUrl, humanReadableSize, humanReadableDate } from '../lib'
 import { DevMode } from '../lib/DevMode'
+import { File } from '../../../backend/src/entity/File'
 
 @Component
-export default class File extends Vue {
+export default class FileView extends Vue {
   @Prop() uuid!: string
-  response = null
+  response: File | null = null
   error = false
   quicklookUrl = process.env.VUE_APP_QUICKLOOKURL
   apiUrl = process.env.VUE_APP_BACKENDURL
