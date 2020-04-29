@@ -12,6 +12,9 @@ STDOUT=${2-/dev/stdout}
 FILEBASE=`basename $FILE`
 FILEREAL=`realpath $FILE`
 IMGPATH="public/quicklook"
+if [ $NODE_ENV == 'test' ]; then
+    IMGPATH="tests/data/public/quicklook"
+fi
 
 FILEPATH=$IMGPATH/$FILEBASE
 
