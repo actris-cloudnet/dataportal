@@ -202,10 +202,7 @@ export default class File extends Vue {
   @Prop() uuid!: string
   response = null
   error = false
-<<<<<<< HEAD
-=======
   quicklookUrl = process.env.VUE_APP_QUICKLOOKURL
->>>>>>> Rename fileserverUrl -> quicklookUrl
   apiUrl = process.env.VUE_APP_BACKENDURL
 
   humanReadableSize = humanReadableSize
