@@ -171,6 +171,8 @@
     cursor: pointer
     text-decoration: underline
     color: #bcd2e2
+    margin-bottom: $filter-margin
+    display: block
 
   .downloadinfo
     float: right
@@ -191,7 +193,7 @@
   <div v-if="displayBetaNotification" class="betanote">
     This is the beta version of Cloudnet data portal.
     Click <a href="http://devcloudnet.fmi.fi/">here</a> to visit the devcloudnet data portal, or
-    <a href="http://legacy.cloudnet.fmi.fi/">here</a> to navigate to the legacy cloudnet site.
+    <a href="http://cloudnet.fmi.fi/index.html">here</a> to navigate to the legacy cloudnet site.
     <span class="close" @click="displayBetaNotification = !displayBetaNotification">&#10005;</span>
   </div>
   <div v-if="devMode.activated" class="rednote">

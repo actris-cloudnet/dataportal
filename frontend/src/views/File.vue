@@ -1,6 +1,7 @@
 <style scoped lang="sass">
 @import "../sass/variables.sass"
 @import "../sass/global.sass"
+$border-color: #c8c8c8
 
 main#landing
 
@@ -43,9 +44,9 @@ main#landing
 
     > section
       flex-grow: 0.5
-      border: 1px solid grey
+      border: 1px solid $border-color
       border-radius: 3px
-      box-shadow: 3px 3px 2px rgba(0,0,0,0.1)
+      box-shadow: 2px 2px 2px rgba(0,0,0,0.1)
       margin: 1em
       min-width: 20em
       word-wrap: anywhere
@@ -54,8 +55,8 @@ main#landing
         padding: 10px
 
       > header
-        background: $blue-dust
-        border-bottom: 1px solid grey
+        background: $landing-header
+        border-bottom: 1px solid $border-color
         font-size: 1.1em
 
       dl
@@ -78,9 +79,14 @@ main#landing
         text-align: left
         margin: 0
 
-    section#history > section
+    .monospace
       white-space: pre-wrap
       font-family: monospace
+      width: 100%
+      display: block
+
+    .notice
+      font-size: 0.9em
 
   #preview
     max-width: 45em
@@ -190,7 +196,9 @@ img.product
       </section>
       <section id="history">
         <header>History</header>
-        <section class="details" v-if="response.history">{{ response.history.trim() }}
+        <section class="details" v-if="response.history">
+          <span class="monospace">{{ response.history.trim() }}</span>
+          <span class="notice">This is a non-standardized history provided by the file creator/processor.</span>
         </section>
         <section class="details na" v-else>N/A
         </section>
