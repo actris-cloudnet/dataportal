@@ -5,7 +5,7 @@ This is the documentation for the alpha-stage API provided by the cloudnet data 
 
 ## General
 
-We provide a REST API for programmatical access to the metadata at the cloudnet data portal. The API responds with JSON and can be accessed via the base URL `https://altocumulus.fmi.fi/api/`. Metadata can be queried via the following routes:
+We provide a HTTP REST API for programmatical access to the metadata at the cloudnet data portal. The API responds with JSON and can be accessed via the base URL `https://altocumulus.fmi.fi/api/`. Metadata can be queried via the following routes:
 
 ## Routes
 
