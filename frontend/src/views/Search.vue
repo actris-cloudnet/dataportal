@@ -372,6 +372,8 @@ export default class Search extends Vue {
     window.removeEventListener('resize', this.adjustPerPageAccordingToWindowHeight)
   }
 
+  alphabeticalSort = (a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName
+
   async initView() {
     this.adjustPerPageAccordingToWindowHeight()
     const payload = { params: { developer: this.devMode.activated || undefined } }
@@ -379,10 +381,10 @@ export default class Search extends Vue {
       axios.get(`${this.apiUrl}sites/`, payload),
       axios.get(`${this.apiUrl}products/`, payload)
     ]).then(([sites, products]) => {
-      this.allSites = sites.data.sort((a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName)
-      this.allProducts = products.data.sort((a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName)
-      this.fetchData()
+      this.allSites = sites.data.sort(this.alphabeticalSort)
+      this.allProducts = products.data.sort(this.alphabeticalSort)
     })
+    this.fetchData()
   }
 
   get payload() {
