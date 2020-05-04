@@ -1,10 +1,8 @@
-import { backendUrl } from '../lib'
+import { backendUrl, genResponse } from '../../lib'
 import axios from 'axios'
-import { RequestError } from '../../src/entity/RequestError'
+import { RequestError } from '../../../src/entity/RequestError'
 import { createConnection, Connection } from 'typeorm'
-import { File } from '../../src/entity/File'
-
-const genResponse = (status: any, data: any) => ({response: {status, data}})
+import { File } from '../../../src/entity/File'
 
 const volatileUuid = '38092c00-161d-4ca2-a29d-628cf8e960f6'
 let conn: Connection
@@ -124,43 +122,5 @@ describe('/files', () => {
   it('shows test files in developer mode', async () => {
     const payload = {params: {location: 'granada', developer: ''}}
     return expect(axios.get(url, payload)).resolves.toBeTruthy()
-  })
-})
-
-describe('/sites', () => {
-  const url = `${backendUrl}sites/`
-
-  it('responds with a list of all sites in dev mode', async () => {
-    const sites = ['macehead', 'hyytiala', 'bucharest', 'granada']
-    const res = await axios.get(url, { params: { developer: '' }})
-    expect(res.data).toHaveLength(sites.length)
-    const siteList = res.data.map((d: any) => d.id)
-    return sites.forEach(site => expect(siteList).toContain(site))
-  })
-
-  it('responds with a list of all sites except test in normal mode', async () => {
-    const sites = ['macehead', 'hyytiala', 'bucharest']
-    const res = await axios.get(url)
-    expect(res.data).toHaveLength(sites.length)
-    const siteList = res.data.map((d: any) => d.id)
-    return sites.forEach(site => expect(siteList).toContain(site))
-  })
-})
-
-describe('/download', () => {
-  const url = `${backendUrl}download/`
-
-  it('responds with 400 if no results were found', async () => {
-    let expectedBody: RequestError = {
-      status: 400,
-      errors: ['No files match the query']
-    }
-    const payload = { params: { dateTo: new Date('1970-02-20') } }
-    expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
-  })
-
-  it('responds with 500 if files that exist in db do not exist on disk', async () => {
-    const payload = { params: { location: 'bucharest' } }
-    expect(axios.get(url, payload)).rejects.toMatchObject({ response: { status: 500 }})
   })
 })
