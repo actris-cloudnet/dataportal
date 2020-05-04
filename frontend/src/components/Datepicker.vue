@@ -58,8 +58,8 @@ const dateToUTC = (date: Date) => new Date(date.getTime() - (date.getTimezoneOff
 const isValidDate = (obj: Date) => !isNaN(obj.getDate())
 const isValidDateString = (obj: string) => isValidDate(new Date(obj))
 const isNotInFuture = (obj: string) => new Date(obj) < dateToUTC(new Date())
-const isBeforeEnd = (obj: string, parentVm: Vue) => new Date(obj) < helpers.ref('end', validationMixin, parentVm)
-const isAfterStart = (obj: string, parentVm: Vue) => new Date(obj) > helpers.ref('start', validationMixin, parentVm)
+const isBeforeEnd = (obj: string, parentVm: Vue) => new Date(obj) <= helpers.ref('end', validationMixin, parentVm)
+const isAfterStart = (obj: string, parentVm: Vue) => new Date(obj) >= helpers.ref('start', validationMixin, parentVm)
 
 @Component
 export default class Datepicker extends mixins(validationMixin, Vue) {
