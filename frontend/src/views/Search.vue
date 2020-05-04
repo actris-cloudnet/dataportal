@@ -11,26 +11,12 @@
     flex-wrap: wrap
 
   .betanote
-    border: 1px #ffeecf solid
-    border-radius: 2px
+    border-color: #ffeecf
     background: #fdfce5
-    width: 100%
-    padding-top: 0.5em
-    padding-bottom: 0.5em
-    padding-left: 1em
-    padding-right: 1em
-    margin-bottom: 2em
 
   .rednote
-    border: 1px #ffcfcf solid
-    border-radius: 2px
+    border-color: #ffcfcf
     background: #fde5e5
-    width: 100%
-    padding-top: 0.5em
-    padding-bottom: 0.5em
-    padding-left: 1em
-    padding-right: 1em
-    margin-bottom: 2em
 
   .close
     float: right
@@ -190,13 +176,13 @@
 
 <template>
 <main id="search">
-  <div v-if="displayBetaNotification" class="betanote">
+  <div v-if="displayBetaNotification" class="note betanote">
     This is the beta version of Cloudnet data portal.
     Click <a href="http://devcloudnet.fmi.fi/">here</a> to visit the devcloudnet data portal, or
     <a href="http://cloudnet.fmi.fi/index.html">here</a> to navigate to the legacy cloudnet site.
     <span class="close" @click="displayBetaNotification = !displayBetaNotification">&#10005;</span>
   </div>
-  <div v-if="devMode.activated" class="rednote">
+  <div v-if="devMode.activated" class="note rednote">
     You are using the dataportal in developer mode. Files from sites in testing mode are now visible.
     <span class="close" id="disableDevMode" @click="devMode.disable()">Deactivate</span>
   </div>
