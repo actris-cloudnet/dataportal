@@ -83,12 +83,12 @@ describe('search page', () => {
 
   beforeEach(initSearch)
 
-  it('should initially contain no files', async () => {
+  it('initially contains no files', async () => {
     const content = await getContent()
     expect(content).toContain('No results')
   })
 
-  it('should contain all files with large date span', async () => {
+  it('contains all files with large date span', async () => {
     await sendInput('dateFrom', '2010')
     const content = await getContent()
     expect(content).toContain('Found 5 results')
@@ -98,7 +98,7 @@ describe('search page', () => {
     }
   })
 
-  it('should contain correct number of files after setting a date range', async () => {
+  it('contains correct number of files after setting a date range', async () => {
     await sendInput('dateFrom', '2019-07-23')
     await sendInput('dateTo', '2019-07-26')
     const content = await getContent()
@@ -108,7 +108,7 @@ describe('search page', () => {
     }
   })
 
-  it('should forward to correct landing page after sorting and clicking certain row', async () => {
+  it('forwards to correct landing page after sorting and clicking certain row', async () => {
     await sendInput('dateFrom', '2010')
     await clickClass('b-table-sort-icon-left')
     await clickTab()
@@ -118,7 +118,7 @@ describe('search page', () => {
     expect(await findElement(By.id('landing'))).toBeTruthy()
   })
 
-  it('should reset the search after clicking the reset button', async () => {
+  it('resets the search after clicking the reset button', async () => {
     await sendInput('dateFrom', '2010')
     await clickId('reset')
     await wait(1000)
@@ -126,20 +126,20 @@ describe('search page', () => {
     expect(content).toContain('No results')
   })
 
-  it('should work when clicking the calendar', async () => {
+  it('works when clicking the calendar', async () => {
     await setDateFromPast()
     const content = await getContent()
     expect(content).toContain('Found 5 results')
   })
 
-  it('correct calendar input should override incorrect keyboard input', async () => {
+  it('corrects calendar input override incorrect keyboard input', async () => {
     await sendInput('dateFrom', '2023')
     await setDateFromPast()
     const content = await getContent()
     expect(content).toContain('Found 5 results')
   })
 
-  it('should work with different site selectors', async () => {
+  it('works with different site selectors', async () => {
     await sendInput('dateFrom', '1980')
     await sendInputToMultiselect('siteSelect', 'mace')
     const content = await getContent()
@@ -148,7 +148,7 @@ describe('search page', () => {
     expect(content).toContain('Ice water content file from Mace-Head')
   })
 
-  it('should work with different product selectors', async () => {
+  it('works with different product selectors', async () => {
     await clearMultiSelect('siteSelect')
     await sendInput('dateFrom', '1980')
     await sendInputToMultiselect('productSelect', 'ice')
@@ -157,7 +157,7 @@ describe('search page', () => {
     expect(content).toContain('Ice water content file from Mace-Head')
   })
 
-  it('should preserve search state after visiting a landing page', async () => {
+  it('preserves search state after visiting a landing page', async () => {
     await sendInput('dateFrom', '2010')
     await clickClass('b-table-sort-icon-left')
     await clickTab()
@@ -169,7 +169,7 @@ describe('search page', () => {
     expect(content).toContain('Found 5 results')
   })
 
-  it('should enable developer mode', async () => {
+  it('enables developer mode', async () => {
     await sendInputToMultiselect('siteSelect', 'iddqd')
     await sendInputToMultiselect('siteSelect', 'granada')
     const content = await getContent()
@@ -177,7 +177,7 @@ describe('search page', () => {
     expect(content).toContain('Model file from Granada')
   })
 
-  it('should disable developer mode', async () => {
+  it('disables developer mode', async () => {
     await clickId('disableDevMode')
     await sendInputToMultiselect('siteSelect', 'granada')
     const content = await getContent()
@@ -185,7 +185,7 @@ describe('search page', () => {
     expect(content).not.toContain('Model file from Granada')
   })
 
-  it('should start download when clicking download button', async () => {
+  it('starts download when clicking download button', async () => {
     await sendInput('dateFrom', '1980')
     const button = await awaitAndFind(By.className('download'))
     const downloadUrl = await button.getAttribute('href')

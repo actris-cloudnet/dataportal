@@ -29,18 +29,16 @@ const axiosMockWith = (returnValue: any) =>
 
 let wrapper: Wrapper<Vue>
 describe('File.vue', () => {
-  describe('volatility', () => {
-    it('should display a note on volatile file', async () => {
-      axiosMockWith(allFiles[0])
-      wrapper = mount(File)
-      await Vue.nextTick()
-      return expect(wrapper.text()).toContain('This is a volatile file.')
-    })
-    it('should not display a note on stable file', async () => {
-      axiosMockWith(allFiles[1])
-      wrapper = mount(File)
-      await Vue.nextTick()
-      return expect(wrapper.text()).not.toContain('This is a volatile file.')
-    })
+  it('displays a note on volatile file', async () => {
+    axiosMockWith(allFiles[0])
+    wrapper = mount(File)
+    await Vue.nextTick()
+    return expect(wrapper.text()).toContain('This is a volatile file.')
+  })
+  it('does not display a note on stable file', async () => {
+    axiosMockWith(allFiles[1])
+    wrapper = mount(File)
+    await Vue.nextTick()
+    return expect(wrapper.text()).not.toContain('This is a volatile file.')
   })
 })

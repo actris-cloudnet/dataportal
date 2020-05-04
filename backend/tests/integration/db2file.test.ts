@@ -11,11 +11,11 @@ describe('/file', () => {
     errors: [ 'No files match this UUID' ]
   }
 
-  it('should respond with a 404 on test file if in normal mode', async () => {
+  it('responds with a 404 on test file if in normal mode', async () => {
     return expect(axios.get(url + testUuid)).rejects.toMatchObject({ response: { data: expectedBody404 }})
   })
 
-  it('should succeed on a test file in developer mode', async () => {
+  it('request succeeds on a test file in developer mode', async () => {
     return expect(axios.get(url + testUuid, { params: { developer: '' }})).resolves.toBeTruthy()
   })
 })

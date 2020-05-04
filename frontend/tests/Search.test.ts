@@ -63,42 +63,42 @@ describe('Search.vue', () => {
     wrapper = mount(Search)
   })
 
-  it('should make less than four api request on mount', () => {
+  it('makes less than four api request on mount', () => {
     // files and sites
     expect(mocked(axios.get).mock.calls.length).toBeLessThan(4)
   })
 
   describe('date selectors', () => {
 
-    it('should have the first day of the current year as the default dateFrom', () => {
+    it('has the first day of the current year as the default dateFrom', () => {
       expect(getInputValueByName('dateFrom')).toBe(dateFromDefault)
     })
 
-    it('should have today as the default dateTo', () => {
+    it('has today as the default dateTo', () => {
       expect(getInputValueByName('dateTo')).toBe(dateToDefault)
     })
 
-    it('should display data objects between dateFrom and dateTo by default', () => {
+    it('displays data objects between dateFrom and dateTo by default', () => {
       allFiles.map(file => file.title).forEach(title =>
         expect(wrapper.text()).toContain(title)
       )
     })
 
-    it('should fetch updated list of files from api on dateFrom change', async () => {
+    it('fetches updated list of files from api on dateFrom change', async () => {
       const newValue = filesSortedByDate[1].measurementDate
       await changeInputAndNextTick('dateFrom', newValue)
       const secondArg = getMockedAxiosLastCallSecondArgument()
       return expect(dateToISOString(secondArg.params.dateFrom)).toEqual(newValue)
     })
 
-    it('should fetch updated list of files from api on dateTo change', async () => {
+    it('fetches updated list of files from api on dateTo change', async () => {
       const newValue = filesSortedByDate[3].measurementDate
       await changeInputAndNextTick('dateTo', newValue)
       const secondArg = getMockedAxiosLastCallSecondArgument()
       return expect(dateToISOString(secondArg.params.dateTo)).toEqual(newValue)
     })
 
-    it('should update table based on api response', async () => {
+    it('updates table based on api response', async () => {
       mocked(axios.get).mockImplementationOnce((_1, _2) => Promise.resolve(augmentAxiosResponse(allFiles.slice(1))))
       const newValue = filesSortedByDate[0].measurementDate
       await changeInputAndNextTick('dateFrom', newValue)
@@ -111,7 +111,7 @@ describe('Search.vue', () => {
       return expect(wrapper.text()).not.toContain(allFiles[0].measurementDate)
     })
 
-    it('should not touch API on invalid input', async () => {
+    it('does not touch API on invalid input', async () => {
       const numberOfCallsBefore = mocked(axios.get).mock.calls.length
       const newValue = 'asdf'
       await changeInputAndNextTick('dateTo', newValue)
@@ -120,7 +120,7 @@ describe('Search.vue', () => {
       return expect(numberOfCallsBefore).toEqual(numberOfCallsAfter)
     })
 
-    it('should display error when inserting invalid input', async () => {
+    it('displays error when inserting invalid input', async () => {
       const newValue = 'asdf'
       await changeInputAndNextTick('dateTo', newValue)
       await changeInputAndNextTick('dateFrom', newValue)
@@ -129,7 +129,7 @@ describe('Search.vue', () => {
       return expect(findElementById('dateFrom').classes()).toContain('error')
     })
 
-    it('should reset error when replacing invalid input with valid', async () => {
+    it('resets error when replacing invalid input with valid', async () => {
       const newValue = 'asdf'
       await changeInputAndNextTick('dateTo', newValue)
       await changeInputAndNextTick('dateFrom', newValue)
@@ -140,7 +140,7 @@ describe('Search.vue', () => {
       return expect(findElementById('dateFrom').classes()).not.toContain('error')
     })
 
-    it('should display error if date is in the future', async () => {
+    it('displays error if date is in the future', async () => {
       await changeInputAndNextTick('dateFrom', dateToISOString(tomorrow()))
       await changeInputAndNextTick('dateTo', dateToISOString(tomorrow()))
       expect(wrapper.text()).toContain('Provided date is in the future.')
@@ -148,7 +148,7 @@ describe('Search.vue', () => {
       return expect(findElementById('dateTo').classes()).toContain('error')
     })
 
-    it('should display error if dateFrom is later than dateTo', async () => {
+    it('displays error if dateFrom is later than dateTo', async () => {
       await changeInputAndNextTick('dateFrom', '2018-09-02')
       await changeInputAndNextTick('dateTo', '2018-09-01')
       expect(wrapper.text()).toContain('Date from must be before date to.')
@@ -159,7 +159,7 @@ describe('Search.vue', () => {
 
   describe('volatility', () => {
 
-    it('should display text "volatile" only next to volatile items', async () => {
+    it('displays text "volatile" only next to volatile items', async () => {
       expect(findElementById('tableContent').text()).toContain('volatile')
       return expect(findElementById('tableContent').text().match('volatile')).toHaveLength(1)
     })

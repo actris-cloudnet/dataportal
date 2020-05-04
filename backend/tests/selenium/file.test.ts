@@ -26,14 +26,14 @@ describe('file landing page', () => {
     return wait(3000)
   })
 
-  it('should return 404 when the file is not found', async () => {
+  it('returns 404 when the file is not found', async () => {
     await driver.get('http://localhost:8000/file/asd')
     const errorEl = await awaitAndFind(By.id('error'))
     const errorText = await errorEl.getText()
     return expect(errorText).toContain('404')
   })
 
-  it('should contain correct information', async () => {
+  it('contains correct information', async () => {
     const targetArray = [
       '15506ea8-d357-4c7b-af8c-95dfcc34fc7d',
       '2019-07-23',
@@ -54,7 +54,7 @@ describe('file landing page', () => {
     return
   })
 
-  it('should start download when clicking download button', async () => {
+  it('starts download when clicking download button', async () => {
     await driver.get('http://localhost:8000/file/15506ea8d3574c7baf8c95dfcc34fc7d')
     const button = await awaitAndFind(By.className('download'))
     const downloadUrl = await button.getAttribute('href')
@@ -63,7 +63,7 @@ describe('file landing page', () => {
     return expect(response.headers['content-length']).toBe('139021')
   })
 
-  it('should show a preview image', async () => {
+  it('shows a preview image', async () => {
     await driver.get('http://localhost:8000/file/15506ea8d3574c7baf8c95dfcc34fc7d')
     const button = await awaitAndFind(By.id('previewImg'))
     const downloadUrl = await button.getAttribute('src')

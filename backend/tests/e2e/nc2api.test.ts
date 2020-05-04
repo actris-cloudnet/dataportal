@@ -52,13 +52,13 @@ describe('after moving a valid NC file to inbox', () => {
     return wait(4000)
   })
 
-  it('should respond with a corresponding metadata JSON', async () => {
+  it('responds with a corresponding metadata JSON', async () => {
     return axios
       .get(`${backendUrl}file/${expectedJson.uuid}`)
       .then(response => expect(response.data).toMatchObject(expectedJson))
   })
 
-  it('should serve the file', async () => {
+  it('serves the file', async () => {
     return axios
       .head(`${fileServerUrl}${expectedJson.filename}`)
       .then(response => {
@@ -73,13 +73,13 @@ describe('after moving a valid NC file to inbox', () => {
       return wait(4000)
     })
 
-    it('should respond with correct uuid in metadata JSON', async () => {
+    it('responds with correct uuid in metadata JSON', async () => {
       return axios
         .get(`${backendUrl}file/${expectedUuidFromSubFolder}`)
         .then(response => expect(response.data.uuid).toMatch(expectedUuidFromSubFolder))
     })
 
-    it('hashes of /download zipped files should match originals', async () => {
+    it('hashes of /download zipped files match originals', async () => {
       const tmpZip = 'tests/data/tmp.zip'
       const shas = await (await axios.get(`${backendUrl}files/`, { params: { location: 'bucharest' } })).data.map((file: any) => file.checksum)
       const receivedFile = await axios.get(`${backendUrl}download/`, { responseType: 'arraybuffer', params: { location: 'bucharest' } })
