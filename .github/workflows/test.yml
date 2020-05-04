@@ -1,4 +1,4 @@
-name: Node.js CI
+name: Dataportal CI
 
 on: [push]
 
