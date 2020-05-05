@@ -14,12 +14,19 @@ footer
   color: darkgrey
   margin: 0
   line-height: 1
+
+.small
+  font-size: 0.6em
+
+.marginright
+  margin-right: 1em
 </style>
 
 <template>
   <footer class="global">
-    <div class="vertical-center footeritem">
-      &copy; Finnish Meteorological Institute
+    <div class="vertical-center footeritem marginright">
+      &copy; Finnish Meteorological Institute<br>
+      <span class="small">Header photo by Flickr user @theaucitron, used under a Creative Commons license.</span>
     </div>
     <div class="vertical-center footeritem">
       Give feedback: <a href="mailto:actris-cloudnet-feedback@fmi.fi">actris-cloudnet-feedback@fmi.fi</a>
