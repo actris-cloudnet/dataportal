@@ -1,14 +1,8 @@
 <style scoped lang="sass">
 @import "@/sass/variables.sass"
+@import "@/sass/global.sass"
 
 header
-  display: flex
-  justify-content: space-between
-  box-sizing: border-box
-  width: 100%
-  height: 4.5em
-  padding-left: 1em
-  padding-right: 1em
   background-image: linear-gradient(to left, rgba(0,0,0,0.0), $header-background-color 70%), url('../assets/clouds3.jpg')
   opacity: 0.7
   background-position: right 0px top 20%
@@ -16,10 +10,7 @@ header
   background-size: cover
   box-shadow: 0 1px 3px rgba(0,0,0,0.3)
 
-.portal_name
-  display: flex
-  flex-direction: column
-  justify-content: center
+.portal-name
   font-family: $header-font
   color: white
   margin: 0
@@ -36,7 +27,7 @@ header
 
 <template functional>
   <header class="global">
-    <div class="portal_name">
+    <div class="vertical-center portal-name">
       <h1>Cloudnet</h1>
       <span>data portal</span>
     </div>
