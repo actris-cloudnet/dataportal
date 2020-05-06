@@ -17,6 +17,8 @@ footer
 
 .small
   font-size: 0.6em
+  a
+    color: darkgrey
 
 .marginright
   margin-right: 1em
@@ -26,7 +28,8 @@ footer
   <footer class="global">
     <div class="vertical-center footeritem marginright">
       &copy; Finnish Meteorological Institute<br>
-      <span class="small">Header photo by Flickr user @theaucitron, used under a Creative Commons license.</span>
+      <span class="small">Header photo by Flickr user @theaucitron, used under a CC license.<br>
+      Icons from <a href="https://icons8.com/">icons8.com</a>.</span>
     </div>
     <div class="vertical-center footeritem">
       Give feedback: <a href="mailto:actris-cloudnet-feedback@fmi.fi">actris-cloudnet-feedback@fmi.fi</a>
