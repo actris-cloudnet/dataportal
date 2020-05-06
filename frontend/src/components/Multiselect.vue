@@ -35,7 +35,7 @@
     color: gray
 
   .option__image
-    height: 1em
+    height: 1.2em
     width: auto
     position: relative
     top: -1px

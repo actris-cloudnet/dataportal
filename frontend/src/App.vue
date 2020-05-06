@@ -14,6 +14,10 @@
 @import "~vue-multiselect/dist/vue-multiselect.min.css"
 @import "@/sass/variables.sass"
 
+html
+  position: relative
+  min-height: 100%
+
 body
     margin: 0
 
@@ -37,5 +41,6 @@ h1, h2, h3, h4, h5, h6
     <keep-alive include="app-search">
       <router-view/>
     </keep-alive>
+    <app-footer/>
   </div>
 </template>
