@@ -19,7 +19,6 @@ const ncObjectSpec: Array<string> = [
   'history',
   'cloudnet_file_type',
   'file_uuid',
-  'pid',
   'Conventions',
   'year',
   'month',
