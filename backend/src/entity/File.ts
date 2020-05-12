@@ -105,6 +105,9 @@ export class File {
       }
       if (typeof obj.pid == 'string') {
         this.pid = obj.pid
+        this.status = FileStatus.FREEZED
+      } else {
+        this.status = FileStatus.VOLATILE
       }
       this.uuid = obj.file_uuid
       this.filename = filename
