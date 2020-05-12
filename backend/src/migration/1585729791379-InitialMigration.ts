@@ -19,7 +19,7 @@ export class InitialMigration1585729791379 implements MigrationInterface {
         await queryRunner.query(`CREATE TABLE "file" (
             "uuid" uuid NOT NULL, 
             "pid" character varying,
-            "status" "file_status_enum" NOT NULL, 
+            "status" file_status_enum NOT NULL, 
             "title" character varying NOT NULL, 
             "measurementDate" date NOT NULL, 
             "history" character varying NOT NULL, 
