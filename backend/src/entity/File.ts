@@ -9,11 +9,25 @@ export enum FilePublicity {
     HIDDEN = 'hidden'
 }
 
+export enum FileStatus {
+    FREEZED = 'freezed',
+    VOLATILE = 'volatile',
+}
+
 @Entity()
 export class File {
 
     @PrimaryColumn('uuid')
     uuid!: string
+
+    @Column({nullable: true})
+    pid!: string
+
+    @Column({
+      type: 'enum',
+      enum: FileStatus,
+    })
+    status!: FileStatus
 
     @Column()
     title!: string
@@ -72,7 +86,7 @@ export class File {
       filesize: number,
       format: string,
       site: Site,
-      product: Product
+      product: Product,
     ) {
       // A typeorm hack, see https://github.com/typeorm/typeorm/issues/3903
       if (typeof obj == 'undefined') return
@@ -88,6 +102,9 @@ export class File {
       this.product = product
       if (typeof obj.cloudnetpy_version == 'string') {
         this.cloudnetpyVersion = obj.cloudnetpy_version
+      }
+      if (typeof obj.pid == 'string') {
+        this.pid = obj.pid
       }
       this.uuid = obj.file_uuid
       this.filename = filename
