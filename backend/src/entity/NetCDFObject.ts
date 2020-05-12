@@ -5,6 +5,7 @@ export interface NetCDFObject {
     cloudnet_file_type: string
     cloudnetpy_version: string
     file_uuid: string
+    pid: string
     Conventions: string
     year: string
     month: string
@@ -18,6 +19,7 @@ const ncObjectSpec: Array<string> = [
   'history',
   'cloudnet_file_type',
   'file_uuid',
+  'pid',
   'Conventions',
   'year',
   'month',
