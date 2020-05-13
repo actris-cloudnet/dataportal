@@ -7,10 +7,13 @@ import * as express from 'express'
 import config from './config'
 import { Middleware } from './lib/middleware'
 import { Routes } from './lib/routes';
+import * as xmlparser from 'express-xml-bodyparser'
 
 (async function() {
   const port = parseInt(process.argv[2])
   const app = express()
+
+  app.use(xmlparser())
 
   const connName = config.connectionName
   const conn = await createConnection(connName)
@@ -45,7 +48,8 @@ import { Routes } from './lib/routes';
   app.get('/products', routes.products)
   app.get('/download', middleware.filesValidator, middleware.filesQueryAugmenter, routes.download)
 
-  app.get('/pid/volatilefiles', routes.volatilefiles)
+  app.get('/files/volatile', routes.volatilefiles)
+  app.put('/file', routes.submit)
 
   app.use(errorHandler)
 

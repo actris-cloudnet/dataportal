@@ -163,6 +163,21 @@ export class Routes {
       .then(result => res.send(this.augmentFiles(result)))
       .catch(err => next({ status: 500, errors: err }))
 
+  submit: RequestHandler = async (req: Request, res: Response, next) => {
+    const attributes = req.body.netcdf.attribute
+    let uuid, pid, name, value
+    for (let n=0; n < attributes.length; n++) {
+      name = attributes[n].$.name
+      value = attributes[n].$.value
+      if (name == 'file_uuid') {
+        uuid = value
+      } else if (name == 'pid') {
+        pid = value
+      }
+    }
+    res.send(uuid)
+  }
+
   status: RequestHandler = async (_req: Request, res: Response, next) =>
     this.fileRepo.createQueryBuilder('file').leftJoin('file.site', 'site')
       .select('site.id')
