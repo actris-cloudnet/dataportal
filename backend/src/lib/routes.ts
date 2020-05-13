@@ -158,14 +158,14 @@ export class Routes {
 
   volatilefiles: RequestHandler = async (req: Request, res: Response, next) =>
     this.fileRepo.createQueryBuilder('file')
-      .where("file.status = :status", { status: "volatile"})
+      .where("file.status = :status", { status: "volatile" })
       .getMany()
       .then(result => res.send(this.augmentFiles(result)))
       .catch(err => next({ status: 500, errors: err }))
 
   submit: RequestHandler = async (req: Request, res: Response, next) => {
     const attributes = req.body.netcdf.attribute
-    let uuid, pid, name, value
+    let name, value, uuid, pid
     for (let n=0; n < attributes.length; n++) {
       name = attributes[n].$.name
       value = attributes[n].$.value
@@ -175,7 +175,22 @@ export class Routes {
         pid = value
       }
     }
-    res.send(uuid)
+    if (typeof pid !== undefined) {
+      // Freeze
+    }
+    this.fileRepo.createQueryBuilder('file')
+      .where("file.uuid = :uuid", { uuid: uuid })
+      .getMany()
+      .then(result => {
+        if (result.length == 0) {
+          // Create
+        } else if (result.length == 1) {
+          // Update
+        }
+      })
+      .catch(err => next({ status: 500, errors: err })) 
+      res.send(uuid)
+
   }
 
   status: RequestHandler = async (_req: Request, res: Response, next) =>
