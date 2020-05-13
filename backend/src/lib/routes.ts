@@ -156,6 +156,13 @@ export class Routes {
       .then(result => res.send(this.augmentFiles(result)))
       .catch(err => next({ status: 500, errors: err }))
 
+  volatilefiles: RequestHandler = async (req: Request, res: Response, next) =>
+    this.fileRepo.createQueryBuilder('file')
+      .where("file.status = :status", { status: "volatile"})
+      .getMany()
+      .then(result => res.send(this.augmentFiles(result)))
+      .catch(err => next({ status: 500, errors: err }))
+
   status: RequestHandler = async (_req: Request, res: Response, next) =>
     this.fileRepo.createQueryBuilder('file').leftJoin('file.site', 'site')
       .select('site.id')

@@ -45,6 +45,8 @@ import { Routes } from './lib/routes';
   app.get('/products', routes.products)
   app.get('/download', middleware.filesValidator, middleware.filesQueryAugmenter, routes.download)
 
+  app.get('/pid/volatilefiles', routes.volatilefiles)
+
   app.use(errorHandler)
 
   app.listen(port, () => console.log(`App listening on port ${port} with ${connName} connection!`))
