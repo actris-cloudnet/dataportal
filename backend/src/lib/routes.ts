@@ -9,6 +9,8 @@ import archiver = require('archiver')
 import { createReadStream, promises as fsp, constants as fsconst } from 'graceful-fs'
 import { fetchAll } from '.'
 import config from '../config'
+import  { exec } from 'child_process'
+import { sendRequest } from 'selenium-webdriver/http'
 
 
 export class Routes {
@@ -165,33 +167,31 @@ export class Routes {
 
   submit: RequestHandler = async (req: Request, res: Response, next) => {
     const attributes = req.body.netcdf.attribute
-    let name, value, uuid, pid
+    let uuid, pid = null
     for (let n=0; n < attributes.length; n++) {
-      name = attributes[n].$.name
-      value = attributes[n].$.value
+      let {name, value} = attributes[n].$
       if (name == 'file_uuid') {
         uuid = value
       } else if (name == 'pid') {
         pid = value
       }
-    }
-    if (typeof pid !== undefined) {
-      // Freeze
-    }
+    }    
+    const freeze = (typeof pid === 'string') && ('X-Freeze' in req.headers) && (req.header('X.Freeze'))
+
     this.fileRepo.createQueryBuilder('file')
       .where("file.uuid = :uuid", { uuid: uuid })
       .getMany()
       .then(result => {
         if (result.length == 0) {
-          // Create
+            if (freeze) {
+            }
         } else if (result.length == 1) {
-          // Update
+            res.send('append')
+            if (freeze) {
+            }
         }
       })
-      .catch(err => next({ status: 500, errors: err })) 
-      res.send(uuid)
-
-  }
+    }
 
   status: RequestHandler = async (_req: Request, res: Response, next) =>
     this.fileRepo.createQueryBuilder('file').leftJoin('file.site', 'site')
