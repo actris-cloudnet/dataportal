@@ -136,26 +136,44 @@ function parseJSON(json: any) {
   return ncObj
 }
 
-export async function putRecord(connection: Connection, input: any) {
-  try {    
-    const ncObj = parseJSON(input)  
-    const existingFile = await findVolatileFile(connection, ncObj.file_uuid)
-    if (existingFile) return await update(existingFile, connection)
-    if (ncObj) return await insert(ncObj, connection)
+async function readFileRow(connection: Connection, uuid: string){
+  try { 
+    return connection
+      .getRepository(File)
+      .createQueryBuilder()
+      .where("uuid = :uuid", { uuid: uuid })
+      .getOne() 
   } catch(e) {
     throw e
   }
 }
 
-export async function freezeRecord(res: any, connection: Connection, pid: string, uuid: string, freeze: any) {
-  if (!freeze) return res
+export async function putRecord(connection: Connection, input: any) {
+  try {    
+    const ncObj = parseJSON(input)  
+    const existingFile = await findVolatileFile(connection, ncObj.file_uuid)
+    if (existingFile) {
+      await update(existingFile, connection)
+    } else {
+      await insert(ncObj, connection)
+    }
+    return await readFileRow(connection, ncObj.file_uuid)
+  } catch(e) {
+    throw e
+  }
+}
+
+export async function freezeRecord(result: any, connection: Connection, pid: string, freeze: boolean) {
+  if (!freeze) return result
   try {
-    return await connection.getRepository(File)
+    await connection
+      .getRepository(File)
       .createQueryBuilder()
       .update()
-      .set({ status: FileStatus['FREEZED'], pid: pid})
-      .where("uuid = :uuid", { uuid: uuid, pid: pid })
+      .set({ pid: pid, status: FileStatus['FREEZED']})
+      .where("uuid = :uuid", { uuid: result.uuid })
       .execute()
+    return await readFileRow(connection, result.uuid)
   } catch(e) {
     throw e
   }

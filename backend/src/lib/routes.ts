@@ -151,12 +151,12 @@ export class Routes {
       })
   }
 
-  allfiles: RequestHandler = async (req: Request, res: Response, next) =>
+  allfiles: RequestHandler = async (_req: Request, res: Response, next) =>
     this.fileRepo.find({ relations: ['site', 'product'] })
       .then(result => res.send(this.augmentFiles(result)))
       .catch(err => next({ status: 500, errors: err }))
 
-  volatilefiles: RequestHandler = async (req: Request, res: Response, next) =>
+  volatilefiles: RequestHandler = async (_req: Request, res: Response, next) =>
     this.fileRepo.createQueryBuilder('file')
       .where("file.status = :status", { status: "volatile" })
       .getMany()
@@ -165,8 +165,8 @@ export class Routes {
 
   submit: RequestHandler = async (req: Request, res: Response, next) => {
     const attributes = req.body.netcdf.attribute
-    let uuid = ''
-    let pid = ''
+    let pid:string=''
+    let uuid:string=''
       for (let n=0; n < attributes.length; n++) {
       let {name, value} = attributes[n].$
       if (name == 'file_uuid') {
@@ -175,10 +175,10 @@ export class Routes {
         pid = value
       }
     }
-    const freeze = (pid.length > 0) && ('X-Freeze' in req.headers) && (req.header('X.Freeze'))
+    const freeze:boolean = (pid.length > 0) && ('X-Freeze' in req.headers) && (req.header('X.Freeze') === 'true')
     putRecord(this.conn, req.body)
     .then(result => {
-      return freezeRecord(result, this.conn, pid, uuid, freeze)
+      return freezeRecord(result, this.conn, pid, freeze)
     })
     .then(result => {
       res.send(result)
