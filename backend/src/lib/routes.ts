@@ -9,9 +9,7 @@ import archiver = require('archiver')
 import { createReadStream, promises as fsp, constants as fsconst } from 'graceful-fs'
 import { fetchAll } from '.'
 import config from '../config'
-import  { exec } from 'child_process'
-import { sendRequest } from 'selenium-webdriver/http'
-
+import { putRecord } from '../metadata2db.js'
 
 export class Routes {
 
@@ -166,6 +164,7 @@ export class Routes {
       .catch(err => next({ status: 500, errors: err }))
 
   submit: RequestHandler = async (req: Request, res: Response, next) => {
+
     const attributes = req.body.netcdf.attribute
     let uuid, pid = null
     for (let n=0; n < attributes.length; n++) {
@@ -175,23 +174,19 @@ export class Routes {
       } else if (name == 'pid') {
         pid = value
       }
-    }    
+    }
+
     const freeze = (typeof pid === 'string') && ('X-Freeze' in req.headers) && (req.header('X.Freeze'))
 
-    this.fileRepo.createQueryBuilder('file')
-      .where("file.uuid = :uuid", { uuid: uuid })
-      .getMany()
-      .then(result => {
-        if (result.length == 0) {
-            if (freeze) {
-            }
-        } else if (result.length == 1) {
-            res.send('append')
-            if (freeze) {
-            }
-        }
-      })
-    }
+    putRecord(this.conn, req.body)
+    .then(result => {
+      if (freeze) {
+        res.send('Freeze')
+      }
+      res.send(result)
+    })
+
+  }
 
   status: RequestHandler = async (_req: Request, res: Response, next) =>
     this.fileRepo.createQueryBuilder('file').leftJoin('file.site', 'site')
