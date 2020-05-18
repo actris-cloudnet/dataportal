@@ -172,7 +172,7 @@ export class Routes {
         pid = value
       }
     }
-    const freeze:boolean = (pid.length > 0) && ('X-Freeze' in req.headers) && (req.header('X.Freeze') === 'true')
+    const freeze:boolean = (pid.length > 0) && ('x-freeze' in req.headers) && (req.header('x-freeze') == 'true')
     putRecord(this.conn, req.body)
     .then(result => {
       return freezeRecord(result, this.conn, pid, freeze)
