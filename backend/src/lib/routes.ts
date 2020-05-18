@@ -33,11 +33,8 @@ export class Routes {
     req.query.developer !== undefined ? dbQuery : dbQuery.andWhere('not site.isTestSite')
 
   private augmentFiles = (files: File[]) => {
-    const now = new Date()
-    const yesterday = new Date(new Date(now.setDate(now.getDate() - 1)))
     return files.map(entry =>
-      ({ ...entry, ...{ url: `${this.fileServerUrl}${entry.filename}` } })
-    )
+      ({ ...entry, url: `${this.fileServerUrl}${entry.filename}` }))
   }
 
   private filesQueryBuilder = (query: any) =>
