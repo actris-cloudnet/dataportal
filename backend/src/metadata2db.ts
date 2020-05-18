@@ -136,7 +136,7 @@ function parseJSON(json: any) {
 
 async function readFileRow(connection: Connection, uuid: string){
   try { 
-    return connection
+    return await connection
       .getRepository(File)
       .createQueryBuilder()
       .where("uuid = :uuid", { uuid: uuid })
