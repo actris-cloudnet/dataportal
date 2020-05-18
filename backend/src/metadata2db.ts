@@ -11,6 +11,8 @@ import { spawn } from 'child_process'
 import { stringify } from './lib'
 import config from './config'
 import { Product } from './entity/Product'
+import { resolve } from 'dns'
+import { rejects } from 'assert'
 
 
 let filename: string
@@ -129,18 +131,20 @@ function parseJSON(json: any) {
 
   if (!isNetCDFObject(ncObj)) {
     const missingFields = getMissingFields(ncObj)
-    throw TypeError(`
-        Invalid header fields\n
-        Missing or invalid: ${stringify(missingFields)}\n
-        ${stringify(ncObj)}`)
+    throw (`Invalid header fields\n
+          Missing or invalid: ${stringify(missingFields)}\n
+          ${stringify(ncObj)}`)
   }  
   return ncObj
 }
 
 export async function putRecord(connection: Connection, input: any) {
-  const ncObj = parseJSON(input)
-  const existingFile = await findVolatileFile(connection, ncObj.file_uuid)
-  if (existingFile) return await update(existingFile, connection)
-  else if (ncObj) return await insert(ncObj, connection)
-  return Promise.reject('Unknown error. This should not happen.')
+  try {    
+    const ncObj = parseJSON(input)  
+    const existingFile = await findVolatileFile(connection, ncObj.file_uuid)
+    if (existingFile) return await update(existingFile, connection)
+    if (ncObj) return await insert(ncObj, connection)
+  } catch(e) {
+    throw e
+  }
 }

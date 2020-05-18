@@ -181,11 +181,11 @@ export class Routes {
     putRecord(this.conn, req.body)
     .then(result => {
       if (freeze) {
-        res.send('Freeze')
+        res.send('Freeze....')
       }
       res.send(result)
     })
-
+    .catch(err => next({ status: 500, errors: err }))
   }
 
   status: RequestHandler = async (_req: Request, res: Response, next) =>
