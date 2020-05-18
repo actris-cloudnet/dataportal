@@ -25,5 +25,3 @@ if [[ `file --mime-type -b $FILE` == image/*g ]]; then
     ln -s $FILEREAL $FILEPATH
     exit 0
 fi
-
-ncdump -xh $FILE | node build/metadata2db.js >> $STDOUT 2>> $ERROUT
