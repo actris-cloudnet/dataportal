@@ -4,15 +4,13 @@ import { basename, join, resolve as pathResolve } from 'path'
 import { createHash } from 'crypto'
 import 'reflect-metadata'
 import { Connection } from 'typeorm'
-import { File } from './entity/File'
+import { File, FileStatus } from './entity/File'
 import { Site } from './entity/Site'
 import { isNetCDFObject, getMissingFields, NetCDFObject } from './entity/NetCDFObject'
 import { spawn } from 'child_process'
 import { stringify } from './lib'
 import config from './config'
 import { Product } from './entity/Product'
-import { resolve } from 'dns'
-import { rejects } from 'assert'
 
 
 let filename: string
@@ -144,6 +142,20 @@ export async function putRecord(connection: Connection, input: any) {
     const existingFile = await findVolatileFile(connection, ncObj.file_uuid)
     if (existingFile) return await update(existingFile, connection)
     if (ncObj) return await insert(ncObj, connection)
+  } catch(e) {
+    throw e
+  }
+}
+
+export async function freezeRecord(res: any, connection: Connection, pid: string, uuid: string, freeze: any) {
+  if (!freeze) return res
+  try {
+    return await connection.getRepository(File)
+      .createQueryBuilder()
+      .update()
+      .set({ status: FileStatus['FREEZED'], pid: pid})
+      .where("uuid = :uuid", { uuid: uuid, pid: pid })
+      .execute()
   } catch(e) {
     throw e
   }

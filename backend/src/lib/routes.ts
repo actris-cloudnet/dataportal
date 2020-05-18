@@ -9,7 +9,7 @@ import archiver = require('archiver')
 import { createReadStream, promises as fsp, constants as fsconst } from 'graceful-fs'
 import { fetchAll } from '.'
 import config from '../config'
-import { putRecord } from '../metadata2db.js'
+import { putRecord, freezeRecord } from '../metadata2db.js'
 
 export class Routes {
 
@@ -164,10 +164,10 @@ export class Routes {
       .catch(err => next({ status: 500, errors: err }))
 
   submit: RequestHandler = async (req: Request, res: Response, next) => {
-
     const attributes = req.body.netcdf.attribute
-    let uuid, pid = null
-    for (let n=0; n < attributes.length; n++) {
+    let uuid = ''
+    let pid = ''
+      for (let n=0; n < attributes.length; n++) {
       let {name, value} = attributes[n].$
       if (name == 'file_uuid') {
         uuid = value
@@ -175,14 +175,12 @@ export class Routes {
         pid = value
       }
     }
-
-    const freeze = (typeof pid === 'string') && ('X-Freeze' in req.headers) && (req.header('X.Freeze'))
-
+    const freeze = (pid.length > 0) && ('X-Freeze' in req.headers) && (req.header('X.Freeze'))
     putRecord(this.conn, req.body)
     .then(result => {
-      if (freeze) {
-        res.send('Freeze....')
-      }
+      return freezeRecord(result, this.conn, pid, uuid, freeze)
+    })
+    .then(result => {
       res.send(result)
     })
     .catch(err => next({ status: 500, errors: err }))
