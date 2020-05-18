@@ -170,7 +170,7 @@ export async function freezeRecord(result: any, connection: Connection, pid: str
       .getRepository(File)
       .createQueryBuilder()
       .update()
-      .set({ pid: pid, status: FileStatus['FREEZED']})
+      .set({ pid: pid, status: FileStatus.FREEZED})
       .where("uuid = :uuid", { uuid: result.uuid })
       .execute()
     return await readFileRow(connection, result.uuid)

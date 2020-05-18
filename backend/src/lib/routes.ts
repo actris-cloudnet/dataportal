@@ -1,4 +1,4 @@
-import { File } from '../entity/File'
+import { File, FileStatus } from '../entity/File'
 import { Site } from '../entity/Site'
 import { Product } from '../entity/Product'
 import { SelectQueryBuilder, Connection, Repository } from 'typeorm'
@@ -36,7 +36,7 @@ export class Routes {
     const now = new Date()
     const yesterday = new Date(new Date(now.setDate(now.getDate() - 1)))
     return files.map(entry =>
-      ({ ...entry, ...{ volatile: entry.releasedAt > yesterday, url: `${this.fileServerUrl}${entry.filename}` } })
+      ({ ...entry, ...{ url: `${this.fileServerUrl}${entry.filename}` } })
     )
   }
 
@@ -158,7 +158,7 @@ export class Routes {
 
   volatilefiles: RequestHandler = async (_req: Request, res: Response, next) =>
     this.fileRepo.createQueryBuilder('file')
-      .where("file.status = :status", { status: "volatile" })
+      .where("file.status = :status", { status: FileStatus.VOLATILE })
       .getMany()
       .then(result => res.send(this.augmentFiles(result)))
       .catch(err => next({ status: 500, errors: err }))
