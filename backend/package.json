@@ -7,8 +7,10 @@
       "doc": "docs"
    },
    "dependencies": {
+      "@types/express-xml-bodyparser": "^0.3.1",
       "archiver": "^4.0.1",
       "express": "^4.17.1",
+      "express-xml-bodyparser": "^0.3.0",
       "graceful-fs": "^4.2.3",
       "nodemon": "^2.0.2",
       "pg": "^7.17.1",
