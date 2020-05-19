@@ -166,8 +166,8 @@ export class Routes {
     .then(result => {
       return freezeRecord(result, this.conn, pid, freeze)
     })
-    .then(result => {
-      res.send(result)
+    .then(status => {
+      res.sendStatus(status)
     })
     .catch(err => next({ status: 500, errors: err }))
   }

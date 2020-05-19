@@ -152,10 +152,11 @@ export async function putRecord(connection: Connection, input: any) {
     const existingFile = await findVolatileFile(connection, ncObj.file_uuid)
     if (existingFile) {
       await update(existingFile, connection)
+      return 200
     } else {
       await insert(ncObj, connection)
+      return 201
     }
-    return await readFileRow(connection, ncObj.file_uuid)
   } catch(e) {
     throw e
   }
@@ -170,9 +171,9 @@ export async function freezeRecord(result: any, connection: Connection, pid: str
       .update()
       .set({ pid: pid, volatile: false})
       .where("uuid = :uuid", { uuid: result.uuid })
-      .execute()
-    return await readFileRow(connection, result.uuid)
+      .execute()    
   } catch(e) {
     throw e
   }
+  return 200
 }
