@@ -30,7 +30,7 @@ export class Middleware {
       return next(pushAndReturn(requestError, 'No search parameters given'))
     }
 
-    const validKeys = ['location', 'product', 'dateFrom', 'dateTo', 'developer']
+    const validKeys = ['location', 'product', 'dateFrom', 'dateTo', 'developer', 'volatile']
     const unknownFields = Object.keys(query).filter(key => !validKeys.includes(key))
     if (unknownFields.length > 0) {
       requestError.errors.push(`Unknown query parameters: ${unknownFields}`)
@@ -54,6 +54,11 @@ export class Middleware {
     }
     if (query.dateTo && !isValidDate(query.dateTo)) {
       requestError.errors.push('Malformed date in property "dateTo"')
+    }
+
+    // Validate volatile
+    if ('volatile' in query && !(query.volatile == 'true' || query.volatile == 'false')) {
+      requestError.errors.push('Malformed value in property "volatile"')
     }
 
     if (requestError.errors.length > 0) {
