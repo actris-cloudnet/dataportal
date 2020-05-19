@@ -47,9 +47,7 @@ import * as xmlparser from 'express-xml-bodyparser'
   app.get('/sites', routes.sites)
   app.get('/products', routes.products)
   app.get('/download', middleware.filesValidator, middleware.filesQueryAugmenter, routes.download)
-
-  app.get('/files/volatile', routes.volatilefiles)
-  app.put('/file', routes.submit)
+  app.put('/file/:uuid', routes.submit)
 
   app.use(errorHandler)
 
