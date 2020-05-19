@@ -103,12 +103,8 @@ export class File {
       if (typeof obj.cloudnetpy_version == 'string') {
         this.cloudnetpyVersion = obj.cloudnetpy_version
       }
-      if (typeof obj.pid == 'string') {
-        this.pid = obj.pid
-        this.status = FileStatus.FREEZED
-      } else {
-        this.status = FileStatus.VOLATILE
-      }
+      if (typeof obj.pid == 'string') this.pid = obj.pid
+      this.status = FileStatus.VOLATILE 
       this.uuid = obj.file_uuid
       this.filename = filename
       this.checksum = chksum
