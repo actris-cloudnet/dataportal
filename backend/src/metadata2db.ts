@@ -134,28 +134,20 @@ function parseJSON(json: any) {
   return ncObj
 }
 
-async function readFileRow(connection: Connection, uuid: string){
-  try { 
-    return await connection
-      .getRepository(File)
-      .createQueryBuilder()
-      .where("uuid = :uuid", { uuid: uuid })
-      .getOne() 
-  } catch(e) {
-    throw e
-  }
-}
-
 export async function putRecord(connection: Connection, input: any) {
   try {    
     const ncObj = parseJSON(input)  
     const existingFile = await findVolatileFile(connection, ncObj.file_uuid)
     if (existingFile) {
-      await update(existingFile, connection)
-      return 200
+      return { 
+        body: await update(existingFile, connection), 
+        status: 200 
+      }
     } else {
-      await insert(ncObj, connection)
-      return 201
+      return { 
+        body: await insert(ncObj, connection), 
+        status: 201 
+      }
     }
   } catch(e) {
     throw e
@@ -163,17 +155,18 @@ export async function putRecord(connection: Connection, input: any) {
 }
 
 export async function freezeRecord(result: any, connection: Connection, pid: string, freeze: boolean) {
-  if (!freeze) return result
-  try {
-    await connection
-      .getRepository(File)
-      .createQueryBuilder()
-      .update()
-      .set({ pid: pid, volatile: false})
-      .where("uuid = :uuid", { uuid: result.uuid })
-      .execute()    
-  } catch(e) {
-    throw e
+  if (freeze) {
+    try {
+      await connection
+        .getRepository(File)
+        .createQueryBuilder()
+        .update()
+        .set({ pid: pid, volatile: false})
+        .where("uuid = :uuid", { uuid: result.body.uuid })
+        .execute()    
+    } catch(e) {
+      throw e
+   }
   }
-  return 200
+  return result.status
 }
