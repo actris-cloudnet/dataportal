@@ -1,4 +1,4 @@
-import { File, FileStatus } from '../entity/File'
+import { File } from '../entity/File'
 import { Site } from '../entity/Site'
 import { Product } from '../entity/Product'
 import { SelectQueryBuilder, Connection, Repository } from 'typeorm'
@@ -153,24 +153,12 @@ export class Routes {
       .then(result => res.send(this.augmentFiles(result)))
       .catch(err => next({ status: 500, errors: err }))
 
-  volatilefiles: RequestHandler = async (_req: Request, res: Response, next) =>
-    this.fileRepo.createQueryBuilder('file')
-      .where("file.status = :status", { status: FileStatus.VOLATILE })
-      .getMany()
-      .then(result => res.send(this.augmentFiles(result)))
-      .catch(err => next({ status: 500, errors: err }))
-
   submit: RequestHandler = async (req: Request, res: Response, next) => {
     const attributes = req.body.netcdf.attribute
     let pid:string=''
-    let uuid:string=''
-      for (let n=0; n < attributes.length; n++) {
+    for (let n=0; n < attributes.length; n++) {
       let {name, value} = attributes[n].$
-      if (name == 'file_uuid') {
-        uuid = value
-      } else if (name == 'pid') {
-        pid = value
-      }
+      if (name == 'pid') pid = value
     }
     const freeze:boolean = (pid.length > 0) && ('x-freeze' in req.headers) && (req.header('x-freeze') == 'true')
     putRecord(this.conn, req.body)

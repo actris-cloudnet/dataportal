@@ -4,7 +4,7 @@ import { basename, join, resolve as pathResolve } from 'path'
 import { createHash } from 'crypto'
 import 'reflect-metadata'
 import { Connection } from 'typeorm'
-import { File, FileStatus } from './entity/File'
+import { File } from './entity/File'
 import { Site } from './entity/Site'
 import { isNetCDFObject, getMissingFields, NetCDFObject } from './entity/NetCDFObject'
 import { spawn } from 'child_process'
@@ -31,8 +31,8 @@ const findVolatileFile = (conn: Connection, uuid: string): Promise<File|null> =>
   new Promise((resolve, reject) =>
     conn.getRepository(File).findOneOrFail(uuid, { relations: [ 'site' ]})
       .then(file => {
-        if (!file.site.isTestSite && file.status === FileStatus.FREEZED)
-          reject('Cannot update a freezed file.')
+        if (!file.site.isTestSite && !file.volatile)
+          reject('Cannot update a non-volatile file.')
         else
           resolve(file)
       })
@@ -168,7 +168,7 @@ export async function freezeRecord(result: any, connection: Connection, pid: str
       .getRepository(File)
       .createQueryBuilder()
       .update()
-      .set({ pid: pid, status: FileStatus.FREEZED})
+      .set({ pid: pid, volatile: false})
       .where("uuid = :uuid", { uuid: result.uuid })
       .execute()
     return await readFileRow(connection, result.uuid)

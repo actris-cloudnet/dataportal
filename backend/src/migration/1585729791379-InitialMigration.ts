@@ -13,13 +13,12 @@ export class InitialMigration1585729791379 implements MigrationInterface {
             "gaw" character varying NOT NULL, 
             "country" character varying NOT NULL, 
             CONSTRAINT "PK_635c0eeabda8862d5b0237b42b4" PRIMARY KEY ("id"))`, undefined);
-        await queryRunner.query(`CREATE TYPE "file_status_enum" AS ENUM('volatile', 'freezed')`, undefined);
         await queryRunner.query(`CREATE TYPE "file_publicity_enum" AS ENUM('public', 'nodl', 'hidden')`, undefined);
         await queryRunner.query(`CREATE TYPE "file_product_enum" AS ENUM('categorize', 'classification', 'drizzle', 'iwc', 'lidar', 'lwc', 'model', 'mwr', 'radar')`, undefined);
         await queryRunner.query(`CREATE TABLE "file" (
             "uuid" uuid NOT NULL, 
             "pid" character varying,
-            "status" file_status_enum NOT NULL, 
+            "volatile" boolean NOT NULL, 
             "title" character varying NOT NULL, 
             "measurementDate" date NOT NULL, 
             "history" character varying NOT NULL, 

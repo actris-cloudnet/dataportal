@@ -9,11 +9,6 @@ export enum FilePublicity {
     HIDDEN = 'hidden'
 }
 
-export enum FileStatus {
-    FREEZED = 'freezed',
-    VOLATILE = 'volatile',
-}
-
 @Entity()
 export class File {
 
@@ -23,11 +18,8 @@ export class File {
     @Column({nullable: true})
     pid!: string
 
-    @Column({
-      type: 'enum',
-      enum: FileStatus,
-    })
-    status!: FileStatus
+    @Column()
+    volatile!: boolean
 
     @Column()
     title!: string
@@ -104,7 +96,7 @@ export class File {
         this.cloudnetpyVersion = obj.cloudnetpy_version
       }
       if (typeof obj.pid == 'string') this.pid = obj.pid
-      this.status = FileStatus.VOLATILE 
+      this.volatile = true
       this.uuid = obj.file_uuid
       this.filename = filename
       this.checksum = chksum
