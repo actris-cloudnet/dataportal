@@ -86,6 +86,10 @@ export class Middleware {
     if (!('product' in query)) query.product = await defaultProduct()
     if (!('dateFrom' in query)) query.dateFrom = defaultDateFrom()
     if (!('dateTo' in query)) query.dateTo = defaultDateTo()
+    if (!('volatile' in query)) query.volatile = [true, false] 
+    else {
+      query.volatile = toArray(query.volatile)
+    } 
 
     query.location = toArray(query.location)
     query.product = toArray(query.product)

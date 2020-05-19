@@ -44,7 +44,7 @@ export class Routes {
       .where('site.id IN (:...location)', query)
       .andWhere('product.id IN (:...product)', query)
       .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate <= :dateTo', query)
-      .andWhere("volatile = :volatile", query)
+      .andWhere('file.volatile IN (:...volatile)', query)
       .orderBy('file.measurementDate', 'DESC')
 
   private allFilesAreReadable = (filepaths: string[]) =>
