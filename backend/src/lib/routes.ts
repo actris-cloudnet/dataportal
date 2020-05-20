@@ -162,7 +162,8 @@ export class Routes {
       let {name, value} = attributes[n].$
       if (name == 'pid') pid = value
     }
-    const freeze:boolean = (pid.length > 0) && ('x-freeze' in req.headers) && (req.header('x-freeze') == 'true')
+
+    const freeze = isFreeze(pid, req.headers)
     putRecord(this.conn, req.body)
     .then(result => {
       return freezeRecord(result, this.conn, pid, freeze)
@@ -202,4 +203,14 @@ export class Routes {
       .catch(err => {
         next({ status: 500, errors: err })
       })
+}
+
+function isFreeze(pid:string, header:any): boolean {
+  Object.keys(header).forEach(key => {
+    const value = header[key]
+    delete header[key]
+    header[key.toLowerCase()] = value.toLowerCase()
+  })
+  const key = 'x-freeze'
+  return (pid.length > 0) && (key in header) && (header[key] == 'true')
 }
