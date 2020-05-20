@@ -1,4 +1,4 @@
-import { createReadStream, existsSync } from 'fs'
+import { createReadStream, existsSync, unlinkSync } from 'fs'
 import { promises as fsp }  from 'fs'
 import { basename, join, resolve as pathResolve } from 'path'
 import { createHash } from 'crypto'
@@ -96,7 +96,9 @@ function computeFileSize(filename: string) {
 
 function linkFile(filename: string) {
   const linkPath = config.publicDir
-  return fsp.symlink(pathResolve(filename), join(linkPath, basename(filename)))
+  const fullLink = join(linkPath, basename(filename))
+  if (existsSync(fullLink)) unlinkSync(fullLink)
+  return fsp.symlink(pathResolve(filename), fullLink)
 }
 
 function getFileFormat(filename: string): Promise<string> {
