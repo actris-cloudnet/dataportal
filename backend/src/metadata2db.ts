@@ -119,7 +119,7 @@ function getFileFormat(filename: string): Promise<string> {
 
 function parseJSON(json: any) {
   const { netcdf }: NetCDFXML = json
-  filename = 'inbox' + '/' + netcdf['$'].location
+  filename = netcdf['$'].location
   const ncObj: any = netcdf.attribute
     .map((a) => a['$'])
     .map(({ name, value }) => ({ [name]: value }))
