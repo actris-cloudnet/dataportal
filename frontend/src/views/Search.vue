@@ -271,6 +271,8 @@ import VizSearchResult from '../components/VizSearchResult.vue'
 import {Visualization} from '../../../backend/src/entity/Visualization'
 import {Product} from '../../../backend/src/entity/Product'
 import {ProductVariable} from '../../../backend/src/entity/ProductVariable'
+import L from 'leaflet'
+import * as Vue2Leaflet from 'vue2-leaflet'
 
 Vue.component('datepicker', Datepicker)
 Vue.component('b-table', BTable)
