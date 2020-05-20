@@ -1,4 +1,4 @@
-import { createReadStream } from 'fs'
+import { createReadStream, existsSync } from 'fs'
 import { promises as fsp }  from 'fs'
 import { basename, join, resolve as pathResolve } from 'path'
 import { createHash } from 'crypto'
@@ -120,6 +120,7 @@ function getFileFormat(filename: string): Promise<string> {
 function parseJSON(json: any) {
   const { netcdf }: NetCDFXML = json
   filename = netcdf['$'].location
+  if (!existsSync(filename)) throw('Missing file')
   const ncObj: any = netcdf.attribute
     .map((a) => a['$'])
     .map(({ name, value }) => ({ [name]: value }))
