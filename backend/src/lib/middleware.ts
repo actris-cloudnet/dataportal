@@ -57,7 +57,7 @@ export class Middleware {
     }
 
     // Validate volatile
-    if ('volatile' in query && !(query.volatile == 'true' || query.volatile == 'false')) {
+    if ('volatile' in query && !(query.volatile.toLowerCase() == 'true' || query.volatile.toLowerCase() == 'false')) {
       requestError.errors.push('Malformed value in property "volatile"')
     }
 
