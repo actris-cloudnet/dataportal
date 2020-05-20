@@ -43,8 +43,9 @@ export class Routes {
       .leftJoinAndSelect('file.product', 'product')
       .where('site.id IN (:...location)', query)
       .andWhere('product.id IN (:...product)', query)
-      .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate <= :dateTo', query)
+      .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate <= :dateTo', query)      
       .andWhere('file.volatile IN (:...volatile)', query)
+      .andWhere('file.releasedAt < :releasedBefore', query)
       .orderBy('file.measurementDate', 'DESC')
 
   private allFilesAreReadable = (filepaths: string[]) =>

@@ -30,7 +30,7 @@ export class Middleware {
       return next(pushAndReturn(requestError, 'No search parameters given'))
     }
 
-    const validKeys = ['location', 'product', 'dateFrom', 'dateTo', 'developer', 'volatile']
+    const validKeys = ['location', 'product', 'dateFrom', 'dateTo', 'developer', 'volatile', 'releasedBefore']
     const unknownFields = Object.keys(query).filter(key => !validKeys.includes(key))
     if (unknownFields.length > 0) {
       requestError.errors.push(`Unknown query parameters: ${unknownFields}`)
@@ -86,6 +86,7 @@ export class Middleware {
     if (!('product' in query)) query.product = await defaultProduct()
     if (!('dateFrom' in query)) query.dateFrom = defaultDateFrom()
     if (!('dateTo' in query)) query.dateTo = defaultDateTo()
+    if (!('releasedBefore' in query)) query.releasedBefore = defaultDateTo()
     if (!('volatile' in query)) query.volatile = [true, false] 
     else {
       query.volatile = toArray(query.volatile)
