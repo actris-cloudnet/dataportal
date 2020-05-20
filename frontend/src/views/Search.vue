@@ -300,6 +300,8 @@ import Datepicker from '../components/Datepicker.vue'
 import CustomMultiselect from '../components/Multiselect.vue'
 import { getIconUrl, humanReadableSize, combinedFileSize } from '../lib'
 import { DevMode } from '../lib/DevMode'
+import L from 'leaflet'
+import * as Vue2Leaflet from 'vue2-leaflet'
 
 Vue.component('datepicker', Datepicker)
 Vue.component('b-table', BTable)
