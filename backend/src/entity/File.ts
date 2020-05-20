@@ -18,7 +18,7 @@ export class File {
     @Column({nullable: true})
     pid!: string
 
-    @Column()
+    @Column({default: true})
     volatile!: boolean
 
     @Column()
@@ -96,7 +96,6 @@ export class File {
         this.cloudnetpyVersion = obj.cloudnetpy_version
       }
       if (typeof obj.pid == 'string') this.pid = obj.pid
-      this.volatile = true
       this.uuid = obj.file_uuid
       this.filename = filename
       this.checksum = chksum
