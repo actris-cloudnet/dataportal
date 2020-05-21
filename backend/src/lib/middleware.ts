@@ -80,6 +80,7 @@ export class Middleware {
     const defaultProduct = async () => (await fetchAll<Product>(this.conn, Product)).map(product => product.id)
     const defaultDateFrom = () => new Date('1970-01-01')
     const defaultDateTo = tomorrow
+    const defaultVolatile = () => ('volatile' in query) ? toArray(query.volatile) : [true, false]
 
     // Set defaults
     if (!('location' in query)) query.location = await defaultLocation()
@@ -87,13 +88,9 @@ export class Middleware {
     if (!('dateFrom' in query)) query.dateFrom = defaultDateFrom()
     if (!('dateTo' in query)) query.dateTo = defaultDateTo()
     if (!('releasedBefore' in query)) query.releasedBefore = defaultDateTo()
-    if (!('volatile' in query)) query.volatile = [true, false] 
-    else {
-      query.volatile = toArray(query.volatile)
-    } 
-
     query.location = toArray(query.location)
     query.product = toArray(query.product)
+    query.volatile = defaultVolatile()
 
     next()
   }
