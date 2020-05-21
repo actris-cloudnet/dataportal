@@ -84,10 +84,6 @@ export class Routes {
     this.hideTestDataFromNormalUsers(qb, req)
       .getMany()
       .then(result => {
-        if (result.length == 0) {
-          next({ status: 404, errors: ['The search yielded zero results'], params: req.query })
-          return
-        }
         res.send(this.augmentFiles(result))
       })
       .catch(err => {
