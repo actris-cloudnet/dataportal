@@ -6,7 +6,7 @@ import { stringify } from './lib'
 import * as express from 'express'
 import config from './config'
 import { Middleware } from './lib/middleware'
-import { Routes } from './lib/routes';
+import { Routes } from './lib/routes'
 import * as xmlparser from 'express-xml-bodyparser'
 
 (async function() {

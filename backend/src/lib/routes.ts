@@ -43,7 +43,7 @@ export class Routes {
       .leftJoinAndSelect('file.product', 'product')
       .where('site.id IN (:...location)', query)
       .andWhere('product.id IN (:...product)', query)
-      .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate <= :dateTo', query)      
+      .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate <= :dateTo', query)
       .andWhere('file.volatile IN (:...volatile)', query)
       .andWhere('file.releasedAt < :releasedBefore', query)
       .orderBy('file.measurementDate', 'DESC')
@@ -161,13 +161,13 @@ export class Routes {
 
     const freeze = isFreeze(pid, req.headers)
     putRecord(this.conn, req.body)
-    .then(result => {
-      return freezeRecord(result, this.conn, pid, freeze)
-    })
-    .then(status => {
-      res.sendStatus(status)
-    })
-    .catch(err => next({ status: 500, errors: err }))
+      .then(result => {
+        return freezeRecord(result, this.conn, pid, freeze)
+      })
+      .then(status => {
+        res.sendStatus(status)
+      })
+      .catch(err => next({ status: 500, errors: err }))
   }
 
   status: RequestHandler = async (_req: Request, res: Response, next) =>

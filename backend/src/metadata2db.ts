@@ -122,7 +122,7 @@ function getFileFormat(filename: string): Promise<string> {
 function parseJSON(json: any) {
   const { netcdf }: NetCDFXML = json
   filename = netcdf['$'].location
-  if (!existsSync(filename)) throw('Missing file')
+  if (!existsSync(filename)) throw ('Missing file')
   const ncObj: any = netcdf.attribute
     .map((a) => a['$'])
     .map(({ name, value }) => ({ [name]: value }))
@@ -133,26 +133,26 @@ function parseJSON(json: any) {
     throw (`Invalid header fields\n
           Missing or invalid: ${stringify(missingFields)}\n
           ${stringify(ncObj)}`)
-  }  
+  }
   return ncObj
 }
 
 export async function putRecord(connection: Connection, input: any) {
-  try {    
-    const ncObj = parseJSON(input)  
+  try {
+    const ncObj = parseJSON(input)
     const existingFile = await findVolatileFile(connection, ncObj.file_uuid)
     if (existingFile) {
-      return { 
-        body: await update(existingFile, connection), 
-        status: 200 
+      return {
+        body: await update(existingFile, connection),
+        status: 200
       }
     } else {
-      return { 
-        body: await insert(ncObj, connection), 
-        status: 201 
+      return {
+        body: await insert(ncObj, connection),
+        status: 201
       }
     }
-  } catch(e) {
+  } catch (e) {
     throw e
   }
 }
@@ -165,11 +165,11 @@ export async function freezeRecord(result: any, connection: Connection, pid: str
         .createQueryBuilder()
         .update()
         .set({ pid: pid, volatile: false})
-        .where("uuid = :uuid", { uuid: result.body.uuid })
-        .execute()    
-    } catch(e) {
+        .where('uuid = :uuid', { uuid: result.body.uuid })
+        .execute()
+    } catch (e) {
       throw e
-   }
+    }
   }
   return result.status
 }
