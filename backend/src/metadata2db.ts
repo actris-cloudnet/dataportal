@@ -138,38 +138,30 @@ function parseJSON(json: any) {
 }
 
 export async function putRecord(connection: Connection, input: any) {
-  try {
-    const ncObj = parseJSON(input)
-    const existingFile = await findVolatileFile(connection, ncObj.file_uuid)
-    if (existingFile) {
-      return {
-        body: await update(existingFile, connection),
-        status: 200
-      }
-    } else {
-      return {
-        body: await insert(ncObj, connection),
-        status: 201
-      }
+  const ncObj = parseJSON(input)
+  const existingFile = await findVolatileFile(connection, ncObj.file_uuid)
+  if (existingFile) {
+    return {
+      body: await update(existingFile, connection),
+      status: 200
     }
-  } catch (e) {
-    throw e
+  } else {
+    return {
+      body: await insert(ncObj, connection),
+      status: 201
+    }
   }
 }
 
 export async function freezeRecord(result: any, connection: Connection, pid: string, freeze: boolean) {
   if (freeze) {
-    try {
-      await connection
-        .getRepository(File)
-        .createQueryBuilder()
-        .update()
-        .set({ pid: pid, volatile: false})
-        .where('uuid = :uuid', { uuid: result.body.uuid })
-        .execute()
-    } catch (e) {
-      throw e
-    }
+    await connection
+      .getRepository(File)
+      .createQueryBuilder()
+      .update()
+      .set({ pid: pid, volatile: false})
+      .where('uuid = :uuid', { uuid: result.body.uuid })
+      .execute()
   }
   return result.status
 }
