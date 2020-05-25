@@ -13,6 +13,7 @@
     "@types/leaflet": "^1.5.12",
     "axios": "^0.19.2",
     "bootstrap-vue": "^2.6.0",
+    "google-maps-api-loader": "^1.1.1",
     "leaflet": "^1.6.0",
     "v-calendar": "^1.0.0-beta.23",
     "vue": "^2.6.11",
@@ -23,7 +24,8 @@
     "vue2-google-maps": "^0.10.7",
     "vue2-leaflet": "^2.5.2",
     "vuelidate": "^0.7.5",
-    "vuelidate-property-decorators": "^1.0.28"
+    "vuelidate-property-decorators": "^1.0.28",
+    "x5-gmaps": "^0.3.8"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.8.7",

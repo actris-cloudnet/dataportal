@@ -172,6 +172,9 @@
 
   .disabled
     opacity: 0.5
+
+  .map
+    height: 100px
 </style>
 
 <template>
@@ -186,8 +189,42 @@
     You are using the dataportal in developer mode. Files from sites in testing mode are now visible.
     <span class="close" id="disableDevMode" @click="devMode.disable()">Deactivate</span>
   </div>
+
   <section id="sideBar">
     <header class="filterOptions">Filter search</header>
+
+    <div id="minimap" class="container">
+      <div class="row">
+        <div class="col-md-9">
+          <div
+            class="form-check"
+            v-for="layer in layers"
+            :key="layer.id"
+          >
+            <label class="form-check-label">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                v-model="layer.active"
+                @change="layerChanged(layer.id, layer.active)"
+              />
+              {{ layer.name }}
+            </label>
+          </div>
+          <div id="map" class="map">
+          test
+          </div>
+
+        </div>
+        <div class="col-md-3">
+          <!-- The layer checkboxes go here -->
+          lllll
+        </div>
+      </div>
+    </div>
+
+
+
     <custom-multiselect
       label="Location"
       v-model="selectedSiteIds"
@@ -300,6 +337,7 @@ import Datepicker from '../components/Datepicker.vue'
 import CustomMultiselect from '../components/Multiselect.vue'
 import { getIconUrl, humanReadableSize, combinedFileSize } from '../lib'
 import { DevMode } from '../lib/DevMode'
+
 import L from 'leaflet'
 import * as Vue2Leaflet from 'vue2-leaflet'
 
@@ -345,6 +383,25 @@ export default class Search extends Vue {
   allProducts = []
   selectedProductIds = []
 
+
+
+  // Minimap
+  map = null
+  tileLayer = null
+  layers = [{
+    id: 0,
+    name: 'Sites',
+    active: true,
+    features: [{
+      id: 0,
+      name: 'Mace Head',
+      type: 'marker',
+      coords: [53.326, -9.9],
+    }],
+  }]
+
+
+
   renderComplete = false
 
   displayBetaNotification = true
@@ -367,6 +424,41 @@ export default class Search extends Vue {
     this.$nextTick(() => {
       window.addEventListener('resize', this.adjustPerPageAccordingToWindowHeight)
       this.renderComplete = true
+    })
+    this.initMap()
+    this.initLayers()
+  }
+
+  initMap() {
+    this.map = L.map('map').setView([60.63, 20.23], 5)
+    this.tileLayer = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png',{
+      maxZoom: 18,
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>',
+    })
+    this.tileLayer.addTo(this.map)
+  }
+
+  initLayers()  {
+    this.layers.forEach((layer) => {
+      const markerFeatures = layer.features.filter(feature => feature.type === 'marker')
+      const polygonFeatures = layer.features.filter(feature => feature.type === 'polygon')
+      markerFeatures.forEach((feature) => {
+        feature.leafletObject = L.marker(feature.coords).bindPopup(feature.name)
+      })
+      polygonFeatures.forEach((feature) => {
+        feature.leafletObject = L.polygon(feature.coords).bindPopup(feature.name)
+      })
+    })
+  }
+
+  layerChanged(layerId, active) {
+    const layer = this.layers.find(layer => layer.id === layerId)
+    layer.features.forEach((feature) => {
+      if (active) {
+        feature.leafletObject.addTo(this.map)
+      } else {
+        feature.leafletObject.removeFrom(this.map)
+      }
     })
   }
 
