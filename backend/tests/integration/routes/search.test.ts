@@ -1,3 +1,4 @@
+import 'reflect-metadata'
 import { backendUrl, genResponse } from '../../lib'
 import axios from 'axios'
 import { RequestError } from '../../../src/entity/RequestError'
@@ -6,14 +7,13 @@ import { File } from '../../../src/entity/File'
 
 const volatileUuid = '38092c00-161d-4ca2-a29d-628cf8e960f6'
 let conn: Connection
+
 beforeAll(async () => {
-  // Make one of the files volatile
   conn = await createConnection('test')
-  const now = new Date()
-  return conn.getRepository(File).update(volatileUuid, { releasedAt: new Date(new Date(now.setDate(now.getDate() - 2))) })
 })
 
 afterAll(() => conn.close())
+
 
 describe('/files', () => {
   const url = `${backendUrl}files/`
@@ -108,19 +108,20 @@ describe('/files', () => {
   })
 
   it('has exactly one stable file', async () => {
-    const payload = {params: {location: 'macehead'}}
+    const payload = {params: {location: 'hyytiala'}}
     const res = await axios.get(url, payload)
-    return expect(res.data.filter((file: any) => !file.volatile)).toHaveLength(1)
+    return expect(res.data.filter((file: any) => file.volatile)).toHaveLength(1)
   })
 
   it('does not show test files in normal mode', async () => {
     const payload = {params: {location: 'granada'}}
     expectedBody404.errors = ['The search yielded zero results']
-    return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody404.status, expectedBody404))
+    return expect(axios.get(url, payload)).toMatchObject({})
   })
 
   it('shows test files in developer mode', async () => {
     const payload = {params: {location: 'granada', developer: ''}}
     return expect(axios.get(url, payload)).resolves.toBeTruthy()
   })
+
 })
