@@ -1,8 +1,9 @@
 import { By, until, WebDriver, Key } from 'selenium-webdriver'
-import * as fs from 'fs'
 import { join } from 'path'
 import axios from 'axios'
-import { inboxDir, prepareSelenium, wait } from '../lib'
+import { prepareSelenium, wait } from '../lib'
+import { spawn } from 'child_process'
+import { Parser } from 'xml2js'
 
 let driver: WebDriver
 
@@ -59,6 +60,31 @@ async function findElement(by: By) {
   return driver.findElement(by)
 }
 
+function dump_file(filename: string): Promise<string> {
+  return new Promise((resolve, _) => {
+    const command = spawn('ncdump', ['-xh', filename])
+    let result = ''
+    command.stdout.on('data', function(data) {
+      result += data.toString()
+    })
+    command.on('close', function(_) {
+      resolve(result)
+    })
+  })
+}
+
+function find_uuid(xml: any): Promise<string> {
+  let parser = new Parser()
+  return new Promise((resolve, _) => {
+    parser.parseString(xml, function(_:any,  result:any) {
+      for (let n=0; n < result.netcdf.attribute.length; n++) {
+        let {name, value} = result.netcdf.attribute[n].$
+        if (name == 'file_uuid') resolve(value)
+      }
+    })
+  })
+}
+
 beforeAll(async () => driver = await prepareSelenium())
 
 afterAll(async () => {
@@ -68,16 +94,22 @@ afterAll(async () => {
 describe('search page', () => {
 
   beforeAll(async () => {
+
+    let filenames = []
     for (let i = 23; i <= 27; i++) {
-      let fname = `201907${i}_bucharest_classification.nc`
-      fs.copyFileSync(join('tests/data/', fname), join(inboxDir, fname))
+      filenames.push(`201907${i}_bucharest_classification.nc`)
     }
     for (let i = 23; i <= 24; i++) {
-      let fname = `201907${i}_mace-head_iwc-Z-T-method.nc`
-      fs.copyFileSync(join('tests/data/', fname), join(inboxDir, fname))
+      filenames.push(`201907${i}_mace-head_iwc-Z-T-method.nc`)
     }
-    const granada = '20200126_granada_ecmwf.nc'
-    fs.copyFileSync(join('tests/data', granada), join(inboxDir, granada))
+    filenames.push('20200126_granada_ecmwf.nc')
+
+    for (let i=0; i < filenames.length; i++) {
+      const xml = await dump_file(join('tests/data', filenames[i]))
+      const uuid = await find_uuid(xml)
+      const url = `http://localhost:3001/file/${uuid}`
+      await axios.put(url, xml, {headers: { 'Content-Type': 'application/xml' }})
+    }
     await wait(3000)
   })
 
