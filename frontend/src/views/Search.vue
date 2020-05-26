@@ -124,7 +124,11 @@
     margin-bottom: $filter-margin
 
   .map
-    height: 100px
+    height: 300px
+
+  .no-padding
+    padding: 0
+
 </style>
 
 <template>
@@ -145,12 +149,8 @@
 
     <div id="minimap" class="container">
       <div class="row">
-        <div class="col-md-9">
-          <div
-            class="form-check"
-            v-for="layer in layers"
-            :key="layer.id"
-          >
+        <div class="col-md-12 no-padding">
+          <div class="form-check" v-for="layer in layers":key="layer.id">
             <label class="form-check-label">
               <input
                 class="form-check-input"
@@ -164,11 +164,6 @@
           <div id="map" class="map">
           test
           </div>
-
-        </div>
-        <div class="col-md-3">
-          <!-- The layer checkboxes go here -->
-          lllll
         </div>
       </div>
     </div>
@@ -437,15 +432,12 @@ export default class Search extends Vue {
       this.renderComplete = true
     })
     this.initMap()
-    this.initLayers()
+    //this.initLayers()
   }
 
   initMap() {
-    this.map = L.map('map').setView([60.63, 20.23], 5)
-    this.tileLayer = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png',{
-      maxZoom: 18,
-      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>',
-    })
+    this.map = L.map('map').setView([54.00, 14.00], 3)
+    this.tileLayer = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png')
     this.tileLayer.addTo(this.map)
   }
 
@@ -456,12 +448,14 @@ export default class Search extends Vue {
       markerFeatures.forEach((feature) => {
         feature.leafletObject = L.marker(feature.coords).bindPopup(feature.name)
       })
+      /*
       polygonFeatures.forEach((feature) => {
         feature.leafletObject = L.polygon(feature.coords).bindPopup(feature.name)
       })
+      */
     })
   }
-
+  /*
   layerChanged(layerId, active) {
     const layer = this.layers.find(layer => layer.id === layerId)
     layer.features.forEach((feature) => {
@@ -471,6 +465,10 @@ export default class Search extends Vue {
         feature.leafletObject.removeFrom(this.map)
       }
     })
+  }
+  */
+  beforeDestroy() {
+    window.removeEventListener('resize', this.adjustPerPageAccordingToWindowHeight)
   }
 
   alphabeticalSort = (a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName
