@@ -28,7 +28,7 @@ main#frontpage
       width: 10em
       height: 8em
       img
-        width: 30px
+        width: 35px
         height: auto
         margin-bottom: 0.5em
 
