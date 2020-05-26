@@ -6,24 +6,30 @@ import { inboxDir, prepareSelenium, wait } from '../lib'
 
 let driver: WebDriver
 
-jest.setTimeout(60000)
+jest.setTimeout(15000)
 
 async function awaitAndFind(by: By) {
   await driver.wait(until.elementLocated(by))
   return driver.findElement(by)
 }
 
-beforeAll(async () => driver = await prepareSelenium())
+beforeAll(async () => {
+  driver = await prepareSelenium()
+  const uuid = '15506ea8d3574c7baf8c95dfcc34fc7d'
+  const xml = fs.readFileSync('tests/data/20190723_bucharest_classification.xml', 'utf-8')
+  const url = `http://localhost:3001/file/${  uuid}`
+  await axios.put(url, xml, {headers: { 'Content-Type': 'application/xml' }})
+  fs.copyFileSync('tests/data/20190723_bucharest_classification.png', join(inboxDir, '20190723_bucharest_classification.png'))
+})
 
 afterAll(async () => {
   return driver.close()
 })
 
 describe('file landing page', () => {
+
   beforeAll(async () => {
-    fs.copyFileSync('tests/data/20190723_bucharest_classification.nc', join(inboxDir, '20190723_bucharest_classification.nc'))
-    fs.copyFileSync('tests/data/20190723_bucharest_classification.png', join(inboxDir, '20190723_bucharest_classification.png'))
-    return wait(3000)
+    wait(1000)
   })
 
   it('returns 404 when the file is not found', async () => {
