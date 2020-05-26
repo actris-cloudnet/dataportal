@@ -80,23 +80,23 @@
     <b-table id="tableContent" borderless small striped hover sort-icon-left
              :items="apiResponse"
              :fields="[
-                  { key: 'product.id', label: '', tdClass: 'icon', tdAttr: setIcon},
-                  { key: 'title', label: 'Data object', sortable: true},
-                  { key: 'volatile', label: '' },
-                  { key: 'measurementDate', label: 'Date', sortable: true},
-                  ]"
+                { key: 'productId', label: '', tdClass: 'icon', tdAttr: setIcon},
+                { key: 'title', label: 'Data object', sortable: true},
+                { key: 'volatile', label: '' },
+                { key: 'measurementDate', label: 'Date', sortable: true},
+                ]"
              :current-page="currentPage"
              :per-page="perPage"
              :busy="isBusy"
              :show-empty="true"
              @row-clicked="clickRow">
       <template v-slot:cell(volatile)="data">
-        <span
-            v-if="data.item.volatile"
-            class="volatile"
-            title="The data for this day may be incomplete. This file is updating in real time.">
-          volatile
-        </span>
+      <span
+        v-if="data.item.volatile"
+        class="volatile"
+        title="The data for this day may be incomplete. This file is updating in real time.">
+        volatile
+      </span>
       </template>
     </b-table>
     <b-pagination id="pagi" v-if="listLength > perPage"
@@ -115,8 +115,8 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
       </a><br>
       <span class="dlcount" v-bind:class="{ disabled: isBusy }">
-          {{ listLength }} files ({{ humanReadableSize(combinedFileSize(apiResponse)) }})
-        </span><br>
+        {{ listLength }} files ({{ humanReadableSize(combinedFileSize(apiResponse)) }})
+      </span><br>
     </div>
   </section>
 </template>

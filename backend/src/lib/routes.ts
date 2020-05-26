@@ -14,6 +14,7 @@ import {Visualization} from '../entity/Visualization'
 import {VisualizationResponse} from '../entity/VisualizationResponse'
 import {ProductVariable} from '../entity/ProductVariable'
 import {LatestVisualizationDateResponse} from '../entity/LatestVisualizationDateResponse'
+import {SearchFile} from '../entity/SearchFile'
 
 
 export class Routes {
@@ -91,6 +92,27 @@ export class Routes {
       .getMany()
       .then(result => {
         res.send(this.augmentFiles(result))
+      })
+      .catch(err => {
+        next({ status: 500, errors: err })
+      })
+  }
+
+  search: RequestHandler = async (req: Request, res: Response, next) => {
+    const query = req.query
+
+    const convertToSearchFiles = (files: File[]) =>
+      files.map(file => new SearchFile(file))
+
+    const qb = this.filesQueryBuilder(query)
+    this.hideTestDataFromNormalUsers(qb, req)
+      .getMany()
+      .then(result => {
+        if (result.length == 0) {
+          next({ status: 404, errors: ['The search yielded zero results'], params: req.query })
+          return
+        }
+        res.send(convertToSearchFiles(result))
       })
       .catch(err => {
         next({ status: 500, errors: err })

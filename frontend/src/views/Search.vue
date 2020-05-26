@@ -271,7 +271,6 @@
       :key="dataSearchUpdate">
     </data-search-result>
   </div>
-
 </main>
 <app-error v-else :response="{status: 404}"></app-error>
 </template>
@@ -280,7 +279,6 @@
 import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import VCalendar from 'v-calendar'
 import axios from 'axios'
-import { File } from '../../../backend/src/entity/File'
 import { Site } from '../../../backend/src/entity/Site'
 import { BTable } from 'bootstrap-vue/esm/components/table'
 import { BPagination } from 'bootstrap-vue/esm/components/pagination'
@@ -294,6 +292,7 @@ import {Visualization} from '../../../backend/src/entity/Visualization'
 import {Product} from '../../../backend/src/entity/Product'
 import {ProductVariable} from '../../../backend/src/entity/ProductVariable'
 import L, { marker } from 'leaflet'
+import {SearchFile} from '../../../backend/src/entity/SearchFile'
 
 Vue.component('datepicker', Datepicker)
 Vue.component('b-table', BTable)
@@ -316,7 +315,11 @@ export default class Search extends Vue {
 
   // api call
   apiUrl = process.env.VUE_APP_BACKENDURL
-  apiResponse: File[] | Visualization[] = this.resetResponse()
+  apiResponse: SearchFile[] | Visualization[] = this.resetResponse()
+
+  // file list
+  sortBy = 'title'
+  sortDesc = false
   isBusy = false
 
   // site selector
@@ -516,13 +519,17 @@ export default class Search extends Vue {
     }
   }
 
+  constructTitle(files: SearchFile[]) {
+    return files.map(file => ({...file, title: `${file.product} file from ${file.site}`}))
+  }
+
   fetchData() {
     this.isBusy = true
-    const apiPath = this.isVizMode() ? 'visualization/' : 'files/'
+    const apiPath = this.isVizMode() ? 'visualization/' : 'search/'
     return axios
       .get(`${this.apiUrl}${apiPath}`, this.payload)
       .then(res => {
-        this.apiResponse = res.data
+        this.apiResponse = this.constructTitle(res.data)
         this.isBusy = false
       })
       .catch(() => {
