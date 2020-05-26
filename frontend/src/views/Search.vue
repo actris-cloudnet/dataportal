@@ -175,6 +175,7 @@
 
   .map
     height: 300px
+    position: relative
 
   .no-padding
     padding: 0
@@ -197,22 +198,10 @@
   <section id="sideBar">
     <header class="filterOptions">Filter search</header>
 
-    <div id="minimap" class="container">
+    <div id="minimap" class="container sticky-top" style="z-index: 4">
       <div class="row">
         <div class="col-md-12 no-padding">
-          <div class="form-check" v-for="layer in layers":key="layer.id">
-            <label class="form-check-label">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                v-model="layer.active"
-                @change="layerChanged(layer.id, layer.active)"
-              />
-              {{ layer.name }}
-            </label>
-          </div>
-          <div id="map" class="map">
-          test
+            <div id="map" class="map">
           </div>
         </div>
       </div>
@@ -378,8 +367,6 @@ export default class Search extends Vue {
   allProducts = []
   selectedProductIds = []
 
-
-
   // Minimap
   map = null
   tileLayer = null
@@ -387,12 +374,25 @@ export default class Search extends Vue {
     id: 0,
     name: 'Sites',
     active: true,
-    features: [{
+    features: [
+    {
       id: 0,
       name: 'Mace Head',
       type: 'marker',
       coords: [53.326, -9.9],
-    }],
+    },
+    {
+      id: 1,
+      name: 'Bucharest',
+      type: 'marker',
+      coords: [44.348, 26.029],
+    },
+    {
+      id: 2,
+      name: 'Hyytiälä',
+      type: 'marker',
+      coords: [61.844, 24.288],
+    },],
   }]
 
 
@@ -421,7 +421,7 @@ export default class Search extends Vue {
       this.renderComplete = true
     })
     this.initMap()
-    //this.initLayers()
+    this.initLayers()
   }
 
   initMap() {
@@ -433,29 +433,13 @@ export default class Search extends Vue {
   initLayers()  {
     this.layers.forEach((layer) => {
       const markerFeatures = layer.features.filter(feature => feature.type === 'marker')
-      const polygonFeatures = layer.features.filter(feature => feature.type === 'polygon')
       markerFeatures.forEach((feature) => {
         feature.leafletObject = L.marker(feature.coords).bindPopup(feature.name)
-      })
-      /*
-      polygonFeatures.forEach((feature) => {
-        feature.leafletObject = L.polygon(feature.coords).bindPopup(feature.name)
-      })
-      */
-    })
-  }
-  /*
-  layerChanged(layerId, active) {
-    const layer = this.layers.find(layer => layer.id === layerId)
-    layer.features.forEach((feature) => {
-      if (active) {
         feature.leafletObject.addTo(this.map)
-      } else {
-        feature.leafletObject.removeFrom(this.map)
-      }
+      })
     })
   }
-  */
+
   beforeDestroy() {
     window.removeEventListener('resize', this.adjustPerPageAccordingToWindowHeight)
   }
