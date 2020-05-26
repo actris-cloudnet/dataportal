@@ -11,6 +11,7 @@ import { spawn } from 'child_process'
 import { stringify } from './lib'
 import config from './config'
 import { Product } from './entity/Product'
+import { release } from 'os'
 
 
 let filename: string
@@ -61,6 +62,7 @@ const insert = (ncObj: NetCDFObject, connection: Connection) =>
     linkFile(filename)
   ]).then(([ncObj, baseFilename, chksum, { size }, format, site, product]) => {
     const file = new File(ncObj, baseFilename, chksum, size, format, site, product)
+    file.releasedAt = new Date()
     return connection.manager.save(file)
   })
 
