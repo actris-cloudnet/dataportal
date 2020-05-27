@@ -2,8 +2,6 @@
   @import "../sass/variables.sass"
   @import "../sass/global.sass"
 
-  $filter-margin: 2em
-
   main#search
     position: relative
     display: flex
@@ -29,73 +27,9 @@
     color: grey
     font-weight: normal
 
-  section#fileTable
-    padding-left: 30px
-    padding-right: 30px
-    flex-grow: 0.2
-    padding-bottom: 100px
-    text-align: left
-
-  #tableContent
-    margin-top: 10px
-
-  .listTitle
-    color: gray
-    font-size: 85%
-    margin-bottom: 5px
-    display: block
-
   .filterOptions
     font-size: 1.2em
     margin-bottom: $filter-margin
-
-  #pagi
-    margin-top: 30px
-    float: left
-    .page-item.active .page-link
-      background-color: $steel-warrior
-      border-color: $steel-warrior
-    .page-link:hover
-      background-color: $blue-dust
-    .page-link
-      color: $blue-sapphire
-
-  .table-striped
-    th:nth-child(1)
-      width: 50px
-      text-align: center
-    th:nth-child(2)
-      width: 300px
-    th:nth-child(3)
-      width: 100px
-    th:nth-child(4)
-      width: 110px
-    td
-      padding: 9px
-    tr:nth-child(2n+1) > td
-      background-color: $blue-dust
-    td:nth-child(3)
-      text-align: center
-  .table-striped[aria-busy="false"]
-    tr:hover td
-      cursor: pointer
-      background-color: #e4eff7
-
-  .text-center.my-2
-    display: none
-
-  .icon
-    background-repeat: no-repeat
-    background-position: center
-    background-size: 20px
-    font-size: 0
-
-  .volatile
-    background: #cad7ff
-    padding-left: 0.5em
-    padding-right: 0.5em
-    padding-top: 0.1em
-    padding-bottom: 0.1em
 
   section#sideBar
     margin-right: 100px
@@ -158,16 +92,6 @@
     text-decoration: underline
     color: #bcd2e2
     margin-bottom: $filter-margin
-    display: block
-
-  .downloadinfo
-    float: right
-    margin-top: 30px
-
-  .dlcount
-    color: gray
-    font-size: 85%
-    text-align: center
     display: block
 
   .disabled
@@ -235,57 +159,20 @@
       :options="allProducts"
       id="productSelect"
       :icons="true"
-      :getIconUrl="getIconUrl"
       :devMode="devMode">
     </custom-multiselect>
 
     <a @click="reset" id="reset">Reset filter</a>
   </section>
 
-  <section id="fileTable">
-    <span class="listTitle"> {{ captionText }} </span>
-    <b-table id="tableContent" borderless small striped hover sort-icon-left
-      :items="apiResponse"
-      :fields="[
-                { key: 'product.id', label: '', tdClass: 'icon', tdAttr: setIcon},
-                { key: 'title', label: 'Data object', sortable: true},
-                { key: 'volatile', label: '' },
-                { key: 'measurementDate', label: 'Date', sortable: true},
-                ]"
-      :current-page="currentPage"
-      :per-page="perPage"
-      :busy="isBusy"
-      :show-empty="true"
-      @row-clicked="clickRow">
-    <template v-slot:cell(volatile)="data">
-      <span
-        v-if="data.item.volatile"
-        class="volatile"
-        title="The data for this day may be incomplete. This file is updating in real time.">
-        volatile
-      </span>
-    </template>
-    </b-table>
-    <b-pagination id="pagi" v-if="listLength > perPage"
-      v-model="currentPage"
-      :total-rows="listLength"
-      :per-page="perPage"
-      :disabled="isBusy"
-      aria-controls="fileTable"
-      align="center"
-    ></b-pagination>
-    <div class="downloadinfo" v-if="listLength > 0">
-      <a class="download"
-        v-bind:class="{ disabled: isBusy }"
-        :href="isBusy? '#' : downloadUri" download>
-        Download all
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-      </a><br>
-      <span class="dlcount" v-bind:class="{ disabled: isBusy }">
-        {{ listLength }} files ({{ humanReadableSize(combinedFileSize(apiResponse)) }})
-      </span><br>
-    </div>
-  </section>
+  <data-search-result
+   :apiResponse="apiResponse"
+   :isBusy="isBusy"
+   :apiUrl="apiUrl"
+   :payload="payload"
+   :downloadUri="downloadUri">
+  </data-search-result>
+
 </main>
 </template>
 
@@ -298,13 +185,14 @@ import { BTable } from 'bootstrap-vue/esm/components/table'
 import { BPagination } from 'bootstrap-vue/esm/components/pagination'
 import Datepicker from '../components/Datepicker.vue'
 import CustomMultiselect from '../components/Multiselect.vue'
-import { getIconUrl, humanReadableSize, combinedFileSize } from '../lib'
+import DataSearchResult from '../components/DataSearchResult.vue'
 import { DevMode } from '../lib/DevMode'
 
 Vue.component('datepicker', Datepicker)
 Vue.component('b-table', BTable)
 Vue.component('b-pagination', BPagination)
 Vue.component('custom-multiselect', CustomMultiselect)
+Vue.component('data-search-result', DataSearchResult)
 
 Vue.use(VCalendar)
 
@@ -319,13 +207,7 @@ export default class Search extends Vue {
   // api call
   apiUrl = process.env.VUE_APP_BACKENDURL
   apiResponse: File[] = this.resetResponse()
-
-  // file list
-  sortBy = 'title'
-  sortDesc = false
   isBusy = false
-  currentPage = 1
-  perPage = 15
 
   // site selector
   allSites = []
@@ -347,9 +229,6 @@ export default class Search extends Vue {
 
   displayBetaNotification = true
 
-  getIconUrl = getIconUrl
-  humanReadableSize = humanReadableSize
-  combinedFileSize = combinedFileSize
   devMode = new DevMode()
 
   isTrueOnBothDateFields(errorId: string) {
@@ -363,19 +242,13 @@ export default class Search extends Vue {
   mounted() {
     // Wait until all child components have rendered
     this.$nextTick(() => {
-      window.addEventListener('resize', this.adjustPerPageAccordingToWindowHeight)
       this.renderComplete = true
     })
-  }
-
-  beforeDestroy() {
-    window.removeEventListener('resize', this.adjustPerPageAccordingToWindowHeight)
   }
 
   alphabeticalSort = (a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName
 
   async initView() {
-    this.adjustPerPageAccordingToWindowHeight()
     const payload = { params: { developer: this.devMode.activated || undefined } }
     Promise.all([
       axios.get(`${this.apiUrl}sites/`, payload),
@@ -400,7 +273,6 @@ export default class Search extends Vue {
   }
 
   fetchData() {
-    this.currentPage = 1
     this.isBusy = true
     axios
       .get(`${this.apiUrl}files/`, this.payload)
@@ -414,15 +286,6 @@ export default class Search extends Vue {
       })
   }
 
-  get listLength() {
-    return this.apiResponse.length
-  }
-
-  get captionText() {
-    if (this.isBusy) return 'Searching...'
-    return this.listLength > 0 ? `Found ${this.listLength} results` : 'No results'
-  }
-
   get downloadUri() {
     return axios.getUri({...{ method: 'post', url: `${this.apiUrl}download/`}, ...this.payload })
   }
@@ -431,21 +294,8 @@ export default class Search extends Vue {
     return []
   }
 
-  clickRow(record: File) {
-    if (this.listLength > 0) this.$router.push(`file/${record.uuid}`)
-  }
-
-
-  setIcon(product: string) {
-    if (product) return {'style': `background-image: url(${getIconUrl(product)})`}
-  }
-
   reset() {
     this.$router.go(0)
-  }
-
-  adjustPerPageAccordingToWindowHeight() {
-    this.perPage = Math.max(Math.floor(document.documentElement.clientHeight / 70), 10)
   }
 
   @Watch('selectedSiteIds')
