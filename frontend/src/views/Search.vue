@@ -201,13 +201,10 @@
     <div id="minimap" class="container sticky-top" style="z-index: 4">
       <div class="row">
         <div class="col-md-12 no-padding">
-            <div id="map" class="map">
-          </div>
+          <div id="map" class="map"></div>
         </div>
       </div>
     </div>
-
-
 
     <custom-multiselect
       label="Location"
@@ -321,9 +318,7 @@ import Datepicker from '../components/Datepicker.vue'
 import CustomMultiselect from '../components/Multiselect.vue'
 import { getIconUrl, humanReadableSize, combinedFileSize } from '../lib'
 import { DevMode } from '../lib/DevMode'
-
 import L from 'leaflet'
-import * as Vue2Leaflet from 'vue2-leaflet'
 
 Vue.component('datepicker', Datepicker)
 Vue.component('b-table', BTable)
@@ -368,34 +363,36 @@ export default class Search extends Vue {
   selectedProductIds = []
 
   // Minimap
-  map = null
-  tileLayer = null
+  map = null as any
+  tileLayer = null as any
+  sitesList = []
   layers = [{
     id: 0,
     name: 'Sites',
     active: true,
     features: [
-    {
-      id: 0,
-      name: 'Mace Head',
-      type: 'marker',
-      coords: [53.326, -9.9],
-    },
-    {
-      id: 1,
-      name: 'Bucharest',
-      type: 'marker',
-      coords: [44.348, 26.029],
-    },
-    {
-      id: 2,
-      name: 'Hyytiälä',
-      type: 'marker',
-      coords: [61.844, 24.288],
-    },],
+      {
+        id: 0,
+        name: 'Mace Head',
+        type: 'marker',
+        coords: [53.326, -9.9],
+        leafletObject: null as any
+      },
+      {
+        id: 1,
+        name: 'Bucharest',
+        type: 'marker',
+        coords: [44.348, 26.029],
+        leafletObject: null as any
+      },
+      {
+        id: 2,
+        name: 'Hyytiälä',
+        type: 'marker',
+        coords: [61.844, 24.288],
+        leafletObject: null as any
+      },],
   }]
-
-
 
   renderComplete = false
 
@@ -412,6 +409,7 @@ export default class Search extends Vue {
 
   created() {
     this.initView()
+    this.fetchSiteList()
   }
 
   mounted() {
@@ -431,6 +429,7 @@ export default class Search extends Vue {
   }
 
   initLayers()  {
+    console.log(this.allSites)
     this.layers.forEach((layer) => {
       const markerFeatures = layer.features.filter(feature => feature.type === 'marker')
       markerFeatures.forEach((feature) => {
@@ -469,6 +468,17 @@ export default class Search extends Vue {
         developer: this.devMode.activated || undefined
       }
     }
+  }
+
+  async fetchSiteList() {
+    const payload = { params: { developer: this.devMode.activated || undefined } }
+    Promise.all([axios.get(`${this.apiUrl}sites/`, payload)
+    ]).then(([sites]) => {
+      this.sitesList = sites.data
+    })
+      .catch(() => {
+        this.sitesList = this.resetResponse()
+      })
   }
 
   fetchData() {
