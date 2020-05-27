@@ -4,6 +4,7 @@
   <dimension name="height" length="376" />
   <attribute name="Conventions" value="CF-1.7" />
   <attribute name="title" value="Classification file from Bucharest" />
+  <attribute name="file_uuid" value="15506ea8d3574c7baf8c95dfcc34fc7d" />
   <attribute name="source" value="Categorize file: c481d6e3b4cd47c59de7b4e3c2e082e3" />
   <attribute name="year" value="2019" />
   <attribute name="month" value="07" />

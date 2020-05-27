@@ -1,9 +1,6 @@
 import { By, until, WebDriver, Key } from 'selenium-webdriver'
-import { join } from 'path'
 import axios from 'axios'
-import { prepareSelenium, wait } from '../lib'
-import { spawn } from 'child_process'
-import { Parser } from 'xml2js'
+import { prepareSelenium, wait, nc2xml, backendUrl, parseUuid } from '../lib'
 
 let driver: WebDriver
 
@@ -60,31 +57,6 @@ async function findElement(by: By) {
   return driver.findElement(by)
 }
 
-function dump_file(filename: string): Promise<string> {
-  return new Promise((resolve, _) => {
-    const command = spawn('ncdump', ['-xh', filename])
-    let result = ''
-    command.stdout.on('data', function(data) {
-      result += data.toString()
-    })
-    command.on('close', function(_) {
-      resolve(result)
-    })
-  })
-}
-
-function find_uuid(xml: any): Promise<string> {
-  let parser = new Parser()
-  return new Promise((resolve, _) => {
-    parser.parseString(xml, function(_:any,  result:any) {
-      for (let n=0; n < result.netcdf.attribute.length; n++) {
-        let {name, value} = result.netcdf.attribute[n].$
-        if (name == 'file_uuid') resolve(value)
-      }
-    })
-  })
-}
-
 beforeAll(async () => driver = await prepareSelenium())
 
 afterAll(async () => {
@@ -105,9 +77,9 @@ describe('search page', () => {
     filenames.push('20200126_granada_ecmwf.nc')
 
     for (let i=0; i < filenames.length; i++) {
-      const xml = await dump_file(join('tests/data', filenames[i]))
-      const uuid = await find_uuid(xml)
-      const url = `http://localhost:3001/file/${uuid}`
+      const xml = await nc2xml(`tests/data/${filenames[i]}`)
+      const uuid = await parseUuid(xml)
+      const url = `${backendUrl}file/${uuid}`
       await axios.put(url, xml, {headers: { 'Content-Type': 'application/xml' }})
     }
     await wait(3000)

@@ -3,9 +3,7 @@ import { backendUrl, genResponse } from '../../lib'
 import axios from 'axios'
 import { RequestError } from '../../../src/entity/RequestError'
 import { createConnection, Connection } from 'typeorm'
-import { File } from '../../../src/entity/File'
 
-const volatileUuid = '38092c00-161d-4ca2-a29d-628cf8e960f6'
 let conn: Connection
 
 beforeAll(async () => {

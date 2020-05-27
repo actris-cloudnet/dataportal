@@ -11,7 +11,6 @@ import { spawn } from 'child_process'
 import { stringify } from './lib'
 import config from './config'
 import { Product } from './entity/Product'
-import { release } from 'os'
 
 
 let filename: string

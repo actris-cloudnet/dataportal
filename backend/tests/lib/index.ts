@@ -3,6 +3,8 @@ import * as path from 'path'
 import { createConnection } from 'typeorm'
 import * as firefox from 'selenium-webdriver/firefox'
 import { Builder } from 'selenium-webdriver'
+import { spawn } from 'child_process'
+import { Parser } from 'xml2js'
 
 export function clearDir(dir: string) {
   const files = fs.readdirSync(dir)
@@ -30,6 +32,31 @@ export const prepareSelenium = async () => {
     .forBrowser('firefox')
     .setFirefoxOptions(options)
     .build()
+}
+
+export async function nc2xml(filename: string) {
+  return new Promise((resolve) => {
+    const command = spawn('ncdump', ['-xh', filename])
+    let result = ''
+    command.stdout.on('data', (data) => {
+      result += data
+    })
+    command.on('close', () => {
+      resolve(result)
+    })
+  })
+}
+
+export async function parseUuid(xml: any) {
+  const parser = new Parser()
+  return new Promise((resolve) => {
+    parser.parseString(xml, (err:any, result:any) => {
+      for (let n=0; n < result.netcdf.attribute.length; n++) {
+        let {name, value} = result.netcdf.attribute[n].$
+        if (name == 'file_uuid') resolve(value)
+      }
+    })
+  })
 }
 
 export const wait = async (ms: number) => new Promise((resolve, _) => setTimeout(resolve, ms))

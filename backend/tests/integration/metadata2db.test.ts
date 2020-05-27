@@ -1,14 +1,16 @@
 import { createConnection, Repository, Connection } from 'typeorm'
 import { File } from '../../src/entity/File'
 import { readFileSync } from 'fs'
-import { publicDir, clearDir } from '../lib'
-import { Parser } from 'xml2js'
-import { putRecord, freezeRecord } from '../../src/metadata2db'
+import { publicDir, clearDir, backendUrl, parseUuid } from '../lib'
+import axios from 'axios'
 
-const bucharestXml = 'tests/data/20190723_bucharest_classification.xml'
-const bucharestXmlMissing = 'tests/data/20190723_bucharest_classification_missing_fields.xml'
-const bucharestXmlInvalidLocation = 'tests/data/20190723_bucharest_classification_invalid_location.xml'
-const granadaXml = 'tests/data/20200126_granada_ecmwf.xml'
+const dataDir = 'tests/data/'
+
+const bucharestXml = `${dataDir}20190723_bucharest_classification.xml`
+const bucharestXmlMissing = `${dataDir}20190723_bucharest_classification_missing_fields.xml`
+const bucharestXmlInvalidLocation = `${dataDir}20190723_bucharest_classification_invalid_location.xml`
+const granadaXml = `${dataDir}20200126_granada_ecmwf.xml`
+
 const uuid = '15506ea8d3574c7baf8c95dfcc34fc7d'
 const lidarUuid = '04ddd0c2f74e481198465c33b95f06af'
 const granadaUuid = '9e04d8ef0f2b4823835d33e458403c67'
@@ -32,77 +34,72 @@ afterAll(async () => {
   return conn.close()
 })
 
-function readJSONIn(filename: string): Promise<string> {
-  let parser = new Parser()
-  return new Promise((resolve, _) => {
-    const xml: string = readFileSync(filename, 'utf-8')
-    parser.parseString(xml, function(err:any,  result:any) {
-      resolve(result)
-    })
-  })
+async function putFile(xmlFileName:string, headers:any) {
+  const xml = readFileSync(xmlFileName, 'utf-8')
+  const uuid = await parseUuid(xml)
+  const url = `${backendUrl}file/${uuid}`
+  return await axios.put(url, xml, {headers: headers})
 }
 
 test('inserting new file', async () => {
-  const input = await readJSONIn(bucharestXml)
-  const out = await putRecord(conn, input)
+  const out = await putFile(bucharestXml, { 'Content-Type': 'application/xml' })
   expect(out.status.toString()).toMatch('201')
+  const dbRow = await repo.findOneOrFail(uuid)
+  expect(dbRow.uuid.replace(/-/g, '')).toMatch(uuid)
 })
 
 test('updating existing file', async () => {
-  const input = await readJSONIn(bucharestXml)
-  const out = await putRecord(conn, input)
+  const out = await putFile(bucharestXml, { 'Content-Type': 'application/xml' })
   expect(out.status.toString()).toMatch('200')
+  const dbRow1 = await repo.findOneOrFail(uuid)
+  await putFile(bucharestXml, { 'Content-Type': 'application/xml' })
+  const dbRow2 = await repo.findOneOrFail(uuid)
+  expect(dbRow1.releasedAt < dbRow2.releasedAt)
 })
 
 test('freezing existing file', async () => {
-  const freeze = true
-  const pid = 'http://123.123.jeejee'
-  const input = await readJSONIn(bucharestXml)
-  const out_from_put = await putRecord(conn, input)
-  const status = await freezeRecord(out_from_put, conn, pid, freeze)
-  expect(status.toString()).toMatch('200')
+  let dbRow = await repo.findOneOrFail(uuid)
+  expect(dbRow.volatile.toString()).toMatch('true')
+  const out = await putFile(bucharestXml, { 'Content-Type': 'application/xml', 'X-Freeze': 'True' })
+  expect(out.status.toString()).toMatch('200')
+  dbRow = await repo.findOneOrFail(uuid)
+  expect(dbRow.volatile.toString()).toMatch('false')
 })
 
 test('refuse updating freezed file', async () => {
-  const input = await readJSONIn(bucharestXml)
   try {
-    await putRecord(conn, input)
+    await putFile(bucharestXml, { 'Content-Type': 'application/xml', 'X-Freeze': 'True' })
   } catch (e) {
-    expect(e).toMatch('Cannot update a non-volatile file.')
+    expect(e.response.data.status.toString()).toMatch('500')
+    expect(e.response.data.errors).toMatch('Cannot update a non-volatile file.')
   }
 })
 
 test('errors on missing header fields', async () => {
-  const input = await readJSONIn(bucharestXmlMissing)
   try {
-    await putRecord(conn, input)
+    await putFile(bucharestXmlMissing, { 'Content-Type': 'application/xml' })
   } catch (e) {
-    let msgs = ['Invalid header fields', 'Missing or invalid:', 'cloudnet_file_type', 'file_uuid']
-    msgs.forEach(element => {
-      expect(e).toMatch(element)
-    })
+    expect(e.response.data.status.toString()).toMatch('500')
+    expect(e.response.data.errors).toMatch('Invalid header fields')
   }
 })
 
 test('errors on invalid location', async () => {
-  await repo.delete(uuid)
-  const input = await readJSONIn(bucharestXmlInvalidLocation)
+  repo.delete(uuid)
   try {
-    await putRecord(conn, input)
+    await putFile(bucharestXmlInvalidLocation, { 'Content-Type': 'application/xml' })
   } catch (e) {
-    expect(e.toString()).toMatch('Could not find any entity of type "Site" matching: "bkrest"')
+    expect(e.response.data.status.toString()).toMatch('500')
+    expect(e.response.data.errors.message).toMatch('Could not find any entity of type "Site" matching: "bkrest"')
   }
 })
 
 test('overwrites existing freezed files on test site', async () => {
-  const freeze = true
-  const pid = 'http://123.123.jeejee'
-  const input = await readJSONIn(granadaXml)
-  const out1 = await putRecord(conn, input)
-  const status = await freezeRecord(out1, conn, pid, freeze)
-  expect(status.toString()).toMatch('201')
-  const out2 = await putRecord(conn, input)
+  const out1 = await putFile(granadaXml, { 'Content-Type': 'application/xml', 'X-Freeze': 'True' })
+  expect(out1.status.toString()).toMatch('201')
+  const dbRow1 = await repo.findOneOrFail(granadaUuid)
+  const out2 = await putFile(granadaXml, { 'Content-Type': 'application/xml'})
   expect(out2.status.toString()).toMatch('200')
-  expect(out1.body.releasedAt < out2.body.releasedAt)
+  const dbRow2 = await repo.findOneOrFail(granadaUuid)
+  expect(dbRow1.releasedAt < dbRow2.releasedAt)
 })
-
