@@ -2,7 +2,7 @@ import { By, until, WebDriver } from 'selenium-webdriver'
 import * as fs from 'fs'
 import { join } from 'path'
 import axios from 'axios'
-import { inboxDir, prepareSelenium, wait, nc2xml, parseUuid } from '../lib'
+import { inboxDir, prepareSelenium, wait, runNcdump, parseUuid } from '../lib'
 
 let driver: WebDriver
 
@@ -15,7 +15,7 @@ async function awaitAndFind(by: By) {
 
 beforeAll(async () => {
   driver = await prepareSelenium()
-  const xml = await nc2xml('tests/data/20190723_bucharest_classification.nc')
+  const xml = await runNcdump('tests/data/20190723_bucharest_classification.nc')
   const uuid = await parseUuid(xml)
   const url = `http://localhost:3001/file/${uuid}`
   await axios.put(url, xml, {headers: { 'Content-Type': 'application/xml' }})

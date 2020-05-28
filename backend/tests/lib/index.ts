@@ -34,16 +34,16 @@ export const prepareSelenium = async () => {
     .build()
 }
 
-export async function nc2xml(filename: string) {
-  return new Promise((resolve) => {
-    const command = spawn('ncdump', ['-xh', filename])
-    let result = ''
-    command.stdout.on('data', (data) => {
-      result += data
+export async function runNcdump(path: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const proc = spawn('ncdump', ['-xh', path])
+    let out: string = ''
+    proc.stderr.on('data', console.error)
+    proc.stdout.on('data', data => {
+      out += data.toString()
     })
-    command.on('close', () => {
-      resolve(result)
-    })
+    proc.on('exit', (code, _) => code ? reject(code) : resolve(out))
+    proc.on('error', err => reject(err))
   })
 }
 

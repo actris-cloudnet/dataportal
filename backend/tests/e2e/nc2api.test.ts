@@ -1,9 +1,8 @@
 import * as fs from 'fs'
 import axios from 'axios'
-import { clearDir, publicDir, clearRepo, backendUrl, fileServerUrl } from '../lib'
+import { clearDir, publicDir, clearRepo, backendUrl, fileServerUrl, runNcdump } from '../lib'
 import * as AdmZip from 'adm-zip'
 import { createHash } from 'crypto'
-import { spawn } from 'child_process'
 
 beforeAll(async () => {
   clearDir(publicDir)
@@ -42,19 +41,6 @@ const expectedJson = {
 }
 
 const axiosConfig = { headers: { 'content-type': 'application/xml'}}
-
-async function runNcdump(path: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const proc = spawn('ncdump', ['-xh', path])
-    let out: string = ''
-    proc.stderr.on('data', console.error)
-    proc.stdout.on('data', data => {
-      out += data.toString()
-    })
-    proc.on('exit', (code, _) => code ? reject(code) : resolve(out))
-    proc.on('error', err => reject(err))
-  })
-}
 
 describe('after PUTting metadata to API', () => {
   beforeAll(async () => {
