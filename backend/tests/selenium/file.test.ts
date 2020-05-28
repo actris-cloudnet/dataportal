@@ -2,7 +2,7 @@ import { By, until, WebDriver } from 'selenium-webdriver'
 import * as fs from 'fs'
 import { join } from 'path'
 import axios from 'axios'
-import { inboxDir, prepareSelenium, wait, runNcdump, parseUuid } from '../lib'
+import { inboxDir, prepareSelenium, runNcdump, parseUuid } from '../lib'
 
 let driver: WebDriver
 
@@ -27,10 +27,6 @@ afterAll(async () => {
 })
 
 describe('file landing page', () => {
-
-  beforeAll(async () => {
-    wait(1000)
-  })
 
   it('returns 404 when the file is not found', async () => {
     await driver.get('http://localhost:8000/file/asd')
