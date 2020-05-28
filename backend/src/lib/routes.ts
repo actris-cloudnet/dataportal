@@ -152,13 +152,7 @@ export class Routes {
       .catch(err => next({ status: 500, errors: err }))
 
   submit: RequestHandler = async (req: Request, res: Response, next) => {
-    const attributes = req.body.netcdf.attribute
-    let pid:string=''
-    for (let n=0; n < attributes.length; n++) {
-      let {name, value} = attributes[n].$
-      if (name == 'pid') pid = value
-    }
-
+    const pid = parsePid(req.body.netcdf.attribute)
     const freeze = isFreeze(pid, req.headers)
     putRecord(this.conn, req.body)
       .then(result => {
@@ -201,12 +195,15 @@ export class Routes {
       })
 }
 
-function isFreeze(pid:string, header:any): boolean {
-  Object.keys(header).forEach(key => {
-    const value = header[key]
-    delete header[key]
-    header[key.toLowerCase()] = value.toLowerCase()
-  })
-  const key = 'x-freeze'
-  return (pid.length > 0) && (key in header) && (header[key] == 'true')
+function parsePid(attributes: Array<any>): string {
+  const { pid = '' }:any = attributes
+    .map((a) => a.$)
+    .map(({ name, value }) => ({ [name]: value }))
+    .reduce((acc, cur) => Object.assign(acc, cur))
+  return pid
+}
+
+function isFreeze(pid:string, header:any): any {
+  const xFreeze = header['x-freeze'] || 'false'
+  return (pid.length > 0) && (xFreeze.toLowerCase() == 'true')
 }
