@@ -106,9 +106,9 @@ describe('/files', () => {
   })
 
   it('has exactly one stable file', async () => {
-    const payload = {params: {location: 'hyytiala'}}
+    const payload = {params: {volatile: 'false'}}
     const res = await axios.get(url, payload)
-    return expect(res.data.filter((file: any) => file.volatile)).toHaveLength(1)
+    return expect(res.data).toHaveLength(1)
   })
 
   it('does not show test files in normal mode', async () => {

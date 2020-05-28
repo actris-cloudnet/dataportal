@@ -71,7 +71,7 @@ items:
   file5:
     uuid: "6cb32746-faf0-4057-9076-ed2e698dcf36"
     pid: null
-    volatile: true
+    volatile: false
     title: "Categorize file from Bucharest"
     measurementDate: "2019-07-15"
     history: "2019-09-16 11:10:33 - categorize file created\n2019-09-16 11:10:10 - radar file created\nLidar backscatter derived from raw values in arbitrary units: calibrated by user Ewan O'Connor <ewan.oconnor@fmi.fi> on 17-Jul-2019."
