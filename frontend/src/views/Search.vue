@@ -175,6 +175,7 @@
 
   .map
     height: 300px
+    width: 300px
     position: relative
 
   .no-padding
@@ -365,34 +366,6 @@ export default class Search extends Vue {
   // Minimap
   map = null as any
   tileLayer = null as any
-  sitesList = []
-  layers = [{
-    id: 0,
-    name: 'Sites',
-    active: true,
-    features: [
-      {
-        id: 0,
-        name: 'Mace Head',
-        type: 'marker',
-        coords: [53.326, -9.9],
-        leafletObject: null as any
-      },
-      {
-        id: 1,
-        name: 'Bucharest',
-        type: 'marker',
-        coords: [44.348, 26.029],
-        leafletObject: null as any
-      },
-      {
-        id: 2,
-        name: 'Hyytiälä',
-        type: 'marker',
-        coords: [61.844, 24.288],
-        leafletObject: null as any
-      },],
-  }]
 
   renderComplete = false
 
@@ -409,7 +382,6 @@ export default class Search extends Vue {
 
   created() {
     this.initView()
-    this.fetchSiteList()
   }
 
   mounted() {
@@ -429,13 +401,12 @@ export default class Search extends Vue {
   }
 
   initLayers()  {
-    console.log(this.allSites)
-    this.layers.forEach((layer) => {
-      const markerFeatures = layer.features.filter(feature => feature.type === 'marker')
-      markerFeatures.forEach((feature) => {
-        feature.leafletObject = L.marker(feature.coords).bindPopup(feature.name)
-        feature.leafletObject.addTo(this.map)
-      })
+    const markerNames = this.allSites.map(site => site.humanReadableName)
+    const lat = this.allSites.map(site => site.latitude)
+    const lon = this.allSites.map(site => site.longitude)
+    markerNames.forEach((name, i) => {
+      const marker = L.marker([lat[i], lon[i]]).bindPopup(name)
+      marker.addTo(this.map)
     })
   }
 
@@ -454,6 +425,7 @@ export default class Search extends Vue {
     ]).then(([sites, products]) => {
       this.allSites = sites.data.sort(this.alphabeticalSort)
       this.allProducts = products.data.sort(this.alphabeticalSort)
+      this.initLayers()
     })
     this.fetchData()
   }
@@ -468,17 +440,6 @@ export default class Search extends Vue {
         developer: this.devMode.activated || undefined
       }
     }
-  }
-
-  async fetchSiteList() {
-    const payload = { params: { developer: this.devMode.activated || undefined } }
-    Promise.all([axios.get(`${this.apiUrl}sites/`, payload)
-    ]).then(([sites]) => {
-      this.sitesList = sites.data
-    })
-      .catch(() => {
-        this.sitesList = this.resetResponse()
-      })
   }
 
   fetchData() {
