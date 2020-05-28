@@ -51,6 +51,7 @@ import * as xmlparser from 'express-xml-bodyparser'
 
   // private
   app.put('/file/:uuid', routes.submit)
+  app.put('/visualization/:filename', express.json(), routes.visualization)
 
   app.use(errorHandler)
 

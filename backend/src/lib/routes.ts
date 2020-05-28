@@ -10,6 +10,8 @@ import { createReadStream, promises as fsp, constants as fsconst } from 'gracefu
 import { fetchAll } from '.'
 import config from '../config'
 import { putRecord, freezeRecord } from '../metadata2db.js'
+import {Visualization} from '../entity/Visualization'
+
 
 export class Routes {
 
@@ -20,14 +22,16 @@ export class Routes {
     this.fileRepo = this.conn.getRepository(File)
     this.siteRepo = this.conn.getRepository(Site)
     this.productRepo = this.conn.getRepository(Product)
+    this.visualizationRepo = this.conn.getRepository(Visualization)
   }
 
   private conn: Connection
   private publicDir: string
-  private fileServerUrl: string
+  readonly fileServerUrl: string
   private fileRepo: Repository<File>
   private siteRepo: Repository<Site>
   private productRepo: Repository<Product>
+  private visualizationRepo: Repository<Visualization>
 
   private hideTestDataFromNormalUsers = <T>(dbQuery: SelectQueryBuilder<T>, req: Request): SelectQueryBuilder<T> =>
     req.query.developer !== undefined ? dbQuery : dbQuery.andWhere('not site.isTestSite')
@@ -146,7 +150,19 @@ export class Routes {
       })
   }
 
-  allfiles: RequestHandler = async (_req: Request, res: Response, next) =>
+  visualization: RequestHandler = async (req: Request, res: Response, next) => {
+    const body = req.body
+    const file = await this.fileRepo.findOneOrFail(req.body.sourceFileId)
+    const viz = new Visualization(req.params.filename, body.variableId, body.variableHumanReadableName, file)
+    return this.visualizationRepo.insert(viz)
+      .then(_ => res.sendStatus(201))
+      .catch(err => {
+        res.sendStatus(500)
+        next(err)
+      })
+  }
+
+  allfiles: RequestHandler = async (req: Request, res: Response, next) =>
     this.fileRepo.find({ relations: ['site', 'product'] })
       .then(result => res.send(this.augmentFiles(result)))
       .catch(err => next({ status: 500, errors: err }))
