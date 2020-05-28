@@ -403,7 +403,6 @@ export default class Search extends Vue {
       this.renderComplete = true
     })
     this.initMap()
-    this.initLayers()
   }
 
   initMap() {
@@ -418,8 +417,16 @@ export default class Search extends Vue {
     const lon = this.allSites.map(site => site.longitude)
     markerNames.forEach((name, i) => {
       const marker = L.marker([lat[i], lon[i]]).bindPopup(name)
+      marker.on("click", (onClick) => {
+        this.onMapMarkerClick(marker)
+        
+      })
       marker.addTo(this.map)
     })
+  }
+
+  onMapMarkerClick(marker) {
+    marker.setOpacity(0.5)
   }
 
   beforeDestroy() {
