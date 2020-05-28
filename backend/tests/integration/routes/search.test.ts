@@ -2,7 +2,7 @@ import 'reflect-metadata'
 import { backendUrl, genResponse } from '../../lib'
 import axios from 'axios'
 import { RequestError } from '../../../src/entity/RequestError'
-import { createConnection, Connection } from 'typeorm'
+import { createConnection, Connection, AdvancedConsoleLogger } from 'typeorm'
 
 let conn: Connection
 
@@ -114,7 +114,8 @@ describe('/files', () => {
   it('does not show test files in normal mode', async () => {
     const payload = {params: {location: 'granada'}}
     expectedBody404.errors = ['The search yielded zero results']
-    return expect(axios.get(url, payload)).toMatchObject({})
+    const res = await axios.get(url, payload)
+    return expect(res.data).toMatchObject([])
   })
 
   it('shows test files in developer mode', async () => {
