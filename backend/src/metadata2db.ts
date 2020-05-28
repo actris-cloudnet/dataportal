@@ -71,6 +71,8 @@ const checkSiteExists = (conn: Connection, site: string): Promise<Site> =>
 const checkProductExists = (conn: Connection, product: string): Promise<Product> =>
   conn.getRepository(Product).findOneOrFail(product)
 
+const checkFileExists = async (path: string) => !!(await fsp.stat(path).catch(_ => false))
+
 async function computeFileChecksum(filename: string): Promise<string> {
   return new Promise((resolve, reject) => {
     try {
@@ -120,10 +122,10 @@ function getFileFormat(filename: string): Promise<string> {
   })
 }
 
-function parseJSON(json: any) {
+async function parseJSON(json: any): Promise<any> {
   const { netcdf }: NetCDFXML = json
   filename = netcdf['$'].location
-  if (!existsSync(filename)) throw ('Missing file')
+  if (!await checkFileExists(filename)) throw ('Missing file')
   const ncObj: any = netcdf.attribute
     .map((a) => a['$'])
     .map(({ name, value }) => ({ [name]: value }))
@@ -139,7 +141,7 @@ function parseJSON(json: any) {
 }
 
 export async function putRecord(connection: Connection, input: any) {
-  const ncObj = parseJSON(input)
+  const ncObj: any = await parseJSON(input)
   const existingFile = await findVolatileFile(connection, ncObj.file_uuid)
   if (existingFile) {
     return {
