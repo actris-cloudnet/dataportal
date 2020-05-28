@@ -31,7 +31,9 @@ beforeEach(() => {
 })
 
 afterAll(async () => {
-  return conn.close()
+  await repo.delete(uuid)
+  await conn.close()
+  return
 })
 
 async function putFile(xmlFileName:string, headers:any) {
@@ -102,4 +104,11 @@ test('overwrites existing freezed files on test site', async () => {
   expect(out2.status.toString()).toMatch('200')
   const dbRow2 = await repo.findOneOrFail(granadaUuid)
   expect(dbRow1.releasedAt < dbRow2.releasedAt)
+  // Reset db (granada metadata is in fixtures)
+  repo
+  .createQueryBuilder()
+  .update()
+  .set({ pid: '', volatile: true})
+  .where('uuid = :uuid', { uuid: granadaUuid })
+  .execute()
 })
