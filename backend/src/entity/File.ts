@@ -1,7 +1,8 @@
-import {Entity, Column, PrimaryColumn, ManyToOne, BeforeUpdate, BeforeInsert} from 'typeorm'
+import {Entity, Column, PrimaryColumn, ManyToOne, BeforeUpdate, BeforeInsert, OneToMany} from 'typeorm'
 import { NetCDFObject } from './NetCDFObject'
 import { Site } from './Site'
 import { Product } from './Product'
+import {Visualization} from './Visualization'
 
 export enum FilePublicity {
     PUBLIC = 'public',
@@ -60,6 +61,9 @@ export class File {
 
     @Column()
     format!: string
+
+    @OneToMany(_ => Visualization, viz => viz.sourceFile)
+    visualizations!: Visualization[]
 
     @BeforeInsert()
     updateDateCreation() {
