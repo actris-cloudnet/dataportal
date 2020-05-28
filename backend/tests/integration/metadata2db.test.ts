@@ -12,7 +12,6 @@ const bucharestXmlInvalidLocation = `${dataDir}20190723_bucharest_classification
 const granadaXml = `${dataDir}20200126_granada_ecmwf.xml`
 
 const uuid = '15506ea8d3574c7baf8c95dfcc34fc7d'
-const lidarUuid = '04ddd0c2f74e481198465c33b95f06af'
 const granadaUuid = '9e04d8ef0f2b4823835d33e458403c67'
 
 let conn: Connection
@@ -23,7 +22,7 @@ beforeAll(async () => {
   repo = conn.getRepository('file')
   await repo.delete(uuid)
   await repo.delete(granadaUuid)
-  return repo.delete(lidarUuid)
+  return
 })
 
 beforeEach(() => {
