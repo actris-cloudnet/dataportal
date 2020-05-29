@@ -27,7 +27,7 @@ interface NetCDFXML {
     }
 }
 
-const findVolatileFile = (conn: Connection, uuid: string): Promise<File|null> =>
+const checkDbRecordExists = (conn: Connection, uuid: string): Promise<File|null> =>
   new Promise((resolve, reject) =>
     conn.getRepository(File).findOneOrFail(uuid, { relations: [ 'site' ]})
       .then(file => {
@@ -142,7 +142,7 @@ async function parseJSON(json: any): Promise<any> {
 
 export async function putRecord(connection: Connection, input: any) {
   const ncObj: any = await parseJSON(input)
-  const existingFile = await findVolatileFile(connection, ncObj.file_uuid)
+  const existingFile = await checkDbRecordExists(connection, ncObj.file_uuid)
   if (existingFile) {
     return {
       body: await update(existingFile, connection),
