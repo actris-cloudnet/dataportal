@@ -212,7 +212,7 @@ import Datepicker from '../components/Datepicker.vue'
 import CustomMultiselect from '../components/Multiselect.vue'
 import DataSearchResult from '../components/DataSearchResult.vue'
 import { DevMode } from '../lib/DevMode'
-import VizSearchResult from '@/components/VizSearchResult.vue'
+import VizSearchResult from '../components/VizSearchResult.vue'
 import {Visualization} from '../../../backend/src/entity/Visualization'
 
 Vue.component('datepicker', Datepicker)

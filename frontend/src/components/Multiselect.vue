@@ -81,7 +81,7 @@ import { Prop } from 'vue-property-decorator'
 import Multiselect from 'vue-multiselect'
 import { Selection } from '../views/Search.vue'
 import { DevMode } from '../lib/DevMode'
-import { getIconUrl } from '@/lib'
+import { getIconUrl } from '../lib'
 
 Vue.component('multiselect', Multiselect)
 
