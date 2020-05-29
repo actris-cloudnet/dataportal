@@ -13,6 +13,10 @@ const routes = [
     component: () => import('../views/Frontpage.vue')
   },
   {
+    path: '/search',
+    redirect: '/search/data'
+  },
+  {
     path: '/file/:uuid',
     name: 'File',
     meta: {
@@ -22,7 +26,7 @@ const routes = [
     props: true,
   },
   {
-    path: '/search',
+    path: '/search/:mode',
     name: 'Search',
     meta: {
       title: 'Cloudnet Search'

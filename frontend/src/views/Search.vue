@@ -99,7 +99,7 @@
 </style>
 
 <template>
-<main id="search">
+<main v-if="mode == 'viz' || mode == 'data'" id="search">
   <div v-if="displayBetaNotification" class="note betanote">
     This is the beta version of Cloudnet data portal.
     Click <a href="http://devcloudnet.fmi.fi/">here</a> to visit the devcloudnet data portal, or
@@ -121,7 +121,7 @@
       :devMode="devMode">
     </custom-multiselect>
 
-    <div class="date">
+    <div class="date" v-if="!isVizMode()">
       <datepicker
         name="dateFrom"
         v-model="dateFrom"
@@ -146,10 +146,29 @@
         class="errormsg"
       >Provided date is in the future.
       </div>
-      <div
-        v-if="isTrueOnBothDateFields('isValidDateString') && (!dateFromError.isBeforeEnd || !dateToError.isAfterStart)"
+      <div v-if="isTrueOnBothDateFields('isValidDateString')
+          && (!dateFromError.isBeforeEnd || !dateToError.isAfterStart)"
         class="errormsg"
       >Date from must be before date to.
+      </div>
+    </div>
+
+    <div class="date" v-else>
+      <datepicker
+        name="dateTo"
+        v-model="dateTo"
+        :start="beginningOfHistory"
+        :end="today"
+        label="Date"
+        v-on:error="dateToError = $event"
+      ></datepicker>
+      <div v-if="!dateToError.isValidDateString" class="errormsg">
+        Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.
+      </div>
+      <div
+        v-if="dateToError.isValidDateString && !dateToError.isNotInFuture"
+        class="errormsg"
+      >Provided date is in the future.
       </div>
     </div>
 
@@ -165,19 +184,25 @@
     <a @click="reset" id="reset">Reset filter</a>
   </section>
 
+  <viz-search-result
+    v-if="isVizMode()"
+    :apiResponse="apiResponse"
+    :isBusy="isBusy">
+  </viz-search-result>
+
   <data-search-result
-   :apiResponse="apiResponse"
-   :isBusy="isBusy"
-   :apiUrl="apiUrl"
-   :payload="payload"
-   :downloadUri="downloadUri">
+    v-else
+    :apiResponse="apiResponse"
+    :isBusy="isBusy"
+    :downloadUri="downloadUri">
   </data-search-result>
 
 </main>
+<app-error v-else :response="{status: 404}"></app-error>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'vue-property-decorator'
+import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import VCalendar from 'v-calendar'
 import axios from 'axios'
 import { File } from '../../../backend/src/entity/File'
@@ -187,12 +212,15 @@ import Datepicker from '../components/Datepicker.vue'
 import CustomMultiselect from '../components/Multiselect.vue'
 import DataSearchResult from '../components/DataSearchResult.vue'
 import { DevMode } from '../lib/DevMode'
+import VizSearchResult from '@/components/VizSearchResult.vue'
+import {Visualization} from '../../../backend/src/entity/Visualization'
 
 Vue.component('datepicker', Datepicker)
 Vue.component('b-table', BTable)
 Vue.component('b-pagination', BPagination)
 Vue.component('custom-multiselect', CustomMultiselect)
 Vue.component('data-search-result', DataSearchResult)
+Vue.component('viz-search-result', VizSearchResult)
 
 Vue.use(VCalendar)
 
@@ -203,10 +231,12 @@ export interface Selection {
 
 @Component({name: 'app-search'})
 export default class Search extends Vue {
+  @Prop() mode!: string
 
   // api call
   apiUrl = process.env.VUE_APP_BACKENDURL
-  apiResponse: File[] = this.resetResponse()
+  apiPath = this.isVizMode() ? 'visualization/' : 'files/'
+  apiResponse: File[] | Visualization[] = this.resetResponse()
   isBusy = false
 
   // site selector
@@ -216,8 +246,8 @@ export default class Search extends Vue {
   // dates
   beginningOfHistory = new Date('1970-01-01')
   today = new Date()
-  dateFrom = new Date(new Date().getFullYear().toString())
   dateTo = this.today
+  dateFrom = this.isVizMode() ? this.today : new Date(new Date().getFullYear().toString())
   dateFromError: { [key: string]: boolean } = {}
   dateToError: { [key: string]: boolean } = {}
 
@@ -231,8 +261,12 @@ export default class Search extends Vue {
 
   devMode = new DevMode()
 
+  isVizMode() {
+    return this.mode == 'viz'
+  }
+
   isTrueOnBothDateFields(errorId: string) {
-    return this.dateFromError[errorId] && this.dateToError[errorId]
+    return (this.isVizMode() || this.dateFromError[errorId]) && this.dateToError[errorId]
   }
 
   created() {
@@ -275,7 +309,7 @@ export default class Search extends Vue {
   fetchData() {
     this.isBusy = true
     axios
-      .get(`${this.apiUrl}files/`, this.payload)
+      .get(`${this.apiUrl}${this.apiPath}`, this.payload)
       .then(res => {
         this.apiResponse = res.data
         this.isBusy = false
@@ -312,6 +346,7 @@ export default class Search extends Vue {
   @Watch('dateTo')
   onDateToChanged() {
     if (!this.renderComplete) return
+    if (this.isVizMode()) this.dateFrom = this.dateTo
     this.fetchData()
   }
 

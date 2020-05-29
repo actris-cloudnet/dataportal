@@ -162,7 +162,7 @@ export default class DataSearchResult extends Vue {
   }
 
   clickRow(record: File) {
-    if (this.listLength > 0) this.$router.push(`file/${record.uuid}`)
+    if (this.listLength > 0) this.$router.push(`/file/${record.uuid}`)
   }
 
 

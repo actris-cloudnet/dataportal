@@ -1,7 +1,6 @@
 <style scoped lang="sass">
 @import "../sass/variables.sass"
 @import "../sass/global.sass"
-$border-color: #c8c8c8
 
 main#landing
 
