@@ -12,7 +12,7 @@ STDOUT=${2-/dev/stdout}
 FILEBASE=`basename $FILE`
 FILEREAL=`realpath $FILE`
 IMGPATH="public/quicklook"
-if [ $NODE_ENV == 'test' ]; then
+if [[ $NODE_ENV == 'test' ]]; then
     IMGPATH="tests/data/public/quicklook"
 elif [ -f quicklook-path ]; then
     read -r IMGPATH < quicklook-path
@@ -25,5 +25,3 @@ if [[ `file --mime-type -b $FILE` == image/*g ]]; then
     ln -s $FILEREAL $FILEPATH
     exit 0
 fi
-
-ncdump -xh $FILE | node build/metadata2db.js >> $STDOUT 2>> $ERROUT

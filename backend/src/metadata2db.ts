@@ -1,10 +1,9 @@
-import { parseStringPromise } from 'xml2js'
-import { readFileSync, createReadStream } from 'fs'
+import { createReadStream, existsSync, unlinkSync } from 'fs'
 import { promises as fsp }  from 'fs'
 import { basename, join, resolve as pathResolve } from 'path'
 import { createHash } from 'crypto'
 import 'reflect-metadata'
-import { createConnection, Connection } from 'typeorm'
+import { Connection } from 'typeorm'
 import { File } from './entity/File'
 import { Site } from './entity/Site'
 import { isNetCDFObject, getMissingFields, NetCDFObject } from './entity/NetCDFObject'
@@ -13,7 +12,7 @@ import { stringify } from './lib'
 import config from './config'
 import { Product } from './entity/Product'
 
-const connName = config.connectionName
+
 let filename: string
 
 interface NetCDFXML {
@@ -28,25 +27,51 @@ interface NetCDFXML {
     }
 }
 
-const findVolatileFile = (conn: Connection, uuid: string): Promise<File|null> =>
+const checkDbRecordExists = (conn: Connection, uuid: string): Promise<File|null> =>
   new Promise((resolve, reject) =>
     conn.getRepository(File).findOneOrFail(uuid, { relations: [ 'site' ]})
       .then(file => {
-        const now = new Date()
-        const yesterday = new Date(now.setDate(now.getDate() - 1))
-        if (!file.site.isTestSite && file.releasedAt < yesterday)
-          reject(`Cannot update a stable file. File last updated on ${file.releasedAt}.`)
+        if (!file.site.isTestSite && !file.volatile)
+          reject('Cannot update a non-volatile file.')
         else
           resolve(file)
       })
       .catch(_ => resolve(null))
   )
 
+const update = (file: File, connection: Connection) =>
+  Promise.all([
+    computeFileChecksum(filename),
+    computeFileSize(filename),
+    getFileFormat(filename)
+  ]).then(([checksum, { size }, format]) => {
+    const repo = connection.getRepository(File)
+    return repo.save({ uuid: file.uuid, checksum, size, format, releasedAt: new Date() })
+  })
+
+const insert = (ncObj: NetCDFObject, connection: Connection) =>
+  Promise.all([
+    ncObj,
+    basename(filename),
+    computeFileChecksum(filename),
+    computeFileSize(filename),
+    getFileFormat(filename),
+    checkSiteExists(connection, ncObj.location),
+    checkProductExists(connection, ncObj.cloudnet_file_type),
+    linkFile(filename)
+  ]).then(([ncObj, baseFilename, chksum, { size }, format, site, product]) => {
+    const file = new File(ncObj, baseFilename, chksum, size, format, site, product)
+    file.releasedAt = new Date()
+    return connection.manager.save(file)
+  })
+
 const checkSiteExists = (conn: Connection, site: string): Promise<Site> =>
   conn.getRepository(Site).findOneOrFail(site.toLowerCase().replace(/\W/g, ''))
 
 const checkProductExists = (conn: Connection, product: string): Promise<Product> =>
   conn.getRepository(Product).findOneOrFail(product)
+
+const checkFileExists = async (path: string) => !!(await fsp.stat(path).catch(_ => false))
 
 async function computeFileChecksum(filename: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -74,7 +99,9 @@ function computeFileSize(filename: string) {
 
 function linkFile(filename: string) {
   const linkPath = config.publicDir
-  return fsp.symlink(pathResolve(filename), join(linkPath, basename(filename)))
+  const fullLink = join(linkPath, basename(filename))
+  if (existsSync(fullLink)) unlinkSync(fullLink)
+  return fsp.symlink(pathResolve(filename), fullLink)
 }
 
 function getFileFormat(filename: string): Promise<string> {
@@ -95,11 +122,10 @@ function getFileFormat(filename: string): Promise<string> {
   })
 }
 
-async function parseXmlFromStdin(): Promise<NetCDFObject> {
-  const xml: string = readFileSync(0, 'utf-8')
-
-  const { netcdf }: NetCDFXML = await parseStringPromise(xml)
+async function parseJSON(json: any): Promise<any> {
+  const { netcdf }: NetCDFXML = json
   filename = netcdf['$'].location
+  if (!await checkFileExists(filename)) throw ('Missing file')
   const ncObj: any = netcdf.attribute
     .map((a) => a['$'])
     .map(({ name, value }) => ({ [name]: value }))
@@ -107,56 +133,38 @@ async function parseXmlFromStdin(): Promise<NetCDFObject> {
 
   if (!isNetCDFObject(ncObj)) {
     const missingFields = getMissingFields(ncObj)
-    throw TypeError(`
-        Invalid header fields\n
-        Missing or invalid: ${stringify(missingFields)}\n
-        ${stringify(ncObj)}`)
+    throw (`Invalid header fields\n
+          Missing or invalid: ${stringify(missingFields)}\n
+          ${stringify(ncObj)}`)
   }
-
   return ncObj
 }
 
-(async function() {
-  let connection = await createConnection(connName)
+export async function putRecord(connection: Connection, input: any) {
+  const ncObj: any = await parseJSON(input)
+  const existingFile = await checkDbRecordExists(connection, ncObj.file_uuid)
+  if (existingFile) {
+    return {
+      body: await update(existingFile, connection),
+      status: 200
+    }
+  } else {
+    return {
+      body: await insert(ncObj, connection),
+      status: 201
+    }
+  }
+}
 
-  const insert = (ncObj: NetCDFObject) =>
-    Promise.all([
-      ncObj,
-      basename(filename),
-      computeFileChecksum(filename),
-      computeFileSize(filename),
-      getFileFormat(filename),
-      checkSiteExists(connection, ncObj.location),
-      checkProductExists(connection, ncObj.cloudnet_file_type),
-      linkFile(filename)
-    ]).then(([ncObj, baseFilename, chksum, { size }, format, site, product]) => {
-      const file = new File(ncObj, baseFilename, chksum, size, format, site, product)
-      return connection.manager.save(file)
-    })
-
-  const update = (file: File) =>
-    Promise.all([
-      computeFileChecksum(filename),
-      computeFileSize(filename),
-      getFileFormat(filename)
-    ]).then(([checksum, { size }, format]) => {
-      const repo = connection.getRepository(File)
-      return repo.save({ uuid: file.uuid, checksum, size, format, releasedAt: new Date() })
-    })
-
-  parseXmlFromStdin()
-    .then((ncObj: NetCDFObject) =>
-      Promise.all([
-        Promise.resolve(ncObj),
-        findVolatileFile(connection, ncObj.file_uuid)
-      ])
-    )
-    .then(([ncObj, existingFile]): Promise<unknown> => {
-      // A hack to bypass a TypeScript bug: https://github.com/microsoft/TypeScript/issues/33752
-      if (existingFile) return update(existingFile)
-      else if (ncObj) return insert(ncObj)
-      return Promise.reject('Unknown error. This should not happen.')
-    })
-    .catch(err => console.error('Failed to import NetCDF XML to DB: ', filename, '\n', err))
-    .finally(() => connection.close())
-})()
+export async function freezeRecord(result: any, connection: Connection, pid: string, freeze: boolean) {
+  if (freeze) {
+    await connection
+      .getRepository(File)
+      .createQueryBuilder()
+      .update()
+      .set({ pid: pid, volatile: false})
+      .where('uuid = :uuid', { uuid: result.body.uuid })
+      .execute()
+  }
+  return result.status
+}

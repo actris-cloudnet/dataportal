@@ -5,6 +5,7 @@ export interface NetCDFObject {
     cloudnet_file_type: string
     cloudnetpy_version: string
     file_uuid: string
+    pid: string
     Conventions: string
     year: string
     month: string
