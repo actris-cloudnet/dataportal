@@ -2,7 +2,7 @@ entity: File
 items:
   file1:
     uuid: "38092c00-161d-4ca2-a29d-628cf8e960f6"
-    pid: null
+    pid: ""
     volatile: true
     title: "Radar file from Mace-Head"
     measurementDate: "2018-11-15"
@@ -19,7 +19,7 @@ items:
     site: '@site2'
   file2:
     uuid: "bde7a35f-03aa-4bff-acfb-b4974ea9f217"
-    pid: null
+    pid: ""
     volatile: true
     title: "Classification file from Mace-Head"
     measurementDate: "2018-06-09"
@@ -36,14 +36,14 @@ items:
     site: '@site2'
   file3:
     uuid: "a5d1d5af-3667-41bc-b952-e684f627d91c"
-    pid: null
+    pid: ""
     volatile: true
     title: "Model file from Mace-Head"
     measurementDate: "2014-12-05"
     history: "2020-02-17 09:19:16 - global attributes fixed using attribute_modifier 0.0.1\nSun Dec  7 07:35:16 GMT 2014 - NetCDF generated from original data by update_files.pl using cnmodel2nc on anvil2"
     publicity: "public"
     product: "model"
-    cloudnetpyVersion: null
+    cloudnetpyVersion: ''
     releasedAt: "2020-02-20T10:52:59.073Z"
     filename: "20141205_mace-head_ecmwf.nc"
     checksum: "255bcd9deae26851992c3da6352844fb9443203c48ae4f4ad8f1aa50ef2ab26f"
@@ -53,7 +53,7 @@ items:
     site: '@site2' 
   file4:
     uuid: "d21d6a9b-6804-4465-a026-74ec429fe17d"
-    pid: null
+    pid: ""
     volatile: true
     title: "Radar file from Hyytiala"
     measurementDate: "2019-09-01"
@@ -70,7 +70,7 @@ items:
     site: '@site3'
   file5:
     uuid: "6cb32746-faf0-4057-9076-ed2e698dcf36"
-    pid: null
+    pid: ""
     volatile: false
     title: "Categorize file from Bucharest"
     measurementDate: "2019-07-15"
@@ -87,13 +87,13 @@ items:
     site: '@site1'
   file6:
     uuid: "9e04d8ef-0f2b-4823-835d-33e458403c67"
-    pid: null
+    pid: ""
     volatile: true
     title: "Model file from Granada"
     measurementDate: "2020-01-26"
     history: "2020-03-25 16:23:35 - global attributes fixed using attribute_modifier 0.0.1\nWed Jan 29 21:34:06 EET 2020 - NetCDF generated from original data by Ewan O'Connor <ewan.oconnor@fmi.fi> using cnmodel2nc on cloudnet.fmi.fi"
     publicity: "public"
-    cloudnetpyVersion: null
+    cloudnetpyVersion: ""
     releasedAt: "2020-04-08T13:33:31.012Z"
     filename: "20200126_granada_ecmwf.nc"
     checksum: "c46e4c7fe4be5b38670b86f3ffc3101c6de8465eabf5c470226c733e69586031"

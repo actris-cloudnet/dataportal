@@ -6,7 +6,7 @@ import { inboxDir, prepareSelenium, backendPrivateUrl, runNcdump, parseUuid } fr
 
 let driver: WebDriver
 
-jest.setTimeout(15000)
+jest.setTimeout(60000)
 
 async function awaitAndFind(by: By) {
   await driver.wait(until.elementLocated(by))
@@ -37,7 +37,6 @@ describe('file landing page', () => {
 
   it('contains correct information', async () => {
     const targetArray = [
-      '15506ea8-d357-4c7b-af8c-95dfcc34fc7d',
       '2019-07-23',
       'Classification',
       '1.0.4',

@@ -15,7 +15,7 @@ export class File {
     @PrimaryColumn('uuid')
     uuid!: string
 
-    @Column({nullable: true})
+    @Column({default: ''})
     pid!: string
 
     @Column({default: true})
@@ -43,7 +43,7 @@ export class File {
     @ManyToOne(_ => Product, product => product.files)
     product!: Product
 
-    @Column({nullable: true})
+    @Column({default: ''})
     cloudnetpyVersion!: string
 
     @Column()
@@ -92,9 +92,7 @@ export class File {
       this.history = obj.history
       this.site = site
       this.product = product
-      if (typeof obj.cloudnetpy_version == 'string') {
-        this.cloudnetpyVersion = obj.cloudnetpy_version
-      }
+      if (typeof obj.cloudnetpy_version == 'string') this.cloudnetpyVersion = obj.cloudnetpy_version
       if (typeof obj.pid == 'string') this.pid = obj.pid
       this.uuid = obj.file_uuid
       this.filename = filename
