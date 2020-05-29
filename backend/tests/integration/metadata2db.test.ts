@@ -86,7 +86,7 @@ test('errors on missing header fields', async () => {
 })
 
 test('errors on invalid location', async () => {
-  repo.delete(uuid)
+  await repo.delete(uuid).catch()
   try {
     await putFile(bucharestXmlInvalidLocation, { 'Content-Type': 'application/xml' })
   } catch (e) {
@@ -104,7 +104,7 @@ test('overwrites existing freezed files on test site', async () => {
   const dbRow2 = await repo.findOneOrFail(granadaUuid)
   expect(dbRow1.releasedAt < dbRow2.releasedAt)
   // Reset db (granada metadata is in fixtures)
-  repo
+  return repo
     .createQueryBuilder()
     .update()
     .set({ pid: '', volatile: true})
