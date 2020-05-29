@@ -72,17 +72,6 @@ export class Routes {
   files: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query
 
-    this.siteRepo.findByIds(query.location)
-      .then(res => {
-        if (res.length != query.location.length) throw { status: 404, errors: ['One or more of the specified locations were not found'], params: req.query }
-      })
-      .catch(next)
-
-    this.productRepo.findByIds(query.product)
-      .then(res => {
-        if (res.length != query.product.length) throw { status: 404, errors: ['One or more of the specified products were not found'], params: req.query }
-      })
-      .catch(next)
 
     const qb = this.filesQueryBuilder(query)
     this.hideTestDataFromNormalUsers(qb, req)
@@ -150,7 +139,7 @@ export class Routes {
       })
   }
 
-  visualization: RequestHandler = async (req: Request, res: Response, next) => {
+  putVisualization: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body
     const file = await this.fileRepo.findOneOrFail(req.body.sourceFileId)
     const viz = new Visualization(req.params.filename, body.variableId, body.variableHumanReadableName, file)
@@ -160,6 +149,19 @@ export class Routes {
         res.sendStatus(500)
         next(err)
       })
+  }
+
+  getVisualization: RequestHandler = async (req: Request, res: Response, next) => {
+    const query = req.query
+    const qb = this.filesQueryBuilder(query)
+      .leftJoinAndSelect('file.visualizations', 'visualizations')
+    this.hideTestDataFromNormalUsers(qb, req)
+      .getMany()
+      .then(result =>
+        res.send(result
+          .map(res => res.visualizations)
+          .reduce((acc, val) => acc.concat(val))))
+      .catch(err => next({ status: 500, errors: err }))
   }
 
   allfiles: RequestHandler = async (req: Request, res: Response, next) =>

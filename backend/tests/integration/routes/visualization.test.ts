@@ -1,5 +1,5 @@
 import { basename, resolve } from 'path'
-import { backendUrl } from '../../lib'
+import {backendPrivateUrl, backendPublicUrl, backendUrl} from '../../lib'
 import axios from 'axios'
 import {Connection, createConnection, Repository} from 'typeorm'
 import {Visualization} from '../../../src/entity/Visualization'
@@ -18,8 +18,9 @@ const headers = { 'content-type': 'application/json'}
 let conn: Connection
 let repo: Repository<Visualization>
 
+const url = `${backendPublicUrl}visualization/`
+const privUrl = `${backendPrivateUrl}visualization/`
 describe('PUT /visualization', () => {
-  const url = `${backendUrl}visualization/`
 
   beforeAll(async () => {
     conn = await createConnection('test')
@@ -29,9 +30,25 @@ describe('PUT /visualization', () => {
   afterAll(async () => repo.delete(validId))
 
   it('on valid new visualization inserts a row to db and responds with 201', async () => {
-    const res = await axios.put(`${url}${validId}`, validJson, { headers })
+    const res = await axios.put(`${privUrl}${validId}`, validJson, { headers })
     expect(res.status).toEqual(201)
     return expect(repo.findOneOrFail(validId)).resolves.toBeTruthy()
+  })
+
+})
+
+describe('GET /visualization', () => {
+
+  it('on valid search returns correct list of visualizations and responds with 200', async () => {
+    const expectedResult = [ { filename: 'test0.png',
+      variableId: 'test',
+      variableHumanReadableName: 'testi testinen' },
+    { variableId: 'test',
+      filename: 'test1.png',
+      variableHumanReadableName: 'testi testinen' } ]
+    const res = await axios.get(url, { headers, params: { product: 'radar'}})
+    expect(res.status).toEqual(200)
+    expect(res.data).toMatchObject(expectedResult)
   })
 
 })

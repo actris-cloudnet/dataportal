@@ -94,4 +94,21 @@ export class Middleware {
 
     next()
   }
+
+  checkParamsExistInDb: RequestHandler = async (req, _res, next) => {
+    const query = req.query
+
+    Promise.all([
+      this.conn.getRepository('site').findByIds(query.location)
+        .then(res => {
+          if (res.length != query.location.length) throw { status: 404, errors: ['One or more of the specified locations were not found'], params: req.query }
+        }),
+      this.conn.getRepository('product').findByIds(query.product)
+        .then(res => {
+          if (res.length != query.product.length) throw { status: 404, errors: ['One or more of the specified products were not found'], params: req.query }
+        })
+    ])
+      .then(() => next())
+      .catch(next)
+  }
 }

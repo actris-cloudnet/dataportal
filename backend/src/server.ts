@@ -44,14 +44,28 @@ import * as xmlparser from 'express-xml-bodyparser'
   // public
   app.get('/api/status', routes.status)
   app.get('/api/file/:uuid', routes.file)
-  app.get('/api/files', middleware.filesValidator, middleware.filesQueryAugmenter, routes.files)
+  app.get('/api/files',
+    middleware.filesValidator,
+    middleware.filesQueryAugmenter,
+    middleware.checkParamsExistInDb,
+    routes.files)
   app.get('/api/sites', routes.sites)
   app.get('/api/products', routes.products)
   app.get('/api/download', middleware.filesValidator, middleware.filesQueryAugmenter, routes.download)
+  app.get('/api/download',
+    middleware.filesValidator,
+    middleware.filesQueryAugmenter,
+    middleware.checkParamsExistInDb,
+    routes.download)
+  app.get('/api/visualization',
+    middleware.filesValidator,
+    middleware.filesQueryAugmenter,
+    middleware.checkParamsExistInDb,
+    routes.getVisualization)
 
   // private
   app.put('/file/:uuid', routes.submit)
-  app.put('/visualization/:filename', express.json(), routes.visualization)
+  app.put('/visualization/:filename', express.json(), routes.putVisualization)
 
   app.use(errorHandler)
 

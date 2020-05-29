@@ -1,0 +1,17 @@
+entity: Visualization
+items:
+  visualization1:
+    filename: 'test0.png'
+    variableId: 'test'
+    variableHumanReadableName: 'testi testinen'
+    sourceFile: '@file1'
+  visualization2:
+    filename: 'test1.png'
+    variableId: 'test'
+    variableHumanReadableName: 'testi testinen'
+    sourceFile: '@file1'
+  visualization3:
+    filename: 'test2.png'
+    variableId: 'test'
+    variableHumanReadableName: 'testi testinen'
+    sourceFile: '@file2'
