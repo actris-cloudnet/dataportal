@@ -2,8 +2,10 @@ import { By, until, WebDriver } from 'selenium-webdriver'
 import * as fs from 'fs'
 import { join } from 'path'
 import axios from 'axios'
-import { inboxDir, prepareSelenium, backendPrivateUrl, runNcdump, parseUuid } from '../lib'
+import { inboxDir, backendPrivateUrl, runNcdump, parseUuid } from '../lib'
+import {initDriver, Selenium} from '../lib/selenium'
 
+let selenium: Selenium
 let driver: WebDriver
 
 jest.setTimeout(60000)
@@ -14,7 +16,8 @@ async function awaitAndFind(by: By) {
 }
 
 beforeAll(async () => {
-  driver = await prepareSelenium()
+  driver = await initDriver()
+  selenium = new Selenium(driver)
   const xml = await runNcdump('tests/data/20190723_bucharest_classification.nc')
   const uuid = await parseUuid(xml)
   const url = `${backendPrivateUrl}file/${uuid}`
@@ -22,9 +25,7 @@ beforeAll(async () => {
   fs.copyFileSync('tests/data/20190723_bucharest_classification.png', join(inboxDir, '20190723_bucharest_classification.png'))
 })
 
-afterAll(async () => {
-  return driver.close()
-})
+afterAll(async () => driver.close())
 
 describe('file landing page', () => {
 
