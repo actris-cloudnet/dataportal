@@ -1,5 +1,5 @@
 import { basename, resolve } from 'path'
-import {backendPrivateUrl, backendPublicUrl, backendUrl} from '../../lib'
+import {backendPrivateUrl, backendPublicUrl, clearDir, publicVizDir} from '../../lib'
 import axios from 'axios'
 import {Connection, createConnection, Repository} from 'typeorm'
 import {Visualization} from '../../../src/entity/Visualization'
@@ -11,7 +11,15 @@ const validJson = {
   variableId: 'testitn'
 }
 
+const badPath = {
+  fullPath: 'data/badpath.png',
+  sourceFileId: '9e04d8ef-0f2b-4823-835d-33e458403c67',
+  variableHumanReadableName: 'Testin onnistumistodennäköisyys',
+  variableId: 'testitn'
+}
+
 const validId = basename(validJson.fullPath)
+const badId = basename(badPath.fullPath)
 
 const headers = { 'content-type': 'application/json'}
 
@@ -25,15 +33,28 @@ describe('PUT /visualization', () => {
   beforeAll(async () => {
     conn = await createConnection('test')
     repo = conn.getRepository(Visualization)
+    return clearDir(publicVizDir)
   })
 
-  afterAll(async () => repo.delete(validId))
+  afterAll(async () =>
+    Promise.all([
+      repo.delete(badId),
+      repo.delete(validId)
+    ]).catch()
+  )
 
   it('on valid new visualization inserts a row to db and responds with 201', async () => {
     const res = await axios.put(`${privUrl}${validId}`, validJson, { headers })
     expect(res.status).toEqual(201)
     return expect(repo.findOneOrFail(validId)).resolves.toBeTruthy()
   })
+
+  it('on invalid path responds with 400', async () =>
+    axios.put(`${url}${badId}`, badPath, { headers })
+      .catch(res =>
+        expect(res.response.status).toEqual(400)
+      )
+  )
 
 })
 

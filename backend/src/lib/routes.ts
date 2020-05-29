@@ -3,7 +3,7 @@ import { Site } from '../entity/Site'
 import { Product } from '../entity/Product'
 import { SelectQueryBuilder, Connection, Repository } from 'typeorm'
 import { Request, Response, RequestHandler } from 'express'
-import { dateToUTCString } from '.'
+import {dateToUTCString, linkFile} from '.'
 import { join, basename } from 'path'
 import archiver = require('archiver')
 import { createReadStream, promises as fsp, constants as fsconst } from 'graceful-fs'
@@ -142,13 +142,17 @@ export class Routes {
   putVisualization: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body
     const file = await this.fileRepo.findOneOrFail(req.body.sourceFileId)
-    const viz = new Visualization(req.params.filename, body.variableId, body.variableHumanReadableName, file)
-    return this.visualizationRepo.insert(viz)
-      .then(_ => res.sendStatus(201))
-      .catch(err => {
-        res.sendStatus(500)
-        next(err)
+    linkFile(body.fullPath, join(config.publicDir, 'viz'))
+      .then(() => {
+        const viz = new Visualization(req.params.filename, body.variableId, body.variableHumanReadableName, file)
+        return this.visualizationRepo.insert(viz)
+          .then(_ => res.sendStatus(201))
+          .catch(err => {
+            res.sendStatus(500)
+            next(err)
+          })
       })
+      .catch(err => next({ status: 400, errors: err}))
   }
 
   getVisualization: RequestHandler = async (req: Request, res: Response, next) => {
