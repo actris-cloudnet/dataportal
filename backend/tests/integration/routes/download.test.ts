@@ -1,9 +1,9 @@
-import { backendUrl, genResponse } from '../../lib'
+import { backendPublicUrl, genResponse } from '../../lib'
 import { RequestError } from '../../../src/entity/RequestError'
 import axios from 'axios'
 
-describe('/download', () => {
-  const url = `${backendUrl}download/`
+describe('/api/download', () => {
+  const url = `${backendPublicUrl}download/`
 
   it('responds with 400 if no results were found', async () => {
     let expectedBody: RequestError = {

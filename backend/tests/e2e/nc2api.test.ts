@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 import axios from 'axios'
-import { clearDir, publicDir, clearRepo, backendUrl, fileServerUrl, runNcdump } from '../lib'
+import { clearDir, publicDir, clearRepo, backendPrivateUrl, backendPublicUrl, fileServerUrl, runNcdump } from '../lib'
 import * as AdmZip from 'adm-zip'
 import { createHash } from 'crypto'
 
@@ -45,12 +45,12 @@ const axiosConfig = { headers: { 'content-type': 'application/xml'}}
 describe('after PUTting metadata to API', () => {
   beforeAll(async () => {
     const xmlOut = await runNcdump('tests/data/20190723_bucharest_classification.nc')
-    return axios.put(`${backendUrl}file/${expectedJson.uuid}`, xmlOut, axiosConfig)
+    return axios.put(`${backendPrivateUrl}file/${expectedJson.uuid}`, xmlOut, axiosConfig)
   })
 
   it('responds with a corresponding metadata JSON', async () => {
     return axios
-      .get(`${backendUrl}file/${expectedJson.uuid}`)
+      .get(`${backendPublicUrl}file/${expectedJson.uuid}`)
       .then(response => expect(response.data).toMatchObject(expectedJson))
   })
 
@@ -66,13 +66,13 @@ describe('after PUTting metadata to API', () => {
   describe('after PUTting more metadata to API', () => {
     beforeAll(async () => {
       const xmlOut = await runNcdump('tests/data/20190724_bucharest_classification.nc')
-      return axios.put(`${backendUrl}file/${expectedJson.uuid}`, xmlOut, axiosConfig)
+      return axios.put(`${backendPrivateUrl}file/${expectedJson.uuid}`, xmlOut, axiosConfig)
     })
 
     it('hashes of /download zipped files match originals', async () => {
       const tmpZip = 'tests/data/tmp.zip'
-      const shas = await (await axios.get(`${backendUrl}files/`, { params: { location: 'bucharest' } })).data.map((file: any) => file.checksum)
-      const receivedFile = await axios.get(`${backendUrl}download/`, { responseType: 'arraybuffer', params: { location: 'bucharest' } })
+      const shas = await (await axios.get(`${backendPublicUrl}files/`, { params: { location: 'bucharest' } })).data.map((file: any) => file.checksum)
+      const receivedFile = await axios.get(`${backendPublicUrl}download/`, { responseType: 'arraybuffer', params: { location: 'bucharest' } })
       fs.writeFileSync(tmpZip, receivedFile.data)
       new AdmZip(tmpZip).getEntries().map((entry, i) => {
         const hash = createHash('sha256')

@@ -1,6 +1,6 @@
 import { By, until, WebDriver, Key } from 'selenium-webdriver'
 import axios from 'axios'
-import { prepareSelenium, wait, runNcdump, backendUrl, parseUuid } from '../lib'
+import { prepareSelenium, wait, runNcdump, backendPrivateUrl, parseUuid } from '../lib'
 
 let driver: WebDriver
 
@@ -79,7 +79,7 @@ describe('search page', () => {
     for (let i=0; i < filenames.length; i++) {
       const xml = await runNcdump(`tests/data/${filenames[i]}`)
       const uuid = await parseUuid(xml)
-      const url = `${backendUrl}file/${uuid}`
+      const url = `${backendPrivateUrl}file/${uuid}`
       await axios.put(url, xml, {headers: { 'Content-Type': 'application/xml' }})
     }
     await wait(3000)

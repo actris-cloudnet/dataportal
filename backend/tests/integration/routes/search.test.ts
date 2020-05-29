@@ -1,8 +1,8 @@
 import 'reflect-metadata'
-import { backendUrl, genResponse } from '../../lib'
+import { backendPublicUrl, genResponse } from '../../lib'
 import axios from 'axios'
 import { RequestError } from '../../../src/entity/RequestError'
-import { createConnection, Connection, AdvancedConsoleLogger } from 'typeorm'
+import { createConnection, Connection } from 'typeorm'
 
 let conn: Connection
 
@@ -13,8 +13,8 @@ beforeAll(async () => {
 afterAll(() => conn.close())
 
 
-describe('/files', () => {
-  const url = `${backendUrl}files/`
+describe('/api/files', () => {
+  const url = `${backendPublicUrl}files/`
   const expectedBody404: RequestError = {
     status: 404,
     errors: 'Not found'
@@ -25,7 +25,7 @@ describe('/files', () => {
       status: 400,
       errors: [ 'No search parameters given' ]
     }
-    expect(axios.get(`${backendUrl}files/`)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
+    expect(axios.get(`${backendPublicUrl}files/`)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
 
   it('responds with 400 if invalid query parameters are given', () => {
@@ -34,7 +34,7 @@ describe('/files', () => {
       status: 400,
       errors: [ 'Unknown query parameters: x,y' ]
     }
-    expect(axios.get(`${backendUrl}files/`, payload))
+    expect(axios.get(`${backendPublicUrl}files/`, payload))
       .rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
 

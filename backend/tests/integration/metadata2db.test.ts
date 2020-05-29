@@ -1,7 +1,7 @@
 import { createConnection, Repository, Connection } from 'typeorm'
 import { File } from '../../src/entity/File'
 import { readFileSync } from 'fs'
-import { publicDir, clearDir, backendUrl, parseUuid } from '../lib'
+import { publicDir, clearDir, backendPrivateUrl, parseUuid } from '../lib'
 import axios from 'axios'
 
 const dataDir = 'tests/data/'
@@ -38,7 +38,7 @@ afterAll(async () => {
 async function putFile(xmlFileName:string, headers:any) {
   const xml = readFileSync(xmlFileName, 'utf-8')
   const uuid = await parseUuid(xml)
-  const url = `${backendUrl}file/${uuid}`
+  const url = `${backendPrivateUrl}file/${uuid}`
   return await axios.put(url, xml, {headers: headers})
 }
 
@@ -105,9 +105,9 @@ test('overwrites existing freezed files on test site', async () => {
   expect(dbRow1.releasedAt < dbRow2.releasedAt)
   // Reset db (granada metadata is in fixtures)
   repo
-  .createQueryBuilder()
-  .update()
-  .set({ pid: '', volatile: true})
-  .where('uuid = :uuid', { uuid: granadaUuid })
-  .execute()
+    .createQueryBuilder()
+    .update()
+    .set({ pid: '', volatile: true})
+    .where('uuid = :uuid', { uuid: granadaUuid })
+    .execute()
 })

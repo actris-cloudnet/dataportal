@@ -2,7 +2,7 @@ import { By, until, WebDriver } from 'selenium-webdriver'
 import * as fs from 'fs'
 import { join } from 'path'
 import axios from 'axios'
-import { inboxDir, prepareSelenium, runNcdump, parseUuid } from '../lib'
+import { inboxDir, prepareSelenium, backendPrivateUrl, runNcdump, parseUuid } from '../lib'
 
 let driver: WebDriver
 
@@ -17,7 +17,7 @@ beforeAll(async () => {
   driver = await prepareSelenium()
   const xml = await runNcdump('tests/data/20190723_bucharest_classification.nc')
   const uuid = await parseUuid(xml)
-  const url = `http://localhost:3001/file/${uuid}`
+  const url = `${backendPrivateUrl}file/${uuid}`
   await axios.put(url, xml, {headers: { 'Content-Type': 'application/xml' }})
   fs.copyFileSync('tests/data/20190723_bucharest_classification.png', join(inboxDir, '20190723_bucharest_classification.png'))
 })
