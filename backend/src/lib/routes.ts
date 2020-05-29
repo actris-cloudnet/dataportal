@@ -141,9 +141,11 @@ export class Routes {
 
   putVisualization: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body
-    const file = await this.fileRepo.findOneOrFail(req.body.sourceFileId)
-    linkFile(body.fullPath, join(config.publicDir, 'viz'))
-      .then(() => {
+    Promise.all([
+      this.fileRepo.findOneOrFail(req.body.sourceFileId),
+      linkFile(body.fullPath, join(config.publicDir, 'viz'))
+    ])
+      .then(([file, _]) => {
         const viz = new Visualization(req.params.filename, body.variableId, body.variableHumanReadableName, file)
         return this.visualizationRepo.insert(viz)
           .then(_ => res.sendStatus(201))
@@ -152,7 +154,7 @@ export class Routes {
             next(err)
           })
       })
-      .catch(err => next({ status: 400, errors: err}))
+      .catch((err: any) => next({ status: 400, errors: err}))
   }
 
   getVisualization: RequestHandler = async (req: Request, res: Response, next) => {

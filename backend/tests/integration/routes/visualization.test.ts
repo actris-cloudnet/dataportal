@@ -18,6 +18,8 @@ const badPath = {
   variableId: 'testitn'
 }
 
+const badUuid = {...validJson, ...{sourceFileId: 'a0fc26e4-d448-4b93-91a3-62051c9d311b'}}
+
 const validId = basename(validJson.fullPath)
 const badId = basename(badPath.fullPath)
 
@@ -36,7 +38,7 @@ describe('PUT /visualization', () => {
     return clearDir(publicVizDir)
   })
 
-  afterAll(async () =>
+  afterEach(async () =>
     Promise.all([
       repo.delete(badId),
       repo.delete(validId)
@@ -51,6 +53,13 @@ describe('PUT /visualization', () => {
 
   it('on invalid path responds with 400', async () =>
     axios.put(`${url}${badId}`, badPath, { headers })
+      .catch(res =>
+        expect(res.response.status).toEqual(400)
+      )
+  )
+
+  it('on invalid source file uuid responds with 400', async () =>
+    axios.put(`${url}${badId}`, badUuid, { headers })
       .catch(res =>
         expect(res.response.status).toEqual(400)
       )
