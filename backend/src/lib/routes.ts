@@ -11,6 +11,7 @@ import { fetchAll } from '.'
 import config from '../config'
 import { putRecord, freezeRecord } from '../metadata2db.js'
 import {Visualization} from '../entity/Visualization'
+import {VisualizationResponse} from '../entity/VisualizationResponse'
 
 
 export class Routes {
@@ -165,8 +166,8 @@ export class Routes {
       .getMany()
       .then(result =>
         res.send(result
-          .map(res => res.visualizations)
-          .reduce((acc, val) => acc.concat(val), [])))
+          .filter(file => file.visualizations.length)
+          .map(file => new VisualizationResponse(file))))
       .catch(err => next({ status: 500, errors: err }))
   }
 

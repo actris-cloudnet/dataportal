@@ -76,12 +76,18 @@ describe('GET /visualization', () => {
   })
 
   it('on valid search returns correct list of visualizations and responds with 200', async () => {
-    const expectedResult = [ { filename: 'test0.png',
-      variableId: 'test',
-      variableHumanReadableName: 'testi testinen' },
-    { variableId: 'test',
-      filename: 'test1.png',
-      variableHumanReadableName: 'testi testinen' } ]
+    const expectedResult = [ {
+      sourceFileId: '38092c00-161d-4ca2-a29d-628cf8e960f6',
+      locationHumanReadable: 'Mace Head',
+      productHumanReadable: 'Radar',
+      visualizations: [
+        { filename: 'test0.png',
+          variableId: 'test',
+          variableHumanReadableName: 'testi testinen' },
+        { variableId: 'test',
+          filename: 'test1.png',
+          variableHumanReadableName: 'testi testinen' } ]
+    }]
     const res = await axios.get(url, { headers, params: { product: 'radar'}})
     expect(res.status).toEqual(200)
     expect(res.data).toMatchObject(expectedResult)
