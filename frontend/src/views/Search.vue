@@ -208,6 +208,7 @@
     </div>
 
     <custom-multiselect
+      ref="siteSelect"
       label="Location"
       v-model="selectedSiteIds"
       :options="allSites"
@@ -333,6 +334,7 @@ export interface Selection {
   humanReadableName: string;
 }
 
+
 @Component({name: 'app-search'})
 export default class Search extends Vue {
 
@@ -403,18 +405,29 @@ export default class Search extends Vue {
     const markerNames = this.allSites.map(site => site.humanReadableName)
     const lat = this.allSites.map(site => site.latitude)
     const lon = this.allSites.map(site => site.longitude)
+    const id = this.allSites.map(site => site.id)
     markerNames.forEach((name, i) => {
       const marker = L.marker([lat[i], lon[i]]).bindPopup(name)
-      marker.on("click", (onClick) => {
-        this.onMapMarkerClick(marker)
-        
+      marker.on('click', (onClick) => {
+        this.onMapMarkerClick(marker, id[i])
       })
       marker.addTo(this.map)
     })
   }
 
-  onMapMarkerClick(marker) {
-    marker.setOpacity(0.5)
+  onMapMarkerClick(marker, id) {
+    const s = this.allSites.find(x => x.id === id)
+    if (this.selectedSiteIds.includes(id)) {
+      this.selectedSiteIds = this.selectedSiteIds.filter(e => e !== id)
+      this.$refs.siteSelect.selection = this.$refs.siteSelect.selection.filter(e => e !== s)
+      marker.setOpacity(1.0)
+    }
+    else {
+      marker.setOpacity(0.5)
+      this.selectedSiteIds.push(id)
+      this.$refs.siteSelect.selection.push(s)
+    }
+    console.log(this.selectedSiteIds)
   }
 
   beforeDestroy() {
