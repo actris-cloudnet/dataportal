@@ -1,8 +1,12 @@
 import * as fs from 'fs'
 import axios from 'axios'
-import {clearDir, publicDir, clearRepo, backendUrl, fileServerUrl, runNcdump, publicVizDir} from '../lib'
-import * as AdmZip from 'adm-zip'
-import { createHash } from 'crypto'
+import {
+  clearDir,
+  clearRepo,
+  fileServerUrl,
+  publicVizDir,
+  backendPrivateUrl
+} from '../lib'
 import {basename, resolve} from 'path'
 
 let fileSize: number
@@ -28,7 +32,7 @@ beforeAll(async () => {
 
 describe('after PUTting visualization to API', () => {
   beforeAll(async () =>
-    axios.put(`${backendUrl}visualization/${validId}`, vizJson, { headers })
+    axios.put(`${backendPrivateUrl}visualization/${validId}`, vizJson, { headers })
   )
 
   it('serves the file', async () => {

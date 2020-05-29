@@ -6,6 +6,7 @@ import { createHash } from 'crypto'
 
 beforeAll(async () => {
   clearDir(publicDir)
+  await clearRepo('visualization')
   return clearRepo('file')
 })
 

@@ -52,14 +52,14 @@ describe('PUT /visualization', () => {
   })
 
   it('on invalid path responds with 400', async () =>
-    axios.put(`${url}${badId}`, badPath, { headers })
+    axios.put(`${privUrl}${badId}`, badPath, { headers })
       .catch(res =>
         expect(res.response.status).toEqual(400)
       )
   )
 
   it('on invalid source file uuid responds with 400', async () =>
-    axios.put(`${url}${badId}`, badUuid, { headers })
+    axios.put(`${privUrl}${badId}`, badUuid, { headers })
       .catch(res =>
         expect(res.response.status).toEqual(400)
       )
