@@ -131,8 +131,9 @@ img.product
         <header>File information</header>
         <section class="details">
           <dl>
-            <dt>Identifier</dt>
-            <dd>{{ response.uuid }}</dd>
+            <dt>PID</dt>
+            <dd v-if="typeof response.pid !== 'undefined' && response.pid.length > 2">{{ response.pid }}</dd>
+            <dd v-else>n/a</dd>
             <dt>Filename</dt>
             <dd>{{ response.filename }}</dd>
             <dt>Format</dt>
