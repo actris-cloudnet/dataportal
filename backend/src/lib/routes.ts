@@ -164,7 +164,7 @@ export class Routes {
       .then(result =>
         res.send(result
           .map(res => res.visualizations)
-          .reduce((acc, val) => acc.concat(val))))
+          .reduce((acc, val) => acc.concat(val), [])))
       .catch(err => next({ status: 500, errors: err }))
   }
 

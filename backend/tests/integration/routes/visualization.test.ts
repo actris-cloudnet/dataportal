@@ -60,6 +60,12 @@ describe('PUT /visualization', () => {
 
 describe('GET /visualization', () => {
 
+  it('on no results returns empty list and responds with 200', async () => {
+    const res = await axios.get(url, { headers, params: { product: 'lidar'}})
+    expect(res.status).toEqual(200)
+    expect(res.data).toEqual([])
+  })
+
   it('on valid search returns correct list of visualizations and responds with 200', async () => {
     const expectedResult = [ { filename: 'test0.png',
       variableId: 'test',
