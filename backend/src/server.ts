@@ -40,9 +40,9 @@ import * as xmlparser from 'express-xml-bodyparser'
 
     app.get('/allfiles', routes.allfiles)
   }
-  
+
   // public
-  app.get('/api/status', routes.status) 
+  app.get('/api/status', routes.status)
   app.get('/api/file/:uuid', routes.file)
   app.get('/api/files', middleware.filesValidator, middleware.filesQueryAugmenter, routes.files)
   app.get('/api/sites', routes.sites)
