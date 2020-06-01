@@ -324,6 +324,10 @@ export default class Search extends Vue {
     this.selectedSiteIds = siteIds
   }
 
+  setSelectedSiteIds(siteIds: []) {
+    this.selectedSiteIds = siteIds
+  }
+
   // dates
   beginningOfHistory = new Date('1970-01-01')
   today = new Date()
@@ -354,6 +358,24 @@ export default class Search extends Vue {
   // Minimap
   map = null as any
   tileLayer = null as any
+  passiveMarker = L.icon({
+    iconUrl: 'frontend/node_modules/leaflet/dist/images/marker-icon.png',
+    iconSize: [38, 95],
+    iconAnchor: [22, 94],
+    popupAnchor: [-3, -76],
+    shadowUrl: 'frontend/node_modules/leaflet/dist/images/marker-shadow.png',
+    shadowSize: [68, 95],
+    shadowAnchor: [22, 94]
+  })
+  activeMarker = L.icon({
+    iconUrl: 'frontend/node_modules/leaflet/dist/images/marker-icon-red.png',
+    shadowUrl: 'frontend/node_modules/leaflet/dist/images/marker-shadow.png',
+    iconSize:     [38, 95], // size of the icon
+    shadowSize:   [68, 95], // size of the shadow
+    iconAnchor:   [22, 94], // point of the icon which will correspond to marker's location
+    shadowAnchor: [22, 94],  // the same for the shadow
+    popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+  })
 
   renderComplete = false
 
@@ -418,8 +440,22 @@ export default class Search extends Vue {
     const lat = this.allSites.map(site => site.latitude)
     const lon = this.allSites.map(site => site.longitude)
     const id = this.allSites.map(site => site.id)
+
+    var passiveMarker = L.Icon.extend({
+      options: {
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+        iconSize: [38, 95],
+        iconAnchor: [22, 94],
+        popupAnchor: [-3, -76],
+        shadowUrl: 'marker-shadow.png',
+        shadowSize: [68, 95],
+        shadowAnchor: [22, 94]
+      }
+    })
+
     markerNames.forEach((name, i) => {
-      const marker = L.marker([lat[i], lon[i]]).bindPopup(name)
+      const marker = L.marker([lat[i], lon[i]])
+      //marker.setIcon(new passiveMarker)
       marker.on('click', (onClick) => {
         this.onMapMarkerClick(marker, id[i])
       })
@@ -431,15 +467,13 @@ export default class Search extends Vue {
     const s = this.allSites.find(x => x.id === id)
     if (this.selectedSiteIds.includes(id)) {
       this.selectedSiteIds = this.selectedSiteIds.filter(e => e !== id)
-      this.$refs.siteSelect.selection = this.$refs.siteSelect.selection.filter(e => e !== s)
-      marker.setOpacity(1.0)
     }
     else {
-      marker.setOpacity(0.5)
       this.selectedSiteIds.push(id)
-      this.$refs.siteSelect.selection.push(s)
     }
-    console.log(this.selectedSiteIds)
+  }
+
+  setActiveMarkers(marker, active) {
   }
 
   beforeDestroy() {

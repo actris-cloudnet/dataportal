@@ -110,6 +110,7 @@ export default class CustomMultiselect extends Vue {
     else {
       this.$emit('input', this.getSelectionIds())
     }
+    this.setSelectedSiteIds(this.getSelectionIds())
   }
 
   get value() {
