@@ -358,23 +358,27 @@ export default class Search extends Vue {
   // Minimap
   map = null as any
   tileLayer = null as any
-  passiveMarker = L.icon({
-    iconUrl: 'frontend/node_modules/leaflet/dist/images/marker-icon.png',
-    iconSize: [38, 95],
-    iconAnchor: [22, 94],
-    popupAnchor: [-3, -76],
-    shadowUrl: 'frontend/node_modules/leaflet/dist/images/marker-shadow.png',
-    shadowSize: [68, 95],
-    shadowAnchor: [22, 94]
+  passiveMarker = L.Icon.extend({
+    options: {
+      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+      shadowSize: [41, 41],
+      shadowAnchor: [12, 41]
+    }
   })
-  activeMarker = L.icon({
-    iconUrl: 'frontend/node_modules/leaflet/dist/images/marker-icon-red.png',
-    shadowUrl: 'frontend/node_modules/leaflet/dist/images/marker-shadow.png',
-    iconSize:     [38, 95], // size of the icon
-    shadowSize:   [68, 95], // size of the shadow
-    iconAnchor:   [22, 94], // point of the icon which will correspond to marker's location
-    shadowAnchor: [22, 94],  // the same for the shadow
-    popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+  activeMarker = L.Icon.extend({
+    options: {
+      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+      shadowSize: [41, 41],
+      shadowAnchor: [12, 41]
+    }
   })
 
   renderComplete = false
@@ -441,21 +445,8 @@ export default class Search extends Vue {
     const lon = this.allSites.map(site => site.longitude)
     const id = this.allSites.map(site => site.id)
 
-    var passiveMarker = L.Icon.extend({
-      options: {
-        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
-        iconSize: [38, 95],
-        iconAnchor: [22, 94],
-        popupAnchor: [-3, -76],
-        shadowUrl: 'marker-shadow.png',
-        shadowSize: [68, 95],
-        shadowAnchor: [22, 94]
-      }
-    })
-
     markerNames.forEach((name, i) => {
       const marker = L.marker([lat[i], lon[i]])
-      //marker.setIcon(new passiveMarker)
       marker.on('click', (onClick) => {
         this.onMapMarkerClick(marker, id[i])
       })
@@ -467,9 +458,11 @@ export default class Search extends Vue {
     const s = this.allSites.find(x => x.id === id)
     if (this.selectedSiteIds.includes(id)) {
       this.selectedSiteIds = this.selectedSiteIds.filter(e => e !== id)
+      marker.setIcon(new this.passiveMarker)
     }
     else {
       this.selectedSiteIds.push(id)
+      marker.setIcon(new this.activeMarker)
     }
   }
 
