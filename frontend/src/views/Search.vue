@@ -190,7 +190,8 @@
     <header class="filterOptions">Filter search</header>
     <custom-multiselect
       label="Location"
-      v-model="selectedSiteIds"
+      :selectedSiteIds="selectedSiteIds"
+      :setSelectedSiteIds="setSelectedSiteIds"
       :options="allSites"
       id="siteSelect"
       :icons="false"
@@ -330,6 +331,10 @@ export default class Search extends Vue {
   // site selector
   allSites = []
   selectedSiteIds = []
+
+  setSelectedSiteIds(siteIds: []) {
+    this.selectedSiteIds = siteIds
+  }
 
   // dates
   beginningOfHistory = new Date('1970-01-01')

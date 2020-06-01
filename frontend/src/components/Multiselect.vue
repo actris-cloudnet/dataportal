@@ -77,7 +77,7 @@
 <script lang="ts">
 import Component from 'vue-class-component'
 import Vue from 'vue'
-import { Prop } from 'vue-property-decorator'
+import {Prop, Watch} from 'vue-property-decorator'
 import Multiselect from 'vue-multiselect'
 import { Selection } from '../views/Search.vue'
 import { DevMode } from '../lib/DevMode'
@@ -92,12 +92,14 @@ export default class CustomMultiselect extends Vue {
   @Prop() icons!: boolean
   @Prop() getIconUrl!: Function
   @Prop() devMode!: DevMode
+  @Prop() setSelectedSiteIds!: Function
+  @Prop() selectedSiteIds!: string[]
 
   selection: Selection[] = []
 
   set value(selection) {
     this.selection = selection
-    this.$emit('input', this.getSelectionIds())
+    this.setSelectedSiteIds(this.getSelectionIds())
   }
 
   get value() {
@@ -112,5 +114,12 @@ export default class CustomMultiselect extends Vue {
   isIddqd(target: string, _: string) {
     if (target == 'iddqd') this.devMode.enable()
   }
+
+  @Watch('selectedSiteIds')
+  onSelectedSiteIdsChange() {
+    console.log(this.selectedSiteIds)
+    this.selection = this.options.filter((selection: Selection) => this.selectedSiteIds.includes(selection.id))
+  }
+
 }
 </script>
