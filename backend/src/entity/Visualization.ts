@@ -1,27 +1,22 @@
-import {Entity, Column, PrimaryColumn, ManyToOne} from 'typeorm'
+import {Entity, PrimaryColumn, ManyToOne} from 'typeorm'
 import { File } from './File'
+import {ProductVariable} from './ProductVariable'
 
 
 @Entity()
 export class Visualization {
-
   @PrimaryColumn()
   filename!: string
-
-  @Column()
-  variableId!: string
-
-  @Column()
-  variableHumanReadableName!: string
 
   @ManyToOne(_ => File, file => file.visualizations)
   sourceFile!: File
 
-  constructor(filename: string, variableId: string, variableHumanReadableName: string, sourceFile: File) {
+  @ManyToOne(_ => ProductVariable, prodVar => prodVar.visualizations)
+  productVariable!: ProductVariable
+
+  constructor(filename: string, sourceFile: File, productVariable: ProductVariable) {
     this.filename = filename
-    this.variableId = variableId
-    this.variableHumanReadableName = variableHumanReadableName
     this.sourceFile = sourceFile
+    this.productVariable = productVariable
   }
 }
-

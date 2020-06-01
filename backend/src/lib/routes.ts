@@ -12,6 +12,7 @@ import config from '../config'
 import { putRecord, freezeRecord } from '../metadata2db.js'
 import {Visualization} from '../entity/Visualization'
 import {VisualizationResponse} from '../entity/VisualizationResponse'
+import {ProductVariable} from '../entity/ProductVariable'
 
 
 export class Routes {
@@ -24,6 +25,7 @@ export class Routes {
     this.siteRepo = this.conn.getRepository(Site)
     this.productRepo = this.conn.getRepository(Product)
     this.visualizationRepo = this.conn.getRepository(Visualization)
+    this.productVariableRepo = this.conn.getRepository(ProductVariable)
   }
 
   private conn: Connection
@@ -33,6 +35,7 @@ export class Routes {
   private siteRepo: Repository<Site>
   private productRepo: Repository<Product>
   private visualizationRepo: Repository<Visualization>
+  private productVariableRepo: Repository<ProductVariable>
 
   private hideTestDataFromNormalUsers = <T>(dbQuery: SelectQueryBuilder<T>, req: Request): SelectQueryBuilder<T> =>
     req.query.developer !== undefined ? dbQuery : dbQuery.andWhere('not site.isTestSite')
@@ -143,11 +146,12 @@ export class Routes {
   putVisualization: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body
     Promise.all([
-      this.fileRepo.findOneOrFail(req.body.sourceFileId),
+      this.fileRepo.findOneOrFail(body.sourceFileId),
+      this.productVariableRepo.findOneOrFail(body.variableId),
       linkFile(body.fullPath, join(config.publicDir, 'viz'))
     ])
-      .then(([file, _]) => {
-        const viz = new Visualization(req.params.filename, body.variableId, body.variableHumanReadableName, file)
+      .then(([file, productVariable, _]) => {
+        const viz = new Visualization(req.params.filename, file, productVariable)
         return this.visualizationRepo.insert(viz)
           .then(_ => res.sendStatus(201))
           .catch(err => {
@@ -162,6 +166,7 @@ export class Routes {
     const query = req.query
     const qb = this.filesQueryBuilder(query)
       .leftJoinAndSelect('file.visualizations', 'visualizations')
+      .leftJoinAndSelect('visualizations.productVariable', 'productVariables')
     this.hideTestDataFromNormalUsers(qb, req)
       .getMany()
       .then(result =>

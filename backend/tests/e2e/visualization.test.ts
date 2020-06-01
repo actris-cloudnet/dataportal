@@ -15,7 +15,7 @@ const vizJson = {
   fullPath: resolve('tests/data/test-viz.png'),
   sourceFileId: '9e04d8ef-0f2b-4823-835d-33e458403c67',
   variableHumanReadableName: 'Testin onnistumistodennäköisyys',
-  variableId: 'testitn'
+  variableId: 'test1'
 }
 
 const validId = basename(vizJson.fullPath)

@@ -7,15 +7,13 @@ import {Visualization} from '../../../src/entity/Visualization'
 const validJson = {
   fullPath: resolve('tests/data/test-viz.png'),
   sourceFileId: '9e04d8ef-0f2b-4823-835d-33e458403c67',
-  variableHumanReadableName: 'Testin onnistumistodennäköisyys',
-  variableId: 'testitn'
+  variableId: 'test1'
 }
 
 const badPath = {
   fullPath: 'data/badpath.png',
   sourceFileId: '9e04d8ef-0f2b-4823-835d-33e458403c67',
-  variableHumanReadableName: 'Testin onnistumistodennäköisyys',
-  variableId: 'testitn'
+  variableId: 'test1'
 }
 
 const badUuid = {...validJson, ...{sourceFileId: 'a0fc26e4-d448-4b93-91a3-62051c9d311b'}}
@@ -72,25 +70,27 @@ describe('GET /visualization', () => {
   it('on no results returns empty list and responds with 200', async () => {
     const res = await axios.get(url, { headers, params: { product: 'lidar'}})
     expect(res.status).toEqual(200)
-    expect(res.data).toEqual([])
+    return expect(res.data).toEqual([])
   })
 
   it('on valid search returns correct list of visualizations and responds with 200', async () => {
-    const expectedResult = [ {
+    const expectedResult = [{
       sourceFileId: '38092c00-161d-4ca2-a29d-628cf8e960f6',
       locationHumanReadable: 'Mace Head',
       productHumanReadable: 'Radar',
       visualizations: [
-        { filename: 'test0.png',
-          variableId: 'test',
-          variableHumanReadableName: 'testi testinen' },
-        { variableId: 'test',
+        {
+          filename: 'test0.png',
+          'productVariable': {'id': 'test1', 'humanReadableName': 'Auringonpaisteen määrä', 'order': '1'}
+        },
+        {
           filename: 'test1.png',
-          variableHumanReadableName: 'testi testinen' } ]
+          'productVariable': {'id': 'test2', 'humanReadableName': 'Kaljanhimo', 'order': '0'}
+        }]
     }]
     const res = await axios.get(url, { headers, params: { product: 'radar'}})
     expect(res.status).toEqual(200)
-    expect(res.data).toMatchObject(expectedResult)
+    return expect(res.data).toMatchObject(expectedResult)
   })
 
 })

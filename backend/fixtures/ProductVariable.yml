@@ -1,0 +1,10 @@
+entity: ProductVariable
+items:
+  productVariable1:
+    id: 'test1'
+    humanReadableName: 'Auringonpaisteen määrä'
+    order: '1'
+  productVariable2:
+    id: 'test2'
+    humanReadableName: 'Kaljanhimo'
+    order: '0'
