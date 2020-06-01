@@ -4,7 +4,7 @@ for file in $(find $1 -name "*.png"); do
     real=$(realpath $file)
     base=$(basename $file)
     echo -n "$base "
-    nc=${base%.png}.nc
+    nc=$(echo $base | gawk -F_ '{ print $1"_"$2"_"$3 }').nc
     uuid=$(psql dataportal -Atc"select uuid from file where filename = '$nc'")
     if [ -z $uuid ]; then
         echo "Skip"
