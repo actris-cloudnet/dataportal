@@ -4,8 +4,6 @@ N_PROCS=${2:-1}
 FILES=$(find $INDIR -name "*.nc" | sort)
 N_FILES=$(printf "%s\n" "${FILES[@]}" | wc -l)
 
+echo "PUTting $N_FILES files..."
 printf "%s\n" "${FILES[@]}" \
-    | xargs -I {} -tn1 -P$N_PROCS scripts/ncdump2node.sh {} populate-db.log 2>&1 \
-    | xargs -n1 -I% psql dataportal -tAc 'select count(*) from file' \
-    | awk '{printf "%d/%d\t\t%d\r",NR,'$N_FILES',$1}'
-echo
+    | xargs -n1 -P$N_PROCS scripts/put-nc-file.sh
