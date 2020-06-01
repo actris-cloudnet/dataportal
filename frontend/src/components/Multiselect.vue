@@ -99,7 +99,7 @@ export default class CustomMultiselect extends Vue {
 
   set value(selection) {
     this.selection = selection
-    this.setSelectedSiteIds(this.getSelectionIds())
+    this.setSelectedSiteIds(this.selection.map(site => site.id))
   }
 
   get value() {
@@ -108,7 +108,6 @@ export default class CustomMultiselect extends Vue {
 
   @Watch('selectedSiteIds')
   onSelectedSiteIdsChange() {
-    console.log(this.selectedSiteIds)
     this.selection = this.options.filter((selection: Selection) => this.selectedSiteIds.includes(selection.id))
   }
 
