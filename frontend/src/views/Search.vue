@@ -285,6 +285,7 @@ import Datepicker from '../components/Datepicker.vue'
 import CustomMultiselect from '../components/Multiselect.vue'
 import DataSearchResult from '../components/DataSearchResult.vue'
 import {getIconUrl, humanReadableSize, combinedFileSize, dateToString} from '../lib'
+import { dateToString, getIconUrl, getShadowUrl, getMarkerUrl, humanReadableSize, combinedFileSize } from '../lib'
 import { DevMode } from '../lib/DevMode'
 import VizSearchResult from '../components/VizSearchResult.vue'
 import {Visualization} from '../../../backend/src/entity/Visualization'
@@ -361,22 +362,22 @@ export default class Search extends Vue {
   allMarkers = {}
   passiveMarker = L.Icon.extend({
     options: {
-      iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+      iconUrl: getMarkerUrl('blue'),
       iconSize: [25, 41],
       iconAnchor: [12, 41],
       popupAnchor: [1, -34],
-      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+      shadowUrl: getShadowUrl(),
       shadowSize: [41, 41],
       shadowAnchor: [12, 41]
     }
   })
   activeMarker = L.Icon.extend({
     options: {
-      iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+      iconUrl: getMarkerUrl('green'),
       iconSize: [25, 41],
       iconAnchor: [12, 41],
       popupAnchor: [1, -34],
-      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+      shadowUrl: getShadowUrl(),
       shadowSize: [41, 41],
       shadowAnchor: [12, 41]
     }
