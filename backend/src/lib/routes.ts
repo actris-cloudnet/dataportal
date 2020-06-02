@@ -98,7 +98,7 @@ export class Routes {
   }
 
   products: RequestHandler = async (_req: Request, res: Response, next) => {
-    fetchAll<Product>(this.conn, Product)
+    fetchAll<Product>(this.conn, Product, {relations: ['variables']})
       .then(result => res.send(result))
       .catch(err => next({ status: 500, errors: err }))
   }

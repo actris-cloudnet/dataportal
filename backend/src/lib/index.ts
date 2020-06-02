@@ -11,9 +11,9 @@ export const dateToUTCString = (date: string | Date) => {
     .toISOString().replace('T', ' ').replace(/\..*/, '')
 }
 
-export const fetchAll = <T>(conn: Connection, schema: Function): Promise<T[]> => {
+export const fetchAll = <T>(conn: Connection, schema: Function, options={}): Promise<T[]> => {
   const repo = conn.getRepository(schema)
-  return repo.find() as Promise<T[]>
+  return repo.find(options) as Promise<T[]>
 }
 
 const checkFileExists = async (path: string) => fsp.stat(path)
