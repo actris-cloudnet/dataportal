@@ -51,6 +51,7 @@ import * as xmlparser from 'express-xml-bodyparser'
     routes.files)
   app.get('/api/sites', routes.sites)
   app.get('/api/products', routes.products)
+  app.get('/api/products/variables', routes.productVariables)
   app.get('/api/download', middleware.filesValidator, middleware.filesQueryAugmenter, routes.download)
   app.get('/api/download',
     middleware.filesValidator,

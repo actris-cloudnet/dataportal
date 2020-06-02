@@ -96,10 +96,11 @@
 
   .disabled
     opacity: 0.5
+
 </style>
 
 <template>
-<main v-if="mode == 'viz' || mode == 'data'" id="search">
+<main v-if="mode == 'viz' || mode == 'data'" id="search" v-bind:class="{ wide: isVizMode() }">
   <div v-if="displayBetaNotification" class="note betanote">
     This is the beta version of Cloudnet data portal.
     Click <a href="http://devcloudnet.fmi.fi/">here</a> to visit the devcloudnet data portal, or
@@ -180,6 +181,14 @@
       :icons="true"
       :devMode="devMode">
     </custom-multiselect>
+
+    <label for="comparisonModeSelector">View mode</label>
+    <div class="modeSelector">
+      <img :src="require('../assets/icons/column.png')" class="smallimg" @click="comparisonMode = 0">
+      <input v-if="isVizMode()" v-model="comparisonMode" type="range" id="comparisonModeSelector" name="volume"
+                                                                                                            min="0" max="1">
+      <img :src="require('../assets/icons/columns.png')" class="smallimg" @click="comparisonMode = 1">
+    </div>
 
     <a @click="reset" id="reset">Reset filter</a>
   </section>

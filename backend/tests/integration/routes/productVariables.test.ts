@@ -70,8 +70,8 @@ const validObject = [
 ]
 
 
-describe('/api/products', () => {
-  const url = `${backendPublicUrl}products/`
+describe('/api/products/variables', () => {
+  const url = `${backendPublicUrl}products/variables`
 
   it('responds with a json including variables', async () => {
     const res = await axios.get(url)

@@ -30,6 +30,9 @@ body
     padding-right: 5em
     font-family: $content-font
 
+#app > main.wide
+  max-width: none
+
 h1, h2, h3, h4, h5, h6
   line-height: 1
   font-weight: normal
