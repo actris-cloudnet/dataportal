@@ -290,7 +290,7 @@ import VizSearchResult from '../components/VizSearchResult.vue'
 import {Visualization} from '../../../backend/src/entity/Visualization'
 import {Product} from '../../../backend/src/entity/Product'
 import {ProductVariable} from '../../../backend/src/entity/ProductVariable'
-import L from 'leaflet'
+import L, { marker, Marker } from 'leaflet'
 
 Vue.component('datepicker', Datepicker)
 Vue.component('b-table', BTable)
@@ -358,9 +358,10 @@ export default class Search extends Vue {
   // Minimap
   map = null as any
   tileLayer = null as any
+  allMarkers = {}
   passiveMarker = L.Icon.extend({
     options: {
-      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+      iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
       iconSize: [25, 41],
       iconAnchor: [12, 41],
       popupAnchor: [1, -34],
@@ -371,7 +372,7 @@ export default class Search extends Vue {
   })
   activeMarker = L.Icon.extend({
     options: {
-      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+      iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
       iconSize: [25, 41],
       iconAnchor: [12, 41],
       popupAnchor: [1, -34],
@@ -446,27 +447,36 @@ export default class Search extends Vue {
     const id = this.allSites.map(site => site.id)
 
     markerNames.forEach((name, i) => {
-      const marker = L.marker([lat[i], lon[i]])
-      marker.on('click', (onClick) => {
-        this.onMapMarkerClick(marker, id[i])
+      const mark = marker([lat[i], lon[i]])
+      mark.on('click', (onClick) => {
+        this.onMapMarkerClick(id[i])
       })
-      marker.addTo(this.map)
+      this.allMarkers[id[i]] = mark
+      mark.addTo(this.map)
     })
   }
 
-  onMapMarkerClick(marker, id) {
+  onMapMarkerClick(id) {
     const s = this.allSites.find(x => x.id === id)
     if (this.selectedSiteIds.includes(id)) {
       this.selectedSiteIds = this.selectedSiteIds.filter(e => e !== id)
-      marker.setIcon(new this.passiveMarker)
     }
     else {
       this.selectedSiteIds.push(id)
-      marker.setIcon(new this.activeMarker)
     }
   }
 
-  setActiveMarkers(marker, active) {
+  setActiveMarkers() {
+    var keys = Object.keys(this.allMarkers)
+    keys.forEach((id) => {
+      var mark = this.allMarkers[id]
+      if (this.selectedSiteIds.includes(id)) {
+        mark.setIcon(new this.activeMarker)
+      }
+      else {
+        mark.setIcon(new this.passiveMarker)
+      }
+    })
   }
 
   beforeDestroy() {
@@ -549,6 +559,7 @@ export default class Search extends Vue {
   @Watch('selectedSiteIds')
   onSiteSelected() {
     this.fetchData()
+    this.setActiveMarkers()
   }
 
   @Watch('dateFrom')
