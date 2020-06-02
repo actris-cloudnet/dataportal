@@ -1,5 +1,6 @@
-import {Entity, Column, PrimaryColumn, OneToMany} from 'typeorm'
+import {Entity, Column, PrimaryColumn, OneToMany, ManyToOne} from 'typeorm'
 import {Visualization} from './Visualization'
+import {Product} from './Product'
 
 
 @Entity()
@@ -17,10 +18,14 @@ export class ProductVariable {
   @OneToMany(_ => Visualization, viz => viz.productVariable)
   visualizations!: Visualization[]
 
-  constructor(id: string, humanReadableName: string, order: string, visualizations: Visualization[]) {
+  @ManyToOne(_ => Product, prod => prod.variables)
+  product!: Product
+
+  constructor(id: string, humanReadableName: string, order: string, visualizations: Visualization[], product: Product) {
     this.id = id
     this.humanReadableName = humanReadableName
     this.order = order
     this.visualizations = visualizations
+    this.product = product
   }
 }

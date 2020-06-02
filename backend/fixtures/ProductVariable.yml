@@ -3,8 +3,10 @@ items:
   productVariable1:
     id: 'test1'
     humanReadableName: 'Auringonpaisteen määrä'
+    product: '@product1'
     order: '1'
   productVariable2:
     id: 'test2'
     humanReadableName: 'Kaljanhimo'
+    product: '@product1'
     order: '0'
