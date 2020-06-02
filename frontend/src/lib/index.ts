@@ -1,6 +1,12 @@
 export const getIconUrl = (product: string) =>
   require(`../assets/icons/${product}.png`)
 
+export const getShadowUrl = () =>
+  require(`../assets/markers/marker-shadow.png`)
+
+export const getMarkerUrl = (color: string) =>
+  require(`../assets/markers/marker-icon-${color}.png`)
+
 export const humanReadableSize = (size: number) => {
   if (size == 0) return '0 B'
   const i = Math.floor( Math.log(size) / Math.log(1024) )
