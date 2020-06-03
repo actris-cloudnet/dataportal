@@ -20,6 +20,8 @@
     padding-left: 1em
     padding-right: 1em
     padding-bottom: 1em
+    display: flex
+    flex-wrap: wrap
   div.paddedSourceFile + div.paddedSourceFile
     border-top: 1px solid $border-color
     padding-top: 1em
@@ -33,14 +35,19 @@
       padding: 0
       border: none
       margin: 0
+    div.sourceFile:only-child
+      flex-basis: 100%
   img
     height: auto
     max-width: 100%
   .sourceFile
     h3
+      width: 100%
       margin-bottom: 1.5em
       font-size: 1.1em
   .variable
+    flex-basis: 600px
+    flex-grow: 1
     h4
       margin-left: 1.5em
       margin-bottom: 0.15em
