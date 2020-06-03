@@ -55,6 +55,9 @@
     input
       width: 2.5em
 
+  .notfound
+    margin-top: $filter-margin
+    text-align: center
 </style>
 
 
@@ -62,7 +65,7 @@
   <main id="vizSearchResults" v-bind:class="{ singleColumn: !comparisonViewAsBoolean }">
     <header>
       <h3>Visualizations from {{humanReadableDate}}</h3>
-      <div>
+      <div v-if="searchYieldedResults">
         <label for="comparisonModeSelector">View mode</label>
         <div class="modeSelector">
           <img :src="require('../assets/icons/column.png')" class="smallimg" @click="comparisonView = '0'">
@@ -72,7 +75,7 @@
         </div>
       </div>
     </header>
-    <section class="vizContainer" v-bind:class="{ sideBySide: comparisonViewAsBoolean }">
+    <section v-if="searchYieldedResults" class="vizContainer" v-bind:class="{ sideBySide: comparisonViewAsBoolean }">
     <div v-for="(file, index) in sortedApiResponse" :key="index" class="sourceFile"
       v-bind:class="{ paddedSourceFile: !comparisonViewAsBoolean }">
       <h3>{{ file.locationHumanReadable }} / {{ file.productHumanReadable }}</h3>
@@ -83,6 +86,7 @@
       </div>
     </div>
     </section>
+    <section class="notfound" v-else>No visualizations were found with the selected parameters.</section>
   </main>
 </template>
 
@@ -111,6 +115,9 @@ export default class DataSearchResult extends Vue {
   }
   get sortedApiResponse() {
     return this.apiResponse.sort(this.alphabeticalSort)
+  }
+  get searchYieldedResults() {
+    return this.apiResponse.length > 0
   }
 
   sortVisualizations(visualizations: Visualization[]) {
