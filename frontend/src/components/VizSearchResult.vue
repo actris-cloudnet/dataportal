@@ -6,6 +6,13 @@
     flex-grow: 1
     flex-basis: 600px
     margin-bottom: 7em
+    header
+      display: flex
+      align-items: center
+      justify-content: space-between
+      margin-bottom: 1em
+      h3
+        margin: 0
   main#vizSearchResults.singleColumn
     max-width: 1000px
   div.sourceFile
@@ -41,8 +48,6 @@
   .modeSelector
     display: flex
     align-content: baseline
-    margin-bottom: $filter-margin
-    margin-top: 0.5em
     img
       width: 30px
       height: auto
@@ -56,13 +61,16 @@
 <template>
   <main id="vizSearchResults" v-bind:class="{ singleColumn: !comparisonViewAsBoolean }">
     <header>
-    <label for="comparisonModeSelector">View mode</label>
-    <div class="modeSelector">
-      <img :src="require('../assets/icons/column.png')" class="smallimg" @click="comparisonView = 0">
-      <input v-model="comparisonView" type="range" id="comparisonModeSelector" name="volume"
-             min="0" max="1">
-      <img :src="require('../assets/icons/columns.png')" class="smallimg" @click="comparisonView = 1">
-    </div>
+      <h3>Visualizations from {{humanReadableDate}}</h3>
+      <div>
+        <label for="comparisonModeSelector">View mode</label>
+        <div class="modeSelector">
+          <img :src="require('../assets/icons/column.png')" class="smallimg" @click="comparisonView = '0'">
+          <input v-on:change="comparisonView = $event.target.value" :value="comparisonView"
+            type="range" id="comparisonModeSelector" name="comparisonModeSelector" min="0" max="1">
+          <img :src="require('../assets/icons/columns.png')" class="smallimg" @click="comparisonView = '1'">
+        </div>
+      </div>
     </header>
     <section class="vizContainer" v-bind:class="{ sideBySide: comparisonViewAsBoolean }">
     <div v-for="(file, index) in sortedApiResponse" :key="index" class="sourceFile"
@@ -84,14 +92,19 @@ import {Component, Prop, Watch} from 'vue-property-decorator'
 import Vue from 'vue'
 import {Visualization} from '../../../backend/src/entity/Visualization'
 import {VisualizationResponse} from '../../../backend/src/entity/VisualizationResponse'
+import {humanReadableDate} from '../lib'
 
 @Component
 export default class DataSearchResult extends Vue {
   @Prop() apiResponse!: VisualizationResponse[]
   @Prop() isBusy!: boolean
+  @Prop() date!: Date
 
-  comparisonView = 0
+  comparisonView = '0'
 
+  get humanReadableDate() {
+    return humanReadableDate(this.date.toString())
+  }
 
   get comparisonViewAsBoolean(): boolean {
     return parseInt(this.comparisonView) ? true : false

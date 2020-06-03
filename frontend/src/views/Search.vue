@@ -199,7 +199,8 @@
   <viz-search-result
     v-if="isVizMode()"
     :apiResponse="apiResponse"
-    :isBusy="isBusy">
+    :isBusy="isBusy"
+    :date="dateTo">
   </viz-search-result>
 
   <data-search-result
