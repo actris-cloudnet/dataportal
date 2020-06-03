@@ -5,8 +5,9 @@
   main#vizSearchResults
     flex-grow: 1
     flex-basis: 600px
-    max-width: 1000px
     margin-bottom: 7em
+  main#vizSearchResults.singleColumn
+    max-width: 1000px
   div.sourceFile
     padding-left: 1em
     padding-right: 1em
@@ -53,7 +54,7 @@
 
 
 <template>
-  <main id="vizSearchResults">
+  <main id="vizSearchResults" v-bind:class="{ singleColumn: !comparisonViewAsBoolean }">
     <header>
     <label for="comparisonModeSelector">View mode</label>
     <div class="modeSelector">
