@@ -2,6 +2,8 @@
   @import "../sass/variables.sass"
   @import "../sass/global.sass"
 
+  $column-spacing: 10px
+
   main#vizSearchResults
     flex-grow: 1
     flex-basis: 600px
@@ -22,7 +24,7 @@
     padding-bottom: 1em
     display: flex
     flex-wrap: wrap
-  div.paddedSourceFile + div.paddedSourceFile
+  div.paddedSourceFile + div.paddedSourceFile, .sideBySide div.sourceFile:nth-child(n+3)
     border-top: 1px solid $border-color
     padding-top: 1em
     margin-top: $filter-margin
@@ -31,10 +33,12 @@
     flex-wrap: wrap
   .sideBySide
     div.sourceFile
-      flex-basis: 50%
+      flex-basis: calc(50% - #{$column-spacing})
       padding: 0
       border: none
       margin: 0
+    div.sourceFile:nth-child(even)
+      padding-left: $column-spacing
     div.sourceFile:only-child
       flex-basis: 100%
   img
