@@ -5,7 +5,7 @@ export const getIconUrl = (product: string) =>
   require(`../assets/icons/${product}.png`)
 
 export const getShadowUrl = () =>
-  require(`../assets/markers/marker-shadow.png`)
+  require('../assets/markers/marker-shadow.png')
 
 export const getMarkerUrl = (color: string) =>
   require(`../assets/markers/marker-icon-${color}.png`)
