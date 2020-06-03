@@ -97,6 +97,10 @@
   .disabled
     opacity: 0.5
 
+  .multiselect--disabled
+    .multiselect__select
+      background: none
+
 </style>
 
 <template>
@@ -182,13 +186,12 @@
       :devMode="devMode">
     </custom-multiselect>
 
-    <label for="comparisonModeSelector">View mode</label>
-    <div class="modeSelector">
-      <img :src="require('../assets/icons/column.png')" class="smallimg" @click="comparisonMode = 0">
-      <input v-if="isVizMode()" v-model="comparisonMode" type="range" id="comparisonModeSelector" name="volume"
-                                                                                                            min="0" max="1">
-      <img :src="require('../assets/icons/columns.png')" class="smallimg" @click="comparisonMode = 1">
-    </div>
+    <custom-multiselect v-if="isVizMode()"
+      label="Variable"
+      v-model="selectedVariableIds"
+      :options="selectableVariables"
+      id="variableSelect">
+    </custom-multiselect>
 
     <a @click="reset" id="reset">Reset filter</a>
   </section>
@@ -223,6 +226,8 @@ import DataSearchResult from '../components/DataSearchResult.vue'
 import { DevMode } from '../lib/DevMode'
 import VizSearchResult from '../components/VizSearchResult.vue'
 import {Visualization} from '../../../backend/src/entity/Visualization'
+import {Product} from '../../../backend/src/entity/Product'
+import {ProductVariable} from '../../../backend/src/entity/ProductVariable'
 
 Vue.component('datepicker', Datepicker)
 Vue.component('b-table', BTable)
@@ -261,8 +266,18 @@ export default class Search extends Vue {
   dateToError: { [key: string]: boolean } = {}
 
   // products
-  allProducts = []
-  selectedProductIds = []
+  allProducts: Product[] = []
+  selectedProductIds: string[] = []
+
+  // variables
+  selectedVariableIds: string[] = []
+  get selectableVariables(): ProductVariable[] {
+    if (this.selectedProductIds.length == 0)
+      return this.allProducts.flatMap(prod => prod.variables)
+    return this.allProducts
+      .filter(prod => this.selectedProductIds.includes(prod.id))
+      .flatMap(prod => prod.variables)
+  }
 
   renderComplete = false
 
@@ -295,7 +310,7 @@ export default class Search extends Vue {
     const payload = { params: { developer: this.devMode.activated || undefined } }
     Promise.all([
       axios.get(`${this.apiUrl}sites/`, payload),
-      axios.get(`${this.apiUrl}products/`, payload)
+      axios.get(`${this.apiUrl}products/variables`, payload)
     ]).then(([sites, products]) => {
       this.allSites = sites.data.sort(this.alphabeticalSort)
       this.allProducts = products.data.sort(this.alphabeticalSort)
@@ -310,6 +325,7 @@ export default class Search extends Vue {
         dateFrom: this.dateFrom,
         dateTo: this.dateTo,
         product: this.selectedProductIds,
+        variable: this.isVizMode() ? this.selectedVariableIds : undefined,
         developer: this.devMode.activated || undefined
       }
     }
@@ -361,6 +377,11 @@ export default class Search extends Vue {
 
   @Watch('selectedProductIds')
   onProductSelected() {
+    this.fetchData()
+  }
+
+  @Watch('selectedVariableIds')
+  onVariableSelected() {
     this.fetchData()
   }
 

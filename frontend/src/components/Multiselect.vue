@@ -54,6 +54,7 @@
     :show-labels="false"
     :multiple="true"
     :hideSelected="false"
+    :disabled="disabled"
     @search-change="isIddqd"
   >
     <template slot="tag" slot-scope="props" v-if="icons">
@@ -92,6 +93,7 @@ export default class CustomMultiselect extends Vue {
   @Prop() options!: Selection[]
   @Prop() icons!: boolean
   @Prop() devMode!: DevMode
+  @Prop() disabled!: boolean
 
   selection: Selection[] = []
 

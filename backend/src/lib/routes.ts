@@ -170,9 +170,10 @@ export class Routes {
 
   getVisualization: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query
-    const qb = this.filesQueryBuilder(query)
+    let qb = this.filesQueryBuilder(query)
       .leftJoinAndSelect('file.visualizations', 'visualizations')
-      .leftJoinAndSelect('visualizations.productVariable', 'productVariables')
+      .leftJoinAndSelect('visualizations.productVariable', 'product_variable')
+    if ('variable' in query && query.variable.length) qb = qb.andWhere('product_variable.id IN (:...variable)', query)
     this.hideTestDataFromNormalUsers(qb, req)
       .getMany()
       .then(result =>
