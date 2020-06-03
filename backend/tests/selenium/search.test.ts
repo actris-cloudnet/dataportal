@@ -1,8 +1,6 @@
 import { By, until, WebDriver, Key } from 'selenium-webdriver'
-import * as fs from 'fs'
-import { join } from 'path'
 import axios from 'axios'
-import { inboxDir, prepareSelenium, wait } from '../lib'
+import { prepareSelenium, wait, runNcdump, backendPrivateUrl, parseUuid } from '../lib'
 
 let driver: WebDriver
 
@@ -68,16 +66,22 @@ afterAll(async () => {
 describe('search page', () => {
 
   beforeAll(async () => {
+
+    let filenames = []
     for (let i = 23; i <= 27; i++) {
-      let fname = `201907${i}_bucharest_classification.nc`
-      fs.copyFileSync(join('tests/data/', fname), join(inboxDir, fname))
+      filenames.push(`201907${i}_bucharest_classification.nc`)
     }
     for (let i = 23; i <= 24; i++) {
-      let fname = `201907${i}_mace-head_iwc-Z-T-method.nc`
-      fs.copyFileSync(join('tests/data/', fname), join(inboxDir, fname))
+      filenames.push(`201907${i}_mace-head_iwc-Z-T-method.nc`)
     }
-    const granada = '20200126_granada_ecmwf.nc'
-    fs.copyFileSync(join('tests/data', granada), join(inboxDir, granada))
+    filenames.push('20200126_granada_ecmwf.nc')
+
+    for (let i=0; i < filenames.length; i++) {
+      const xml = await runNcdump(`tests/data/${filenames[i]}`)
+      const uuid = await parseUuid(xml)
+      const url = `${backendPrivateUrl}file/${uuid}`
+      await axios.put(url, xml, {headers: { 'Content-Type': 'application/xml' }})
+    }
     await wait(3000)
   })
 

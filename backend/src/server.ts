@@ -6,11 +6,14 @@ import { stringify } from './lib'
 import * as express from 'express'
 import config from './config'
 import { Middleware } from './lib/middleware'
-import { Routes } from './lib/routes';
+import { Routes } from './lib/routes'
+import * as xmlparser from 'express-xml-bodyparser'
 
 (async function() {
   const port = parseInt(process.argv[2])
   const app = express()
+
+  app.use(xmlparser())
 
   const connName = config.connectionName
   const conn = await createConnection(connName)
@@ -38,12 +41,16 @@ import { Routes } from './lib/routes';
     app.get('/allfiles', routes.allfiles)
   }
 
-  app.get('/status', routes.status)
-  app.get('/file/:uuid', routes.file)
-  app.get('/files', middleware.filesValidator, middleware.filesQueryAugmenter, routes.files)
-  app.get('/sites', routes.sites)
-  app.get('/products', routes.products)
-  app.get('/download', middleware.filesValidator, middleware.filesQueryAugmenter, routes.download)
+  // public
+  app.get('/api/status', routes.status)
+  app.get('/api/file/:uuid', routes.file)
+  app.get('/api/files', middleware.filesValidator, middleware.filesQueryAugmenter, routes.files)
+  app.get('/api/sites', routes.sites)
+  app.get('/api/products', routes.products)
+  app.get('/api/download', middleware.filesValidator, middleware.filesQueryAugmenter, routes.download)
+
+  // private
+  app.put('/file/:uuid', routes.submit)
 
   app.use(errorHandler)
 

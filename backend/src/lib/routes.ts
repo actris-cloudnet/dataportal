@@ -9,7 +9,7 @@ import archiver = require('archiver')
 import { createReadStream, promises as fsp, constants as fsconst } from 'graceful-fs'
 import { fetchAll } from '.'
 import config from '../config'
-
+import { putRecord, freezeRecord } from '../metadata2db.js'
 
 export class Routes {
 
@@ -33,11 +33,8 @@ export class Routes {
     req.query.developer !== undefined ? dbQuery : dbQuery.andWhere('not site.isTestSite')
 
   private augmentFiles = (files: File[]) => {
-    const now = new Date()
-    const yesterday = new Date(new Date(now.setDate(now.getDate() - 1)))
     return files.map(entry =>
-      ({ ...entry, ...{ volatile: entry.releasedAt > yesterday, url: `${this.fileServerUrl}${entry.filename}` } })
-    )
+      ({ ...entry, url: `${this.fileServerUrl}${entry.filename}` }))
   }
 
   private filesQueryBuilder = (query: any) =>
@@ -47,6 +44,8 @@ export class Routes {
       .where('site.id IN (:...location)', query)
       .andWhere('product.id IN (:...product)', query)
       .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate <= :dateTo', query)
+      .andWhere('file.volatile IN (:...volatile)', query)
+      .andWhere('file.releasedAt < :releasedBefore', query)
       .orderBy('file.measurementDate', 'DESC')
 
   private allFilesAreReadable = (filepaths: string[]) =>
@@ -85,10 +84,6 @@ export class Routes {
     this.hideTestDataFromNormalUsers(qb, req)
       .getMany()
       .then(result => {
-        if (result.length == 0) {
-          next({ status: 404, errors: ['The search yielded zero results'], params: req.query })
-          return
-        }
         res.send(this.augmentFiles(result))
       })
       .catch(err => {
@@ -151,10 +146,23 @@ export class Routes {
       })
   }
 
-  allfiles: RequestHandler = async (req: Request, res: Response, next) =>
+  allfiles: RequestHandler = async (_req: Request, res: Response, next) =>
     this.fileRepo.find({ relations: ['site', 'product'] })
       .then(result => res.send(this.augmentFiles(result)))
       .catch(err => next({ status: 500, errors: err }))
+
+  submit: RequestHandler = async (req: Request, res: Response, next) => {
+    const pid = parsePid(req.body.netcdf.attribute)
+    const freeze = isFreeze(pid, req.headers)
+    putRecord(this.conn, req.body)
+      .then(result => {
+        return freezeRecord(result, this.conn, pid, freeze)
+      })
+      .then(status => {
+        return res.sendStatus(status)
+      })
+      .catch(err => next({ status: 500, errors: err }))
+  }
 
   status: RequestHandler = async (_req: Request, res: Response, next) =>
     this.fileRepo.createQueryBuilder('file').leftJoin('file.site', 'site')
@@ -185,4 +193,17 @@ export class Routes {
       .catch(err => {
         next({ status: 500, errors: err })
       })
+}
+
+function parsePid(attributes: Array<any>): string {
+  const { pid = '' }:any = attributes
+    .map((a) => a.$)
+    .map(({ name, value }) => ({ [name]: value }))
+    .reduce((acc, cur) => Object.assign(acc, cur))
+  return pid
+}
+
+function isFreeze(pid:string, header:any): any {
+  const xFreeze = header['x-freeze'] || 'false'
+  return (pid.length > 0) && (xFreeze.toLowerCase() == 'true')
 }

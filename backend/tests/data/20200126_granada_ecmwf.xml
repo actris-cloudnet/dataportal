@@ -7,6 +7,7 @@
   <attribute name="Conventions" value="CF-1.0" />
   <attribute name="title" value="Model file from Granada" />
   <attribute name="location" value="Granada" />
+  <attribute name="pid" value="http://123123123" />
   <attribute name="source" value="ECMWF Integrated Forecast System (IFS)" />
   <attribute name="institution" value="European Centre for Medium-Range Weather Forecasting" />
   <attribute name="initialization_time" value="2020-01-26 00:00:00 +00:00" />

@@ -131,8 +131,9 @@ img.product
         <header>File information</header>
         <section class="details">
           <dl>
-            <dt>Identifier</dt>
-            <dd>{{ response.uuid }}</dd>
+            <dt>PID</dt>
+            <dd v-if="response.pid.length > 2"> {{ response.pid }} </dd>
+            <dd v-else> {{ 'n/a' }} </dd>
             <dt>Filename</dt>
             <dd>{{ response.filename }}</dd>
             <dt>Format</dt>
@@ -216,7 +217,6 @@ export default class FileView extends Vue {
   error = false
   quicklookUrl = process.env.VUE_APP_QUICKLOOKURL
   apiUrl = process.env.VUE_APP_BACKENDURL
-
   humanReadableSize = humanReadableSize
   humanReadableDate = humanReadableDate
   getIconUrl = getIconUrl

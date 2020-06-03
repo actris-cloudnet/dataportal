@@ -1,13 +1,10 @@
 import * as fs from 'fs'
-import * as path from 'path'
 import axios from 'axios'
-import { clearDir, inboxDir, inboxSubDir, publicDir, clearRepo, backendUrl, fileServerUrl, wait } from '../lib'
+import { clearDir, publicDir, clearRepo, backendPrivateUrl, backendPublicUrl, fileServerUrl, runNcdump } from '../lib'
 import * as AdmZip from 'adm-zip'
 import { createHash } from 'crypto'
 
 beforeAll(async () => {
-  clearDir(inboxDir)
-  clearDir(inboxSubDir)
   clearDir(publicDir)
   return clearRepo('file')
 })
@@ -43,18 +40,17 @@ const expectedJson = {
   'volatile': true
 }
 
+const axiosConfig = { headers: { 'content-type': 'application/xml'}}
 
-const expectedUuidFromSubFolder = '926ba5cb-19e2-4153-8d87-9d97596f5574'
-
-describe('after moving a valid NC file to inbox', () => {
+describe('after PUTting metadata to API', () => {
   beforeAll(async () => {
-    fs.copyFileSync('tests/data/20190723_bucharest_classification.nc', path.join(inboxDir, '20190723_bucharest_classification.nc'))
-    return wait(4000)
+    const xmlOut = await runNcdump('tests/data/20190723_bucharest_classification.nc')
+    return axios.put(`${backendPrivateUrl}file/${expectedJson.uuid}`, xmlOut, axiosConfig)
   })
 
   it('responds with a corresponding metadata JSON', async () => {
     return axios
-      .get(`${backendUrl}file/${expectedJson.uuid}`)
+      .get(`${backendPublicUrl}file/${expectedJson.uuid}`)
       .then(response => expect(response.data).toMatchObject(expectedJson))
   })
 
@@ -67,22 +63,16 @@ describe('after moving a valid NC file to inbox', () => {
       })
   })
 
-  describe('after moving a another valid NC file to inbox subfolder', () => {
+  describe('after PUTting more metadata to API', () => {
     beforeAll(async () => {
-      fs.copyFileSync('tests/data/20190724_bucharest_classification.nc', path.join(inboxSubDir, '20190724_bucharest_classification.nc'))
-      return wait(4000)
-    })
-
-    it('responds with correct uuid in metadata JSON', async () => {
-      return axios
-        .get(`${backendUrl}file/${expectedUuidFromSubFolder}`)
-        .then(response => expect(response.data.uuid).toMatch(expectedUuidFromSubFolder))
+      const xmlOut = await runNcdump('tests/data/20190724_bucharest_classification.nc')
+      return axios.put(`${backendPrivateUrl}file/${expectedJson.uuid}`, xmlOut, axiosConfig)
     })
 
     it('hashes of /download zipped files match originals', async () => {
       const tmpZip = 'tests/data/tmp.zip'
-      const shas = await (await axios.get(`${backendUrl}files/`, { params: { location: 'bucharest' } })).data.map((file: any) => file.checksum)
-      const receivedFile = await axios.get(`${backendUrl}download/`, { responseType: 'arraybuffer', params: { location: 'bucharest' } })
+      const shas = await (await axios.get(`${backendPublicUrl}files/`, { params: { location: 'bucharest' } })).data.map((file: any) => file.checksum)
+      const receivedFile = await axios.get(`${backendPublicUrl}download/`, { responseType: 'arraybuffer', params: { location: 'bucharest' } })
       fs.writeFileSync(tmpZip, receivedFile.data)
       new AdmZip(tmpZip).getEntries().map((entry, i) => {
         const hash = createHash('sha256')

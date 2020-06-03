@@ -2,7 +2,7 @@ import { By, until, WebDriver } from 'selenium-webdriver'
 import * as fs from 'fs'
 import { join } from 'path'
 import axios from 'axios'
-import { inboxDir, prepareSelenium, wait } from '../lib'
+import { inboxDir, prepareSelenium, backendPrivateUrl, runNcdump, parseUuid } from '../lib'
 
 let driver: WebDriver
 
@@ -13,18 +13,20 @@ async function awaitAndFind(by: By) {
   return driver.findElement(by)
 }
 
-beforeAll(async () => driver = await prepareSelenium())
+beforeAll(async () => {
+  driver = await prepareSelenium()
+  const xml = await runNcdump('tests/data/20190723_bucharest_classification.nc')
+  const uuid = await parseUuid(xml)
+  const url = `${backendPrivateUrl}file/${uuid}`
+  await axios.put(url, xml, {headers: { 'Content-Type': 'application/xml' }})
+  fs.copyFileSync('tests/data/20190723_bucharest_classification.png', join(inboxDir, '20190723_bucharest_classification.png'))
+})
 
 afterAll(async () => {
   return driver.close()
 })
 
 describe('file landing page', () => {
-  beforeAll(async () => {
-    fs.copyFileSync('tests/data/20190723_bucharest_classification.nc', join(inboxDir, '20190723_bucharest_classification.nc'))
-    fs.copyFileSync('tests/data/20190723_bucharest_classification.png', join(inboxDir, '20190723_bucharest_classification.png'))
-    return wait(3000)
-  })
 
   it('returns 404 when the file is not found', async () => {
     await driver.get('http://localhost:8000/file/asd')
@@ -35,7 +37,6 @@ describe('file landing page', () => {
 
   it('contains correct information', async () => {
     const targetArray = [
-      '15506ea8-d357-4c7b-af8c-95dfcc34fc7d',
       '2019-07-23',
       'Classification',
       '1.0.4',

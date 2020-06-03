@@ -1,8 +1,8 @@
-import { backendUrl } from '../../lib'
+import { backendPublicUrl } from '../../lib'
 import axios from 'axios'
 
-describe('/sites', () => {
-  const url = `${backendUrl}sites/`
+describe('/api/sites', () => {
+  const url = `${backendPublicUrl}sites/`
 
   it('responds with a list of all sites in dev mode', async () => {
     const sites = ['macehead', 'hyytiala', 'bucharest', 'granada']

@@ -17,6 +17,7 @@ export function init() {
 
 export const allFiles = [
   {
+    'pid': '',
     'uuid': 'bde7a35f-03aa-4bff-acfb-b4974ea9f217',
     'title': 'Classification file from Mace-Head',
     'measurementDate': '2018-06-09',
@@ -45,6 +46,7 @@ export const allFiles = [
     'volatile': true
   },
   {
+    'pid': '',
     'uuid': '6cb32746-faf0-4057-9076-ed2e698dcf36',
     'title': 'Categorize file from Bucharest',
     'measurementDate': '2019-07-15',
@@ -72,6 +74,7 @@ export const allFiles = [
     }
   },
   {
+    'pid': '',
     'uuid': 'd21d6a9b-6804-4465-a026-74ec429fe17d',
     'title': 'Radar file from Hyytiala',
     'measurementDate': '2019-09-01',
@@ -99,6 +102,7 @@ export const allFiles = [
     }
   },
   {
+    'pid': '',
     'uuid': 'a5d1d5af-3667-41bc-b952-e684f627d91c',
     'title': 'Model file from Mace-Head',
     'measurementDate': '2014-12-05',
@@ -126,6 +130,7 @@ export const allFiles = [
     }
   },
   {
+    'pid': '',
     'uuid': '38092c00-161d-4ca2-a29d-628cf8e960f6',
     'title': 'Radar file from Mace-Head',
     'measurementDate': '2018-11-15',

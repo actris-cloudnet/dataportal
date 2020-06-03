@@ -30,7 +30,7 @@ export class Middleware {
       return next(pushAndReturn(requestError, 'No search parameters given'))
     }
 
-    const validKeys = ['location', 'product', 'dateFrom', 'dateTo', 'developer']
+    const validKeys = ['location', 'product', 'dateFrom', 'dateTo', 'developer', 'volatile', 'releasedBefore']
     const unknownFields = Object.keys(query).filter(key => !validKeys.includes(key))
     if (unknownFields.length > 0) {
       requestError.errors.push(`Unknown query parameters: ${unknownFields}`)
@@ -56,6 +56,11 @@ export class Middleware {
       requestError.errors.push('Malformed date in property "dateTo"')
     }
 
+    // Validate volatile
+    if ('volatile' in query && !(query.volatile.toLowerCase() == 'true' || query.volatile.toLowerCase() == 'false')) {
+      requestError.errors.push('Malformed value in property "volatile"')
+    }
+
     if (requestError.errors.length > 0) {
       return next(requestError)
     }
@@ -75,15 +80,17 @@ export class Middleware {
     const defaultProduct = async () => (await fetchAll<Product>(this.conn, Product)).map(product => product.id)
     const defaultDateFrom = () => new Date('1970-01-01')
     const defaultDateTo = tomorrow
+    const setVolatile = () => ('volatile' in query) ? toArray(query.volatile) : [true, false]
 
     // Set defaults
     if (!('location' in query)) query.location = await defaultLocation()
     if (!('product' in query)) query.product = await defaultProduct()
     if (!('dateFrom' in query)) query.dateFrom = defaultDateFrom()
     if (!('dateTo' in query)) query.dateTo = defaultDateTo()
-
+    if (!('releasedBefore' in query)) query.releasedBefore = defaultDateTo()
     query.location = toArray(query.location)
     query.product = toArray(query.product)
+    query.volatile = setVolatile()
 
     next()
   }

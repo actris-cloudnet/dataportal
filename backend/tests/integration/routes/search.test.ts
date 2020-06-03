@@ -1,22 +1,20 @@
-import { backendUrl, genResponse } from '../../lib'
+import 'reflect-metadata'
+import { backendPublicUrl, genResponse } from '../../lib'
 import axios from 'axios'
 import { RequestError } from '../../../src/entity/RequestError'
 import { createConnection, Connection } from 'typeorm'
-import { File } from '../../../src/entity/File'
 
-const volatileUuid = '38092c00-161d-4ca2-a29d-628cf8e960f6'
 let conn: Connection
+
 beforeAll(async () => {
-  // Make one of the files volatile
   conn = await createConnection('test')
-  const now = new Date()
-  return conn.getRepository(File).update(volatileUuid, { releasedAt: new Date(new Date(now.setDate(now.getDate() - 2))) })
 })
 
 afterAll(() => conn.close())
 
-describe('/files', () => {
-  const url = `${backendUrl}files/`
+
+describe('/api/files', () => {
+  const url = `${backendPublicUrl}files/`
   const expectedBody404: RequestError = {
     status: 404,
     errors: 'Not found'
@@ -27,7 +25,7 @@ describe('/files', () => {
       status: 400,
       errors: [ 'No search parameters given' ]
     }
-    expect(axios.get(`${backendUrl}files/`)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
+    expect(axios.get(`${backendPublicUrl}files/`)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
 
   it('responds with 400 if invalid query parameters are given', () => {
@@ -36,7 +34,7 @@ describe('/files', () => {
       status: 400,
       errors: [ 'Unknown query parameters: x,y' ]
     }
-    expect(axios.get(`${backendUrl}files/`, payload))
+    expect(axios.get(`${backendPublicUrl}files/`, payload))
       .rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
 
@@ -108,19 +106,21 @@ describe('/files', () => {
   })
 
   it('has exactly one stable file', async () => {
-    const payload = {params: {location: 'macehead'}}
+    const payload = {params: {volatile: 'false'}}
     const res = await axios.get(url, payload)
-    return expect(res.data.filter((file: any) => !file.volatile)).toHaveLength(1)
+    return expect(res.data).toHaveLength(1)
   })
 
   it('does not show test files in normal mode', async () => {
     const payload = {params: {location: 'granada'}}
     expectedBody404.errors = ['The search yielded zero results']
-    return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody404.status, expectedBody404))
+    const res = await axios.get(url, payload)
+    return expect(res.data).toMatchObject([])
   })
 
   it('shows test files in developer mode', async () => {
     const payload = {params: {location: 'granada', developer: ''}}
     return expect(axios.get(url, payload)).resolves.toBeTruthy()
   })
+
 })
