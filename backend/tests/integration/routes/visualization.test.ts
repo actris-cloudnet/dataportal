@@ -43,6 +43,8 @@ describe('PUT /visualization', () => {
     ]).catch()
   )
 
+  afterAll(() => conn.close())
+
   it('on valid new visualization inserts a row to db and responds with 201', async () => {
     const res = await axios.put(`${privUrl}${validId}`, validJson, { headers })
     expect(res.status).toEqual(201)
