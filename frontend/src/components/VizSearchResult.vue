@@ -11,6 +11,7 @@
       align-items: center
       justify-content: space-between
       margin-bottom: 1em
+      height: 3em
       h3
         margin: 0
   main#vizSearchResults.singleColumn
@@ -37,11 +38,10 @@
     max-width: 100%
   .sourceFile
     h3
-      display: inline-block
       margin-bottom: 1.5em
+      font-size: 1.1em
   .variable
     h4
-      display: inline-block
       margin-left: 1.5em
       margin-bottom: 0
 
