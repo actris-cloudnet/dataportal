@@ -176,6 +176,9 @@
   .map
     height: 300px
     width: 300px
+    margin-bottom: $filter-margin
+
+  .wrapper
     position: relative
 
   .no-padding
@@ -199,7 +202,7 @@
   <section id="sideBar">
     <header class="filterOptions">Filter search</header>
 
-    <div id="minimap" class="container sticky-top" style="z-index: 4">
+    <div id="minimap" class="container wrapper" style="z-index: 4">
       <div class="row">
         <div class="col-md-12 no-padding">
           <div id="map" class="map"></div>
@@ -315,13 +318,14 @@ import { Component, Vue, Watch } from 'vue-property-decorator'
 import VCalendar from 'v-calendar'
 import axios from 'axios'
 import { File } from '../../../backend/src/entity/File'
+import { Site } from '../../../backend/src/entity/Site'
 import { BTable } from 'bootstrap-vue/esm/components/table'
 import { BPagination } from 'bootstrap-vue/esm/components/pagination'
 import Datepicker from '../components/Datepicker.vue'
 import CustomMultiselect from '../components/Multiselect.vue'
 import { getIconUrl, getShadowUrl, getMarkerUrl, humanReadableSize, combinedFileSize } from '../lib'
 import { DevMode } from '../lib/DevMode'
-import L, { marker, Marker } from 'leaflet'
+import L, { marker } from 'leaflet'
 
 Vue.component('datepicker', Datepicker)
 Vue.component('b-table', BTable)
@@ -351,8 +355,8 @@ export default class Search extends Vue {
   perPage = 15
 
   // site selector
-  allSites = []
-  selectedSiteIds = []
+  allSites: Site[] = []
+  selectedSiteIds: string[] = []
 
   setSelectedSiteIds(siteIds: []) {
     this.selectedSiteIds = siteIds
@@ -371,9 +375,9 @@ export default class Search extends Vue {
   selectedProductIds = []
 
   // Minimap
-  map = null as any
-  tileLayer = null as any
-  allMarkers = {}
+  map = null as any  //L.map('map')
+  tileLayer = null as any //L.tileLayer('')
+  allMarkers: { [key: string]: L.Marker } = {}
   passiveMarker = L.Icon.extend({
     options: {
       iconUrl: getMarkerUrl('blue'),
@@ -445,8 +449,7 @@ export default class Search extends Vue {
     })
   }
 
-  onMapMarkerClick(id) {
-    const s = this.allSites.find(x => x.id === id)
+  onMapMarkerClick(id: string) {
     if (this.selectedSiteIds.includes(id)) {
       this.selectedSiteIds = this.selectedSiteIds.filter(e => e !== id)
     }
@@ -456,9 +459,9 @@ export default class Search extends Vue {
   }
 
   setActiveMarkers() {
-    var keys = Object.keys(this.allMarkers)
-    keys.forEach((id) => {
-      var mark = this.allMarkers[id]
+    const keys = Object.keys(this.allMarkers)
+    keys.forEach((id: string) => {
+      const mark = this.allMarkers[id]
       if (this.selectedSiteIds.includes(id)) {
         mark.setIcon(new this.activeMarker)
       }
