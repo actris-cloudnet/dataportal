@@ -43,7 +43,7 @@
   .variable
     h4
       margin-left: 1.5em
-      margin-bottom: 0
+      margin-bottom: 0.15em
 
   .modeSelector
     display: flex
