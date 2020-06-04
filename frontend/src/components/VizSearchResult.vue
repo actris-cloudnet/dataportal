@@ -72,10 +72,8 @@
 <script lang="ts">
 import {Component, Prop, Watch} from 'vue-property-decorator'
 import Vue from 'vue'
-import {Visualization} from '../../../backend/src/entity/Visualization'
 import {VisualizationResponse} from '../../../backend/src/entity/VisualizationResponse'
 import {humanReadableDate, sortVisualizations} from '../lib'
-import router from '@/router'
 
 @Component
 export default class DataSearchResult extends Vue {
@@ -112,7 +110,7 @@ export default class DataSearchResult extends Vue {
   }
 
   navigateToFile(uuid: string) {
-    router.push({ name: 'File', params: { uuid } })
+    this.$router.push({ name: 'File', params: { uuid } })
   }
 
   @Watch('comparisonViewAsBoolean')

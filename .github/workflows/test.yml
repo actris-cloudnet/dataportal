@@ -11,7 +11,6 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [10.16.3]
         python-version: [3.6]
 
     env:
@@ -32,14 +31,12 @@ jobs:
       run: export PATH=/usr/local/bin:$PATH
     - name: Install nvm
       run: | 
-      wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
-      export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-      [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+          wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
     - name: Install node
       run: |
+          export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
           nvm install v10.16
-          nvm install v12
-          nvm use v10
     - name: Setup geckodriver
       run: |
           wget https://github.com/mozilla/geckodriver/releases/download/v0.26.0/geckodriver-v0.26.0-linux64.tar.gz 
@@ -70,7 +67,11 @@ jobs:
     - name: Start backend and frontend
       run: ./control start
     - name: Run frontend unit tests
-      run: cd frontend && npm test && cd ..
+      run: |
+          . ~/.nvm/nvm.sh
+          nvm install v12
+          cd frontend && npm test && cd ..
+          nvm use v10
     - name: Run integration tests
       run: cd backend && npm test && cd ..
     - name: Run e2e tests
