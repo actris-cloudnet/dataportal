@@ -1,8 +1,7 @@
 import { By, until, WebDriver } from 'selenium-webdriver'
-import * as fs from 'fs'
-import {basename, join} from 'path'
+import {basename} from 'path'
 import axios from 'axios'
-import {inboxDir, backendPrivateUrl, runNcdump, parseUuid, visualizationPayloads, wait} from '../lib'
+import {backendPrivateUrl, runNcdump, parseUuid, visualizationPayloads, wait, putFile} from '../lib'
 import {initDriver, Selenium} from '../lib/selenium'
 
 let selenium: Selenium
@@ -18,12 +17,6 @@ async function awaitAndFind(by: By) {
 beforeAll(async () => {
   driver = await initDriver()
   selenium = new Selenium(driver)
-  async function putFile(filename: string) {
-    const xml = await runNcdump(`tests/data/${filename}`)
-    const uuid = await parseUuid(xml)
-    const url = `${backendPrivateUrl}file/${uuid}`
-    return axios.put(url, xml, {headers: { 'Content-Type': 'application/xml' }})
-  }
 
   const vizUrl = `${backendPrivateUrl}visualization/`
   await putFile('20190723_bucharest_classification.nc')

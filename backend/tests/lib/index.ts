@@ -3,7 +3,8 @@ import * as path from 'path'
 import { createConnection } from 'typeorm'
 import { spawn } from 'child_process'
 import { Parser } from 'xml2js'
-import {resolve} from "path"
+import {resolve} from 'path'
+import axios from 'axios'
 
 export function clearDir(dir: string) {
   const files = fs.readdirSync(dir)
@@ -44,6 +45,13 @@ export async function parseUuid(xml: any) {
       }
     })
   })
+}
+
+export async function putFile(filename: string) {
+  const xml = await runNcdump(`tests/data/${filename}`)
+  const uuid = await parseUuid(xml)
+  const url = `${backendPrivateUrl}file/${uuid}`
+  return axios.put(url, xml, {headers: { 'Content-Type': 'application/xml' }})
 }
 
 export const wait = async (ms: number) => new Promise((resolve, _) => setTimeout(resolve, ms))

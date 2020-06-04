@@ -2,10 +2,8 @@ import {WebDriver} from 'selenium-webdriver'
 import axios from 'axios'
 import {
   wait,
-  runNcdump,
   backendPrivateUrl,
-  parseUuid,
-  visualizationPayloads
+  visualizationPayloads, putFile
 } from '../lib'
 import {Selenium, initDriver} from '../lib/selenium'
 import {basename} from 'path'
@@ -30,10 +28,7 @@ afterAll(async () => driver.close())
 describe('visualizations page', () => {
 
   beforeAll(async () => {
-    const xml = await runNcdump('tests/data/20200501_bucharest_classification.nc')
-    const uuid = await parseUuid(xml)
-    const fileUrl = `${backendPrivateUrl}file/${uuid}`
-    await axios.put(fileUrl, xml, {headers: { 'Content-Type': 'application/xml' }})
+    await putFile('20200501_bucharest_classification.nc')
     return Promise.all([
       axios.put(`${backendPrivateUrl}visualization/${basename(visualizationPayloads[0].fullPath)}`, visualizationPayloads[0]),
       axios.put(`${backendPrivateUrl}visualization/${basename(visualizationPayloads[1].fullPath)}`, visualizationPayloads[1]),

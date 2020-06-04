@@ -2,14 +2,8 @@ import {By, WebDriver} from 'selenium-webdriver'
 import axios from 'axios'
 import {
   wait,
-  runNcdump,
   backendPrivateUrl,
-  parseUuid,
-  clearDir,
-  inboxDir,
-  publicDir,
-  clearRepo,
-  visualizationPayloads
+  visualizationPayloads, putFile
 } from '../lib'
 import {Selenium, initDriver} from '../lib/selenium'
 import { basename } from 'path'
@@ -48,10 +42,7 @@ describe('search page', () => {
 
     // PUT files
     for (let i=0; i < filenames.length; i++) {
-      const xml = await runNcdump(`tests/data/${filenames[i]}`)
-      const uuid = await parseUuid(xml)
-      const url = `${backendPrivateUrl}file/${uuid}`
-      await axios.put(url, xml, {headers: { 'Content-Type': 'application/xml' }})
+      await putFile(filenames[i])
     }
 
     // PUT visualizations
