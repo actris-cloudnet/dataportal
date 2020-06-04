@@ -1,8 +1,7 @@
 <style lang="sass">
   @import "../sass/variables.sass"
   @import "../sass/global.sass"
-
-  $column-spacing: 10px
+  @import "../sass/visualizations.sass"
 
   main#vizSearchResults
     width: 100%
@@ -17,50 +16,6 @@
         margin: 0
   main#vizSearchResults.singleColumn
     max-width: 1000px
-  div.sourceFile
-    padding-left: 1em
-    padding-right: 1em
-    padding-bottom: 1em
-    display: flex
-    flex-wrap: wrap
-  div.paddedSourceFile + div.paddedSourceFile, .sideBySide div.sourceFile:nth-child(n+3)
-    border-top: 1px solid $border-color
-    padding-top: 1em
-    margin-top: $filter-margin
-  .sideBySide
-    display: flex
-    flex-wrap: wrap
-  .sideBySide
-    div.sourceFile
-      flex-basis: calc(50% - #{$column-spacing})
-      align-content: flex-start
-      padding: 0
-      border: none
-      margin: 0
-    div.sourceFile:nth-child(even)
-      padding-left: $column-spacing
-    div.sourceFile:only-child
-      flex-basis: 100%
-  img
-    height: auto
-    max-width: 100%
-  .sourceFile
-    h3
-      width: 100%
-      margin-bottom: 1.5em
-      font-size: 1.1em
-      cursor: pointer
-      svg
-        position: relative
-        top: -1px
-        width: 0.9em
-        height: auto
-  .variable
-    flex-basis: 600px
-    flex-grow: 1
-    h4
-      margin-left: 1.5em
-      margin-bottom: 0.15em
 
   .modeSelector
     display: flex
@@ -119,7 +74,7 @@ import {Component, Prop, Watch} from 'vue-property-decorator'
 import Vue from 'vue'
 import {Visualization} from '../../../backend/src/entity/Visualization'
 import {VisualizationResponse} from '../../../backend/src/entity/VisualizationResponse'
-import {humanReadableDate} from '../lib'
+import {humanReadableDate, sortVisualizations} from '../lib'
 import router from '@/router'
 
 @Component
@@ -130,6 +85,7 @@ export default class DataSearchResult extends Vue {
   @Prop() setWideMode!: Function
 
   comparisonView = '0'
+  sortVisualizations = sortVisualizations
 
   get humanReadableDate() {
     return humanReadableDate(this.date.toString())
@@ -143,14 +99,6 @@ export default class DataSearchResult extends Vue {
   }
   get searchYieldedResults() {
     return this.apiResponse.length > 0
-  }
-
-  sortVisualizations(visualizations: Visualization[]) {
-    return visualizations.sort((a: Visualization, b: Visualization) => {
-      if (a.productVariable.order == b.productVariable.order) return 0
-      if (a.productVariable.order < b.productVariable.order) return -1
-      return 1
-    })
   }
 
   alphabeticalSort(a: VisualizationResponse, b: VisualizationResponse) {

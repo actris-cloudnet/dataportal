@@ -1,6 +1,7 @@
 <style scoped lang="sass">
 @import "../sass/variables.sass"
 @import "../sass/global.sass"
+@import "../sass/visualizations.sass"
 
 main#landing
 
@@ -71,6 +72,9 @@ main#landing
         text-align: left
         margin: 0
 
+    section#preview.wide
+      flex-basis: 100%
+
     .monospace
       white-space: pre-wrap
       font-family: monospace
@@ -81,16 +85,16 @@ main#landing
       font-size: 0.9em
 
   #preview
-    max-width: 45em
+    flex-basis: 600px
     img
       width: 100%
       height: auto
 
-  .linkNotImplemented
+  a.viewAllPlots
+    cursor: pointer
+  a.viewAllPlots:hover
+    color: #0056b3
     text-decoration: underline
-    cursor: default
-    color: #a0a9aa
-
 .capitalize
   text-transform: capitalize
 
@@ -177,16 +181,6 @@ img.product
           </dl>
         </section>
       </section>
-      <section id="preview">
-        <header>Preview</header>
-        <section class="details">
-          <img id="previewImg" v-show="imgExists" v-bind:src="`${quicklookUrl}${imgName}`" @load="imgExists = true">
-          <span v-if="imgExists" title="This feature is not yet implemented." class="linkNotImplemented">
-            See all plots &rarr;
-          </span>
-          <span v-else>Preview not available</span>
-        </section>
-      </section>
       <section id="history">
         <header>History</header>
         <section class="details" v-if="response.history">
@@ -194,6 +188,29 @@ img.product
           <span class="notice">This is a non-standardized history provided by the file creator/processor.</span>
         </section>
         <section class="details na" v-else>N/A
+        </section>
+      </section>
+      <section id="preview" v-bind:class="{ wide: allVisualizations }">
+        <header>Preview</header>
+        <section class="details">
+          <div v-if="visualizations && visualizations.visualizations.length" v-bind:class="{sourceFile: allVisualizations}">
+            <div v-for="viz in getVisualizations(sortVisualizations(visualizations.visualizations))"
+                 :key="viz.filename" class="variable">
+              <h4>{{ viz.productVariable.humanReadableName }}</h4>
+              <img v-bind:src="`${quicklookUrl}${visualizations.visualizations[0].filename}`">
+            </div>
+          </div>
+          <a v-if="visualizations && visualizations.visualizations.length > 1 && !allVisualizations"
+             class="viewAllPlots"
+             @click="allVisualizations = true">
+            See all plots
+          </a>
+          <a v-else-if="allVisualizations"
+             class="viewAllPlots"
+             @click="allVisualizations = false">
+            View only one plot
+          </a>
+          <span v-else-if="!visualizations || visualizations.visualizations.length == 0">Preview not available</span>
         </section>
       </section>
     </main>
@@ -205,28 +222,32 @@ img.product
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import axios from 'axios'
-import { getIconUrl, humanReadableSize, humanReadableDate } from '../lib'
+import {getIconUrl, humanReadableSize, humanReadableDate, sortVisualizations} from '../lib'
 import { DevMode } from '../lib/DevMode'
 import { File } from '../../../backend/src/entity/File'
+import {VisualizationResponse} from '../../../backend/src/entity/VisualizationResponse'
+import {Visualization} from '../../../backend/src/entity/Visualization'
 
 @Component
 export default class FileView extends Vue {
   @Prop() uuid!: string
   response: File | null = null
+  visualizations: VisualizationResponse | null = null
   error = false
   quicklookUrl = process.env.VUE_APP_QUICKLOOKURL
   apiUrl = process.env.VUE_APP_BACKENDURL
   humanReadableSize = humanReadableSize
   humanReadableDate = humanReadableDate
   getIconUrl = getIconUrl
+  sortVisualizations = sortVisualizations
   devMode = new DevMode()
 
-  get imgName() {
-    if (!this.response) return ''
-    return this.response.filename.replace('.nc', '.png')
-  }
+  allVisualizations = false
 
-  imgExists = false
+  getVisualizations(visualizations: Visualization[]) {
+    if (!this.allVisualizations) return visualizations.slice(0, 1)
+    return visualizations
+  }
 
   created() {
     const payload = { params: { developer: this.devMode.activated || undefined}}
@@ -239,6 +260,12 @@ export default class FileView extends Vue {
         this.error = true
         this.response = response
       })
+    axios
+      .get(`${this.apiUrl}visualization/${this.uuid}`, payload)
+      .then(response => {
+        this.visualizations = response.data
+      })
+      .catch()
   }
 }
 </script>

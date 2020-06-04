@@ -1,4 +1,5 @@
 import { File } from '../../../backend/src/entity/File'
+import {Visualization} from '../../../backend/src/entity/Visualization'
 
 export const getIconUrl = (product: string) =>
   require(`../assets/icons/${product}.png`)
@@ -23,3 +24,10 @@ export const dateToString = (date: Date) => {
   return utcTime.toISOString().substring(0,10)
 }
 
+export const sortVisualizations = (visualizations: Visualization[]) => {
+  return visualizations.sort((a: Visualization, b: Visualization) => {
+    if (a.productVariable.order == b.productVariable.order) return 0
+    if (a.productVariable.order < b.productVariable.order) return -1
+    return 1
+  })
+}
