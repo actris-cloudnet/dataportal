@@ -1,7 +1,18 @@
 import {By, WebDriver} from 'selenium-webdriver'
 import axios from 'axios'
-import {wait, runNcdump, backendPrivateUrl, parseUuid, clearDir, inboxDir, publicDir, clearRepo} from '../lib'
+import {
+  wait,
+  runNcdump,
+  backendPrivateUrl,
+  parseUuid,
+  clearDir,
+  inboxDir,
+  publicDir,
+  clearRepo,
+  visualizationPayloads
+} from '../lib'
 import {Selenium, initDriver} from '../lib/selenium'
+import { basename } from 'path'
 
 let selenium: Selenium
 let driver: WebDriver
@@ -10,7 +21,8 @@ jest.setTimeout(60000)
 
 async function initSearch() {
   await selenium.driver.get('http://localhost:8000/search/data')
-  return selenium.sendInputToMultiselect('siteSelect', 'bucharest')
+  await selenium.sendInputToMultiselect('siteSelect', 'bucharest')
+  return selenium.sendInput('dateTo', '2020-04-01')
 }
 
 beforeAll(async () => {
@@ -32,14 +44,22 @@ describe('search page', () => {
       filenames.push(`201907${i}_mace-head_iwc-Z-T-method.nc`)
     }
     filenames.push('20200126_granada_ecmwf.nc')
+    filenames.push('20200501_bucharest_classification.nc')
 
+    // PUT files
     for (let i=0; i < filenames.length; i++) {
       const xml = await runNcdump(`tests/data/${filenames[i]}`)
       const uuid = await parseUuid(xml)
       const url = `${backendPrivateUrl}file/${uuid}`
       await axios.put(url, xml, {headers: { 'Content-Type': 'application/xml' }})
     }
-    await wait(3000)
+
+    // PUT visualizations
+    const vizUrl = `${backendPrivateUrl}visualization/`
+    return Promise.all([
+      axios.put(`${vizUrl}${basename(visualizationPayloads[0].fullPath)}`, visualizationPayloads[0]),
+      axios.put(`${vizUrl}${basename(visualizationPayloads[1].fullPath)}`, visualizationPayloads[1]),
+    ])
   })
 
   beforeEach(initSearch)
@@ -84,7 +104,7 @@ describe('search page', () => {
     await selenium.clickId('reset')
     await wait(1000)
     const content = await selenium.getContent()
-    expect(content).toContain('No results')
+    expect(content).toContain('Found 1 results')
   })
 
   it('works when clicking the calendar', async () => {
@@ -152,6 +172,14 @@ describe('search page', () => {
     const downloadUrl = await button.getAttribute('href')
     const response = await axios.head(downloadUrl)
     expect(response.status).toBe(200)
+  })
+
+  it('switches to visualization search', async () => {
+    await selenium.sendInput('dateTo', '2020-05-01')
+    await selenium.clickClass('secondaryButton')
+    const content = await selenium.getContent()
+    expect((await selenium.findAllByClass('sourceFile')).length).toEqual(1)
+    expect((await selenium.findAllByClass('variable')).length).toEqual(2)
   })
 
 })

@@ -1,4 +1,4 @@
-import {clearDir, clearRepo, inboxDir, publicDir, wait} from './index'
+import {clearDir, clearRepo, inboxDir, publicDir, publicVizDir, wait} from './index'
 import {Builder, By, Key, until, WebDriver, } from 'selenium-webdriver'
 import * as firefox from 'selenium-webdriver/firefox'
 
@@ -7,6 +7,7 @@ export async function initDriver() {
   if (process.env.CI) options.addArguments('-headless') // Run in headless on CI
   clearDir(inboxDir)
   clearDir(publicDir)
+  clearDir(publicVizDir)
   await clearRepo('visualization')
   await clearRepo('file')
   return new Builder()
@@ -24,12 +25,14 @@ export class Selenium {
   }
 
   getContent = async () => await (await this.findElement(By.tagName('html'))).getText()
+  getContentBy = async (by: By) => await (await this.findElement(by)).getText()
   clickTab = async () => await this.driver.actions().sendKeys(Key.TAB).perform()
   getById = async (key: string) => await this.findElement(By.id(key))
   clickId = async (key: string) => (await this.getById(key)).click()
   clickGrandparentById = async (key: string) => (await (await this.getById(key)).findElement(By.xpath('../..'))).click()
   clickClass = async (key: string) => await (await this.findElement(By.className(key))).click()
   clickXpath = async (key: string) => await (await this.findElement(By.xpath(key))).click()
+  findAllByClass = async (key: string) => await this.driver.findElements(By.className(key))
 
   async awaitAndFind(by: By) {
     await this.driver.wait(until.elementLocated(by))
@@ -68,4 +71,5 @@ export class Selenium {
     await this.driver.wait(until.elementLocated(by))
     return this.driver.findElement(by)
   }
+
 }

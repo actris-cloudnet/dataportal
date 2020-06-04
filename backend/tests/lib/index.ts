@@ -3,6 +3,7 @@ import * as path from 'path'
 import { createConnection } from 'typeorm'
 import { spawn } from 'child_process'
 import { Parser } from 'xml2js'
+import {resolve} from "path"
 
 export function clearDir(dir: string) {
   const files = fs.readdirSync(dir)
@@ -56,3 +57,12 @@ export const backendPublicUrl = 'http://localhost:3001/api/'
 export const backendPrivateUrl = 'http://localhost:3001/'
 export const publicVizDir = 'tests/data/public/viz'
 export const fileServerUrl = 'http://localhost:4001/'
+export const visualizationPayloads = [  {
+  fullPath: resolve('tests/data/20200501_bucharest_classification_detection_status.png'),
+  sourceFileId: '7a9c3894ef7e43d9aa7da3f25017acec',
+  variableId: 'classification-detection_status'
+},  {
+  fullPath: resolve('tests/data/20200501_bucharest_classification_target_classification.png'),
+  sourceFileId: '7a9c3894ef7e43d9aa7da3f25017acec',
+  variableId: 'classification-target_classification'
+} ]
