@@ -63,6 +63,7 @@ import * as xmlparser from 'express-xml-bodyparser'
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
     routes.getVisualization)
+  app.get('/api/visualization/:uuid', routes.getVisualizationForSourceFile)
 
   // private
   app.put('/file/:uuid', routes.submit)

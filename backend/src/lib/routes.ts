@@ -183,6 +183,26 @@ export class Routes {
       .catch(err => next({ status: 500, errors: err }))
   }
 
+  getVisualizationForSourceFile: RequestHandler = async (req: Request, res: Response, next) => {
+    const params = req.params
+    const qb = this.fileRepo.createQueryBuilder('file')
+      .leftJoinAndSelect('file.visualizations', 'visualizations')
+      .leftJoinAndSelect('visualizations.productVariable', 'product_variable')
+      .leftJoinAndSelect('file.site', 'site')
+      .leftJoinAndSelect('file.product', 'product')
+      .where('file.uuid = :uuid', params)
+    this.hideTestDataFromNormalUsers(qb, req)
+      .getOne()
+      .then(file => {
+        if (file == undefined) {
+          next({status: 404, errors: ['No files match the query'], params})
+          return
+        }
+        res.send(new VisualizationResponse(file))
+      })
+      .catch(err => next({status: 500, errors: err}))
+  }
+
   allfiles: RequestHandler = async (req: Request, res: Response, next) =>
     this.fileRepo.find({ relations: ['site', 'product'] })
       .then(result => res.send(this.augmentFiles(result)))
