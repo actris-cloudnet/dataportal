@@ -34,7 +34,6 @@
   section#sideBar
     margin-right: 80px
     width: 300px
-    margin-bottom: 7em
 
   .multiselect
     margin-bottom: $filter-margin
