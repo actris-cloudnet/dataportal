@@ -1,8 +1,8 @@
 import { By, until, WebDriver } from 'selenium-webdriver'
 import * as fs from 'fs'
-import { join } from 'path'
+import {basename, join} from 'path'
 import axios from 'axios'
-import { inboxDir, backendPrivateUrl, runNcdump, parseUuid } from '../lib'
+import {inboxDir, backendPrivateUrl, runNcdump, parseUuid, visualizationPayloads, wait} from '../lib'
 import {initDriver, Selenium} from '../lib/selenium'
 
 let selenium: Selenium
@@ -18,11 +18,20 @@ async function awaitAndFind(by: By) {
 beforeAll(async () => {
   driver = await initDriver()
   selenium = new Selenium(driver)
-  const xml = await runNcdump('tests/data/20190723_bucharest_classification.nc')
-  const uuid = await parseUuid(xml)
-  const url = `${backendPrivateUrl}file/${uuid}`
-  await axios.put(url, xml, {headers: { 'Content-Type': 'application/xml' }})
-  fs.copyFileSync('tests/data/20190723_bucharest_classification.png', join(inboxDir, '20190723_bucharest_classification.png'))
+  async function putFile(filename: string) {
+    const xml = await runNcdump(`tests/data/${filename}`)
+    const uuid = await parseUuid(xml)
+    const url = `${backendPrivateUrl}file/${uuid}`
+    return axios.put(url, xml, {headers: { 'Content-Type': 'application/xml' }})
+  }
+
+  const vizUrl = `${backendPrivateUrl}visualization/`
+  await putFile('20190723_bucharest_classification.nc')
+  await putFile('20200501_bucharest_classification.nc')
+  return Promise.all([
+    axios.put(`${vizUrl}${basename(visualizationPayloads[0].fullPath)}`, visualizationPayloads[0]),
+    axios.put(`${vizUrl}${basename(visualizationPayloads[1].fullPath)}`, visualizationPayloads[1]),
+  ])
 })
 
 afterAll(async () => driver.close())
@@ -50,10 +59,9 @@ describe('file landing page', () => {
     ]
     await driver.get('http://localhost:8000/file/15506ea8d3574c7baf8c95dfcc34fc7d')
     const content = await (await awaitAndFind(By.id('landing'))).getText()
-    targetArray.forEach(value => {
+    return Promise.all(targetArray.map(value =>
       expect(content).toContain(value)
-    })
-    return
+    ))
   })
 
   it('starts download when clicking download button', async () => {
@@ -66,11 +74,23 @@ describe('file landing page', () => {
   })
 
   it('shows a preview image', async () => {
-    await driver.get('http://localhost:8000/file/15506ea8d3574c7baf8c95dfcc34fc7d')
-    const button = await awaitAndFind(By.id('previewImg'))
-    const downloadUrl = await button.getAttribute('src')
+    await driver.get('http://localhost:8000/file/7a9c3894ef7e43d9aa7da3f25017acec')
+    // Wait for page to load
+    await wait(300)
+    const imgs = await selenium.findAllByClass('visualization')
+    expect(imgs.length).toEqual(1)
+    const downloadUrl = await imgs[0].getAttribute('src')
     const response = await axios.head(downloadUrl)
     expect(response.status).toBe(200)
-    return expect(response.headers['content-length']).toBe('163576')
+    return expect(response.headers['content-length']).toBe('91112')
+  })
+
+  it('shows all plots after clicking see more plots', async () => {
+    await driver.get('http://localhost:8000/file/7a9c3894ef7e43d9aa7da3f25017acec')
+    // Wait for page to load
+    await wait(300)
+    await selenium.clickClass('viewAllPlots')
+    const imgs = await selenium.findAllByClass('visualization')
+    expect(imgs.length).toEqual(2)
   })
 })

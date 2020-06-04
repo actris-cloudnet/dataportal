@@ -197,7 +197,7 @@ img.product
             <div v-for="viz in getVisualizations(sortVisualizations(visualizations.visualizations))"
                  :key="viz.filename" class="variable">
               <h4>{{ viz.productVariable.humanReadableName }}</h4>
-              <img v-bind:src="`${quicklookUrl}${visualizations.visualizations[0].filename}`">
+              <img v-bind:src="`${quicklookUrl}${visualizations.visualizations[0].filename}`" class="visualization">
             </div>
           </div>
           <a v-if="visualizations && visualizations.visualizations.length > 1 && !allVisualizations"
