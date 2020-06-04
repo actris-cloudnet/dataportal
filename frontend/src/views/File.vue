@@ -193,14 +193,14 @@ img.product
       <section id="preview" v-bind:class="{ wide: allVisualizations }">
         <header>Preview</header>
         <section class="details">
-          <div v-if="visualizations && visualizations.visualizations.length" v-bind:class="{sourceFile: allVisualizations}">
-            <div v-for="viz in getVisualizations(sortVisualizations(visualizations.visualizations))"
-                 :key="viz.filename" class="variable">
+          <div v-if="visualizations.length" v-bind:class="{sourceFile: allVisualizations}">
+            <div v-for="viz in getVisualizations(visualizations)"
+                 :key="viz.productVariable.id" class="variable">
               <h4>{{ viz.productVariable.humanReadableName }}</h4>
-              <img v-bind:src="`${quicklookUrl}${visualizations.visualizations[0].filename}`" class="visualization">
+              <img v-bind:src="`${quicklookUrl}${visualizations[0].filename}`" class="visualization">
             </div>
           </div>
-          <a v-if="visualizations && visualizations.visualizations.length > 1 && !allVisualizations"
+          <a v-if="visualizations.length > 1 && !allVisualizations"
              class="viewAllPlots"
              @click="allVisualizations = true">
             See all plots
@@ -210,7 +210,7 @@ img.product
              @click="allVisualizations = false">
             View only one plot
           </a>
-          <span v-else-if="!visualizations || visualizations.visualizations.length == 0">Preview not available</span>
+          <span v-else-if="visualizations.length === 0">Preview not available</span>
         </section>
       </section>
     </main>
@@ -232,7 +232,7 @@ import {Visualization} from '../../../backend/src/entity/Visualization'
 export default class FileView extends Vue {
   @Prop() uuid!: string
   response: File | null = null
-  visualizations: VisualizationResponse | null = null
+  visualizations: Visualization[] | [] = []
   error = false
   quicklookUrl = process.env.VUE_APP_QUICKLOOKURL
   apiUrl = process.env.VUE_APP_BACKENDURL
@@ -244,9 +244,9 @@ export default class FileView extends Vue {
 
   allVisualizations = false
 
-  getVisualizations(visualizations: Visualization[]) {
-    if (!this.allVisualizations) return visualizations.slice(0, 1)
-    return visualizations
+  getVisualizations() {
+    if (!this.allVisualizations) return this.visualizations.slice(0, 1)
+    return this.visualizations
   }
 
   created() {
@@ -263,7 +263,7 @@ export default class FileView extends Vue {
     axios
       .get(`${this.apiUrl}visualization/${this.uuid}`, payload)
       .then(response => {
-        this.visualizations = response.data
+        this.visualizations = sortVisualizations(response.data.visualizations)
       })
       .catch()
   }

@@ -25,7 +25,7 @@ export const dateToString = (date: Date) => {
 }
 
 export const sortVisualizations = (visualizations: Visualization[]) => {
-  return visualizations.sort((a: Visualization, b: Visualization) => {
+  return visualizations.concat().sort((a: Visualization, b: Visualization) => {
     if (a.productVariable.order == b.productVariable.order) return 0
     if (a.productVariable.order < b.productVariable.order) return -1
     return 1

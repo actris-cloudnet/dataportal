@@ -93,7 +93,7 @@ export default class DataSearchResult extends Vue {
     return parseInt(this.comparisonView) ? true : false
   }
   get sortedApiResponse() {
-    return this.apiResponse.sort(this.alphabeticalSort)
+    return this.apiResponse.concat().sort(this.alphabeticalSort)
   }
   get searchYieldedResults() {
     return this.apiResponse.length > 0
