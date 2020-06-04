@@ -21,14 +21,13 @@ jobs:
     - name: Install Ubuntu dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install zsh postgresql netcdf-bin nginx-light inotify-tools
+        sudo apt-get install zsh postgresql netcdf-bin nginx-light
     - name: Print versions
       run: |
         zsh --version
         psql --version
         ncdump
         nginx -v
-        inotifywait -h || true
     - name: Add local bin to PATH
       run: export PATH=/usr/local/bin:$PATH
     - name: Setup geckodriver
