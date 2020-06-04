@@ -5,7 +5,7 @@
   section#fileTable
     padding-left: 30px
     padding-right: 30px
-    flex-grow: 0.2
+    width: 100%
     padding-bottom: 100px
     text-align: left
 

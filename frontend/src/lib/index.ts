@@ -14,3 +14,12 @@ export const humanReadableDate = (date: string) =>
 
 export const combinedFileSize = (files: File[]) =>
   files.map(file => file.size).reduce((prev, cur) => cur + prev, 0)
+
+export const dateToUTC = (date: Date) =>
+  new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
+
+export const dateToString = (date: Date) => {
+  const utcTime = dateToUTC(date)
+  return utcTime.toISOString().substring(0,10)
+}
+

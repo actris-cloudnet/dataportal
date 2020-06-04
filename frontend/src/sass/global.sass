@@ -49,6 +49,42 @@ header.global, footer.global
     height: 1.3em
     fill: white
 
+.secondaryButton
+  appearance: button
+  text-decoration: none
+  background-color: $blue-dust
+  border-radius: 3px
+  border-style: solid
+  border-width: 1px
+  border-color: $steel-warrior
+  color: #83a1b7
+  padding-top: 4px
+  padding-bottom: 4px
+  padding-left: 10px
+  padding-right: 10px
+  font-size: 0.9em
+  cursor: pointer
+  font-family: $content-font
+  display: inline-block
+  text-align: center
+  &:hover:not(.disabled)
+    text-decoration: none
+    color: #518daf
+    background-color: $steel-warrior
+  &:active:not(.disabled)
+    background-color: $steel-warrior
+    border-color: $blue-dust
+  &.disabled
+    cursor: default
+  &.disabled:hover
+    color: white
+    text-decoration: none
+  > svg
+    vertical-align: middle
+    width: auto
+    height: 1.3em
+    fill: white
+
 .note
   border-width: 1px
   border-style: solid

@@ -5,8 +5,7 @@
   $column-spacing: 10px
 
   main#vizSearchResults
-    flex-grow: 1
-    flex-basis: 600px
+    width: 100%
     margin-bottom: 7em
     header
       display: flex
@@ -34,6 +33,7 @@
   .sideBySide
     div.sourceFile
       flex-basis: calc(50% - #{$column-spacing})
+      align-content: flex-start
       padding: 0
       border: none
       margin: 0
@@ -79,9 +79,10 @@
 
 
 <template>
-  <main id="vizSearchResults" v-bind:class="{ singleColumn: !comparisonViewAsBoolean }">
+  <main id="vizSearchResults" v-bind:class="{ singleColumn: !comparisonViewAsBoolean, opaque: isBusy }">
     <header>
-      <h3>Visualizations from {{humanReadableDate}}</h3>
+      <h3>Visualizations for {{humanReadableDate}}</h3>
+      <span v-if="isBusy" class="listTitle">Loading...</span>
       <div v-if="searchYieldedResults">
         <label for="comparisonModeSelector">View mode</label>
         <div class="modeSelector">
@@ -126,6 +127,7 @@ export default class DataSearchResult extends Vue {
   @Prop() apiResponse!: VisualizationResponse[]
   @Prop() isBusy!: boolean
   @Prop() date!: Date
+  @Prop() setWideMode!: Function
 
   comparisonView = '0'
 
@@ -163,6 +165,11 @@ export default class DataSearchResult extends Vue {
 
   navigateToFile(uuid: string) {
     router.push({ name: 'File', params: { uuid } })
+  }
+
+  @Watch('comparisonViewAsBoolean')
+  onViewModeChange() {
+    this.setWideMode(this.comparisonViewAsBoolean)
   }
 
   quicklookUrl = process.env.VUE_APP_QUICKLOOKURL

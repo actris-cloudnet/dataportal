@@ -32,7 +32,7 @@
     margin-bottom: $filter-margin
 
   section#sideBar
-    margin-right: 100px
+    margin-right: 80px
     width: 300px
     margin-bottom: 7em
 
@@ -98,9 +98,31 @@
   .disabled
     opacity: 0.5
 
+  .hidden
+    display: none
+
   .multiselect--disabled
     .multiselect__select
       background: none
+
+  .results
+    display: inline-flex
+    flex-basis: 600px
+
+  .resultsWide
+    flex-grow: 1
+
+  .resultsNarrow
+    flex-grow: 0.2
+
+  .resultsViz
+    flex-grow: 1
+    max-width: 1000px
+
+  .secondaryButton
+    width: 100%
+    margin: 0 auto
+    margin-bottom: $filter-margin
 
 </style>
 
@@ -135,6 +157,7 @@
         :end="dateTo"
         label="Date from"
         v-on:error="dateFromError = $event"
+        :key="dateFromUpdate"
       ></datepicker>
       <datepicker
         name="dateTo"
@@ -143,6 +166,7 @@
         :end="today"
         label="Date to"
         v-on:error="dateToError = $event"
+        :key="dateToUpdate"
       ></datepicker>
       <div v-if="!isTrueOnBothDateFields('isValidDateString')" class="errormsg">
         Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.
@@ -167,6 +191,7 @@
         :end="today"
         label="Date"
         v-on:error="dateToError = $event"
+        :key="vizDateUpdate"
       ></datepicker>
       <div v-if="!dateToError.isValidDateString" class="errormsg">
         Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.
@@ -187,29 +212,41 @@
       :devMode="devMode">
     </custom-multiselect>
 
-    <custom-multiselect v-if="isVizMode()"
+    <custom-multiselect v-bind:class="{ hidden: !isVizMode() }"
       label="Variable"
       v-model="selectedVariableIds"
       :options="selectableVariables"
       id="variableSelect">
     </custom-multiselect>
 
+    <button v-if="isVizMode()" @click="navigateToSearch('data')" class="secondaryButton">
+      View in data search &rarr;
+    </button>
+    <button v-else @click="navigateToSearch('viz')" class="secondaryButton">
+      View latest date in visualization search &rarr;
+    </button>
+
     <a @click="reset" id="reset">Reset filter</a>
   </section>
 
-  <viz-search-result
-    v-if="isVizMode()"
-    :apiResponse="apiResponse"
-    :isBusy="isBusy"
-    :date="dateTo">
-  </viz-search-result>
+  <div class="results" v-bind:class="resultsWidth">
+    <viz-search-result
+      v-if="isVizMode()"
+      :apiResponse="apiResponse"
+      :isBusy="isBusy"
+      :date="dateTo"
+      :key="vizSearchUpdate"
+      :setWideMode="setVizWideMode">
+    </viz-search-result>
 
-  <data-search-result
-    v-else
-    :apiResponse="apiResponse"
-    :isBusy="isBusy"
-    :downloadUri="downloadUri">
-  </data-search-result>
+    <data-search-result
+      v-else
+      :apiResponse="apiResponse"
+      :isBusy="isBusy"
+      :downloadUri="downloadUri"
+      :key="dataSearchUpdate">
+    </data-search-result>
+  </div>
 
 </main>
 <app-error v-else :response="{status: 404}"></app-error>
@@ -225,6 +262,7 @@ import { BPagination } from 'bootstrap-vue/esm/components/pagination'
 import Datepicker from '../components/Datepicker.vue'
 import CustomMultiselect from '../components/Multiselect.vue'
 import DataSearchResult from '../components/DataSearchResult.vue'
+import {getIconUrl, humanReadableSize, combinedFileSize, dateToString} from '../lib'
 import { DevMode } from '../lib/DevMode'
 import VizSearchResult from '../components/VizSearchResult.vue'
 import {Visualization} from '../../../backend/src/entity/Visualization'
@@ -251,7 +289,6 @@ export default class Search extends Vue {
 
   // api call
   apiUrl = process.env.VUE_APP_BACKENDURL
-  apiPath = this.isVizMode() ? 'visualization/' : 'files/'
   apiResponse: File[] | Visualization[] = this.resetResponse()
   isBusy = false
 
@@ -285,10 +322,36 @@ export default class Search extends Vue {
 
   displayBetaNotification = true
 
+  getIconUrl = getIconUrl
+  humanReadableSize = humanReadableSize
+  combinedFileSize = combinedFileSize
+  dateToString = dateToString
   devMode = new DevMode()
+
+  vizWideMode = false
+
+  // keys
+  dateFromUpdate = 10000
+  dateToUpdate = 20000
+  vizDateUpdate = 30000
+  dataSearchUpdate = 40000
+  vizSearchUpdate = 50000
 
   isVizMode() {
     return this.mode == 'viz'
+  }
+
+  setVizWideMode(wide: boolean) {
+    if (wide) this.vizWideMode = true
+    else this.vizWideMode = false
+  }
+
+  get resultsWidth() {
+    if (this.isVizMode()) {
+      if (this.vizWideMode) return {resultsWide: true}
+      else return { resultsViz: true }
+    }
+    return { resultsNarrow: true }
   }
 
   isTrueOnBothDateFields(errorId: string) {
@@ -317,14 +380,14 @@ export default class Search extends Vue {
       this.allSites = sites.data.sort(this.alphabeticalSort)
       this.allProducts = products.data.sort(this.alphabeticalSort)
     })
-    this.fetchData()
+    return this.fetchData()
   }
 
   get payload() {
     return {
       params: {
         location: this.selectedSiteIds,
-        dateFrom: this.dateFrom,
+        dateFrom: this.isVizMode() ? this.dateTo : this.dateFrom,
         dateTo: this.dateTo,
         product: this.selectedProductIds,
         variable: this.isVizMode() ? this.selectedVariableIds : undefined,
@@ -335,8 +398,9 @@ export default class Search extends Vue {
 
   fetchData() {
     this.isBusy = true
-    axios
-      .get(`${this.apiUrl}${this.apiPath}`, this.payload)
+    const apiPath = this.isVizMode() ? 'visualization/' : 'files/'
+    return axios
+      .get(`${this.apiUrl}${apiPath}`, this.payload)
       .then(res => {
         this.apiResponse = res.data
         this.isBusy = false
@@ -353,6 +417,10 @@ export default class Search extends Vue {
 
   resetResponse() {
     return []
+  }
+
+  navigateToSearch(mode: string) {
+    this.$router.push({ name: 'Search', params: { mode }})
   }
 
   reset() {
@@ -390,6 +458,17 @@ export default class Search extends Vue {
   @Watch('devMode.activated')
   onDevModeToggled() {
     this.initView()
+  }
+
+  @Watch('mode')
+  onModeChange() {
+    this.renderComplete = false
+    this.dateFromUpdate = this.dateFromUpdate += 1
+    this.dateToUpdate = this.dateToUpdate += 1
+    this.vizDateUpdate = this.vizDateUpdate += 1
+    this.dataSearchUpdate = this.dataSearchUpdate += 1
+    this.vizSearchUpdate = this.vizSearchUpdate += 1
+    this.fetchData().then(() => this.renderComplete = true)
   }
 }
 </script>

@@ -50,9 +50,7 @@ import { validationMixin } from 'vuelidate'
 import {Validate} from 'vuelidate-property-decorators'
 import { helpers } from 'vuelidate/lib/validators'
 import { Prop } from 'vue-property-decorator'
-
-// helpers
-const dateToUTC = (date: Date) => new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
+import {dateToUTC, dateToString} from '../lib'
 
 // date validation
 const isValidDate = (obj: Date) => !isNaN(obj.getDate())
@@ -68,13 +66,10 @@ export default class Datepicker extends mixins(validationMixin, Vue) {
   @Prop() start!: Date
   @Prop() end!: Date
 
-  dateToString(date: Date) {
-    const utcTime = dateToUTC(date)
-    return utcTime.toISOString().substring(0,10)
-  }
-
   @Validate({ isValidDateString, isNotInFuture, isBeforeEnd, isAfterStart })
   dateString = this.$attrs.value
+
+  dateToString = dateToString
 
   set value(date: Date) {
     if (!isValidDate(date)) return
