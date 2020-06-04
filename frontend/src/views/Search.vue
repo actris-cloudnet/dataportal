@@ -462,6 +462,7 @@ export default class Search extends Vue {
   @Watch('mode')
   onModeChange() {
     this.renderComplete = false
+    this.apiResponse = this.resetResponse()
     this.dateFromUpdate = this.dateFromUpdate += 1
     this.dateToUpdate = this.dateToUpdate += 1
     this.vizDateUpdate = this.vizDateUpdate += 1
