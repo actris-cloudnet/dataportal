@@ -30,6 +30,16 @@ jobs:
         nginx -v
     - name: Add local bin to PATH
       run: export PATH=/usr/local/bin:$PATH
+    - name: Install nvm
+      run: | 
+      wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+      export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+      [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+    - name: Install node
+      run: |
+          nvm install v10.16
+          nvm install v12
+          nvm use v10
     - name: Setup geckodriver
       run: |
           wget https://github.com/mozilla/geckodriver/releases/download/v0.26.0/geckodriver-v0.26.0-linux64.tar.gz 
@@ -45,10 +55,6 @@ jobs:
     - name: Configure nginx
       run: |
         sudo chown -R runner /var/log/nginx
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
     - name: Use Python ${{ matrix.python-version }} 
       uses: actions/setup-python@v1
       with:
