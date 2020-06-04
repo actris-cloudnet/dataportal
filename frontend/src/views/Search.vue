@@ -211,7 +211,7 @@
       :devMode="devMode">
     </custom-multiselect>
 
-    <custom-multiselect v-bind:class="{ hidden: !isVizMode() }"
+    <custom-multiselect v-show="isVizMode()"
       label="Variable"
       v-model="selectedVariableIds"
       :options="selectableVariables"

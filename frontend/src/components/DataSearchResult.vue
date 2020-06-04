@@ -6,7 +6,6 @@
     padding-left: 30px
     padding-right: 30px
     width: 100%
-    padding-bottom: 100px
     text-align: left
 
     #tableContent
