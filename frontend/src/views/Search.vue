@@ -127,7 +127,7 @@
 </style>
 
 <template>
-<main v-if="mode == 'viz' || mode == 'data'" id="search" v-bind:class="{ wide: isVizMode() }">
+<main v-if="mode == 'visualizations' || mode == 'data'" id="search" v-bind:class="{ wide: isVizMode() }">
   <div v-if="displayBetaNotification" class="note betanote">
     This is the beta version of Cloudnet data portal.
     Click <a href="http://devcloudnet.fmi.fi/">here</a> to visit the devcloudnet data portal, or
@@ -222,7 +222,7 @@
     <button v-if="isVizMode()" @click="navigateToSearch('data')" class="secondaryButton">
       View in data search &rarr;
     </button>
-    <button v-else @click="navigateToSearch('viz')" class="secondaryButton">
+    <button v-else @click="navigateToSearch('visualizations')" class="secondaryButton">
       View latest date in visualization search &rarr;
     </button>
 
@@ -338,7 +338,7 @@ export default class Search extends Vue {
   vizSearchUpdate = 50000
 
   isVizMode() {
-    return this.mode == 'viz'
+    return this.mode == 'visualizations'
   }
 
   setVizWideMode(wide: boolean) {
