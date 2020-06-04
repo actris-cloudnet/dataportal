@@ -20,6 +20,23 @@ const validObject = [
     ]
   },
   {
+    'id': 'classification',
+    'humanReadableName': 'Classification',
+    'level': '2',
+    'variables': [
+      {
+        'id': 'classification-target_classification',
+        'humanReadableName': 'Target classification',
+        'order': '0'
+      },
+      {
+        'id': 'classification-detection_status',
+        'humanReadableName': 'Classification detection status',
+        'order': '1'
+      }
+    ]
+  },
+  {
     'id': 'radar',
     'humanReadableName': 'Radar',
     'level': '1',
@@ -34,12 +51,6 @@ const validObject = [
   {
     'id': 'iwc',
     'humanReadableName': 'Ice water content',
-    'level': '2',
-    'variables': []
-  },
-  {
-    'id': 'classification',
-    'humanReadableName': 'Classification',
     'level': '2',
     'variables': []
   },
