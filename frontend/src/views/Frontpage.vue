@@ -47,11 +47,11 @@ main#frontpage
       Eu vix maluisset persecuti definitionem, natum assentior sed an, mundi delectus iracundia sit eu.
       Duo eu invenire accusamus consectetuer, sit ut sumo explicari, fabulas electram delicatissimi duo in.
       <div class="buttons">
-        <router-link to="view" class="download">
+        <router-link to="search/visualizations" class="download">
           <img :src="require('../assets/icons/graph-white.png')"><br>
           View data visualizations
         </router-link>
-        <router-link to="search" class="download">
+        <router-link to="search/data" class="download">
           <img :src="require('../assets/icons/search-white.png')"><br>
           Search and download data
         </router-link>
