@@ -57,6 +57,14 @@ export class Routes {
       .andWhere('file.releasedAt < :releasedBefore', query)
       .orderBy('file.measurementDate', 'DESC')
 
+  private visualizationsQueryBuilder(query: any) {
+    let qb = this.filesQueryBuilder(query)
+      .innerJoinAndSelect('file.visualizations', 'visualizations')
+      .leftJoinAndSelect('visualizations.productVariable', 'product_variable')
+    if ('variable' in query && query.variable.length) qb = qb.andWhere('product_variable.id IN (:...variable)', query)
+    return qb
+  }
+
   private allFilesAreReadable = (filepaths: string[]) =>
     Promise.all(filepaths.map(filepath => fsp.access(filepath, fsconst.R_OK)))
 
@@ -171,15 +179,11 @@ export class Routes {
 
   getVisualization: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query
-    let qb = this.filesQueryBuilder(query)
-      .leftJoinAndSelect('file.visualizations', 'visualizations')
-      .leftJoinAndSelect('visualizations.productVariable', 'product_variable')
-    if ('variable' in query && query.variable.length) qb = qb.andWhere('product_variable.id IN (:...variable)', query)
+    let qb = this.visualizationsQueryBuilder(query)
     this.hideTestDataFromNormalUsers(qb, req)
       .getMany()
       .then(result =>
         res.send(result
-          .filter(file => file.visualizations.length)
           .map(file => new VisualizationResponse(file))))
       .catch(err => next({ status: 500, errors: err }))
   }
@@ -206,10 +210,7 @@ export class Routes {
 
   getLatestVisualizationDate: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query
-    let qb = this.filesQueryBuilder(query)
-      .innerJoinAndSelect('file.visualizations', 'visualizations')
-      .leftJoinAndSelect('visualizations.productVariable', 'product_variable')
-    if ('variable' in query && query.variable.length) qb = qb.andWhere('product_variable.id IN (:...variable)', query)
+    const qb = this.visualizationsQueryBuilder(query)
     this.hideTestDataFromNormalUsers(qb, req)
       .getOne()
       .then(result => {
