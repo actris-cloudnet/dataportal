@@ -1,4 +1,4 @@
-import { By, until, WebDriver, Key } from 'selenium-webdriver'
+import { By, until, WebDriver, Key, WebElement } from 'selenium-webdriver'
 import axios from 'axios'
 import { prepareSelenium, wait, runNcdump, backendPrivateUrl, parseUuid } from '../lib'
 
@@ -55,6 +55,11 @@ async function clearMultiSelect(key: string) {
 async function findElement(by: By) {
   await driver.wait(until.elementLocated(by))
   return driver.findElement(by)
+}
+
+async function clickMapMarker(by: By) {
+  const mapArea = await driver.wait(until.elementLocated(by))
+  driver.actions({bridge: true}).move({x: 215, y: 212, origin: mapArea}).click()
 }
 
 beforeAll(async () => driver = await prepareSelenium())
@@ -133,6 +138,7 @@ describe('search page', () => {
   it('works when clicking the calendar', async () => {
     await setDateFromPast()
     const content = await getContent()
+    console.log(content)
     expect(content).toContain('Found 5 results')
   })
 
@@ -195,6 +201,23 @@ describe('search page', () => {
     const downloadUrl = await button.getAttribute('href')
     const response = await axios.head(downloadUrl)
     expect(response.status).toBe(200)
+  })
+
+  it('select site from multi-selection while clicking marker', async () => {
+    await clickMapMarker(By.id('map'))
+    expect(sendInputToMultiselect('siteSelect', 'Bucharest'))
+  })
+
+  it('remove site from multi-selection while clicking marker twice', async () => {
+
+  })
+
+  it('change marker color by clicking marker', async () => {
+
+  })
+
+  it('change marker color by clicking site from multi-selection', async () => {
+
   })
 
 })
