@@ -14,11 +14,15 @@ main#frontpage
       width: auto
       margin: 1em
   main
-    margin-top: 2em
+    text-align: justify
     display: inline-block
-    max-width: 50em
+    max-width: 51em
+    h3
+      text-align: center
+      line-height: 3em
 
   .buttons
+    text-align: center
     display: flex
     justify-content: center
     margin-top: 2em
@@ -42,10 +46,9 @@ main#frontpage
       <img src="../assets/cloudnet_logo_large_2020.png">
     </header>
     <main>
-      Lorem ipsum dolor sit amet, veniam putent dignissim no cum. Et ludus oratio per, vidit perfecto dignissim ea vis.
-      Illud decore corpora ne qui, cum sanctus praesent cu, eu sint porro nominati sed.
-      Eu vix maluisset persecuti definitionem, natum assentior sed an, mundi delectus iracundia sit eu.
-      Duo eu invenire accusamus consectetuer, sit ut sumo explicari, fabulas electram delicatissimi duo in.
+      <h3>Welcome to the ACTRIS Data Centre node for cloud profiling (CLU).</h3>
+CLU provides vertical profiles of cloud and turbulent properties at high temporal and spatial resolution from a network of ground-based stations using the Cloudnet processing suite. Major objectives also include the development and validation of new synergetic remote sensing algorithms, and the continuous evaluation of the representation of clouds and other atmospheric parameters in climate and weather forecast models.
+This node is physically hosted by FMI in Helsinki, Finland. You can find our contact information at the bottom right of this page.
       <div class="buttons">
         <router-link to="search/visualizations" class="download">
           <img :src="require('../assets/icons/graph-white.png')"><br>
