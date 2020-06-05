@@ -1,4 +1,4 @@
-import {By, WebDriver} from 'selenium-webdriver'
+import {Key, By, until, WebDriver} from 'selenium-webdriver'
 import axios from 'axios'
 import {
   wait,
@@ -19,9 +19,42 @@ async function initSearch() {
   return selenium.sendInput('dateTo', '2020-04-01')
 }
 
+async function sendInput(key: string, input: string) {
+  const element = await findElement(By.name(key))
+  await element.sendKeys(input)
+  await selenium.clickTab()
+  return wait(100)
+}
+
+async function sendInputToMultiselect(key: string, input: string) {
+  await selenium.clickGrandparentById(key)
+  await driver.actions().sendKeys(`${input}${Key.ENTER}`).perform()
+  return wait(100)
+}
+
+async function clearMultiSelect(key: string) {
+  await selenium.clickGrandparentById(key)
+  await driver.actions().sendKeys(`${Key.BACK_SPACE}${Key.BACK_SPACE}${Key.BACK_SPACE}`).perform()
+  return wait(100)
+}
+
+async function findElement(by: By) {
+  await driver.wait(until.elementLocated(by))
+  return driver.findElement(by)
+}
+
+async function clickMapMarker(by: By) {
+  const mapArea = await driver.wait(until.elementLocated(by))
+  driver.actions({bridge: true}).move({x: 215, y: 212, origin: mapArea}).click()
+}
+
 beforeAll(async () => {
   driver = await initDriver()
   selenium = new Selenium(driver)
+})
+
+afterAll(async () => {
+  return driver.close()
 })
 
 afterAll(async () => driver.close())
@@ -171,6 +204,23 @@ describe('search page', () => {
     const content = await selenium.getContent()
     expect((await selenium.findAllByClass('sourceFile')).length).toEqual(1)
     expect((await selenium.findAllByClass('variable')).length).toEqual(2)
+  })
+
+  it('select site from multi-selection while clicking marker', async () => {
+    await clickMapMarker(By.id('map'))
+    expect(sendInputToMultiselect('siteSelect', 'Bucharest'))
+  })
+
+  it('remove site from multi-selection while clicking marker twice', async () => {
+
+  })
+
+  it('change marker color by clicking marker', async () => {
+
+  })
+
+  it('change marker color by clicking site from multi-selection', async () => {
+
   })
 
 })
