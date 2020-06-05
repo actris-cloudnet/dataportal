@@ -21,31 +21,24 @@ const visualizationResponse = {"sourceFileId":"62a702ca-318a-478d-8a32-842d4ec94
 
 const augmentAxiosResponse = (data: any) => ({ ...axiosResponse, ...{ data } })
 
-const generateAxiosMock = (returnValue: any) =>
-  (_url: string, _: AxiosRequestConfig | undefined): AxiosPromise =>
-    Promise.resolve(augmentAxiosResponse(returnValue))
-
-const axiosMockWith = (returnValue: any) =>
-  mocked(axios.get).mockImplementation(generateAxiosMock(returnValue))
-
-const defaultAxiosMock = (url: string, _: AxiosRequestConfig | undefined): AxiosPromise => {
+const axiosMockWithFileIdx = (idx: number) => (url: string, _: AxiosRequestConfig | undefined): AxiosPromise => {
   if (url.includes('visualization')) {
     return Promise.resolve(augmentAxiosResponse(visualizationResponse))
   } else {
-    return Promise.resolve(augmentAxiosResponse(allFiles[0]))
+    return Promise.resolve(augmentAxiosResponse(allFiles[idx]))
   }
 }
 
 let wrapper: Wrapper<Vue>
 describe('File.vue', () => {
   it('displays a note on volatile file', async () => {
-    mocked(axios.get).mockImplementation(defaultAxiosMock)
+    mocked(axios.get).mockImplementation(axiosMockWithFileIdx(0))
     wrapper = mount(File)
     await Vue.nextTick()
     return expect(wrapper.text()).toContain('This is a volatile file.')
   })
   it('does not display a note on stable file', async () => {
-    axiosMockWith(allFiles[1])
+    mocked(axios.get).mockImplementation(axiosMockWithFileIdx(1))
     wrapper = mount(File)
     await Vue.nextTick()
     return expect(wrapper.text()).not.toContain('This is a volatile file.')
