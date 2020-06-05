@@ -277,6 +277,8 @@ Vue.component('viz-search-result', VizSearchResult)
 
 Vue.use(VCalendar)
 
+const defaultVisualizationSite = 'norunda'
+
 export interface Selection {
   id: string;
   humanReadableName: string;
@@ -293,7 +295,7 @@ export default class Search extends Vue {
 
   // site selector
   allSites = []
-  selectedSiteIds = []
+  selectedSiteIds: string[] = []
 
   // dates
   beginningOfHistory = new Date('1970-01-01')
@@ -378,6 +380,13 @@ export default class Search extends Vue {
     ]).then(([sites, products]) => {
       this.allSites = sites.data.sort(this.alphabeticalSort)
       this.allProducts = products.data.sort(this.alphabeticalSort)
+      if (this.isVizMode()) {
+        this.selectedSiteIds.push(defaultVisualizationSite)
+        return axios.get(`${this.apiUrl}latest-visualization-date/?location=${defaultVisualizationSite}`)
+          .then(res => {
+            this.dateTo = new Date(res.data.date)
+          })
+      }
     })
     return this.fetchData()
   }
