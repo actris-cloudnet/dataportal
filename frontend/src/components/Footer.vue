@@ -8,17 +8,19 @@ footer
   z-index: 5
   position: absolute
   bottom: 0
+  height: 6em !important
 
 .footeritem
   font-family: $header-font
   color: darkgrey
   margin: 0
-  line-height: 1
+  line-height: 1.1
+
+.small a, .hidden-links a
+  color: darkgrey
 
 .small
   font-size: 0.6em
-  a
-    color: darkgrey
 
 .marginright
   margin-right: 1em
@@ -26,8 +28,9 @@ footer
 
 <template>
   <footer class="global">
-    <div class="vertical-center footeritem marginright">
-      &copy; Finnish Meteorological Institute<br>
+    <div class="vertical-center footeritem marginright hidden-links">
+      <span>&copy; <a href="https://en.ilmatieteenlaitos.fi/">Finnish Meteorological Institute</a></span><br>
+      <span>data licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a><br></span>
       <span class="small">Header photo by Flickr user @theaucitron, used under a CC license.<br>
       Icons from <a href="https://icons8.com/">icons8.com</a>.</span>
     </div>
