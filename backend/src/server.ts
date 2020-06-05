@@ -64,6 +64,11 @@ import * as xmlparser from 'express-xml-bodyparser'
     middleware.checkParamsExistInDb,
     routes.getVisualization)
   app.get('/api/visualization/:uuid', routes.getVisualizationForSourceFile)
+  app.get('/api/latest-visualization-date',
+    middleware.filesValidator,
+    middleware.filesQueryAugmenter,
+    routes.getLatestVisualizationDate
+  )
 
   // private
   app.put('/file/:uuid', routes.submit)

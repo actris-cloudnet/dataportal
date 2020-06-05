@@ -13,6 +13,7 @@ import { putRecord, freezeRecord } from '../metadata2db.js'
 import {Visualization} from '../entity/Visualization'
 import {VisualizationResponse} from '../entity/VisualizationResponse'
 import {ProductVariable} from '../entity/ProductVariable'
+import {LatestVisualizationDateResponse} from '../entity/LatestVisualizationDateResponse'
 
 
 export class Routes {
@@ -201,6 +202,24 @@ export class Routes {
         res.send(new VisualizationResponse(file))
       })
       .catch(err => next({status: 500, errors: err}))
+  }
+
+  getLatestVisualizationDate: RequestHandler = async (req: Request, res: Response, next) => {
+    const query = req.query
+    let qb = this.filesQueryBuilder(query)
+      .innerJoinAndSelect('file.visualizations', 'visualizations')
+      .leftJoinAndSelect('visualizations.productVariable', 'product_variable')
+    if ('variable' in query && query.variable.length) qb = qb.andWhere('product_variable.id IN (:...variable)', query)
+    this.hideTestDataFromNormalUsers(qb, req)
+      .getOne()
+      .then(result => {
+        if (!result) {
+          next(next({ status: 404, errors: ['No visualizations were found with the selected query parameters'] }))
+          return
+        }
+        res.send(new LatestVisualizationDateResponse(result))
+      })
+      .catch(err => next({ status: 500, errors: err }))
   }
 
   allfiles: RequestHandler = async (req: Request, res: Response, next) =>
