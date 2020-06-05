@@ -438,7 +438,6 @@ export default class Search extends Vue {
     const lat = this.allSites.map(site => site.latitude)
     const lon = this.allSites.map(site => site.longitude)
     const id = this.allSites.map(site => site.id)
-
     markerNames.forEach((name, i) => {
       const mark = marker([lat[i], lon[i]])
       mark.on('click', (onClick) => {
