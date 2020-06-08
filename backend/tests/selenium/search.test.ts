@@ -84,7 +84,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await wait(3000)
+  await wait(300)
   return driver.close()
 })
 

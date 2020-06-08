@@ -161,7 +161,6 @@
     </div>
 
     <custom-multiselect
-      ref="siteSelect"
       label="Location"
       :selectedSiteIds="selectedSiteIds"
       :setSelectedSiteIds="setSelectedSiteIds"
