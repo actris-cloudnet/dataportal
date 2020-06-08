@@ -440,6 +440,7 @@ export default class Search extends Vue {
     const id = this.allSites.map(site => site.id)
     markerNames.forEach((name, i) => {
       const mark = marker([lat[i], lon[i]])
+      mark.setIcon(new this.passiveMarker)
       mark.on('click', (onClick) => {
         this.onMapMarkerClick(id[i])
       })

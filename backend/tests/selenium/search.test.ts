@@ -1,4 +1,4 @@
-import { By, until, WebDriver, Key, WebElement } from 'selenium-webdriver'
+import { By, until, WebDriver, Key, Origin } from 'selenium-webdriver'
 import axios from 'axios'
 import { prepareSelenium, wait, runNcdump, backendPrivateUrl, parseUuid } from '../lib'
 
@@ -57,14 +57,45 @@ async function findElement(by: By) {
   return driver.findElement(by)
 }
 
-async function clickMapMarker(by: By) {
-  const mapArea = await driver.wait(until.elementLocated(by))
-  driver.actions({bridge: true}).move({x: 215, y: 212, origin: mapArea}).click()
+async function selectAllSites() {
+  await sendInputToMultiselect('siteSelect', 'bucharest')
+  await sendInputToMultiselect('siteSelect', 'hyytiälä')
+  await sendInputToMultiselect('siteSelect', 'mace head')
+ }
+
+async function clearkMapSelection(by: By) {
+  const mapElement = await driver.wait(until.elementLocated(by))
+  let actions = driver.actions({bridge: true})
+  actions.move({origin: mapElement, x: 68, y: 78})
+  actions.click().perform()
+  actions.clear()
+}
+
+async function clickMapMarker(by: By, x: number, y: number) {
+  const mapElement = await driver.wait(until.elementLocated(by))
+  let actions = driver.actions({bridge: true})
+  actions.move({origin: mapElement, x: x, y: y})
+  actions.click().perform()
+  actions.clear()
+}
+
+async function getMarkerSrc(by: By) {
+  const mapElement = await driver.wait(until.elementLocated(by))
+  const x = mapElement.findElement(By.className('leaflet-marker-pane'))
+  const marker = x.findElement(By.className('leaflet-marker-icon'))
+  return marker.getAttribute('src')
+}
+
+async function clickAllMarkers(by: By) {
+  await clickMapMarker(by, 55, -113) // Hyytiälä
+  await clickMapMarker(by, 68, 78) //Bucharest
+  await clickMapMarker(by, -140, -20) // Mace Head
 }
 
 beforeAll(async () => driver = await prepareSelenium())
 
 afterAll(async () => {
+  await wait(3000)
   return driver.close()
 })
 
@@ -138,7 +169,6 @@ describe('search page', () => {
   it('works when clicking the calendar', async () => {
     await setDateFromPast()
     const content = await getContent()
-    console.log(content)
     expect(content).toContain('Found 5 results')
   })
 
@@ -162,6 +192,7 @@ describe('search page', () => {
     await clearMultiSelect('siteSelect')
     await sendInput('dateFrom', '1980')
     await sendInputToMultiselect('productSelect', 'ice')
+    await wait(300)
     const content = await getContent()
     expect(content).toContain('Found 2 results')
     expect(content).toContain('Ice water content file from Mace-Head')
@@ -204,20 +235,61 @@ describe('search page', () => {
   })
 
   it('select site from multi-selection while clicking marker', async () => {
-    await clickMapMarker(By.id('map'))
-    expect(sendInputToMultiselect('siteSelect', 'Bucharest'))
+    await clearkMapSelection(By.id('map'))
+    await clickMapMarker(By.id('map'), -140, -20)
+    const content = await getContent()
+    expect(content).toContain('Mace Head')
   })
 
   it('remove site from multi-selection while clicking marker twice', async () => {
-
+    await clearkMapSelection(By.id('map'))
+    await clickMapMarker(By.id('map'), -140, -20)
+    await clickMapMarker(By.id('map'), -140, -20)
+    const content = await getContent()
+    expect(content).not.toContain('Mace Head')
   })
 
   it('change marker color by clicking marker', async () => {
+    await clearkMapSelection(By.id('map'))
+    const src1 = getMarkerSrc(By.id('map'))
+    const s1 = (await src1).anchor('src')
+    await clickAllMarkers(By.id('map'))
+    const src2 = getMarkerSrc(By.id('map'))
+    const s2 = (await src2).anchor('src')
+    expect(s1).not.toEqual(s2)
+  })
 
+  it('change marker color by doupleclicking marker', async () => {
+    await clearkMapSelection(By.id('map'))
+    const src1 = getMarkerSrc(By.id('map'))
+    const s1 = (await src1).anchor('src')
+    await clickAllMarkers(By.id('map'))
+    await clickAllMarkers(By.id('map'))
+    const src2 = getMarkerSrc(By.id('map'))
+    const s2 = (await src2).anchor('src')
+    expect(s1).toEqual(s2)
   })
 
   it('change marker color by clicking site from multi-selection', async () => {
+    await clearkMapSelection(By.id('map'))
+    const src1 = getMarkerSrc(By.id('map'))
+    const s1 = (await src1).anchor('src')
+    await selectAllSites()
+    const src2 = getMarkerSrc(By.id('map'))
+    const s2 = (await src2).anchor('src')
+    expect(s1).not.toEqual(s2)
+    
+  })
 
+  it('change marker color by removing site from multi-selection', async () => {
+    await clearkMapSelection(By.id('map'))
+    const src1 = getMarkerSrc(By.id('map'))
+    const s1 = (await src1).anchor('src')
+    await selectAllSites()
+    await clearMultiSelect('siteSelect')
+    const src2 = getMarkerSrc(By.id('map'))
+    const s2 = (await src2).anchor('src')
+    expect(s1).toEqual(s2)
   })
 
 })
