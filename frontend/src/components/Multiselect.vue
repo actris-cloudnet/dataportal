@@ -107,10 +107,6 @@ export default class CustomMultiselect extends Vue {
     else if (this.id == 'productSelect') {
       this.setSelectedProductIds(this.selection.map(product => product.id))
     }
-    else {
-      this.$emit('input', this.getSelectionIds())
-    }
-    this.setSelectedSiteIds(this.selection.map(site => site.id))
   }
 
   get value() {
