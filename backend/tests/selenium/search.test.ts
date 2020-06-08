@@ -95,7 +95,7 @@ async function clickAllMarkers(by: By) {
 beforeAll(async () => driver = await prepareSelenium())
 
 afterAll(async () => {
-  await wait(3000)
+  await wait(300)
   return driver.close()
 })
 
