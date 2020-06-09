@@ -225,7 +225,6 @@ import axios from 'axios'
 import {getIconUrl, humanReadableSize, humanReadableDate, sortVisualizations} from '../lib'
 import { DevMode } from '../lib/DevMode'
 import { File } from '../../../backend/src/entity/File'
-import {VisualizationResponse} from '../../../backend/src/entity/VisualizationResponse'
 import {Visualization} from '../../../backend/src/entity/Visualization'
 
 @Component

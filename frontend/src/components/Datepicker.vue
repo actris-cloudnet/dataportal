@@ -46,10 +46,10 @@
 import Component, { mixins } from 'vue-class-component'
 import Vue from 'vue'
 import { validationMixin } from 'vuelidate'
-import {Validate} from 'vuelidate-property-decorators'
+import { Validate } from 'vuelidate-property-decorators'
 import { helpers } from 'vuelidate/lib/validators'
 import { Prop, Watch } from 'vue-property-decorator'
-import {dateToUTC, dateToString} from '../lib'
+import { dateToUTC, dateToString } from '../lib'
 
 // date validation
 const isValidDate = (obj: Date) => !isNaN(obj.getDate())
@@ -64,8 +64,7 @@ export default class Datepicker extends mixins(validationMixin, Vue) {
   @Prop() label!: string
   @Prop() start!: Date
   @Prop() end!: Date
-  @Prop() dateToDefault!: Date
-  @Prop() onDateToDefaultChange!: Function
+  @Prop() defaultVizDate!: Date
 
   @Validate({ isValidDateString, isNotInFuture, isBeforeEnd, isAfterStart })
   dateString = this.$attrs.value
@@ -83,12 +82,10 @@ export default class Datepicker extends mixins(validationMixin, Vue) {
     return new Date(this.dateString)
   }
 
-  @Watch('dateToDefault')
-  onDefaultDateChange() {
-    this.value = this.dateToDefault
-    this.onDateToDefaultChange()
+  @Watch('defaultVizDate')
+  onDefaultVizChange() {
+    this.value = this.defaultVizDate
   }
-
 
 }
 </script>

@@ -94,7 +94,7 @@ export default class CustomMultiselect extends Vue {
   @Prop() devMode!: DevMode
   @Prop() setSelectedSiteIds!: Function
   @Prop() setSelectedProductIds!: Function
-  @Prop() selectedSiteIds!: string[]  
+  @Prop() selectedSiteIds!: string[]
   @Prop() selectedProductIds!: string[]
 
   selection: Selection[] = []
@@ -103,7 +103,7 @@ export default class CustomMultiselect extends Vue {
     this.selection = selection
     if (this.id == 'siteSelect') {
       this.setSelectedSiteIds(this.selection.map(site => site.id))
-    } 
+    }
     else if (this.id == 'productSelect') {
       this.setSelectedProductIds(this.selection.map(product => product.id))
     }

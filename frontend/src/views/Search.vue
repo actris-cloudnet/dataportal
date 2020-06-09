@@ -187,7 +187,7 @@
       <datepicker
         name="dateTo"
         v-model="dateTo"
-        :dateToDefault="dateToDefault"
+        :defaultVizDate="defaultVizDate"
         :start="beginningOfHistory"
         :end="today"
         label="Date"
@@ -210,7 +210,6 @@
       :setSelectedProductIds="setSelectedProductIds"
       :options="allProducts"
       id="productSelect"
-      :key="productUpdate"
       :icons="true"
       :getIconUrl="getIconUrl"
       :devMode="devMode">
@@ -282,7 +281,7 @@ Vue.component('viz-search-result', VizSearchResult)
 
 Vue.use(VCalendar)
 
-const defaultVisualizationSite = 'norunda'
+const defaultVisualizationSite = 'bucharest'
 
 export interface Selection {
   id: string;
@@ -305,7 +304,7 @@ export default class Search extends Vue {
   setSelectedSiteIds(siteIds: []) {
     this.selectedSiteIds = siteIds
   }
-  
+
   // dates
   beginningOfHistory = new Date('1970-01-01')
   today = new Date()
@@ -313,8 +312,7 @@ export default class Search extends Vue {
   dateFrom = this.isVizMode() ? this.today : new Date(new Date().getFullYear().toString())
   dateFromError: { [key: string]: boolean } = {}
   dateToError: { [key: string]: boolean } = {}
-
-  dateToDefault = this.dateTo
+  defaultVizDate = this.dateTo
 
   // products
   allProducts: Product[] = []
@@ -352,7 +350,6 @@ export default class Search extends Vue {
   vizDateUpdate = 30000
   dataSearchUpdate = 40000
   vizSearchUpdate = 50000
-  productUpdate = 60000
 
   isVizMode() {
     return this.mode == 'visualizations'
@@ -403,13 +400,13 @@ export default class Search extends Vue {
         return axios.get(`${this.apiUrl}latest-visualization-date/`, payload)
           .then(res => {
             this.dateTo = res.data.date
-            this.dateToDefault = new Date(res.data.date)
+            this.defaultVizDate = new Date(res.data.date)
           })
       }
     })
     return this.fetchData()
   }
-  
+
   get payload() {
     return {
       params: {
