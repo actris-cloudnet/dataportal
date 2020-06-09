@@ -27,7 +27,6 @@
       v-model="value"
       :popover="{ placement: 'bottom', visibility: 'click' }"
       :input-debounce="100"
-      :value="value"
       :available-dates="{end, start}"
     >
       <button class="calendar">

@@ -93,7 +93,9 @@ export default class CustomMultiselect extends Vue {
   @Prop() getIconUrl!: Function
   @Prop() devMode!: DevMode
   @Prop() setSelectedSiteIds!: Function
-  @Prop() selectedSiteIds!: string[]
+  @Prop() setSelectedProductIds!: Function
+  @Prop() selectedSiteIds!: string[]  
+  @Prop() selectedProductIds!: string[]
 
   selection: Selection[] = []
 
@@ -101,6 +103,9 @@ export default class CustomMultiselect extends Vue {
     this.selection = selection
     if (this.id == 'siteSelect') {
       this.setSelectedSiteIds(this.selection.map(site => site.id))
+    } 
+    else if (this.id == 'productSelect') {
+      this.setSelectedProductIds(this.selection.map(product => product.id))
     }
     else {
       this.$emit('input', this.getSelectionIds())
@@ -114,6 +119,11 @@ export default class CustomMultiselect extends Vue {
   @Watch('selectedSiteIds')
   onSelectedSiteIdsChange() {
     this.selection = this.options.filter((selection: Selection) => this.selectedSiteIds.includes(selection.id))
+  }
+
+  @Watch('selectedProductIds')
+  onSelectedProductIdsChange() {
+    this.selection = this.options.filter((selection: Selection) => this.selectedProductIds.includes(selection.id))
   }
 
   getSelectionIds() {

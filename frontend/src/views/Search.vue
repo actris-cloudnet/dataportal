@@ -183,21 +183,17 @@
       </div>
     </div>
 
-    <!-- visualizataion view -->
     <div class="date" v-else>
-
       <datepicker
         name="dateTo"
         v-model="dateTo"
         :dateToDefault="dateToDefault"
-        :onDateToDefaultChange="onDateToDefaultChange"
         :start="beginningOfHistory"
         :end="today"
         label="Date"
         v-on:error="dateToError = $event"
         :key="vizDateUpdate"
       ></datepicker>
-
       <div v-if="!dateToError.isValidDateString" class="errormsg">
         Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.
       </div>
@@ -210,9 +206,11 @@
 
     <custom-multiselect
       label="Product"
-      v-model="selectedProductIds"
+      :selectedProductIds="selectedProductIds"
+      :setSelectedProductIds="setSelectedProductIds"
       :options="allProducts"
       id="productSelect"
+      :key="productUpdate"
       :icons="true"
       :getIconUrl="getIconUrl"
       :devMode="devMode">
@@ -307,7 +305,7 @@ export default class Search extends Vue {
   setSelectedSiteIds(siteIds: []) {
     this.selectedSiteIds = siteIds
   }
-
+  
   // dates
   beginningOfHistory = new Date('1970-01-01')
   today = new Date()
@@ -321,6 +319,10 @@ export default class Search extends Vue {
   // products
   allProducts: Product[] = []
   selectedProductIds: string[] = []
+
+  setSelectedProductIds(productIds: []) {
+    this.selectedProductIds = productIds
+  }
 
   // variables
   selectedVariableIds: string[] = []
@@ -350,6 +352,7 @@ export default class Search extends Vue {
   vizDateUpdate = 30000
   dataSearchUpdate = 40000
   vizSearchUpdate = 50000
+  productUpdate = 60000
 
   isVizMode() {
     return this.mode == 'visualizations'
@@ -395,6 +398,7 @@ export default class Search extends Vue {
       this.allProducts = products.data.sort(this.alphabeticalSort)
       if (this.isVizMode()) {
         this.selectedSiteIds.push(defaultVisualizationSite)
+        this.selectedProductIds.push('classification')
         const payload = { params: { location: defaultVisualizationSite } }
         return axios.get(`${this.apiUrl}latest-visualization-date/`, payload)
           .then(res => {
@@ -485,10 +489,6 @@ export default class Search extends Vue {
   @Watch('devMode.activated')
   onDevModeToggled() {
     this.initView()
-  }
-
-  onDateToDefaultChange() {
-    this.dateToUpdate = this.dateToUpdate += 1
   }
 
   @Watch('mode')
