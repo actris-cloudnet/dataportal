@@ -183,16 +183,21 @@
       </div>
     </div>
 
+    <!-- visualizataion view -->
     <div class="date" v-else>
+
       <datepicker
         name="dateTo"
         v-model="dateTo"
+        :dateToDefault="dateToDefault"
+        :onDateToDefaultChange="onDateToDefaultChange"
         :start="beginningOfHistory"
         :end="today"
         label="Date"
         v-on:error="dateToError = $event"
         :key="vizDateUpdate"
       ></datepicker>
+
       <div v-if="!dateToError.isValidDateString" class="errormsg">
         Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.
       </div>
@@ -310,6 +315,8 @@ export default class Search extends Vue {
   dateFromError: { [key: string]: boolean } = {}
   dateToError: { [key: string]: boolean } = {}
 
+  dateToDefault = this.dateTo
+
   // products
   allProducts: Product[] = []
   selectedProductIds: string[] = []
@@ -387,15 +394,17 @@ export default class Search extends Vue {
       this.allProducts = products.data.sort(this.alphabeticalSort)
       if (this.isVizMode()) {
         this.selectedSiteIds.push(defaultVisualizationSite)
+        // use payload instead
         return axios.get(`${this.apiUrl}latest-visualization-date/?location=${defaultVisualizationSite}`)
           .then(res => {
-            this.dateTo = new Date(res.data.date)
+            this.dateTo = res.data.date
+            this.dateToDefault = new Date(res.data.date)
           })
       }
     })
     return this.fetchData()
   }
-
+  
   get payload() {
     return {
       params: {
@@ -471,6 +480,10 @@ export default class Search extends Vue {
   @Watch('devMode.activated')
   onDevModeToggled() {
     this.initView()
+  }
+
+  onDateToDefaultChange() {
+    this.dateToUpdate = this.dateToUpdate += 1
   }
 
   @Watch('mode')
