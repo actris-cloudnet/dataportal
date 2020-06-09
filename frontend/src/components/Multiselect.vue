@@ -54,7 +54,6 @@
     :show-labels="false"
     :multiple="true"
     :hideSelected="false"
-    :disabled="disabled"
     @search-change="isIddqd"
   >
     <template slot="tag" slot-scope="props" v-if="icons">
@@ -78,11 +77,10 @@
 <script lang="ts">
 import Component from 'vue-class-component'
 import Vue from 'vue'
-import { Prop } from 'vue-property-decorator'
+import {Prop, Watch} from 'vue-property-decorator'
 import Multiselect from 'vue-multiselect'
 import { Selection } from '../views/Search.vue'
 import { DevMode } from '../lib/DevMode'
-import { getIconUrl } from '../lib'
 
 Vue.component('multiselect', Multiselect)
 
@@ -92,20 +90,30 @@ export default class CustomMultiselect extends Vue {
   @Prop() label!: string
   @Prop() options!: Selection[]
   @Prop() icons!: boolean
+  @Prop() getIconUrl!: Function
   @Prop() devMode!: DevMode
-  @Prop() disabled!: boolean
+  @Prop() setSelectedSiteIds!: Function
+  @Prop() selectedSiteIds!: string[]
 
   selection: Selection[] = []
 
-  getIconUrl = getIconUrl
-
   set value(selection) {
     this.selection = selection
-    this.$emit('input', this.getSelectionIds())
+    if (this.id == 'siteSelect') {
+      this.setSelectedSiteIds(this.selection.map(site => site.id))
+    }
+    else {
+      this.$emit('input', this.getSelectionIds())
+    }
   }
 
   get value() {
     return this.selection
+  }
+
+  @Watch('selectedSiteIds')
+  onSelectedSiteIdsChange() {
+    this.selection = this.options.filter((selection: Selection) => this.selectedSiteIds.includes(selection.id))
   }
 
   getSelectionIds() {
