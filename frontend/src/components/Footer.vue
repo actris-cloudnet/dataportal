@@ -37,5 +37,8 @@ footer
     <div class="vertical-center footeritem">
       Give feedback: <a href="mailto:actris-cloudnet-feedback@fmi.fi">actris-cloudnet-feedback@fmi.fi</a>
     </div>
+    <div class="vertical-center footeritem">
+      Visit Cloudnet forum: <a href="https://forum.cloudnet.fmi.fi/" target="_blank">forum.cloudnet.fmi.fi</a>
+    </div>
   </footer>
 </template>
