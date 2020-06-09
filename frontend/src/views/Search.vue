@@ -395,8 +395,8 @@ export default class Search extends Vue {
       this.allProducts = products.data.sort(this.alphabeticalSort)
       if (this.isVizMode()) {
         this.selectedSiteIds.push(defaultVisualizationSite)
-        // use payload instead
-        return axios.get(`${this.apiUrl}latest-visualization-date/?location=${defaultVisualizationSite}`)
+        const payload = { params: { location: defaultVisualizationSite } }
+        return axios.get(`${this.apiUrl}latest-visualization-date/`, payload)
           .then(res => {
             this.dateTo = res.data.date
             this.dateToDefault = new Date(res.data.date)
