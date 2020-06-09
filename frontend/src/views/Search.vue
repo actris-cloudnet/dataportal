@@ -214,6 +214,7 @@
       :options="allProducts"
       id="productSelect"
       :icons="true"
+      :getIconUrl="getIconUrl"
       :devMode="devMode">
     </custom-multiselect>
 
@@ -443,6 +444,10 @@ export default class Search extends Vue {
 
   navigateToSearch(mode: string) {
     this.$router.push({ name: 'Search', params: { mode }})
+  }
+
+  setIcon(product: string) {
+    if (product) return {'style': `background-image: url(${getIconUrl(product)})`}
   }
 
   reset() {
