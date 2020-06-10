@@ -8,7 +8,7 @@ footer
   z-index: 5
   position: absolute
   bottom: 0
-  height: 6em !important
+  height: $footer-height
 
 .footeritem
   font-family: $header-font
