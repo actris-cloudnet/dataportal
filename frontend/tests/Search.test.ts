@@ -3,7 +3,7 @@ import { mount, Wrapper } from '@vue/test-utils'
 import Search from '../src/views/Search.vue'
 import axios, { AxiosResponse, AxiosPromise, AxiosRequestConfig } from 'axios'
 import Vue from 'vue'
-import { init, allFiles, allSites, dateToISOString, tomorrow } from './lib'
+import {init, allFiles, allSites, dateToISOString, tomorrow, allProducts} from './lib'
 import { mocked } from 'ts-jest/dist/util/testing'
 init()
 
@@ -25,8 +25,10 @@ const augmentAxiosResponse = (data: any) => ({ ...axiosResponse, ...{ data } })
 const defaultAxiosMock = (url: string, _: AxiosRequestConfig | undefined): AxiosPromise => {
   if (url.includes('files')) {
     return Promise.resolve(augmentAxiosResponse(allFiles))
-  } else { // sites
+  } else if (url.includes('sites')) { // sites
     return Promise.resolve(augmentAxiosResponse(allSites))
+  } else {
+    return Promise.resolve(augmentAxiosResponse(allProducts))
   }
 }
 
@@ -60,7 +62,7 @@ describe('Search.vue', () => {
 
   beforeAll(() => {
     mocked(axios.get).mockImplementation(defaultAxiosMock)
-    wrapper = mount(Search)
+    wrapper = mount(Search, { propsData: { mode: 'data'}})
   })
 
   it('makes less than four api request on mount', () => {

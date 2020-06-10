@@ -1,16 +1,15 @@
-import { createReadStream, existsSync, unlinkSync } from 'fs'
-import { promises as fsp }  from 'fs'
-import { basename, join, resolve as pathResolve } from 'path'
-import { createHash } from 'crypto'
+import {createReadStream, promises as fsp} from 'fs'
+import {basename} from 'path'
+import {createHash} from 'crypto'
 import 'reflect-metadata'
-import { Connection } from 'typeorm'
-import { File } from './entity/File'
-import { Site } from './entity/Site'
-import { isNetCDFObject, getMissingFields, NetCDFObject } from './entity/NetCDFObject'
-import { spawn } from 'child_process'
-import { stringify } from './lib'
+import {Connection} from 'typeorm'
+import {File} from './entity/File'
+import {Site} from './entity/Site'
+import {getMissingFields, isNetCDFObject, NetCDFObject} from './entity/NetCDFObject'
+import {spawn} from 'child_process'
+import {linkFile, stringify} from './lib'
 import config from './config'
-import { Product } from './entity/Product'
+import {Product} from './entity/Product'
 
 
 let filename: string
@@ -58,7 +57,7 @@ const insert = (ncObj: NetCDFObject, connection: Connection) =>
     getFileFormat(filename),
     checkSiteExists(connection, ncObj.location),
     checkProductExists(connection, ncObj.cloudnet_file_type),
-    linkFile(filename)
+    linkFile(filename, config.publicDir)
   ]).then(([ncObj, baseFilename, chksum, { size }, format, site, product]) => {
     const file = new File(ncObj, baseFilename, chksum, size, format, site, product)
     file.releasedAt = new Date()
@@ -70,8 +69,6 @@ const checkSiteExists = (conn: Connection, site: string): Promise<Site> =>
 
 const checkProductExists = (conn: Connection, product: string): Promise<Product> =>
   conn.getRepository(Product).findOneOrFail(product)
-
-const checkFileExists = async (path: string) => !!(await fsp.stat(path).catch(_ => false))
 
 async function computeFileChecksum(filename: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -97,13 +94,6 @@ function computeFileSize(filename: string) {
   return fsp.stat(filename)
 }
 
-function linkFile(filename: string) {
-  const linkPath = config.publicDir
-  const fullLink = join(linkPath, basename(filename))
-  if (existsSync(fullLink)) unlinkSync(fullLink)
-  return fsp.symlink(pathResolve(filename), fullLink)
-}
-
 function getFileFormat(filename: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const proc = spawn('file', [filename])
@@ -125,7 +115,6 @@ function getFileFormat(filename: string): Promise<string> {
 async function parseJSON(json: any): Promise<any> {
   const { netcdf }: NetCDFXML = json
   filename = netcdf['$'].location
-  if (!await checkFileExists(filename)) throw ('Missing file')
   const ncObj: any = netcdf.attribute
     .map((a) => a['$'])
     .map(({ name, value }) => ({ [name]: value }))

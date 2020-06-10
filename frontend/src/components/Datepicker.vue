@@ -27,7 +27,6 @@
       v-model="value"
       :popover="{ placement: 'bottom', visibility: 'click' }"
       :input-debounce="100"
-      :value="value"
       :available-dates="{end, start}"
     >
       <button class="calendar">
@@ -47,12 +46,10 @@
 import Component, { mixins } from 'vue-class-component'
 import Vue from 'vue'
 import { validationMixin } from 'vuelidate'
-import {Validate} from 'vuelidate-property-decorators'
+import { Validate } from 'vuelidate-property-decorators'
 import { helpers } from 'vuelidate/lib/validators'
-import { Prop } from 'vue-property-decorator'
-
-// helpers
-const dateToUTC = (date: Date) => new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
+import { Prop, Watch } from 'vue-property-decorator'
+import { dateToUTC, dateToString } from '../lib'
 
 // date validation
 const isValidDate = (obj: Date) => !isNaN(obj.getDate())
@@ -67,14 +64,12 @@ export default class Datepicker extends mixins(validationMixin, Vue) {
   @Prop() label!: string
   @Prop() start!: Date
   @Prop() end!: Date
-
-  dateToString(date: Date) {
-    const utcTime = dateToUTC(date)
-    return utcTime.toISOString().substring(0,10)
-  }
+  @Prop() defaultVizDate!: Date
 
   @Validate({ isValidDateString, isNotInFuture, isBeforeEnd, isAfterStart })
   dateString = this.$attrs.value
+
+  dateToString = dateToString
 
   set value(date: Date) {
     if (!isValidDate(date)) return
@@ -86,5 +81,11 @@ export default class Datepicker extends mixins(validationMixin, Vue) {
   get value(): Date {
     return new Date(this.dateString)
   }
+
+  @Watch('defaultVizDate')
+  onDefaultVizChange() {
+    this.value = this.defaultVizDate
+  }
+
 }
 </script>

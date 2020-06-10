@@ -77,7 +77,7 @@
 <script lang="ts">
 import Component from 'vue-class-component'
 import Vue from 'vue'
-import { Prop } from 'vue-property-decorator'
+import {Prop, Watch} from 'vue-property-decorator'
 import Multiselect from 'vue-multiselect'
 import { Selection } from '../views/Search.vue'
 import { DevMode } from '../lib/DevMode'
@@ -92,16 +92,38 @@ export default class CustomMultiselect extends Vue {
   @Prop() icons!: boolean
   @Prop() getIconUrl!: Function
   @Prop() devMode!: DevMode
+  @Prop() setSelectedSiteIds!: Function
+  @Prop() setSelectedProductIds!: Function
+  @Prop() selectedSiteIds!: string[]
+  @Prop() selectedProductIds!: string[]
 
   selection: Selection[] = []
 
   set value(selection) {
     this.selection = selection
-    this.$emit('input', this.getSelectionIds())
+    if (this.id == 'siteSelect') {
+      this.setSelectedSiteIds(this.selection.map(site => site.id))
+    }
+    else if (this.id == 'productSelect') {
+      this.setSelectedProductIds(this.selection.map(product => product.id))
+    }
+    else {
+      this.$emit('input', this.getSelectionIds())
+    }
   }
 
   get value() {
     return this.selection
+  }
+
+  @Watch('selectedSiteIds')
+  onSelectedSiteIdsChange() {
+    this.selection = this.options.filter((selection: Selection) => this.selectedSiteIds.includes(selection.id))
+  }
+
+  @Watch('selectedProductIds')
+  onSelectedProductIdsChange() {
+    this.selection = this.options.filter((selection: Selection) => this.selectedProductIds.includes(selection.id))
   }
 
   getSelectionIds() {

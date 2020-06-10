@@ -1,3 +1,6 @@
+import { File } from '../../../backend/src/entity/File'
+import {Visualization} from '../../../backend/src/entity/Visualization'
+
 export const getIconUrl = (product: string) =>
   require(`../assets/icons/${product}.png`)
 
@@ -12,3 +15,19 @@ export const humanReadableDate = (date: string) =>
 
 export const combinedFileSize = (files: File[]) =>
   files.map(file => file.size).reduce((prev, cur) => cur + prev, 0)
+
+export const dateToUTC = (date: Date) =>
+  new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
+
+export const dateToString = (date: Date) => {
+  const utcTime = dateToUTC(date)
+  return utcTime.toISOString().substring(0,10)
+}
+
+export const sortVisualizations = (visualizations: Visualization[]) => {
+  return visualizations.concat().sort((a: Visualization, b: Visualization) => {
+    if (a.productVariable.order == b.productVariable.order) return 0
+    if (a.productVariable.order < b.productVariable.order) return -1
+    return 1
+  })
+}

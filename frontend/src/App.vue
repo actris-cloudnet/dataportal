@@ -19,16 +19,17 @@ html
   min-height: 100%
 
 body
-    margin: 0
+  margin: 0
 
 #app > main
-    max-width: 100em
-    margin-left: auto
-    margin-right: auto
-    margin-top: 3em
-    padding-left: 5em
-    padding-right: 5em
-    font-family: $content-font
+  max-width: 100em
+  margin: 3em auto calc(#{$footer-height} + 4em)
+  padding-left: 5em
+  padding-right: 5em
+  font-family: $content-font
+
+#app > main.wide
+  max-width: none
 
 h1, h2, h3, h4, h5, h6
   line-height: 1

@@ -12,23 +12,11 @@ fileserver_port=4000
 frontend_port=8000
 backend_port=3000
 pid_dir='.'
-inbox_dir='inbox'
 
 if [[ "$NODE_ENV" == 'test' ]]; then
     backend_port=3001
     pid_dir='tests'
-    inbox_dir='tests/data/inbox'
 fi
-
-if [ -f backend/listen-path ]; then
-    read -r inbox_dir < backend/listen-path
-fi
-
-typeset -A backend_targets
-typeset -A frontend_targets
-
-backend_targets[$pid_dir/.listen-inbox.pid]="scripts/listen-inbox.sh $inbox_dir"
-backend_targets[$pid_dir/.node.pid]="npx nodemon -w build -- $backend_port"
 
 is_production () {
     [ "$NODE_ENV" '==' 'production' ]
@@ -51,11 +39,11 @@ waitport () {
 
 backend_postinstall () {
     mkdir -p public
-    mkdir -p public/quicklook
+    mkdir -p public/viz
     mkdir -p inbox
     mkdir -p tests/data/inbox
     mkdir -p tests/data/inbox/inbox
-    mkdir -p tests/data/public/quicklook
+    mkdir -p tests/data/public/viz
     createdb dataportal
     createdb dataportal-test
     npm run build
@@ -66,13 +54,12 @@ case "$action" in
     start)
     echo "Starting backend..."
     cd backend
-    for target cmd in ${(kv)backend_targets}; do
-        if [[ ! -f $target ]]; then
-            echo $cmd
-            eval "nohup ${cmd} >> $pid_dir/all.log 2>&1 &"
-            echo $! > $target
-        fi
-    done
+    target=$pid_dir/.node.pid
+    if [[ ! -f $target ]]; then
+        echo $cmd
+        eval "nohup npx nodemon -w build -- $backend_port >> $pid_dir/all.log 2>&1 &"
+        echo $! > $target
+    fi
     echo
     cd ..
     if ! is_production; then

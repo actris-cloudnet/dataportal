@@ -11,7 +11,6 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [10.16.3]
         python-version: [3.6]
 
     env:
@@ -21,16 +20,23 @@ jobs:
     - name: Install Ubuntu dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install zsh postgresql netcdf-bin nginx-light inotify-tools
+        sudo apt-get install zsh postgresql netcdf-bin nginx-light
     - name: Print versions
       run: |
         zsh --version
         psql --version
         ncdump
         nginx -v
-        inotifywait -h || true
     - name: Add local bin to PATH
       run: export PATH=/usr/local/bin:$PATH
+    - name: Install nvm
+      run: | 
+          wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+    - name: Install node
+      run: |
+          export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          nvm install v10.16
     - name: Setup geckodriver
       run: |
           wget https://github.com/mozilla/geckodriver/releases/download/v0.26.0/geckodriver-v0.26.0-linux64.tar.gz 
@@ -46,10 +52,6 @@ jobs:
     - name: Configure nginx
       run: |
         sudo chown -R runner /var/log/nginx
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
     - name: Use Python ${{ matrix.python-version }} 
       uses: actions/setup-python@v1
       with:
@@ -65,7 +67,11 @@ jobs:
     - name: Start backend and frontend
       run: ./control start
     - name: Run frontend unit tests
-      run: cd frontend && npm test && cd ..
+      run: |
+          . ~/.nvm/nvm.sh
+          nvm install v12
+          cd frontend && npm test && cd ..
+          nvm use v10
     - name: Run integration tests
       run: cd backend && npm test && cd ..
     - name: Run e2e tests

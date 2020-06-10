@@ -2,8 +2,6 @@
   @import "../sass/variables.sass"
   @import "../sass/global.sass"
 
-  $filter-margin: 2em
-
   main#search
     position: relative
     display: flex
@@ -29,76 +27,12 @@
     color: grey
     font-weight: normal
 
-  section#fileTable
-    padding-left: 30px
-    padding-right: 30px
-    flex-grow: 0.2
-    padding-bottom: 100px
-    text-align: left
-
-  #tableContent
-    margin-top: 10px
-
-  .listTitle
-    color: gray
-    font-size: 85%
-    margin-bottom: 5px
-    display: block
-
   .filterOptions
     font-size: 1.2em
     margin-bottom: $filter-margin
 
-  #pagi
-    margin-top: 30px
-    float: left
-    .page-item.active .page-link
-      background-color: $steel-warrior
-      border-color: $steel-warrior
-    .page-link:hover
-      background-color: $blue-dust
-    .page-link
-      color: $blue-sapphire
-
-  .table-striped
-    th:nth-child(1)
-      width: 50px
-      text-align: center
-    th:nth-child(2)
-      width: 300px
-    th:nth-child(3)
-      width: 100px
-    th:nth-child(4)
-      width: 110px
-    td
-      padding: 9px
-    tr:nth-child(2n+1) > td
-      background-color: $blue-dust
-    td:nth-child(3)
-      text-align: center
-  .table-striped[aria-busy="false"]
-    tr:hover td
-      cursor: pointer
-      background-color: #e4eff7
-
-  .text-center.my-2
-    display: none
-
-  .icon
-    background-repeat: no-repeat
-    background-position: center
-    background-size: 20px
-    font-size: 0
-
-  .volatile
-    background: #cad7ff
-    padding-left: 0.5em
-    padding-right: 0.5em
-    padding-top: 0.1em
-    padding-bottom: 0.1em
-
   section#sideBar
-    margin-right: 100px
+    margin-right: 80px
     width: 300px
 
   .multiselect
@@ -160,22 +94,39 @@
     margin-bottom: $filter-margin
     display: block
 
-  .downloadinfo
-    float: right
-    margin-top: 30px
-
-  .dlcount
-    color: gray
-    font-size: 85%
-    text-align: center
-    display: block
-
   .disabled
     opacity: 0.5
+
+  .hidden
+    display: none
+
+  .multiselect--disabled
+    .multiselect__select
+      background: none
+
+  .results
+    display: inline-flex
+    flex-basis: 600px
+
+  .resultsWide
+    flex-grow: 1
+
+  .resultsNarrow
+    flex-grow: 0.2
+
+  .resultsViz
+    flex-grow: 1
+    max-width: 1000px
+
+  .secondaryButton
+    width: 100%
+    margin: 0 auto
+    margin-bottom: $filter-margin
+
 </style>
 
 <template>
-<main id="search">
+<main v-if="mode == 'visualizations' || mode == 'data'" id="search" v-bind:class="{ wide: isVizMode() }">
   <div v-if="displayBetaNotification" class="note betanote">
     This is the beta version of Cloudnet data portal.
     Click <a href="http://devcloudnet.fmi.fi/">here</a> to visit the devcloudnet data portal, or
@@ -190,14 +141,15 @@
     <header class="filterOptions">Filter search</header>
     <custom-multiselect
       label="Location"
-      v-model="selectedSiteIds"
+      :selectedSiteIds="selectedSiteIds"
+      :setSelectedSiteIds="setSelectedSiteIds"
       :options="allSites"
       id="siteSelect"
       :icons="false"
       :devMode="devMode">
     </custom-multiselect>
 
-    <div class="date">
+    <div class="date" v-if="!isVizMode()">
       <datepicker
         name="dateFrom"
         v-model="dateFrom"
@@ -205,6 +157,7 @@
         :end="dateTo"
         label="Date from"
         v-on:error="dateFromError = $event"
+        :key="dateFromUpdate"
       ></datepicker>
       <datepicker
         name="dateTo"
@@ -213,6 +166,7 @@
         :end="today"
         label="Date to"
         v-on:error="dateToError = $event"
+        :key="dateToUpdate"
       ></datepicker>
       <div v-if="!isTrueOnBothDateFields('isValidDateString')" class="errormsg">
         Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.
@@ -222,16 +176,38 @@
         class="errormsg"
       >Provided date is in the future.
       </div>
-      <div
-        v-if="isTrueOnBothDateFields('isValidDateString') && (!dateFromError.isBeforeEnd || !dateToError.isAfterStart)"
+      <div v-if="isTrueOnBothDateFields('isValidDateString')
+          && (!dateFromError.isBeforeEnd || !dateToError.isAfterStart)"
         class="errormsg"
       >Date from must be before date to.
       </div>
     </div>
 
+    <div class="date" v-else>
+      <datepicker
+        name="dateTo"
+        v-model="dateTo"
+        :defaultVizDate="defaultVizDate"
+        :start="beginningOfHistory"
+        :end="today"
+        label="Date"
+        v-on:error="dateToError = $event"
+        :key="vizDateUpdate"
+      ></datepicker>
+      <div v-if="!dateToError.isValidDateString" class="errormsg">
+        Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.
+      </div>
+      <div
+        v-if="dateToError.isValidDateString && !dateToError.isNotInFuture"
+        class="errormsg"
+      >Provided date is in the future.
+      </div>
+    </div>
+
     <custom-multiselect
       label="Product"
-      v-model="selectedProductIds"
+      :selectedProductIds="selectedProductIds"
+      :setSelectedProductIds="setSelectedProductIds"
       :options="allProducts"
       id="productSelect"
       :icons="true"
@@ -239,58 +215,48 @@
       :devMode="devMode">
     </custom-multiselect>
 
+    <custom-multiselect v-show="isVizMode()"
+      label="Variable"
+      v-model="selectedVariableIds"
+      :options="selectableVariables"
+      id="variableSelect">
+    </custom-multiselect>
+
+    <button v-if="isVizMode()" @click="navigateToSearch('data')" class="secondaryButton">
+      View in data search &rarr;
+    </button>
+    <button v-else @click="navigateToSearch('visualizations')" class="secondaryButton">
+      View latest date in visualization search &rarr;
+    </button>
+
     <a @click="reset" id="reset">Reset filter</a>
   </section>
 
-  <section id="fileTable">
-    <span class="listTitle"> {{ captionText }} </span>
-    <b-table id="tableContent" borderless small striped hover sort-icon-left
-      :items="apiResponse"
-      :fields="[
-                { key: 'product.id', label: '', tdClass: 'icon', tdAttr: setIcon},
-                { key: 'title', label: 'Data object', sortable: true},
-                { key: 'volatile', label: '' },
-                { key: 'measurementDate', label: 'Date', sortable: true},
-                ]"
-      :current-page="currentPage"
-      :per-page="perPage"
-      :busy="isBusy"
-      :show-empty="true"
-      @row-clicked="clickRow">
-    <template v-slot:cell(volatile)="data">
-      <span
-        v-if="data.item.volatile"
-        class="volatile"
-        title="The data for this day may be incomplete. This file is updating in real time.">
-        volatile
-      </span>
-    </template>
-    </b-table>
-    <b-pagination id="pagi" v-if="listLength > perPage"
-      v-model="currentPage"
-      :total-rows="listLength"
-      :per-page="perPage"
-      :disabled="isBusy"
-      aria-controls="fileTable"
-      align="center"
-    ></b-pagination>
-    <div class="downloadinfo" v-if="listLength > 0">
-      <a class="download"
-        v-bind:class="{ disabled: isBusy }"
-        :href="isBusy? '#' : downloadUri" download>
-        Download all
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-      </a><br>
-      <span class="dlcount" v-bind:class="{ disabled: isBusy }">
-        {{ listLength }} files ({{ humanReadableSize(combinedFileSize(apiResponse)) }})
-      </span><br>
-    </div>
-  </section>
+  <div class="results" v-bind:class="resultsWidth">
+    <viz-search-result
+      v-if="isVizMode()"
+      :apiResponse="apiResponse"
+      :isBusy="isBusy"
+      :date="dateTo"
+      :key="vizSearchUpdate"
+      :setWideMode="setVizWideMode">
+    </viz-search-result>
+
+    <data-search-result
+      v-else
+      :apiResponse="apiResponse"
+      :isBusy="isBusy"
+      :downloadUri="downloadUri"
+      :key="dataSearchUpdate">
+    </data-search-result>
+  </div>
+
 </main>
+<app-error v-else :response="{status: 404}"></app-error>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'vue-property-decorator'
+import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import VCalendar from 'v-calendar'
 import axios from 'axios'
 import { File } from '../../../backend/src/entity/File'
@@ -298,13 +264,20 @@ import { BTable } from 'bootstrap-vue/esm/components/table'
 import { BPagination } from 'bootstrap-vue/esm/components/pagination'
 import Datepicker from '../components/Datepicker.vue'
 import CustomMultiselect from '../components/Multiselect.vue'
-import { getIconUrl, humanReadableSize, combinedFileSize } from '../lib'
+import DataSearchResult from '../components/DataSearchResult.vue'
+import {getIconUrl, humanReadableSize, combinedFileSize, dateToString} from '../lib'
 import { DevMode } from '../lib/DevMode'
+import VizSearchResult from '../components/VizSearchResult.vue'
+import {Visualization} from '../../../backend/src/entity/Visualization'
+import {Product} from '../../../backend/src/entity/Product'
+import {ProductVariable} from '../../../backend/src/entity/ProductVariable'
 
 Vue.component('datepicker', Datepicker)
 Vue.component('b-table', BTable)
 Vue.component('b-pagination', BPagination)
 Vue.component('custom-multiselect', CustomMultiselect)
+Vue.component('data-search-result', DataSearchResult)
+Vue.component('viz-search-result', VizSearchResult)
 
 Vue.use(VCalendar)
 
@@ -315,33 +288,47 @@ export interface Selection {
 
 @Component({name: 'app-search'})
 export default class Search extends Vue {
+  @Prop() mode!: string
 
   // api call
   apiUrl = process.env.VUE_APP_BACKENDURL
-  apiResponse: File[] = this.resetResponse()
-
-  // file list
-  sortBy = 'title'
-  sortDesc = false
+  apiResponse: File[] | Visualization[] = this.resetResponse()
   isBusy = false
-  currentPage = 1
-  perPage = 15
 
   // site selector
   allSites = []
-  selectedSiteIds = []
+  selectedSiteIds: string[] = []
+
+  setSelectedSiteIds(siteIds: []) {
+    this.selectedSiteIds = siteIds
+  }
 
   // dates
   beginningOfHistory = new Date('1970-01-01')
   today = new Date()
-  dateFrom = new Date(new Date().getFullYear().toString())
   dateTo = this.today
+  dateFrom = this.isVizMode() ? this.today : new Date(new Date().getFullYear().toString())
   dateFromError: { [key: string]: boolean } = {}
   dateToError: { [key: string]: boolean } = {}
+  defaultVizDate = this.dateTo
 
   // products
-  allProducts = []
-  selectedProductIds = []
+  allProducts: Product[] = []
+  selectedProductIds: string[] = []
+
+  setSelectedProductIds(productIds: []) {
+    this.selectedProductIds = productIds
+  }
+
+  // variables
+  selectedVariableIds: string[] = []
+  get selectableVariables(): ProductVariable[] {
+    if (this.selectedProductIds.length == 0)
+      return this.allProducts.flatMap(prod => prod.variables)
+    return this.allProducts
+      .filter(prod => this.selectedProductIds.includes(prod.id))
+      .flatMap(prod => prod.variables)
+  }
 
   renderComplete = false
 
@@ -350,10 +337,37 @@ export default class Search extends Vue {
   getIconUrl = getIconUrl
   humanReadableSize = humanReadableSize
   combinedFileSize = combinedFileSize
+  dateToString = dateToString
   devMode = new DevMode()
 
+  vizWideMode = false
+
+  // keys
+  dateFromUpdate = 10000
+  dateToUpdate = 20000
+  vizDateUpdate = 30000
+  dataSearchUpdate = 40000
+  vizSearchUpdate = 50000
+
+  isVizMode() {
+    return this.mode == 'visualizations'
+  }
+
+  setVizWideMode(wide: boolean) {
+    if (wide) this.vizWideMode = true
+    else this.vizWideMode = false
+  }
+
+  get resultsWidth() {
+    if (this.isVizMode()) {
+      if (this.vizWideMode) return {resultsWide: true}
+      else return { resultsViz: true }
+    }
+    return { resultsNarrow: true }
+  }
+
   isTrueOnBothDateFields(errorId: string) {
-    return this.dateFromError[errorId] && this.dateToError[errorId]
+    return (this.isVizMode() || this.dateFromError[errorId]) && this.dateToError[errorId]
   }
 
   created() {
@@ -363,47 +377,52 @@ export default class Search extends Vue {
   mounted() {
     // Wait until all child components have rendered
     this.$nextTick(() => {
-      window.addEventListener('resize', this.adjustPerPageAccordingToWindowHeight)
       this.renderComplete = true
     })
-  }
-
-  beforeDestroy() {
-    window.removeEventListener('resize', this.adjustPerPageAccordingToWindowHeight)
   }
 
   alphabeticalSort = (a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName
 
   async initView() {
-    this.adjustPerPageAccordingToWindowHeight()
     const payload = { params: { developer: this.devMode.activated || undefined } }
     Promise.all([
       axios.get(`${this.apiUrl}sites/`, payload),
-      axios.get(`${this.apiUrl}products/`, payload)
+      axios.get(`${this.apiUrl}products/variables`, payload)
     ]).then(([sites, products]) => {
       this.allSites = sites.data.sort(this.alphabeticalSort)
       this.allProducts = products.data.sort(this.alphabeticalSort)
+      if (this.isVizMode()) {
+        this.selectedSiteIds.push('bucharest')
+        this.selectedProductIds.push('classification')
+        const payload = { params: { location: 'bucharest' } }
+        return axios.get(`${this.apiUrl}latest-visualization-date/`, payload)
+          .then(res => {
+            this.dateTo = res.data.date
+            this.defaultVizDate = new Date(res.data.date)
+          })
+      }
     })
-    this.fetchData()
+    return this.fetchData()
   }
 
   get payload() {
     return {
       params: {
         location: this.selectedSiteIds,
-        dateFrom: this.dateFrom,
+        dateFrom: this.isVizMode() ? this.dateTo : this.dateFrom,
         dateTo: this.dateTo,
         product: this.selectedProductIds,
+        variable: this.isVizMode() ? this.selectedVariableIds : undefined,
         developer: this.devMode.activated || undefined
       }
     }
   }
 
   fetchData() {
-    this.currentPage = 1
     this.isBusy = true
-    axios
-      .get(`${this.apiUrl}files/`, this.payload)
+    const apiPath = this.isVizMode() ? 'visualization/' : 'files/'
+    return axios
+      .get(`${this.apiUrl}${apiPath}`, this.payload)
       .then(res => {
         this.apiResponse = res.data
         this.isBusy = false
@@ -414,15 +433,6 @@ export default class Search extends Vue {
       })
   }
 
-  get listLength() {
-    return this.apiResponse.length
-  }
-
-  get captionText() {
-    if (this.isBusy) return 'Searching...'
-    return this.listLength > 0 ? `Found ${this.listLength} results` : 'No results'
-  }
-
   get downloadUri() {
     return axios.getUri({...{ method: 'post', url: `${this.apiUrl}download/`}, ...this.payload })
   }
@@ -431,10 +441,9 @@ export default class Search extends Vue {
     return []
   }
 
-  clickRow(record: File) {
-    if (this.listLength > 0) this.$router.push(`file/${record.uuid}`)
+  navigateToSearch(mode: string) {
+    this.$router.push({ name: 'Search', params: { mode }})
   }
-
 
   setIcon(product: string) {
     if (product) return {'style': `background-image: url(${getIconUrl(product)})`}
@@ -442,10 +451,6 @@ export default class Search extends Vue {
 
   reset() {
     this.$router.go(0)
-  }
-
-  adjustPerPageAccordingToWindowHeight() {
-    this.perPage = Math.max(Math.floor(document.documentElement.clientHeight / 70), 10)
   }
 
   @Watch('selectedSiteIds')
@@ -462,6 +467,7 @@ export default class Search extends Vue {
   @Watch('dateTo')
   onDateToChanged() {
     if (!this.renderComplete) return
+    if (this.isVizMode()) this.dateFrom = this.dateTo
     this.fetchData()
   }
 
@@ -470,9 +476,26 @@ export default class Search extends Vue {
     this.fetchData()
   }
 
+  @Watch('selectedVariableIds')
+  onVariableSelected() {
+    this.fetchData()
+  }
+
   @Watch('devMode.activated')
   onDevModeToggled() {
     this.initView()
+  }
+
+  @Watch('mode')
+  onModeChange() {
+    this.renderComplete = false
+    this.apiResponse = this.resetResponse()
+    this.dateFromUpdate = this.dateFromUpdate += 1
+    this.dateToUpdate = this.dateToUpdate += 1
+    this.vizDateUpdate = this.vizDateUpdate += 1
+    this.dataSearchUpdate = this.dataSearchUpdate += 1
+    this.vizSearchUpdate = this.vizSearchUpdate += 1
+    this.fetchData().then(() => this.renderComplete = true)
   }
 }
 </script>

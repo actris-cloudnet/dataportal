@@ -3,13 +3,18 @@ import { Site } from '../entity/Site'
 import { Product } from '../entity/Product'
 import { SelectQueryBuilder, Connection, Repository } from 'typeorm'
 import { Request, Response, RequestHandler } from 'express'
-import { dateToUTCString } from '.'
+import {dateToUTCString, linkFile} from '.'
 import { join, basename } from 'path'
 import archiver = require('archiver')
 import { createReadStream, promises as fsp, constants as fsconst } from 'graceful-fs'
 import { fetchAll } from '.'
 import config from '../config'
 import { putRecord, freezeRecord } from '../metadata2db.js'
+import {Visualization} from '../entity/Visualization'
+import {VisualizationResponse} from '../entity/VisualizationResponse'
+import {ProductVariable} from '../entity/ProductVariable'
+import {LatestVisualizationDateResponse} from '../entity/LatestVisualizationDateResponse'
+
 
 export class Routes {
 
@@ -20,14 +25,18 @@ export class Routes {
     this.fileRepo = this.conn.getRepository(File)
     this.siteRepo = this.conn.getRepository(Site)
     this.productRepo = this.conn.getRepository(Product)
+    this.visualizationRepo = this.conn.getRepository(Visualization)
+    this.productVariableRepo = this.conn.getRepository(ProductVariable)
   }
 
   private conn: Connection
   private publicDir: string
-  private fileServerUrl: string
+  readonly fileServerUrl: string
   private fileRepo: Repository<File>
   private siteRepo: Repository<Site>
   private productRepo: Repository<Product>
+  private visualizationRepo: Repository<Visualization>
+  private productVariableRepo: Repository<ProductVariable>
 
   private hideTestDataFromNormalUsers = <T>(dbQuery: SelectQueryBuilder<T>, req: Request): SelectQueryBuilder<T> =>
     req.query.developer !== undefined ? dbQuery : dbQuery.andWhere('not site.isTestSite')
@@ -47,6 +56,14 @@ export class Routes {
       .andWhere('file.volatile IN (:...volatile)', query)
       .andWhere('file.releasedAt < :releasedBefore', query)
       .orderBy('file.measurementDate', 'DESC')
+
+  private visualizationsQueryBuilder(query: any) {
+    let qb = this.filesQueryBuilder(query)
+      .innerJoinAndSelect('file.visualizations', 'visualizations')
+      .leftJoinAndSelect('visualizations.productVariable', 'product_variable')
+    if ('variable' in query && query.variable.length) qb = qb.andWhere('product_variable.id IN (:...variable)', query)
+    return qb
+  }
 
   private allFilesAreReadable = (filepaths: string[]) =>
     Promise.all(filepaths.map(filepath => fsp.access(filepath, fsconst.R_OK)))
@@ -68,17 +85,6 @@ export class Routes {
   files: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query
 
-    this.siteRepo.findByIds(query.location)
-      .then(res => {
-        if (res.length != query.location.length) throw { status: 404, errors: ['One or more of the specified locations were not found'], params: req.query }
-      })
-      .catch(next)
-
-    this.productRepo.findByIds(query.product)
-      .then(res => {
-        if (res.length != query.product.length) throw { status: 404, errors: ['One or more of the specified products were not found'], params: req.query }
-      })
-      .catch(next)
 
     const qb = this.filesQueryBuilder(query)
     this.hideTestDataFromNormalUsers(qb, req)
@@ -102,6 +108,12 @@ export class Routes {
 
   products: RequestHandler = async (_req: Request, res: Response, next) => {
     fetchAll<Product>(this.conn, Product)
+      .then(result => res.send(result))
+      .catch(err => next({ status: 500, errors: err }))
+  }
+
+  productVariables: RequestHandler = async (_req: Request, res: Response, next) => {
+    fetchAll<Product>(this.conn, Product, {relations: ['variables']})
       .then(result => res.send(result))
       .catch(err => next({ status: 500, errors: err }))
   }
@@ -146,7 +158,72 @@ export class Routes {
       })
   }
 
-  allfiles: RequestHandler = async (_req: Request, res: Response, next) =>
+  putVisualization: RequestHandler = async (req: Request, res: Response, next) => {
+    const body = req.body
+    Promise.all([
+      this.fileRepo.findOneOrFail(body.sourceFileId),
+      this.productVariableRepo.findOneOrFail(body.variableId),
+      linkFile(body.fullPath, join(config.publicDir, 'viz'))
+    ])
+      .then(([file, productVariable, _]) => {
+        const viz = new Visualization(req.params.filename, file, productVariable)
+        return this.visualizationRepo.insert(viz)
+          .then(_ => res.sendStatus(201))
+          .catch(err => {
+            res.sendStatus(500)
+            next(err)
+          })
+      })
+      .catch((err: any) => next({ status: 400, errors: err}))
+  }
+
+  getVisualization: RequestHandler = async (req: Request, res: Response, next) => {
+    const query = req.query
+    let qb = this.visualizationsQueryBuilder(query)
+    this.hideTestDataFromNormalUsers(qb, req)
+      .getMany()
+      .then(result =>
+        res.send(result
+          .map(file => new VisualizationResponse(file))))
+      .catch(err => next({ status: 500, errors: err }))
+  }
+
+  getVisualizationForSourceFile: RequestHandler = async (req: Request, res: Response, next) => {
+    const params = req.params
+    const qb = this.fileRepo.createQueryBuilder('file')
+      .leftJoinAndSelect('file.visualizations', 'visualizations')
+      .leftJoinAndSelect('visualizations.productVariable', 'product_variable')
+      .leftJoinAndSelect('file.site', 'site')
+      .leftJoinAndSelect('file.product', 'product')
+      .where('file.uuid = :uuid', params)
+    this.hideTestDataFromNormalUsers(qb, req)
+      .getOne()
+      .then(file => {
+        if (file == undefined) {
+          next({status: 404, errors: ['No files match the query'], params})
+          return
+        }
+        res.send(new VisualizationResponse(file))
+      })
+      .catch(err => next({status: 500, errors: err}))
+  }
+
+  getLatestVisualizationDate: RequestHandler = async (req: Request, res: Response, next) => {
+    const query = req.query
+    const qb = this.visualizationsQueryBuilder(query)
+    this.hideTestDataFromNormalUsers(qb, req)
+      .getOne()
+      .then(result => {
+        if (!result) {
+          next(next({ status: 404, errors: ['No visualizations were found with the selected query parameters'] }))
+          return
+        }
+        res.send(new LatestVisualizationDateResponse(result))
+      })
+      .catch(err => next({ status: 500, errors: err }))
+  }
+
+  allfiles: RequestHandler = async (req: Request, res: Response, next) =>
     this.fileRepo.find({ relations: ['site', 'product'] })
       .then(result => res.send(this.augmentFiles(result)))
       .catch(err => next({ status: 500, errors: err }))
