@@ -202,7 +202,7 @@
   <section id="sideBar">
     <header class="filterOptions">Filter search</header>
 
-    <div id="minimap" class="container wrapper" style="z-index: 4">
+    <div id="map" ref="mapElement" class="container wrapper" style="z-index: 4">
       <div class="row">
         <div class="col-md-12 no-padding">
           <div id="map" class="map"></div>
@@ -373,9 +373,9 @@ export default class Search extends Vue {
   allProducts = []
   selectedProductIds = []
 
-  // Minimap
-  map = null as any  //L.map('map')
-  tileLayer = null as any //L.tileLayer('')
+  // map
+  map: L.Map | null = null
+  tileLayer: L.TileLayer | null = null
   allMarkers: { [key: string]: L.Marker } = {}
   passiveMarker = L.Icon.extend({
     options: {
@@ -427,7 +427,7 @@ export default class Search extends Vue {
   }
 
   initMap() {
-    this.map = L.map('map').setView([54.00, 14.00], 3)
+    this.map = L.map(this.$refs['mapElement'] as HTMLElement).setView([54.00, 14.00], 3)
     this.tileLayer = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png')
     this.tileLayer.addTo(this.map)
   }
@@ -440,10 +440,11 @@ export default class Search extends Vue {
     markerNames.forEach((name, i) => {
       const mark = marker([lat[i], lon[i]])
       mark.setIcon(new this.passiveMarker)
-      mark.on('click', (onClick) => {
+      mark.on('click', (_onClick) => {
         this.onMapMarkerClick(id[i])
       })
       this.allMarkers[id[i]] = mark
+      if (!this.map) return
       mark.addTo(this.map)
     })
   }
