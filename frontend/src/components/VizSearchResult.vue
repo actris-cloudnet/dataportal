@@ -19,17 +19,68 @@
 
   .modeSelector
     display: flex
-    align-content: baseline
-    img
-      width: 30px
-      height: auto
-      cursor: pointer
-    input
-      width: 2.5em
+    span
+      padding-right: 5px
 
   .notfound
     margin-top: $filter-margin
     text-align: center
+
+  .switch
+    position: relative
+    display: inline-block
+    width: 30px
+    min-width: 30px
+    height: 19px
+    margin-top: 2px
+
+  .switch input
+    opacity: 0
+    width: 0
+    height: 0
+
+  .slider
+    position: absolute
+    cursor: pointer
+    top: 0
+    left: 0
+    right: 0
+    bottom: 0
+    background-color: #ccc
+    -webkit-transition: .4s
+    transition: .4s
+
+  .slider:before
+    position: absolute
+    content: ""
+    height: 13px
+    width: 13px
+    left: 3px
+    bottom: 3px
+    background-color: white
+    -webkit-transition: .4s
+    transition: .4s
+
+  input:checked + .slider
+    background-color: #2196F3
+
+  input:focus + .slider
+    box-shadow: 0 0 1px #2196F3
+
+  input:checked + .slider:before
+    -webkit-transform: translateX(11px)
+    -ms-transform: translateX(11px)
+    transform: translateX(11px)
+
+  .slider.round
+    border-radius: 15px
+
+  .slider.round:before
+    border-radius: 50%
+
+  #switchlabel
+    font-size: 90%
+
 </style>
 
 
@@ -39,12 +90,12 @@
       <h3>Visualizations for {{humanReadableDate}}</h3>
       <span v-if="isBusy" class="listTitle">Loading...</span>
       <div v-if="searchYieldedResults">
-        <label for="comparisonModeSelector">View mode</label>
         <div class="modeSelector">
-          <img :src="require('../assets/icons/column.png')" class="smallimg" @click="comparisonView = '0'">
-          <input v-on:change="comparisonView = $event.target.value" :value="comparisonView"
-            type="range" id="comparisonModeSelector" name="comparisonModeSelector" min="0" max="1">
-          <img :src="require('../assets/icons/columns.png')" class="smallimg" @click="comparisonView = '1'">
+          <span id="switchlabel">wide view</span>
+          <label class="switch">
+            <input type="checkbox" v-model="checked">
+              <span class="slider round"></span>
+            </label>
         </div>
       </div>
     </header>
@@ -84,6 +135,7 @@ export default class DataSearchResult extends Vue {
 
   comparisonView = '0'
   sortVisualizations = sortVisualizations
+  checked = false
 
   get humanReadableDate() {
     return humanReadableDate(this.date.toString())
@@ -116,6 +168,11 @@ export default class DataSearchResult extends Vue {
   @Watch('comparisonViewAsBoolean')
   onViewModeChange() {
     this.setWideMode(this.comparisonViewAsBoolean)
+  }
+
+  @Watch('checked')
+  onCheck() {
+    this.checked ? this.comparisonView = '1' : this.comparisonView = '0'
   }
 
   quicklookUrl = process.env.VUE_APP_QUICKLOOKURL
