@@ -1,0 +1,37 @@
+name: Lint
+
+on: [push]
+
+jobs:
+  build:
+
+    timeout-minutes: 5
+
+    runs-on: ubuntu-latest
+
+    env:
+      NODE_ENV: 'test' 
+      CI: true
+    steps:
+    - name: Install ubuntu dependencies
+      run: |
+          sudo apt-get update
+          sudo apt-get install zsh postgresql
+    - name: Install node
+      run: |
+          export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          nvm install v10.16
+    - name: Configure postgresql
+      run: |
+        sudo service postgresql start
+        sudo -u postgres createuser -d -r -s -w runner
+        sudo cat /etc/postgresql/12/main/pg_hba.conf|sed 's/md5/trust/' > pg_hba.tmp
+        sudo mv pg_hba.tmp /etc/postgresql/12/main/pg_hba.conf
+        sudo service postgresql restart
+    - name: Checkout  
+      uses: actions/checkout@v2
+    - name: Install project
+      run: ./control ci
+    - name: Lint
+      run: ./control lint

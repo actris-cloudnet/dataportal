@@ -1,4 +1,4 @@
-name: Dataportal CI
+name: Test
 
 on: [push]
 
