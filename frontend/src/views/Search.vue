@@ -488,6 +488,7 @@ export default class Search extends Vue {
     ]).then(([sites, products]) => {
       this.allSites = sites.data.sort(this.alphabeticalSort)
       this.allProducts = products.data.sort(this.alphabeticalSort)
+      this.initLayers()
       if (this.isVizMode()) {
         this.selectedSiteIds.push('bucharest')
         this.selectedProductIds.push('classification')
@@ -498,7 +499,6 @@ export default class Search extends Vue {
             this.defaultVizDate = new Date(res.data.date)
           })
       }
-      this.initLayers()
     })
     return this.fetchData()
   }
