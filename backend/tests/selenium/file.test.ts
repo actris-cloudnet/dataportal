@@ -1,10 +1,8 @@
 import { By, until, WebDriver } from 'selenium-webdriver'
-import {basename} from 'path'
 import axios from 'axios'
-import {backendPrivateUrl, runNcdump, parseUuid, visualizationPayloads, wait, putFile} from '../lib'
-import {initDriver, Selenium} from '../lib/selenium'
+import {putFile} from '../lib'
+import {initDriver} from '../lib/selenium'
 
-let selenium: Selenium
 let driver: WebDriver
 
 jest.setTimeout(60000)
@@ -16,7 +14,6 @@ async function awaitAndFind(by: By) {
 
 beforeAll(async () => {
   driver = await initDriver()
-  selenium = new Selenium(driver)
 
   return putFile('20190723_bucharest_classification.nc')
 })

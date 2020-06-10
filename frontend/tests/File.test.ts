@@ -3,7 +3,7 @@ import { mount, Wrapper } from '@vue/test-utils'
 import File from '../src/views/File.vue'
 import axios, { AxiosResponse, AxiosPromise, AxiosRequestConfig } from 'axios'
 import Vue from 'vue'
-import {init, allFiles, allSites} from './lib'
+import {init, allFiles} from './lib'
 import { mocked } from 'ts-jest/dist/util/testing'
 init()
 
@@ -17,7 +17,7 @@ const axiosResponse: AxiosResponse = {
   headers: {}
 }
 
-const visualizationResponse = {"sourceFileId":"62a702ca-318a-478d-8a32-842d4ec94a85","visualizations":[{"filename":"20200503_bucharest_chm15k_beta.png","productVariable":{"id":"lidar-beta","humanReadableName":"Attenuated backscatter coefficient","order":"0"}},{"filename":"20200503_bucharest_chm15k_beta_raw.png","productVariable":{"id":"lidar-beta_raw","humanReadableName":"Raw attenuated backscatter coefficient","order":"1"}}],"productHumanReadable":"Lidar","locationHumanReadable":"Bucharest"}
+const visualizationResponse = {'sourceFileId':'62a702ca-318a-478d-8a32-842d4ec94a85','visualizations':[{'filename':'20200503_bucharest_chm15k_beta.png','productVariable':{'id':'lidar-beta','humanReadableName':'Attenuated backscatter coefficient','order':'0'}},{'filename':'20200503_bucharest_chm15k_beta_raw.png','productVariable':{'id':'lidar-beta_raw','humanReadableName':'Raw attenuated backscatter coefficient','order':'1'}}],'productHumanReadable':'Lidar','locationHumanReadable':'Bucharest'}
 
 const augmentAxiosResponse = (data: any) => ({ ...axiosResponse, ...{ data } })
 

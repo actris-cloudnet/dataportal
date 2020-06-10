@@ -1,6 +1,6 @@
 import {Connection} from 'typeorm'
 import {basename, join, resolve as pathResolve} from 'path'
-import {existsSync, promises as fsp, unlinkSync} from 'fs'
+import {promises as fsp} from 'fs'
 
 export const stringify = (obj: any): string => JSON.stringify(obj, null, 2)
 
