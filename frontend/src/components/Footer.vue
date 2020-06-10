@@ -24,6 +24,9 @@ footer
 
 .marginright
   margin-right: 1em
+
+.centered
+  text-align: center
 </style>
 
 <template>
@@ -34,8 +37,11 @@ footer
       <span class="small">Header photo by Flickr user @theaucitron, used under a CC license.<br>
       Icons from <a href="https://icons8.com/">icons8.com</a>.</span>
     </div>
-    <div class="vertical-center footeritem">
+    <div class="vertical-center footeritem centered">
       Give feedback: <a href="mailto:actris-cloudnet-feedback@fmi.fi">actris-cloudnet-feedback@fmi.fi</a>
+    </div>
+    <div class="vertical-center footeritem">
+      Visit Cloudnet forum: <a href="https://forum.cloudnet.fmi.fi/" target="_blank">forum.cloudnet.fmi.fi</a>
     </div>
   </footer>
 </template>
