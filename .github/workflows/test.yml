@@ -38,9 +38,10 @@ jobs:
           sudo ln -s geckodriver /usr/local/bin/geckodriver
     - name: Configure postgresql
       run: |
+        sudo service postgresql start
         sudo -u postgres createuser -d -r -s -w runner
-        sudo cat /etc/postgresql/10/main/pg_hba.conf|sed 's/md5/trust/' > pg_hba.tmp
-        sudo mv pg_hba.tmp /etc/postgresql/10/main/pg_hba.conf
+        sudo cat /etc/postgresql/12/main/pg_hba.conf|sed 's/md5/trust/' > pg_hba.tmp
+        sudo mv pg_hba.tmp /etc/postgresql/12/main/pg_hba.conf
         sudo service postgresql restart
     - name: Configure nginx
       run: |

@@ -132,8 +132,8 @@ img.product
         <section class="details">
           <dl>
             <dt>PID</dt>
-            <dd v-if="response.pid.length > 2"> {{ response.pid }} </dd>
-            <dd v-else> {{ 'n/a' }} </dd>
+            <dd v-if="response.pid.length > 2"> <a :href=response.pid> {{ response.pid }} </a></dd>
+            <dd v-else> n/a </dd>
             <dt>Filename</dt>
             <dd>{{ response.filename }}</dd>
             <dt>Format</dt>

@@ -6,7 +6,11 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    redirect: '/search'
+    name: 'Frontpage',
+    meta: {
+      title: 'Cloudnet Data Portal'
+    },
+    component: () => import('../views/Frontpage.vue')
   },
   {
     path: '/file/:uuid',
