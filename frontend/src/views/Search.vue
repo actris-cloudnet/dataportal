@@ -281,8 +281,6 @@ Vue.component('viz-search-result', VizSearchResult)
 
 Vue.use(VCalendar)
 
-const defaultVisualizationSite = 'bucharest'
-
 export interface Selection {
   id: string;
   humanReadableName: string;
@@ -394,9 +392,9 @@ export default class Search extends Vue {
       this.allSites = sites.data.sort(this.alphabeticalSort)
       this.allProducts = products.data.sort(this.alphabeticalSort)
       if (this.isVizMode()) {
-        this.selectedSiteIds.push(defaultVisualizationSite)
+        this.selectedSiteIds.push('bucharest')
         this.selectedProductIds.push('classification')
-        const payload = { params: { location: defaultVisualizationSite } }
+        const payload = { params: { location: 'bucharest' } }
         return axios.get(`${this.apiUrl}latest-visualization-date/`, payload)
           .then(res => {
             this.dateTo = res.data.date
