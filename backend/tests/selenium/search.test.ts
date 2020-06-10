@@ -14,55 +14,31 @@ let driver: WebDriver
 jest.setTimeout(60000)
 
 async function initSearch() {
-  await selenium.driver.get('http://localhost:8000/search/data')
+  await driver.get('http://localhost:8000/search/data')
   await selenium.sendInputToMultiselect('siteSelect', 'bucharest')
   return selenium.sendInput('dateTo', '2020-04-01')
 }
 
-async function sendInput(key: string, input: string) {
-  const element = await findElement(By.name(key))
-  await element.sendKeys(input)
-  await selenium.clickTab()
-  return wait(100)
-}
-
-async function sendInputToMultiselect(key: string, input: string) {
-  await selenium.clickGrandparentById(key)
-  await driver.actions().sendKeys(`${input}${Key.ENTER}`).perform()
-  return wait(100)
-}
-
-async function clearMultiSelect(key: string) {
-  await selenium.clickGrandparentById(key)
-  await driver.actions().sendKeys(`${Key.BACK_SPACE}${Key.BACK_SPACE}${Key.BACK_SPACE}`).perform()
-  return wait(100)
-}
-
-async function findElement(by: By) {
-  await driver.wait(until.elementLocated(by))
-  return driver.findElement(by)
-}
-
 async function selectAllSites() {
-  await sendInputToMultiselect('siteSelect', 'bucharest')
-  await sendInputToMultiselect('siteSelect', 'hyytiälä')
-  await sendInputToMultiselect('siteSelect', 'mace head')
- }
+  await selenium.sendInputToMultiselect('siteSelect', 'bucharest')
+  await selenium.sendInputToMultiselect('siteSelect', 'hyytiälä')
+  await selenium.sendInputToMultiselect('siteSelect', 'mace head')
+}
 
 async function clearkMapSelection(by: By) {
   const mapElement = await driver.wait(until.elementLocated(by))
   let actions = driver.actions({bridge: true})
   actions.move({origin: mapElement, x: 68, y: 78})
-  actions.click().perform()
-  actions.clear()
+  await actions.click().perform()
+  await actions.clear()
 }
 
 async function clickMapMarker(by: By, x: number, y: number) {
   const mapElement = await driver.wait(until.elementLocated(by))
   let actions = driver.actions({bridge: true})
   actions.move({origin: mapElement, x: x, y: y})
-  actions.click().perform()
-  actions.clear()
+  await actions.click().perform()
+  await actions.clear()
 }
 
 async function getMarkerSrc(by: By) {
@@ -81,11 +57,6 @@ async function clickAllMarkers(by: By) {
 beforeAll(async () => {
   driver = await initDriver()
   selenium = new Selenium(driver)
-})
-
-afterAll(async () => {
-  await wait(300)
-  return driver.close()
 })
 
 afterAll(async () => driver.close())
@@ -148,9 +119,9 @@ describe('search page', () => {
     await selenium.sendInput('dateFrom', '2010')
     await selenium.clickClass('b-table-sort-icon-left')
     await selenium.clickTab()
-    selenium.driver.actions().click()
+    driver.actions().click()
     await selenium.clickXpath('//*[contains(text(), "2019-07-25")]')
-    expect(await selenium.driver.getCurrentUrl()).toContain('20c03d8f-c9c5-4cb1-8bf8-48d275d621ff')
+    expect(await driver.getCurrentUrl()).toContain('20c03d8f-c9c5-4cb1-8bf8-48d275d621ff')
     expect(await selenium.findElement(By.id('landing'))).toBeTruthy()
   })
 
@@ -200,7 +171,7 @@ describe('search page', () => {
     await selenium.clickTab()
     await selenium.clickXpath('//*[contains(text(), "2019-07-25")]')
     await wait(100)
-    await selenium.driver.navigate().back()
+    await driver.navigate().back()
     await wait(100)
     const content = await selenium.getContent()
     expect(content).toContain('Found 5 results')
@@ -289,7 +260,7 @@ describe('search page', () => {
     const src1 = getMarkerSrc(By.id('map'))
     const s1 = (await src1).anchor('src')
     await selectAllSites()
-    await clearMultiSelect('siteSelect')
+    await selenium.clearMultiSelect('siteSelect')
     const src2 = getMarkerSrc(By.id('map'))
     const s2 = (await src2).anchor('src')
     expect(s1).toEqual(s2)
