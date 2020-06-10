@@ -9,6 +9,7 @@ header
   background-repeat: no-repeat
   background-size: cover
   box-shadow: 0 1px 3px rgba(0,0,0,0.3)
+  height: 4.5em
 
 .portal-name
   font-family: $header-font
