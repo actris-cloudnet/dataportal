@@ -37,9 +37,9 @@ describe('visualizations page', () => {
 
   beforeEach(initSearch)
 
-  it('initially contains no visualizations', async () => {
+  it('initially contains the latest visualization', async () => {
     const content = await selenium.getContent()
-    expect(content).toContain('No visualizations')
+    expect(content).toContain('Visualizations for 1 May 2020')
   })
 
   it('finds visualizations if they exist', async () => {
