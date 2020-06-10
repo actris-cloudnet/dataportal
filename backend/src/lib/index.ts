@@ -22,8 +22,12 @@ export function linkFile(filename: string, linkPath: string) {
   const resolvedSource = pathResolve(filename)
   const fullLink = join(linkPath, basename(filename))
   return checkFileExists(resolvedSource)
-    .then(() => {
-      if (existsSync(fullLink)) unlinkSync(fullLink)
+    .then(async () => {
+      try {
+        await checkFileExists(fullLink)
+        await fsp.unlink(fullLink)
+      } catch { // if file does not exist do nothing
+      }
       return fsp.symlink(resolvedSource, fullLink)
     })
 }
