@@ -80,12 +80,6 @@ describe('search page', () => {
       await putFile(filenames[i])
     }
 
-    // PUT visualizations
-    const vizUrl = `${backendPrivateUrl}visualization/`
-    return Promise.all([
-      axios.put(`${vizUrl}${basename(visualizationPayloads[0].fullPath)}`, visualizationPayloads[0]),
-      axios.put(`${vizUrl}${basename(visualizationPayloads[1].fullPath)}`, visualizationPayloads[1]),
-    ])
   })
 
   beforeEach(initSearch)
@@ -199,14 +193,6 @@ describe('search page', () => {
     const downloadUrl = await button.getAttribute('href')
     const response = await axios.head(downloadUrl)
     expect(response.status).toBe(200)
-  })
-
-  it('switches to visualization search', async () => {
-    await selenium.sendInput('dateTo', '2020-05-01')
-    await selenium.clickClass('secondaryButton')
-    const content = await selenium.getContent()
-    expect((await selenium.findAllByClass('sourceFile')).length).toEqual(1)
-    expect((await selenium.findAllByClass('variable')).length).toEqual(2)
   })
 
   it('select site from multi-selection while clicking marker', async () => {
