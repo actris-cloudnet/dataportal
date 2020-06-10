@@ -478,10 +478,6 @@ export default class Search extends Vue {
     })
   }
 
-  beforeDestroy() {
-    window.removeEventListener('resize', this.adjustPerPageAccordingToWindowHeight)
-  }
-
   alphabeticalSort = (a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName
 
   async initView() {
