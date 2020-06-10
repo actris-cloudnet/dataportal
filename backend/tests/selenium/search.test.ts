@@ -1,4 +1,4 @@
-import {By, WebDriver} from 'selenium-webdriver'
+import {Key, By, until, WebDriver} from 'selenium-webdriver'
 import axios from 'axios'
 import {
   wait,
@@ -14,9 +14,44 @@ let driver: WebDriver
 jest.setTimeout(60000)
 
 async function initSearch() {
-  await selenium.driver.get('http://localhost:8000/search/data')
+  await driver.get('http://localhost:8000/search/data')
   await selenium.sendInputToMultiselect('siteSelect', 'bucharest')
   return selenium.sendInput('dateTo', '2020-04-01')
+}
+
+async function selectAllSites() {
+  await selenium.sendInputToMultiselect('siteSelect', 'bucharest')
+  await selenium.sendInputToMultiselect('siteSelect', 'hyytiälä')
+  await selenium.sendInputToMultiselect('siteSelect', 'mace head')
+}
+
+async function clearkMapSelection(by: By) {
+  const mapElement = await driver.wait(until.elementLocated(by))
+  let actions = driver.actions({bridge: true})
+  actions.move({origin: mapElement, x: 68, y: 78})
+  await actions.click().perform()
+  await actions.clear()
+}
+
+async function clickMapMarker(by: By, x: number, y: number) {
+  const mapElement = await driver.wait(until.elementLocated(by))
+  let actions = driver.actions({bridge: true})
+  actions.move({origin: mapElement, x: x, y: y})
+  await actions.click().perform()
+  await actions.clear()
+}
+
+async function getMarkerSrc(by: By) {
+  const mapElement = await driver.wait(until.elementLocated(by))
+  const x = mapElement.findElement(By.className('leaflet-marker-pane'))
+  const marker = x.findElement(By.className('leaflet-marker-icon'))
+  return marker.getAttribute('src')
+}
+
+async function clickAllMarkers(by: By) {
+  await clickMapMarker(by, 55, -113) // Hyytiälä
+  await clickMapMarker(by, 68, 78) //Bucharest
+  await clickMapMarker(by, -140, -20) // Mace Head
 }
 
 beforeAll(async () => {
@@ -45,12 +80,6 @@ describe('search page', () => {
       await putFile(filenames[i])
     }
 
-    // PUT visualizations
-    const vizUrl = `${backendPrivateUrl}visualization/`
-    return Promise.all([
-      axios.put(`${vizUrl}${basename(visualizationPayloads[0].fullPath)}`, visualizationPayloads[0]),
-      axios.put(`${vizUrl}${basename(visualizationPayloads[1].fullPath)}`, visualizationPayloads[1]),
-    ])
   })
 
   beforeEach(initSearch)
@@ -84,9 +113,9 @@ describe('search page', () => {
     await selenium.sendInput('dateFrom', '2010')
     await selenium.clickClass('b-table-sort-icon-left')
     await selenium.clickTab()
-    selenium.driver.actions().click()
+    driver.actions().click()
     await selenium.clickXpath('//*[contains(text(), "2019-07-25")]')
-    expect(await selenium.driver.getCurrentUrl()).toContain('20c03d8f-c9c5-4cb1-8bf8-48d275d621ff')
+    expect(await driver.getCurrentUrl()).toContain('20c03d8f-c9c5-4cb1-8bf8-48d275d621ff')
     expect(await selenium.findElement(By.id('landing'))).toBeTruthy()
   })
 
@@ -125,6 +154,7 @@ describe('search page', () => {
     await selenium.sendInput('dateFrom', '1980')
     await selenium.sendInputToMultiselect('productSelect', 'ice')
     const content = await selenium.getContent()
+    await wait(300)
     expect(content).toContain('Found 2 results')
     expect(content).toContain('Ice water content file from Mace-Head')
   })
@@ -135,7 +165,7 @@ describe('search page', () => {
     await selenium.clickTab()
     await selenium.clickXpath('//*[contains(text(), "2019-07-25")]')
     await wait(100)
-    await selenium.driver.navigate().back()
+    await driver.navigate().back()
     await wait(100)
     const content = await selenium.getContent()
     expect(content).toContain('Found 5 results')
@@ -165,12 +195,61 @@ describe('search page', () => {
     expect(response.status).toBe(200)
   })
 
-  it('switches to visualization search', async () => {
-    await selenium.sendInput('dateTo', '2020-05-01')
-    await selenium.clickClass('secondaryButton')
+  it('select site from multi-selection while clicking marker', async () => {
+    await clearkMapSelection(By.id('map'))
+    await clickMapMarker(By.id('map'), -140, -20)
     const content = await selenium.getContent()
-    expect((await selenium.findAllByClass('sourceFile')).length).toEqual(1)
-    expect((await selenium.findAllByClass('variable')).length).toEqual(2)
+    expect(content).toContain('Mace Head')
+  })
+
+  it('remove site from multi-selection while clicking marker twice', async () => {
+    await clearkMapSelection(By.id('map'))
+    await clickMapMarker(By.id('map'), -140, -20)
+    await clickMapMarker(By.id('map'), -140, -20)
+    const content = await selenium.getContent()
+    expect(content).not.toContain('Mace Head')
+  })
+
+  it('change marker color by clicking marker', async () => {
+    await clearkMapSelection(By.id('map'))
+    const src1 = getMarkerSrc(By.id('map'))
+    const s1 = (await src1).anchor('src')
+    await clickAllMarkers(By.id('map'))
+    const src2 = getMarkerSrc(By.id('map'))
+    const s2 = (await src2).anchor('src')
+    expect(s1).not.toEqual(s2)
+  })
+
+  it('change marker color by doupleclicking marker', async () => {
+    await clearkMapSelection(By.id('map'))
+    const src1 = getMarkerSrc(By.id('map'))
+    const s1 = (await src1).anchor('src')
+    await clickAllMarkers(By.id('map'))
+    await clickAllMarkers(By.id('map'))
+    const src2 = getMarkerSrc(By.id('map'))
+    const s2 = (await src2).anchor('src')
+    expect(s1).toEqual(s2)
+  })
+
+  it('change marker color by clicking site from multi-selection', async () => {
+    await clearkMapSelection(By.id('map'))
+    const src1 = getMarkerSrc(By.id('map'))
+    const s1 = (await src1).anchor('src')
+    await selectAllSites()
+    const src2 = getMarkerSrc(By.id('map'))
+    const s2 = (await src2).anchor('src')
+    expect(s1).not.toEqual(s2)
+  })
+
+  it('change marker color by removing site from multi-selection', async () => {
+    await clearkMapSelection(By.id('map'))
+    const src1 = getMarkerSrc(By.id('map'))
+    const s1 = (await src1).anchor('src')
+    await selectAllSites()
+    await selenium.clearMultiSelect('siteSelect')
+    const src2 = getMarkerSrc(By.id('map'))
+    const s2 = (await src2).anchor('src')
+    expect(s1).toEqual(s2)
   })
 
 })

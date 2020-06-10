@@ -123,6 +123,17 @@
     margin: 0 auto
     margin-bottom: $filter-margin
 
+  .map
+    height: 300px
+    width: 300px
+    margin-bottom: $filter-margin
+
+  .wrapper
+    position: relative
+
+  .no-padding
+    padding: 0
+
 </style>
 
 <template>
@@ -137,8 +148,18 @@
     You are using the dataportal in developer mode. Files from sites in testing mode are now visible.
     <span class="close" id="disableDevMode" @click="devMode.disable()">Deactivate</span>
   </div>
+
   <section id="sideBar">
     <header class="filterOptions">Filter search</header>
+
+    <div id="map" ref="mapElement" class="container wrapper" style="z-index: 4">
+      <div class="row">
+        <div class="col-md-12 no-padding">
+          <div id="map" class="map"></div>
+        </div>
+      </div>
+    </div>
+
     <custom-multiselect
       label="Location"
       :selectedSiteIds="selectedSiteIds"
@@ -260,17 +281,19 @@ import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import VCalendar from 'v-calendar'
 import axios from 'axios'
 import { File } from '../../../backend/src/entity/File'
+import { Site } from '../../../backend/src/entity/Site'
 import { BTable } from 'bootstrap-vue/esm/components/table'
 import { BPagination } from 'bootstrap-vue/esm/components/pagination'
 import Datepicker from '../components/Datepicker.vue'
 import CustomMultiselect from '../components/Multiselect.vue'
 import DataSearchResult from '../components/DataSearchResult.vue'
-import {getIconUrl, humanReadableSize, combinedFileSize, dateToString} from '../lib'
+import { dateToString, getIconUrl, getShadowUrl, getMarkerUrl, humanReadableSize, combinedFileSize } from '../lib'
 import { DevMode } from '../lib/DevMode'
 import VizSearchResult from '../components/VizSearchResult.vue'
 import {Visualization} from '../../../backend/src/entity/Visualization'
 import {Product} from '../../../backend/src/entity/Product'
 import {ProductVariable} from '../../../backend/src/entity/ProductVariable'
+import L, { marker } from 'leaflet'
 
 Vue.component('datepicker', Datepicker)
 Vue.component('b-table', BTable)
@@ -286,6 +309,7 @@ export interface Selection {
   humanReadableName: string;
 }
 
+
 @Component({name: 'app-search'})
 export default class Search extends Vue {
   @Prop() mode!: string
@@ -296,7 +320,7 @@ export default class Search extends Vue {
   isBusy = false
 
   // site selector
-  allSites = []
+  allSites: Site[] = []
   selectedSiteIds: string[] = []
 
   setSelectedSiteIds(siteIds: []) {
@@ -329,6 +353,33 @@ export default class Search extends Vue {
       .filter(prod => this.selectedProductIds.includes(prod.id))
       .flatMap(prod => prod.variables)
   }
+
+  // map
+  map: L.Map | null = null
+  tileLayer: L.TileLayer | null = null
+  allMarkers: { [key: string]: L.Marker } = {}
+  passiveMarker = L.Icon.extend({
+    options: {
+      iconUrl: getMarkerUrl('blue'),
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowUrl: getShadowUrl(),
+      shadowSize: [41, 41],
+      shadowAnchor: [12, 41]
+    }
+  })
+  activeMarker = L.Icon.extend({
+    options: {
+      iconUrl: getMarkerUrl('green'),
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowUrl: getShadowUrl(),
+      shadowSize: [41, 41],
+      shadowAnchor: [12, 41]
+    }
+  })
 
   renderComplete = false
 
@@ -379,6 +430,52 @@ export default class Search extends Vue {
     this.$nextTick(() => {
       this.renderComplete = true
     })
+    this.initMap()
+  }
+
+  initMap() {
+    this.map = L.map(this.$refs['mapElement'] as HTMLElement).setView([54.00, 14.00], 3)
+    this.tileLayer = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png')
+    this.tileLayer.addTo(this.map)
+  }
+
+  initLayers()  {
+    const markerNames = this.allSites.map(site => site.humanReadableName)
+    const lat = this.allSites.map(site => site.latitude)
+    const lon = this.allSites.map(site => site.longitude)
+    const id = this.allSites.map(site => site.id)
+    markerNames.forEach((name, i) => {
+      const mark = marker([lat[i], lon[i]])
+      mark.setIcon(new this.passiveMarker)
+      mark.on('click', (_onClick) => {
+        this.onMapMarkerClick(id[i])
+      })
+      this.allMarkers[id[i]] = mark
+      if (!this.map) return
+      mark.addTo(this.map)
+    })
+  }
+
+  onMapMarkerClick(id: string) {
+    if (this.selectedSiteIds.includes(id)) {
+      this.selectedSiteIds = this.selectedSiteIds.filter(e => e !== id)
+    }
+    else {
+      this.selectedSiteIds.push(id)
+    }
+  }
+
+  setActiveMarkers() {
+    const keys = Object.keys(this.allMarkers)
+    keys.forEach((id: string) => {
+      const mark = this.allMarkers[id]
+      if (this.selectedSiteIds.includes(id)) {
+        mark.setIcon(new this.activeMarker)
+      }
+      else {
+        mark.setIcon(new this.passiveMarker)
+      }
+    })
   }
 
   alphabeticalSort = (a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName
@@ -391,6 +488,7 @@ export default class Search extends Vue {
     ]).then(([sites, products]) => {
       this.allSites = sites.data.sort(this.alphabeticalSort)
       this.allProducts = products.data.sort(this.alphabeticalSort)
+      this.initLayers()
       if (this.isVizMode()) {
         this.selectedSiteIds.push('bucharest')
         this.selectedProductIds.push('classification')
@@ -456,6 +554,7 @@ export default class Search extends Vue {
   @Watch('selectedSiteIds')
   onSiteSelected() {
     this.fetchData()
+    this.setActiveMarkers()
   }
 
   @Watch('dateFrom')

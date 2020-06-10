@@ -21,19 +21,17 @@ async function initSearch() {
 beforeAll(async () => {
   driver = await initDriver()
   selenium = new Selenium(driver)
+
+  await putFile('20200501_bucharest_classification.nc')
+  return Promise.all([
+    axios.put(`${backendPrivateUrl}visualization/${basename(visualizationPayloads[0].fullPath)}`, visualizationPayloads[0]),
+    axios.put(`${backendPrivateUrl}visualization/${basename(visualizationPayloads[1].fullPath)}`, visualizationPayloads[1]),
+  ])
 })
 
 afterAll(async () => driver.close())
 
 describe('visualizations page', () => {
-
-  beforeAll(async () => {
-    await putFile('20200501_bucharest_classification.nc')
-    return Promise.all([
-      axios.put(`${backendPrivateUrl}visualization/${basename(visualizationPayloads[0].fullPath)}`, visualizationPayloads[0]),
-      axios.put(`${backendPrivateUrl}visualization/${basename(visualizationPayloads[1].fullPath)}`, visualizationPayloads[1]),
-    ])
-  })
 
   beforeEach(initSearch)
 
@@ -100,5 +98,28 @@ describe('visualizations page', () => {
     await wait(500)
     await selenium.clickClass('secondaryButton')
     expect((await selenium.findAllByClass('variable')).length).toEqual(1)
+  })
+})
+
+describe('file landing page', () => {
+  it('shows a preview image', async () => {
+    await driver.get('http://localhost:8000/file/7a9c3894ef7e43d9aa7da3f25017acec')
+    // Wait for page to load
+    await wait(300)
+    const imgs = await selenium.findAllByClass('visualization')
+    expect(imgs.length).toEqual(1)
+    const downloadUrl = await imgs[0].getAttribute('src')
+    const response = await axios.head(downloadUrl)
+    expect(response.status).toBe(200)
+    return expect(response.headers['content-length']).toBe('91112')
+  })
+
+  it('shows all plots after clicking see more plots', async () => {
+    await driver.get('http://localhost:8000/file/7a9c3894ef7e43d9aa7da3f25017acec')
+    // Wait for page to load
+    await wait(300)
+    await selenium.clickClass('viewAllPlots')
+    const imgs = await selenium.findAllByClass('visualization')
+    expect(imgs.length).toEqual(2)
   })
 })
