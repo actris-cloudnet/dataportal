@@ -492,7 +492,7 @@ export default class Search extends Vue {
       if (this.isVizMode()) {
         this.selectedSiteIds.push('bucharest')
         this.selectedProductIds.push('classification')
-        const payload = { params: { location: 'bucharest' } }
+        const payload = { params: { location: this.selectedSiteIds, product: this.selectedProductIds } }
         return axios.get(`${this.apiUrl}latest-visualization-date/`, payload)
           .then(res => {
             this.dateTo = res.data.date
