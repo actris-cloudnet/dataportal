@@ -141,7 +141,7 @@
   <div v-if="displayBetaNotification" class="note betanote">
     This is the beta version of Cloudnet data portal.
     Click <a href="http://devcloudnet.fmi.fi/">here</a> to visit the devcloudnet data portal, or
-    <a href="http://cloudnet.fmi.fi/index.html">here</a> to navigate to the legacy cloudnet site.
+    <a href="http://legacy.cloudnet.fmi.fi/index.html">here</a> to navigate to the legacy cloudnet site.
     <span class="close" @click="displayBetaNotification = !displayBetaNotification">&#10005;</span>
   </div>
   <div v-if="devMode.activated" class="note rednote">
@@ -492,7 +492,7 @@ export default class Search extends Vue {
       if (this.isVizMode()) {
         this.selectedSiteIds.push('bucharest')
         this.selectedProductIds.push('classification')
-        const payload = { params: { location: 'bucharest' } }
+        const payload = { params: { location: this.selectedSiteIds, product: this.selectedProductIds } }
         return axios.get(`${this.apiUrl}latest-visualization-date/`, payload)
           .then(res => {
             this.dateTo = res.data.date
