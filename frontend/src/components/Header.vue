@@ -28,7 +28,7 @@ header
 
 <template functional>
   <header class="global">
-    <div class="vertical-center portal-name">
+    <div onclick="window.location = '/'" class="vertical-center portal-name">
       <h1>Cloudnet</h1>
       <span>data portal</span>
     </div>
