@@ -12,6 +12,7 @@ header
   height: 4.5em
 
 .portal-name
+  cursor: pointer
   font-family: $header-font
   color: white
   margin: 0
