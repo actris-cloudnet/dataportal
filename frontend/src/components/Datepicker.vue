@@ -74,8 +74,6 @@ export default class Datepicker extends mixins(validationMixin, Vue) {
   set value(date: Date) {
     if (!isValidDate(date)) return
     this.dateString = this.dateToString(date)
-    this.$emit('input', date)
-    this.$emit('error', this.$v.dateString)
   }
 
   get value(): Date {
@@ -85,6 +83,12 @@ export default class Datepicker extends mixins(validationMixin, Vue) {
   @Watch('defaultVizDate')
   onDefaultVizChange() {
     this.value = this.defaultVizDate
+  }
+
+  @Watch('dateString')
+  onDateChange() {
+    this.$emit('input', this.value)
+    this.$emit('error', this.$v.dateString)
   }
 
 }
