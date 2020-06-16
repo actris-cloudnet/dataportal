@@ -124,3 +124,22 @@ describe('/api/files', () => {
   })
 
 })
+
+describe('/api/search', () => {
+  const url = `${backendPublicUrl}search/`
+
+  const expectedData = [{
+    uuid: 'bde7a35f-03aa-4bff-acfb-b4974ea9f217',
+    measurementDate: '2018-06-09',
+    site: 'Mace Head',
+    product: 'Classification',
+    productId: 'classification',
+    size: 130744
+  }]
+
+  it('responds with correct objects if dateFrom, dateTo, location, and product are specified', async () => {
+    const payload = {params: {dateFrom: new Date('2018-06-09'), dateTo: new Date('2019-09-02'), location: 'macehead', product: 'classification'}}
+    const res = await axios.get(url, payload)
+    return expect(res.data).toMatchObject(expectedData)
+  })
+})

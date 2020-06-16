@@ -44,6 +44,7 @@ import * as xmlparser from 'express-xml-bodyparser'
   // public
   app.get('/api/status', routes.status)
   app.get('/api/file/:uuid', routes.file)
+  app.get('/api/search', middleware.filesValidator, middleware.filesQueryAugmenter, routes.search)
   app.get('/api/files',
     middleware.filesValidator,
     middleware.filesQueryAugmenter,

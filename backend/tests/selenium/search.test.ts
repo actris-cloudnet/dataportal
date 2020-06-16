@@ -144,7 +144,7 @@ describe('search page', () => {
     const content = await selenium.getContent()
     expect(content).toContain('Found 7 results')
     expect(content).toContain('Classification file from Bucharest')
-    expect(content).toContain('Ice water content file from Mace-Head')
+    expect(content).toContain('Ice water content file from Mace Head')
   })
 
   it('works with different product selectors', async () => {
@@ -154,7 +154,7 @@ describe('search page', () => {
     const content = await selenium.getContent()
     await wait(300)
     expect(content).toContain('Found 2 results')
-    expect(content).toContain('Ice water content file from Mace-Head')
+    expect(content).toContain('Ice water content file from Mace Head')
   })
 
   it('preserves search state after visiting a landing page', async () => {
