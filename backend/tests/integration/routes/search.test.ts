@@ -134,6 +134,7 @@ describe('/api/search', () => {
     site: 'Mace Head',
     product: 'Classification',
     productId: 'classification',
+    volatile: true,
     size: 130744
   }]
 

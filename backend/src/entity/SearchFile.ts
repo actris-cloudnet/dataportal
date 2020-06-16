@@ -8,6 +8,7 @@ export class SearchFile {
   product: string
   productId: string
   size: number
+  volatile: boolean
 
   constructor(file: File) {
     this.uuid = file.uuid
@@ -16,5 +17,6 @@ export class SearchFile {
     this.product = file.product.humanReadableName
     this.productId = file.product.id
     this.size = file.size
+    this.volatile = file.volatile
   }
 }
