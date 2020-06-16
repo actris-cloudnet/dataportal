@@ -38,7 +38,7 @@ afterAll(async () => {
 async function putFile(xmlFileName:string, headers:any) {
   const xml = readFileSync(xmlFileName, 'utf-8')
   const uuid = await parseUuid(xml)
-  const url = `${backendPrivateUrl}file/${uuid}`
+  const url = `${backendPrivateUrl}files/${uuid}`
   return await axios.put(url, xml, {headers: headers})
 }
 

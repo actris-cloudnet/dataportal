@@ -24,8 +24,8 @@ beforeAll(async () => {
 
   await putFile('20200501_bucharest_classification.nc')
   return Promise.all([
-    axios.put(`${backendPrivateUrl}visualization/${basename(visualizationPayloads[0].fullPath)}`, visualizationPayloads[0]),
-    axios.put(`${backendPrivateUrl}visualization/${basename(visualizationPayloads[1].fullPath)}`, visualizationPayloads[1]),
+    axios.put(`${backendPrivateUrl}visualizations/${basename(visualizationPayloads[0].fullPath)}`, visualizationPayloads[0]),
+    axios.put(`${backendPrivateUrl}visualizations/${basename(visualizationPayloads[1].fullPath)}`, visualizationPayloads[1]),
   ])
 })
 
