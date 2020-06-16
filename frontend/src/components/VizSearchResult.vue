@@ -62,10 +62,10 @@
     transition: .4s
 
   input:checked + .slider
-    background-color: #2196F3
+    background-color: $blue-sapphire-light
 
   input:focus + .slider
-    box-shadow: 0 0 1px #2196F3
+    box-shadow: 0 0 1px $blue-sapphire-light
 
   input:checked + .slider:before
     -webkit-transform: translateX(11px)
@@ -91,7 +91,7 @@
       <span v-if="isBusy" class="listTitle">Loading...</span>
       <div v-if="searchYieldedResults">
         <div class="modeSelector">
-          <span id="switchlabel">wide view</span>
+          <span id="switchlabel">comparison view</span>
           <label class="switch">
             <input type="checkbox" v-model="checked">
               <span class="slider round"></span>
