@@ -67,7 +67,7 @@ describe('after PUTting metadata to API', () => {
   describe('after PUTting more metadata to API', () => {
     beforeAll(async () => {
       const xmlOut = await runNcdump('tests/data/20190724_bucharest_classification.nc')
-      return axios.put(`${backendPrivateUrl}file/${expectedJson.uuid}`, xmlOut, axiosConfig)
+      return axios.put(`${backendPrivateUrl}files/${expectedJson.uuid}`, xmlOut, axiosConfig)
     })
 
     it('hashes of /download zipped files match originals', async () => {

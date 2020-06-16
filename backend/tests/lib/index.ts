@@ -50,7 +50,7 @@ export async function parseUuid(xml: any) {
 export async function putFile(filename: string) {
   const xml = await runNcdump(`tests/data/${filename}`)
   const uuid = await parseUuid(xml)
-  const url = `${backendPrivateUrl}file/${uuid}`
+  const url = `${backendPrivateUrl}files/${uuid}`
   return axios.put(url, xml, {headers: { 'Content-Type': 'application/xml' }})
 }
 

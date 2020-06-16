@@ -41,30 +41,27 @@ import * as xmlparser from 'express-xml-bodyparser'
     app.get('/allfiles', routes.allfiles)
   }
 
-  // public
-  app.get('/api/status', routes.status)
-  app.get('/api/file/:uuid', routes.file)
+  // public (changes to these require changes to API docs)
   app.get('/api/search', middleware.filesValidator, middleware.filesQueryAugmenter, routes.search)
   app.get('/api/files',
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
     routes.files)
+  app.get('/api/files/:uuid', routes.file)
   app.get('/api/sites', routes.sites)
   app.get('/api/products', routes.products)
+
+  // public/internal
+  app.get('/api/status', routes.status)
   app.get('/api/products/variables', routes.productVariables)
   app.get('/api/download', middleware.filesValidator, middleware.filesQueryAugmenter, routes.download)
-  app.get('/api/download',
-    middleware.filesValidator,
-    middleware.filesQueryAugmenter,
-    middleware.checkParamsExistInDb,
-    routes.download)
-  app.get('/api/visualization',
+  app.get('/api/visualizations',
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
     routes.getVisualization)
-  app.get('/api/visualization/:uuid', routes.getVisualizationForSourceFile)
+  app.get('/api/visualizations/:uuid', routes.getVisualizationForSourceFile)
   app.get('/api/latest-visualization-date',
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
@@ -72,8 +69,8 @@ import * as xmlparser from 'express-xml-bodyparser'
   )
 
   // private
-  app.put('/file/:uuid', routes.submit)
-  app.put('/visualization/:filename', express.json(), routes.putVisualization)
+  app.put('/files/:uuid', routes.submit)
+  app.put('/visualizations/:filename', express.json(), routes.putVisualization)
 
   app.use(errorHandler)
 

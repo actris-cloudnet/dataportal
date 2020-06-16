@@ -251,7 +251,7 @@ export default class FileView extends Vue {
   created() {
     const payload = { params: { developer: this.devMode.activated || undefined}}
     axios
-      .get(`${this.apiUrl}file/${this.uuid}`, payload)
+      .get(`${this.apiUrl}files/${this.uuid}`, payload)
       .then(response => {
         this.response = response.data
       })
@@ -260,7 +260,7 @@ export default class FileView extends Vue {
         this.response = response
       })
     axios
-      .get(`${this.apiUrl}visualization/${this.uuid}`, payload)
+      .get(`${this.apiUrl}visualizations/${this.uuid}`, payload)
       .then(response => {
         this.visualizations = sortVisualizations(response.data.visualizations)
       })
