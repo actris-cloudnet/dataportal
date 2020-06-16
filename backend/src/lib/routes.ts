@@ -14,7 +14,7 @@ import {Visualization} from '../entity/Visualization'
 import {VisualizationResponse} from '../entity/VisualizationResponse'
 import {ProductVariable} from '../entity/ProductVariable'
 import {LatestVisualizationDateResponse} from '../entity/LatestVisualizationDateResponse'
-import {SearchFile} from '../entity/SearchFile'
+import {SearchFileResponse} from '../entity/SearchFileResponse'
 
 
 export class Routes {
@@ -102,7 +102,7 @@ export class Routes {
     const query = req.query
 
     const convertToSearchFiles = (files: File[]) =>
-      files.map(file => new SearchFile(file))
+      files.map(file => new SearchFileResponse(file))
 
     const qb = this.filesQueryBuilder(query)
     this.hideTestDataFromNormalUsers(qb, req)

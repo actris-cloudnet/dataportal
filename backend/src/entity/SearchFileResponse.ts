@@ -1,6 +1,6 @@
 import {File} from './File'
 
-export class SearchFile {
+export class SearchFileResponse {
 
   uuid: string
   measurementDate: Date

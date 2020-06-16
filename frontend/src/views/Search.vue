@@ -292,7 +292,7 @@ import {Visualization} from '../../../backend/src/entity/Visualization'
 import {Product} from '../../../backend/src/entity/Product'
 import {ProductVariable} from '../../../backend/src/entity/ProductVariable'
 import L, { marker } from 'leaflet'
-import {SearchFile} from '../../../backend/src/entity/SearchFile'
+import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 
 Vue.component('datepicker', Datepicker)
 Vue.component('b-table', BTable)
@@ -315,7 +315,7 @@ export default class Search extends Vue {
 
   // api call
   apiUrl = process.env.VUE_APP_BACKENDURL
-  apiResponse: SearchFile[] | Visualization[] = this.resetResponse()
+  apiResponse: SearchFileResponse[] | Visualization[] = this.resetResponse()
 
   // file list
   sortBy = 'title'
@@ -519,7 +519,7 @@ export default class Search extends Vue {
     }
   }
 
-  constructTitle(files: SearchFile[]) {
+  constructTitle(files: SearchFileResponse[]) {
     return files.map(file => ({...file, title: `${file.product} file from ${file.site}`}))
   }
 
