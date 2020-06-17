@@ -4,8 +4,8 @@ import { RequestError } from '../../../src/entity/RequestError'
 
 const testUuid = '9e04d8ef-0f2b-4823-835d-33e458403c67'
 
-describe('/api/file', () => {
-  const url = `${backendPublicUrl}file/`
+describe('/api/files', () => {
+  const url = `${backendPublicUrl}files/`
   const expectedBody404: RequestError = {
     status: 404,
     errors: [ 'No files match this UUID' ]

@@ -26,9 +26,9 @@ const headers = { 'content-type': 'application/json'}
 let conn: Connection
 let repo: Repository<Visualization>
 
-const url = `${backendPublicUrl}visualization/`
-const privUrl = `${backendPrivateUrl}visualization/`
-describe('PUT /visualization', () => {
+const url = `${backendPublicUrl}visualizations/`
+const privUrl = `${backendPrivateUrl}visualizations/`
+describe('PUT /visualizations', () => {
 
   beforeAll(async () => {
     conn = await createConnection('test')
@@ -67,7 +67,7 @@ describe('PUT /visualization', () => {
 
 })
 
-describe('GET /visualization', () => {
+describe('GET /visualizations', () => {
 
   it('on no results returns empty list and responds with 200', async () => {
     const res = await axios.get(url, {headers, params: {product: 'lidar'}})
@@ -96,7 +96,7 @@ describe('GET /visualization', () => {
   })
 })
 
-describe('GET /visualization/:uuid', () => {
+describe('GET /visualizations/:uuid', () => {
 
   it('returns correct list of visualizations and responds with 200', async () => {
     const expectedResult = {

@@ -525,7 +525,7 @@ export default class Search extends Vue {
 
   fetchData() {
     this.isBusy = true
-    const apiPath = this.isVizMode() ? 'visualization/' : 'search/'
+    const apiPath = this.isVizMode() ? 'visualizations/' : 'search/'
     return axios
       .get(`${this.apiUrl}${apiPath}`, this.payload)
       .then(res => {

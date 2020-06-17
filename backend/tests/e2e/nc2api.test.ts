@@ -46,12 +46,12 @@ const axiosConfig = { headers: { 'content-type': 'application/xml'}}
 describe('after PUTting metadata to API', () => {
   beforeAll(async () => {
     const xmlOut = await runNcdump('tests/data/20190723_bucharest_classification.nc')
-    return axios.put(`${backendPrivateUrl}file/${expectedJson.uuid}`, xmlOut, axiosConfig)
+    return axios.put(`${backendPrivateUrl}files/${expectedJson.uuid}`, xmlOut, axiosConfig)
   })
 
   it('responds with a corresponding metadata JSON', async () => {
     return axios
-      .get(`${backendPublicUrl}file/${expectedJson.uuid}`)
+      .get(`${backendPublicUrl}files/${expectedJson.uuid}`)
       .then(response => expect(response.data).toMatchObject(expectedJson))
   })
 
@@ -67,7 +67,7 @@ describe('after PUTting metadata to API', () => {
   describe('after PUTting more metadata to API', () => {
     beforeAll(async () => {
       const xmlOut = await runNcdump('tests/data/20190724_bucharest_classification.nc')
-      return axios.put(`${backendPrivateUrl}file/${expectedJson.uuid}`, xmlOut, axiosConfig)
+      return axios.put(`${backendPrivateUrl}files/${expectedJson.uuid}`, xmlOut, axiosConfig)
     })
 
     it('hashes of /download zipped files match originals', async () => {

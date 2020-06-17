@@ -32,7 +32,7 @@ beforeAll(async () => {
 
 describe('after PUTting visualization to API', () => {
   beforeAll(async () =>
-    axios.put(`${backendPrivateUrl}visualization/${validId}`, vizJson, { headers })
+    axios.put(`${backendPrivateUrl}visualizations/${validId}`, vizJson, { headers })
   )
 
   it('serves the file', async () => {
