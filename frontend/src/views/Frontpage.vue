@@ -12,14 +12,17 @@ main#frontpage
     img
       max-height: 120px
       width: auto
-      margin: 1em
+      margin-left: 1em
+      margin-right: 1em
   main
     text-align: justify
     display: inline-block
     max-width: 51em
     h3
       text-align: center
-      line-height: 3em
+      margin-bottom: 2em
+      margin-top: 2.5em
+      line-heigth: 2em
 
   .buttons
     text-align: center
@@ -50,7 +53,7 @@ main#frontpage
       <!-- eslint-disable-next-line -->
 CLU provides vertical profiles of cloud and turbulent properties at high temporal and spatial resolution from a network of ground-based stations using the Cloudnet processing suite. Major objectives also include the development and validation of new synergetic remote sensing algorithms, and the continuous evaluation of the representation of clouds and other atmospheric parameters in climate and weather forecast models.
       <!-- eslint-disable-next-line -->
-This node is physically hosted by FMI in Helsinki, Finland. You can find our contact information at the bottom of this page.
+This node is physically hosted by FMI in Helsinki, Finland. You can find our contact information and API documentation at the bottom of this page.
       <div class="buttons">
         <router-link to="search/visualizations" class="download">
           <img :src="require('../assets/icons/graph-white.png')"><br>
