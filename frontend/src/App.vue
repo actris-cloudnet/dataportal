@@ -28,6 +28,11 @@ body
   padding-right: 5em
   font-family: $content-font
 
+
+@media screen and (max-width: $narrow-screen)
+  #app > main
+    margin: 3em auto calc(#{$footer-height-narrow} + 4em)
+
 #app > main.wide
   max-width: none
 
