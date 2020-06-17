@@ -2,7 +2,7 @@
 ![](https://github.com/actris-cloudnet/dataportal/workflows/Dataportal%20CI/badge.svg)
 
 This repository contains the source code for Actris-Cloudnet data portal hosted at https://cloudnet.fmi.fi.
-The API documentation can be found [here](docs/).
+The API documentation can be found [here](https://actris-cloudnet.github.io/dataportal/).
 
 
 ### Requirements
