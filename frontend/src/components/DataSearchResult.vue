@@ -145,6 +145,7 @@ export default class DataSearchResult extends Vue {
 
   mounted() {
     window.addEventListener('resize', this.adjustPerPageAccordingToWindowHeight)
+    this.adjustPerPageAccordingToWindowHeight()
   }
 
   beforeDestroy() {
