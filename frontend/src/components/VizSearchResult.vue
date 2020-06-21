@@ -80,6 +80,8 @@
 
   #switchlabel
     font-size: 90%
+    padding-right: 5px
+    cursor: pointer
 
 </style>
 
@@ -91,12 +93,12 @@
       <span v-if="isBusy" class="listTitle">Loading...</span>
       <div v-if="searchYieldedResults">
         <div class="modeSelector">
-          <span id="switchlabel">comparison view</span>
+          <label for="checkbox_id" id="switchlabel">comparision view</label>
           <label class="switch">
-            <input type="checkbox" v-model="checked">
-              <span class="slider round"></span>
-            </label>
-        </div>
+            <input type="checkbox" id="checkbox_id" v-model="checked">
+            <span class="slider round"></span>
+          </label>          
+        </div>        
       </div>
     </header>
     <section v-if="searchYieldedResults" class="vizContainer" v-bind:class="{ sideBySide: comparisonViewAsBoolean }">
