@@ -14,9 +14,6 @@
       height: 3em
       h3
         margin: 0
-  main#vizSearchResults.singleColumn
-    max-width: 1000px
-
   .modeSelector
     display: flex
     span
