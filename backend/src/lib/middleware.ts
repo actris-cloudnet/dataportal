@@ -16,7 +16,7 @@ export class Middleware {
 
   filesValidator: RequestHandler = (req, _res, next) => {
     const requestError: RequestErrorArray = { status: 400, errors: [] }
-    const query = req.query
+    const query = req.query as any
 
     const isArrayWithElements = (obj: any) => Array.isArray(obj) && obj.length > 0
     const pushAndReturn = (err: RequestErrorArray, el: string) => {
@@ -69,7 +69,7 @@ export class Middleware {
   }
 
   filesQueryAugmenter: RequestHandler = async (req, _res, next) => {
-    const query = req.query
+    const query = req.query as any
     const toArray = (obj: string | Array<string>): Array<string> =>
       (typeof obj == 'string') ? [obj] : obj
     const tomorrow = () => {
@@ -97,7 +97,7 @@ export class Middleware {
   }
 
   checkParamsExistInDb: RequestHandler = async (req, _res, next) => {
-    const query = req.query
+    const query = req.query as any
 
     Promise.all([
       this.conn.getRepository('site').findByIds(query.location)
