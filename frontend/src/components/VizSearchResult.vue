@@ -93,7 +93,7 @@
       <span v-if="isBusy" class="listTitle">Loading...</span>
       <div v-if="searchYieldedResults">
         <div class="modeSelector">
-          <label for="checkbox_id" id="switchlabel">comparision view</label>
+          <label for="checkbox_id" id="switchlabel">comparison view</label>
           <label class="switch">
             <input type="checkbox" id="checkbox_id" v-model="comparisonView">
             <span class="slider round"></span>
