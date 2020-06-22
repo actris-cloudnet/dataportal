@@ -32,6 +32,8 @@ body
 @media screen and (max-width: $narrow-screen)
   #app > main
     margin: 3em auto calc(#{$footer-height-narrow} + 4em)
+    padding-left: 1em
+    padding-right: 1em
 
 #app > main.wide
   max-width: none

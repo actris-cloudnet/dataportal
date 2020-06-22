@@ -18,6 +18,7 @@ main#frontpage
     text-align: justify
     display: inline-block
     max-width: 51em
+    width: 100%
     h3
       text-align: center
       margin-bottom: 2em
@@ -34,6 +35,7 @@ main#frontpage
       padding: 1em
       width: 10em
       height: 8em
+      flex-shrink: 0
       img
         width: 35px
         height: auto
