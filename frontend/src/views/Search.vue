@@ -35,6 +35,10 @@
     margin-right: 80px
     width: 300px
 
+  @media screen and (max-width: $narrow-screen)
+    section#sideBar
+      margin-right: 0px
+
   .multiselect
     margin-bottom: $filter-margin
 
