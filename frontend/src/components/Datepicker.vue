@@ -71,8 +71,15 @@ export default class Datepicker extends mixins(validationMixin, Vue) {
 
   dateToString = dateToString
 
+  created() {
+    // Fix displaying date string on component create
+    // eslint-disable-next-line no-self-assign
+    this.value = this.value
+  }
+
   set value(date: Date) {
     if (!isValidDate(date)) return
+    console.log('yay', date)
     this.dateString = this.dateToString(date)
   }
 
