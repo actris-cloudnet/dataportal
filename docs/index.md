@@ -25,7 +25,7 @@ each having the properties:
 
 Example query:
 
-`GET https://cloudnet.fi/api/sites`
+`GET https://cloudnet.fmi.fi/api/sites`
 
 Response body:
 
@@ -79,16 +79,16 @@ To view the global attributes of a NetCDF file, one may use `ncdump -h file.nc`.
 
 On a successful query the route responds with a `File` object, which has the following properties:
 - `uuid`: UUIDv3 identifier.
-- `pid`: Persistent identifier of the data object.
-- `volatile`: `true` if the file has been modified in the last 24 hours and it may change in the future, 
-`false` if the file has not been changed in the last 24 hours and will not change in the future.
+- `pid`: Persistent identifier of the data object. Empty string for data objects that do not have a PID, such as volatile files.
+- `volatile`: `true` if the file has been modified recently and may change in the future, 
+`false` if the file has not been changed recently and will not change in the future.
 - `title`: A human readable title of the data object 
 - `measurementDate`: The date on which the data was measured, `YYYY-MM-DD`.
 - `history`: A freeform history of the file set by the creator/processor of the file. This field 
 is not curated in any way and may or may not contain helpful information.
 - `publicity`: Used internally. Always `public`.
 - `cloudnetpyVersion`: The version of the [CloudnetPy](https://github.com/actris-cloudnet/cloudnetpy) library 
-used for the generation of the file. Empty for files which have not been processed with `CloudnetPy`
+used for the generation of the file. Empty string for files which have not been processed with `CloudnetPy`
 - `releasedAt`: The datetime on which the file was made public on the data portal. In ISO 8601 -format.
 - `filename`: The name of the file.
 - `checksum`: The SHA-256 checksum of the file. Useful for verifying file integrity.
@@ -226,9 +226,9 @@ repositories of most UNIX-based systems.
 
 ### Multiple sites and products as parameters
 
-Fetch all model and classification products from Mace Head and Hyytiälä:
+Fetch all model and classification products from Mace Head and Granada:
 
-`curl "https://cloudnet.fmi.fi/api/files?location=macehead&location=hyytiala&product=model&product=classification"`
+`curl "https://cloudnet.fmi.fi/api/files?location=macehead&location=granada&product=model&product=classification"`
 
 ### Using the API to download all data objects matching a criteria
 
