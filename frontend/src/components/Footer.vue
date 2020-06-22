@@ -58,7 +58,7 @@ footer.global
     <div class="vertical-center footeritem">
       Development:
       <a href="https://actris-cloudnet.github.io/dataportal/">API documentation</a>
-      <a href="https://github.com/actris-cloudnet/dataportal/">GitHub repository</a>
+      <a href="https://github.com/actris-cloudnet/">GitHub organization</a>
     </div>
   </footer>
 </template>
