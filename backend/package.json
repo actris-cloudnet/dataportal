@@ -47,7 +47,7 @@
    },
    "scripts": {
       "populate-testdb": "fixtures ./fixtures --connection=test --sync",
-      "test": "npm run populate-testdb && jest tests/integration",
+      "test": "npm run populate-testdb && jest tests/integration/parallel && jest --runInBand tests/integration/sequential",
       "e2e-test": "set -e; for f in tests/e2e/*; do npm run populate-testdb && jest $f; done",
       "start": "echo 'Use ./control script at project root'",
       "stop": "echo 'Use ./control script at project root'",
