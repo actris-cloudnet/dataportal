@@ -11,6 +11,8 @@ footer.global
   height: $footer-height
   display: grid
   grid-template-columns: repeat(3, 1fr)
+  padding-top: 1em
+  padding-bottom: 1em
 
 @media screen and (max-width: $narrow-screen)
   footer.global
@@ -25,7 +27,8 @@ footer.global
   line-height: 1.1
   font-size: 95%
   text-align: center
-  margin: 1em
+  padding: 0
+  margin: 0
 
 
 .footeritem.no-width
