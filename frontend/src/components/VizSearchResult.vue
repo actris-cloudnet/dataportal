@@ -19,38 +19,91 @@
 
   .modeSelector
     display: flex
-    align-content: baseline
-    img
-      width: 30px
-      height: auto
-      cursor: pointer
-    input
-      width: 2.5em
+    span
+      padding-right: 5px
 
   .notfound
     margin-top: $filter-margin
     text-align: center
+
+  .switch
+    position: relative
+    display: inline-block
+    width: 30px
+    min-width: 30px
+    height: 19px
+    margin-top: 2px
+
+  .switch input
+    opacity: 0
+    width: 0
+    height: 0
+
+  .slider
+    position: absolute
+    cursor: pointer
+    top: 0
+    left: 0
+    right: 0
+    bottom: 0
+    background-color: #ccc
+    -webkit-transition: .4s
+    transition: .4s
+
+  .slider:before
+    position: absolute
+    content: ""
+    height: 13px
+    width: 13px
+    left: 3px
+    bottom: 3px
+    background-color: white
+    -webkit-transition: .4s
+    transition: .4s
+
+  input:checked + .slider
+    background-color: $blue-sapphire-light
+
+  input:focus + .slider
+    box-shadow: 0 0 1px $blue-sapphire-light
+
+  input:checked + .slider:before
+    -webkit-transform: translateX(11px)
+    -ms-transform: translateX(11px)
+    transform: translateX(11px)
+
+  .slider.round
+    border-radius: 15px
+
+  .slider.round:before
+    border-radius: 50%
+
+  #switchlabel
+    font-size: 90%
+    padding-right: 5px
+    cursor: pointer
+
 </style>
 
 
 <template>
-  <main id="vizSearchResults" v-bind:class="{ singleColumn: !comparisonViewAsBoolean, opaque: isBusy }">
+  <main id="vizSearchResults" v-bind:class="{ singleColumn: !comparisonView, opaque: isBusy }">
     <header>
       <h3>Visualizations for {{humanReadableDate}}</h3>
       <span v-if="isBusy" class="listTitle">Loading...</span>
       <div v-if="searchYieldedResults">
-        <label for="comparisonModeSelector">View mode</label>
         <div class="modeSelector">
-          <img :src="require('../assets/icons/column.png')" class="smallimg" @click="comparisonView = '0'">
-          <input v-on:change="comparisonView = $event.target.value" :value="comparisonView"
-            type="range" id="comparisonModeSelector" name="comparisonModeSelector" min="0" max="1">
-          <img :src="require('../assets/icons/columns.png')" class="smallimg" @click="comparisonView = '1'">
+          <label for="checkbox_id" id="switchlabel">comparison view</label>
+          <label class="switch">
+            <input type="checkbox" id="checkbox_id" v-model="comparisonView">
+            <span class="slider round"></span>
+          </label>
         </div>
       </div>
     </header>
-    <section v-if="searchYieldedResults" class="vizContainer" v-bind:class="{ sideBySide: comparisonViewAsBoolean }">
+    <section v-if="searchYieldedResults" class="vizContainer" v-bind:class="{ sideBySide: comparisonView }">
     <div v-for="(file, index) in sortedApiResponse" :key="index" class="sourceFile"
-      v-bind:class="{ paddedSourceFile: !comparisonViewAsBoolean }">
+      v-bind:class="{ paddedSourceFile: !comparisonView }">
       <h3 @click="navigateToFile(file.sourceFileId)" title="View data object" class="sourceFileLink">
         {{ file.locationHumanReadable }} / {{ file.productHumanReadable }}
         <svg
@@ -82,15 +135,11 @@ export default class DataSearchResult extends Vue {
   @Prop() date!: Date
   @Prop() setWideMode!: Function
 
-  comparisonView = '0'
+  comparisonView = false
   sortVisualizations = sortVisualizations
 
   get humanReadableDate() {
     return humanReadableDate(this.date.toString())
-  }
-
-  get comparisonViewAsBoolean(): boolean {
-    return parseInt(this.comparisonView) ? true : false
   }
   get sortedApiResponse() {
     return this.apiResponse.concat().sort(this.alphabeticalSort)
@@ -113,9 +162,9 @@ export default class DataSearchResult extends Vue {
     this.$router.push({ name: 'File', params: { uuid } })
   }
 
-  @Watch('comparisonViewAsBoolean')
+  @Watch('comparisonView')
   onViewModeChange() {
-    this.setWideMode(this.comparisonViewAsBoolean)
+    this.setWideMode(this.comparisonView)
   }
 
   quicklookUrl = process.env.VUE_APP_QUICKLOOKURL
