@@ -52,7 +52,7 @@ import { Prop, Watch } from 'vue-property-decorator'
 import { dateToUTC, dateToString } from '../lib'
 
 // date validation
-const isValidDate = (obj: Date) => !isNaN(obj.getDate())
+const isValidDate = (obj: Date) => obj && !isNaN(obj.getDate())
 const isValidDateString = (obj: string) => isValidDate(new Date(obj))
 const isNotInFuture = (obj: string) => new Date(obj) < dateToUTC(new Date())
 const isBeforeEnd = (obj: string, parentVm: Vue) => new Date(obj) <= helpers.ref('end', validationMixin, parentVm)
