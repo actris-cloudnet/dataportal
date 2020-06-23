@@ -92,14 +92,16 @@ export default class CustomMultiselect extends Vue {
   @Prop() icons!: boolean
   @Prop() getIconUrl!: Function
   @Prop() devMode!: DevMode
-  @Prop() setSelectedIds!: Function
+  @Prop() setSelectedIds!: Function | null
   @Prop() selectedIds!: string[]
 
   selection: Selection[] = []
 
   set value(selection) {
     this.selection = selection
-    this.setSelectedIds(this.selection.map(product => product.id))
+    if (this.setSelectedIds) {
+      this.setSelectedIds(this.selection.map(product => product.id))
+    }
     this.$emit('input', this.getSelectionIds())
   }
 
