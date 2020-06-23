@@ -343,6 +343,11 @@ export default class Search extends Vue {
   dateToError: { [key: string]: boolean } = {}
   defaultVizDate = this.dateTo
 
+  dateErrorsExist(dateError: { [key: string]: boolean }) {
+    return !(dateError.isValidDateString && dateError.isAfterStart && dateError.isBeforeEnd &&
+      dateError.isNotInFuture)
+  }
+
   // products
   allProducts: Product[] = []
   selectedProductIds: string[] = []
@@ -570,13 +575,13 @@ export default class Search extends Vue {
 
   @Watch('dateFrom')
   onDateFromChanged() {
-    if (!this.renderComplete) return
+    if (!this.renderComplete || this.dateErrorsExist(this.dateFromError)) return
     this.fetchData()
   }
 
   @Watch('dateTo')
   onDateToChanged() {
-    if (!this.renderComplete) return
+    if (!this.renderComplete || this.dateErrorsExist(this.dateToError)) return
     if (this.isVizMode()) this.dateFrom = this.dateTo
     this.fetchData()
   }

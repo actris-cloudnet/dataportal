@@ -3,7 +3,7 @@ import { mount, Wrapper } from '@vue/test-utils'
 import Search from '../src/views/Search.vue'
 import axios, { AxiosResponse, AxiosPromise, AxiosRequestConfig } from 'axios'
 import Vue from 'vue'
-import {init, allFiles, allSites, dateToISOString, tomorrow, allProducts} from './lib'
+import {init, allFiles, allSites, dateToISOString, tomorrow, allProducts, allSearch} from './lib'
 import { mocked } from 'ts-jest/dist/util/testing'
 init()
 
@@ -27,6 +27,8 @@ const defaultAxiosMock = (url: string, _: AxiosRequestConfig | undefined): Axios
     return Promise.resolve(augmentAxiosResponse(allFiles))
   } else if (url.includes('sites')) { // sites
     return Promise.resolve(augmentAxiosResponse(allSites))
+  } else if (url.includes('search')) { // search
+    return Promise.resolve(augmentAxiosResponse(allSearch))
   } else {
     return Promise.resolve(augmentAxiosResponse(allProducts))
   }
@@ -81,8 +83,8 @@ describe('Search.vue', () => {
     })
 
     it('displays data objects between dateFrom and dateTo by default', () => {
-      allFiles.map(file => file.title).forEach(title =>
-        expect(wrapper.text()).toContain(title)
+      allSearch.map(file => file.measurementDate).forEach(date =>
+        expect(wrapper.text()).toContain(date)
       )
     })
 
