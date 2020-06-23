@@ -32,7 +32,11 @@ describe('PUT /visualizations', () => {
 
   beforeAll(async () => {
     conn = await createConnection('test')
-    repo = conn.getRepository(Visualization)
+    repo = conn.getRepository('visualization')
+    await Promise.all([
+      repo.delete(badId),
+      repo.delete(validId)
+    ]).catch()
     return clearDir(publicVizDir)
   })
 

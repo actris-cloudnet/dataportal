@@ -15,7 +15,7 @@
       "pg": "^7.18.2",
       "reflect-metadata": "^0.1.10",
       "sass": "^1.26.8",
-      "typeorm": "0.2.22",
+      "typeorm": "^0.2.25",
       "typeorm-fixtures-cli": "^1.7.0",
       "validator": "^12.2.0",
       "xml2js": "^0.4.23"
@@ -47,7 +47,7 @@
    },
    "scripts": {
       "populate-testdb": "fixtures ./fixtures --connection=test --sync",
-      "test": "npm run populate-testdb && jest tests/integration",
+      "test": "npm run populate-testdb && jest tests/integration/parallel && jest --runInBand tests/integration/sequential",
       "e2e-test": "set -e; for f in tests/e2e/*; do npm run populate-testdb && jest $f; done",
       "start": "echo 'Use ./control script at project root'",
       "stop": "echo 'Use ./control script at project root'",

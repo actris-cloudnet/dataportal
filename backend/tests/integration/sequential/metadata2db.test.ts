@@ -1,7 +1,7 @@
 import { createConnection, Repository, Connection } from 'typeorm'
-import { File } from '../../src/entity/File'
+import { File } from '../../../src/entity/File'
 import { readFileSync } from 'fs'
-import { publicDir, clearDir, backendPrivateUrl, parseUuid } from '../lib'
+import { publicDir, clearDir, backendPrivateUrl, parseUuid } from '../../lib'
 import axios from 'axios'
 
 const dataDir = 'tests/data/'
