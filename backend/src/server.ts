@@ -39,6 +39,7 @@ import * as xmlparser from 'express-xml-bodyparser'
     })
 
     app.get('/allfiles', routes.allfiles)
+    app.get('/allsearch', routes.allsearch)
   }
 
   // public (changes to these require changes to API docs)

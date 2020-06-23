@@ -69,6 +69,10 @@ export class Routes {
   private allFilesAreReadable = (filepaths: string[]) =>
     Promise.all(filepaths.map(filepath => fsp.access(filepath, fsconst.R_OK)))
 
+  private convertToSearchFiles = (files: File[]) =>
+    files.map(file => new SearchFileResponse(file))
+
+
   file: RequestHandler = async (req: Request, res: Response, next) => {
     const qb = this.fileRepo.createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
@@ -101,9 +105,6 @@ export class Routes {
   search: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query
 
-    const convertToSearchFiles = (files: File[]) =>
-      files.map(file => new SearchFileResponse(file))
-
     const qb = this.filesQueryBuilder(query)
     this.hideTestDataFromNormalUsers(qb, req)
       .getMany()
@@ -112,7 +113,7 @@ export class Routes {
           next({ status: 404, errors: ['The search yielded zero results'], params: req.query })
           return
         }
-        res.send(convertToSearchFiles(result))
+        res.send(this.convertToSearchFiles(result))
       })
       .catch(err => {
         next({ status: 500, errors: err })
@@ -248,6 +249,11 @@ export class Routes {
   allfiles: RequestHandler = async (req: Request, res: Response, next) =>
     this.fileRepo.find({ relations: ['site', 'product'] })
       .then(result => res.send(this.augmentFiles(result)))
+      .catch(err => next({ status: 500, errors: err }))
+
+  allsearch: RequestHandler = async (req: Request, res: Response, next) =>
+    this.fileRepo.find({ relations: ['site', 'product'] })
+      .then(result => res.send(this.convertToSearchFiles(result)))
       .catch(err => next({ status: 500, errors: err }))
 
   submit: RequestHandler = async (req: Request, res: Response, next) => {
