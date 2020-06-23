@@ -166,8 +166,8 @@
 
     <custom-multiselect
       label="Location"
-      :selectedSiteIds="selectedSiteIds"
-      :setSelectedSiteIds="setSelectedSiteIds"
+      :selectedIds="selectedSiteIds"
+      :setSelectedIds="setSelectedSiteIds"
       :options="allSites"
       id="siteSelect"
       :icons="false"
@@ -231,8 +231,8 @@
 
     <custom-multiselect
       label="Product"
-      :selectedProductIds="selectedProductIds"
-      :setSelectedProductIds="setSelectedProductIds"
+      :selectedIds="selectedProductIds"
+      :setSelectedIds="setSelectedProductIds"
       :options="allProducts"
       id="productSelect"
       :icons="true"
