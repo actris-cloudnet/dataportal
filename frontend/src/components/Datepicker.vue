@@ -65,6 +65,7 @@ export default class Datepicker extends mixins(validationMixin, Vue) {
   @Prop() start!: Date
   @Prop() end!: Date
   @Prop() defaultVizDate!: Date
+  @Prop() dateInput!: Date
 
   @Validate({ isValidDateString, isNotInFuture, isBeforeEnd, isAfterStart })
   dateString = this.$attrs.value
@@ -89,6 +90,11 @@ export default class Datepicker extends mixins(validationMixin, Vue) {
   @Watch('defaultVizDate')
   onDefaultVizChange() {
     this.value = this.defaultVizDate
+  }
+
+  @Watch('dateInput')
+  onDateInputChange() {
+    this.value = this.dateInput
   }
 
   @Watch('dateString')

@@ -48,7 +48,7 @@
     column-gap: 1em
     row-gap: 0.5em
     max-width: 100%
-    margin-bottom: $filter-margin
+    margin-bottom: 1em
 
   button.calendar
     width: 2em
@@ -84,8 +84,6 @@
   label
     font-size: 0.9em
     margin-bottom: 0
-  label::after
-    content: ':'
 
   #noRes
     font-size: 90%
@@ -138,6 +136,43 @@
   .no-padding
     padding: 0
 
+  .quickselectors
+    height: 20px
+    width: 100%
+    display: flex
+    justify-content: center
+    margin-bottom: .5em
+    margin-top: 0.7em
+    .quick_range
+      height: 25px
+      padding-left: 5px
+      padding-right: 5px
+      padding-top: 10px
+      padding-bottom: 10px
+      font-size: 80%
+      line-height: 5px
+      margin-left: 0px
+      margin-right: 15px
+      border: 1px solid $steel-warrior
+      border-radius: 3px
+      background-color: $blue-dust
+      &:hover
+        text-decoration: none
+        background-color: $steel-warrior
+  .active
+    background-color: $steel-warrior !important
+    border: 1px solid darkgray !important
+
+  h4
+    font-size: 90%
+
+  .date
+    margin-bottom: 2em
+  .date label
+    margin-left: 3.3em
+    font-size: 80%
+    color: gray
+    vertical-align: bottom
 </style>
 
 <template>
@@ -165,7 +200,7 @@
     </div>
 
     <custom-multiselect
-      label="Location"
+      label="Location:"
       :selectedIds="selectedSiteIds"
       :setSelectedIds="setSelectedSiteIds"
       :options="allSites"
@@ -174,24 +209,39 @@
       :devMode="devMode">
     </custom-multiselect>
 
+    <h4 v-if="!isVizMode()">Date range:</h4>
+    <div class="quickselectors" v-if="!isVizMode()">
+      <button class="quick_range"
+        @click="changeDateFrom(29)"
+        :class="{active: activeBtn == 'btn1' }">Last 30 days</button>
+      <button class="quick_range"
+        @click="changeDateFrom(6)"
+        :class="{active: activeBtn == 'btn2' }">Last 7 days</button>
+      <button class="quick_range"
+        @click="changeDateFrom(0)"
+        :class="{active: activeBtn == 'btn3' }">Today</button>
+    </div>
+
     <div class="date" v-if="!isVizMode()">
       <datepicker
         name="dateFrom"
         v-model="dateFrom"
+        :dateInput="dateInputStart"
         :start="beginningOfHistory"
         :end="dateTo"
-        label="Date from"
         v-on:error="dateFromError = $event"
         :key="dateFromUpdate"
+        label="from"
       ></datepicker>
       <datepicker
         name="dateTo"
         v-model="dateTo"
+        :dateInput="dateInputEnd"
         :start="dateFrom"
         :end="today"
-        label="Date to"
         v-on:error="dateToError = $event"
         :key="dateToUpdate"
+        label="to"
       ></datepicker>
       <div v-if="!isTrueOnBothDateFields('isValidDateString')" class="errormsg">
         Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.
@@ -230,7 +280,7 @@
     </div>
 
     <custom-multiselect
-      label="Product"
+      label="Product:"
       :selectedIds="selectedProductIds"
       :setSelectedIds="setSelectedProductIds"
       :options="allProducts"
@@ -342,6 +392,9 @@ export default class Search extends Vue {
   dateFromError: { [key: string]: boolean } = {}
   dateToError: { [key: string]: boolean } = {}
   defaultVizDate = this.dateTo
+  dateInputStart = this.dateFrom
+  dateInputEnd = this.dateFrom
+  activeBtn = ''
 
   dateErrorsExist(dateError: { [key: string]: boolean }) {
     return !(dateError.isValidDateString && dateError.isAfterStart && dateError.isBeforeEnd &&
@@ -501,6 +554,7 @@ export default class Search extends Vue {
       this.allSites = sites.data.sort(this.alphabeticalSort)
       this.allProducts = products.data.sort(this.alphabeticalSort)
       this.initLayers()
+      this.changeDateFrom(30)
       if (this.isVizMode()) {
         this.selectedSiteIds.push('bucharest')
         this.selectedProductIds.push('classification')
@@ -535,6 +589,7 @@ export default class Search extends Vue {
   fetchData() {
     this.isBusy = true
     const apiPath = this.isVizMode() ? 'visualizations/' : 'search/'
+    if (!this.isVizMode()) this.checkIfButtonShouldBeActive()
     return axios
       .get(`${this.apiUrl}${apiPath}`, this.payload)
       .then(res => {
@@ -557,6 +612,22 @@ export default class Search extends Vue {
 
   navigateToSearch(mode: string) {
     this.$router.push({ name: 'Search', params: { mode }})
+  }
+
+  changeDateFrom(n: number) {
+    this.dateInputEnd = new Date()
+    const date = new Date()
+    date.setDate(date.getDate() - n)
+    this.dateInputStart = date
+  }
+
+  checkIfButtonShouldBeActive() {
+    const oneDay = 24 * 60 * 60 * 1000
+    const diffDays = Math.round(Math.abs((this.dateTo.valueOf() - this.dateFrom.valueOf()) / oneDay))
+    if (diffDays == 30) this.activeBtn = 'btn1'
+    else if (diffDays == 7) this.activeBtn = 'btn2'
+    else if (diffDays == 0) this.activeBtn = 'btn3'
+    else this.activeBtn = ''
   }
 
   setIcon(product: string) {
