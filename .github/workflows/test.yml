@@ -71,9 +71,11 @@ jobs:
           . ~/.nvm/nvm.sh
           nvm install v12
           cd frontend && npm test && cd ..
-          nvm use v10
     - name: Run integration tests
-      run: cd backend && npm test && cd ..
+      run: |
+          . ~/.nvm/nvm.sh
+          nvm use v10
+          cd backend && npm test && cd ..
     - name: Run e2e tests
       run: cd backend && npm run e2e-test && cd ..
     - name: Run selenium tests
