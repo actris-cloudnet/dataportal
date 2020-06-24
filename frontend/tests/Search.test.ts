@@ -43,7 +43,9 @@ const getMockedAxiosLastCallSecondArgument = () => {
   return secondArg
 }
 
-const dateFromDefault = '2020-01-01'
+const date = new Date()
+date.setDate(date.getDate() - 29)
+const dateFromDefault = date.toISOString().substring(0,10)
 const dateToDefault = new Date().toISOString().substring(0,10)
 
 describe('Search.vue', () => {
