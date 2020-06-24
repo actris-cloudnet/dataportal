@@ -122,7 +122,7 @@ describe('search page', () => {
     await selenium.clickId('reset')
     await wait(1000)
     const content = await selenium.getContent()
-    expect(content).toContain('Found 1 results')
+    expect(content).toContain('No results')
   })
 
   it('works when clicking the calendar', async () => {
@@ -172,6 +172,7 @@ describe('search page', () => {
   it('enables developer mode', async () => {
     await selenium.sendInputToMultiselect('siteSelect', 'iddqd')
     await selenium.sendInputToMultiselect('siteSelect', 'granada')
+    await selenium.sendInput('dateFrom', '1980')
     const content = await selenium.getContent()
     expect(content).toContain('developer mode')
     expect(content).toContain('Model file from Granada')
