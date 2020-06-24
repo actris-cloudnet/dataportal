@@ -37,3 +37,5 @@ export const sortVisualizations = (visualizations: Visualization[]) => {
     return 1
   })
 }
+
+export const fixedRanges = Object.freeze({'day':0, 'week':6, 'month':29})
