@@ -208,13 +208,13 @@
     <h4 v-if="!isVizMode()">Date range:</h4>
      <div class="quickselectors" v-if="!isVizMode()">
       <button class="quick_range"
-        @click="changeDateFrom(29)"
+        @click="setDateRange(29)"
         :class="{activeBtn: activeBtn == 'btn1' }">Last 30 days</button>
       <button class="quick_range"
-        @click="changeDateFrom(6)"
+        @click="setDateRange(6)"
         :class="{activeBtn: activeBtn == 'btn2' }">Last 7 days</button>
       <button class="quick_range"
-        @click="changeDateFrom(0)"
+        @click="setDateRange(0)"
         :class="{activeBtn: activeBtn == 'btn3' }">Today</button>
     </div>
 
@@ -335,7 +335,8 @@ import { BPagination } from 'bootstrap-vue/esm/components/pagination'
 import Datepicker from '../components/Datepicker.vue'
 import CustomMultiselect from '../components/Multiselect.vue'
 import DataSearchResult from '../components/DataSearchResult.vue'
-import { dateToString, getIconUrl, getShadowUrl, getMarkerUrl, humanReadableSize, combinedFileSize } from '../lib'
+import { dateToString, getIconUrl, getShadowUrl, getMarkerUrl,
+  humanReadableSize, combinedFileSize, fixedRanges} from '../lib'
 import { DevMode } from '../lib/DevMode'
 import VizSearchResult from '../components/VizSearchResult.vue'
 import {Visualization} from '../../../backend/src/entity/Visualization'
@@ -357,7 +358,6 @@ export interface Selection {
   id: string;
   humanReadableName: string;
 }
-
 
 @Component({name: 'app-search'})
 export default class Search extends Vue {
@@ -384,7 +384,7 @@ export default class Search extends Vue {
   beginningOfHistory = new Date('1970-01-01')
   today = new Date()
   dateTo = this.today
-  dateFrom = this.isVizMode() ? this.today : new Date(new Date().getFullYear().toString())
+  dateFrom = this.isVizMode() ? this.today : this.getInitialDateFrom()
   dateFromError: { [key: string]: boolean } = {}
   dateToError: { [key: string]: boolean } = {}
   defaultVizDate = this.dateTo
@@ -403,6 +403,11 @@ export default class Search extends Vue {
 
   setSelectedProductIds(productIds: []) {
     this.selectedProductIds = productIds
+  }
+
+  getInitialDateFrom() {
+    const date = new Date()
+    return date.setDate(date.getDate() - fixedRanges.month)
   }
 
   // variables
@@ -550,7 +555,6 @@ export default class Search extends Vue {
       this.allSites = sites.data.sort(this.alphabeticalSort)
       this.allProducts = products.data.sort(this.alphabeticalSort)
       this.initLayers()
-      this.changeDateFrom(29)
       if (this.isVizMode()) {
         this.selectedSiteIds.push('bucharest')
         this.selectedProductIds.push('classification')
@@ -610,7 +614,7 @@ export default class Search extends Vue {
     this.$router.push({ name: 'Search', params: { mode }})
   }
 
-  changeDateFrom(n: number) {
+  setDateRange(n: number) {
     this.dateInputEnd = new Date()
     const date = new Date()
     date.setDate(date.getDate() - n)
@@ -620,10 +624,15 @@ export default class Search extends Vue {
   checkIfButtonShouldBeActive() {
     const oneDay = 24 * 60 * 60 * 1000
     const diffDays = Math.round(Math.abs((this.dateTo.valueOf() - this.dateFrom.valueOf()) / oneDay))
-    if (diffDays == 29) this.activeBtn = 'btn1'
-    else if (diffDays == 6) this.activeBtn = 'btn2'
-    else if (diffDays == 0) this.activeBtn = 'btn3'
+    const isToday = this.isSameDay(this.dateTo, new Date())
+    if (isToday && diffDays === fixedRanges.month) this.activeBtn = 'btn1'
+    else if (isToday && diffDays === fixedRanges.week) this.activeBtn = 'btn2'
+    else if (isToday && diffDays === fixedRanges.day) this.activeBtn = 'btn3'
     else this.activeBtn = ''
+  }
+
+  isSameDay(a: Date, b: Date) {
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate()=== b.getDate()
   }
 
   setIcon(product: string) {
