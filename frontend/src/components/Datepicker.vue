@@ -14,7 +14,6 @@
 
 <template>
   <div class="dateform" :id="name" :class="{ 'error': $v.dateString.$error }">
-    <label :for="name">{{ label }}</label><br>
     <input
       class="date"
       :name="name"

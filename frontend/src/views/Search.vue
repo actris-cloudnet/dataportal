@@ -48,7 +48,7 @@
     column-gap: 1em
     row-gap: 0.5em
     max-width: 100%
-    margin-bottom: 1em
+    margin-bottom: $filter-margin
 
   button.calendar
     width: 2em
@@ -138,11 +138,10 @@
 
   .quickselectors
     height: 20px
-    width: 100%
     display: flex
     justify-content: center
-    margin-bottom: .5em
-    margin-top: 0.7em
+    margin-bottom: 0.9em
+    margin-top: 0.9em
     .quick_range
       height: 25px
       padding-left: 5px
@@ -150,29 +149,26 @@
       padding-top: 10px
       padding-bottom: 10px
       font-size: 80%
-      line-height: 5px
-      margin-left: 0px
+      line-height: 0px
       margin-right: 15px
       border: 1px solid $steel-warrior
       border-radius: 3px
       background-color: $blue-dust
       &:hover
-        text-decoration: none
         background-color: $steel-warrior
-  .active
-    background-color: $steel-warrior !important
-    border: 1px solid darkgray !important
+    .activeBtn
+      background-color: $steel-warrior
+      border: 1px solid darkgray
 
   h4
     font-size: 90%
+    margin-bottom: 0.2em
 
-  .date
-    margin-bottom: 2em
-  .date label
-    margin-left: 3.3em
-    font-size: 80%
+  h5
+    width: 100%
+    text-align: center
     color: gray
-    vertical-align: bottom
+
 </style>
 
 <template>
@@ -210,18 +206,19 @@
     </custom-multiselect>
 
     <h4 v-if="!isVizMode()">Date range:</h4>
-    <div class="quickselectors" v-if="!isVizMode()">
+     <div class="quickselectors" v-if="!isVizMode()">
       <button class="quick_range"
         @click="changeDateFrom(29)"
-        :class="{active: activeBtn == 'btn1' }">Last 30 days</button>
+        :class="{activeBtn: activeBtn == 'btn1' }">Last 30 days</button>
       <button class="quick_range"
         @click="changeDateFrom(6)"
-        :class="{active: activeBtn == 'btn2' }">Last 7 days</button>
+        :class="{activeBtn: activeBtn == 'btn2' }">Last 7 days</button>
       <button class="quick_range"
         @click="changeDateFrom(0)"
-        :class="{active: activeBtn == 'btn3' }">Today</button>
+        :class="{activeBtn: activeBtn == 'btn3' }">Today</button>
     </div>
 
+    <h5 v-if="!isVizMode()">custom:</h5>
     <div class="date" v-if="!isVizMode()">
       <datepicker
         name="dateFrom"
@@ -231,7 +228,6 @@
         :end="dateTo"
         v-on:error="dateFromError = $event"
         :key="dateFromUpdate"
-        label="from"
       ></datepicker>
       <datepicker
         name="dateTo"
@@ -241,7 +237,6 @@
         :end="today"
         v-on:error="dateToError = $event"
         :key="dateToUpdate"
-        label="to"
       ></datepicker>
       <div v-if="!isTrueOnBothDateFields('isValidDateString')" class="errormsg">
         Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.
@@ -258,7 +253,8 @@
       </div>
     </div>
 
-    <div class="date" v-else>
+    <h4 v-if="isVizMode()">Date:</h4>
+    <div class="date" v-if="isVizMode()">
       <datepicker
         name="dateTo"
         v-model="dateTo"
@@ -291,7 +287,7 @@
     </custom-multiselect>
 
     <custom-multiselect v-show="isVizMode()"
-      label="Variable"
+      label="Variable:"
       v-model="selectedVariableIds"
       :options="selectableVariables"
       id="variableSelect">
@@ -554,7 +550,7 @@ export default class Search extends Vue {
       this.allSites = sites.data.sort(this.alphabeticalSort)
       this.allProducts = products.data.sort(this.alphabeticalSort)
       this.initLayers()
-      this.changeDateFrom(30)
+      this.changeDateFrom(29)
       if (this.isVizMode()) {
         this.selectedSiteIds.push('bucharest')
         this.selectedProductIds.push('classification')
@@ -624,8 +620,8 @@ export default class Search extends Vue {
   checkIfButtonShouldBeActive() {
     const oneDay = 24 * 60 * 60 * 1000
     const diffDays = Math.round(Math.abs((this.dateTo.valueOf() - this.dateFrom.valueOf()) / oneDay))
-    if (diffDays == 30) this.activeBtn = 'btn1'
-    else if (diffDays == 7) this.activeBtn = 'btn2'
+    if (diffDays == 29) this.activeBtn = 'btn1'
+    else if (diffDays == 6) this.activeBtn = 'btn2'
     else if (diffDays == 0) this.activeBtn = 'btn3'
     else this.activeBtn = ''
   }
