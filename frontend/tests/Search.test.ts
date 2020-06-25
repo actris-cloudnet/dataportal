@@ -3,12 +3,11 @@ import { mount, Wrapper } from '@vue/test-utils'
 import Search from '../src/views/Search.vue'
 import axios, { AxiosResponse, AxiosPromise, AxiosRequestConfig } from 'axios'
 import Vue from 'vue'
-import {init, allFiles, allSites, dateToISOString, tomorrow, allProducts, allSearch} from './lib'
+import {init,dateToISOString, tomorrow} from './lib'
 import { mocked } from 'ts-jest/dist/util/testing'
+import {readResources} from '../../shared/lib'
 init()
 
-const filesSortedByDate = allFiles
-  .sort((a, b) => new Date(a.measurementDate).getTime() - new Date(b.measurementDate).getTime())
 
 jest.mock('axios')
 
@@ -22,18 +21,6 @@ const axiosResponse: AxiosResponse = {
 
 const augmentAxiosResponse = (data: any) => ({ ...axiosResponse, ...{ data } })
 
-const defaultAxiosMock = (url: string, _: AxiosRequestConfig | undefined): AxiosPromise => {
-  if (url.includes('files')) {
-    return Promise.resolve(augmentAxiosResponse(allFiles))
-  } else if (url.includes('sites')) { // sites
-    return Promise.resolve(augmentAxiosResponse(allSites))
-  } else if (url.includes('search')) { // search
-    return Promise.resolve(augmentAxiosResponse(allSearch))
-  } else {
-    return Promise.resolve(augmentAxiosResponse(allProducts))
-  }
-}
-
 const getMockedAxiosLastCallSecondArgument = () => {
   const calls = mocked(axios.get).mock.calls
   const idxLast = calls.length - 1
@@ -45,9 +32,11 @@ const getMockedAxiosLastCallSecondArgument = () => {
 
 const dateFromDefault = '2020-01-01'
 const dateToDefault = new Date().toISOString().substring(0,10)
+let filesSortedByDate: any
 
 describe('Search.vue', () => {
   let wrapper: Wrapper<Vue>
+  let resources: any
 
   const findInputByName = (inputName: string) => wrapper.find(`input[name="${inputName}"]`)
   const findElementById = (id: string) => wrapper.find(`#${id}`)
@@ -62,7 +51,21 @@ describe('Search.vue', () => {
     await Vue.nextTick()
   }
 
-  beforeAll(() => {
+  beforeAll(async () => {
+    resources = await readResources()
+    filesSortedByDate = resources['allfiles']
+      .sort((a: any, b: any) => new Date(a.measurementDate).getTime() - new Date(b.measurementDate).getTime())
+    const defaultAxiosMock = (url: string, _: AxiosRequestConfig | undefined): AxiosPromise => {
+      if (url.includes('files')) {
+        return Promise.resolve(augmentAxiosResponse(resources['allfiles']))
+      } else if (url.includes('sites')) { // sites
+        return Promise.resolve(augmentAxiosResponse(resources['sites']))
+      } else if (url.includes('search')) { // search
+        return Promise.resolve(augmentAxiosResponse(resources['allsearch']))
+      } else {
+        return Promise.resolve(augmentAxiosResponse(resources['products-with-variables']))
+      }
+    }
     mocked(axios.get).mockImplementation(defaultAxiosMock)
     wrapper = mount(Search, { propsData: { mode: 'data'}})
   })
@@ -83,7 +86,7 @@ describe('Search.vue', () => {
     })
 
     it('displays data objects between dateFrom and dateTo by default', () => {
-      allSearch.map(file => file.measurementDate).forEach(date =>
+      resources['allsearch'].map((file: any) => file.measurementDate).forEach((date: any) =>
         expect(wrapper.text()).toContain(date)
       )
     })
@@ -103,16 +106,16 @@ describe('Search.vue', () => {
     })
 
     it('updates table based on api response', async () => {
-      mocked(axios.get).mockImplementationOnce((_1, _2) => Promise.resolve(augmentAxiosResponse(allFiles.slice(1))))
+      mocked(axios.get).mockImplementationOnce((_1, _2) => Promise.resolve(augmentAxiosResponse(resources['allsearch'].slice(1))))
       const newValue = filesSortedByDate[0].measurementDate
       await changeInputAndNextTick('dateFrom', newValue)
       // Contains the dates of all files except the first
-      allFiles
+      resources['allsearch']
         .slice(1)
-        .map(file => file.measurementDate).forEach(date =>
+        .map((file: any) => file.measurementDate).forEach((date: any) =>
           expect(wrapper.text()).toContain(date)
         )
-      return expect(wrapper.text()).not.toContain(allFiles[0].measurementDate)
+      return expect(wrapper.text()).not.toContain(resources['allsearch'][0].measurementDate)
     })
 
     it('does not touch API on invalid input', async () => {
