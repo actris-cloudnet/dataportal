@@ -1,0 +1,47 @@
+[
+  {
+    "id": "categorize",
+    "humanReadableName": "Categorize",
+    "level": "1"
+  },
+  {
+    "id": "classification",
+    "humanReadableName": "Classification",
+    "level": "2"
+  },
+  {
+    "id": "drizzle",
+    "humanReadableName": "Drizzle",
+    "level": "2"
+  },
+  {
+    "id": "iwc",
+    "humanReadableName": "Ice water content",
+    "level": "2"
+  },
+  {
+    "id": "lidar",
+    "humanReadableName": "Lidar",
+    "level": "1"
+  },
+  {
+    "id": "lwc",
+    "humanReadableName": "Liquid water content",
+    "level": "2"
+  },
+  {
+    "id": "model",
+    "humanReadableName": "Model",
+    "level": "1"
+  },
+  {
+    "id": "mwr",
+    "humanReadableName": "Microwave radiometer",
+    "level": "1"
+  },
+  {
+    "id": "radar",
+    "humanReadableName": "Radar",
+    "level": "1"
+  }
+]

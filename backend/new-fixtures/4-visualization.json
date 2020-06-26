@@ -1,0 +1,21 @@
+[
+  {
+    "filename": "test0.png",
+    "productVariable": "test1",
+    "variableHumanReadableName": "testi testinen",
+    "sourceFile": "38092c00-161d-4ca2-a29d-628cf8e960f6"
+  },
+  {
+    "filename": "test1.png",
+    "variableId": "test2",
+    "productVariable": "test2",
+    "variableHumanReadableName": "testi testinen",
+    "sourceFile": "38092c00-161d-4ca2-a29d-628cf8e960f6"
+  },
+  {
+    "filename": "test2.png",
+    "productVariable": "test1",
+    "variableHumanReadableName": "testi testinen",
+    "sourceFile": "bde7a35f-03aa-4bff-acfb-b4974ea9f217"
+  }
+]
