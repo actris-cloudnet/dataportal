@@ -135,6 +135,10 @@ case "$action" in
     echo "Installing frontend..."
     cd ../frontend
     npm install
+    echo
+    echo "Installing shared..."
+    cd ../shared
+    npm install
     cd ..
     ;;
 
@@ -146,6 +150,10 @@ case "$action" in
     echo
     echo "Installing frontend..."
     cd ../frontend
+    npm ci
+    echo
+    echo "Installing shared..."
+    cd ../shared
     npm ci
     cd ..
     ;;
