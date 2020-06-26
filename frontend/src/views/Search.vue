@@ -37,7 +37,7 @@
 
   @media screen and (max-width: $narrow-screen)
     section#sideBar
-      margin-right: 0px
+      margin-right: 0
 
   .multiselect
     margin-bottom: $filter-margin
@@ -81,9 +81,11 @@
     border-color: #e4c7c7
     background: #f9ebea
 
-  label
+  label, span.filterlabel
     font-size: 0.9em
     margin-bottom: 0
+    &::after
+      content: ':'
 
   #noRes
     font-size: 90%
@@ -142,14 +144,14 @@
     justify-content: center
     margin-bottom: 0.9em
     margin-top: 0.9em
-    .quick_range
+    .quickBtn
       height: 25px
       padding-left: 5px
       padding-right: 5px
       padding-top: 10px
       padding-bottom: 10px
       font-size: 80%
-      line-height: 0px
+      line-height: 0
       margin-right: 15px
       border: 1px solid $steel-warrior
       border-radius: 3px
@@ -160,14 +162,13 @@
       background-color: $steel-warrior
       border: 1px solid darkgray
 
-  h4
-    font-size: 90%
-    margin-bottom: 0.2em
-
-  h5
+  span.centerlabel
+    display: inline-block
     width: 100%
     text-align: center
     color: gray
+    font-size: 0.85em
+    margin-bottom: 0.5em
 
 </style>
 
@@ -196,7 +197,7 @@
     </div>
 
     <custom-multiselect
-      label="Location:"
+      label="Location"
       :selectedIds="selectedSiteIds"
       :setSelectedIds="setSelectedSiteIds"
       :options="allSites"
@@ -205,20 +206,20 @@
       :devMode="devMode">
     </custom-multiselect>
 
-    <h4 v-if="!isVizMode()">Date range:</h4>
-     <div class="quickselectors" v-if="!isVizMode()">
-      <button class="quick_range"
+    <span class="filterlabel" v-if="!isVizMode()">Date range</span>
+    <div class="quickselectors" v-if="!isVizMode()">
+      <button class="quickBtn"
         @click="setDateRange(29)"
         :class="{activeBtn: activeBtn == 'btn1' }">Last 30 days</button>
-      <button class="quick_range"
+      <button class="quickBtn"
         @click="setDateRange(6)"
         :class="{activeBtn: activeBtn == 'btn2' }">Last 7 days</button>
-      <button class="quick_range"
+      <button class="quickBtn"
         @click="setDateRange(0)"
         :class="{activeBtn: activeBtn == 'btn3' }">Today</button>
     </div>
 
-    <h5 v-if="!isVizMode()">custom:</h5>
+    <span class="centerlabel" v-if="!isVizMode()">custom:</span>
     <div class="date" v-if="!isVizMode()">
       <datepicker
         name="dateFrom"
@@ -253,15 +254,14 @@
       </div>
     </div>
 
-    <h4 v-if="isVizMode()">Date:</h4>
     <div class="date" v-if="isVizMode()">
       <datepicker
+        label="Date"
         name="dateTo"
         v-model="dateTo"
-        :defaultVizDate="defaultVizDate"
+        :dateInput="defaultVizDate"
         :start="beginningOfHistory"
         :end="today"
-        label="Date"
         v-on:error="dateToError = $event"
         :key="vizDateUpdate"
       ></datepicker>
@@ -276,7 +276,7 @@
     </div>
 
     <custom-multiselect
-      label="Product:"
+      label="Product"
       :selectedIds="selectedProductIds"
       :setSelectedIds="setSelectedProductIds"
       :options="allProducts"
@@ -287,7 +287,7 @@
     </custom-multiselect>
 
     <custom-multiselect v-show="isVizMode()"
-      label="Variable:"
+      label="Variable"
       v-model="selectedVariableIds"
       :options="selectableVariables"
       id="variableSelect">
