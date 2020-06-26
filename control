@@ -47,7 +47,6 @@ backend_postinstall () {
     createdb dataportal
     createdb dataportal-test
     npm run build
-    npx fixtures ./fixtures/Site.yml
 }
 
 case "$action" in

@@ -58,9 +58,9 @@ By default, there is no data in the portal's database. The following command wil
 database with test fixtures:
 
     cd backend
-    npx fixtures ./fixtures --connection=default --sync
+    node build/fixtures.js default fixtures
 
-Warning: the command will erase any existing data in the database.
+Note: the project will have to be built prior to running this command.
 
 
 ### Running unit and integration tests
