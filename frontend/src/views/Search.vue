@@ -208,13 +208,13 @@
 
     <span class="filterlabel" v-if="!isVizMode()">Date range</span>
     <div class="quickselectors" v-if="!isVizMode()">
-      <button class="quickBtn"
+      <button id="monthBtn" class="quickBtn"
         @click="setDateRange(29)"
         :class="{activeBtn: activeBtn == 'btn1' }">Last 30 days</button>
-      <button class="quickBtn"
+      <button id="weekBtn" class="quickBtn"
         @click="setDateRange(6)"
         :class="{activeBtn: activeBtn == 'btn2' }">Last 7 days</button>
-      <button class="quickBtn"
+      <button id="dayBtn" class="quickBtn"
         @click="setDateRange(0)"
         :class="{activeBtn: activeBtn == 'btn3' }">Today</button>
     </div>
