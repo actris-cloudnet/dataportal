@@ -20,3 +20,8 @@ export function init() {
 export const dateToISOString = (date: Date) => date.toISOString().substring(0,10)
 
 export const tomorrow = () => new Date(new Date().setDate(new Date().getDate() + 1))
+
+export function dateFromPast(n: number) {
+  const date = new Date(new Date().setDate(new Date().getDate() - n))
+  return dateToISOString(date)
+}

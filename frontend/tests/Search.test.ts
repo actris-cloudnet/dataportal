@@ -3,7 +3,7 @@ import { mount, Wrapper } from '@vue/test-utils'
 import Search from '../src/views/Search.vue'
 import axios, { AxiosResponse, AxiosPromise, AxiosRequestConfig } from 'axios'
 import Vue from 'vue'
-import {init,dateToISOString, tomorrow} from './lib'
+import {init, dateToISOString, tomorrow, dateFromPast} from './lib'
 import { mocked } from 'ts-jest/dist/util/testing'
 import {readResources} from '../../shared/lib'
 init()
@@ -84,6 +84,18 @@ describe('Search.vue', () => {
     })
 
     it('has today as the default dateTo', () => {
+      expect(getInputValueByName('dateTo')).toBe(dateToDefault)
+    })
+
+    it('sets correct date ranges from quickselector buttons', async () => {
+      await findElementById('weekBtn').trigger('click')
+      expect(getInputValueByName('dateFrom')).toBe(dateFromPast(6))
+      expect(getInputValueByName('dateTo')).toBe(dateToDefault)
+      await findElementById('dayBtn').trigger('click')
+      expect(getInputValueByName('dateFrom')).toBe(dateToDefault)
+      expect(getInputValueByName('dateTo')).toBe(dateToDefault)
+      await findElementById('monthBtn').trigger('click')
+      expect(getInputValueByName('dateFrom')).toBe(dateFromPast(29))
       expect(getInputValueByName('dateTo')).toBe(dateToDefault)
     })
 
