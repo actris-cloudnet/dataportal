@@ -38,4 +38,13 @@ export const sortVisualizations = (visualizations: Visualization[]) => {
   })
 }
 
-export const fixedRanges = Object.freeze({'day':0, 'week':6, 'month':29})
+export const fixedRanges = Object.freeze({'week':6, 'month':29})
+
+export function getDateFromBeginningOfYear(): Date {
+  const currentYear = new Date().getFullYear().toString()
+  return new Date(`${currentYear}-01-01`)
+}
+
+export function isSameDay(a: Date, b: Date) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate()=== b.getDate()
+}
