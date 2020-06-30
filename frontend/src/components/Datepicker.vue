@@ -6,7 +6,7 @@
   input.date
     box-sizing: content-box
     height: 2em
-    width: 7em
+    width: 6.3em
     font-size: 0.9em
     border: 1px solid #e8e8e8
     border-radius: 2px

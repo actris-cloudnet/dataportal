@@ -44,10 +44,9 @@
 
   div.date
     display: grid
-    grid-template-columns: 1fr 1fr
-    column-gap: 1em
+    grid-template-columns: 42.5% 15% 42.5%
+    justify-items: center
     row-gap: 0.5em
-    max-width: 100%
     margin-bottom: $filter-margin
 
   button.calendar
@@ -74,8 +73,9 @@
     border-style: solid
     border-width: 1px
     border-radius: 2px
-    grid-column: 1 / 3
+    grid-column: 1 / 4
     padding: 0.5em
+    width: 100%
 
   div.errormsg, .error>input
     border-color: #e4c7c7
@@ -139,20 +139,22 @@
     padding: 0
 
   .quickselectors
-    height: 20px
+    width: 100%
+    height: 27px
     display: flex
-    justify-content: center
-    margin-bottom: 0.9em
-    margin-top: 0.9em
+    justify-content: space-between
+    margin-bottom: 0.6em
+    margin-top: 0.6em
     .quickBtn
+      color: black
       height: 25px
-      padding-left: 5px
-      padding-right: 5px
+      padding-left: 10px
+      padding-right: 10px
       padding-top: 10px
       padding-bottom: 10px
       font-size: 80%
       line-height: 0
-      margin-right: 15px
+      margin-right: 0px
       border: 1px solid $steel-warrior
       border-radius: 3px
       background-color: $blue-dust
@@ -163,12 +165,8 @@
       border: 1px solid darkgray
 
   span.centerlabel
-    display: inline-block
-    width: 100%
-    text-align: center
-    color: gray
-    font-size: 0.85em
-    margin-bottom: 0.5em
+    line-height: 30px
+    font-size: 80%
 
 </style>
 
@@ -208,18 +206,17 @@
 
     <span class="filterlabel" v-if="!isVizMode()">Date range</span>
     <div class="quickselectors" v-if="!isVizMode()">
+      <button id="yearBtn" class="quickBtn"
+        @click="setDateRangeForCurrentYear()"
+        :class="{activeBtn: activeBtn == 'btn1' }">Current year</button>
       <button id="monthBtn" class="quickBtn"
         @click="setDateRange(29)"
-        :class="{activeBtn: activeBtn == 'btn1' }">Last 30 days</button>
+        :class="{activeBtn: activeBtn == 'btn2' }">Last 30 days</button>
       <button id="weekBtn" class="quickBtn"
         @click="setDateRange(6)"
-        :class="{activeBtn: activeBtn == 'btn2' }">Last 7 days</button>
-      <button id="dayBtn" class="quickBtn"
-        @click="setDateRange(0)"
-        :class="{activeBtn: activeBtn == 'btn3' }">Today</button>
+        :class="{activeBtn: activeBtn == 'btn3' }">Last 7 days</button>
     </div>
 
-    <span class="centerlabel" v-if="!isVizMode()">custom:</span>
     <div class="date" v-if="!isVizMode()">
       <datepicker
         name="dateFrom"
@@ -230,6 +227,7 @@
         v-on:error="dateFromError = $event"
         :key="dateFromUpdate"
       ></datepicker>
+      <span class="centerlabel">&#8212;</span>
       <datepicker
         name="dateTo"
         v-model="dateTo"
@@ -335,8 +333,8 @@ import { BPagination } from 'bootstrap-vue/esm/components/pagination'
 import Datepicker from '../components/Datepicker.vue'
 import CustomMultiselect from '../components/Multiselect.vue'
 import DataSearchResult from '../components/DataSearchResult.vue'
-import { dateToString, getIconUrl, getShadowUrl, getMarkerUrl,
-  humanReadableSize, combinedFileSize, fixedRanges} from '../lib'
+import { dateToString, getIconUrl, getShadowUrl, getMarkerUrl, humanReadableSize, combinedFileSize,
+  fixedRanges, getDateFromBeginningOfYear, isSameDay} from '../lib'
 import { DevMode } from '../lib/DevMode'
 import VizSearchResult from '../components/VizSearchResult.vue'
 import {Visualization} from '../../../backend/src/entity/Visualization'
@@ -621,18 +619,20 @@ export default class Search extends Vue {
     this.dateInputStart = date
   }
 
+  setDateRangeForCurrentYear() {
+    this.dateInputEnd = new Date()
+    this.dateInputStart = getDateFromBeginningOfYear()
+  }
+
   checkIfButtonShouldBeActive() {
     const oneDay = 24 * 60 * 60 * 1000
     const diffDays = Math.round(Math.abs((this.dateTo.valueOf() - this.dateFrom.valueOf()) / oneDay))
-    const isToday = this.isSameDay(this.dateTo, new Date())
-    if (isToday && diffDays === fixedRanges.month) this.activeBtn = 'btn1'
-    else if (isToday && diffDays === fixedRanges.week) this.activeBtn = 'btn2'
-    else if (isToday && diffDays === fixedRanges.day) this.activeBtn = 'btn3'
+    const isDateToToday = isSameDay(this.dateTo, new Date())
+    const isDateFromBeginningOfYear = isSameDay(new Date(this.dateFrom), getDateFromBeginningOfYear())
+    if (isDateToToday && isDateFromBeginningOfYear) this.activeBtn = 'btn1'
+    else if (isDateToToday && diffDays === fixedRanges.month) this.activeBtn = 'btn2'
+    else if (isDateToToday && diffDays === fixedRanges.week) this.activeBtn = 'btn3'
     else this.activeBtn = ''
-  }
-
-  isSameDay(a: Date, b: Date) {
-    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate()=== b.getDate()
   }
 
   setIcon(product: string) {
