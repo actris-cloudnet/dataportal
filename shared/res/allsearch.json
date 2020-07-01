@@ -1,0 +1,57 @@
+[
+  {
+    "uuid": "bde7a35f-03aa-4bff-acfb-b4974ea9f217",
+    "measurementDate": "2018-06-09",
+    "site": "Mace Head",
+    "product": "Classification",
+    "productId": "classification",
+    "size": 130744,
+    "volatile": true
+  },
+  {
+    "uuid": "d21d6a9b-6804-4465-a026-74ec429fe17d",
+    "measurementDate": "2019-09-01",
+    "site": "Hyytiälä",
+    "product": "Radar",
+    "productId": "radar",
+    "size": 16027310,
+    "volatile": true
+  },
+  {
+    "uuid": "6cb32746-faf0-4057-9076-ed2e698dcf36",
+    "measurementDate": "2019-07-15",
+    "site": "Bucharest",
+    "product": "Categorize",
+    "productId": "categorize",
+    "size": 7127282,
+    "volatile": false
+  },
+  {
+    "uuid": "38092c00-161d-4ca2-a29d-628cf8e960f6",
+    "measurementDate": "2018-11-15",
+    "site": "Mace Head",
+    "product": "Radar",
+    "productId": "radar",
+    "size": 12200657,
+    "volatile": true
+  },
+  {
+    "uuid": "a5d1d5af-3667-41bc-b952-e684f627d91c",
+    "measurementDate": "2014-12-05",
+    "site": "Mace Head",
+    "product": "Model",
+    "productId": "model",
+    "size": 500452,
+    "volatile": true
+  },
+  {
+    "uuid": "9e04d8ef-0f2b-4823-835d-33e458403c67",
+    "measurementDate": "2020-01-26",
+    "site": "Granada",
+    "product": "Model",
+    "productId": "model",
+    "size": 501452,
+    "volatile": true
+  }
+]
+

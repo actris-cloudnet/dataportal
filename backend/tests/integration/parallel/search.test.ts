@@ -3,10 +3,13 @@ import { backendPublicUrl, genResponse } from '../../lib'
 import axios from 'axios'
 import { RequestError } from '../../../src/entity/RequestError'
 import { createConnection, Connection } from 'typeorm'
+import {readResources} from '../../../../shared/lib'
 
 let conn: Connection
+let responses: any
 
 beforeAll(async () => {
+  responses = await readResources()
   conn = await createConnection('test')
 })
 
@@ -128,17 +131,8 @@ describe('/api/files', () => {
 describe('/api/search', () => {
   const url = `${backendPublicUrl}search/`
 
-  const expectedData = [{
-    uuid: 'bde7a35f-03aa-4bff-acfb-b4974ea9f217',
-    measurementDate: '2018-06-09',
-    site: 'Mace Head',
-    product: 'Classification',
-    productId: 'classification',
-    volatile: true,
-    size: 130744
-  }]
-
   it('responds with correct objects if dateFrom, dateTo, location, and product are specified', async () => {
+    const expectedData = [responses['allsearch'][0]]
     const payload = {params: {dateFrom: new Date('2018-06-09'), dateTo: new Date('2019-09-02'), location: 'macehead', product: 'classification'}}
     const res = await axios.get(url, payload)
     return expect(res.data).toMatchObject(expectedData)

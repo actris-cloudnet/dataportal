@@ -47,7 +47,6 @@ backend_postinstall () {
     createdb dataportal
     createdb dataportal-test
     npm run build
-    npx fixtures ./fixtures/Site.yml
 }
 
 case "$action" in
@@ -135,6 +134,10 @@ case "$action" in
     echo "Installing frontend..."
     cd ../frontend
     npm install
+    echo
+    echo "Installing shared..."
+    cd ../shared
+    npm install
     cd ..
     ;;
 
@@ -147,6 +150,10 @@ case "$action" in
     echo "Installing frontend..."
     cd ../frontend
     npm ci
+    echo
+    echo "Installing shared..."
+    cd ../shared
+    npm ci
     cd ..
     ;;
 
@@ -154,6 +161,8 @@ case "$action" in
     cd frontend
     npm run lint
     cd ../backend
+    npm run lint
+    cd ../shared
     npm run lint
     cd ..
     ;;
