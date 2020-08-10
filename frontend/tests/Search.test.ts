@@ -3,7 +3,7 @@ import { mount, Wrapper } from '@vue/test-utils'
 import Search from '../src/views/Search.vue'
 import axios, { AxiosResponse, AxiosPromise, AxiosRequestConfig } from 'axios'
 import Vue from 'vue'
-import {init,dateToISOString, tomorrow} from './lib'
+import {init, dateToISOString, tomorrow, dateFromPast} from './lib'
 import { mocked } from 'ts-jest/dist/util/testing'
 import {readResources} from '../../shared/lib'
 init()
@@ -30,7 +30,9 @@ const getMockedAxiosLastCallSecondArgument = () => {
   return secondArg
 }
 
-const dateFromDefault = '2020-01-01'
+const date = new Date()
+date.setDate(date.getDate() - 29)
+const dateFromDefault = date.toISOString().substring(0,10)
 const dateToDefault = new Date().toISOString().substring(0,10)
 let filesSortedByDate: any
 
@@ -82,6 +84,18 @@ describe('Search.vue', () => {
     })
 
     it('has today as the default dateTo', () => {
+      expect(getInputValueByName('dateTo')).toBe(dateToDefault)
+    })
+
+    it('sets correct date ranges from quickselector buttons', async () => {
+      await findElementById('weekBtn').trigger('click')
+      expect(getInputValueByName('dateFrom')).toBe(dateFromPast(6))
+      expect(getInputValueByName('dateTo')).toBe(dateToDefault)
+      await findElementById('yearBtn').trigger('click')
+      expect(getInputValueByName('dateFrom')).toBe('2020-01-01')
+      expect(getInputValueByName('dateTo')).toBe(dateToDefault)
+      await findElementById('monthBtn').trigger('click')
+      expect(getInputValueByName('dateFrom')).toBe(dateFromPast(29))
       expect(getInputValueByName('dateTo')).toBe(dateToDefault)
     })
 

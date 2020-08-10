@@ -37,17 +37,16 @@
 
   @media screen and (max-width: $narrow-screen)
     section#sideBar
-      margin-right: 0px
+      margin-right: 0
 
   .multiselect
     margin-bottom: $filter-margin
 
   div.date
     display: grid
-    grid-template-columns: 1fr 1fr
-    column-gap: 1em
+    grid-template-columns: 42.5% 15% 42.5%
+    justify-items: center
     row-gap: 0.5em
-    max-width: 100%
     margin-bottom: $filter-margin
 
   button.calendar
@@ -74,18 +73,19 @@
     border-style: solid
     border-width: 1px
     border-radius: 2px
-    grid-column: 1 / 3
+    grid-column: 1 / 4
     padding: 0.5em
+    width: 100%
 
   div.errormsg, .error>input
     border-color: #e4c7c7
     background: #f9ebea
 
-  label
+  label, span.filterlabel
     font-size: 0.9em
     margin-bottom: 0
-  label::after
-    content: ':'
+    &::after
+      content: ':'
 
   #noRes
     font-size: 90%
@@ -138,6 +138,36 @@
   .no-padding
     padding: 0
 
+  .quickselectors
+    width: 100%
+    height: 27px
+    display: flex
+    justify-content: space-between
+    margin-bottom: 0.6em
+    margin-top: 0.6em
+    .quickBtn
+      color: black
+      height: 25px
+      padding-left: 10px
+      padding-right: 10px
+      padding-top: 10px
+      padding-bottom: 10px
+      font-size: 80%
+      line-height: 0
+      margin-right: 0px
+      border: 1px solid $steel-warrior
+      border-radius: 3px
+      background-color: $blue-dust
+      &:hover
+        background-color: $steel-warrior
+    .activeBtn
+      background-color: $steel-warrior
+      border: 1px solid darkgray
+
+  span.centerlabel
+    line-height: 30px
+    font-size: 80%
+
 </style>
 
 <template>
@@ -174,22 +204,36 @@
       :devMode="devMode">
     </custom-multiselect>
 
+    <span class="filterlabel" v-if="!isVizMode()">Date range</span>
+    <div class="quickselectors" v-if="!isVizMode()">
+      <button id="yearBtn" class="quickBtn"
+        @click="setDateRangeForCurrentYear()"
+        :class="{activeBtn: activeBtn == 'btn1' }">Current year</button>
+      <button id="monthBtn" class="quickBtn"
+        @click="setDateRange(29)"
+        :class="{activeBtn: activeBtn == 'btn2' }">Last 30 days</button>
+      <button id="weekBtn" class="quickBtn"
+        @click="setDateRange(6)"
+        :class="{activeBtn: activeBtn == 'btn3' }">Last 7 days</button>
+    </div>
+
     <div class="date" v-if="!isVizMode()">
       <datepicker
         name="dateFrom"
         v-model="dateFrom"
+        :dateInput="dateInputStart"
         :start="beginningOfHistory"
         :end="dateTo"
-        label="Date from"
         v-on:error="dateFromError = $event"
         :key="dateFromUpdate"
       ></datepicker>
+      <span class="centerlabel">&#8212;</span>
       <datepicker
         name="dateTo"
         v-model="dateTo"
+        :dateInput="dateInputEnd"
         :start="dateFrom"
         :end="today"
-        label="Date to"
         v-on:error="dateToError = $event"
         :key="dateToUpdate"
       ></datepicker>
@@ -208,14 +252,14 @@
       </div>
     </div>
 
-    <div class="date" v-else>
+    <div class="date" v-if="isVizMode()">
       <datepicker
+        label="Date"
         name="dateTo"
         v-model="dateTo"
-        :defaultVizDate="defaultVizDate"
+        :dateInput="defaultVizDate"
         :start="beginningOfHistory"
         :end="today"
-        label="Date"
         v-on:error="dateToError = $event"
         :key="vizDateUpdate"
       ></datepicker>
@@ -289,7 +333,8 @@ import { BPagination } from 'bootstrap-vue/esm/components/pagination'
 import Datepicker from '../components/Datepicker.vue'
 import CustomMultiselect from '../components/Multiselect.vue'
 import DataSearchResult from '../components/DataSearchResult.vue'
-import { dateToString, getIconUrl, getShadowUrl, getMarkerUrl, humanReadableSize, combinedFileSize } from '../lib'
+import { dateToString, getIconUrl, getShadowUrl, getMarkerUrl, humanReadableSize, combinedFileSize,
+  fixedRanges, getDateFromBeginningOfYear, isSameDay} from '../lib'
 import { DevMode } from '../lib/DevMode'
 import VizSearchResult from '../components/VizSearchResult.vue'
 import {Visualization} from '../../../backend/src/entity/Visualization'
@@ -311,7 +356,6 @@ export interface Selection {
   id: string;
   humanReadableName: string;
 }
-
 
 @Component({name: 'app-search'})
 export default class Search extends Vue {
@@ -338,10 +382,13 @@ export default class Search extends Vue {
   beginningOfHistory = new Date('1970-01-01')
   today = new Date()
   dateTo = this.today
-  dateFrom = this.isVizMode() ? this.today : new Date(new Date().getFullYear().toString())
+  dateFrom = this.isVizMode() ? this.today : this.getInitialDateFrom()
   dateFromError: { [key: string]: boolean } = {}
   dateToError: { [key: string]: boolean } = {}
   defaultVizDate = this.dateTo
+  dateInputStart = this.dateFrom
+  dateInputEnd = this.dateFrom
+  activeBtn = ''
 
   dateErrorsExist(dateError: { [key: string]: boolean }) {
     return !(dateError.isValidDateString && dateError.isAfterStart && dateError.isBeforeEnd &&
@@ -354,6 +401,11 @@ export default class Search extends Vue {
 
   setSelectedProductIds(productIds: []) {
     this.selectedProductIds = productIds
+  }
+
+  getInitialDateFrom() {
+    const date = new Date()
+    return date.setDate(date.getDate() - fixedRanges.month)
   }
 
   // variables
@@ -535,6 +587,7 @@ export default class Search extends Vue {
   fetchData() {
     this.isBusy = true
     const apiPath = this.isVizMode() ? 'visualizations/' : 'search/'
+    if (!this.isVizMode()) this.checkIfButtonShouldBeActive()
     return axios
       .get(`${this.apiUrl}${apiPath}`, this.payload)
       .then(res => {
@@ -557,6 +610,29 @@ export default class Search extends Vue {
 
   navigateToSearch(mode: string) {
     this.$router.push({ name: 'Search', params: { mode }})
+  }
+
+  setDateRange(n: number) {
+    this.dateInputEnd = new Date()
+    const date = new Date()
+    date.setDate(date.getDate() - n)
+    this.dateInputStart = date
+  }
+
+  setDateRangeForCurrentYear() {
+    this.dateInputEnd = new Date()
+    this.dateInputStart = getDateFromBeginningOfYear()
+  }
+
+  checkIfButtonShouldBeActive() {
+    const oneDay = 24 * 60 * 60 * 1000
+    const diffDays = Math.round(Math.abs((this.dateTo.valueOf() - this.dateFrom.valueOf()) / oneDay))
+    const isDateToToday = isSameDay(this.dateTo, new Date())
+    const isDateFromBeginningOfYear = isSameDay(new Date(this.dateFrom), getDateFromBeginningOfYear())
+    if (isDateToToday && isDateFromBeginningOfYear) this.activeBtn = 'btn1'
+    else if (isDateToToday && diffDays === fixedRanges.month) this.activeBtn = 'btn2'
+    else if (isDateToToday && diffDays === fixedRanges.week) this.activeBtn = 'btn3'
+    else this.activeBtn = ''
   }
 
   setIcon(product: string) {

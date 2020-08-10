@@ -6,7 +6,7 @@
   input.date
     box-sizing: content-box
     height: 2em
-    width: 7em
+    width: 6.3em
     font-size: 0.9em
     border: 1px solid #e8e8e8
     border-radius: 2px
@@ -14,7 +14,7 @@
 
 <template>
   <div class="dateform" :id="name" :class="{ 'error': $v.dateString.$error }">
-    <label :for="name">{{ label }}</label><br>
+    <label v-if="label" :for="name">{{ label }}</label><br v-if="label">
     <input
       class="date"
       :name="name"
@@ -64,7 +64,7 @@ export default class Datepicker extends mixins(validationMixin, Vue) {
   @Prop() label!: string
   @Prop() start!: Date
   @Prop() end!: Date
-  @Prop() defaultVizDate!: Date
+  @Prop() dateInput!: Date
 
   @Validate({ isValidDateString, isNotInFuture, isBeforeEnd, isAfterStart })
   dateString = this.$attrs.value
@@ -86,9 +86,9 @@ export default class Datepicker extends mixins(validationMixin, Vue) {
     return new Date(this.dateString)
   }
 
-  @Watch('defaultVizDate')
-  onDefaultVizChange() {
-    this.value = this.defaultVizDate
+  @Watch('dateInput')
+  onDateInputChange() {
+    this.value = this.dateInput
   }
 
   @Watch('dateString')
