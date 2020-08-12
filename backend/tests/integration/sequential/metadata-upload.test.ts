@@ -1,7 +1,7 @@
 import {File} from '../../../src/entity/File'
 import axios from 'axios'
 import {Connection, createConnection, Repository} from 'typeorm/index'
-import {backendPrivateUrl, backendPublicUrl, clearRepo} from '../../lib'
+import {backendPublicUrl} from '../../lib'
 
 let conn: Connection
 let repo: Repository<File>
