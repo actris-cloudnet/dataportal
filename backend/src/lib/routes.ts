@@ -1,9 +1,10 @@
 import { File } from '../entity/File'
 import { Site } from '../entity/Site'
 import { Product } from '../entity/Product'
+import { UploadedMetadata } from '../entity/UploadedMetadata'
 import { SelectQueryBuilder, Connection, Repository } from 'typeorm'
 import { Request, Response, RequestHandler } from 'express'
-import {dateToUTCString, linkFile} from '.'
+import {dateToUTCString, isValidDate, linkFile} from '.'
 import { join, basename } from 'path'
 import archiver = require('archiver')
 import { createReadStream, promises as fsp, constants as fsconst } from 'graceful-fs'
@@ -28,6 +29,7 @@ export class Routes {
     this.productRepo = this.conn.getRepository(Product)
     this.visualizationRepo = this.conn.getRepository(Visualization)
     this.productVariableRepo = this.conn.getRepository(ProductVariable)
+    this.uploadedMetadataRepo = this.conn.getRepository(UploadedMetadata)
   }
 
   private conn: Connection
@@ -38,6 +40,7 @@ export class Routes {
   private productRepo: Repository<Product>
   private visualizationRepo: Repository<Visualization>
   private productVariableRepo: Repository<ProductVariable>
+  private uploadedMetadataRepo: Repository<UploadedMetadata>
 
   private hideTestDataFromNormalUsers = <T>(dbQuery: SelectQueryBuilder<T>, req: Request): SelectQueryBuilder<T> =>
     req.query.developer !== undefined ? dbQuery : dbQuery.andWhere('not site.isTestSite')
@@ -298,6 +301,26 @@ export class Routes {
       .catch(err => {
         next({ status: 500, errors: err })
       })
+
+    uploadMetadata: RequestHandler = async (req: Request, res: Response, next) => {
+      const body = req.body
+      if (!('filename' in body) || !body.filename) {
+        next({ status: 400, errors: ['Request is missing filename']})
+        return
+      }
+      if (!('hashSum' in body) || body.hashSum.length != 32) {
+        next({ status: 400, errors: ['Request is missing hashSum or hashSum is invalid']})
+        return
+      }
+      if (!('measurementDate' in body) || !body.measurementDate || !isValidDate(body.measurementDate)) {
+        next({ status: 400, errors: ['Request is missing measurementDate or measurementDate is invalid']})
+        return
+      }
+      return this.uploadedMetadataRepo.insert(new UploadedMetadata(body.hashSum, body.filename, body.measurementDate))
+        .then(() => res.sendStatus(200))
+        .catch(err => next({ status: 500, errors: err}))
+    }
+
 }
 
 function parsePid(attributes: Array<any>): string {

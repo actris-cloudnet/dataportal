@@ -31,3 +31,5 @@ export function linkFile(filename: string, linkPath: string) {
       return fsp.symlink(resolvedSource, fullLink)
     })
 }
+
+export const isValidDate = (obj: any) => !isNaN(new Date(obj).getDate())

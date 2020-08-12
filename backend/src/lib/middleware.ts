@@ -4,7 +4,7 @@ import validator from 'validator'
 import { Site } from '../entity/Site'
 import { Product } from '../entity/Product'
 import { Connection } from 'typeorm'
-import { fetchAll } from '.'
+import {fetchAll, isValidDate} from '.'
 
 export class Middleware {
 
@@ -23,7 +23,6 @@ export class Middleware {
       err.errors.push(el)
       return err
     }
-    const isValidDate = (obj: any) => !isNaN(new Date(obj).getDate())
 
 
     if (Object.keys(query).length == 0) {
