@@ -33,3 +33,5 @@ export function linkFile(filename: string, linkPath: string) {
 }
 
 export const isValidDate = (obj: any) => !isNaN(new Date(obj).getDate())
+
+export const PG_UNIQUE_CONSTRAINT_VIOLATION = '23505'

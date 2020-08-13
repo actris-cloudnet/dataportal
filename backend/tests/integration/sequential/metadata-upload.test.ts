@@ -22,17 +22,21 @@ const config = {
 beforeAll(async () => {
   conn = await createConnection('test')
   repo = conn.getRepository('uploaded_metadata')
-  await repo.delete({})
   return
 })
 
-afterEach(() => repo.delete({}))
 
 beforeEach(() => {
+  return repo.delete({})
 })
 
-afterAll(async () => {
-  return await conn.close()
+afterAll(() => {
+  return conn.close()
+})
+
+test('responds with 400 on existing hashsum', async () => {
+  await axios.post(url, validMetadata, config)
+  return expect(axios.post(url, validMetadata, config)).rejects.toMatchObject({ response: { data: { status: 400}}})
 })
 
 test('inserts new metadata', async () => {

@@ -4,7 +4,7 @@ import { Product } from '../entity/Product'
 import { UploadedMetadata } from '../entity/UploadedMetadata'
 import { SelectQueryBuilder, Connection, Repository } from 'typeorm'
 import { Request, Response, RequestHandler } from 'express'
-import {dateToUTCString, isValidDate, linkFile} from '.'
+import {dateToUTCString, isValidDate, linkFile, PG_UNIQUE_CONSTRAINT_VIOLATION} from '.'
 import { join, basename } from 'path'
 import archiver = require('archiver')
 import { createReadStream, promises as fsp, constants as fsconst } from 'graceful-fs'
@@ -326,7 +326,9 @@ export class Routes {
 
       return this.uploadedMetadataRepo.insert(new UploadedMetadata(body.hashSum, body.filename, body.measurementDate, site))
         .then(() => res.sendStatus(200))
-        .catch(err => next({ status: 500, errors: err}))
+        .catch(err => err.code == PG_UNIQUE_CONSTRAINT_VIOLATION
+          ? next({ status: 400, errors: ['Metadata with this hash sum already exists']})
+          : next({ status: 500, errors: err}))
     }
 
     checkMetadataExists: RequestHandler = async (req: Request, res: Response, next) => {
