@@ -54,7 +54,7 @@ import * as xmlparser from 'express-xml-bodyparser'
   app.get('/api/products', routes.products)
 
   // public (for sites)
-  app.post('/api/upload-metadata', express.json(), routes.uploadMetadata)
+  app.post('/protected/upload-metadata', express.json(), routes.uploadMetadata)
 
   // public/internal
   app.get('/api/status', routes.status)

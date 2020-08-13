@@ -61,6 +61,7 @@ export const genResponse = (status: any, data: any) => ({response: {status, data
 export const inboxDir = 'tests/data/inbox'
 export const inboxSubDir = 'tests/data/inbox/inbox'
 export const publicDir = 'tests/data/public'
+export const backendProtectedUrl = 'http://localhost:3001/protected/'
 export const backendPublicUrl = 'http://localhost:3001/api/'
 export const backendPrivateUrl = 'http://localhost:3001/'
 export const publicVizDir = 'tests/data/public/viz'

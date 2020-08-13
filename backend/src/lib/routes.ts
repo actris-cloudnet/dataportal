@@ -316,7 +316,15 @@ export class Routes {
         next({ status: 400, errors: ['Request is missing measurementDate or measurementDate is invalid']})
         return
       }
-      return this.uploadedMetadataRepo.insert(new UploadedMetadata(body.hashSum, body.filename, body.measurementDate))
+
+      const auth = req.headers['authorization']
+      if (auth == undefined) return next({ status: 400, errors: [ 'Authorization header missing']})
+      const credentials = auth.split(' ')[1]
+      const username = Buffer.from(credentials, 'base64').toString('utf-8').split(':')[0]
+      const site = await this.siteRepo.findOne(username)
+      if (site == undefined) return next({ status: 400, errors: [ 'Invalid site id']})
+
+      return this.uploadedMetadataRepo.insert(new UploadedMetadata(body.hashSum, body.filename, body.measurementDate, site))
         .then(() => res.sendStatus(200))
         .catch(err => next({ status: 500, errors: err}))
     }

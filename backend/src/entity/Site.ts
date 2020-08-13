@@ -1,5 +1,6 @@
 import {Entity, Column, PrimaryColumn, OneToMany} from 'typeorm'
 import {File} from './File'
+import {UploadedMetadata} from './UploadedMetadata'
 
 @Entity()
 export class Site {
@@ -30,4 +31,7 @@ export class Site {
 
     @OneToMany(_ => File, file => file.site)
     files!: File[]
+
+    @OneToMany(_ => UploadedMetadata, uploadedMetadata => uploadedMetadata.site)
+    uploadedMetadatas!: File[]
 }

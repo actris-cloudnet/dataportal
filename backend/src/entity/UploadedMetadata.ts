@@ -1,4 +1,5 @@
-import {Column, Entity, PrimaryColumn} from 'typeorm/index'
+import {Column, Entity, ManyToOne, PrimaryColumn} from 'typeorm/index'
+import {Site} from './Site'
 
 @Entity()
 export class UploadedMetadata {
@@ -12,9 +13,13 @@ export class UploadedMetadata {
   @Column({type: 'date'})
   measurementDate!: Date
 
-  constructor(hash: string, filename: string, date: string) {
+  @ManyToOne(_ => Site, site => site.uploadedMetadatas)
+  site!: Site
+
+  constructor(hash: string, filename: string, date: string, site: Site) {
     this.hash = hash
     this.filename = filename
     this.measurementDate= new Date(date)
+    this.site = site
   }
 }
