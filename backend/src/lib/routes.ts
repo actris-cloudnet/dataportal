@@ -340,10 +340,10 @@ export class Routes {
     }
 
     checkMetadataExists: RequestHandler = async (req: Request, res: Response, next) => {
-      this.uploadedMetadataRepo.findOne(req.params.hash)
-        .then(result => {
-          if (result == undefined) return next({ status: 404, errors: ['No metadata was found with provided hash']})
-          res.sendStatus(200)
+      this.uploadedMetadataRepo.findOne(req.params.hash, { relations: ['site', 'product']})
+        .then(uploadedMetadata => {
+          if (uploadedMetadata == undefined) return next({ status: 404, errors: ['No metadata was found with provided hash']})
+          res.send(uploadedMetadata)
         })
         .catch(err => next({ status: 500, errors: err}))
     }
