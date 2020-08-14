@@ -33,5 +33,5 @@ export class Site {
     files!: File[]
 
     @OneToMany(_ => UploadedMetadata, uploadedMetadata => uploadedMetadata.site)
-    uploadedMetadatas!: File[]
+    uploadedMetadatas!: UploadedMetadata[]
 }
