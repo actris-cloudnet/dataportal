@@ -316,6 +316,10 @@ export class Routes {
         next({ status: 400, errors: ['Request is missing measurementDate or measurementDate is invalid']})
         return
       }
+      if (!('product' in body) || !body.filename) {
+        next({ status: 400, errors: ['Request is missing product']})
+        return
+      }
 
       const auth = req.headers['authorization']
       if (auth == undefined) return next({ status: 400, errors: [ 'Authorization header missing']})
@@ -324,7 +328,11 @@ export class Routes {
       const site = await this.siteRepo.findOne(username)
       if (site == undefined) return next({ status: 400, errors: [ 'Invalid site id']})
 
-      return this.uploadedMetadataRepo.insert(new UploadedMetadata(body.hashSum, body.filename, body.measurementDate, site))
+      const product = await this.productRepo.findOne(body.product)
+      if (product == undefined) return next({ status: 400, errors: [ 'Invalid product']})
+
+      const uploadedMetadata = new UploadedMetadata(body.hashSum, body.filename, body.measurementDate, site, product)
+      return this.uploadedMetadataRepo.insert(uploadedMetadata)
         .then(() => res.sendStatus(200))
         .catch(err => err.code == PG_UNIQUE_CONSTRAINT_VIOLATION
           ? next({ status: 400, errors: ['Metadata with this hash sum already exists']})
