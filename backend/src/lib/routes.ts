@@ -308,7 +308,7 @@ export class Routes {
         next({ status: 400, errors: ['Request is missing filename']})
         return
       }
-      if (!('hashSum' in body) || body.hashSum.length != 32) {
+      if (!('hashSum' in body) || body.hashSum.length != 64) {
         next({ status: 400, errors: ['Request is missing hashSum or hashSum is invalid']})
         return
       }

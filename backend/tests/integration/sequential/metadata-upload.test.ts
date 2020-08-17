@@ -10,7 +10,7 @@ const url = `${backendProtectedUrl}upload-metadata/`
 const validMetadata = {
   filename: 'file1.LV1',
   measurementDate: '2020-08-11',
-  hashSum: '1wkf934jflaodig39gksodjg3491ldk3',
+  hashSum: 'dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b5',
   product: 'radar'
 }
 const config = {
