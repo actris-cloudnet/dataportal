@@ -164,6 +164,33 @@
       background-color: $steel-warrior
       border: 1px solid darkgray
 
+  .dateButtons
+    width: 80%
+    display: flex
+    margin-top: 1.5em
+    margin-left: 2.0em
+    .dateBtn:disabled
+      background-color: none
+      opacity: 0.5
+    .dateBtn:hover:enabled
+      background-color: $steel-warrior
+    .dateBtn
+      color: black
+      height: 33px
+      padding-left: 8px
+      padding-right: 10px
+      padding-top: 10px
+      padding-bottom: 20px
+      margin-right: 5px
+      border: 1px solid $steel-warrior
+      border-radius: 3px
+      background-color: $blue-dust
+      .option__image
+        height: 1.5em
+        width: auto
+        position: relative
+        top: -8px
+        margin-right: 1.5em
   span.centerlabel
     line-height: 30px
     font-size: 80%
@@ -263,6 +290,20 @@
         v-on:error="dateToError = $event"
         :key="vizDateUpdate"
       ></datepicker>
+      <div class="dateButtons">
+        <button id="previousBtn" class="dateBtn" @click="setPreviousDate()"
+        :disabled="disabledPrevious">
+          <img class="option__image" :src="getIconUrl('date-previous')">
+        </button>
+        <button id="nexthBtn" class="dateBtn" @click="setNextDate()"
+        :disabled="disabledNext">
+          <img class="option__image" :src="getIconUrl('date-next')">
+        </button>
+        <button id="latestBtn" class="dateBtn" @click="setLatestDate()"
+        :disabled="disabledLatest">
+          <img class="option__image" :src="getIconUrl('date-latest')">
+        </button>
+      </div>
       <div v-if="!dateToError.isValidDateString" class="errormsg">
         Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.
       </div>
@@ -389,6 +430,9 @@ export default class Search extends Vue {
   dateInputStart = this.dateFrom
   dateInputEnd = this.dateFrom
   activeBtn = ''
+  disabledPrevious = false
+  disabledNext = false
+  disabledLatest = false
 
   dateErrorsExist(dateError: { [key: string]: boolean }) {
     return !(dateError.isValidDateString && dateError.isAfterStart && dateError.isBeforeEnd &&
@@ -588,6 +632,7 @@ export default class Search extends Vue {
     this.isBusy = true
     const apiPath = this.isVizMode() ? 'visualizations/' : 'search/'
     if (!this.isVizMode()) this.checkIfButtonShouldBeActive()
+    else this.checkIfDateButtonShouldBedisabled()
     return axios
       .get(`${this.apiUrl}${apiPath}`, this.payload)
       .then(res => {
@@ -624,6 +669,32 @@ export default class Search extends Vue {
     this.dateInputStart = getDateFromBeginningOfYear()
   }
 
+  setLatestDate() {
+    const date = new Date
+    date.setDate(date.getDate())
+    this.defaultVizDate = date
+  }
+
+  setPreviousDate() {
+    if (this.dateTo > this.beginningOfHistory) {
+      const date = this.dateTo
+      date.setDate(date.getDate() - 1)
+      this.dateTo = date
+      this.dateFrom = date
+      this.defaultVizDate = date
+    }
+  }
+
+  setNextDate() {
+    if (!isSameDay(this.dateTo, new Date)) {
+      const date = this.dateTo
+      date.setDate(date.getDate() + 1)
+      this.dateTo = date
+      this.dateFrom = date
+      this.defaultVizDate = date
+    }
+  }
+
   checkIfButtonShouldBeActive() {
     const oneDay = 24 * 60 * 60 * 1000
     const diffDays = Math.round(Math.abs((this.dateTo.valueOf() - this.dateFrom.valueOf()) / oneDay))
@@ -633,6 +704,18 @@ export default class Search extends Vue {
     else if (isDateToToday && diffDays === fixedRanges.month) this.activeBtn = 'btn2'
     else if (isDateToToday && diffDays === fixedRanges.week) this.activeBtn = 'btn3'
     else this.activeBtn = ''
+  }
+
+  checkIfDateButtonShouldBedisabled() {
+    const isDateToday = isSameDay(this.dateTo, new Date())
+    const isDateLatest = isSameDay(this.dateTo, this.beginningOfHistory)
+    this.disabledPrevious = false
+    this.disabledNext = false
+    this.disabledLatest = false
+    if (isDateToday) {
+      this.disabledNext = true
+      this.disabledLatest = true }
+    if (isDateLatest) this.disabledPrevious = true
   }
 
   setIcon(product: string) {
