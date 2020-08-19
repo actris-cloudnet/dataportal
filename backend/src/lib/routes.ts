@@ -1,7 +1,7 @@
 import { File } from '../entity/File'
 import { Site } from '../entity/Site'
 import { Product } from '../entity/Product'
-import { UploadedMetadata } from '../entity/UploadedMetadata'
+import { UploadedMetadata, Status } from '../entity/UploadedMetadata'
 import { SelectQueryBuilder, Connection, Repository } from 'typeorm'
 import { Request, Response, RequestHandler } from 'express'
 import {dateToUTCString, isValidDate, linkFile, PG_UNIQUE_CONSTRAINT_VIOLATION} from '.'
@@ -331,7 +331,8 @@ export class Routes {
       const product = await this.productRepo.findOne(body.product)
       if (product == undefined) return next({ status: 400, errors: [ 'Invalid product']})
 
-      const uploadedMetadata = new UploadedMetadata(body.hashSum, body.filename, body.measurementDate, site, product)
+      const uploadedMetadata =
+        new UploadedMetadata(body.hashSum, body.filename, body.measurementDate, site, product, Status.CREATED)
       return this.uploadedMetadataRepo.insert(uploadedMetadata)
         .then(() => res.sendStatus(200))
         .catch(err => err.code == PG_UNIQUE_CONSTRAINT_VIOLATION
@@ -347,6 +348,18 @@ export class Routes {
         })
         .catch(err => next({ status: 500, errors: err}))
     }
+
+  updateMetadata: RequestHandler = async (req: Request, res: Response, next) => {
+    this.uploadedMetadataRepo.update(req.params.hash, req.body)
+      .then(() =>
+        this.uploadedMetadataRepo.findOne(req.params.hash, { relations: ['site', 'product']})
+          .then(uploadedMetadata => {
+            if (uploadedMetadata == undefined) return next({ status: 404, errors: ['No metadata was found with provided hash']})
+            res.send(uploadedMetadata)
+          })
+      )
+      .catch(err => next({ status: 500, errors: err}))
+  }
 }
 
 function parsePid(attributes: Array<any>): string {
