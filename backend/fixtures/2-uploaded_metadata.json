@@ -1,8 +1,16 @@
-{
+[{
   "filename": "file1.LV1",
   "measurementDate": "2020-08-11",
   "hash": "dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b5",
   "site": "granada",
   "product": "radar",
   "status": "created"
-}
+},
+{
+  "filename": "file2.LV1",
+  "measurementDate": "2020-08-11",
+  "hash": "ac460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b1",
+  "site": "granada",
+  "product": "radar",
+  "status": "created"
+}]

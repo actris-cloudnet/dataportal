@@ -75,7 +75,7 @@ import * as xmlparser from 'express-xml-bodyparser'
   // private
   app.put('/files/:uuid', routes.submit)
   app.get('/metadata/:hash', routes.checkMetadataExists)
-  app.post('/metadata/:hash', routes.updateMetadata)
+  app.post('/metadata/:hash', express.json(), routes.updateMetadata)
   app.put('/visualizations/:filename', express.json(), routes.putVisualization)
 
   app.use(errorHandler)

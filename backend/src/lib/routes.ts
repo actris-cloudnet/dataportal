@@ -350,15 +350,11 @@ export class Routes {
     }
 
   updateMetadata: RequestHandler = async (req: Request, res: Response, next) => {
-    this.uploadedMetadataRepo.update(req.params.hash, req.body)
-      .then(() =>
-        this.uploadedMetadataRepo.findOne(req.params.hash, { relations: ['site', 'product']})
-          .then(uploadedMetadata => {
-            if (uploadedMetadata == undefined) return next({ status: 404, errors: ['No metadata was found with provided hash']})
-            res.send(uploadedMetadata)
-          })
-      )
-      .catch(err => next({ status: 500, errors: err}))
+    const partialEntity = {...req.body, ...{hash: req.params.hash}}
+    console.log(partialEntity)
+    this.uploadedMetadataRepo.save(partialEntity)
+      .then(uploadedMetadata => res.send(uploadedMetadata))
+      .catch(err => { console.log(err); next({ status: 500, errors: err})})
   }
 }
 
