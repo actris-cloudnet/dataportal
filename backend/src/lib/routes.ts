@@ -305,19 +305,19 @@ export class Routes {
     uploadMetadata: RequestHandler = async (req: Request, res: Response, next) => {
       const body = req.body
       if (!('filename' in body) || !body.filename) {
-        next({ status: 400, errors: ['Request is missing filename']})
+        next({ status: 422, errors: ['Request is missing filename']})
         return
       }
       if (!('hashSum' in body) || body.hashSum.length != 64) {
-        next({ status: 400, errors: ['Request is missing hashSum or hashSum is invalid']})
+        next({ status: 422, errors: ['Request is missing hashSum or hashSum is invalid']})
         return
       }
       if (!('measurementDate' in body) || !body.measurementDate || !isValidDate(body.measurementDate)) {
-        next({ status: 400, errors: ['Request is missing measurementDate or measurementDate is invalid']})
+        next({ status: 422, errors: ['Request is missing measurementDate or measurementDate is invalid']})
         return
       }
       if (!('product' in body) || !body.filename) {
-        next({ status: 400, errors: ['Request is missing product']})
+        next({ status: 422, errors: ['Request is missing product']})
         return
       }
 
@@ -326,10 +326,10 @@ export class Routes {
       const credentials = auth.split(' ')[1]
       const username = Buffer.from(credentials, 'base64').toString('utf-8').split(':')[0]
       const site = await this.siteRepo.findOne(username)
-      if (site == undefined) return next({ status: 400, errors: [ 'Invalid site id']})
+      if (site == undefined) return next({ status: 422, errors: [ 'Invalid site id']})
 
       const product = await this.productRepo.findOne(body.product)
-      if (product == undefined) return next({ status: 400, errors: [ 'Invalid product']})
+      if (product == undefined) return next({ status: 422, errors: [ 'Invalid product']})
 
       const uploadedMetadata =
         new UploadedMetadata(body.hashSum, body.filename, body.measurementDate, site, product, Status.CREATED)

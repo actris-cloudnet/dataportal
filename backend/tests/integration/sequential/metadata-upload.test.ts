@@ -47,52 +47,52 @@ describe('PUT /metadata', () => {
     return expect(axios.put(validUrl, validMetadata, config)).resolves.toMatchObject({ status: 200})
   })
 
-  test('responds with 400 on missing filename', async () => {
+  test('responds with 422 on missing filename', async () => {
     const payload = {...validMetadata}
     delete payload.filename
-    return expect(axios.put(validUrl, payload, config)).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.put(validUrl, payload, config)).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
-  test('responds with 400 on missing measurementDate', async () => {
+  test('responds with 422 on missing measurementDate', async () => {
     const payload = {...validMetadata}
     delete payload.measurementDate
-    return expect(axios.put(validUrl, payload, config)).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.put(validUrl, payload, config)).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
-  test('responds with 400 on invalid measurementDate', async () => {
+  test('responds with 422 on invalid measurementDate', async () => {
     let payload = {...validMetadata}
     payload.measurementDate = 'July'
-    return expect(axios.put(validUrl, payload, config)).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.put(validUrl, payload, config)).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
-  test('responds with 400 on missing hashSum', async () => {
+  test('responds with 422 on missing hashSum', async () => {
     const payload = {...validMetadata}
     delete payload.measurementDate
-    return expect(axios.put(validUrl, payload, config)).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.put(validUrl, payload, config)).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
-  test('responds with 400 on invalid hashSum', async () => {
+  test('responds with 422 on invalid hashSum', async () => {
     let payload = {...validMetadata}
     payload.hashSum = '293948'
-    return expect(axios.put(validUrl, payload, config)).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.put(validUrl, payload, config)).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
-  test('responds with 400 on missing product', async () => {
+  test('responds with 422 on missing product', async () => {
     const payload = {...validMetadata}
     delete payload.product
-    return expect(axios.put(validUrl, payload, config)).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.put(validUrl, payload, config)).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
-  test('responds with 400 on invalid product', async () => {
+  test('responds with 422 on invalid product', async () => {
     let payload = {...validMetadata}
     payload.product = 'kukko'
-    return expect(axios.put(validUrl, payload, config)).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.put(validUrl, payload, config)).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
-  test('responds with 400 on invalid username / station id', async () => {
+  test('responds with 422 on invalid username / station id', async () => {
     let invalidConfig = {...config}
     invalidConfig.auth.username = 'nonexistent'
-    return expect(axios.put(validUrl, validMetadata, config)).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.put(validUrl, validMetadata, config)).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
   test('responds with 400 on missing authorization header', async () => {
