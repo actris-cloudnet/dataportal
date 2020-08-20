@@ -54,7 +54,6 @@ import * as xmlparser from 'express-xml-bodyparser'
   app.get('/api/products', routes.products)
 
   // public (for sites)
-  app.post('/protected/upload-metadata', express.json(), routes.uploadMetadata)
 
   // public/internal
   app.get('/api/status', routes.status)
@@ -76,6 +75,7 @@ import * as xmlparser from 'express-xml-bodyparser'
   app.put('/files/:uuid', routes.submit)
   app.get('/metadata/:hash', routes.checkMetadataExists)
   app.post('/metadata/:hash', express.json(), routes.updateMetadata)
+  app.put('/metadata/:hash', express.json(), routes.uploadMetadata)
   app.put('/visualizations/:filename', express.json(), routes.putVisualization)
 
   app.use(errorHandler)

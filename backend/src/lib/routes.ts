@@ -334,9 +334,9 @@ export class Routes {
       const uploadedMetadata =
         new UploadedMetadata(body.hashSum, body.filename, body.measurementDate, site, product, Status.CREATED)
       return this.uploadedMetadataRepo.insert(uploadedMetadata)
-        .then(() => res.sendStatus(200))
+        .then(() => res.sendStatus(201))
         .catch(err => err.code == PG_UNIQUE_CONSTRAINT_VIOLATION
-          ? next({ status: 400, errors: ['Metadata with this hash sum already exists']})
+          ? res.sendStatus(200)
           : next({ status: 500, errors: err}))
     }
 
