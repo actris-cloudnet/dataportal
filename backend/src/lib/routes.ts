@@ -304,6 +304,7 @@ export class Routes {
 
     uploadMetadata: RequestHandler = async (req: Request, res: Response, next) => {
       const body = req.body
+      console.log(body)
       if (!('filename' in body) || !body.filename) {
         next({ status: 422, errors: ['Request is missing filename']})
         return
@@ -316,20 +317,20 @@ export class Routes {
         next({ status: 422, errors: ['Request is missing measurementDate or measurementDate is invalid']})
         return
       }
-      if (!('product' in body) || !body.filename) {
+      if (!('product' in body) || !body.product) {
         next({ status: 422, errors: ['Request is missing product']})
         return
       }
+      if (!('site' in body) || !body.site) {
+        next({ status: 422, errors: ['Request is missing site']})
+        return
+      }
 
-      const auth = req.headers['authorization']
-      if (auth == undefined) return next({ status: 400, errors: [ 'Authorization header missing']})
-      const credentials = auth.split(' ')[1]
-      const username = Buffer.from(credentials, 'base64').toString('utf-8').split(':')[0]
-      const site = await this.siteRepo.findOne(username)
-      if (site == undefined) return next({ status: 422, errors: [ 'Invalid site id']})
+      const site = await this.siteRepo.findOne(body.site)
+      if (site == undefined) return next({ status: 422, errors: [ 'Unknown site']})
 
       const product = await this.productRepo.findOne(body.product)
-      if (product == undefined) return next({ status: 422, errors: [ 'Invalid product']})
+      if (product == undefined) return next({ status: 422, errors: [ 'Unknown product']})
 
       const uploadedMetadata =
         new UploadedMetadata(body.hashSum, body.filename, body.measurementDate, site, product, Status.CREATED)
