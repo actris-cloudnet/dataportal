@@ -1,10 +1,10 @@
-import {File} from '../../../src/entity/File'
 import axios from 'axios'
-import {Connection, createConnection, Repository} from 'typeorm/index'
-import {backendPrivateUrl, backendProtectedUrl} from '../../lib'
+import {Connection, createConnection} from 'typeorm/index'
+import {backendPrivateUrl} from '../../lib'
+import {Status} from '../../../src/entity/UploadedMetadata'
 
 let conn: Connection
-let repo: Repository<File>
+let repo: any
 
 const url = `${backendPrivateUrl}metadata/`
 const validMetadata = {
@@ -37,7 +37,15 @@ describe('PUT /metadata', () => {
     return expect(repo.findOneOrFail(validMetadata.hashSum)).resolves.toBeTruthy()
   })
 
-  test('responds with 200 on existing hashsum', async () => {
+  test('responds with 201 on existing hashsum with created status', async () => {
+    await axios.put(validUrl, validMetadata)
+    return expect(axios.put(validUrl, validMetadata)).resolves.toMatchObject({ status: 201})
+  })
+
+  test('responds with 200 on existing hashsum with uploaded status', async () => {
+    let uploadedMetadata = {...validMetadata, ...{hash: validMetadata.hashSum, status: Status.UPLOADED}}
+    delete uploadedMetadata.hashSum
+    await repo.save(uploadedMetadata)
     await axios.put(validUrl, validMetadata)
     return expect(axios.put(validUrl, validMetadata)).resolves.toMatchObject({ status: 200})
   })

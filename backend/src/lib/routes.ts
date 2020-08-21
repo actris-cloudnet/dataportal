@@ -304,7 +304,6 @@ export class Routes {
 
     uploadMetadata: RequestHandler = async (req: Request, res: Response, next) => {
       const body = req.body
-      console.log(body)
       if (!('filename' in body) || !body.filename) {
         next({ status: 422, errors: ['Request is missing filename']})
         return
@@ -332,8 +331,16 @@ export class Routes {
       const product = await this.productRepo.findOne(body.product)
       if (product == undefined) return next({ status: 422, errors: [ 'Unknown product']})
 
+      // Remove existing metadata if it's status is created
+      const existingCreatedMetadata = await this.uploadedMetadataRepo.createQueryBuilder('uploaded_metadata')
+        .where('uploaded_metadata.id = :hashSum', body)
+        .where('uploaded_metadata.status = :status', { status: Status.CREATED })
+        .getOne()
+      if (existingCreatedMetadata != undefined) await this.uploadedMetadataRepo.remove(existingCreatedMetadata)
+
       const uploadedMetadata =
         new UploadedMetadata(body.hashSum, body.filename, body.measurementDate, site, product, Status.CREATED)
+
       return this.uploadedMetadataRepo.insert(uploadedMetadata)
         .then(() => res.sendStatus(201))
         .catch(err => rowExists(err)
