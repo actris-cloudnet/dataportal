@@ -24,7 +24,4 @@ export class Product {
 
     @OneToMany(_ => UploadedMetadata, uploadedMetadata => uploadedMetadata.site)
     uploadedMetadatas!: UploadedMetadata[]
-
-    @OneToMany(_ => Instrument, instrument => instrument.product)
-    instruments!: Instrument[]
 }

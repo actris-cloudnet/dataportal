@@ -148,7 +148,7 @@ export class Routes {
   }
 
   instruments: RequestHandler = async (_req: Request, res: Response, next) => {
-    fetchAll<Product>(this.conn, Instrument, {relations: ['product']})
+    fetchAll<Product>(this.conn, Instrument)
       .then(result => res.send(result))
       .catch(err => next({ status: 500, errors: err }))
   }
