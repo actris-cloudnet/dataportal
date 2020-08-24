@@ -1,6 +1,6 @@
 import {Column, Entity, ManyToOne, PrimaryColumn} from 'typeorm/index'
 import {Site} from './Site'
-import {Product} from './Product'
+import {Instrument} from './Instrument'
 
 export enum Status {
   CREATED = 'created',
@@ -29,15 +29,15 @@ export class UploadedMetadata {
   @ManyToOne(_ => Site, site => site.uploadedMetadatas)
   site!: Site
 
-  @ManyToOne(_ => Product, product => product.uploadedMetadatas)
-  product!: Product
+  @ManyToOne(_ => Instrument, instrument => instrument.uploadedMetadatas)
+  instrument!: Instrument
 
-  constructor(hash: string, filename: string, date: string, site: Site, product: Product, status: Status) {
+  constructor(hash: string, filename: string, date: string, site: Site, instrument: Instrument, status: Status) {
     this.hash = hash
     this.filename = filename
     this.measurementDate= new Date(date)
     this.site = site
-    this.product = product
+    this.instrument = instrument
     this.status = status
   }
 }

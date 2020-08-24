@@ -31,6 +31,7 @@ export class Routes {
     this.visualizationRepo = this.conn.getRepository(Visualization)
     this.productVariableRepo = this.conn.getRepository(ProductVariable)
     this.uploadedMetadataRepo = this.conn.getRepository(UploadedMetadata)
+    this.instrumentRepo = this.conn.getRepository(Instrument)
   }
 
   private conn: Connection
@@ -42,6 +43,7 @@ export class Routes {
   private visualizationRepo: Repository<Visualization>
   private productVariableRepo: Repository<ProductVariable>
   private uploadedMetadataRepo: Repository<UploadedMetadata>
+  private instrumentRepo: Repository<Instrument>
 
   private hideTestDataFromNormalUsers = <T>(dbQuery: SelectQueryBuilder<T>, req: Request): SelectQueryBuilder<T> =>
     req.query.developer !== undefined ? dbQuery : dbQuery.andWhere('not site.isTestSite')
@@ -323,8 +325,8 @@ export class Routes {
         next({ status: 422, errors: ['Request is missing measurementDate or measurementDate is invalid']})
         return
       }
-      if (!('product' in body) || !body.product) {
-        next({ status: 422, errors: ['Request is missing product']})
+      if (!('instrument' in body) || !body.instrument) {
+        next({ status: 422, errors: ['Request is missing instrument']})
         return
       }
       if (!('site' in body) || !body.site) {
@@ -335,8 +337,8 @@ export class Routes {
       const site = await this.siteRepo.findOne(body.site)
       if (site == undefined) return next({ status: 422, errors: [ 'Unknown site']})
 
-      const product = await this.productRepo.findOne(body.product)
-      if (product == undefined) return next({ status: 422, errors: [ 'Unknown product']})
+      const instrument = await this.instrumentRepo.findOne(body.instrument)
+      if (instrument == undefined) return next({ status: 422, errors: [ 'Unknown instrument']})
 
       // Remove existing metadata if it's status is created
       const existingCreatedMetadata = await this.uploadedMetadataRepo.createQueryBuilder('uploaded_metadata')
@@ -346,7 +348,7 @@ export class Routes {
       if (existingCreatedMetadata != undefined) await this.uploadedMetadataRepo.remove(existingCreatedMetadata)
 
       const uploadedMetadata =
-        new UploadedMetadata(body.hashSum, body.filename, body.measurementDate, site, product, Status.CREATED)
+        new UploadedMetadata(body.hashSum, body.filename, body.measurementDate, site, instrument, Status.CREATED)
 
       return this.uploadedMetadataRepo.insert(uploadedMetadata)
         .then(() => res.sendStatus(201))
@@ -361,7 +363,7 @@ export class Routes {
 
       this.uploadedMetadataRepo.createQueryBuilder('uploaded_metadata')
         .leftJoinAndSelect('uploaded_metadata.site', 'site')
-        .leftJoinAndSelect('uploaded_metadata.product', 'product')
+        .leftJoinAndSelect('uploaded_metadata.instrument', 'instrument')
         .where('uploaded_metadata.hash like :hash', {hash: `${req.params.hash}%`})
         .getOne()
         .then(uploadedMetadata => {

@@ -11,7 +11,7 @@ const validMetadata = {
   filename: 'file1.LV1',
   measurementDate: '2020-08-11',
   hashSum: 'dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b5',
-  product: 'radar',
+  instrument: 'mira',
   site: 'granada'
 }
 const validUrl = `${url}${validMetadata.hashSum}`
@@ -80,15 +80,15 @@ describe('PUT /metadata', () => {
     return expect(axios.put(validUrl, payload)).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
-  test('responds with 422 on missing product', async () => {
+  test('responds with 422 on missing instrument', async () => {
     const payload = {...validMetadata}
-    delete payload.product
+    delete payload.instrument
     return expect(axios.put(validUrl, payload)).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
-  test('responds with 422 on invalid product', async () => {
+  test('responds with 422 on invalid instrument', async () => {
     let payload = {...validMetadata}
-    payload.product = 'kukko'
+    payload.instrument = 'kukko'
     return expect(axios.put(validUrl, payload)).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 

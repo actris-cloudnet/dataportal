@@ -10,9 +10,16 @@ describe('GET /metadata', () => {
     'measurementDate': '2020-08-11',
     'site': {
       'id': 'granada',
+      'humanReadableName': 'Granada',
+      'latitude': 37.164,
+      'longitude': -3.605,
+      'altitude': 680,
+      'gaw': 'UGR',
+      'country': 'Spain',
+      'isTestSite': true
     },
-    'product': {
-      'id': 'radar',
+    'instrument': {
+      'id': 'mira'
     },
     'status': 'created'
   }
