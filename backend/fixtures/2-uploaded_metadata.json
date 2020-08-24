@@ -5,12 +5,12 @@
   "site": "granada",
   "instrument": "mira",
   "status": "created"
-},
-{
-  "filename": "file2.LV1",
-  "measurementDate": "2020-08-11",
-  "hash": "ac460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b1",
-  "site": "granada",
-  "instrument": "rpg-fmcw-94",
-  "status": "created"
-}]
+},{
+  "filename": "file3.LV1",
+  "measurementDate": "2020-08-12",
+  "hash": "ab460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998ab",
+  "site": "bucharest",
+  "instrument": "chm15k",
+  "status": "processed"
+}
+]

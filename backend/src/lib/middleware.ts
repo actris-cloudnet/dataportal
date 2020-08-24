@@ -4,7 +4,7 @@ import validator from 'validator'
 import { Site } from '../entity/Site'
 import { Product } from '../entity/Product'
 import { Connection } from 'typeorm'
-import {fetchAll, isValidDate} from '.'
+import {fetchAll, isValidDate, toArray, tomorrow} from '.'
 
 export class Middleware {
 
@@ -69,13 +69,6 @@ export class Middleware {
 
   filesQueryAugmenter: RequestHandler = async (req, _res, next) => {
     const query = req.query as any
-    const toArray = (obj: string | Array<string>): Array<string> =>
-      (typeof obj == 'string') ? [obj] : obj
-    const tomorrow = () => {
-      const tomorrow = new Date()
-      tomorrow.setDate(tomorrow.getDate() + 1)
-      return tomorrow
-    }
     const defaultLocation = async () => (await fetchAll<Site>(this.conn, Site)).map(site => site.id)
     const defaultProduct = async () => (await fetchAll<Product>(this.conn, Product)).map(product => product.id)
     const defaultDateFrom = () => new Date('1970-01-01')

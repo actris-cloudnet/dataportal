@@ -4,7 +4,7 @@ import { Product } from '../entity/Product'
 import { UploadedMetadata, Status } from '../entity/UploadedMetadata'
 import { SelectQueryBuilder, Connection, Repository } from 'typeorm'
 import { Request, Response, RequestHandler } from 'express'
-import {dateToUTCString, isValidDate, linkFile, rowExists} from '.'
+import {dateToUTCString, isValidDate, linkFile, rowExists, toArray, tomorrow} from '.'
 import { join, basename } from 'path'
 import archiver = require('archiver')
 import { createReadStream, promises as fsp, constants as fsconst } from 'graceful-fs'
@@ -357,7 +357,7 @@ export class Routes {
           : next({ status: 500, errors: err}))
     }
 
-    checkMetadataExists: RequestHandler = async (req: Request, res: Response, next) => {
+    getMetadata: RequestHandler = async (req: Request, res: Response, next) => {
       if (!req.params.hash || req.params.hash.length < 18)
         return next({ status: 400, errors: ['No hash provided or hash length less than 18 characters']})
 
@@ -372,6 +372,29 @@ export class Routes {
         })
         .catch(err => next({ status: 500, errors: err}))
     }
+
+  listMetadata: RequestHandler = async (req: Request, res: Response, next) => {
+    const query: any = {
+      site: req.query.site || (await fetchAll<Site>(this.conn, Site)).map(site => site.id),
+      status: req.query.status || [Status.UPLOADED, Status.CREATED, Status.PROCESSED],
+      dateFrom: req.query.dateFrom || '1970-01-01',
+      dateTo: req.query.dateTo || tomorrow()
+    }
+    query.site = toArray(query.site)
+    query.status = toArray(query.status)
+
+    console.log(query)
+    this.uploadedMetadataRepo.createQueryBuilder('um')
+      .leftJoinAndSelect('um.site', 'site')
+      .leftJoinAndSelect('um.instrument', 'instrument')
+      .where('um.measurementDate >= :dateFrom AND um.measurementDate <= :dateTo', query)
+      .andWhere('site.id IN (:...site)', query)
+      .andWhere('um.status IN (:...status)', query)
+      .orderBy('um.measurementDate', 'ASC')
+      .getMany()
+      .then(uploadedMetadata => res.send(uploadedMetadata))
+      .catch(err => {console.log(err);next({status: 500, errors: err})})
+  }
 
   updateMetadata: RequestHandler = async (req: Request, res: Response, next) => {
     const partialEntity = {...req.body, ...{hash: req.params.hash}}

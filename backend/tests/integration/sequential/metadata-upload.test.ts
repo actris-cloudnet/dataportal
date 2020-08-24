@@ -16,20 +16,20 @@ const validMetadata = {
 }
 const validUrl = `${url}${validMetadata.hashSum}`
 
+beforeAll(async () => {
+  conn = await createConnection('test')
+  repo = conn.getRepository('uploaded_metadata')
+  return
+})
+
+afterAll(async () => {
+  await repo.delete({})
+  return conn.close()
+})
+
 describe('PUT /metadata', () => {
-  beforeAll(async () => {
-    conn = await createConnection('test')
-    repo = conn.getRepository('uploaded_metadata')
-    return
-  })
-
-
   beforeEach(() => {
     return repo.delete({})
-  })
-
-  afterAll(() => {
-    return conn.close()
   })
 
   test('inserts new metadata', async () => {
@@ -102,5 +102,27 @@ describe('PUT /metadata', () => {
     let payload = {...validMetadata}
     payload.site = 'kukko'
     return expect(axios.put(validUrl, payload)).rejects.toMatchObject({ response: { data: { status: 422}}})
+  })
+})
+
+describe('POST /metadata', () => {
+  beforeAll(async () => repo.save({
+    'filename': 'file2.LV1',
+    'measurementDate': '2020-08-11',
+    'hash': 'ac460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b1',
+    'site': 'granada',
+    'instrument': 'rpg-fmcw-94',
+    'status': 'created'
+  }))
+  const postMetadata = {
+    'hash': 'ac460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b1',
+    'status': 'uploaded'
+  }
+
+  const postUrl = `${backendPrivateUrl}metadata/${postMetadata.hash}`
+
+  it('changes corresponding fields in metadata', async () => {
+    await expect(axios.post(postUrl, postMetadata)).resolves.toMatchObject({ status: 200 })
+    await expect(axios.get(postUrl)).resolves.toMatchObject({ status: 200, data: postMetadata })
   })
 })

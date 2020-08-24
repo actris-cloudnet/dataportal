@@ -34,6 +34,14 @@ export function linkFile(filename: string, linkPath: string) {
 
 export const isValidDate = (obj: any) => !isNaN(new Date(obj).getDate())
 
+export const tomorrow = () => {
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  return tomorrow
+}
+
+export const toArray = (obj: string | Array<string>): Array<string> =>
+  (typeof obj == 'string') ? [obj] : obj
 
 export const rowExists = (err: any) => {
   const PG_UNIQUE_CONSTRAINT_VIOLATION = '23505'

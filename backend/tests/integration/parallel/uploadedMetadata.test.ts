@@ -1,35 +1,25 @@
 import { backendPrivateUrl } from '../../lib'
 import axios from 'axios'
+import {readResources} from '../../../../shared/lib'
 
-describe('GET /metadata', () => {
-  const url = `${backendPrivateUrl}metadata/`
+const url = `${backendPrivateUrl}metadata/`
 
-  const expected = {
-    'hash': 'dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b5',
-    'filename': 'file1.LV1',
-    'measurementDate': '2020-08-11',
-    'site': {
-      'id': 'granada',
-      'humanReadableName': 'Granada',
-      'latitude': 37.164,
-      'longitude': -3.605,
-      'altitude': 680,
-      'gaw': 'UGR',
-      'country': 'Spain',
-      'isTestSite': true
-    },
-    'instrument': {
-      'id': 'mira'
-    },
-    'status': 'created'
-  }
+let responses: any
+let expected: any
+
+beforeAll(async () => {
+  responses = (await readResources())['uploaded-metadata']
+  expected = responses[0]
+})
+
+describe('GET /metadata/:hash', () => {
 
   it('responds with 200 when metadata is found', async () => {
     const validHash = expected.hash
     return expect(axios.get(`${url}${validHash}`)).resolves.toMatchObject({ status: 200, data: expected })
   })
 
-  it('responds with 200 when metadata is not found with shorter hash', async () => {
+  it('responds with 200 when metadata is found with shorter hash', async () => {
     const validHash = 'dc460da4ad72c48223'
     return expect(axios.get(`${url}${validHash}`)).resolves.toMatchObject({ status: 200, data: expected })
   })
@@ -46,16 +36,20 @@ describe('GET /metadata', () => {
 
 })
 
-describe('POST /metadata', () => {
-  const postMetadata = {
-    'hash': 'ac460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b1',
-    'status': 'uploaded'
-  }
+describe('GET /metadata', () => {
+  it('without arguments responds with a list of all uploaded metadata', async () => {
+    return expect(axios.get(`${url}`)).resolves.toMatchObject({status: 200, data: responses})
+  })
 
-  const postUrl = `${backendPrivateUrl}metadata/${postMetadata.hash}`
+  it('responds with correct object when filtering with date', async () => {
+    return expect(axios.get(`${url}`, {params: {dateFrom: '2020-08-11', dateTo: '2020-08-11'}})).resolves.toMatchObject({status: 200, data: [responses[0]]})
+  })
 
-  it('changes corresponding fields in metadata', async () => {
-    await expect(axios.post(postUrl, postMetadata)).resolves.toMatchObject({ status: 200 })
-    await expect(axios.get(postUrl)).resolves.toMatchObject({ status: 200, data: postMetadata })
+  it('responds with correct object when filtering with site', async () => {
+    return expect(axios.get(`${url}`, {params: {site: 'bucharest'}})).resolves.toMatchObject({status: 200, data: [responses[1]]})
+  })
+
+  it('responds with correct object when filtering with status', async () => {
+    return expect(axios.get(`${url}`, {params: {status: 'processed'}})).resolves.toMatchObject({status: 200, data: [responses[1]]})
   })
 })

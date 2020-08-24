@@ -4,7 +4,8 @@ import {Instrument} from './Instrument'
 
 export enum Status {
   CREATED = 'created',
-  UPLOADED = 'uploaded'
+  UPLOADED = 'uploaded',
+  PROCESSED = 'processed'
 }
 
 @Entity()
