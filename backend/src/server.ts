@@ -52,6 +52,7 @@ import * as xmlparser from 'express-xml-bodyparser'
   app.get('/api/files/:uuid', routes.file)
   app.get('/api/sites', routes.sites)
   app.get('/api/products', routes.products)
+  app.get('/api/instruments', routes.instruments)
 
   // public (for sites)
 

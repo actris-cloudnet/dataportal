@@ -16,6 +16,7 @@ import {VisualizationResponse} from '../entity/VisualizationResponse'
 import {ProductVariable} from '../entity/ProductVariable'
 import {LatestVisualizationDateResponse} from '../entity/LatestVisualizationDateResponse'
 import {SearchFileResponse} from '../entity/SearchFileResponse'
+import {Instrument} from '../entity/Instrument'
 
 
 export class Routes {
@@ -140,6 +141,12 @@ export class Routes {
 
   productVariables: RequestHandler = async (_req: Request, res: Response, next) => {
     fetchAll<Product>(this.conn, Product, {relations: ['variables']})
+      .then(result => res.send(result))
+      .catch(err => next({ status: 500, errors: err }))
+  }
+
+  instruments: RequestHandler = async (_req: Request, res: Response, next) => {
+    fetchAll<Product>(this.conn, Instrument, {relations: ['product']})
       .then(result => res.send(result))
       .catch(err => next({ status: 500, errors: err }))
   }

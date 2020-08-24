@@ -1,0 +1,58 @@
+[
+  {
+    "id": "mira",
+    "product": {
+      "id": "radar",
+      "humanReadableName": "Radar",
+      "level": "1"
+    }
+  },
+  {
+    "id": "rpg-fmcw-94",
+    "product": {
+      "id": "radar",
+      "humanReadableName": "Radar",
+      "level": "1"
+    }
+  },
+  {
+    "id": "ct25k",
+    "product": {
+      "id": "lidar",
+      "humanReadableName": "Lidar",
+      "level": "1"
+    }
+  },
+  {
+    "id": "cl31",
+    "product": {
+      "id": "lidar",
+      "humanReadableName": "Lidar",
+      "level": "1"
+    }
+  },
+  {
+    "id": "cl51",
+    "product": {
+      "id": "lidar",
+      "humanReadableName": "Lidar",
+      "level": "1"
+    }
+  },
+  {
+    "id": "chm15k",
+    "product": {
+      "id": "lidar",
+      "humanReadableName": "Lidar",
+      "level": "1"
+    }
+  },
+  {
+    "id": "hatpro",
+    "product": {
+      "id": "mwr",
+      "humanReadableName": "Microwave radiometer",
+      "level": "1"
+    }
+  }
+]
