@@ -366,11 +366,11 @@ export class Routes {
 
   updateMetadata: RequestHandler = async (req: Request, res: Response, next) => {
     const partialEntity = {...req.body, ...{hash: req.params.hash}}
-    console.log(partialEntity)
     this.uploadedMetadataRepo.save(partialEntity)
       .then(uploadedMetadata => res.send(uploadedMetadata))
       .catch(err => { console.log(err); next({ status: 500, errors: err})})
   }
+
 }
 
 function parsePid(attributes: Array<any>): string {
