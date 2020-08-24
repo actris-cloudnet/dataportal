@@ -22,10 +22,21 @@ describe('GET /metadata', () => {
     return expect(axios.get(`${url}${validHash}`)).resolves.toMatchObject({ status: 200, data: expected })
   })
 
+  it('responds with 200 when metadata is not found with shorter hash', async () => {
+    const validHash = 'dc460da4ad72c48223'
+    return expect(axios.get(`${url}${validHash}`)).resolves.toMatchObject({ status: 200, data: expected })
+  })
+
   it('responds with 404 when metadata is not found', async () => {
     const invalidHash = 'dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b4'
     return expect(axios.get(`${url}${invalidHash}`)).rejects.toMatchObject({ response: { data: { status: 404 }}})
   })
+
+  it('responds with 400 when attempting to find metadata with too short hash', async () => {
+    const invalidHash = 'dc460da4ad72c4822'
+    return expect(axios.get(`${url}${invalidHash}`)).rejects.toMatchObject({ response: { data: { status: 400 }}})
+  })
+
 })
 
 describe('POST /metadata', () => {

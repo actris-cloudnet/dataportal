@@ -349,7 +349,14 @@ export class Routes {
     }
 
     checkMetadataExists: RequestHandler = async (req: Request, res: Response, next) => {
-      this.uploadedMetadataRepo.findOne(req.params.hash, { relations: ['site', 'product']})
+      if (!req.params.hash || req.params.hash.length < 18)
+        return next({ status: 400, errors: ['No hash provided or hash length less than 18 characters']})
+
+      this.uploadedMetadataRepo.createQueryBuilder('uploaded_metadata')
+        .leftJoinAndSelect('uploaded_metadata.site', 'site')
+        .leftJoinAndSelect('uploaded_metadata.product', 'product')
+        .where('uploaded_metadata.hash like :hash', {hash: `${req.params.hash}%`})
+        .getOne()
         .then(uploadedMetadata => {
           if (uploadedMetadata == undefined) return next({ status: 404, errors: ['No metadata was found with provided hash']})
           res.send(uploadedMetadata)
