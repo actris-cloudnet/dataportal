@@ -4,7 +4,7 @@ export class AddStatusFieldToUploadedMetadata1597834096053 implements MigrationI
     name = 'AddStatusFieldToUploadedMetadata1597834096053'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`CREATE TYPE "uploaded_metadata_status_enum" AS ENUM('created', 'uploaded')`);
+        await queryRunner.query(`CREATE TYPE "uploaded_metadata_status_enum" AS ENUM('created', 'uploaded', 'processed')`);
         await queryRunner.query(`ALTER TABLE "uploaded_metadata" ADD "status" "uploaded_metadata_status_enum" NOT NULL DEFAULT 'created'`);
     }
 
