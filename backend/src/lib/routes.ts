@@ -312,6 +312,7 @@ export class Routes {
       })
 
     uploadMetadata: RequestHandler = async (req: Request, res: Response, next) => {
+      const id = req.params.hash
       const body = req.body
       if (!('filename' in body) || !body.filename) {
         next({ status: 422, errors: ['Request is missing filename']})
@@ -319,6 +320,10 @@ export class Routes {
       }
       if (!('hashSum' in body) || body.hashSum.length != 64) {
         next({ status: 422, errors: ['Request is missing hashSum or hashSum is invalid']})
+        return
+      }
+      if (id != body.hashSum.substr(0, 18)) {
+        next({ status: 400, errors: ['Invalid ID. ID must consist of the 18 first characters of hash']})
         return
       }
       if (!('measurementDate' in body) || !body.measurementDate || !isValidDate(body.measurementDate)) {
@@ -342,13 +347,19 @@ export class Routes {
 
       // Remove existing metadata if it's status is created
       const existingCreatedMetadata = await this.uploadedMetadataRepo.createQueryBuilder('uploaded_metadata')
-        .where('uploaded_metadata.id = :hashSum', body)
+        .where('uploaded_metadata.id = :id', { id })
         .where('uploaded_metadata.status = :status', { status: Status.CREATED })
         .getOne()
       if (existingCreatedMetadata != undefined) await this.uploadedMetadataRepo.remove(existingCreatedMetadata)
 
-      const uploadedMetadata =
-        new UploadedMetadata(body.hashSum, body.filename, body.measurementDate, site, instrument, Status.CREATED)
+      const uploadedMetadata = new UploadedMetadata(
+        id,
+        body.hashSum,
+        body.filename,
+        body.measurementDate,
+        site,
+        instrument,
+        Status.CREATED)
 
       return this.uploadedMetadataRepo.insert(uploadedMetadata)
         .then(() => res.sendStatus(201))
@@ -358,16 +369,12 @@ export class Routes {
     }
 
     getMetadata: RequestHandler = async (req: Request, res: Response, next) => {
-      if (!req.params.hash || req.params.hash.length < 18)
-        return next({ status: 400, errors: ['No hash provided or hash length less than 18 characters']})
+      if (req.params.hash.length != 18)
+        return next({ status: 400, errors: ['ID length must be exactly 18 characters']})
 
-      this.uploadedMetadataRepo.createQueryBuilder('uploaded_metadata')
-        .leftJoinAndSelect('uploaded_metadata.site', 'site')
-        .leftJoinAndSelect('uploaded_metadata.instrument', 'instrument')
-        .where('uploaded_metadata.hash like :hash', {hash: `${req.params.hash}%`})
-        .getOne()
+      this.uploadedMetadataRepo.findOne(req.params.hash, { relations: ['site', 'instrument'] })
         .then(uploadedMetadata => {
-          if (uploadedMetadata == undefined) return next({ status: 404, errors: ['No metadata was found with provided hash']})
+          if (uploadedMetadata == undefined) return next({ status: 404, errors: ['No metadata was found with provided id']})
           res.send(uploadedMetadata)
         })
         .catch(err => next({ status: 500, errors: err}))
@@ -397,9 +404,9 @@ export class Routes {
   }
 
   updateMetadata: RequestHandler = async (req: Request, res: Response, next) => {
-    this.uploadedMetadataRepo.update({hash: req.params.hash}, req.body)
+    this.uploadedMetadataRepo.update({id: req.params.hash}, req.body)
       .then(updatedResults => {
-        if (updatedResults.affected == 0) return next({ status: 404, errors: ['No metadata was found with provided hash']})
+        if (updatedResults.affected == 0) return next({ status: 404, errors: ['No metadata was found with provided id']})
         res.send(updatedResults)
       })
       .catch(err => { console.log(err); next({ status: 500, errors: err})})

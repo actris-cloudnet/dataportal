@@ -14,7 +14,9 @@ const validMetadata = {
   instrument: 'mira',
   site: 'granada'
 }
-const validUrl = `${url}${validMetadata.hashSum}`
+const validId = validMetadata.hashSum.substr(0, 18)
+const validUrl = `${url}${validId}`
+
 
 beforeAll(async () => {
   conn = await createConnection('test')
@@ -34,7 +36,7 @@ describe('PUT /metadata', () => {
 
   test('inserts new metadata', async () => {
     await expect(axios.put(validUrl, validMetadata)).resolves.toMatchObject({status: 201})
-    return expect(repo.findOneOrFail(validMetadata.hashSum)).resolves.toBeTruthy()
+    return expect(repo.findOneOrFail(validId)).resolves.toBeTruthy()
   })
 
   test('responds with 201 on existing hashsum with created status', async () => {
@@ -43,11 +45,16 @@ describe('PUT /metadata', () => {
   })
 
   test('responds with 200 on existing hashsum with uploaded status', async () => {
-    let uploadedMetadata = {...validMetadata, ...{hash: validMetadata.hashSum, status: Status.UPLOADED}}
+    let uploadedMetadata = {...validMetadata, ...{hash: validMetadata.hashSum, status: Status.UPLOADED, id: validId}}
     delete uploadedMetadata.hashSum
     await repo.save(uploadedMetadata)
     await axios.put(validUrl, validMetadata)
     return expect(axios.put(validUrl, validMetadata)).resolves.toMatchObject({ status: 200})
+  })
+
+  test('responds with 400 on invalid id', async () => {
+    const invalidUrl = `${url}1234567890123456789`
+    return expect(axios.put(invalidUrl, validMetadata)).rejects.toMatchObject({ response: { data: { status: 400}}})
   })
 
   test('responds with 422 on missing filename', async () => {
@@ -106,7 +113,13 @@ describe('PUT /metadata', () => {
 })
 
 describe('POST /metadata', () => {
+  const postMetadata = {
+    'hash': 'ac460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b1',
+    'status': 'uploaded'
+  }
+  const id = postMetadata.hash.substr(0, 18)
   beforeAll(async () => repo.save({
+    id,
     'filename': 'file2.LV1',
     'measurementDate': '2020-08-11',
     'hash': 'ac460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b1',
@@ -114,12 +127,8 @@ describe('POST /metadata', () => {
     'instrument': 'rpg-fmcw-94',
     'status': 'created'
   }))
-  const postMetadata = {
-    'hash': 'ac460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b1',
-    'status': 'uploaded'
-  }
 
-  const postUrl = `${backendPrivateUrl}metadata/${postMetadata.hash}`
+  const postUrl = `${backendPrivateUrl}metadata/${id}`
 
   it('changes corresponding fields in metadata', async () => {
     await expect(axios.post(postUrl, postMetadata)).resolves.toMatchObject({ status: 200 })

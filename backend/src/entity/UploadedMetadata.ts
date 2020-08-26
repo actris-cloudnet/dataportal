@@ -1,4 +1,4 @@
-import {Column, Entity, ManyToOne, PrimaryColumn} from 'typeorm/index'
+import {Column, Entity, ManyToOne, PrimaryColumn, Unique} from 'typeorm/index'
 import {Site} from './Site'
 import {Instrument} from './Instrument'
 
@@ -11,7 +11,10 @@ export enum Status {
 @Entity()
 export class UploadedMetadata {
 
-  @PrimaryColumn()
+  @PrimaryColumn({type: 'varchar', length: 18, unique: true})
+  id!: string
+
+  @Column({type: 'varchar', length: 64, unique: true})
   hash!: string
 
   @Column()
@@ -33,7 +36,8 @@ export class UploadedMetadata {
   @ManyToOne(_ => Instrument, instrument => instrument.uploadedMetadatas)
   instrument!: Instrument
 
-  constructor(hash: string, filename: string, date: string, site: Site, instrument: Instrument, status: Status) {
+  constructor(id: string, hash: string, filename: string, date: string, site: Site, instrument: Instrument, status: Status) {
+    this.id = id
     this.hash = hash
     this.filename = filename
     this.measurementDate= new Date(date)
