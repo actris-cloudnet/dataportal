@@ -390,7 +390,6 @@ export class Routes {
     query.site = toArray(query.site)
     query.status = toArray(query.status)
 
-    console.log(query)
     this.uploadedMetadataRepo.createQueryBuilder('um')
       .leftJoinAndSelect('um.site', 'site')
       .leftJoinAndSelect('um.instrument', 'instrument')
@@ -400,7 +399,7 @@ export class Routes {
       .orderBy('um.measurementDate', 'ASC')
       .getMany()
       .then(uploadedMetadata => res.send(uploadedMetadata))
-      .catch(err => {console.log(err);next({status: 500, errors: err})})
+      .catch(err => {next({status: 500, errors: err})})
   }
 
   updateMetadata: RequestHandler = async (req: Request, res: Response, next) => {
@@ -409,7 +408,7 @@ export class Routes {
         if (updatedResults.affected == 0) return next({ status: 404, errors: ['No metadata was found with provided id']})
         res.send(updatedResults)
       })
-      .catch(err => { console.log(err); next({ status: 500, errors: err})})
+      .catch(err => { next({ status: 500, errors: err}) })
   }
 
 }

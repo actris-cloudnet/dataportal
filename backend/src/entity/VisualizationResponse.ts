@@ -9,7 +9,6 @@ export class VisualizationResponse {
   visualizations: Visualization[]
 
   constructor(file: File) {
-    console.log(file)
     this.sourceFileId = file.uuid
     this.visualizations = file.visualizations
     this.productHumanReadable = file.product.humanReadableName
