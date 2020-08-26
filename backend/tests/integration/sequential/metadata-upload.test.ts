@@ -125,4 +125,10 @@ describe('POST /metadata', () => {
     await expect(axios.post(postUrl, postMetadata)).resolves.toMatchObject({ status: 200 })
     await expect(axios.get(postUrl)).resolves.toMatchObject({ status: 200, data: postMetadata })
   })
+
+  it('responds with 404 if metadata is not found', async () => {
+    const hash = '123456789012345678'
+    const invalidUrl = `${url}${hash}`
+    return expect(axios.post(invalidUrl, postMetadata)).rejects.toMatchObject({ response: { data: { status: 404}}})
+  })
 })
