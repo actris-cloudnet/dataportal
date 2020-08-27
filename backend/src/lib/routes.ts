@@ -348,9 +348,11 @@ export class Routes {
       // Remove existing metadata if it's status is created
       const existingCreatedMetadata = await this.uploadedMetadataRepo.createQueryBuilder('uploaded_metadata')
         .where('uploaded_metadata.id = :id', { id })
-        .where('uploaded_metadata.status = :status', { status: Status.CREATED })
+        .andWhere('uploaded_metadata.status = :status', { status: Status.CREATED })
         .getOne()
-      if (existingCreatedMetadata != undefined) await this.uploadedMetadataRepo.remove(existingCreatedMetadata)
+      if (existingCreatedMetadata != undefined) {
+        await this.uploadedMetadataRepo.remove(existingCreatedMetadata)
+      }
 
       const uploadedMetadata = new UploadedMetadata(
         id,
