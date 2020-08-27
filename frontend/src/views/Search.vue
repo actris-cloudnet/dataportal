@@ -295,7 +295,7 @@
         :disabled="disabledPrevious">
           <img class="option__image" :src="getIconUrl('date-previous')">
         </button>
-        <button id="nexthBtn" class="dateBtn" @click="setNextDate()"
+        <button id="nextBtn" class="dateBtn" @click="setNextDate()"
         :disabled="disabledNext">
           <img class="option__image" :src="getIconUrl('date-next')">
         </button>
