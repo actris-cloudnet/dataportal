@@ -1,0 +1,20 @@
+[
+  {
+    "id": "dc460da4ad72c48223",
+    "filename": "file1-dc460da4ad72c48223.LV1",
+    "measurementDate": "2020-08-11",
+    "hash": "dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b5",
+    "site": "granada",
+    "instrument": "mira",
+    "status": "created"
+  },
+  {
+    "id": "ab460da4ad72c48223",
+    "filename": "file3-ab460da4ad72c48223.LV1",
+    "measurementDate": "2020-08-12",
+    "hash": "ab460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998ab",
+    "site": "bucharest",
+    "instrument": "chm15k",
+    "status": "processed"
+  }
+]

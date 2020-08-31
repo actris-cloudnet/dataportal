@@ -1,6 +1,7 @@
 import { Entity, PrimaryColumn, Column, OneToMany } from 'typeorm'
 import { File } from './File'
 import {ProductVariable} from './ProductVariable'
+import {UploadedMetadata} from './UploadedMetadata'
 
 @Entity()
 export class Product {
@@ -19,4 +20,7 @@ export class Product {
 
     @OneToMany(_ => ProductVariable, prodVar => prodVar.product)
     variables!: ProductVariable[]
+
+    @OneToMany(_ => UploadedMetadata, uploadedMetadata => uploadedMetadata.site)
+    uploadedMetadatas!: UploadedMetadata[]
 }

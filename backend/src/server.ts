@@ -52,6 +52,9 @@ import * as xmlparser from 'express-xml-bodyparser'
   app.get('/api/files/:uuid', routes.file)
   app.get('/api/sites', routes.sites)
   app.get('/api/products', routes.products)
+  app.get('/api/instruments', routes.instruments)
+
+  // public (for sites)
 
   // public/internal
   app.get('/api/status', routes.status)
@@ -71,6 +74,10 @@ import * as xmlparser from 'express-xml-bodyparser'
 
   // private
   app.put('/files/:uuid', routes.submit)
+  app.get('/metadata/:hash', routes.getMetadata)
+  app.get('/metadata', routes.listMetadata)
+  app.post('/metadata/:hash', express.json(), routes.updateMetadata)
+  app.put('/metadata/:hash', express.json(), routes.uploadMetadata)
   app.put('/visualizations/:filename', express.json(), routes.putVisualization)
 
   app.use(errorHandler)

@@ -1,9 +1,10 @@
 import { File } from '../entity/File'
 import { Site } from '../entity/Site'
 import { Product } from '../entity/Product'
+import {UploadedMetadata, Status, METADATA_ID_LENGTH} from '../entity/UploadedMetadata'
 import { SelectQueryBuilder, Connection, Repository } from 'typeorm'
 import { Request, Response, RequestHandler } from 'express'
-import {dateToUTCString, linkFile} from '.'
+import {dateToUTCString, isValidDate, linkFile, rowExists, toArray, tomorrow} from '.'
 import { join, basename } from 'path'
 import archiver = require('archiver')
 import { createReadStream, promises as fsp, constants as fsconst } from 'graceful-fs'
@@ -15,6 +16,7 @@ import {VisualizationResponse} from '../entity/VisualizationResponse'
 import {ProductVariable} from '../entity/ProductVariable'
 import {LatestVisualizationDateResponse} from '../entity/LatestVisualizationDateResponse'
 import {SearchFileResponse} from '../entity/SearchFileResponse'
+import {Instrument} from '../entity/Instrument'
 
 
 export class Routes {
@@ -28,6 +30,8 @@ export class Routes {
     this.productRepo = this.conn.getRepository(Product)
     this.visualizationRepo = this.conn.getRepository(Visualization)
     this.productVariableRepo = this.conn.getRepository(ProductVariable)
+    this.uploadedMetadataRepo = this.conn.getRepository(UploadedMetadata)
+    this.instrumentRepo = this.conn.getRepository(Instrument)
   }
 
   private conn: Connection
@@ -38,6 +42,8 @@ export class Routes {
   private productRepo: Repository<Product>
   private visualizationRepo: Repository<Visualization>
   private productVariableRepo: Repository<ProductVariable>
+  private uploadedMetadataRepo: Repository<UploadedMetadata>
+  private instrumentRepo: Repository<Instrument>
 
   private hideTestDataFromNormalUsers = <T>(dbQuery: SelectQueryBuilder<T>, req: Request): SelectQueryBuilder<T> =>
     req.query.developer !== undefined ? dbQuery : dbQuery.andWhere('not site.isTestSite')
@@ -137,6 +143,12 @@ export class Routes {
 
   productVariables: RequestHandler = async (_req: Request, res: Response, next) => {
     fetchAll<Product>(this.conn, Product, {relations: ['variables']})
+      .then(result => res.send(result))
+      .catch(err => next({ status: 500, errors: err }))
+  }
+
+  instruments: RequestHandler = async (_req: Request, res: Response, next) => {
+    fetchAll<Product>(this.conn, Instrument)
       .then(result => res.send(result))
       .catch(err => next({ status: 500, errors: err }))
   }
@@ -298,6 +310,109 @@ export class Routes {
       .catch(err => {
         next({ status: 500, errors: err })
       })
+
+    uploadMetadata: RequestHandler = async (req: Request, res: Response, next) => {
+      const id = req.params.hash
+      const body = req.body
+      if (!('filename' in body) || !body.filename) {
+        next({ status: 422, errors: ['Request is missing filename']})
+        return
+      }
+      if (!('hashSum' in body) || body.hashSum.length != 64) {
+        next({ status: 422, errors: ['Request is missing hashSum or hashSum is invalid']})
+        return
+      }
+      if (id != body.hashSum.substr(0, METADATA_ID_LENGTH)) {
+        next({ status: 400, errors: [`Invalid ID. ID must consist of the ${METADATA_ID_LENGTH} first characters of hash`]})
+        return
+      }
+      if (!('measurementDate' in body) || !body.measurementDate || !isValidDate(body.measurementDate)) {
+        next({ status: 422, errors: ['Request is missing measurementDate or measurementDate is invalid']})
+        return
+      }
+      if (!('instrument' in body) || !body.instrument) {
+        next({ status: 422, errors: ['Request is missing instrument']})
+        return
+      }
+      if (!('site' in body) || !body.site) {
+        next({ status: 422, errors: ['Request is missing site']})
+        return
+      }
+
+      const site = await this.siteRepo.findOne(body.site)
+      if (site == undefined) return next({ status: 422, errors: [ 'Unknown site']})
+
+      const instrument = await this.instrumentRepo.findOne(body.instrument)
+      if (instrument == undefined) return next({ status: 422, errors: [ 'Unknown instrument']})
+
+      // Remove existing metadata if it's status is created
+      const existingCreatedMetadata = await this.uploadedMetadataRepo.createQueryBuilder('uploaded_metadata')
+        .where('uploaded_metadata.id = :id', { id })
+        .andWhere('uploaded_metadata.status = :status', { status: Status.CREATED })
+        .getOne()
+      if (existingCreatedMetadata != undefined) {
+        await this.uploadedMetadataRepo.remove(existingCreatedMetadata)
+      }
+
+      const uploadedMetadata = new UploadedMetadata(
+        id,
+        body.hashSum,
+        body.filename,
+        body.measurementDate,
+        site,
+        instrument,
+        Status.CREATED)
+
+      return this.uploadedMetadataRepo.insert(uploadedMetadata)
+        .then(() => res.sendStatus(201))
+        .catch(err => rowExists(err)
+          ? res.sendStatus(200)
+          : next({ status: 500, errors: err}))
+    }
+
+    getMetadata: RequestHandler = async (req: Request, res: Response, next) => {
+      if (req.params.hash.length != METADATA_ID_LENGTH)
+        return next({ status: 400, errors: [`ID length must be exactly ${METADATA_ID_LENGTH} characters`]})
+
+      this.uploadedMetadataRepo.findOne(req.params.hash, { relations: ['site', 'instrument'] })
+        .then(uploadedMetadata => {
+          if (uploadedMetadata == undefined) return next({ status: 404, errors: ['No metadata was found with provided id']})
+          res.send(uploadedMetadata)
+        })
+        .catch(err => next({ status: 500, errors: err}))
+    }
+
+  listMetadata: RequestHandler = async (req: Request, res: Response, next) => {
+    const query: any = {
+      site: req.query.site || (await fetchAll<Site>(this.conn, Site)).map(site => site.id),
+      status: req.query.status || [Status.UPLOADED, Status.CREATED, Status.PROCESSED],
+      dateFrom: req.query.dateFrom || '1970-01-01',
+      dateTo: req.query.dateTo || tomorrow()
+    }
+    query.site = toArray(query.site)
+    query.status = toArray(query.status)
+
+    this.uploadedMetadataRepo.createQueryBuilder('um')
+      .leftJoinAndSelect('um.site', 'site')
+      .leftJoinAndSelect('um.instrument', 'instrument')
+      .where('um.measurementDate >= :dateFrom AND um.measurementDate <= :dateTo', query)
+      .andWhere('site.id IN (:...site)', query)
+      .andWhere('um.status IN (:...status)', query)
+      .orderBy('um.measurementDate', 'ASC')
+      .getMany()
+      .then(uploadedMetadata => res.send(uploadedMetadata))
+      .catch(err => {next({status: 500, errors: err})})
+  }
+
+  updateMetadata: RequestHandler = async (req: Request, res: Response, next) => {
+    this.uploadedMetadataRepo.update({id: req.params.hash}, req.body)
+      .then(updatedResults => {
+        if (updatedResults.affected == 0) return next({ status: 404, errors: ['No metadata was found with provided id']})
+        res.send(updatedResults)
+      })
+      .catch(err => { next({ status: 500, errors: err}) })
+  }
+
 }
 
 function parsePid(attributes: Array<any>): string {

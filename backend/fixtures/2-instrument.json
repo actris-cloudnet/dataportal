@@ -1,0 +1,30 @@
+[
+  {
+    "id": "mira",
+    "type": "radar"
+  },
+  {
+    "id": "rpg-fmcw-94",
+    "type": "radar"
+  },
+  {
+    "id": "ct25k",
+    "type": "lidar"
+  },
+  {
+    "id": "cl31",
+    "type": "lidar"
+  },
+  {
+    "id": "cl51",
+    "type": "lidar"
+  },
+  {
+    "id": "chm15k",
+    "type": "lidar"
+  },
+  {
+    "id": "hatpro",
+    "type": "mwr"
+  }
+]
