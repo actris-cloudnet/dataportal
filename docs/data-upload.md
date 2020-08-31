@@ -10,7 +10,7 @@ The route accepts `multipart/form-data` type data, and requires HTTP Basic authe
 The request should have the following fields:
 
 - `hashSum`: An sha256-sum of the file being sent. Used for identifying the file and verifying its integrity.
-- `measurementDate`: Date on which the measurement was made, in `YYYY-MM-DD` format.
+- `measurementDate`: UTC date in `YYYY-MM-DD` format of the first data point in the file.
 - `instrument`: Instrument name. Must be one of the ids listed in `https://cloudnet.fmi.fmi/instruments/`.
 - `file`: The file contents in binary.
 
