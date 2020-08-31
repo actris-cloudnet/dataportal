@@ -1,6 +1,4 @@
 // Prevents window.matchMedia error, see https://stackoverflow.com/questions/39830580/jest-test-fails-typeerror-window-matchmedia-is-not-a-function
-import {readResources} from '../../../shared/lib'
-
 export function init() {
   return Object.defineProperty(window, 'matchMedia', {
     writable: true,
