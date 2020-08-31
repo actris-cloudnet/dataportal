@@ -1,4 +1,4 @@
-import {Column, Entity, ManyToOne, PrimaryColumn, Unique} from 'typeorm/index'
+import {Column, Entity, ManyToOne, PrimaryColumn} from 'typeorm/index'
 import {Site} from './Site'
 import {Instrument} from './Instrument'
 

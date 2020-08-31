@@ -2,7 +2,6 @@ import { Entity, PrimaryColumn, Column, OneToMany } from 'typeorm'
 import { File } from './File'
 import {ProductVariable} from './ProductVariable'
 import {UploadedMetadata} from './UploadedMetadata'
-import {Instrument} from './Instrument'
 
 @Entity()
 export class Product {
