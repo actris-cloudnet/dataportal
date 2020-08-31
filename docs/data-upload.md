@@ -17,7 +17,7 @@ The request should have the following fields:
 Following is a simple bash script for uploading a file named `file1.LV1`.
 The script uses `sha256sum` to compute the hash sum and `curl` to make the HTTP request:
 
-```shell script
+```bash
 FILENAME="file1.nc"
 USERNAME="example"
 PASSWORD="letmein"
