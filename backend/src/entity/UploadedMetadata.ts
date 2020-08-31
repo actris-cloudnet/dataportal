@@ -8,10 +8,12 @@ export enum Status {
   PROCESSED = 'processed'
 }
 
+export const METADATA_ID_LENGTH = 18
+
 @Entity()
 export class UploadedMetadata {
 
-  @PrimaryColumn({type: 'varchar', length: 18, unique: true})
+  @PrimaryColumn({type: 'varchar', length: METADATA_ID_LENGTH, unique: true})
   id!: string
 
   @Column({type: 'varchar', length: 64, unique: true})

@@ -1,7 +1,7 @@
 import { File } from '../entity/File'
 import { Site } from '../entity/Site'
 import { Product } from '../entity/Product'
-import { UploadedMetadata, Status } from '../entity/UploadedMetadata'
+import {UploadedMetadata, Status, METADATA_ID_LENGTH} from '../entity/UploadedMetadata'
 import { SelectQueryBuilder, Connection, Repository } from 'typeorm'
 import { Request, Response, RequestHandler } from 'express'
 import {dateToUTCString, isValidDate, linkFile, rowExists, toArray, tomorrow} from '.'
@@ -322,8 +322,8 @@ export class Routes {
         next({ status: 422, errors: ['Request is missing hashSum or hashSum is invalid']})
         return
       }
-      if (id != body.hashSum.substr(0, 18)) {
-        next({ status: 400, errors: ['Invalid ID. ID must consist of the 18 first characters of hash']})
+      if (id != body.hashSum.substr(0, METADATA_ID_LENGTH)) {
+        next({ status: 400, errors: [`Invalid ID. ID must consist of the ${METADATA_ID_LENGTH} first characters of hash`]})
         return
       }
       if (!('measurementDate' in body) || !body.measurementDate || !isValidDate(body.measurementDate)) {
@@ -371,8 +371,8 @@ export class Routes {
     }
 
     getMetadata: RequestHandler = async (req: Request, res: Response, next) => {
-      if (req.params.hash.length != 18)
-        return next({ status: 400, errors: ['ID length must be exactly 18 characters']})
+      if (req.params.hash.length != METADATA_ID_LENGTH)
+        return next({ status: 400, errors: [`ID length must be exactly ${METADATA_ID_LENGTH} characters`]})
 
       this.uploadedMetadataRepo.findOne(req.params.hash, { relations: ['site', 'instrument'] })
         .then(uploadedMetadata => {

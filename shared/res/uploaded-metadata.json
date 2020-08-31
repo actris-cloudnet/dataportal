@@ -2,7 +2,7 @@
   {
     "id": "dc460da4ad72c48223",
     "hash": "dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b5",
-    "filename": "file1.LV1",
+    "filename": "file1-dc460da4ad72c48223.LV1",
     "measurementDate": "2020-08-11",
     "site": {
       "id": "granada",
@@ -23,7 +23,7 @@
   {
     "id": "ab460da4ad72c48223",
     "hash": "ab460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998ab",
-    "filename": "file3.LV1",
+    "filename": "file3-ab460da4ad72c48223.LV1",
     "measurementDate": "2020-08-12",
     "site": {
       "id": "bucharest",
