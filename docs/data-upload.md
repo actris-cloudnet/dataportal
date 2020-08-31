@@ -18,14 +18,16 @@ Following is a simple bash script for uploading a file named `file1.LV1`.
 The script uses `sha256sum` to compute the hash sum and `curl` to make the HTTP request:
 
 ```shell script
+FILENAME="file1.nc"
 USERNAME="example"
 PASSWORD="letmein"
-HASH=$(sha256sum file1.LV1 | cut -f 1 -d " ")
+HASH=$(sha256sum $FILENAME | cut -f 1 -d " ")
+
 curl -v -X POST -u $USERNAME:$PASSWORD -H "Transfer-Encoding: chunked" \
     -F hashSum=$HASH \
     -F measurementDate=2020-09-01 \
     -F instrument=chm15k \
-    -F file=@file.LV1 \
+    -F file=@$FILENAME \
     https://cloudnet.fmi.fi/data-upload/
 ```
 
@@ -39,7 +41,7 @@ Here is an another example for uploading the file using the Python library `requ
 import hashlib
 import requests
 
-filename = 'file1.LV1'
+filename = 'file1.nc'
 username = 'example'
 password = 'letmein'
 
