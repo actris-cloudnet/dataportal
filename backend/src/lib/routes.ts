@@ -53,19 +53,29 @@ export class Routes {
       ({ ...entry, url: `${this.fileServerUrl}${entry.filename}` }))
   }
 
-  private takeLatestOnly = <T>(dbQuery: SelectQueryBuilder<T>, req: Request): SelectQueryBuilder<T> =>
-    req.query.latest == undefined ? dbQuery : dbQuery.orderBy('file.releasedAt', 'DESC').limit(1)
-
-  private filesQueryBuilder = (query: any) =>
-    this.fileRepo.createQueryBuilder('file')
+  private filesQueryBuilder (query: any) {
+    const qb = this.fileRepo.createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
       .leftJoinAndSelect('file.product', 'product')
-      .where('site.id IN (:...location)', query)
+    if (query.allVersions == undefined) {
+      qb.innerJoin(sub_qb => 
+          sub_qb
+            .from('file', 'file')
+            .select('MAX(file.releasedAt)', 'released_at')
+            .groupBy('file.site, file.measurementDate, file.product'),
+          'last_version',
+          'file.releasedAt = last_version.released_at'
+      )
+    }
+    qb
+      .andWhere('site.id IN (:...location)', query)
       .andWhere('product.id IN (:...product)', query)
       .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate <= :dateTo', query)
       .andWhere('file.volatile IN (:...volatile)', query)
       .andWhere('file.releasedAt < :releasedBefore', query)
       .orderBy('file.measurementDate', 'DESC')
+    return qb
+  }
 
   private visualizationsQueryBuilder(query: any) {
     let qb = this.filesQueryBuilder(query)
@@ -100,7 +110,6 @@ export class Routes {
     const query = req.query
 
     const qb = this.filesQueryBuilder(query)
-    this.takeLatestOnly(qb, req)
     this.hideTestDataFromNormalUsers(qb, req)
       .getMany()
       .then(result => {
