@@ -53,6 +53,9 @@ export class Routes {
       ({ ...entry, url: `${this.fileServerUrl}${entry.filename}` }))
   }
 
+  private takeLatestOnly = <T>(dbQuery: SelectQueryBuilder<T>, req: Request): SelectQueryBuilder<T> =>
+    req.query.latest == undefined ? dbQuery : dbQuery.orderBy('file.releasedAt', 'DESC').limit(1)
+
   private filesQueryBuilder = (query: any) =>
     this.fileRepo.createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
@@ -96,8 +99,8 @@ export class Routes {
   files: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query
 
-
     const qb = this.filesQueryBuilder(query)
+    this.takeLatestOnly(qb, req)
     this.hideTestDataFromNormalUsers(qb, req)
       .getMany()
       .then(result => {
