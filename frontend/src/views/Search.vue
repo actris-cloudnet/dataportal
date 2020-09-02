@@ -69,6 +69,22 @@
     &>svg
       color: black
 
+  div.keyInfo
+    border-style: solid
+    border-width: 0.5px
+    border-radius: 2px
+    grid-column: 1 / 8
+    padding: 0.1em
+    width: 100%
+    border-color: $steel-warrior
+    background: $blue-dust
+    font-size: 85%
+    .option__image
+      width: auto
+      position: relative
+      margin-right: 0.5em
+      margin-left: 0.5em
+
   div.errormsg
     border-style: solid
     border-width: 1px
@@ -168,7 +184,7 @@
     width: 80%
     display: flex
     margin-top: 1.5em
-    margin-left: 2.0em
+    margin-left: 8.0em
     .dateBtn:disabled
       background-color: none
       opacity: 0.5
@@ -176,12 +192,12 @@
       background-color: $steel-warrior
     .dateBtn
       color: black
-      height: 33px
-      padding-left: 8px
+      height: 25px
+      padding-left: 10px
       padding-right: 10px
       padding-top: 10px
       padding-bottom: 20px
-      margin-right: 5px
+      margin-right: 12px
       border: 1px solid $steel-warrior
       border-radius: 3px
       background-color: $blue-dust
@@ -299,10 +315,10 @@
         :disabled="disabledNext">
           <img class="option__image" :src="getIconUrl('date-next')">
         </button>
-        <button id="latestBtn" class="dateBtn" @click="setLatestDate()"
-        :disabled="disabledLatest">
-          <img class="option__image" :src="getIconUrl('date-latest')">
-        </button>
+      </div>
+      <div class="keyInfo">
+        <img class="option__image" :src="getIconUrl('info')">
+        Use arrow keys for browsing views
       </div>
       <div v-if="!dateToError.isValidDateString" class="errormsg">
         Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.
@@ -432,7 +448,6 @@ export default class Search extends Vue {
   activeBtn = ''
   disabledPrevious = false
   disabledNext = false
-  disabledLatest = false
 
   dateErrorsExist(dateError: { [key: string]: boolean }) {
     return !(dateError.isValidDateString && dateError.isAfterStart && dateError.isBeforeEnd &&
@@ -539,6 +554,7 @@ export default class Search extends Vue {
       this.renderComplete = true
     })
     this.initMap()
+    this.pressKey()
   }
 
   initMap() {
@@ -669,10 +685,11 @@ export default class Search extends Vue {
     this.dateInputStart = getDateFromBeginningOfYear()
   }
 
-  setLatestDate() {
-    const date = new Date
-    date.setDate(date.getDate())
-    this.defaultVizDate = date
+  pressKey() {
+    window.addEventListener('keydown', e => {
+      if (e.keyCode == 37) this.setPreviousDate()
+      if (e.keyCode == 39) this.setNextDate()
+    })
   }
 
   setPreviousDate() {
@@ -711,10 +728,7 @@ export default class Search extends Vue {
     const isDateLatest = isSameDay(this.dateTo, this.beginningOfHistory)
     this.disabledPrevious = false
     this.disabledNext = false
-    this.disabledLatest = false
-    if (isDateToday) {
-      this.disabledNext = true
-      this.disabledLatest = true }
+    if (isDateToday) this.disabledNext = true
     if (isDateLatest) this.disabledPrevious = true
   }
 
