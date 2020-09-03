@@ -1,4 +1,4 @@
-import {Entity, Column, PrimaryColumn, ManyToOne, BeforeUpdate, BeforeInsert, OneToMany, Unique} from 'typeorm'
+import {Entity, Column, PrimaryColumn, ManyToOne, BeforeUpdate, BeforeInsert, OneToMany, Unique, Index} from 'typeorm'
 import { NetCDFObject } from './NetCDFObject'
 import { Site } from './Site'
 import { Product } from './Product'
@@ -12,6 +12,7 @@ export enum FilePublicity {
 
 @Entity()
 @Unique(['checksum'])
+@Index(['measurementDate', 'site', 'product'])
 export class File {
 
     @PrimaryColumn('uuid')
