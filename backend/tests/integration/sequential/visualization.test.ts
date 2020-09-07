@@ -83,7 +83,8 @@ const expectedResult = {
     {
       filename: 'test1.png',
       'productVariable': {'id': 'test2', 'humanReadableName': 'Kaljanhimo', 'order': '0'}
-    }]
+    },
+  ]
 }
 
 describe('GET /visualizations', () => {
