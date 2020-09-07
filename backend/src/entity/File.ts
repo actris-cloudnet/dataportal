@@ -85,6 +85,7 @@ export class File {
       format: string,
       site: Site,
       product: Product,
+      volatile = true
     ) {
       // A typeorm hack, see https://github.com/typeorm/typeorm/issues/3903
       if (typeof obj == 'undefined') return
@@ -105,5 +106,6 @@ export class File {
       this.checksum = chksum
       this.size = filesize
       this.format = format
+      this.volatile = volatile
     }
 }

@@ -73,7 +73,7 @@ import * as xmlparser from 'express-xml-bodyparser'
   )
 
   // private
-  app.put('/files/:uuid', routes.submit)
+  app.put('/files/:uuid', routes.putMetadataXml)
   app.get('/metadata/:hash', routes.getMetadata)
   app.get('/metadata', routes.listMetadata)
   app.post('/metadata/:hash', express.json(), routes.updateMetadata)

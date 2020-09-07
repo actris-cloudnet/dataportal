@@ -71,8 +71,8 @@ test('refuse updating freezed file', async () => {
   try {
     await putFile(bucharestXml, { 'Content-Type': 'application/xml', 'X-Freeze': 'True' })
   } catch (e) {
-    expect(e.response.data.status.toString()).toMatch('500')
-    expect(e.response.data.errors).toMatch('Cannot update a non-volatile file.')
+    expect(e.response.data.status.toString()).toMatch('403')
+    expect(e.response.data.errors[0]).toMatch('File exists and cannot be updated since it is freezed and not from a test site')
   }
 })
 

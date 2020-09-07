@@ -26,29 +26,18 @@ interface NetCDFXML {
     }
 }
 
-const checkDbRecordExists = (conn: Connection, uuid: string): Promise<File|null> =>
-  new Promise((resolve, reject) =>
-    conn.getRepository(File).findOneOrFail(uuid, { relations: [ 'site' ]})
-      .then(file => {
-        if (!file.site.isTestSite && !file.volatile)
-          reject('Cannot update a non-volatile file.')
-        else
-          resolve(file)
-      })
-      .catch(_ => resolve(null))
-  )
 
-const update = (file: File, connection: Connection) =>
+export const updateFile = (file: File, freeze: boolean, connection: Connection) =>
   Promise.all([
     computeFileChecksum(filename),
     computeFileSize(filename),
     getFileFormat(filename)
   ]).then(([checksum, { size }, format]) => {
     const repo = connection.getRepository(File)
-    return repo.save({ uuid: file.uuid, checksum, size, format, releasedAt: new Date() })
+    return repo.update({uuid: file.uuid}, { checksum, size, format, releasedAt: new Date(), volatile: !freeze })
   })
 
-const insert = (ncObj: NetCDFObject, connection: Connection) =>
+export const insertFile = (ncObj: NetCDFObject, freeze: boolean, connection: Connection) =>
   Promise.all([
     ncObj,
     basename(filename),
@@ -59,9 +48,10 @@ const insert = (ncObj: NetCDFObject, connection: Connection) =>
     checkProductExists(connection, ncObj.cloudnet_file_type),
     linkFile(filename, config.publicDir)
   ]).then(([ncObj, baseFilename, chksum, { size }, format, site, product]) => {
-    const file = new File(ncObj, baseFilename, chksum, size, format, site, product)
+    const file = new File(ncObj, baseFilename, chksum, size, format, site, product, !freeze)
     file.releasedAt = new Date()
-    return connection.manager.save(file)
+    const repo = connection.getRepository(File)
+    return repo.insert(file)
   })
 
 const checkSiteExists = (conn: Connection, site: string): Promise<Site> =>
@@ -112,7 +102,7 @@ function getFileFormat(filename: string): Promise<string> {
   })
 }
 
-async function parseJSON(json: any): Promise<any> {
+export async function parseJSON(json: any): Promise<NetCDFObject> {
   const { netcdf }: NetCDFXML = json
   filename = netcdf['$'].location
   const ncObj: any = netcdf.attribute
@@ -127,33 +117,4 @@ async function parseJSON(json: any): Promise<any> {
           ${stringify(ncObj)}`)
   }
   return ncObj
-}
-
-export async function putRecord(connection: Connection, input: any) {
-  const ncObj: any = await parseJSON(input)
-  const existingFile = await checkDbRecordExists(connection, ncObj.file_uuid)
-  if (existingFile) {
-    return {
-      body: await update(existingFile, connection),
-      status: 200
-    }
-  } else {
-    return {
-      body: await insert(ncObj, connection),
-      status: 201
-    }
-  }
-}
-
-export async function freezeRecord(result: any, connection: Connection, pid: string, freeze: boolean) {
-  if (freeze) {
-    await connection
-      .getRepository(File)
-      .createQueryBuilder()
-      .update()
-      .set({ pid: pid, volatile: false})
-      .where('uuid = :uuid', { uuid: result.body.uuid })
-      .execute()
-  }
-  return result.status
 }

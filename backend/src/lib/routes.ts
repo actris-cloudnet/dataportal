@@ -10,7 +10,7 @@ import archiver = require('archiver')
 import { createReadStream, promises as fsp, constants as fsconst } from 'graceful-fs'
 import { fetchAll } from '.'
 import config from '../config'
-import { putRecord, freezeRecord } from '../metadata2db.js'
+import {parseJSON, updateFile, insertFile} from '../metadata2db.js'
 import {Visualization} from '../entity/Visualization'
 import {VisualizationResponse} from '../entity/VisualizationResponse'
 import {ProductVariable} from '../entity/ProductVariable'
@@ -53,18 +53,18 @@ export class Routes {
       ({ ...entry, url: `${this.fileServerUrl}${entry.filename}` }))
   }
 
-  private filesQueryBuilder (query: any) {
+  private filesQueryBuilder(query: any) {
     const qb = this.fileRepo.createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
       .leftJoinAndSelect('file.product', 'product')
     if (query.allVersions == undefined) {
-      qb.innerJoin(sub_qb => 
-          sub_qb
-            .from('file', 'file')
-            .select('MAX(file.releasedAt)', 'released_at')
-            .groupBy('file.site, file.measurementDate, file.product'),
-          'last_version',
-          'file.releasedAt = last_version.released_at'
+      qb.innerJoin(sub_qb =>
+        sub_qb
+          .from('file', 'file')
+          .select('MAX(file.releasedAt)', 'released_at')
+          .groupBy('file.site, file.measurementDate, file.product'),
+      'last_version',
+      'file.releasedAt = last_version.released_at'
       )
     }
     qb
@@ -280,17 +280,30 @@ export class Routes {
       .then(result => res.send(this.convertToSearchFiles(result)))
       .catch(err => next({ status: 500, errors: err }))
 
-  submit: RequestHandler = async (req: Request, res: Response, next) => {
-    const pid = parsePid(req.body.netcdf.attribute)
-    const freeze = isFreeze(pid, req.headers)
-    putRecord(this.conn, req.body)
-      .then(result => {
-        return freezeRecord(result, this.conn, pid, freeze)
-      })
-      .then(status => {
-        return res.sendStatus(status)
-      })
-      .catch(err => next({ status: 500, errors: err }))
+  putMetadataXml: RequestHandler = async (req: Request, res: Response, next) => {
+    try {
+      const pid = parsePid(req.body.netcdf.attribute)
+      const freeze = isFreeze(pid, req.headers)
+      const ncObj = await parseJSON(req.body)
+
+      const existingFile = await this.fileRepo.findOne(ncObj.file_uuid, { relations: ['site']})
+      if (existingFile == undefined) {
+        await insertFile(ncObj, freeze, this.conn)
+        return res.sendStatus(201)
+      } else {
+        if (existingFile.site.isTestSite || existingFile.volatile) {
+          await updateFile(existingFile, freeze, this.conn)
+          return res.sendStatus(200)
+        }
+        return next({
+          status: 403,
+          errors: ['File exists and cannot be updated since it is freezed and not from a test site']
+        })
+      }
+    } catch (e) {
+      if (rowExists(e)) return next({status: 409, errors: e})
+      return next({status: 500, errors: e})
+    }
   }
 
   status: RequestHandler = async (_req: Request, res: Response, next) =>

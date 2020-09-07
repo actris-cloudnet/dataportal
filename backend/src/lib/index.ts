@@ -45,5 +45,5 @@ export const toArray = (obj: string | Array<string>): Array<string> =>
 
 export const rowExists = (err: any) => {
   const PG_UNIQUE_CONSTRAINT_VIOLATION = '23505'
-  return err.code == PG_UNIQUE_CONSTRAINT_VIOLATION
+  return typeof err == 'object' && 'code' in err && err.code == PG_UNIQUE_CONSTRAINT_VIOLATION
 }
