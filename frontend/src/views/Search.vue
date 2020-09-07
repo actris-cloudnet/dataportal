@@ -23,6 +23,13 @@
     cursor: pointer
     margin-left: 1em
 
+  .closeX
+    float: right
+    font-weight: bold
+    color: lightgrey
+    cursor: pointer
+    margin-right: 0.5em
+
   .rednote>.close
     color: grey
     font-weight: normal
@@ -79,11 +86,15 @@
     border-color: $steel-warrior
     background: $blue-dust
     font-size: 85%
-    .option__image
+    color: grey
+    .infoIcon
+      opacity: 0.5
+      height: 1.3em
       width: auto
+      top: -1.5px
       position: relative
       margin-right: 0.5em
-      margin-left: 0.5em
+      margin-left: 0.7em
 
   div.errormsg
     border-style: solid
@@ -201,7 +212,7 @@
       border: 1px solid $steel-warrior
       border-radius: 3px
       background-color: $blue-dust
-      .option__image
+      .dateIcon
         height: 1.5em
         width: auto
         position: relative
@@ -223,7 +234,7 @@
   </div>
   <div v-if="devMode.activated" class="note rednote">
     You are using the dataportal in developer mode. Files from sites in testing mode are now visible.
-    <span class="close" id="disableDevMode" @click="devMode.disable()">Deactivate</span>
+    <span class="close_x" id="disableDevMode" @click="devMode.disable()">Deactivate</span>
   </div>
 
   <section id="sideBar">
@@ -300,7 +311,7 @@
         label="Date"
         name="dateTo"
         v-model="dateTo"
-        :dateInput="defaultVizDate"
+        :dateInput="visualizationDate"
         :start="beginningOfHistory"
         :end="today"
         v-on:error="dateToError = $event"
@@ -308,17 +319,18 @@
       ></datepicker>
       <div class="dateButtons">
         <button id="previousBtn" class="dateBtn" @click="setPreviousDate()"
-        :disabled="disabledPrevious">
-          <img class="option__image" :src="getIconUrl('date-previous')">
+        :disabled="setDateButtonActiveStatus('previous')">
+          <img class="dateIcon" :src="getIconUrl('date-previous')">
         </button>
         <button id="nextBtn" class="dateBtn" @click="setNextDate()"
-        :disabled="disabledNext">
-          <img class="option__image" :src="getIconUrl('date-next')">
+        :disabled="setDateButtonActiveStatus('next')">
+          <img class="dateIcon" :src="getIconUrl('date-next')">
         </button>
       </div>
-      <div class="keyInfo">
-        <img class="option__image" :src="getIconUrl('info')">
-        Use arrow keys for browsing views
+      <div v-if="displayKeyInfo" class="keyInfo note">
+        <img class="infoIcon" :src="getIconUrl('info')">
+        Use arrow keys to change dates
+        <span class="closeX" @click="displayKeyInfo = !displayKeyInfo"> &#10005; </span>
       </div>
       <div v-if="!dateToError.isValidDateString" class="errormsg">
         Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.
@@ -442,12 +454,10 @@ export default class Search extends Vue {
   dateFrom = this.isVizMode() ? this.today : this.getInitialDateFrom()
   dateFromError: { [key: string]: boolean } = {}
   dateToError: { [key: string]: boolean } = {}
-  defaultVizDate = this.dateTo
+  visualizationDate = this.dateTo
   dateInputStart = this.dateFrom
   dateInputEnd = this.dateFrom
   activeBtn = ''
-  disabledPrevious = false
-  disabledNext = false
 
   dateErrorsExist(dateError: { [key: string]: boolean }) {
     return !(dateError.isValidDateString && dateError.isAfterStart && dateError.isBeforeEnd &&
@@ -507,6 +517,7 @@ export default class Search extends Vue {
   renderComplete = false
 
   displayBetaNotification = true
+  displayKeyInfo = true
 
   getIconUrl = getIconUrl
   humanReadableSize = humanReadableSize
@@ -554,7 +565,7 @@ export default class Search extends Vue {
       this.renderComplete = true
     })
     this.initMap()
-    this.pressKey()
+    this.addKeyPressListener()
   }
 
   initMap() {
@@ -620,7 +631,7 @@ export default class Search extends Vue {
         return axios.get(`${this.apiUrl}latest-visualization-date/`, payload)
           .then(res => {
             this.dateTo = res.data.date
-            this.defaultVizDate = new Date(res.data.date)
+            this.visualizationDate = new Date(res.data.date)
           })
       }
     })
@@ -648,7 +659,6 @@ export default class Search extends Vue {
     this.isBusy = true
     const apiPath = this.isVizMode() ? 'visualizations/' : 'search/'
     if (!this.isVizMode()) this.checkIfButtonShouldBeActive()
-    else this.checkIfDateButtonShouldBedisabled()
     return axios
       .get(`${this.apiUrl}${apiPath}`, this.payload)
       .then(res => {
@@ -685,10 +695,19 @@ export default class Search extends Vue {
     this.dateInputStart = getDateFromBeginningOfYear()
   }
 
-  pressKey() {
-    window.addEventListener('keydown', e => {
-      if (e.keyCode == 37) this.setPreviousDate()
-      if (e.keyCode == 39) this.setNextDate()
+  addKeyPressListener() {
+    window.addEventListener('keydown',  e => {
+      if (document.activeElement === null) {
+        alert('No active element')
+      }
+      else {
+        const element = document.activeElement
+        const input = 'INPUT'
+        if (input != element.tagName) {
+          if (e.keyCode == 37) this.setPreviousDate()
+          if (e.keyCode == 39) this.setNextDate()
+        }
+      }
     })
   }
 
@@ -696,9 +715,7 @@ export default class Search extends Vue {
     if (this.dateTo > this.beginningOfHistory) {
       const date = this.dateTo
       date.setDate(date.getDate() - 1)
-      this.dateTo = date
-      this.dateFrom = date
-      this.defaultVizDate = date
+      this.visualizationDate = date
     }
   }
 
@@ -706,9 +723,7 @@ export default class Search extends Vue {
     if (!isSameDay(this.dateTo, new Date)) {
       const date = this.dateTo
       date.setDate(date.getDate() + 1)
-      this.dateTo = date
-      this.dateFrom = date
-      this.defaultVizDate = date
+      this.visualizationDate = date
     }
   }
 
@@ -723,13 +738,16 @@ export default class Search extends Vue {
     else this.activeBtn = ''
   }
 
-  checkIfDateButtonShouldBedisabled() {
+  setDateButtonActiveStatus(name: string) {
     const isDateToday = isSameDay(this.dateTo, new Date())
     const isDateLatest = isSameDay(this.dateTo, this.beginningOfHistory)
-    this.disabledPrevious = false
-    this.disabledNext = false
-    if (isDateToday) this.disabledNext = true
-    if (isDateLatest) this.disabledPrevious = true
+    if (name == 'next') {
+      if (isDateToday) return true
+    }
+    else {
+      if (isDateLatest) return true
+    }
+    return false
   }
 
   setIcon(product: string) {

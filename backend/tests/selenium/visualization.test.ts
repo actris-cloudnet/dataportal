@@ -15,7 +15,8 @@ jest.setTimeout(60000)
 
 async function initSearch() {
   await selenium.driver.get('http://localhost:8000/search/visualizations')
-  return selenium.sendInputToMultiselect('siteSelect', 'bucharest')
+  await selenium.sendInputToMultiselect('siteSelect', 'bucharest')
+  return selenium.sendInput('dateTo', '2020-05-01')
 }
 
 async function getDateToValue(by: By) {
@@ -131,7 +132,6 @@ describe('visualizations page', () => {
 
   it('selects previous day by clicking to left button', async () => {
     await selenium.sendInput('dateTo', '2020-05-02')
-    await wait(200)
     await selenium.clickId('previousBtn')
     await wait(200)
     const dateTo = getDateToValue(By.id('dateTo'))
@@ -140,9 +140,8 @@ describe('visualizations page', () => {
 
   it('selects next day by clicking to right button', async () => {
     await selenium.sendInput('dateTo', '2020-05-02')
-    await wait(200)
     await selenium.clickId('nextBtn')
-    await wait(200)
+    await wait(800)
     const dateTo = getDateToValue(By.id('dateTo'))
     expect(await dateTo).toContain('May 03 2020')
   })
