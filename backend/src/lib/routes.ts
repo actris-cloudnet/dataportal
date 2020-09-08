@@ -291,7 +291,7 @@ export class Routes {
 
       const existingFile = await this.fileRepo.findOne(receivedFile.getUuid(), { relations: ['site']})
       if (existingFile == undefined) {
-        console.log(await receivedFile.insertFile())
+        await receivedFile.insertFile()
         return res.sendStatus(201)
       } else {
         if (existingFile.site.isTestSite || existingFile.volatile) {
@@ -304,7 +304,6 @@ export class Routes {
         })
       }
     } catch (e) {
-      console.log(e)
       if (rowExists(e)) return next({status: 409, errors: e})
       return next({status: 500, errors: e})
     }
