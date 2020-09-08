@@ -74,6 +74,7 @@ export class Routes {
       .andWhere('file.volatile IN (:...volatile)', query)
       .andWhere('file.releasedAt < :releasedBefore', query)
       .orderBy('file.measurementDate', 'DESC')
+      .addOrderBy('file.releasedAt', 'DESC')
     return qb
   }
 
