@@ -10,7 +10,7 @@ import archiver = require('archiver')
 import { createReadStream, promises as fsp, constants as fsconst } from 'graceful-fs'
 import { fetchAll } from '.'
 import config from '../config'
-import {parseJSON, updateFile, insertFile} from '../metadata2db.js'
+import {ReceivedFile} from './metadata2db.js'
 import {Visualization} from '../entity/Visualization'
 import {VisualizationResponse} from '../entity/VisualizationResponse'
 import {ProductVariable} from '../entity/ProductVariable'
@@ -282,18 +282,20 @@ export class Routes {
       .catch(err => next({ status: 500, errors: err }))
 
   putMetadataXml: RequestHandler = async (req: Request, res: Response, next) => {
+    const isFreeze = (header:any) => {
+      const xFreeze = header['x-freeze'] || 'false'
+      return xFreeze.toLowerCase() == 'true'
+    }
     try {
-      const pid = parsePid(req.body.netcdf.attribute)
-      const freeze = isFreeze(pid, req.headers)
-      const ncObj = await parseJSON(req.body)
+      const receivedFile = new ReceivedFile(req.body, this.conn, isFreeze(req.headers))
 
-      const existingFile = await this.fileRepo.findOne(ncObj.file_uuid, { relations: ['site']})
+      const existingFile = await this.fileRepo.findOne(receivedFile.getUuid(), { relations: ['site']})
       if (existingFile == undefined) {
-        await insertFile(ncObj, freeze, this.conn)
+        console.log(await receivedFile.insertFile())
         return res.sendStatus(201)
       } else {
         if (existingFile.site.isTestSite || existingFile.volatile) {
-          await updateFile(existingFile, freeze, this.conn)
+          await receivedFile.updateFile()
           return res.sendStatus(200)
         }
         return next({
@@ -302,6 +304,7 @@ export class Routes {
         })
       }
     } catch (e) {
+      console.log(e)
       if (rowExists(e)) return next({status: 409, errors: e})
       return next({status: 500, errors: e})
     }
@@ -441,15 +444,3 @@ export class Routes {
 
 }
 
-function parsePid(attributes: Array<any>): string {
-  const { pid = '' }:any = attributes
-    .map((a) => a.$)
-    .map(({ name, value }) => ({ [name]: value }))
-    .reduce((acc, cur) => Object.assign(acc, cur))
-  return pid
-}
-
-function isFreeze(pid:string, header:any): any {
-  const xFreeze = header['x-freeze'] || 'false'
-  return (pid.length > 0) && (xFreeze.toLowerCase() == 'true')
-}
