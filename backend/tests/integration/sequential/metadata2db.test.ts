@@ -7,6 +7,7 @@ import axios from 'axios'
 const dataDir = 'tests/data/'
 
 const bucharestXml = `${dataDir}20190723_bucharest_classification.xml`
+const bucharestXmlNoPid = `${dataDir}20190723_bucharest_classification_no_pid.xml`
 const bucharestXmlMissing = `${dataDir}20190723_bucharest_classification_missing_fields.xml`
 const bucharestXmlInvalidLocation = `${dataDir}20190723_bucharest_classification_invalid_location.xml`
 const granadaXml = `${dataDir}20200126_granada_ecmwf.xml`
@@ -43,19 +44,27 @@ async function putFile(xmlFileName:string, headers:any) {
 }
 
 test('inserting new file', async () => {
-  const out = await putFile(bucharestXml, { 'Content-Type': 'application/xml' })
+  const out = await putFile(bucharestXmlNoPid, { 'Content-Type': 'application/xml' })
   expect(out.status.toString()).toMatch('201')
-  const dbRow = await repo.findOneOrFail(uuid)
-  expect(dbRow.uuid.replace(/-/g, '')).toMatch(uuid)
+  return expect(repo.findOneOrFail(uuid)).resolves.toBeTruthy()
 })
 
 test('updating existing file', async () => {
-  const out = await putFile(bucharestXml, { 'Content-Type': 'application/xml' })
+  const out = await putFile(bucharestXmlNoPid, { 'Content-Type': 'application/xml' })
   expect(out.status.toString()).toMatch('200')
   const dbRow1 = await repo.findOneOrFail(uuid)
   await putFile(bucharestXml, { 'Content-Type': 'application/xml' })
   const dbRow2 = await repo.findOneOrFail(uuid)
   expect(dbRow1.releasedAt < dbRow2.releasedAt)
+})
+
+test('refuse freezing a file without pid', async () => {
+  try {
+    await putFile(bucharestXmlNoPid, { 'Content-Type': 'application/xml', 'X-Freeze': 'True' })
+  } catch (e) {
+    expect(e.response.data.status.toString()).toMatch('500')
+    expect(e.response.data.errors[0]).toMatch('Tried to freeze a file with no PID')
+  }
 })
 
 test('freezing existing file', async () => {
@@ -65,6 +74,7 @@ test('freezing existing file', async () => {
   expect(out.status.toString()).toMatch('200')
   dbRow = await repo.findOneOrFail(uuid)
   expect(dbRow.volatile.toString()).toMatch('false')
+  expect(dbRow.pid).toEqual('http://pid-server.com/sdfsfoweirweir234234')
 })
 
 test('refuse updating freezed file', async () => {
@@ -81,7 +91,7 @@ test('errors on missing header fields', async () => {
     await putFile(bucharestXmlMissing, { 'Content-Type': 'application/xml' })
   } catch (e) {
     expect(e.response.data.status.toString()).toMatch('500')
-    expect(e.response.data.errors).toMatch('Invalid header fields')
+    expect(e.response.data.errors[0]).toMatch('Invalid header fields')
   }
 })
 
