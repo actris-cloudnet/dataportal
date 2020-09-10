@@ -126,6 +126,19 @@ describe('/api/files', () => {
     return expect(axios.get(url, payload)).resolves.toBeTruthy()
   })
 
+  it('returns newest file by default', async () => {
+    const res = await axios.get(url, { params: { product: 'categorize' }})
+    expect(res.data).toHaveLength(1)
+    expect(res.data[0].uuid === '6cb32746-faf0-4057-9076-ed2e698dcf36').toBeTruthy()
+  })
+
+  it('returns optionally all versions of a file sorted by releasedAt', async () => {
+    const res = await axios.get(url, { params: { product: 'categorize', allVersions: '' }})
+    expect(res.data).toHaveLength(3)
+    expect(res.data[0].releasedAt > res.data[1].releasedAt).toBeTruthy()
+    expect(res.data[1].releasedAt > res.data[2].releasedAt).toBeTruthy()
+  })
+
 })
 
 describe('/api/search', () => {
