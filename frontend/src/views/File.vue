@@ -223,18 +223,20 @@ img.product
 
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import axios from 'axios'
 import {getIconUrl, humanReadableSize, humanReadableDate, sortVisualizations} from '../lib'
 import { DevMode } from '../lib/DevMode'
 import { File } from '../../../backend/src/entity/File'
 import {Visualization} from '../../../backend/src/entity/Visualization'
+import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 
 @Component
 export default class FileView extends Vue {
   @Prop() uuid!: string
   response: File | null = null
   visualizations: Visualization[] | [] = []
+  versions: string[] = []
   error = false
   quicklookUrl = process.env.VUE_APP_QUICKLOOKURL
   apiUrl = process.env.VUE_APP_BACKENDURL
@@ -249,6 +251,26 @@ export default class FileView extends Vue {
   getVisualizations() {
     if (!this.allVisualizations) return this.visualizations.slice(0, 1)
     return this.visualizations
+  }
+
+  get currentVersionIndex() {
+    if (this.response == null) return null
+    const response = this.response
+    return this.versions.findIndex(uuid => uuid == response.uuid)
+  }
+
+  get newestVersion() {
+    if (!this.currentVersionIndex) return null
+    return this.versions[0]
+  }
+  get previousVersion() {
+    if (this.currentVersionIndex == null) return null
+    return this.versions[this.currentVersionIndex + 1]
+  }
+
+  get nextVersion() {
+    if (!this.currentVersionIndex) return null
+    return this.versions[this.currentVersionIndex - 1]
   }
 
   created() {
@@ -268,6 +290,31 @@ export default class FileView extends Vue {
         this.visualizations = sortVisualizations(response.data.visualizations)
       })
       .catch()
+  }
+
+  @Watch('response')
+  onResponseChange() {
+    if (this.response == null) return
+    const payload = {
+      params: {
+        developer: this.devMode.activated || undefined,
+        location: this.response.site.id,
+        product: this.response.product.id,
+        dateFrom: this.response.measurementDate,
+        dateTo: this.response.measurementDate,
+        allVersions: true
+      }
+    }
+    axios
+      .get(`${this.apiUrl}search`, payload)
+      .then(response => {
+        const searchFiles = response.data as SearchFileResponse[]
+        this.versions = searchFiles.map(sf => sf.uuid)
+        console.log(this.previousVersion, this.nextVersion, this.newestVersion)
+      })
+      .catch(({response}) => {
+        console.error(response)
+      })
   }
 }
 </script>
