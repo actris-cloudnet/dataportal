@@ -327,7 +327,7 @@
           <img class="dateIcon" :src="getIconUrl('date-next')">
         </button>
       </div>
-      <div v-if="displayKeyInfo" class="keyInfo note">
+      <div v-if="displayKeyInfo" class="keyInfo">
         <img class="infoIcon" :src="getIconUrl('info')">
         Use arrow keys to change dates
         <span class="closeX" @click="displayKeyInfo = !displayKeyInfo"> &#10005; </span>
@@ -698,7 +698,8 @@ export default class Search extends Vue {
   addKeyPressListener() {
     window.addEventListener('keydown',  e => {
       if (document.activeElement === null) {
-        alert('No active element')
+        if (e.keyCode == 37) this.setPreviousDate()
+        if (e.keyCode == 39) this.setNextDate()
       }
       else {
         const element = document.activeElement
