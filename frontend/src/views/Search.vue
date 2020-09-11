@@ -23,6 +23,13 @@
     cursor: pointer
     margin-left: 1em
 
+  .closeX
+    float: right
+    font-weight: bold
+    color: lightgrey
+    cursor: pointer
+    margin-right: 0.5em
+
   .rednote>.close
     color: grey
     font-weight: normal
@@ -68,6 +75,26 @@
       border-color: $blue-dust
     &>svg
       color: black
+
+  div.keyInfo
+    border-style: solid
+    border-width: 0.5px
+    border-radius: 2px
+    grid-column: 1 / 8
+    padding: 0.1em
+    width: 100%
+    border-color: $steel-warrior
+    background: $blue-dust
+    font-size: 85%
+    color: grey
+    .infoIcon
+      opacity: 0.5
+      height: 1.3em
+      width: auto
+      top: -1.5px
+      position: relative
+      margin-right: 0.5em
+      margin-left: 0.7em
 
   div.errormsg
     border-style: solid
@@ -164,6 +191,33 @@
       background-color: $steel-warrior
       border: 1px solid darkgray
 
+  .dateButtons
+    width: 80%
+    display: flex
+    margin-top: 1.5em
+    margin-left: 8.0em
+    .dateBtn:disabled
+      background-color: none
+      opacity: 0.5
+    .dateBtn:hover:enabled
+      background-color: $steel-warrior
+    .dateBtn
+      color: black
+      height: 25px
+      padding-left: 10px
+      padding-right: 10px
+      padding-top: 10px
+      padding-bottom: 20px
+      margin-right: 12px
+      border: 1px solid $steel-warrior
+      border-radius: 3px
+      background-color: $blue-dust
+      .dateIcon
+        height: 1.5em
+        width: auto
+        position: relative
+        top: -8px
+        margin-right: 1.5em
   span.centerlabel
     line-height: 30px
     font-size: 80%
@@ -180,7 +234,7 @@
   </div>
   <div v-if="devMode.activated" class="note rednote">
     You are using the dataportal in developer mode. Files from sites in testing mode are now visible.
-    <span class="close" id="disableDevMode" @click="devMode.disable()">Deactivate</span>
+    <span class="close_x" id="disableDevMode" @click="devMode.disable()">Deactivate</span>
   </div>
 
   <section id="sideBar">
@@ -257,12 +311,27 @@
         label="Date"
         name="dateTo"
         v-model="dateTo"
-        :dateInput="defaultVizDate"
+        :dateInput="visualizationDate"
         :start="beginningOfHistory"
         :end="today"
         v-on:error="dateToError = $event"
         :key="vizDateUpdate"
       ></datepicker>
+      <div class="dateButtons">
+        <button id="previousBtn" class="dateBtn" @click="setPreviousDate()"
+        :disabled="setDateButtonActiveStatus('previous')">
+          <img class="dateIcon" :src="getIconUrl('date-previous')">
+        </button>
+        <button id="nextBtn" class="dateBtn" @click="setNextDate()"
+        :disabled="setDateButtonActiveStatus('next')">
+          <img class="dateIcon" :src="getIconUrl('date-next')">
+        </button>
+      </div>
+      <div v-if="displayKeyInfo" class="keyInfo">
+        <img class="infoIcon" :src="getIconUrl('info')">
+        Use arrow keys to change dates
+        <span class="closeX" @click="displayKeyInfo = !displayKeyInfo"> &#10005; </span>
+      </div>
       <div v-if="!dateToError.isValidDateString" class="errormsg">
         Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.
       </div>
@@ -385,7 +454,7 @@ export default class Search extends Vue {
   dateFrom = this.isVizMode() ? this.today : this.getInitialDateFrom()
   dateFromError: { [key: string]: boolean } = {}
   dateToError: { [key: string]: boolean } = {}
-  defaultVizDate = this.dateTo
+  visualizationDate = this.dateTo
   dateInputStart = this.dateFrom
   dateInputEnd = this.dateFrom
   activeBtn = ''
@@ -448,6 +517,7 @@ export default class Search extends Vue {
   renderComplete = false
 
   displayBetaNotification = true
+  displayKeyInfo = true
 
   getIconUrl = getIconUrl
   humanReadableSize = humanReadableSize
@@ -495,6 +565,7 @@ export default class Search extends Vue {
       this.renderComplete = true
     })
     this.initMap()
+    this.addKeyPressListener()
   }
 
   initMap() {
@@ -560,7 +631,7 @@ export default class Search extends Vue {
         return axios.get(`${this.apiUrl}latest-visualization-date/`, payload)
           .then(res => {
             this.dateTo = res.data.date
-            this.defaultVizDate = new Date(res.data.date)
+            this.visualizationDate = new Date(res.data.date)
           })
       }
     })
@@ -624,6 +695,39 @@ export default class Search extends Vue {
     this.dateInputStart = getDateFromBeginningOfYear()
   }
 
+  addKeyPressListener() {
+    window.addEventListener('keydown',  e => {
+      if (document.activeElement === null) {
+        if (e.keyCode == 37) this.setPreviousDate()
+        if (e.keyCode == 39) this.setNextDate()
+      }
+      else {
+        const element = document.activeElement
+        const input = 'INPUT'
+        if (input != element.tagName) {
+          if (e.keyCode == 37) this.setPreviousDate()
+          if (e.keyCode == 39) this.setNextDate()
+        }
+      }
+    })
+  }
+
+  setPreviousDate() {
+    if (this.dateTo > this.beginningOfHistory) {
+      const date = this.dateTo
+      date.setDate(date.getDate() - 1)
+      this.visualizationDate = date
+    }
+  }
+
+  setNextDate() {
+    if (!isSameDay(this.dateTo, new Date)) {
+      const date = this.dateTo
+      date.setDate(date.getDate() + 1)
+      this.visualizationDate = date
+    }
+  }
+
   checkIfButtonShouldBeActive() {
     const oneDay = 24 * 60 * 60 * 1000
     const diffDays = Math.round(Math.abs((this.dateTo.valueOf() - this.dateFrom.valueOf()) / oneDay))
@@ -633,6 +737,18 @@ export default class Search extends Vue {
     else if (isDateToToday && diffDays === fixedRanges.month) this.activeBtn = 'btn2'
     else if (isDateToToday && diffDays === fixedRanges.week) this.activeBtn = 'btn3'
     else this.activeBtn = ''
+  }
+
+  setDateButtonActiveStatus(name: string) {
+    const isDateToday = isSameDay(this.dateTo, new Date())
+    const isDateLatest = isSameDay(this.dateTo, this.beginningOfHistory)
+    if (name == 'next') {
+      if (isDateToday) return true
+    }
+    else {
+      if (isDateLatest) return true
+    }
+    return false
   }
 
   setIcon(product: string) {

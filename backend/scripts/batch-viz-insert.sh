@@ -11,7 +11,7 @@ for file in $(find $1 -name "*.png"); do
         echo "Skip"
         continue
     fi
-    curl -X PUT "http://localhost:3000/visualization/$base" \
+    curl -X PUT "http://localhost:3000/visualizations/$base" \
         -H "Content-Type: application/json" \
         -d '{"fullPath":"'$real'","sourceFileId":"'$uuid'","variableHumanReadableName":"test","variableId": "'$varid'"}'
     echo

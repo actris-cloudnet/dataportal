@@ -1,9 +1,6 @@
 import {By, until, WebDriver} from 'selenium-webdriver'
 import axios from 'axios'
-import {
-  wait,
-  putFile
-} from '../lib'
+import { wait, putFile } from '../lib'
 import {Selenium, initDriver} from '../lib/selenium'
 
 let selenium: Selenium
@@ -194,7 +191,7 @@ describe('search page', () => {
     expect(response.status).toBe(200)
   })
 
-  it('select site from multi-selection while clicking marker', async () => {
+  it('selects site from multi-selection while clicking marker', async () => {
     await clearkMapSelection(By.id('map'))
     await clickMapMarker(By.id('map'), -140, -20)
     await wait(200)
@@ -202,7 +199,7 @@ describe('search page', () => {
     expect(content).toContain('Mace Head')
   })
 
-  it('remove site from multi-selection while clicking marker twice', async () => {
+  it('removes site from multi-selection while clicking marker twice', async () => {
     await clearkMapSelection(By.id('map'))
     await clickMapMarker(By.id('map'), -140, -20)
     await clickMapMarker(By.id('map'), -140, -20)
@@ -210,7 +207,7 @@ describe('search page', () => {
     expect(content).not.toContain('Mace Head')
   })
 
-  it('change marker color by clicking marker', async () => {
+  it('changes marker color by clicking marker', async () => {
     await clearkMapSelection(By.id('map'))
     const src1 = getMarkerSrc(By.id('map'))
     const s1 = (await src1).anchor('src')
@@ -220,7 +217,7 @@ describe('search page', () => {
     expect(s1).not.toEqual(s2)
   })
 
-  it('change marker color by doupleclicking marker', async () => {
+  it('changes marker color by doupleclicking marker', async () => {
     await clearkMapSelection(By.id('map'))
     const src1 = getMarkerSrc(By.id('map'))
     const s1 = (await src1).anchor('src')
@@ -231,7 +228,7 @@ describe('search page', () => {
     expect(s1).toEqual(s2)
   })
 
-  it('change marker color by clicking site from multi-selection', async () => {
+  it('changes marker color by clicking site from multi-selection', async () => {
     await clearkMapSelection(By.id('map'))
     const src1 = getMarkerSrc(By.id('map'))
     const s1 = (await src1).anchor('src')
@@ -241,7 +238,7 @@ describe('search page', () => {
     expect(s1).not.toEqual(s2)
   })
 
-  it('change marker color by removing site from multi-selection', async () => {
+  it('changes marker color by removing site from multi-selection', async () => {
     await clearkMapSelection(By.id('map'))
     const src1 = getMarkerSrc(By.id('map'))
     const s1 = (await src1).anchor('src')
@@ -251,5 +248,4 @@ describe('search page', () => {
     const s2 = (await src2).anchor('src')
     expect(s1).toEqual(s2)
   })
-
 })

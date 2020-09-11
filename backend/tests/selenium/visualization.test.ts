@@ -1,4 +1,4 @@
-import {By, WebDriver} from 'selenium-webdriver'
+import {By, WebDriver, Key} from 'selenium-webdriver'
 import axios from 'axios'
 import {
   wait,
@@ -15,7 +15,37 @@ jest.setTimeout(60000)
 
 async function initSearch() {
   await selenium.driver.get('http://localhost:8000/search/visualizations')
-  return selenium.sendInputToMultiselect('siteSelect', 'bucharest')
+  await selenium.sendInputToMultiselect('siteSelect', 'bucharest')
+  return selenium.sendInput('dateTo', '2020-05-01')
+}
+
+async function getDateToValue(by: By) {
+  const dateTo = await driver.findElement(by)
+  return dateTo.getAttribute('value')
+}
+
+async function generateDateNowString() {
+  const dateNow = new Date()
+  const dateString = dateNow.toString()
+  return dateString.substr(4, 11)
+}
+
+async function pressLeftKey() {
+  var key = Key
+  let actions = driver.actions({async: true})
+  await actions.keyDown(key.CONTROL).sendKeys(key.LEFT).perform()
+  await wait(200)
+  await actions.keyUp(key.CONTROL).sendKeys(key.LEFT)
+  await actions.clear()
+}
+
+async function pressRightKey() {
+  var key = Key
+  let actions = driver.actions({async: true})
+  await actions.keyDown(key.CONTROL).sendKeys(key.RIGHT).perform()
+  await wait(200)
+  await actions.keyUp(key.CONTROL).sendKeys(key.RIGHT)
+  await actions.clear()
 }
 
 beforeAll(async () => {
@@ -98,6 +128,78 @@ describe('visualizations page', () => {
     await wait(500)
     await selenium.clickClass('secondaryButton')
     expect((await selenium.findAllByClass('variable')).length).toEqual(1)
+  })
+
+  it('selects previous day by clicking to left button', async () => {
+    await selenium.sendInput('dateTo', '2020-05-02')
+    await selenium.clickId('previousBtn')
+    await wait(200)
+    const dateTo = getDateToValue(By.id('dateTo'))
+    expect(await dateTo).toContain('May 01 2020')
+  })
+
+  it('selects next day by clicking to right button', async () => {
+    await selenium.sendInput('dateTo', '2020-05-02')
+    await selenium.clickId('nextBtn')
+    await wait(800)
+    const dateTo = getDateToValue(By.id('dateTo'))
+    expect(await dateTo).toContain('May 03 2020')
+  })
+
+  it('does nothing by clicking to left button if begining of history', async () => {
+    await selenium.sendInput('dateTo', '1970-01-01')
+    await wait(200)
+    await selenium.clickId('previousBtn')
+    await wait(200)
+    const dateTo = getDateToValue(By.id('dateTo'))
+    expect(await dateTo).toContain('Jan 01 1970')
+  })
+
+  it('does nothing by clicking to right button if current date', async () => {
+    const dateNow = await generateDateNowString()
+    await selenium.sendInput('dateTo', dateNow.toString())
+    await wait(200)
+    await selenium.clickId('nextBtn')
+    await wait(200)
+    const dateTo = getDateToValue(By.id('dateTo'))
+    expect(await dateTo).toContain(dateNow)
+  })
+
+  it('selects previous day by pressing left key', async () => {
+    await selenium.sendInput('dateTo', '2020-05-02')
+    await wait(500)
+    await pressLeftKey()
+    await wait(500)
+    const dateTo = getDateToValue(By.id('dateTo'))
+    expect(await dateTo).toContain('May 01 2020')
+  })
+
+  it('selects next day by pressing right key', async () => {
+    await selenium.sendInput('dateTo', '2020-05-02')
+    await wait(200)
+    await pressRightKey()
+    await wait(200)
+    const dateTo = getDateToValue(By.id('dateTo'))
+    expect(await dateTo).toContain('May 03 2020')
+  })
+
+  it('does nothing by pressing left key if begining of history', async () => {
+    await selenium.sendInput('dateTo', '1970-01-01')
+    await wait(200)
+    await pressLeftKey()
+    await wait(200)
+    const dateTo = getDateToValue(By.id('dateTo'))
+    expect(await dateTo).toContain('Jan 01 1970')
+  })
+
+  it('does nothing by pressing right key if current date', async () => {
+    const dateNow = await generateDateNowString()
+    await selenium.sendInput('dateTo', dateNow.toString())
+    await wait(200)
+    await pressRightKey()
+    await wait(200)
+    const dateTo = getDateToValue(By.id('dateTo'))
+    expect(await dateTo).toContain(dateNow)
   })
 })
 
