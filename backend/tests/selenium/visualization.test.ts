@@ -61,14 +61,17 @@ beforeAll(async () => {
 
 afterAll(async () => driver.close())
 
-describe('visualizations page', () => {
-
-  beforeEach(initSearch)
-
+describe('visualizations page before input', () => {
   it('initially contains the latest visualization', async () => {
+    await selenium.driver.get('http://localhost:8000/search/visualizations')
     const content = await selenium.getContent()
     expect(content).toContain('Visualizations for 1 May 2020')
   })
+})
+
+describe('visualizations page', () => {
+
+  beforeEach(initSearch)
 
   it('finds visualizations if they exist', async () => {
     await selenium.sendInput('dateTo', '2020-05-01')
