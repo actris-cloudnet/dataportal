@@ -89,7 +89,7 @@ export class File {
       site: Site,
       product: Product,
       volatile = true,
-      sourceFileIds: string[] = []
+      sourceFiles: File[] = []
     ) {
       // A typeorm hack, see https://github.com/typeorm/typeorm/issues/3903
       if (typeof obj == 'undefined') return
@@ -111,6 +111,6 @@ export class File {
       this.size = filesize
       this.format = format
       this.volatile = volatile
-      this.sourceFileIds = sourceFileIds
+      this.sourceFileIds = sourceFiles.map(file => file.uuid)
     }
 }

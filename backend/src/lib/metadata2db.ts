@@ -66,9 +66,10 @@ export class ReceivedFile {
       this.getFileFormat(),
       this.checkSiteExists(),
       this.checkProductExists(),
+      this.checkSourceFilesExist(),
       linkFile(this.filepath, config.publicDir)
-    ]).then(([baseFilename, chksum, { size }, format, site, product]) => {
-      const file = new File(this.ncObj, baseFilename, chksum, size, format, site, product, !this.freeze)
+    ]).then(([baseFilename, chksum, { size }, format, site, product, sourceFiles]) => {
+      const file = new File(this.ncObj, baseFilename, chksum, size, format, site, product, !this.freeze, sourceFiles)
       file.releasedAt = new Date()
       const repo = this.conn.getRepository(File)
       return repo.save(file)
@@ -92,6 +93,14 @@ export class ReceivedFile {
 
   private checkProductExists = (): Promise<Product> =>
     this.conn.getRepository(Product).findOneOrFail(this.ncObj.cloudnet_file_type)
+
+  private checkSourceFilesExist() {
+    if (!this.ncObj.source_file_uuids) return []
+    const uuids = this.ncObj.source_file_uuids.split(', ')
+    const fileRepo = this.conn.getRepository(File)
+    return Promise.all(uuids.map(uuid => fileRepo.findOneOrFail(uuid)))
+  }
+
 
   private async computeFileChecksum(): Promise<string> {
     return new Promise((resolve, reject) => {
