@@ -717,6 +717,7 @@ export default class Search extends Vue {
       const date = this.dateTo
       date.setDate(date.getDate() - 1)
       this.visualizationDate = date
+      this.dateTo = date
     }
   }
 
@@ -725,6 +726,7 @@ export default class Search extends Vue {
       const date = this.dateTo
       date.setDate(date.getDate() + 1)
       this.visualizationDate = date
+      this.dateTo = date
     }
   }
 
@@ -740,8 +742,8 @@ export default class Search extends Vue {
   }
 
   setDateButtonActiveStatus(name: string) {
-    const isDateToday = isSameDay(this.dateTo, new Date())
-    const isDateLatest = isSameDay(this.dateTo, this.beginningOfHistory)
+    const isDateToday = isSameDay(this.visualizationDate, new Date())
+    const isDateLatest = isSameDay(this.visualizationDate, this.beginningOfHistory)
     if (name == 'next') {
       if (isDateToday) return true
     }
@@ -774,7 +776,10 @@ export default class Search extends Vue {
   @Watch('dateTo')
   onDateToChanged() {
     if (!this.renderComplete || this.dateErrorsExist(this.dateToError)) return
-    if (this.isVizMode()) this.dateFrom = this.dateTo
+    if (this.isVizMode()) {
+      this.dateFrom = this.dateTo
+      this.visualizationDate = new Date(this.dateTo)
+    }
     this.fetchData()
   }
 
