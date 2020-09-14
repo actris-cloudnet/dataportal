@@ -29,6 +29,10 @@ main#landing
     border-color: #cad7ff
     background: #eef2ff
 
+  .versionnote
+    border-color: #cad7ff
+    background: #d2fccc
+
   main
     margin: -1em
     display: flex
@@ -132,6 +136,9 @@ img.product
     <div v-if="response.volatile" class="note volatilenote">
       This is a volatile file. The data in this file may be incomplete and update in real time.
     </div>
+    <div v-if="response.volatile" class="note versionnote">
+      This is old version of the file. Go to the latest version.
+    </div>
     <main class="info">
       <section id="file">
         <header>File information</header>
@@ -181,6 +188,19 @@ img.product
             <dd>{{ response.site.latitude }}&deg; N, {{ response.site.longitude }}&deg; E</dd>
             <dt>Site altitude</dt>
             <dd>{{ response.site.altitude }} m</dd>
+          </dl>
+        </section>
+      </section>
+      <section id="version">
+        <header>Versions</header>
+        <section class="details">
+          <dl>
+            <dt>Previous version</dt>
+            <dd v-if="response.pid.length > 2"> <a :href=response.pid> Available </a></dd>
+            <dd v-else> Not available </dd>
+            <dt>Next version</dt>
+            <dd v-if="response.pid.length > 2"> <a :href=response.pid> Available </a></dd>
+            <dd v-else> Not available </dd>
           </dl>
         </section>
       </section>
