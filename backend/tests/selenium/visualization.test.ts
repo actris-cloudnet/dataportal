@@ -64,6 +64,7 @@ afterAll(async () => driver.close())
 describe('visualizations page before input', () => {
   it('initially contains the latest visualization', async () => {
     await selenium.driver.get('http://localhost:8000/search/visualizations')
+    await wait(300)
     const content = await selenium.getContent()
     expect(content).toContain('Visualizations for 1 May 2020')
   })
