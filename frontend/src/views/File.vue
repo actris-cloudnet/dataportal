@@ -136,8 +136,8 @@ img.product
     <div v-if="response.volatile" class="note volatilenote">
       This is a volatile file. The data in this file may be incomplete and update in real time.
     </div>
-    <div v-if="response.volatile" class="note versionnote">
-      This is old version of the file. Go to the latest version.
+    <div v-if="newestVersion" class="note versionnote">
+      This is old version of the file: <a :href=setNewestVersionUrl()> Go to the newest version </a>.
     </div>
     <main class="info">
       <section id="file">
@@ -196,10 +196,10 @@ img.product
         <section class="details">
           <dl>
             <dt>Previous version</dt>
-            <dd v-if="response.pid.length > 2"> <a :href=response.pid> Available </a></dd>
+            <dd v-if="previousVersion"><a :href=setPreviousVersionUrl()> Available </a></dd>
             <dd v-else> Not available </dd>
             <dt>Next version</dt>
-            <dd v-if="response.pid.length > 2"> <a :href=response.pid> Available </a></dd>
+            <dd v-if="nextVersion"> <a :href=setNextVersionUrl()> Available </a></dd>
             <dd v-else> Not available </dd>
           </dl>
         </section>
@@ -293,6 +293,28 @@ export default class FileView extends Vue {
     return this.versions[this.currentVersionIndex - 1]
   }
 
+  setPreviousVersionUrl() {
+    if (this.previousVersion != null) {
+      return `${this.localhostDomain}file/${this.previousVersion}`
+    }
+  }
+
+  setNextVersionUrl() {
+    if (this.nextVersion != null) {
+      return `${this.localhostDomain}file/${this.nextVersion}`
+    }
+  }
+
+  setNewestVersionUrl() {
+    if (this.newestVersion != null) {
+      return `${this.localhostDomain}file/${this.newestVersion}`
+    }
+  }
+
+  get localhostDomain() {
+    return `${window.location.protocol}//${window.location.host }/`
+  }
+
   created() {
     const payload = { params: { developer: this.devMode.activated || undefined}}
     axios
@@ -330,7 +352,6 @@ export default class FileView extends Vue {
       .then(response => {
         const searchFiles = response.data as SearchFileResponse[]
         this.versions = searchFiles.map(sf => sf.uuid)
-        console.log(this.previousVersion, this.nextVersion, this.newestVersion)
       })
       .catch(({response}) => {
         console.error(response)
