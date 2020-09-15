@@ -40,6 +40,8 @@ main#frontpage
         width: 35px
         height: auto
         margin-bottom: 0.5em
+    a:focus
+      outline: thin dotted black
 
 </style>
 

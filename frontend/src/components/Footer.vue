@@ -20,7 +20,6 @@ footer.global
     flex-direction: column
     height: $footer-height-narrow
 
-
 .footeritem
   font-family: $header-font
   color: darkgrey
@@ -30,16 +29,17 @@ footer.global
   padding: 0
   margin: 0
 
-
 .footeritem.no-width
   width: auto
+
+.footeritem a:focus
+  outline: thin dotted
 
 .small a, .hidden-links a
   color: darkgrey
 
 .small
   font-size: 0.6em
-
 
 .align-right
   text-align: right

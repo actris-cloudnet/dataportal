@@ -12,6 +12,9 @@
     border-color: #ffeecf
     background: #fdfce5
 
+  a:focus
+    outline: thin dotted
+
   .rednote
     border-color: #ffcfcf
     background: #fde5e5
@@ -55,6 +58,8 @@
     justify-items: center
     row-gap: 0.5em
     margin-bottom: $filter-margin
+    .date
+      outline: none
 
   button.calendar
     width: 2em
@@ -68,6 +73,9 @@
     font-size: 1em
     cursor: pointer
     font-family: $content-font
+    &:focus
+      background-color: $steel-warrior
+      outline: none
     &:hover
       background-color: $steel-warrior
     &:active
@@ -153,6 +161,8 @@
     width: 100%
     margin: 0 auto
     margin-bottom: $filter-margin
+    &:focus
+      outline: none
 
   .map
     height: 300px
@@ -187,9 +197,15 @@
       background-color: $blue-dust
       &:hover
         background-color: $steel-warrior
+      &:focus
+        outline: thin dotted
+      &:active
+        outline: none
     .activeBtn
       background-color: $steel-warrior
       border: 1px solid darkgray
+      &:focus
+        outline: none
 
   .dateButtons
     width: 80%
@@ -212,6 +228,8 @@
       border: 1px solid $steel-warrior
       border-radius: 3px
       background-color: $blue-dust
+      &:focus
+        outline: thin dotted
       .dateIcon
         height: 1.5em
         width: auto
