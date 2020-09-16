@@ -29,6 +29,8 @@
         color: $blue-sapphire
 
     .table-striped
+      th:focus
+        outline: thin dotted
       th:nth-child(1)
         width: 50px
         text-align: center
@@ -48,6 +50,10 @@
       tr:hover td
         cursor: pointer
         background-color: #e4eff7
+      tr:focus td
+        background-color: #e4eff7
+      tr
+        outline: none
 
     .text-center.my-2
       display: none
@@ -71,6 +77,9 @@
       font-size: 85%
       text-align: center
       display: block
+
+    .download:focus
+      outline: thin dotted black
 </style>
 
 

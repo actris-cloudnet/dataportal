@@ -101,6 +101,9 @@ main#landing
 .na
   color: grey
 
+.download:focus
+  outline: thin dotted black
+
 img.product
   height: auto
   width: 1em
