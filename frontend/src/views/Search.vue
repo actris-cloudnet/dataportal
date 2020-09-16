@@ -162,7 +162,7 @@
     margin: 0 auto
     margin-bottom: $filter-margin
     &:focus
-      outline: none
+      outline: thin dotted
 
   .map
     height: 300px

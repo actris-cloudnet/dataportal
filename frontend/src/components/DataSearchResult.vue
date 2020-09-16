@@ -77,6 +77,9 @@
       font-size: 85%
       text-align: center
       display: block
+
+    .download:focus
+      outline: thin dotted black
 </style>
 
 
