@@ -156,8 +156,8 @@ img.product
             <dt>Hash (SHA-256)</dt>
             <dd>{{ response.checksum }}</dd>
             <dt>Versions</dt>
-            <dd><a v-if="previousVersion" :href=setPreviousVersionUrl()> Previous </a>
-             - <a v-if="nextVersion" :href=setNextVersionUrl()> Next </a></dd>
+            <dd><a v-if="previousVersion" id="previousVersion" :href=setPreviousVersionUrl()> Previous </a>
+             - <a v-if="nextVersion" id="nextVersion" :href=setNextVersionUrl()> Next </a></dd>
           </dl>
         </section>
       </section>
@@ -306,6 +306,26 @@ export default class FileView extends Vue {
       .get(`${this.apiUrl}files/${this.uuid}`, payload)
       .then(response => {
         this.response = response.data
+        if (this.response == null) return
+        const payload = {
+          params: {
+            developer: this.devMode.activated || undefined,
+            location: this.response.site.id,
+            product: this.response.product.id,
+            dateFrom: this.response.measurementDate,
+            dateTo: this.response.measurementDate,
+            allVersions: true
+          }
+        }
+        return axios
+          .get(`${this.apiUrl}search`, payload)
+          .then(response => {
+            const searchFiles = response.data as SearchFileResponse[]
+            this.versions = searchFiles.map(sf => sf.uuid)
+          })
+          .catch(({response}) => {
+            console.error(response)
+          })
       })
       .catch(({response}) => {
         this.error = true
@@ -317,30 +337,6 @@ export default class FileView extends Vue {
         this.visualizations = sortVisualizations(response.data.visualizations)
       })
       .catch()
-  }
-
-  @Watch('response')
-  onResponseChange() {
-    if (this.response == null) return
-    const payload = {
-      params: {
-        developer: this.devMode.activated || undefined,
-        location: this.response.site.id,
-        product: this.response.product.id,
-        dateFrom: this.response.measurementDate,
-        dateTo: this.response.measurementDate,
-        allVersions: true
-      }
-    }
-    axios
-      .get(`${this.apiUrl}search`, payload)
-      .then(response => {
-        const searchFiles = response.data as SearchFileResponse[]
-        this.versions = searchFiles.map(sf => sf.uuid)
-      })
-      .catch(({response}) => {
-        console.error(response)
-      })
   }
 }
 </script>
