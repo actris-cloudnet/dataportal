@@ -155,6 +155,9 @@ img.product
             <dd>{{ response.size }} bytes ({{ humanReadableSize(response.size) }})</dd>
             <dt>Hash (SHA-256)</dt>
             <dd>{{ response.checksum }}</dd>
+            <dt>Versions</dt>
+            <dd><a v-if="previousVersion" :href=setPreviousVersionUrl()> Previous </a>
+             - <a v-if="nextVersion" :href=setNextVersionUrl()> Next </a></dd>
           </dl>
         </section>
       </section>
@@ -188,19 +191,6 @@ img.product
             <dd>{{ response.site.latitude }}&deg; N, {{ response.site.longitude }}&deg; E</dd>
             <dt>Site altitude</dt>
             <dd>{{ response.site.altitude }} m</dd>
-          </dl>
-        </section>
-      </section>
-      <section id="version">
-        <header>Versions</header>
-        <section class="details">
-          <dl>
-            <dt>Previous version</dt>
-            <dd v-if="previousVersion"><a :href=setPreviousVersionUrl()> Available </a></dd>
-            <dd v-else> Not available </dd>
-            <dt>Next version</dt>
-            <dd v-if="nextVersion"> <a :href=setNextVersionUrl()> Available </a></dd>
-            <dd v-else> Not available </dd>
           </dl>
         </section>
       </section>
@@ -265,7 +255,6 @@ export default class FileView extends Vue {
   getIconUrl = getIconUrl
   sortVisualizations = sortVisualizations
   devMode = new DevMode()
-
   allVisualizations = false
 
   getVisualizations() {
@@ -295,24 +284,20 @@ export default class FileView extends Vue {
 
   setPreviousVersionUrl() {
     if (this.previousVersion != null) {
-      return `${this.localhostDomain}file/${this.previousVersion}`
+      return `/file/${this.previousVersion}`
     }
   }
 
   setNextVersionUrl() {
     if (this.nextVersion != null) {
-      return `${this.localhostDomain}file/${this.nextVersion}`
+      return `/file/${this.nextVersion}`
     }
   }
 
   setNewestVersionUrl() {
     if (this.newestVersion != null) {
-      return `${this.localhostDomain}file/${this.newestVersion}`
+      return `/file/${this.newestVersion}`
     }
-  }
-
-  get localhostDomain() {
-    return `${window.location.protocol}//${window.location.host }/`
   }
 
   created() {
