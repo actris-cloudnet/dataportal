@@ -137,7 +137,7 @@ img.product
       This is a volatile file. The data in this file may be incomplete and update in real time.
     </div>
     <div v-if="newestVersion" class="note versionnote">
-      This is old version of the file: <a :href=setNewestVersionUrl()> Go to the newest version </a>.
+      This is an old version of the file, <router-link :to="`/file/${newestVersion}`">go to the newest version</router-link>.
     </div>
     <main class="info">
       <section id="file">
@@ -156,8 +156,11 @@ img.product
             <dt>Hash (SHA-256)</dt>
             <dd>{{ response.checksum }}</dd>
             <dt>Versions</dt>
-            <dd><a v-if="previousVersion" id="previousVersion" :href=setPreviousVersionUrl()> Previous </a>
-             - <a v-if="nextVersion" id="nextVersion" :href=setNextVersionUrl()> Next </a></dd>
+            <dd>
+              <router-link v-if="previousVersion" id="previousVersion" :to="`/file/${previousVersion}`">&larr; previous </router-link>
+              <span v-if="previousVersion && nextVersion">-</span> <router-link v-if="nextVersion" id="nextVersion" :to="`/file/${nextVersion}`"> next &rarr;</router-link>
+              <span v-if="!previousVersion && !nextVersion">n/a</span>
+            </dd>
           </dl>
         </section>
       </section>
@@ -282,30 +285,13 @@ export default class FileView extends Vue {
     return this.versions[this.currentVersionIndex - 1]
   }
 
-  setPreviousVersionUrl() {
-    if (this.previousVersion != null) {
-      return `/file/${this.previousVersion}`
-    }
-  }
-
-  setNextVersionUrl() {
-    if (this.nextVersion != null) {
-      return `/file/${this.nextVersion}`
-    }
-  }
-
-  setNewestVersionUrl() {
-    if (this.newestVersion != null) {
-      return `/file/${this.newestVersion}`
-    }
+  navigateToFile(uuid: string) {
+    this.$router.push(`/file/${uuid}`)
   }
 
   created() {
-    const payload = { params: { developer: this.devMode.activated || undefined}}
-    axios
-      .get(`${this.apiUrl}files/${this.uuid}`, payload)
-      .then(response => {
-        this.response = response.data
+    this.onUuidChange()
+      .then(() => {
         if (this.response == null) return
         const payload = {
           params: {
@@ -323,20 +309,27 @@ export default class FileView extends Vue {
             const searchFiles = response.data as SearchFileResponse[]
             this.versions = searchFiles.map(sf => sf.uuid)
           })
-          .catch(({response}) => {
-            console.error(response)
-          })
       })
-      .catch(({response}) => {
-        this.error = true
-        this.response = response
-      })
+  }
+
+  @Watch('uuid')
+  onUuidChange() {
+    const payload = { params: { developer: this.devMode.activated || undefined}}
     axios
       .get(`${this.apiUrl}visualizations/${this.uuid}`, payload)
       .then(response => {
         this.visualizations = sortVisualizations(response.data.visualizations)
       })
       .catch()
+    return axios
+      .get(`${this.apiUrl}files/${this.uuid}`, payload)
+      .then(response => {
+        this.response = response.data
+      })
+      .catch(({response}) => {
+        this.error = true
+        this.response = response
+      })
   }
 }
 </script>
