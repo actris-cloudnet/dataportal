@@ -165,8 +165,11 @@ img.product
             <dd>{{ response.releasedAt }}</dd>
             <dt>Versions</dt>
             <dd>
-              <router-link v-if="previousVersion" id="previousVersion" :to="`/file/${previousVersion}`">&larr; previous </router-link>
-              <span v-if="previousVersion && nextVersion">-</span> <router-link v-if="nextVersion" id="nextVersion" :to="`/file/${nextVersion}`"> next &rarr;</router-link>
+              <router-link v-if="previousVersion" id="previousVersion" :to="`/file/${previousVersion}`">
+                &larr; previous
+              </router-link>
+              <span v-if="previousVersion && nextVersion">-</span>
+              <router-link v-if="nextVersion" id="nextVersion" :to="`/file/${nextVersion}`"> next &rarr;</router-link>
               <span v-if="!previousVersion && !nextVersion" class="notAvailable"></span>
             </dd>
           </dl>

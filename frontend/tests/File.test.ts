@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {mount, shallowMount, Wrapper} from '@vue/test-utils'
+import {shallowMount, Wrapper} from '@vue/test-utils'
 import File from '../src/views/File.vue'
 import axios, { AxiosResponse, AxiosPromise, AxiosRequestConfig } from 'axios'
 import Vue from 'vue'
