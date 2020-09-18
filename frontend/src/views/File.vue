@@ -155,6 +155,8 @@ img.product
             <dd>{{ response.size }} bytes ({{ humanReadableSize(response.size) }})</dd>
             <dt>Hash (SHA-256)</dt>
             <dd>{{ response.checksum }}</dd>
+            <dt>Last modified</dt>
+            <dd>{{ response.releasedAt }}</dd>
             <dt>Versions</dt>
             <dd>
               <router-link v-if="previousVersion" id="previousVersion" :to="`/file/${previousVersion}`">&larr; previous </router-link>
