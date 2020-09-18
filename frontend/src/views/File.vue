@@ -30,8 +30,8 @@ main#landing
     background: #eef2ff
 
   .versionnote
-    border-color: #cad7ff
-    background: #d2fccc
+    border-color: #ddffca
+    background: #f4ffee
 
   main
     margin: -1em
@@ -108,6 +108,11 @@ main#landing
 .download:focus
   outline: thin dotted black
 
+.notAvailable
+  color: grey
+.notAvailable::after
+  content: 'n/a'
+
 img.product
   height: auto
   width: 1em
@@ -137,7 +142,7 @@ img.product
       This is a volatile file. The data in this file may be incomplete and update in real time.
     </div>
     <div v-if="newestVersion" class="note versionnote">
-      This is an old version of the file, <router-link :to="`/file/${newestVersion}`">go to the newest version</router-link>.
+      There is a newer version of this file available, the newest version can be found <router-link :to="`/file/${newestVersion}`">here</router-link>.
     </div>
     <main class="info">
       <section id="file">
@@ -146,7 +151,7 @@ img.product
           <dl>
             <dt>PID</dt>
             <dd v-if="response.pid.length > 2"> <a :href=response.pid> {{ response.pid }} </a></dd>
-            <dd v-else> n/a </dd>
+            <dd v-else class="notAvailable"></dd>
             <dt>Filename</dt>
             <dd>{{ response.filename }}</dd>
             <dt>Format</dt>
@@ -161,7 +166,7 @@ img.product
             <dd>
               <router-link v-if="previousVersion" id="previousVersion" :to="`/file/${previousVersion}`">&larr; previous </router-link>
               <span v-if="previousVersion && nextVersion">-</span> <router-link v-if="nextVersion" id="nextVersion" :to="`/file/${nextVersion}`"> next &rarr;</router-link>
-              <span v-if="!previousVersion && !nextVersion">n/a</span>
+              <span v-if="!previousVersion && !nextVersion" class="notAvailable"></span>
             </dd>
           </dl>
         </section>
