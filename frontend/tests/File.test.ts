@@ -39,13 +39,13 @@ describe('File.vue', () => {
     }
   })
   it('displays a note on volatile file', async () => {
-    mocked(axios.get).mockImplementation(axiosMockWithFileIdx(0))
+    mocked(axios.get).mockImplementation(axiosMockWithFileIdx(3))
     wrapper = mount(File)
     await Vue.nextTick()
     return expect(wrapper.text()).toContain('This is a volatile file.')
   })
   it('does not display a note on stable file', async () => {
-    mocked(axios.get).mockImplementation(axiosMockWithFileIdx(2))
+    mocked(axios.get).mockImplementation(axiosMockWithFileIdx(0))
     wrapper = mount(File)
     await Vue.nextTick()
     return expect(wrapper.text()).not.toContain('This is a volatile file.')

@@ -120,16 +120,17 @@ describe('Search.vue', () => {
     })
 
     it('updates table based on api response', async () => {
-      mocked(axios.get).mockImplementationOnce((_1, _2) => Promise.resolve(augmentAxiosResponse(resources['allsearch'].slice(1))))
+      mocked(axios.get).mockImplementationOnce((_1, _2) => Promise.resolve(augmentAxiosResponse(resources['allsearch'].slice(3))))
       const newValue = filesSortedByDate[0].measurementDate
       await changeInputAndNextTick('dateFrom', newValue)
       // Contains the dates of all files except the first
       resources['allsearch']
-        .slice(1)
+        .slice(3)
         .map((file: any) => file.measurementDate).forEach((date: any) =>
-          expect(wrapper.text()).toContain(date)
-        )
-      return expect(wrapper.text()).not.toContain(resources['allsearch'][0].measurementDate)
+          expect(wrapper.text()).toContain(date))
+      expect(wrapper.text()).not.toContain(resources['allsearch'][0].measurementDate)
+      expect(wrapper.text()).not.toContain(resources['allsearch'][1].measurementDate)
+      return expect(wrapper.text()).not.toContain(resources['allsearch'][2].measurementDate)
     })
 
     it('does not touch API on invalid input', async () => {

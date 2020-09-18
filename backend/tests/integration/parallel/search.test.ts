@@ -129,14 +129,14 @@ describe('/api/files', () => {
   it('returns newest file by default', async () => {
     const res = await axios.get(url, { params: { product: 'categorize' }})
     expect(res.data).toHaveLength(1)
-    expect(res.data[0].uuid === '6cb32746-faf0-4057-9076-ed2e698dcf36').toBeTruthy()
+    expect(res.data[0].uuid).toEqual('8bb32746-faf0-4057-9076-ed2e698dcf36')
   })
 
   it('returns optionally all versions of a file sorted by releasedAt', async () => {
     const res = await axios.get(url, { params: { product: 'categorize', allVersions: '' }})
     expect(res.data).toHaveLength(3)
-    expect(res.data[0].releasedAt > res.data[1].releasedAt).toBeTruthy()
-    expect(res.data[1].releasedAt > res.data[2].releasedAt).toBeTruthy()
+    expect(new Date(res.data[0].releasedAt).getTime()).toBeGreaterThan(new Date(res.data[1].releasedAt).getTime())
+    expect(new Date(res.data[1].releasedAt).getTime()).toBeGreaterThan(new Date(res.data[2].releasedAt).getTime())
   })
 
 })
@@ -145,7 +145,7 @@ describe('/api/search', () => {
   const url = `${backendPublicUrl}search/`
 
   it('responds with correct objects if dateFrom, dateTo, location, and product are specified', async () => {
-    const expectedData = [responses['allsearch'][0]]
+    const expectedData = [responses['allsearch'][3]]
     const payload = {params: {dateFrom: new Date('2018-06-09'), dateTo: new Date('2019-09-02'), location: 'macehead', product: 'classification'}}
     const res = await axios.get(url, payload)
     return expect(res.data).toMatchObject(expectedData)
