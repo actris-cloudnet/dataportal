@@ -142,7 +142,8 @@ img.product
       This is a volatile file. The data in this file may be incomplete and update in real time.
     </div>
     <div v-if="newestVersion" class="note versionnote">
-      There is a newer version of this file available, the newest version can be found <router-link :to="`/file/${newestVersion}`">here</router-link>.
+      There is a newer version of this file available, the newest version can be found
+      <router-link id="newestVersion" :to="`/file/${newestVersion}`">here</router-link>.
     </div>
     <main class="info">
       <section id="file">
