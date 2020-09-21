@@ -29,6 +29,10 @@ main#landing
     border-color: #cad7ff
     background: #eef2ff
 
+  .versionnote
+    border-color: #fff2ca
+    background: #fffdee
+
   main
     margin: -1em
     display: flex
@@ -104,6 +108,11 @@ main#landing
 .download:focus
   outline: thin dotted black
 
+.notAvailable
+  color: grey
+.notAvailable::after
+  content: 'n/a'
+
 img.product
   height: auto
   width: 1em
@@ -132,6 +141,9 @@ img.product
     <div v-if="response.volatile" class="note volatilenote">
       This is a volatile file. The data in this file may be incomplete and update in real time.
     </div>
+    <div v-if="newestVersion" class="note versionnote">
+      A <router-link id="newestVersion" :to="`/file/${newestVersion}`">newer version</router-link> of this file is available.
+    </div>
     <main class="info">
       <section id="file">
         <header>File information</header>
@@ -139,7 +151,7 @@ img.product
           <dl>
             <dt>PID</dt>
             <dd v-if="response.pid.length > 2"> <a :href=response.pid> {{ response.pid }} </a></dd>
-            <dd v-else> n/a </dd>
+            <dd v-else class="notAvailable"></dd>
             <dt>Filename</dt>
             <dd>{{ response.filename }}</dd>
             <dt>Format</dt>
@@ -148,6 +160,17 @@ img.product
             <dd>{{ response.size }} bytes ({{ humanReadableSize(response.size) }})</dd>
             <dt>Hash (SHA-256)</dt>
             <dd>{{ response.checksum }}</dd>
+            <dt>Last modified</dt>
+            <dd>{{ response.releasedAt }}</dd>
+            <dt>Versions</dt>
+            <dd>
+              <router-link v-if="previousVersion" id="previousVersion" :to="`/file/${previousVersion}`">
+                previous
+              </router-link>
+              <span v-if="previousVersion && nextVersion">-</span>
+              <router-link v-if="nextVersion" id="nextVersion" :to="`/file/${nextVersion}`"> next</router-link>
+              <span v-if="!previousVersion && !nextVersion" class="notAvailable"></span>
+            </dd>
           </dl>
         </section>
       </section>
@@ -223,18 +246,20 @@ img.product
 
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import axios from 'axios'
 import {getIconUrl, humanReadableSize, humanReadableDate, sortVisualizations} from '../lib'
 import { DevMode } from '../lib/DevMode'
 import { File } from '../../../backend/src/entity/File'
 import {Visualization} from '../../../backend/src/entity/Visualization'
+import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 
 @Component
 export default class FileView extends Vue {
   @Prop() uuid!: string
   response: File | null = null
   visualizations: Visualization[] | [] = []
+  versions: string[] = []
   error = false
   quicklookUrl = process.env.VUE_APP_QUICKLOOKURL
   apiUrl = process.env.VUE_APP_BACKENDURL
@@ -243,7 +268,6 @@ export default class FileView extends Vue {
   getIconUrl = getIconUrl
   sortVisualizations = sortVisualizations
   devMode = new DevMode()
-
   allVisualizations = false
 
   getVisualizations() {
@@ -251,9 +275,63 @@ export default class FileView extends Vue {
     return this.visualizations
   }
 
+  get currentVersionIndex() {
+    if (this.response == null) return null
+    const response = this.response
+    return this.versions.findIndex(uuid => uuid == response.uuid)
+  }
+
+  get newestVersion() {
+    if (!this.currentVersionIndex) return null
+    return this.versions[0]
+  }
+  get previousVersion() {
+    if (this.currentVersionIndex == null) return null
+    return this.versions[this.currentVersionIndex + 1]
+  }
+
+  get nextVersion() {
+    if (!this.currentVersionIndex) return null
+    return this.versions[this.currentVersionIndex - 1]
+  }
+
+  navigateToFile(uuid: string) {
+    this.$router.push(`/file/${uuid}`)
+  }
+
   created() {
+    this.onUuidChange()
+      .then(() => {
+        if (this.response == null) return
+        const payload = {
+          params: {
+            developer: this.devMode.activated || undefined,
+            location: this.response.site.id,
+            product: this.response.product.id,
+            dateFrom: this.response.measurementDate,
+            dateTo: this.response.measurementDate,
+            allVersions: true
+          }
+        }
+        return axios
+          .get(`${this.apiUrl}search`, payload)
+          .then(response => {
+            const searchFiles = response.data as SearchFileResponse[]
+            this.versions = searchFiles.map(sf => sf.uuid)
+          })
+      })
+  }
+
+  @Watch('uuid')
+  onUuidChange() {
     const payload = { params: { developer: this.devMode.activated || undefined}}
     axios
+      .get(`${this.apiUrl}visualizations/${this.uuid}`, payload)
+      .then(response => {
+        this.visualizations = sortVisualizations(response.data.visualizations)
+      })
+      .catch()
+    return axios
       .get(`${this.apiUrl}files/${this.uuid}`, payload)
       .then(response => {
         this.response = response.data
@@ -262,12 +340,6 @@ export default class FileView extends Vue {
         this.error = true
         this.response = response
       })
-    axios
-      .get(`${this.apiUrl}visualizations/${this.uuid}`, payload)
-      .then(response => {
-        this.visualizations = sortVisualizations(response.data.visualizations)
-      })
-      .catch()
   }
 }
 </script>
