@@ -30,8 +30,8 @@ main#landing
     background: #eef2ff
 
   .versionnote
-    border-color: #ddffca
-    background: #f4ffee
+    border-color: #fff2ca
+    background: #fffdee
 
   main
     margin: -1em
@@ -142,8 +142,7 @@ img.product
       This is a volatile file. The data in this file may be incomplete and update in real time.
     </div>
     <div v-if="newestVersion" class="note versionnote">
-      There is a newer version of this file available, the newest version can be found
-      <router-link id="newestVersion" :to="`/file/${newestVersion}`">here</router-link>.
+      A <router-link id="newestVersion" :to="`/file/${newestVersion}`">newer version</router-link> of this file is available.
     </div>
     <main class="info">
       <section id="file">
@@ -166,10 +165,10 @@ img.product
             <dt>Versions</dt>
             <dd>
               <router-link v-if="previousVersion" id="previousVersion" :to="`/file/${previousVersion}`">
-                &larr; previous
+                previous
               </router-link>
               <span v-if="previousVersion && nextVersion">-</span>
-              <router-link v-if="nextVersion" id="nextVersion" :to="`/file/${nextVersion}`"> next &rarr;</router-link>
+              <router-link v-if="nextVersion" id="nextVersion" :to="`/file/${nextVersion}`"> next</router-link>
               <span v-if="!previousVersion && !nextVersion" class="notAvailable"></span>
             </dd>
           </dl>
