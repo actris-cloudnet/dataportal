@@ -64,7 +64,7 @@ export class File {
     @Column()
     format!: string
 
-    @Column('text', {array: true})
+    @Column('text', {array: true, nullable: true})
     sourceFileIds!: string[]
 
     @OneToMany(_ => Visualization, viz => viz.sourceFile)
