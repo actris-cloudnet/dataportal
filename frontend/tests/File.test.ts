@@ -40,49 +40,49 @@ describe('File.vue', () => {
       if (url.includes('visualization')) {
         return Promise.resolve(augmentAxiosResponse(visualizationResponse))
       } else if (url.includes('search')) {
-        return Promise.resolve(augmentAxiosResponse(resources['allsearch'].slice(0,3)))
+        return Promise.resolve(augmentAxiosResponse(resources['allsearch'].slice(4,7)))
       } else {
         return Promise.resolve(augmentAxiosResponse(resources['allfiles'][idx]))
       }
     }
   })
   it('displays a note on volatile file', async () => {
-    mocked(axios.get).mockImplementation(axiosMockWithFileIdx(3))
+    mocked(axios.get).mockImplementation(axiosMockWithFileIdx(0))
     wrapper = mountVue()
     await Vue.nextTick()
     return expect(wrapper.text()).toContain('This is a volatile file.')
   })
   it('does not display a note on stable file', async () => {
-    mocked(axios.get).mockImplementation(axiosMockWithFileIdx(0))
+    mocked(axios.get).mockImplementation(axiosMockWithFileIdx(4))
     wrapper = mountVue()
     await Vue.nextTick()
     return expect(wrapper.text()).not.toContain('This is a volatile file.')
   })
 
   it('displays link to next and newest version in oldest version', async () => {
-    mocked(axios.get).mockImplementation(axiosMockWithFileIdx(2))
+    mocked(axios.get).mockImplementation(axiosMockWithFileIdx(6))
     wrapper = mountVue()
     await nextTick(3)
     expect(wrapper.findAll('#previousVersion').length).toEqual(0)
-    expect(wrapper.find('#nextVersion').html()).toContain(`/file/${resources['allfiles'][1]['uuid']}`)
-    expect(wrapper.find('#newestVersion').html()).toContain(`/file/${resources['allfiles'][0]['uuid']}`)
+    expect(wrapper.find('#nextVersion').html()).toContain(`/file/${resources['allfiles'][5]['uuid']}`)
+    expect(wrapper.find('#newestVersion').html()).toContain(`/file/${resources['allfiles'][4]['uuid']}`)
   })
 
   it('displays link to next, previous and newest version in second-to-newest version', async () => {
-    mocked(axios.get).mockImplementation(axiosMockWithFileIdx(1))
+    mocked(axios.get).mockImplementation(axiosMockWithFileIdx(5))
     wrapper = mountVue()
     await nextTick(3)
-    expect(wrapper.find('#nextVersion').html()).toContain(`/file/${resources['allfiles'][0]['uuid']}`)
-    expect(wrapper.find('#previousVersion').html()).toContain(`/file/${resources['allfiles'][2]['uuid']}`)
-    expect(wrapper.find('#newestVersion').html()).toContain(`/file/${resources['allfiles'][0]['uuid']}`)
+    expect(wrapper.find('#nextVersion').html()).toContain(`/file/${resources['allfiles'][4]['uuid']}`)
+    expect(wrapper.find('#previousVersion').html()).toContain(`/file/${resources['allfiles'][6]['uuid']}`)
+    expect(wrapper.find('#newestVersion').html()).toContain(`/file/${resources['allfiles'][4]['uuid']}`)
   })
 
   it('displays link to previous version in the newest version', async () => {
-    mocked(axios.get).mockImplementation(axiosMockWithFileIdx(0))
+    mocked(axios.get).mockImplementation(axiosMockWithFileIdx(4))
     wrapper = mountVue()
     await nextTick(3)
     expect(wrapper.findAll('#newestVersion').length).toEqual(0)
-    expect(wrapper.find('#previousVersion').html()).toContain(`/file/${resources['allfiles'][1]['uuid']}`)
+    expect(wrapper.find('#previousVersion').html()).toContain(`/file/${resources['allfiles'][5]['uuid']}`)
   })
 
   it('displays last modified date', async () => {
