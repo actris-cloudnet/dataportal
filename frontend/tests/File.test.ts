@@ -36,13 +36,18 @@ let wrapper: Wrapper<Vue>
 describe('File.vue', () => {
   beforeAll(async () => {
     resources = await readResources()
-    axiosMockWithFileIdx = (idx: number) => (url: string, _: AxiosRequestConfig | undefined): AxiosPromise => {
-      if (url.includes('visualization')) {
-        return Promise.resolve(augmentAxiosResponse(visualizationResponse))
-      } else if (url.includes('search')) {
-        return Promise.resolve(augmentAxiosResponse(resources['allsearch'].slice(4,7)))
-      } else {
-        return Promise.resolve(augmentAxiosResponse(resources['allfiles'][idx]))
+    axiosMockWithFileIdx = (idx: number | number[]) => {
+      let nreq = 0
+      return (url: string, _: AxiosRequestConfig | undefined): AxiosPromise => {
+        if (url.includes('visualization')) {
+          return Promise.resolve(augmentAxiosResponse(visualizationResponse))
+        } else if (url.includes('search')) {
+          return Promise.resolve(augmentAxiosResponse(resources['allsearch'].slice(4, 7)))
+        } else {
+          const i = Array.isArray(idx) ? idx[nreq] : idx
+          nreq += 1
+          return Promise.resolve(augmentAxiosResponse(resources['allfiles'][i]))
+        }
       }
     }
   })
@@ -90,5 +95,20 @@ describe('File.vue', () => {
     wrapper = mountVue()
     await Vue.nextTick()
     expect(wrapper.text()).toContain(resources['allfiles'][0]['releasedAt'])
+  })
+
+  it('displays links to source files', async () => {
+    mocked(axios.get).mockImplementation(axiosMockWithFileIdx([9, 8]))
+    wrapper = mountVue()
+    await nextTick(3)
+    expect(wrapper.findAll('#provenance').length).toEqual(1)
+    expect(wrapper.find('#provenance').html()).toContain(`/file/${resources['allfiles'][8]['uuid']}`)
+  })
+
+  it('does not display source file info where not applicable', async () => {
+    mocked(axios.get).mockImplementation(axiosMockWithFileIdx(8))
+    wrapper = mountVue()
+    await nextTick(3)
+    expect(wrapper.findAll('#provenance').length).toEqual(0)
   })
 })
