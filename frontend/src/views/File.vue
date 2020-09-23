@@ -117,6 +117,11 @@ img.product
   height: auto
   width: 1em
   margin-right: 0.3em
+
+.sourceFileList
+  margin-top: 5px
+  margin-bottom: 5px
+  margin-left: 10px
 </style>
 
 
@@ -207,6 +212,18 @@ img.product
           </dl>
         </section>
       </section>
+      <section id="provenance" v-if="response.sourceFileIds">
+        <header>Source files</header>
+        <section class="details">
+          <span class="notice">This file was generated using the following files:<br></span>
+            <div v-for="sourceFile in sourceFiles" :key="sourceFile.uuid" class="sourceFileList">
+              <router-link :to="`/file/${sourceFile.uuid}`">
+                <img :src="getIconUrl(sourceFile.product.id)" class="product">
+                {{ sourceFile.product.humanReadableName }}
+              </router-link><br>
+            </div>
+        </section>
+      </section>
       <section id="history">
         <header>History</header>
         <section class="details" v-if="response.history">
@@ -269,6 +286,7 @@ export default class FileView extends Vue {
   sortVisualizations = sortVisualizations
   devMode = new DevMode()
   allVisualizations = false
+  sourceFiles: File[] = []
 
   getVisualizations() {
     if (!this.allVisualizations) return this.visualizations.slice(0, 1)
@@ -301,36 +319,18 @@ export default class FileView extends Vue {
 
   created() {
     this.onUuidChange()
-      .then(() => {
-        if (this.response == null) return
-        const payload = {
-          params: {
-            developer: this.devMode.activated || undefined,
-            location: this.response.site.id,
-            product: this.response.product.id,
-            dateFrom: this.response.measurementDate,
-            dateTo: this.response.measurementDate,
-            allVersions: true
-          }
-        }
-        return axios
-          .get(`${this.apiUrl}search`, payload)
-          .then(response => {
-            const searchFiles = response.data as SearchFileResponse[]
-            this.versions = searchFiles.map(sf => sf.uuid)
-          })
-      })
   }
 
-  @Watch('uuid')
-  onUuidChange() {
-    const payload = { params: { developer: this.devMode.activated || undefined}}
-    axios
+  fetchVisualizations(payload: {}) {
+    return axios
       .get(`${this.apiUrl}visualizations/${this.uuid}`, payload)
       .then(response => {
         this.visualizations = sortVisualizations(response.data.visualizations)
       })
       .catch()
+  }
+
+  fetchFileMetadata(payload: {}) {
     return axios
       .get(`${this.apiUrl}files/${this.uuid}`, payload)
       .then(response => {
@@ -339,6 +339,44 @@ export default class FileView extends Vue {
       .catch(({response}) => {
         this.error = true
         this.response = response
+      })
+  }
+
+  fetchVersions(response: File) {
+    const payload = {
+      params: {
+        developer: this.devMode.activated || undefined,
+        location: response.site.id,
+        product: response.product.id,
+        dateFrom: response.measurementDate,
+        dateTo: response.measurementDate,
+        allVersions: true
+      }
+    }
+    return axios
+      .get(`${this.apiUrl}search`, payload)
+      .then(response => {
+        const searchFiles = response.data as SearchFileResponse[]
+        this.versions = searchFiles.map(sf => sf.uuid)
+      })
+  }
+
+  fetchSourceFiles(response: File) {
+    if (!response.sourceFileIds) return
+    return Promise.all(response.sourceFileIds.map(uuid => axios.get(`${this.apiUrl}files/${uuid}`)))
+      .then(response => this.sourceFiles = response.map(res => res.data))
+  }
+
+  @Watch('uuid')
+  onUuidChange() {
+    this.versions = []
+    const payload = { params: { developer: this.devMode.activated || undefined}}
+    return this.fetchFileMetadata(payload)
+      .then(() => {
+        if (this.response == null || this.error) return
+        this.fetchVisualizations(payload)
+        this.fetchVersions(this.response)
+        this.fetchSourceFiles(this.response)
       })
   }
 }
