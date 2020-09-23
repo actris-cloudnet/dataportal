@@ -47,6 +47,8 @@ main#landing
       margin: 1em
       min-width: 20em
       word-wrap: anywhere
+      display: flex
+      flex-direction: column
 
       > *
         padding: 10px
@@ -78,6 +80,13 @@ main#landing
 
     section#preview.wide
       flex-basis: 100%
+
+    .centered
+      text-align: center
+      flex-grow: 1
+      display: flex
+      justify-content: center
+      align-items: center
 
     .monospace
       white-space: pre-wrap
@@ -224,13 +233,15 @@ img.product
             </div>
         </section>
       </section>
-      <section id="history">
+      <section id="history" v-if="response.history">
         <header>History</header>
-        <section class="details" v-if="response.history">
+        <section class="details" v-if="showHistory">
           <span class="monospace">{{ response.history.trim() }}</span>
-          <span class="notice">This is a non-standardized history provided by the file creator/processor.</span>
+          <span class="notice">This is a non-standardized history provided by the file creator/processor.
+          <a href="" @click.prevent="showHistory = false" id="hideHistory">Hide history</a>.</span>
         </section>
-        <section class="details na" v-else>N/A
+        <section class="details centered" v-else>
+          <a href="" @click.prevent="showHistory = true" id="showHistory">Show history</a>
         </section>
       </section>
       <section id="preview" v-bind:class="{ wide: allVisualizations }">
@@ -287,6 +298,7 @@ export default class FileView extends Vue {
   devMode = new DevMode()
   allVisualizations = false
   sourceFiles: File[] = []
+  showHistory = false
 
   getVisualizations() {
     if (!this.allVisualizations) return this.visualizations.slice(0, 1)
