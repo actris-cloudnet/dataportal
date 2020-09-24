@@ -227,7 +227,7 @@ img.product
       <section id="history">
         <header>History</header>
         <section class="details history">
-          <div v-if="response.sourceFileIds">
+          <div v-if="response.sourceFileIds && response.sourceFileIds.length > 0">
             <span class="notice">This file was generated using the following files:<br></span>
             <div v-for="sourceFile in sourceFiles" :key="sourceFile.uuid" class="sourceFileList">
               <router-link :to="`/file/${sourceFile.uuid}`">
