@@ -73,7 +73,7 @@ describe('/api/files', () => {
   it('responds with an array of objects with dates between [ dateFrom, dateTo ], in descending order', async () => {
     const payload = {params: {dateFrom: new Date('2018-06-09'), dateTo: new Date('2019-09-01')}}
     const res = await axios.get(url, payload)
-    return expect(res.data.map((d: any) => d.measurementDate)).toEqual(['2019-09-01', '2019-07-15', '2018-11-15', '2018-06-09'])
+    return expect(res.data.map((d: any) => d.measurementDate)).toEqual(['2019-09-01', '2019-07-16', '2019-07-16', '2019-07-15', '2018-11-15', '2018-06-09'])
   })
 
   it('responds with correct objects if product is specified', async () => {
@@ -108,10 +108,10 @@ describe('/api/files', () => {
     expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
 
-  it('has exactly one stable file', async () => {
+  it('has exactly three stable files', async () => {
     const payload = {params: {volatile: 'false'}}
     const res = await axios.get(url, payload)
-    return expect(res.data).toHaveLength(1)
+    return expect(res.data).toHaveLength(3)
   })
 
   it('does not show test files in normal mode', async () => {
@@ -127,13 +127,13 @@ describe('/api/files', () => {
   })
 
   it('returns newest file by default', async () => {
-    const res = await axios.get(url, { params: { product: 'categorize' }})
+    const res = await axios.get(url, { params: { product: 'categorize', dateTo: '2019-07-15' }})
     expect(res.data).toHaveLength(1)
     expect(res.data[0].uuid).toEqual('8bb32746-faf0-4057-9076-ed2e698dcf36')
   })
 
   it('returns optionally all versions of a file sorted by releasedAt', async () => {
-    const res = await axios.get(url, { params: { product: 'categorize', allVersions: '' }})
+    const res = await axios.get(url, { params: { product: 'categorize', dateTo: '2019-07-15', allVersions: '' }})
     expect(res.data).toHaveLength(3)
     expect(new Date(res.data[0].releasedAt).getTime()).toBeGreaterThan(new Date(res.data[1].releasedAt).getTime())
     expect(new Date(res.data[1].releasedAt).getTime()).toBeGreaterThan(new Date(res.data[2].releasedAt).getTime())
@@ -145,7 +145,7 @@ describe('/api/search', () => {
   const url = `${backendPublicUrl}search/`
 
   it('responds with correct objects if dateFrom, dateTo, location, and product are specified', async () => {
-    const expectedData = [responses['allsearch'][3]]
+    const expectedData = [responses['allsearch'][1]]
     const payload = {params: {dateFrom: new Date('2018-06-09'), dateTo: new Date('2019-09-02'), location: 'macehead', product: 'classification'}}
     const res = await axios.get(url, payload)
     return expect(res.data).toMatchObject(expectedData)

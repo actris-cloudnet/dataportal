@@ -194,7 +194,7 @@ describe('search page', () => {
   it('selects site from multi-selection while clicking marker', async () => {
     await clearkMapSelection(By.id('map'))
     await clickMapMarker(By.id('map'), -140, -20)
-    await wait(200)
+    await wait(300)
     const content = await selenium.getContent()
     expect(content).toContain('Mace Head')
   })

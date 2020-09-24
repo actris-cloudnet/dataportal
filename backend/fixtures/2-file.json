@@ -134,5 +134,40 @@
       "format": "NetCDF3",
       "product": "model",
       "site": "granada"
+    },
+    {
+      "uuid": "1bb32746-faf0-4057-9076-ed2e698dcf36",
+      "pid": "",
+      "volatile": false,
+      "title": "Categorize file from Bucharest",
+      "measurementDate": "2019-07-16",
+      "history": "2019-09-16 11:10:33 - categorize file created\n2019-09-16 11:10:10 - radar file created\nLidar backscatter derived from raw values in arbitrary units: calibrated by user Ewan O'Connor <ewan.oconnor@fmi.fi> on 17-Jul-2019.",
+      "publicity": "public",
+      "product": "categorize",
+      "cloudnetpyVersion": "1.0.4",
+      "releasedAt": "2020-02-19T10:59:58.449Z",
+      "filename": "20190715_bucharest_categorize.nc",
+      "checksum": "14d86b26f642a0befdcd7088ff38caab00ea3d95933f4ccc430179b4a29b74d3",
+      "size": 7127282,
+      "format": "HDF5 (NetCDF4)",
+      "site": "bucharest"
+    },
+    {
+      "uuid": "2bb32746-faf0-4057-9076-ed2e698dcf36",
+      "pid": "",
+      "volatile": false,
+      "title": "Classification file from Bucharest",
+      "measurementDate": "2019-07-16",
+      "history": "2019-09-16 11:10:33 - categorize file created\n2019-09-16 11:10:10 - radar file created\nLidar backscatter derived from raw values in arbitrary units: calibrated by user Ewan O'Connor <ewan.oconnor@fmi.fi> on 17-Jul-2019.",
+      "publicity": "public",
+      "product": "classification",
+      "cloudnetpyVersion": "1.0.4",
+      "releasedAt": "2020-02-19T10:59:58.449Z",
+      "filename": "20190715_bucharest_categorize.nc",
+      "checksum": "24d86b26f642a0befdcd7088ff38caab00ea3d95933f4ccc430179b4a29b74d3",
+      "size": 7127282,
+      "format": "HDF5 (NetCDF4)",
+      "site": "bucharest",
+      "sourceFileIds": ["1bb32746-faf0-4057-9076-ed2e698dcf36"]
     }
-  ]
+]

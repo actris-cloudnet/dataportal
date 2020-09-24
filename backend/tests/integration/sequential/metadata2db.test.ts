@@ -10,10 +10,13 @@ const bucharestXml = `${dataDir}20190723_bucharest_classification.xml`
 const bucharestXmlNoPid = `${dataDir}20190723_bucharest_classification_no_pid.xml`
 const bucharestXmlMissing = `${dataDir}20190723_bucharest_classification_missing_fields.xml`
 const bucharestXmlInvalidLocation = `${dataDir}20190723_bucharest_classification_invalid_location.xml`
+const bucharestXmlProvenance = `${dataDir}20190723_bucharest_classification_provenance.xml`
+const bucharestXmlInvalidProvenance = `${dataDir}20190723_bucharest_classification_provenance.xml`
 const granadaXml = `${dataDir}20200126_granada_ecmwf.xml`
 
 const uuid = '15506ea8d3574c7baf8c95dfcc34fc7d'
 const granadaUuid = '9e04d8ef0f2b4823835d33e458403c67'
+const provenanceUuid = '55506ea8d3574c7baf8c95dfcc34fc7d'
 
 let conn: Connection
 let repo: Repository<File>
@@ -23,6 +26,7 @@ beforeAll(async () => {
   repo = conn.getRepository('file')
   await repo.delete(uuid)
   await repo.delete(granadaUuid)
+  await repo.delete(provenanceUuid)
   return
 })
 
@@ -32,6 +36,7 @@ beforeEach(() => {
 
 afterAll(async () => {
   await repo.delete(uuid)
+  await repo.delete(provenanceUuid)
   await conn.close()
   return
 })
@@ -120,4 +125,20 @@ test('overwrites existing freezed files on test site', async () => {
     .set({ pid: '', volatile: true})
     .where('uuid = :uuid', { uuid: granadaUuid })
     .execute()
+})
+
+test('inserting new file with source files', async () => {
+  const out = await putFile(bucharestXmlProvenance, { 'Content-Type': 'application/xml' })
+  expect(out.status.toString()).toMatch('201')
+  const provenanceFile = await repo.findOneOrFail(provenanceUuid)
+  return expect(provenanceFile.sourceFileIds).toMatchObject(['22b32746-faf0-4057-9076-ed2e698dcc34', '6cb32746-faf0-4057-9076-ed2e698dcf36'])
+})
+
+test('errors on nonexisting source files', async () => {
+  try {
+    await repo.delete(provenanceUuid)
+    await putFile(bucharestXmlInvalidProvenance, { 'Content-Type': 'application/xml' })
+  } catch (e) {
+    expect(e.response.data.status.toString()).toMatch('500')
+  }
 })

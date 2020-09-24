@@ -1,11 +1,5 @@
 [
   {
-    "id": "test1",
-    "humanReadableName": "Auringonpaisteen määrä",
-    "product": "categorize",
-    "order": "1"
-  },
-  {
     "id": "test2",
     "humanReadableName": "Kaljanhimo",
     "product": "categorize",
@@ -16,6 +10,12 @@
     "humanReadableName": "Target classification",
     "product": "classification",
     "order": "0"
+  },
+  {
+    "id": "test1",
+    "humanReadableName": "Auringonpaisteen määrä",
+    "product": "categorize",
+    "order": "1"
   },
   {
     "id": "classification-detection_status",

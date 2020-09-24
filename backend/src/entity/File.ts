@@ -64,6 +64,9 @@ export class File {
     @Column()
     format!: string
 
+    @Column('text', {array: true, nullable: true})
+    sourceFileIds!: string[]
+
     @OneToMany(_ => Visualization, viz => viz.sourceFile)
     visualizations!: Visualization[]
 
@@ -85,7 +88,8 @@ export class File {
       format: string,
       site: Site,
       product: Product,
-      volatile = true
+      volatile = true,
+      sourceFiles: File[] = []
     ) {
       // A typeorm hack, see https://github.com/typeorm/typeorm/issues/3903
       if (typeof obj == 'undefined') return
@@ -107,5 +111,6 @@ export class File {
       this.size = filesize
       this.format = format
       this.volatile = volatile
+      this.sourceFileIds = sourceFiles.map(file => file.uuid)
     }
 }

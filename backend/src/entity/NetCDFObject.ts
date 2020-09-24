@@ -10,6 +10,7 @@ export interface NetCDFObject {
     year: string
     month: string
     day: string
+    source_file_uuids?: string
 }
 
 // Cloudnet NC file header specification
@@ -22,7 +23,7 @@ const ncObjectSpec: Array<string> = [
   'Conventions',
   'year',
   'month',
-  'day',
+  'day'
 ]
 
 export const getMissingFields = (obj: any) =>
