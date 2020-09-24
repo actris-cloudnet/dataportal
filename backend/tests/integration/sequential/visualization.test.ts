@@ -1,5 +1,5 @@
 import { basename, resolve } from 'path'
-import {backendPrivateUrl, backendPublicUrl, clearDir, publicVizDir} from '../../lib'
+import {backendPrivateUrl, clearDir, publicVizDir} from '../../lib'
 import axios from 'axios'
 import {Connection, createConnection, Repository} from 'typeorm'
 import {Visualization} from '../../../src/entity/Visualization'
