@@ -81,12 +81,12 @@ main#landing
     section#preview.wide
       flex-basis: 100%
 
-    .centered
-      text-align: center
+    .history
       flex-grow: 1
+      flex-direction: column
       display: flex
-      justify-content: center
-      align-items: center
+      justify-content: space-between
+      align-items: start
 
     .monospace
       white-space: pre-wrap
@@ -129,8 +129,11 @@ img.product
 
 .sourceFileList
   margin-top: 5px
-  margin-bottom: 5px
+  margin-bottom: 1em
   margin-left: 10px
+
+.sourceFileNotAvailable
+  margin-bottom: 1em
 </style>
 
 
@@ -221,27 +224,27 @@ img.product
           </dl>
         </section>
       </section>
-      <section id="provenance" v-if="response.sourceFileIds">
-        <header>Source files</header>
-        <section class="details">
-          <span class="notice">This file was generated using the following files:<br></span>
+      <section id="history">
+        <header>History</header>
+        <section class="details history">
+          <div v-if="response.sourceFileIds">
+            <span class="notice">This file was generated using the following files:<br></span>
             <div v-for="sourceFile in sourceFiles" :key="sourceFile.uuid" class="sourceFileList">
               <router-link :to="`/file/${sourceFile.uuid}`">
                 <img :src="getIconUrl(sourceFile.product.id)" class="product">
                 {{ sourceFile.product.humanReadableName }}
               </router-link><br>
             </div>
-        </section>
-      </section>
-      <section id="history" v-if="response.history">
-        <header>History</header>
-        <section class="details" v-if="showHistory">
-          <span class="monospace">{{ response.history.trim() }}</span>
-          <span class="notice">This is a non-standardized history provided by the file creator/processor.
-          <a href="" @click.prevent="showHistory = false" id="hideHistory">Hide history</a>.</span>
-        </section>
-        <section class="details centered" v-else>
-          <a href="" @click.prevent="showHistory = true" id="showHistory">Show history</a>
+          </div>
+          <div class="sourceFileNotAvailable" v-else>Source file information not available.</div>
+          <div v-if="showHistory">
+            <span class="notice">Details:</span>
+            <span class="monospace">{{ response.history.trim() }}</span>
+            <span class="notice">This is a non-standardized history provided by the file creator/processor.
+              <a href="" @click.prevent="showHistory = false" id="hideHistory">Hide details</a>.
+            </span>
+          </div>
+          <a href="" @click.prevent="showHistory = true" id="showHistory" class="notice" v-else>Show details</a>
         </section>
       </section>
       <section id="preview" v-bind:class="{ wide: allVisualizations }">
@@ -264,7 +267,7 @@ img.product
              @click="allVisualizations = false">
             View only one plot
           </a>
-          <span v-else-if="visualizations.length === 0">Preview not available</span>
+          <span v-else-if="visualizations.length === 0">Preview not available.</span>
         </section>
       </section>
     </main>

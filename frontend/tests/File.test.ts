@@ -101,15 +101,15 @@ describe('File.vue', () => {
     mocked(axios.get).mockImplementation(axiosMockWithFileIdx([9, 8]))
     wrapper = mountVue()
     await nextTick(3)
-    expect(wrapper.findAll('#provenance').length).toEqual(1)
-    expect(wrapper.find('#provenance').html()).toContain(`/file/${resources['allfiles'][8]['uuid']}`)
+    expect(wrapper.findAll('#history').length).toEqual(1)
+    expect(wrapper.find('#history').html()).toContain(`/file/${resources['allfiles'][8]['uuid']}`)
   })
 
   it('does not display source file info where not applicable', async () => {
     mocked(axios.get).mockImplementation(axiosMockWithFileIdx(8))
     wrapper = mountVue()
     await nextTick(3)
-    expect(wrapper.findAll('#provenance').length).toEqual(0)
+    expect(wrapper.findAll('.sourceFileList').length).toEqual(0)
   })
 
   it('shows history by clicking a link', async () => {
