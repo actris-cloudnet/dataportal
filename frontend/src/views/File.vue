@@ -86,7 +86,7 @@ main#landing
       flex-direction: column
       display: flex
       justify-content: space-between
-      align-items: start
+      align-items: flex-start
 
     .monospace
       white-space: pre-wrap
@@ -326,10 +326,6 @@ export default class FileView extends Vue {
   get nextVersion() {
     if (!this.currentVersionIndex) return null
     return this.versions[this.currentVersionIndex - 1]
-  }
-
-  navigateToFile(uuid: string) {
-    this.$router.push(`/file/${uuid}`)
   }
 
   created() {
