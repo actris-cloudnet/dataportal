@@ -353,14 +353,16 @@ export default class FileView extends Vue {
       })
   }
 
-  fetchVersions(response: File) {
+  fetchVersions(file: File) {
+    // No need to reload versions
+    if (this.versions.includes(file.uuid)) return
     const payload = {
       params: {
         developer: this.devMode.activated || undefined,
-        location: response.site.id,
-        product: response.product.id,
-        dateFrom: response.measurementDate,
-        dateTo: response.measurementDate,
+        location: file.site.id,
+        product: file.product.id,
+        dateFrom: file.measurementDate,
+        dateTo: file.measurementDate,
         allVersions: true
       }
     }
@@ -380,7 +382,6 @@ export default class FileView extends Vue {
 
   @Watch('uuid')
   onUuidChange() {
-    this.versions = []
     const payload = { params: { developer: this.devMode.activated || undefined}}
     return this.fetchFileMetadata(payload)
       .then(() => {
