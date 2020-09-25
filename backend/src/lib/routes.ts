@@ -139,6 +139,18 @@ export class Routes {
       })
   }
 
+  site: RequestHandler = async (req: Request, res: Response, next) => {
+    const qb = this.siteRepo.createQueryBuilder('site')
+      .where('site.id = :siteid', req.params)
+    this.hideTestDataFromNormalUsers<Site>(qb, req)
+      .getOne()
+      .then(result => {
+        if (result == undefined) return next({ status: 404, errors: ['No sites match this id'] })
+        res.send(result)
+      })
+      .catch(err => next({ status: 500, errors: err }))
+  }
+
   sites: RequestHandler = async (req: Request, res: Response, next) => {
     const qb = this.siteRepo.createQueryBuilder('site')
       .select()

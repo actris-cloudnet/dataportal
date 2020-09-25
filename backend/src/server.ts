@@ -71,6 +71,7 @@ import * as xmlparser from 'express-xml-bodyparser'
     middleware.filesQueryAugmenter,
     routes.getLatestVisualizationDate
   )
+  app.get('/api/sites/:siteid', routes.site)
 
   // private
   app.put('/files/:uuid', routes.putMetadataXml)
