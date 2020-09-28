@@ -413,7 +413,7 @@ import {Visualization} from '../../../backend/src/entity/Visualization'
 import {Product} from '../../../backend/src/entity/Product'
 import {ProductVariable} from '../../../backend/src/entity/ProductVariable'
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
-import Map from '@/components/Map.vue'
+import Map from '../components/Map.vue'
 
 Vue.component('datepicker', Datepicker)
 Vue.component('b-table', BTable)
