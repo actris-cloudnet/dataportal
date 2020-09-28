@@ -18,7 +18,9 @@
       "id": "mira",
       "type": "radar"
     },
-    "status": "created"
+    "status": "created",
+    "createdAt": "2020-09-28T12:45:21.916Z",
+    "updatedAt": "2020-09-28T12:45:21.916Z"
   },
   {
     "id": "ab460da4ad72c48223",
@@ -39,6 +41,8 @@
       "id": "chm15k",
       "type": "lidar"
     },
-    "status": "processed"
+    "status": "processed",
+    "createdAt": "2020-09-28T12:46:21.916Z",
+    "updatedAt": "2020-09-28T12:46:21.916Z"
   }
 ]

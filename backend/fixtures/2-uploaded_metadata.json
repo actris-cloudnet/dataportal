@@ -6,7 +6,9 @@
     "hash": "dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b5",
     "site": "granada",
     "instrument": "mira",
-    "status": "created"
+    "status": "created",
+    "createdAt": "2020-09-28T12:45:21.916Z",
+    "updatedAt": "2020-09-28T12:45:21.916Z"
   },
   {
     "id": "ab460da4ad72c48223",
@@ -15,6 +17,8 @@
     "hash": "ab460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998ab",
     "site": "bucharest",
     "instrument": "chm15k",
-    "status": "processed"
+    "status": "processed",
+    "createdAt": "2020-09-28T12:46:21.916Z",
+    "updatedAt": "2020-09-28T12:46:21.916Z"
   }
 ]

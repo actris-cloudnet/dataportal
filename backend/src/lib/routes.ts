@@ -446,7 +446,7 @@ export class Routes {
   }
 
   updateMetadata: RequestHandler = async (req: Request, res: Response, next) => {
-    this.uploadedMetadataRepo.update({id: req.params.hash}, req.body)
+    this.uploadedMetadataRepo.update({id: req.params.hash}, {...req.body, ...{updatedAt: new Date() }})
       .then(updatedResults => {
         if (updatedResults.affected == 0) return next({ status: 404, errors: ['No metadata was found with provided id']})
         res.send(updatedResults)
