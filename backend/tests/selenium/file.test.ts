@@ -42,7 +42,7 @@ describe('file landing page', () => {
       '44.348', '26.029'
     ]
     await driver.get('http://localhost:8000/file/15506ea8d3574c7baf8c95dfcc34fc7d')
-    const content = await (await awaitAndFind(By.id('landing'))).getText()
+    const content = await (await awaitAndFind(By.id('filelanding'))).getText()
     return Promise.all(targetArray.map(value =>
       expect(content).toContain(value)
     ))
