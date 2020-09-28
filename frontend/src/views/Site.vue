@@ -21,6 +21,9 @@
             <dd>{{ response.latitude }}&deg; N, {{ response.longitude }}&deg; E</dd>
             <dt>Site altitude</dt>
             <dd>{{ response.altitude }} m</dd>
+            <dt>Last measurement</dt>
+            <dd v-if="latestFile">{{ latestFile.measurementDate }}</dd>
+            <dd class="notAvailable" v-else></dd>
           </dl>
         </section>
       </section>
@@ -33,12 +36,14 @@
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import axios from 'axios'
 import {Site} from '../../../backend/src/entity/Site'
+import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 
 @Component
 export default class SiteView extends Vue {
   @Prop() siteid!: string
   apiUrl = process.env.VUE_APP_BACKENDURL
   response: Site | null = null
+  latestFile: SearchFileResponse | null = null
   error = false
 
 
@@ -50,6 +55,10 @@ export default class SiteView extends Vue {
         this.error = true
         this.response = response
       })
+    axios
+      .get(`${this.apiUrl}search/`, {params: { location: this.siteid, limit: 1}})
+      .then(({data}) => (this.latestFile = data[0]))
+      .catch()
   }
 }
 </script>

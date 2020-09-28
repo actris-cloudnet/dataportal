@@ -69,11 +69,6 @@ main#filelanding
 .download:focus
   outline: thin dotted black
 
-.notAvailable
-  color: grey
-.notAvailable::after
-  content: 'n/a'
-
 img.product
   height: auto
   width: 1em
