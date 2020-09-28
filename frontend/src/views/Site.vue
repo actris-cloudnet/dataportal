@@ -27,6 +27,12 @@
           </dl>
         </section>
       </section>
+      <section id="sitemap">
+        <header>Map</header>
+        <section class="details">
+          <Map :sites="[response]"></Map>
+        </section>
+      </section>
     </main>
   </main>
   <app-error v-else-if="error" :response="response"></app-error>
@@ -37,15 +43,17 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
 import axios from 'axios'
 import {Site} from '../../../backend/src/entity/Site'
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
+import Map from '@/components/Map.vue'
 
-@Component
+@Component({
+  components: {Map}
+})
 export default class SiteView extends Vue {
   @Prop() siteid!: string
   apiUrl = process.env.VUE_APP_BACKENDURL
   response: Site | null = null
   latestFile: SearchFileResponse | null = null
   error = false
-
 
   created() {
     axios

@@ -31,8 +31,8 @@ import {Site} from '../../../backend/src/entity/Site'
 @Component
 export default class Map extends Vue {
   @Prop() sites!: Site[]
-  @Prop() selectedSiteIds!: string[]
-  @Prop() onMapMarkerClick!: Function
+  @Prop() selectedSiteIds?: string[]
+  @Prop() onMapMarkerClick?: Function
 
   // map
   map: L.Map | null = null
@@ -72,7 +72,7 @@ export default class Map extends Vue {
       const mark = marker([site.latitude, site.longitude])
       mark.setIcon(new this.passiveMarker)
       mark.on('click', (_onClick) => {
-        this.onMapMarkerClick(site.id)
+        if (this.onMapMarkerClick) this.onMapMarkerClick(site.id)
       })
       this.allMarkers[site.id] = mark
       if (!this.map) return
@@ -84,7 +84,7 @@ export default class Map extends Vue {
     const keys = Object.keys(this.allMarkers)
     keys.forEach((id: string) => {
       const mark = this.allMarkers[id]
-      if (this.selectedSiteIds.includes(id)) {
+      if (this.selectedSiteIds && this.selectedSiteIds.includes(id)) {
         mark.setIcon(new this.activeMarker)
       }
       else {
