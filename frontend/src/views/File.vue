@@ -163,7 +163,9 @@ img.product
         <section class="details">
           <dl>
             <dt>Location</dt>
-            <dd>{{ response.site.humanReadableName }}, {{ response.site.country }}</dd>
+            <dd><router-link :to="`/site/${this.response.site.id}`">
+              {{ response.site.humanReadableName }}, {{ response.site.country }}
+            </router-link></dd>
             <dt>Coordinates</dt>
             <dd>{{ response.site.latitude }}&deg; N, {{ response.site.longitude }}&deg; E</dd>
             <dt>Site altitude</dt>
