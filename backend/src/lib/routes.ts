@@ -75,6 +75,7 @@ export class Routes {
       .andWhere('file.releasedAt < :releasedBefore', query)
       .orderBy('file.measurementDate', 'DESC')
       .addOrderBy('file.releasedAt', 'DESC')
+    if ('limit' in query) qb.limit(parseInt(query.limit))
     return qb
   }
 

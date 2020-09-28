@@ -29,7 +29,7 @@ export class Middleware {
       return next(pushAndReturn(requestError, 'No search parameters given'))
     }
 
-    let validKeys = ['location', 'product', 'dateFrom', 'dateTo', 'developer', 'volatile', 'releasedBefore', 'allVersions']
+    let validKeys = ['location', 'product', 'dateFrom', 'dateTo', 'developer', 'volatile', 'releasedBefore', 'allVersions', 'limit']
     if (req.path.includes('visualization')) validKeys.push('variable')
     const unknownFields = Object.keys(query).filter(key => !validKeys.includes(key))
     if (unknownFields.length > 0) {
@@ -59,6 +59,11 @@ export class Middleware {
     // Validate volatile
     if ('volatile' in query && !(query.volatile.toLowerCase() == 'true' || query.volatile.toLowerCase() == 'false')) {
       requestError.errors.push('Malformed value in property "volatile"')
+    }
+
+    // Validate limit
+    if ('limit' in query && isNaN(parseInt(query.limit))) {
+      requestError.errors.push('Malformed value in property "limit"')
     }
 
     if (requestError.errors.length > 0) {
