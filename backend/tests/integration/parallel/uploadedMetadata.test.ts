@@ -1,4 +1,4 @@
-import { backendPrivateUrl } from '../../lib'
+import {backendPrivateUrl, backendPublicUrl} from '../../lib'
 import axios from 'axios'
 import {readResources} from '../../../../shared/lib'
 
@@ -41,10 +41,21 @@ describe('GET /metadata', () => {
   })
 
   it('responds with correct object when filtering with site', async () => {
-    return expect(axios.get(`${url}`, {params: {site: 'bucharest'}})).resolves.toMatchObject({status: 200, data: [responses[1]]})
+    return expect(axios.get(`${url}`, {params: {site: 'granada'}})).resolves.toMatchObject({status: 200, data: [responses[0]]})
   })
 
   it('responds with correct object when filtering with status', async () => {
-    return expect(axios.get(`${url}`, {params: {status: 'processed'}})).resolves.toMatchObject({status: 200, data: [responses[1]]})
+    return expect(axios.get(`${url}`, {params: {status: 'processed'}})).resolves.toMatchObject({status: 200, data: [responses[1], responses[2]]})
+  })
+})
+
+describe('GET /api/uploaded-metadata', () => {
+  const publicUrl = `${backendPublicUrl}uploaded-metadata/`
+  it('responds with correct object when filtering with site', async () => {
+    return expect(axios.get(`${publicUrl}`, {params: {site: 'bucharest'}}))
+      .resolves.toMatchObject({status: 200, data: [
+        {instrument: responses[1]['instrument']},
+        {instrument: responses[3]['instrument']}
+      ]})
   })
 })

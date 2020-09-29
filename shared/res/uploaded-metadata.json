@@ -44,5 +44,51 @@
     "status": "processed",
     "createdAt": "2020-09-28T12:46:21.916Z",
     "updatedAt": "2020-09-28T12:46:21.916Z"
+  },
+  {
+    "id": "bb460da4ad72c48223",
+    "hash": "bb460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998ab",
+    "filename": "file4-ab460da4ad72c48223.LV1",
+    "measurementDate": "2020-08-12",
+    "site": {
+      "id": "bucharest",
+      "humanReadableName": "Bucharest",
+      "latitude": 44.348,
+      "longitude": 26.029,
+      "altitude": 93,
+      "gaw": "Unknown",
+      "country": "Romania",
+      "isTestSite": false
+    },
+    "instrument": {
+      "id": "chm15k",
+      "type": "lidar"
+    },
+    "status": "processed",
+    "createdAt": "2020-09-28T12:47:21.916Z",
+    "updatedAt": "2020-09-28T12:47:21.916Z"
+  },
+  {
+    "id": "cb460da4ad72c48223",
+    "hash": "cb460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998ab",
+    "filename": "file4-ab460da4ad72c48223.LV1",
+    "measurementDate": "2020-08-13",
+    "site": {
+      "id": "bucharest",
+      "humanReadableName": "Bucharest",
+      "latitude": 44.348,
+      "longitude": 26.029,
+      "altitude": 93,
+      "gaw": "Unknown",
+      "country": "Romania",
+      "isTestSite": false
+    },
+    "instrument": {
+      "id": "mira",
+      "type": "radar"
+    },
+    "status": "uploaded",
+    "createdAt": "2020-09-28T12:48:21.916Z",
+    "updatedAt": "2020-09-28T12:48:21.916Z"
   }
 ]

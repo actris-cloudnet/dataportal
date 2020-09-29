@@ -20,5 +20,27 @@
     "status": "processed",
     "createdAt": "2020-09-28T12:46:21.916Z",
     "updatedAt": "2020-09-28T12:46:21.916Z"
+  },
+  {
+    "id": "bb460da4ad72c48223",
+    "filename": "file4-ab460da4ad72c48223.LV1",
+    "measurementDate": "2020-08-12",
+    "hash": "bb460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998ab",
+    "site": "bucharest",
+    "instrument": "chm15k",
+    "status": "processed",
+    "createdAt": "2020-09-28T12:47:21.916Z",
+    "updatedAt": "2020-09-28T12:47:21.916Z"
+  },
+  {
+    "id": "cb460da4ad72c48223",
+    "filename": "file4-ab460da4ad72c48223.LV1",
+    "measurementDate": "2020-08-13",
+    "hash": "cb460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998ab",
+    "site": "bucharest",
+    "instrument": "mira",
+    "status": "uploaded",
+    "createdAt": "2020-09-28T12:48:21.916Z",
+    "updatedAt": "2020-09-28T12:48:21.916Z"
   }
 ]
