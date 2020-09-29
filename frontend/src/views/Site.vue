@@ -60,7 +60,7 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
 import axios from 'axios'
 import {Site} from '../../../backend/src/entity/Site'
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
-import Map from '@/components/Map.vue'
+import Map from '../components/Map.vue'
 import {ReducedMetadataResponse} from '../../../backend/src/entity/ReducedMetadataResponse'
 import {getIconUrl} from '../lib'
 
