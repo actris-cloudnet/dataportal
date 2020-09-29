@@ -17,6 +17,7 @@ import {ProductVariable} from '../entity/ProductVariable'
 import {LatestVisualizationDateResponse} from '../entity/LatestVisualizationDateResponse'
 import {SearchFileResponse} from '../entity/SearchFileResponse'
 import {Instrument} from '../entity/Instrument'
+import {ReducedMetadataResponse} from '../entity/ReducedMetadataResponse'
 
 
 export class Routes {
@@ -423,25 +424,40 @@ export class Routes {
         .catch(err => next({ status: 500, errors: err}))
     }
 
-  listMetadata: RequestHandler = async (req: Request, res: Response, next) => {
-    const query: any = {
-      site: req.query.site || (await fetchAll<Site>(this.conn, Site)).map(site => site.id),
-      status: req.query.status || [Status.UPLOADED, Status.CREATED, Status.PROCESSED],
-      dateFrom: req.query.dateFrom || '1970-01-01',
-      dateTo: req.query.dateTo || tomorrow()
-    }
-    query.site = toArray(query.site)
-    query.status = toArray(query.status)
+    private async metadataQueryBuilder(query: any, onlyDistinctInstruments= false) {
+      const augmentedQuery: any = {
+        site: query.site || (await fetchAll<Site>(this.conn, Site)).map(site => site.id),
+        status: query.status || [Status.UPLOADED, Status.CREATED, Status.PROCESSED],
+        dateFrom: query.dateFrom || '1970-01-01',
+        dateTo: query.dateTo || tomorrow()
+      }
+      augmentedQuery.site = toArray(augmentedQuery.site)
+      augmentedQuery.status = toArray(augmentedQuery.status)
 
-    this.uploadedMetadataRepo.createQueryBuilder('um')
-      .leftJoinAndSelect('um.site', 'site')
-      .leftJoinAndSelect('um.instrument', 'instrument')
-      .where('um.measurementDate >= :dateFrom AND um.measurementDate <= :dateTo', query)
-      .andWhere('site.id IN (:...site)', query)
-      .andWhere('um.status IN (:...status)', query)
-      .orderBy('um.measurementDate', 'ASC')
+      const qb = this.uploadedMetadataRepo.createQueryBuilder('um')
+      qb.leftJoinAndSelect('um.site', 'site')
+        .leftJoinAndSelect('um.instrument', 'instrument')
+      if (onlyDistinctInstruments)  qb.distinctOn(['instrument.id'])
+      qb.where('um.measurementDate >= :dateFrom AND um.measurementDate <= :dateTo', augmentedQuery)
+        .andWhere('site.id IN (:...site)', augmentedQuery)
+        .andWhere('um.status IN (:...status)', augmentedQuery)
+      if (!onlyDistinctInstruments) qb.orderBy('um.measurementDate', 'ASC')
+
+      return Promise.resolve(qb)
+    }
+
+  listMetadata: RequestHandler = async (req: Request, res: Response, next) => {
+    (await this.metadataQueryBuilder(req.query))
       .getMany()
       .then(uploadedMetadata => res.send(uploadedMetadata))
+      .catch(err => {next({status: 500, errors: err})})
+  }
+
+  listInstrumentsFromMetadata: RequestHandler = async (req: Request, res: Response, next) => {
+    (await this.metadataQueryBuilder(req.query, true))
+      .getMany()
+      .then(uploadedMetadata =>
+        res.send(uploadedMetadata.map(md => new ReducedMetadataResponse(md))))
       .catch(err => {next({status: 500, errors: err})})
   }
 
