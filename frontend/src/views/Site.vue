@@ -2,6 +2,11 @@
 @import "../sass/variables.sass"
 @import "../sass/global.sass"
 @import "../sass/landing.sass"
+
+.forcewrap
+  flex-basis: 100%
+  height: 0
+
 </style>
 
 
@@ -27,6 +32,18 @@
           </dl>
         </section>
       </section>
+      <section id="instruments">
+        <header>Instruments (last 30 days)</header>
+        <section class="details">
+          <div v-if="instruments && instruments.length">
+           <div v-for="instrument in instruments" :key="instrument.id" class="detailslist">
+             <span><img :src="getIconUrl(instrument.instrument.type)" class="product">{{ instrument.instrument.id }}</span>
+           </div>
+          </div>
+          <div class="detailslistNotAvailable" v-else>Instrument information not available.</div>
+        </section>
+      </section>
+      <div class="forcewrap"></div>
       <section id="sitemap">
         <header>Map</header>
         <section class="details">
@@ -44,6 +61,8 @@ import axios from 'axios'
 import {Site} from '../../../backend/src/entity/Site'
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 import Map from '@/components/Map.vue'
+import {ReducedMetadataResponse} from '../../../backend/src/entity/ReducedMetadataResponse'
+import {getIconUrl} from '../lib'
 
 @Component({
   components: {Map}
@@ -54,6 +73,8 @@ export default class SiteView extends Vue {
   response: Site | null = null
   latestFile: SearchFileResponse | null = null
   error = false
+  instruments: ReducedMetadataResponse[] | null = null
+  getIconUrl = getIconUrl
 
   created() {
     axios
@@ -66,6 +87,12 @@ export default class SiteView extends Vue {
     axios
       .get(`${this.apiUrl}search/`, {params: { location: this.siteid, limit: 1}})
       .then(({data}) => (this.latestFile = data[0]))
+      .catch()
+    const date30daysago = new Date()
+    date30daysago.setDate(date30daysago.getDate() - 300)
+    axios
+      .get(`${this.apiUrl}uploaded-metadata/`, {params: { site: this.siteid, dateFrom: date30daysago}})
+      .then(({data}) => (this.instruments = data))
       .catch()
   }
 }

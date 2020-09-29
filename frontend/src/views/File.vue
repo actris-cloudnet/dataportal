@@ -69,18 +69,6 @@ main#filelanding
 .download:focus
   outline: thin dotted black
 
-img.product
-  height: auto
-  width: 1em
-  margin-right: 0.3em
-
-.sourceFileList
-  margin-top: 5px
-  margin-bottom: 1em
-  margin-left: 10px
-
-.sourceFileNotAvailable
-  margin-bottom: 1em
 </style>
 
 
@@ -178,14 +166,14 @@ img.product
         <section class="details history">
           <div v-if="response.sourceFileIds && response.sourceFileIds.length > 0">
             <span class="notice">This file was generated using the following files:<br></span>
-            <div v-for="sourceFile in sourceFiles" :key="sourceFile.uuid" class="sourceFileList">
+            <div v-for="sourceFile in sourceFiles" :key="sourceFile.uuid" class="detailslist">
               <router-link :to="`/file/${sourceFile.uuid}`">
                 <img :src="getIconUrl(sourceFile.product.id)" class="product">
                 {{ sourceFile.product.humanReadableName }}
               </router-link><br>
             </div>
           </div>
-          <div class="sourceFileNotAvailable" v-else>Source file information not available.</div>
+          <div class="detailslistNotAvailable" v-else>Source file information not available.</div>
           <div v-if="showHistory">
             <span class="notice">Details:</span>
             <span class="monospace">{{ response.history.trim() }}</span>
