@@ -1,6 +1,9 @@
-// Prevents window.matchMedia error, see https://stackoverflow.com/questions/39830580/jest-test-fails-typeerror-window-matchmedia-is-not-a-function
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Vue from 'vue'
+import {AxiosResponse} from 'axios'
+import {shallowMount, VueClass} from '@vue/test-utils'
 
+// Prevents window.matchMedia error, see https://stackoverflow.com/questions/39830580/jest-test-fails-typeerror-window-matchmedia-is-not-a-function
 export function init() {
   return Object.defineProperty(window, 'matchMedia', {
     writable: true,
@@ -31,3 +34,18 @@ export const nextTick = async (amount: number): Promise<unknown> => {
   return Vue.nextTick()
     .then(() => nextTick(amount - 1))
 }
+
+const axiosResponse: AxiosResponse = {
+  data: {},
+  status: 200,
+  statusText: 'OK',
+  config: {},
+  headers: {}
+}
+
+export const augmentAxiosResponse = (data: any) => ({...axiosResponse, ...{data}})
+
+export const mountVue = (classObject: VueClass<Vue>) =>
+  shallowMount(classObject, {
+    stubs: ['router-link', 'router-view']
+  })

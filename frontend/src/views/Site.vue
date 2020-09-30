@@ -55,6 +55,7 @@
   <app-error v-else-if="error" :response="response"></app-error>
 </template>
 
+
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import axios from 'axios'
