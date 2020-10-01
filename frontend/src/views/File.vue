@@ -110,7 +110,7 @@ main#filelanding
             <dt>Hash (SHA-256)</dt>
             <dd>{{ response.checksum }}</dd>
             <dt>Last modified</dt>
-            <dd>{{ response.releasedAt }}</dd>
+            <dd>{{ humanReadableTimestamp(response.releasedAt) }}</dd>
             <dt>Versions</dt>
             <dd>
               <router-link v-if="previousVersion" id="previousVersion" :to="`/file/${previousVersion}`">
@@ -136,8 +136,13 @@ main#filelanding
             <dd>{{ response.product.level }}</dd>
             <dt>Quality</dt>
             <dd>Near Real Time (NRT)</dd>
-            <dt v-if="response.cloudnetpyVersion">CloudnetPy version</dt>
-            <dd v-if="response.cloudnetpyVersion">{{ response.cloudnetpyVersion }}</dd>
+            <dt v-if="response.cloudnetpyVersion">Software version</dt>
+            <dd v-if="response.cloudnetpyVersion">
+              CloudnetPy {{ response.cloudnetpyVersion }}
+              <a href="https://github.com/actris-cloudnet/cloudnetpy/releases"><svg class="link"
+                  fill="#000000" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="60px" height="60px"><path d="M 25.980469 2.9902344 A 1.0001 1.0001 0 0 0 25.869141 3 L 20 3 A 1.0001 1.0001 0 1 0 20 5 L 23.585938 5 L 13.292969 15.292969 A 1.0001 1.0001 0 1 0 14.707031 16.707031 L 25 6.4140625 L 25 10 A 1.0001 1.0001 0 1 0 27 10 L 27 4.1269531 A 1.0001 1.0001 0 0 0 25.980469 2.9902344 z M 6 7 C 4.9069372 7 4 7.9069372 4 9 L 4 24 C 4 25.093063 4.9069372 26 6 26 L 21 26 C 22.093063 26 23 25.093063 23 24 L 23 14 L 23 11.421875 L 21 13.421875 L 21 16 L 21 24 L 6 24 L 6 9 L 14 9 L 16 9 L 16.578125 9 L 18.578125 7 L 16 7 L 14 7 L 6 7 z"/>
+              </svg></a>
+            </dd>
             <dt>Data from</dt>
             <dd>{{ response.measurementDate }}</dd>
           </dl>
@@ -161,9 +166,9 @@ main#filelanding
       <section id="history">
         <header>History</header>
         <section class="details history">
-          <div v-if="response.sourceFileIds && response.sourceFileIds.length > 0">
+          <div v-if="response.sourceFileIds && response.sourceFileIds.length > 0" class="detailslist">
             <span class="notice">This file was generated using the following files:<br></span>
-            <div v-for="sourceFile in sourceFiles" :key="sourceFile.uuid" class="detailslist">
+            <div v-for="sourceFile in sourceFiles" :key="sourceFile.uuid" class="detailslistItem">
               <router-link :to="`/file/${sourceFile.uuid}`">
                 <img :src="getIconUrl(sourceFile.product.id)" class="product">
                 {{ sourceFile.product.humanReadableName }}
@@ -192,14 +197,14 @@ main#filelanding
             </div>
           </div>
           <a v-if="visualizations.length > 1 && !allVisualizations"
-             class="viewAllPlots"
+             class="notice viewAllPlots"
              @click="allVisualizations = true">
-            See all plots
+            Show all plots
           </a>
           <a v-else-if="allVisualizations"
-             class="viewAllPlots"
+             class="notice viewAllPlots"
              @click="allVisualizations = false">
-            View only one plot
+            Show one plot
           </a>
           <span v-else-if="visualizations.length === 0">Preview not available.</span>
         </section>
@@ -213,7 +218,7 @@ main#filelanding
 <script lang="ts">
 import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import axios from 'axios'
-import {getIconUrl, humanReadableSize, humanReadableDate, sortVisualizations} from '../lib'
+import {getIconUrl, humanReadableSize, humanReadableDate, sortVisualizations, humanReadableTimestamp} from '../lib'
 import { DevMode } from '../lib/DevMode'
 import { File } from '../../../backend/src/entity/File'
 import {Visualization} from '../../../backend/src/entity/Visualization'
@@ -230,6 +235,7 @@ export default class FileView extends Vue {
   apiUrl = process.env.VUE_APP_BACKENDURL
   humanReadableSize = humanReadableSize
   humanReadableDate = humanReadableDate
+  humanReadableTimestamp = humanReadableTimestamp
   getIconUrl = getIconUrl
   sortVisualizations = sortVisualizations
   devMode = new DevMode()

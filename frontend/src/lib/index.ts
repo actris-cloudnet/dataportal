@@ -19,6 +19,11 @@ export const humanReadableSize = (size: number) => {
 export const humanReadableDate = (date: string) =>
   new Date(date).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })
 
+export const humanReadableTimestamp = (date: string) => {
+  const [timestamp, suffix] = date.replace('T', ' ').split('.')
+  return suffix.includes('Z') ? `${timestamp} UTC` : timestamp
+}
+
 export const combinedFileSize = (files: File[]) =>
   files.map(file => file.size).reduce((prev, cur) => cur + prev, 0)
 

@@ -77,7 +77,7 @@ describe('File.vue', () => {
     mocked(axios.get).mockImplementation(axiosMockWithFileIdx(0))
     wrapper = mountVue(File)
     await Vue.nextTick()
-    expect(wrapper.text()).toContain(resources['allfiles'][0]['releasedAt'])
+    expect(wrapper.text()).toContain('2020-02-20 10:56:19 UTC')
   })
 
   it('displays links to source files', async () => {

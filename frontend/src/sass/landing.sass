@@ -55,15 +55,22 @@ main.info
 .notAvailable::after
   content: 'n/a'
 
-img.product
+img.product, svg.link
   height: auto
   width: 1em
   margin-right: 0.3em
 
+svg.link
+  position: relative
+  top: -0.15em
+
 .detailslist
-  margin-top: 5px
-  margin-bottom: 1em
-  margin-left: 10px
+  margin-bottom: 0.5em
+
+  .detailslistItem
+    margin-top: 5px
+    margin-bottom: 0.5em
+    margin-left: 10px
 
 .detailslistNotAvailable
   margin-bottom: 1em
