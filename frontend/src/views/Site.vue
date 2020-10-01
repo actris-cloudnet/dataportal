@@ -35,12 +35,15 @@
       <section id="instruments">
         <header>Instruments</header>
         <section class="details">
+          <div v-if="instruments && instruments.length">
           <span class="notice">
             The site has submitted data from the following instruments in the last {{ instrumentsFromLastDays }} days.<br>
           </span>
-          <div v-if="instruments && instruments.length">
            <div v-for="instrument in instruments" :key="instrument.id" class="detailslist">
-             <span><img :src="getIconUrl(instrument.instrument.type)" class="product">{{ instrument.instrument.id }}</span>
+             <span>
+               <img :src="getIconUrl(instrument.instrument.type)" class="product">
+               {{ instrument.instrument.humanReadableName }}
+             </span>
            </div>
           </div>
           <div class="detailslistNotAvailable" v-else>Instrument information not available.</div>

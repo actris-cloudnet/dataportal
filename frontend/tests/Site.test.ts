@@ -47,8 +47,8 @@ describe('Site.vue', () => {
 
   it('displays instruments when they are found', async () => {
     const expected = [
-      'chm15k',
-      'mira'
+      'Lufft CHM15k ceilometer',
+      'METEK MIRA-35 cloud radar'
     ]
     mocked(axios.get).mockImplementation(axiosMockWithIndices(0, 8, resources['uploaded-metadata-public']))
     wrapper = mountVue(Site)
