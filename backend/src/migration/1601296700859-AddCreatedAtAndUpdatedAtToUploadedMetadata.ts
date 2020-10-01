@@ -4,8 +4,8 @@ export class AddCreatedAtAndUpdatedAtToUploadedMetadata1601296700859 implements 
     name = 'AddCreatedAtAndUpdatedAtToUploadedMetadata1601296700859'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`ALTER TABLE "uploaded_metadata" ADD "createdAt" TIMESTAMP NOT NULL`);
-        await queryRunner.query(`ALTER TABLE "uploaded_metadata" ADD "updatedAt" TIMESTAMP NOT NULL`);
+        await queryRunner.query(`ALTER TABLE "uploaded_metadata" ADD "createdAt" TIMESTAMP NOT NULL DEFAULT NOW()`);
+        await queryRunner.query(`ALTER TABLE "uploaded_metadata" ADD "updatedAt" TIMESTAMP NOT NULL DEFAULT NOW()`);
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
