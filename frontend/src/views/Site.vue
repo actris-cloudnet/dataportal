@@ -33,8 +33,11 @@
         </section>
       </section>
       <section id="instruments">
-        <header>Instruments (last 30 days)</header>
+        <header>Instruments</header>
         <section class="details">
+          <span class="notice">
+            The site has submitted data from the following instruments in the last {{ instrumentDateFrom }} days.<br>
+          </span>
           <div v-if="instruments && instruments.length">
            <div v-for="instrument in instruments" :key="instrument.id" class="detailslist">
              <span><img :src="getIconUrl(instrument.instrument.type)" class="product">{{ instrument.instrument.id }}</span>
@@ -75,6 +78,7 @@ export default class SiteView extends Vue {
   latestFile: SearchFileResponse | null = null
   error = false
   instruments: ReducedMetadataResponse[] | null = null
+  instrumentDateFrom = 30
   getIconUrl = getIconUrl
 
   created() {

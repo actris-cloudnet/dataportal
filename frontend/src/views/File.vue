@@ -46,9 +46,6 @@ main#filelanding
     width: 100%
     display: block
 
-  .notice
-    font-size: 0.9em
-
   #preview
     flex-basis: 600px
     img
