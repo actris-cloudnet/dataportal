@@ -36,7 +36,7 @@
         <header>Instruments</header>
         <section class="details">
           <span class="notice">
-            The site has submitted data from the following instruments in the last {{ instrumentDateFrom }} days.<br>
+            The site has submitted data from the following instruments in the last {{ instrumentsFromLastDays }} days.<br>
           </span>
           <div v-if="instruments && instruments.length">
            <div v-for="instrument in instruments" :key="instrument.id" class="detailslist">
@@ -78,7 +78,7 @@ export default class SiteView extends Vue {
   latestFile: SearchFileResponse | null = null
   error = false
   instruments: ReducedMetadataResponse[] | null = null
-  instrumentDateFrom = 30
+  instrumentsFromLastDays = 30
   getIconUrl = getIconUrl
 
   created() {
@@ -94,7 +94,7 @@ export default class SiteView extends Vue {
       .then(({data}) => (this.latestFile = data[0]))
       .catch()
     const date30daysago = new Date()
-    date30daysago.setDate(date30daysago.getDate() - 300)
+    date30daysago.setDate(date30daysago.getDate() - this.instrumentsFromLastDays)
     axios
       .get(`${this.apiUrl}uploaded-metadata/`, {params: { site: this.siteid, dateFrom: date30daysago}})
       .then(({data}) => (this.instruments = data))
