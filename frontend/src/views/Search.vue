@@ -481,7 +481,7 @@ export default class Search extends Vue {
 
   getInitialDateFrom() {
     const date = new Date()
-    return new Date(date.setDate(date.getDate() - fixedRanges.month))
+    return new Date(date.setDate(date.getDate() - fixedRanges.week))
   }
 
   // variables
