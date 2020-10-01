@@ -2,7 +2,7 @@
 import {Wrapper} from '@vue/test-utils'
 import axios, {AxiosPromise, AxiosRequestConfig} from 'axios'
 import Vue from 'vue'
-import {augmentAxiosResponse, init, mountVue, nextTick} from './lib'
+import {augmentAxiosResponse, getMockedAxiosLastCallSecondArgument, init, mountVue, nextTick} from './lib'
 import {mocked} from 'ts-jest/dist/util/testing'
 import {readResources} from '../../shared/lib'
 import Site from '../src/views/Site.vue'
@@ -63,5 +63,22 @@ describe('Site.vue', () => {
     await nextTick(1)
     const instrumentText = await wrapper.find('#instruments').text()
     return expect(instrumentText).toContain('not available')
+  })
+
+  it.only('fetches instruments from last n days', async () => {
+    const expectedString = 'The site has submitted data from the following instruments in the last'
+    const parseDaysFromInstrumentString = (instrumentString: string) =>
+      parseInt(instrumentString.split(expectedString)[1].split(' ')[1])
+    mocked(axios.get).mockImplementation(axiosMockWithIndices(0, 8, resources['uploaded-metadata-public']))
+    wrapper = mountVue(Site)
+    await nextTick(1)
+    const instrumentText = await wrapper.find('#instruments').text()
+    expect(instrumentText).toContain(expectedString)
+    const numberOfDays = parseDaysFromInstrumentString(instrumentText)
+    const date30daysago = new Date()
+    date30daysago.setDate(date30daysago.getDate() - numberOfDays)
+    const secondArg = getMockedAxiosLastCallSecondArgument()
+    // Expect to be within 5 seconds
+    return expect(new Date(secondArg.params.dateFrom).getTime() / 1000).toBeCloseTo(date30daysago.getTime() / 1000, -1)
   })
 })
