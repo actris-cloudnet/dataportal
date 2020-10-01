@@ -108,7 +108,7 @@ describe('visualizations page', () => {
     await selenium.sendInput('dateTo', '2020-05-01')
     await selenium.clickClass('sourceFileLink')
     expect(await selenium.driver.getCurrentUrl()).toContain('7a9c3894-ef7e-43d9-aa7d-a3f25017acec')
-    expect(await selenium.findElement(By.id('landing'))).toBeTruthy()
+    expect(await selenium.findElement(By.id('filelanding'))).toBeTruthy()
   })
 
   it('switches to data search', async () => {

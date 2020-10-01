@@ -1,34 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { mount, Wrapper } from '@vue/test-utils'
+import {mount, Wrapper} from '@vue/test-utils'
 import Search from '../src/views/Search.vue'
-import axios, { AxiosResponse, AxiosPromise, AxiosRequestConfig } from 'axios'
+import axios, {AxiosPromise, AxiosRequestConfig} from 'axios'
 import Vue from 'vue'
-import {init, dateToISOString, tomorrow, dateFromPast} from './lib'
-import { mocked } from 'ts-jest/dist/util/testing'
+import {
+  augmentAxiosResponse,
+  dateFromPast,
+  dateToISOString,
+  getMockedAxiosLastCallSecondArgument,
+  init,
+  tomorrow
+} from './lib'
+import {mocked} from 'ts-jest/dist/util/testing'
 import {readResources} from '../../shared/lib'
+
 init()
 
-
 jest.mock('axios')
-
-const axiosResponse: AxiosResponse = {
-  data: {},
-  status: 200,
-  statusText: 'OK',
-  config: {},
-  headers: {}
-}
-
-const augmentAxiosResponse = (data: any) => ({ ...axiosResponse, ...{ data } })
-
-const getMockedAxiosLastCallSecondArgument = () => {
-  const calls = mocked(axios.get).mock.calls
-  const idxLast = calls.length - 1
-  const lastCall = calls[idxLast]
-  const secondArg = lastCall[1]
-  if (!secondArg) return {}
-  return secondArg
-}
 
 const date = new Date()
 date.setDate(date.getDate() - 29)

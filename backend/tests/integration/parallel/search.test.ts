@@ -139,6 +139,21 @@ describe('/api/files', () => {
     expect(new Date(res.data[1].releasedAt).getTime()).toBeGreaterThan(new Date(res.data[2].releasedAt).getTime())
   })
 
+  it('returns the latest file when limit=1', async () => {
+    const res = await axios.get(url, { params: { location: 'bucharest', limit: '1' }})
+    expect(res.data).toHaveLength(1)
+    expect(res.data[0].measurementDate).toEqual('2019-07-16')
+  })
+
+  it('responds with 400 on malformed limit', async () => {
+    const payload = { params: { location: 'bucharest', limit: 'j' }}
+    let expectedBody: RequestError = {
+      status: 400,
+      errors: [ 'Malformed value in property "limit"' ]
+    }
+    return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
+  })
+
 })
 
 describe('/api/search', () => {

@@ -1,0 +1,14 @@
+[
+  {
+    "instrument": {
+      "id": "chm15k",
+      "type": "lidar"
+    }
+  },
+  {
+    "instrument": {
+      "id": "mira",
+      "type": "radar"
+    }
+  }
+]

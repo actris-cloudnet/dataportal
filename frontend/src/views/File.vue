@@ -2,18 +2,15 @@
 @import "../sass/variables.sass"
 @import "../sass/global.sass"
 @import "../sass/visualizations.sass"
+@import "../sass/landing.sass"
 
-main#landing
+main#filelanding
 
   >header
-    margin-bottom: 3em
     display: flex
     justify-content: space-between
     align-items: center
     flex-wrap: wrap
-    h2
-      color: $section-title
-      margin: 0px
     span
       display: block
       color: grey
@@ -33,69 +30,21 @@ main#landing
     border-color: #fff2ca
     background: #fffdee
 
-  main
-    margin: -1em
+  section#preview.wide
+    flex-basis: 100%
+
+  .history
+    flex-grow: 1
+    flex-direction: column
     display: flex
-    justify-content: center
-    flex-wrap: wrap
+    justify-content: space-between
+    align-items: flex-start
 
-    > section
-      flex-grow: 0.5
-      border: 1px solid $border-color
-      border-radius: 3px
-      box-shadow: 2px 2px 2px rgba(0,0,0,0.1)
-      margin: 1em
-      min-width: 20em
-      word-wrap: anywhere
-      display: flex
-      flex-direction: column
-
-      > *
-        padding: 10px
-
-      > header
-        background: $landing-header
-        border-bottom: 1px solid $border-color
-        font-size: 1.1em
-
-      dl
-        margin-top: 5px
-        margin-bottom: 5px
-        margin-left: 10px
-        display: grid
-        grid-template-columns: auto 4fr
-        column-gap: 0.5em
-        row-gap: 0.5em
-
-      dt
-        text-align: left
-        font-weight: 600
-        max-width: 11em
-      dt::after
-        content: ": "
-
-      dd
-        text-align: left
-        margin: 0
-
-    section#preview.wide
-      flex-basis: 100%
-
-    .history
-      flex-grow: 1
-      flex-direction: column
-      display: flex
-      justify-content: space-between
-      align-items: flex-start
-
-    .monospace
-      white-space: pre-wrap
-      font-family: monospace
-      width: 100%
-      display: block
-
-    .notice
-      font-size: 0.9em
+  .monospace
+    white-space: pre-wrap
+    font-family: monospace
+    width: 100%
+    display: block
 
   #preview
     flex-basis: 600px
@@ -117,28 +66,11 @@ main#landing
 .download:focus
   outline: thin dotted black
 
-.notAvailable
-  color: grey
-.notAvailable::after
-  content: 'n/a'
-
-img.product
-  height: auto
-  width: 1em
-  margin-right: 0.3em
-
-.sourceFileList
-  margin-top: 5px
-  margin-bottom: 1em
-  margin-left: 10px
-
-.sourceFileNotAvailable
-  margin-bottom: 1em
 </style>
 
 
 <template>
-  <main id="landing" v-if="!error && response">
+  <main id="filelanding" v-if="!error && response">
     <header>
       <div class="summary">
           <h2>Cloudnet data object</h2>
@@ -216,7 +148,9 @@ img.product
         <section class="details">
           <dl>
             <dt>Location</dt>
-            <dd>{{ response.site.humanReadableName }}, {{ response.site.country }}</dd>
+            <dd><router-link :to="`/site/${this.response.site.id}`">
+              {{ response.site.humanReadableName }}, {{ response.site.country }}
+            </router-link></dd>
             <dt>Coordinates</dt>
             <dd>{{ response.site.latitude }}&deg; N, {{ response.site.longitude }}&deg; E</dd>
             <dt>Site altitude</dt>
@@ -229,14 +163,14 @@ img.product
         <section class="details history">
           <div v-if="response.sourceFileIds && response.sourceFileIds.length > 0">
             <span class="notice">This file was generated using the following files:<br></span>
-            <div v-for="sourceFile in sourceFiles" :key="sourceFile.uuid" class="sourceFileList">
+            <div v-for="sourceFile in sourceFiles" :key="sourceFile.uuid" class="detailslist">
               <router-link :to="`/file/${sourceFile.uuid}`">
                 <img :src="getIconUrl(sourceFile.product.id)" class="product">
                 {{ sourceFile.product.humanReadableName }}
               </router-link><br>
             </div>
           </div>
-          <div class="sourceFileNotAvailable" v-else>Source file information not available.</div>
+          <div class="detailslistNotAvailable" v-else>Source file information not available.</div>
           <div v-if="showHistory">
             <span class="notice">Details:</span>
             <span class="monospace">{{ response.history.trim() }}</span>

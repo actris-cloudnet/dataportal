@@ -35,8 +35,12 @@ describe('PUT /metadata', () => {
   })
 
   test('inserts new metadata', async () => {
+    const now = new Date()
     await expect(axios.put(validUrl, validMetadata)).resolves.toMatchObject({status: 201})
-    return expect(repo.findOneOrFail(validId)).resolves.toBeTruthy()
+    const md = await repo.findOne(validId)
+    expect(md).toBeTruthy()
+    expect(new Date(md.createdAt).getTime()).toBeGreaterThan(now.getTime())
+    expect(new Date(md.updatedAt).getTime()).toEqual(new Date(md.createdAt).getTime())
   })
 
   test('responds with 201 on existing hashsum with created status', async () => {
@@ -45,7 +49,8 @@ describe('PUT /metadata', () => {
   })
 
   test('responds with 200 on existing hashsum with uploaded status', async () => {
-    let uploadedMetadata = {...validMetadata, ...{hash: validMetadata.hashSum, status: Status.UPLOADED, id: validId}}
+    let uploadedMetadata = {...validMetadata, ...{hash: validMetadata.hashSum, status: Status.UPLOADED, id: validId,
+      createdAt: new Date(), updatedAt: new Date()}}
     delete uploadedMetadata.hashSum
     await repo.save(uploadedMetadata)
     await axios.put(validUrl, validMetadata)
@@ -118,21 +123,26 @@ describe('POST /metadata', () => {
     'status': 'uploaded'
   }
   const id = postMetadata.hash.substr(0, 18)
-  beforeAll(async () => repo.save({
+  const uploadedMetadata ={
     id,
     'filename': 'file2.LV1',
     'measurementDate': '2020-08-11',
     'hash': 'ac460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b1',
     'site': 'granada',
     'instrument': 'rpg-fmcw-94',
-    'status': 'created'
-  }))
+    'status': 'created',
+    'createdAt': '2020-09-28T13:34:04.478Z',
+    'updatedAt': '2020-09-28T13:34:04.478Z'
+  }
+  beforeAll(async () => repo.save(uploadedMetadata))
 
   const postUrl = `${backendPrivateUrl}metadata/${id}`
 
   it('changes corresponding fields in metadata', async () => {
     await expect(axios.post(postUrl, postMetadata)).resolves.toMatchObject({ status: 200 })
-    await expect(axios.get(postUrl)).resolves.toMatchObject({ status: 200, data: postMetadata })
+    const result = await axios.get(postUrl)
+    expect(result).toMatchObject({ status: 200, data: postMetadata })
+    return expect(new Date(result.data.updatedAt).getTime()).toBeGreaterThan(new Date(result.data.createdAt).getTime())
   })
 
   it('responds with 404 if metadata is not found', async () => {

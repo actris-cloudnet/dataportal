@@ -16,6 +16,9 @@ export class Instrument {
   @Column()
   type!: InstrumentType
 
+  @Column()
+  humanReadableName!: string
+
   @OneToMany(_ => UploadedMetadata, uploadedMetadata => uploadedMetadata.site)
   uploadedMetadatas!: UploadedMetadata[]
 }

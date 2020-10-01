@@ -1,6 +1,7 @@
 import {Column, Entity, ManyToOne, PrimaryColumn} from 'typeorm/index'
 import {Site} from './Site'
 import {Instrument} from './Instrument'
+import {BeforeInsert, BeforeUpdate} from 'typeorm'
 
 export enum Status {
   CREATED = 'created',
@@ -32,11 +33,28 @@ export class UploadedMetadata {
   })
   status!: Status
 
+  @Column()
+  createdAt!: Date
+
+  @Column()
+  updatedAt!: Date
+
   @ManyToOne(_ => Site, site => site.uploadedMetadatas)
   site!: Site
 
   @ManyToOne(_ => Instrument, instrument => instrument.uploadedMetadatas)
   instrument!: Instrument
+
+  @BeforeInsert()
+  updateDateCreation() {
+    this.createdAt = new Date()
+    this.updatedAt = this.createdAt
+  }
+
+  @BeforeUpdate()
+  updateDateUpdate() {
+    this.updatedAt = new Date()
+  }
 
   constructor(id: string, hash: string, filename: string, date: string, site: Site, instrument: Instrument, status: Status) {
     this.id = id
