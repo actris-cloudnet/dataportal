@@ -69,6 +69,29 @@ Response body:
 ]
 ```
 
+### `GET /api/instruments` → `Instrument[]`
+
+Fetch information on the instruments supported by the data portal. Responds with an array of `Instrument` objects, 
+each having the properties:
+- `id`: Unique identifier of the instrument.
+- `humanReadableName`: Name of the instrument in a human readable format.
+- `type`: Instrument type. May be, for example, `radar`, `lidar` or `mwr`.
+
+Example query:
+
+`GET https://cloudnet.fmi.fi/api/instruments`
+
+Response body:
+```json
+[
+  {
+    "id": "mira",
+    "humanReadableName": "METEK MIRA-35 cloud radar",
+    "type": "radar"
+  },
+...
+]
+```
 
 ### `GET /api/files/UUID` → `File`
 
@@ -93,7 +116,8 @@ used for the generation of the file. Empty string for files which have not been 
 - `filename`: The name of the file.
 - `checksum`: The SHA-256 checksum of the file. Useful for verifying file integrity.
 - `size`: Size of the file in bytes.
-- `format`: The data structure of the file. Either `NetCDF3` or `HDF5 (NetCDF4)`. 
+- `format`: The data structure of the file. Either `NetCDF3` or `HDF5 (NetCDF4)`.
+- `sourceFileIds`: Comma-separated list of `uuid` strings corresponding to the source files that were used to generate the file. If the source file information is not available, this is `null`.
 - `url`: The full URL to the data object. Useful for downloading the file.
 - `site`: `Site` object containing information of the site on which the measurement was made.
 - `product`: `Product` object containing information of the data product.
@@ -119,6 +143,7 @@ Response body:
   "checksum": "1e64830a85088db2b476ba2c85064c9f2ea17bdd8e28bc0efdc9e9cab57321f5",
   "size": 501484,
   "format": "NetCDF3",
+  "sourceFileIds": null,
   "site": {
     "id": "bucharest",
     "humanReadableName": "Bucharest",
@@ -150,6 +175,7 @@ By default `measurementDate` is not limited.
 date format parseable by [JavaScript `Date`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) -object. 
 If omitted will default to the current date.
 - `product`: One or more `Product` ids, by which to filter the files.
+- `allVersions`: By default the API returns only the latest version of the files. Adding this parameter will fetch all existing versions.
 
 Note: one or more of the parameters *must* be issued. A query without any valid parameters will result in a `400 Bad Request` error.
 
@@ -175,6 +201,7 @@ Response body:
     "checksum": "3a5c3c335702251370b1c5df055faad4b53ba66780217a313aac00d983e688e6",
     "size": 111023,
     "format": "HDF5 (NetCDF4)",
+    "sourceFileIds": null,
     "site": {
       "id": "bucharest",
       "humanReadableName": "Bucharest",
@@ -229,6 +256,14 @@ repositories of most UNIX-based systems.
 Fetch all model and classification products from Mace Head and Granada:
 
 `curl "https://cloudnet.fmi.fi/api/files?location=macehead&location=granada&product=model&product=classification"`
+
+
+### Fetching all versions
+
+Fetch all versions of a classification product from Granada on 2020-05-20:
+
+`curl "https://cloudnet.fmi.fi/api/files?location=granada&product=classification&dateFrom=2020-05-20&dateTo=2020-05-20&allVersions"`
+
 
 ### Using the API to download all data objects matching a criteria
 
