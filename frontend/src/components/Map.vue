@@ -33,6 +33,8 @@ export default class Map extends Vue {
   @Prop() sites!: Site[]
   @Prop() selectedSiteIds?: string[]
   @Prop() onMapMarkerClick?: Function
+  @Prop() zoom!: number
+  @Prop() center!: [number, number]
 
   // map
   map: L.Map | null = null
@@ -62,7 +64,7 @@ export default class Map extends Vue {
   })
 
   initMap() {
-    this.map = L.map(this.$refs['mapElement'] as HTMLElement).setView([54.00, 14.00], 3)
+    this.map = L.map(this.$refs['mapElement'] as HTMLElement).setView(this.center, this.zoom)
     this.tileLayer = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png')
     this.tileLayer.addTo(this.map)
   }

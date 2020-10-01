@@ -248,7 +248,9 @@
     <Map v-if="allSites && allSites.length > 0"
       :sites="allSites"
       :selectedSiteIds="selectedSiteIds"
-      :onMapMarkerClick="onMapMarkerClick">
+      :onMapMarkerClick="onMapMarkerClick"
+      :center="[54.00, 14.00]"
+      :zoom="3">
     </Map>
 
     <custom-multiselect

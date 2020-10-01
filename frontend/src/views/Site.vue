@@ -53,7 +53,11 @@
       <section id="sitemap">
         <header>Map</header>
         <section class="details">
-          <Map :sites="[response]"></Map>
+          <Map
+            :sites="[response]"
+            :center="[response.latitude, response.longitude]"
+            :zoom="5"
+          ></Map>
         </section>
       </section>
     </main>
