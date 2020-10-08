@@ -43,7 +43,11 @@ import * as xmlparser from 'express-xml-bodyparser'
   }
 
   // public (changes to these require changes to API docs)
-  app.get('/api/search', middleware.filesValidator, middleware.filesQueryAugmenter, routes.search)
+  app.get('/api/search',
+    middleware.filesValidator,
+    middleware.filesQueryAugmenter,
+    middleware.checkParamsExistInDb,
+    routes.search)
   app.get('/api/files',
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
@@ -59,7 +63,11 @@ import * as xmlparser from 'express-xml-bodyparser'
   // public/internal
   app.get('/api/status', routes.status)
   app.get('/api/products/variables', routes.productVariables)
-  app.get('/api/download', middleware.filesValidator, middleware.filesQueryAugmenter, routes.download)
+  app.get('/api/download',
+    middleware.filesValidator,
+    middleware.filesQueryAugmenter,
+    middleware.checkParamsExistInDb,
+    routes.download)
   app.get('/api/visualizations',
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
@@ -69,6 +77,7 @@ import * as xmlparser from 'express-xml-bodyparser'
   app.get('/api/latest-visualization-date',
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
+    middleware.checkParamsExistInDb,
     routes.getLatestVisualizationDate
   )
   app.get('/api/sites/:siteid', routes.site)

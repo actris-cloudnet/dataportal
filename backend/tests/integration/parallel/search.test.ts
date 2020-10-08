@@ -116,9 +116,8 @@ describe('/api/files', () => {
 
   it('does not show test files in normal mode', async () => {
     const payload = {params: {location: 'granada'}}
-    expectedBody404.errors = ['The search yielded zero results']
-    const res = await axios.get(url, payload)
-    return expect(res.data).toMatchObject([])
+    expectedBody404.errors = ['One or more of the specified locations were not found']
+    return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody404.status, expectedBody404))
   })
 
   it('shows test files in developer mode', async () => {
