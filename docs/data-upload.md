@@ -14,6 +14,7 @@ The request should have the following fields:
 - `instrument`: Instrument name. Must be one of the ids listed in `https://cloudnet.fmi.fi/api/instruments/`.
 - `file`: The file contents in binary.
 
+### Bash example
 Following is a simple bash script for uploading a file named `file1.LV1`.
 The script uses `sha256sum` to compute the hash sum and `curl` to make the HTTP request:
 
@@ -42,7 +43,8 @@ scheduler (e.g. cron) to upload all files for all instruments for one day in one
     cloudnet_transfer_often.sample.sh --site sitename --date YYYYMMDD
 
 
-Here is an another example for uploading the file using the Python library `requests`:
+### Python example
+Here is an another example for uploading a file using the Python library `requests`:
 
 ```python
 import hashlib
