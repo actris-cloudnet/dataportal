@@ -17,7 +17,7 @@ const routes = [
     redirect: '/search/data'
   },
   {
-    path: '/file/:uuid',
+    path: '/(/)?file/:uuid',
     name: 'File',
     meta: {
       title: 'Cloudnet Data Object'
