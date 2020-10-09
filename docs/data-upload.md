@@ -35,6 +35,12 @@ Both `sha256sum` and `curl` are available on most UNIX-based systems.
 Note that `USERNAME` and `PASSWORD` need to be changed to match the credentials provided to you by the
 Cloudnet team.
 
+A more complete sample transfer script written in bash is available: "cloudnet_transfer_often.sample.sh".
+Modify the default settings to those appropriate for your system. This script can then be run using a 
+scheduler (e.g. cron) to upload all files for all instruments for one day in one command:
+  cloudnet_transfer_often.sample.sh --site sitename --date YYYYMMDD
+
+
 Here is an another example for uploading the file using the Python library `requests`:
 
 ```python
