@@ -109,7 +109,6 @@ export class Middleware {
       siteQb
         .getMany()
         .then(res => {
-          console.log(res.length, query.location.length)
           if (res.length != query.location.length) throw { status: 404, errors: ['One or more of the specified locations were not found'], params: req.query }
         }),
       this.conn.getRepository('product')
