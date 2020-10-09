@@ -1,10 +1,10 @@
-import { RequestHandler } from 'express'
+import {RequestHandler} from 'express'
 import { RequestErrorArray } from '../entity/RequestError'
 import validator from 'validator'
 import { Site } from '../entity/Site'
 import { Product } from '../entity/Product'
-import { Connection } from 'typeorm'
-import {fetchAll, isValidDate, toArray, tomorrow} from '.'
+import {Connection} from 'typeorm'
+import {fetchAll, hideTestDataFromNormalUsers, isValidDate, toArray, tomorrow} from '.'
 
 export class Middleware {
 
@@ -13,6 +13,7 @@ export class Middleware {
   }
 
   private conn: Connection
+
 
   filesValidator: RequestHandler = (req, _res, next) => {
     const requestError: RequestErrorArray = { status: 400, errors: [] }
@@ -74,7 +75,9 @@ export class Middleware {
 
   filesQueryAugmenter: RequestHandler = async (req, _res, next) => {
     const query = req.query as any
-    const defaultLocation = async () => (await fetchAll<Site>(this.conn, Site)).map(site => site.id)
+    const defaultLocation = async () => (await fetchAll<Site>(this.conn, Site))
+      .filter(site => !(req.query.developer === undefined && site.isTestSite))
+      .map(site => site.id)
     const defaultProduct = async () => (await fetchAll<Product>(this.conn, Product)).map(product => product.id)
     const defaultDateFrom = () => new Date('1970-01-01')
     const defaultDateTo = tomorrow
@@ -96,12 +99,20 @@ export class Middleware {
   checkParamsExistInDb: RequestHandler = async (req, _res, next) => {
     const query = req.query as any
 
+    let siteQb = this.conn.getRepository<Site>('site')
+      .createQueryBuilder('site')
+      .select()
+      .where('site.id IN (:...location)', query)
+    siteQb = hideTestDataFromNormalUsers(siteQb, req)
+
     Promise.all([
-      this.conn.getRepository('site').findByIds(query.location)
+      siteQb
+        .getMany()
         .then(res => {
           if (res.length != query.location.length) throw { status: 404, errors: ['One or more of the specified locations were not found'], params: req.query }
         }),
-      this.conn.getRepository('product').findByIds(query.product)
+      this.conn.getRepository('product')
+        .findByIds(query.product)
         .then(res => {
           if (res.length != query.product.length) throw { status: 404, errors: ['One or more of the specified products were not found'], params: req.query }
         })

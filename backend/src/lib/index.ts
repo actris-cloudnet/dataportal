@@ -1,6 +1,7 @@
-import {Connection} from 'typeorm'
+import {Connection, SelectQueryBuilder} from 'typeorm'
 import {basename, join, resolve as pathResolve} from 'path'
 import {promises as fsp} from 'fs'
+import {Request} from 'express'
 
 export const stringify = (obj: any): string => JSON.stringify(obj, null, 2)
 
@@ -47,3 +48,7 @@ export const rowExists = (err: any) => {
   const PG_UNIQUE_CONSTRAINT_VIOLATION = '23505'
   return typeof err == 'object' && 'code' in err && err.code == PG_UNIQUE_CONSTRAINT_VIOLATION
 }
+
+export const hideTestDataFromNormalUsers = <T>(dbQuery: SelectQueryBuilder<T>, req: Request): SelectQueryBuilder<T> =>
+  req.query.developer !== undefined ? dbQuery : dbQuery.andWhere('not site.isTestSite')
+

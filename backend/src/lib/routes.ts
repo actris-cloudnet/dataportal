@@ -2,9 +2,9 @@ import { File } from '../entity/File'
 import { Site } from '../entity/Site'
 import { Product } from '../entity/Product'
 import {UploadedMetadata, Status, METADATA_ID_LENGTH} from '../entity/UploadedMetadata'
-import { SelectQueryBuilder, Connection, Repository } from 'typeorm'
+import { Connection, Repository } from 'typeorm'
 import { Request, Response, RequestHandler } from 'express'
-import {dateToUTCString, isValidDate, linkFile, rowExists, toArray, tomorrow} from '.'
+import {dateToUTCString, hideTestDataFromNormalUsers, isValidDate, linkFile, rowExists, toArray, tomorrow} from '.'
 import { join, basename } from 'path'
 import archiver = require('archiver')
 import { createReadStream, promises as fsp, constants as fsconst } from 'graceful-fs'
@@ -45,9 +45,6 @@ export class Routes {
   private productVariableRepo: Repository<ProductVariable>
   private uploadedMetadataRepo: Repository<UploadedMetadata>
   private instrumentRepo: Repository<Instrument>
-
-  private hideTestDataFromNormalUsers = <T>(dbQuery: SelectQueryBuilder<T>, req: Request): SelectQueryBuilder<T> =>
-    req.query.developer !== undefined ? dbQuery : dbQuery.andWhere('not site.isTestSite')
 
   private augmentFiles = (files: File[]) => {
     return files.map(entry =>
@@ -100,7 +97,7 @@ export class Routes {
       .leftJoinAndSelect('file.site', 'site')
       .leftJoinAndSelect('file.product', 'product')
       .where('file.uuid = :uuid', req.params)
-    this.hideTestDataFromNormalUsers<File>(qb, req)
+    hideTestDataFromNormalUsers<File>(qb, req)
       .getMany()
       .then(result => {
         if (result.length == 0) throw new Error()
@@ -111,9 +108,7 @@ export class Routes {
 
   files: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query
-
-    const qb = this.filesQueryBuilder(query)
-    this.hideTestDataFromNormalUsers(qb, req)
+    this.filesQueryBuilder(query)
       .getMany()
       .then(result => {
         res.send(this.augmentFiles(result))
@@ -126,8 +121,7 @@ export class Routes {
   search: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query
 
-    const qb = this.filesQueryBuilder(query)
-    this.hideTestDataFromNormalUsers(qb, req)
+    this.filesQueryBuilder(query)
       .getMany()
       .then(result => {
         if (result.length == 0) {
@@ -144,7 +138,7 @@ export class Routes {
   site: RequestHandler = async (req: Request, res: Response, next) => {
     const qb = this.siteRepo.createQueryBuilder('site')
       .where('site.id = :siteid', req.params)
-    this.hideTestDataFromNormalUsers<Site>(qb, req)
+    hideTestDataFromNormalUsers<Site>(qb, req)
       .getOne()
       .then(result => {
         if (result == undefined) return next({ status: 404, errors: ['No sites match this id'] })
@@ -156,7 +150,7 @@ export class Routes {
   sites: RequestHandler = async (req: Request, res: Response, next) => {
     const qb = this.siteRepo.createQueryBuilder('site')
       .select()
-    this.hideTestDataFromNormalUsers(qb, req)
+    hideTestDataFromNormalUsers(qb, req)
       .getMany()
       .then(result => res.send(result))
       .catch(err => next({ status: 500, errors: err }))
@@ -181,8 +175,7 @@ export class Routes {
   }
 
   download: RequestHandler = async (req: Request, res: Response, next) => {
-    const qb = this.filesQueryBuilder(req.query)
-    this.hideTestDataFromNormalUsers(qb, req)
+    this.filesQueryBuilder(req.query)
       .select('file.filename')
       .getMany()
       .then(async result => {
@@ -241,8 +234,7 @@ export class Routes {
 
   getVisualization: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query
-    let qb = this.visualizationsQueryBuilder(query)
-    this.hideTestDataFromNormalUsers(qb, req)
+    this.visualizationsQueryBuilder(query)
       .getMany()
       .then(result =>
         res.send(result
@@ -258,7 +250,7 @@ export class Routes {
       .leftJoinAndSelect('file.site', 'site')
       .leftJoinAndSelect('file.product', 'product')
       .where('file.uuid = :uuid', params)
-    this.hideTestDataFromNormalUsers(qb, req)
+    hideTestDataFromNormalUsers(qb, req)
       .getOne()
       .then(file => {
         if (file == undefined) {
@@ -272,8 +264,7 @@ export class Routes {
 
   getLatestVisualizationDate: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query
-    const qb = this.visualizationsQueryBuilder(query)
-    this.hideTestDataFromNormalUsers(qb, req)
+    this.visualizationsQueryBuilder(query)
       .getOne()
       .then(result => {
         if (!result) {
