@@ -60,7 +60,7 @@ export class UploadedMetadata {
     this.id = id
     this.hash = hash
     this.filename = filename
-    this.measurementDate= new Date(date)
+    this.measurementDate = new Date(date)
     this.site = site
     this.instrument = instrument
     this.status = status
