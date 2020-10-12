@@ -7,6 +7,7 @@ import * as express from 'express'
 import config from './config'
 import { Middleware } from './lib/middleware'
 import { Routes } from './lib/routes'
+import { ModelRoutes } from './lib/model_routes'
 import * as xmlparser from 'express-xml-bodyparser'
 
 (async function() {
@@ -19,6 +20,7 @@ import * as xmlparser from 'express-xml-bodyparser'
   const conn = await createConnection(connName)
   const middleware = new Middleware(conn)
   const routes = new Routes(conn)
+  const modelRoutes = new ModelRoutes(conn)
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, _req, res, next) => {
     console.log(`Error in path ${_req.path}:`, stringify(err))
@@ -59,7 +61,12 @@ import * as xmlparser from 'express-xml-bodyparser'
   app.get('/api/products', routes.products)
   app.get('/api/instruments', routes.instruments)
 
-  // public (for sites)
+  // model api (public)
+  app.get('/api/modelSites', modelRoutes.sites)
+  app.get('/api/modelTypes', modelRoutes.modelTypes)
+  app.get('/api/modelFiles', 
+    middleware.modelFilesQueryAugmenter,
+    modelRoutes.files)
 
   // public/internal
   app.get('/api/status', routes.status)
@@ -90,6 +97,7 @@ import * as xmlparser from 'express-xml-bodyparser'
   app.post('/metadata/:hash', express.json(), routes.updateMetadata)
   app.put('/metadata/:hash', express.json(), routes.uploadMetadata)
   app.put('/visualizations/:filename', express.json(), routes.putVisualization)
+  app.put('/modelFiles/', modelRoutes.putModelFiles)
 
   app.use(errorHandler)
 

@@ -2,7 +2,6 @@ import {File} from '../entity/File'
 import {Site} from '../entity/Site'
 import {Product} from '../entity/Product'
 import {UploadedMetadata, Status, METADATA_ID_LENGTH} from '../entity/UploadedMetadata'
-<<<<<<< HEAD
 import { Connection, Repository } from 'typeorm'
 import { Request, Response, RequestHandler } from 'express'
 import {
@@ -16,12 +15,6 @@ import {
   tomorrow
 } from '.'
 import { join, basename } from 'path'
-=======
-import {Connection, Repository} from 'typeorm'
-import {Request, Response, RequestHandler } from 'express'
-import {dateToUTCString, hideTestDataFromNormalUsers, isValidDate, linkFile, rowExists, toArray, tomorrow} from '.'
-import {join, basename } from 'path'
->>>>>>> Fix style issues
 import archiver = require('archiver')
 import {createReadStream, promises as fsp, constants as fsconst} from 'graceful-fs'
 import {fetchAll} from '.'

@@ -1,8 +1,10 @@
 import {RequestHandler} from 'express'
-import { RequestErrorArray } from '../entity/RequestError'
+import {RequestErrorArray} from '../entity/RequestError'
 import validator from 'validator'
-import { Site } from '../entity/Site'
-import { Product } from '../entity/Product'
+import {Site} from '../entity/Site'
+import {ModelSite} from '../entity/ModelSite'
+import {Product} from '../entity/Product'
+import {ModelType} from '../entity/ModelType'
 import {Connection} from 'typeorm'
 import {fetchAll, hideTestDataFromNormalUsers, isValidDate, toArray, tomorrow} from '.'
 import {validate as validateUuid} from 'uuid'
@@ -92,7 +94,8 @@ export class Middleware {
     const defaultLocation = async () => (await fetchAll<Site>(this.conn, Site))
       .filter(site => !(req.query.developer === undefined && site.isTestSite))
       .map(site => site.id)
-    const defaultProduct = async () => (await fetchAll<Product>(this.conn, Product)).map(product => product.id)
+    const defaultProduct = async () => (await fetchAll<Product>(this.conn, Product))
+      .map(product => product.id)
     const defaultDateFrom = () => new Date('1970-01-01')
     const defaultDateTo = tomorrow
     const setVolatile = () => ('volatile' in query) ? toArray(query.volatile) : [true, false]
@@ -107,6 +110,21 @@ export class Middleware {
     query.product = toArray(query.product)
     query.volatile = setVolatile()
 
+    next()
+  }
+
+  modelFilesQueryAugmenter: RequestHandler = async (req, _res, next) => {
+    const query = req.query as any
+    const defaultLocation = async () => (await fetchAll<ModelSite>(this.conn, ModelSite))
+      .map(site => site.id)
+    const defaultModelType = async () => (await fetchAll<ModelType>(this.conn, ModelType))
+      .map(modelType => modelType.id)
+    const setVolatile = () => ('volatile' in query) ? toArray(query.volatile) : [true, false]
+    if (!('location' in query)) query.location = await defaultLocation()
+    if (!('modelType' in query)) query.modelType = await defaultModelType()
+    query.location = toArray(query.location)
+    query.modelType = toArray(query.modelType)
+    query.volatile = setVolatile()
     next()
   }
 
