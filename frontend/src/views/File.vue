@@ -11,12 +11,6 @@ main#filelanding
     justify-content: space-between
     align-items: center
     flex-wrap: wrap
-    span
-      display: block
-      color: grey
-      font-style: italic
-    span::first-letter
-      text-transform: capitalize
 
   div.actions
     margin-top: 5px
@@ -71,6 +65,7 @@ main#filelanding
 
 <template>
   <main id="filelanding" v-if="!error && response">
+    <img id="backButton" :src="require('../assets/icons/back.png')" @click="$router.back()">
     <header>
       <div class="summary">
           <h2>Cloudnet data object</h2>

@@ -1,8 +1,34 @@
+$backButtonHeight: 2em
+
 main>header
+  margin-top: -$backButtonHeight
   margin-bottom: 3em
   h2
     color: $section-title
     margin: 0px
+  span
+    display: block
+    color: grey
+    font-style: italic
+  span::first-letter
+    text-transform: capitalize
+
+#backButton
+  height: $backButtonHeight
+  width: auto
+  position: relative
+  left: -3.5em
+  top: 0.5em
+  color: gray
+  cursor: pointer
+  display: inline
+  opacity: 0.6
+
+@media screen and (max-width: $narrow-screen)
+  #backButton
+    left: 0
+    top: -$backButtonHeight
+    margin-bottom: 0.5em
 
 
 main.info

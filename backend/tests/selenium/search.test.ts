@@ -114,6 +114,19 @@ describe('search page', () => {
     expect(await selenium.findElement(By.id('filelanding'))).toBeTruthy()
   })
 
+  it('comes back from landing page when clicking the back button', async () => {
+    await selenium.sendInput('dateFrom', '2010')
+    await selenium.clickClass('b-table-sort-icon-left')
+    await selenium.clickTab()
+    driver.actions().click()
+    await selenium.clickXpath('//*[contains(text(), "2019-07-25")]')
+    expect(await driver.getCurrentUrl()).toContain('20c03d8f-c9c5-4cb1-8bf8-48d275d621ff')
+    const backButton = await selenium.findElement(By.id('backButton'))
+    expect(backButton).toBeTruthy()
+    await backButton.click()
+    expect(await driver.getCurrentUrl()).toContain('search/data')
+  })
+
   it('resets the search after clicking the reset button', async () => {
     await selenium.sendInput('dateFrom', '2010')
     await selenium.clickId('reset')
