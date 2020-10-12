@@ -246,6 +246,7 @@
     <header class="filterOptions">Filter search</header>
 
     <Map v-if="allSites && allSites.length > 0"
+      :key="mapKey"
       :sites="allSites"
       :selectedSiteIds="selectedSiteIds"
       :onMapMarkerClick="onMapMarkerClick"
@@ -513,6 +514,7 @@ export default class Search extends Vue {
   vizDateUpdate = 30000
   dataSearchUpdate = 40000
   vizSearchUpdate = 50000
+  mapKey = 60000
 
   isVizMode() {
     return this.mode == 'visualizations'
@@ -560,7 +562,7 @@ export default class Search extends Vue {
 
   async initView() {
     const payload = { params: { developer: this.devMode.activated || undefined } }
-    Promise.all([
+    await Promise.all([
       axios.get(`${this.apiUrl}sites/`, payload),
       axios.get(`${this.apiUrl}products/variables`, payload)
     ]).then(([sites, products]) => {
@@ -735,8 +737,9 @@ export default class Search extends Vue {
   }
 
   @Watch('devMode.activated')
-  onDevModeToggled() {
-    this.initView()
+  async onDevModeToggled() {
+    await this.initView()
+    this.mapKey = this.mapKey + 1
   }
 
   @Watch('mode')
