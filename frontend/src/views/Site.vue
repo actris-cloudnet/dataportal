@@ -12,6 +12,7 @@
 
 <template>
   <main id="sitelanding" v-if="!error && response">
+    <img id="backButton" :src="require('../assets/icons/back.png')" @click="$router.back()">
     <header>
       <h2>{{ response.humanReadableName }}</h2>
     </header>
