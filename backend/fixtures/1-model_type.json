@@ -1,0 +1,22 @@
+[
+  {
+    "id": "ecmwf",
+    "order": 0
+  },
+  {
+    "id": "icon-iglo-12-23",
+    "order": 1
+  },
+  {
+    "id": "icon-iglo-24-35",
+    "order": 2
+  },
+  {
+    "id": "icon-iglo-36-47",
+    "order": 3
+  },
+  {
+    "id": "gdas1",
+    "order": 4
+  }
+]

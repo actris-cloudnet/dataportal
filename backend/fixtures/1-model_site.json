@@ -1,0 +1,34 @@
+[
+  {
+    "id": "bucharest",
+    "humanReadableName": "Bucharest",
+    "latitude": 44.348,
+    "longitude": 26.029,
+    "altitude": 93,
+    "country": "Romania"
+  },
+  {
+    "id": "macehead",
+    "humanReadableName": "Mace Head",
+    "latitude": 53.326,
+    "longitude": -9.9,
+    "altitude": 16,
+    "country": "Ireland"
+  },
+  {
+    "id": "hyytiala",
+    "humanReadableName": "Hyytiälä",
+    "latitude": 61.844,
+    "longitude": 24.288,
+    "altitude": 174,
+    "country": "Finland"
+  },
+  {
+    "id": "granada",
+    "humanReadableName": "Granada",
+    "latitude": 37.164,
+    "longitude": -3.605,
+    "altitude": 680,
+    "country": "Spain"
+  }
+]

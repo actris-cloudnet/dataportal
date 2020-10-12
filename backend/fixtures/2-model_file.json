@@ -1,0 +1,29 @@
+[
+    {
+      "uuid": "a5d1d5af-3667-41bc-b952-e684f627d91c",
+      "pid": "",
+      "volatile": true,
+      "measurementDate": "2014-12-05",
+      "publicity": "public",
+      "releasedAt": "2020-02-20T10:52:59.073Z",
+      "filename": "20141205_mace-head_ecmwf.nc",
+      "checksum": "255bcd9deae26851992c3da6352844fb9443203c48ae4f4ad8f1aa50ef2ab26f",
+      "size": 500452,
+      "modelType": "ecmwf",
+      "format": "NetCDF3",
+      "site": "macehead"
+    },
+    {
+      "uuid": "9e04d8ef-0f2b-4823-835d-33e458403c67",
+      "pid": "",
+      "volatile": true,
+      "measurementDate": "2020-01-26",
+      "releasedAt": "2020-04-08T13:33:31.012Z",
+      "filename": "20200126_granada_ecmwf.nc",
+      "checksum": "c46e4c7fe4be5b38670b86f3ffc3101c6de8465eabf5c470226c733e69586031",
+      "size": 501452,
+      "modelType": "ecmwf",
+      "format": "NetCDF3",
+      "site": "granada"
+    }
+]
