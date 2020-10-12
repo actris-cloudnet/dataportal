@@ -3,11 +3,15 @@ import { promises as fsp } from 'fs'
 import { basename, join } from 'path'
 import { argv } from 'process'
 
+const truncate = argv[4] ? argv[4] == 'TRUNCATE' : false
+
 const isJson = (filepath: string) => filepath.substring(filepath.length - 4) == 'json'
 
 async function handleFile(conn: Connection, filepath: string) {
   const repoName = basename(filepath).split('-')[1].split('.')[0]
-  return conn.getRepository(repoName).save(JSON.parse((await fsp.readFile(filepath)).toString()))
+  const repo = conn.getRepository(repoName)
+  if (truncate) await repo.query(`TRUNCATE TABLE ${repoName} CASCADE`)
+  return repo.save(JSON.parse((await fsp.readFile(filepath)).toString()))
 }
 
 async function handleDir(conn: Connection, dirpath: string) {
@@ -28,6 +32,10 @@ async function importFixture(connName: string, path: string) {
   if (stat.isDirectory()) return handleDir(conn, path)
   else if (stat.isFile() && isJson(path)) return handleFile(conn, path)
   else throw ('Unknown file type')
+}
+
+if (truncate) {
+  console.log('NOTE: Truncating all existing data')
 }
 
 importFixture(argv[2], argv[3])
