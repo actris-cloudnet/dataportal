@@ -1,7 +1,8 @@
-import { File } from '../entity/File'
-import { Site } from '../entity/Site'
-import { Product } from '../entity/Product'
+import {File} from '../entity/File'
+import {Site} from '../entity/Site'
+import {Product} from '../entity/Product'
 import {UploadedMetadata, Status, METADATA_ID_LENGTH} from '../entity/UploadedMetadata'
+<<<<<<< HEAD
 import { Connection, Repository } from 'typeorm'
 import { Request, Response, RequestHandler } from 'express'
 import {
@@ -15,9 +16,15 @@ import {
   tomorrow
 } from '.'
 import { join, basename } from 'path'
+=======
+import {Connection, Repository} from 'typeorm'
+import {Request, Response, RequestHandler } from 'express'
+import {dateToUTCString, hideTestDataFromNormalUsers, isValidDate, linkFile, rowExists, toArray, tomorrow} from '.'
+import {join, basename } from 'path'
+>>>>>>> Fix style issues
 import archiver = require('archiver')
-import { createReadStream, promises as fsp, constants as fsconst } from 'graceful-fs'
-import { fetchAll } from '.'
+import {createReadStream, promises as fsp, constants as fsconst} from 'graceful-fs'
+import {fetchAll} from '.'
 import config from '../config'
 import {ReceivedFile} from './metadata2db.js'
 import {Visualization} from '../entity/Visualization'
@@ -40,7 +47,6 @@ export class Routes {
     this.fileServerUrl = config.fileServerUrl
     this.fileRepo = this.conn.getRepository(File)
     this.siteRepo = this.conn.getRepository(Site)
-    this.productRepo = this.conn.getRepository(Product)
     this.visualizationRepo = this.conn.getRepository(Visualization)
     this.productVariableRepo = this.conn.getRepository(ProductVariable)
     this.uploadedMetadataRepo = this.conn.getRepository(UploadedMetadata)
@@ -53,7 +59,6 @@ export class Routes {
   readonly fileServerUrl: string
   private fileRepo: Repository<File>
   private siteRepo: Repository<Site>
-  private productRepo: Repository<Product>
   private visualizationRepo: Repository<Visualization>
   private productVariableRepo: Repository<ProductVariable>
   private uploadedMetadataRepo: Repository<UploadedMetadata>
@@ -374,98 +379,98 @@ export class Routes {
         next({ status: 500, errors: err })
       })
 
-    uploadMetadata: RequestHandler = async (req: Request, res: Response, next) => {
-      const id = req.params.hash
-      const body = req.body
-      if (!('filename' in body) || !body.filename) {
-        next({ status: 422, errors: ['Request is missing filename']})
-        return
-      }
-      if (!('hashSum' in body) || body.hashSum.length != 64) {
-        next({ status: 422, errors: ['Request is missing hashSum or hashSum is invalid']})
-        return
-      }
-      if (id != body.hashSum.substr(0, METADATA_ID_LENGTH)) {
-        next({ status: 400, errors: [`Invalid ID. ID must consist of the ${METADATA_ID_LENGTH} first characters of hash`]})
-        return
-      }
-      if (!('measurementDate' in body) || !body.measurementDate || !isValidDate(body.measurementDate)) {
-        next({ status: 422, errors: ['Request is missing measurementDate or measurementDate is invalid']})
-        return
-      }
-      if (!('instrument' in body) || !body.instrument) {
-        next({ status: 422, errors: ['Request is missing instrument']})
-        return
-      }
-      if (!('site' in body) || !body.site) {
-        next({ status: 422, errors: ['Request is missing site']})
-        return
-      }
-
-      const site = await this.siteRepo.findOne(body.site)
-      if (site == undefined) return next({ status: 422, errors: [ 'Unknown site']})
-
-      const instrument = await this.instrumentRepo.findOne(body.instrument)
-      if (instrument == undefined) return next({ status: 422, errors: [ 'Unknown instrument']})
-
-      // Remove existing metadata if it's status is created
-      const existingCreatedMetadata = await this.uploadedMetadataRepo.createQueryBuilder('uploaded_metadata')
-        .where('uploaded_metadata.id = :id', { id })
-        .andWhere('uploaded_metadata.status = :status', { status: Status.CREATED })
-        .getOne()
-      if (existingCreatedMetadata != undefined) {
-        await this.uploadedMetadataRepo.remove(existingCreatedMetadata)
-      }
-
-      const uploadedMetadata = new UploadedMetadata(
-        id,
-        body.hashSum,
-        body.filename,
-        body.measurementDate,
-        site,
-        instrument,
-        Status.CREATED)
-
-      return this.uploadedMetadataRepo.insert(uploadedMetadata)
-        .then(() => res.sendStatus(201))
-        .catch(err => rowExists(err)
-          ? res.sendStatus(200)
-          : next({ status: 500, errors: err}))
+  uploadMetadata: RequestHandler = async (req: Request, res: Response, next) => {
+    const id = req.params.hash
+    const body = req.body
+    if (!('filename' in body) || !body.filename) {
+      next({ status: 422, errors: ['Request is missing filename']})
+      return
+    }
+    if (!('hashSum' in body) || body.hashSum.length != 64) {
+      next({ status: 422, errors: ['Request is missing hashSum or hashSum is invalid']})
+      return
+    }
+    if (id != body.hashSum.substr(0, METADATA_ID_LENGTH)) {
+      next({ status: 400, errors: [`Invalid ID. ID must consist of the ${METADATA_ID_LENGTH} first characters of hash`]})
+      return
+    }
+    if (!('measurementDate' in body) || !body.measurementDate || !isValidDate(body.measurementDate)) {
+      next({ status: 422, errors: ['Request is missing measurementDate or measurementDate is invalid']})
+      return
+    }
+    if (!('instrument' in body) || !body.instrument) {
+      next({ status: 422, errors: ['Request is missing instrument']})
+      return
+    }
+    if (!('site' in body) || !body.site) {
+      next({ status: 422, errors: ['Request is missing site']})
+      return
     }
 
-    getMetadata: RequestHandler = async (req: Request, res: Response, next) => {
-      if (req.params.hash.length != METADATA_ID_LENGTH)
-        return next({ status: 400, errors: [`ID length must be exactly ${METADATA_ID_LENGTH} characters`]})
+    const site = await this.siteRepo.findOne(body.site)
+    if (site == undefined) return next({ status: 422, errors: [ 'Unknown site']})
 
-      this.uploadedMetadataRepo.findOne(req.params.hash, { relations: ['site', 'instrument'] })
-        .then(uploadedMetadata => {
-          if (uploadedMetadata == undefined) return next({ status: 404, errors: ['No metadata was found with provided id']})
-          res.send(uploadedMetadata)
-        })
-        .catch(err => next({ status: 500, errors: err}))
+    const instrument = await this.instrumentRepo.findOne(body.instrument)
+    if (instrument == undefined) return next({ status: 422, errors: [ 'Unknown instrument']})
+
+    // Remove existing metadata if it's status is created
+    const existingCreatedMetadata = await this.uploadedMetadataRepo.createQueryBuilder('uploaded_metadata')
+      .where('uploaded_metadata.id = :id', { id })
+      .andWhere('uploaded_metadata.status = :status', { status: Status.CREATED })
+      .getOne()
+    if (existingCreatedMetadata != undefined) {
+      await this.uploadedMetadataRepo.remove(existingCreatedMetadata)
     }
 
-    private async metadataQueryBuilder(query: any, onlyDistinctInstruments= false) {
-      const augmentedQuery: any = {
-        site: query.site || (await fetchAll<Site>(this.conn, Site)).map(site => site.id),
-        status: query.status || [Status.UPLOADED, Status.CREATED, Status.PROCESSED],
-        dateFrom: query.dateFrom || '1970-01-01',
-        dateTo: query.dateTo || tomorrow()
-      }
-      augmentedQuery.site = toArray(augmentedQuery.site)
-      augmentedQuery.status = toArray(augmentedQuery.status)
+    const uploadedMetadata = new UploadedMetadata(
+      id,
+      body.hashSum,
+      body.filename,
+      body.measurementDate,
+      site,
+      instrument,
+      Status.CREATED)
 
-      const qb = this.uploadedMetadataRepo.createQueryBuilder('um')
-      qb.leftJoinAndSelect('um.site', 'site')
-        .leftJoinAndSelect('um.instrument', 'instrument')
-      if (onlyDistinctInstruments)  qb.distinctOn(['instrument.id'])
-      qb.where('um.measurementDate >= :dateFrom AND um.measurementDate <= :dateTo', augmentedQuery)
-        .andWhere('site.id IN (:...site)', augmentedQuery)
-        .andWhere('um.status IN (:...status)', augmentedQuery)
-      if (!onlyDistinctInstruments) qb.orderBy('um.measurementDate', 'ASC')
+    return this.uploadedMetadataRepo.insert(uploadedMetadata)
+      .then(() => res.sendStatus(201))
+      .catch(err => rowExists(err)
+        ? res.sendStatus(200)
+        : next({ status: 500, errors: err}))
+  }
 
-      return Promise.resolve(qb)
+  getMetadata: RequestHandler = async (req: Request, res: Response, next) => {
+    if (req.params.hash.length != METADATA_ID_LENGTH)
+      return next({ status: 400, errors: [`ID length must be exactly ${METADATA_ID_LENGTH} characters`]})
+
+    this.uploadedMetadataRepo.findOne(req.params.hash, { relations: ['site', 'instrument'] })
+      .then(uploadedMetadata => {
+        if (uploadedMetadata == undefined) return next({ status: 404, errors: ['No metadata was found with provided id']})
+        res.send(uploadedMetadata)
+      })
+      .catch(err => next({ status: 500, errors: err}))
+  }
+
+  private async metadataQueryBuilder(query: any, onlyDistinctInstruments= false) {
+    const augmentedQuery: any = {
+      site: query.site || (await fetchAll<Site>(this.conn, Site)).map(site => site.id),
+      status: query.status || [Status.UPLOADED, Status.CREATED, Status.PROCESSED],
+      dateFrom: query.dateFrom || '1970-01-01',
+      dateTo: query.dateTo || tomorrow()
     }
+    augmentedQuery.site = toArray(augmentedQuery.site)
+    augmentedQuery.status = toArray(augmentedQuery.status)
+
+    const qb = this.uploadedMetadataRepo.createQueryBuilder('um')
+    qb.leftJoinAndSelect('um.site', 'site')
+      .leftJoinAndSelect('um.instrument', 'instrument')
+    if (onlyDistinctInstruments)  qb.distinctOn(['instrument.id'])
+    qb.where('um.measurementDate >= :dateFrom AND um.measurementDate <= :dateTo', augmentedQuery)
+      .andWhere('site.id IN (:...site)', augmentedQuery)
+      .andWhere('um.status IN (:...status)', augmentedQuery)
+    if (!onlyDistinctInstruments) qb.orderBy('um.measurementDate', 'ASC')
+
+    return Promise.resolve(qb)
+  }
 
   listMetadata: RequestHandler = async (req: Request, res: Response, next) => {
     (await this.metadataQueryBuilder(req.query))
