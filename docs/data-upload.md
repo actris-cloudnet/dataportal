@@ -11,7 +11,7 @@ The request should have the following fields:
 
 - `hashSum`: An sha256-sum of the file being sent. Used for identifying the file and verifying its integrity.
 - `measurementDate`: UTC date in `YYYY-MM-DD` format of the first data point in the file.
-- `instrument`: Instrument name. Must be one of the ids listed in `https://cloudnet.fmi.fi/api/instruments/`.
+- `instrument`: Instrument name. Must be one of the ids listed in [https://cloudnet.fmi.fi/api/instruments/](https://cloudnet.fmi.fi/api/instruments/).
 - `file`: The file contents in binary.
 
 ### Bash example
