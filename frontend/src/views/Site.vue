@@ -15,6 +15,7 @@
     <img id="backButton" :src="require('../assets/icons/back.png')" @click="$router.back()">
     <header>
       <h2>{{ response.humanReadableName }}</h2>
+      <span>Measurement station in {{ response.country }}.</span>
     </header>
     <main class="info">
       <section id="summary">
