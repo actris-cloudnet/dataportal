@@ -6,7 +6,6 @@ import {Request, Response, RequestHandler} from 'express'
 import {rowExists} from '.'
 import {fetchAll} from '.'
 import config from '../config'
-import {ReceivedFile} from './metadata2db.js'
 
 
 export class ModelRoutes {
@@ -70,8 +69,30 @@ export class ModelRoutes {
 
 
   putModelFiles: RequestHandler = async (req: Request, res: Response, next) => {
-    next({status: 200, "body": req.body, "headers": req.headers})
+    const body = req.body
+    const modelFile = new ModelFile(
+      body.file_uuid,
+      body.year,
+      body.month,
+      body.day,
+      body.filename,
+      body.hashSum,
+      body.format,
+      body.size,
+      body.site,
+      body.modelType)
+    try {
+      const existingFile = await this.modelFileRepo.findOne({uuid: body.file_uuid})
+      if (existingFile == undefined) {
+        await this.modelFileRepo.insert(modelFile)
+      } else {
+        await this.modelFileRepo.update({uuid: body.file_uuid}, {...modelFile, ...{releasedAt: new Date() }})
+      }
+      return res.sendStatus(200)
+    } catch(e) {
+      return next({status: 500, errors: e})
+    }
   }
-
 }
+
 

@@ -97,7 +97,7 @@ import * as xmlparser from 'express-xml-bodyparser'
   app.post('/metadata/:hash', express.json(), routes.updateMetadata)
   app.put('/metadata/:hash', express.json(), routes.uploadMetadata)
   app.put('/visualizations/:filename', express.json(), routes.putVisualization)
-  app.put('/modelFiles/', modelRoutes.putModelFiles)
+  app.put('/modelFiles/', express.json(), modelRoutes.putModelFiles)
 
   app.use(errorHandler)
 

@@ -1,5 +1,4 @@
 import {Entity, Column, PrimaryColumn, ManyToOne, BeforeUpdate, BeforeInsert, Unique, Index} from 'typeorm'
-import {NetCDFObject} from './NetCDFObject'
 import {ModelSite} from './ModelSite'
 import {ModelType} from './ModelType'
 
@@ -52,29 +51,32 @@ export class ModelFile {
     }
 
     constructor(
-      obj: NetCDFObject,
+      uuid: string,
+      year: string,
+      month: string,
+      day: string,
       filename: string,
-      chksum: string,
-      filesize: number,
+      checksum: string,
       format: string,
+      size: number,
       site: ModelSite,
+      modelType: ModelType,
+      pid = '',
       volatile = true,
     ) {
-      // A typeorm hack, see https://github.com/typeorm/typeorm/issues/3903
-      if (typeof obj == 'undefined') return
-
       this.measurementDate = new Date(
-        parseInt(obj.year),
-        parseInt(obj.month) - 1,
-        parseInt(obj.day)
+        parseInt(year),
+        parseInt(month) - 1,
+        parseInt(day)
       )
-      this.site = site
-      if (typeof obj.pid == 'string') this.pid = obj.pid
-      this.uuid = obj.file_uuid
+      this.uuid = uuid
       this.filename = filename
-      this.checksum = chksum
-      this.size = filesize
+      this.checksum = checksum
       this.format = format
+      this.size = size
+      this.site = site
+      this.modelType = modelType
+      this.pid = pid
       this.volatile = volatile
     }
 }
