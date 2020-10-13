@@ -18,6 +18,7 @@ import {LatestVisualizationDateResponse} from '../entity/LatestVisualizationDate
 import {SearchFileResponse} from '../entity/SearchFileResponse'
 import {Instrument} from '../entity/Instrument'
 import {ReducedMetadataResponse} from '../entity/ReducedMetadataResponse'
+import {Collection} from '../entity/Collection'
 
 
 export class Routes {
@@ -33,10 +34,11 @@ export class Routes {
     this.productVariableRepo = this.conn.getRepository(ProductVariable)
     this.uploadedMetadataRepo = this.conn.getRepository(UploadedMetadata)
     this.instrumentRepo = this.conn.getRepository(Instrument)
+    this.collectionRepo = this.conn.getRepository(Collection)
   }
 
-  private conn: Connection
-  private publicDir: string
+  readonly conn: Connection
+  readonly publicDir: string
   readonly fileServerUrl: string
   private fileRepo: Repository<File>
   private siteRepo: Repository<Site>
@@ -45,6 +47,7 @@ export class Routes {
   private productVariableRepo: Repository<ProductVariable>
   private uploadedMetadataRepo: Repository<UploadedMetadata>
   private instrumentRepo: Repository<Instrument>
+  private collectionRepo: Repository<Collection>
 
   private augmentFiles = (files: File[]) => {
     return files.map(entry =>
@@ -461,5 +464,24 @@ export class Routes {
       .catch(err => { next({ status: 500, errors: err}) })
   }
 
+  addCollection: RequestHandler = async (req: Request, res: Response, next) => {
+    if (!('files' in req.body) || !req.body.files || !Array.isArray(req.body.files)) {
+      next({status: 422, errors: ['Request is missing field "files".']})
+      return
+    }
+    const fileUuids: string[] = req.body.files
+    try {
+      const files = await this.fileRepo.findByIds(fileUuids)
+      if (files.length != fileUuids.length) {
+        const existingUuids = files.map(file => file.uuid)
+        const missingFiles = fileUuids.filter(uuid => !existingUuids.includes(uuid))
+        return next({status: 422, errors: [`Following files do not exist: ${missingFiles}`]})
+      }
+      const collection = await this.collectionRepo.save(new Collection(files))
+      res.send(collection.uuid)
+    } catch (e) {
+      return next({status: 500, errors: e})
+    }
+  }
 }
 
