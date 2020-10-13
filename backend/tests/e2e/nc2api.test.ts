@@ -65,20 +65,24 @@ describe('after PUTting metadata to API', () => {
   })
 
   describe('after PUTting more metadata to API', () => {
+    let collectionUuid = ''
     beforeAll(async () => {
+      const uuid = '926ba5cb19e241538d879d97596f5574'
       const xmlOut = await runNcdump('tests/data/20190724_bucharest_classification.nc')
-      return axios.put(`${backendPrivateUrl}files/${expectedJson.uuid}`, xmlOut, axiosConfig)
+      await axios.put(`${backendPrivateUrl}files/${uuid}`, xmlOut, axiosConfig)
+      const res =  await axios.post(`${backendPublicUrl}collection/`, {files: [expectedJson.uuid, uuid]})
+      collectionUuid = res.data
     })
 
     it('hashes of /download zipped files match originals', async () => {
       const tmpZip = 'tests/data/tmp.zip'
       const shas = await (await axios.get(`${backendPublicUrl}files/`, { params: { location: 'bucharest' } })).data.map((file: any) => file.checksum)
-      const receivedFile = await axios.get(`${backendPublicUrl}download/`, { responseType: 'arraybuffer', params: { location: 'bucharest' } })
+      const receivedFile = await axios.get(`${backendPublicUrl}download/${collectionUuid}`, { responseType: 'arraybuffer'})
       fs.writeFileSync(tmpZip, receivedFile.data)
       new AdmZip(tmpZip).getEntries().map((entry, i) => {
         const hash = createHash('sha256')
         hash.update(entry.getData())
-        expect(hash.digest('hex')).toEqual(shas[i])
+        expect(hash.digest('hex')).toEqual(shas[shas.length - 1 - i])
       })
       fs.unlinkSync(tmpZip)
     }

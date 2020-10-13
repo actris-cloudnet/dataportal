@@ -63,11 +63,7 @@ import * as xmlparser from 'express-xml-bodyparser'
   // public/internal
   app.get('/api/status', routes.status)
   app.get('/api/products/variables', routes.productVariables)
-  app.get('/api/download',
-    middleware.filesValidator,
-    middleware.filesQueryAugmenter,
-    middleware.checkParamsExistInDb,
-    routes.download)
+  app.get('/api/download/:collectionUuid', routes.download)
   app.get('/api/visualizations',
     middleware.filesValidator,
     middleware.filesQueryAugmenter,

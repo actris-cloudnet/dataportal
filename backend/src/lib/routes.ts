@@ -178,42 +178,39 @@ export class Routes {
   }
 
   download: RequestHandler = async (req: Request, res: Response, next) => {
-    this.filesQueryBuilder(req.query)
-      .select('file.filename')
-      .getMany()
-      .then(async result => {
-        if (result.length == 0) {
-          next({ status: 400, errors: ['No files match the query'], params: req.query })
-          return
-        }
-        const filepaths = result
-          .map(file => file.filename)
-          .map(filename => join(this.publicDir, filename))
-        await this.allFilesAreReadable(filepaths)
+    const collectionUuid: string = req.params.collectionUuid
+    const collection = await this.collectionRepo.findOne(collectionUuid, {relations: ['files']})
+    if (collection === undefined) {
+      return next({status: 404, errors: ['No collection matches this UUID.']})
+    }
+    try {
+      const filepaths = collection.files
+        .map(file => file.filename)
+        .map(filename => join(this.publicDir, filename))
+      await this.allFilesAreReadable(filepaths)
 
-        const archive = archiver('zip', { store: true })
-        archive.on('warning', console.error)
-        archive.on('error', console.error)
-        req.on('close', () => archive.abort)
+      const archive = archiver('zip', { store: true })
+      archive.on('warning', console.error)
+      archive.on('error', console.error)
+      req.on('close', () => archive.abort)
 
-        const receiverFilename = `cloudnet-collection-${new Date().getTime()}.zip`
-        res.set('Content-Type', 'application/octet-stream')
-        res.set('Content-Disposition', `attachment; filename="${receiverFilename}"`)
-        archive.pipe(res)
+      const receiverFilename = `cloudnet-collection-${new Date().getTime()}.zip`
+      res.set('Content-Type', 'application/octet-stream')
+      res.set('Content-Disposition', `attachment; filename="${receiverFilename}"`)
+      archive.pipe(res)
 
-        let i = 1
-        const appendFile = (idx: number) => {
-          const fileStream = createReadStream(filepaths[idx])
-          archive.append(fileStream, { name: basename(filepaths[idx]) })
-          if (idx == (filepaths.length - 1)) archive.finalize()
-        }
-        archive.on('entry', () => i < filepaths.length ? appendFile(i++) : null)
-        appendFile(0)
-      })
-      .catch(err => {
-        res.sendStatus(500)
-        next(err)
-      })
+      let i = 1
+      const appendFile = (idx: number) => {
+        const fileStream = createReadStream(filepaths[idx])
+        archive.append(fileStream, { name: basename(filepaths[idx]) })
+        if (idx == (filepaths.length - 1)) archive.finalize()
+      }
+      archive.on('entry', () => i < filepaths.length ? appendFile(i++) : null)
+      appendFile(0)
+    } catch (err) {
+      res.sendStatus(500)
+      next(err)
+    }
   }
 
   putVisualization: RequestHandler = async (req: Request, res: Response, next) => {
