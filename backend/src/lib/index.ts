@@ -21,18 +21,16 @@ export const fetchAll = <T>(conn: Connection, schema: Function, options={}): Pro
 
 const checkFileExists = async (path: string) => fsp.stat(path)
 
-export function linkFile(filename: string, linkPath: string) {
+export async function linkFile(filename: string, linkPath: string) {
   const resolvedSource = pathResolve(filename)
   const fullLink = join(linkPath, basename(filename))
-  return checkFileExists(resolvedSource)
-    .then(async () => {
-      try {
-        await checkFileExists(fullLink)
-        await fsp.unlink(fullLink)
-      } catch { // if file does not exist do nothing
-      }
-      return fsp.symlink(resolvedSource, fullLink)
-    })
+  await checkFileExists(resolvedSource)
+  try {
+    await checkFileExists(fullLink)
+    await fsp.unlink(fullLink)
+  } catch { // if file does not exist do nothing
+  }
+  return fsp.symlink(resolvedSource, fullLink)
 }
 
 export const isValidDate = (obj: any) => !isNaN(new Date(obj).getDate())
