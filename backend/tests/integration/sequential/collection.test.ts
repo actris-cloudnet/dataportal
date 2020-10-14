@@ -32,7 +32,7 @@ describe('POST /api/collection', () => {
 
   it('on invalid request responds with 422', async () => {
     return expect(axios.post(url, {file: validFileUuids})).rejects
-      .toMatchObject(genResponse(422, {errors: ['Request is missing field "files".']}))
+      .toMatchObject(genResponse(422, {errors: ['Request is missing field "files"']}))
   })
 
   it('on missing files responds with 422', async () => {

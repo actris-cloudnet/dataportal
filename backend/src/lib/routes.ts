@@ -471,7 +471,7 @@ export class Routes {
 
   addCollection: RequestHandler = async (req: Request, res: Response, next) => {
     if (!('files' in req.body) || !req.body.files || !Array.isArray(req.body.files)) {
-      next({status: 422, errors: ['Request is missing field "files".']})
+      next({status: 422, errors: ['Request is missing field "files"']})
       return
     }
     const fileUuids: string[] = req.body.files
@@ -494,7 +494,7 @@ export class Routes {
     try {
       const collection = await this.collectionRepo.findOne(uuid, {relations: ['files', 'files.site', 'files.product']})
       if (collection === undefined) return next({status: 404, errors: ['Collection not found']})
-      const files = collection.files.map(file => new SearchFileResponse(file))
+      const files = this.convertToSearchFiles(collection.files)
       const collectionResponse = {...collection, ...{files}}
       res.send(collectionResponse)
     } catch (e) {
