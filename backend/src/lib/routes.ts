@@ -4,7 +4,16 @@ import { Product } from '../entity/Product'
 import {UploadedMetadata, Status, METADATA_ID_LENGTH} from '../entity/UploadedMetadata'
 import { Connection, Repository } from 'typeorm'
 import { Request, Response, RequestHandler } from 'express'
-import {dateToUTCString, hideTestDataFromNormalUsers, isValidDate, linkFile, rowExists, toArray, tomorrow} from '.'
+import {
+  convertToSearchFiles,
+  dateToUTCString,
+  hideTestDataFromNormalUsers,
+  isValidDate,
+  linkFile,
+  rowExists,
+  toArray,
+  tomorrow
+} from '.'
 import { join, basename } from 'path'
 import archiver = require('archiver')
 import { createReadStream, promises as fsp, constants as fsconst } from 'graceful-fs'
@@ -15,10 +24,10 @@ import {Visualization} from '../entity/Visualization'
 import {VisualizationResponse} from '../entity/VisualizationResponse'
 import {ProductVariable} from '../entity/ProductVariable'
 import {LatestVisualizationDateResponse} from '../entity/LatestVisualizationDateResponse'
-import {SearchFileResponse} from '../entity/SearchFileResponse'
 import {Instrument} from '../entity/Instrument'
 import {ReducedMetadataResponse} from '../entity/ReducedMetadataResponse'
 import {Collection} from '../entity/Collection'
+import {CollectionResponse} from '../entity/CollectionResponse'
 
 
 export class Routes {
@@ -91,10 +100,6 @@ export class Routes {
   private allFilesAreReadable = (filepaths: string[]) =>
     Promise.all(filepaths.map(filepath => fsp.access(filepath, fsconst.R_OK)))
 
-  private convertToSearchFiles = (files: File[]) =>
-    files.map(file => new SearchFileResponse(file))
-
-
   file: RequestHandler = async (req: Request, res: Response, next) => {
     const qb = this.fileRepo.createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
@@ -131,7 +136,7 @@ export class Routes {
           next({ status: 404, errors: ['The search yielded zero results'], params: req.query })
           return
         }
-        res.send(this.convertToSearchFiles(result))
+        res.send(convertToSearchFiles(result))
       })
       .catch(err => {
         next({ status: 500, errors: err })
@@ -283,13 +288,13 @@ export class Routes {
 
   allsearch: RequestHandler = async (req: Request, res: Response, next) =>
     this.fileRepo.find({ relations: ['site', 'product'] })
-      .then(result => res.send(this.convertToSearchFiles(result)))
+      .then(result => res.send(convertToSearchFiles(result)))
       .catch(err => next({ status: 500, errors: err }))
 
   allcollections: RequestHandler = async (req: Request, res: Response, next) =>
     this.collectionRepo.find({ relations: ['files', 'files.product', 'files.site'] })
       .then(collections => {
-        const response = collections.map(coll => ({...coll, ...{files: this.convertToSearchFiles(coll.files)}}))
+        const response = collections.map(coll => ({...coll, ...{files: convertToSearchFiles(coll.files)}}))
         res.send(response)
       })
       .catch(err => next({ status: 500, errors: err }))
@@ -494,9 +499,7 @@ export class Routes {
     try {
       const collection = await this.collectionRepo.findOne(uuid, {relations: ['files', 'files.site', 'files.product']})
       if (collection === undefined) return next({status: 404, errors: ['Collection not found']})
-      const files = this.convertToSearchFiles(collection.files)
-      const collectionResponse = {...collection, ...{files}}
-      res.send(collectionResponse)
+      res.send(new CollectionResponse(collection))
     } catch (e) {
       return next({status: 500, errors: e})
     }
