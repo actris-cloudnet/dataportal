@@ -11,6 +11,15 @@ export class Collection {
   @JoinTable()
   files!: File[]
 
+  @Column({default: ''})
+  title!: string
+
+  @Column({default: ''})
+  pid!: string
+
+  @Column({default: 0})
+  downloadCount!: number
+
   @Column()
   createdAt!: Date
 
