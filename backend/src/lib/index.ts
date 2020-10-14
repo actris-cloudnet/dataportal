@@ -14,6 +14,14 @@ export const dateToUTCString = (date: string | Date) => {
     .toISOString().replace('T', ' ').replace(/\..*/, '')
 }
 
+export const dateToJSDate = (year: string, month: string, day: string): Date => {
+  return new Date(
+    parseInt(year),
+    parseInt(month) - 1,
+    parseInt(day)
+  )
+}
+
 export const fetchAll = <T>(conn: Connection, schema: Function, options={}): Promise<T[]> => {
   const repo = conn.getRepository(schema)
   return repo.find(options) as Promise<T[]>
