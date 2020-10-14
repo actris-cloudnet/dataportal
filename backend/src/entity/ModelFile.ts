@@ -1,7 +1,6 @@
 import {Entity, Column, PrimaryColumn, ManyToOne, BeforeUpdate, BeforeInsert, Unique, Index} from 'typeorm'
 import {ModelSite} from './ModelSite'
 import {ModelType} from './ModelType'
-import {dateToJSDate} from '../lib'
 
 @Entity()
 @Unique(['checksum'])
@@ -50,9 +49,7 @@ export class ModelFile {
 
     constructor(
       uuid: string,
-      year: string,
-      month: string,
-      day: string,
+      measurementDate: Date,
       filename: string,
       checksum: string,
       format: string,
@@ -61,7 +58,7 @@ export class ModelFile {
       modelType: ModelType,
       volatile = true,
     ) {
-      this.measurementDate = dateToJSDate(year, month, day)
+      this.measurementDate = measurementDate
       this.uuid = uuid
       this.filename = filename
       this.checksum = checksum

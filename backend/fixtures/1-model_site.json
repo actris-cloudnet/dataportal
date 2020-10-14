@@ -30,5 +30,14 @@
     "longitude": -3.605,
     "altitude": 680,
     "country": "Spain"
+  },
+  {
+    "id": "norunda",
+    "humanReadableName": "Norunda",
+    "latitude": 60.086,
+    "longitude": 17.479,
+    "altitude": 46,
+    "country": "Sweden"
   }
+
 ]

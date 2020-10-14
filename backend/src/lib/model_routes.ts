@@ -3,7 +3,7 @@ import {ModelSite} from '../entity/ModelSite'
 import {ModelType} from '../entity/ModelType'
 import {Connection, Repository} from 'typeorm'
 import {Request, Response, RequestHandler} from 'express'
-import {fetchAll, dateToJSDate} from '.'
+import {fetchAll, dateToJSDate, isValidDate} from '.'
 import config from '../config'
 
 
@@ -13,11 +13,15 @@ export class ModelRoutes {
     this.conn = conn
     this.fileServerUrl = config.fileServerUrl
     this.modelFileRepo = this.conn.getRepository(ModelFile)
+    this.modelTypeRepo = this.conn.getRepository(ModelType)
+    this.modelSiteRepo = this.conn.getRepository(ModelSite)
   }
 
   private conn: Connection
   readonly fileServerUrl: string
   private modelFileRepo: Repository<ModelFile>
+  private modelTypeRepo: Repository<ModelType>
+  private modelSiteRepo: Repository<ModelSite>
 
   private augmentFiles = (files: ModelFile[]) => {
     return files.map(entry =>
@@ -69,57 +73,59 @@ export class ModelRoutes {
 
   putModelFiles: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body
-    this.validateBody(body, next)
+    const measurementDate = await this.validateBody(body, next)
 
     const modelFile = new ModelFile(
       body.file_uuid,
-      body.year,
-      body.month,
-      body.day,
+      measurementDate,
       body.filename,
       body.hashSum,
       body.format,
       body.size,
-      body.site,
+      body.location,
       body.modelType)
 
-    try {
-      const date = dateToJSDate(body.year, body.month, body.day)
-      // Assuming file_uuid can change but having only one file / date / site / modelType:
-      const existingFile = await this.modelFileRepo.findOne({
-        measurementDate: date,
-        site: body.site,
-        modelType: body.modelType
-      })
-      if (existingFile == undefined) {
-        await this.modelFileRepo.insert(modelFile)
-        return res.sendStatus(201)
-      } else {
-        if (existingFile.volatile) {
-          await this.modelFileRepo.update({uuid: existingFile.uuid}, {...modelFile, ...{releasedAt: new Date() }
-          })
-          return res.sendStatus(200)
-        } else {
-          return next({
-            status: 403,
-            errors: 'Existing file can not be updated because it is non-volatile'
-          })
-        }
-      }
-    } catch (e) {
-      return next({status: 500, errors: e})
+    const error = (msg: string) => {next({status: 403, errors: `${msg}: ${body.filename}`})}
+
+    // Assuming file_uuid can change but there is only one file / date / site / modelType:
+    const existingFile = await this.modelFileRepo.findOne({
+      measurementDate: measurementDate,
+      site: body.location,
+      modelType: body.modelType
+    })
+    if (existingFile == undefined) {
+      await this.modelFileRepo.insert(modelFile)
+      res.send({status: 201})
+    } else if (!existingFile.volatile) {
+      error('Can not update non-volatile file')
+    }
+    else if (existingFile.checksum == body.hashSum) {
+      error('File already exists')
+    }
+    else {
+      await this.modelFileRepo.update({uuid: existingFile.uuid}, modelFile)
+      res.send({status: 200})
     }
   }
 
-  private validateBody = (body: any, next: any) => {
-    // Simple validation of the model submission Request
-    const error = (msg: string) => {next({ status: 422, errors: [msg]})}
-    const keys = ['year', 'month', 'day', 'hashSum', 'filename', 'modelType', 'site', 'file_uuid', 'format', 'size', 'date']
-    keys.forEach(key => {
-      if (!(key in body)) {error(`Missing ${key}`)}
-    })
-    if (`${body.year}-${body.month}-${body.day}` !== body.date) {error('Invalid date')}
+
+  private validateBody = async (body: any, next: any) => {
+
+    const error = (msg: string) => {next({status: 403, errors: `${msg} in ${body.filename}`})}
+
+    ['year', 'month', 'day', 'hashSum', 'filename', 'modelType', 'location', 'file_uuid', 'format', 'size']
+      .forEach(key => {
+        if (!(key in body)) {error(`Missing: ${key}`)}
+      })
+
+    const date = dateToJSDate(body.year, body.month, body.day)
+    if (!isValidDate(date)) {error('Invalid date')}
+
+    if (await this.modelTypeRepo.findOne(body.modelType) == undefined) {error(`Invalid model type "${body.modelType}"`)}
+    if (await this.modelSiteRepo.findOne(body.location) == undefined) {error(`Invalid model site "${body.location}"`)}
     if (body.hashSum.length !== 64) {error('Invalid hash length')}
+
+    return date
   }
 
 }
