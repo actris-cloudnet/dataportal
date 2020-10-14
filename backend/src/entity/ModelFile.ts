@@ -10,9 +10,6 @@ export class ModelFile {
     @PrimaryColumn('uuid')
     uuid!: string
 
-    @Column({default: ''})
-    pid!: string
-
     @Column({default: true})
     volatile!: boolean
 
@@ -61,7 +58,6 @@ export class ModelFile {
       size: number,
       site: ModelSite,
       modelType: ModelType,
-      pid = '',
       volatile = true,
     ) {
       this.measurementDate = new Date(
@@ -76,7 +72,6 @@ export class ModelFile {
       this.size = size
       this.site = site
       this.modelType = modelType
-      this.pid = pid
       this.volatile = volatile
     }
 }
