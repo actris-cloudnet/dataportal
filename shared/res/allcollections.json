@@ -1,0 +1,27 @@
+[
+  {
+    "files": [
+      {
+        "uuid": "a5d1d5af-3667-41bc-b952-e684f627d91c",
+        "measurementDate": "2014-12-05",
+        "site": "Mace Head",
+        "product": "Model",
+        "productId": "model",
+        "size": 500452,
+        "volatile": true
+      },
+      {
+        "uuid": "d21d6a9b-6804-4465-a026-74ec429fe17d",
+        "measurementDate": "2019-09-01",
+        "site": "Hyytiälä",
+        "product": "Radar",
+        "productId": "radar",
+        "size": 16027310,
+        "volatile": true
+      }
+    ],
+    "uuid": "48092c00-161d-4ca2-a29d-628cf8e960f6",
+    "createdAt": "2020-09-28T12:45:21.916Z",
+    "updatedAt": "2020-09-28T12:45:21.916Z"
+  }
+]

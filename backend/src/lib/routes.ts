@@ -286,6 +286,14 @@ export class Routes {
       .then(result => res.send(this.convertToSearchFiles(result)))
       .catch(err => next({ status: 500, errors: err }))
 
+  allcollections: RequestHandler = async (req: Request, res: Response, next) =>
+    this.collectionRepo.find({ relations: ['files', 'files.product', 'files.site'] })
+      .then(collections => {
+        const response = collections.map(coll => ({...coll, ...{files: this.convertToSearchFiles(coll.files)}}))
+        res.send(response)
+      })
+      .catch(err => next({ status: 500, errors: err }))
+
   putMetadataXml: RequestHandler = async (req: Request, res: Response, next) => {
     const isFreeze = (header:any) => {
       const xFreeze = header['x-freeze'] || 'false'
