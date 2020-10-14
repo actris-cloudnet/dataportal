@@ -69,6 +69,8 @@ export class ModelRoutes {
 
   putModelFiles: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body
+    this.validateBody(body, next)
+
     const modelFile = new ModelFile(
       body.file_uuid,
       body.year,
@@ -80,8 +82,10 @@ export class ModelRoutes {
       body.size,
       body.site,
       body.modelType)
+
     try {
       const date = dateToJSDate(body.year, body.month, body.day)
+      // Assuming file_uuid can change but having only one file / date / site / modelType:
       const existingFile = await this.modelFileRepo.findOne({
         measurementDate: date,
         site: body.site,
@@ -106,6 +110,16 @@ export class ModelRoutes {
       return next({status: 500, errors: e})
     }
   }
+
+  private validateBody = (body: any, next: any) => {
+    // Simple validation of the model submission Request
+    const error = (msg: string) => {next({ status: 422, errors: [msg]})}
+    const keys = ['year', 'month', 'day', 'hashSum', 'filename', 'modelType', 'site', 'file_uuid', 'format', 'size', 'date']
+    keys.forEach(key => {
+      if (!(key in body)) {error(`Missing ${key}`)}
+    })
+    if (`${body.year}-${body.month}-${body.day}` !== body.date) {error('Invalid date')}
+    if (body.hashSum.length !== 64) {error('Invalid hash length')}
+  }
+
 }
-
-
