@@ -64,7 +64,7 @@ import * as xmlparser from 'express-xml-bodyparser'
   // model api (public)
   app.get('/api/modelSites', modelRoutes.sites)
   app.get('/api/modelTypes', modelRoutes.modelTypes)
-  app.get('/api/modelFiles', 
+  app.get('/api/modelFiles',
     middleware.modelFilesQueryAugmenter,
     modelRoutes.files)
 

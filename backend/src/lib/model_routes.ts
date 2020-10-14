@@ -3,8 +3,7 @@ import {ModelSite} from '../entity/ModelSite'
 import {ModelType} from '../entity/ModelType'
 import {Connection, Repository} from 'typeorm'
 import {Request, Response, RequestHandler} from 'express'
-import {rowExists} from '.'
-import {fetchAll} from '.'
+import {fetchAll, dateToJSDate} from '.'
 import config from '../config'
 
 
@@ -26,17 +25,17 @@ export class ModelRoutes {
   }
 
   private filesQueryBuilder(query: any) {
-    const qb = this.modelFileRepo      
-    .createQueryBuilder('file')
-    .leftJoinAndSelect('file.site', 'site')
-    .leftJoinAndSelect('file.modelType', 'modelType')
-    .where('site.id IN (:...location)', query)
-    .andWhere('modelType.id IN (:...modelType)', query)
-    .andWhere('file.volatile IN (:...volatile)', query)
+    const qb = this.modelFileRepo
+      .createQueryBuilder('file')
+      .leftJoinAndSelect('file.site', 'site')
+      .leftJoinAndSelect('file.modelType', 'modelType')
+      .where('site.id IN (:...location)', query)
+      .andWhere('modelType.id IN (:...modelType)', query)
+      .andWhere('file.volatile IN (:...volatile)', query)
     if (query.date != undefined) {
       qb.andWhere('file.measurementDate = :date',)
     }
-    return qb    
+    return qb
   }
 
   files: RequestHandler = async (req: Request, res: Response, next) => {
@@ -82,14 +81,28 @@ export class ModelRoutes {
       body.site,
       body.modelType)
     try {
-      const existingFile = await this.modelFileRepo.findOne({uuid: body.file_uuid})
+      const date = dateToJSDate(body.year, body.month, body.day)
+      const existingFile = await this.modelFileRepo.findOne({
+        measurementDate: date,
+        site: body.site,
+        modelType: body.modelType
+      })
       if (existingFile == undefined) {
         await this.modelFileRepo.insert(modelFile)
+        return res.sendStatus(201)
       } else {
-        await this.modelFileRepo.update({uuid: body.file_uuid}, {...modelFile, ...{releasedAt: new Date() }})
+        if (existingFile.volatile) {
+          await this.modelFileRepo.update({uuid: existingFile.uuid}, {...modelFile, ...{releasedAt: new Date() }
+          })
+          return res.sendStatus(200)
+        } else {
+          return next({
+            status: 403,
+            errors: 'Existing file can not be updated because it is non-volatile'
+          })
+        }
       }
-      return res.sendStatus(200)
-    } catch(e) {
+    } catch (e) {
       return next({status: 500, errors: e})
     }
   }
