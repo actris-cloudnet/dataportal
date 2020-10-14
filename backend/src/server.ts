@@ -79,6 +79,7 @@ import * as xmlparser from 'express-xml-bodyparser'
   app.get('/api/sites/:siteid', routes.site)
   app.get('/api/uploaded-metadata', routes.listInstrumentsFromMetadata)
   app.post('/api/collection', express.json(), routes.addCollection)
+  app.get('/api/collection/:uuid', routes.getCollection)
 
   // private
   app.put('/files/:uuid', routes.putMetadataXml)
