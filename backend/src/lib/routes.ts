@@ -28,6 +28,7 @@ import {Instrument} from '../entity/Instrument'
 import {ReducedMetadataResponse} from '../entity/ReducedMetadataResponse'
 import {Collection} from '../entity/Collection'
 import {CollectionResponse} from '../entity/CollectionResponse'
+import axios from 'axios'
 
 
 export class Routes {
@@ -504,5 +505,22 @@ export class Routes {
       return next({status: 500, errors: e})
     }
   }
-}
 
+  generatePid: RequestHandler = async (req: Request, res: Response, next) => {
+    const body = req.body
+    if (!body.uuid || !body.type) {
+      return next({status: 422, errors: ['Request is missing uuid or type']})
+    }
+    if (body.type != 'collection') {
+      return next({status: 422, errors: ['Type must be collection']})
+    }
+    try {
+      const collection = await this.collectionRepo.findOne(body.uuid)
+      if (collection === undefined) return next({status: 422, errors: ['Collection not found']})
+      const pidRes = await axios.post(config.pidServiceUrl, req.body)
+      res.send(pidRes.data)
+    } catch (e) {
+      return next({status: 500, errors: e})
+    }
+  }
+}
