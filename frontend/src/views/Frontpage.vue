@@ -23,7 +23,7 @@ main#frontpage
       text-align: center
       margin-bottom: 2em
       margin-top: 2.5em
-      line-heigth: 2em
+      line-height: 2em
 
   .buttons
     text-align: center
@@ -49,8 +49,8 @@ main#frontpage
 <template>
   <main id="frontpage">
     <header class="logos">
-      <img src="../assets/actris_logo.gif">
-      <img src="../assets/cloudnet_logo_large_2020.png">
+      <img alt="Actris logo" src="../assets/actris_logo.gif">
+      <img alt="Cloudnet logo" src="../assets/cloudnet_logo_large_2020.png">
     </header>
     <main>
       <h3>Welcome to the ACTRIS Data Centre node for cloud profiling (CLU).</h3>
@@ -60,11 +60,11 @@ CLU provides vertical profiles of cloud and turbulent properties at high tempora
 This node is physically hosted by FMI in Helsinki, Finland. You can find our contact information and API documentation at the bottom of this page.
       <div class="buttons">
         <router-link to="search/visualizations" class="download">
-          <img :src="require('../assets/icons/graph-white.png')"><br>
+          <img alt="graph" :src="require('../assets/icons/graph-white.png')"><br>
           View data visualizations
         </router-link>
         <router-link to="search/data" class="download">
-          <img :src="require('../assets/icons/search-white.png')"><br>
+          <img alt="magnifying glass" :src="require('../assets/icons/search-white.png')"><br>
           Search and download data
         </router-link>
       </div>

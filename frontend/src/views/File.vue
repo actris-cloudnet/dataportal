@@ -65,7 +65,7 @@ main#filelanding
 
 <template>
   <main id="filelanding" v-if="!error && response">
-    <img id="backButton" :src="require('../assets/icons/back.png')" @click="$router.back()">
+    <img alt="back" id="backButton" :src="require('../assets/icons/back.png')" @click="$router.back()">
     <header>
       <div class="summary">
           <h2>Cloudnet data object</h2>
@@ -124,7 +124,7 @@ main#filelanding
           <dl>
             <dt>Product</dt>
             <dd class="capitalize">
-              <img :src="getIconUrl(response.product.id)" class="product">
+              <img :alt="response.product.id" :src="getIconUrl(response.product.id)" class="product">
               {{ response.product.humanReadableName }}
             </dd>
             <dt>Level</dt>
@@ -165,7 +165,7 @@ main#filelanding
             <span class="notice">This file was generated using the following files:<br></span>
             <div v-for="sourceFile in sourceFiles" :key="sourceFile.uuid" class="detailslistItem">
               <router-link :to="`/file/${sourceFile.uuid}`">
-                <img :src="getIconUrl(sourceFile.product.id)" class="product">
+                <img :alt="sourceFile.product.id" :src="getIconUrl(sourceFile.product.id)" class="product">
                 {{ sourceFile.product.humanReadableName }}
               </router-link><br>
             </div>
@@ -188,7 +188,7 @@ main#filelanding
             <div v-for="viz in getVisualizations(visualizations)"
                  :key="viz.productVariable.id" class="variable">
               <h4>{{ viz.productVariable.humanReadableName }}</h4>
-              <img v-bind:src="`${quicklookUrl}${viz.filename}`" class="visualization">
+              <img :alt="visualization" v-bind:src="`${quicklookUrl}${viz.filename}`" class="visualization">
             </div>
           </div>
           <a v-if="visualizations.length > 1 && !allVisualizations"

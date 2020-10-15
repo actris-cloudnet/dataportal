@@ -1,7 +1,7 @@
 export class DevMode {
 
   constructor() {
-    this.activated = localStorage.getItem('devmode') ? true : false
+    this.activated = !!localStorage.getItem('devmode')
   }
 
   activated: boolean

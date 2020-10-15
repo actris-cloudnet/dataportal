@@ -12,7 +12,7 @@
 
 <template>
   <main id="sitelanding" v-if="!error && response">
-    <img id="backButton" :src="require('../assets/icons/back.png')" @click="$router.back()">
+    <img alt="back" id="backButton" :src="require('../assets/icons/back.png')" @click="$router.back()">
     <header>
       <h2>{{ response.humanReadableName }}</h2>
       <span>Measurement station in {{ response.country }}.</span>
@@ -42,7 +42,7 @@
             The site has submitted data from the following instruments in the last {{ instrumentsFromLastDays }} days:<br>
           </span>
            <div v-for="instrument in instruments" :key="instrument.id" class="detailslistItem">
-               <img :src="getIconUrl(instrument.instrument.type)" class="product">
+               <img alt="instrument icon" :src="getIconUrl(instrument.instrument.type)" class="product">
                {{ instrument.instrument.humanReadableName }}
            </div>
           </div>

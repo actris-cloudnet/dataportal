@@ -151,7 +151,6 @@ export default class DataSearchResult extends Vue {
   currentPage = 1
   perPage = 15
 
-  getIconUrl = getIconUrl
   humanReadableSize = humanReadableSize
   combinedFileSize = combinedFileSize
 

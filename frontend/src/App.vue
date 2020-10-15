@@ -12,7 +12,7 @@
 @import "~bootstrap-vue/dist/bootstrap-vue.min.css"
 
 @import "~vue-multiselect/dist/vue-multiselect.min.css"
-@import "@/sass/variables.sass"
+@import "./sass/variables.sass"
 
 html
   position: relative

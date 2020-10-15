@@ -159,8 +159,8 @@
 
   .secondaryButton
     width: 100%
-    margin: 0 auto
-    margin-bottom: $filter-margin
+    margin: 0 auto $filter-margin
+
     &:focus
       outline: thin dotted
 
@@ -177,13 +177,10 @@
     .quickBtn
       color: black
       height: 25px
-      padding-left: 10px
-      padding-right: 10px
-      padding-top: 10px
-      padding-bottom: 10px
+      padding: 10px
       font-size: 80%
       line-height: 0
-      margin-right: 0px
+      margin-right: 0
       border: 1px solid $steel-warrior
       border-radius: 3px
       background-color: $blue-dust
@@ -206,7 +203,6 @@
     margin-top: 1.5em
     margin-left: 8.0em
     .dateBtn:disabled
-      background-color: none
       opacity: 0.5
     .dateBtn:hover:enabled
       background-color: $steel-warrior
@@ -230,7 +226,7 @@
 </style>
 
 <template>
-<main v-if="mode == 'visualizations' || mode == 'data'" id="search" v-bind:class="{ wide: isVizMode() }">
+<main v-if="mode === 'visualizations' || mode === 'data'" id="search" v-bind:class="{ wide: isVizMode() }">
   <div v-if="displayBetaNotification" class="note betanote">
     This is the beta version of Cloudnet data portal.
     Click <a href="http://devcloudnet.fmi.fi/">here</a> to visit the devcloudnet data portal, or
@@ -268,13 +264,13 @@
     <div class="quickselectors" v-if="!isVizMode()">
       <button id="yearBtn" class="quickBtn"
         @click="setDateRangeForCurrentYear()"
-        :class="{activeBtn: activeBtn == 'btn1' }">Current year</button>
+        :class="{activeBtn: activeBtn === 'btn1' }">Current year</button>
       <button id="monthBtn" class="quickBtn"
         @click="setDateRange(29)"
-        :class="{activeBtn: activeBtn == 'btn2' }">Last 30 days</button>
+        :class="{activeBtn: activeBtn === 'btn2' }">Last 30 days</button>
       <button id="weekBtn" class="quickBtn"
         @click="setDateRange(6)"
-        :class="{activeBtn: activeBtn == 'btn3' }">Last 7 days</button>
+        :class="{activeBtn: activeBtn === 'btn3' }">Last 7 days</button>
     </div>
 
     <div class="date" v-if="!isVizMode()">
@@ -326,15 +322,15 @@
       <div class="dateButtons">
         <button id="previousBtn" class="dateBtn" @click="setPreviousDate()"
         :disabled="setDateButtonActiveStatus('previous')">
-          <img class="dateIcon" :src="getIconUrl('date-previous')">
+          <img alt="calendar" class="dateIcon" :src="getIconUrl('date-previous')">
         </button>
         <button id="nextBtn" class="dateBtn" @click="setNextDate()"
         :disabled="setDateButtonActiveStatus('next')">
-          <img class="dateIcon" :src="getIconUrl('date-next')">
+          <img alt="calendar" class="dateIcon" :src="getIconUrl('date-next')">
         </button>
       </div>
       <div v-if="displayKeyInfo" class="keyInfo">
-        <img class="infoIcon" :src="getIconUrl('info')">
+        <img alt="info" class="infoIcon" :src="getIconUrl('info')">
         Use arrow keys to change dates
         <span class="closeX" @click="displayKeyInfo = !displayKeyInfo"> &#10005; </span>
       </div>
@@ -521,8 +517,7 @@ export default class Search extends Vue {
   }
 
   setVizWideMode(wide: boolean) {
-    if (wide) this.vizWideMode = true
-    else this.vizWideMode = false
+    this.vizWideMode = wide
   }
 
   get resultsWidth() {
@@ -642,15 +637,15 @@ export default class Search extends Vue {
   addKeyPressListener() {
     window.addEventListener('keydown',  e => {
       if (document.activeElement === null) {
-        if (e.keyCode == 37) this.setPreviousDate()
-        if (e.keyCode == 39) this.setNextDate()
+        if (e.code == 'ArrowLeft') this.setPreviousDate()
+        if (e.code == 'ArrowRight') this.setNextDate()
       }
       else {
         const element = document.activeElement
         const input = 'INPUT'
         if (input != element.tagName) {
-          if (e.keyCode == 37) this.setPreviousDate()
-          if (e.keyCode == 39) this.setNextDate()
+          if (e.code == 'ArrowLeft') this.setPreviousDate()
+          if (e.code == 'ArrowRight') this.setNextDate()
         }
       }
     })

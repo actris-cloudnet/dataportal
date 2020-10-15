@@ -18,9 +18,9 @@ section
 <template>
     <main id="error">
         <h1>{{ response.status }}</h1>
-        <h2 v-if="response.status != 500">{{ message }}</h2>
+        <h2 v-if="response.status !== 500">{{ message }}</h2>
         <h2 v-else>Internal server error</h2>
-        <section v-if="response.status == 404">
+        <section v-if="response.status === 404">
         The file you are looking for does not exist.<br>
         If you are looking for the old devcloudnet data portal, click <a href="http://devcloudnet.fmi.fi">here</a>.<br>
         If you are looking for the legacy cloudnet site, click <a href="http://legacy.cloudnet.fmi.fi">here</a>.
