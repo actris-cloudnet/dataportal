@@ -399,13 +399,11 @@ import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import VCalendar from 'v-calendar'
 import axios from 'axios'
 import { Site } from '../../../backend/src/entity/Site'
-import { BTable } from 'bootstrap-vue/esm/components/table'
-import { BPagination } from 'bootstrap-vue/esm/components/pagination'
 import Datepicker from '../components/Datepicker.vue'
 import CustomMultiselect from '../components/Multiselect.vue'
 import DataSearchResult from '../components/DataSearchResult.vue'
 import { dateToString, getIconUrl, humanReadableSize, combinedFileSize,
-  fixedRanges, getDateFromBeginningOfYear, isSameDay} from '../lib'
+  fixedRanges, getDateFromBeginningOfYear, isSameDay, constructTitle} from '../lib'
 import { DevMode } from '../lib/DevMode'
 import VizSearchResult from '../components/VizSearchResult.vue'
 import {Visualization} from '../../../backend/src/entity/Visualization'
@@ -415,8 +413,6 @@ import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse
 import Map from '../components/Map.vue'
 
 Vue.component('datepicker', Datepicker)
-Vue.component('b-table', BTable)
-Vue.component('b-pagination', BPagination)
 Vue.component('custom-multiselect', CustomMultiselect)
 Vue.component('data-search-result', DataSearchResult)
 Vue.component('viz-search-result', VizSearchResult)
@@ -590,10 +586,6 @@ export default class Search extends Vue {
     }
   }
 
-  constructTitle(files: SearchFileResponse[]) {
-    return files.map(file => ({...file, title: `${file.product} file from ${file.site}`}))
-  }
-
   fetchData() {
     this.isBusy = true
     const apiPath = this.isVizMode() ? 'visualizations/' : 'search/'
@@ -601,7 +593,7 @@ export default class Search extends Vue {
     return axios
       .get(`${this.apiUrl}${apiPath}`, this.payload)
       .then(res => {
-        this.apiResponse = this.constructTitle(res.data)
+        this.apiResponse = constructTitle(res.data)
         this.isBusy = false
       })
       .catch(() => {

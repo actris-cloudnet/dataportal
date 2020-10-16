@@ -53,3 +53,8 @@ export function getDateFromBeginningOfYear(): Date {
 export function isSameDay(a: Date, b: Date) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate()=== b.getDate()
 }
+
+export function constructTitle(files: SearchFileResponse[]) {
+  return files.map(file => ({...file, title: `${file.product} file from ${file.site}`}))
+}
+

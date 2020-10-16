@@ -85,7 +85,7 @@
 
 <template>
   <section id="fileTable">
-    <span class="listTitle"> {{ captionText }} </span>
+    <span class="listTitle" v-if="!simplifiedView"> {{ captionText }} </span>
     <b-table id="tableContent" borderless small striped hover sort-icon-left
              :items="apiResponse"
              :fields="[
@@ -116,7 +116,7 @@
                   aria-controls="fileTable"
                   align="center"
     ></b-pagination>
-    <div class="downloadinfo" v-if="listLength > 0">
+    <div class="downloadinfo" v-if="listLength > 0 && !simplifiedView">
       <a class="download"
          v-bind:class="{ disabled: isBusy }"
          href=""
@@ -138,12 +138,18 @@ import { File } from '../../../backend/src/entity/File'
 import Vue from 'vue'
 import { getIconUrl, humanReadableSize, combinedFileSize } from '../lib'
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
+import {BTable} from 'bootstrap-vue/esm/components/table'
+import {BPagination} from 'bootstrap-vue/esm/components/pagination'
+
+Vue.component('b-table', BTable)
+Vue.component('b-pagination', BPagination)
 
 @Component
 export default class DataSearchResult extends Vue {
   @Prop() apiResponse!: SearchFileResponse[]
   @Prop() isBusy!: boolean
   @Prop() downloadUri!: string
+  @Prop() simplifiedView?: boolean
   apiUrl = process.env.VUE_APP_BACKENDURL
 
   sortBy = 'title'

@@ -44,13 +44,16 @@ const routes = [
     props: true,
   },
   {
-    path: '/collection/:uuid',
+    path: '/collection/:uuid/:mode',
     name: 'Collection',
     meta: {
       title: 'Cloudnet Collection'
     },
     component: () => import('../views/Collection.vue'),
     props: true,
+  },
+  {
+    path: '/collection/:uuid/general', alias: '/collection/:uuid'
   },
   {
     path: '*',
