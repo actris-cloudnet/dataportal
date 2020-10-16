@@ -517,6 +517,7 @@ export class Routes {
     try {
       const collection = await this.collectionRepo.findOne(body.uuid)
       if (collection === undefined) return next({status: 422, errors: ['Collection not found']})
+      if (collection.pid) return next({status: 403, errors: ['Collection already has a PID']})
       const pidRes = await axios.post(config.pidServiceUrl, req.body)
       console.log(pidRes)
       await this.collectionRepo.update({uuid: body.uuid}, {pid: pidRes.data.pid})

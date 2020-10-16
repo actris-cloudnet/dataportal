@@ -44,6 +44,12 @@ describe('POST /api/generate-pid', () => {
     return expect(repo.findOneOrFail(validRequest.uuid)).resolves.toMatchObject({pid: response.pid})
   })
 
+  it('responds with a pid and adds it to the collection', async () => {
+    await repo.update({uuid: validRequest.uuid}, {pid: 'asd'})
+    const error = { errors: ['Collection already has a PID'] }
+    await expect(axios.post(url, validRequest)).rejects.toMatchObject(genResponse(403, error))
+  })
+
   it('responds with 422 if type or uuid is missing', async () => {
     const error = { errors: ['Request is missing uuid or type'] }
     await expect(axios.post(url, {type: 'collection'})).rejects.toMatchObject(genResponse(422, error))
