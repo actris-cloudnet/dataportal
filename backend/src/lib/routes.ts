@@ -10,7 +10,7 @@ import {
   hideTestDataFromNormalUsers,
   isValidDate,
   linkFile,
-  rowExists,
+  rowExists, sortByMeasurementDateAsc,
   toArray,
   tomorrow
 } from '.'
@@ -290,12 +290,14 @@ export class Routes {
 
   allfiles: RequestHandler = async (req: Request, res: Response, next) =>
     this.fileRepo.find({ relations: ['site', 'product'] })
-      .then(result => res.send(this.augmentFiles(result)))
+      .then(result => res.send(this.augmentFiles(sortByMeasurementDateAsc(result))))
       .catch(err => next({ status: 500, errors: err }))
 
   allsearch: RequestHandler = async (req: Request, res: Response, next) =>
     this.fileRepo.find({ relations: ['site', 'product'] })
-      .then(result => res.send(convertToSearchFiles(result)))
+      .then(result => {
+        res.send(convertToSearchFiles(sortByMeasurementDateAsc(result)))
+      })
       .catch(err => next({ status: 500, errors: err }))
 
   allcollections: RequestHandler = async (req: Request, res: Response, next) =>

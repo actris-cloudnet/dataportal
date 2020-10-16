@@ -74,18 +74,18 @@ describe('File.vue', () => {
   })
 
   it('displays last modified date', async () => {
-    mocked(axios.get).mockImplementation(axiosMockWithFileIdx(0))
+    mocked(axios.get).mockImplementation(axiosMockWithFileIdx(2))
     wrapper = mountVue(File)
     await Vue.nextTick()
     expect(wrapper.text()).toContain('2020-02-20 10:56:19 UTC')
   })
 
   it('displays links to source files', async () => {
-    mocked(axios.get).mockImplementation(axiosMockWithFileIdx([9, 8]))
+    mocked(axios.get).mockImplementation(axiosMockWithFileIdx([7, 6]))
     wrapper = mountVue(File)
     await nextTick(3)
     expect(wrapper.findAll('#history').length).toEqual(1)
-    expect(wrapper.find('#history').html()).toContain(`/file/${resources['allfiles'][8]['uuid']}`)
+    expect(wrapper.find('#history').html()).toContain(`/file/${resources['allfiles'][6]['uuid']}`)
   })
 
   it('does not display source file info where not applicable', async () => {
@@ -96,7 +96,7 @@ describe('File.vue', () => {
   })
 
   it('shows history by clicking a link', async () => {
-    mocked(axios.get).mockImplementation(axiosMockWithFileIdx(0))
+    mocked(axios.get).mockImplementation(axiosMockWithFileIdx(2))
     wrapper = mountVue(File)
     await Vue.nextTick()
     expect(wrapper.text()).not.toContain('2019-09-14 22:56:17 - radar file created')

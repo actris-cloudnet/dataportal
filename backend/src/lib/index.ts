@@ -56,3 +56,6 @@ export const hideTestDataFromNormalUsers = <T>(dbQuery: SelectQueryBuilder<T>, r
 
 export const convertToSearchFiles = (files: File[]) =>
   files.map(file => new SearchFileResponse(file))
+
+export const sortByMeasurementDateAsc = (files: File[]) =>
+  files.sort((a, b) => new Date(a.measurementDate).getTime() - new Date(b.measurementDate).getTime())
