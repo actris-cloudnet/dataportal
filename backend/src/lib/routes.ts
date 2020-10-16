@@ -524,10 +524,11 @@ export class Routes {
       const collection = await this.collectionRepo.findOne(body.uuid)
       if (collection === undefined) return next({status: 422, errors: ['Collection not found']})
       if (collection.pid) return next({status: 403, errors: ['Collection already has a PID']})
-      const pidRes = await axios.post(config.pidServiceUrl, req.body)
+      const pidRes = await axios.post(config.pidServiceUrl, req.body, {timeout: config.pidServiceTimeoutMs})
       await this.collectionRepo.update({uuid: body.uuid}, {pid: pidRes.data.pid})
       res.send(pidRes.data)
     } catch (e) {
+      if (e.code == 'ECONNABORTED') return next({status: 504, errors: ['PID service took too long to respond']})
       return next({status: 500, errors: e})
     }
   }

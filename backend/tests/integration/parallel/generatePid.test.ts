@@ -26,7 +26,7 @@ describe('POST /api/generate-pid', () => {
     const app = express()
     app.post('/pid', express.json(), (req, res, next) =>{
       if (req.body.type != validRequest.type || req.body.uuid != validRequest.uuid) return res.sendStatus(400)
-      res.send(response)
+      if (!req.body.wait) res.send(response)
     })
     server = app.listen(5801, next)
   })
@@ -44,7 +44,7 @@ describe('POST /api/generate-pid', () => {
     return expect(repo.findOneOrFail(validRequest.uuid)).resolves.toMatchObject({pid: response.pid})
   })
 
-  it('responds with a pid and adds it to the collection', async () => {
+  it('responds with 403 if collection already has a PID', async () => {
     await repo.update({uuid: validRequest.uuid}, {pid: 'asd'})
     const error = { errors: ['Collection already has a PID'] }
     await expect(axios.post(url, validRequest)).rejects.toMatchObject(genResponse(403, error))
@@ -65,5 +65,11 @@ describe('POST /api/generate-pid', () => {
     const error = { errors: ['Collection not found'] }
     return expect(axios.post(url, {type: 'collection', uuid: '11092c00-161d-4ca2-a29d-628cf8e960f6'})).rejects
       .toMatchObject(genResponse(422, error))
+  })
+
+  it('responds with 504 if PID service does not respond in time', async () => {
+    await repo.update({uuid: validRequest.uuid}, {pid: ''})
+    const error = { errors: ['PID service took too long to respond'] }
+    await expect(axios.post(url, {...validRequest, ...{wait: true}})).rejects.toMatchObject(genResponse(504, error))
   })
 })
