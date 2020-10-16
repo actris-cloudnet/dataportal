@@ -2,6 +2,8 @@ import axios from 'axios'
 import {backendPublicUrl, genResponse} from '../../lib'
 import * as express from 'express'
 import {Server} from 'http'
+import {Connection, createConnection, Repository} from 'typeorm'
+import {Collection} from '../../../src/entity/Collection'
 
 const url = `${backendPublicUrl}generate-pid/`
 
@@ -11,6 +13,13 @@ const validRequest = {
 }
 const response = {pid: 'testpid'}
 let server: Server
+let conn: Connection
+let repo: Repository<Collection>
+
+beforeAll(async () => {
+  conn = await createConnection('test')
+  repo = conn.getRepository('collection')
+})
 
 describe('POST /api/generate-pid', () => {
   beforeAll(next => {
@@ -23,12 +32,16 @@ describe('POST /api/generate-pid', () => {
   })
 
   afterAll(next => {
-    server.close(next)
+    server.close(() =>
+      conn.close().then(next)
+    )
   })
 
-  it('responds with a pid', async () => {
+  it('responds with a pid and adds it to the collection', async () => {
+    await repo.update({uuid: validRequest.uuid}, {pid: ''})
     const res = await axios.post(url, validRequest)
     expect(res.data).toMatchObject(response)
+    return expect(repo.findOneOrFail(validRequest.uuid)).resolves.toMatchObject({pid: response.pid})
   })
 
   it('responds with 422 if type or uuid is missing', async () => {
