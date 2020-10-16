@@ -83,7 +83,9 @@ main.column
       </main>
       <div class="rightView">
         <nav class="internalNavi">
-          <router-link :to="{path: 'general'}" :replace="true" v-bind:class="{ 'router-link-active': mode === 'general' }">General</router-link> |
+          <router-link :to="{path: 'general'}" :replace="true" v-bind:class="{ 'router-link-active': mode === 'general' }">
+            General
+          </router-link> |
           <router-link :to="{path: 'files'}" :replace="true">All files</router-link>
         </nav>
         <section id="editCollection" class="rightView" v-if="mode === 'general'">
@@ -145,6 +147,8 @@ export default class CollectionView extends Vue {
   sites: Site[] = []
   products: Product[] = []
   apiUrl = process.env.VUE_APP_BACKENDURL
+  busy = false
+  pidServiceError = false
 
   combinedFileSize = combinedFileSize
   humanReadableSize = humanReadableSize
@@ -156,6 +160,11 @@ export default class CollectionView extends Vue {
 
   get endDate() {
     return this.sortedFiles[0].measurementDate
+  }
+
+  get downloadUrl() {
+    if (!this.response) return null
+    return `${this.apiUrl}download/${this.response.uuid}`
   }
 
   getUnique(field: keyof SearchFileResponse) {
@@ -170,6 +179,25 @@ export default class CollectionView extends Vue {
 
   get size() {
     return combinedFileSize(this.sortedFiles)
+  }
+
+  async generatePid() {
+    if (this.busy) return
+    this.busy = true
+    this.pidServiceError = false
+    const payload = {
+      type: 'collection',
+      uuid: this.uuid
+    }
+    axios.post(`${this.apiUrl}generate-pid`, payload)
+      .then(({data}) => {
+        if (!this.response) return
+        this.response.pid = data.pid
+      })
+      .catch(({response}) => {
+        if (response.status == 504) this.pidServiceError = true
+      })
+      .finally(() => (this.busy = false))
   }
 
   created() {

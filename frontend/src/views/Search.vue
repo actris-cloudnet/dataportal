@@ -104,18 +104,6 @@
       margin-right: 0.5em
       margin-left: 0.7em
 
-  div.errormsg
-    border-style: solid
-    border-width: 1px
-    border-radius: 2px
-    grid-column: 1 / 4
-    padding: 0.5em
-    width: 100%
-
-  div.errormsg, .error>input
-    border-color: #e4c7c7
-    background: #f9ebea
-
   label, span.filterlabel
     font-size: 0.9em
     margin-bottom: 0
