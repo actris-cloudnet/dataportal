@@ -3,7 +3,7 @@ import {ModelSite} from '../entity/ModelSite'
 import {ModelType} from '../entity/ModelType'
 import {Connection, Repository} from 'typeorm'
 import {Request, Response, RequestHandler} from 'express'
-import {fetchAll, dateToJSDate, isValidDate} from '.'
+import {fetchAll, dateToJSDate, isValidDateString} from '.'
 import config from '../config'
 
 
@@ -73,7 +73,9 @@ export class ModelRoutes {
 
   putModelFiles: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body
-    const measurementDate = await this.validateBody(body, next)
+    await this.validateBody(body, next)
+
+    const measurementDate = dateToJSDate(body.year, body.month, body.day)
 
     const modelFile = new ModelFile(
       body.file_uuid,
@@ -87,7 +89,7 @@ export class ModelRoutes {
 
     const error = (msg: string) => {next({status: 403, errors: `${msg}: ${body.filename}`})}
 
-    // Assuming file_uuid can change but there is only one file / date / site / modelType:
+    // Assuming file_uuid may change but there will be only one file / date / site / modelType:
     const existingFile = await this.modelFileRepo.findOne({
       measurementDate: measurementDate,
       site: body.location,
@@ -111,21 +113,20 @@ export class ModelRoutes {
 
   private validateBody = async (body: any, next: any) => {
 
-    const error = (msg: string) => {next({status: 403, errors: `${msg} in ${body.filename}`})}
+    const error = (msg: string) => {next({status: 400, errors: `${msg} in ${body.filename}`})}
 
     ['year', 'month', 'day', 'hashSum', 'filename', 'modelType', 'location', 'file_uuid', 'format', 'size']
       .forEach(key => {
         if (!(key in body)) {error(`Missing: ${key}`)}
       })
 
-    const date = dateToJSDate(body.year, body.month, body.day)
-    if (!isValidDate(date)) {error('Invalid date')}
+    const datestr = `${body.year}${body.month}${body.day}`
+    if (!isValidDateString(datestr)) {error(`Invalid date "${datestr}"`)}
 
     if (await this.modelTypeRepo.findOne(body.modelType) == undefined) {error(`Invalid model type "${body.modelType}"`)}
     if (await this.modelSiteRepo.findOne(body.location) == undefined) {error(`Invalid model site "${body.location}"`)}
     if (body.hashSum.length !== 64) {error('Invalid hash length')}
 
-    return date
   }
 
 }

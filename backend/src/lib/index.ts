@@ -43,6 +43,12 @@ export async function linkFile(filename: string, linkPath: string) {
 
 export const isValidDate = (obj: any) => !isNaN(new Date(obj).getDate())
 
+export const isValidDateString = (date: string) => {
+  // Naive check that YYYYMMDD is a valid date string
+  const date_regex = /^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$/
+  return date_regex.test(date)
+}
+
 export const tomorrow = () => {
   const tomorrow = new Date()
   tomorrow.setDate(tomorrow.getDate() + 1)
