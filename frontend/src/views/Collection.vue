@@ -21,7 +21,7 @@ main.column
 
   > h3
     margin-top: 2em
-    margin-bottom: 0.5em
+    margin-bottom: 0.7em
   > h3:nth-child(1)
     margin-top: 0
 
@@ -29,11 +29,18 @@ main.column
   margin-bottom: 2em
   text-align: center
 
+  > a
+    margin: 0
+
 .router-link-active
   color: black
   font-weight: bold
   text-decoration: none
   cursor: default
+
+button, a
+  display: inline-block
+  margin-top: 0.5em
 
 </style>
 
