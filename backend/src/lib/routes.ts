@@ -198,7 +198,7 @@ export class Routes {
       const archive = archiver('zip', { store: true })
       archive.on('warning', console.error)
       archive.on('error', console.error)
-      req.on('close', () => archive.abort)
+      req.on('close', () => archive.abort())
 
       const receiverFilename = `cloudnet-collection-${new Date().getTime()}.zip`
       res.set('Content-Type', 'application/octet-stream')
@@ -213,6 +213,12 @@ export class Routes {
       }
       archive.on('entry', () => i < filepaths.length ? appendFile(i++) : null)
       appendFile(0)
+
+      // Update collection download count
+      await this.collectionRepo.createQueryBuilder('collection')
+        .update()
+        .set({ downloadCount: () => '"downloadCount" + 1' })
+        .execute()
     } catch (err) {
       res.sendStatus(500)
       next(err)
@@ -519,7 +525,6 @@ export class Routes {
       if (collection === undefined) return next({status: 422, errors: ['Collection not found']})
       if (collection.pid) return next({status: 403, errors: ['Collection already has a PID']})
       const pidRes = await axios.post(config.pidServiceUrl, req.body)
-      console.log(pidRes)
       await this.collectionRepo.update({uuid: body.uuid}, {pid: pidRes.data.pid})
       res.send(pidRes.data)
     } catch (e) {

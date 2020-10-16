@@ -74,7 +74,7 @@ describe('after PUTting metadata to API', () => {
       collectionUuid = res.data
     })
 
-    it('hashes of /download zipped files match originals', async () => {
+    it('hashes of /download zipped files match originals and collection download count increases', async () => {
       const tmpZip = 'tests/data/tmp.zip'
       const shas = await (await axios.get(`${backendPublicUrl}files/`, { params: { location: 'bucharest' } })).data.map((file: any) => file.checksum)
       const receivedFile = await axios.get(`${backendPublicUrl}download/${collectionUuid}`, { responseType: 'arraybuffer'})
@@ -85,6 +85,7 @@ describe('after PUTting metadata to API', () => {
         expect(hash.digest('hex')).toEqual(shas[shas.length - 1 - i])
       })
       fs.unlinkSync(tmpZip)
+      return expect(axios.get(`${backendPublicUrl}collection/${collectionUuid}`)).resolves.toMatchObject({data: {downloadCount: 1}})
     }
     )
   })
