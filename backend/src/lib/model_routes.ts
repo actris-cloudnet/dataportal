@@ -36,11 +36,8 @@ export class ModelRoutes {
       .where('site.id IN (:...location)', query)
       .andWhere('modelType.id IN (:...modelType)', query)
       .andWhere('file.volatile IN (:...volatile)', query)
-    if (query.date != undefined) {
-      qb.andWhere('file.measurementDate = :date',)
-    }
-    qb
-      .orderBy('file.measurementDate', 'DESC')
+    if (query.date != undefined) qb.andWhere('file.measurementDate = :date',)
+    qb.orderBy('file.measurementDate', 'DESC')
     return qb
   }
 
@@ -100,12 +97,9 @@ export class ModelRoutes {
     if (existingFile == undefined) {
       await this.modelFileRepo.insert(modelFile)
       res.send({ status: 201 })
-    } else if (!existingFile.volatile) {
-      error('Can not update non-volatile file')
     }
-    else if (existingFile.checksum == body.hashSum) {
-      error('File already exists')
-    }
+    else if (!existingFile.volatile) error('Can not update non-volatile file')
+    else if (existingFile.checksum == body.hashSum) error('File already exists')
     else {
       await this.modelFileRepo.update({uuid: existingFile.uuid}, modelFile)
       res.send({ status: 200 })
@@ -119,14 +113,14 @@ export class ModelRoutes {
 
     ['year', 'month', 'day', 'hashSum', 'filename', 'modelType', 'location', 'file_uuid', 'format', 'size']
       .forEach(key => {
-        if (!(key in body)) {error(`Missing: ${key}`)}
+        if (!(key in body)) error(`Missing: ${key}`)
       })
 
     const datestr = `${body.year}${body.month}${body.day}`
-    if (!isValidDateString(datestr)) {error(`Invalid date "${datestr}"`)}
+    if (!isValidDateString(datestr)) error(`Invalid date "${datestr}"`)
 
-    if (await this.modelTypeRepo.findOne(body.modelType) == undefined) {error(`Invalid model type "${body.modelType}"`)}
-    if (await this.modelSiteRepo.findOne(body.location) == undefined) {error(`Invalid model site "${body.location}"`)}
+    if (await this.modelTypeRepo.findOne(body.modelType) == undefined) error(`Invalid model type "${body.modelType}"`)
+    if (await this.modelSiteRepo.findOne(body.location) == undefined) error(`Invalid model site "${body.location}"`)
     if (body.hashSum.length !== 64) {error('Invalid hash length')}
 
   }
