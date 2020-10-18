@@ -39,6 +39,8 @@ export class ModelRoutes {
     if (query.date != undefined) {
       qb.andWhere('file.measurementDate = :date',)
     }
+    qb
+      .orderBy('file.measurementDate', 'DESC')
     return qb
   }
 
@@ -87,7 +89,7 @@ export class ModelRoutes {
       body.location,
       body.modelType)
 
-    const error = (msg: string) => {next({status: 403, errors: `${msg}: ${body.filename}`})}
+    const error = (msg: string) => {next({ status: 403, errors: `${msg}: ${body.filename}` })}
 
     // Assuming file_uuid may change but there will be only one file / date / site / modelType:
     const existingFile = await this.modelFileRepo.findOne({
@@ -97,7 +99,7 @@ export class ModelRoutes {
     })
     if (existingFile == undefined) {
       await this.modelFileRepo.insert(modelFile)
-      res.send({status: 201})
+      res.send({ status: 201 })
     } else if (!existingFile.volatile) {
       error('Can not update non-volatile file')
     }
@@ -106,14 +108,14 @@ export class ModelRoutes {
     }
     else {
       await this.modelFileRepo.update({uuid: existingFile.uuid}, modelFile)
-      res.send({status: 200})
+      res.send({ status: 200 })
     }
   }
 
 
   private validateBody = async (body: any, next: any) => {
 
-    const error = (msg: string) => {next({status: 400, errors: `${msg} in ${body.filename}`})}
+    const error = (msg: string) => {next({ status: 400, errors: `${msg} in ${body.filename}` })}
 
     ['year', 'month', 'day', 'hashSum', 'filename', 'modelType', 'location', 'file_uuid', 'format', 'size']
       .forEach(key => {
