@@ -62,11 +62,12 @@ import * as xmlparser from 'express-xml-bodyparser'
   app.get('/api/instruments', routes.instruments)
 
   // model api (public)
-  app.get('/api/modelSites', modelRoutes.sites)
+  app.get('/api/modelFiles/:uuid', modelRoutes.modelFile)
+  app.get('/api/modelSites', modelRoutes.modelSites)
   app.get('/api/modelTypes', modelRoutes.modelTypes)
   app.get('/api/modelFiles',
     middleware.modelFilesQueryAugmenter,
-    modelRoutes.files)
+    modelRoutes.modelFiles)
 
   // public/internal
   app.get('/api/status', routes.status)
@@ -98,7 +99,7 @@ import * as xmlparser from 'express-xml-bodyparser'
   app.put('/metadata/:hash', express.json(), routes.uploadMetadata)
   app.put('/visualizations/:filename', express.json(), routes.putVisualization)
   app.put('/modelFiles/', express.json(), modelRoutes.putModelFiles)
-  app.put('/modelFiles/:uuid', express.json(), modelRoutes.freezeFile)
+  app.put('/modelFiles/:uuid', express.json(), modelRoutes.freezeModelFile)
 
   app.use(errorHandler)
 

@@ -28,7 +28,7 @@ export class ModelRoutes {
       ({ ...entry, url: `${this.fileServerUrl}${entry.filename}` }))
   }
 
-  private filesQueryBuilder(query: any) {
+  private ModelFilesQueryBuilder(query: any) {
     const qb = this.modelFileRepo
       .createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
@@ -41,18 +41,24 @@ export class ModelRoutes {
     return qb
   }
 
-  files: RequestHandler = async (req: Request, res: Response, next) => {
-    this.filesQueryBuilder(req.query)
+  modelFiles: RequestHandler = async (req: Request, res: Response, next) => {
+    this.ModelFilesQueryBuilder(req.query)
       .getMany()
-      .then(result => {
-        res.send(this.augmentFiles(result))
-      })
-      .catch(err => {
-        next({ status: 500, errors: err })
-      })
+      .then(result => res.send(this.augmentFiles(result)))
+      .catch(err => next ({ status: 500, errors: err }))
   }
 
-  sites: RequestHandler = async (_: Request, res: Response, next) => {
+  modelFile: RequestHandler = async (req: Request, res: Response, next) => {
+    this.modelFileRepo.createQueryBuilder('file')
+      .leftJoinAndSelect('file.site', 'site')
+      .leftJoinAndSelect('file.modelType', 'modelType')
+      .where('file.uuid = :uuid', req.params)
+      .getOne()
+      .then(result => res.send(result))
+      .catch(err => next({ status: 404, errors: err }))
+  }
+
+  modelSites: RequestHandler = async (_: Request, res: Response, next) => {
     fetchAll<ModelSite>(this.conn, ModelSite)
       .then(result => res.send(result))
       .catch(err => next({ status: 500, errors: err }))
@@ -64,18 +70,18 @@ export class ModelRoutes {
       .catch(err => next({ status: 500, errors: err }))
   }
 
-  allfiles: RequestHandler = async (_: Request, res: Response, next) => {
+  allModelFiles: RequestHandler = async (_: Request, res: Response, next) => {
     this.modelFileRepo.find({ relations: ['site', 'modelType'] })
       .then(result => res.send(this.augmentFiles(result)))
       .catch(err => next({ status: 500, errors: err }))
   }
 
-  freezeFile: RequestHandler = async (req: Request, res: Response, next) => {
-    if ('volatile' in req.body && req.body.volatile === "false") {
+  freezeModelFile: RequestHandler = async (req: Request, res: Response, next) => {
+    if ('volatile' in req.body && req.body.volatile === 'false') {
       this.modelFileRepo.update({uuid: req.params.uuid}, {volatile: false})
         .then(result => res.send(result))
-        .catch(err => { next({ status: 400, errors: err}) })
-      } else next({ status: 400 })
+        .catch(err => next({ status: 400, errors: err }))
+    } else next({ status: 400 })
   }
 
   putModelFiles: RequestHandler = async (req: Request, res: Response, next) => {
@@ -94,7 +100,7 @@ export class ModelRoutes {
       body.location,
       body.modelType)
 
-    const error = (msg: string) => {next({ status: 403, errors: `${msg}: ${body.filename}` })}
+    const error = (msg: string) => next({ status: 403, errors: `${msg}: ${body.filename}` })
 
     // Assuming file_uuid may change but there will be only one file / date / site / modelType:
     const existingFile = await this.modelFileRepo.findOne({
