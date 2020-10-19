@@ -53,7 +53,7 @@ const routes = [
     props: true,
   },
   {
-    path: '/collection/:uuid/general', alias: '/collection/:uuid'
+    path: '/collection/:uuid', redirect: '/collection/:uuid/general'
   },
   {
     path: '*',

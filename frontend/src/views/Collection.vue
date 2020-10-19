@@ -90,10 +90,10 @@ button, a
       </main>
       <div class="rightView">
         <nav class="internalNavi">
-          <router-link :to="{path: 'general'}" :replace="true" v-bind:class="{ 'router-link-active': mode === 'general' }">
+          <router-link :to="{path: `general`}" :replace="true" v-bind:class="{ 'router-link-active': mode === 'general' }">
             General
           </router-link> |
-          <router-link :to="{path: 'files'}" :replace="true">All files</router-link>
+          <router-link :to="{path: `./files`}" :replace="true" v-bind:class="{ 'router-link-active': mode === 'files' }">All files</router-link>
         </nav>
         <section id="editCollection" class="rightView" v-if="mode === 'general'">
           <h3>Citing</h3>
