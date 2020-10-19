@@ -161,8 +161,10 @@ export class Routes {
   }
 
   sites: RequestHandler = async (req: Request, res: Response, next) => {
+    // Returns Cloudnet sites only
     const qb = this.siteRepo.createQueryBuilder('site')
       .select()
+      .where('site.isModelOnlySite = false')
     hideTestDataFromNormalUsers(qb, req)
       .getMany()
       .then(result => res.send(result))

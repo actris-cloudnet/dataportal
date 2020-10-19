@@ -2,7 +2,6 @@ import {RequestHandler} from 'express'
 import {RequestErrorArray} from '../entity/RequestError'
 import validator from 'validator'
 import {Site} from '../entity/Site'
-import {ModelSite} from '../entity/ModelSite'
 import {Product} from '../entity/Product'
 import {ModelType} from '../entity/ModelType'
 import {Connection} from 'typeorm'
@@ -92,7 +91,7 @@ export class Middleware {
   filesQueryAugmenter: RequestHandler = async (req, _res, next) => {
     const query = req.query as any
     const defaultLocation = async () => (await fetchAll<Site>(this.conn, Site))
-      .filter(site => !(req.query.developer === undefined && site.isTestSite))
+      .filter(site => !(req.query.developer === undefined && site.isTestSite && !site.isModelOnlySite))
       .map(site => site.id)
     const defaultProduct = async () => (await fetchAll<Product>(this.conn, Product))
       .map(product => product.id)
@@ -115,8 +114,7 @@ export class Middleware {
 
   modelFilesQueryAugmenter: RequestHandler = async (req, _res, next) => {
     const query = req.query as any
-    const defaultLocation = async () => (await fetchAll<ModelSite>(this.conn, ModelSite))
-      .map(site => site.id)
+    const defaultLocation = async () => (await fetchAll<Site>(this.conn, Site))
     const defaultModelType = async () => (await fetchAll<ModelType>(this.conn, ModelType))
       .map(modelType => modelType.id)
     const setVolatile = () => ('volatile' in query) ? toArray(query.volatile) : [true, false]

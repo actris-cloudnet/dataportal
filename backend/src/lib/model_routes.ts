@@ -1,5 +1,5 @@
 import {ModelFile} from '../entity/ModelFile'
-import {ModelSite} from '../entity/ModelSite'
+import {Site} from '../entity/Site'
 import {ModelType} from '../entity/ModelType'
 import {Connection, Repository} from 'typeorm'
 import {Request, Response, RequestHandler} from 'express'
@@ -14,14 +14,14 @@ export class ModelRoutes {
     this.fileServerUrl = config.fileServerUrl
     this.modelFileRepo = this.conn.getRepository(ModelFile)
     this.modelTypeRepo = this.conn.getRepository(ModelType)
-    this.modelSiteRepo = this.conn.getRepository(ModelSite)
+    this.siteRepo = this.conn.getRepository(Site)
   }
 
   private conn: Connection
   readonly fileServerUrl: string
   private modelFileRepo: Repository<ModelFile>
   private modelTypeRepo: Repository<ModelType>
-  private modelSiteRepo: Repository<ModelSite>
+  private siteRepo: Repository<Site>
 
   private augmentFiles = (files: ModelFile[]) => {
     return files.map(entry =>
@@ -59,9 +59,10 @@ export class ModelRoutes {
   }
 
   modelSites: RequestHandler = async (_: Request, res: Response, next) => {
-    fetchAll<ModelSite>(this.conn, ModelSite)
+    this.siteRepo.createQueryBuilder('site')
+      .getMany()
       .then(result => res.send(result))
-      .catch(err => next({ status: 500, errors: err }))
+      .catch(err => next({ status: 404, errors: err }))
   }
 
   modelTypes: RequestHandler = async (_: Request, res: Response, next) => {
@@ -134,8 +135,8 @@ export class ModelRoutes {
     if (!isValidDateString(datestr)) error(`Invalid date "${datestr}"`)
 
     if (await this.modelTypeRepo.findOne(body.modelType) == undefined) error(`Invalid model type "${body.modelType}"`)
-    if (await this.modelSiteRepo.findOne(body.location) == undefined) error(`Invalid model site "${body.location}"`)
-    if (body.hashSum.length !== 64) {error('Invalid hash length')}
+    if (await this.siteRepo.findOne(body.location) == undefined) error(`Invalid model site "${body.location}"`)
+    if (body.hashSum.length !== 64) error('Invalid hash length')
 
   }
 

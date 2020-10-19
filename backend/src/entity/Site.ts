@@ -29,6 +29,9 @@ export class Site {
     @Column({ default: false })
     isTestSite!: boolean
 
+    @Column({ default: false })
+    isModelOnlySite!: boolean
+
     @OneToMany(_ => File, file => file.site)
     files!: File[]
 

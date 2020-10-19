@@ -1,5 +1,5 @@
 import {Entity, Column, PrimaryColumn, ManyToOne, BeforeUpdate, BeforeInsert, Unique, Index} from 'typeorm'
-import {ModelSite} from './ModelSite'
+import {Site} from './Site'
 import {ModelType} from './ModelType'
 
 @Entity()
@@ -16,8 +16,8 @@ export class ModelFile {
     @Column({type: 'date'})
     measurementDate!: Date
 
-    @ManyToOne(() => ModelSite, site => site.files)
-    site!: ModelSite
+    @ManyToOne(() => Site, site => site.files)
+    site!: Site
 
     @ManyToOne(() => ModelType, type => type.files)
     modelType!: ModelType
@@ -54,7 +54,7 @@ export class ModelFile {
       checksum: string,
       format: string,
       size: number,
-      site: ModelSite,
+      site: Site,
       modelType: ModelType,
       volatile = true,
     ) {
