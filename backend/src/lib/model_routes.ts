@@ -64,11 +64,19 @@ export class ModelRoutes {
       .catch(err => next({ status: 500, errors: err }))
   }
 
-  allfiles: RequestHandler = async (_: Request, res: Response, next) =>
+  allfiles: RequestHandler = async (_: Request, res: Response, next) => {
     this.modelFileRepo.find({ relations: ['site', 'modelType'] })
       .then(result => res.send(this.augmentFiles(result)))
       .catch(err => next({ status: 500, errors: err }))
+  }
 
+  freezeFile: RequestHandler = async (req: Request, res: Response, next) => {
+    if ('volatile' in req.body && req.body.volatile === "false") {
+      this.modelFileRepo.update({uuid: req.params.uuid}, {volatile: false})
+        .then(result => res.send(result))
+        .catch(err => { next({ status: 400, errors: err}) })
+      } else next({ status: 400 })
+  }
 
   putModelFiles: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body
