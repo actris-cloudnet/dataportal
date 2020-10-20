@@ -52,7 +52,7 @@ export class ModelRoutes {
     this.modelFileRepo.createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
       .leftJoinAndSelect('file.modelType', 'modelType')
-      .where('file.uuid = :uuid', req.params)
+      .where('file.id = :id ', req.params)
       .getOne()
       .then(result => res.send(result))
       .catch(err => next({ status: 404, errors: err }))
@@ -79,7 +79,7 @@ export class ModelRoutes {
 
   freezeModelFile: RequestHandler = async (req: Request, res: Response, next) => {
     if ('volatile' in req.body && req.body.volatile === 'false') {
-      this.modelFileRepo.update({uuid: req.params.uuid}, {volatile: false})
+      this.modelFileRepo.update({id: parseInt(req.params.id)}, {volatile: false})
         .then(result => res.send(result))
         .catch(err => next({ status: 400, errors: err }))
     } else next({ status: 400 })
@@ -92,7 +92,6 @@ export class ModelRoutes {
     const measurementDate = dateToJSDate(body.year, body.month, body.day)
 
     const modelFile = new ModelFile(
-      body.file_uuid,
       measurementDate,
       body.filename,
       body.hashSum,
@@ -103,7 +102,7 @@ export class ModelRoutes {
 
     const error = (msg: string) => next({ status: 403, errors: `${msg}: ${body.filename}` })
 
-    // Assuming file_uuid may change but there will be only one file / date / site / modelType:
+    // Assuming only one file / date / site / modelType:
     const existingFile = await this.modelFileRepo.findOne({
       measurementDate: measurementDate,
       site: body.location,
@@ -116,7 +115,7 @@ export class ModelRoutes {
     else if (!existingFile.volatile) error('Can not update non-volatile file')
     else if (existingFile.checksum == body.hashSum) error('File already exists')
     else {
-      await this.modelFileRepo.update({uuid: existingFile.uuid}, modelFile)
+      await this.modelFileRepo.update({id: existingFile.id}, modelFile)
       res.send({ status: 200 })
     }
   }
@@ -126,7 +125,7 @@ export class ModelRoutes {
 
     const error = (msg: string) => {next({ status: 400, errors: `${msg} in ${body.filename}` })}
 
-    ['year', 'month', 'day', 'hashSum', 'filename', 'modelType', 'location', 'file_uuid', 'format', 'size']
+    ['year', 'month', 'day', 'hashSum', 'filename', 'modelType', 'location', 'format', 'size']
       .forEach(key => {
         if (!(key in body)) error(`Missing: ${key}`)
       })

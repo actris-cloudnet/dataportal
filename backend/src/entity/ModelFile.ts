@@ -1,4 +1,4 @@
-import {Entity, Column, PrimaryColumn, ManyToOne, BeforeUpdate, BeforeInsert, Unique, Index} from 'typeorm'
+import {Entity, Column, PrimaryGeneratedColumn, ManyToOne, BeforeUpdate, BeforeInsert, Unique, Index} from 'typeorm'
 import {Site} from './Site'
 import {ModelType} from './ModelType'
 
@@ -7,8 +7,11 @@ import {ModelType} from './ModelType'
 @Index(['measurementDate', 'site'])
 export class ModelFile {
 
-    @PrimaryColumn('uuid')
-    uuid!: string
+    @PrimaryGeneratedColumn()
+    id!: number
+
+    @Column()
+    filename!: string
 
     @Column({default: true})
     volatile!: boolean
@@ -24,9 +27,6 @@ export class ModelFile {
 
     @Column()
     releasedAt!: Date
-
-    @Column()
-    filename!: string
 
     @Column()
     checksum!: string
@@ -48,7 +48,6 @@ export class ModelFile {
     }
 
     constructor(
-      uuid: string,
       measurementDate: Date,
       filename: string,
       checksum: string,
@@ -59,7 +58,6 @@ export class ModelFile {
       volatile = true,
     ) {
       this.measurementDate = measurementDate
-      this.uuid = uuid
       this.filename = filename
       this.checksum = checksum
       this.format = format

@@ -1,6 +1,5 @@
 [
     {
-      "uuid": "a5d1d5af-3667-41bc-b952-e684f627d91c",
       "volatile": true,
       "measurementDate": "2014-12-05",
       "publicity": "public",
@@ -13,7 +12,6 @@
       "site": "macehead"
     },
     {
-      "uuid": "9e04d8ef-0f2b-4823-835d-33e458403c67",
       "volatile": true,
       "measurementDate": "2020-01-26",
       "releasedAt": "2020-04-08T13:33:31.012Z",
