@@ -42,6 +42,12 @@ button, a
   display: inline-block
   margin-top: 0.5em
 
+#editCollection
+  ul
+    margin-top: 0.5em
+  li
+    list-style: none
+
 </style>
 
 
@@ -103,10 +109,24 @@ button, a
           <a v-if="response.pid" :href="response.pid">{{response.pid }}</a>
           <div v-if="pidServiceError" class="errormsg">PID service is unavailable. Please try again later.</div>
           <h3>License</h3>
-          <!-- eslint-disable-next-line max-len -->
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+          <!-- eslint-disable max-len -->
+          Cloudnet data is licensed under a <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 international licence</a>
+          <p>
+            This is a human-readable summary of (and not a substitute for) the <a href="https://creativecommons.org/licenses/by/4.0/legalcode">licence</a>.<br>
+            You are free to:
+          <ul>
+            <li><b>Share</b> — copy and redistribute the material in any medium or format</li>
+            <li><b>Adapt</b> — remix, transform, and build upon the material for any purpose, even commercially</li>
+          </ul>
+          Under the following terms:
+          <ul>
+            <li><b>Attribution</b> — You must give appropriate credit, provide a link to the licence, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use</li>
+            <li><b>No additional restrictions</b> — You may not apply legal terms or technological measures that legally restrict others from doing anything the licence permits</li>
+          </ul>
+The licensor cannot revoke these freedoms as long as you follow the licence terms.
+          <!-- eslint-enable max-len -->
           <h3>Download</h3>
-          By clicking the download button below you agree to the terms<br>
+          By clicking the download button you confirm that you have taken notice of the above data licensing information.<br>
           <a class="download" :href="downloadUrl">
             Download collection
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
