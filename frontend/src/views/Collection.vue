@@ -93,18 +93,15 @@ button, a
           <router-link :to="{path: `general`}" :replace="true" v-bind:class="{ 'router-link-active': mode === 'general' }">
             General
           </router-link> |
-          <router-link :to="{path: `./files`}" :replace="true" v-bind:class="{ 'router-link-active': mode === 'files' }">All files</router-link>
+          <router-link :to="{path: `files`}" :replace="true" v-bind:class="{ 'router-link-active': mode === 'files' }">
+            All files
+          </router-link>
         </nav>
         <section id="editCollection" class="rightView" v-if="mode === 'general'">
           <h3>Citing</h3>
+          <span v-if="busy">Generating PID...</span>
           <a v-if="response.pid" :href="response.pid">{{response.pid }}</a>
-          <span v-else>
-          In order to cite this collection, you need to generate a persistent identifier for it.<br>
-          <a class="secondaryButton" @click="generatePid()" v-bind:class="{ disabled: busy }">
-            Generate persistent identifier
-          </a>
           <div v-if="pidServiceError" class="errormsg">PID service is unavailable. Please try again later.</div>
-        </span>
           <h3>License</h3>
           <!-- eslint-disable-next-line max-len -->
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
@@ -189,31 +186,31 @@ export default class CollectionView extends Vue {
   }
 
   async generatePid() {
-    if (this.busy) return
+    if (!this.response || this.response.pid) return
     this.busy = true
-    this.pidServiceError = false
     const payload = {
       type: 'collection',
       uuid: this.uuid
     }
-    axios.post(`${this.apiUrl}generate-pid`, payload)
+    return axios.post(`${this.apiUrl}generate-pid`, payload)
       .then(({data}) => {
         if (!this.response) return
         this.response.pid = data.pid
       })
-      .catch(({response}) => {
-        if (response.status == 504) this.pidServiceError = true
+      .catch(e => {
+        this.pidServiceError = true
+        console.error(e)
       })
       .finally(() => (this.busy = false))
   }
 
   created() {
-    axios.get(`${this.apiUrl}collection/${this.uuid}`)
+    return axios.get(`${this.apiUrl}collection/${this.uuid}`)
       .then(res => {
         this.response = res.data
         if (this.response == null) return
         this.sortedFiles = constructTitle(this.response.files
-          .sort((a, b) => new Date(a.measurementDate).getTime() - new Date(b.measurementDate).getTime()))
+          .sort((a, b) => new Date(b.measurementDate).getTime() - new Date(a.measurementDate).getTime()))
       })
       .catch(({response}) => {
         this.error = true
@@ -224,8 +221,9 @@ export default class CollectionView extends Vue {
         const productIds = this.getUnique('productId')
         return Promise.all([
           axios.get(`${this.apiUrl}sites/`),
-          axios.get(`${this.apiUrl}products/`)
-        ]).then(([sites, products]) => {
+          axios.get(`${this.apiUrl}products/`),
+          this.generatePid(),
+        ]).then(([sites, products, _]) => {
           this.sites = sites.data.filter((site: Site) => siteIds.includes(site.id))
           this.products = products.data.filter((product: Product) => productIds.includes(product.id))
         })
