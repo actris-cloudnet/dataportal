@@ -126,28 +126,46 @@ export class Middleware {
     next()
   }
 
-  checkParamsExistInDb: RequestHandler = async (req, _res, next) => {
-    const query = req.query as any
+  private throwError = (param: string, req: any) => {
+    throw { status: 404, errors: [`One or more of the specified ${param}s were not found`], params: req.query }
+  }
 
-    let siteQb = this.conn.getRepository<Site>('site')
+  private checkParam = async (repo: string, param: string, req: any) => {
+    await this.conn.getRepository(repo)
+      .findByIds(req.query[param])
+      .then(res => {
+        if (res.length != req.query[param].length) this.throwError(param, req)
+      })
+  }
+
+  private checkSite = async (hideTestSites: boolean, req: any) => {
+    let qb = this.conn.getRepository<Site>('site')
       .createQueryBuilder('site')
       .select()
-      .where('site.id IN (:...location)', query)
-    siteQb = hideTestDataFromNormalUsers(siteQb, req)
+      .where('site.id IN (:...location)', req.query)
+    if (hideTestSites) qb = hideTestDataFromNormalUsers(qb, req)
+    await qb.getMany()
+      .then((res: any[]) => {
+        if (res.length != req.query.location.length) this.throwError('location', req)
+      })
+  }
 
+  checkParamsExistInDb: RequestHandler = async (req: any, _res, next) => {
     Promise.all([
-      siteQb
-        .getMany()
-        .then(res => {
-          if (res.length != query.location.length) throw { status: 404, errors: ['One or more of the specified locations were not found'], params: req.query }
-        }),
-      this.conn.getRepository('product')
-        .findByIds(query.product)
-        .then(res => {
-          if (res.length != query.product.length) throw { status: 404, errors: ['One or more of the specified products were not found'], params: req.query }
-        })
+      this.checkSite(true, req),
+      this.checkParam('product', 'product', req)
     ])
       .then(() => next())
       .catch(next)
   }
+
+  checkModelParamsExistInDb: RequestHandler = async (req: any, _res, next) => {
+    Promise.all([
+      this.checkSite(false, req),
+      this.checkParam('model_type', 'modelType', req)
+    ])
+      .then(() => next())
+      .catch(next)
+  }
+
 }

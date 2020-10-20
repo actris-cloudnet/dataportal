@@ -67,6 +67,7 @@ import * as xmlparser from 'express-xml-bodyparser'
   app.get('/api/modelTypes', modelRoutes.modelTypes)
   app.get('/api/modelFiles',
     middleware.modelFilesQueryAugmenter,
+    middleware.checkModelParamsExistInDb,
     modelRoutes.modelFiles)
 
   // public/internal
