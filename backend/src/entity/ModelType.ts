@@ -8,7 +8,7 @@ export class ModelType {
     id!: string
 
     @Column()
-    order!: number;
+    optimumOrder!: number;
 
     @OneToMany(() => ModelFile, file => file.site)
     files!: ModelFile[]
