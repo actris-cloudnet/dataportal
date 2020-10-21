@@ -30,62 +30,87 @@ export class Middleware {
     return next()
   }
 
+  private pushAndReturn = (err: RequestErrorArray, msg: string) => {
+    err.errors.push(msg)
+    return err
+  }
+
+  private checkFieldNames = (validKeys: string[], query: any) => Object.keys(query).filter(key => !validKeys.includes(key))
+
+  private checkField = (key: string, err: RequestErrorArray, query: any) => {
+    switch (key) {
+    case 'product':
+      if (key in query && !((typeof query[key] == 'string' && validator.isAlphanumeric(query[key]))
+        || this.isArrayWithElements(query[key]))) {
+        err.errors.push(`Malformed ${key}`)
+      }
+      break
+    case 'dateTo':
+    case 'dateFrom':
+    case 'date':
+      if (key in query && !isValidDate(query[key])) {
+        err.errors.push(`Malformed date in property "${key}"`)
+      }
+      break
+    case 'limit':
+      if (key in query && isNaN(parseInt(query[key]))) {
+        err.errors.push(`Malformed value in property "${key}"`)
+      }
+      break
+    case 'volatile':
+      if (key in query && !(query[key].toLowerCase() == 'true' || query[key].toLowerCase() == 'false')) {
+        err.errors.push(`Malformed value in property "${key}"`)
+      }
+    }
+  }
+
   filesValidator: RequestHandler = (req, _res, next) => {
     const requestError: RequestErrorArray = { status: 400, errors: [] }
     const query = req.query as any
 
-    const isArrayWithElements = (obj: any) => Array.isArray(obj) && obj.length > 0
-    const pushAndReturn = (err: RequestErrorArray, el: string) => {
-      err.errors.push(el)
-      return err
-    }
-
-
     if (Object.keys(query).length == 0) {
-      return next(pushAndReturn(requestError, 'No search parameters given'))
+      return next(this.pushAndReturn(requestError, 'No search parameters given'))
     }
 
     let validKeys = ['location', 'product', 'dateFrom', 'dateTo', 'developer', 'volatile', 'releasedBefore', 'allVersions', 'limit']
     if (req.path.includes('visualization')) validKeys.push('variable')
-    const unknownFields = Object.keys(query).filter(key => !validKeys.includes(key))
+    const unknownFields = this.checkFieldNames(validKeys, query)
     if (unknownFields.length > 0) {
       requestError.errors.push(`Unknown query parameters: ${unknownFields}`)
     }
 
-    // Validate location
-    if ('location' in query && !((typeof query.location == 'string' && validator.isAlphanumeric(query.location))
-      || isArrayWithElements(query.location))) {
-      requestError.errors.push('Malformed location')
-    }
+    const keys = ['location', 'product', 'dateFrom', 'dateTo', 'volatile', 'limit']
+    keys.forEach(key => {
+      this.checkField(key, requestError, query)
+    })
 
-    // Validate product
-    if ('product' in query && !((typeof query.product == 'string' && validator.isAlphanumeric(query.product))
-      || isArrayWithElements(query.product))) {
-      requestError.errors.push('Malformed product')
-    }
-
-    // Validate dates
-    if (query.dateFrom && !isValidDate(query.dateFrom)) {
-      requestError.errors.push('Malformed date in property "dateFrom"')
-    }
-    if (query.dateTo && !isValidDate(query.dateTo)) {
-      requestError.errors.push('Malformed date in property "dateTo"')
-    }
-
-    // Validate volatile
-    if ('volatile' in query && !(query.volatile.toLowerCase() == 'true' || query.volatile.toLowerCase() == 'false')) {
-      requestError.errors.push('Malformed value in property "volatile"')
-    }
-
-    // Validate limit
-    if ('limit' in query && isNaN(parseInt(query.limit))) {
-      requestError.errors.push('Malformed value in property "limit"')
-    }
-
-    if (requestError.errors.length > 0) {
-      return next(requestError)
-    }
+    if (requestError.errors.length > 0) return next(requestError)
     return next()
+
+  }
+
+  modelFilesValidator: RequestHandler = (req, _res, next) => {
+    const requestError: RequestErrorArray = { status: 400, errors: [] }
+    const query = req.query as any
+
+    if (Object.keys(query).length == 0) {
+      return next(this.pushAndReturn(requestError, 'No search parameters given'))
+    }
+
+    const validKeys = ['location', 'modelType', 'date', 'volatile']
+    const unknownFields = this.checkFieldNames(validKeys, query)
+    if (unknownFields.length > 0) {
+      requestError.errors.push(`Unknown query parameters: ${unknownFields}`)
+    }
+
+    const keys = ['location', 'date', 'volatile']
+    keys.forEach(key => {
+      this.checkField(key, requestError, query)
+    })
+
+    if (requestError.errors.length > 0) return next(requestError)
+    return next()
+
   }
 
   filesQueryAugmenter: RequestHandler = async (req, _res, next) => {
