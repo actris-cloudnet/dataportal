@@ -17,7 +17,7 @@ main.column
     margin-right: 0
 
 .rightView
-  flex: 1 0 600px
+  flex: 1 1 600px
 
   > h3
     margin-top: 2em
@@ -155,7 +155,7 @@ import {combinedFileSize, getIconUrl, humanReadableSize, constructTitle} from '.
 import {Site} from '../../../backend/src/entity/Site'
 import Map from '../components/Map.vue'
 import {Product} from '../../../backend/src/entity/Product'
-import DataSearchResult from '@/components/DataSearchResult.vue'
+import DataSearchResult from '../components/DataSearchResult.vue'
 
 Vue.component('data-search-result', DataSearchResult)
 

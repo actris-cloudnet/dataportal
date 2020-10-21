@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Vue from 'vue'
 import axios, {AxiosResponse} from 'axios'
-import {shallowMount, VueClass} from '@vue/test-utils'
+import {shallowMount, ShallowMountOptions, VueClass} from '@vue/test-utils'
 import {mocked} from 'ts-jest/dist/util/testing'
 
 // Prevents window.matchMedia error, see https://stackoverflow.com/questions/39830580/jest-test-fails-typeerror-window-matchmedia-is-not-a-function
@@ -46,10 +46,10 @@ const axiosResponse: AxiosResponse = {
 
 export const augmentAxiosResponse = (data: any) => ({...axiosResponse, ...{data}})
 
-export const mountVue = (classObject: VueClass<Vue>) =>
-  shallowMount(classObject, {
+export const mountVue = (classObject: VueClass<Vue>, options: ShallowMountOptions<Vue> = {}) =>
+  shallowMount(classObject, {...{
     stubs: ['router-link', 'router-view']
-  })
+  }, ...options})
 
 export const getMockedAxiosLastCallSecondArgument = () => {
   const calls = mocked(axios.get).mock.calls
