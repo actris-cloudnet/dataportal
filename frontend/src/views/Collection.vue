@@ -127,7 +127,7 @@ The licensor cannot revoke these freedoms as long as you follow the licence term
           <!-- eslint-enable max-len -->
           <h3>Download</h3>
           By clicking the download button you confirm that you have taken notice of the above data licensing information.<br>
-          <a class="download" :href="downloadUrl">
+          <a class="download" :href="downloadUrl" id="downloadCollection">
             Download collection
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
           </a>
