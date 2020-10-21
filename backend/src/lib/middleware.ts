@@ -115,6 +115,7 @@ export class Middleware {
   modelFilesQueryAugmenter: RequestHandler = async (req, _res, next) => {
     const query = req.query as any
     const defaultLocation = async () => (await fetchAll<Site>(this.conn, Site))
+      .map(site => site.id)
     const defaultModelType = async () => (await fetchAll<ModelType>(this.conn, ModelType))
       .map(modelType => modelType.id)
     const setVolatile = () => ('volatile' in query) ? toArray(query.volatile) : [true, false]

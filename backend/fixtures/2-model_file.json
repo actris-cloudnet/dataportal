@@ -16,10 +16,45 @@
       "measurementDate": "2020-01-26",
       "releasedAt": "2020-04-08T13:33:31.012Z",
       "filename": "20200126_granada_ecmwf.nc",
-      "checksum": "c46e4c7fe4be5b38670b86f3ffc3101c6de8465eabf5c470226c733e69586031",
+      "checksum": "c46e4c7ffghe5b38670b86f3ffc3101cfgj8465eabf5c470226c733e69586031",
       "size": 501452,
       "modelType": "ecmwf",
       "format": "NetCDF3",
       "site": "granada"
+    },
+    {
+      "volatile": true,
+      "measurementDate": "2020-01-22",
+      "releasedAt": "2019-04-08T13:33:31.012Z",
+      "filename": "20200122_bucharest_icon-iglo-12-23.nc",
+      "checksum": "c46e46yge4be5b38ff0b86f3ffc3101c6defg65eabf5c470226c733e69586031",
+      "size": 501465,
+      "modelType": "icon-iglo-12-23",
+      "format": "NetCDF3",
+      "site": "bucharest"
+    },
+    {
+      "volatile": false,
+      "measurementDate": "2010-01-02",
+      "releasedAt": "2010-01-08T13:33:31.012Z",
+      "filename": "20100102_granada_ecmwf.nc",
+      "checksum": "c46e4c33e4thyj38670b86f3ffc3101c6defg65eabf5c470226c733e69586031",
+      "size": 501452,
+      "modelType": "ecmwf",
+      "format": "NetCDF3",
+      "site": "granada"
+    },
+    {
+      "volatile": false,
+      "measurementDate": "2018-01-26",
+      "releasedAt": "2000-03-08T13:33:31.012Z",
+      "filename": "20180126_granada_icon-iglo-12-23.nc",
+      "checksum": "c46e4c7fe4bgthj386744f6f3ffc3101cgggg465abf5c470226c733e69586031",
+      "size": 501452,
+      "modelType": "icon-iglo-12-23",
+      "format": "NetCDF3",
+      "site": "granada"
     }
+
+
 ]
