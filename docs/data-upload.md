@@ -84,7 +84,7 @@ The server responds to requests with the following HTTP status codes:
 
 - `200 OK`: File was received successfully or a file with the same hash already exists.
 - `400 Bad Request`: There was a problem in handling the request. Check request headers and content type.
-- `401 Unauhtorized`: Problem in authentication. Check credentials.
+- `401 Unauthorized`: Problem in authentication. Check credentials.
 - `422 Unprocessable Entity`: Problem in handling metadata. Check that the metadata fields are valid.
 
 Each response is accompanied by a message elaborating the cause of the status code.
