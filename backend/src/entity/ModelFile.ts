@@ -7,8 +7,8 @@ import {ModelType} from './ModelType'
 @Index(['measurementDate', 'site'])
 export class ModelFile {
 
-    @PrimaryGeneratedColumn()
-    id!: number
+    @PrimaryGeneratedColumn('uuid')
+    uuid!: string
 
     @Column()
     filename!: string

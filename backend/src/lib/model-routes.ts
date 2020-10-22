@@ -44,7 +44,7 @@ export class ModelRoutes {
     this.modelFileRepo.createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
       .leftJoinAndSelect('file.modelType', 'modelType')
-      .where('file.id = :id ', req.params)
+      .where('file.id = :uuid ', req.params)
       .getOne()
       .then(result => res.send(result))
       .catch(err => next({ status: 404, errors: err }))
@@ -64,7 +64,7 @@ export class ModelRoutes {
 
   freezeModelFile: RequestHandler = async (req: Request, res: Response, next) => {
     if ('volatile' in req.body && req.body.volatile === 'false') {
-      this.modelFileRepo.update({id: parseInt(req.params.id)}, {volatile: false})
+      this.modelFileRepo.update({uuid: req.params.uuid}, {volatile: false})
         .then(result => res.send(result))
         .catch(err => next({ status: 400, errors: err }))
     } else next({ status: 400 })
@@ -100,7 +100,7 @@ export class ModelRoutes {
     else if (!existingFile.volatile) error('Can not update non-volatile file')
     else if (existingFile.checksum == body.hashSum) error('File already exists')
     else {
-      await this.modelFileRepo.update({id: existingFile.id}, modelFile)
+      await this.modelFileRepo.update({uuid: existingFile.uuid}, modelFile)
       res.sendStatus(200)
     }
   }

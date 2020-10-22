@@ -41,7 +41,7 @@ export class Middleware {
     switch (key) {
     case 'product':
       if (key in query && !((typeof query[key] == 'string' && validator.isAlphanumeric(query[key]))
-        || this.isArrayWithElements(query[key]))) {
+          || this.isArrayWithElements(query[key]))) {
         err.errors.push(`Malformed ${key}`)
       }
       break
