@@ -56,7 +56,7 @@ export class ModelRoutes {
       .catch(err => next({ status: 500, errors: err }))
   }
 
-  allModelFiles: RequestHandler = async (_: Request, res: Response, next) => {
+  allmodelfiles: RequestHandler = async (_: Request, res: Response, next) => {
     this.modelFileRepo.find({ relations: ['site', 'modelType'] })
       .then(result => res.send(augmentFiles(result)))
       .catch(err => next({ status: 500, errors: err }))
@@ -70,7 +70,7 @@ export class ModelRoutes {
     } else next({ status: 400 })
   }
 
-  putModelFiles: RequestHandler = async (req: Request, res: Response, next) => {
+  postModelFiles: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body
     await this.validateBody(body, next)
 

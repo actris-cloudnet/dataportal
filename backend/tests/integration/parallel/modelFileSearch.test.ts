@@ -5,7 +5,7 @@ import { RequestError } from '../../../src/entity/RequestError'
 
 
 describe('/api/Modelfiles', () => {
-  const url = `${backendPublicUrl}modelFiles/`
+  const url = `${backendPublicUrl}model-files/`
   const expectedBody404: RequestError = {
     status: 404,
     errors: 'Not found'
@@ -91,9 +91,9 @@ describe('/api/Modelfiles', () => {
 
 })
 
-describe('GET /api/modelTypes', () => {
+describe('GET /api/model-types', () => {
 
-  const modelTypeUrl = `${backendPublicUrl}modelTypes/`
+  const modelTypeUrl = `${backendPublicUrl}model-types/`
 
   it('responds with a list of all model types', async () => {
     const types = ['ecmwf', 'icon-iglo-12-23', 'icon-iglo-24-35', 'icon-iglo-36-47', 'gdas1']

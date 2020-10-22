@@ -62,9 +62,9 @@ import * as xmlparser from 'express-xml-bodyparser'
   app.get('/api/instruments', routes.instruments)
 
   // model api (public)
-  app.get('/api/modelFiles/:id', modelRoutes.modelFile)
-  app.get('/api/modelTypes', modelRoutes.modelTypes)
-  app.get('/api/modelFiles',
+  app.get('/api/model-files/:id', modelRoutes.modelFile)
+  app.get('/api/model-types', modelRoutes.modelTypes)
+  app.get('/api/model-files',
     middleware.modelFilesValidator,
     middleware.modelFilesQueryAugmenter,
     middleware.checkModelParamsExistInDb,
@@ -99,8 +99,8 @@ import * as xmlparser from 'express-xml-bodyparser'
   app.post('/metadata/:hash', express.json(), routes.updateMetadata)
   app.put('/metadata/:hash', express.json(), routes.uploadMetadata)
   app.put('/visualizations/:filename', express.json(), routes.putVisualization)
-  app.put('/modelFiles/', express.json(), modelRoutes.putModelFiles)
-  app.put('/modelFiles/:id', express.json(), modelRoutes.freezeModelFile)
+  app.post('/model-files/', express.json(), modelRoutes.postModelFiles)
+  app.post('/model-files/:id', express.json(), modelRoutes.freezeModelFile)
 
   app.use(errorHandler)
 

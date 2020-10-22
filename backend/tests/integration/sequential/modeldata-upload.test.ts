@@ -29,7 +29,7 @@ afterAll(async () => {
   return conn.close()
 })
 
-describe('PUT /modelFiles', () => {
+describe('PUT /model-files', () => {
 
   beforeEach(() => {
     return repo.delete({})
