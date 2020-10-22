@@ -4,7 +4,7 @@ import axios from 'axios'
 import { RequestError } from '../../../src/entity/RequestError'
 
 
-describe('/api/Modelfiles', () => {
+describe('GET /api/model-files', () => {
   const url = `${backendPublicUrl}model-files/`
   const expectedBody404: RequestError = {
     status: 404,
