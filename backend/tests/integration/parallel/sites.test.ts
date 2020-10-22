@@ -26,9 +26,9 @@ describe('GET /api/sites', () => {
   })
 })
 
-describe('GET /api/modelSites', () => {
+describe('GET /api/sites?modelSites', () => {
 
-  const modelSiteUrl = `${backendPublicUrl}modelSites/`
+  const modelSiteUrl = `${backendPublicUrl}sites/?modelSites`
 
   it('responds with a list of all sites', async () => {
     const sites = ['macehead', 'hyytiala', 'bucharest', 'granada', 'potenza', 'norunda']

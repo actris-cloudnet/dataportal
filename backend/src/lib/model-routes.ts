@@ -28,7 +28,7 @@ export class ModelRoutes {
       .where('site.id IN (:...location)', query)
       .andWhere('modelType.id IN (:...modelType)', query)
       .andWhere('file.volatile IN (:...volatile)', query)
-    if (query.date != undefined) qb.andWhere('file.measurementDate = :date',)
+    if (query.date != undefined) qb.andWhere('file.measurementDate = :date')
     qb.orderBy('file.measurementDate', 'DESC')
     return qb
   }
@@ -46,13 +46,6 @@ export class ModelRoutes {
       .leftJoinAndSelect('file.modelType', 'modelType')
       .where('file.id = :id ', req.params)
       .getOne()
-      .then(result => res.send(result))
-      .catch(err => next({ status: 404, errors: err }))
-  }
-
-  modelSites: RequestHandler = async (_: Request, res: Response, next) => {
-    this.siteRepo.createQueryBuilder('site')
-      .getMany()
       .then(result => res.send(result))
       .catch(err => next({ status: 404, errors: err }))
   }
