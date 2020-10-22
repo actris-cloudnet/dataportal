@@ -17,7 +17,7 @@ import {
 import { join, basename } from 'path'
 import archiver = require('archiver')
 import {createReadStream, promises as fsp, constants as fsconst} from 'graceful-fs'
-import {fetchAll} from '.'
+import {fetchAll, augmentFiles} from '.'
 import config from '../config'
 import {ReceivedFile} from './metadata2db.js'
 import {Visualization} from '../entity/Visualization'
@@ -37,7 +37,6 @@ export class Routes {
   constructor(conn: Connection) {
     this.conn = conn
     this.publicDir = config.publicDir
-    this.fileServerUrl = config.fileServerUrl
     this.fileRepo = this.conn.getRepository(File)
     this.siteRepo = this.conn.getRepository(Site)
     this.visualizationRepo = this.conn.getRepository(Visualization)
@@ -57,11 +56,6 @@ export class Routes {
   private uploadedMetadataRepo: Repository<UploadedMetadata>
   private instrumentRepo: Repository<Instrument>
   private collectionRepo: Repository<Collection>
-
-  private augmentFiles = (files: File[]) => {
-    return files.map(entry =>
-      ({ ...entry, url: `${this.fileServerUrl}${entry.filename}` }))
-  }
 
   private filesQueryBuilder(query: any) {
     const qb = this.fileRepo.createQueryBuilder('file')
@@ -114,7 +108,7 @@ export class Routes {
       .getMany()
       .then(result => {
         if (result.length == 0) throw new Error()
-        res.send(this.augmentFiles(result)[0])
+        res.send(augmentFiles(result)[0])
       })
       .catch(_err => next({ status: 404, errors: ['No files match this UUID'] }))
   }
@@ -124,7 +118,7 @@ export class Routes {
     this.filesQueryBuilder(query)
       .getMany()
       .then(result => {
-        res.send(this.augmentFiles(result))
+        res.send(augmentFiles(result))
       })
       .catch(err => {
         next({ status: 500, errors: err })
@@ -298,7 +292,11 @@ export class Routes {
 
   allfiles: RequestHandler = async (req: Request, res: Response, next) =>
     this.fileRepo.find({ relations: ['site', 'product'] })
+<<<<<<< HEAD
       .then(result => res.send(this.augmentFiles(sortByMeasurementDateAsc(result))))
+=======
+      .then(result => res.send(augmentFiles(result)))
+>>>>>>> Rename file and remove duplicate function
       .catch(err => next({ status: 500, errors: err }))
 
   allsearch: RequestHandler = async (req: Request, res: Response, next) =>

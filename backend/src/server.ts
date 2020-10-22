@@ -7,7 +7,7 @@ import * as express from 'express'
 import config from './config'
 import { Middleware } from './lib/middleware'
 import { Routes } from './lib/routes'
-import { ModelRoutes } from './lib/model_routes'
+import { ModelRoutes } from './lib/model-routes'
 import * as xmlparser from 'express-xml-bodyparser'
 
 (async function() {

@@ -66,8 +66,13 @@ export const rowExists = (err: any) => {
 export const hideTestDataFromNormalUsers = <T>(dbQuery: SelectQueryBuilder<T>, req: Request): SelectQueryBuilder<T> =>
   req.query.developer !== undefined ? dbQuery : dbQuery.andWhere('not site.isTestSite')
 
+<<<<<<< HEAD
 export const convertToSearchFiles = (files: File[]) =>
   files.map(file => new SearchFileResponse(file))
 
 export const sortByMeasurementDateAsc = (files: File[]) =>
   files.sort((a, b) => new Date(a.measurementDate).getTime() - new Date(b.measurementDate).getTime())
+=======
+export const augmentFiles = (files: any[]) =>
+  files.map(entry => ({ ...entry, url: `${config.fileServerUrl}${entry.filename}` }))
+>>>>>>> Rename file and remove duplicate function

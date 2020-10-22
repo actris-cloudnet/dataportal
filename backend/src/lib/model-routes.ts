@@ -3,30 +3,22 @@ import {Site} from '../entity/Site'
 import {ModelType} from '../entity/ModelType'
 import {Connection, Repository} from 'typeorm'
 import {Request, Response, RequestHandler} from 'express'
-import {fetchAll, dateToJSDate, isValidDateString} from '.'
-import config from '../config'
+import {fetchAll, dateToJSDate, isValidDateString, augmentFiles} from '.'
 
 
 export class ModelRoutes {
 
   constructor(conn: Connection) {
     this.conn = conn
-    this.fileServerUrl = config.fileServerUrl
     this.modelFileRepo = this.conn.getRepository(ModelFile)
     this.modelTypeRepo = this.conn.getRepository(ModelType)
     this.siteRepo = this.conn.getRepository(Site)
   }
 
   private conn: Connection
-  readonly fileServerUrl: string
   private modelFileRepo: Repository<ModelFile>
   private modelTypeRepo: Repository<ModelType>
   private siteRepo: Repository<Site>
-
-  private augmentFiles = (files: ModelFile[]) => {
-    return files.map(entry =>
-      ({ ...entry, url: `${this.fileServerUrl}${entry.filename}` }))
-  }
 
   private ModelFilesQueryBuilder(query: any) {
     const qb = this.modelFileRepo
@@ -44,7 +36,7 @@ export class ModelRoutes {
   modelFiles: RequestHandler = async (req: Request, res: Response, next) => {
     this.ModelFilesQueryBuilder(req.query)
       .getMany()
-      .then(result => res.send(this.augmentFiles(result)))
+      .then(result => res.send(augmentFiles(result)))
       .catch(err => next ({ status: 500, errors: err }))
   }
 
@@ -73,7 +65,7 @@ export class ModelRoutes {
 
   allModelFiles: RequestHandler = async (_: Request, res: Response, next) => {
     this.modelFileRepo.find({ relations: ['site', 'modelType'] })
-      .then(result => res.send(this.augmentFiles(result)))
+      .then(result => res.send(augmentFiles(result)))
       .catch(err => next({ status: 500, errors: err }))
   }
 
@@ -110,13 +102,13 @@ export class ModelRoutes {
     })
     if (existingFile == undefined) {
       await this.modelFileRepo.insert(modelFile)
-      res.send({ status: 201 })
+      res.sendStatus(201)
     }
     else if (!existingFile.volatile) error('Can not update non-volatile file')
     else if (existingFile.checksum == body.hashSum) error('File already exists')
     else {
       await this.modelFileRepo.update({id: existingFile.id}, modelFile)
-      res.send({ status: 200 })
+      res.sendStatus(200)
     }
   }
 
