@@ -7,7 +7,7 @@ export class Collection {
   @PrimaryGeneratedColumn('uuid')
   uuid!: string
 
-  @ManyToMany(type => File)
+  @ManyToMany(_type => File)
   @JoinTable()
   files!: File[]
 

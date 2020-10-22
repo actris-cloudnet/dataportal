@@ -85,7 +85,8 @@ describe('after PUTting metadata to API', () => {
         expect(hash.digest('hex')).toEqual(shas[shas.length - 1 - i])
       })
       fs.unlinkSync(tmpZip)
-      return expect(axios.get(`${backendPublicUrl}collection/${collectionUuid}`)).resolves.toMatchObject({data: {downloadCount: 1}})
+      return expect(axios.get(`${backendPublicUrl}collection/${collectionUuid}`)).resolves
+        .toMatchObject({data: {downloadCount: 1}})
     }
     )
   })

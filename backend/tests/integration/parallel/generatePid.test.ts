@@ -24,7 +24,7 @@ beforeAll(async () => {
 describe('POST /api/generate-pid', () => {
   beforeAll(next => {
     const app = express()
-    app.post('/pid', express.json(), (req, res, next) =>{
+    app.post('/pid', express.json(), (req, res, _next) =>{
       if (req.body.type != validRequest.type || req.body.uuid != validRequest.uuid) return res.sendStatus(400)
       if (!req.body.wait) res.send(response)
     })
