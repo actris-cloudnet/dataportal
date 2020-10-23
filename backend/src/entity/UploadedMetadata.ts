@@ -46,13 +46,13 @@ export class UploadedMetadata {
   instrument!: Instrument
 
   @BeforeInsert()
-  updateDateCreation() {
+  setCreatedAt() {
     this.createdAt = new Date()
     this.updatedAt = this.createdAt
   }
 
   @BeforeUpdate()
-  updateDateUpdate() {
+  setUpdatedAt() {
     this.updatedAt = new Date()
   }
 

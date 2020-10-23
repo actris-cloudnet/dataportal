@@ -4,7 +4,16 @@ import { Product } from '../entity/Product'
 import {UploadedMetadata, Status, METADATA_ID_LENGTH} from '../entity/UploadedMetadata'
 import { Connection, Repository } from 'typeorm'
 import { Request, Response, RequestHandler } from 'express'
-import {dateToUTCString, hideTestDataFromNormalUsers, isValidDate, linkFile, rowExists, toArray, tomorrow} from '.'
+import {
+  convertToSearchFiles,
+  dateToUTCString,
+  hideTestDataFromNormalUsers,
+  isValidDate,
+  linkFile,
+  rowExists, sortByMeasurementDateAsc,
+  toArray,
+  tomorrow
+} from '.'
 import { join, basename } from 'path'
 import archiver = require('archiver')
 import { createReadStream, promises as fsp, constants as fsconst } from 'graceful-fs'
@@ -15,9 +24,12 @@ import {Visualization} from '../entity/Visualization'
 import {VisualizationResponse} from '../entity/VisualizationResponse'
 import {ProductVariable} from '../entity/ProductVariable'
 import {LatestVisualizationDateResponse} from '../entity/LatestVisualizationDateResponse'
-import {SearchFileResponse} from '../entity/SearchFileResponse'
 import {Instrument} from '../entity/Instrument'
 import {ReducedMetadataResponse} from '../entity/ReducedMetadataResponse'
+import {Collection} from '../entity/Collection'
+import {CollectionResponse} from '../entity/CollectionResponse'
+import axios from 'axios'
+import {validate as validateUuid} from 'uuid'
 
 
 export class Routes {
@@ -33,10 +45,11 @@ export class Routes {
     this.productVariableRepo = this.conn.getRepository(ProductVariable)
     this.uploadedMetadataRepo = this.conn.getRepository(UploadedMetadata)
     this.instrumentRepo = this.conn.getRepository(Instrument)
+    this.collectionRepo = this.conn.getRepository(Collection)
   }
 
-  private conn: Connection
-  private publicDir: string
+  readonly conn: Connection
+  readonly publicDir: string
   readonly fileServerUrl: string
   private fileRepo: Repository<File>
   private siteRepo: Repository<Site>
@@ -45,6 +58,7 @@ export class Routes {
   private productVariableRepo: Repository<ProductVariable>
   private uploadedMetadataRepo: Repository<UploadedMetadata>
   private instrumentRepo: Repository<Instrument>
+  private collectionRepo: Repository<Collection>
 
   private augmentFiles = (files: File[]) => {
     return files.map(entry =>
@@ -88,9 +102,10 @@ export class Routes {
   private allFilesAreReadable = (filepaths: string[]) =>
     Promise.all(filepaths.map(filepath => fsp.access(filepath, fsconst.R_OK)))
 
-  private convertToSearchFiles = (files: File[]) =>
-    files.map(file => new SearchFileResponse(file))
-
+  private getFilePaths = (files: File[]) =>
+    files
+      .map(file => file.filename)
+      .map(filename => join(this.publicDir, filename))
 
   file: RequestHandler = async (req: Request, res: Response, next) => {
     const qb = this.fileRepo.createQueryBuilder('file')
@@ -128,7 +143,7 @@ export class Routes {
           next({ status: 404, errors: ['The search yielded zero results'], params: req.query })
           return
         }
-        res.send(this.convertToSearchFiles(result))
+        res.send(convertToSearchFiles(result))
       })
       .catch(err => {
         next({ status: 500, errors: err })
@@ -175,42 +190,47 @@ export class Routes {
   }
 
   download: RequestHandler = async (req: Request, res: Response, next) => {
-    this.filesQueryBuilder(req.query)
-      .select('file.filename')
-      .getMany()
-      .then(async result => {
-        if (result.length == 0) {
-          next({ status: 400, errors: ['No files match the query'], params: req.query })
-          return
-        }
-        const filepaths = result
-          .map(file => file.filename)
-          .map(filename => join(this.publicDir, filename))
-        await this.allFilesAreReadable(filepaths)
+    const collectionUuid: string = req.params.uuid
+    const collection = await this.collectionRepo.findOne(collectionUuid, {relations: ['files']})
+    if (collection === undefined) {
+      return next({status: 404, errors: ['No collection matches this UUID.']})
+    }
+    try {
+      const filepaths = this.getFilePaths(collection.files)
+      await this.allFilesAreReadable(filepaths)
 
-        const archive = archiver('zip', { store: true })
-        archive.on('warning', console.error)
-        archive.on('error', console.error)
-        req.on('close', () => archive.abort)
+      const archive = archiver('zip', { store: true })
+      archive.on('warning', console.error)
+      archive.on('error', console.error)
+      req.on('close', () => archive.abort())
 
-        const receiverFilename = `cloudnet-collection-${new Date().getTime()}.zip`
-        res.set('Content-Type', 'application/octet-stream')
-        res.set('Content-Disposition', `attachment; filename="${receiverFilename}"`)
-        archive.pipe(res)
+      const receiverFilename = `cloudnet-collection-${new Date().getTime()}.zip`
+      res.set('Content-Type', 'application/octet-stream')
+      res.set('Content-Disposition', `attachment; filename="${receiverFilename}"`)
+      archive.pipe(res)
 
-        let i = 1
-        const appendFile = (idx: number) => {
-          const fileStream = createReadStream(filepaths[idx])
-          archive.append(fileStream, { name: basename(filepaths[idx]) })
-          if (idx == (filepaths.length - 1)) archive.finalize()
-        }
-        archive.on('entry', () => i < filepaths.length ? appendFile(i++) : null)
-        appendFile(0)
-      })
-      .catch(err => {
-        res.sendStatus(500)
-        next(err)
-      })
+      let i = 1
+      const appendFile = (idx: number) => {
+        const fileStream = createReadStream(filepaths[idx])
+        archive.append(fileStream, { name: basename(filepaths[idx]) })
+        if (idx == (filepaths.length - 1)) archive.finalize()
+      }
+      archive.on('entry', () => i < filepaths.length ? appendFile(i++) : null)
+      appendFile(0)
+
+      // Update collection download count
+      await this.collectionRepo.createQueryBuilder('collection')
+        .update()
+        .set({
+          downloadCount: () => '"downloadCount" + 1',
+          updatedAt: () => 'NOW()'
+        })
+        .where('uuid = :uuid', collection)
+        .execute()
+    } catch (err) {
+      res.sendStatus(500)
+      next(err)
+    }
   }
 
   putVisualization: RequestHandler = async (req: Request, res: Response, next) => {
@@ -278,12 +298,22 @@ export class Routes {
 
   allfiles: RequestHandler = async (req: Request, res: Response, next) =>
     this.fileRepo.find({ relations: ['site', 'product'] })
-      .then(result => res.send(this.augmentFiles(result)))
+      .then(result => res.send(this.augmentFiles(sortByMeasurementDateAsc(result))))
       .catch(err => next({ status: 500, errors: err }))
 
   allsearch: RequestHandler = async (req: Request, res: Response, next) =>
     this.fileRepo.find({ relations: ['site', 'product'] })
-      .then(result => res.send(this.convertToSearchFiles(result)))
+      .then(result => {
+        res.send(convertToSearchFiles(sortByMeasurementDateAsc(result)))
+      })
+      .catch(err => next({ status: 500, errors: err }))
+
+  allcollections: RequestHandler = async (req: Request, res: Response, next) =>
+    this.collectionRepo.find({ relations: ['files', 'files.product', 'files.site'] })
+      .then(collections => {
+        const response = collections.map(coll => ({...coll, ...{files: convertToSearchFiles(coll.files)}}))
+        res.send(response)
+      })
       .catch(err => next({ status: 500, errors: err }))
 
   putMetadataXml: RequestHandler = async (req: Request, res: Response, next) => {
@@ -461,5 +491,55 @@ export class Routes {
       .catch(err => { next({ status: 500, errors: err}) })
   }
 
-}
+  addCollection: RequestHandler = async (req: Request, res: Response, next) => {
+    if (!('files' in req.body) || !req.body.files || !Array.isArray(req.body.files)) {
+      next({status: 422, errors: ['Request is missing field "files"']})
+      return
+    }
+    const fileUuids: string[] = req.body.files
+    try {
+      const files = await this.fileRepo.findByIds(fileUuids)
+      if (files.length != fileUuids.length) {
+        const existingUuids = files.map(file => file.uuid)
+        const missingFiles = fileUuids.filter(uuid => !existingUuids.includes(uuid))
+        return next({status: 422, errors: [`Following files do not exist: ${missingFiles}`]})
+      }
+      const collection = await this.collectionRepo.save(new Collection(files))
+      res.send(collection.uuid)
+    } catch (e) {
+      return next({status: 500, errors: e})
+    }
+  }
 
+  getCollection: RequestHandler = async (req: Request, res: Response, next) => {
+    const uuid: string = req.params.uuid
+    try {
+      const collection = await this.collectionRepo.findOne(uuid, {relations: ['files', 'files.site', 'files.product']})
+      if (collection === undefined) return next({status: 404, errors: ['Collection not found']})
+      res.send(new CollectionResponse(collection))
+    } catch (e) {
+      return next({status: 500, errors: e})
+    }
+  }
+
+  generatePid: RequestHandler = async (req: Request, res: Response, next) => {
+    const body = req.body
+    if (!body.uuid || !body.type || !validateUuid(body.uuid)) {
+      return next({status: 422, errors: ['Missing or invalid uuid or type']})
+    }
+    if (body.type != 'collection') {
+      return next({status: 422, errors: ['Type must be collection']})
+    }
+    try {
+      const collection = await this.collectionRepo.findOne(body.uuid)
+      if (collection === undefined) return next({status: 422, errors: ['Collection not found']})
+      if (collection.pid) return next({status: 403, errors: ['Collection already has a PID']})
+      const pidRes = await axios.post(config.pidServiceUrl, req.body, {timeout: config.pidServiceTimeoutMs})
+      await this.collectionRepo.update({uuid: body.uuid}, {pid: pidRes.data.pid})
+      res.send(pidRes.data)
+    } catch (e) {
+      if (e.code == 'ECONNABORTED') return next({status: 504, errors: ['PID service took too long to respond']})
+      return next({status: 500, errors: e})
+    }
+  }
+}

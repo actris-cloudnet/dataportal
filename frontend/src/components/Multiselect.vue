@@ -3,7 +3,7 @@
 
   .multiselect__input
     padding: 2px
-    padding-left: 0px
+    padding-left: 0
     &::placeholder
       font-size: 88%
       color: gray
@@ -58,14 +58,14 @@
   >
     <template slot="tag" slot-scope="props" v-if="icons">
       <span class="multiselect__tag">
-        <img class="option__image" :src="getIconUrl(props.option.id)">
+        <img alt="option" class="option__image" :src="getIconUrl(props.option.id)">
         {{ props.option.humanReadableName }}
         <i class="multiselect__tag-icon" @click="props.remove(props.option)"></i>
       </span>
     </template>
     <template slot="option" slot-scope="props" v-if="icons">
       <span>
-        <img v-if="icons" class="option__image" :src="getIconUrl(props.option.id)">
+        <img alt="option" v-if="icons" class="option__image" :src="getIconUrl(props.option.id)">
         {{ props.option.humanReadableName }}
       </span>
     </template>

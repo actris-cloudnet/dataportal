@@ -85,7 +85,7 @@
 
 <template>
   <section id="fileTable">
-    <span class="listTitle"> {{ captionText }} </span>
+    <span class="listTitle" v-if="!simplifiedView"> {{ captionText }} </span>
     <b-table id="tableContent" borderless small striped hover sort-icon-left
              :items="apiResponse"
              :fields="[
@@ -116,12 +116,12 @@
                   aria-controls="fileTable"
                   align="center"
     ></b-pagination>
-    <div class="downloadinfo" v-if="listLength > 0">
+    <div class="downloadinfo" v-if="listLength > 0 && !simplifiedView">
       <a class="download"
          v-bind:class="{ disabled: isBusy }"
-         :href="isBusy? '#' : downloadUri" download>
+         href=""
+         @click.prevent="createCollection()">
         Download all
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
       </a><br>
       <span class="dlcount" v-bind:class="{ disabled: isBusy }">
         {{ listLength }} files ({{ humanReadableSize(combinedFileSize(apiResponse)) }})
@@ -132,23 +132,31 @@
 
 
 <script lang="ts">
+import axios from 'axios'
 import {Component, Prop, Watch} from 'vue-property-decorator'
 import { File } from '../../../backend/src/entity/File'
 import Vue from 'vue'
 import { getIconUrl, humanReadableSize, combinedFileSize } from '../lib'
+import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
+import {BTable} from 'bootstrap-vue/esm/components/table'
+import {BPagination} from 'bootstrap-vue/esm/components/pagination'
+
+Vue.component('b-table', BTable)
+Vue.component('b-pagination', BPagination)
 
 @Component
 export default class DataSearchResult extends Vue {
-  @Prop() apiResponse!: File[]
+  @Prop() apiResponse!: SearchFileResponse[]
   @Prop() isBusy!: boolean
   @Prop() downloadUri!: string
+  @Prop() simplifiedView?: boolean
+  apiUrl = process.env.VUE_APP_BACKENDURL
 
   sortBy = 'title'
   sortDesc = false
   currentPage = 1
   perPage = 15
 
-  getIconUrl = getIconUrl
   humanReadableSize = humanReadableSize
   combinedFileSize = combinedFileSize
 
@@ -174,6 +182,11 @@ export default class DataSearchResult extends Vue {
     if (this.listLength > 0) this.$router.push(`/file/${record.uuid}`)
   }
 
+  createCollection() {
+    axios.post(`${this.apiUrl}collection`, { files: this.apiResponse.map(file => file.uuid)})
+      .then(({data}) => this.$router.push({path: `/collection/${data}`}))
+      .catch(console.error)
+  }
 
   setIcon(product: string) {
     if (product) return {'style': `background-image: url(${getIconUrl(product)})`}

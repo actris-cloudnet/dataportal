@@ -44,6 +44,18 @@ const routes = [
     props: true,
   },
   {
+    path: '/collection/:uuid/:mode',
+    name: 'Collection',
+    meta: {
+      title: 'Cloudnet Collection'
+    },
+    component: () => import('../views/Collection.vue'),
+    props: true,
+  },
+  {
+    path: '/collection/:uuid', redirect: '/collection/:uuid/general'
+  },
+  {
     path: '*',
     name: 'ApiError',
     meta: {

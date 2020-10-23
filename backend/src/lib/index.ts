@@ -2,6 +2,8 @@ import {Connection, SelectQueryBuilder} from 'typeorm'
 import {basename, join, resolve as pathResolve} from 'path'
 import {promises as fsp} from 'fs'
 import {Request} from 'express'
+import {File} from '../entity/File'
+import {SearchFileResponse} from '../entity/SearchFileResponse'
 
 export const stringify = (obj: any): string => JSON.stringify(obj, null, 2)
 
@@ -52,3 +54,8 @@ export const rowExists = (err: any) => {
 export const hideTestDataFromNormalUsers = <T>(dbQuery: SelectQueryBuilder<T>, req: Request): SelectQueryBuilder<T> =>
   req.query.developer !== undefined ? dbQuery : dbQuery.andWhere('not site.isTestSite')
 
+export const convertToSearchFiles = (files: File[]) =>
+  files.map(file => new SearchFileResponse(file))
+
+export const sortByMeasurementDateAsc = (files: File[]) =>
+  files.sort((a, b) => new Date(a.measurementDate).getTime() - new Date(b.measurementDate).getTime())

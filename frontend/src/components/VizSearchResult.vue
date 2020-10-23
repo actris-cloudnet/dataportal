@@ -110,7 +110,7 @@
       <div v-for="viz in sortVisualizations(file.visualizations)"
         :key="viz.filename" class="variable">
         <h4>{{ viz.productVariable.humanReadableName }}</h4>
-        <img :src="quicklookUrl + viz.filename" class="visualization"><br>
+        <img alt="visualization" :src="quicklookUrl + viz.filename" class="visualization"><br>
       </div>
     </div>
     </section>

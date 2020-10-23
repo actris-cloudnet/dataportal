@@ -196,10 +196,14 @@ describe('search page', () => {
     expect(content).not.toContain('Model file from Granada')
   })
 
-  it('starts download when clicking download button', async () => {
+  it.only('starts download from collection page', async () => {
     await selenium.sendInput('dateFrom', '1980')
     const button = await selenium.awaitAndFind(By.className('download'))
-    const downloadUrl = await button.getAttribute('href')
+    await button.click()
+    await wait(200)
+    expect(await driver.getCurrentUrl()).toContain('collection')
+    const downloadButton = await selenium.awaitAndFind(By.id('downloadCollection'))
+    const downloadUrl = await downloadButton.getAttribute('href')
     const response = await axios.head(downloadUrl)
     expect(response.status).toBe(200)
   })

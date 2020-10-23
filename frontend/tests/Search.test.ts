@@ -57,7 +57,7 @@ describe('Search.vue', () => {
       }
     }
     mocked(axios.get).mockImplementation(defaultAxiosMock)
-    wrapper = mount(Search, { propsData: { mode: 'data'}})
+    wrapper = mount(Search, { propsData: { mode: 'data'}, stubs: { Map: true }})
   })
 
   it('makes less than four api request on mount', () => {

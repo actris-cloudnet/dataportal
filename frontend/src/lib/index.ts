@@ -1,5 +1,5 @@
-import { File } from '../../../backend/src/entity/File'
 import {Visualization} from '../../../backend/src/entity/Visualization'
+import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 
 export const getIconUrl = (product: string) =>
   require(`../assets/icons/${product}.png`)
@@ -24,7 +24,7 @@ export const humanReadableTimestamp = (date: string) => {
   return suffix.includes('Z') ? `${timestamp} UTC` : timestamp
 }
 
-export const combinedFileSize = (files: File[]) =>
+export const combinedFileSize = (files: SearchFileResponse[]) =>
   files.map(file => file.size).reduce((prev, cur) => cur + prev, 0)
 
 export const dateToUTC = (date: Date) =>
@@ -53,3 +53,8 @@ export function getDateFromBeginningOfYear(): Date {
 export function isSameDay(a: Date, b: Date) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate()=== b.getDate()
 }
+
+export function constructTitle(files: SearchFileResponse[]) {
+  return files.map(file => ({...file, title: `${file.product} file from ${file.site}`}))
+}
+

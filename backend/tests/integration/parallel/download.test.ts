@@ -5,17 +5,22 @@ import axios from 'axios'
 describe('/api/download', () => {
   const url = `${backendPublicUrl}download/`
 
-  it('responds with 400 if no results were found', async () => {
+  it('responds with 404 if collection is not found', async () => {
     let expectedBody: RequestError = {
-      status: 400,
-      errors: ['No files match the query']
+      status: 404,
+      errors: ['No collection matches this UUID.']
     }
-    const payload = { params: { dateTo: new Date('1970-02-20') } }
-    expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
+    return expect(axios.get(`${url}25506ea8-d357-4c7b-af8c-95dfcc34fc7d`)).rejects
+      .toMatchObject(genResponse(expectedBody.status, expectedBody))
+  })
+
+  it('responds 404 if invalid uuid', async () => {
+    return expect(axios.get(`${url}kisseliini`)).rejects
+      .toMatchObject(genResponse(404, {errors: ['Not found: invalid UUID']}))
   })
 
   it('responds with 500 if files that exist in db do not exist on disk', async () => {
-    const payload = { params: { location: 'bucharest' } }
-    expect(axios.get(url, payload)).rejects.toMatchObject({ response: { status: 500 }})
+    return expect(axios.get(`${url}48092c00-161d-4ca2-a29d-628cf8e960f6`)).rejects
+      .toMatchObject({ response: { status: 500 }})
   })
 })
