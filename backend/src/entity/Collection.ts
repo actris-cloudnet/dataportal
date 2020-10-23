@@ -1,10 +1,20 @@
-import {BeforeInsert, BeforeUpdate, Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn} from 'typeorm'
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  PrimaryColumn,
+  PrimaryGeneratedColumn
+} from 'typeorm'
 import {File} from './File'
+import { v4 as generateUuidV4 } from 'uuid'
 
 @Entity()
 export class Collection {
 
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn('uuid')
   uuid!: string
 
   @ManyToMany(_type => File)
@@ -38,6 +48,7 @@ export class Collection {
   }
 
   constructor(files: File[]) {
+    this.uuid = generateUuidV4()
     this.files = files
   }
 }

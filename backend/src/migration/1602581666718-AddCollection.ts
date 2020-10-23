@@ -4,7 +4,7 @@ export class AddCollection1602581666718 implements MigrationInterface {
     name = 'AddCollection1602581666718'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`CREATE TABLE "collection" ("uuid" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP NOT NULL, "updatedAt" TIMESTAMP NOT NULL, CONSTRAINT "PK_3be7c065e8288915cd60b52bf0a" PRIMARY KEY ("uuid"))`);
+        await queryRunner.query(`CREATE TABLE "collection" ("uuid" uuid NOT NULL, "createdAt" TIMESTAMP NOT NULL, "updatedAt" TIMESTAMP NOT NULL, CONSTRAINT "PK_3be7c065e8288915cd60b52bf0a" PRIMARY KEY ("uuid"))`);
         await queryRunner.query(`CREATE TABLE "collection_files_file" ("collectionUuid" uuid NOT NULL, "fileUuid" uuid NOT NULL, CONSTRAINT "PK_769caf6e6e7f33fd4a6ced04b26" PRIMARY KEY ("collectionUuid", "fileUuid"))`);
         await queryRunner.query(`CREATE INDEX "IDX_094919863be141393570945026" ON "collection_files_file" ("collectionUuid") `);
         await queryRunner.query(`CREATE INDEX "IDX_cf576dd45955b2a78d16227515" ON "collection_files_file" ("fileUuid") `);
