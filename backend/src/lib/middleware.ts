@@ -5,6 +5,7 @@ import { Site } from '../entity/Site'
 import { Product } from '../entity/Product'
 import {Connection} from 'typeorm'
 import {fetchAll, hideTestDataFromNormalUsers, isValidDate, toArray, tomorrow} from '.'
+import {validate as validateUuid} from 'uuid'
 
 export class Middleware {
 
@@ -14,6 +15,19 @@ export class Middleware {
 
   private conn: Connection
 
+  validateUuidParam: RequestHandler = (req, _res, next) => {
+    /* eslint-disable prefer-template */
+    const addDashesToUuid = (uuid: string) =>
+      uuid.substr(0,8)+'-'
+      +uuid.substr(8,4)+'-'
+      +uuid.substr(12,4)+'-'
+      +uuid.substr(16,4)+'-'
+      +uuid.substr(20)
+    /* eslint-enable prefer-template */
+    const uuid = req.params.uuid.includes('-') ? req.params.uuid : addDashesToUuid(req.params.uuid)
+    if (!validateUuid(uuid)) return next({status: 404, errors: ['Not found: invalid UUID']})
+    return next()
+  }
 
   filesValidator: RequestHandler = (req, _res, next) => {
     const requestError: RequestErrorArray = { status: 400, errors: [] }

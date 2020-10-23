@@ -51,7 +51,7 @@ describe('POST /api/generate-pid', () => {
   })
 
   it('responds with 422 if type or uuid is missing', async () => {
-    const error = { errors: ['Request is missing uuid or type'] }
+    const error = { errors: ['Missing or invalid uuid or type'] }
     await expect(axios.post(url, {type: 'collection'})).rejects.toMatchObject(genResponse(422, error))
     return expect(axios.post(url, {uuid: validRequest.uuid})).rejects.toMatchObject(genResponse(422, error))
   })

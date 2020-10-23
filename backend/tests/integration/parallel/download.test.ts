@@ -14,6 +14,11 @@ describe('/api/download', () => {
       .toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
 
+  it('responds 404 if invalid uuid', async () => {
+    return expect(axios.get(`${url}kisseliini`)).rejects
+      .toMatchObject(genResponse(404, {errors: ['Not found: invalid UUID']}))
+  })
+
   it('responds with 500 if files that exist in db do not exist on disk', async () => {
     return expect(axios.get(`${url}48092c00-161d-4ca2-a29d-628cf8e960f6`)).rejects
       .toMatchObject({ response: { status: 500 }})

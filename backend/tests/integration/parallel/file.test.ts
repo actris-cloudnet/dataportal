@@ -15,6 +15,11 @@ describe('/api/files/:uuid', () => {
     return expect(axios.get(url + testUuid)).rejects.toMatchObject({ response: { data: expectedBody404 }})
   })
 
+  it('responds with a 400 if invalid uuid', async () => {
+    const expectedBody = {...expectedBody404, ...{errors: ['Not found: invalid UUID']}}
+    return expect(axios.get(`${url}kisuli`)).rejects.toMatchObject({ response: { data: expectedBody}})
+  })
+
   it('request succeeds on a test file in developer mode', async () => {
     return expect(axios.get(url + testUuid, { params: { developer: '' }})).resolves.toBeTruthy()
   })

@@ -29,6 +29,7 @@ import {ReducedMetadataResponse} from '../entity/ReducedMetadataResponse'
 import {Collection} from '../entity/Collection'
 import {CollectionResponse} from '../entity/CollectionResponse'
 import axios from 'axios'
+import {validate as validateUuid} from 'uuid'
 
 
 export class Routes {
@@ -189,7 +190,7 @@ export class Routes {
   }
 
   download: RequestHandler = async (req: Request, res: Response, next) => {
-    const collectionUuid: string = req.params.collectionUuid
+    const collectionUuid: string = req.params.uuid
     const collection = await this.collectionRepo.findOne(collectionUuid, {relations: ['files']})
     if (collection === undefined) {
       return next({status: 404, errors: ['No collection matches this UUID.']})
@@ -523,8 +524,8 @@ export class Routes {
 
   generatePid: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body
-    if (!body.uuid || !body.type) {
-      return next({status: 422, errors: ['Request is missing uuid or type']})
+    if (!body.uuid || !body.type || !validateUuid(body.uuid)) {
+      return next({status: 422, errors: ['Missing or invalid uuid or type']})
     }
     if (body.type != 'collection') {
       return next({status: 422, errors: ['Type must be collection']})

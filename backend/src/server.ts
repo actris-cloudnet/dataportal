@@ -54,7 +54,7 @@ import * as xmlparser from 'express-xml-bodyparser'
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
     routes.files)
-  app.get('/api/files/:uuid', routes.file)
+  app.get('/api/files/:uuid', middleware.validateUuidParam, routes.file)
   app.get('/api/sites', routes.sites)
   app.get('/api/products', routes.products)
   app.get('/api/instruments', routes.instruments)
@@ -64,13 +64,13 @@ import * as xmlparser from 'express-xml-bodyparser'
   // public/internal
   app.get('/api/status', routes.status)
   app.get('/api/products/variables', routes.productVariables)
-  app.get('/api/download/:collectionUuid', routes.download)
+  app.get('/api/download/:uuid', middleware.validateUuidParam, routes.download)
   app.get('/api/visualizations',
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
     routes.getVisualization)
-  app.get('/api/visualizations/:uuid', routes.getVisualizationForSourceFile)
+  app.get('/api/visualizations/:uuid', middleware.validateUuidParam, routes.getVisualizationForSourceFile)
   app.get('/api/latest-visualization-date',
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
@@ -80,7 +80,7 @@ import * as xmlparser from 'express-xml-bodyparser'
   app.get('/api/sites/:siteid', routes.site)
   app.get('/api/uploaded-metadata', routes.listInstrumentsFromMetadata)
   app.post('/api/collection', express.json(), routes.addCollection)
-  app.get('/api/collection/:uuid', routes.getCollection)
+  app.get('/api/collection/:uuid', middleware.validateUuidParam, routes.getCollection)
   app.post('/api/generate-pid', express.json(), routes.generatePid)
 
   // private

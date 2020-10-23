@@ -1,5 +1,5 @@
 import axios from 'axios'
-import {backendPublicUrl} from '../../lib'
+import {backendPublicUrl, genResponse} from '../../lib'
 
 const url = `${backendPublicUrl}visualizations/`
 const headers = { 'content-type': 'application/json'}
@@ -39,6 +39,11 @@ describe('GET /visualizations', () => {
 
 describe('GET /visualizations/:uuid', () => {
 
+
+  it('responds 404 if invalid uuid', async () => {
+    return expect(axios.get(`${url}kisseliini`)).rejects
+      .toMatchObject(genResponse(404, {errors: ['Not found: invalid UUID']}))
+  })
 
   it('returns correct list of visualizations and responds with 200', async () => {
     const res = await axios.get(`${url}${expectedResult.sourceFileId}`)
