@@ -237,13 +237,13 @@ export default class CollectionView extends Vue {
         this.response = response
       })
       .then(() => {
+        this.generatePid()
         const siteIds = this.getUnique('siteId')
         const productIds = this.getUnique('productId')
         return Promise.all([
           axios.get(`${this.apiUrl}sites/`),
           axios.get(`${this.apiUrl}products/`),
-          this.generatePid(),
-        ]).then(([sites, products, _]) => {
+        ]).then(([sites, products]) => {
           this.sites = sites.data.filter((site: Site) => siteIds.includes(site.id))
           this.products = products.data.filter((product: Product) => productIds.includes(product.id))
         })
