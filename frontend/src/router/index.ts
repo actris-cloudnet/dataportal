@@ -13,6 +13,14 @@ const routes = [
     component: () => import('../views/Frontpage.vue')
   },
   {
+    path: '/privacy',
+    name: 'Privacy Policy',
+    meta: {
+      title: 'Cloudnet privacy policy'
+    },
+    component: () => import('../views/PrivacyPolicy.vue')
+  },
+  {
     path: '/search',
     redirect: '/search/data'
   },
