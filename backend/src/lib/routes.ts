@@ -101,6 +101,11 @@ export class Routes {
   private allFilesAreReadable = (filepaths: string[]) =>
     Promise.all(filepaths.map(filepath => fsp.access(filepath, fsconst.R_OK)))
 
+  private getFilePaths = (files: File[]) =>
+    files
+      .map(file => file.filename)
+      .map(filename => join(this.publicDir, filename))
+
   file: RequestHandler = async (req: Request, res: Response, next) => {
     const qb = this.fileRepo.createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
@@ -190,9 +195,7 @@ export class Routes {
       return next({status: 404, errors: ['No collection matches this UUID.']})
     }
     try {
-      const filepaths = collection.files
-        .map(file => file.filename)
-        .map(filename => join(this.publicDir, filename))
+      const filepaths = this.getFilePaths(collection.files)
       await this.allFilesAreReadable(filepaths)
 
       const archive = archiver('zip', { store: true })
