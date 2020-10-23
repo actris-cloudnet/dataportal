@@ -38,7 +38,7 @@ main.column
   text-decoration: none
   cursor: default
 
-button, a
+.download
   display: inline-block
   margin-top: 0.5em
 
@@ -110,9 +110,9 @@ button, a
           <div v-if="pidServiceError" class="errormsg">PID service is unavailable. Please try again later.</div>
           <h3>License</h3>
           <!-- eslint-disable max-len -->
-          Cloudnet data is licensed under a <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 international licence</a>.
-          <p>
-            This is a human-readable summary of (and not a substitute for) the <a href="https://creativecommons.org/licenses/by/4.0/legalcode">licence</a>.<br>
+          Cloudnet data is licensed under a <a href="https://creativecommons.org/licenses/by/4.0">Creative Commons Attribution 4.0 international licence</a>.
+          <p></p>
+          This is a human-readable summary of (and not a substitute for) the <a href="https://creativecommons.org/licenses/by/4.0/legalcode">licence</a>.<br>
             You are free to:
           <ul>
             <li><b>Share</b> — copy and redistribute the material in any medium or format</li>
