@@ -220,7 +220,11 @@ export class Routes {
       // Update collection download count
       await this.collectionRepo.createQueryBuilder('collection')
         .update()
-        .set({ downloadCount: () => '"downloadCount" + 1' })
+        .set({
+          downloadCount: () => '"downloadCount" + 1',
+          updatedAt: () => 'NOW()'
+        })
+        .where('uuid = :uuid', collection)
         .execute()
     } catch (err) {
       res.sendStatus(500)
