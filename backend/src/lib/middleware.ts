@@ -16,6 +16,8 @@ export class Middleware {
 
   private conn: Connection
 
+  private isArrayWithElements = (obj: any) => Array.isArray(obj) && obj.length > 0
+
   validateUuidParam: RequestHandler = (req, _res, next) => {
     /* eslint-disable prefer-template */
     const addDashesToUuid = (uuid: string) =>

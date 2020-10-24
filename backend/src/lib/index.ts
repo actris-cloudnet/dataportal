@@ -4,6 +4,7 @@ import {promises as fsp} from 'fs'
 import {Request} from 'express'
 import {File} from '../entity/File'
 import {SearchFileResponse} from '../entity/SearchFileResponse'
+import config from '../config'
 
 export const stringify = (obj: any): string => JSON.stringify(obj, null, 2)
 
@@ -66,13 +67,11 @@ export const rowExists = (err: any) => {
 export const hideTestDataFromNormalUsers = <T>(dbQuery: SelectQueryBuilder<T>, req: Request): SelectQueryBuilder<T> =>
   req.query.developer !== undefined ? dbQuery : dbQuery.andWhere('not site.isTestSite')
 
-<<<<<<< HEAD
 export const convertToSearchFiles = (files: File[]) =>
   files.map(file => new SearchFileResponse(file))
 
 export const sortByMeasurementDateAsc = (files: File[]) =>
   files.sort((a, b) => new Date(a.measurementDate).getTime() - new Date(b.measurementDate).getTime())
-=======
+
 export const augmentFiles = (files: any[]) =>
   files.map(entry => ({ ...entry, url: `${config.fileServerUrl}${entry.filename}` }))
->>>>>>> Rename file and remove duplicate function

@@ -48,7 +48,6 @@ export class Routes {
 
   readonly conn: Connection
   readonly publicDir: string
-  readonly fileServerUrl: string
   private fileRepo: Repository<File>
   private siteRepo: Repository<Site>
   private visualizationRepo: Repository<Visualization>
@@ -295,11 +294,7 @@ export class Routes {
 
   allfiles: RequestHandler = async (req: Request, res: Response, next) =>
     this.fileRepo.find({ relations: ['site', 'product'] })
-<<<<<<< HEAD
-      .then(result => res.send(this.augmentFiles(sortByMeasurementDateAsc(result))))
-=======
       .then(result => res.send(augmentFiles(result)))
->>>>>>> Rename file and remove duplicate function
       .catch(err => next({ status: 500, errors: err }))
 
   allsearch: RequestHandler = async (req: Request, res: Response, next) =>
