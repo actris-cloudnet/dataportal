@@ -68,25 +68,30 @@ describe('GET /api/model-files', () => {
   it('has exactly 2 stable files', async () => {
     const payload = {params: {volatile: false}}
     const res = await axios.get(url, payload)
-    return expect(res.data).toHaveLength(2)
+    expect(res.data).toHaveLength(2)
+    return expect(new Set(res.data.map((d: any) => d.volatile))).toEqual(new Set([false, false]))
   })
 
   it('has exactly 3 volatile files', async () => {
     const payload = {params: {volatile: true}}
     const res = await axios.get(url, payload)
-    return expect(res.data).toHaveLength(3)
+    expect(res.data).toHaveLength(3)
+    return expect(new Set(res.data.map((d: any) => d.volatile))).toEqual(new Set([true, true, true]))
   })
 
   it('responds with correct objects with certain modelType', async () => {
-    const payload = {params: {modelType: 'icon-iglo-12-23'}}
+    const model = 'icon-iglo-12-23'
+    const payload = {params: {modelType: model}}
     const res = await axios.get(url, payload)
-    return expect(res.data).toHaveLength(2)
+    expect(res.data).toHaveLength(2)
+    return expect(new Set(res.data.map((d: any) => d.modelType.id))).toEqual(new Set([model, model]))
   })
 
   it('responds with correct objects with certain date', async () => {
     const payload = {params: {date: '2010-01-02'}}
     const res = await axios.get(url, payload)
-    return expect(res.data).toHaveLength(1)
+    expect(res.data).toHaveLength(1)
+    return expect(res.data[0].measurementDate).toBe('2010-01-02')
   })
 
 })

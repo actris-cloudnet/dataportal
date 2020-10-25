@@ -38,7 +38,7 @@ describe('POST /model-files', () => {
   test('responds with 201 on new model file submission', async () => {
     const now = new Date()
     const res = await axios.post(url, validMetadata)
-    expect(res.data).toMatchObject({ response: { data: { status: 201 }}})
+    expect(res.status).toBe(201)
     const md = await repo.findOne({filename: validMetadata.filename})
     expect(md).toBeTruthy()
     expect(new Date(md.releasedAt).getTime()).toBeGreaterThan(now.getTime())
@@ -55,14 +55,18 @@ describe('POST /model-files', () => {
     const updatedMetadata = {...validMetadata, hashSum: newHash}
     await axios.post(url, validMetadata)
     const res = await axios.post(url, updatedMetadata)
-    return expect(res.data).toMatchObject({status: 200})
+    expect(res.status).toBe(200)
+    const md = await repo.findOne({filename: validMetadata.filename})
+    return expect(md.checksum).toBe(newHash)
   })
 
   test('responds with 200 on successful freeze', async () => {
     await axios.post(url, validMetadata)
     const md = await repo.findOne({filename: validMetadata.filename})
     const res = await axios.post(`${url}${md.uuid}`, {'volatile': 'false'})
-    return expect(res.status).toBe(200)
+    expect(res.status).toBe(200)
+    const updatedMd = await repo.findOne(md.uuid)
+    return expect(updatedMd.volatile).toBe(false)
   })
 
   test('responds with 403 on freezed model file update', async () => {
