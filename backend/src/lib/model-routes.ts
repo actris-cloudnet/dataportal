@@ -3,7 +3,7 @@ import {Site} from '../entity/Site'
 import {ModelType} from '../entity/ModelType'
 import {Connection, Repository} from 'typeorm'
 import {Request, Response, RequestHandler} from 'express'
-import {fetchAll, dateToJSDate, isValidDateString, augmentFiles} from '.'
+import {fetchAll, dateToJSDate, augmentFiles, isValidDate} from '.'
 
 
 export class ModelRoutes {
@@ -41,13 +41,12 @@ export class ModelRoutes {
   }
 
   modelFile: RequestHandler = async (req: Request, res: Response, next) => {
-    this.modelFileRepo.createQueryBuilder('file')
-      .leftJoinAndSelect('file.site', 'site')
-      .leftJoinAndSelect('file.modelType', 'modelType')
-      .where('file.id = :uuid ', req.params)
-      .getOne()
-      .then(result => res.send(result))
-      .catch(err => next({ status: 404, errors: err }))
+    this.modelFileRepo.findOne(req.params.uuid, {relations: ['site', 'modelType']})
+      .then(result => {
+        if (!result) next({ status: 404, errors: ['No files match this UUID']})
+        res.send(augmentFiles([result])[0])
+      })
+      .catch(err => next ({ status: 500, errors: err }))
   }
 
   modelTypes: RequestHandler = async (_: Request, res: Response, next) => {
@@ -63,11 +62,16 @@ export class ModelRoutes {
   }
 
   freezeModelFile: RequestHandler = async (req: Request, res: Response, next) => {
-    if ('volatile' in req.body && req.body.volatile === 'false') {
-      this.modelFileRepo.update({uuid: req.params.uuid}, {volatile: false})
-        .then(result => res.send(result))
-        .catch(err => next({ status: 400, errors: err }))
-    } else next({ status: 400 })
+    if (!('volatile' in req.body && req.body.volatile === 'false')) {
+      next({ status: 422 , errors: ['Request is missing volatile or volatile is not false'] })
+    }
+    const modelFile = await this.modelFileRepo.findOne(req.params.uuid)
+    if (!modelFile) {
+      next({ status: 404, errors: ['No files match this UUID'] })
+    }
+    this.modelFileRepo.update(req.params.uuid, { volatile: false })
+      .then(result => res.send(result))
+      .catch(err => next({ status: 500, errors: err }))
   }
 
   postModelFiles: RequestHandler = async (req: Request, res: Response, next) => {
@@ -85,38 +89,46 @@ export class ModelRoutes {
       body.location,
       body.modelType)
 
-    const error = (msg: string) => next({ status: 403, errors: `${msg}: ${body.filename}` })
+    try {
+      // Assuming only one file / date / site / modelType:
+      const existingFile = await this.modelFileRepo.findOne({
+        measurementDate: measurementDate,
+        site: body.location,
+        modelType: body.modelType
+      })
+      if (!existingFile) {
+        await this.modelFileRepo.insert(modelFile)
+        res.sendStatus(201)
+      }
+      else if (!existingFile.volatile) {
+        next({ status: 403, errors: ['Can not update non-volatile file'] })
+      }
+      else if (existingFile.checksum == body.hashSum) {
+        next({ status: 409, errors: ['File already exists'] })
+      }
+      else {
+        await this.modelFileRepo.update(existingFile.uuid, modelFile)
+        res.sendStatus(200)
+      }
+    }
+    catch (err) {
+      next({ status: 500, errors: err })
+    }
 
-    // Assuming only one file / date / site / modelType:
-    const existingFile = await this.modelFileRepo.findOne({
-      measurementDate: measurementDate,
-      site: body.location,
-      modelType: body.modelType
-    })
-    if (existingFile == undefined) {
-      await this.modelFileRepo.insert(modelFile)
-      res.sendStatus(201)
-    }
-    else if (!existingFile.volatile) error('Can not update non-volatile file')
-    else if (existingFile.checksum == body.hashSum) error('File already exists')
-    else {
-      await this.modelFileRepo.update({uuid: existingFile.uuid}, modelFile)
-      res.sendStatus(200)
-    }
   }
 
 
   private validateBody = async (body: any, next: any) => {
 
-    const error = (msg: string) => {next({ status: 400, errors: `${msg} in ${body.filename}` })}
+    const error = (msg: string) => {next({ status: 422, errors: `${msg} in ${body.filename}` })}
 
     ['year', 'month', 'day', 'hashSum', 'filename', 'modelType', 'location', 'format', 'size']
       .forEach(key => {
         if (!(key in body)) error(`Missing: ${key}`)
       })
 
-    const datestr = `${body.year}${body.month}${body.day}`
-    if (!isValidDateString(datestr)) error(`Invalid date "${datestr}"`)
+    const datestr = `${body.year}-${body.month}-${body.day}`
+    if (!isValidDate(datestr)) error(`Invalid date "${datestr}"`)
 
     if (await this.modelTypeRepo.findOne(body.modelType) == undefined) error(`Invalid model type "${body.modelType}"`)
     if (await this.siteRepo.findOne(body.location) == undefined) error(`Invalid model site "${body.location}"`)

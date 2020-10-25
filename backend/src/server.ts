@@ -43,6 +43,7 @@ import * as xmlparser from 'express-xml-bodyparser'
     app.get('/allfiles', routes.allfiles)
     app.get('/allsearch', routes.allsearch)
     app.get('/allcollections', routes.allcollections)
+    app.get('/allmodelfiles', modelRoutes.allmodelfiles)
   }
 
   // public (changes to these require changes to API docs)
@@ -62,10 +63,10 @@ import * as xmlparser from 'express-xml-bodyparser'
   app.get('/api/instruments', routes.instruments)
 
   // model api (public)
-  app.get('/api/model-files/:uuid', modelRoutes.modelFile)
+  app.get('/api/model-files/:uuid', middleware.validateUuidParam, modelRoutes.modelFile)
   app.get('/api/model-types', modelRoutes.modelTypes)
   app.get('/api/model-files',
-    middleware.modelFilesValidator,
+    middleware.filesValidator,
     middleware.modelFilesQueryAugmenter,
     middleware.checkModelParamsExistInDb,
     modelRoutes.modelFiles)
@@ -100,7 +101,10 @@ import * as xmlparser from 'express-xml-bodyparser'
   app.put('/metadata/:hash', express.json(), routes.uploadMetadata)
   app.put('/visualizations/:filename', express.json(), routes.putVisualization)
   app.post('/model-files/', express.json(), modelRoutes.postModelFiles)
-  app.post('/model-files/:uuid', express.json(), modelRoutes.freezeModelFile)
+  app.post('/model-files/:uuid',
+    express.json(),
+    middleware.validateUuidParam,
+    modelRoutes.freezeModelFile)
 
   app.use(errorHandler)
 

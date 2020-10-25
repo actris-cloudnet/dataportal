@@ -16,8 +16,6 @@ export class Middleware {
 
   private conn: Connection
 
-  private isArrayWithElements = (obj: any) => Array.isArray(obj) && obj.length > 0
-
   validateUuidParam: RequestHandler = (req, _res, next) => {
     /* eslint-disable prefer-template */
     const addDashesToUuid = (uuid: string) =>
@@ -32,93 +30,78 @@ export class Middleware {
     return next()
   }
 
-  private pushAndReturn = (err: RequestErrorArray, msg: string) => {
-    err.errors.push(msg)
-    return err
-  }
 
-  private checkFieldNames = (validKeys: string[], query: any) => Object.keys(query).filter(key => !validKeys.includes(key))
+  private checkField = (key: string, query: any): string | void => {
 
-  private checkField = (key: string, err: RequestErrorArray, query: any) => {
+    const isArrayWithElements = (obj: any) => Array.isArray(obj) && obj.length > 0
+
     switch (key) {
     case 'product':
       if (key in query && !((typeof query[key] == 'string' && validator.isAlphanumeric(query[key]))
-          || this.isArrayWithElements(query[key]))) {
-        err.errors.push(`Malformed ${key}`)
+          || isArrayWithElements(query[key]))) {
+        return (`Malformed ${key}`)
       }
       break
     case 'dateTo':
     case 'dateFrom':
     case 'date':
       if (key in query && !isValidDate(query[key])) {
-        err.errors.push(`Malformed date in property "${key}"`)
+        return (`Malformed date in property "${key}"`)
       }
       break
     case 'limit':
       if (key in query && isNaN(parseInt(query[key]))) {
-        err.errors.push(`Malformed value in property "${key}"`)
+        return (`Malformed value in property "${key}"`)
       }
       break
     case 'volatile':
       if (key in query && !(query[key].toLowerCase() == 'true' || query[key].toLowerCase() == 'false')) {
-        err.errors.push(`Malformed value in property "${key}"`)
+        return (`Malformed value in property "${key}"`)
       }
     }
   }
 
   filesValidator: RequestHandler = (req, _res, next) => {
-    const requestError: RequestErrorArray = { status: 400, errors: [] }
-    const query = req.query as any
 
-    if (Object.keys(query).length == 0) {
-      return next(this.pushAndReturn(requestError, 'No search parameters given'))
+    const checkFieldNames = (validKeys: string[], query: any) => Object.keys(query).filter(key => !validKeys.includes(key))
+
+    const requestError: RequestErrorArray = { status: 400, errors: [] }
+
+    if (Object.keys(req.query).length == 0) {
+      requestError.errors.push('No search parameters given')
+      return next(requestError)
     }
 
-    let validKeys = ['location', 'product', 'dateFrom', 'dateTo', 'developer', 'volatile', 'releasedBefore', 'allVersions', 'limit']
-    if (req.path.includes('visualization')) validKeys.push('variable')
-    const unknownFields = this.checkFieldNames(validKeys, query)
+    let validKeys = ['location', 'volatile']
+
+    if (req.path.includes('model')) {
+      validKeys = validKeys.concat(['date', 'modelType'])
+    }
+    else {
+      validKeys = validKeys.concat(['product', 'dateFrom', 'dateTo', 'developer', 'releasedBefore', 'allVersions', 'limit'])
+      if (req.path.includes('visualization')) validKeys.push('variable')
+    }
+
+    const unknownFields = checkFieldNames(validKeys, req.query)
     if (unknownFields.length > 0) {
       requestError.errors.push(`Unknown query parameters: ${unknownFields}`)
     }
 
-    const keys = ['location', 'product', 'dateFrom', 'dateTo', 'volatile', 'limit']
+    const keys = ['location', 'product', 'dateFrom', 'dateTo', 'volatile', 'limit', 'date', 'modelType']
     keys.forEach(key => {
-      this.checkField(key, requestError, query)
+      const keyError = this.checkField(key, req.query)
+      if (keyError) requestError.errors.push(keyError)
     })
 
     if (requestError.errors.length > 0) return next(requestError)
     return next()
-
-  }
-
-  modelFilesValidator: RequestHandler = (req, _res, next) => {
-    const requestError: RequestErrorArray = { status: 400, errors: [] }
-    const query = req.query as any
-
-    if (Object.keys(query).length == 0) {
-      return next(this.pushAndReturn(requestError, 'No search parameters given'))
-    }
-
-    const validKeys = ['location', 'modelType', 'date', 'volatile']
-    const unknownFields = this.checkFieldNames(validKeys, query)
-    if (unknownFields.length > 0) {
-      requestError.errors.push(`Unknown query parameters: ${unknownFields}`)
-    }
-
-    const keys = ['location', 'date', 'volatile']
-    keys.forEach(key => {
-      this.checkField(key, requestError, query)
-    })
-
-    if (requestError.errors.length > 0) return next(requestError)
-    return next()
-
   }
 
   filesQueryAugmenter: RequestHandler = async (req, _res, next) => {
     const query = req.query as any
     const defaultLocation = async () => (await fetchAll<Site>(this.conn, Site))
-      .filter(site => !(req.query.developer === undefined && site.isTestSite && !site.isModelOnlySite))
+      .filter(site => !(req.query.developer === undefined && site.isTestSite))
+      .filter(site => !site.isModelOnlySite)
       .map(site => site.id)
     const defaultProduct = async () => (await fetchAll<Product>(this.conn, Product))
       .map(product => product.id)
@@ -135,7 +118,6 @@ export class Middleware {
     query.location = toArray(query.location)
     query.product = toArray(query.product)
     query.volatile = setVolatile()
-
     next()
   }
 
@@ -154,7 +136,7 @@ export class Middleware {
     next()
   }
 
-  private throwError = (param: string, req: any) => {
+  private throw404Error = (param: string, req: any) => {
     throw { status: 404, errors: [`One or more of the specified ${param}s were not found`], params: req.query }
   }
 
@@ -162,7 +144,7 @@ export class Middleware {
     await this.conn.getRepository(repo)
       .findByIds(req.query[param])
       .then(res => {
-        if (res.length != req.query[param].length) this.throwError(param, req)
+        if (res.length != req.query[param].length) this.throw404Error(param, req)
       })
   }
 
@@ -174,7 +156,7 @@ export class Middleware {
     if (hideTestSites) qb = hideTestDataFromNormalUsers(qb, req)
     await qb.getMany()
       .then((res: any[]) => {
-        if (res.length != req.query.location.length) this.throwError('location', req)
+        if (res.length != req.query.location.length) this.throw404Error('location', req)
       })
   }
 

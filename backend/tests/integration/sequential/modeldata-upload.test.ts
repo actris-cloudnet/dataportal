@@ -45,13 +45,13 @@ describe('POST /model-files', () => {
     return
   })
 
-  test('responds with 403 on duplicate file submission', async () => {
+  test('responds with 409 on duplicate file submission', async () => {
     await axios.post(url, validMetadata)
-    return expect(axios.post(url, validMetadata)).rejects.toMatchObject({ response: { data: { status: 403 }}})
+    return expect(axios.post(url, validMetadata)).rejects.toMatchObject({ response: { data: { status: 409 }}})
   })
 
   test('responds with 200 on model file update', async () => {
-    const newHash = 'dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b6'
+    const newHash = 'dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef718399333'
     const updatedMetadata = {...validMetadata, hashSum: newHash}
     await axios.post(url, validMetadata)
     const res = await axios.post(url, updatedMetadata)
@@ -60,93 +60,119 @@ describe('POST /model-files', () => {
     return expect(md.checksum).toBe(newHash)
   })
 
-  test('responds with 200 on successful freeze', async () => {
-    await axios.post(url, validMetadata)
-    const md = await repo.findOne({filename: validMetadata.filename})
-    const res = await axios.post(`${url}${md.uuid}`, {'volatile': 'false'})
-    expect(res.status).toBe(200)
-    const updatedMd = await repo.findOne(md.uuid)
-    return expect(updatedMd.volatile).toBe(false)
-  })
-
   test('responds with 403 on freezed model file update', async () => {
-    const freezedMetadata = {...validMetadata, volatile: false}
-    await axios.post(url, freezedMetadata)
-    return expect(axios.post(url, freezedMetadata)).rejects.toMatchObject({ response: { data: { status: 403 }}})
+    const newHash = 'dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b6'
+    await axios.post(url, validMetadata)
+    await repo.update({filename: validMetadata.filename}, {volatile: false})
+    let md = await repo.findOne({filename: validMetadata.filename})
+    expect(md.volatile).toBe(false)
+    const incomingMetadata = {...validMetadata, hashSum: newHash}
+    return expect(axios.post(url, incomingMetadata)).rejects.toMatchObject({ response: { data: { status: 403 }}})
   })
 
-  test('responds with 400 on invalid hash length', async () => {
+  test('responds with 422 on invalid hash length', async () => {
     const payload = {...validMetadata, hashSum: 'abc'}
-    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
-  test('responds with 400 on invalid date', async () => {
+  test('responds with 422 on invalid date', async () => {
     const payload = {...validMetadata, day: '32'}
-    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
-  test('responds with 400 on invalid site', async () => {
+  test('responds with 422 on invalid site', async () => {
     const payload = {...validMetadata, location: 'moskova'}
-    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
-  test('responds with 400 on invalid model_type', async () => {
+  test('responds with 422 on invalid model_type', async () => {
     const payload = {...validMetadata, modelType: 'kissa'}
-    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
-  test('responds with 400 on missing year', async () => {
+  test('responds with 422 on missing year', async () => {
     const payload = {...validMetadata}
     delete payload.year
-    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
-  test('responds with 400 on missing month', async () => {
+  test('responds with 422 on missing month', async () => {
     const payload = {...validMetadata}
     delete payload.month
-    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
-  test('responds with 400 on missing day', async () => {
+  test('responds with 422 on missing day', async () => {
     const payload = {...validMetadata}
     delete payload.day
-    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
-  test('responds with 400 on missing hashSum', async () => {
+  test('responds with 422 on missing hashSum', async () => {
     const payload = {...validMetadata}
     delete payload.hashSum
-    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
-  test('responds with 400 on missing filename', async () => {
+  test('responds with 422 on missing filename', async () => {
     const payload = {...validMetadata}
     delete payload.filename
-    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
-  test('responds with 400 on missing modelType', async () => {
+  test('responds with 422 on missing modelType', async () => {
     const payload = {...validMetadata}
     delete payload.modelType
-    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
-  test('responds with 400 on missing location', async () => {
+  test('responds with 422 on missing location', async () => {
     const payload = {...validMetadata}
     delete payload.location
-    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
-  test('responds with 400 on missing format', async () => {
+  test('responds with 422 on missing format', async () => {
     const payload = {...validMetadata}
     delete payload.format
-    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
-  test('responds with 400 on missing size', async () => {
+  test('responds with 422 on missing size', async () => {
     const payload = {...validMetadata}
     delete payload.size
-    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.post(url, payload)).rejects.toMatchObject({ response: { data: { status: 422}}})
+  })
+
+  describe('POST /model-files/:uuid', () => {
+
+    beforeEach(() => {
+      return repo.delete({})
+    })
+
+    test('responds with 200 on successful freeze', async () => {
+      await axios.post(url, validMetadata)
+      const md = await repo.findOne({filename: validMetadata.filename})
+      const res = await axios.post(`${url}${md.uuid}`, {'volatile': 'false'})
+      expect(res.status).toBe(200)
+      const updatedMd = await repo.findOne(md.uuid)
+      return expect(updatedMd.volatile).toBe(false)
+    })
+
+    test('responds with 422 on freeze with correct uuid but bad payload', async () => {
+      await axios.post(url, validMetadata)
+      const md = await repo.findOne({filename: validMetadata.filename})
+      const payload = {'asldkjflasdfk': 'asdfdf'}
+      return expect(axios.post(`${url}${md.uuid}`, payload)).rejects.toMatchObject({ response: { data: { status: 422}}})
+    })
+
+    test('responds with 404 on freeze with correct payload but non-existing uuid', async () => {
+      await axios.post(url, validMetadata)
+      const payload = {'volatile': 'false'}
+      return expect(axios.post(`${url}kissa`, payload)).rejects.toMatchObject({ response: { data: { status: 404}}})
+    })
+
+
   })
 
 })

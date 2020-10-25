@@ -4,12 +4,13 @@ import axios from 'axios'
 import { RequestError } from '../../../src/entity/RequestError'
 
 
+const expectedBody404: RequestError = {
+  status: 404,
+  errors: 'Not found'
+}
+
 describe('GET /api/model-files', () => {
   const url = `${backendPublicUrl}model-files/`
-  const expectedBody404: RequestError = {
-    status: 404,
-    errors: 'Not found'
-  }
 
   it('responds with 400 if no query parameters are given', () => {
     const expectedBody: RequestError = {
@@ -93,8 +94,26 @@ describe('GET /api/model-files', () => {
     expect(res.data).toHaveLength(1)
     return expect(res.data[0].measurementDate).toBe('2010-01-02')
   })
+})
+
+describe('GET /api/model-files/:uuid', () => {
+
+  it('finds the correct file with given uuid', async () => {
+    const payload = {params: {location: 'bucharest'}}
+    const md = await axios.get(`${backendPublicUrl}model-files/`, payload)
+    const uuid = md.data[0].uuid
+    const modelFileUrl = `${backendPublicUrl}model-files/${uuid}`
+    const res = await axios.get(modelFileUrl)
+    return expect(res.data.uuid).toBe(uuid)
+  })
+
+  it('responds with 404 with arbitrary uuid', async () => {
+    const modelFileUrl = `${backendPublicUrl}model-files/blablabla`
+    return expect(axios.get(modelFileUrl)).rejects.toMatchObject({ response: { data: { status: 404}}})
+  })
 
 })
+
 
 describe('GET /api/model-types', () => {
 
@@ -107,6 +126,5 @@ describe('GET /api/model-types', () => {
     const siteList = res.data.map((d: any) => d.id)
     return types.forEach(mtype => expect(siteList).toContain(mtype))
   })
-
 })
 
