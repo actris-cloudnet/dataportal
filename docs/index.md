@@ -267,9 +267,9 @@ Fetch all versions of a classification product from Granada on 2020-05-20:
 
 ### Using the API to download all data objects matching a criteria
 
-Download all data since 24. April 2020, saving them to the current working directory:
+Download all data since 1. October 2020, saving them to the current working directory:
 
-`curl "https://cloudnet.fmi.fi/api/files?dateFrom=2020-04-24" | jq '.[]["url"]' | xargs -n1 curl -O`
+`curl "https://cloudnet.fmi.fi/api/files?dateFrom=2020-10-01" | jq '.[]["url"]' | xargs -n1 curl -O`
 
 That is, get the filtered list of file metadata, pick the `url` properties from each of the `File` objects 
 and pass them on to `curl` again to download.
