@@ -253,9 +253,9 @@ repositories of most UNIX-based systems.
 
 ### Multiple sites and products as parameters
 
-Fetch all model and classification products from Mace Head and Granada:
+Fetch all model and classification products from Norunda and Granada:
 
-`curl "https://cloudnet.fmi.fi/api/files?location=macehead&location=granada&product=model&product=classification"`
+`curl "https://cloudnet.fmi.fi/api/files?location=norunda&location=granada&product=model&product=classification"`
 
 
 ### Fetching all versions
