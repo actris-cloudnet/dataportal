@@ -79,7 +79,7 @@ import * as xmlparser from 'express-xml-bodyparser'
   )
   app.get('/api/sites/:siteid', routes.site)
   app.get('/api/uploaded-metadata', routes.listInstrumentsFromMetadata)
-  app.post('/api/collection', express.json(), routes.addCollection)
+  app.post('/api/collection', express.json({limit: '1mb'}), routes.addCollection)
   app.get('/api/collection/:uuid', middleware.validateUuidParam, routes.getCollection)
   app.post('/api/generate-pid', express.json(), routes.generatePid)
 
