@@ -118,14 +118,17 @@
     ></b-pagination>
     <div class="downloadinfo" v-if="listLength > 0 && !simplifiedView">
       <a class="download"
-         v-bind:class="{ disabled: isBusy }"
+         v-bind:class="{ disabled: isBusy || downloadIsBusy }"
          href=""
          @click.prevent="createCollection()">
         Download all
       </a><br>
-      <span class="dlcount" v-bind:class="{ disabled: isBusy }">
+      <span v-if="!downloadFailed" class="dlcount" v-bind:class="{ disabled: isBusy || downloadIsBusy }">
         {{ listLength }} files ({{ humanReadableSize(combinedFileSize(apiResponse)) }})
-      </span><br>
+      </span>
+      <div v-else class="dlcount errormsg">
+        Download failed!
+      </div><br>
     </div>
   </section>
 </template>
@@ -150,6 +153,8 @@ export default class DataSearchResult extends Vue {
   @Prop() isBusy!: boolean
   @Prop() downloadUri!: string
   @Prop() simplifiedView?: boolean
+  downloadIsBusy = false
+  downloadFailed = false
   apiUrl = process.env.VUE_APP_BACKENDURL
 
   sortBy = 'title'
@@ -183,9 +188,14 @@ export default class DataSearchResult extends Vue {
   }
 
   createCollection() {
+    this.downloadIsBusy = true
     axios.post(`${this.apiUrl}collection`, { files: this.apiResponse.map(file => file.uuid)})
       .then(({data}) => this.$router.push({path: `/collection/${data}`}))
-      .catch(console.error)
+      .catch(err => {
+        this.downloadFailed = true
+        console.error(err)
+      })
+      .finally(() => (this.downloadIsBusy = false))
   }
 
   setIcon(product: string) {
