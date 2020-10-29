@@ -1,23 +1,24 @@
-import { File } from '../entity/File'
-import { Site } from '../entity/Site'
-import { Product } from '../entity/Product'
-import {UploadedMetadata, Status, METADATA_ID_LENGTH} from '../entity/UploadedMetadata'
-import { Connection, Repository } from 'typeorm'
-import { Request, Response, RequestHandler } from 'express'
+import {File} from '../entity/File'
+import {Site} from '../entity/Site'
+import {Product} from '../entity/Product'
+import {METADATA_ID_LENGTH, Status, UploadedMetadata} from '../entity/UploadedMetadata'
+import {Connection, Repository} from 'typeorm'
+import {Request, RequestHandler, Response} from 'express'
 import {
   convertToSearchFiles,
   dateToUTCString,
+  fetchAll,
   hideTestDataFromNormalUsers,
   isValidDate,
   linkFile,
-  rowExists, sortByMeasurementDateAsc,
+  rowExists,
+  S3_BAD_HASH_ERROR_CODE,
+  sortByMeasurementDateAsc,
   toArray,
   tomorrow
 } from '.'
-import { join, basename } from 'path'
-import archiver = require('archiver')
-import { createReadStream, promises as fsp, constants as fsconst } from 'graceful-fs'
-import { fetchAll } from '.'
+import {basename, join} from 'path'
+import {constants as fsconst, createReadStream, promises as fsp} from 'graceful-fs'
 import config from '../config'
 import {ReceivedFile} from './metadata2db.js'
 import {Visualization} from '../entity/Visualization'
@@ -30,6 +31,9 @@ import {Collection} from '../entity/Collection'
 import {CollectionResponse} from '../entity/CollectionResponse'
 import axios from 'axios'
 import {validate as validateUuid} from 'uuid'
+import {S3} from 'aws-sdk'
+import {PutObjectRequest} from 'aws-sdk/clients/s3'
+import archiver = require('archiver')
 
 
 export class Routes {
@@ -46,6 +50,8 @@ export class Routes {
     this.uploadedMetadataRepo = this.conn.getRepository(UploadedMetadata)
     this.instrumentRepo = this.conn.getRepository(Instrument)
     this.collectionRepo = this.conn.getRepository(Collection)
+    if (!config.s3) return
+    this.s3 = new S3({...config.s3.connection.rw, ...{logger:console}})
   }
 
   readonly conn: Connection
@@ -59,6 +65,7 @@ export class Routes {
   private uploadedMetadataRepo: Repository<UploadedMetadata>
   private instrumentRepo: Repository<Instrument>
   private collectionRepo: Repository<Collection>
+  private s3!: S3
 
   private augmentFiles = (files: File[]) => {
     return files.map(entry =>
@@ -480,6 +487,36 @@ export class Routes {
       .then(uploadedMetadata =>
         res.send(uploadedMetadata.map(md => new ReducedMetadataResponse(md))))
       .catch(err => {next({status: 500, errors: err})})
+  }
+
+  uploadData: RequestHandler = async (req: Request, res: Response, next) => {
+    const hash = req.params.hash
+    const site = req.params.site
+    try {
+      const md = await this.uploadedMetadataRepo.findOne({hash, site: {id: site}})
+      if (!md) return next({status: 400, error: 'No metadata matches this hash'})
+      if (md.status != Status.CREATED) return res.sendStatus(200) // Already uploaded
+
+      const uploadParams: PutObjectRequest = {
+        Bucket: config.s3.buckets.upload,
+        Key: md.s3key,
+        Body: req,
+        ContentMD5: Buffer.from(hash, 'hex').toString('base64')
+      }
+      try {
+        await this.s3.upload(uploadParams).promise()
+      } catch (err) {
+        if (err.code == S3_BAD_HASH_ERROR_CODE) {
+          return next({status: 400, error: 'Hash does not match file contents'})
+        }
+        console.error(err)
+        next({status: 502, error: `Upstream server error: ${err.code}`})
+      }
+      await this.uploadedMetadataRepo.update({hash}, {status: Status.UPLOADED, updatedAt: new Date() })
+      res.sendStatus(201)
+    } catch(err) {
+      return next({status: 500, error: err})
+    }
   }
 
   updateMetadata: RequestHandler = async (req: Request, res: Response, next) => {

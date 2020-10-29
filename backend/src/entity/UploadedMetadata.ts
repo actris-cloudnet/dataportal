@@ -45,6 +45,10 @@ export class UploadedMetadata {
   @ManyToOne(_ => Instrument, instrument => instrument.uploadedMetadatas)
   instrument!: Instrument
 
+  get s3key() {
+    return `${this.site.id}/${this.hash}/${this.filename}`
+  }
+
   @BeforeInsert()
   setCreatedAt() {
     this.createdAt = new Date()

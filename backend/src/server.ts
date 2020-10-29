@@ -59,8 +59,6 @@ import * as xmlparser from 'express-xml-bodyparser'
   app.get('/api/products', routes.products)
   app.get('/api/instruments', routes.instruments)
 
-  // public (for sites)
-
   // public/internal
   app.get('/api/status', routes.status)
   app.get('/api/products/variables', routes.productVariables)
@@ -83,12 +81,20 @@ import * as xmlparser from 'express-xml-bodyparser'
   app.get('/api/collection/:uuid', middleware.validateUuidParam, routes.getCollection)
   app.post('/api/generate-pid', express.json(), routes.generatePid)
 
+  // protected (for sites)
+  app.post('/upload/metadata', middleware.getSiteNameFromAuth, express.json(), routes.uploadMetadata)
+  app.put('/upload/data/:hash',
+    middleware.validateMD5Param,
+    middleware.getSiteNameFromAuth,
+    express.raw({limit: '100gb'}),
+    routes.uploadData)
+
+
   // private
   app.put('/files/:uuid', routes.putMetadataXml)
   app.get('/metadata/:hash', routes.getMetadata)
   app.get('/metadata', routes.listMetadata)
   app.post('/metadata/:hash', express.json(), routes.updateMetadata)
-  app.put('/metadata/:hash', express.json(), routes.uploadMetadata)
   app.put('/visualizations/:filename', express.json(), routes.putVisualization)
 
   app.use(errorHandler)
