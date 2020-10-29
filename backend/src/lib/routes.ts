@@ -508,7 +508,7 @@ export class Routes {
       }
       await this.uploadedMetadataRepo.update({hashSum}, {status: Status.UPLOADED, updatedAt: new Date() })
       res.sendStatus(201)
-    } catch(err) {
+    } catch (err) {
       return next({status: 500, error: err})
     }
   }

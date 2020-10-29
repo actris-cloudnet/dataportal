@@ -143,7 +143,7 @@ export class Middleware {
     const [authMethod, base64AuthString] = (req.header('authorization') || '').split(' ')
     if (!authMethod || !base64AuthString || authMethod.toLowerCase() != 'basic') return next({status: 400, errors: ['Invalid authentication method']})
     const authString = (Buffer.from(base64AuthString, 'base64')).toString('utf8')
-    const [site, _] = authString.split(':')
+    const [site] = authString.split(':')
     req.params.site = site
     return next()
   }

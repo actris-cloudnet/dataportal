@@ -6,7 +6,6 @@ import {
   JoinTable,
   ManyToMany,
   PrimaryColumn,
-  PrimaryGeneratedColumn
 } from 'typeorm'
 import {File} from './File'
 import { v4 as generateUuidV4 } from 'uuid'
