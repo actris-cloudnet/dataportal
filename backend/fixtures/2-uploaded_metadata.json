@@ -1,9 +1,9 @@
 [
   {
-    "id": "dc460da4ad72c48223",
+    "uuid": "b8e96ee1-d3e1-49ba-a557-c131d56beeab",
     "filename": "file1-dc460da4ad72c48223.LV1",
     "measurementDate": "2020-08-11",
-    "hash": "dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b5",
+    "hashSum": "dc460da4ad72c482231e28e688e01f27",
     "site": "granada",
     "instrument": "mira",
     "status": "created",
@@ -11,10 +11,10 @@
     "updatedAt": "2020-09-28T12:45:21.916Z"
   },
   {
-    "id": "ab460da4ad72c48223",
+    "uuid": "5bc638ba-d38f-4b98-b771-3f16ec59570b",
     "filename": "file3-ab460da4ad72c48223.LV1",
     "measurementDate": "2020-08-12",
-    "hash": "ab460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998ab",
+    "hashSum": "ab460da4ad72c482231e28e688e01f27",
     "site": "bucharest",
     "instrument": "chm15k",
     "status": "processed",
@@ -22,10 +22,10 @@
     "updatedAt": "2020-09-28T12:46:21.916Z"
   },
   {
-    "id": "bb460da4ad72c48223",
+    "uuid": "b4633e6b-a3fc-4d55-b9f4-8033b4896117",
     "filename": "file4-ab460da4ad72c48223.LV1",
     "measurementDate": "2020-08-12",
-    "hash": "bb460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998ab",
+    "hashSum": "bb460da4ad72c482231e28e688e01f27",
     "site": "bucharest",
     "instrument": "chm15k",
     "status": "processed",
@@ -33,10 +33,10 @@
     "updatedAt": "2020-09-28T12:47:21.916Z"
   },
   {
-    "id": "cb460da4ad72c48223",
+    "uuid": "1fa2b98c-e415-4e5e-b73d-87d050e2c61c",
     "filename": "file4-ab460da4ad72c48223.LV1",
     "measurementDate": "2020-08-13",
-    "hash": "cb460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998ab",
+    "hashSum": "cb460da4ad72c482231e28e688e01f27",
     "site": "bucharest",
     "instrument": "mira",
     "status": "uploaded",

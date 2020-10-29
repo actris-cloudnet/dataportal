@@ -22,6 +22,7 @@ import * as xmlparser from 'express-xml-bodyparser'
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, _req, res, next) => {
     console.log(`Error in path ${_req.path}:`, stringify(err))
+    console.error(err)
     if (!res.headersSent) {
       delete err.params
       const status = err.status || 500
@@ -83,18 +84,17 @@ import * as xmlparser from 'express-xml-bodyparser'
 
   // protected (for sites)
   app.post('/upload/metadata', middleware.getSiteNameFromAuth, express.json(), routes.uploadMetadata)
-  app.put('/upload/data/:hash',
+  app.put('/upload/data/:hashSum',
     middleware.validateMD5Param,
     middleware.getSiteNameFromAuth,
     express.raw({limit: '100gb'}),
     routes.uploadData)
+  app.get('/upload/metadata/:hashSum', middleware.validateMD5Param, routes.getMetadata)
 
 
   // private
   app.put('/files/:uuid', routes.putMetadataXml)
-  app.get('/metadata/:hash', routes.getMetadata)
   app.get('/metadata', routes.listMetadata)
-  app.post('/metadata/:hash', express.json(), routes.updateMetadata)
   app.put('/visualizations/:filename', express.json(), routes.putVisualization)
 
   app.use(errorHandler)

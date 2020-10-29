@@ -1,7 +1,8 @@
-import {Column, Entity, ManyToOne, PrimaryColumn} from 'typeorm/index'
+import {Column, Entity, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn} from 'typeorm/index'
 import {Site} from './Site'
 import {Instrument} from './Instrument'
 import {BeforeInsert, BeforeUpdate} from 'typeorm'
+import { v4 as generateUuidV4 } from 'uuid'
 
 export enum Status {
   CREATED = 'created',
@@ -9,16 +10,14 @@ export enum Status {
   PROCESSED = 'processed'
 }
 
-export const METADATA_ID_LENGTH = 18
-
 @Entity()
 export class UploadedMetadata {
 
-  @PrimaryColumn({type: 'varchar', length: METADATA_ID_LENGTH, unique: true})
-  id!: string
+  @PrimaryColumn('uuid')
+  uuid!: string
 
-  @Column({type: 'varchar', length: 64, unique: true})
-  hash!: string
+  @Column({type: 'varchar', length: 32, unique: true})
+  hashSum!: string
 
   @Column()
   filename!: string
@@ -46,7 +45,7 @@ export class UploadedMetadata {
   instrument!: Instrument
 
   get s3key() {
-    return `${this.site.id}/${this.hash}/${this.filename}`
+    return `${this.site.id}/${this.hashSum}/${this.filename}`
   }
 
   @BeforeInsert()
@@ -60,11 +59,11 @@ export class UploadedMetadata {
     this.updatedAt = new Date()
   }
 
-  constructor(id: string, hash: string, filename: string, date: string, site: Site, instrument: Instrument, status: Status) {
-    this.id = id
-    this.hash = hash
+  constructor(hash: string, filename: string, date: string, site: Site, instrument: Instrument, status: Status) {
+    this.uuid = generateUuidV4()
+    this.hashSum = hash
     this.filename = filename
-    this.measurementDate= new Date(date)
+    this.measurementDate = new Date(date)
     this.site = site
     this.instrument = instrument
     this.status = status

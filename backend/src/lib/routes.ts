@@ -1,7 +1,7 @@
 import {File} from '../entity/File'
 import {Site} from '../entity/Site'
 import {Product} from '../entity/Product'
-import {METADATA_ID_LENGTH, Status, UploadedMetadata} from '../entity/UploadedMetadata'
+import {Status, UploadedMetadata} from '../entity/UploadedMetadata'
 import {Connection, Repository} from 'typeorm'
 import {Request, RequestHandler, Response} from 'express'
 import {
@@ -34,6 +34,7 @@ import {validate as validateUuid} from 'uuid'
 import {S3} from 'aws-sdk'
 import {PutObjectRequest} from 'aws-sdk/clients/s3'
 import archiver = require('archiver')
+import validator from 'validator'
 
 
 export class Routes {
@@ -385,35 +386,31 @@ export class Routes {
       const id = req.params.hash
       const body = req.body
       if (!('filename' in body) || !body.filename) {
-        next({ status: 422, errors: ['Request is missing filename']})
+        next({ status: 422, error: 'Request is missing filename'})
         return
       }
-      if (!('hashSum' in body) || body.hashSum.length != 64) {
-        next({ status: 422, errors: ['Request is missing hashSum or hashSum is invalid']})
-        return
-      }
-      if (id != body.hashSum.substr(0, METADATA_ID_LENGTH)) {
-        next({ status: 400, errors: [`Invalid ID. ID must consist of the ${METADATA_ID_LENGTH} first characters of hash`]})
+      if (!('hashSum' in body) || !validator.isMD5(body.hashSum)) {
+        next({ status: 422, error: 'Request is missing hashSum or hashSum is invalid'})
         return
       }
       if (!('measurementDate' in body) || !body.measurementDate || !isValidDate(body.measurementDate)) {
-        next({ status: 422, errors: ['Request is missing measurementDate or measurementDate is invalid']})
+        next({ status: 422, error: 'Request is missing measurementDate or measurementDate is invalid'})
         return
       }
       if (!('instrument' in body) || !body.instrument) {
-        next({ status: 422, errors: ['Request is missing instrument']})
+        next({ status: 422, error: 'Request is missing instrument'})
         return
       }
       if (!('site' in body) || !body.site) {
-        next({ status: 422, errors: ['Request is missing site']})
+        next({ status: 422, error: 'Request is missing site'})
         return
       }
 
       const site = await this.siteRepo.findOne(body.site)
-      if (site == undefined) return next({ status: 422, errors: [ 'Unknown site']})
+      if (site == undefined) return next({ status: 422, error: 'Unknown site'})
 
       const instrument = await this.instrumentRepo.findOne(body.instrument)
-      if (instrument == undefined) return next({ status: 422, errors: [ 'Unknown instrument']})
+      if (instrument == undefined) return next({ status: 422, error: 'Unknown instrument'})
 
       // Remove existing metadata if it's status is created
       const existingCreatedMetadata = await this.uploadedMetadataRepo.createQueryBuilder('uploaded_metadata')
@@ -425,7 +422,6 @@ export class Routes {
       }
 
       const uploadedMetadata = new UploadedMetadata(
-        id,
         body.hashSum,
         body.filename,
         body.measurementDate,
@@ -434,17 +430,15 @@ export class Routes {
         Status.CREATED)
 
       return this.uploadedMetadataRepo.insert(uploadedMetadata)
-        .then(() => res.sendStatus(201))
+        .then(() => res.sendStatus(200))
         .catch(err => rowExists(err)
-          ? res.sendStatus(200)
-          : next({ status: 500, errors: err}))
+          ? next({ status: 409, error: 'File already exists' })
+          : next({ status: 500, error: `Internal server error: ${err.code}`}))
     }
 
     getMetadata: RequestHandler = async (req: Request, res: Response, next) => {
-      if (req.params.hash.length != METADATA_ID_LENGTH)
-        return next({ status: 400, errors: [`ID length must be exactly ${METADATA_ID_LENGTH} characters`]})
-
-      this.uploadedMetadataRepo.findOne(req.params.hash, { relations: ['site', 'instrument'] })
+      const hashSum = req.params.hashSum
+      this.uploadedMetadataRepo.findOne({hashSum}, { relations: ['site', 'instrument'] })
         .then(uploadedMetadata => {
           if (uploadedMetadata == undefined) return next({ status: 404, errors: ['No metadata was found with provided id']})
           res.send(uploadedMetadata)
@@ -490,10 +484,10 @@ export class Routes {
   }
 
   uploadData: RequestHandler = async (req: Request, res: Response, next) => {
-    const hash = req.params.hash
+    const hashSum = req.params.hashSum
     const site = req.params.site
     try {
-      const md = await this.uploadedMetadataRepo.findOne({hash, site: {id: site}})
+      const md = await this.uploadedMetadataRepo.findOne({hashSum, site: {id: site}})
       if (!md) return next({status: 400, error: 'No metadata matches this hash'})
       if (md.status != Status.CREATED) return res.sendStatus(200) // Already uploaded
 
@@ -501,7 +495,7 @@ export class Routes {
         Bucket: config.s3.buckets.upload,
         Key: md.s3key,
         Body: req,
-        ContentMD5: Buffer.from(hash, 'hex').toString('base64')
+        ContentMD5: Buffer.from(hashSum, 'hex').toString('base64')
       }
       try {
         await this.s3.upload(uploadParams).promise()
@@ -512,20 +506,11 @@ export class Routes {
         console.error(err)
         next({status: 502, error: `Upstream server error: ${err.code}`})
       }
-      await this.uploadedMetadataRepo.update({hash}, {status: Status.UPLOADED, updatedAt: new Date() })
+      await this.uploadedMetadataRepo.update({hashSum}, {status: Status.UPLOADED, updatedAt: new Date() })
       res.sendStatus(201)
     } catch(err) {
       return next({status: 500, error: err})
     }
-  }
-
-  updateMetadata: RequestHandler = async (req: Request, res: Response, next) => {
-    this.uploadedMetadataRepo.update({id: req.params.hash}, {...req.body, ...{updatedAt: new Date() }})
-      .then(updatedResults => {
-        if (updatedResults.affected == 0) return next({ status: 404, errors: ['No metadata was found with provided id']})
-        res.send(updatedResults)
-      })
-      .catch(err => { next({ status: 500, errors: err}) })
   }
 
   addCollection: RequestHandler = async (req: Request, res: Response, next) => {
