@@ -38,7 +38,7 @@ describe('Site.vue', () => {
       '93 m',
       '2019-07-16'
     ]
-    mocked(axios.get).mockImplementation(axiosMockWithIndices(0, 8))
+    mocked(axios.get).mockImplementation(axiosMockWithIndices(0, 6))
     wrapper = mountVue(Site)
     await nextTick(1)
     const summaryText = await wrapper.find('#summary').text()
@@ -50,7 +50,7 @@ describe('Site.vue', () => {
       'Lufft CHM15k ceilometer',
       'METEK MIRA-35 cloud radar'
     ]
-    mocked(axios.get).mockImplementation(axiosMockWithIndices(0, 8, resources['uploaded-metadata-public']))
+    mocked(axios.get).mockImplementation(axiosMockWithIndices(0, 7, resources['uploaded-metadata-public']))
     wrapper = mountVue(Site)
     await nextTick(1)
     const instrumentText = await wrapper.find('#instruments').text()
