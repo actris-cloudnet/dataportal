@@ -4,7 +4,8 @@ import {UploadedMetadata} from './UploadedMetadata'
 export enum InstrumentType {
   RADAR = 'radar',
   LIDAR = 'lidar',
-  MWR = 'mwr'
+  MWR = 'mwr',
+  DISDROMETER = 'disdrometer'
 }
 
 @Entity()
