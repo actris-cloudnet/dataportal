@@ -26,18 +26,21 @@ const testConfig = {
   publicDir: 'tests/data/public',
   s3: {
     connection: {rw: {}},
-    buckets: {upload: ''}
+    buckets: {upload: 'cloudnet-upload-test'}
   }
 }
 
-const devConfig = (s3Config: s3Config) => ({
+const devConfig = {
   connectionName: 'default',
   fileServerUrl: 'http://localhost:4000/',
   pidServiceUrl: 'http://localhost:5800/pid/',
   pidServiceTimeoutMs: 2000,
   publicDir: 'public',
-  s3: s3Config
-})
+  s3: {
+    connection: {rw: {}},
+    buckets: {upload: 'cloudnet-upload-dev'}
+  }
+}
 
 let config: Config
 
@@ -49,16 +52,11 @@ case 'production':
     throw new Error('FATAL: Production configuration not found.')
   }
   break
-case 'test':
-  config = testConfig
-  break
-default:
-  try {
-    const s3Config = require('../../../dataportal-production/altocumulus/backend/private/config.s3').default
-    config = devConfig(s3Config)
-  } catch (ex) {
-    throw new Error('FATAL: S3 configuration not found.')
-  }
+  case 'test':
+    config = testConfig
+    break
+  default:
+    config = devConfig
   break
 }
 

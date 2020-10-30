@@ -32,6 +32,7 @@ import {CollectionResponse} from '../entity/CollectionResponse'
 import axios from 'axios'
 import {validate as validateUuid} from 'uuid'
 import {S3} from 'aws-sdk'
+import * as AWSMock from 'mock-aws-s3'
 import {PutObjectRequest} from 'aws-sdk/clients/s3'
 import archiver = require('archiver')
 import validator from 'validator'
@@ -51,8 +52,13 @@ export class Routes {
     this.uploadedMetadataRepo = this.conn.getRepository(UploadedMetadata)
     this.instrumentRepo = this.conn.getRepository(Instrument)
     this.collectionRepo = this.conn.getRepository(Collection)
-    if (!config.s3) return
-    this.s3 = new S3({...config.s3.connection.rw, ...{logger:console}})
+    if (process.env.NODE_ENV == 'production') {
+      this.s3 = new S3(config.s3.connection.rw)
+    } else {
+      AWSMock.config.basePath = 'buckets/'
+      this.s3 = new AWSMock.S3()
+      this.s3.createBucket({Bucket: config.s3.buckets.upload})
+    }
   }
 
   readonly conn: Connection
