@@ -6,8 +6,15 @@ import { stringify } from './lib'
 import * as express from 'express'
 import config from './config'
 import { Middleware } from './lib/middleware'
-import { Routes } from './lib/routes'
 import * as xmlparser from 'express-xml-bodyparser'
+import {FileController} from './routes/file'
+import {ProductController} from './routes/product'
+import {SiteController} from './routes/site'
+import {InstrumentController} from './routes/instrument'
+import {VisualizationController} from './routes/visualization'
+import {MiscRoutes} from './routes/status'
+import {CollectionController} from './routes/collection'
+import {UploadController} from './routes/upload'
 
 (async function() {
   const port = parseInt(process.argv[2])
@@ -18,7 +25,15 @@ import * as xmlparser from 'express-xml-bodyparser'
   const connName = config.connectionName
   const conn = await createConnection(connName)
   const middleware = new Middleware(conn)
-  const routes = new Routes(conn)
+
+  const fileController = new FileController(conn)
+  const siteController = new SiteController(conn)
+  const prodController = new ProductController(conn)
+  const instrController = new InstrumentController(conn)
+  const vizController = new VisualizationController(conn, fileController)
+  const uploadController = new UploadController(conn)
+  const miscRoutes = new MiscRoutes(conn)
+  const collController = new CollectionController(conn)
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, _req, res, next) => {
     console.log(`Error in path ${_req.path}:`, stringify(err))
@@ -39,9 +54,9 @@ import * as xmlparser from 'express-xml-bodyparser'
       next()
     })
 
-    app.get('/allfiles', routes.allfiles)
-    app.get('/allsearch', routes.allsearch)
-    app.get('/allcollections', routes.allcollections)
+    app.get('/allfiles', fileController.allfiles)
+    app.get('/allsearch', fileController.allsearch)
+    app.get('/allcollections', collController.allcollections)
   }
 
   // public (changes to these require changes to API docs)
@@ -49,53 +64,53 @@ import * as xmlparser from 'express-xml-bodyparser'
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
-    routes.search)
+    fileController.getSearch)
   app.get('/api/files',
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
-    routes.files)
-  app.get('/api/files/:uuid', middleware.validateUuidParam, routes.file)
-  app.get('/api/sites', routes.sites)
-  app.get('/api/products', routes.products)
-  app.get('/api/instruments', routes.instruments)
+    fileController.getFiles)
+  app.get('/api/files/:uuid', middleware.validateUuidParam, fileController.getFile)
+  app.get('/api/sites', siteController.sites)
+  app.get('/api/products', prodController.products)
+  app.get('/api/instruments', instrController.instruments)
 
   // public/internal
-  app.get('/api/status', routes.status)
-  app.get('/api/products/variables', routes.productVariables)
-  app.get('/api/download/:uuid', middleware.validateUuidParam, routes.download)
+  app.get('/api/status', miscRoutes.status)
+  app.get('/api/products/variables', prodController.productVariables)
+  app.get('/api/download/:uuid', middleware.validateUuidParam, collController.download)
   app.get('/api/visualizations',
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
-    routes.getVisualization)
-  app.get('/api/visualizations/:uuid', middleware.validateUuidParam, routes.getVisualizationForSourceFile)
+    vizController.getVisualization)
+  app.get('/api/visualizations/:uuid', middleware.validateUuidParam, vizController.getVisualizationForSourceFile)
   app.get('/api/latest-visualization-date',
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
-    routes.getLatestVisualizationDate
+    vizController.getLatestVisualizationDate
   )
-  app.get('/api/sites/:siteid', routes.site)
-  app.get('/api/uploaded-metadata', routes.listInstrumentsFromMetadata)
-  app.post('/api/collection', express.json({limit: '1mb'}), routes.addCollection)
-  app.get('/api/collection/:uuid', middleware.validateUuidParam, routes.getCollection)
-  app.post('/api/generate-pid', express.json(), routes.generatePid)
+  app.get('/api/sites/:siteid', siteController.site)
+  app.get('/api/uploaded-metadata', uploadController.listInstrumentsFromMetadata)
+  app.post('/api/collection', express.json({limit: '1mb'}), collController.postCollection)
+  app.get('/api/collection/:uuid', middleware.validateUuidParam, collController.getCollection)
+  app.post('/api/generate-pid', express.json(), collController.generatePid)
 
   // protected (for sites)
-  app.post('/upload/metadata', middleware.getSiteNameFromAuth, express.json(), routes.uploadMetadata)
+  app.post('/upload/metadata', middleware.getSiteNameFromAuth, express.json(), uploadController.postMetadata)
   app.put('/upload/data/:hashSum',
     middleware.validateMD5Param,
     middleware.getSiteNameFromAuth,
     express.raw({limit: '100gb'}),
-    routes.uploadData)
-  app.get('/upload/metadata/:hashSum', middleware.validateMD5Param, routes.getMetadata)
+    uploadController.putData)
+  app.get('/upload/metadata/:hashSum', middleware.validateMD5Param, uploadController.getMetadata)
 
 
   // private
-  app.put('/files/:uuid', routes.putMetadataXml)
-  app.get('/metadata', routes.listMetadata)
-  app.put('/visualizations/:filename', express.json(), routes.putVisualization)
+  app.put('/files/:uuid', fileController.putFile)
+  app.get('/metadata', uploadController.listMetadata)
+  app.put('/visualizations/:filename', express.json(), vizController.putVisualization)
 
   app.use(errorHandler)
 

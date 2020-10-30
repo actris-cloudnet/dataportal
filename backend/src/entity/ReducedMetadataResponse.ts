@@ -1,10 +1,10 @@
 import {Instrument} from './Instrument'
-import {UploadedMetadata} from './UploadedMetadata'
+import {Upload} from './Upload'
 
 export class ReducedMetadataResponse {
   instrument: Instrument
 
-  constructor(md: UploadedMetadata) {
+  constructor(md: Upload) {
     this.instrument = md.instrument
   }
 }

@@ -11,7 +11,7 @@ export enum Status {
 }
 
 @Entity()
-export class UploadedMetadata {
+export class Upload {
 
   @PrimaryColumn('uuid')
   uuid!: string

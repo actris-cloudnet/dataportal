@@ -1,7 +1,7 @@
 import axios from 'axios'
 import {Connection, createConnection} from 'typeorm/index'
 import {backendPrivateUrl} from '../../lib'
-import {Status} from '../../../src/entity/UploadedMetadata'
+import {Status} from '../../../src/entity/Upload'
 
 let conn: Connection
 let repo: any
@@ -21,7 +21,7 @@ const headers = {'authorization': `Basic ${str2base64('granada:lol')}`}
 
 beforeAll(async () => {
   conn = await createConnection('test')
-  repo = conn.getRepository('uploaded_metadata')
+  repo = conn.getRepository('upload')
   return
 })
 
