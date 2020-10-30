@@ -65,7 +65,7 @@ describe('Site.vue', () => {
     return expect(instrumentText).toContain('not available')
   })
 
-  it.only('fetches instruments from last n days', async () => {
+  it('fetches instruments from last n days', async () => {
     const expectedString = 'The site has submitted data from the following instruments in the last'
     const parseDaysFromInstrumentString = (instrumentString: string) =>
       parseInt(instrumentString.split(expectedString)[1].split(' ')[1])
