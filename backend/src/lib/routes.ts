@@ -389,7 +389,6 @@ export class Routes {
       })
 
     uploadMetadata: RequestHandler = async (req: Request, res: Response, next) => {
-      const id = req.params.hash
       const body = req.body
       if (!('filename' in body) || !body.filename) {
         next({ status: 422, error: 'Request is missing filename'})
@@ -407,22 +406,17 @@ export class Routes {
         next({ status: 422, error: 'Request is missing instrument'})
         return
       }
-      if (!('site' in body) || !body.site) {
-        next({ status: 422, error: 'Request is missing site'})
-        return
-      }
 
-      const site = await this.siteRepo.findOne(body.site)
+      const hashSum = req.body.hashSum
+
+      const site = await this.siteRepo.findOne(req.params.site)
       if (site == undefined) return next({ status: 422, error: 'Unknown site'})
 
       const instrument = await this.instrumentRepo.findOne(body.instrument)
       if (instrument == undefined) return next({ status: 422, error: 'Unknown instrument'})
 
       // Remove existing metadata if it's status is created
-      const existingCreatedMetadata = await this.uploadedMetadataRepo.createQueryBuilder('uploaded_metadata')
-        .where('uploaded_metadata.id = :id', { id })
-        .andWhere('uploaded_metadata.status = :status', { status: Status.CREATED })
-        .getOne()
+      const existingCreatedMetadata = await this.uploadedMetadataRepo.findOne({hashSum, status: Status.CREATED})
       if (existingCreatedMetadata != undefined) {
         await this.uploadedMetadataRepo.remove(existingCreatedMetadata)
       }
@@ -493,7 +487,7 @@ export class Routes {
     const hashSum = req.params.hashSum
     const site = req.params.site
     try {
-      const md = await this.uploadedMetadataRepo.findOne({hashSum, site: {id: site}})
+      const md = await this.uploadedMetadataRepo.findOne({where: {hashSum, site: {id: site}}, relations: ['site']})
       if (!md) return next({status: 400, error: 'No metadata matches this hash'})
       if (md.status != Status.CREATED) return res.sendStatus(200) // Already uploaded
 
