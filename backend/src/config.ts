@@ -52,11 +52,11 @@ case 'production':
     throw new Error('FATAL: Production configuration not found.')
   }
   break
-  case 'test':
-    config = testConfig
-    break
-  default:
-    config = devConfig
+case 'test':
+  config = testConfig
+  break
+default:
+  config = devConfig
   break
 }
 

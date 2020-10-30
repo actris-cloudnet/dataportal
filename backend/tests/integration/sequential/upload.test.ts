@@ -112,7 +112,8 @@ describe('POST /upload/metadata', () => {
   test('responds with 422 on invalid site', async () => {
     let payload = {...validMetadata}
     const badHeaders = {'authorization':  `Basic ${str2base64('espoo:lol')}`}
-    return expect(axios.post(metadataUrl, payload, {headers: badHeaders})).rejects.toMatchObject({ response: { data: { status: 422}}})
+    return expect(axios.post(metadataUrl, payload, {headers: badHeaders})).rejects
+      .toMatchObject({ response: { data: { status: 422}}})
   })
 })
 
