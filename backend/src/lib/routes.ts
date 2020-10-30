@@ -423,7 +423,7 @@ export class Routes {
 
       const uploadedMetadata = new UploadedMetadata(
         body.hashSum,
-        body.filename,
+        basename(body.filename),
         body.measurementDate,
         site,
         instrument,
