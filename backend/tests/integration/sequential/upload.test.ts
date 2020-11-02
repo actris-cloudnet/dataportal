@@ -42,6 +42,7 @@ describe('POST /upload/metadata', () => {
     expect(md).toBeTruthy()
     expect(new Date(md.createdAt).getTime()).toBeGreaterThan(now.getTime())
     expect(new Date(md.updatedAt).getTime()).toEqual(new Date(md.createdAt).getTime())
+    expect(md.status).toEqual(Status.CREATED)
   })
 
   test('responds with 200 on existing hashsum with created status', async () => {
@@ -126,12 +127,17 @@ describe('PUT /upload/data/:checksum', () => {
   })
 
   test('responds with 201 on submitting new file', async () => {
-    return expect(axios.put(validUrl, validFile, {headers})).resolves.toMatchObject({ status: 201})
+    await expect(axios.put(validUrl, validFile, {headers})).resolves.toMatchObject({ status: 201})
+    const md = await repo.findOne({checksum: validMetadata.checksum})
+    expect(new Date(md.updatedAt).getTime()).toBeGreaterThan(new Date(md.createdAt).getTime())
+    expect(md.status).toEqual(Status.UPLOADED)
   })
 
   test('responds with 200 on submitting existing file', async () => {
     await axios.put(validUrl, validFile, {headers})
-    return expect(axios.put(validUrl, validFile, {headers})).resolves.toMatchObject({ status: 200})
+    await expect(axios.put(validUrl, validFile, {headers})).resolves.toMatchObject({ status: 200})
+    const md = await repo.findOne({checksum: validMetadata.checksum})
+    expect(new Date(md.updatedAt).getTime()).toEqual(new Date(md.createdAt).getTime())
   })
 
   test('responds with 400 on invalid hash', async () => {
@@ -150,5 +156,14 @@ describe('PUT /upload/data/:checksum', () => {
   test('responds with 400 on nonexistent hash', async () => {
     const url = `${dataUrl}9a0364b9e99bb480dd25e1f0284c8554`
     return expect(axios.put(url, validFile, {headers})).rejects.toMatchObject({ response: { data: { status: 400}}})
+  })
+
+  test('responds with 400 when submitting data from a wrong site', async () => {
+    const now = new Date()
+    const headers = {'authorization': `Basic ${str2base64('martinlaakso:lol')}`}
+    await expect(axios.put(validUrl, validFile, {headers}))
+      .rejects.toMatchObject({ response: { data: { status: 400}}})
+    const md = await repo.findOne({checksum: validMetadata.checksum})
+    expect(new Date(md.updatedAt).getTime()).toBeLessThan(now.getTime())
   })
 })
