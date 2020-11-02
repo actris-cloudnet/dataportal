@@ -46,7 +46,7 @@ export class CollectionRoutes {
     }
   }
 
-  getCollection: RequestHandler = async (req: Request, res: Response, next) => {
+  collection: RequestHandler = async (req: Request, res: Response, next) => {
     const uuid: string = req.params.uuid
     try {
       const collection = await this.collectionRepo.findOne(uuid, {relations: ['files', 'files.site', 'files.product']})

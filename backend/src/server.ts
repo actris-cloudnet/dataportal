@@ -64,13 +64,13 @@ import {ProductRoutes} from './routes/product'
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
-    fileRoutes.getSearch)
+    fileRoutes.search)
   app.get('/api/files',
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
-    fileRoutes.getFiles)
-  app.get('/api/files/:uuid', middleware.validateUuidParam, fileRoutes.getFile)
+    fileRoutes.files)
+  app.get('/api/files/:uuid', middleware.validateUuidParam, fileRoutes.file)
   app.get('/api/sites', siteRoutes.sites)
   app.get('/api/sites/:siteid', siteRoutes.site)
   app.get('/api/products', prodRoutes.products)
@@ -84,17 +84,17 @@ import {ProductRoutes} from './routes/product'
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
-    vizRoutes.getVisualization)
-  app.get('/api/visualizations/:uuid', middleware.validateUuidParam, vizRoutes.getVisualizationForSourceFile)
+    vizRoutes.visualization)
+  app.get('/api/visualizations/:uuid', middleware.validateUuidParam, vizRoutes.visualizationForSourceFile)
   app.get('/api/latest-visualization-date',
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
-    vizRoutes.getLatestVisualizationDate
+    vizRoutes.latestVisualizationDate
   )
   app.get('/api/uploaded-metadata', uploadRoutes.listInstrumentsFromMetadata)
   app.post('/api/collection', express.json({limit: '1mb'}), collRoutes.postCollection)
-  app.get('/api/collection/:uuid', middleware.validateUuidParam, collRoutes.getCollection)
+  app.get('/api/collection/:uuid', middleware.validateUuidParam, collRoutes.collection)
   app.post('/api/generate-pid', express.json(), collRoutes.generatePid)
 
   // protected (for sites)
@@ -108,7 +108,7 @@ import {ProductRoutes} from './routes/product'
     middleware.getSiteNameFromAuth,
     express.raw({limit: '100gb'}),
     uploadRoutes.putData)
-  app.get('/upload/metadata/:checksum', middleware.validateMD5Param, uploadRoutes.getMetadata)
+  app.get('/upload/metadata/:checksum', middleware.validateMD5Param, uploadRoutes.metadata)
 
 
   // private

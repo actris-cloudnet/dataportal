@@ -45,7 +45,7 @@ export class VisualizationRoutes {
       .catch((err: any) => next({ status: 400, errors: err}))
   }
 
-  getVisualization: RequestHandler = async (req: Request, res: Response, next) => {
+  visualization: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query
     this.visualizationsQueryBuilder(query)
       .getMany()
@@ -55,7 +55,7 @@ export class VisualizationRoutes {
       .catch(err => next({ status: 500, errors: err }))
   }
 
-  getVisualizationForSourceFile: RequestHandler = async (req: Request, res: Response, next) => {
+  visualizationForSourceFile: RequestHandler = async (req: Request, res: Response, next) => {
     const params = req.params
     const qb = this.fileRepo.createQueryBuilder('file')
       .leftJoinAndSelect('file.visualizations', 'visualizations')
@@ -75,7 +75,7 @@ export class VisualizationRoutes {
       .catch(err => next({status: 500, errors: err}))
   }
 
-  getLatestVisualizationDate: RequestHandler = async (req: Request, res: Response, next) => {
+  latestVisualizationDate: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query
     this.visualizationsQueryBuilder(query)
       .getOne()

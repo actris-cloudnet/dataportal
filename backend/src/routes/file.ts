@@ -20,7 +20,7 @@ export class FileRoutes {
   readonly fileRepo: Repository<File>
   readonly fileServerUrl: string
 
-  getFile: RequestHandler = async (req: Request, res: Response, next) => {
+  file: RequestHandler = async (req: Request, res: Response, next) => {
     const qb = this.fileRepo.createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
       .leftJoinAndSelect('file.product', 'product')
@@ -34,7 +34,7 @@ export class FileRoutes {
       .catch(_err => next({ status: 404, errors: ['No files match this UUID'] }))
   }
 
-  getFiles: RequestHandler = async (req: Request, res: Response, next) => {
+  files: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query
     this.filesQueryBuilder(query)
       .getMany()
@@ -46,7 +46,7 @@ export class FileRoutes {
       })
   }
 
-  getSearch: RequestHandler = async (req: Request, res: Response, next) => {
+  search: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query
 
     this.filesQueryBuilder(query)

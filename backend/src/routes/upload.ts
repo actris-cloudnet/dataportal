@@ -73,7 +73,7 @@ export class UploadRoutes {
         : next({ status: 500, error: `Internal server error: ${err.code}`}))
   }
 
-  getMetadata: RequestHandler = async (req: Request, res: Response, next) => {
+  metadata: RequestHandler = async (req: Request, res: Response, next) => {
     const checksum = req.params.checksum
     this.uploadedMetadataRepo.findOne({checksum: checksum}, { relations: ['site', 'instrument'] })
       .then(uploadedMetadata => {
