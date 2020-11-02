@@ -11,7 +11,7 @@ const dataUrl = `${backendPrivateUrl}upload/data/`
 const validMetadata = {
   filename: 'file1.LV1',
   measurementDate: '2020-08-11',
-  hashSum: '9a0364b9e99bb480dd25e1f0284c8555',
+  checksum: '9a0364b9e99bb480dd25e1f0284c8555',
   instrument: 'mira',
   site: 'granada'
 }
@@ -38,7 +38,7 @@ describe('POST /upload/metadata', () => {
   test('inserts new metadata', async () => {
     const now = new Date()
     await expect(axios.post(metadataUrl, validMetadata, {headers})).resolves.toMatchObject({status: 200})
-    const md = await repo.findOne({hashSum: validMetadata.hashSum})
+    const md = await repo.findOne({checksum: validMetadata.checksum})
     expect(md).toBeTruthy()
     expect(new Date(md.createdAt).getTime()).toBeGreaterThan(now.getTime())
     expect(new Date(md.updatedAt).getTime()).toEqual(new Date(md.createdAt).getTime())
@@ -57,7 +57,7 @@ describe('POST /upload/metadata', () => {
         createdAt: now, updatedAt: now}}
     await repo.save(uploadedMetadata)
     await expect(axios.post(metadataUrl, validMetadata, {headers})).rejects.toMatchObject({ response: { data: { status: 409}}})
-    const md = await repo.findOne({hashSum: validMetadata.hashSum})
+    const md = await repo.findOne({checksum: validMetadata.checksum})
     return expect(new Date(md.updatedAt).getTime()).toEqual(now.getTime())
   })
 
@@ -79,15 +79,15 @@ describe('POST /upload/metadata', () => {
     return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
-  test('responds with 422 on missing hashSum', async () => {
+  test('responds with 422 on missing checksum', async () => {
     const payload = {...validMetadata}
     delete payload.measurementDate
     return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
-  test('responds with 422 on invalid hashSum', async () => {
+  test('responds with 422 on invalid checksum', async () => {
     let payload = {...validMetadata}
-    payload.hashSum = '293948'
+    payload.checksum = '293948'
     return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
@@ -117,8 +117,8 @@ describe('POST /upload/metadata', () => {
   })
 })
 
-describe('PUT /upload/data/:hashSum', () => {
-  const validUrl = `${dataUrl}${validMetadata.hashSum}`
+describe('PUT /upload/data/:checksum', () => {
+  const validUrl = `${dataUrl}${validMetadata.checksum}`
   const validFile = 'content'
   beforeEach(async () => {
     await repo.delete({})

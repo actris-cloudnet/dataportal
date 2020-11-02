@@ -44,7 +44,7 @@ export class UploadRoutes {
   postMetadata: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body
 
-    const hashSum = req.body.hashSum
+    const checksum = req.body.checksum
 
     const site = await this.siteRepo.findOne(req.params.site)
     if (site == undefined) return next({ status: 422, error: 'Unknown site'})
@@ -53,13 +53,13 @@ export class UploadRoutes {
     if (instrument == undefined) return next({ status: 422, error: 'Unknown instrument'})
 
     // Remove existing metadata if it's status is created
-    const existingCreatedMetadata = await this.uploadedMetadataRepo.findOne({hashSum, status: Status.CREATED})
+    const existingCreatedMetadata = await this.uploadedMetadataRepo.findOne({checksum: checksum, status: Status.CREATED})
     if (existingCreatedMetadata != undefined) {
       await this.uploadedMetadataRepo.remove(existingCreatedMetadata)
     }
 
     const uploadedMetadata = new Upload(
-      body.hashSum,
+      body.checksum,
       basename(body.filename),
       body.measurementDate,
       site,
@@ -74,8 +74,8 @@ export class UploadRoutes {
   }
 
   getMetadata: RequestHandler = async (req: Request, res: Response, next) => {
-    const hashSum = req.params.hashSum
-    this.uploadedMetadataRepo.findOne({hashSum}, { relations: ['site', 'instrument'] })
+    const checksum = req.params.checksum
+    this.uploadedMetadataRepo.findOne({checksum: checksum}, { relations: ['site', 'instrument'] })
       .then(uploadedMetadata => {
         if (uploadedMetadata == undefined) return next({ status: 404, errors: ['No metadata was found with provided id']})
         res.send(uploadedMetadata)
@@ -99,10 +99,10 @@ export class UploadRoutes {
   }
 
   putData: RequestHandler = async (req: Request, res: Response, next) => {
-    const hashSum = req.params.hashSum
+    const checksum = req.params.checksum
     const site = req.params.site
     try {
-      const md = await this.uploadedMetadataRepo.findOne({where: {hashSum, site: {id: site}}, relations: ['site']})
+      const md = await this.uploadedMetadataRepo.findOne({where: {checksum: checksum, site: {id: site}}, relations: ['site']})
       if (!md) return next({status: 400, error: 'No metadata matches this hash'})
       if (md.status != Status.CREATED) return res.sendStatus(200) // Already uploaded
 
@@ -110,7 +110,7 @@ export class UploadRoutes {
         Bucket: config.s3.buckets.upload,
         Key: md.s3key,
         Body: req,
-        ContentMD5: Buffer.from(hashSum, 'hex').toString('base64')
+        ContentMD5: Buffer.from(checksum, 'hex').toString('base64')
       }
       try {
         await this.s3.upload(uploadParams).promise()
@@ -123,7 +123,7 @@ export class UploadRoutes {
         res.send({status: status, error: `Upstream server error: ${err.code}`})
         next({status: status, error: err})
       }
-      await this.uploadedMetadataRepo.update({hashSum}, {status: Status.UPLOADED, updatedAt: new Date() })
+      await this.uploadedMetadataRepo.update({checksum: checksum}, {status: Status.UPLOADED, updatedAt: new Date() })
       res.sendStatus(201)
     } catch (err) {
       return next({status: 500, error: err})
@@ -159,8 +159,8 @@ export class UploadRoutes {
       next({ status: 422, error: 'Request is missing filename'})
       return
     }
-    if (!('hashSum' in body) || !validator.isMD5(body.hashSum)) {
-      next({ status: 422, error: 'Request is missing hashSum or hashSum is invalid'})
+    if (!('checksum' in body) || !validator.isMD5(body.checksum)) {
+      next({ status: 422, error: 'Request is missing checksum or checksum is invalid'})
       return
     }
     if (!('measurementDate' in body) || !body.measurementDate || !isValidDate(body.measurementDate)) {

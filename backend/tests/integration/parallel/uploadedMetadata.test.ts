@@ -13,10 +13,10 @@ beforeAll(async () => {
   expected = responses[0]
 })
 
-describe('GET /metadata/:hashSum', () => {
+describe('GET /metadata/:checksum', () => {
 
   it('responds with 200 when metadata is found', async () => {
-    const validId = expected.hashSum
+    const validId = expected.checksum
     return expect(axios.get(`${protectedUrl}${validId}`)).resolves.toMatchObject({ status: 200, data: expected })
   })
 

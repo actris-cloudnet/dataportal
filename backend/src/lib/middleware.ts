@@ -30,7 +30,7 @@ export class Middleware {
   }
 
   validateMD5Param: RequestHandler = (req, _res, next) =>
-    validator.isMD5(req.params.hashSum)
+    validator.isMD5(req.params.checksum)
       ? next()
       : next({status: 400, error: 'Checksum is not an MD5 hash'})
 

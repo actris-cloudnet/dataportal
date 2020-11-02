@@ -17,7 +17,7 @@ export class Upload {
   uuid!: string
 
   @Column({type: 'varchar', length: 32, unique: true})
-  hashSum!: string
+  checksum!: string
 
   @Column()
   filename!: string
@@ -45,7 +45,7 @@ export class Upload {
   instrument!: Instrument
 
   get s3key() {
-    return `${this.site.id}/${this.hashSum}/${this.filename}`
+    return `${this.site.id}/${this.checksum}/${this.filename}`
   }
 
   @BeforeInsert()
@@ -59,9 +59,9 @@ export class Upload {
     this.updatedAt = new Date()
   }
 
-  constructor(hash: string, filename: string, date: string, site: Site, instrument: Instrument, status: Status) {
+  constructor(checksum: string, filename: string, date: string, site: Site, instrument: Instrument, status: Status) {
     this.uuid = generateUuidV4()
-    this.hashSum = hash
+    this.checksum = checksum
     this.filename = filename
     this.measurementDate = new Date(date)
     this.site = site

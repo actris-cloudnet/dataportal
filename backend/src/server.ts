@@ -103,12 +103,12 @@ import {ProductRoutes} from './routes/product'
     express.json(),
     uploadRoutes.validateMetadata,
     uploadRoutes.postMetadata)
-  app.put('/upload/data/:hashSum',
+  app.put('/upload/data/:checksum',
     middleware.validateMD5Param,
     middleware.getSiteNameFromAuth,
     express.raw({limit: '100gb'}),
     uploadRoutes.putData)
-  app.get('/upload/metadata/:hashSum', middleware.validateMD5Param, uploadRoutes.getMetadata)
+  app.get('/upload/metadata/:checksum', middleware.validateMD5Param, uploadRoutes.getMetadata)
 
 
   // private
