@@ -1,0 +1,75 @@
+# Data upload API v2 reference
+
+This is the documentation for the HTTP API allowing sites to upload data files for processing and
+publication in the Cloudnet data portal. This documentation is for API v2.
+
+## Uploading files
+
+File upload has two stages: metadata and data upload. Metadata of the file must be uploaded before uploading the file itself.
+
+### Metadata upload
+
+Metadata is uploaded by sending a `POST` request to `https://cloudnet.fmi.fi/upload/metadata/`.
+The route accepts `application/json` type data, and requires HTTP Basic authentication.
+The JSON request should have the following fields:
+
+- `measurementDate`: UTC date in `YYYY-MM-DD` format of the first data point in the file.
+- `instrument`: Instrument name. Must be one of the ids listed in [https://cloudnet.fmi.fi/api/instruments/](https://cloudnet.fmi.fi/api/instruments/).
+- `filename`: Name of the file.
+- `checksum`: An MD5 sum of the file being sent. Used for identifying the file and verifying its integrity. Can be computed by using for instance the `md5sum` UNIX program.
+
+Example JSON for uploading a file named `201030_020000_P06_ZEN.LV1`:
+
+```json
+{
+  "measurementDate": "2020-10-30",
+  "instrument": "rpg-fmcw-94",
+  "filename": "201030_020000_P06_ZEN.LV1",
+  "checksum": "e07910a06a086c83ba41827aa00b26ed"
+}
+```
+
+Example of metadata upload with the `curl` command:
+
+```bash
+curl -u USERNAME:PASSWORD \
+  -H "Content-Type: application/json" \
+  -d '{"measurementDate":"2020-10-30","instrument":"chm15k","filename":"201030_020000_P06_ZEN.LV1","checksum":"e07910a06a086c83ba41827aa00b26ed"}' \
+  https://cloudnet.fmi.fi/upload/metadata/
+```
+Replace `USERNAME` and `PASSWORD` with your station's credentials. You can acquire the credentials by contacting the CLU team at actris-cloudnet-feedback@fmi.fi.
+  
+### Data upload
+
+After uploading the metadata, the file itself is uploaded by sending a `PUT` request to `https://cloudnet.fmi.fi/upload/data/<md5>`, where `<md5>` is replaced by the file's MD5 checksum.
+The body of the request should be the file contents. Use the `Transfer-Encoding: chunked` HTTP header when uploading files.
+
+Example using `curl`:
+
+```bash
+curl -u USERNAME:PASSWORD \
+  -H "Transfer-Encoding: chunked" \
+  --upload-file 201030_020000_P06_ZEN.LV1 \
+  https://cloudnet.fmi.fi/upload/data/e07910a06a086c83ba41827aa00b26ed
+```
+
+## Responses
+
+The following status codes are used by the server to signal the success/failure of the (meta)data upload.
+Each response is accompanied by a message elaborating the cause of the status code.
+
+### Metadata
+- `200 OK`: Metadata creation was successful.
+- `400 Bad Request`: There was a problem in handling the request. Check request headers and content type.
+- `401 Unauthorized`: Problem in authentication. Check credentials.
+- `409 Conflict`: Metadata for this file already exists and the file has been received. Do not attempt file submission.
+- `422 Unprocessable Entity`: Problem in handling metadata body. Check that the metadata JSON is correct.
+
+### Data
+
+- `201 Created`: File was received successfully.
+- `200 OK`: File already exists, doing nothing.
+- `400 Bad Request`: There was a problem in handling the request. Check that the MD5 checksum is valid and corresponds to the file.
+- `401 Unauthorized`: Problem in authentication. Check credentials.
+
+
