@@ -115,9 +115,11 @@ export class UploadRoutes {
       try {
         await this.s3.upload(uploadParams).promise()
       } catch (err) {
+        // Changes to this block require manual testing
         if (err.code == S3_BAD_HASH_ERROR_CODE) {
           return next({status: 400, error: 'Hash does not match file contents'})
         }
+        // End block
         const status = 502
         res.status(status)
         res.send({status: status, error: `Upstream server error: ${err.code}`})

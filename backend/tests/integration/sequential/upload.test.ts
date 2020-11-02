@@ -135,9 +135,10 @@ describe('PUT /upload/data/:checksum', () => {
 
   test('responds with 200 on submitting existing file', async () => {
     await axios.put(validUrl, validFile, {headers})
+    const md1 = await repo.findOne({checksum: validMetadata.checksum})
     await expect(axios.put(validUrl, validFile, {headers})).resolves.toMatchObject({ status: 200})
-    const md = await repo.findOne({checksum: validMetadata.checksum})
-    expect(new Date(md.updatedAt).getTime()).toEqual(new Date(md.createdAt).getTime())
+    const md2 = await repo.findOne({checksum: validMetadata.checksum})
+    expect(new Date(md1.updatedAt).getTime()).toEqual(new Date(md2.updatedAt).getTime())
   })
 
   test('responds with 400 on invalid hash', async () => {
