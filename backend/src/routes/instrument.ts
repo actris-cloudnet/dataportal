@@ -4,7 +4,7 @@ import {fetchAll} from '../lib'
 import {Instrument} from '../entity/Instrument'
 import {Product} from '../entity/Product'
 
-export class InstrumentController {
+export class InstrumentRoutes {
 
   constructor(conn: Connection) {
     this.conn = conn

@@ -7,14 +7,14 @@ import * as express from 'express'
 import config from './config'
 import { Middleware } from './lib/middleware'
 import * as xmlparser from 'express-xml-bodyparser'
-import {FileController} from './routes/file'
-import {ProductController} from './routes/product'
-import {SiteController} from './routes/site'
-import {InstrumentController} from './routes/instrument'
-import {VisualizationController} from './routes/visualization'
-import {MiscRoutes} from './routes/status'
-import {CollectionController} from './routes/collection'
-import {UploadController} from './routes/upload'
+import {MiscRoutes} from './routes/misc'
+import {FileRoutes} from './routes/file'
+import {SiteRoutes} from './routes/site'
+import {CollectionRoutes} from './routes/collection'
+import {UploadRoutes} from './routes/upload'
+import {VisualizationRoutes} from './routes/visualization'
+import {InstrumentRoutes} from './routes/instrument'
+import {ProductRoutes} from './routes/product'
 
 (async function() {
   const port = parseInt(process.argv[2])
@@ -26,19 +26,19 @@ import {UploadController} from './routes/upload'
   const conn = await createConnection(connName)
   const middleware = new Middleware(conn)
 
-  const fileController = new FileController(conn)
-  const siteController = new SiteController(conn)
-  const prodController = new ProductController(conn)
-  const instrController = new InstrumentController(conn)
-  const vizController = new VisualizationController(conn, fileController)
-  const uploadController = new UploadController(conn)
+  const fileRoutes = new FileRoutes(conn)
+  const siteRoutes = new SiteRoutes(conn)
+  const prodRoutes = new ProductRoutes(conn)
+  const instrRoutes = new InstrumentRoutes(conn)
+  const vizRoutes = new VisualizationRoutes(conn, fileRoutes)
+  const uploadRoutes = new UploadRoutes(conn)
   const miscRoutes = new MiscRoutes(conn)
-  const collController = new CollectionController(conn)
+  const collRoutes = new CollectionRoutes(conn)
 
-  const errorHandler: ErrorRequestHandler = (err: RequestError, _req, res, next) => {
-    console.log(`Error in path ${_req.path}:`, stringify(err))
-    console.error(err)
-    if (!res.headersSent) {
+  const errorHandler: ErrorRequestHandler = (err: RequestError | Error, _req, res, next) => {
+    const errorStr = err instanceof Error ? err : stringify(err)
+    console.log(`Error in path ${_req.path}:`, stringify(errorStr))
+    if (!res.headersSent && !(err instanceof Error)) {
       delete err.params
       const status = err.status || 500
       res.status(status)
@@ -54,9 +54,9 @@ import {UploadController} from './routes/upload'
       next()
     })
 
-    app.get('/allfiles', fileController.allfiles)
-    app.get('/allsearch', fileController.allsearch)
-    app.get('/allcollections', collController.allcollections)
+    app.get('/allfiles', fileRoutes.allfiles)
+    app.get('/allsearch', fileRoutes.allsearch)
+    app.get('/allcollections', collRoutes.allcollections)
   }
 
   // public (changes to these require changes to API docs)
@@ -64,53 +64,57 @@ import {UploadController} from './routes/upload'
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
-    fileController.getSearch)
+    fileRoutes.getSearch)
   app.get('/api/files',
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
-    fileController.getFiles)
-  app.get('/api/files/:uuid', middleware.validateUuidParam, fileController.getFile)
-  app.get('/api/sites', siteController.sites)
-  app.get('/api/products', prodController.products)
-  app.get('/api/instruments', instrController.instruments)
+    fileRoutes.getFiles)
+  app.get('/api/files/:uuid', middleware.validateUuidParam, fileRoutes.getFile)
+  app.get('/api/sites', siteRoutes.sites)
+  app.get('/api/sites/:siteid', siteRoutes.site)
+  app.get('/api/products', prodRoutes.products)
+  app.get('/api/instruments', instrRoutes.instruments)
 
   // public/internal
   app.get('/api/status', miscRoutes.status)
-  app.get('/api/products/variables', prodController.productVariables)
-  app.get('/api/download/:uuid', middleware.validateUuidParam, collController.download)
+  app.get('/api/products/variables', prodRoutes.productVariables)
+  app.get('/api/download/:uuid', middleware.validateUuidParam, collRoutes.download)
   app.get('/api/visualizations',
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
-    vizController.getVisualization)
-  app.get('/api/visualizations/:uuid', middleware.validateUuidParam, vizController.getVisualizationForSourceFile)
+    vizRoutes.getVisualization)
+  app.get('/api/visualizations/:uuid', middleware.validateUuidParam, vizRoutes.getVisualizationForSourceFile)
   app.get('/api/latest-visualization-date',
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
-    vizController.getLatestVisualizationDate
+    vizRoutes.getLatestVisualizationDate
   )
-  app.get('/api/sites/:siteid', siteController.site)
-  app.get('/api/uploaded-metadata', uploadController.listInstrumentsFromMetadata)
-  app.post('/api/collection', express.json({limit: '1mb'}), collController.postCollection)
-  app.get('/api/collection/:uuid', middleware.validateUuidParam, collController.getCollection)
-  app.post('/api/generate-pid', express.json(), collController.generatePid)
+  app.get('/api/uploaded-metadata', uploadRoutes.listInstrumentsFromMetadata)
+  app.post('/api/collection', express.json({limit: '1mb'}), collRoutes.postCollection)
+  app.get('/api/collection/:uuid', middleware.validateUuidParam, collRoutes.getCollection)
+  app.post('/api/generate-pid', express.json(), collRoutes.generatePid)
 
   // protected (for sites)
-  app.post('/upload/metadata', middleware.getSiteNameFromAuth, express.json(), uploadController.postMetadata)
+  app.post('/upload/metadata',
+    middleware.getSiteNameFromAuth,
+    express.json(),
+    uploadRoutes.validateMetadata,
+    uploadRoutes.postMetadata)
   app.put('/upload/data/:hashSum',
     middleware.validateMD5Param,
     middleware.getSiteNameFromAuth,
     express.raw({limit: '100gb'}),
-    uploadController.putData)
-  app.get('/upload/metadata/:hashSum', middleware.validateMD5Param, uploadController.getMetadata)
+    uploadRoutes.putData)
+  app.get('/upload/metadata/:hashSum', middleware.validateMD5Param, uploadRoutes.getMetadata)
 
 
   // private
-  app.put('/files/:uuid', fileController.putFile)
-  app.get('/metadata', uploadController.listMetadata)
-  app.put('/visualizations/:filename', express.json(), vizController.putVisualization)
+  app.put('/files/:uuid', fileRoutes.putFile)
+  app.get('/metadata', uploadRoutes.listMetadata)
+  app.put('/visualizations/:filename', express.json(), vizRoutes.putVisualization)
 
   app.use(errorHandler)
 

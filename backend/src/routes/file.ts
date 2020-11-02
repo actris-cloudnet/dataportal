@@ -6,7 +6,7 @@ import {File} from '../entity/File'
 import {convertToSearchFiles, hideTestDataFromNormalUsers, rowExists, sortByMeasurementDateAsc} from '../lib'
 import {ReceivedFile} from '../lib/metadata2db'
 
-export class FileController {
+export class FileRoutes {
 
   constructor(conn: Connection) {
     this.conn = conn

@@ -19,7 +19,7 @@ import validator from 'validator'
 import {Instrument} from '../entity/Instrument'
 
 
-export class UploadController {
+export class UploadRoutes {
 
   constructor(conn: Connection) {
     this.conn = conn
@@ -43,22 +43,6 @@ export class UploadController {
 
   postMetadata: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body
-    if (!('filename' in body) || !body.filename) {
-      next({ status: 422, error: 'Request is missing filename'})
-      return
-    }
-    if (!('hashSum' in body) || !validator.isMD5(body.hashSum)) {
-      next({ status: 422, error: 'Request is missing hashSum or hashSum is invalid'})
-      return
-    }
-    if (!('measurementDate' in body) || !body.measurementDate || !isValidDate(body.measurementDate)) {
-      next({ status: 422, error: 'Request is missing measurementDate or measurementDate is invalid'})
-      return
-    }
-    if (!('instrument' in body) || !body.instrument) {
-      next({ status: 422, error: 'Request is missing instrument'})
-      return
-    }
 
     const hashSum = req.body.hashSum
 
@@ -134,8 +118,10 @@ export class UploadController {
         if (err.code == S3_BAD_HASH_ERROR_CODE) {
           return next({status: 400, error: 'Hash does not match file contents'})
         }
-        console.error(err)
-        next({status: 502, error: `Upstream server error: ${err.code}`})
+        const status = 502
+        res.status(status)
+        res.send({status: status, error: `Upstream server error: ${err.code}`})
+        next({status: status, error: err})
       }
       await this.uploadedMetadataRepo.update({hashSum}, {status: Status.UPLOADED, updatedAt: new Date() })
       res.sendStatus(201)
@@ -164,5 +150,28 @@ export class UploadController {
     if (!onlyDistinctInstruments) qb.orderBy('um.measurementDate', 'ASC')
 
     return Promise.resolve(qb)
+  }
+
+  validateMetadata: RequestHandler = async (req, res, next) => {
+    const body = req.body
+
+    if (!('filename' in body) || !body.filename) {
+      next({ status: 422, error: 'Request is missing filename'})
+      return
+    }
+    if (!('hashSum' in body) || !validator.isMD5(body.hashSum)) {
+      next({ status: 422, error: 'Request is missing hashSum or hashSum is invalid'})
+      return
+    }
+    if (!('measurementDate' in body) || !body.measurementDate || !isValidDate(body.measurementDate)) {
+      next({ status: 422, error: 'Request is missing measurementDate or measurementDate is invalid'})
+      return
+    }
+    if (!('instrument' in body) || !body.instrument) {
+      next({ status: 422, error: 'Request is missing instrument'})
+      return
+    }
+
+    return next()
   }
 }

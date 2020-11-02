@@ -3,7 +3,7 @@ import {Connection} from 'typeorm'
 import {fetchAll} from '../lib'
 import {Product} from '../entity/Product'
 
-export class ProductController {
+export class ProductRoutes {
 
   constructor(conn: Connection) {
     this.conn = conn

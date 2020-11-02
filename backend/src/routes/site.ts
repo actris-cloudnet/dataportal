@@ -3,7 +3,7 @@ import {Connection, Repository} from 'typeorm'
 import {hideTestDataFromNormalUsers} from '../lib'
 import {Site} from '../entity/Site'
 
-export class SiteController {
+export class SiteRoutes {
 
   constructor(conn: Connection) {
     this.conn = conn

@@ -12,7 +12,7 @@ import {constants as fsconst, promises as fsp} from 'fs'
 import archiver = require('archiver')
 import {convertToSearchFiles} from '../lib'
 
-export class CollectionController {
+export class CollectionRoutes {
 
   constructor(conn: Connection) {
     this.conn = conn

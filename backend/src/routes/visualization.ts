@@ -6,13 +6,13 @@ import config from '../config'
 import {Visualization} from '../entity/Visualization'
 import {VisualizationResponse} from '../entity/VisualizationResponse'
 import {LatestVisualizationDateResponse} from '../entity/LatestVisualizationDateResponse'
-import {FileController} from './file'
+import {FileRoutes} from './file'
 import {File} from '../entity/File'
 import {ProductVariable} from '../entity/ProductVariable'
 
-export class VisualizationController {
+export class VisualizationRoutes {
 
-  constructor(conn: Connection, fileController: FileController) {
+  constructor(conn: Connection, fileController: FileRoutes) {
     this.conn = conn
     this.fileRepo = conn.getRepository<File>('file')
     this.visualizationRepo = conn.getRepository<Visualization>('visualization')
