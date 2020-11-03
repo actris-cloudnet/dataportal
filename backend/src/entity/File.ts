@@ -3,6 +3,7 @@ import { NetCDFObject } from './NetCDFObject'
 import { Site } from './Site'
 import { Product } from './Product'
 import {Visualization} from './Visualization'
+import {dateToJSDate} from '../lib'
 
 export enum FilePublicity {
     PUBLIC = 'public',
@@ -94,11 +95,7 @@ export class File {
       // A typeorm hack, see https://github.com/typeorm/typeorm/issues/3903
       if (typeof obj == 'undefined') return
 
-      this.measurementDate = new Date(
-        parseInt(obj.year),
-        parseInt(obj.month) - 1,
-        parseInt(obj.day)
-      )
+      this.measurementDate = dateToJSDate(obj.year, obj.month, obj.day)
       this.title = obj.title
       this.history = obj.history
       this.site = site

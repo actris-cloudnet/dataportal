@@ -4,6 +4,7 @@ import {promises as fsp} from 'fs'
 import {Request} from 'express'
 import {File} from '../entity/File'
 import {SearchFileResponse} from '../entity/SearchFileResponse'
+import config from '../config'
 
 export const S3_BAD_HASH_ERROR_CODE = 'BadDigest'
 
@@ -16,6 +17,14 @@ export const dateToUTCString = (date: string | Date) => {
     .toISOString().replace('T', ' ').replace(/\..*/, '')
 }
 
+export const dateToJSDate = (year: string, month: string, day: string): Date => {
+  return new Date(
+    parseInt(year),
+    parseInt(month) - 1,
+    parseInt(day)
+  )
+}
+
 export const fetchAll = <T>(conn: Connection, schema: Function, options={}): Promise<T[]> => {
   const repo = conn.getRepository(schema)
   return repo.find(options) as Promise<T[]>
@@ -23,18 +32,16 @@ export const fetchAll = <T>(conn: Connection, schema: Function, options={}): Pro
 
 const checkFileExists = async (path: string) => fsp.stat(path)
 
-export function linkFile(filename: string, linkPath: string) {
+export async function linkFile(filename: string, linkPath: string) {
   const resolvedSource = pathResolve(filename)
   const fullLink = join(linkPath, basename(filename))
-  return checkFileExists(resolvedSource)
-    .then(async () => {
-      try {
-        await checkFileExists(fullLink)
-        await fsp.unlink(fullLink)
-      } catch { // if file does not exist do nothing
-      }
-      return fsp.symlink(resolvedSource, fullLink)
-    })
+  await checkFileExists(resolvedSource)
+  try {
+    await checkFileExists(fullLink)
+    await fsp.unlink(fullLink)
+  } catch { // if file does not exist do nothing
+  }
+  return fsp.symlink(resolvedSource, fullLink)
 }
 
 export const isValidDate = (obj: any) => !isNaN(new Date(obj).getDate())
@@ -61,3 +68,6 @@ export const convertToSearchFiles = (files: File[]) =>
 
 export const sortByMeasurementDateAsc = (files: File[]) =>
   files.sort((a, b) => new Date(a.measurementDate).getTime() - new Date(b.measurementDate).getTime())
+
+export const augmentFiles = (files: any[]) =>
+  files.map(entry => ({ ...entry, url: `${config.fileServerUrl}${entry.filename}` }))
