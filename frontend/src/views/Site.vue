@@ -74,6 +74,7 @@ import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse
 import Map from '../components/Map.vue'
 import {ReducedMetadataResponse} from '../../../backend/src/entity/ReducedMetadataResponse'
 import {getIconUrl} from '../lib'
+import {DevMode} from '../lib/DevMode'
 
 @Component({
   components: {Map}
@@ -87,23 +88,25 @@ export default class SiteView extends Vue {
   instruments: ReducedMetadataResponse[] | null = null
   instrumentsFromLastDays = 30
   getIconUrl = getIconUrl
+  devMode = new DevMode()
 
+  payload = {developer: this.devMode.activated}
   created() {
     axios
-      .get(`${this.apiUrl}sites/${this.siteid}`)
+      .get(`${this.apiUrl}sites/${this.siteid}`, {params: this.payload})
       .then(({data}) => (this.response = data))
       .catch(({response}) => {
         this.error = true
         this.response = response
       })
     axios
-      .get(`${this.apiUrl}search/`, {params: { location: this.siteid, limit: 1}})
+      .get(`${this.apiUrl}search/`, {params: {...this.payload, ...{location: this.siteid, limit: 1}}})
       .then(({data}) => (this.latestFile = data[0]))
       .catch()
     const date30daysago = new Date()
     date30daysago.setDate(date30daysago.getDate() - this.instrumentsFromLastDays)
     axios
-      .get(`${this.apiUrl}uploaded-metadata/`, {params: { site: this.siteid, dateFrom: date30daysago}})
+      .get(`${this.apiUrl}uploaded-metadata/`, {params: {...this.payload, ...{ site: this.siteid, dateFrom: date30daysago}}})
       .then(({data}) => (this.instruments = data))
       .catch()
   }
