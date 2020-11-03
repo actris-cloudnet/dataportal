@@ -123,14 +123,14 @@ metadata = {
 
 # Upload metadata
 print(f'Uploading {filename}', end='\t')
-res = requests.post('http://localhost:3000/upload/metadata',
+res = requests.post('https://cloudnet.fmi.fi/upload/metadata',
    json=metadata,
    auth=(username, password))
 
 if res.status_code != 200: # Handle errors
    print(res.text)
 else: # Upload data
-   res = requests.put(f'http://localhost:3000/upload/data/{checksum}',
+   res = requests.put(f'https://cloudnet.fmi.fi/upload/data/{checksum}',
        data=open(filename, 'rb'),
        auth=(username, password))
    print(res.text)
