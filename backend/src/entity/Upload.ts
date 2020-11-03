@@ -1,6 +1,7 @@
 import {Column, Entity, ManyToOne, PrimaryColumn} from 'typeorm/index'
 import {Site} from './Site'
 import {Instrument} from './Instrument'
+import {Model} from './Model'
 import {BeforeInsert, BeforeUpdate} from 'typeorm'
 import { v4 as generateUuidV4 } from 'uuid'
 
@@ -25,12 +26,18 @@ export class Upload {
   @Column({type: 'date'})
   measurementDate!: Date
 
+  @Column()
+  size!: number
+
   @Column({
     type: 'enum',
     enum: Status,
     default: Status.CREATED
   })
   status!: Status
+
+  @Column({ default: false })
+  appendable!: boolean
 
   @Column()
   createdAt!: Date
@@ -44,8 +51,11 @@ export class Upload {
   @ManyToOne(_ => Instrument, instrument => instrument.uploadedMetadatas)
   instrument!: Instrument
 
+  @ManyToOne(_ => Model, model => model.uploadedMetadatas)
+  model!: Model
+
   get s3key() {
-    return `${this.site.id}/${this.checksum}/${this.filename}`
+    return `${this.site.id}/${this.uuid}/${this.filename}`
   }
 
   @BeforeInsert()
@@ -59,13 +69,26 @@ export class Upload {
     this.updatedAt = new Date()
   }
 
-  constructor(checksum: string, filename: string, date: string, site: Site, instrument: Instrument, status: Status) {
+  constructor(
+    checksum: string,
+    filename: string,
+    date: string,
+    site: Site,
+    instrument: Instrument | null,
+    model: Model | null,
+    status: Status
+    ) {
     this.uuid = generateUuidV4()
     this.checksum = checksum
     this.filename = filename
     this.measurementDate = new Date(date)
     this.site = site
-    this.instrument = instrument
+    if (instrument != undefined) {
+      this.instrument = instrument
+    }
+    else if (model != undefined) {
+      this.model = model
+    }
     this.status = status
   }
 }

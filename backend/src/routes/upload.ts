@@ -17,6 +17,7 @@ import * as AWSMock from 'mock-aws-s3'
 import {PutObjectRequest} from 'aws-sdk/clients/s3'
 import validator from 'validator'
 import {Instrument} from '../entity/Instrument'
+import { Model } from '../entity/Model'
 
 
 export class UploadRoutes {
@@ -25,6 +26,7 @@ export class UploadRoutes {
     this.conn = conn
     this.uploadedMetadataRepo = this.conn.getRepository(Upload)
     this.instrumentRepo = this.conn.getRepository(Instrument)
+    this.modelRepo = this.conn.getRepository(Model)
     this.siteRepo = this.conn.getRepository(Site)
     if (process.env.NODE_ENV == 'production') {
       this.s3 = new S3(config.s3.connection.rw)
@@ -40,17 +42,25 @@ export class UploadRoutes {
   readonly instrumentRepo: Repository<Instrument>
   readonly siteRepo: Repository<Site>
   readonly s3: S3
+  readonly modelRepo: Repository<Model>
 
   postMetadata: RequestHandler = async (req: Request, res: Response, next) => {
-    const body = req.body
 
+    let instrument = null
+    let model = null
+    const body = req.body
     const checksum = req.body.checksum
 
     const site = await this.siteRepo.findOne(req.params.site)
     if (site == undefined) return next({ status: 422, error: 'Unknown site'})
 
-    const instrument = await this.instrumentRepo.findOne(body.instrument)
-    if (instrument == undefined) return next({ status: 422, error: 'Unknown instrument'})
+    if ('instrument' in body && body.instrument) {
+      instrument = await this.instrumentRepo.findOne(body.instrument)
+      if (instrument == undefined) return next({ status: 422, error: 'Unknown instrument'})
+    } else if ('model' in body && body.model) {
+      model = await this.modelRepo.findOne(body.model)
+      if (model == undefined) return next({ status: 422, error: 'Unknown model type'})
+    }
 
     // Remove existing metadata if it's status is created
     const existingCreatedMetadata = await this.uploadedMetadataRepo.findOne({checksum: checksum, status: Status.CREATED})
@@ -64,6 +74,7 @@ export class UploadRoutes {
       body.measurementDate,
       site,
       instrument,
+      model,
       Status.CREATED)
 
     return this.uploadedMetadataRepo.insert(uploadedMetadata)
