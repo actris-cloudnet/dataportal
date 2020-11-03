@@ -5,7 +5,7 @@ publication in the Cloudnet data portal. This documentation is for API v2.
 
 ## Uploading files
 
-File upload has two stages: metadata and data upload. Metadata of the file must be uploaded before uploading the file itself.
+File upload has two stages: metadata and data upload. Metadata of the file must be uploaded before uploading the file itself. You can find sample scripts in [examples](#examples).
 
 ### Metadata upload
 
@@ -34,7 +34,7 @@ Example of metadata upload with the `curl` command:
 ```bash
 curl -u USERNAME:PASSWORD \
   -H "Content-Type: application/json" \
-  -d '{"measurementDate":"2020-10-30","instrument":"chm15k","filename":"201030_020000_P06_ZEN.LV1","checksum":"e07910a06a086c83ba41827aa00b26ed"}' \
+  -d '{"measurementDate":"2020-10-30","instrument":"rpg-fmcw-94","filename":"201030_020000_P06_ZEN.LV1","checksum":"e07910a06a086c83ba41827aa00b26ed"}' \
   https://cloudnet.fmi.fi/upload/metadata/
 ```
 Replace `USERNAME` and `PASSWORD` with your station's credentials. You can acquire the credentials by contacting the CLU team at actris-cloudnet-feedback@fmi.fi.
@@ -51,6 +51,90 @@ curl -u USERNAME:PASSWORD \
   -H "Transfer-Encoding: chunked" \
   --upload-file 201030_020000_P06_ZEN.LV1 \
   https://cloudnet.fmi.fi/upload/data/e07910a06a086c83ba41827aa00b26ed
+```
+
+## Examples
+
+Here are some examples for submitting a `chmk15k` file named `file1.nc` from the current working directory.
+
+### Bash
+
+```bash
+FILENAME="file1.nc"
+USERNAME="example"
+PASSWORD="letmein"
+HASH=$(md5sum $FILENAME | cut -f 1 -d " ")
+JSON=$(cat << EOF
+{
+ "measurementDate": "2020-10-30",
+ "instrument": "chm15k",
+ "filename": "$FILENAME",
+ "checksum": "$HASH"
+}
+EOF
+)
+
+# Upload metadata
+printf "Uploading $FILENAME\t"
+MD_RESPONSE=$(curl -s -i -u $USERNAME:$PASSWORD \
+   -H "Content-Type: application/json" \
+   -d "$JSON" \
+   https://cloudnet.fmi.fi/upload/metadata)
+
+STATUS_CODE=$(echo "$MD_RESPONSE" | head -1 | cut -d' ' -f2)
+if test $STATUS_CODE -ne 200 ; then # Handle errors
+   RESPONSE_BODY=$(echo "$MD_RESPONSE" | tail -1)
+   echo "$RESPONSE_BODY"
+else # Upload data
+DATA_RESPONSE=$(curl -s -u $USERNAME:$PASSWORD \
+   -H "Transfer-Encoding: chunked" \
+   --upload-file "$FILENAME" \
+   https://cloudnet.fmi.fi/upload/data/$HASH)
+echo "$DATA_RESPONSE"
+fi
+```
+
+### Python
+
+This example uses the python library `requests` for submitting requests.
+
+```python
+import hashlib
+import requests
+
+filename = 'file1.nc'
+username = 'granada'
+password = 'letmein'
+
+# Compute hash
+md5_hash = hashlib.md5()
+with open(filename, 'rb') as f:
+   for byte_block in iter(lambda: f.read(4096), b""):
+       md5_hash.update(byte_block)
+
+checksum = md5_hash.hexdigest()
+
+metadata = {
+   'filename': filename,
+   'checksum': checksum,
+   'measurementDate': '2020-10-30',
+   'instrument': 'chm15k',
+}
+
+# Upload metadata
+print(f'Uploading {filename}', end='\t')
+res = requests.post('http://localhost:3000/upload/metadata',
+   json=metadata,
+   auth=(username, password))
+
+if res.status_code != 200: # Handle errors
+   print(res.text)
+else: # Upload data
+   res = requests.put(f'http://localhost:3000/upload/data/{checksum}',
+       data=open(filename, 'rb'),
+       auth=(username, password))
+   print(res.text)
+
 ```
 
 ## Responses
