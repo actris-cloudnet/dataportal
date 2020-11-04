@@ -8,6 +8,7 @@ let repo: any
 
 const metadataUrl = `${backendPrivateUrl}upload/metadata/`
 const dataUrl = `${backendPrivateUrl}upload/data/`
+
 const validMetadata = {
   filename: 'file1.LV1',
   measurementDate: '2020-08-11',
@@ -62,6 +63,23 @@ describe('POST /upload/metadata', () => {
     expect(new Date(md.createdAt).getTime()).toBeGreaterThan(now.getTime())
     expect(new Date(md.updatedAt).getTime()).toEqual(new Date(md.createdAt).getTime())
     return expect(md.status).toEqual(Status.CREATED)
+  })
+
+  test('updates metadata with appendable flag', async () => {
+    // new submission with appendable flag
+    const payload = {...validMetadata, appendable: true}
+    await expect(axios.post(metadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
+    const md = await repo.findOne({checksum: payload.checksum})
+    expect(md.checksum).toBe(validMetadata.checksum)
+    const initial_time = new Date(md.updatedAt).getTime()
+    // submit same metadata with different checksum
+    const new_checksum = 'ac5c1f6c923cc8b259c2e22c7b258ee4'
+    const payload_resub = {...payload, checksum: new_checksum}
+    await expect(axios.post(metadataUrl, payload_resub, {headers})).resolves.toMatchObject({status: 200})
+    const md_resub = await repo.findOne(md.uuid)
+    expect(md_resub.checksum).toBe(new_checksum)
+    const resub_time = new Date(md_resub.updatedAt).getTime()
+    return expect(resub_time).toBeGreaterThan(initial_time)
   })
 
   test('responds with 200 on existing hashsum with created status', async () => {
@@ -188,7 +206,7 @@ describe('PUT /upload/data/:checksum', () => {
     return expect(axios.put(validUrl, invalidFile, {headers})).rejects.toMatchObject({ response: { data: { status: 400}}})
   })
 
-   */
+  */
 
   test('responds with 400 on nonexistent hash', async () => {
     const url = `${dataUrl}9a0364b9e99bb480dd25e1f0284c8554`

@@ -12,5 +12,5 @@ export class Model {
 
     @OneToMany(_ => Upload, uploadedMetadata => uploadedMetadata.site)
     uploadedMetadatas!: Upload[]
-  
+
 }

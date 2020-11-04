@@ -47,6 +47,7 @@ export class UploadRoutes {
   postMetadata: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body
     const checksum = req.body.checksum
+    const filename = basename(body.filename)
 
     const site = await this.siteRepo.findOne(req.params.site)
     if (site == undefined) {
@@ -62,7 +63,7 @@ export class UploadRoutes {
     let model = null
     if ('model' in body && body.model) {
       model = await this.modelRepo.findOne(body.model)
-      if (model == undefined) return next({ status: 422, error: 'Unknown model type'})
+      if (model == undefined) return next({ status: 422, error: 'Unknown model'})
     }
 
     // Remove existing metadata if it's status is created
@@ -70,14 +71,34 @@ export class UploadRoutes {
     if (existingCreatedMetadata != undefined) {
       await this.uploadedMetadataRepo.remove(existingCreatedMetadata)
     }
-    
+
+    const appendable = ('appendable' in body && body.appendable == true) ? true : false
+
+    // Keeps the old ID to avoid duplicate files in S3
+    if (appendable) {
+      try {
+        const existingMetadata = await this.uploadedMetadataRepo.findOne({filename: filename, appendable: true})
+        if (existingMetadata != undefined) {
+          await this.uploadedMetadataRepo.update(existingMetadata.uuid, {
+            checksum: body.checksum,
+            updatedAt: new Date(),
+            status: Status.CREATED
+          })
+          return res.sendStatus(200)
+        }
+      } catch (err) {
+        return next({ status: 500, error: err })
+      }
+    }
+
     const uploadedMetadata = new Upload(
       body.checksum,
-      basename(body.filename),
+      filename,
       body.measurementDate,
       site,
       instrument,
       model,
+      appendable,
       Status.CREATED)
 
     return this.uploadedMetadataRepo.insert(uploadedMetadata)

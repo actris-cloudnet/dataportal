@@ -36,7 +36,7 @@ export class Upload {
   })
   status!: Status
 
-  @Column({ default: false })
+  @Column({default: false})
   appendable!: boolean
 
   @Column()
@@ -76,19 +76,17 @@ export class Upload {
     site: Site,
     instrument: Instrument | null,
     model: Model | null,
-    status: Status
-    ) {
+    appendable: boolean,
+    status: Status,
+  ) {
     this.uuid = generateUuidV4()
     this.checksum = checksum
     this.filename = filename
     this.measurementDate = new Date(date)
     this.site = site
-    if (instrument) {
-      this.instrument = instrument
-    }
-    else if (model) {
-      this.model = model
-    }
+    if (instrument) this.instrument = instrument
+    if (model) this.model = model
+    this.appendable = appendable
     this.status = status
   }
 }
