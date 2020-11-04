@@ -45,19 +45,22 @@ export class UploadRoutes {
   readonly modelRepo: Repository<Model>
 
   postMetadata: RequestHandler = async (req: Request, res: Response, next) => {
-
-    let instrument = null
-    let model = null
     const body = req.body
     const checksum = req.body.checksum
 
     const site = await this.siteRepo.findOne(req.params.site)
-    if (site == undefined) return next({ status: 422, error: 'Unknown site'})
+    if (site == undefined) {
+      return next({ status: 422, error: 'Unknown site'})
+    }
 
+    let instrument = null
     if ('instrument' in body && body.instrument) {
       instrument = await this.instrumentRepo.findOne(body.instrument)
       if (instrument == undefined) return next({ status: 422, error: 'Unknown instrument'})
-    } else if ('model' in body && body.model) {
+    }
+
+    let model = null
+    if ('model' in body && body.model) {
       model = await this.modelRepo.findOne(body.model)
       if (model == undefined) return next({ status: 422, error: 'Unknown model type'})
     }
@@ -67,7 +70,7 @@ export class UploadRoutes {
     if (existingCreatedMetadata != undefined) {
       await this.uploadedMetadataRepo.remove(existingCreatedMetadata)
     }
-
+    
     const uploadedMetadata = new Upload(
       body.checksum,
       basename(body.filename),
@@ -86,7 +89,7 @@ export class UploadRoutes {
 
   metadata: RequestHandler = async (req: Request, res: Response, next) => {
     const checksum = req.params.checksum
-    this.uploadedMetadataRepo.findOne({checksum: checksum}, { relations: ['site', 'instrument'] })
+    this.uploadedMetadataRepo.findOne({checksum: checksum}, { relations: ['site', 'instrument', 'model'] })
       .then(uploadedMetadata => {
         if (uploadedMetadata == undefined) return next({ status: 404, errors: ['No metadata was found with provided id']})
         res.send(uploadedMetadata)
@@ -143,7 +146,7 @@ export class UploadRoutes {
     }
   }
 
-  private async metadataQueryBuilder(query: any, onlyDistinctInstruments= false) {
+  private async metadataQueryBuilder(query: any, onlyDistinctInstruments = false) {
     const augmentedQuery: any = {
       site: query.site || (await fetchAll<Site>(this.conn, Site)).map(site => site.id),
       status: query.status || [Status.UPLOADED, Status.CREATED, Status.PROCESSED],
@@ -156,6 +159,7 @@ export class UploadRoutes {
     const qb = this.uploadedMetadataRepo.createQueryBuilder('um')
     qb.leftJoinAndSelect('um.site', 'site')
       .leftJoinAndSelect('um.instrument', 'instrument')
+      .leftJoinAndSelect('um.model', 'model')
     if (onlyDistinctInstruments)  qb.distinctOn(['instrument.id'])
     qb.where('um.measurementDate >= :dateFrom AND um.measurementDate <= :dateTo', augmentedQuery)
       .andWhere('site.id IN (:...site)', augmentedQuery)
@@ -180,11 +184,14 @@ export class UploadRoutes {
       next({ status: 422, error: 'Request is missing measurementDate or measurementDate is invalid'})
       return
     }
-    if (!('instrument' in body) || !body.instrument) {
-      next({ status: 422, error: 'Request is missing instrument'})
+    if (!(('instrument' in body && body.instrument) || ('model' in body && body.model))) {
+      next({ status: 422, error: 'Request is missing either instrument or model'})
       return
     }
-
+    if ('instrument' in body && body.instrument && 'model' in body && body.model) {
+      next({ status: 422, error: 'Request contains both instrument and model'})
+      return
+    }
     return next()
   }
 }

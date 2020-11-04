@@ -95,8 +95,10 @@ export class Middleware {
     const query = req.query as any
     const defaultLocation = async () => (await fetchAll<Site>(this.conn, Site))
       .filter(site => !(req.query.developer === undefined && site.isTestSite))
+      .filter(site => !site.isModelOnlySite)
       .map(site => site.id)
-    const defaultProduct = async () => (await fetchAll<Product>(this.conn, Product)).map(product => product.id)
+    const defaultProduct = async () => (await fetchAll<Product>(this.conn, Product))
+      .map(product => product.id)
     const defaultDateFrom = () => new Date('1970-01-01')
     const defaultDateTo = tomorrow
     const setVolatile = () => ('volatile' in query) ? toArray(query.volatile) : [true, false]

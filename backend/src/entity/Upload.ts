@@ -26,7 +26,7 @@ export class Upload {
   @Column({type: 'date'})
   measurementDate!: Date
 
-  @Column()
+  @Column({nullable: true})
   size!: number
 
   @Column({
@@ -83,10 +83,10 @@ export class Upload {
     this.filename = filename
     this.measurementDate = new Date(date)
     this.site = site
-    if (instrument != undefined) {
+    if (instrument) {
       this.instrument = instrument
     }
-    else if (model != undefined) {
+    else if (model) {
       this.model = model
     }
     this.status = status

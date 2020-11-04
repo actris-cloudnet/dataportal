@@ -1,5 +1,140 @@
 [
   {
+    "uuid": "1bb32743-faf0-4057-9076-ed2e698dcf26",
+    "checksum": "7e82475ecc9d026bebfe07969eee7b6d",
+    "filename": "20100102_granada_ecmwf.nc",
+    "measurementDate": "2010-01-02",
+    "site": {
+      "id": "granada",
+      "humanReadableName": "Granada",
+      "latitude": 37.164,
+      "longitude": -3.605,
+      "altitude": 680,
+      "gaw": "UGR",
+      "country": "Spain",
+      "isTestSite": true,
+      "isModelOnlySite": false
+    },
+    "status": "created",
+    "size": null,
+    "appendable": true,
+    "createdAt": "2020-09-28T12:47:21.916Z",
+    "updatedAt": "2020-09-28T12:47:21.916Z",
+    "instrument": null,
+    "model": {
+      "id": "ecmwf",
+      "optimumOrder": 0
+    }
+  },
+  {
+    "uuid": "1bb32748-faf0-4057-9076-ed2e698dcf31",
+    "checksum": "7e58ba1a02bb8ecdcca06e523f926f76",
+    "filename": "20141205_mace-head_ecmwf.nc",
+    "measurementDate": "2014-12-05",
+    "site": {
+      "id": "macehead",
+      "humanReadableName": "Mace Head",
+      "latitude": 53.326,
+      "longitude": -9.9,
+      "altitude": 16,
+      "gaw": "MHD",
+      "country": "Ireland",
+      "isTestSite": false,
+      "isModelOnlySite": false
+    },
+    "status": "created",
+    "size": null,
+    "appendable": true,
+    "createdAt": "2020-09-28T12:47:21.916Z",
+    "updatedAt": "2020-09-28T12:47:21.916Z",
+    "instrument": null,
+    "model": {
+      "id": "ecmwf",
+      "optimumOrder": 0
+    }
+  },
+  {
+    "uuid": "1bb32744-faf0-4057-9076-ed2e698dcf16",
+    "checksum": "6c453388a98bc38d246dfa2b51f43736",
+    "filename": "20180126_granada_icon-iglo-12-23.nc",
+    "measurementDate": "2018-01-26",
+    "site": {
+      "id": "granada",
+      "humanReadableName": "Granada",
+      "latitude": 37.164,
+      "longitude": -3.605,
+      "altitude": 680,
+      "gaw": "UGR",
+      "country": "Spain",
+      "isTestSite": true,
+      "isModelOnlySite": false
+    },
+    "status": "created",
+    "size": null,
+    "appendable": true,
+    "createdAt": "2020-09-28T12:47:21.916Z",
+    "updatedAt": "2020-09-28T12:47:21.916Z",
+    "instrument": null,
+    "model": {
+      "id": "icon-iglo-12-23",
+      "optimumOrder": 1
+    }
+  },
+  {
+    "uuid": "1bb32742-faf0-4057-9076-ed2e698dcf33",
+    "checksum": "85ad66e6094fbf73f7665d81b6e8dea8",
+    "filename": "20200122_bucharest_icon-iglo-12-23.nc",
+    "measurementDate": "2020-01-22",
+    "site": {
+      "id": "bucharest",
+      "humanReadableName": "Bucharest",
+      "latitude": 44.348,
+      "longitude": 26.029,
+      "altitude": 93,
+      "gaw": "Unknown",
+      "country": "Romania",
+      "isTestSite": false,
+      "isModelOnlySite": false
+    },
+    "status": "processed",
+    "size": 301465,
+    "appendable": true,
+    "createdAt": "2020-09-28T12:47:21.916Z",
+    "updatedAt": "2020-09-28T12:47:21.916Z",
+    "instrument": null,
+    "model": {
+      "id": "icon-iglo-12-23",
+      "optimumOrder": 1
+    }
+  },
+  {
+    "uuid": "1bb32741-faf0-4057-9076-ed2e698dcf32",
+    "checksum": "21598f28bfae2a37406fab9766bc0b47",
+    "filename": "20200126_granada_ecmwf.nc",
+    "measurementDate": "2020-01-26",
+    "site": {
+      "id": "granada",
+      "humanReadableName": "Granada",
+      "latitude": 37.164,
+      "longitude": -3.605,
+      "altitude": 680,
+      "gaw": "UGR",
+      "country": "Spain",
+      "isTestSite": true,
+      "isModelOnlySite": false
+    },
+    "status": "uploaded",
+    "size": 701452,
+    "appendable": false,
+    "createdAt": "2020-09-28T12:47:21.916Z",
+    "updatedAt": "2020-09-28T12:47:21.916Z",
+    "instrument": null,
+    "model": {
+      "id": "ecmwf",
+      "optimumOrder": 0
+    }
+  },
+  {
     "uuid": "b8e96ee1-d3e1-49ba-a557-c131d56beeab",
     "checksum": "dc460da4ad72c482231e28e688e01f27",
     "filename": "file1-dc460da4ad72c48223.LV1",
@@ -12,38 +147,20 @@
       "altitude": 680,
       "gaw": "UGR",
       "country": "Spain",
-      "isTestSite": true
-    },
-    "instrument": {
-      "id": "mira",
-      "type": "radar"
+      "isTestSite": true,
+      "isModelOnlySite": false
     },
     "status": "created",
+    "size": null,
+    "appendable": false,
     "createdAt": "2020-09-28T12:45:21.916Z",
-    "updatedAt": "2020-09-28T12:45:21.916Z"
-  },
-  {
-    "uuid": "5bc638ba-d38f-4b98-b771-3f16ec59570b",
-    "checksum": "ab460da4ad72c482231e28e688e01f27",
-    "filename": "file3-ab460da4ad72c48223.LV1",
-    "measurementDate": "2020-08-12",
-    "site": {
-      "id": "bucharest",
-      "humanReadableName": "Bucharest",
-      "latitude": 44.348,
-      "longitude": 26.029,
-      "altitude": 93,
-      "gaw": "Unknown",
-      "country": "Romania",
-      "isTestSite": false
-    },
+    "updatedAt": "2020-09-28T12:45:21.916Z",
     "instrument": {
-      "id": "chm15k",
-      "type": "lidar"
+      "id": "mira",
+      "type": "radar",
+      "humanReadableName": "METEK MIRA-35 cloud radar"
     },
-    "status": "processed",
-    "createdAt": "2020-09-28T12:46:21.916Z",
-    "updatedAt": "2020-09-28T12:46:21.916Z"
+    "model": null
   },
   {
     "uuid": "b4633e6b-a3fc-4d55-b9f4-8033b4896117",
@@ -58,15 +175,48 @@
       "altitude": 93,
       "gaw": "Unknown",
       "country": "Romania",
-      "isTestSite": false
-    },
-    "instrument": {
-      "id": "chm15k",
-      "type": "lidar"
+      "isTestSite": false,
+      "isModelOnlySite": false
     },
     "status": "processed",
+    "size": 301465,
+    "appendable": false,
     "createdAt": "2020-09-28T12:47:21.916Z",
-    "updatedAt": "2020-09-28T12:47:21.916Z"
+    "updatedAt": "2020-09-28T12:47:21.916Z",
+    "instrument": {
+      "id": "chm15k",
+      "type": "lidar",
+      "humanReadableName": "Lufft CHM15k ceilometer"
+    },
+    "model": null
+  },
+  {
+    "uuid": "5bc638ba-d38f-4b98-b771-3f16ec59570b",
+    "checksum": "ab460da4ad72c482231e28e688e01f27",
+    "filename": "file3-ab460da4ad72c48223.LV1",
+    "measurementDate": "2020-08-12",
+    "site": {
+      "id": "bucharest",
+      "humanReadableName": "Bucharest",
+      "latitude": 44.348,
+      "longitude": 26.029,
+      "altitude": 93,
+      "gaw": "Unknown",
+      "country": "Romania",
+      "isTestSite": false,
+      "isModelOnlySite": false
+    },
+    "status": "processed",
+    "size": 301465,
+    "appendable": false,
+    "createdAt": "2020-09-28T12:46:21.916Z",
+    "updatedAt": "2020-09-28T12:46:21.916Z",
+    "instrument": {
+      "id": "chm15k",
+      "type": "lidar",
+      "humanReadableName": "Lufft CHM15k ceilometer"
+    },
+    "model": null
   },
   {
     "uuid": "1fa2b98c-e415-4e5e-b73d-87d050e2c61c",
@@ -81,14 +231,19 @@
       "altitude": 93,
       "gaw": "Unknown",
       "country": "Romania",
-      "isTestSite": false
-    },
-    "instrument": {
-      "id": "mira",
-      "type": "radar"
+      "isTestSite": false,
+      "isModelOnlySite": false
     },
     "status": "uploaded",
+    "size": 301465,
+    "appendable": false,
     "createdAt": "2020-09-28T12:48:21.916Z",
-    "updatedAt": "2020-09-28T12:48:21.916Z"
+    "updatedAt": "2020-09-28T12:48:21.916Z",
+    "instrument": {
+      "id": "mira",
+      "type": "radar",
+      "humanReadableName": "METEK MIRA-35 cloud radar"
+    },
+    "model": null
   }
 ]
