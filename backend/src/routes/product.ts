@@ -18,7 +18,7 @@ export class ProductRoutes {
   }
 
   productVariables: RequestHandler = async (_req: Request, res: Response, next) => {
-    fetchAll<Product>(this.conn, Product, {relations: ['variables']})
+    fetchAll<Product>(this.conn, Product, {relations: ['variables'], order: {level: 'ASC', id: 'ASC'}})
       .then(result => res.send(result))
       .catch(err => next({ status: 500, errors: err }))
   }
