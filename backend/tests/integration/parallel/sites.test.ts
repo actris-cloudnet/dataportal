@@ -38,5 +38,17 @@ describe('GET /api/sites/:siteid', () => {
     const invalidUrl = `${url}espoo`
     return expect(axios.get(invalidUrl)).rejects.toMatchObject(genResponse(404, {status: 404, errors: ['No sites match this id']}))
   })
+})
 
+describe('GET /api/sites?modelSites', () => {
+
+  const modelSiteUrl = `${backendPublicUrl}sites/?modelSites`
+
+  it('responds with a list of all sites', async () => {
+    const sites = ['macehead', 'hyytiala', 'bucharest', 'granada', 'potenza', 'norunda']
+    const res = await axios.get(modelSiteUrl)
+    expect(res.data).toHaveLength(sites.length)
+    const siteList = res.data.map((d: any) => d.id)
+    return sites.forEach(site => expect(siteList).toContain(site))
+  })
 })
