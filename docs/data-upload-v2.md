@@ -18,6 +18,11 @@ The JSON request should have the following fields:
 - `filename`: Name of the file.
 - `checksum`: An MD5 sum of the file being sent. Used for identifying the file and verifying its integrity. Can be computed by using for instance the `md5sum` UNIX program.
 
+I addition to the mandatory fields above, there is one optional field:
+
+- `appendable`: Setting this to true indicates that the user is going send the same file multiple times, with more data in each submission. Used with instruments that
+append data to a single daily file instead of saving multiple files per day.
+
 Example JSON for uploading a file named `201030_020000_P06_ZEN.LV1`:
 
 ```json
@@ -155,5 +160,4 @@ Each response is accompanied by a message elaborating the cause of the status co
 - `200 OK`: File already exists, doing nothing.
 - `400 Bad Request`: There was a problem in handling the request. Check that the MD5 checksum is valid and corresponds to the file.
 - `401 Unauthorized`: Problem in authentication. Check credentials.
-
 
