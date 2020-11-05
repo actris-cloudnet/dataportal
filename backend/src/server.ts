@@ -15,6 +15,7 @@ import {UploadRoutes} from './routes/upload'
 import {VisualizationRoutes} from './routes/visualization'
 import {InstrumentRoutes} from './routes/instrument'
 import {ProductRoutes} from './routes/product'
+import {ModelRoutes} from './routes/model'
 
 (async function() {
   const port = parseInt(process.argv[2])
@@ -34,6 +35,7 @@ import {ProductRoutes} from './routes/product'
   const uploadRoutes = new UploadRoutes(conn)
   const miscRoutes = new MiscRoutes(conn)
   const collRoutes = new CollectionRoutes(conn)
+  const modelRoutes = new ModelRoutes(conn)
 
   const errorHandler: ErrorRequestHandler = (err: RequestError | Error, _req, res, next) => {
     const errorStr = err instanceof Error ? err : stringify(err)
@@ -75,6 +77,15 @@ import {ProductRoutes} from './routes/product'
   app.get('/api/sites/:siteid', siteRoutes.site)
   app.get('/api/products', prodRoutes.products)
   app.get('/api/instruments', instrRoutes.instruments)
+  app.get('/api/model-files/:uuid',
+    middleware.validateUuidParam,
+    modelRoutes.modelFile)
+  app.get('/api/models', modelRoutes.models)
+  app.get('/api/model-files',
+    middleware.filesValidator,
+    middleware.modelFilesQueryAugmenter,
+    middleware.checkParamsExistInDb,
+    modelRoutes.modelFiles)
 
   // public/internal
   app.get('/api/status', miscRoutes.status)
