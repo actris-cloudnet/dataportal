@@ -7,7 +7,7 @@ import {
   isValidDate,
   rowExists,
   S3_BAD_HASH_ERROR_CODE, toArray,
-  tomorrow
+  tomorrow,
 } from '../lib'
 import {basename} from 'path'
 import config from '../config'
@@ -160,7 +160,8 @@ export class UploadRoutes {
         res.send({status: status, error: `Upstream server error: ${err.code}`})
         next({status: status, error: err})
       }
-      await this.uploadedMetadataRepo.update({checksum: checksum}, {status: Status.UPLOADED, updatedAt: new Date() })
+      const size: any = req.headers['content-length']
+      await this.uploadedMetadataRepo.update({checksum: checksum}, {status: Status.UPLOADED, updatedAt: new Date(), size: size})
       res.sendStatus(201)
     } catch (err) {
       return next({status: 500, error: err})
