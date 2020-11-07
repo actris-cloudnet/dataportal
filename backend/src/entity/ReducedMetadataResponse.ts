@@ -3,11 +3,11 @@ import {Model} from './Model'
 import {Upload} from './Upload'
 
 export class ReducedMetadataResponse {
-  instrument: Instrument | null
-  model: Model | null
+  instrument?: Instrument
+  model?: Model
 
   constructor(md: Upload) {
-    this.instrument = md.instrument
-    this.model = md.model
+    if (md.instrument) this.instrument = md.instrument
+    if (md.model) this.model = md.model
   }
 }
