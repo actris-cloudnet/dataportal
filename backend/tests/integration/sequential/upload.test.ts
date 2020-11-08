@@ -82,6 +82,19 @@ describe('POST /upload/metadata', () => {
     return expect(resub_time).toBeGreaterThan(initial_time)
   })
 
+  test('works with string type appedable flag too', async () => {
+    // new submission with appendable flag
+    const payload = {...validMetadata, appendable: 'TrUe'}
+    await expect(axios.post(metadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
+    const md = await repo.findOne({checksum: payload.checksum})
+    expect(md.checksum).toBe(validMetadata.checksum)
+    const new_checksum = 'ac5c1f6c923cc8b259c2e22c7b258ee4'
+    const payload_resub = {...payload, checksum: new_checksum}
+    await expect(axios.post(metadataUrl, payload_resub, {headers})).resolves.toMatchObject({status: 200})
+    const md_resub = await repo.findOne(md.uuid)
+    expect(md_resub.checksum).toBe(new_checksum)
+  })
+
   test('responds with 200 on existing hashsum with created status', async () => {
     await axios.post(metadataUrl, validMetadata, {headers})
     return expect(axios.post(metadataUrl, validMetadata, {headers})).resolves.toMatchObject({ status: 200})

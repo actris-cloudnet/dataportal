@@ -46,35 +46,33 @@ export class UploadRoutes {
 
   postMetadata: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body
-    const checksum = req.body.checksum
     const filename = basename(body.filename)
+    let instrument, model
 
     const site = await this.siteRepo.findOne(req.params.site)
     if (site == undefined) {
       return next({ status: 422, error: 'Unknown site'})
     }
 
-    let instrument = null
-    if ('instrument' in body && body.instrument) {
+    if ('instrument' in body) {
       instrument = await this.instrumentRepo.findOne(body.instrument)
       if (instrument == undefined) return next({ status: 422, error: 'Unknown instrument'})
     }
 
-    let model = null
-    if ('model' in body && body.model) {
+    if ('model' in body) {
       model = await this.modelRepo.findOne(body.model)
       if (model == undefined) return next({ status: 422, error: 'Unknown model'})
     }
 
-    // Remove existing metadata if it's status is created
-    const existingCreatedMetadata = await this.uploadedMetadataRepo.findOne({checksum: checksum, status: Status.CREATED})
+    // Remove existing metadata if its status is created
+    const existingCreatedMetadata = await this.uploadedMetadataRepo.findOne({checksum: body.checksum, status: Status.CREATED})
     if (existingCreatedMetadata != undefined) {
       await this.uploadedMetadataRepo.remove(existingCreatedMetadata)
     }
 
-    const appendable = ('appendable' in body && body.appendable == true) ? true : false
+    const appendable = ('appendable' in body && body.appendable.toString().toLowerCase() === 'true') ? true : false
 
-    // Keeps the old ID to avoid duplicate files in S3
+    // With appendable flag, keep existing uuid to avoid duplicate files
     if (appendable) {
       try {
         const existingMetadata = await this.uploadedMetadataRepo.findOne({filename: filename, appendable: true})
@@ -96,10 +94,10 @@ export class UploadRoutes {
       filename,
       body.measurementDate,
       site,
-      instrument,
-      model,
       appendable,
-      Status.CREATED)
+      Status.CREATED,
+      instrument,
+      model)
 
     return this.uploadedMetadataRepo.insert(uploadedMetadata)
       .then(() => res.sendStatus(200))

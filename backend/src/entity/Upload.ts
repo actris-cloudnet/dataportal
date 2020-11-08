@@ -74,19 +74,19 @@ export class Upload {
     filename: string,
     date: string,
     site: Site,
-    instrument: Instrument | null,
-    model: Model | null,
     appendable: boolean,
     status: Status,
+    instrument?: Instrument,
+    model?: Model,
   ) {
     this.uuid = generateUuidV4()
     this.checksum = checksum
     this.filename = filename
     this.measurementDate = new Date(date)
     this.site = site
-    if (instrument) this.instrument = instrument
-    if (model) this.model = model
     this.appendable = appendable
     this.status = status
+    if (instrument) this.instrument = instrument
+    if (model) this.model = model
   }
 }
