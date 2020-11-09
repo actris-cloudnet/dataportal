@@ -23,7 +23,7 @@ is_production () {
 }
 
 waitport () {
-    timeout=10
+    timeout=15
     interval=0.5
     i=0
     echo -n "Waiting for port $1... "
