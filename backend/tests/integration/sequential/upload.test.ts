@@ -219,6 +219,12 @@ describe('PUT /upload/data/:checksum', () => {
     return expect(new Date(md1.updatedAt).getTime()).toEqual(new Date(md2.updatedAt).getTime())
   })
 
+  test('saves correct file size', async () => {
+    await axios.put(validUrl, validFile, {headers})
+    const md = await repo.findOne({checksum: validMetadata.checksum})
+    return expect(md.size).toBe(validFile.length)
+  })
+
   test('responds with 400 on invalid hash', async () => {
     const url = `${dataUrl}file1.lv1`
     return expect(axios.put(url, validFile, {headers})).rejects.toMatchObject({ response: { data: { status: 400}}})
