@@ -20,8 +20,8 @@ The JSON request should have the following fields:
 
 I addition to the mandatory fields above, there is one optional field:
 
-- `appendable`: Setting this to true indicates that the user is going send the same file multiple times, with more data in each submission. Used with instruments that
-append data to a single daily file instead of saving multiple files per day.
+- `appendable`: Setting this to true indicates that the user is going send the same file multiple times, with more data in each submission. Used with instruments that append data to a single daily file instead of providing multiple files per day. Default is `false`, when a new version of the submitted 
+file is always saved - even if the same filename has been submitted earlier.
 
 Example JSON for uploading a file named `201030_020000_P06_ZEN.LV1`:
 

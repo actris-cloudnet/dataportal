@@ -52,6 +52,12 @@ export const tomorrow = () => {
   return tomorrow
 }
 
+export const dateNDaysAgo = (n: number) => {
+  const dateInPast = new Date()
+  dateInPast.setDate(dateInPast.getDate() - n)
+  return dateInPast
+}
+
 export const toArray = (obj: string | Array<string>): Array<string> =>
   (typeof obj == 'string') ? [obj] : obj
 

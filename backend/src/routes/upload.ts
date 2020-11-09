@@ -8,6 +8,7 @@ import {
   rowExists,
   S3_BAD_HASH_ERROR_CODE, toArray,
   tomorrow,
+  dateNDaysAgo
 } from '../lib'
 import {basename} from 'path'
 import config from '../config'
@@ -70,13 +71,16 @@ export class UploadRoutes {
       await this.uploadedMetadataRepo.remove(existingCreatedMetadata)
     }
 
-    const appendable = ('appendable' in body && body.appendable.toString().toLowerCase() === 'true') ? true : false
+    const appendable = ('appendable' in body && body.appendable.toString().toLowerCase() === 'true')
 
     // With appendable flag, keep existing uuid to avoid duplicate files
     if (appendable) {
       try {
         const existingMetadata = await this.uploadedMetadataRepo.findOne({filename: filename, appendable: true})
         if (existingMetadata != undefined) {
+          if (existingMetadata.updatedAt < dateNDaysAgo(2)) {
+            next({ status: 409, error: 'File too old to be updated' })
+          }
           await this.uploadedMetadataRepo.update(existingMetadata.uuid, {
             checksum: body.checksum,
             updatedAt: new Date(),
@@ -205,7 +209,7 @@ export class UploadRoutes {
       return
     }
     if (!(('instrument' in body && body.instrument) || ('model' in body && body.model))) {
-      next({ status: 422, error: 'Request is missing either instrument or model'})
+      next({ status: 422, error: 'Request must have either the field "instrument" or the field "model"'})
       return
     }
     if ('instrument' in body && body.instrument && 'model' in body && body.model) {

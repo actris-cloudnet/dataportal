@@ -9,20 +9,21 @@ export class ModelRoutes {
 
   constructor(conn: Connection) {
     this.conn = conn
-    this.uploadRepo = this.conn.getRepository(Upload)}
+    this.uploadRepo = this.conn.getRepository(Upload)
+  }
 
   private conn: Connection
   private uploadRepo: Repository<Upload>
 
   private ModelFilesQueryBuilder(query: any) {
     const qb = this.uploadRepo
-      .createQueryBuilder('file')
-      .leftJoinAndSelect('file.site', 'site')
-      .leftJoinAndSelect('file.model', 'model')
+      .createQueryBuilder('upload')
+      .leftJoinAndSelect('upload.site', 'site')
+      .leftJoinAndSelect('upload.model', 'model')
       .where('site.id IN (:...location)', query)
       .andWhere('model.id IN (:...model)', query)
-    if (query.date != undefined) qb.andWhere('file.measurementDate = :date')
-    qb.orderBy('file.measurementDate', 'DESC')
+    if (query.date != undefined) qb.andWhere('upload.measurementDate = :date')
+    qb.orderBy('upload.measurementDate', 'DESC')
     return qb
   }
 
@@ -37,7 +38,7 @@ export class ModelRoutes {
     try {
       const metadata = await this.uploadRepo.findOne(req.params.uuid, {relations: ['site', 'model']})
       if (metadata == undefined || metadata.model == null) {
-        next({ status: 404, errors: ['No model file match this UUID']})
+        next({ status: 404, errors: ['No model file matches this UUID']})
       }
       res.send(augmentFiles([metadata])[0])
     } catch (err) {
