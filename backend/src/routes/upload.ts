@@ -162,12 +162,19 @@ export class UploadRoutes {
         res.send({status: status, error: `Upstream server error: ${err.code}`})
         next({status: status, error: err})
       }
-      const size: any = req.headers['content-length']
+      const size = await this.getSizeOfS3Obj(uploadParams)
       await this.uploadedMetadataRepo.update({checksum: checksum}, {status: Status.UPLOADED, updatedAt: new Date(), size: size})
       res.sendStatus(201)
     } catch (err) {
       return next({status: 500, error: err})
     }
+  }
+
+  private async getSizeOfS3Obj(params: PutObjectRequest) {
+    return this.s3.headObject({ Key: params.Key, Bucket: params.Bucket })
+      .promise()
+      .then(res => res.ContentLength)
+      .catch(err => { throw err })
   }
 
   private async metadataQueryBuilder(query: any, onlyDistinctInstruments = false) {
