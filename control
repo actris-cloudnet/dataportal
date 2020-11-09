@@ -26,6 +26,7 @@ waitport () {
     timeout=10
     interval=0.5
     i=0
+    echo -n "Waiting for port $1... "
     while ! nc -z localhost $1; do
         if [[ "$i" -ge $timeout ]]; then
             echo "Timeout"
@@ -34,6 +35,7 @@ waitport () {
         sleep $interval
         i=$((i+$interval))
     done
+    echo "OK"
     return 0
 }
 
