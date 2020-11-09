@@ -61,11 +61,20 @@ jobs:
     - name: Checkout  
       uses: actions/checkout@v2
     - name: Install project
-      run: ./control ci
+      run: |
+          . ~/.nvm/nvm.sh
+          nvm use v10
+          ./control ci
     - name: Build project
-      run: cd frontend && npx vue-cli-service build --mode e2e && cd ..
+      run: |
+          . ~/.nvm/nvm.sh
+          nvm use v10
+          cd frontend && npx vue-cli-service build --mode e2e && cd ..
     - name: Start backend and frontend
-      run: ./control start
+      run: |
+          . ~/.nvm/nvm.sh
+          nvm use v10
+          ./control start
     - name: Run frontend unit tests
       run: |
           . ~/.nvm/nvm.sh
@@ -77,9 +86,17 @@ jobs:
           nvm use v10
           cd backend && npm test && cd ..
     - name: Run e2e tests
-      run: cd backend && npm run e2e-test && cd ..
+      run: |
+          cd backend
+          . ~/.nvm/nvm.sh
+          nvm use v10
+          npm run e2e-test
+          cd ..
     - name: Run selenium tests
-      run: ./control selenium-test
+      run: |
+        . ~/.nvm/nvm.sh
+        nvm use v10
+        ./control selenium-test
     - name: Print logs
       if: always()
       run: cat */tests/all.log
