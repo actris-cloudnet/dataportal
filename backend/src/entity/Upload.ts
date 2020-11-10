@@ -37,7 +37,7 @@ export class Upload {
   status!: Status
 
   @Column({default: false})
-  appendable!: boolean
+  allowUpdate!: boolean
 
   @Column()
   createdAt!: Date
@@ -74,7 +74,7 @@ export class Upload {
     filename: string,
     date: string,
     site: Site,
-    appendable: boolean,
+    allowUpdate: boolean,
     status: Status,
     instrument?: Instrument,
     model?: Model,
@@ -84,7 +84,7 @@ export class Upload {
     this.filename = filename
     this.measurementDate = new Date(date)
     this.site = site
-    this.appendable = appendable
+    this.allowUpdate = allowUpdate
     this.status = status
     if (instrument) this.instrument = instrument
     if (model) this.model = model

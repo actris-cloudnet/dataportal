@@ -65,9 +65,9 @@ describe('POST /upload/metadata', () => {
     return expect(md.status).toEqual(Status.CREATED)
   })
 
-  test('updates metadata with appendable flag', async () => {
-    // new submission with appendable flag
-    const payload = {...validMetadata, appendable: true}
+  test('updates metadata with allowUpdate flag', async () => {
+    // new submission with allowUpdate flag
+    const payload = {...validMetadata, allowUpdate: true}
     await expect(axios.post(metadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
     const md = await repo.findOne({checksum: payload.checksum})
     expect(md.checksum).toBe(validMetadata.checksum)
@@ -82,9 +82,9 @@ describe('POST /upload/metadata', () => {
     return expect(resub_time).toBeGreaterThan(initial_time)
   })
 
-  test('works with string type appedable flag too', async () => {
-    // new submission with appendable flag
-    const payload = {...validMetadata, appendable: 'TrUe'}
+  test('works with string type allowUpdate flag too', async () => {
+    // new submission with allowUpdate flag
+    const payload = {...validMetadata, allowUpdate: 'TrUe'}
     await expect(axios.post(metadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
     const md = await repo.findOne({checksum: payload.checksum})
     expect(md.checksum).toBe(validMetadata.checksum)
@@ -96,8 +96,8 @@ describe('POST /upload/metadata', () => {
   })
 
   test('refuses to update file after certain time period', async () => {
-    // new submission with appendable flag
-    const payload = {...validMetadata, appendable: 'TrUe'}
+    // new submission with allowUpdate flag
+    const payload = {...validMetadata, allowUpdate: 'TrUe'}
     await expect(axios.post(metadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
     const md = await repo.findOne({checksum: payload.checksum})
     await repo.update(md.uuid, {updatedAt: '2020-11-07'})

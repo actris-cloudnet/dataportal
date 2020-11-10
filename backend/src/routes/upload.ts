@@ -71,12 +71,12 @@ export class UploadRoutes {
       await this.uploadedMetadataRepo.remove(existingCreatedMetadata)
     }
 
-    const appendable = ('appendable' in body && body.appendable.toString().toLowerCase() === 'true')
+    const allowUpdate = ('allowUpdate' in body && body.allowUpdate.toString().toLowerCase() === 'true')
 
-    // With appendable flag, keep existing uuid to avoid duplicate files
-    if (appendable) {
+    // With allowUpdate flag, keep existing uuid to avoid duplicate files
+    if (allowUpdate) {
       try {
-        const existingMetadata = await this.uploadedMetadataRepo.findOne({filename: filename, appendable: true})
+        const existingMetadata = await this.uploadedMetadataRepo.findOne({filename: filename, allowUpdate: true})
         if (existingMetadata != undefined) {
           if (existingMetadata.updatedAt < dateNDaysAgo(2)) {
             next({ status: 409, error: 'File too old to be updated' })
@@ -98,7 +98,7 @@ export class UploadRoutes {
       filename,
       body.measurementDate,
       site,
-      appendable,
+      allowUpdate,
       Status.CREATED,
       instrument,
       model)
