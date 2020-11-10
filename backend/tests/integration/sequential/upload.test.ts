@@ -103,7 +103,7 @@ describe('POST /upload/metadata', () => {
     await repo.update(md.uuid, {updatedAt: '2020-11-07'})
     const new_checksum = 'ac5c1f6c923cc8b259c2e22c7b258ee4'
     const payload_resub = {...payload, checksum: new_checksum}
-    await expect(axios.post(metadataUrl, payload_resub, {headers})).rejects.toMatchObject({ response: { data: { status: 409}}})
+    await expect(axios.post(metadataUrl, payload_resub, {headers})).rejects.toMatchObject({ response: { status: 409}})
   })
 
   test('responds with 200 on existing hashsum with created status', async () => {
@@ -118,7 +118,7 @@ describe('POST /upload/metadata', () => {
       ...{status: Status.UPLOADED, uuid: 'ca2b8ff0-c7e4-427f-894a-e6cf1ff2b8d1',
         createdAt: now, updatedAt: now}}
     await repo.save(uploadedMetadata)
-    await expect(axios.post(metadataUrl, validMetadata, {headers})).rejects.toMatchObject({ response: { data: { status: 409}}})
+    await expect(axios.post(metadataUrl, validMetadata, {headers})).rejects.toMatchObject({ response: { status: 409}})
     const md = await repo.findOne({checksum: validMetadata.checksum})
     return expect(new Date(md.updatedAt).getTime()).toEqual(now.getTime())
   })
@@ -126,73 +126,73 @@ describe('POST /upload/metadata', () => {
   test('responds with 422 on missing filename', async () => {
     const payload = {...validMetadata}
     delete payload.filename
-    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { data: { status: 422}}})
+    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
   })
 
   test('responds with 422 on missing measurementDate', async () => {
     const payload = {...validMetadata}
     delete payload.measurementDate
-    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { data: { status: 422}}})
+    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
   })
 
   test('responds with 422 on invalid measurementDate', async () => {
     let payload = {...validMetadata}
     payload.measurementDate = 'July'
-    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { data: { status: 422}}})
+    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
   })
 
   test('responds with 422 on missing checksum', async () => {
     const payload = {...validMetadata}
     delete payload.measurementDate
-    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { data: { status: 422}}})
+    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
   })
 
   test('responds with 422 on invalid checksum', async () => {
     let payload = {...validMetadata}
     payload.checksum = '293948'
-    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { data: { status: 422}}})
+    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
   })
 
   test('responds with 422 on missing instrument', async () => {
     const payload = {...validMetadata}
     delete payload.instrument
-    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { data: { status: 422}}})
+    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
   })
 
   test('responds with 422 on invalid instrument', async () => {
     let payload = {...validMetadata}
     payload.instrument = 'kukko'
-    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { data: { status: 422}}})
+    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
   })
 
   test('responds with 422 on missing model', async () => {
     const payload = {...validModelMetadata}
     delete payload.model
-    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { data: { status: 422}}})
+    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
   })
 
   test('responds with 422 on invalid model', async () => {
     let payload = {...validModelMetadata}
     payload.model = 'kukko'
-    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { data: { status: 422}}})
+    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
   })
 
   test('responds with 422 on both model and instrument defined', async () => {
     let payload = {...validModelMetadata, instrument: 'chm15k'}
-    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { data: { status: 422}}})
+    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
   })
 
   test('responds with 400 on missing site', async () => {
     let payload = {...validMetadata}
     delete payload.site
-    return expect(axios.post(metadataUrl, payload)).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.post(metadataUrl, payload)).rejects.toMatchObject({ response: { status: 400}})
   })
 
   test('responds with 422 on invalid site', async () => {
     let payload = {...validMetadata}
     const badHeaders = {'authorization':  `Basic ${str2base64('espoo:lol')}`}
     return expect(axios.post(metadataUrl, payload, {headers: badHeaders})).rejects
-      .toMatchObject({ response: { data: { status: 422}}})
+      .toMatchObject({ response: { status: 422}})
   })
 })
 
@@ -227,7 +227,7 @@ describe('PUT /upload/data/:checksum', () => {
 
   test('responds with 400 on invalid hash', async () => {
     const url = `${dataUrl}file1.lv1`
-    return expect(axios.put(url, validFile, {headers})).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.put(url, validFile, {headers})).rejects.toMatchObject({ response: { status: 400}})
   })
 
   /*  mock-aws-s3 does not check hashes, so this test will fail. Must test manually.
@@ -240,7 +240,7 @@ describe('PUT /upload/data/:checksum', () => {
 
   test('responds with 400 on nonexistent hash', async () => {
     const url = `${dataUrl}9a0364b9e99bb480dd25e1f0284c8554`
-    return expect(axios.put(url, validFile, {headers})).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.put(url, validFile, {headers})).rejects.toMatchObject({ response: { status: 400}})
   })
 
   test('responds with 400 when submitting data from a wrong site', async () => {

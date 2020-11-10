@@ -22,12 +22,12 @@ describe('GET /upload/metadata/:checksum', () => {
 
   it('responds with 400 when hash is invalid', async () => {
     const invalidHash = '123456789012345678'
-    return expect(axios.get(`${protectedUrl}${invalidHash}`)).rejects.toMatchObject({ response: { data: { status: 400 }}})
+    return expect(axios.get(`${protectedUrl}${invalidHash}`)).rejects.toMatchObject({ response: { status: 400 }})
   })
 
   it('responds with 404 when hash is not found', async () => {
     const invalidHash = '12345678901234567892123456789012'
-    return expect(axios.get(`${protectedUrl}${invalidHash}`)).rejects.toMatchObject({ response: { data: { status: 404 }}})
+    return expect(axios.get(`${protectedUrl}${invalidHash}`)).rejects.toMatchObject({ response: { status: 404 }})
   })
 
 })

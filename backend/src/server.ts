@@ -44,7 +44,11 @@ import {ModelRoutes} from './routes/model'
       delete err.params
       const status = err.status || 500
       res.status(status)
-      res.send(err)
+      if (err.plaintext) {
+        res.send(err.errors)
+      } else {
+        res.send(err)
+      }
     }
     next()
   }

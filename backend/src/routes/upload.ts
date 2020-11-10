@@ -52,17 +52,17 @@ export class UploadRoutes {
 
     const site = await this.siteRepo.findOne(req.params.site)
     if (site == undefined) {
-      return next({ status: 422, error: 'Unknown site'})
+      return next({ status: 422, errors: 'Unknown site'})
     }
 
     if ('instrument' in body) {
       instrument = await this.instrumentRepo.findOne(body.instrument)
-      if (instrument == undefined) return next({ status: 422, error: 'Unknown instrument'})
+      if (instrument == undefined) return next({ status: 422, errors: 'Unknown instrument'})
     }
 
     if ('model' in body) {
       model = await this.modelRepo.findOne(body.model)
-      if (model == undefined) return next({ status: 422, error: 'Unknown model'})
+      if (model == undefined) return next({ status: 422, errors: 'Unknown model'})
     }
 
     // Remove existing metadata if its status is created
@@ -79,7 +79,7 @@ export class UploadRoutes {
         const existingMetadata = await this.uploadedMetadataRepo.findOne({filename: filename, allowUpdate: true})
         if (existingMetadata != undefined) {
           if (existingMetadata.updatedAt < dateNDaysAgo(config.allowUpdateLimitDays)) {
-            next({ status: 409, error: 'File too old to be updated' })
+            next({ status: 409, errors: 'File too old to be updated' })
           }
           await this.uploadedMetadataRepo.update(existingMetadata.uuid, {
             checksum: body.checksum,
@@ -89,7 +89,7 @@ export class UploadRoutes {
           return res.sendStatus(200)
         }
       } catch (err) {
-        return next({ status: 500, error: err })
+        return next({ status: 500, errors: err })
       }
     }
 
@@ -106,15 +106,15 @@ export class UploadRoutes {
     return this.uploadedMetadataRepo.insert(uploadedMetadata)
       .then(() => res.sendStatus(200))
       .catch(err => rowExists(err)
-        ? next({ status: 409, error: 'File already exists' })
-        : next({ status: 500, error: `Internal server error: ${err.code}`}))
+        ? next({ status: 409, errors: 'File already exists' })
+        : next({ status: 500, errors: `Internal server error: ${err.code}`}))
   }
 
   metadata: RequestHandler = async (req: Request, res: Response, next) => {
     const checksum = req.params.checksum
     this.uploadedMetadataRepo.findOne({checksum: checksum}, { relations: ['site', 'instrument', 'model'] })
       .then(uploadedMetadata => {
-        if (uploadedMetadata == undefined) return next({ status: 404, errors: ['No metadata was found with provided id']})
+        if (uploadedMetadata == undefined) return next({ status: 404, errors: 'No metadata was found with provided id'})
         res.send(uploadedMetadata)
       })
       .catch(err => next({ status: 500, errors: err}))
@@ -140,7 +140,7 @@ export class UploadRoutes {
     const site = req.params.site
     try {
       const md = await this.uploadedMetadataRepo.findOne({where: {checksum: checksum, site: {id: site}}, relations: ['site']})
-      if (!md) return next({status: 400, error: 'No metadata matches this hash'})
+      if (!md) return next({status: 400, errors: 'No metadata matches this hash'})
       if (md.status != Status.CREATED) return res.sendStatus(200) // Already uploaded
 
       const uploadParams: PutObjectRequest = {
@@ -154,19 +154,19 @@ export class UploadRoutes {
       } catch (err) {
         // Changes to this block require manual testing
         if (err.code == S3_BAD_HASH_ERROR_CODE) {
-          return next({status: 400, error: 'Hash does not match file contents'})
+          return next({status: 400, errors: 'Hash does not match file contents'})
         }
         // End block
         const status = 502
         res.status(status)
-        res.send({status: status, error: `Upstream server error: ${err.code}`})
-        next({status: status, error: err})
+        res.send({status: status, errors: `Upstream server error: ${err.code}`})
+        next({status: status, errors: err})
       }
       const size = await this.getSizeOfS3Obj(uploadParams)
       await this.uploadedMetadataRepo.update({checksum: checksum}, {status: Status.UPLOADED, updatedAt: new Date(), size: size})
       res.sendStatus(201)
     } catch (err) {
-      return next({status: 500, error: err})
+      return next({status: 500, errors: err})
     }
   }
 
@@ -204,23 +204,23 @@ export class UploadRoutes {
     const body = req.body
 
     if (!('filename' in body) || !body.filename) {
-      next({ status: 422, error: 'Request is missing filename'})
+      next({ status: 422, errors: 'Request is missing filename'})
       return
     }
     if (!('checksum' in body) || !validator.isMD5(body.checksum)) {
-      next({ status: 422, error: 'Request is missing checksum or checksum is invalid'})
+      next({ status: 422, errors: 'Request is missing checksum or checksum is invalid'})
       return
     }
     if (!('measurementDate' in body) || !body.measurementDate || !isValidDate(body.measurementDate)) {
-      next({ status: 422, error: 'Request is missing measurementDate or measurementDate is invalid'})
+      next({ status: 422, errors: 'Request is missing measurementDate or measurementDate is invalid'})
       return
     }
     if (!(('instrument' in body && body.instrument) || ('model' in body && body.model))) {
-      next({ status: 422, error: 'Request must have either the field "instrument" or the field "model"'})
+      next({ status: 422, errors: 'Request must have either the field "instrument" or the field "model"'})
       return
     }
     if ('instrument' in body && body.instrument && 'model' in body && body.model) {
-      next({ status: 422, error: 'Request contains both instrument and model'})
+      next({ status: 422, errors: 'Request contains both instrument and model'})
       return
     }
     return next()
