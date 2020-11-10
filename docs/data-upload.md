@@ -1,5 +1,7 @@
 # Data upload API reference
 
+## This version of the API is no longer in use. Please consult the [current API documentation](https://actris-cloudnet.github.io/dataportal/data-upload-v2).
+
 This is the documentation for the API allowing sites to upload data files for processing and
 publication in the Cloudnet data portal. This documentation is for API v1.
 
