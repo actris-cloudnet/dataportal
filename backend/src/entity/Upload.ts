@@ -26,7 +26,7 @@ export class Upload {
   @Column({type: 'date'})
   measurementDate!: Date
 
-  @Column({nullable: true})
+  @Column({default: 0})
   size!: number
 
   @Column({
