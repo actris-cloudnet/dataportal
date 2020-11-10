@@ -6,7 +6,8 @@ interface Config {
   pidServiceUrl: string
   pidServiceTimeoutMs: number
   publicDir: string
-  s3: s3Config
+  s3: s3Config,
+  allowUpdateLimitDays: number
 }
 
 interface s3Config {
@@ -27,7 +28,8 @@ const testConfig = {
   s3: {
     connection: {rw: {}},
     buckets: {upload: 'cloudnet-upload-test'}
-  }
+  },
+  allowUpdateLimitDays: 2
 }
 
 const devConfig = {
@@ -39,7 +41,8 @@ const devConfig = {
   s3: {
     connection: {rw: {}},
     buckets: {upload: 'cloudnet-upload-dev'}
-  }
+  },
+  allowUpdateLimitDays: 2
 }
 
 let config: Config

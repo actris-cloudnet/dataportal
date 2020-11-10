@@ -78,7 +78,7 @@ export class UploadRoutes {
       try {
         const existingMetadata = await this.uploadedMetadataRepo.findOne({filename: filename, allowUpdate: true})
         if (existingMetadata != undefined) {
-          if (existingMetadata.updatedAt < dateNDaysAgo(2)) {
+          if (existingMetadata.updatedAt < dateNDaysAgo(config.allowUpdateLimitDays)) {
             next({ status: 409, error: 'File too old to be updated' })
           }
           await this.uploadedMetadataRepo.update(existingMetadata.uuid, {
