@@ -5,6 +5,8 @@ import {Request} from 'express'
 import {File} from '../entity/File'
 import {SearchFileResponse} from '../entity/SearchFileResponse'
 
+export const S3_BAD_HASH_ERROR_CODE = 'BadDigest'
+
 export const stringify = (obj: any): string => JSON.stringify(obj, null, 2)
 
 export const dateToUTCString = (date: string | Date) => {

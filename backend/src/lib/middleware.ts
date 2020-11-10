@@ -29,6 +29,11 @@ export class Middleware {
     return next()
   }
 
+  validateMD5Param: RequestHandler = (req, _res, next) =>
+    validator.isMD5(req.params.checksum)
+      ? next()
+      : next({status: 400, error: 'Checksum is not an MD5 hash'})
+
   filesValidator: RequestHandler = (req, _res, next) => {
     const requestError: RequestErrorArray = { status: 400, errors: [] }
     const query = req.query as any
@@ -38,7 +43,6 @@ export class Middleware {
       err.errors.push(el)
       return err
     }
-
 
     if (Object.keys(query).length == 0) {
       return next(pushAndReturn(requestError, 'No search parameters given'))
@@ -133,5 +137,14 @@ export class Middleware {
     ])
       .then(() => next())
       .catch(next)
+  }
+
+  getSiteNameFromAuth: RequestHandler = async (req, _res, next) => {
+    const [authMethod, base64AuthString] = (req.header('authorization') || '').split(' ')
+    if (!authMethod || !base64AuthString || authMethod.toLowerCase() != 'basic') return next({status: 400, errors: ['Invalid authentication method']})
+    const authString = (Buffer.from(base64AuthString, 'base64')).toString('utf8')
+    const [site] = authString.split(':')
+    req.params.site = site
+    return next()
   }
 }

@@ -127,3 +127,7 @@ public/css
 
 # Config
 config.prod.ts
+
+# S3 mock
+backend/buckets/*
+!backend/buckets/placeholder

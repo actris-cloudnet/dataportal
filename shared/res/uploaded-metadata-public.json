@@ -2,13 +2,15 @@
   {
     "instrument": {
       "id": "chm15k",
-      "type": "lidar"
+      "type": "lidar",
+      "humanReadableName": "Lufft CHM15k ceilometer"
     }
   },
   {
     "instrument": {
       "id": "mira",
-      "type": "radar"
+      "type": "radar",
+      "humanReadableName": "METEK MIRA-35 cloud radar"
     }
   }
 ]

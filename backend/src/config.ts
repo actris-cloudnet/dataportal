@@ -1,9 +1,21 @@
+import {ClientConfiguration} from 'aws-sdk/clients/s3'
+
 interface Config {
   connectionName: string
   fileServerUrl: string
   pidServiceUrl: string
   pidServiceTimeoutMs: number
   publicDir: string
+  s3: s3Config
+}
+
+interface s3Config {
+  connection: {
+    rw: ClientConfiguration
+  },
+  buckets: {
+    upload: string
+  }
 }
 
 const testConfig = {
@@ -11,7 +23,11 @@ const testConfig = {
   fileServerUrl: 'http://localhost:4001/',
   pidServiceUrl: 'http://localhost:5801/pid/',
   pidServiceTimeoutMs: 200,
-  publicDir: 'tests/data/public'
+  publicDir: 'tests/data/public',
+  s3: {
+    connection: {rw: {}},
+    buckets: {upload: 'cloudnet-upload-test'}
+  }
 }
 
 const devConfig = {
@@ -19,7 +35,11 @@ const devConfig = {
   fileServerUrl: 'http://localhost:4000/',
   pidServiceUrl: 'http://localhost:5800/pid/',
   pidServiceTimeoutMs: 2000,
-  publicDir: 'public'
+  publicDir: 'public',
+  s3: {
+    connection: {rw: {}},
+    buckets: {upload: 'cloudnet-upload-dev'}
+  }
 }
 
 let config: Config
