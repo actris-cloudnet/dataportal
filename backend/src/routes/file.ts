@@ -5,6 +5,7 @@ import {Connection, Repository} from 'typeorm'
 import {File} from '../entity/File'
 import {convertToSearchFiles, hideTestDataFromNormalUsers, rowExists, sortByMeasurementDateAsc} from '../lib'
 import {ReceivedFile} from '../lib/metadata2db'
+import {augmentFiles} from '../lib/'
 
 export class FileRoutes {
 
@@ -29,7 +30,7 @@ export class FileRoutes {
       .getMany()
       .then(result => {
         if (result.length == 0) throw new Error()
-        res.send(this.augmentFiles(result)[0])
+        res.send(augmentFiles(result)[0])
       })
       .catch(_err => next({ status: 404, errors: ['No files match this UUID'] }))
   }
@@ -39,7 +40,7 @@ export class FileRoutes {
     this.filesQueryBuilder(query)
       .getMany()
       .then(result => {
-        res.send(this.augmentFiles(result))
+        res.send(augmentFiles(result))
       })
       .catch(err => {
         next({ status: 500, errors: err })
@@ -93,7 +94,7 @@ export class FileRoutes {
 
   allfiles: RequestHandler = async (req: Request, res: Response, next) =>
     this.fileRepo.find({ relations: ['site', 'product'] })
-      .then(result => res.send(this.augmentFiles(sortByMeasurementDateAsc(result))))
+      .then(result => res.send(augmentFiles(sortByMeasurementDateAsc(result))))
       .catch(err => next({ status: 500, errors: err }))
 
   allsearch: RequestHandler = async (req: Request, res: Response, next) =>
@@ -102,11 +103,6 @@ export class FileRoutes {
         res.send(convertToSearchFiles(sortByMeasurementDateAsc(result)))
       })
       .catch(err => next({ status: 500, errors: err }))
-
-  private augmentFiles = (files: File[]) => {
-    return files.map(entry =>
-      ({ ...entry, url: `${this.fileServerUrl}${entry.filename}` }))
-  }
 
   filesQueryBuilder(query: any) {
     const qb = this.fileRepo.createQueryBuilder('file')

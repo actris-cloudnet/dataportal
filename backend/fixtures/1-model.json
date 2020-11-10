@@ -1,0 +1,23 @@
+[
+    {
+      "id": "ecmwf",
+      "optimumOrder": 0
+    },
+    {
+      "id": "icon-iglo-12-23",
+      "optimumOrder": 1
+    },
+    {
+      "id": "icon-iglo-24-35",
+      "optimumOrder": 2
+    },
+    {
+      "id": "icon-iglo-36-47",
+      "optimumOrder": 2
+    },
+    {
+      "id": "gdas1",
+      "optimumOrder": 3
+    }
+  ]
+  

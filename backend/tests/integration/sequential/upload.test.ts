@@ -8,6 +8,7 @@ let repo: any
 
 const metadataUrl = `${backendPrivateUrl}upload/metadata/`
 const dataUrl = `${backendPrivateUrl}upload/data/`
+
 const validMetadata = {
   filename: 'file1.LV1',
   measurementDate: '2020-08-11',
@@ -15,6 +16,15 @@ const validMetadata = {
   instrument: 'mira',
   site: 'granada'
 }
+
+const validModelMetadata = {
+  filename: '19990101_granada_ecmwf.nc',
+  measurementDate: '1999-01-01',
+  checksum: '691a2a67e1d9e95e96ce963075942e2f',
+  model: 'ecmwf',
+  site: 'granada'
+}
+
 const str2base64 = (hex: string) =>
   Buffer.from(hex, 'utf8').toString('base64')
 const headers = {'authorization': `Basic ${str2base64('granada:lol')}`}
@@ -42,7 +52,58 @@ describe('POST /upload/metadata', () => {
     expect(md).toBeTruthy()
     expect(new Date(md.createdAt).getTime()).toBeGreaterThan(now.getTime())
     expect(new Date(md.updatedAt).getTime()).toEqual(new Date(md.createdAt).getTime())
-    expect(md.status).toEqual(Status.CREATED)
+    return expect(md.status).toEqual(Status.CREATED)
+  })
+
+  test('inserts new model metadata', async () => {
+    const now = new Date()
+    await expect(axios.post(metadataUrl, validModelMetadata, {headers})).resolves.toMatchObject({status: 200})
+    const md = await repo.findOne({checksum: validModelMetadata.checksum})
+    expect(md).toBeTruthy()
+    expect(new Date(md.createdAt).getTime()).toBeGreaterThan(now.getTime())
+    expect(new Date(md.updatedAt).getTime()).toEqual(new Date(md.createdAt).getTime())
+    return expect(md.status).toEqual(Status.CREATED)
+  })
+
+  test('updates metadata with allowUpdate flag', async () => {
+    // new submission with allowUpdate flag
+    const payload = {...validMetadata, allowUpdate: true}
+    await expect(axios.post(metadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
+    const md = await repo.findOne({checksum: payload.checksum})
+    expect(md.checksum).toBe(validMetadata.checksum)
+    const initial_time = new Date(md.updatedAt).getTime()
+    // submit same metadata with different checksum
+    const new_checksum = 'ac5c1f6c923cc8b259c2e22c7b258ee4'
+    const payload_resub = {...payload, checksum: new_checksum}
+    await expect(axios.post(metadataUrl, payload_resub, {headers})).resolves.toMatchObject({status: 200})
+    const md_resub = await repo.findOne(md.uuid)
+    expect(md_resub.checksum).toBe(new_checksum)
+    const resub_time = new Date(md_resub.updatedAt).getTime()
+    return expect(resub_time).toBeGreaterThan(initial_time)
+  })
+
+  test('works with string type allowUpdate flag too', async () => {
+    // new submission with allowUpdate flag
+    const payload = {...validMetadata, allowUpdate: 'TrUe'}
+    await expect(axios.post(metadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
+    const md = await repo.findOne({checksum: payload.checksum})
+    expect(md.checksum).toBe(validMetadata.checksum)
+    const new_checksum = 'ac5c1f6c923cc8b259c2e22c7b258ee4'
+    const payload_resub = {...payload, checksum: new_checksum}
+    await expect(axios.post(metadataUrl, payload_resub, {headers})).resolves.toMatchObject({status: 200})
+    const md_resub = await repo.findOne(md.uuid)
+    expect(md_resub.checksum).toBe(new_checksum)
+  })
+
+  test('refuses to update file after certain time period', async () => {
+    // new submission with allowUpdate flag
+    const payload = {...validMetadata, allowUpdate: 'TrUe'}
+    await expect(axios.post(metadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
+    const md = await repo.findOne({checksum: payload.checksum})
+    await repo.update(md.uuid, {updatedAt: '2020-11-07'})
+    const new_checksum = 'ac5c1f6c923cc8b259c2e22c7b258ee4'
+    const payload_resub = {...payload, checksum: new_checksum}
+    await expect(axios.post(metadataUrl, payload_resub, {headers})).rejects.toMatchObject({ response: { data: { status: 409}}})
   })
 
   test('responds with 200 on existing hashsum with created status', async () => {
@@ -104,6 +165,23 @@ describe('POST /upload/metadata', () => {
     return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { data: { status: 422}}})
   })
 
+  test('responds with 422 on missing model', async () => {
+    const payload = {...validModelMetadata}
+    delete payload.model
+    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { data: { status: 422}}})
+  })
+
+  test('responds with 422 on invalid model', async () => {
+    let payload = {...validModelMetadata}
+    payload.model = 'kukko'
+    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { data: { status: 422}}})
+  })
+
+  test('responds with 422 on both model and instrument defined', async () => {
+    let payload = {...validModelMetadata, instrument: 'chm15k'}
+    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { data: { status: 422}}})
+  })
+
   test('responds with 400 on missing site', async () => {
     let payload = {...validMetadata}
     delete payload.site
@@ -130,7 +208,7 @@ describe('PUT /upload/data/:checksum', () => {
     await expect(axios.put(validUrl, validFile, {headers})).resolves.toMatchObject({ status: 201})
     const md = await repo.findOne({checksum: validMetadata.checksum})
     expect(new Date(md.updatedAt).getTime()).toBeGreaterThan(new Date(md.createdAt).getTime())
-    expect(md.status).toEqual(Status.UPLOADED)
+    return expect(md.status).toEqual(Status.UPLOADED)
   })
 
   test('responds with 200 on submitting existing file', async () => {
@@ -138,7 +216,13 @@ describe('PUT /upload/data/:checksum', () => {
     const md1 = await repo.findOne({checksum: validMetadata.checksum})
     await expect(axios.put(validUrl, validFile, {headers})).resolves.toMatchObject({ status: 200})
     const md2 = await repo.findOne({checksum: validMetadata.checksum})
-    expect(new Date(md1.updatedAt).getTime()).toEqual(new Date(md2.updatedAt).getTime())
+    return expect(new Date(md1.updatedAt).getTime()).toEqual(new Date(md2.updatedAt).getTime())
+  })
+
+  test('saves correct file size', async () => {
+    await axios.put(validUrl, validFile, {headers})
+    const md = await repo.findOne({checksum: validMetadata.checksum})
+    return expect(md.size).toBe(validFile.length)
   })
 
   test('responds with 400 on invalid hash', async () => {
@@ -152,7 +236,7 @@ describe('PUT /upload/data/:checksum', () => {
     return expect(axios.put(validUrl, invalidFile, {headers})).rejects.toMatchObject({ response: { data: { status: 400}}})
   })
 
-   */
+  */
 
   test('responds with 400 on nonexistent hash', async () => {
     const url = `${dataUrl}9a0364b9e99bb480dd25e1f0284c8554`
@@ -165,6 +249,6 @@ describe('PUT /upload/data/:checksum', () => {
     await expect(axios.put(validUrl, validFile, {headers}))
       .rejects.toMatchObject({ response: { data: { status: 400}}})
     const md = await repo.findOne({checksum: validMetadata.checksum})
-    expect(new Date(md.updatedAt).getTime()).toBeLessThan(now.getTime())
+    return expect(new Date(md.updatedAt).getTime()).toBeLessThan(now.getTime())
   })
 })

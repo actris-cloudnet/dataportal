@@ -18,6 +18,13 @@ The JSON request should have the following fields:
 - `filename`: Name of the file.
 - `checksum`: An MD5 sum of the file being sent. Used for identifying the file and verifying its integrity. Can be computed by using for instance the `md5sum` UNIX program.
 
+I addition to the mandatory fields above, there is one optional field:
+
+- `allowUpdate`: Setting this to `true` indicates that the same file is going to be sent multiple times. Used in the real-time 
+data transfer with instruments that append data to a single daily file instead of providing multiple static files per day. New submission must happen within two days after the initial submission and the flag should be `true` also in the subsequent submissions. 
+Default is `false`, when a new version of the file is saved regardless of filename.
+**Do not set this flag if your file is complete and you only submit it once!**
+
 Example JSON for uploading a file named `201030_020000_P06_ZEN.LV1`:
 
 ```json
@@ -155,5 +162,4 @@ Each response is accompanied by a message elaborating the cause of the status co
 - `200 OK`: File already exists, doing nothing.
 - `400 Bad Request`: There was a problem in handling the request. Check that the MD5 checksum is valid and corresponds to the file.
 - `401 Unauthorized`: Problem in authentication. Check credentials.
-
 

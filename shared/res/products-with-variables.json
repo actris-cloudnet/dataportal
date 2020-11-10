@@ -5,16 +5,40 @@
     "level": "1",
     "variables": [
       {
-        "id": "test2",
-        "humanReadableName": "Kaljanhimo",
-        "order": "0"
-      },
-      {
         "id": "test1",
         "humanReadableName": "Auringonpaisteen määrä",
         "order": "1"
+      },
+      {
+        "id": "test2",
+        "humanReadableName": "Kaljanhimo",
+        "order": "0"
       }
     ]
+  },
+  {
+    "id": "lidar",
+    "humanReadableName": "Lidar",
+    "level": "1",
+    "variables": []
+  },
+  {
+    "id": "model",
+    "humanReadableName": "Model",
+    "level": "1",
+    "variables": []
+  },
+  {
+    "id": "mwr",
+    "humanReadableName": "Microwave radiometer",
+    "level": "1",
+    "variables": []
+  },
+  {
+    "id": "radar",
+    "humanReadableName": "Radar",
+    "level": "1",
+    "variables": []
   },
   {
     "id": "classification",
@@ -34,14 +58,8 @@
     ]
   },
   {
-    "id": "radar",
-    "humanReadableName": "Radar",
-    "level": "1",
-    "variables": []
-  },
-  {
-    "id": "lwc",
-    "humanReadableName": "Liquid water content",
+    "id": "drizzle",
+    "humanReadableName": "Drizzle",
     "level": "2",
     "variables": []
   },
@@ -52,27 +70,9 @@
     "variables": []
   },
   {
-    "id": "model",
-    "humanReadableName": "Model",
-    "level": "1",
-    "variables": []
-  },
-  {
-    "id": "drizzle",
-    "humanReadableName": "Drizzle",
+    "id": "lwc",
+    "humanReadableName": "Liquid water content",
     "level": "2",
-    "variables": []
-  },
-  {
-    "id": "mwr",
-    "humanReadableName": "Microwave radiometer",
-    "level": "1",
-    "variables": []
-  },
-  {
-    "id": "lidar",
-    "humanReadableName": "Lidar",
-    "level": "1",
     "variables": []
   }
 ]

@@ -18,6 +18,7 @@
     "site": "bucharest",
     "instrument": "chm15k",
     "status": "processed",
+    "size": 301465,
     "createdAt": "2020-09-28T12:46:21.916Z",
     "updatedAt": "2020-09-28T12:46:21.916Z"
   },
@@ -29,6 +30,7 @@
     "site": "bucharest",
     "instrument": "chm15k",
     "status": "processed",
+    "size": 301465,
     "createdAt": "2020-09-28T12:47:21.916Z",
     "updatedAt": "2020-09-28T12:47:21.916Z"
   },
@@ -40,7 +42,71 @@
     "site": "bucharest",
     "instrument": "mira",
     "status": "uploaded",
+    "size": 301465,
     "createdAt": "2020-09-28T12:48:21.916Z",
     "updatedAt": "2020-09-28T12:48:21.916Z"
+  },
+  {
+    "uuid": "1bb32743-faf0-4057-9076-ed2e698dcf26",
+    "checksum": "7e82475ecc9d026bebfe07969eee7b6d",
+    "filename": "20100102_granada_ecmwf.nc",
+    "measurementDate": "2010-01-02",
+    "site": "granada",
+    "status": "created",
+    "allowUpdate": true,
+    "createdAt": "2020-09-28T12:47:21.916Z",
+    "updatedAt": "2020-09-28T12:47:21.916Z",
+    "model": "ecmwf"
+  },
+  {
+    "uuid": "1bb32748-faf0-4057-9076-ed2e698dcf31",
+    "checksum": "7e58ba1a02bb8ecdcca06e523f926f76",
+    "filename": "20141205_mace-head_ecmwf.nc",
+    "measurementDate": "2014-12-05",
+    "site": "macehead",
+    "status": "created",
+    "allowUpdate": true,
+    "createdAt": "2020-09-28T12:47:21.916Z",
+    "updatedAt": "2020-09-28T12:47:21.916Z",
+    "model": "ecmwf"
+  },
+  {
+    "uuid": "1bb32744-faf0-4057-9076-ed2e698dcf16",
+    "checksum": "6c453388a98bc38d246dfa2b51f43736",
+    "filename": "20180126_granada_icon-iglo-12-23.nc",
+    "measurementDate": "2018-01-26",
+    "site": "granada",
+    "status": "created",
+    "allowUpdate": true,
+    "createdAt": "2020-09-28T12:47:21.916Z",
+    "updatedAt": "2020-09-28T12:47:21.916Z",
+    "model": "icon-iglo-12-23"
+  },
+  {
+    "uuid": "1bb32742-faf0-4057-9076-ed2e698dcf33",
+    "checksum": "85ad66e6094fbf73f7665d81b6e8dea8",
+    "filename": "20200122_bucharest_icon-iglo-12-23.nc",
+    "measurementDate": "2020-01-22",
+    "site": "bucharest",
+    "status": "processed",
+    "size": 301465,
+    "allowUpdate": true,
+    "createdAt": "2020-09-28T12:47:21.916Z",
+    "updatedAt": "2020-09-28T12:47:21.916Z",
+    "model": "icon-iglo-12-23"
+  },
+  {
+    "uuid": "1bb32741-faf0-4057-9076-ed2e698dcf32",
+    "checksum": "21598f28bfae2a37406fab9766bc0b47",
+    "filename": "20200126_granada_ecmwf.nc",
+    "measurementDate": "2020-01-26",
+    "site": "granada",
+    "status": "uploaded",
+    "size": 701452,
+    "createdAt": "2020-09-28T12:47:21.916Z",
+    "updatedAt": "2020-09-28T12:47:21.916Z",
+    "model": "ecmwf"
   }
+
+
 ]

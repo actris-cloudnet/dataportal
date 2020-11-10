@@ -13,7 +13,7 @@ beforeAll(async () => {
   expected = responses[0]
 })
 
-describe('GET /metadata/:checksum', () => {
+describe('GET /upload/metadata/:checksum', () => {
 
   it('responds with 200 when metadata is found', async () => {
     const validId = expected.checksum
@@ -38,15 +38,15 @@ describe('GET /metadata', () => {
   })
 
   it('responds with correct object when filtering with date', async () => {
-    return expect(axios.get(`${privateUrl}`, {params: {dateFrom: '2020-08-11', dateTo: '2020-08-11'}})).resolves.toMatchObject({status: 200, data: [responses[0]]})
+    return expect(axios.get(`${privateUrl}`, {params: {dateFrom: '2020-08-11', dateTo: '2020-08-11'}})).resolves.toMatchObject({status: 200, data: [responses[5]]})
   })
 
   it('responds with correct object when filtering with site', async () => {
-    return expect(axios.get(`${privateUrl}`, {params: {site: 'granada'}})).resolves.toMatchObject({status: 200, data: [responses[0]]})
+    return expect(axios.get(`${privateUrl}`, {params: {site: 'macehead'}})).resolves.toMatchObject({status: 200, data: [responses[1]]})
   })
 
   it('responds with correct object when filtering with status', async () => {
-    return expect(axios.get(`${privateUrl}`, {params: {status: 'processed'}})).resolves.toMatchObject({status: 200, data: [responses[1], responses[2]]})
+    return expect(axios.get(`${privateUrl}`, {params: {status: 'processed'}})).resolves.toMatchObject({status: 200, data: [responses[3], responses[7], responses[6]]})
   })
 })
 
@@ -55,8 +55,9 @@ describe('GET /api/uploaded-metadata', () => {
   it('responds with correct object when filtering with site', async () => {
     return expect(axios.get(`${publicUrl}`, {params: {site: 'bucharest'}}))
       .resolves.toMatchObject({status: 200, data: [
-        {instrument: responses[1]['instrument']},
-        {instrument: responses[3]['instrument']}
+        {instrument: responses[7]['instrument']},
+        {instrument: responses[8]['instrument']},
+        {model: responses[3]['model']}
       ]})
   })
 })

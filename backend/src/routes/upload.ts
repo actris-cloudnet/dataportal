@@ -7,7 +7,8 @@ import {
   isValidDate,
   rowExists,
   S3_BAD_HASH_ERROR_CODE, toArray,
-  tomorrow
+  tomorrow,
+  dateNDaysAgo
 } from '../lib'
 import {basename} from 'path'
 import config from '../config'
@@ -17,6 +18,7 @@ import * as AWSMock from 'mock-aws-s3'
 import {PutObjectRequest} from 'aws-sdk/clients/s3'
 import validator from 'validator'
 import {Instrument} from '../entity/Instrument'
+import { Model } from '../entity/Model'
 
 
 export class UploadRoutes {
@@ -25,6 +27,7 @@ export class UploadRoutes {
     this.conn = conn
     this.uploadedMetadataRepo = this.conn.getRepository(Upload)
     this.instrumentRepo = this.conn.getRepository(Instrument)
+    this.modelRepo = this.conn.getRepository(Model)
     this.siteRepo = this.conn.getRepository(Site)
     if (process.env.NODE_ENV == 'production') {
       this.s3 = new S3(config.s3.connection.rw)
@@ -40,31 +43,65 @@ export class UploadRoutes {
   readonly instrumentRepo: Repository<Instrument>
   readonly siteRepo: Repository<Site>
   readonly s3: S3
+  readonly modelRepo: Repository<Model>
 
   postMetadata: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body
-
-    const checksum = req.body.checksum
+    const filename = basename(body.filename)
+    let instrument, model
 
     const site = await this.siteRepo.findOne(req.params.site)
-    if (site == undefined) return next({ status: 422, error: 'Unknown site'})
+    if (site == undefined) {
+      return next({ status: 422, error: 'Unknown site'})
+    }
 
-    const instrument = await this.instrumentRepo.findOne(body.instrument)
-    if (instrument == undefined) return next({ status: 422, error: 'Unknown instrument'})
+    if ('instrument' in body) {
+      instrument = await this.instrumentRepo.findOne(body.instrument)
+      if (instrument == undefined) return next({ status: 422, error: 'Unknown instrument'})
+    }
 
-    // Remove existing metadata if it's status is created
-    const existingCreatedMetadata = await this.uploadedMetadataRepo.findOne({checksum: checksum, status: Status.CREATED})
+    if ('model' in body) {
+      model = await this.modelRepo.findOne(body.model)
+      if (model == undefined) return next({ status: 422, error: 'Unknown model'})
+    }
+
+    // Remove existing metadata if its status is created
+    const existingCreatedMetadata = await this.uploadedMetadataRepo.findOne({checksum: body.checksum, status: Status.CREATED})
     if (existingCreatedMetadata != undefined) {
       await this.uploadedMetadataRepo.remove(existingCreatedMetadata)
     }
 
+    const allowUpdate = ('allowUpdate' in body && body.allowUpdate.toString().toLowerCase() === 'true')
+
+    // With allowUpdate flag, keep existing uuid to avoid duplicate files
+    if (allowUpdate) {
+      try {
+        const existingMetadata = await this.uploadedMetadataRepo.findOne({filename: filename, allowUpdate: true})
+        if (existingMetadata != undefined) {
+          if (existingMetadata.updatedAt < dateNDaysAgo(config.allowUpdateLimitDays)) {
+            next({ status: 409, error: 'File too old to be updated' })
+          }
+          await this.uploadedMetadataRepo.update(existingMetadata.uuid, {
+            checksum: body.checksum,
+            updatedAt: new Date(),
+            status: Status.CREATED
+          })
+          return res.sendStatus(200)
+        }
+      } catch (err) {
+        return next({ status: 500, error: err })
+      }
+    }
+
     const uploadedMetadata = new Upload(
       body.checksum,
-      basename(body.filename),
+      filename,
       body.measurementDate,
       site,
+      allowUpdate,
+      Status.CREATED,
       instrument,
-      Status.CREATED)
+      model)
 
     return this.uploadedMetadataRepo.insert(uploadedMetadata)
       .then(() => res.sendStatus(200))
@@ -75,7 +112,7 @@ export class UploadRoutes {
 
   metadata: RequestHandler = async (req: Request, res: Response, next) => {
     const checksum = req.params.checksum
-    this.uploadedMetadataRepo.findOne({checksum: checksum}, { relations: ['site', 'instrument'] })
+    this.uploadedMetadataRepo.findOne({checksum: checksum}, { relations: ['site', 'instrument', 'model'] })
       .then(uploadedMetadata => {
         if (uploadedMetadata == undefined) return next({ status: 404, errors: ['No metadata was found with provided id']})
         res.send(uploadedMetadata)
@@ -125,14 +162,22 @@ export class UploadRoutes {
         res.send({status: status, error: `Upstream server error: ${err.code}`})
         next({status: status, error: err})
       }
-      await this.uploadedMetadataRepo.update({checksum: checksum}, {status: Status.UPLOADED, updatedAt: new Date() })
+      const size = await this.getSizeOfS3Obj(uploadParams)
+      await this.uploadedMetadataRepo.update({checksum: checksum}, {status: Status.UPLOADED, updatedAt: new Date(), size: size})
       res.sendStatus(201)
     } catch (err) {
       return next({status: 500, error: err})
     }
   }
 
-  private async metadataQueryBuilder(query: any, onlyDistinctInstruments= false) {
+  private async getSizeOfS3Obj(params: PutObjectRequest) {
+    return this.s3.headObject({ Key: params.Key, Bucket: params.Bucket })
+      .promise()
+      .then(res => res.ContentLength)
+      .catch(err => { throw err })
+  }
+
+  private async metadataQueryBuilder(query: any, onlyDistinctInstruments = false) {
     const augmentedQuery: any = {
       site: query.site || (await fetchAll<Site>(this.conn, Site)).map(site => site.id),
       status: query.status || [Status.UPLOADED, Status.CREATED, Status.PROCESSED],
@@ -145,6 +190,7 @@ export class UploadRoutes {
     const qb = this.uploadedMetadataRepo.createQueryBuilder('um')
     qb.leftJoinAndSelect('um.site', 'site')
       .leftJoinAndSelect('um.instrument', 'instrument')
+      .leftJoinAndSelect('um.model', 'model')
     if (onlyDistinctInstruments)  qb.distinctOn(['instrument.id'])
     qb.where('um.measurementDate >= :dateFrom AND um.measurementDate <= :dateTo', augmentedQuery)
       .andWhere('site.id IN (:...site)', augmentedQuery)
@@ -169,11 +215,14 @@ export class UploadRoutes {
       next({ status: 422, error: 'Request is missing measurementDate or measurementDate is invalid'})
       return
     }
-    if (!('instrument' in body) || !body.instrument) {
-      next({ status: 422, error: 'Request is missing instrument'})
+    if (!(('instrument' in body && body.instrument) || ('model' in body && body.model))) {
+      next({ status: 422, error: 'Request must have either the field "instrument" or the field "model"'})
       return
     }
-
+    if ('instrument' in body && body.instrument && 'model' in body && body.model) {
+      next({ status: 422, error: 'Request contains both instrument and model'})
+      return
+    }
     return next()
   }
 }
