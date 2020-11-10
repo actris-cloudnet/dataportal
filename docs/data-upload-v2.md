@@ -86,7 +86,7 @@ printf "Uploading $FILENAME\t"
 MD_RESPONSE=$(curl -s -i -u $USERNAME:$PASSWORD \
    -H "Content-Type: application/json" \
    -d "$JSON" \
-   https://cloudnet.fmi.fi/upload/metadata)
+   https://cloudnet.fmi.fi/upload/metadata/)
 
 STATUS_CODE=$(echo "$MD_RESPONSE" | head -1 | cut -d' ' -f2)
 if test $STATUS_CODE -ne 200 ; then # Handle errors
@@ -130,7 +130,7 @@ metadata = {
 
 # Upload metadata
 print(f'Uploading {filename}', end='\t')
-res = requests.post('https://cloudnet.fmi.fi/upload/metadata',
+res = requests.post('https://cloudnet.fmi.fi/upload/metadata/',
    json=metadata,
    auth=(username, password))
 
