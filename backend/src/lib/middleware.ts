@@ -1,5 +1,6 @@
 import {RequestHandler} from 'express'
 import { RequestErrorArray } from '../entity/RequestError'
+import {Upload} from '../entity/Upload'
 import validator from 'validator'
 import { Site } from '../entity/Site'
 import { Product } from '../entity/Product'
@@ -113,6 +114,18 @@ export class Middleware {
     const [site] = authString.split(':')
     req.params.site = site
     return next()
+  }
+
+  getSiteNameFromBody: RequestHandler = async (req, _res, next) => {
+    req.params.site = req.body.site
+    next()
+  }
+
+  getSiteNameFromMeta: RequestHandler = async (req, _res, next) => {
+    const md = await this.conn.getRepository(Upload)
+      .findOne({checksum: req.params.checksum}, { relations: ['site'] })
+    if (md != undefined) req.params.site = md.site.id
+    next()
   }
 
   checkParamsExistInDb: RequestHandler = async (req: any, _res, next) => {

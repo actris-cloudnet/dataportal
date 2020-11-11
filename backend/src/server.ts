@@ -123,8 +123,21 @@ import {ModelRoutes} from './routes/model'
     middleware.getSiteNameFromAuth,
     express.raw({limit: '100gb'}),
     uploadRoutes.putData)
-  app.get('/upload/metadata/:checksum', middleware.validateMD5Param, uploadRoutes.metadata)
+  app.get('/upload/metadata/:checksum',
+    middleware.validateMD5Param,
+    uploadRoutes.metadata)
 
+  // model data upload (for Ewan only)
+  app.post('/model-upload/metadata',
+    express.json(),
+    middleware.getSiteNameFromBody,
+    uploadRoutes.validateMetadata,
+    uploadRoutes.postMetadata)
+  app.put('/model-upload/data/:checksum',
+    middleware.validateMD5Param,
+    middleware.getSiteNameFromMeta,
+    express.raw({limit: '1gb'}),
+    uploadRoutes.putData)
 
   // private
   app.put('/files/:uuid', fileRoutes.putFile)
