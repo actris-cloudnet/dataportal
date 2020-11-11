@@ -215,13 +215,11 @@ export class UploadRoutes {
       next({ status: 422, errors: 'Request is missing measurementDate or measurementDate is invalid'})
       return
     }
-    if (!(('instrument' in body && body.instrument) || ('model' in body && body.model))) {
-      next({ status: 422, errors: 'Request must have either the field "instrument" or the field "model"'})
-      return
-    }
-    if ('instrument' in body && body.instrument && 'model' in body && body.model) {
-      next({ status: 422, errors: 'Request contains both instrument and model'})
-      return
+
+    if (req.path.includes('model')) {
+      if (!('model' in body && body.model)) return next({ status: 422, errors: 'Request is missing model'})
+    } else {
+      if (!('instrument' in body && body.instrument)) return next({ status: 422, errors: 'Request is missing instrument'})
     }
     return next()
   }

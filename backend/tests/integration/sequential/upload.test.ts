@@ -17,14 +17,6 @@ const validMetadata = {
   site: 'granada'
 }
 
-const validModelMetadata = {
-  filename: '19990101_granada_ecmwf.nc',
-  measurementDate: '1999-01-01',
-  checksum: '691a2a67e1d9e95e96ce963075942e2f',
-  model: 'ecmwf',
-  site: 'granada'
-}
-
 const str2base64 = (hex: string) =>
   Buffer.from(hex, 'utf8').toString('base64')
 const headers = {'authorization': `Basic ${str2base64('granada:lol')}`}
@@ -49,16 +41,6 @@ describe('POST /upload/metadata', () => {
     const now = new Date()
     await expect(axios.post(metadataUrl, validMetadata, {headers})).resolves.toMatchObject({status: 200})
     const md = await repo.findOne({checksum: validMetadata.checksum})
-    expect(md).toBeTruthy()
-    expect(new Date(md.createdAt).getTime()).toBeGreaterThan(now.getTime())
-    expect(new Date(md.updatedAt).getTime()).toEqual(new Date(md.createdAt).getTime())
-    return expect(md.status).toEqual(Status.CREATED)
-  })
-
-  test('inserts new model metadata', async () => {
-    const now = new Date()
-    await expect(axios.post(metadataUrl, validModelMetadata, {headers})).resolves.toMatchObject({status: 200})
-    const md = await repo.findOne({checksum: validModelMetadata.checksum})
     expect(md).toBeTruthy()
     expect(new Date(md.createdAt).getTime()).toBeGreaterThan(now.getTime())
     expect(new Date(md.updatedAt).getTime()).toEqual(new Date(md.createdAt).getTime())
@@ -165,23 +147,6 @@ describe('POST /upload/metadata', () => {
     return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
   })
 
-  test('responds with 422 on missing model', async () => {
-    const payload = {...validModelMetadata}
-    delete payload.model
-    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
-  })
-
-  test('responds with 422 on invalid model', async () => {
-    let payload = {...validModelMetadata}
-    payload.model = 'kukko'
-    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
-  })
-
-  test('responds with 422 on both model and instrument defined', async () => {
-    let payload = {...validModelMetadata, instrument: 'chm15k'}
-    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
-  })
-
   test('responds with 400 on missing site', async () => {
     let payload = {...validMetadata}
     delete payload.site
@@ -252,3 +217,39 @@ describe('PUT /upload/data/:checksum', () => {
     return expect(new Date(md.updatedAt).getTime()).toBeLessThan(now.getTime())
   })
 })
+
+describe('POST /model-upload/metadata', () => {
+  beforeEach(async () => {
+    await repo.delete({})
+  })
+
+  const modelMetadataUrl = `${backendPrivateUrl}model-upload/metadata/`
+
+  const validModelMetadata = {
+    filename: '19990101_granada_ecmwf.nc',
+    measurementDate: '1999-01-01',
+    checksum: '60b725f10c9c85c70d97880dfe8191b3',
+    model: 'ecmwf',
+    site: 'bucharest'
+  }
+
+  test('inserts new model metadata and takes site from metadata', async () => {
+    await expect(axios.post(modelMetadataUrl, validModelMetadata, {headers})).resolves.toMatchObject({status: 200})
+    const md = await repo.findOne({checksum: validModelMetadata.checksum}, { relations: ['site', 'model'] })
+    return expect(md.site.id).toBe(validModelMetadata.site)
+  })
+
+  test('responds with 422 on missing model', async () => {
+    const payload = {...validModelMetadata}
+    delete payload.model
+    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
+  })
+
+  test('responds with 422 on invalid model', async () => {
+    let payload = {...validModelMetadata}
+    payload.model = 'kukko'
+    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
+  })
+
+})
+
