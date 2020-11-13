@@ -8,6 +8,12 @@ interface Config {
   publicDir: string
   s3: s3Config,
   allowUpdateLimitDays: number
+  storageService: {
+    host: string
+    port: string
+    user: string
+    password: string
+  }
 }
 
 interface s3Config {
@@ -29,7 +35,13 @@ const testConfig = {
     connection: {rw: {}},
     buckets: {upload: 'cloudnet-upload-test'}
   },
-  allowUpdateLimitDays: 2
+  allowUpdateLimitDays: 2,
+  storageService: {
+    host: 'localhost',
+    port: '5910',
+    user: 'test',
+    password: 'test'
+  }
 }
 
 const devConfig = {
@@ -42,7 +54,13 @@ const devConfig = {
     connection: {rw: {}},
     buckets: {upload: 'cloudnet-upload-dev'}
   },
-  allowUpdateLimitDays: 2
+  allowUpdateLimitDays: 2,
+  storageService: {
+    host: 'localhost',
+    port: '5900',
+    user: 'test',
+    password: 'test'
+  }
 }
 
 let config: Config
