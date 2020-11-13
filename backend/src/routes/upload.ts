@@ -153,7 +153,7 @@ export class UploadRoutes {
     Promise<{status: number, body: any}> {
 
     let headers = {
-      'Authorization': 'Basic ' +
+      'Authorization': 'Basic ' + // eslint-disable-line prefer-template
       Buffer.from(`${config.storageService.user}:${config.storageService.password}`).toString('base64'),
     }
     if (checksum)
