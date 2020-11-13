@@ -6,19 +6,18 @@ import {
   fetchAll,
   isValidDate,
   rowExists,
-  S3_BAD_HASH_ERROR_CODE, toArray,
+  toArray,
   tomorrow,
   dateNDaysAgo
 } from '../lib'
 import {basename} from 'path'
 import config from '../config'
 import {ReducedMetadataResponse} from '../entity/ReducedMetadataResponse'
-import {S3} from 'aws-sdk'
-import * as AWSMock from 'mock-aws-s3'
-import {PutObjectRequest} from 'aws-sdk/clients/s3'
 import validator from 'validator'
 import {Instrument} from '../entity/Instrument'
 import { Model } from '../entity/Model'
+import * as http from 'http'
+import ReadableStream = NodeJS.ReadableStream
 
 
 export class UploadRoutes {
@@ -29,20 +28,12 @@ export class UploadRoutes {
     this.instrumentRepo = this.conn.getRepository(Instrument)
     this.modelRepo = this.conn.getRepository(Model)
     this.siteRepo = this.conn.getRepository(Site)
-    if (process.env.NODE_ENV == 'production') {
-      this.s3 = new S3(config.s3.connection.rw)
-    } else {
-      AWSMock.config.basePath = 'buckets/'
-      this.s3 = new AWSMock.S3()
-      this.s3.createBucket({Bucket: config.s3.buckets.upload})
-    }
   }
 
   readonly conn: Connection
   readonly uploadedMetadataRepo: Repository<Upload>
   readonly instrumentRepo: Repository<Instrument>
   readonly siteRepo: Repository<Site>
-  readonly s3: S3
   readonly modelRepo: Repository<Model>
 
   postMetadata: RequestHandler = async (req: Request, res: Response, next) => {
@@ -143,38 +134,53 @@ export class UploadRoutes {
       if (!md) return next({status: 400, errors: 'No metadata matches this hash'})
       if (md.status != Status.CREATED) return res.sendStatus(200) // Already uploaded
 
-      const uploadParams: PutObjectRequest = {
-        Bucket: config.s3.buckets.upload,
-        Key: md.s3key,
-        Body: req,
-        ContentMD5: Buffer.from(checksum, 'hex').toString('base64')
-      }
-      try {
-        await this.s3.upload(uploadParams).promise()
-      } catch (err) {
-        // Changes to this block require manual testing
-        if (err.code == S3_BAD_HASH_ERROR_CODE) {
-          return next({status: 400, errors: 'Hash does not match file contents'})
-        }
-        // End block
-        const status = 502
-        res.status(status)
-        res.send({status: status, errors: `Upstream server error: ${err.code}`})
-        next({status: status, errors: err})
-      }
-      const size = await this.getSizeOfS3Obj(uploadParams)
-      await this.uploadedMetadataRepo.update({checksum: checksum}, {status: Status.UPLOADED, updatedAt: new Date(), size: size})
-      res.sendStatus(201)
+      const {status, body} = await this.makeRequest('PUT', md.s3key, checksum, req)
+
+      await this.uploadedMetadataRepo.update({checksum: checksum},
+        {status: Status.UPLOADED, updatedAt: new Date(), size: body.size}
+      )
+      res.sendStatus(status)
     } catch (err) {
-      return next({status: 500, errors: err})
+      if (err.status == 400 && err.errors == 'Checksum does not match file contents')
+        return next(err) // Client error
+      if (err.errors) // Our error
+        return next({status: 500, errors: `Internal server error: ${err.errors}`})
+      return next({status: 500, errors: err}) // Unknown error
     }
   }
 
-  private async getSizeOfS3Obj(params: PutObjectRequest) {
-    return this.s3.headObject({ Key: params.Key, Bucket: params.Bucket })
-      .promise()
-      .then(res => res.ContentLength)
-      .catch(err => { throw err })
+  private async makeRequest(method: string, key: string, checksum: string | null, inputStream: ReadableStream):
+    Promise<{status: number, body: any}> {
+
+    let headers = {
+      'Authorization': 'Basic ' +
+      Buffer.from(`${config.storageService.user}:${config.storageService.password}`).toString('base64'),
+    }
+    if (checksum)
+      headers = {...headers, ...{'Content-MD5': Buffer.from(checksum, 'hex').toString('base64')}}
+
+    const requestOptions = {
+      host: config.storageService.host,
+      port: config.storageService.port,
+      path: `/cloudnet-upload/${key}`,
+      headers,
+      method
+    }
+
+    return new Promise((resolve, reject) => {
+      const req = http.request(requestOptions,  response => {
+        let responseStr = ''
+        response.on('data', chunk => responseStr += chunk)
+        response.on('end', () => {
+          if (response.statusCode && response.statusCode >= 300)
+            return reject({status: response.statusCode, errors: responseStr})
+          const responseJson = JSON.parse(responseStr)
+          resolve({status: response.statusCode as number, body: responseJson})
+        })
+      })
+      req.on('error', err => reject({status: 500, errors: err}))
+      inputStream.pipe(req, {end: true})
+    })
   }
 
   private async metadataQueryBuilder(query: any, onlyDistinctInstruments = false) {
