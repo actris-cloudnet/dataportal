@@ -171,8 +171,11 @@ describe('PUT /upload/data/:checksum', () => {
     const app = express()
     app.put('/cloudnet-upload/*', (req, res, _next) =>{
       req.on('data', chunk => {
-        if (chunk.toString() == 'content') return res.status(201).send({size: chunk.length})
-        return res.status(400).send('Checksum does not match file contents')
+        const chunkStr = chunk.toString()
+        if (chunkStr == 'content') return res.status(201).send({size: chunk.length})
+        if (chunkStr == 'invalidhash') return res.status(400).send('Checksum does not match file contents')
+        if (chunkStr == 'servererr') return res.sendStatus(400)
+        return res.sendStatus(500)
       })
     })
     server = app.listen(5910, next)
@@ -215,8 +218,13 @@ describe('PUT /upload/data/:checksum', () => {
   })
 
   test('responds with 400 on incorrect hash', async () => {
-    const invalidFile = 'invalid'
+    const invalidFile = 'invalidhash'
     return expect(axios.put(validUrl, invalidFile, {headers})).rejects.toMatchObject({ response: { data: { status: 400}}})
+  })
+
+  test('responds with 500 on internal errors', async () => {
+    const invalidFile = 'servererr'
+    return expect(axios.put(validUrl, invalidFile, {headers})).rejects.toMatchObject({ response: { data: { status: 500}}})
   })
 
   test('responds with 400 on nonexistent hash', async () => {
