@@ -2,6 +2,8 @@ import axios from 'axios'
 import {Connection, createConnection} from 'typeorm/index'
 import {backendPrivateUrl} from '../../lib'
 import {Status} from '../../../src/entity/Upload'
+import * as express from 'express'
+import {Server} from 'http'
 
 let conn: Connection
 let repo: any
@@ -16,6 +18,7 @@ const validMetadata = {
   instrument: 'mira',
   site: 'granada'
 }
+let server: Server
 
 const str2base64 = (hex: string) =>
   Buffer.from(hex, 'utf8').toString('base64')
@@ -24,7 +27,6 @@ const headers = {'authorization': `Basic ${str2base64('granada:lol')}`}
 beforeAll(async () => {
   conn = await createConnection('test')
   repo = conn.getRepository('upload')
-  return
 })
 
 afterAll(async () => {
@@ -164,6 +166,26 @@ describe('POST /upload/metadata', () => {
 describe('PUT /upload/data/:checksum', () => {
   const validUrl = `${dataUrl}${validMetadata.checksum}`
   const validFile = 'content'
+
+  beforeAll(next => {
+    const app = express()
+    app.put('/cloudnet-upload/*', (req, res, _next) =>{
+      req.on('data', chunk => {
+        const chunkStr = chunk.toString()
+        if (chunkStr == 'content') return res.status(201).send({size: chunk.length})
+        if (chunkStr == 'invalidhash') return res.status(400).send('Checksum does not match file contents')
+        if (chunkStr == 'servererr') return res.sendStatus(400)
+        return res.sendStatus(500)
+      })
+    })
+    server = app.listen(5910, next)
+    return
+  })
+
+  afterAll(next => {
+    server.close(next)
+  })
+
   beforeEach(async () => {
     await repo.delete({})
     return axios.post(metadataUrl, validMetadata, {headers})
@@ -195,13 +217,15 @@ describe('PUT /upload/data/:checksum', () => {
     return expect(axios.put(url, validFile, {headers})).rejects.toMatchObject({ response: { status: 400}})
   })
 
-  /*  mock-aws-s3 does not check hashes, so this test will fail. Must test manually.
   test('responds with 400 on incorrect hash', async () => {
-    const invalidFile = 'invalid'
+    const invalidFile = 'invalidhash'
     return expect(axios.put(validUrl, invalidFile, {headers})).rejects.toMatchObject({ response: { data: { status: 400}}})
   })
 
-  */
+  test('responds with 500 on internal errors', async () => {
+    const invalidFile = 'servererr'
+    return expect(axios.put(validUrl, invalidFile, {headers})).rejects.toMatchObject({ response: { data: { status: 500}}})
+  })
 
   test('responds with 400 on nonexistent hash', async () => {
     const url = `${dataUrl}9a0364b9e99bb480dd25e1f0284c8554`
