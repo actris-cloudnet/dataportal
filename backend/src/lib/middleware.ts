@@ -117,6 +117,7 @@ export class Middleware {
   }
 
   getSiteNameFromBody: RequestHandler = async (req, _res, next) => {
+    if (!req.body.site) next({status: 422, error: 'Missing site'})
     req.params.site = req.body.site
     next()
   }

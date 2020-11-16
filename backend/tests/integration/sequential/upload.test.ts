@@ -266,13 +266,37 @@ describe('POST /model-upload/metadata', () => {
   test('responds with 422 on missing model', async () => {
     const payload = {...validModelMetadata}
     delete payload.model
-    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
+    return expect(axios.post(modelMetadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
   })
 
   test('responds with 422 on invalid model', async () => {
     let payload = {...validModelMetadata}
     payload.model = 'kukko'
-    return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
+    return expect(axios.post(modelMetadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
+  })
+
+  test('responds with 422 on empty model', async () => {
+    let payload = {...validModelMetadata}
+    payload.model = ''
+    return expect(axios.post(modelMetadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
+  })
+
+  test('responds with 422 on missing site', async () => {
+    let payload = {...validModelMetadata}
+    delete payload.site
+    return expect(axios.post(modelMetadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
+  })
+
+  test('responds with 422 on empty site', async () => {
+    let payload = {...validModelMetadata}
+    payload.site = ''
+    return expect(axios.post(modelMetadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
+  })
+
+  test('responds with 422 on invalid site', async () => {
+    let payload = {...validModelMetadata}
+    payload.site = 'aksjdfksdf'
+    return expect(axios.post(modelMetadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
   })
 
 })
