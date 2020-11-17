@@ -188,19 +188,24 @@ export class UploadRoutes {
       site: query.site || (await fetchAll<Site>(this.conn, Site)).map(site => site.id),
       status: query.status || [Status.UPLOADED, Status.CREATED, Status.PROCESSED],
       dateFrom: query.dateFrom || '1970-01-01',
-      dateTo: query.dateTo || tomorrow()
+      dateTo: query.dateTo || tomorrow(),
+      instrument: query.instrument || (await fetchAll<Instrument>(this.conn, Instrument)).map(instrument => instrument.id),
+      model: query.model || (await fetchAll<Model>(this.conn, Model)).map(model => model.id),
     }
-    augmentedQuery.site = toArray(augmentedQuery.site)
-    augmentedQuery.status = toArray(augmentedQuery.status)
+
+    const fieldsToArray = ['site', 'status', 'instrument', 'model']
+    fieldsToArray.forEach(element => augmentedQuery[element] = toArray(augmentedQuery[element]))
 
     const qb = this.uploadedMetadataRepo.createQueryBuilder('um')
     qb.leftJoinAndSelect('um.site', 'site')
       .leftJoinAndSelect('um.instrument', 'instrument')
       .leftJoinAndSelect('um.model', 'model')
-    if (onlyDistinctInstruments)  qb.distinctOn(['instrument.id'])
+    if (onlyDistinctInstruments) qb.distinctOn(['instrument.id'])
     qb.where('um.measurementDate >= :dateFrom AND um.measurementDate <= :dateTo', augmentedQuery)
       .andWhere('site.id IN (:...site)', augmentedQuery)
       .andWhere('um.status IN (:...status)', augmentedQuery)
+    if (query.instrument) qb.andWhere('instrument.id IN (:...instrument)', augmentedQuery)
+    if (query.model) qb.andWhere('model.id IN (:...model)', augmentedQuery)
     if (!onlyDistinctInstruments) qb.orderBy('um.measurementDate', 'ASC')
 
     return Promise.resolve(qb)
