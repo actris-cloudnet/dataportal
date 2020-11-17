@@ -39,7 +39,7 @@ import {ModelRoutes} from './routes/model'
 
   const errorHandler: ErrorRequestHandler = (err: RequestError | Error, _req, res, next) => {
     const errorStr = err instanceof Error ? err : stringify(err)
-    console.log(`Error in path ${_req.path}:`, stringify(errorStr))
+    console.log(`Error in path ${_req.path}:`, errorStr)
     if (!res.headersSent && !(err instanceof Error)) {
       delete err.params
       const status = err.status || 500
