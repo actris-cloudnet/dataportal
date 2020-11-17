@@ -1,6 +1,7 @@
 [
     {
       "uuid": "38092c00-161d-4ca2-a29d-628cf8e960f6",
+      "s3key": "38092c00-161d-4ca2-a29d-628cf8e960f6",
       "pid": "",
       "volatile": true,
       "title": "Radar file from Mace-Head",
@@ -18,6 +19,7 @@
     },
     {
       "uuid": "bde7a35f-03aa-4bff-acfb-b4974ea9f217",
+      "s3key": "bde7a35f-03aa-4bff-acfb-b4974ea9f217",
       "pid": "",
       "volatile": true,
       "title": "Classification file from Mace-Head",
@@ -35,6 +37,7 @@
     },
     {
       "uuid": "a5d1d5af-3667-41bc-b952-e684f627d91c",
+      "s3key": "a5d1d5af-3667-41bc-b952-e684f627d91c",
       "pid": "",
       "volatile": true,
       "title": "Model file from Mace-Head",
@@ -52,6 +55,7 @@
     },
     {
       "uuid": "d21d6a9b-6804-4465-a026-74ec429fe17d",
+      "s3key": "d21d6a9b-6804-4465-a026-74ec429fe17d",
       "pid": "",
       "volatile": true,
       "title": "Radar file from Hyytiala",
@@ -69,6 +73,7 @@
     },
     {
       "uuid": "22b32746-faf0-4057-9076-ed2e698dcc34",
+      "s3key": "22b32746-faf0-4057-9076-ed2e698dcc34",
       "pid": "",
       "volatile": false,
       "title": "Categorize file from Bucharest",
@@ -86,6 +91,7 @@
     },
     {
       "uuid": "6cb32746-faf0-4057-9076-ed2e698dcf36",
+      "s3key": "6cb32746-faf0-4057-9076-ed2e698dcf36",
       "pid": "",
       "volatile": false,
       "title": "Categorize file from Bucharest",
@@ -103,6 +109,7 @@
     },
     {
       "uuid": "8bb32746-faf0-4057-9076-ed2e698dcf36",
+      "s3key": "8bb32746-faf0-4057-9076-ed2e698dcf36",
       "pid": "",
       "volatile": false,
       "title": "Categorize file from Bucharest",
@@ -120,6 +127,7 @@
     },
     {
       "uuid": "9e04d8ef-0f2b-4823-835d-33e458403c67",
+      "s3key": "9e04d8ef-0f2b-4823-835d-33e458403c67",
       "pid": "",
       "volatile": true,
       "title": "Model file from Granada",
@@ -137,6 +145,7 @@
     },
     {
       "uuid": "1bb32746-faf0-4057-9076-ed2e698dcf36",
+      "s3key": "1bb32746-faf0-4057-9076-ed2e698dcf36",
       "pid": "",
       "volatile": false,
       "title": "Categorize file from Bucharest",
@@ -154,6 +163,7 @@
     },
     {
       "uuid": "2bb32746-faf0-4057-9076-ed2e698dcf36",
+      "s3key": "2bb32746-faf0-4057-9076-ed2e698dcf36",
       "pid": "",
       "volatile": false,
       "title": "Classification file from Bucharest",

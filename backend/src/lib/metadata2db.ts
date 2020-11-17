@@ -31,8 +31,9 @@ export class ReceivedFile {
   readonly filepath: string
   readonly conn: Connection
   readonly freeze: boolean
+  readonly s3key: string
 
-  constructor(json: any, conn: Connection, freeze: boolean) {
+  constructor(json: any, conn: Connection, freeze: boolean, s3key: string) {
     const { netcdf }: NetCDFXML = json
     const ncObj: any = netcdf.attribute
       .map((a) => a['$'])
@@ -52,6 +53,7 @@ export class ReceivedFile {
     this.filepath = netcdf['$'].location
     this.conn = conn
     this.freeze = freeze
+    this.s3key = s3key
   }
 
   getUuid() {
@@ -69,7 +71,7 @@ export class ReceivedFile {
       this.checkSourceFilesExist(),
       linkFile(this.filepath, config.publicDir)
     ]).then(([baseFilename, chksum, { size }, format, site, product, sourceFiles]) => {
-      const file = new File(this.ncObj, baseFilename, chksum, size, format, site, product, !this.freeze, sourceFiles)
+      const file = new File(this.ncObj, baseFilename, chksum, size, format, site, product, !this.freeze, sourceFiles, this.s3key)
       file.releasedAt = new Date()
       const repo = this.conn.getRepository(File)
       return repo.save(file)

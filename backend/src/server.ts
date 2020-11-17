@@ -140,7 +140,7 @@ import {ModelRoutes} from './routes/model'
     uploadRoutes.putData)
 
   // private
-  app.put('/files/:uuid', fileRoutes.putFile)
+  app.put('/files/:s3key', fileRoutes.putFile)
   app.get('/metadata', uploadRoutes.listMetadata)
   app.put('/visualizations/:filename', express.json(), vizRoutes.putVisualization)
 

@@ -71,6 +71,9 @@ export class File {
     @OneToMany(_ => Visualization, viz => viz.sourceFile)
     visualizations!: Visualization[]
 
+    @Column()
+    s3key!: string
+
     @BeforeInsert()
     updateDateCreation() {
       this.releasedAt = new Date()
@@ -90,7 +93,8 @@ export class File {
       site: Site,
       product: Product,
       volatile = true,
-      sourceFiles: File[] = []
+      sourceFiles: File[] = [],
+      s3key: string
     ) {
       // A typeorm hack, see https://github.com/typeorm/typeorm/issues/3903
       if (typeof obj == 'undefined') return
@@ -109,5 +113,6 @@ export class File {
       this.format = format
       this.volatile = volatile
       this.sourceFileIds = sourceFiles.map(file => file.uuid)
+      this.s3key = s3key
     }
 }

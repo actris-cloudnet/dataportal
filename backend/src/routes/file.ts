@@ -65,12 +65,13 @@ export class FileRoutes {
   }
 
   putFile: RequestHandler = async (req: Request, res: Response, next) => {
+    const s3key = req.params.s3key
     const isFreeze = (header:any) => {
       const xFreeze = header['x-freeze'] || 'false'
       return xFreeze.toLowerCase() == 'true'
     }
     try {
-      const receivedFile = new ReceivedFile(req.body, this.conn, isFreeze(req.headers))
+      const receivedFile = new ReceivedFile(req.body, this.conn, isFreeze(req.headers), s3key)
 
       const existingFile = await this.fileRepo.findOne(receivedFile.getUuid(), { relations: ['site']})
       if (existingFile == undefined) {
