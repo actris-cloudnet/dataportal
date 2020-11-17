@@ -8,7 +8,7 @@ import {
   rowExists,
   toArray,
   tomorrow,
-  dateNDaysAgo
+  dateNDaysAgo, ssAuthString
 } from '../lib'
 import {basename} from 'path'
 import config from '../config'
@@ -134,7 +134,7 @@ export class UploadRoutes {
       if (!md) return next({status: 400, errors: 'No metadata matches this hash'})
       if (md.status != Status.CREATED) return res.sendStatus(200) // Already uploaded
 
-      const {status, body} = await this.makeRequest('PUT', md.s3key, checksum, req)
+      const {status, body} = await this.makeRequest(md.s3key, checksum, req)
 
       await this.uploadedMetadataRepo.update({checksum: checksum},
         {status: Status.UPLOADED, updatedAt: new Date(), size: body.size}
@@ -149,22 +149,20 @@ export class UploadRoutes {
     }
   }
 
-  private async makeRequest(method: string, key: string, checksum: string | null, inputStream: ReadableStream):
+  private async makeRequest(key: string, checksum: string, inputStream: ReadableStream):
     Promise<{status: number, body: any}> {
 
     let headers = {
-      'Authorization': 'Basic ' + // eslint-disable-line prefer-template
-      Buffer.from(`${config.storageService.user}:${config.storageService.password}`).toString('base64'),
+      'Authorization': ssAuthString(),
+      'Content-MD5': Buffer.from(checksum, 'hex').toString('base64')
     }
-    if (checksum)
-      headers = {...headers, ...{'Content-MD5': Buffer.from(checksum, 'hex').toString('base64')}}
 
     const requestOptions = {
       host: config.storageService.host,
       port: config.storageService.port,
       path: `/cloudnet-upload/${key}`,
       headers,
-      method
+      method: 'PUT'
     }
 
     return new Promise((resolve, reject) => {

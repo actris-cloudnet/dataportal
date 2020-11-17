@@ -78,50 +78,6 @@ export class CollectionRoutes {
     }
   }
 
-  download: RequestHandler = async (req: Request, res: Response, next) => {
-    const collectionUuid: string = req.params.uuid
-    const collection = await this.collectionRepo.findOne(collectionUuid, {relations: ['files']})
-    if (collection === undefined) {
-      return next({status: 404, errors: ['No collection matches this UUID.']})
-    }
-    try {
-      const filepaths = this.getFilePaths(collection.files)
-      await this.allFilesAreReadable(filepaths)
-
-      const archive = archiver('zip', { store: true })
-      archive.on('warning', console.error)
-      archive.on('error', console.error)
-      req.on('close', () => archive.abort())
-
-      const receiverFilename = `cloudnet-collection-${new Date().getTime()}.zip`
-      res.set('Content-Type', 'application/octet-stream')
-      res.set('Content-Disposition', `attachment; filename="${receiverFilename}"`)
-      archive.pipe(res)
-
-      let i = 1
-      const appendFile = (idx: number) => {
-        const fileStream = createReadStream(filepaths[idx])
-        archive.append(fileStream, { name: basename(filepaths[idx]) })
-        if (idx == (filepaths.length - 1)) archive.finalize()
-      }
-      archive.on('entry', () => i < filepaths.length ? appendFile(i++) : null)
-      appendFile(0)
-
-      // Update collection download count
-      await this.collectionRepo.createQueryBuilder('collection')
-        .update()
-        .set({
-          downloadCount: () => '"downloadCount" + 1',
-          updatedAt: () => 'NOW()'
-        })
-        .where('uuid = :uuid', collection)
-        .execute()
-    } catch (err) {
-      res.sendStatus(500)
-      next(err)
-    }
-  }
-
   allcollections: RequestHandler = async (req: Request, res: Response, next) =>
     this.collectionRepo.find({ relations: ['files', 'files.product', 'files.site'] })
       .then(collections => {

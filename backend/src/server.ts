@@ -16,6 +16,7 @@ import {VisualizationRoutes} from './routes/visualization'
 import {InstrumentRoutes} from './routes/instrument'
 import {ProductRoutes} from './routes/product'
 import {ModelRoutes} from './routes/model'
+import {DownloadRoutes} from './routes/download'
 
 (async function() {
   const port = parseInt(process.argv[2])
@@ -36,6 +37,7 @@ import {ModelRoutes} from './routes/model'
   const miscRoutes = new MiscRoutes(conn)
   const collRoutes = new CollectionRoutes(conn)
   const modelRoutes = new ModelRoutes(conn)
+  const dlRoutes = new DownloadRoutes(conn)
 
   const errorHandler: ErrorRequestHandler = (err: RequestError | Error, _req, res, next) => {
     const errorStr = err instanceof Error ? err : stringify(err)
@@ -94,7 +96,6 @@ import {ModelRoutes} from './routes/model'
   // public/internal
   app.get('/api/status', miscRoutes.status)
   app.get('/api/products/variables', prodRoutes.productVariables)
-  app.get('/api/download/:uuid', middleware.validateUuidParam, collRoutes.download)
   app.get('/api/visualizations',
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
@@ -111,6 +112,8 @@ import {ModelRoutes} from './routes/model'
   app.post('/api/collection', express.json({limit: '1mb'}), collRoutes.postCollection)
   app.get('/api/collection/:uuid', middleware.validateUuidParam, collRoutes.collection)
   app.post('/api/generate-pid', express.json(), collRoutes.generatePid)
+  app.get('/api/download/product/:uuid/:filename', middleware.validateUuidParam, dlRoutes.product)
+  app.get('/api/download/collection/:uuid', middleware.validateUuidParam, dlRoutes.collection)
 
   // protected (for sites)
   app.post('/upload/metadata',

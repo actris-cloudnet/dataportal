@@ -77,3 +77,7 @@ export const sortByMeasurementDateAsc = (files: File[]) =>
 
 export const augmentFiles = (files: any[]) =>
   files.map(entry => ({ ...entry, url: `${config.fileServerUrl}${entry.filename}` }))
+
+export const ssAuthString = () =>
+  'Basic ' + // eslint-disable-line prefer-template
+  Buffer.from(`${config.storageService.user}:${config.storageService.password}`).toString('base64')
