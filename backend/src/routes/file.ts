@@ -107,6 +107,18 @@ export class FileRoutes {
     }
   }
 
+  postFile: RequestHandler = async (req: Request, res: Response, next) => {
+    const partialFile = req.body
+    if (!partialFile.uuid) return next({status: 422, errors: ['Request body is missing uuid']})
+    try {
+      const updateResult = await this.fileRepo.update({uuid: partialFile.uuid}, partialFile)
+      if (updateResult.affected == 0) return next({status: 422, errors: ['No file matches the provided uuid']})
+      res.sendStatus(200)
+    } catch (e) {
+      return next({status: 500, errors: e})
+    }
+  }
+
   allfiles: RequestHandler = async (req: Request, res: Response, next) =>
     this.fileRepo.find({ relations: ['site', 'product'] })
       .then(result => res.send(augmentFiles(sortByMeasurementDateAsc(result))))
