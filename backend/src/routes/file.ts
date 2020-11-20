@@ -1,11 +1,11 @@
 import {Request, RequestHandler, Response} from 'express'
 import {Collection} from '../entity/Collection'
 import config from '../config'
-import {Connection, Repository} from 'typeorm'
-import {File} from '../entity/File'
+import {Connection, getManager, Repository} from 'typeorm'
+import {File, isFile} from '../entity/File'
 import {convertToSearchFiles, hideTestDataFromNormalUsers, rowExists, sortByMeasurementDateAsc} from '../lib'
-import {ReceivedFile} from '../lib/metadata2db'
 import {augmentFiles} from '../lib/'
+import {SearchFile} from '../entity/SearchFile'
 
 export class FileRoutes {
 
@@ -65,21 +65,36 @@ export class FileRoutes {
   }
 
   putFile: RequestHandler = async (req: Request, res: Response, next) => {
-    const s3key = req.params.s3key
-    const isFreeze = (header:any) => {
-      const xFreeze = header['x-freeze'] || 'false'
-      return xFreeze.toLowerCase() == 'true'
-    }
-    try {
-      const receivedFile = new ReceivedFile(req.body, this.conn, isFreeze(req.headers), s3key)
+    const file = req.body
+    req.body.s3key = req.params[0]
+    req.body.createdAt = new Date()
+    req.body.updatedAt = req.body.createdAt
+    req.body.visualizations = req.body.visualizations || []
+    if (!isFile(file)) return next({status: 422, errors: ['Request body is missing fields or has invalid values in them']})
 
-      const existingFile = await this.fileRepo.findOne(receivedFile.getUuid(), { relations: ['site']})
+    try {
+      const sourceFileIds = req.body.sourceFileIds || []
+      await Promise.all(sourceFileIds.map((uuid: string) => this.fileRepo.findOneOrFail(uuid)))
+    } catch (e) {
+      return next({status: 422, errors: ['One or more of the specified source files were not found']})
+    }
+
+    try {
+      const existingFile = await this.fileRepo.findOne({uuid: req.body.uuid}, { relations: ['site']})
+      const searchFile = new SearchFile(file)
       if (existingFile == undefined) {
-        await receivedFile.insertFile()
+        await this.conn.transaction(async transactionalEntityManager => {
+          await transactionalEntityManager.save(File, file)
+          await transactionalEntityManager.save(SearchFile, searchFile)
+        })
         return res.sendStatus(201)
       } else {
-        if (existingFile.site.isTestSite || existingFile.volatile) {
-          await receivedFile.updateFile()
+        if (existingFile.uuid != file.uuid || existingFile.site.isTestSite || existingFile.volatile) {
+          await this.conn.transaction(async transactionalEntityManager => {
+            await transactionalEntityManager.save(File, file)
+            await transactionalEntityManager.delete(SearchFile, {uuid: existingFile.uuid})
+            await transactionalEntityManager.save(SearchFile, searchFile)
+          })
           return res.sendStatus(200)
         }
         return next({
@@ -88,7 +103,6 @@ export class FileRoutes {
         })
       }
     } catch (e) {
-      if (rowExists(e)) return next({status: 409, errors: e})
       return next({status: 500, errors: e})
     }
   }

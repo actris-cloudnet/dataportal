@@ -6,7 +6,6 @@ import { stringify } from './lib'
 import * as express from 'express'
 import config from './config'
 import { Middleware } from './lib/middleware'
-import * as xmlparser from 'express-xml-bodyparser'
 import {MiscRoutes} from './routes/misc'
 import {FileRoutes} from './routes/file'
 import {SiteRoutes} from './routes/site'
@@ -21,8 +20,6 @@ import {DownloadRoutes} from './routes/download'
 (async function() {
   const port = parseInt(process.argv[2])
   const app = express()
-
-  app.use(xmlparser())
 
   const connName = config.connectionName
   const conn = await createConnection(connName)
@@ -143,7 +140,7 @@ import {DownloadRoutes} from './routes/download'
     uploadRoutes.putData)
 
   // private
-  app.put('/files/:s3key', fileRoutes.putFile)
+  app.put('/files/*', express.json(), fileRoutes.putFile)
   app.get('/metadata', uploadRoutes.listMetadata)
   app.put('/visualizations/:filename', express.json(), vizRoutes.putVisualization)
 
