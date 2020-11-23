@@ -30,7 +30,7 @@ export class DownloadRoutes {
 
   product: RequestHandler = async (req, res, next) => {
     try {
-      const file = await this.fileRepo.findOne({uuid: req.params.uuid, filename: req.params.filename})
+      const file = await this.fileRepo.findOne({uuid: req.params.uuid, s3key: req.params.s3key})
       if (file === undefined) return next({status: 404, errors: ['File not found']})
       const upstreamRes = await this.makeRequest('cloudnet-product', file.s3key)
       res.setHeader('Content-Type', 'application/octet-stream')

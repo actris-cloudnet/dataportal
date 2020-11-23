@@ -6,10 +6,8 @@ import axios from 'axios'
 import config from '../config'
 import {Connection, Repository} from 'typeorm'
 import {File} from '../entity/File'
-import {createReadStream} from 'graceful-fs'
-import {basename, join} from 'path'
+import {join} from 'path'
 import {constants as fsconst, promises as fsp} from 'fs'
-import archiver = require('archiver')
 import {convertToSearchResponse} from '../lib'
 
 export class CollectionRoutes {
