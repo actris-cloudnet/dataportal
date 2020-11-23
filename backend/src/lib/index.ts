@@ -5,6 +5,7 @@ import {Request} from 'express'
 import {File} from '../entity/File'
 import {SearchFileResponse} from '../entity/SearchFileResponse'
 import config from '../config'
+import {SearchFile} from '../entity/SearchFile'
 
 export const S3_BAD_HASH_ERROR_CODE = 'BadDigest'
 
@@ -69,7 +70,7 @@ export const rowExists = (err: any) => {
 export const hideTestDataFromNormalUsers = <T>(dbQuery: SelectQueryBuilder<T>, req: Request): SelectQueryBuilder<T> =>
   req.query.developer !== undefined ? dbQuery : dbQuery.andWhere('not site.isTestSite')
 
-export const convertToSearchFiles = (files: File[]) =>
+export const convertToSearchResponse = (files: SearchFile[]) =>
   files.map(file => new SearchFileResponse(file))
 
 export const sortByMeasurementDateAsc = (files: File[]) =>

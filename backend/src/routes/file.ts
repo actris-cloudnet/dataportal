@@ -3,7 +3,7 @@ import {Collection} from '../entity/Collection'
 import config from '../config'
 import {Connection, getManager, Repository} from 'typeorm'
 import {File, isFile} from '../entity/File'
-import {convertToSearchFiles, hideTestDataFromNormalUsers, rowExists, sortByMeasurementDateAsc} from '../lib'
+import {convertToSearchResponse, hideTestDataFromNormalUsers, rowExists, sortByMeasurementDateAsc} from '../lib'
 import {augmentFiles} from '../lib/'
 import {SearchFile} from '../entity/SearchFile'
 
@@ -13,12 +13,14 @@ export class FileRoutes {
     this.conn = conn
     this.collectionRepo = conn.getRepository<Collection>('collection')
     this.fileRepo = conn.getRepository<File>('file')
+    this.searchFileRepo = conn.getRepository<SearchFile>('search_file')
     this.fileServerUrl = config.fileServerUrl
   }
 
   readonly conn: Connection
   readonly collectionRepo: Repository<Collection>
   readonly fileRepo: Repository<File>
+  readonly searchFileRepo: Repository<SearchFile>
   readonly fileServerUrl: string
 
   file: RequestHandler = async (req: Request, res: Response, next) => {
@@ -50,14 +52,14 @@ export class FileRoutes {
   search: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query
 
-    this.filesQueryBuilder(query)
+    this.searchFilesQueryBuilder(query)
       .getMany()
       .then(result => {
         if (result.length == 0) {
           next({ status: 404, errors: ['The search yielded zero results'], params: req.query })
           return
         }
-        res.send(convertToSearchFiles(result))
+        res.send(convertToSearchResponse(result))
       })
       .catch(err => {
         next({ status: 500, errors: err })
@@ -127,7 +129,7 @@ export class FileRoutes {
   allsearch: RequestHandler = async (req: Request, res: Response, next) =>
     this.fileRepo.find({ relations: ['site', 'product'] })
       .then(result => {
-        res.send(convertToSearchFiles(sortByMeasurementDateAsc(result)))
+        res.send(convertToSearchResponse(sortByMeasurementDateAsc(result)))
       })
       .catch(err => next({ status: 500, errors: err }))
 
@@ -139,10 +141,10 @@ export class FileRoutes {
       qb.innerJoin(sub_qb =>
         sub_qb
           .from('file', 'file')
-          .select('MAX(file.releasedAt)', 'released_at')
+          .select('MAX(file.updatedAt)', 'updated_at')
           .groupBy('file.site, file.measurementDate, file.product'),
       'last_version',
-      'file.releasedAt = last_version.released_at'
+      'file.updatedAt = last_version.updated_at'
       )
     }
     qb
@@ -150,10 +152,22 @@ export class FileRoutes {
       .andWhere('product.id IN (:...product)', query)
       .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate <= :dateTo', query)
       .andWhere('file.volatile IN (:...volatile)', query)
-      .andWhere('file.releasedAt < :releasedBefore', query)
+      .andWhere('file.updatedAt < :releasedBefore', query)
       .orderBy('file.measurementDate', 'DESC')
-      .addOrderBy('file.releasedAt', 'DESC')
+      .addOrderBy('file.updatedAt', 'DESC')
     if ('limit' in query) qb.limit(parseInt(query.limit))
+    return qb
+  }
+
+  searchFilesQueryBuilder(query: any) {
+    const qb = this.searchFileRepo.createQueryBuilder('file')
+      .leftJoinAndSelect('file.site', 'site')
+      .leftJoinAndSelect('file.product', 'product')
+      .andWhere('site.id IN (:...location)', query)
+      .andWhere('product.id IN (:...product)', query)
+      .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate <= :dateTo', query)
+      .andWhere('file.volatile IN (:...volatile)', query)
+      .orderBy('file.measurementDate', 'DESC')
     return qb
   }
 

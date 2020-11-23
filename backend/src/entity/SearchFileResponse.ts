@@ -1,4 +1,5 @@
 import {File} from './File'
+import {SearchFile} from './SearchFile'
 
 export class SearchFileResponse {
 
@@ -11,7 +12,7 @@ export class SearchFileResponse {
   size: number
   volatile: boolean
 
-  constructor(file: File) {
+  constructor(file: SearchFile) {
     this.uuid = file.uuid
     this.measurementDate = file.measurementDate
     this.site = file.site.humanReadableName

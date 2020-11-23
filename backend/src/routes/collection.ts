@@ -10,7 +10,7 @@ import {createReadStream} from 'graceful-fs'
 import {basename, join} from 'path'
 import {constants as fsconst, promises as fsp} from 'fs'
 import archiver = require('archiver')
-import {convertToSearchFiles} from '../lib'
+import {convertToSearchResponse} from '../lib'
 
 export class CollectionRoutes {
 
@@ -81,7 +81,7 @@ export class CollectionRoutes {
   allcollections: RequestHandler = async (req: Request, res: Response, next) =>
     this.collectionRepo.find({ relations: ['files', 'files.product', 'files.site'] })
       .then(collections => {
-        const response = collections.map(coll => ({...coll, ...{files: convertToSearchFiles(coll.files)}}))
+        const response = collections.map(coll => ({...coll, ...{files: convertToSearchResponse(coll.files)}}))
         res.send(response)
       })
       .catch(err => next({ status: 500, errors: err }))
