@@ -33,6 +33,7 @@ beforeAll(next => {
           req.on('end', () => res.sendStatus(201))
         })
         app.get('/*', (req, res, _next) =>{
+          if (!(req.params[0] in serverMemory)) return res.sendStatus(404)
           res.send(serverMemory[req.params[0]])
         })
         server = app.listen(5910, next)
@@ -111,8 +112,8 @@ describe('after PUTting metadata to API', () => {
   beforeAll(async () => {
     const filepath = 'tests/data/20190723_bucharest_classification.nc'
     const s3key = basename(filepath)
-    await axios.put(`${backendPrivateUrl}files/${s3key}`, inputJson)
-    return axios.put(`http://localhost:5910/cloudnet-product/${s3key}`, fs.createReadStream(filepath))
+    await axios.put(`http://localhost:5910/cloudnet-product/${s3key}`, fs.createReadStream(filepath))
+    return axios.put(`${backendPrivateUrl}files/${s3key}`, inputJson)
   })
 
   it('responds with a corresponding metadata JSON', async () => {
@@ -133,13 +134,17 @@ describe('after PUTting metadata to API', () => {
       })
   })
 
+  it('responds with 400 if file not uploaded', async () => {
+    return expect(axios.put(`${backendPrivateUrl}files/notfound`, inputJson)).rejects.toMatchObject({response: {status: 400}})
+  })
+
   describe('after PUTting more metadata to API', () => {
     let collectionUuid = ''
     beforeAll(async () => {
       const filepath = 'tests/data/20190724_bucharest_classification.nc'
       const s3key = basename(filepath)
-      await axios.put(`${backendPrivateUrl}files/${s3key}`, inputJson2)
       await axios.put(`http://localhost:5910/cloudnet-product/${s3key}`, fs.createReadStream(filepath))
+      await axios.put(`${backendPrivateUrl}files/${s3key}`, inputJson2)
       const res =  await axios.post(`${backendPublicUrl}collection/`, {files: [expectedJson.uuid, inputJson2.uuid]})
       collectionUuid = res.data
     })

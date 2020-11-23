@@ -1,6 +1,7 @@
 import {Request, RequestHandler, Response} from 'express'
 import {Collection} from '../entity/Collection'
 import config from '../config'
+import axios from 'axios'
 import {Connection, getManager, Repository} from 'typeorm'
 import {File, isFile} from '../entity/File'
 import {convertToSearchResponse, hideTestDataFromNormalUsers, rowExists, sortByMeasurementDateAsc} from '../lib'
@@ -68,10 +69,10 @@ export class FileRoutes {
 
   putFile: RequestHandler = async (req: Request, res: Response, next) => {
     const file = req.body
-    req.body.s3key = req.params[0]
-    req.body.createdAt = new Date()
-    req.body.updatedAt = req.body.createdAt
-    req.body.visualizations = req.body.visualizations || []
+    file.s3key = req.params[0]
+    file.createdAt = new Date()
+    file.updatedAt = req.body.createdAt
+    file.visualizations = req.body.visualizations || []
     if (!isFile(file)) return next({status: 422, errors: ['Request body is missing fields or has invalid values in them']})
 
     try {
@@ -82,7 +83,13 @@ export class FileRoutes {
     }
 
     try {
-      const existingFile = await this.fileRepo.findOne({uuid: req.body.uuid}, { relations: ['site']})
+      await axios.head(`http://${config.storageService.host}:${config.storageService.port}/cloudnet-product/${file.s3key}`)
+    } catch (e) {
+      return next({status: 400, errors: ['The specified file was not found in storage service']})
+    }
+
+    try {
+      const existingFile = await this.fileRepo.findOne({uuid: file.uuid}, { relations: ['site']})
       const searchFile = new SearchFile(file)
       if (existingFile == undefined) {
         await this.conn.transaction(async transactionalEntityManager => {

@@ -93,8 +93,6 @@ export class DownloadRoutes {
       method: 'GET'
     }
 
-    console.log('making request', requestOptions)
-
     return new Promise((resolve, reject) => {
       const req = http.request(requestOptions,  resolve)
       req.on('error', err => reject({status: 500, errors: err}))

@@ -5,21 +5,30 @@ import { backendPrivateUrl } from '../../lib'
 import axios from 'axios'
 import {Visualization} from '../../../src/entity/Visualization'
 import {SearchFile} from '../../../src/entity/SearchFile'
+import * as express from 'express'
+import {Server} from 'http'
 
 
 let conn: Connection
 let fileRepo: Repository<File>
 let searchFileRepo: Repository<SearchFile>
 let vizRepo: Repository<Visualization>
+let server: Server
 const volatileFile = JSON.parse(readFileSync('tests/data/file.json', 'utf8'))
 const stableFile  = {...volatileFile, ...{volatile: false, pid: '1234'}}
 
 beforeAll(async () => {
-  conn = await createConnection('test')
-  fileRepo = conn.getRepository('file')
-  searchFileRepo = conn.getRepository('search_file')
-  vizRepo = conn.getRepository('visualization')
-  return
+  return new Promise(async (resolve, reject) => {
+    conn = await createConnection('test')
+    fileRepo = conn.getRepository('file')
+    searchFileRepo = conn.getRepository('search_file')
+    vizRepo = conn.getRepository('visualization')
+    const app = express()
+    app.get('/*', (req, res, _next) =>{
+      res.sendStatus(200)
+    })
+    server = app.listen(5910, resolve)
+  })
 })
 
 beforeEach(async () => {
@@ -31,7 +40,7 @@ afterAll(async () => {
   await vizRepo.delete({})
   await fileRepo.delete({})
   await conn.close()
-  return
+  return new Promise((resolve, _) => server.close(resolve))
 })
 
 async function putFile(json: any) {
