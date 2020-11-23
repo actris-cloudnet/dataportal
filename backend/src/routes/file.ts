@@ -115,6 +115,9 @@ export class FileRoutes {
     try {
       const updateResult = await this.fileRepo.update({uuid: partialFile.uuid}, partialFile)
       if (updateResult.affected == 0) return next({status: 422, errors: ['No file matches the provided uuid']})
+      delete partialFile.pid // No PID in SearchFile
+      delete partialFile.checksum // No checksum in SearchFile
+      await this.searchFileRepo.update({uuid: partialFile.uuid}, partialFile)
       res.sendStatus(200)
     } catch (e) {
       return next({status: 500, errors: e})
