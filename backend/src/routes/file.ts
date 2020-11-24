@@ -9,7 +9,7 @@ import {
   getBucketForFile,
   hideTestDataFromNormalUsers,
   rowExists,
-  sortByMeasurementDateAsc
+  sortByMeasurementDateAsc, ssAuthString
 } from '../lib'
 import {augmentFiles} from '../lib/'
 import {SearchFile} from '../entity/SearchFile'
@@ -89,8 +89,9 @@ export class FileRoutes {
     }
 
     try {
-      await this.checkFileExists(file)
+      await this.checkFileExists(getBucketForFile(file), file.s3key)
     } catch (e) {
+      console.error(e)
       return next({status: 400, errors: ['The specified file was not found in storage service']})
     }
 
@@ -187,9 +188,11 @@ export class FileRoutes {
     return qb
   }
 
-  private async checkFileExists(file: File) {
-    const bucket = getBucketForFile(file)
-    return axios.head(`http://${config.storageService.host}:${config.storageService.port}/${bucket}/${file.s3key}`)
+  private async checkFileExists(bucket: string, s3key: string) {
+    let headers = {
+      'Authorization': ssAuthString()
+    }
+    return axios.head(`http://${config.storageService.host}:${config.storageService.port}/${bucket}/${s3key}`, {headers})
   }
 
 }
