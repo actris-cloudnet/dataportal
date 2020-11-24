@@ -82,3 +82,6 @@ export const augmentFiles = (files: any[]) =>
 export const ssAuthString = () =>
   'Basic ' + // eslint-disable-line prefer-template
   Buffer.from(`${config.storageService.user}:${config.storageService.password}`).toString('base64')
+
+export const getBucketForFile = (file: File) =>
+  file.volatile ? 'cloudnet-product-volatile' : 'cloudnet-product'

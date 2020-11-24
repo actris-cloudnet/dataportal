@@ -5,7 +5,7 @@ import {Connection, Repository} from 'typeorm'
 import {File} from '../entity/File'
 import {Upload} from '../entity/Upload'
 import {Download, ObjectType} from '../entity/Download'
-import {ssAuthString} from '../lib'
+import {getBucketForFile, ssAuthString} from '../lib'
 import config from '../config'
 import * as http from 'http'
 import {IncomingMessage} from 'http'
@@ -32,7 +32,7 @@ export class DownloadRoutes {
     try {
       const file = await this.fileRepo.findOne({uuid: req.params.uuid, s3key: req.params.s3key})
       if (file === undefined) return next({status: 404, errors: ['File not found']})
-      const upstreamRes = await this.makeRequest('cloudnet-product', file.s3key)
+      const upstreamRes = await this.makeRequest(file)
       res.setHeader('Content-Type', 'application/octet-stream')
       res.setHeader('Content-Length', file.size)
       upstreamRes.pipe(res, {end: true})
@@ -63,7 +63,7 @@ export class DownloadRoutes {
       let i = 1
       const appendFile = async (idx: number) => {
         const file = collection.files[idx]
-        const fileStream = await this.makeRequest('cloudnet-product', file.s3key)
+        const fileStream = await this.makeRequest(file)
         archive.append(fileStream, { name: file.filename })
         if (idx == (collection.files.length - 1)) archive.finalize()
       }
@@ -80,7 +80,8 @@ export class DownloadRoutes {
   }
 
 
-  private async makeRequest(bucket: string, key: string): Promise<IncomingMessage> {
+  private async makeRequest(file: File): Promise<IncomingMessage> {
+    const bucket = getBucketForFile(file)
     let headers = {
       'Authorization': ssAuthString()
     }
@@ -88,7 +89,7 @@ export class DownloadRoutes {
     const requestOptions = {
       host: config.storageService.host,
       port: config.storageService.port,
-      path: `/${bucket}/${key}`,
+      path: `/${bucket}/${file.s3key}`,
       headers,
       method: 'GET'
     }

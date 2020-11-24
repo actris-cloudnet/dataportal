@@ -4,7 +4,13 @@ import config from '../config'
 import axios from 'axios'
 import {Connection, getManager, Repository} from 'typeorm'
 import {File, isFile} from '../entity/File'
-import {convertToSearchResponse, hideTestDataFromNormalUsers, rowExists, sortByMeasurementDateAsc} from '../lib'
+import {
+  convertToSearchResponse,
+  getBucketForFile,
+  hideTestDataFromNormalUsers,
+  rowExists,
+  sortByMeasurementDateAsc
+} from '../lib'
 import {augmentFiles} from '../lib/'
 import {SearchFile} from '../entity/SearchFile'
 
@@ -71,7 +77,7 @@ export class FileRoutes {
     const file = req.body
     file.s3key = req.params[0]
     file.createdAt = new Date()
-    file.updatedAt = req.body.createdAt
+    file.updatedAt = file.createdAt
     file.visualizations = req.body.visualizations || []
     if (!isFile(file)) return next({status: 422, errors: ['Request body is missing fields or has invalid values in them']})
 
@@ -83,7 +89,7 @@ export class FileRoutes {
     }
 
     try {
-      await axios.head(`http://${config.storageService.host}:${config.storageService.port}/cloudnet-product/${file.s3key}`)
+      await this.checkFileExists(file)
     } catch (e) {
       return next({status: 400, errors: ['The specified file was not found in storage service']})
     }
@@ -179,6 +185,11 @@ export class FileRoutes {
       .andWhere('file.volatile IN (:...volatile)', query)
       .orderBy('file.measurementDate', 'DESC')
     return qb
+  }
+
+  private async checkFileExists(file: File) {
+    const bucket = getBucketForFile(file)
+    return axios.head(`http://${config.storageService.host}:${config.storageService.port}/${bucket}/${file.s3key}`)
   }
 
 }
