@@ -3,7 +3,7 @@ import axios from 'axios'
 import {readResources} from '../../../../shared/lib'
 
 const protectedUrl = `${backendPrivateUrl}upload/metadata/`
-const privateUrl = `${backendPrivateUrl}metadata/`
+const privateUrl = `${backendPrivateUrl}upload-metadata/`
 
 let responses: any
 let expected: any
@@ -32,7 +32,7 @@ describe('GET /upload/metadata/:checksum', () => {
 
 })
 
-describe('GET /metadata', () => {
+describe('GET /upload-metadata', () => {
   it('without arguments responds with a list of all uploaded metadata', async () => {
     return expect(axios.get(`${privateUrl}`)).resolves.toMatchObject({status: 200, data: responses})
   })
