@@ -143,6 +143,7 @@ import {DownloadRoutes} from './routes/download'
   app.put('/files/*', express.json(), fileRoutes.putFile)
   app.post('/files/', express.json(), fileRoutes.postFile)
   app.get('/upload-metadata', uploadRoutes.listMetadata)
+  app.post('/upload-metadata', express.json(), uploadRoutes.updateMetadata)
   app.put('/visualizations/:filename', express.json(), vizRoutes.putVisualization)
 
   app.use(errorHandler)

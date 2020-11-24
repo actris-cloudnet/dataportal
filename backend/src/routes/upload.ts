@@ -101,6 +101,18 @@ export class UploadRoutes {
         : next({ status: 500, errors: `Internal server error: ${err.code}`}))
   }
 
+  updateMetadata: RequestHandler = async (req: Request, res: Response, next) => {
+    const partialUpload = req.body
+    if (!partialUpload.uuid) return next({status: 422, errors: ['Request body is missing uuid']})
+    try {
+      const updateResult = await this.uploadedMetadataRepo.update({uuid: partialUpload.uuid}, partialUpload)
+      if (updateResult.affected == 0) return next({status: 422, errors: ['No file matches the provided uuid']})
+      res.sendStatus(200)
+    } catch (e) {
+      return next({status: 500, errors: e})
+    }
+  }
+
   metadata: RequestHandler = async (req: Request, res: Response, next) => {
     const checksum = req.params.checksum
     this.uploadedMetadataRepo.findOne({checksum: checksum}, { relations: ['site', 'instrument', 'model'] })

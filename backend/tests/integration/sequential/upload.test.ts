@@ -9,6 +9,7 @@ let conn: Connection
 let repo: any
 
 const metadataUrl = `${backendPrivateUrl}upload/metadata/`
+const privateMetadataUrl = `${backendPrivateUrl}upload-metadata/`
 const dataUrl = `${backendPrivateUrl}upload/data/`
 
 const validMetadata = {
@@ -301,3 +302,17 @@ describe('POST /model-upload/metadata', () => {
 
 })
 
+describe('POST /upload-metadata/', () => {
+  let uuid: string
+
+  beforeAll(async () => {
+    await axios.post(metadataUrl, validMetadata, {headers})
+    const {data} = await axios.get(privateMetadataUrl)
+    uuid = data[0].uuid
+  })
+
+  test('updates status', async () => {
+    await expect(axios.post(privateMetadataUrl, {uuid, status: Status.PROCESSED})).resolves.toMatchObject({status: 200})
+    return expect(repo.findOne(uuid)).resolves.toMatchObject({status: Status.PROCESSED})
+  })
+})
