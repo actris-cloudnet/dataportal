@@ -106,7 +106,7 @@ export class UploadRoutes {
     this.uploadedMetadataRepo.findOne({checksum: checksum}, { relations: ['site', 'instrument', 'model'] })
       .then(uploadedMetadata => {
         if (uploadedMetadata == undefined) return next({ status: 404, errors: 'No metadata was found with provided id'})
-        res.send(uploadedMetadata)
+        res.send(this.addS3keyToUpload(uploadedMetadata))
       })
       .catch(err => next({ status: 500, errors: err}))
   }
@@ -114,7 +114,7 @@ export class UploadRoutes {
   listMetadata: RequestHandler = async (req: Request, res: Response, next) => {
     (await this.metadataQueryBuilder(req.query))
       .getMany()
-      .then(uploadedMetadata => res.send(uploadedMetadata))
+      .then(uploadedMetadata => res.send(uploadedMetadata.map(this.addS3keyToUpload)))
       .catch(err => {next({status: 500, errors: err})})
   }
 
@@ -208,6 +208,10 @@ export class UploadRoutes {
 
     return Promise.resolve(qb)
   }
+
+  private addS3keyToUpload = (upload: Upload) =>
+    ({...upload, ...{s3key: upload.s3key}})
+
 
   validateMetadata: RequestHandler = async (req, res, next) => {
     const body = req.body

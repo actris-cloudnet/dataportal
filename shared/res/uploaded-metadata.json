@@ -24,7 +24,8 @@
     "model": {
       "id": "ecmwf",
       "optimumOrder": 0
-    }
+    },
+    "s3key": "granada/1bb32743-faf0-4057-9076-ed2e698dcf26/20100102_granada_ecmwf.nc"
   },
   {
     "uuid": "1bb32748-faf0-4057-9076-ed2e698dcf31",
@@ -51,7 +52,8 @@
     "model": {
       "id": "ecmwf",
       "optimumOrder": 0
-    }
+    },
+    "s3key": "macehead/1bb32748-faf0-4057-9076-ed2e698dcf31/20141205_mace-head_ecmwf.nc"
   },
   {
     "uuid": "1bb32744-faf0-4057-9076-ed2e698dcf16",
@@ -78,7 +80,8 @@
     "model": {
       "id": "icon-iglo-12-23",
       "optimumOrder": 1
-    }
+    },
+    "s3key": "granada/1bb32744-faf0-4057-9076-ed2e698dcf16/20180126_granada_icon-iglo-12-23.nc"
   },
   {
     "uuid": "1bb32742-faf0-4057-9076-ed2e698dcf33",
@@ -105,7 +108,8 @@
     "model": {
       "id": "icon-iglo-12-23",
       "optimumOrder": 1
-    }
+    },
+    "s3key": "bucharest/1bb32742-faf0-4057-9076-ed2e698dcf33/20200122_bucharest_icon-iglo-12-23.nc"
   },
   {
     "uuid": "1bb32741-faf0-4057-9076-ed2e698dcf32",
@@ -132,7 +136,8 @@
     "model": {
       "id": "ecmwf",
       "optimumOrder": 0
-    }
+    },
+    "s3key": "granada/1bb32741-faf0-4057-9076-ed2e698dcf32/20200126_granada_ecmwf.nc"
   },
   {
     "uuid": "b8e96ee1-d3e1-49ba-a557-c131d56beeab",
@@ -160,7 +165,8 @@
       "type": "radar",
       "humanReadableName": "METEK MIRA-35 cloud radar"
     },
-    "model": null
+    "model": null,
+    "s3key": "granada/b8e96ee1-d3e1-49ba-a557-c131d56beeab/file1-dc460da4ad72c48223.LV1"
   },
   {
     "uuid": "b4633e6b-a3fc-4d55-b9f4-8033b4896117",
@@ -188,7 +194,8 @@
       "type": "lidar",
       "humanReadableName": "Lufft CHM15k ceilometer"
     },
-    "model": null
+    "model": null,
+    "s3key": "bucharest/b4633e6b-a3fc-4d55-b9f4-8033b4896117/file4-ab460da4ad72c48223.LV1"
   },
   {
     "uuid": "5bc638ba-d38f-4b98-b771-3f16ec59570b",
@@ -216,7 +223,8 @@
       "type": "lidar",
       "humanReadableName": "Lufft CHM15k ceilometer"
     },
-    "model": null
+    "model": null,
+    "s3key": "bucharest/5bc638ba-d38f-4b98-b771-3f16ec59570b/file3-ab460da4ad72c48223.LV1"
   },
   {
     "uuid": "1fa2b98c-e415-4e5e-b73d-87d050e2c61c",
@@ -244,6 +252,7 @@
       "type": "radar",
       "humanReadableName": "METEK MIRA-35 cloud radar"
     },
-    "model": null
+    "model": null,
+    "s3key": "bucharest/1fa2b98c-e415-4e5e-b73d-87d050e2c61c/file4-ab460da4ad72c48223.LV1"
   }
 ]
