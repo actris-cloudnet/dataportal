@@ -7,6 +7,7 @@ import {SearchFileResponse} from '../entity/SearchFileResponse'
 import config from '../config'
 import {SearchFile} from '../entity/SearchFile'
 import {Upload} from '../entity/Upload'
+import axios from 'axios'
 
 export const S3_BAD_HASH_ERROR_CODE = 'BadDigest'
 
@@ -30,20 +31,6 @@ export const dateToJSDate = (year: string, month: string, day: string): Date => 
 export const fetchAll = <T>(conn: Connection, schema: Function, options={}): Promise<T[]> => {
   const repo = conn.getRepository(schema)
   return repo.find(options) as Promise<T[]>
-}
-
-const checkFileExists = async (path: string) => fsp.stat(path)
-
-export async function linkFile(filename: string, linkPath: string) {
-  const resolvedSource = pathResolve(filename)
-  const fullLink = join(linkPath, basename(filename))
-  await checkFileExists(resolvedSource)
-  try {
-    await checkFileExists(fullLink)
-    await fsp.unlink(fullLink)
-  } catch { // if file does not exist do nothing
-  }
-  return fsp.symlink(resolvedSource, fullLink)
 }
 
 export const isValidDate = (obj: any) => !isNaN(new Date(obj).getDate())
@@ -89,4 +76,11 @@ export const getBucketForFile = (file: File) =>
 
 export const getS3keyForUpload = (upload: Upload) =>
   `${upload.site.id}/${upload.uuid}/${upload.filename}`
+
+export async function checkFileExists(bucket: string, s3key: string) {
+  let headers = {
+    'Authorization': ssAuthString()
+  }
+  return axios.head(`http://${config.storageService.host}:${config.storageService.port}/${bucket}/${s3key}`, {headers})
+}
 

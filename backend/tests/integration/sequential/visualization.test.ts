@@ -3,6 +3,8 @@ import {backendPrivateUrl, clearDir, publicVizDir} from '../../lib'
 import axios from 'axios'
 import {Connection, createConnection, Repository} from 'typeorm'
 import {Visualization} from '../../../src/entity/Visualization'
+import * as express from 'express'
+import {Server} from 'http'
 
 const validJson = {
   fullPath: resolve('tests/data/test-viz.png'),
@@ -25,24 +27,32 @@ const headers = { 'content-type': 'application/json'}
 
 let conn: Connection
 let repo: Repository<Visualization>
+let server: Server
 
 const privUrl = `${backendPrivateUrl}visualizations/`
 describe('PUT /visualizations', () => {
 
   beforeAll(async () => {
-    conn = await createConnection('test')
-    repo = conn.getRepository('visualization')
-    await Promise.all([
-      repo.delete(badId),
-      repo.delete(validId)
-    ]).catch()
-    return clearDir(publicVizDir)
+    return new Promise(async (resolve, reject) => {
+      conn = await createConnection('test')
+      repo = conn.getRepository('visualization')
+      await Promise.all([
+        repo.delete(badId),
+        repo.delete(validId)
+      ]).catch()
+      const app = express()
+      app.get('/*', (req, res, _next) =>{
+        res.sendStatus(200)
+      })
+      server = app.listen(5910, resolve)
+    })
   })
 
   afterEach(async () =>
     Promise.all([
       repo.delete(badId),
-      repo.delete(validId)
+      repo.delete(validId),
+      new Promise((r, _) => server.close(r))
     ]).catch()
   )
 

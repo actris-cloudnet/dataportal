@@ -5,6 +5,7 @@ import axios from 'axios'
 import {Connection, getManager, Repository} from 'typeorm'
 import {File, isFile} from '../entity/File'
 import {
+  checkFileExists,
   convertToSearchResponse,
   getBucketForFile,
   hideTestDataFromNormalUsers,
@@ -89,7 +90,7 @@ export class FileRoutes {
     }
 
     try {
-      await this.checkFileExists(getBucketForFile(file), file.s3key)
+      await checkFileExists(getBucketForFile(file), file.s3key)
     } catch (e) {
       console.error(e)
       return next({status: 400, errors: ['The specified file was not found in storage service']})
@@ -186,13 +187,6 @@ export class FileRoutes {
       .andWhere('file.volatile IN (:...volatile)', query)
       .orderBy('file.measurementDate', 'DESC')
     return qb
-  }
-
-  private async checkFileExists(bucket: string, s3key: string) {
-    let headers = {
-      'Authorization': ssAuthString()
-    }
-    return axios.head(`http://${config.storageService.host}:${config.storageService.port}/${bucket}/${s3key}`, {headers})
   }
 
 }

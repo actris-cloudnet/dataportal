@@ -1,8 +1,6 @@
 import {Request, RequestHandler, Response} from 'express'
 import {Connection, Repository, SelectQueryBuilder} from 'typeorm'
-import {hideTestDataFromNormalUsers, linkFile} from '../lib'
-import {join} from 'path'
-import config from '../config'
+import {checkFileExists, hideTestDataFromNormalUsers} from '../lib'
 import {Visualization} from '../entity/Visualization'
 import {VisualizationResponse} from '../entity/VisualizationResponse'
 import {LatestVisualizationDateResponse} from '../entity/LatestVisualizationDateResponse'
@@ -28,10 +26,11 @@ export class VisualizationRoutes {
 
   putVisualization: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body
+    const s3key = req.params[0]
     Promise.all([
       this.fileRepo.findOneOrFail(body.sourceFileId),
       this.productVariableRepo.findOneOrFail(body.variableId),
-      linkFile(body.fullPath, join(config.publicDir, 'viz'))
+      checkFileExists('cloudnet-img', s3key)
     ])
       .then(([file, productVariable, _]) => {
         const viz = new Visualization(req.params[0], file, productVariable)
