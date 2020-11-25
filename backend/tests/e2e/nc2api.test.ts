@@ -14,32 +14,27 @@ let repo: Repository<Download>
 
 let server: Server
 let serverMemory: any = {}
-beforeAll(next => {
-  createConnection('test')
-    .then(connection => {
-      conn = connection
-      return Promise.all([
-        conn.getRepository('download').delete({}),
-        conn.getRepository('visualization').delete({}),
-        conn.getRepository('file').delete({})
-      ]).then(([newConn, _1, _2]) => {
-        repo = conn.getRepository('download')
-        const app = express()
-        app.put('/*', (req, res, _next) =>{
-          const path = req.params[0]
-          serverMemory[path] = new Buffer(0)
-          req.on('data', chunk => (serverMemory[path] = Buffer.concat([serverMemory[path], chunk])))
-          req.on('error', console.error)
-          req.on('end', () => res.sendStatus(201))
-        })
-        app.get('/*', (req, res, _next) =>{
-          if (!(req.params[0] in serverMemory)) return res.sendStatus(404)
-          res.send(serverMemory[req.params[0]])
-        })
-        server = app.listen(5910, next)
-        return
-      })
+beforeAll(async () => {
+  return new Promise(async (resolve, reject) => {
+    conn = await createConnection('test')
+    await conn.getRepository('download').delete({})
+    await conn.getRepository('visualization').delete({})
+    await conn.getRepository('file').delete({})
+    repo = conn.getRepository('download')
+    const app = express()
+    app.put('/*', (req, res, _next) =>{
+      const path = req.params[0]
+      serverMemory[path] = new Buffer(0)
+      req.on('data', chunk => (serverMemory[path] = Buffer.concat([serverMemory[path], chunk])))
+      req.on('error', console.error)
+      req.on('end', () => res.sendStatus(201))
     })
+    app.get('/*', (req, res, _next) =>{
+      if (!(req.params[0] in serverMemory)) return res.sendStatus(404)
+      res.send(serverMemory[req.params[0]])
+    })
+    server = app.listen(5910, resolve)
+  })
 })
 
 afterAll(next => {
