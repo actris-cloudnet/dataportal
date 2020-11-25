@@ -1,6 +1,6 @@
 import {Request, RequestHandler, Response} from 'express'
 import {Connection, Repository, SelectQueryBuilder} from 'typeorm'
-import {checkFileExists, hideTestDataFromNormalUsers} from '../lib'
+import {checkFileExists, hideTestDataFromNormalUsers, rowExists} from '../lib'
 import {Visualization} from '../entity/Visualization'
 import {VisualizationResponse} from '../entity/VisualizationResponse'
 import {LatestVisualizationDateResponse} from '../entity/LatestVisualizationDateResponse'
@@ -37,6 +37,7 @@ export class VisualizationRoutes {
         return this.visualizationRepo.insert(viz)
           .then(_ => res.sendStatus(201))
           .catch(err => {
+            if (rowExists(err)) return res.sendStatus(200)
             res.sendStatus(500)
             next(err)
           })
