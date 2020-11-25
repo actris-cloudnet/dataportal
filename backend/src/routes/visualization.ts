@@ -34,7 +34,7 @@ export class VisualizationRoutes {
       linkFile(body.fullPath, join(config.publicDir, 'viz'))
     ])
       .then(([file, productVariable, _]) => {
-        const viz = new Visualization(req.params.filename, file, productVariable)
+        const viz = new Visualization(req.params[0], file, productVariable)
         return this.visualizationRepo.insert(viz)
           .then(_ => res.sendStatus(201))
           .catch(err => {
