@@ -6,6 +6,7 @@ import {File} from '../entity/File'
 import {SearchFileResponse} from '../entity/SearchFileResponse'
 import config from '../config'
 import {SearchFile} from '../entity/SearchFile'
+import {Upload} from '../entity/Upload'
 
 export const S3_BAD_HASH_ERROR_CODE = 'BadDigest'
 
@@ -85,3 +86,7 @@ export const ssAuthString = () =>
 
 export const getBucketForFile = (file: File) =>
   file.volatile ? 'cloudnet-product-volatile' : 'cloudnet-product'
+
+export const getS3keyForUpload = (upload: Upload) =>
+  `${upload.site.id}/${upload.uuid}/${upload.filename}`
+

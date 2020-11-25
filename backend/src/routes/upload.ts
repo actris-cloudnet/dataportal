@@ -8,7 +8,7 @@ import {
   rowExists,
   toArray,
   tomorrow,
-  dateNDaysAgo, ssAuthString
+  dateNDaysAgo, ssAuthString, getS3keyForUpload
 } from '../lib'
 import {basename} from 'path'
 import config from '../config'
@@ -142,11 +142,11 @@ export class UploadRoutes {
     const checksum = req.params.checksum
     const site = req.params.site
     try {
-      const md = await this.uploadedMetadataRepo.findOne({where: {checksum: checksum, site: {id: site}}, relations: ['site']})
-      if (!md) return next({status: 400, errors: 'No metadata matches this hash'})
-      if (md.status != Status.CREATED) return res.sendStatus(200) // Already uploaded
+      const upload = await this.uploadedMetadataRepo.findOne({where: {checksum: checksum, site: {id: site}}, relations: ['site']})
+      if (!upload) return next({status: 400, errors: 'No metadata matches this hash'})
+      if (upload.status != Status.CREATED) return res.sendStatus(200) // Already uploaded
 
-      const {status, body} = await this.makeRequest(md.s3key, checksum, req)
+      const {status, body} = await this.makeRequest(getS3keyForUpload(upload), checksum, req)
 
       await this.uploadedMetadataRepo.update({checksum: checksum},
         {status: Status.UPLOADED, updatedAt: new Date(), size: body.size}
@@ -222,7 +222,7 @@ export class UploadRoutes {
   }
 
   private addS3keyToUpload = (upload: Upload) =>
-    ({...upload, ...{s3key: upload.s3key}})
+    ({...upload, ...{s3key: getS3keyForUpload(upload)}})
 
 
   validateMetadata: RequestHandler = async (req, res, next) => {

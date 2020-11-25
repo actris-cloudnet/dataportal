@@ -54,10 +54,6 @@ export class Upload {
   @ManyToOne(_ => Model, model => model.uploadedMetadatas)
   model!: Model
 
-  get s3key() {
-    return `${this.site.id}/${this.uuid}/${this.filename}`
-  }
-
   @BeforeInsert()
   setCreatedAt() {
     this.createdAt = new Date()
