@@ -6,7 +6,7 @@ import {ProductVariable} from './ProductVariable'
 @Entity()
 export class Visualization {
   @PrimaryColumn()
-  filename!: string
+  s3key!: string
 
   @ManyToOne(_ => File, file => file.visualizations)
   sourceFile!: File
@@ -15,7 +15,7 @@ export class Visualization {
   productVariable!: ProductVariable
 
   constructor(filename: string, sourceFile: File, productVariable: ProductVariable) {
-    this.filename = filename
+    this.s3key = filename
     this.sourceFile = sourceFile
     this.productVariable = productVariable
   }
