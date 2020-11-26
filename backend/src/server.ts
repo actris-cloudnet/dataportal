@@ -80,15 +80,7 @@ import {DownloadRoutes} from './routes/download'
   app.get('/api/sites/:siteid', siteRoutes.site)
   app.get('/api/products', prodRoutes.products)
   app.get('/api/instruments', instrRoutes.instruments)
-  app.get('/api/model-files/:uuid',
-    middleware.validateUuidParam,
-    modelRoutes.modelFile)
   app.get('/api/models', modelRoutes.models)
-  app.get('/api/model-files',
-    middleware.filesValidator,
-    middleware.modelFilesQueryAugmenter,
-    middleware.checkParamsExistInDb,
-    modelRoutes.modelFiles)
 
   // public/internal
   app.get('/api/status', miscRoutes.status)

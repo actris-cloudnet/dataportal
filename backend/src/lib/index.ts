@@ -65,7 +65,7 @@ export const convertToSearchResponse = (files: SearchFile[]) =>
 export const sortByMeasurementDateAsc = (files: File[]) =>
   files.sort((a, b) => new Date(a.measurementDate).getTime() - new Date(b.measurementDate).getTime())
 
-export const augmentFiles = (files: any[]) =>
+export const augmentFiles = (files: File[]) =>
   files.map(file => ({
     ...file,
     downloadUrl: `${config.downloadBaseUrl}${getDownloadPathForFile(file)}`,
