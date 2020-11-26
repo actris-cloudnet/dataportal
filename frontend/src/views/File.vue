@@ -76,7 +76,7 @@ main#filelanding
           </span>
       </div>
       <div class="actions">
-        <a class="download" :href="response.url">
+        <a class="download" :href="response.downloadUrl">
           Download file
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
         </a>
@@ -97,7 +97,7 @@ main#filelanding
             <dd v-if="response.pid.length > 2"> <a :href=response.pid> {{ response.pid }} </a></dd>
             <dd v-else class="notAvailable"></dd>
             <dt>Filename</dt>
-            <dd>{{ response.filename }}</dd>
+            <dd>{{ response.s3key }}</dd>
             <dt>Format</dt>
             <dd>{{ response.format }}</dd>
             <dt>Size</dt>
@@ -105,7 +105,7 @@ main#filelanding
             <dt>Hash (SHA-256)</dt>
             <dd>{{ response.checksum }}</dd>
             <dt>Last modified</dt>
-            <dd>{{ humanReadableTimestamp(response.releasedAt) }}</dd>
+            <dd>{{ humanReadableTimestamp(response.updatedAt) }}</dd>
             <dt>Versions</dt>
             <dd>
               <router-link v-if="previousVersion" id="previousVersion" :to="`/file/${previousVersion}`">

@@ -229,7 +229,7 @@ export default class CollectionView extends Vue {
 
   get downloadUrl() {
     if (!this.response) return null
-    return `${this.apiUrl}download/${this.response.uuid}`
+    return `${this.apiUrl}download/collection/${this.response.uuid}`
   }
 
   getUnique(field: keyof SearchFileResponse) {

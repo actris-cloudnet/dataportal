@@ -3,6 +3,7 @@ import {basename, join, resolve as pathResolve} from 'path'
 import {promises as fsp} from 'fs'
 import {Request} from 'express'
 import {File} from '../entity/File'
+import {Collection} from '../entity/Collection'
 import {SearchFileResponse} from '../entity/SearchFileResponse'
 import config from '../config'
 import {SearchFile} from '../entity/SearchFile'
@@ -65,7 +66,7 @@ export const sortByMeasurementDateAsc = (files: File[]) =>
   files.sort((a, b) => new Date(a.measurementDate).getTime() - new Date(b.measurementDate).getTime())
 
 export const augmentFiles = (files: any[]) =>
-  files.map(entry => ({ ...entry, url: `${config.fileServerUrl}${entry.filename}` }))
+  files.map(file => ({ ...file, downloadUrl: `${config.downloadBaseUrl}${getDownloadPathForFile(file)}` }))
 
 export const ssAuthString = () =>
   'Basic ' + // eslint-disable-line prefer-template
@@ -76,6 +77,9 @@ export const getBucketForFile = (file: File) =>
 
 export const getS3keyForUpload = (upload: Upload) =>
   `${upload.site.id}/${upload.uuid}/${upload.filename}`
+
+export const getDownloadPathForFile = (file: File) =>
+  `product/${file.uuid}/${file.s3key}`
 
 export async function checkFileExists(bucket: string, s3key: string) {
   let headers = {
