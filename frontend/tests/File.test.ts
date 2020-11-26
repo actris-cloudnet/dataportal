@@ -81,11 +81,11 @@ describe('File.vue', () => {
   })
 
   it('displays links to source files', async () => {
-    mocked(axios.get).mockImplementation(axiosMockWithFileIdx([7, 6]))
+    mocked(axios.get).mockImplementation(axiosMockWithFileIdx([6, 5]))
     wrapper = mountVue(File)
     await nextTick(3)
     expect(wrapper.findAll('#history').length).toEqual(1)
-    expect(wrapper.find('#history').html()).toContain(`/file/${resources['allfiles'][6]['uuid']}`)
+    expect(wrapper.find('#history').html()).toContain(`/file/${resources['allfiles'][5]['uuid']}`)
   })
 
   it('does not display source file info where not applicable', async () => {

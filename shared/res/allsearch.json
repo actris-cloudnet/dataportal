@@ -30,7 +30,7 @@
     "volatile": true
   },
   {
-    "uuid": "22b32746-faf0-4057-9076-ed2e698dcc34",
+    "uuid": "8bb32746-faf0-4057-9076-ed2e698dcf36",
     "measurementDate": "2019-07-15",
     "site": "Bucharest",
     "siteId": "bucharest",
@@ -50,18 +50,8 @@
     "volatile": false
   },
   {
-    "uuid": "8bb32746-faf0-4057-9076-ed2e698dcf36",
+    "uuid": "22b32746-faf0-4057-9076-ed2e698dcc34",
     "measurementDate": "2019-07-15",
-    "site": "Bucharest",
-    "siteId": "bucharest",
-    "product": "Categorize",
-    "productId": "categorize",
-    "size": 7127282,
-    "volatile": false
-  },
-  {
-    "uuid": "1bb32746-faf0-4057-9076-ed2e698dcf36",
-    "measurementDate": "2019-07-16",
     "site": "Bucharest",
     "siteId": "bucharest",
     "product": "Categorize",
@@ -76,6 +66,16 @@
     "siteId": "bucharest",
     "product": "Classification",
     "productId": "classification",
+    "size": 7127282,
+    "volatile": false
+  },
+  {
+    "uuid": "1bb32746-faf0-4057-9076-ed2e698dcf36",
+    "measurementDate": "2019-07-16",
+    "site": "Bucharest",
+    "siteId": "bucharest",
+    "product": "Categorize",
+    "productId": "categorize",
     "size": 7127282,
     "volatile": false
   },
