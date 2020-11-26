@@ -74,7 +74,7 @@ jobs:
       run: |
           . ~/.nvm/nvm.sh
           nvm use v10
-          ./control start
+          ./control test-start
     - name: Run frontend unit tests
       run: |
           . ~/.nvm/nvm.sh
