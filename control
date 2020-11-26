@@ -96,15 +96,24 @@ case "$action" in
     ;;
 
     test-start)
-    export NODE_ENV='test' && ./control start && unset NODE_ENV
+    export NODE_ENV='test'
+    node backend/tests/lib/storage-service-mock.js >> backend/tests/all.log 2&>1 &
+    ./control start
+    waitport 5910
+    unset NODE_ENV
     ;;
 
     test-stop)
-    export NODE_ENV='test' && ./control stop && unset NODE_ENV
+    set +e
+    export NODE_ENV='test'
+    ./control stop
+    kill $(lsof -t -i:5910)
+    unset NODE_ENV
     ;;
 
     test-restart)
-    export NODE_ENV='test' && ./control restart && unset NODE_ENV
+    ./control test-stop
+    ./control test-start
     ;;
 
     purge)
@@ -188,6 +197,7 @@ case "$action" in
     cd frontend
     npx vue-cli-service build --mode e2e
     cd ../backend
+    set +e
     npx jest tests/selenium
     cd ..
     ;;

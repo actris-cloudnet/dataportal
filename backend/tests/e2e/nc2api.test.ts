@@ -1,10 +1,8 @@
 import * as fs from 'fs'
 import axios from 'axios'
-import { clearRepo, backendPrivateUrl, backendPublicUrl} from '../lib'
+import {backendPrivateUrl, backendPublicUrl, storageServiceUrl} from '../lib'
 import * as AdmZip from 'adm-zip'
 import { createHash } from 'crypto'
-import * as express from 'express'
-import {Server} from 'http'
 import {Connection, createConnection, Repository} from 'typeorm'
 import {Download} from '../../src/entity/Download'
 import {basename} from 'path'
@@ -12,37 +10,19 @@ import {basename} from 'path'
 let conn: Connection
 let repo: Repository<Download>
 
-let server: Server
-let serverMemory: any = {}
 beforeAll(async () => {
-  return new Promise(async (resolve, reject) => {
     conn = await createConnection('test')
     await conn.getRepository('download').delete({})
     await conn.getRepository('visualization').delete({})
     await conn.getRepository('file').delete({})
     repo = conn.getRepository('download')
-    const app = express()
-    app.put('/*', (req, res, _next) =>{
-      const path = req.params[0]
-      serverMemory[path] = new Buffer(0)
-      req.on('data', chunk => (serverMemory[path] = Buffer.concat([serverMemory[path], chunk])))
-      req.on('error', console.error)
-      req.on('end', () => res.sendStatus(201))
-    })
-    app.get('/*', (req, res, _next) =>{
-      if (!(req.params[0] in serverMemory)) return res.sendStatus(404)
-      res.send(serverMemory[req.params[0]])
-    })
-    server = app.listen(5910, resolve)
-  })
 })
 
-afterAll(next => {
-  conn.getRepository('download').delete({}).then(() =>
-    conn.getRepository('visualization').delete({}).then(() =>
-      conn.getRepository('file').delete({}).then(() =>
-        conn.close().then(() =>
-          server.close(() => next())))))
+afterAll(async () => {
+  await conn.getRepository('download').delete({})
+  await conn.getRepository('visualization').delete({})
+  await conn.getRepository('file').delete({})
+  await conn.close()
 })
 
 
@@ -107,7 +87,7 @@ describe('after PUTting metadata to API', () => {
   beforeAll(async () => {
     const filepath = 'tests/data/20190723_bucharest_classification.nc'
     const s3key = basename(filepath)
-    await axios.put(`http://localhost:5910/cloudnet-product-volatile/${s3key}`, fs.createReadStream(filepath))
+    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${s3key}`, fs.createReadStream(filepath))
     return axios.put(`${backendPrivateUrl}files/${s3key}`, inputJson)
   })
 
@@ -138,7 +118,7 @@ describe('after PUTting metadata to API', () => {
     beforeAll(async () => {
       const filepath = 'tests/data/20190724_bucharest_classification.nc'
       const s3key = basename(filepath)
-      await axios.put(`http://localhost:5910/cloudnet-product-volatile/${s3key}`, fs.createReadStream(filepath))
+      await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${s3key}`, fs.createReadStream(filepath))
       await axios.put(`${backendPrivateUrl}files/${s3key}`, inputJson2)
       const res =  await axios.post(`${backendPublicUrl}collection/`, {files: [expectedJson.uuid, inputJson2.uuid]})
       collectionUuid = res.data

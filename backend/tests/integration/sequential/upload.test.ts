@@ -168,25 +168,6 @@ describe('PUT /upload/data/:checksum', () => {
   const validUrl = `${dataUrl}${validMetadata.checksum}`
   const validFile = 'content'
 
-  beforeAll(next => {
-    const app = express()
-    app.put('/cloudnet-upload/*', (req, res, _next) =>{
-      req.on('data', chunk => {
-        const chunkStr = chunk.toString()
-        if (chunkStr == 'content') return res.status(201).send({size: chunk.length})
-        if (chunkStr == 'invalidhash') return res.status(400).send('Checksum does not match file contents')
-        if (chunkStr == 'servererr') return res.sendStatus(400)
-        return res.sendStatus(500)
-      })
-    })
-    server = app.listen(5910, next)
-    return
-  })
-
-  afterAll(next => {
-    server.close(next)
-  })
-
   beforeEach(async () => {
     await repo.delete({})
     return axios.post(metadataUrl, validMetadata, {headers})

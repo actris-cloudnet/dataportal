@@ -1,7 +1,7 @@
 import { createConnection, Repository, Connection } from 'typeorm'
 import { File } from '../../../src/entity/File'
 import { readFileSync } from 'fs'
-import { backendPrivateUrl } from '../../lib'
+import {backendPrivateUrl, storageServiceUrl} from '../../lib'
 import axios from 'axios'
 import {Visualization} from '../../../src/entity/Visualization'
 import {SearchFile} from '../../../src/entity/SearchFile'
@@ -13,22 +13,18 @@ let conn: Connection
 let fileRepo: Repository<File>
 let searchFileRepo: Repository<SearchFile>
 let vizRepo: Repository<Visualization>
-let server: Server
 const volatileFile = JSON.parse(readFileSync('tests/data/file.json', 'utf8'))
 const stableFile  = {...volatileFile, ...{volatile: false, pid: '1234'}}
 
 beforeAll(async () => {
-  return new Promise(async (resolve, reject) => {
-    conn = await createConnection('test')
-    fileRepo = conn.getRepository('file')
-    searchFileRepo = conn.getRepository('search_file')
-    vizRepo = conn.getRepository('visualization')
-    const app = express()
-    app.get('/*', (req, res, _next) =>{
-      res.sendStatus(200)
-    })
-    server = app.listen(5910, resolve)
-  })
+  conn = await createConnection('test')
+  fileRepo = conn.getRepository('file')
+  searchFileRepo = conn.getRepository('search_file')
+  vizRepo = conn.getRepository('visualization')
+  return Promise.all([
+    axios.put(`${storageServiceUrl}cloudnet-product-volatile/${volatileFile.s3key}`, 'content'),
+    axios.put(`${storageServiceUrl}cloudnet-product/${stableFile.s3key}`, 'content')
+  ])
 })
 
 beforeEach(async () => {
@@ -40,7 +36,6 @@ afterAll(async () => {
   await vizRepo.delete({})
   await fileRepo.delete({})
   await conn.close()
-  return new Promise((resolve, _) => server.close(resolve))
 })
 
 async function putFile(json: any) {
