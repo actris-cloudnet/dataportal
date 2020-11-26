@@ -61,7 +61,7 @@ const expectedJson = {
   'measurementDate': '2019-07-23',
   'history': '2019-09-16 11:21:13 - classification file created\n2019-09-16 11:21:02 - categorize file created\n2019-09-16 11:20:30 - radar file created\nLidar backscatter derived from raw values in arbitrary units: calibrated by user Ewan O\'Connor <ewan.oconnor@fmi.fi> on 25-Jul-2019.',
   'cloudnetpyVersion': '1.0.4',
-  's3key': '20190723_bucharest_classification.nc',
+  'filename': '20190723_bucharest_classification.nc',
   'checksum': 'b77b731aaae54f403aae6765ad1d20e1603b4454e2bc0d461aab4985a4a82ca4',
   'size': 139021,
   'format': 'HDF5 (NetCDF4)',
@@ -99,7 +99,7 @@ describe('after PUTting metadata to API', () => {
 
   it('serves the file and increases download count', async () => {
     return axios
-      .get(`${backendPublicUrl}download/product/${expectedJson.uuid}/${expectedJson.s3key}`, {responseType: 'arraybuffer'})
+      .get(`${backendPublicUrl}download/product/${expectedJson.uuid}/${expectedJson.filename}`, {responseType: 'arraybuffer'})
       .then(response => {
         expect(response.status).toEqual(200)
         const hash = createHash('sha256')
@@ -126,14 +126,15 @@ describe('after PUTting metadata to API', () => {
 
     it('hashes of /download zipped files match originals and collection download count increases', async () => {
       const tmpZip = 'tests/data/tmp.zip'
-      const shas = await (await axios.get(`${backendPublicUrl}files/`, { params: { location: 'bucharest' } })).data.map((file: any) => file.checksum)
+      const expectedShas = await (await axios.get(`${backendPublicUrl}files/`, { params: { location: 'bucharest' } })).data.map((file: any) => file.checksum)
       const receivedFile = await axios.get(`${backendPublicUrl}download/collection/${collectionUuid}`, { responseType: 'arraybuffer'})
       fs.writeFileSync(tmpZip, receivedFile.data)
-      new AdmZip(tmpZip).getEntries().map((entry, i) => {
+      const shas = new AdmZip(tmpZip).getEntries().map(entry => {
         const hash = createHash('sha256')
         hash.update(entry.getData())
-        expect(hash.digest('hex')).toEqual(shas[i])
+        return hash.digest('hex')
       })
+      expect(shas.sort()).toMatchObject(expectedShas.sort())
       fs.unlinkSync(tmpZip)
       return expect(repo.findOne({objectUuid: collectionUuid})).resolves.toBeTruthy()
     })
