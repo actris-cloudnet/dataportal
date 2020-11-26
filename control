@@ -27,7 +27,7 @@ waitport () {
     interval=0.5
     i=0
     echo -n "Waiting for port $1... "
-    while ! nc -z localhost $1; do
+    while ! nc -z localhost $1 2> /dev/null; do
         if [[ "$i" -ge $timeout ]]; then
             echo "Timeout"
             return 2
@@ -57,7 +57,6 @@ case "$action" in
     cd backend
     target=$pid_dir/.node.pid
     if [[ ! -f $target ]]; then
-        echo $cmd
         eval "nohup npx nodemon -w build -- $backend_port >> $pid_dir/all.log 2>&1 &"
         echo $! > $target
     fi
