@@ -21,6 +21,10 @@ export async function clearRepo(repo: string) {
 }
 
 export async function putFile(filename: string) {
+  await Promise.all([
+    axios.put(`${storageServiceUrl}cloudnet-product-volatile/${filename}`, 'content'),
+    axios.put(`${storageServiceUrl}cloudnet-product/${filename}`, 'content')
+  ])
   const json = JSON.parse(fs.readFileSync(`tests/data/${filename}.json`, 'utf8'))
   const url = `${backendPrivateUrl}files/${filename}`
   return axios.put(url, json)
@@ -40,11 +44,11 @@ export const publicVizDir = 'tests/data/public/viz'
 export const fileServerUrl = 'http://localhost:4001/'
 export const storageServiceUrl = 'http://localhost:5910/'
 export const visualizationPayloads = [  {
-  fullPath: resolve('tests/data/20200501_bucharest_classification_detection_status.png'),
+  s3key: resolve('tests/data/20200501_bucharest_classification_detection_status.png'),
   sourceFileId: '7a9c3894ef7e43d9aa7da3f25017acec',
   variableId: 'classification-detection_status'
 },  {
-  fullPath: resolve('tests/data/20200501_bucharest_classification_target_classification.png'),
+  s3key: resolve('tests/data/20200501_bucharest_classification_target_classification.png'),
   sourceFileId: '7a9c3894ef7e43d9aa7da3f25017acec',
   variableId: 'classification-target_classification'
 } ]

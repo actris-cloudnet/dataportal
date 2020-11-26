@@ -18,8 +18,9 @@ app.put('/*', (req, res, _next) =>{
 })
 
 app.get('/*', (req, res, _next) =>{
-  if (!(req.params[0] in serverMemory)) return res.sendStatus(404)
-  res.send(serverMemory[req.params[0]])
+  const path = req.params[0]
+  if (!(path in serverMemory)) return res.sendStatus(404)
+  res.send(serverMemory[path])
 })
 
 app.delete('/', (req, res, _next) =>{

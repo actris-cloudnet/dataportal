@@ -1,0 +1,14 @@
+{
+  "uuid": "20c03d8fc9c54cb18bf848d275d621ff",
+  "pid": "",
+  "volatile": true,
+  "measurementDate": "2019-07-25",
+  "history": "2019-09-16 11:24:32 - classification file created\n2019-09-16 11:24:21 - categorize file created\n2019-09-16 11:23:55 - radar file created\nLidar backscatter derived from raw values in arbitrary units: calibrated by user Ewan O'Connor <ewan.oconnor@fmi.fi> on 27-Jul-2019.",
+  "product": "classification",
+  "cloudnetpyVersion": "1.0.4",
+  "checksum": "531d7cc8b4264f388546baf18043a4b8bc3575094e9005e27df44c5b4088f492",
+  "format": "HDF5 (NetCDF4)",
+  "site": "bucharest",
+  "size": 123,
+  "version": "123"
+}

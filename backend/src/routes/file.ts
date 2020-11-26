@@ -22,7 +22,7 @@ export class FileRoutes {
     this.collectionRepo = conn.getRepository<Collection>('collection')
     this.fileRepo = conn.getRepository<File>('file')
     this.searchFileRepo = conn.getRepository<SearchFile>('search_file')
-    this.fileServerUrl = config.fileServerUrl
+    this.fileServerUrl = config.downloadBaseUrl
   }
 
   readonly conn: Connection

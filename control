@@ -97,7 +97,7 @@ case "$action" in
 
     test-start)
     export NODE_ENV='test'
-    node backend/tests/lib/storage-service-mock.js >> backend/tests/all.log 2&>1 &
+    node backend/tests/lib/storage-service-mock.js >> backend/tests/all.log 2>&1 &
     ./control start
     waitport 5910
     unset NODE_ENV
@@ -198,7 +198,7 @@ case "$action" in
     npx vue-cli-service build --mode e2e
     cd ../backend
     set +e
-    npx jest tests/selenium
+    npx jest --runInBand tests/selenium
     cd ..
     ;;
 

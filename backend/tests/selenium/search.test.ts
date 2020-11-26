@@ -6,6 +6,7 @@ import {Selenium, initDriver} from '../lib/selenium'
 let selenium: Selenium
 let driver: WebDriver
 
+
 jest.setTimeout(60000)
 
 async function initSearch() {
@@ -196,7 +197,7 @@ describe('search page', () => {
     expect(content).not.toContain('Model file from Granada')
   })
 
-  it.only('starts download from collection page', async () => {
+  it('starts download from collection page', async () => {
     await selenium.sendInput('dateFrom', '1980')
     const button = await selenium.awaitAndFind(By.className('download'))
     await button.click()
