@@ -66,7 +66,12 @@ export const sortByMeasurementDateAsc = (files: File[]) =>
   files.sort((a, b) => new Date(a.measurementDate).getTime() - new Date(b.measurementDate).getTime())
 
 export const augmentFiles = (files: any[]) =>
-  files.map(file => ({ ...file, downloadUrl: `${config.downloadBaseUrl}${getDownloadPathForFile(file)}` }))
+  files.map(file => ({
+    ...file,
+    downloadUrl: `${config.downloadBaseUrl}${getDownloadPathForFile(file)}`,
+    filename: basename(file.s3key),
+    s3key: undefined
+  }))
 
 export const ssAuthString = () =>
   'Basic ' + // eslint-disable-line prefer-template

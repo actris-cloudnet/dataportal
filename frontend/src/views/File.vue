@@ -97,7 +97,7 @@ main#filelanding
             <dd v-if="response.pid.length > 2"> <a :href=response.pid> {{ response.pid }} </a></dd>
             <dd v-else class="notAvailable"></dd>
             <dt>Filename</dt>
-            <dd>{{ response.s3key }}</dd>
+            <dd>{{ response.filename }}</dd>
             <dt>Format</dt>
             <dd>{{ response.format }}</dd>
             <dt>Size</dt>
