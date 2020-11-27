@@ -1,4 +1,4 @@
-import { By, until, WebDriver } from 'selenium-webdriver'
+import {By, until, WebDriver} from 'selenium-webdriver'
 import axios from 'axios'
 import {putFile} from '../lib'
 import {initDriver} from '../lib/selenium'

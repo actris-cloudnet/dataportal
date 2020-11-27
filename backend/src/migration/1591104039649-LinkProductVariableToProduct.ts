@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class LinkProductVariableToProduct1591104039649 implements MigrationInterface {
     name = 'LinkProductVariableToProduct1591104039649'

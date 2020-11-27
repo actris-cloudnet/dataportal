@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import { createConnection } from 'typeorm'
 import {resolve} from 'path'
+import {createConnection} from 'typeorm'
 import axios from 'axios'
 
 export function clearDir(dir: string) {
@@ -40,7 +40,6 @@ export const publicDir = 'tests/data/public'
 export const backendProtectedUrl = 'http://localhost:3001/protected/'
 export const backendPublicUrl = 'http://localhost:3001/api/'
 export const backendPrivateUrl = 'http://localhost:3001/'
-export const publicVizDir = 'tests/data/public/viz'
 export const fileServerUrl = 'http://localhost:4001/'
 export const storageServiceUrl = 'http://localhost:5910/'
 export const visualizationPayloads = [  {

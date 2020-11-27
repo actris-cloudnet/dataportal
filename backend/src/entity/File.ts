@@ -1,9 +1,9 @@
-import {Entity, Column, PrimaryColumn, ManyToOne, BeforeUpdate, BeforeInsert, OneToMany, Unique, Index} from 'typeorm'
-import { Site } from './Site'
-import { Product } from './Product'
+import {BeforeInsert, BeforeUpdate, Column, Entity, Index, ManyToOne, OneToMany, PrimaryColumn, Unique} from 'typeorm'
+import {Site} from './Site'
+import {Product} from './Product'
 import {Visualization} from './Visualization'
 import {isValidDate} from '../lib'
-import { basename } from 'path'
+import {basename} from 'path'
 
 @Entity()
 @Unique(['checksum'])
@@ -62,7 +62,7 @@ export class File {
     updatedAt!: Date
 
     get filename() {
-        return basename(this.s3key)
+      return basename(this.s3key)
     }
 
     @BeforeInsert()
@@ -78,7 +78,7 @@ export class File {
 }
 
 export function isFile(obj: any): obj is File {
-    return 'uuid' in obj
+  return 'uuid' in obj
       && 'measurementDate' in obj
       && isValidDate(obj.measurementDate)
       && 'site' in obj

@@ -43,13 +43,13 @@
 </template>
 
 <script lang="ts">
-import Component, { mixins } from 'vue-class-component'
+import Component, {mixins} from 'vue-class-component'
 import Vue from 'vue'
-import { validationMixin } from 'vuelidate'
-import { Validate } from 'vuelidate-property-decorators'
-import { helpers } from 'vuelidate/lib/validators'
-import { Prop, Watch } from 'vue-property-decorator'
-import { dateToUTC, dateToString } from '../lib'
+import {validationMixin} from 'vuelidate'
+import {Validate} from 'vuelidate-property-decorators'
+import {helpers} from 'vuelidate/lib/validators'
+import {Prop, Watch} from 'vue-property-decorator'
+import {dateToString, dateToUTC} from '../lib'
 
 // date validation
 const isValidDate = (obj: Date) => obj && !isNaN(obj.getDate())

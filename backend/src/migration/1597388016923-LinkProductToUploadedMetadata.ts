@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class LinkProductToUploadedMetadata1597388016923 implements MigrationInterface {
     name = 'LinkProductToUploadedMetadata1597388016923'

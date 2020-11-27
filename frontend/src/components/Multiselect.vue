@@ -79,8 +79,8 @@ import Component from 'vue-class-component'
 import Vue from 'vue'
 import {Prop, Watch} from 'vue-property-decorator'
 import Multiselect from 'vue-multiselect'
-import { Selection } from '../views/Search.vue'
-import { DevMode } from '../lib/DevMode'
+import {Selection} from '../views/Search.vue'
+import {DevMode} from '../lib/DevMode'
 
 Vue.component('multiselect', Multiselect)
 

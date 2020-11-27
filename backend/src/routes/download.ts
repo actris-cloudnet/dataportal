@@ -10,7 +10,6 @@ import config from '../config'
 import * as http from 'http'
 import {IncomingMessage} from 'http'
 import archiver = require('archiver')
-import {Model} from '../entity/Model'
 
 export class DownloadRoutes {
 

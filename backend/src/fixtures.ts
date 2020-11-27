@@ -1,7 +1,7 @@
 import {Connection, createConnection} from 'typeorm'
-import { promises as fsp } from 'fs'
-import { basename, join } from 'path'
-import { argv } from 'process'
+import {promises as fsp} from 'fs'
+import {basename, join} from 'path'
+import {argv} from 'process'
 
 const truncate = argv[4] ? argv[4] == 'TRUNCATE' : false
 

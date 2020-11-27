@@ -1,5 +1,5 @@
 import {clearRepo, wait} from './index'
-import {Builder, By, Key, until, WebDriver, } from 'selenium-webdriver'
+import {Builder, By, Key, until, WebDriver,} from 'selenium-webdriver'
 import * as firefox from 'selenium-webdriver/firefox'
 
 export async function initDriver() {

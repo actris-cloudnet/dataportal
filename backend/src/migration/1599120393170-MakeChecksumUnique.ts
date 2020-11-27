@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class MakePidAndChecksumUnique1599120393170 implements MigrationInterface {
     name = 'MakePidAndChecksumUnique1599120393170'

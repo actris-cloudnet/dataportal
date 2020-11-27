@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class AddS3KeyToFile1605611380585 implements MigrationInterface {
     name = 'AddS3KeyToFile1605611380585'

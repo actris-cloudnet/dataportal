@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { backendPublicUrl, genResponse } from '../../lib'
+import {backendPublicUrl} from '../../lib'
 import axios from 'axios'
 
 

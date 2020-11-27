@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class RenameVizFileToS3key1606289905808 implements MigrationInterface {
     name = 'RenameVizFileToS3key1606289905808'

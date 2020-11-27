@@ -3,7 +3,7 @@ import {Site} from './Site'
 import {Instrument} from './Instrument'
 import {Model} from './Model'
 import {BeforeInsert, BeforeUpdate} from 'typeorm'
-import { v4 as generateUuidV4 } from 'uuid'
+import {v4 as generateUuidV4} from 'uuid'
 
 export enum Status {
   CREATED = 'created',

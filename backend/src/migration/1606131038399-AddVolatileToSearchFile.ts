@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class AddVolatileToSearchFile1606131038399 implements MigrationInterface {
     name = 'AddVolatileToSearchFile1606131038399'

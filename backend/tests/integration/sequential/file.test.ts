@@ -1,12 +1,10 @@
-import { createConnection, Repository, Connection } from 'typeorm'
-import { File } from '../../../src/entity/File'
-import { readFileSync } from 'fs'
+import {Connection, createConnection, Repository} from 'typeorm'
+import {File} from '../../../src/entity/File'
+import {readFileSync} from 'fs'
 import {backendPrivateUrl, storageServiceUrl} from '../../lib'
 import axios from 'axios'
 import {Visualization} from '../../../src/entity/Visualization'
 import {SearchFile} from '../../../src/entity/SearchFile'
-import * as express from 'express'
-import {Server} from 'http'
 
 
 let conn: Connection

@@ -2,7 +2,7 @@ import * as fs from 'fs'
 import axios from 'axios'
 import {backendPrivateUrl, backendPublicUrl, storageServiceUrl} from '../lib'
 import * as AdmZip from 'adm-zip'
-import { createHash } from 'crypto'
+import {createHash} from 'crypto'
 import {Connection, createConnection, Repository} from 'typeorm'
 import {Download} from '../../src/entity/Download'
 import {basename} from 'path'
@@ -11,11 +11,11 @@ let conn: Connection
 let repo: Repository<Download>
 
 beforeAll(async () => {
-    conn = await createConnection('test')
-    await conn.getRepository('download').delete({})
-    await conn.getRepository('visualization').delete({})
-    await conn.getRepository('file').delete({})
-    repo = conn.getRepository('download')
+  conn = await createConnection('test')
+  await conn.getRepository('download').delete({})
+  await conn.getRepository('visualization').delete({})
+  await conn.getRepository('file').delete({})
+  repo = conn.getRepository('download')
 })
 
 afterAll(async () => {

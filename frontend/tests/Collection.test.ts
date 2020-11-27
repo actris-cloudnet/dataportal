@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {Wrapper} from '@vue/test-utils'
 import Collection from '../src/views/Collection.vue'
-import axios, { AxiosPromise, AxiosRequestConfig } from 'axios'
+import axios, {AxiosPromise, AxiosRequestConfig} from 'axios'
 import Vue from 'vue'
 import {augmentAxiosResponse, init, mountVue, nextTick} from './lib'
-import { mocked } from 'ts-jest/dist/util/testing'
+import {mocked} from 'ts-jest/dist/util/testing'
 import {readResources} from '../../shared/lib'
 import DataSearchResult from '../src/components/DataSearchResult.vue'
+
 init()
 
 jest.mock('axios')

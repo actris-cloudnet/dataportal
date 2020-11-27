@@ -137,9 +137,9 @@
 <script lang="ts">
 import axios from 'axios'
 import {Component, Prop, Watch} from 'vue-property-decorator'
-import { File } from '../../../backend/src/entity/File'
+import {File} from '../../../backend/src/entity/File'
 import Vue from 'vue'
-import { getIconUrl, humanReadableSize, combinedFileSize } from '../lib'
+import {combinedFileSize, getIconUrl, humanReadableSize} from '../lib'
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 import {BTable} from 'bootstrap-vue/esm/components/table'
 import {BPagination} from 'bootstrap-vue/esm/components/pagination'

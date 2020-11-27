@@ -1,8 +1,8 @@
 import 'reflect-metadata'
-import { backendPublicUrl, genResponse } from '../../lib'
+import {backendPublicUrl, genResponse} from '../../lib'
 import axios from 'axios'
-import { RequestError } from '../../../src/entity/RequestError'
-import { createConnection, Connection } from 'typeorm'
+import {RequestError} from '../../../src/entity/RequestError'
+import {Connection, createConnection} from 'typeorm'
 import {readResources} from '../../../../shared/lib'
 
 let conn: Connection

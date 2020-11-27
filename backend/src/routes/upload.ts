@@ -3,19 +3,21 @@ import {Status, Upload} from '../entity/Upload'
 import {Connection, Repository} from 'typeorm'
 import {Request, RequestHandler, Response} from 'express'
 import {
+  dateNDaysAgo,
   fetchAll,
+  getS3keyForUpload,
   isValidDate,
   rowExists,
+  ssAuthString,
   toArray,
-  tomorrow,
-  dateNDaysAgo, ssAuthString, getS3keyForUpload
+  tomorrow
 } from '../lib'
 import {basename} from 'path'
 import config from '../config'
 import {ReducedMetadataResponse} from '../entity/ReducedMetadataResponse'
 import validator from 'validator'
 import {Instrument} from '../entity/Instrument'
-import { Model } from '../entity/Model'
+import {Model} from '../entity/Model'
 import * as http from 'http'
 import ReadableStream = NodeJS.ReadableStream
 

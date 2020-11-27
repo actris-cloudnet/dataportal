@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class AddSearchFileAndRemoveObsoleteFileFields1605868476766 implements MigrationInterface {
     name = 'AddSearchFileAndRemoveObsoleteFileFields1605868476766'

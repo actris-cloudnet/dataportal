@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class SetDefaultSizeAsZero1605000460702 implements MigrationInterface {
     name = 'SetDefaultSizeAsZero1605000460702'

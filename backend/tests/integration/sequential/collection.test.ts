@@ -2,7 +2,7 @@ import axios from 'axios'
 import {backendPublicUrl, genResponse} from '../../lib'
 import {Connection, createConnection, Repository} from 'typeorm'
 import {Collection} from '../../../src/entity/Collection'
-import {promises as fsp} from "fs"
+import {promises as fsp} from 'fs'
 import {File} from '../../../src/entity/File'
 
 let conn: Connection

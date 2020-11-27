@@ -386,13 +386,21 @@
 import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import VCalendar from 'v-calendar'
 import axios from 'axios'
-import { Site } from '../../../backend/src/entity/Site'
+import {Site} from '../../../backend/src/entity/Site'
 import Datepicker from '../components/Datepicker.vue'
 import CustomMultiselect from '../components/Multiselect.vue'
 import DataSearchResult from '../components/DataSearchResult.vue'
-import { dateToString, getIconUrl, humanReadableSize, combinedFileSize,
-  fixedRanges, getDateFromBeginningOfYear, isSameDay, constructTitle} from '../lib'
-import { DevMode } from '../lib/DevMode'
+import {
+  combinedFileSize,
+  constructTitle,
+  dateToString,
+  fixedRanges,
+  getDateFromBeginningOfYear,
+  getIconUrl,
+  humanReadableSize,
+  isSameDay
+} from '../lib'
+import {DevMode} from '../lib/DevMode'
 import VizSearchResult from '../components/VizSearchResult.vue'
 import {Visualization} from '../../../backend/src/entity/Visualization'
 import {Product} from '../../../backend/src/entity/Product'

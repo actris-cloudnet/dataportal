@@ -1,6 +1,6 @@
-import {Entity, Column, PrimaryColumn, ManyToOne} from 'typeorm'
-import { Site } from './Site'
-import { Product } from './Product'
+import {Column, Entity, ManyToOne, PrimaryColumn} from 'typeorm'
+import {Site} from './Site'
+import {Product} from './Product'
 import {File} from './File'
 
 @Entity()

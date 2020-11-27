@@ -1,8 +1,7 @@
 import {Model} from '../entity/Model'
-import {Upload} from '../entity/Upload'
-import {Connection, Repository} from 'typeorm'
-import {Request, Response, RequestHandler} from 'express'
-import {fetchAll, augmentFiles} from '../lib'
+import {Connection} from 'typeorm'
+import {Request, RequestHandler, Response} from 'express'
+import {fetchAll} from '../lib'
 
 
 export class ModelRoutes {

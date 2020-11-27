@@ -1,16 +1,14 @@
 import {Request, RequestHandler, Response} from 'express'
 import {Collection} from '../entity/Collection'
 import config from '../config'
-import axios from 'axios'
-import {Connection, getManager, Repository} from 'typeorm'
+import {Connection, Repository} from 'typeorm'
 import {File, isFile} from '../entity/File'
 import {
   checkFileExists,
   convertToSearchResponse,
   getBucketForFile,
   hideTestDataFromNormalUsers,
-  rowExists,
-  sortByMeasurementDateAsc, ssAuthString
+  sortByMeasurementDateAsc
 } from '../lib'
 import {augmentFiles} from '../lib/'
 import {SearchFile} from '../entity/SearchFile'

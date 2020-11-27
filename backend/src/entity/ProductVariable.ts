@@ -1,4 +1,4 @@
-import {Entity, Column, PrimaryColumn, OneToMany, ManyToOne} from 'typeorm'
+import {Column, Entity, ManyToOne, OneToMany, PrimaryColumn} from 'typeorm'
 import {Visualization} from './Visualization'
 import {Product} from './Product'
 

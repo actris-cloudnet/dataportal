@@ -1,5 +1,5 @@
-import { backendPublicUrl, genResponse } from '../../lib'
-import { RequestError } from '../../../src/entity/RequestError'
+import {backendPublicUrl, genResponse} from '../../lib'
+import {RequestError} from '../../../src/entity/RequestError'
 import axios from 'axios'
 
 describe('GET /api/download/collection/:uuid', () => {

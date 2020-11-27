@@ -1,4 +1,3 @@
-import {File} from './File'
 import {SearchFile} from './SearchFile'
 
 export class SearchFileResponse {

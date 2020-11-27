@@ -1,7 +1,7 @@
 import {By, until, WebDriver} from 'selenium-webdriver'
 import axios from 'axios'
-import { wait, putFile } from '../lib'
-import {Selenium, initDriver} from '../lib/selenium'
+import {putFile, wait} from '../lib'
+import {initDriver, Selenium} from '../lib/selenium'
 
 let selenium: Selenium
 let driver: WebDriver

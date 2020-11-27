@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class AddHumanReadableNameToInstruments1601540932396 implements MigrationInterface {
     name = 'AddHumanReadableNameToInstruments1601540932396'

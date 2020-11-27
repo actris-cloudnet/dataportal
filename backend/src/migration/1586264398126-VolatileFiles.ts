@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class VolatileFiles1586264398126 implements MigrationInterface {
     name = 'VolatileFiles1586264398126'

@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class RenameUpload1604059619977 implements MigrationInterface {
     name = 'RenameUpload1604059619977'

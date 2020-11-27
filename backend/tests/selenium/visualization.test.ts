@@ -1,11 +1,7 @@
-import {By, WebDriver, Key} from 'selenium-webdriver'
+import {By, Key, WebDriver} from 'selenium-webdriver'
 import axios from 'axios'
-import {
-  wait,
-  backendPrivateUrl,
-  visualizationPayloads, putFile, storageServiceUrl
-} from '../lib'
-import {Selenium, initDriver} from '../lib/selenium'
+import {backendPrivateUrl, putFile, storageServiceUrl, visualizationPayloads, wait} from '../lib'
+import {initDriver, Selenium} from '../lib/selenium'
 import {basename} from 'path'
 
 let selenium: Selenium

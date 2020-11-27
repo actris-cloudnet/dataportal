@@ -2,8 +2,6 @@ import axios from 'axios'
 import {Connection, createConnection} from 'typeorm/index'
 import {backendPrivateUrl} from '../../lib'
 import {Status} from '../../../src/entity/Upload'
-import * as express from 'express'
-import {Server} from 'http'
 
 let conn: Connection
 let repo: any
@@ -19,7 +17,6 @@ const validMetadata = {
   instrument: 'mira',
   site: 'granada'
 }
-let server: Server
 
 const str2base64 = (hex: string) =>
   Buffer.from(hex, 'utf8').toString('base64')
