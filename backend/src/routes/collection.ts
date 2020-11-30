@@ -6,8 +6,6 @@ import axios from 'axios'
 import config from '../config'
 import {Connection, Repository} from 'typeorm'
 import {File} from '../entity/File'
-import {join} from 'path'
-import {constants as fsconst, promises as fsp} from 'fs'
 import {convertToSearchResponse} from '../lib'
 
 export class CollectionRoutes {
@@ -83,13 +81,4 @@ export class CollectionRoutes {
         res.send(response)
       })
       .catch(err => next({ status: 500, errors: err }))
-
-  private allFilesAreReadable = (filepaths: string[]) =>
-    Promise.all(filepaths.map(filepath => fsp.access(filepath, fsconst.R_OK)))
-
-  private getFilePaths = (files: File[]) =>
-    files
-      .map(file => file.filename)
-      .map(filename => join(this.publicDir, filename))
-
 }
