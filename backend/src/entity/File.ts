@@ -93,7 +93,6 @@ export function isFile(obj: any): obj is File {
       && isValidDate(obj.createdAt)
       && 'updatedAt' in obj
       && isValidDate(obj.updatedAt)
-      && 'visualizations' in obj
       && (obj.volatile === true || (obj.volatile === false && 'pid' in obj))
 }
 

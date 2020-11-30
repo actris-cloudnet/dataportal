@@ -27,6 +27,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   await vizRepo.delete({})
+  await searchFileRepo.delete({})
   return fileRepo.delete({})
 })
 
@@ -42,13 +43,14 @@ async function putFile(json: any) {
 }
 
 describe('PUT /files/:s3key', () => {
-  test('inserting new file', async () => {
+  test('inserting new volatile file', async () => {
+    console.log(await fileRepo.findOne(volatileFile.uuid))
     await expect(putFile(volatileFile)).resolves.toMatchObject({status: 201})
     await expect(searchFileRepo.findOneOrFail({where: {uuid: volatileFile.uuid}})).resolves.toBeTruthy()
     return expect(fileRepo.findOneOrFail(volatileFile.uuid)).resolves.toBeTruthy()
   })
 
-  test('updating existing file', async () => {
+  test('updating existing volatile file', async () => {
     await expect(putFile(volatileFile)).resolves.toMatchObject({status: 201})
     const dbRow1 = await fileRepo.findOneOrFail(volatileFile.uuid)
     await expect(putFile(volatileFile)).resolves.toMatchObject({status: 200})
@@ -56,6 +58,23 @@ describe('PUT /files/:s3key', () => {
     await expect(searchFileRepo.findOneOrFail({where: {uuid: volatileFile.uuid}})).resolves.toBeTruthy()
     expect(dbRow1.updatedAt < dbRow2.updatedAt)
   })
+
+  test('inserting new version of an existing freezed file', async () => {
+    await expect(putFile(stableFile)).resolves.toMatchObject({status: 201})
+    const newVersion = {...stableFile,
+      ...{
+        uuid: '3cf275bb-5b09-42ec-8784-943fe2a745f6',
+        checksum: '510980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678'
+      }
+    }
+    await expect(putFile(newVersion)).resolves.toMatchObject({status: 200})
+    await expect(fileRepo.findOneOrFail({where: {uuid: newVersion.uuid}})).resolves.toBeTruthy()
+    await expect(searchFileRepo.findOneOrFail({where: {uuid: stableFile.uuid}})).rejects
+      .toBeTruthy()
+    await expect(searchFileRepo.findOneOrFail({where: {uuid: newVersion.uuid}})).resolves
+      .toBeTruthy()
+  })
+
 
   test('errors on invalid location', async () => {
     const tmpfile = {...stableFile}
@@ -79,7 +98,7 @@ describe('PUT /files/:s3key', () => {
     tmpfile.sourceFileIds = [stableFile.uuid]
     tmpfile.uuid = '62b32746-faf0-4057-9076-ed2e698dcc34'
     tmpfile.checksum = 'dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b5'
-    await expect(putFile(tmpfile)).resolves.toMatchObject({status: 201})
+    await expect(putFile(tmpfile)).resolves.toMatchObject({status: 200})
     const dbRow1 = await fileRepo.findOneOrFail(tmpfile.uuid)
     return expect(dbRow1.sourceFileIds).toMatchObject([stableFile.uuid])
   })

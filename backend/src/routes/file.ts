@@ -77,7 +77,6 @@ export class FileRoutes {
     file.s3key = req.params[0]
     file.createdAt = new Date()
     file.updatedAt = file.createdAt
-    file.visualizations = req.body.visualizations || []
     if (!isFile(file)) return next({status: 422, errors: ['Request body is missing fields or has invalid values in them']})
 
     try {
@@ -95,30 +94,35 @@ export class FileRoutes {
     }
 
     try {
-      const existingFile = await this.fileRepo.findOne({uuid: file.uuid}, { relations: ['site']})
+      const existingFile = await this.fileRepo.findOne({s3key: file.s3key}, { relations: ['site']})
       const searchFile = new SearchFile(file)
-      if (existingFile == undefined) {
+      if (existingFile == undefined) { // New file
         await this.conn.transaction(async transactionalEntityManager => {
-          await transactionalEntityManager.save(File, file)
-          await transactionalEntityManager.save(SearchFile, searchFile)
+          await transactionalEntityManager.insert(File, file)
+          await transactionalEntityManager.insert(SearchFile, searchFile)
         })
-        return res.sendStatus(201)
+        res.sendStatus(201)
+      } else if (existingFile.site.isTestSite || existingFile.volatile) { // Replace existing
+        await this.conn.transaction(async transactionalEntityManager => {
+          await transactionalEntityManager.update(File, {uuid: file.uuid}, file)
+          await transactionalEntityManager.update(SearchFile, {uuid: file.uuid}, searchFile)
+        })
+        res.sendStatus(200)
+      } else if (existingFile.uuid != file.uuid) { // New version
+        await this.conn.transaction(async transactionalEntityManager => {
+          await transactionalEntityManager.insert(File, file)
+          await transactionalEntityManager.delete(SearchFile, {uuid: existingFile.uuid})
+          await transactionalEntityManager.insert(SearchFile, searchFile)
+        })
+        res.sendStatus(200)
       } else {
-        if (existingFile.uuid != file.uuid || existingFile.site.isTestSite || existingFile.volatile) {
-          await this.conn.transaction(async transactionalEntityManager => {
-            await transactionalEntityManager.save(File, file)
-            await transactionalEntityManager.delete(SearchFile, {uuid: existingFile.uuid})
-            await transactionalEntityManager.save(SearchFile, searchFile)
-          })
-          return res.sendStatus(200)
-        }
-        return next({
+        next({
           status: 403,
           errors: ['File exists and cannot be updated since it is freezed and not from a test site']
         })
       }
     } catch (e) {
-      return next({status: 500, errors: e})
+      next({status: 500, errors: e})
     }
   }
 
