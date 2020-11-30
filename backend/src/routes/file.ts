@@ -75,8 +75,7 @@ export class FileRoutes {
   putFile: RequestHandler = async (req: Request, res: Response, next) => {
     const file = req.body
     file.s3key = req.params[0]
-    file.createdAt = new Date()
-    file.updatedAt = file.createdAt
+    file.updatedAt = new Date()
     if (!isFile(file)) return next({status: 422, errors: ['Request body is missing fields or has invalid values in them']})
 
     try {
@@ -97,12 +96,14 @@ export class FileRoutes {
       const existingFile = await this.fileRepo.findOne({s3key: file.s3key}, { relations: ['site']})
       const searchFile = new SearchFile(file)
       if (existingFile == undefined) { // New file
+        file.createdAt = file.updatedAt
         await this.conn.transaction(async transactionalEntityManager => {
           await transactionalEntityManager.insert(File, file)
           await transactionalEntityManager.insert(SearchFile, searchFile)
         })
         res.sendStatus(201)
       } else if (existingFile.site.isTestSite || existingFile.volatile) { // Replace existing
+        file.createdAt = existingFile.createdAt
         await this.conn.transaction(async transactionalEntityManager => {
           await transactionalEntityManager.update(File, {uuid: file.uuid}, file)
           await transactionalEntityManager.update(SearchFile, {uuid: file.uuid}, searchFile)
@@ -110,6 +111,7 @@ export class FileRoutes {
         res.sendStatus(200)
       } else if (existingFile.uuid != file.uuid) { // New version
         await this.conn.transaction(async transactionalEntityManager => {
+          file.createdAt = file.updatedAt
           await transactionalEntityManager.insert(File, file)
           await transactionalEntityManager.delete(SearchFile, {uuid: existingFile.uuid})
           await transactionalEntityManager.insert(SearchFile, searchFile)

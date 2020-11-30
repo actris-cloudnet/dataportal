@@ -44,7 +44,6 @@ async function putFile(json: any) {
 
 describe('PUT /files/:s3key', () => {
   test('inserting new volatile file', async () => {
-    console.log(await fileRepo.findOne(volatileFile.uuid))
     await expect(putFile(volatileFile)).resolves.toMatchObject({status: 201})
     await expect(searchFileRepo.findOneOrFail({where: {uuid: volatileFile.uuid}})).resolves.toBeTruthy()
     return expect(fileRepo.findOneOrFail(volatileFile.uuid)).resolves.toBeTruthy()
@@ -56,6 +55,7 @@ describe('PUT /files/:s3key', () => {
     await expect(putFile(volatileFile)).resolves.toMatchObject({status: 200})
     const dbRow2 = await fileRepo.findOneOrFail(volatileFile.uuid)
     await expect(searchFileRepo.findOneOrFail({where: {uuid: volatileFile.uuid}})).resolves.toBeTruthy()
+    expect(dbRow1.createdAt).toEqual(dbRow2.createdAt)
     expect(dbRow1.updatedAt < dbRow2.updatedAt)
   })
 

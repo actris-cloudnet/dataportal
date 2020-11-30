@@ -89,10 +89,6 @@ export function isFile(obj: any): obj is File {
       && 'format' in obj
       && 's3key' in obj
       && 'version' in obj
-      && 'createdAt' in obj
-      && isValidDate(obj.createdAt)
-      && 'updatedAt' in obj
-      && isValidDate(obj.updatedAt)
       && (obj.volatile === true || (obj.volatile === false && 'pid' in obj))
 }
 
