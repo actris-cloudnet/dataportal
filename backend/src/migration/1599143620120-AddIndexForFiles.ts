@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class AddIndexForFiles1599143620120 implements MigrationInterface {
     name = 'AddIndexForFiles1599143620120'

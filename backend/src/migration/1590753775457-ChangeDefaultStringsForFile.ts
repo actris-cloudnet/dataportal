@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class ChangeDefaultStringsForFile1590753775457 implements MigrationInterface {
     name = 'ChangeDefaultStringsForFile1590753775457'

@@ -1,4 +1,4 @@
-import { By, until, WebDriver } from 'selenium-webdriver'
+import {By, until, WebDriver} from 'selenium-webdriver'
 import axios from 'axios'
 import {putFile} from '../lib'
 import {initDriver} from '../lib/selenium'
@@ -15,7 +15,7 @@ async function awaitAndFind(by: By) {
 beforeAll(async () => {
   driver = await initDriver()
 
-  return putFile('20190723_bucharest_classification.nc')
+  await putFile('20190723_bucharest_classification.nc')
 })
 
 afterAll(async () => driver.close())
@@ -36,7 +36,7 @@ describe('file landing page', () => {
       '1.0.4',
       '20190723_bucharest_classification.nc',
       'b77b731aaae54f403aae6765ad1d20e1603b4454e2bc0d461aab4985a4a82ca4',
-      139021,
+      123,
       'HDF5 (NetCDF4)',
       'Bucharest, Romania',
       '44.348', '26.029'
@@ -54,7 +54,7 @@ describe('file landing page', () => {
     const downloadUrl = await button.getAttribute('href')
     const response = await axios.head(downloadUrl)
     expect(response.status).toBe(200)
-    return expect(response.headers['content-length']).toBe('139021')
+    return expect(response.headers['content-length']).toBe('123')
   })
 
 })

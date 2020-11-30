@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class AddTestColumnForSite1586271414780 implements MigrationInterface {
     name = 'AddTestColumnForSite1586271414780'

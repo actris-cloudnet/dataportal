@@ -27,7 +27,7 @@ waitport () {
     interval=0.5
     i=0
     echo -n "Waiting for port $1... "
-    while ! nc -z localhost $1; do
+    while ! nc -z localhost $1 2> /dev/null; do
         if [[ "$i" -ge $timeout ]]; then
             echo "Timeout"
             return 2
@@ -57,7 +57,6 @@ case "$action" in
     cd backend
     target=$pid_dir/.node.pid
     if [[ ! -f $target ]]; then
-        echo $cmd
         eval "nohup npx nodemon -w build -- $backend_port >> $pid_dir/all.log 2>&1 &"
         echo $! > $target
     fi
@@ -97,15 +96,24 @@ case "$action" in
     ;;
 
     test-start)
-    export NODE_ENV='test' && ./control start && unset NODE_ENV
+    export NODE_ENV='test'
+    node backend/tests/lib/storage-service-mock.js >> backend/tests/all.log 2>&1 &
+    ./control start
+    waitport 5910
+    unset NODE_ENV
     ;;
 
     test-stop)
-    export NODE_ENV='test' && ./control stop && unset NODE_ENV
+    set +e
+    export NODE_ENV='test'
+    ./control stop
+    kill $(lsof -t -i:5910)
+    unset NODE_ENV
     ;;
 
     test-restart)
-    export NODE_ENV='test' && ./control restart && unset NODE_ENV
+    ./control test-stop
+    ./control test-start
     ;;
 
     purge)
@@ -189,7 +197,8 @@ case "$action" in
     cd frontend
     npx vue-cli-service build --mode e2e
     cd ../backend
-    npx jest tests/selenium
+    set +e
+    npx jest --runInBand tests/selenium
     cd ..
     ;;
 

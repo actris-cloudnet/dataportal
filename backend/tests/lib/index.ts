@@ -1,9 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import { createConnection } from 'typeorm'
-import { spawn } from 'child_process'
-import { Parser } from 'xml2js'
 import {resolve} from 'path'
+import {createConnection} from 'typeorm'
 import axios from 'axios'
 
 export function clearDir(dir: string) {
@@ -22,36 +20,14 @@ export async function clearRepo(repo: string) {
   return conn.close()
 }
 
-export async function runNcdump(path: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const proc = spawn('ncdump', ['-xh', path])
-    let out: string = ''
-    proc.stderr.on('data', console.error)
-    proc.stdout.on('data', data => {
-      out += data.toString()
-    })
-    proc.on('exit', (code, _) => code ? reject(code) : resolve(out))
-    proc.on('error', err => reject(err))
-  })
-}
-
-export async function parseUuid(xml: any) {
-  const parser = new Parser()
-  return new Promise((resolve) => {
-    parser.parseString(xml, (err:any, result:any) => {
-      for (let n=0; n < result.netcdf.attribute.length; n++) {
-        let {name, value} = result.netcdf.attribute[n].$
-        if (name == 'file_uuid') resolve(value)
-      }
-    })
-  })
-}
-
 export async function putFile(filename: string) {
-  const xml = await runNcdump(`tests/data/${filename}`)
-  const uuid = await parseUuid(xml)
-  const url = `${backendPrivateUrl}files/${uuid}`
-  return axios.put(url, xml, {headers: { 'Content-Type': 'application/xml' }})
+  await Promise.all([
+    axios.put(`${storageServiceUrl}cloudnet-product-volatile/${filename}`, 'content'),
+    axios.put(`${storageServiceUrl}cloudnet-product/${filename}`, 'content')
+  ])
+  const json = JSON.parse(fs.readFileSync(`tests/data/${filename}.json`, 'utf8'))
+  const url = `${backendPrivateUrl}files/${filename}`
+  return axios.put(url, json)
 }
 
 export const wait = async (ms: number) => new Promise((resolve, _) => setTimeout(resolve, ms))
@@ -64,14 +40,14 @@ export const publicDir = 'tests/data/public'
 export const backendProtectedUrl = 'http://localhost:3001/protected/'
 export const backendPublicUrl = 'http://localhost:3001/api/'
 export const backendPrivateUrl = 'http://localhost:3001/'
-export const publicVizDir = 'tests/data/public/viz'
 export const fileServerUrl = 'http://localhost:4001/'
+export const storageServiceUrl = 'http://localhost:5910/'
 export const visualizationPayloads = [  {
-  fullPath: resolve('tests/data/20200501_bucharest_classification_detection_status.png'),
+  s3key: resolve('tests/data/20200501_bucharest_classification_detection_status.png'),
   sourceFileId: '7a9c3894ef7e43d9aa7da3f25017acec',
   variableId: 'classification-detection_status'
 },  {
-  fullPath: resolve('tests/data/20200501_bucharest_classification_target_classification.png'),
+  s3key: resolve('tests/data/20200501_bucharest_classification_target_classification.png'),
   sourceFileId: '7a9c3894ef7e43d9aa7da3f25017acec',
   variableId: 'classification-target_classification'
 } ]

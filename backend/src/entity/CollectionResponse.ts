@@ -1,6 +1,6 @@
 import {Collection} from './Collection'
 import {SearchFileResponse} from './SearchFileResponse'
-import {convertToSearchFiles} from '../lib'
+import {convertToSearchResponse} from '../lib'
 
 export class CollectionResponse {
 
@@ -14,7 +14,7 @@ export class CollectionResponse {
 
   constructor(coll: Collection) {
     this.uuid = coll.uuid
-    this.files = convertToSearchFiles(coll.files)
+    this.files = convertToSearchResponse(coll.files.sort((a, b) => a.measurementDate > b.measurementDate ? 1 : -1))
     this.title = coll.title
     this.pid = coll.pid
     this.downloadCount = coll.downloadCount

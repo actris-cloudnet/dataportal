@@ -3,19 +3,21 @@ import {Status, Upload} from '../entity/Upload'
 import {Connection, Repository} from 'typeorm'
 import {Request, RequestHandler, Response} from 'express'
 import {
+  dateNDaysAgo,
   fetchAll,
+  getS3keyForUpload,
   isValidDate,
   rowExists,
+  ssAuthString,
   toArray,
-  tomorrow,
-  dateNDaysAgo
+  tomorrow
 } from '../lib'
 import {basename} from 'path'
 import config from '../config'
 import {ReducedMetadataResponse} from '../entity/ReducedMetadataResponse'
 import validator from 'validator'
 import {Instrument} from '../entity/Instrument'
-import { Model } from '../entity/Model'
+import {Model} from '../entity/Model'
 import * as http from 'http'
 import ReadableStream = NodeJS.ReadableStream
 
@@ -101,12 +103,24 @@ export class UploadRoutes {
         : next({ status: 500, errors: `Internal server error: ${err.code}`}))
   }
 
+  updateMetadata: RequestHandler = async (req: Request, res: Response, next) => {
+    const partialUpload = req.body
+    if (!partialUpload.uuid) return next({status: 422, errors: ['Request body is missing uuid']})
+    try {
+      const updateResult = await this.uploadedMetadataRepo.update({uuid: partialUpload.uuid}, partialUpload)
+      if (updateResult.affected == 0) return next({status: 422, errors: ['No file matches the provided uuid']})
+      res.sendStatus(200)
+    } catch (e) {
+      return next({status: 500, errors: e})
+    }
+  }
+
   metadata: RequestHandler = async (req: Request, res: Response, next) => {
     const checksum = req.params.checksum
     this.uploadedMetadataRepo.findOne({checksum: checksum}, { relations: ['site', 'instrument', 'model'] })
       .then(uploadedMetadata => {
         if (uploadedMetadata == undefined) return next({ status: 404, errors: 'No metadata was found with provided id'})
-        res.send(uploadedMetadata)
+        res.send(this.addS3keyToUpload(uploadedMetadata))
       })
       .catch(err => next({ status: 500, errors: err}))
   }
@@ -114,7 +128,7 @@ export class UploadRoutes {
   listMetadata: RequestHandler = async (req: Request, res: Response, next) => {
     (await this.metadataQueryBuilder(req.query))
       .getMany()
-      .then(uploadedMetadata => res.send(uploadedMetadata))
+      .then(uploadedMetadata => res.send(uploadedMetadata.map(this.addS3keyToUpload)))
       .catch(err => {next({status: 500, errors: err})})
   }
 
@@ -130,11 +144,11 @@ export class UploadRoutes {
     const checksum = req.params.checksum
     const site = req.params.site
     try {
-      const md = await this.uploadedMetadataRepo.findOne({where: {checksum: checksum, site: {id: site}}, relations: ['site']})
-      if (!md) return next({status: 400, errors: 'No metadata matches this hash'})
-      if (md.status != Status.CREATED) return res.sendStatus(200) // Already uploaded
+      const upload = await this.uploadedMetadataRepo.findOne({where: {checksum: checksum, site: {id: site}}, relations: ['site']})
+      if (!upload) return next({status: 400, errors: 'No metadata matches this hash'})
+      if (upload.status != Status.CREATED) return res.sendStatus(200) // Already uploaded
 
-      const {status, body} = await this.makeRequest('PUT', md.s3key, checksum, req)
+      const {status, body} = await this.makeRequest(getS3keyForUpload(upload), checksum, req)
 
       await this.uploadedMetadataRepo.update({checksum: checksum},
         {status: Status.UPLOADED, updatedAt: new Date(), size: body.size}
@@ -149,22 +163,20 @@ export class UploadRoutes {
     }
   }
 
-  private async makeRequest(method: string, key: string, checksum: string | null, inputStream: ReadableStream):
+  private async makeRequest(key: string, checksum: string, inputStream: ReadableStream):
     Promise<{status: number, body: any}> {
 
     let headers = {
-      'Authorization': 'Basic ' + // eslint-disable-line prefer-template
-      Buffer.from(`${config.storageService.user}:${config.storageService.password}`).toString('base64'),
+      'Authorization': ssAuthString(),
+      'Content-MD5': Buffer.from(checksum, 'hex').toString('base64')
     }
-    if (checksum)
-      headers = {...headers, ...{'Content-MD5': Buffer.from(checksum, 'hex').toString('base64')}}
 
     const requestOptions = {
       host: config.storageService.host,
       port: config.storageService.port,
       path: `/cloudnet-upload/${key}`,
       headers,
-      method
+      method: 'PUT'
     }
 
     return new Promise((resolve, reject) => {
@@ -210,6 +222,10 @@ export class UploadRoutes {
 
     return Promise.resolve(qb)
   }
+
+  private addS3keyToUpload = (upload: Upload) =>
+    ({...upload, ...{s3key: getS3keyForUpload(upload)}})
+
 
   validateMetadata: RequestHandler = async (req, res, next) => {
     const body = req.body

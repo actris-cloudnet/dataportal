@@ -2,13 +2,12 @@ import axios from 'axios'
 import {Connection, createConnection} from 'typeorm/index'
 import {backendPrivateUrl} from '../../lib'
 import {Status} from '../../../src/entity/Upload'
-import * as express from 'express'
-import {Server} from 'http'
 
 let conn: Connection
 let repo: any
 
 const metadataUrl = `${backendPrivateUrl}upload/metadata/`
+const privateMetadataUrl = `${backendPrivateUrl}upload-metadata/`
 const dataUrl = `${backendPrivateUrl}upload/data/`
 
 const validMetadata = {
@@ -18,7 +17,6 @@ const validMetadata = {
   instrument: 'mira',
   site: 'granada'
 }
-let server: Server
 
 const str2base64 = (hex: string) =>
   Buffer.from(hex, 'utf8').toString('base64')
@@ -167,25 +165,6 @@ describe('PUT /upload/data/:checksum', () => {
   const validUrl = `${dataUrl}${validMetadata.checksum}`
   const validFile = 'content'
 
-  beforeAll(next => {
-    const app = express()
-    app.put('/cloudnet-upload/*', (req, res, _next) =>{
-      req.on('data', chunk => {
-        const chunkStr = chunk.toString()
-        if (chunkStr == 'content') return res.status(201).send({size: chunk.length})
-        if (chunkStr == 'invalidhash') return res.status(400).send('Checksum does not match file contents')
-        if (chunkStr == 'servererr') return res.sendStatus(400)
-        return res.sendStatus(500)
-      })
-    })
-    server = app.listen(5910, next)
-    return
-  })
-
-  afterAll(next => {
-    server.close(next)
-  })
-
   beforeEach(async () => {
     await repo.delete({})
     return axios.post(metadataUrl, validMetadata, {headers})
@@ -301,3 +280,17 @@ describe('POST /model-upload/metadata', () => {
 
 })
 
+describe('POST /upload-metadata/', () => {
+  let uuid: string
+
+  beforeAll(async () => {
+    await axios.post(metadataUrl, validMetadata, {headers})
+    const {data} = await axios.get(privateMetadataUrl)
+    uuid = data[0].uuid
+  })
+
+  test('updates status', async () => {
+    await expect(axios.post(privateMetadataUrl, {uuid, status: Status.PROCESSED})).resolves.toMatchObject({status: 200})
+    return expect(repo.findOne(uuid)).resolves.toMatchObject({status: Status.PROCESSED})
+  })
+})

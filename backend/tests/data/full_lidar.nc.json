@@ -1,0 +1,14 @@
+{
+  "uuid": "04ddd0c2f74e481198465c33b95f06af",
+  "pid": "",
+  "volatile": true,
+  "measurementDate": "2020-2-26",
+  "history": "2020-04-07 12:26:42 - ceilometer file created",
+  "product": "lidar",
+  "cloudnetpyVersion": "1.0.7",
+  "checksum": "d7470fd228064d4b8d5a71cad8f538718d535032b0f41520e4722795491fbb26",
+  "format": "HDF5 (NetCDF4)",
+  "site": "bucharest",
+  "size": 123,
+  "version": "123"
+}

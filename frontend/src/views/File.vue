@@ -76,7 +76,7 @@ main#filelanding
           </span>
       </div>
       <div class="actions">
-        <a class="download" :href="response.url">
+        <a class="download" :href="response.downloadUrl">
           Download file
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
         </a>
@@ -105,7 +105,7 @@ main#filelanding
             <dt>Hash (SHA-256)</dt>
             <dd>{{ response.checksum }}</dd>
             <dt>Last modified</dt>
-            <dd>{{ humanReadableTimestamp(response.releasedAt) }}</dd>
+            <dd>{{ humanReadableTimestamp(response.updatedAt) }}</dd>
             <dt>Versions</dt>
             <dd>
               <router-link v-if="previousVersion" id="previousVersion" :to="`/file/${previousVersion}`">
@@ -188,7 +188,7 @@ main#filelanding
             <div v-for="viz in getVisualizations(visualizations)"
                  :key="viz.productVariable.id" class="variable">
               <h4>{{ viz.productVariable.humanReadableName }}</h4>
-              <img :alt="visualization" v-bind:src="`${quicklookUrl}${viz.filename}`" class="visualization">
+              <img :alt="visualization" v-bind:src="`${quicklookUrl}${viz.s3key}`" class="visualization">
             </div>
           </div>
           <a v-if="visualizations.length > 1 && !allVisualizations"
@@ -213,9 +213,9 @@ main#filelanding
 <script lang="ts">
 import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import axios from 'axios'
-import {getIconUrl, humanReadableSize, humanReadableDate, sortVisualizations, humanReadableTimestamp} from '../lib'
-import { DevMode } from '../lib/DevMode'
-import { File } from '../../../backend/src/entity/File'
+import {getIconUrl, humanReadableDate, humanReadableSize, humanReadableTimestamp, sortVisualizations} from '../lib'
+import {DevMode} from '../lib/DevMode'
+import {File} from '../../../backend/src/entity/File'
 import {Visualization} from '../../../backend/src/entity/Visualization'
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 

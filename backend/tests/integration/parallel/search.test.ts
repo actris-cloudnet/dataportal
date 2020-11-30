@@ -1,8 +1,8 @@
 import 'reflect-metadata'
-import { backendPublicUrl, genResponse } from '../../lib'
+import {backendPublicUrl, genResponse} from '../../lib'
 import axios from 'axios'
-import { RequestError } from '../../../src/entity/RequestError'
-import { createConnection, Connection } from 'typeorm'
+import {RequestError} from '../../../src/entity/RequestError'
+import {Connection, createConnection} from 'typeorm'
 import {readResources} from '../../../../shared/lib'
 
 let conn: Connection
@@ -131,11 +131,11 @@ describe('/api/files', () => {
     expect(res.data[0].uuid).toEqual('8bb32746-faf0-4057-9076-ed2e698dcf36')
   })
 
-  it('returns optionally all versions of a file sorted by releasedAt', async () => {
+  it('returns optionally all versions of a file sorted by updatedAt', async () => {
     const res = await axios.get(url, { params: { product: 'categorize', dateTo: '2019-07-15', allVersions: '' }})
     expect(res.data).toHaveLength(3)
-    expect(new Date(res.data[0].releasedAt).getTime()).toBeGreaterThan(new Date(res.data[1].releasedAt).getTime())
-    expect(new Date(res.data[1].releasedAt).getTime()).toBeGreaterThan(new Date(res.data[2].releasedAt).getTime())
+    expect(new Date(res.data[0].updatedAt).getTime()).toBeGreaterThan(new Date(res.data[1].updatedAt).getTime())
+    expect(new Date(res.data[1].updatedAt).getTime()).toBeGreaterThan(new Date(res.data[2].updatedAt).getTime())
   })
 
   it('returns the latest file when limit=1', async () => {

@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class RenameChecksum1604306824932 implements MigrationInterface {
     name = 'RenameChecksum1604306824932'

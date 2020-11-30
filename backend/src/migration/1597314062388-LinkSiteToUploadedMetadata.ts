@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class LinkSiteToUploadedMetadata1597314062388 implements MigrationInterface {
     name = 'LinkSiteToUploadedMetadata1597314062388'

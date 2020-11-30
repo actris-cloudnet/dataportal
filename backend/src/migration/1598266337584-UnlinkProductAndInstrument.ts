@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class UnlinkProductAndInstrument1598266337584 implements MigrationInterface {
     name = 'UnlinkProductAndInstrument1598266337584'

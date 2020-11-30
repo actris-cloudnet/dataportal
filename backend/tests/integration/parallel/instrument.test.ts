@@ -1,4 +1,4 @@
-import { backendPublicUrl } from '../../lib'
+import {backendPublicUrl} from '../../lib'
 import axios from 'axios'
 import {readResources} from '../../../../shared/lib'
 

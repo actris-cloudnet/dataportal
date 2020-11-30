@@ -1,15 +1,13 @@
-import {clearDir, clearRepo, inboxDir, publicDir, publicVizDir, wait} from './index'
-import {Builder, By, Key, until, WebDriver, } from 'selenium-webdriver'
+import {clearRepo, wait} from './index'
+import {Builder, By, Key, until, WebDriver,} from 'selenium-webdriver'
 import * as firefox from 'selenium-webdriver/firefox'
 
 export async function initDriver() {
   const options = new firefox.Options()
   if (process.env.CI) options.addArguments('-headless') // Run in headless on CI
-  clearDir(inboxDir)
-  clearDir(publicDir)
-  clearDir(publicVizDir)
   await clearRepo('visualization')
   await clearRepo('file')
+  await clearRepo('search_file')
   return new Builder()
     .forBrowser('firefox')
     .setFirefoxOptions(options)

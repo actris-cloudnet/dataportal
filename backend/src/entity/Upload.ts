@@ -3,7 +3,7 @@ import {Site} from './Site'
 import {Instrument} from './Instrument'
 import {Model} from './Model'
 import {BeforeInsert, BeforeUpdate} from 'typeorm'
-import { v4 as generateUuidV4 } from 'uuid'
+import {v4 as generateUuidV4} from 'uuid'
 
 export enum Status {
   CREATED = 'created',
@@ -53,10 +53,6 @@ export class Upload {
 
   @ManyToOne(_ => Model, model => model.uploadedMetadatas)
   model!: Model
-
-  get s3key() {
-    return `${this.site.id}/${this.uuid}/${this.filename}`
-  }
 
   @BeforeInsert()
   setCreatedAt() {

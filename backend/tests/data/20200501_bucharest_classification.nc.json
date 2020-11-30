@@ -1,0 +1,14 @@
+{
+  "uuid": "7a9c3894ef7e43d9aa7da3f25017acec",
+  "pid": "",
+  "volatile": true,
+  "measurementDate": "2020-05-01",
+  "history": "2020-05-03 05:00:57 - classification file created\n2020-05-03 05:00:57 - categorize file created\n2020-05-03 05:00:32 - radar file created\n2020-05-03 05:00:21 - ceilometer file created",
+  "product": "classification",
+  "cloudnetpyVersion": "1.0.9",
+  "checksum": "90799fdd27603e14bf257937391505591667a2ba00cddd2deca0bb2f45899c9f",
+  "format": "HDF5 (NetCDF4)",
+  "site": "bucharest",
+  "size": 123,
+  "version": "123"
+}

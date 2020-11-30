@@ -1,0 +1,82 @@
+[
+    {
+      "uuid": "38092c00-161d-4ca2-a29d-628cf8e960f6",
+      "volatile": true,
+      "measurementDate": "2018-11-15",
+      "product": "radar",
+      "size": 12200657,
+      "site": "macehead"
+    },
+    {
+      "uuid": "bde7a35f-03aa-4bff-acfb-b4974ea9f217",
+      "volatile": true,
+      "measurementDate": "2018-06-09",
+      "product": "classification",
+      "size": 130744,
+      "site": "macehead"
+    },
+    {
+      "uuid": "a5d1d5af-3667-41bc-b952-e684f627d91c",
+      "volatile": true,
+      "measurementDate": "2014-12-05",
+      "product": "model",
+      "size": 500452,
+      "site": "macehead"
+    },
+    {
+      "uuid": "d21d6a9b-6804-4465-a026-74ec429fe17d",
+      "volatile": true,
+      "measurementDate": "2019-09-01",
+      "product": "radar",
+      "size": 16027310,
+      "site": "hyytiala"
+    },
+    {
+      "uuid": "22b32746-faf0-4057-9076-ed2e698dcc34",
+      "volatile": false,
+      "measurementDate": "2019-07-15",
+      "product": "categorize",
+      "size": 7127282,
+      "site": "bucharest"
+    },
+    {
+      "uuid": "6cb32746-faf0-4057-9076-ed2e698dcf36",
+      "volatile": false,
+      "measurementDate": "2019-07-15",
+      "product": "categorize",
+      "size": 7127282,
+      "site": "bucharest"
+    },
+    {
+      "uuid": "8bb32746-faf0-4057-9076-ed2e698dcf36",
+      "volatile": false,
+      "measurementDate": "2019-07-15",
+      "product": "categorize",
+      "size": 7127282,
+      "site": "bucharest"
+    },
+    {
+      "uuid": "9e04d8ef-0f2b-4823-835d-33e458403c67",
+      "volatile": true,
+      "measurementDate": "2020-01-26",
+      "size": 501452,
+      "product": "model",
+      "site": "granada"
+    },
+    {
+      "uuid": "1bb32746-faf0-4057-9076-ed2e698dcf36",
+      "volatile": false,
+      "measurementDate": "2019-07-16",
+      "product": "categorize",
+      "size": 7127282,
+      "site": "bucharest"
+    },
+    {
+      "uuid": "2bb32746-faf0-4057-9076-ed2e698dcf36",
+      "volatile": false,
+      "measurementDate": "2019-07-16",
+      "product": "classification",
+      "size": 7127282,
+      "site": "bucharest"
+    }
+]

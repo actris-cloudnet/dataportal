@@ -1,14 +1,6 @@
-import {
-  BeforeInsert,
-  BeforeUpdate,
-  Column,
-  Entity,
-  JoinTable,
-  ManyToMany,
-  PrimaryColumn,
-} from 'typeorm'
+import {BeforeInsert, BeforeUpdate, Column, Entity, JoinTable, ManyToMany, PrimaryColumn,} from 'typeorm'
 import {File} from './File'
-import { v4 as generateUuidV4 } from 'uuid'
+import {v4 as generateUuidV4} from 'uuid'
 
 @Entity()
 export class Collection {

@@ -1,4 +1,4 @@
-import {Entity, Column, PrimaryColumn, OneToMany} from 'typeorm'
+import {Column, Entity, OneToMany, PrimaryColumn} from 'typeorm'
 import {File} from './File'
 import {Upload} from './Upload'
 

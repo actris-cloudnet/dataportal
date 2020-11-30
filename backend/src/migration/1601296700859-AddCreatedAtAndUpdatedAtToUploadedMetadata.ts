@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class AddCreatedAtAndUpdatedAtToUploadedMetadata1601296700859 implements MigrationInterface {
     name = 'AddCreatedAtAndUpdatedAtToUploadedMetadata1601296700859'

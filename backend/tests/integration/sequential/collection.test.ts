@@ -2,9 +2,12 @@ import axios from 'axios'
 import {backendPublicUrl, genResponse} from '../../lib'
 import {Connection, createConnection, Repository} from 'typeorm'
 import {Collection} from '../../../src/entity/Collection'
+import {promises as fsp} from 'fs'
+import {File} from '../../../src/entity/File'
 
 let conn: Connection
 let repo: Repository<Collection>
+let fileRepo: Repository<File>
 const url = `${backendPublicUrl}collection/`
 
 const validFileUuids = [
@@ -17,6 +20,10 @@ describe('POST /api/collection', () => {
   beforeAll(async () => {
     conn = await createConnection('test')
     repo = conn.getRepository('collection')
+    fileRepo = conn.getRepository('file')
+
+    // Populate necessary table
+    return fileRepo.save(JSON.parse((await fsp.readFile('fixtures/2-file.json')).toString()))
   })
 
   beforeEach(async () => {

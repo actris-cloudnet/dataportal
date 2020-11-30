@@ -108,9 +108,9 @@
         </svg>
       </h3>
       <div v-for="viz in sortVisualizations(file.visualizations)"
-        :key="viz.filename" class="variable">
+           :key="viz.s3key" class="variable">
         <h4>{{ viz.productVariable.humanReadableName }}</h4>
-        <img alt="visualization" :src="quicklookUrl + viz.filename" class="visualization"><br>
+        <img alt="visualization" :src="quicklookUrl + viz.s3key" class="visualization"><br>
       </div>
     </div>
     </section>

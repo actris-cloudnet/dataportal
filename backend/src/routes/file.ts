@@ -2,10 +2,16 @@ import {Request, RequestHandler, Response} from 'express'
 import {Collection} from '../entity/Collection'
 import config from '../config'
 import {Connection, Repository} from 'typeorm'
-import {File} from '../entity/File'
-import {convertToSearchFiles, hideTestDataFromNormalUsers, rowExists, sortByMeasurementDateAsc} from '../lib'
-import {ReceivedFile} from '../lib/metadata2db'
+import {File, isFile} from '../entity/File'
+import {
+  checkFileExists,
+  convertToSearchResponse,
+  getBucketForFile,
+  hideTestDataFromNormalUsers,
+  sortByMeasurementDateAsc
+} from '../lib'
 import {augmentFiles} from '../lib/'
+import {SearchFile} from '../entity/SearchFile'
 
 export class FileRoutes {
 
@@ -13,12 +19,14 @@ export class FileRoutes {
     this.conn = conn
     this.collectionRepo = conn.getRepository<Collection>('collection')
     this.fileRepo = conn.getRepository<File>('file')
-    this.fileServerUrl = config.fileServerUrl
+    this.searchFileRepo = conn.getRepository<SearchFile>('search_file')
+    this.fileServerUrl = config.downloadBaseUrl
   }
 
   readonly conn: Connection
   readonly collectionRepo: Repository<Collection>
   readonly fileRepo: Repository<File>
+  readonly searchFileRepo: Repository<SearchFile>
   readonly fileServerUrl: string
 
   file: RequestHandler = async (req: Request, res: Response, next) => {
@@ -50,14 +58,14 @@ export class FileRoutes {
   search: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query
 
-    this.filesQueryBuilder(query)
+    this.searchFilesQueryBuilder(query)
       .getMany()
       .then(result => {
         if (result.length == 0) {
           next({ status: 404, errors: ['The search yielded zero results'], params: req.query })
           return
         }
-        res.send(convertToSearchFiles(result))
+        res.send(convertToSearchResponse(result))
       })
       .catch(err => {
         next({ status: 500, errors: err })
@@ -65,29 +73,73 @@ export class FileRoutes {
   }
 
   putFile: RequestHandler = async (req: Request, res: Response, next) => {
-    const isFreeze = (header:any) => {
-      const xFreeze = header['x-freeze'] || 'false'
-      return xFreeze.toLowerCase() == 'true'
-    }
-    try {
-      const receivedFile = new ReceivedFile(req.body, this.conn, isFreeze(req.headers))
+    const file = req.body
+    file.s3key = req.params[0]
+    file.updatedAt = new Date()
+    if (!isFile(file)) return next({status: 422, errors: ['Request body is missing fields or has invalid values in them']})
 
-      const existingFile = await this.fileRepo.findOne(receivedFile.getUuid(), { relations: ['site']})
-      if (existingFile == undefined) {
-        await receivedFile.insertFile()
-        return res.sendStatus(201)
+    try {
+      const sourceFileIds = req.body.sourceFileIds || []
+      await Promise.all(sourceFileIds.map((uuid: string) => this.fileRepo.findOneOrFail(uuid)))
+    } catch (e) {
+      return next({status: 422, errors: ['One or more of the specified source files were not found']})
+    }
+
+    try {
+      await checkFileExists(getBucketForFile(file), file.s3key)
+    } catch (e) {
+      console.error(e)
+      return next({status: 400, errors: ['The specified file was not found in storage service']})
+    }
+
+    try {
+      const existingFile = await this.fileRepo.findOne({s3key: file.s3key}, { relations: ['site']})
+      const searchFile = new SearchFile(file)
+      if (existingFile == undefined) { // New file
+        file.createdAt = file.updatedAt
+        await this.conn.transaction(async transactionalEntityManager => {
+          await transactionalEntityManager.insert(File, file)
+          await transactionalEntityManager.insert(SearchFile, searchFile)
+        })
+        res.sendStatus(201)
+      } else if (existingFile.site.isTestSite || existingFile.volatile) { // Replace existing
+        file.createdAt = existingFile.createdAt
+        await this.conn.transaction(async transactionalEntityManager => {
+          await transactionalEntityManager.update(File, {uuid: file.uuid}, file)
+          await transactionalEntityManager.update(SearchFile, {uuid: file.uuid}, searchFile)
+        })
+        res.sendStatus(200)
+      } else if (existingFile.uuid != file.uuid) { // New version
+        await this.conn.transaction(async transactionalEntityManager => {
+          file.createdAt = file.updatedAt
+          await transactionalEntityManager.insert(File, file)
+          await transactionalEntityManager.delete(SearchFile, {uuid: existingFile.uuid})
+          await transactionalEntityManager.insert(SearchFile, searchFile)
+        })
+        res.sendStatus(200)
       } else {
-        if (existingFile.site.isTestSite || existingFile.volatile) {
-          await receivedFile.updateFile()
-          return res.sendStatus(200)
-        }
-        return next({
+        next({
           status: 403,
           errors: ['File exists and cannot be updated since it is freezed and not from a test site']
         })
       }
     } catch (e) {
-      if (rowExists(e)) return next({status: 409, errors: e})
+      next({status: 500, errors: e})
+    }
+  }
+
+  postFile: RequestHandler = async (req: Request, res: Response, next) => {
+    const partialFile = req.body
+    if (!partialFile.uuid) return next({status: 422, errors: ['Request body is missing uuid']})
+    try {
+      const updateResult = await this.fileRepo.update({uuid: partialFile.uuid}, partialFile)
+      if (updateResult.affected == 0) return next({status: 422, errors: ['No file matches the provided uuid']})
+      delete partialFile.pid // No PID in SearchFile
+      delete partialFile.checksum // No checksum in SearchFile
+      delete partialFile.version // No version in SearchFile
+      await this.searchFileRepo.update({uuid: partialFile.uuid}, partialFile)
+      res.sendStatus(200)
+    } catch (e) {
       return next({status: 500, errors: e})
     }
   }
@@ -100,7 +152,7 @@ export class FileRoutes {
   allsearch: RequestHandler = async (req: Request, res: Response, next) =>
     this.fileRepo.find({ relations: ['site', 'product'] })
       .then(result => {
-        res.send(convertToSearchFiles(sortByMeasurementDateAsc(result)))
+        res.send(convertToSearchResponse(sortByMeasurementDateAsc(result)))
       })
       .catch(err => next({ status: 500, errors: err }))
 
@@ -112,10 +164,10 @@ export class FileRoutes {
       qb.innerJoin(sub_qb =>
         sub_qb
           .from('file', 'file')
-          .select('MAX(file.releasedAt)', 'released_at')
+          .select('MAX(file.updatedAt)', 'updated_at')
           .groupBy('file.site, file.measurementDate, file.product'),
       'last_version',
-      'file.releasedAt = last_version.released_at'
+      'file.updatedAt = last_version.updated_at'
       )
     }
     qb
@@ -123,10 +175,22 @@ export class FileRoutes {
       .andWhere('product.id IN (:...product)', query)
       .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate <= :dateTo', query)
       .andWhere('file.volatile IN (:...volatile)', query)
-      .andWhere('file.releasedAt < :releasedBefore', query)
+      .andWhere('file.updatedAt < :releasedBefore', query)
       .orderBy('file.measurementDate', 'DESC')
-      .addOrderBy('file.releasedAt', 'DESC')
+      .addOrderBy('file.updatedAt', 'DESC')
     if ('limit' in query) qb.limit(parseInt(query.limit))
+    return qb
+  }
+
+  searchFilesQueryBuilder(query: any) {
+    const qb = this.searchFileRepo.createQueryBuilder('file')
+      .leftJoinAndSelect('file.site', 'site')
+      .leftJoinAndSelect('file.product', 'product')
+      .andWhere('site.id IN (:...location)', query)
+      .andWhere('product.id IN (:...product)', query)
+      .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate <= :dateTo', query)
+      .andWhere('file.volatile IN (:...volatile)', query)
+      .orderBy('file.measurementDate', 'DESC')
     return qb
   }
 

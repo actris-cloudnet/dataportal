@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class AllowNullSize1604489422034 implements MigrationInterface {
     name = 'AllowNullSize1604489422034'

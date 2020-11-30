@@ -1,0 +1,14 @@
+{
+  "uuid": "b15be898efee44f2a1a2efa526abb853",
+  "pid": "",
+  "volatile": true,
+  "measurementDate": "2019-07-24",
+  "history": "2019-09-15 10:24:53 - ice water content file created\n2019-09-15 10:24:27 - categorize file created\n2019-09-15 10:23:31 - radar file created\n2019-09-15 10:23:52 - ceilometer file created",
+  "product": "iwc",
+  "cloudnetpyVersion": "1.0.4",
+  "checksum": "cb972b8a1c4c1a24a37208eb9199f6b8b20bd9987a68266c454ecd77ebb09bd5",
+  "format": "HDF5 (NetCDF4)",
+  "site": "macehead",
+  "size": 123,
+  "version": "123"
+}

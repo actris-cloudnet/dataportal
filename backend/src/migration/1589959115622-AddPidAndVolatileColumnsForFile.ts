@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class AddPidAndVolatileColumnsForFile1589959115622 implements MigrationInterface {
     name = 'AddPidAndVolatileColumnsForFile1589959115622'

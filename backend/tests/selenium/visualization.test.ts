@@ -1,11 +1,7 @@
-import {By, WebDriver, Key} from 'selenium-webdriver'
+import {By, Key, WebDriver} from 'selenium-webdriver'
 import axios from 'axios'
-import {
-  wait,
-  backendPrivateUrl,
-  visualizationPayloads, putFile
-} from '../lib'
-import {Selenium, initDriver} from '../lib/selenium'
+import {backendPrivateUrl, putFile, storageServiceUrl, visualizationPayloads, wait} from '../lib'
+import {initDriver, Selenium} from '../lib/selenium'
 import {basename} from 'path'
 
 let selenium: Selenium
@@ -53,9 +49,13 @@ beforeAll(async () => {
   selenium = new Selenium(driver)
 
   await putFile('20200501_bucharest_classification.nc')
+  await Promise.all([
+    axios.put(`${storageServiceUrl}cloudnet-img/${basename(visualizationPayloads[0].s3key)}`, 'content'),
+    axios.put(`${storageServiceUrl}cloudnet-img/${basename(visualizationPayloads[1].s3key)}`, 'content')
+  ])
   return Promise.all([
-    axios.put(`${backendPrivateUrl}visualizations/${basename(visualizationPayloads[0].fullPath)}`, visualizationPayloads[0]),
-    axios.put(`${backendPrivateUrl}visualizations/${basename(visualizationPayloads[1].fullPath)}`, visualizationPayloads[1]),
+    axios.put(`${backendPrivateUrl}visualizations/${basename(visualizationPayloads[0].s3key)}`, visualizationPayloads[0]),
+    axios.put(`${backendPrivateUrl}visualizations/${basename(visualizationPayloads[1].s3key)}`, visualizationPayloads[1]),
   ])
 })
 

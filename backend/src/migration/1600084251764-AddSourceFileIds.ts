@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class AddSourceFileIds1600084251764 implements MigrationInterface {
     name = 'AddSourceFileIds1600084251764'

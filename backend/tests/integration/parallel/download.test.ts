@@ -1,9 +1,9 @@
-import { backendPublicUrl, genResponse } from '../../lib'
-import { RequestError } from '../../../src/entity/RequestError'
+import {backendPublicUrl, genResponse} from '../../lib'
+import {RequestError} from '../../../src/entity/RequestError'
 import axios from 'axios'
 
-describe('/api/download', () => {
-  const url = `${backendPublicUrl}download/`
+describe('GET /api/download/collection/:uuid', () => {
+  const url = `${backendPublicUrl}download/collection/`
 
   it('responds with 404 if collection is not found', async () => {
     let expectedBody: RequestError = {
@@ -18,9 +18,22 @@ describe('/api/download', () => {
     return expect(axios.get(`${url}kisseliini`)).rejects
       .toMatchObject(genResponse(404, {errors: ['Not found: invalid UUID']}))
   })
+})
 
-  it('responds with 500 if files that exist in db do not exist on disk', async () => {
-    return expect(axios.get(`${url}48092c00-161d-4ca2-a29d-628cf8e960f6`)).rejects
-      .toMatchObject({ response: { status: 500 }})
+describe('GET /api/download/product/:uuid/:filename', () => {
+  const url = `${backendPublicUrl}download/product/`
+
+  it('responds with 404 if file is not found', async () => {
+    let expectedBody: RequestError = {
+      status: 404,
+      errors: ['File not found']
+    }
+    return expect(axios.get(`${url}25506ea8-d357-4c7b-af8c-95dfcc34fc7d/test.nc`)).rejects
+      .toMatchObject(genResponse(expectedBody.status, expectedBody))
+  })
+
+  it('responds 404 if invalid uuid', async () => {
+    return expect(axios.get(`${url}kisseliini/asd`)).rejects
+      .toMatchObject(genResponse(404, {errors: ['Not found: invalid UUID']}))
   })
 })

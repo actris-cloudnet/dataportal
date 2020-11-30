@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class AddModelSiteOnlyFlag1604412465263 implements MigrationInterface {
     name = 'AddModelSiteOnlyFlag1604412465263'

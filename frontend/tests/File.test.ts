@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {Wrapper} from '@vue/test-utils'
 import File from '../src/views/File.vue'
-import axios, { AxiosPromise, AxiosRequestConfig } from 'axios'
+import axios, {AxiosPromise, AxiosRequestConfig} from 'axios'
 import Vue from 'vue'
 import {augmentAxiosResponse, init, mountVue, nextTick} from './lib'
-import { mocked } from 'ts-jest/dist/util/testing'
+import {mocked} from 'ts-jest/dist/util/testing'
 import {readResources} from '../../shared/lib'
+
 init()
 
 jest.mock('axios')
@@ -81,11 +82,11 @@ describe('File.vue', () => {
   })
 
   it('displays links to source files', async () => {
-    mocked(axios.get).mockImplementation(axiosMockWithFileIdx([7, 6]))
+    mocked(axios.get).mockImplementation(axiosMockWithFileIdx([6, 5]))
     wrapper = mountVue(File)
     await nextTick(3)
     expect(wrapper.findAll('#history').length).toEqual(1)
-    expect(wrapper.find('#history').html()).toContain(`/file/${resources['allfiles'][6]['uuid']}`)
+    expect(wrapper.find('#history').html()).toContain(`/file/${resources['allfiles'][5]['uuid']}`)
   })
 
   it('does not display source file info where not applicable', async () => {

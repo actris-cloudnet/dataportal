@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class AddUploadedMetadata1597233469409 implements MigrationInterface {
     name = 'AddUploadedMetadata1597233469409'

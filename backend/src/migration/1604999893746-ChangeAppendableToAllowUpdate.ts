@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class ChangeAppendableToAllowUpdate1604999893746 implements MigrationInterface {
     name = 'ChangeAppendableToAllowUpdate1604999893746'

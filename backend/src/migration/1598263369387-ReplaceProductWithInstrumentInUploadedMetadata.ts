@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import {MigrationInterface, QueryRunner} from 'typeorm'
 
 export class ReplaceProductWithInstrumentInUploadedMetadata1598263369387 implements MigrationInterface {
     name = 'ReplaceProductWithInstrumentInUploadedMetadata1598263369387'

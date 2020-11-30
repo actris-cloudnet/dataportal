@@ -2,7 +2,7 @@ import {ClientConfiguration} from 'aws-sdk/clients/s3'
 
 interface Config {
   connectionName: string
-  fileServerUrl: string
+  downloadBaseUrl: string
   pidServiceUrl: string
   pidServiceTimeoutMs: number
   publicDir: string
@@ -27,7 +27,7 @@ interface s3Config {
 
 const testConfig = {
   connectionName: 'test',
-  fileServerUrl: 'http://localhost:4001/',
+  downloadBaseUrl: 'http://localhost:3001/api/download/',
   pidServiceUrl: 'http://localhost:5801/pid/',
   pidServiceTimeoutMs: 200,
   publicDir: 'tests/data/public',
@@ -46,7 +46,7 @@ const testConfig = {
 
 const devConfig = {
   connectionName: 'default',
-  fileServerUrl: 'http://localhost:4000/',
+  downloadBaseUrl: 'http://localhost:3000/api/download/',
   pidServiceUrl: 'http://localhost:5800/pid/',
   pidServiceTimeoutMs: 2000,
   publicDir: 'public',
