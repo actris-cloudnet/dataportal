@@ -302,9 +302,9 @@ export default class FileView extends Vue {
       }
     }
     return axios
-      .get(`${this.apiUrl}search`, payload)
+      .get(`${this.apiUrl}files`, payload)
       .then(response => {
-        const searchFiles = response.data as SearchFileResponse[]
+        const searchFiles = response.data as File[]
         this.versions = searchFiles.map(sf => sf.uuid)
       })
   }

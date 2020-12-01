@@ -22,12 +22,11 @@ describe('File.vue', () => {
     resources = await readResources()
     axiosMockWithFileIdx = (idx: number | number[]) => {
       let nreq = 0
-      return (url: string, _: AxiosRequestConfig | undefined): AxiosPromise => {
+      return (url: string, req: AxiosRequestConfig | undefined): AxiosPromise => {
         if (url.includes('visualization')) {
           return Promise.resolve(augmentAxiosResponse(visualizationResponse))
-        } else if (url.includes('search')) {
-          return Promise.resolve(augmentAxiosResponse(resources['allsearch'].slice(4, 7)))
         } else {
+          if (req && req.params['allVersions']) return Promise.resolve(augmentAxiosResponse(resources['allsearch'].slice(4, 7)))
           const i = Array.isArray(idx) ? idx[nreq] : idx
           nreq += 1
           return Promise.resolve(augmentAxiosResponse(resources['allfiles'][i]))
