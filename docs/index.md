@@ -1,6 +1,6 @@
 # API reference
 
-This is the documentation for the API v1 provided by the Cloudnet data portal.
+This is the documentation for the API v2 provided by the Cloudnet data portal.
 
 ## General
 
@@ -101,49 +101,52 @@ which can be found in the data object's global attribute `file_uuid`.
 To view the global attributes of a NetCDF file, one may use `ncdump -h file.nc`.
 
 On a successful query the route responds with a `File` object, which has the following properties:
-- `uuid`: UUIDv3 identifier.
+- `uuid`: UUIDv4 identifier.
+- `version`: String identifying file version.
 - `pid`: Persistent identifier of the data object. Empty string for data objects that do not have a PID, such as volatile files.
 - `volatile`: `true` if the file has been modified recently and may change in the future, 
 `false` if the file has not been changed recently and will not change in the future.
-- `title`: A human readable title of the data object 
 - `measurementDate`: The date on which the data was measured, `YYYY-MM-DD`.
 - `history`: A freeform history of the file set by the creator/processor of the file. This field 
 is not curated in any way and may or may not contain helpful information.
-- `publicity`: Used internally. Always `public`.
 - `cloudnetpyVersion`: The version of the [CloudnetPy](https://github.com/actris-cloudnet/cloudnetpy) library 
 used for the generation of the file. Empty string for files which have not been processed with `CloudnetPy`
-- `releasedAt`: The datetime on which the file was made public on the data portal. In ISO 8601 -format.
-- `filename`: The name of the file.
 - `checksum`: The SHA-256 checksum of the file. Useful for verifying file integrity.
 - `size`: Size of the file in bytes.
 - `format`: The data structure of the file. Either `NetCDF3` or `HDF5 (NetCDF4)`.
 - `sourceFileIds`: Comma-separated list of `uuid` strings corresponding to the source files that were used to generate the file. If the source file information is not available, this is `null`.
-- `url`: The full URL to the data object. Useful for downloading the file.
+- `createdAt`: The datetime on which the file was created. In ISO 8601 -format.
+- `updatedAt`: The datetime on which the file was last updated. In ISO 8601 -format.
 - `site`: `Site` object containing information of the site on which the measurement was made.
 - `product`: `Product` object containing information of the data product.
+- `downloadUrl`: The full URL to the data object. Useful for downloading the file.
+- `filename`: The name of the file.
 
 
 Example query:
 
-`GET https://cloudnet.fmi.fi/api/files/8e1c61fe-e6c1-472a-bd47-8c69ea3789b8`
+`GET https://cloudnet.fmi.fi/api/files/911bd5b1-3104-4732-9bd3-34ed8208adad`
 
 Response body:
 ```json
 {
-  "uuid": "8e1c61fe-e6c1-472a-bd47-8c69ea3789b8",
-  "pid": "https://hdl.handle.net/21.12132/1.8e1c61fee6c1472a",
+  "uuid": "911bd5b1-3104-4732-9bd3-34ed8208adad",
+  "version": "icRZfkXzTHB2-uuRTDaSV-eQu6N5wNm",
+  "pid": "https://hdl.handle.net/21.12132/1.911bd5b131044732",
   "volatile": false,
-  "title": "Model file from Bucharest",
-  "measurementDate": "2020-04-26",
-  "history": "2020-04-27 04:00:18 - global attributes fixed using attribute_modifier 0.0.1\nSun Apr 26 21:32:53 EEST 2020 - NetCDF generated from original data by Ewan O'Connor <ewan.oconnor@fmi.fi> using cnmodel2nc on cloudnet.fmi.fi",
-  "publicity": "public",
-  "cloudnetpyVersion": "",
-  "releasedAt": "2020-04-27T04:00:19.766Z",
-  "filename": "20200426_bucharest_ecmwf.nc",
-  "checksum": "1e64830a85088db2b476ba2c85064c9f2ea17bdd8e28bc0efdc9e9cab57321f5",
-  "size": 501484,
-  "format": "NetCDF3",
-  "sourceFileIds": null,
+  "measurementDate": "2020-01-05",
+  "history": "2020-09-25 02:51:44 - categorize file created\n2020-09-25 02:50:07 - radar file created\n2020-09-25 02:49:27 - ceilometer file created",
+  "cloudnetpyVersion": "1.3.1",
+  "checksum": "51db399d73e69842988d35e7e14fff815342f6925c70c0bdc9296b2847960738",
+  "size": 8836007,
+  "format": "HDF5 (NetCDF4)",
+  "sourceFileIds": [
+    "f4cb2b92bd0c49779606b87440afa7b7",
+    "6ac91e0483934db2afb3bacc97a7d8c0",
+    "3171e11d022549b29e863138c406dce8"
+  ],
+  "createdAt": "2020-12-01T09:30:40.016Z",
+  "updatedAt": "2020-12-01T09:30:40.016Z",
   "site": {
     "id": "bucharest",
     "humanReadableName": "Bucharest",
@@ -152,14 +155,16 @@ Response body:
     "altitude": 93,
     "gaw": "Unknown",
     "country": "Romania",
-    "isTestSite": false
+    "isTestSite": false,
+    "isModelOnlySite": false
   },
   "product": {
-    "id": "model",
-    "humanReadableName": "Model",
+    "id": "categorize",
+    "humanReadableName": "Categorize",
     "level": "1"
   },
-  "url": "https://cloudnet.fmi.fi/download/20200426_bucharest_ecmwf.nc"
+  "downloadUrl": "https://cloudnet.fmi.fi/api/download/product/911bd5b1-3104-4732-9bd3-34ed8208adad/20200105_bucharest_categorize.nc",
+  "filename": "20200105_bucharest_categorize.nc"
 }
 ```
 
@@ -167,7 +172,7 @@ Response body:
 
 Queries the metadata of multiple files. On a successful query responds with an array of `File` objects. 
 The results can be filtered with the following parameters:
-- `location`: One or more `Site` ids, from which to display data files.
+- `site`: One or more `Site` ids, from which to display data files.
 - `dateFrom`: Limit query to files whose `measurementDate` is `dateFrom` or later. `YYYY-MM-DD` or any 
 date format parseable by [JavaScript `Date`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) -object. 
 By default `measurementDate` is not limited.
@@ -181,27 +186,28 @@ Note: one or more of the parameters *must* be issued. A query without any valid 
 
 Example query for fetching metadata for all model files from Bucharest starting at 24. April 2020 and ending at the current date:
 
-`GET https://cloudnet.fmi.fi/api/files?location=bucharest&dateFrom=2020-04-24&product=classification`
+`GET https://cloudnet.fmi.fi/api/files?site=bucharest&dateFrom=2020-04-24&product=classification`
 
 Response body:
 
 ```json
 [
   {
-    "uuid": "03701a1a-a461-4aa7-80f4-f69b8ac170b9",
-    "pid": "https://hdl.handle.net/21.12132/1.5a52e97bbcaf4f9f",
+    "uuid": "70ca4647-eca9-437e-844c-9bf163ad73e0",
+    "version": "UpJgpQ6XA-mLBSAdDuGLCFy4M0pr3Mp",
+    "pid": "https://hdl.handle.net/21.12132/1.70ca4647eca9437e",
     "volatile": false,
-    "title": "Classification file from Bucharest",
-    "measurementDate": "2020-04-25",
-    "history": "2020-04-27 05:00:45 - classification file created\n2020-04-27 05:00:45 - categorize file created\n2020-04-27 05:00:28 - radar file created\n2020-04-27 05:00:30 - ceilometer file created",
-    "publicity": "public",
-    "cloudnetpyVersion": "1.2.1",
-    "releasedAt": "2020-04-27T05:00:46.329Z",
-    "filename": "20200425_bucharest_classification.nc",
-    "checksum": "3a5c3c335702251370b1c5df055faad4b53ba66780217a313aac00d983e688e6",
-    "size": 111023,
+    "measurementDate": "2020-11-25",
+    "history": "2020-11-27 06:11:29 - classification file created\n2020-11-27 06:11:19 - categorize file created\n2020-11-27 06:11:05 - radar file created\n2020-11-27 06:10:23 - ceilometer file created",
+    "cloudnetpyVersion": "1.3.2",
+    "checksum": "6931e3ca473d8ad635aada0ff6d936227e553a78e94acae0c67a956e85ef2889",
+    "size": 86966,
     "format": "HDF5 (NetCDF4)",
-    "sourceFileIds": null,
+    "sourceFileIds": [
+      "1e2e5264b6864d35829df7c14be7a243"
+    ],
+    "createdAt": "2020-12-01T09:39:08.399Z",
+    "updatedAt": "2020-12-01T09:39:08.399Z",
     "site": {
       "id": "bucharest",
       "humanReadableName": "Bucharest",
@@ -210,14 +216,16 @@ Response body:
       "altitude": 93,
       "gaw": "Unknown",
       "country": "Romania",
-      "isTestSite": false
+      "isTestSite": false,
+      "isModelOnlySite": false
     },
     "product": {
       "id": "classification",
       "humanReadableName": "Classification",
       "level": "2"
     },
-    "url": "https://cloudnet.fmi.fi/download/20200425_bucharest_classification.nc"
+    "downloadUrl": "https://cloudnet.fmi.fi/api/download/product/70ca4647-eca9-437e-844c-9bf163ad73e0/20201125_bucharest_classification.nc",
+    "filename": "20201125_bucharest_classification.nc"
   },
 ...
 ]
