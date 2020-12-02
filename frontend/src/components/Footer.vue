@@ -59,9 +59,9 @@ footer.global
       Icons from <a href="https://icons8.com/">icons8.com</a>.</span>
     </div>
     <div class="vertical-center footeritem">
-      Development:
       <a href="https://actris-cloudnet.github.io/dataportal/">API documentation</a>
       <a href="https://github.com/actris-cloudnet/">GitHub organization</a>
+      <router-link to="/privacy">Privacy policy</router-link>
     </div>
   </footer>
 </template>
