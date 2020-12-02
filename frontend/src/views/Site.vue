@@ -100,7 +100,7 @@ export default class SiteView extends Vue {
         this.response = response
       })
     axios
-      .get(`${this.apiUrl}search/`, {params: {...this.payload, ...{location: this.siteid, limit: 1}}})
+      .get(`${this.apiUrl}search/`, {params: {...this.payload, ...{site: this.siteid, limit: 1}}})
       .then(({data}) => (this.latestFile = data[0]))
       .catch()
     const date30daysago = new Date()

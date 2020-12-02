@@ -171,7 +171,7 @@ export class FileRoutes {
       )
     }
     qb
-      .andWhere('site.id IN (:...location)', query)
+      .andWhere('site.id IN (:...site)', query)
       .andWhere('product.id IN (:...product)', query)
       .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate <= :dateTo', query)
       .andWhere('file.volatile IN (:...volatile)', query)
@@ -186,7 +186,7 @@ export class FileRoutes {
     const qb = this.searchFileRepo.createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
       .leftJoinAndSelect('file.product', 'product')
-      .andWhere('site.id IN (:...location)', query)
+      .andWhere('site.id IN (:...site)', query)
       .andWhere('product.id IN (:...product)', query)
       .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate <= :dateTo', query)
       .andWhere('file.volatile IN (:...volatile)', query)

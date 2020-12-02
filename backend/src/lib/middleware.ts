@@ -47,7 +47,7 @@ export class Middleware {
       return next(requestError)
     }
 
-    let validKeys = ['location', 'volatile']
+    let validKeys = ['site', 'volatile']
 
     if (req.path.includes('model')) {
       validKeys = validKeys.concat(['date', 'model'])
@@ -62,7 +62,7 @@ export class Middleware {
       requestError.errors.push(`Unknown query parameters: ${unknownFields}`)
     }
 
-    const keys = ['location', 'product', 'dateFrom', 'dateTo', 'volatile', 'limit', 'date', 'model']
+    const keys = ['site', 'product', 'dateFrom', 'dateTo', 'volatile', 'limit', 'date', 'model']
     keys.forEach(key => {
       const keyError = this.checkField(key, req.query)
       if (keyError) requestError.errors.push(keyError)
@@ -74,7 +74,7 @@ export class Middleware {
 
   filesQueryAugmenter: RequestHandler = async (req, _res, next) => {
     const query = req.query as any
-    const defaultLocation = async () => (await fetchAll<Site>(this.conn, Site))
+    const defaultSite = async () => (await fetchAll<Site>(this.conn, Site))
       .filter(site => !(req.query.developer === undefined && site.isTestSite))
       .filter(site => !site.isModelOnlySite)
       .map(site => site.id)
@@ -83,12 +83,12 @@ export class Middleware {
     const defaultDateFrom = () => new Date('1970-01-01')
     const defaultDateTo = tomorrow
     const setVolatile = () => ('volatile' in query) ? toArray(query.volatile) : [true, false]
-    if (!('location' in query)) query.location = await defaultLocation()
+    if (!('site' in query)) query.site = await defaultSite()
     if (!('product' in query)) query.product = await defaultProduct()
     if (!('dateFrom' in query)) query.dateFrom = defaultDateFrom()
     if (!('dateTo' in query)) query.dateTo = defaultDateTo()
     if (!('releasedBefore' in query)) query.releasedBefore = defaultDateTo()
-    query.location = toArray(query.location)
+    query.site = toArray(query.site)
     query.product = toArray(query.product)
     query.volatile = setVolatile()
     next()
@@ -96,13 +96,13 @@ export class Middleware {
 
   modelFilesQueryAugmenter: RequestHandler = async (req, _res, next) => {
     const query = req.query as any
-    const defaultLocation = async () => (await fetchAll<Site>(this.conn, Site))
+    const defaultSite = async () => (await fetchAll<Site>(this.conn, Site))
       .map(site => site.id)
     const defaultModel = async () => (await fetchAll<Model>(this.conn, Model))
       .map(model => model.id)
-    if (!('location' in query)) query.location = await defaultLocation()
+    if (!('site' in query)) query.site = await defaultSite()
     if (!('model' in query)) query.model = await defaultModel()
-    query.location = toArray(query.location)
+    query.site = toArray(query.site)
     query.model = toArray(query.model)
     next()
   }
@@ -155,11 +155,11 @@ export class Middleware {
     let qb = this.conn.getRepository<Site>('site')
       .createQueryBuilder('site')
       .select()
-      .where('site.id IN (:...location)', req.query)
+      .where('site.id IN (:...site)', req.query)
     if (routeType !== 'model') qb = hideTestDataFromNormalUsers(qb, req)
     await qb.getMany()
       .then((res: any[]) => {
-        if (res.length != req.query.location.length) this.throw404Error('location', req)
+        if (res.length != req.query.site.length) this.throw404Error('site', req)
       })
   }
 
