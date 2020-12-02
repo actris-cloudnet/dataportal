@@ -217,7 +217,6 @@ import {getIconUrl, humanReadableDate, humanReadableSize, humanReadableTimestamp
 import {DevMode} from '../lib/DevMode'
 import {File} from '../../../backend/src/entity/File'
 import {Visualization} from '../../../backend/src/entity/Visualization'
-import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 
 @Component
 export default class FileView extends Vue {
