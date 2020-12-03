@@ -22,6 +22,7 @@ each having the properties:
 - `gaw`: Global Atmosphere Watch identifier. If the site does not have one, `Unknown`.
 - `country`: The country in which the site resides. Human readable.
 - `isTestSite`: Used internally. Always `false`.
+- `isModelOnlySite`: `true` of this site only provides model data. `false` if the site is a regular Cloudnet site.
 
 Example query:
 
