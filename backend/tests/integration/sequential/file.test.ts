@@ -76,7 +76,7 @@ describe('PUT /files/:s3key', () => {
   })
 
 
-  test('errors on invalid location', async () => {
+  test('errors on invalid site', async () => {
     const tmpfile = {...stableFile}
     tmpfile.site = 'Bökärest'
     return expect(putFile(tmpfile)).rejects.toMatchObject({response: { status: 500}})

@@ -126,7 +126,7 @@ describe('after PUTting metadata to API', () => {
 
     it('hashes of /download zipped files match originals and collection download count increases', async () => {
       const tmpZip = 'tests/data/tmp.zip'
-      const expectedShas = await (await axios.get(`${backendPublicUrl}files/`, { params: { location: 'bucharest' } })).data.map((file: any) => file.checksum)
+      const expectedShas = await (await axios.get(`${backendPublicUrl}files/`, { params: { site: 'bucharest' } })).data.map((file: any) => file.checksum)
       const receivedFile = await axios.get(`${backendPublicUrl}download/collection/${collectionUuid}`, { responseType: 'arraybuffer'})
       fs.writeFileSync(tmpZip, receivedFile.data)
       const shas = new AdmZip(tmpZip).getEntries().map(entry => {

@@ -293,7 +293,7 @@ export default class FileView extends Vue {
     const payload = {
       params: {
         developer: this.devMode.activated || undefined,
-        location: file.site.id,
+        site: file.site.id,
         product: file.product.id,
         dateFrom: file.measurementDate,
         dateTo: file.measurementDate,

@@ -32,7 +32,7 @@ describe('/api/files', () => {
   })
 
   it('responds with 400 if invalid query parameters are given', () => {
-    const payload = {params: {location: 'macehead', x: '', y: 'kissa'}}
+    const payload = {params: {site: 'macehead', x: '', y: 'kissa'}}
     const expectedBody: RequestError = {
       status: 400,
       errors: [ 'Unknown query parameters: x,y' ]
@@ -42,7 +42,7 @@ describe('/api/files', () => {
   })
 
   it('responds with an array of 3 objects when searching for macehead', async () => {
-    const payload = {params: {location: 'macehead'}}
+    const payload = {params: {site: 'macehead'}}
     const res = await axios.get(url, payload)
     expect(res).toHaveProperty('data')
     expect(res.data).toHaveLength(3)
@@ -50,7 +50,7 @@ describe('/api/files', () => {
   })
 
   it('responds with an array of 4 objects when searching for macehead and hyytiala', async () => {
-    const payload = {params: {location: ['macehead', 'hyytiala']}}
+    const payload = {params: {site: ['macehead', 'hyytiala']}}
     const res = await axios.get(url, payload)
     expect(res).toHaveProperty('data')
     expect(res.data).toHaveLength(4)
@@ -58,15 +58,15 @@ describe('/api/files', () => {
   })
 
 
-  it('responds with 404 if location was not found', () => {
-    const payload = {params: {location: ['kilpikonna']}}
-    expectedBody404.errors = ['One or more of the specified locations were not found']
+  it('responds with 404 if site was not found', () => {
+    const payload = {params: {site: ['kilpikonna']}}
+    expectedBody404.errors = ['One or more of the specified sites were not found']
     expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody404.status, expectedBody404))
   })
 
-  it('responds 404 if one of many locations was not found', () => {
-    const payload = {params: {location: ['macehead', 'kilpikonna']}}
-    expectedBody404.errors = ['One or more of the specified locations were not found']
+  it('responds 404 if one of many sites was not found', () => {
+    const payload = {params: {site: ['macehead', 'kilpikonna']}}
+    expectedBody404.errors = ['One or more of the specified sites were not found']
     expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody404.status, expectedBody404))
   })
 
@@ -82,8 +82,8 @@ describe('/api/files', () => {
     return expect(res.data.map((d: any) => d.product.id)).toEqual(['radar', 'radar'])
   })
 
-  it('responds with correct objects if dateFrom, dateTo, location, and product are specified', async () => {
-    const payload = {params: {dateFrom: new Date('2018-06-09'), dateTo: new Date('2019-09-02'), location: 'macehead', product: 'classification'}}
+  it('responds with correct objects if dateFrom, dateTo, site, and product are specified', async () => {
+    const payload = {params: {dateFrom: new Date('2018-06-09'), dateTo: new Date('2019-09-02'), site: 'macehead', product: 'classification'}}
     const res = await axios.get(url, payload)
     expect(res.data.map((d: any) => d.site.id)).toEqual(['macehead'])
     expect(res.data.map((d: any) => d.product.id)).toEqual(['classification'])
@@ -115,13 +115,13 @@ describe('/api/files', () => {
   })
 
   it('does not show test files in normal mode', async () => {
-    const payload = {params: {location: 'granada'}}
-    expectedBody404.errors = ['One or more of the specified locations were not found']
+    const payload = {params: {site: 'granada'}}
+    expectedBody404.errors = ['One or more of the specified sites were not found']
     return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody404.status, expectedBody404))
   })
 
   it('shows test files in developer mode', async () => {
-    const payload = {params: {location: 'granada', developer: ''}}
+    const payload = {params: {site: 'granada', developer: ''}}
     return expect(axios.get(url, payload)).resolves.toBeTruthy()
   })
 
@@ -139,13 +139,13 @@ describe('/api/files', () => {
   })
 
   it('returns the latest file when limit=1', async () => {
-    const res = await axios.get(url, { params: { location: 'bucharest', limit: '1' }})
+    const res = await axios.get(url, { params: { site: 'bucharest', limit: '1' }})
     expect(res.data).toHaveLength(1)
     expect(res.data[0].measurementDate).toEqual('2019-07-16')
   })
 
   it('responds with 400 on malformed limit', async () => {
-    const payload = { params: { location: 'bucharest', limit: 'j' }}
+    const payload = { params: { site: 'bucharest', limit: 'j' }}
     let expectedBody: RequestError = {
       status: 400,
       errors: [ 'Malformed value in property "limit"' ]
@@ -158,9 +158,9 @@ describe('/api/files', () => {
 describe('/api/search', () => {
   const url = `${backendPublicUrl}search/`
 
-  it('responds with correct objects if dateFrom, dateTo, location, and product are specified', async () => {
+  it('responds with correct objects if dateFrom, dateTo, site, and product are specified', async () => {
     const expectedData = [responses['allsearch'][1]]
-    const payload = {params: {dateFrom: new Date('2018-06-09'), dateTo: new Date('2019-09-02'), location: 'macehead', product: 'classification'}}
+    const payload = {params: {dateFrom: new Date('2018-06-09'), dateTo: new Date('2019-09-02'), site: 'macehead', product: 'classification'}}
     const res = await axios.get(url, payload)
     return expect(res.data).toMatchObject(expectedData)
   })
