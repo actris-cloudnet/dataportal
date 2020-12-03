@@ -2,6 +2,15 @@
 @import "../sass/variables.sass"
 @import "../sass/global.sass"
 
+main#privacypolicy
+  background-color: $landing-header
+  padding: 2em
+  max-width: 70em
+
+@media screen and (max-width: $narrow-screen)
+  main#privacypolicy
+    padding: 1em
+
 h2
   margin-bottom: 1em
 h3
@@ -46,7 +55,7 @@ These rights apply if certain conditions are met.
       <li>Portability. You have the right to have your data transmitted to another controller without hindrance from Cloudnet when the processing is based on your consent or a contract between you and us.</li>
       </ul>
     <h3>Exercising your rights</h3>
-    If you have a question regarding our privacy policy, wish to exercise any of your rights, or feel dissatisfaction with our use of your data, please contact the Cloudnet team by sending an email to <a hfer="mailto:actris-cloudnet-feedback@fmi.fi">actris-cloudnet-feedback@fmi.fi</a>. We will perform our duties without undue delay within one month of your request. That period may be extended by two further months where necessary, considering the complexity and number of the requests.
+    If you have a question regarding our privacy policy, wish to exercise any of your rights, or feel dissatisfaction with our use of your data, please contact the Cloudnet team by sending an email to <a href="mailto:actris-cloudnet-feedback@fmi.fi">actris-cloudnet-feedback@fmi.fi</a>. We will perform our duties without undue delay within one month of your request. That period may be extended by two further months where necessary, considering the complexity and number of the requests.
     For further information about your rights and exercising them, please see here <a href="https://tietosuoja.fi/en/know-your-rights">https://tietosuoja.fi/en/know-your-rights</a>.
     <h3>Changes to this policy</h3>
 We will inform you of any material changes to this policy with a notice on our website.
