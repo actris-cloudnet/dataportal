@@ -19,7 +19,7 @@ init()
 jest.mock('axios')
 
 const date = new Date()
-date.setDate(date.getDate() - 6)
+date.setDate(date.getDate() - 29)
 const dateFromDefault = date.toISOString().substring(0,10)
 const dateToDefault = new Date().toISOString().substring(0,10)
 let filesSortedByDate: any
