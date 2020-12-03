@@ -33,7 +33,8 @@ This policy describes how we, ACTRIS Data Centre node for cloud profiling (later
     <h3>Who is responsible for my data?</h3>
 Cloudnet is the data controller. That means we are responsible for collecting your data and looking after it.
     <h3>What data is used?</h3>
-Your IP address is recorded when you are using the Cloudnet data portal. We use IP addresses to extract metrics of site use, such as which country our users connect from, and how many unique users have downloaded data files. Processing is based on our interest in Cloudnet data spread.
+Your IP address is recorded when you are using the Cloudnet data portal. We use IP addresses to extract metrics of site use, such as which country our users connect from, and how many unique users have downloaded data files.
+Processing is based on our interest in Cloudnet data spread, and in the need to prevent the malicious use of the site (e.g. denial of service attacks).
     <h3>Who gets my data?</h3>
 Personal data will be used for the purpose it was first collected for. We won’t transfer your personal information outside of Cloudnet.
 
@@ -61,7 +62,7 @@ These rights apply if certain conditions are met.
 We will inform you of any material changes to this policy with a notice on our website.
     <p></p>
     <!-- REMEMBER TO CHANGE LAST UPDATED DATE WHEN MAKING MODIFICATIONS TO THIS PAGE -->
-    This policy has been last updated in <b>October 20, 2020</b>.
+    This policy has been last updated in <b>December 03, 2020</b>.
   </main>
 </template>
 
