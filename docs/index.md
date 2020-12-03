@@ -184,7 +184,7 @@ If omitted will default to the current date.
 
 Note: one or more of the parameters *must* be issued. A query without any valid parameters will result in a `400 Bad Request` error.
 
-Example query for fetching metadata for all model files from Bucharest starting at 24. April 2020 and ending at the current date:
+Example query for fetching metadata for all classification files from Bucharest starting at 24. April 2020 and ending at the current date:
 
 `GET https://cloudnet.fmi.fi/api/files?site=bucharest&dateFrom=2020-04-24&product=classification`
 
@@ -263,14 +263,14 @@ repositories of most UNIX-based systems.
 
 Fetch all model and classification products from Norunda and Granada:
 
-`curl "https://cloudnet.fmi.fi/api/files?location=norunda&location=granada&product=model&product=classification"`
+`curl "https://cloudnet.fmi.fi/api/files?site=norunda&site=granada&product=model&product=classification"`
 
 
 ### Fetching all versions
 
 Fetch all versions of a classification product from Granada on 2020-05-20:
 
-`curl "https://cloudnet.fmi.fi/api/files?location=granada&product=classification&dateFrom=2020-05-20&dateTo=2020-05-20&allVersions"`
+`curl "https://cloudnet.fmi.fi/api/files?site=granada&product=classification&dateFrom=2020-05-20&dateTo=2020-05-20&allVersions"`
 
 
 ### Using the API to download all data objects matching a criteria
