@@ -153,6 +153,15 @@ describe('/api/files', () => {
     return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
 
+  it('by default does not show legacy data', async () => {
+    const payload = { params: { site: 'bucharest', product: 'classification', dateFrom: '2009-01-01', dateTo: '2010-01-01' }}
+    return expect(axios.get(url, payload)).resolves.toMatchObject({data: []})
+  })
+  it('shows legacy data when using showLegacy flag', async () => {
+    const payload = { params: { site: 'bucharest', product: 'classification', dateFrom: '2009-01-01', dateTo: '2010-01-01', showLegacy: true }}
+    return expect(axios.get(url, payload)).resolves.toMatchObject({data: [{legacy: true}]})
+  })
+
 })
 
 describe('/api/search', () => {

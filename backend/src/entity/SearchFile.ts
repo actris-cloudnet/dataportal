@@ -38,6 +38,7 @@ export class SearchFile {
     this.product = file.product
     this.size = file.size
     this.volatile = file.volatile
+    this.legacy = file.legacy || false
   }
 }
 

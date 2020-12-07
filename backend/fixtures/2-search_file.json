@@ -32,22 +32,6 @@
       "site": "hyytiala"
     },
     {
-      "uuid": "22b32746-faf0-4057-9076-ed2e698dcc34",
-      "volatile": false,
-      "measurementDate": "2019-07-15",
-      "product": "categorize",
-      "size": 7127282,
-      "site": "bucharest"
-    },
-    {
-      "uuid": "6cb32746-faf0-4057-9076-ed2e698dcf36",
-      "volatile": false,
-      "measurementDate": "2019-07-15",
-      "product": "categorize",
-      "size": 7127282,
-      "site": "bucharest"
-    },
-    {
       "uuid": "8bb32746-faf0-4057-9076-ed2e698dcf36",
       "volatile": false,
       "measurementDate": "2019-07-15",
@@ -75,6 +59,15 @@
       "uuid": "2bb32746-faf0-4057-9076-ed2e698dcf36",
       "volatile": false,
       "measurementDate": "2019-07-16",
+      "product": "classification",
+      "size": 7127282,
+      "site": "bucharest"
+    },
+    {
+      "uuid": "3bb32746-faf0-4057-9076-ed2e698dcf36",
+      "volatile": false,
+      "legacy": true,
+      "measurementDate": "2009-07-16",
       "product": "classification",
       "size": 7127282,
       "site": "bucharest"

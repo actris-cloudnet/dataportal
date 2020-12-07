@@ -176,6 +176,7 @@ export class FileRoutes {
       .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate <= :dateTo', query)
       .andWhere('file.volatile IN (:...volatile)', query)
       .andWhere('file.updatedAt < :releasedBefore', query)
+      .andWhere('file.legacy IN (:...showLegacy)', query)
       .orderBy('file.measurementDate', 'DESC')
       .addOrderBy('file.updatedAt', 'DESC')
     if ('limit' in query) qb.limit(parseInt(query.limit))
@@ -190,6 +191,7 @@ export class FileRoutes {
       .andWhere('product.id IN (:...product)', query)
       .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate <= :dateTo', query)
       .andWhere('file.volatile IN (:...volatile)', query)
+      .andWhere('file.legacy IN (:...showLegacy)', query)
       .orderBy('file.measurementDate', 'DESC')
     return qb
   }
