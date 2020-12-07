@@ -2,6 +2,7 @@ import {backendPrivateUrl, storageServiceUrl} from '../../lib'
 import axios from 'axios'
 import {Connection, createConnection, Repository} from 'typeorm'
 import {Visualization} from '../../../src/entity/Visualization'
+import {promises as fsp, readFileSync} from 'fs'
 
 const validJson = {
   sourceFileId: '9e04d8ef-0f2b-4823-835d-33e458403c67',
@@ -23,6 +24,8 @@ describe('PUT /visualizations', () => {
   beforeAll(async () => {
     conn = await createConnection('test')
     repo = conn.getRepository('visualization')
+    // File fixtures are needed here
+    await conn.getRepository('file').save(JSON.parse((await fsp.readFile('fixtures/2-file.json')).toString()))
     return axios.put(`${storageServiceUrl}cloudnet-img/${validId}`, 'content')
   })
 
