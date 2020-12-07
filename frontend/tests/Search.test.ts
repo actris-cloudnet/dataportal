@@ -174,4 +174,14 @@ describe('Search.vue', () => {
       return expect(findElementById('tableContent').text().match('volatile')).toHaveLength(1)
     })
   })
+
+  describe('legacy', () => {
+
+    it.only('makes correct query to backend after checking show legacy data box', async () => {
+      await findElementById('showLegacyCheckbox').trigger('click')
+      const calls = mocked(axios.get).mock.calls
+      const lastCall = calls[calls.length - 1]
+      expect(lastCall[1]).toMatchObject({params: {showLegacy: true}})
+    })
+  })
 })
