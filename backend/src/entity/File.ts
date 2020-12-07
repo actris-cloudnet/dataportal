@@ -25,6 +25,9 @@ export class File {
     @Column({default: true})
     volatile!: boolean
 
+    @Column({default: false})
+    legacy!: boolean
+
     @Column({type: 'date'})
     measurementDate!: Date
 
