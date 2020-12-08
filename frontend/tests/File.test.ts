@@ -63,17 +63,17 @@ describe('File.vue', () => {
     wrapper = mountVue(File)
     await nextTick(3)
     expect(wrapper.findAll('#previousVersion').length).toEqual(0)
-    expect(wrapper.find('#nextVersion').html()).toContain(`/file/6cb32746-faf0-4057-9076-ed2e698dcf36`)
-    expect(wrapper.find('#newestVersion').html()).toContain(`/file/8bb32746-faf0-4057-9076-ed2e698dcf36`)
+    expect(wrapper.find('#nextVersion').html()).toContain('/file/6cb32746-faf0-4057-9076-ed2e698dcf36')
+    expect(wrapper.find('#newestVersion').html()).toContain('/file/8bb32746-faf0-4057-9076-ed2e698dcf36')
   })
 
   it('displays link to next, previous and newest version in second-to-newest version', async () => {
     mocked(axios.get).mockImplementation(axiosMockWithFileUuid('6cb'))
     wrapper = mountVue(File)
     await nextTick(3)
-    expect(wrapper.find('#nextVersion').html()).toContain(`/file/8bb32746-faf0-4057-9076-ed2e698dcf36`)
-    expect(wrapper.find('#previousVersion').html()).toContain(`/file/22b32746-faf0-4057-9076-ed2e698dcc34`)
-    expect(wrapper.find('#newestVersion').html()).toContain(`/file/8bb32746-faf0-4057-9076-ed2e698dcf36`)
+    expect(wrapper.find('#nextVersion').html()).toContain('/file/8bb32746-faf0-4057-9076-ed2e698dcf36')
+    expect(wrapper.find('#previousVersion').html()).toContain('/file/22b32746-faf0-4057-9076-ed2e698dcc34')
+    expect(wrapper.find('#newestVersion').html()).toContain('/file/8bb32746-faf0-4057-9076-ed2e698dcf36')
   })
 
   it('displays link to previous version in the newest version', async () => {
@@ -81,7 +81,7 @@ describe('File.vue', () => {
     wrapper = mountVue(File)
     await nextTick(3)
     expect(wrapper.findAll('#newestVersion').length).toEqual(0)
-    expect(wrapper.find('#previousVersion').html()).toContain(`/file/6cb32746-faf0-4057-9076-ed2e698dcf36`)
+    expect(wrapper.find('#previousVersion').html()).toContain('/file/6cb32746-faf0-4057-9076-ed2e698dcf36')
   })
 
   it('displays last modified date', async () => {
@@ -96,7 +96,7 @@ describe('File.vue', () => {
     wrapper = mountVue(File)
     await nextTick(3)
     expect(wrapper.findAll('#history').length).toEqual(1)
-    expect(wrapper.find('#history').html()).toContain(`/file/1bb32746-faf0-4057-9076-ed2e698dcf36`)
+    expect(wrapper.find('#history').html()).toContain('/file/1bb32746-faf0-4057-9076-ed2e698dcf36')
   })
 
   it('does not display source file info where not applicable', async () => {

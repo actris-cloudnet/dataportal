@@ -2,7 +2,7 @@ import {backendPrivateUrl, storageServiceUrl} from '../../lib'
 import axios from 'axios'
 import {Connection, createConnection, Repository} from 'typeorm'
 import {Visualization} from '../../../src/entity/Visualization'
-import {promises as fsp, readFileSync} from 'fs'
+import {promises as fsp} from 'fs'
 
 const validJson = {
   sourceFileId: '9e04d8ef-0f2b-4823-835d-33e458403c67',
