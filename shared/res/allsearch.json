@@ -1,5 +1,15 @@
 [
   {
+    "uuid": "3bb32746-faf0-4057-9076-ed2e698dcf36",
+    "measurementDate": "2009-07-16",
+    "site": "Bucharest",
+    "siteId": "bucharest",
+    "product": "Classification",
+    "productId": "classification",
+    "size": 7127282,
+    "volatile": false
+  },
+  {
     "uuid": "a5d1d5af-3667-41bc-b952-e684f627d91c",
     "measurementDate": "2014-12-05",
     "site": "Mace Head",
@@ -30,6 +40,16 @@
     "volatile": true
   },
   {
+    "uuid": "22b32746-faf0-4057-9076-ed2e698dcc34",
+    "measurementDate": "2019-07-15",
+    "site": "Bucharest",
+    "siteId": "bucharest",
+    "product": "Categorize",
+    "productId": "categorize",
+    "size": 7127282,
+    "volatile": false
+  },
+  {
     "uuid": "8bb32746-faf0-4057-9076-ed2e698dcf36",
     "measurementDate": "2019-07-15",
     "site": "Bucharest",
@@ -50,8 +70,8 @@
     "volatile": false
   },
   {
-    "uuid": "22b32746-faf0-4057-9076-ed2e698dcc34",
-    "measurementDate": "2019-07-15",
+    "uuid": "1bb32746-faf0-4057-9076-ed2e698dcf36",
+    "measurementDate": "2019-07-16",
     "site": "Bucharest",
     "siteId": "bucharest",
     "product": "Categorize",
@@ -66,16 +86,6 @@
     "siteId": "bucharest",
     "product": "Classification",
     "productId": "classification",
-    "size": 7127282,
-    "volatile": false
-  },
-  {
-    "uuid": "1bb32746-faf0-4057-9076-ed2e698dcf36",
-    "measurementDate": "2019-07-16",
-    "site": "Bucharest",
-    "siteId": "bucharest",
-    "product": "Categorize",
-    "productId": "categorize",
     "size": 7127282,
     "volatile": false
   },
