@@ -93,7 +93,6 @@ export class Middleware {
     query.product = toArray(query.product)
     query.volatile = setVolatile()
     query.showLegacy = setLegacy()
-    console.log(query.showLegacy)
     next()
   }
 
