@@ -51,6 +51,13 @@ describe('File.vue', () => {
     return expect(wrapper.text()).not.toContain('This is a volatile file.')
   })
 
+  it('displays a note on legacy file', async () => {
+    mocked(axios.get).mockImplementation(axiosMockWithFileUuid('3bb'))
+    wrapper = mountVue(File)
+    await Vue.nextTick()
+    return expect(wrapper.text()).toContain('This is legacy data.')
+  })
+
   it('displays link to next and newest version in oldest version', async () => {
     mocked(axios.get).mockImplementation(axiosMockWithFileUuid('22b'))
     wrapper = mountVue(File)
