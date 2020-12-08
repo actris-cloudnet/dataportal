@@ -82,7 +82,7 @@ export class UploadRoutes {
           return res.sendStatus(200)
         }
       } catch (err) {
-        return next({ status: 500, errors: err })
+        return next({ status: 500, errors: `Internal server error: ${err.code}` })
       }
     }
 
@@ -105,13 +105,13 @@ export class UploadRoutes {
 
   updateMetadata: RequestHandler = async (req: Request, res: Response, next) => {
     const partialUpload = req.body
-    if (!partialUpload.uuid) return next({status: 422, errors: ['Request body is missing uuid']})
+    if (!partialUpload.uuid) return next({status: 422, errors: 'Request body is missing uuid'})
     try {
       const updateResult = await this.uploadedMetadataRepo.update({uuid: partialUpload.uuid}, partialUpload)
-      if (updateResult.affected == 0) return next({status: 422, errors: ['No file matches the provided uuid']})
+      if (updateResult.affected == 0) return next({status: 422, errors: 'No file matches the provided uuid'})
       res.sendStatus(200)
-    } catch (e) {
-      return next({status: 500, errors: e})
+    } catch (err) {
+      return next({status: 500, errors: `Internal server error: ${err.code}`})
     }
   }
 
@@ -122,14 +122,14 @@ export class UploadRoutes {
         if (uploadedMetadata == undefined) return next({ status: 404, errors: 'No metadata was found with provided id'})
         res.send(this.addS3keyToUpload(uploadedMetadata))
       })
-      .catch(err => next({ status: 500, errors: err}))
+      .catch(err => next({ status: 500, errors: `Internal server error: ${err.code}`}))
   }
 
   listMetadata: RequestHandler = async (req: Request, res: Response, next) => {
     (await this.metadataQueryBuilder(req.query))
       .getMany()
       .then(uploadedMetadata => res.send(uploadedMetadata.map(this.addS3keyToUpload)))
-      .catch(err => {next({status: 500, errors: err})})
+      .catch(err => {next({status: 500, errors: `Internal server error: ${err.code}`})})
   }
 
   listInstrumentsFromMetadata: RequestHandler = async (req: Request, res: Response, next) => {
@@ -159,7 +159,7 @@ export class UploadRoutes {
         return next(err) // Client error
       if (err.errors) // Our error
         return next({status: 500, errors: `Internal server error: ${err.errors}`})
-      return next({status: 500, errors: err}) // Unknown error
+      return next({status: 500, errors: `Internal server error: ${err.code}`}) // Unknown error
     }
   }
 

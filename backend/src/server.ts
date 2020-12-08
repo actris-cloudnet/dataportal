@@ -52,6 +52,13 @@ import {DownloadRoutes} from './routes/download'
     next()
   }
 
+  const errorAsPlaintext: ErrorRequestHandler = (err: RequestError | Error, _req, res, next) => {
+    if (!(err instanceof Error)) {
+      err.plaintext = true
+    }
+    next(err)
+  }
+
   if (process.env.NODE_ENV != 'production') {
     app.use(function(_req, res, next) {
       res.header('Access-Control-Allow-Origin', '*')
@@ -109,15 +116,18 @@ import {DownloadRoutes} from './routes/download'
     middleware.getSiteNameFromAuth,
     express.json(),
     uploadRoutes.validateMetadata,
-    uploadRoutes.postMetadata)
+    uploadRoutes.postMetadata,
+    errorAsPlaintext)
   app.put('/upload/data/:checksum',
     middleware.validateMD5Param,
     middleware.getSiteNameFromAuth,
     express.raw({limit: '100gb'}),
-    uploadRoutes.putData)
+    uploadRoutes.putData,
+    errorAsPlaintext)
   app.get('/upload/metadata/:checksum',
     middleware.validateMD5Param,
-    uploadRoutes.metadata)
+    uploadRoutes.metadata,
+    errorAsPlaintext)
 
   // model data upload (for Ewan only)
   app.post('/model-upload/metadata',
