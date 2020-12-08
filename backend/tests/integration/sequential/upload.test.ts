@@ -198,12 +198,12 @@ describe('PUT /upload/data/:checksum', () => {
 
   test('responds with 400 on incorrect hash', async () => {
     const invalidFile = 'invalidhash'
-    return expect(axios.put(validUrl, invalidFile, {headers})).rejects.toMatchObject({ response: { data: { status: 400}}})
+    return expect(axios.put(validUrl, invalidFile, {headers})).rejects.toMatchObject({ response: {status: 400}})
   })
 
   test('responds with 500 on internal errors', async () => {
     const invalidFile = 'servererr'
-    return expect(axios.put(validUrl, invalidFile, {headers})).rejects.toMatchObject({ response: { data: { status: 500}}})
+    return expect(axios.put(validUrl, invalidFile, {headers})).rejects.toMatchObject({ response: {status: 500}})
   })
 
   test('responds with 400 on nonexistent hash', async () => {
@@ -215,7 +215,7 @@ describe('PUT /upload/data/:checksum', () => {
     const now = new Date()
     const headers = {'authorization': `Basic ${str2base64('martinlaakso:lol')}`}
     await expect(axios.put(validUrl, validFile, {headers}))
-      .rejects.toMatchObject({ response: { data: { status: 400}}})
+      .rejects.toMatchObject({ response: { status: 400}})
     const md = await repo.findOne({checksum: validMetadata.checksum})
     return expect(new Date(md.updatedAt).getTime()).toBeLessThan(now.getTime())
   })
