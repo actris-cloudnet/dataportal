@@ -65,7 +65,8 @@
       font-size: 0
 
     .rowtag
-      padding: 0.2em 0.5em
+      display: inline-block
+      width: 5em
       font-size: 0.9em
 
     .volatile

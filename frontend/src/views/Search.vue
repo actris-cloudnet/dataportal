@@ -112,7 +112,8 @@
 
   div.checkbox
     position: relative
-    top: -$filter-margin
+    top: -1.5em
+    margin-bottom: 1em
     label
       margin-left: 0.5em
       margin-top: 0

@@ -90,7 +90,7 @@ main#filelanding
       This is a volatile file. The data in this file may be incomplete and update in real time.
     </div>
     <div v-if="response.legacy" class="note legacynote">
-      This is legacy data. The data quality is not controlled and the file's metadata is not curated.
+      This is legacy data. The data quality is not controlled.
     </div>
     <div v-if="newestVersion" class="note versionnote">
       A <router-link id="newestVersion" :to="`/file/${newestVersion}`">newer version</router-link> of this file is available.
