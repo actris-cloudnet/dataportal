@@ -10,6 +10,7 @@ export class SearchFileResponse {
   productId: string
   size: number
   volatile: boolean
+  legacy: boolean
 
   constructor(file: SearchFile) {
     this.uuid = file.uuid
@@ -20,5 +21,6 @@ export class SearchFileResponse {
     this.productId = file.product.id
     this.size = file.size
     this.volatile = file.volatile
+    this.legacy = file.legacy
   }
 }

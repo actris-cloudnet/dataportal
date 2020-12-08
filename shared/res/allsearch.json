@@ -7,7 +7,8 @@
     "product": "Classification",
     "productId": "classification",
     "size": 7127282,
-    "volatile": false
+    "volatile": false,
+    "legacy": true
   },
   {
     "uuid": "a5d1d5af-3667-41bc-b952-e684f627d91c",
@@ -17,7 +18,8 @@
     "product": "Model",
     "productId": "model",
     "size": 500452,
-    "volatile": true
+    "volatile": true,
+    "legacy": false
   },
   {
     "uuid": "bde7a35f-03aa-4bff-acfb-b4974ea9f217",
@@ -27,7 +29,8 @@
     "product": "Classification",
     "productId": "classification",
     "size": 130744,
-    "volatile": true
+    "volatile": true,
+    "legacy": false
   },
   {
     "uuid": "38092c00-161d-4ca2-a29d-628cf8e960f6",
@@ -37,7 +40,8 @@
     "product": "Radar",
     "productId": "radar",
     "size": 12200657,
-    "volatile": true
+    "volatile": true,
+    "legacy": false
   },
   {
     "uuid": "22b32746-faf0-4057-9076-ed2e698dcc34",
@@ -47,7 +51,8 @@
     "product": "Categorize",
     "productId": "categorize",
     "size": 7127282,
-    "volatile": false
+    "volatile": false,
+    "legacy": false
   },
   {
     "uuid": "8bb32746-faf0-4057-9076-ed2e698dcf36",
@@ -57,7 +62,8 @@
     "product": "Categorize",
     "productId": "categorize",
     "size": 7127282,
-    "volatile": false
+    "volatile": false,
+    "legacy": false
   },
   {
     "uuid": "6cb32746-faf0-4057-9076-ed2e698dcf36",
@@ -67,7 +73,8 @@
     "product": "Categorize",
     "productId": "categorize",
     "size": 7127282,
-    "volatile": false
+    "volatile": false,
+    "legacy": false
   },
   {
     "uuid": "1bb32746-faf0-4057-9076-ed2e698dcf36",
@@ -77,7 +84,8 @@
     "product": "Categorize",
     "productId": "categorize",
     "size": 7127282,
-    "volatile": false
+    "volatile": false,
+    "legacy": false
   },
   {
     "uuid": "2bb32746-faf0-4057-9076-ed2e698dcf36",
@@ -87,7 +95,8 @@
     "product": "Classification",
     "productId": "classification",
     "size": 7127282,
-    "volatile": false
+    "volatile": false,
+    "legacy": false
   },
   {
     "uuid": "d21d6a9b-6804-4465-a026-74ec429fe17d",
@@ -97,7 +106,8 @@
     "product": "Radar",
     "productId": "radar",
     "size": 16027310,
-    "volatile": true
+    "volatile": true,
+    "legacy": false
   },
   {
     "uuid": "9e04d8ef-0f2b-4823-835d-33e458403c67",
@@ -107,6 +117,7 @@
     "product": "Model",
     "productId": "model",
     "size": 501452,
-    "volatile": true
+    "volatile": true,
+    "legacy": false
   }
 ]
