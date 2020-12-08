@@ -178,11 +178,16 @@ describe('Search.vue', () => {
 
   describe('legacy', () => {
 
-    it.only('makes correct query to backend after checking show legacy data box', async () => {
+    it('makes correct query to backend after checking show legacy data box', async () => {
       await findElementById('showLegacyCheckbox').trigger('click')
       const calls = mocked(axios.get).mock.calls
       const lastCall = calls[calls.length - 1]
       expect(lastCall[1]).toMatchObject({params: {showLegacy: true}})
+    })
+
+    it('displays text "legacy" only next to volatile items', async () => {
+      expect(findElementById('tableContent').text()).toContain('legacy')
+      return expect(findElementById('tableContent').text().match('volatile')).toHaveLength(1)
     })
   })
 })

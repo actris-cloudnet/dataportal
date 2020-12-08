@@ -64,9 +64,15 @@
       background-size: 20px
       font-size: 0
 
+    .rowtag
+      padding: 0.2em 0.5em
+      font-size: 0.9em
+
     .volatile
       background: #cad7ff
-      padding: 0.1em 0.5em
+
+    .legacy
+      background: #f2f2f2
 
     .downloadinfo
       float: right
@@ -102,10 +108,16 @@
       <template v-slot:cell(volatile)="data">
       <span
         v-if="data.item.volatile"
-        class="volatile"
+        class="rowtag volatile"
         title="The data for this day may be incomplete. This file is updating in real time.">
         volatile
       </span>
+      <span
+          v-if="data.item.legacy"
+          class="rowtag legacy"
+          title="This is legacy data. Quality of the data is not assured.">
+      legacy
+    </span>
       </template>
     </b-table>
     <b-pagination id="pagi" v-if="listLength > perPage"
