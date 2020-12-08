@@ -88,7 +88,8 @@ describe('Search.vue', () => {
     })
 
     it('displays data objects between dateFrom and dateTo by default', () => {
-      resources['allsearch'].map((file: any) => file.measurementDate).forEach((date: any) =>
+      // Has to be sliced because only 10 results are shown before pagination
+      resources['allsearch'].slice(0, 10).map((file: any) => file.measurementDate).forEach((date: any) =>
         expect(wrapper.text()).toContain(date)
       )
     })
