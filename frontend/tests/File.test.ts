@@ -6,6 +6,7 @@ import Vue from 'vue'
 import {augmentAxiosResponse, init, mountVue, nextTick} from './lib'
 import {mocked} from 'ts-jest/dist/util/testing'
 import {findByUuid, readResources} from '../../shared/lib'
+import HowToCite from '../src/components/HowToCite.vue'
 
 init()
 
@@ -115,5 +116,16 @@ describe('File.vue', () => {
     expect(wrapper.text()).toContain('2019-09-14 22:56:17 - radar file created')
     await wrapper.find('#hideHistory').trigger('click')
     expect(wrapper.text()).not.toContain('2019-09-14 22:56:17 - radar file created')
+  })
+
+  it('shows how to cite box by clicking a button', async () => {
+    mocked(axios.get).mockImplementation(axiosMockWithFileUuid('22b'))
+    wrapper = mountVue(File, {
+      stubs: {'router-link': true, 'how-to-cite': HowToCite}
+    })
+    await nextTick(2)
+    await wrapper.find('#showCiting').trigger('click')
+    expect(wrapper.findAll('#howtocite').length).toEqual(1)
+    expect(wrapper.text()).toContain('This is an example of how to cite Cloudnet datasets.')
   })
 })

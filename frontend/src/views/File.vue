@@ -55,14 +55,31 @@ main#filelanding
   a.viewAllPlots:hover
     color: #0056b3
     text-decoration: underline
+
+  .hoverbox
+    position: absolute
+    right: 1em
+    margin-left: 1em
+    margin-top: -2em
+    z-index: 100
+    background: white
+    max-width: 53em
+    padding: 1em
+    border: 1px solid $border-color
+    border-radius: 3px
+    box-shadow: 2px 2px 2px rgba(0,0,0,0.1)
+
 .capitalize
   text-transform: capitalize
 
 .na
   color: grey
 
-.download:focus
+.download:focus, .secondaryButton:focus
   outline: thin dotted black
+
+.secondaryButton
+  margin-right: 1em
 
 </style>
 
@@ -80,12 +97,28 @@ main#filelanding
           </span>
       </div>
       <div class="actions">
+        <a class="secondaryButton"
+           id="showCiting"
+          v-bind:class="{active: showHowToCite, disabled: response.volatile}"
+          @click.prevent="response.volatile ? null : (showHowToCite = !showHowToCite)"
+          :title="response.volatile ? 'Citing information is not available for volatile files' : ''"
+        >
+          How to cite
+        </a>
         <a class="download" :href="response.downloadUrl">
           Download file
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
         </a>
       </div>
     </header>
+    <how-to-cite
+        v-if="showHowToCite"
+        class="hoverbox"
+        :pid="response.pid"
+        :products="[response.product.humanReadableName]"
+        :sites="[response.site.humanReadableName]"
+        :startDate="response.measurementDate"
+    ></how-to-cite>
     <div v-if="response.volatile" class="note volatilenote">
       This is a volatile file. The data in this file may be incomplete and update in real time.
     </div>
@@ -224,6 +257,9 @@ import {getIconUrl, humanReadableDate, humanReadableSize, humanReadableTimestamp
 import {DevMode} from '../lib/DevMode'
 import {File} from '../../../backend/src/entity/File'
 import {Visualization} from '../../../backend/src/entity/Visualization'
+import HowToCite from '../components/HowToCite.vue'
+
+Vue.component('how-to-cite', HowToCite)
 
 @Component
 export default class FileView extends Vue {
@@ -243,6 +279,7 @@ export default class FileView extends Vue {
   allVisualizations = false
   sourceFiles: File[] = []
   showHistory = false
+  showHowToCite = false
 
   getVisualizations() {
     if (!this.allVisualizations) return this.visualizations.slice(0, 1)
