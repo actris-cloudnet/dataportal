@@ -26,13 +26,6 @@
     cursor: pointer
     margin-left: 1em
 
-  .closeX
-    float: right
-    font-weight: bold
-    color: lightgrey
-    cursor: pointer
-    margin-right: 0.5em
-
   .rednote>.close
     color: grey
     font-weight: normal

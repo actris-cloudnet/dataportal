@@ -102,12 +102,21 @@ main#filelanding
       </div>
       <div class="actions">
         <a class="secondaryButton"
+           id="showLicense"
+           v-bind:class="{active: showLicense}"
+           @click="showLicense = !showLicense"
+        >License
+        </a>
+        <div class="hoverbox" v-if="showLicense">
+          <span class="closeX" id="hideLicense" @click="showLicense = false"> &#10005; </span>
+          <license></license>
+        </div>
+        <a class="secondaryButton"
            id="showCiting"
           v-bind:class="{active: showHowToCite, disabled: response.volatile}"
           @click.prevent="response.volatile ? null : (showHowToCite = !showHowToCite)"
           :title="response.volatile ? 'Citing information is not available for volatile files' : ''"
-        >
-          How to cite
+        >How to cite
         </a>
         <div class="hoverbox" v-if="showHowToCite">
           <span class="closeX" id="hideCiting" @click="showHowToCite = false"> &#10005; </span>
@@ -263,8 +272,10 @@ import {DevMode} from '../lib/DevMode'
 import {File} from '../../../backend/src/entity/File'
 import {Visualization} from '../../../backend/src/entity/Visualization'
 import HowToCite from '../components/HowToCite.vue'
+import License from '../components/License.vue'
 
 Vue.component('how-to-cite', HowToCite)
+Vue.component('license', License)
 
 @Component
 export default class FileView extends Vue {
@@ -285,6 +296,7 @@ export default class FileView extends Vue {
   sourceFiles: File[] = []
   showHistory = false
   showHowToCite = false
+  showLicense = false
 
   getVisualizations() {
     if (!this.allVisualizations) return this.visualizations.slice(0, 1)
