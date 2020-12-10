@@ -125,22 +125,7 @@ main.column
           </how-to-cite>
 
           <h3>License</h3>
-          Cloudnet data is licensed under a <a href="https://creativecommons.org/licenses/by/4.0">Creative Commons Attribution 4.0 international licence</a>.
-          <section class="infobox">
-            This is a human-readable summary of (and not a substitute for) the <a href="https://creativecommons.org/licenses/by/4.0/legalcode">licence</a>.<br>
-            You are free to:
-            <ul>
-              <li><b>Share</b> — copy and redistribute the material in any medium or format</li>
-              <li><b>Adapt</b> — remix, transform, and build upon the material for any purpose, even commercially</li>
-            </ul>
-            Under the following terms:
-            <ul>
-              <li><b>Attribution</b> — You must give appropriate credit, provide a link to the licence, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use</li>
-              <li><b>No additional restrictions</b> — You may not apply legal terms or technological measures that legally restrict others from doing anything the licence permits</li>
-            </ul>
-            The licensor cannot revoke these freedoms as long as you follow the licence terms.
-            <!-- eslint-enable max-len -->
-          </section>
+          <license></license>
 
           <h3>Download</h3>
           By clicking the download button you confirm that you have taken notice of the above data licensing information.<br>
@@ -174,9 +159,11 @@ import Map from '../components/Map.vue'
 import {Product} from '../../../backend/src/entity/Product'
 import DataSearchResult from '../components/DataSearchResult.vue'
 import HowToCite from '../components/HowToCite.vue'
+import License from '../components/License.vue'
 
 Vue.component('data-search-result', DataSearchResult)
 Vue.component('how-to-cite', HowToCite)
+Vue.component('license', License)
 
 @Component({
   components: {Map}

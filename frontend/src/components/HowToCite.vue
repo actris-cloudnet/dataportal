@@ -1,18 +1,6 @@
 <style scoped lang="sass">
 @import "../sass/variables.sass"
 @import "../sass/global.sass"
-
-.infobox
-  margin-top: 0.5em
-  padding: 1em
-.infocolor
-  background: $landing-header
-  font-size: 0.9em
-  > h4:first-child
-    margin-top: 0
-  h4
-    font-size: 1.1em
-    margin-top: 1em
 </style>
 
 

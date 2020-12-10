@@ -8,6 +8,7 @@ import {mocked} from 'ts-jest/dist/util/testing'
 import {readResources} from '../../shared/lib'
 import DataSearchResult from '../src/components/DataSearchResult.vue'
 import HowToCite from '../src/components/HowToCite.vue'
+import License from '../src/components/License.vue'
 
 init()
 
@@ -43,7 +44,7 @@ describe('Collection.vue', () => {
   describe('general view', () => {
     beforeAll(async () => {
       wrapper = mountVue(Collection, {propsData: {mode: 'general'},
-        stubs: {'router-link': true, 'data-search-result': DataSearchResult, 'how-to-cite': HowToCite}
+        stubs: {'router-link': true, 'data-search-result': DataSearchResult, 'how-to-cite': HowToCite, 'license': License}
       })
       return nextTick(1)
     })
@@ -73,6 +74,11 @@ describe('Collection.vue', () => {
     it('displays PID', async () => {
       await nextTick(2)
       expect(wrapper.text()).toContain('testpid')
+    })
+
+    it('displays license', async () => {
+      await nextTick(2)
+      expect(wrapper.text()).toContain('Cloudnet data is licensed under a Creative Commons Attribution 4.0 international licence.')
     })
   })
 
