@@ -83,7 +83,7 @@ export class Middleware {
     const defaultDateFrom = () => new Date('1970-01-01')
     const defaultDateTo = tomorrow
     const setVolatile = () => ('volatile' in query) ? toArray(query.volatile) : [true, false]
-    const setLegacy = () => ('showLegacy' in query) && query.showLegacy == 'true' ? [true, false] : [false]
+    const setLegacy = () => ('showLegacy' in query) && query.showLegacy.toLowerCase() == 'true' ? [true, false] : [false]
     if (!('site' in query)) query.site = await defaultSite()
     if (!('product' in query)) query.product = await defaultProduct()
     if (!('dateFrom' in query)) query.dateFrom = defaultDateFrom()
