@@ -11,6 +11,7 @@ main#filelanding
     justify-content: space-between
     align-items: center
     flex-wrap: wrap
+    position: relative
 
   div.actions
     margin-top: 5px
@@ -58,16 +59,17 @@ main#filelanding
 
   .hoverbox
     position: absolute
-    right: 1em
-    margin-left: 1em
-    margin-top: -2em
+    right: -1em
+    margin-right: 1em
+    margin-top: 1em
+    margin-bottom: 1em
     z-index: 100
     background: white
     max-width: 53em
     padding: 1em
     border: 1px solid $border-color
     border-radius: 3px
-    box-shadow: 2px 2px 2px rgba(0,0,0,0.1)
+    box-shadow: 3px 3px 3px rgba(0,0,0,0.1)
 
 .capitalize
   text-transform: capitalize
@@ -105,20 +107,20 @@ main#filelanding
         >
           How to cite
         </a>
+        <how-to-cite
+            v-if="showHowToCite"
+            class="hoverbox"
+            :pid="response.pid"
+            :products="[response.product.humanReadableName]"
+            :sites="[response.site.humanReadableName]"
+            :startDate="response.measurementDate"
+        ></how-to-cite>
         <a class="download" :href="response.downloadUrl">
           Download file
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
         </a>
       </div>
     </header>
-    <how-to-cite
-        v-if="showHowToCite"
-        class="hoverbox"
-        :pid="response.pid"
-        :products="[response.product.humanReadableName]"
-        :sites="[response.site.humanReadableName]"
-        :startDate="response.measurementDate"
-    ></how-to-cite>
     <div v-if="response.volatile" class="note volatilenote">
       This is a volatile file. The data in this file may be incomplete and update in real time.
     </div>
