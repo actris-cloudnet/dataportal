@@ -70,6 +70,8 @@ main#filelanding
     border: 1px solid $border-color
     border-radius: 3px
     box-shadow: 3px 3px 3px rgba(0,0,0,0.1)
+    .closeX
+      font-style: normal
 
 .capitalize
   text-transform: capitalize
@@ -107,14 +109,15 @@ main#filelanding
         >
           How to cite
         </a>
-        <how-to-cite
-            v-if="showHowToCite"
-            class="hoverbox"
-            :pid="response.pid"
-            :products="[response.product.humanReadableName]"
-            :sites="[response.site.humanReadableName]"
-            :startDate="response.measurementDate"
-        ></how-to-cite>
+        <div class="hoverbox" v-if="showHowToCite">
+          <span class="closeX" id="hideCiting" @click="showHowToCite = false"> &#10005; </span>
+          <how-to-cite
+              :pid="response.pid"
+              :products="[response.product.humanReadableName]"
+              :sites="[response.site.humanReadableName]"
+              :startDate="response.measurementDate"
+          ></how-to-cite>
+        </div>
         <a class="download" :href="response.downloadUrl">
           Download file
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>

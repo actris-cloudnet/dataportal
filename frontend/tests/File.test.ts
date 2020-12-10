@@ -128,4 +128,16 @@ describe('File.vue', () => {
     expect(wrapper.findAll('#howtocite').length).toEqual(1)
     expect(wrapper.text()).toContain('This is an example of how to cite Cloudnet datasets.')
   })
+
+  it('hides how to cite box by clicking a button', async () => {
+    mocked(axios.get).mockImplementation(axiosMockWithFileUuid('22b'))
+    wrapper = mountVue(File, {
+      stubs: {'router-link': true, 'how-to-cite': HowToCite}
+    })
+    await nextTick(2)
+    await wrapper.find('#showCiting').trigger('click')
+    expect(wrapper.findAll('#howtocite').length).toEqual(1)
+    await wrapper.find('#hideCiting').trigger('click')
+    expect(wrapper.findAll('#howtocite').length).toEqual(0)
+  })
 })
