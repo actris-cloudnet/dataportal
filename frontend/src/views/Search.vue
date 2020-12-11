@@ -114,6 +114,9 @@
     position: relative
     top: -1.5em
     margin-bottom: 1em
+    display: flex
+    flex-direction: row
+    align-items: center
     label
       margin-left: 0.5em
       margin-top: 0
