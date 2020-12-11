@@ -83,10 +83,11 @@ const expectedJson = {
   'version': '1234'
 }
 
+const filepath = 'tests/data/20190723_bucharest_classification.nc'
+const s3key = `something/${basename(filepath)}`
+
 describe('after PUTting metadata to API', () => {
   beforeAll(async () => {
-    const filepath = 'tests/data/20190723_bucharest_classification.nc'
-    const s3key = basename(filepath)
     await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${s3key}`, fs.createReadStream(filepath))
     return axios.put(`${backendPrivateUrl}files/${s3key}`, inputJson)
   })
@@ -99,7 +100,7 @@ describe('after PUTting metadata to API', () => {
 
   it('serves the file and increases download count', async () => {
     return axios
-      .get(`${backendPublicUrl}download/product/${expectedJson.uuid}/${expectedJson.filename}`, {responseType: 'arraybuffer'})
+      .get(`${backendPublicUrl}download/product/${expectedJson.uuid}/${s3key}`, {responseType: 'arraybuffer'})
       .then(response => {
         expect(response.status).toEqual(200)
         const hash = createHash('sha256')

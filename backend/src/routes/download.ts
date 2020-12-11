@@ -28,8 +28,9 @@ export class DownloadRoutes {
   readonly downloadRepo: Repository<Download>
 
   product: RequestHandler = async (req, res, next) => {
+    const s3key = req.params[0]
     try {
-      const file = await this.fileRepo.findOne({uuid: req.params.uuid, s3key: req.params.s3key})
+      const file = await this.fileRepo.findOne({uuid: req.params.uuid, s3key})
       if (file === undefined) return next({status: 404, errors: ['File not found']})
       const upstreamRes = await this.makeRequest(file)
       res.setHeader('Content-Type', 'application/octet-stream')
