@@ -11,17 +11,17 @@ init()
 
 jest.mock('axios')
 
-let axiosMockWithIndices: Function
+let axiosMockWithUuid: Function
 let resources: any
 let wrapper: Wrapper<Vue>
 
 describe('Site.vue', () => {
   beforeAll(async () => {
     resources = await readResources()
-    axiosMockWithIndices = (siteIdx: number, searchIdx: number, instruments = []) => {
+    axiosMockWithUuid = (siteUuid: number, searchIdx: number, instruments = []) => {
       return (url: string, _: AxiosRequestConfig | undefined): AxiosPromise => {
         if (url.includes('site')) {
-          return Promise.resolve(augmentAxiosResponse(resources['sites'][siteIdx]))
+          return Promise.resolve(augmentAxiosResponse(resources['sites'][siteUuid]))
         } else if (url.includes('search')) {
           return Promise.resolve(augmentAxiosResponse([resources['allsearch'][searchIdx]]))
         } else { // metadata-upload
@@ -38,7 +38,7 @@ describe('Site.vue', () => {
       '93 m',
       '2019-07-16'
     ]
-    mocked(axios.get).mockImplementation(axiosMockWithIndices(0, 6))
+    mocked(axios.get).mockImplementation(axiosMockWithUuid(0, 7))
     wrapper = mountVue(Site)
     await nextTick(1)
     const summaryText = await wrapper.find('#summary').text()
@@ -50,7 +50,7 @@ describe('Site.vue', () => {
       'Lufft CHM15k ceilometer',
       'METEK MIRA-35 cloud radar'
     ]
-    mocked(axios.get).mockImplementation(axiosMockWithIndices(0, 7, resources['uploaded-metadata-public']))
+    mocked(axios.get).mockImplementation(axiosMockWithUuid(0, 7, resources['uploaded-metadata-public']))
     wrapper = mountVue(Site)
     await nextTick(1)
     const instrumentText = await wrapper.find('#instruments').text()
@@ -58,7 +58,7 @@ describe('Site.vue', () => {
   })
 
   it('displays notification when instruments are not found', async () => {
-    mocked(axios.get).mockImplementation(axiosMockWithIndices(1, 0))
+    mocked(axios.get).mockImplementation(axiosMockWithUuid(1, 0))
     wrapper = mountVue(Site)
     await nextTick(1)
     const instrumentText = await wrapper.find('#instruments').text()
@@ -69,7 +69,7 @@ describe('Site.vue', () => {
     const expectedString = 'The site has submitted data from the following instruments in the last'
     const parseDaysFromInstrumentString = (instrumentString: string) =>
       parseInt(instrumentString.split(expectedString)[1].split(' ')[1])
-    mocked(axios.get).mockImplementation(axiosMockWithIndices(0, 8, resources['uploaded-metadata-public']))
+    mocked(axios.get).mockImplementation(axiosMockWithUuid(0, 8, resources['uploaded-metadata-public']))
     wrapper = mountVue(Site)
     await nextTick(1)
     const instrumentText = await wrapper.find('#instruments').text()

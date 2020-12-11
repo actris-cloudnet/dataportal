@@ -11,3 +11,6 @@ export const readResources = async () => {
       return res
     })
 }
+
+export const findByUuid = (uuidablelist: any, uuid: string) =>
+  uuidablelist.filter((uuidable: any) => uuidable.uuid.startsWith(uuid))[0]

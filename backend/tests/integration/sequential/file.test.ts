@@ -75,6 +75,13 @@ describe('PUT /files/:s3key', () => {
       .toBeTruthy()
   })
 
+  test('inserting new legacy file', async () => {
+    const tmpfile = {...volatileFile}
+    tmpfile.legacy = true
+    await expect(putFile(tmpfile)).resolves.toMatchObject({status: 201})
+    await expect(fileRepo.findOneOrFail(volatileFile.uuid)).resolves.toMatchObject({legacy: true})
+    return expect(searchFileRepo.findOneOrFail(volatileFile.uuid)).resolves.toMatchObject({legacy: true})
+  })
 
   test('errors on invalid site', async () => {
     const tmpfile = {...stableFile}

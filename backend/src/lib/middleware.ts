@@ -53,7 +53,7 @@ export class Middleware {
       validKeys = validKeys.concat(['date', 'model'])
     }
     else {
-      validKeys = validKeys.concat(['product', 'dateFrom', 'dateTo', 'developer', 'releasedBefore', 'allVersions', 'limit'])
+      validKeys = validKeys.concat(['product', 'dateFrom', 'dateTo', 'developer', 'releasedBefore', 'allVersions', 'limit', 'showLegacy'])
       if (req.path.includes('visualization')) validKeys.push('variable')
     }
 
@@ -83,6 +83,7 @@ export class Middleware {
     const defaultDateFrom = () => new Date('1970-01-01')
     const defaultDateTo = tomorrow
     const setVolatile = () => ('volatile' in query) ? toArray(query.volatile) : [true, false]
+    const setLegacy = () => ('showLegacy' in query) && query.showLegacy.toLowerCase() == 'true' ? [true, false] : [false]
     if (!('site' in query)) query.site = await defaultSite()
     if (!('product' in query)) query.product = await defaultProduct()
     if (!('dateFrom' in query)) query.dateFrom = defaultDateFrom()
@@ -91,6 +92,7 @@ export class Middleware {
     query.site = toArray(query.site)
     query.product = toArray(query.product)
     query.volatile = setVolatile()
+    query.showLegacy = setLegacy()
     next()
   }
 

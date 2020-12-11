@@ -153,13 +153,22 @@ describe('/api/files', () => {
     return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
 
+  it('by default does not show legacy data', async () => {
+    const payload = { params: { site: 'bucharest', product: 'classification', dateFrom: '2009-01-01', dateTo: '2010-01-01' }}
+    return expect(axios.get(url, payload)).resolves.toMatchObject({data: []})
+  })
+  it('shows legacy data when using showLegacy flag', async () => {
+    const payload = { params: { site: 'bucharest', product: 'classification', dateFrom: '2009-01-01', dateTo: '2010-01-01', showLegacy: true }}
+    return expect(axios.get(url, payload)).resolves.toMatchObject({data: [{legacy: true}]})
+  })
+
 })
 
 describe('/api/search', () => {
   const url = `${backendPublicUrl}search/`
 
   it('responds with correct objects if dateFrom, dateTo, site, and product are specified', async () => {
-    const expectedData = [responses['allsearch'][1]]
+    const expectedData = [responses['allsearch'][2]]
     const payload = {params: {dateFrom: new Date('2018-06-09'), dateTo: new Date('2019-09-02'), site: 'macehead', product: 'classification'}}
     const res = await axios.get(url, payload)
     return expect(res.data).toMatchObject(expectedData)

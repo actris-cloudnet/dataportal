@@ -24,6 +24,10 @@ export class SearchFile {
   @Column({default: true})
   volatile!: boolean
 
+  @Column({default: false})
+  legacy!: boolean
+
+
   constructor(file: File) {
     // A typeorm hack, see https://github.com/typeorm/typeorm/issues/3903
     if (typeof file == 'undefined') return
@@ -34,6 +38,7 @@ export class SearchFile {
     this.product = file.product
     this.size = file.size
     this.volatile = file.volatile
+    this.legacy = file.legacy || false
   }
 }
 

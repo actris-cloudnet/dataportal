@@ -88,7 +88,8 @@ describe('Search.vue', () => {
     })
 
     it('displays data objects between dateFrom and dateTo by default', () => {
-      resources['allsearch'].map((file: any) => file.measurementDate).forEach((date: any) =>
+      // Has to be sliced because only 10 results are shown before pagination
+      resources['allsearch'].slice(0, 10).map((file: any) => file.measurementDate).forEach((date: any) =>
         expect(wrapper.text()).toContain(date)
       )
     })
@@ -171,6 +172,21 @@ describe('Search.vue', () => {
 
     it('displays text "volatile" only next to volatile items', async () => {
       expect(findElementById('tableContent').text()).toContain('volatile')
+      return expect(findElementById('tableContent').text().match('volatile')).toHaveLength(1)
+    })
+  })
+
+  describe('legacy', () => {
+
+    it('makes correct query to backend after checking show legacy data box', async () => {
+      await findElementById('showLegacyCheckbox').trigger('click')
+      const calls = mocked(axios.get).mock.calls
+      const lastCall = calls[calls.length - 1]
+      expect(lastCall[1]).toMatchObject({params: {showLegacy: true}})
+    })
+
+    it('displays text "legacy" only next to volatile items', async () => {
+      expect(findElementById('tableContent').text()).toContain('legacy')
       return expect(findElementById('tableContent').text().match('volatile')).toHaveLength(1)
     })
   })

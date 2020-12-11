@@ -108,7 +108,7 @@ import {DownloadRoutes} from './routes/download'
   app.post('/api/collection', express.json({limit: '1mb'}), collRoutes.postCollection)
   app.get('/api/collection/:uuid', middleware.validateUuidParam, collRoutes.collection)
   app.post('/api/generate-pid', express.json(), collRoutes.generatePid)
-  app.get('/api/download/product/:uuid/:s3key', middleware.validateUuidParam, dlRoutes.product)
+  app.get('/api/download/product/:uuid/*', middleware.validateUuidParam, dlRoutes.product)
   app.get('/api/download/collection/:uuid', middleware.validateUuidParam, dlRoutes.collection)
 
   // protected (for sites)
