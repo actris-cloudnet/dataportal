@@ -104,7 +104,7 @@ main#filelanding
         <a class="secondaryButton"
            id="showLicense"
            v-bind:class="{active: showLicense}"
-           @click="showLicense = !showLicense"
+           @click="(showLicense = !showLicense) && (showHowToCite = false)"
         >License
         </a>
         <div class="hoverbox" v-if="showLicense">
@@ -112,9 +112,9 @@ main#filelanding
           <license></license>
         </div>
         <a class="secondaryButton"
-           id="showCiting"
+          id="showCiting"
           v-bind:class="{active: showHowToCite, disabled: response.volatile}"
-          @click.prevent="response.volatile ? null : (showHowToCite = !showHowToCite)"
+          @click="response.volatile ? null : ((showHowToCite = !showHowToCite) && (showLicense = false))"
           :title="response.volatile ? 'Citing information is not available for volatile files' : ''"
         >How to cite
         </a>
