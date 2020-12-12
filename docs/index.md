@@ -283,6 +283,18 @@ Download all data since 1. October 2020, saving them to the current working dire
 That is, get the filtered list of file metadata, pick the `downloadUrl` properties from each of the `File` objects 
 and pass them on to `curl` again to download.
 
+Here is the same example in Python using the `requests` package:
+
+```python
+import requests
+
+metadata = requests.get('https://cloudnet.fmi.fi/api/files?dateFrom=2020-10-01').json()
+for row in metadata:
+    res = requests.get(row['downloadUrl'])
+    with open(row['filename'], 'wb') as f:
+        f.write(res.content)
+```
+
 ## Notes
 
 The API provides `gzip` compression of responses where applicable. 
