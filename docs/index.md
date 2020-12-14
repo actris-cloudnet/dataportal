@@ -264,31 +264,43 @@ repositories of most UNIX-based systems.
 
 Fetch all model and classification products from Norunda and Granada:
 
-`curl "https://cloudnet.fmi.fi/api/files?site=norunda&site=granada&product=model&product=classification"`
-
+```shell
+curl "https://cloudnet.fmi.fi/api/files?site=norunda&site=granada&product=model&product=classification"
+```
 
 ### Fetching all versions
 
 Fetch all versions of a classification product from Granada on 2020-05-20:
 
-`curl "https://cloudnet.fmi.fi/api/files?site=granada&product=classification&dateFrom=2020-05-20&dateTo=2020-05-20&allVersions"`
-
+```shell
+curl "https://cloudnet.fmi.fi/api/files?site=granada&product=classification&dateFrom=2020-05-20&dateTo=2020-05-20&allVersions"
+```
 
 ### Using the API to download all data objects matching a criteria
 
 Download all data since 1. October 2020, saving them to the current working directory:
 
-`curl "https://cloudnet.fmi.fi/api/files?dateFrom=2020-10-01" | jq '.[]["downloadUrl"]' | xargs -n1 curl -O`
+```shell
+curl "https://cloudnet.fmi.fi/api/files?dateFrom=2020-10-01" | jq '.[]["downloadUrl"]' | xargs -n1 curl -O
+```
 
 That is, get the filtered list of file metadata, pick the `downloadUrl` properties from each of the `File` objects 
 and pass them on to `curl` again to download.
 
-Here is the same example in Python using the `requests` package:
+### Python example
+
+Download one day of classification data from all sites using the `requests` package:
 
 ```python
 import requests
 
-metadata = requests.get('https://cloudnet.fmi.fi/api/files?dateFrom=2020-10-01').json()
+url = 'https://cloudnet.fmi.fi/api/files'
+payload = {
+    'dateFrom': '2020-10-01',
+    'dateTo': '2020-10-01',
+    'product': 'classification'
+}
+metadata = requests.get(url, payload).json()
 for row in metadata:
     res = requests.get(row['downloadUrl'])
     with open(row['filename'], 'wb') as f:
