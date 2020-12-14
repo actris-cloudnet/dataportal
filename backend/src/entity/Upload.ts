@@ -45,10 +45,10 @@ export class Upload {
   @Column()
   updatedAt!: Date
 
-  @ManyToOne(_ => Site, site => site.uploadedMetadatas)
+  @ManyToOne(_ => Site, site => site.uploads)
   site!: Site
 
-  @ManyToOne(_ => Instrument, instrument => instrument.uploadedMetadatas)
+  @ManyToOne(_ => Instrument, instrument => instrument.uploads)
   instrument!: Instrument
 
   @ManyToOne(_ => Model, model => model.uploads)

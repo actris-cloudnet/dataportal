@@ -35,6 +35,6 @@ export class Site {
     @OneToMany(_ => File, file => file.site)
     files!: File[]
 
-    @OneToMany(_ => Upload, uploadedMetadata => uploadedMetadata.site)
-    uploadedMetadatas!: Upload[]
+    @OneToMany(_ => Upload, upload => upload.site)
+    uploads!: Upload[]
 }
