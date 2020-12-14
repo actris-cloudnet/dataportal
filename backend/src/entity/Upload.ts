@@ -51,7 +51,7 @@ export class Upload {
   @ManyToOne(_ => Instrument, instrument => instrument.uploadedMetadatas)
   instrument!: Instrument
 
-  @ManyToOne(_ => Model, model => model.uploadedMetadatas)
+  @ManyToOne(_ => Model, model => model.uploads)
   model!: Model
 
   @BeforeInsert()

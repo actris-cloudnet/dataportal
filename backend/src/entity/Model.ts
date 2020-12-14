@@ -1,5 +1,6 @@
 import {Column, Entity, OneToMany, PrimaryColumn} from 'typeorm'
 import {Upload} from './Upload'
+import {File} from './File'
 
 @Entity()
 export class Model {
@@ -10,7 +11,9 @@ export class Model {
     @Column()
     optimumOrder!: number;
 
-    @OneToMany(_ => Upload, uploadedMetadata => uploadedMetadata.site)
-    uploadedMetadatas!: Upload[]
+    @OneToMany(_ => Upload, uploads => uploads.site)
+    uploads!: Upload[]
 
+    @OneToMany(_ => File, file => file.model)
+    files!: File[]
 }
