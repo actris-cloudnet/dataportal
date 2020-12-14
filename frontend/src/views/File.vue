@@ -102,16 +102,6 @@ main#filelanding
       </div>
       <div class="actions">
         <a class="secondaryButton"
-           id="showLicense"
-           v-bind:class="{active: showLicense}"
-           @click="(showLicense = !showLicense) && (showHowToCite = false)"
-        >License
-        </a>
-        <div class="hoverbox" v-if="showLicense">
-          <span class="closeX" id="hideLicense" @click="showLicense = false"> &#10005; </span>
-          <license></license>
-        </div>
-        <a class="secondaryButton"
           id="showCiting"
           v-bind:class="{active: showHowToCite, disabled: response.volatile}"
           @click="response.volatile ? null : ((showHowToCite = !showHowToCite) && (showLicense = false))"
@@ -126,6 +116,16 @@ main#filelanding
               :sites="[response.site.humanReadableName]"
               :startDate="response.measurementDate"
           ></how-to-cite>
+        </div>
+        <a class="secondaryButton"
+           id="showLicense"
+           v-bind:class="{active: showLicense}"
+           @click="(showLicense = !showLicense) && (showHowToCite = false)"
+        >License
+        </a>
+        <div class="hoverbox" v-if="showLicense">
+          <span class="closeX" id="hideLicense" @click="showLicense = false"> &#10005; </span>
+          <license></license>
         </div>
         <a class="download" :href="response.downloadUrl">
           Download file
