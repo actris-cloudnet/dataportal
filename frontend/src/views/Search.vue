@@ -26,13 +26,6 @@
     cursor: pointer
     margin-left: 1em
 
-  .closeX
-    float: right
-    font-weight: bold
-    color: lightgrey
-    cursor: pointer
-    margin-right: 0.5em
-
   .rednote>.close
     color: grey
     font-weight: normal
@@ -158,7 +151,7 @@
     flex-grow: 1
     max-width: 1000px
 
-  .secondaryButton
+  .widebutton
     width: 100%
     margin: 0 auto $filter-margin
 
@@ -369,10 +362,10 @@
       id="variableSelect">
     </custom-multiselect>
 
-    <button v-if="isVizMode()" @click="navigateToSearch('data')" class="secondaryButton">
+    <button v-if="isVizMode()" @click="navigateToSearch('data')" class="secondaryButton widebutton">
       View in data search &rarr;
     </button>
-    <button v-else @click="navigateToSearch('visualizations')" class="secondaryButton">
+    <button v-else @click="navigateToSearch('visualizations')" class="secondaryButton widebutton">
       View latest date in visualization search &rarr;
     </button>
 

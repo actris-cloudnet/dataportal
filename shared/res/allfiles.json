@@ -138,7 +138,7 @@
   {
     "uuid": "22b32746-faf0-4057-9076-ed2e698dcc34",
     "version": "123",
-    "pid": "",
+    "pid": "http://pidservice.example/pidhandle",
     "volatile": false,
     "legacy": false,
     "measurementDate": "2019-07-15",

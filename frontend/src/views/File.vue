@@ -11,6 +11,7 @@ main#filelanding
     justify-content: space-between
     align-items: center
     flex-wrap: wrap
+    position: relative
 
   div.actions
     margin-top: 5px
@@ -55,14 +56,34 @@ main#filelanding
   a.viewAllPlots:hover
     color: #0056b3
     text-decoration: underline
+
+  .hoverbox
+    position: absolute
+    right: -1em
+    margin-right: 1em
+    margin-top: 1em
+    margin-bottom: 1em
+    z-index: 100
+    background: white
+    max-width: 53em
+    padding: 1em
+    border: 1px solid $border-color
+    border-radius: 3px
+    box-shadow: 3px 3px 3px rgba(0,0,0,0.1)
+    .closeX
+      font-style: normal
+
 .capitalize
   text-transform: capitalize
 
 .na
   color: grey
 
-.download:focus
+.download:focus, .secondaryButton:focus
   outline: thin dotted black
+
+.secondaryButton
+  margin-right: 1em
 
 </style>
 
@@ -80,6 +101,32 @@ main#filelanding
           </span>
       </div>
       <div class="actions">
+        <a class="secondaryButton"
+          id="showCiting"
+          v-bind:class="{active: showHowToCite, disabled: response.volatile}"
+          @click="response.volatile ? null : ((showHowToCite = !showHowToCite) && (showLicense = false))"
+          :title="response.volatile ? 'Citing information is not available for volatile files' : ''"
+        >How to cite
+        </a>
+        <div class="hoverbox" v-if="showHowToCite">
+          <span class="closeX" id="hideCiting" @click="showHowToCite = false"> &#10005; </span>
+          <how-to-cite
+              :pid="response.pid"
+              :products="[response.product.humanReadableName]"
+              :sites="[response.site.humanReadableName]"
+              :startDate="response.measurementDate"
+          ></how-to-cite>
+        </div>
+        <a class="secondaryButton"
+           id="showLicense"
+           v-bind:class="{active: showLicense}"
+           @click="(showLicense = !showLicense) && (showHowToCite = false)"
+        >License
+        </a>
+        <div class="hoverbox" v-if="showLicense">
+          <span class="closeX" id="hideLicense" @click="showLicense = false"> &#10005; </span>
+          <license></license>
+        </div>
         <a class="download" :href="response.downloadUrl">
           Download file
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
@@ -224,6 +271,11 @@ import {getIconUrl, humanReadableDate, humanReadableSize, humanReadableTimestamp
 import {DevMode} from '../lib/DevMode'
 import {File} from '../../../backend/src/entity/File'
 import {Visualization} from '../../../backend/src/entity/Visualization'
+import HowToCite from '../components/HowToCite.vue'
+import License from '../components/License.vue'
+
+Vue.component('how-to-cite', HowToCite)
+Vue.component('license', License)
 
 @Component
 export default class FileView extends Vue {
@@ -243,6 +295,8 @@ export default class FileView extends Vue {
   allVisualizations = false
   sourceFiles: File[] = []
   showHistory = false
+  showHowToCite = false
+  showLicense = false
 
   getVisualizations() {
     if (!this.allVisualizations) return this.visualizations.slice(0, 1)

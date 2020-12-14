@@ -54,7 +54,6 @@ footer.global
     </div>
     <div class="vertical-center footeritem centered hidden-links">
       <span>&copy; <a href="https://en.ilmatieteenlaitos.fi/">Finnish Meteorological Institute</a></span><br>
-      <span>Except where otherwise noted, content on this site is licensed under a <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> license.<br></span>
       <span class="small">Header photo by Flickr user @theaucitron, used under a CC license.<br>
       Icons from <a href="https://icons8.com/">icons8.com</a>.</span>
     </div>
