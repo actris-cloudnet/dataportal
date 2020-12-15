@@ -188,5 +188,41 @@
       "format": "HDF5 (NetCDF4)",
       "site": "bucharest",
       "version": "123"
+    },
+    {
+      "uuid": "b5d1d5af-3667-41bc-b952-e684f627d91c",
+      "pid": "",
+      "volatile": true,
+      "measurementDate": "2020-12-05",
+      "history": "2020-02-17 09:19:16 - global attributes fixed using attribute_modifier 0.0.1\nSun Dec  7 07:35:16 GMT 2014 - NetCDF generated from original data by update_files.pl using cnmodel2nc on anvil2",
+      "product": "model",
+      "model": "ecmwf",
+      "cloudnetpyVersion": "",
+      "createdAt": "2020-02-20T10:52:59.073Z",
+      "updatedAt": "2020-02-20T10:52:59.073Z",
+      "s3key": "20141205_mace-head_ecmwf.nc",
+      "checksum": "055bcd9deae26851992c3da6352844fb9443203c48ae4f4ad8f1aa50ef2ab26f",
+      "size": 500452,
+      "format": "NetCDF3",
+      "site": "bucharest",
+      "version": "123"
+    },
+    {
+      "uuid": "c5d1d5af-3667-41bc-b952-e684f627d91c",
+      "pid": "",
+      "volatile": true,
+      "measurementDate": "2020-12-05",
+      "history": "2020-02-17 09:19:16 - global attributes fixed using attribute_modifier 0.0.1\nSun Dec  7 07:35:16 GMT 2014 - NetCDF generated from original data by update_files.pl using cnmodel2nc on anvil2",
+      "product": "model",
+      "model": "icon-iglo-12-23",
+      "cloudnetpyVersion": "",
+      "createdAt": "2020-02-20T10:52:59.073Z",
+      "updatedAt": "2020-02-20T10:52:59.073Z",
+      "s3key": "20141205_mace-head_ecmwf.nc",
+      "checksum": "155bcd9deae26851992c3da6352844fb9443203c48ae4f4ad8f1aa50ef2ab26f",
+      "size": 500452,
+      "format": "NetCDF3",
+      "site": "bucharest",
+      "version": "123"
     }
 ]
