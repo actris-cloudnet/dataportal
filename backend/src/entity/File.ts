@@ -95,7 +95,7 @@ export class File {
     }
 }
 
-export function isFile(obj: any): obj is File {
+export function isFile(obj: any) {
   return 'uuid' in obj
       && 'measurementDate' in obj
       && isValidDate(obj.measurementDate)

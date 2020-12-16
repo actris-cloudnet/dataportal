@@ -1,7 +1,7 @@
 import {Request, RequestHandler, Response} from 'express'
 import {Collection} from '../entity/Collection'
 import config from '../config'
-import {Connection, Repository} from 'typeorm'
+import {Connection, EntityManager, Repository} from 'typeorm'
 import {File, isFile} from '../entity/File'
 import {
   checkFileExists,
@@ -12,6 +12,7 @@ import {
 } from '../lib'
 import {augmentFiles} from '../lib/'
 import {SearchFile} from '../entity/SearchFile'
+import {Model} from '../entity/Model'
 
 export class FileRoutes {
 
@@ -98,6 +99,9 @@ export class FileRoutes {
       if (existingFile == undefined) { // New file
         file.createdAt = file.updatedAt
         await this.conn.transaction(async transactionalEntityManager => {
+          if (file.product == 'model') {
+            await this.removeWorseModelFile(transactionalEntityManager, file)
+          }
           await transactionalEntityManager.insert(File, file)
           await transactionalEntityManager.insert(SearchFile, searchFile)
         })
@@ -195,5 +199,21 @@ export class FileRoutes {
       .orderBy('file.measurementDate', 'DESC')
     return qb
   }
+
+  private async removeWorseModelFile(transactionalEntityManager: EntityManager, file: any) {
+    const {optimumOrder} = await transactionalEntityManager.findOneOrFail(Model, {id: file.model})
+    const [bestModelFile] = await transactionalEntityManager.createQueryBuilder(File, 'file')
+      .leftJoinAndSelect('file.site', 'site')
+      .leftJoinAndSelect('file.product', 'product')
+      .leftJoinAndSelect('file.model', 'model')
+      .andWhere('site.id = :site', file)
+      .andWhere('product.id = :product', file)
+      .andWhere('file.measurementDate = :measurementDate', file)
+      .orderBy('model.optimumOrder', 'ASC')
+      .getMany()
+    if (bestModelFile && bestModelFile.model.optimumOrder > optimumOrder)
+      await transactionalEntityManager.delete(SearchFile, {uuid: bestModelFile.uuid})
+  }
+
 
 }

@@ -71,16 +71,35 @@ describe('PUT /files/:s3key', () => {
     await expect(fileRepo.findOneOrFail({where: {uuid: newVersion.uuid}})).resolves.toBeTruthy()
     await expect(searchFileRepo.findOneOrFail({where: {uuid: stableFile.uuid}})).rejects
       .toBeTruthy()
-    await expect(searchFileRepo.findOneOrFail({where: {uuid: newVersion.uuid}})).resolves
+    return expect(searchFileRepo.findOneOrFail({where: {uuid: newVersion.uuid}})).resolves
       .toBeTruthy()
   })
 
-  test('inserting new legacy file', async () => {
+  test('inserting legacy file', async () => {
     const tmpfile = {...volatileFile}
     tmpfile.legacy = true
     await expect(putFile(tmpfile)).resolves.toMatchObject({status: 201})
     await expect(fileRepo.findOneOrFail(volatileFile.uuid)).resolves.toMatchObject({legacy: true})
     return expect(searchFileRepo.findOneOrFail(volatileFile.uuid)).resolves.toMatchObject({legacy: true})
+  })
+
+  test('inserting two model files', async () => {
+    const tmpfile1 = {...volatileFile}
+    tmpfile1.product = 'model'
+    tmpfile1.model = 'icon-iglo-12-23'
+    const tmpfile2 = {...tmpfile1}
+    tmpfile2.model = 'ecmwf'
+    tmpfile2.uuid = '87EB042E-B247-4AC1-BC03-074DD0D74BDB'
+    tmpfile2.s3key = 'icomodel.nc'
+    tmpfile2.checksum = '610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678'
+    await expect(putFile(tmpfile1)).resolves.toMatchObject({status: 201})
+    await expect(fileRepo.findOneOrFail(tmpfile1.uuid, {relations: ['model']})).resolves.toMatchObject({model: {id: tmpfile1.model}})
+    await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeTruthy()
+    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile2.s3key}`, 'content')
+    await expect(putFile(tmpfile2)).resolves.toMatchObject({status: 201})
+    await expect(fileRepo.findOneOrFail(tmpfile2.uuid, {relations: ['model']})).resolves.toMatchObject({model: {id: tmpfile2.model}})
+    await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeFalsy()
+    return expect(searchFileRepo.findOne(tmpfile2.uuid)).resolves.toBeTruthy()
   })
 
   test('errors on invalid site', async () => {
@@ -105,7 +124,9 @@ describe('PUT /files/:s3key', () => {
     tmpfile.sourceFileIds = [stableFile.uuid]
     tmpfile.uuid = '62b32746-faf0-4057-9076-ed2e698dcc34'
     tmpfile.checksum = 'dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b5'
-    await expect(putFile(tmpfile)).resolves.toMatchObject({status: 200})
+    tmpfile.s3key = 'sourcefiles.nc'
+    await axios.put(`${storageServiceUrl}cloudnet-product/${tmpfile.s3key}`, 'content')
+    await expect(putFile(tmpfile)).resolves.toMatchObject({status: 201})
     const dbRow1 = await fileRepo.findOneOrFail(tmpfile.uuid)
     return expect(dbRow1.sourceFileIds).toMatchObject([stableFile.uuid])
   })

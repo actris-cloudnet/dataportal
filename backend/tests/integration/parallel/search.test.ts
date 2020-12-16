@@ -141,7 +141,7 @@ describe('/api/files', () => {
   it('returns the latest file when limit=1', async () => {
     const res = await axios.get(url, { params: { site: 'bucharest', limit: '1' }})
     expect(res.data).toHaveLength(1)
-    expect(res.data[0].measurementDate).toEqual('2019-07-16')
+    expect(res.data[0].measurementDate).toEqual('2020-12-05')
   })
 
   it('responds with 400 on malformed limit', async () => {
