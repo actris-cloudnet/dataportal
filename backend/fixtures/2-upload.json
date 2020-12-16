@@ -7,6 +7,7 @@
     "site": "granada",
     "instrument": "mira",
     "status": "created",
+    "size": 30,
     "createdAt": "2020-09-28T12:45:21.916Z",
     "updatedAt": "2020-09-28T12:45:21.916Z"
   },
@@ -18,7 +19,7 @@
     "site": "bucharest",
     "instrument": "chm15k",
     "status": "processed",
-    "size": 301465,
+    "size": 10,
     "createdAt": "2020-09-28T12:46:21.916Z",
     "updatedAt": "2020-09-28T12:46:21.916Z"
   },
@@ -30,7 +31,7 @@
     "site": "bucharest",
     "instrument": "chm15k",
     "status": "processed",
-    "size": 301465,
+    "size": 20,
     "createdAt": "2020-09-28T12:47:21.916Z",
     "updatedAt": "2020-09-28T12:47:21.916Z"
   },
@@ -42,7 +43,7 @@
     "site": "bucharest",
     "instrument": "mira",
     "status": "uploaded",
-    "size": 301465,
+    "size": 0,
     "createdAt": "2020-09-28T12:48:21.916Z",
     "updatedAt": "2020-09-28T12:48:21.916Z"
   },
@@ -53,6 +54,7 @@
     "measurementDate": "2010-01-02",
     "site": "granada",
     "status": "created",
+    "size": 80,
     "allowUpdate": true,
     "createdAt": "2020-09-28T12:47:21.916Z",
     "updatedAt": "2020-09-28T12:47:21.916Z",
@@ -65,6 +67,7 @@
     "measurementDate": "2014-12-05",
     "site": "macehead",
     "status": "created",
+    "size": 70,
     "allowUpdate": true,
     "createdAt": "2020-09-28T12:47:21.916Z",
     "updatedAt": "2020-09-28T12:47:21.916Z",
@@ -78,6 +81,7 @@
     "site": "granada",
     "status": "created",
     "allowUpdate": true,
+    "size": 60,
     "createdAt": "2020-09-28T12:47:21.916Z",
     "updatedAt": "2020-09-28T12:47:21.916Z",
     "model": "icon-iglo-12-23"
@@ -89,7 +93,7 @@
     "measurementDate": "2020-01-22",
     "site": "bucharest",
     "status": "processed",
-    "size": 301465,
+    "size": 50,
     "allowUpdate": true,
     "createdAt": "2020-09-28T12:47:21.916Z",
     "updatedAt": "2020-09-28T12:47:21.916Z",
@@ -102,7 +106,7 @@
     "measurementDate": "2020-01-26",
     "site": "granada",
     "status": "uploaded",
-    "size": 701452,
+    "size": 40,
     "createdAt": "2020-09-28T12:47:21.916Z",
     "updatedAt": "2020-09-28T12:47:21.916Z",
     "model": "ecmwf"
