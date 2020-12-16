@@ -33,7 +33,7 @@ describe('GET /upload/metadata/:checksum', () => {
 })
 
 describe('GET /upload-metadata', () => {
-  it('without arguments responds with a list of all uploaded metadata', async () => {
+  it('without arguments responds with a list of all uploaded metadata sorted by size', async () => {
     return expect(axios.get(`${privateUrl}`)).resolves.toMatchObject({status: 200, data: responses})
   })
 
@@ -46,7 +46,7 @@ describe('GET /upload-metadata', () => {
   })
 
   it('responds with correct object when filtering with status', async () => {
-    return expect(axios.get(`${privateUrl}`, {params: {status: 'processed'}})).resolves.toMatchObject({status: 200, data: [responses[3], responses[7], responses[6]]})
+    return expect(axios.get(`${privateUrl}`, {params: {status: 'processed'}})).resolves.toMatchObject({status: 200, data: [responses[3], responses[6], responses[7]]})
   })
 })
 

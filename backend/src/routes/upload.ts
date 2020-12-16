@@ -218,7 +218,7 @@ export class UploadRoutes {
       .andWhere('um.status IN (:...status)', augmentedQuery)
     if (query.instrument) qb.andWhere('instrument.id IN (:...instrument)', augmentedQuery)
     if (query.model) qb.andWhere('model.id IN (:...model)', augmentedQuery)
-    if (!onlyDistinctInstruments) qb.orderBy('um.measurementDate', 'ASC')
+    if (!onlyDistinctInstruments) qb.orderBy('um.size', 'DESC')
 
     return Promise.resolve(qb)
   }
