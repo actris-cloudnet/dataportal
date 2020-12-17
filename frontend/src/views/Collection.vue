@@ -230,6 +230,7 @@ export default class CollectionView extends Vue {
       })
       .catch(e => {
         this.pidServiceError = true
+        // eslint-disable-next-line no-console
         console.error(e)
       })
       .finally(() => (this.busy = false))
@@ -259,6 +260,7 @@ export default class CollectionView extends Vue {
           this.products = products.data.filter((product: Product) => productIds.includes(product.id))
         })
       })
+      // eslint-disable-next-line no-console
       .catch(console.error)
   }
 }
