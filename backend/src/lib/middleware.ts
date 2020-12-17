@@ -61,6 +61,8 @@ export class Middleware {
       if (keyError) requestError.errors.push(keyError)
     })
 
+    requestError.errors = this.checkModelParamConflicts(requestError.errors, req.query)
+
     if (requestError.errors.length > 0) return next(requestError)
     return next()
   }
@@ -188,5 +190,9 @@ export class Middleware {
     }
   }
 
+  private checkModelParamConflicts = (errors: string[], query: any) => {
+    if (query.allModels && query.model) errors.push('Properties "allModels" and "model" can not be both defined')
+    return errors
+  }
 
 }

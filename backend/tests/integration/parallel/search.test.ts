@@ -192,6 +192,15 @@ describe('/api/files', () => {
     expect(res.data[1]).toMatchObject({ version: '122'})
   })
 
+  it('responds with 400 if model and allModels are both defined', async () => {
+    const payload = {params: {product: 'model', model: 'ecmwf', allModels: true}}
+    let expectedBody: RequestError = {
+      status: 400,
+      errors: [ 'Properties "allModels" and "model" can not be both defined' ]
+    }
+    return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
+  })
+
 })
 
 describe('/api/search', () => {
