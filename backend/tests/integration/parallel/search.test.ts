@@ -169,6 +169,13 @@ describe('/api/files', () => {
     return expect(res.data[0]).toMatchObject({ model: {id: 'ecmwf'}})
   })
 
+  it('responds with the specified model file', async () => {
+    const payload = {params: {product: 'model', site: 'bucharest', dateFrom: '2020-12-05', dateTo: '2020-12-05', model: 'icon-iglo-12-23'}}
+    const res = await axios.get(url, payload)
+    expect(res.data).toHaveLength(1)
+    return expect(res.data[0]).toMatchObject({ model: {id: 'icon-iglo-12-23'}})
+  })
+
 })
 
 describe('/api/search', () => {

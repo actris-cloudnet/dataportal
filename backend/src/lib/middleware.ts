@@ -47,22 +47,15 @@ export class Middleware {
       return next(requestError)
     }
 
-    let validKeys = ['site', 'volatile']
-
-    if (req.path.includes('model')) {
-      validKeys = validKeys.concat(['date', 'model'])
-    }
-    else {
-      validKeys = validKeys.concat(['product', 'dateFrom', 'dateTo', 'developer', 'releasedBefore', 'allVersions', 'limit', 'showLegacy'])
-      if (req.path.includes('visualization')) validKeys.push('variable')
-    }
+    let validKeys = ['site', 'volatile', 'product', 'dateFrom', 'dateTo', 'developer', 'releasedBefore', 'allVersions', 'limit', 'showLegacy', 'model']
+    if (req.path.includes('visualization')) validKeys.push('variable')
 
     const unknownFields = checkFieldNames(validKeys, req.query)
     if (unknownFields.length > 0) {
       requestError.errors.push(`Unknown query parameters: ${unknownFields}`)
     }
 
-    const keys = ['site', 'product', 'dateFrom', 'dateTo', 'volatile', 'limit', 'date', 'model']
+    const keys = ['site', 'product', 'dateFrom', 'dateTo', 'volatile', 'limit', 'date']
     keys.forEach(key => {
       const keyError = this.checkField(key, req.query)
       if (keyError) requestError.errors.push(keyError)

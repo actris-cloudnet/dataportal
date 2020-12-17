@@ -8,7 +8,7 @@ import {
   convertToSearchResponse,
   getBucketForFile,
   hideTestDataFromNormalUsers,
-  sortByMeasurementDateAsc
+  sortByMeasurementDateAsc, toArray
 } from '../lib'
 import {augmentFiles} from '../lib/'
 import {SearchFile} from '../entity/SearchFile'
@@ -171,7 +171,8 @@ export class FileRoutes {
       .andWhere('file.volatile IN (:...volatile)', query)
       .andWhere('file.updatedAt < :releasedBefore', query)
       .andWhere('file.legacy IN (:...showLegacy)', query)
-    if (query.allVersions == undefined) {
+    if (query.model) qb.andWhere('model.id IN (:...model)', {model: toArray(query.model)})
+    if (query.allVersions == undefined && query.model == undefined) {
       qb.innerJoin(sub_qb =>
         sub_qb
           .from('search_file', 'searchfile'),
