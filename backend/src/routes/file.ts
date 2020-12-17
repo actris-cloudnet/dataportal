@@ -198,7 +198,7 @@ export class FileRoutes {
       'file.updatedAt = last_version.updated_at'
       )
     }
-    else if (query.model) qb.andWhere('model.id IN (:...model)', {model: toArray(query.model)})
+    else if (query.model) qb.andWhere('model.id IN (:...model)', query)
     qb.orderBy('file.measurementDate', 'DESC')
       .addOrderBy('model.optimumOrder', 'ASC')
       .addOrderBy('file.updatedAt', 'DESC')

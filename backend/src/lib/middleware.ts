@@ -86,6 +86,7 @@ export class Middleware {
     if (!('releasedBefore' in query)) query.releasedBefore = defaultDateTo()
     query.site = toArray(query.site)
     query.product = toArray(query.product)
+    query.model = toArray(query.model)
     query.volatile = setVolatile()
     query.showLegacy = setLegacy()
     next()
@@ -127,10 +128,10 @@ export class Middleware {
   }
 
   checkParamsExistInDb: RequestHandler = async (req: any, _res, next) => {
-    const param = req.path.includes('model') ? 'model' : 'product'
     Promise.all([
-      this.checkSite(param, req),
-      this.checkParam(param, req)
+      this.checkSite(req),
+      this.checkParam('product', req),
+      this.checkParam('model', req)
     ])
       .then(() => next())
       .catch(next)
@@ -141,6 +142,7 @@ export class Middleware {
   }
 
   private checkParam = async (param: string, req: any) => {
+    if (!req.query[param]) return Promise.resolve()
     await this.conn.getRepository(param)
       .findByIds(req.query[param])
       .then(res => {
@@ -148,12 +150,13 @@ export class Middleware {
       })
   }
 
-  private checkSite = async (routeType: string, req: any) => {
+  private checkSite = async (req: any) => {
+    if (!req.query['site']) return Promise.resolve()
     let qb = this.conn.getRepository<Site>('site')
       .createQueryBuilder('site')
       .select()
       .where('site.id IN (:...site)', req.query)
-    if (routeType !== 'model') qb = hideTestDataFromNormalUsers(qb, req)
+    qb = hideTestDataFromNormalUsers(qb, req)
     await qb.getMany()
       .then((res: any[]) => {
         if (res.length != req.query.site.length) this.throw404Error('site', req)
