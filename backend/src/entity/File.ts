@@ -1,14 +1,13 @@
 import {
-    BeforeInsert,
-    BeforeUpdate,
-    Column,
-    Entity,
-    Index, JoinColumn,
-    ManyToOne,
-    OneToMany,
-    OneToOne,
-    PrimaryColumn,
-    Unique
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  Entity,
+  Index,
+  ManyToOne,
+  OneToMany,
+  PrimaryColumn,
+  Unique
 } from 'typeorm'
 import {Site} from './Site'
 import {Product} from './Product'
