@@ -162,6 +162,13 @@ describe('/api/files', () => {
     return expect(axios.get(url, payload)).resolves.toMatchObject({data: [{legacy: true}]})
   })
 
+  it('responds with the best model file by default', async () => {
+    const payload = {params: {product: 'model', site: 'bucharest', dateFrom: '2020-12-05', dateTo: '2020-12-05'}}
+    const res = await axios.get(url, payload)
+    expect(res.data).toHaveLength(1)
+    return expect(res.data[0]).toMatchObject({ model: {id: 'ecmwf'}})
+  })
+
 })
 
 describe('/api/search', () => {

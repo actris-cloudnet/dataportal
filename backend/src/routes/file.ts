@@ -164,24 +164,21 @@ export class FileRoutes {
     const qb = this.fileRepo.createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
       .leftJoinAndSelect('file.product', 'product')
-    if (query.allVersions == undefined) {
-      qb.innerJoin(sub_qb =>
-        sub_qb
-          .from('file', 'file')
-          .select('MAX(file.updatedAt)', 'updated_at')
-          .groupBy('file.site, file.measurementDate, file.product'),
-      'last_version',
-      'file.updatedAt = last_version.updated_at'
-      )
-    }
-    qb
+      .leftJoinAndSelect('file.model', 'model')
       .andWhere('site.id IN (:...site)', query)
       .andWhere('product.id IN (:...product)', query)
       .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate <= :dateTo', query)
       .andWhere('file.volatile IN (:...volatile)', query)
       .andWhere('file.updatedAt < :releasedBefore', query)
       .andWhere('file.legacy IN (:...showLegacy)', query)
-      .orderBy('file.measurementDate', 'DESC')
+    if (query.allVersions == undefined) {
+      qb.innerJoin(sub_qb =>
+        sub_qb
+          .from('search_file', 'searchfile'),
+        'best_version',
+        'file.uuid = best_version.uuid')
+    }
+    qb.orderBy('file.measurementDate', 'DESC')
       .addOrderBy('file.updatedAt', 'DESC')
     if ('limit' in query) qb.limit(parseInt(query.limit))
     return qb
