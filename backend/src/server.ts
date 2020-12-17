@@ -18,7 +18,7 @@ import {ModelRoutes} from './routes/model'
 import {DownloadRoutes} from './routes/download'
 
 (async function() {
-  const port = parseInt(process.argv[2])
+  const port = config.port
   const app = express()
 
   const connName = config.connectionName
