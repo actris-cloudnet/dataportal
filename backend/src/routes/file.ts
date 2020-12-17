@@ -8,7 +8,7 @@ import {
   convertToSearchResponse,
   getBucketForFile,
   hideTestDataFromNormalUsers,
-  sortByMeasurementDateAsc, toArray
+  sortByMeasurementDateAsc
 } from '../lib'
 import {augmentFiles} from '../lib/'
 import {SearchFile} from '../entity/SearchFile'
