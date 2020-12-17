@@ -57,7 +57,7 @@ case "$action" in
     cd backend
     target=$pid_dir/.node.pid
     if [[ ! -f $target ]]; then
-        eval "nohup npx nodemon -w build -- $backend_port >> $pid_dir/all.log 2>&1 &"
+        eval "nohup npx nodemon -w build >> $pid_dir/all.log 2>&1 &"
         echo $! > $target
     fi
     echo

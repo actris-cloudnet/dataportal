@@ -1,6 +1,7 @@
 import {ClientConfiguration} from 'aws-sdk/clients/s3'
 
 interface Config {
+  port: number
   connectionName: string
   downloadBaseUrl: string
   pidServiceUrl: string
@@ -26,6 +27,7 @@ interface s3Config {
 }
 
 const testConfig = {
+  port: 3001,
   connectionName: 'test',
   downloadBaseUrl: 'http://localhost:3001/api/download/',
   pidServiceUrl: 'http://localhost:5801/pid/',
@@ -45,6 +47,7 @@ const testConfig = {
 }
 
 const devConfig = {
+  port: 3000,
   connectionName: 'default',
   downloadBaseUrl: 'http://localhost:3000/api/download/',
   pidServiceUrl: 'http://localhost:5800/pid/',
