@@ -192,6 +192,22 @@ describe('/api/files', () => {
     expect(res.data[1]).toMatchObject({ version: '122'})
   })
 
+  it('responds with data for one day when using the date parameter', async () => {
+    const payload = {params: {product: 'model', site: 'bucharest', date: '2020-12-05'}}
+    const res = await axios.get(url, payload)
+    expect(res.data).toHaveLength(1)
+    return expect(res.data[0]).toMatchObject({ model: {id: 'ecmwf'}})
+  })
+
+  it('responds with 400 on malformed date', async () => {
+    const payload = { params: { date: 'j' }}
+    let expectedBody: RequestError = {
+      status: 400,
+      errors: [ 'Malformed date in property "date"' ]
+    }
+    return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
+  })
+
   it('responds with 400 if model and allModels are both defined', async () => {
     const payload = {params: {product: 'model', model: 'ecmwf', allModels: true}}
     let expectedBody: RequestError = {
