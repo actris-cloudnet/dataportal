@@ -176,6 +176,22 @@ describe('/api/files', () => {
     return expect(res.data[0]).toMatchObject({ model: {id: 'icon-iglo-12-23'}})
   })
 
+  it('responds with all model files with allModels flag ordered by model quality', async () => {
+    const payload = {params: {product: 'model', site: 'bucharest', dateFrom: '2020-12-05', dateTo: '2020-12-05', allModels: true}}
+    const res = await axios.get(url, payload)
+    expect(res.data).toHaveLength(2)
+    expect(res.data[0]).toMatchObject({ model: {id: 'ecmwf'}})
+    expect(res.data[1]).toMatchObject({ model: {id: 'icon-iglo-12-23'}})
+  })
+
+  it('responds with all versions of best model file when using allVersions', async () => {
+    const payload = {params: {product: 'model', site: 'bucharest', dateFrom: '2020-12-05', dateTo: '2020-12-05', allVersions: true}}
+    const res = await axios.get(url, payload)
+    expect(res.data).toHaveLength(2)
+    expect(res.data[0]).toMatchObject({ version: '123'})
+    expect(res.data[1]).toMatchObject({ version: '122'})
+  })
+
 })
 
 describe('/api/search', () => {

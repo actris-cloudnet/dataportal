@@ -171,15 +171,36 @@ export class FileRoutes {
       .andWhere('file.volatile IN (:...volatile)', query)
       .andWhere('file.updatedAt < :releasedBefore', query)
       .andWhere('file.legacy IN (:...showLegacy)', query)
-    if (query.model) qb.andWhere('model.id IN (:...model)', {model: toArray(query.model)})
-    if (query.allVersions == undefined && query.model == undefined) {
-      qb.innerJoin(sub_qb =>
-        sub_qb
-          .from('search_file', 'searchfile'),
+    if (query.allVersions == undefined && query.model == undefined && query.allModels == undefined) {
+      qb.innerJoin(sub_qb => // Default functionality
+          sub_qb
+            .from('search_file', 'searchfile'),
         'best_version',
         'file.uuid = best_version.uuid')
     }
+    else if (query.allVersions && query.allModels == undefined) {
+      qb.innerJoin(sub_qb =>
+          sub_qb
+            .from('file', 'file')
+            .leftJoin('file.model', 'model')
+            .select('MIN(model.optimumOrder)', 'optimum_order')
+            .groupBy('file.site, file.measurementDate, file.product'),
+        'best_model',
+        'model.optimumOrder = best_model.optimum_order')
+    }
+    else if (query.allModels && query.allVersions == undefined) {
+      qb.innerJoin(sub_qb =>
+          sub_qb
+            .from('file', 'file')
+            .select('MAX(file.updatedAt)', 'updated_at')
+            .groupBy('file.site, file.measurementDate, file.product'),
+        'last_version',
+        'file.updatedAt = last_version.updated_at'
+      )
+    }
+    else if (query.model) qb.andWhere('model.id IN (:...model)', {model: toArray(query.model)})
     qb.orderBy('file.measurementDate', 'DESC')
+      .addOrderBy('model.optimumOrder', 'ASC')
       .addOrderBy('file.updatedAt', 'DESC')
     if ('limit' in query) qb.limit(parseInt(query.limit))
     return qb
