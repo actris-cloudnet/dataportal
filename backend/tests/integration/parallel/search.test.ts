@@ -235,6 +235,20 @@ describe('/api/files', () => {
     return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
 
+  it('responds with 400 on conflicting date, dateFrom and dateTo', async () => {
+    const validParams = {date: '2020-12-05'}
+    let expectedBody: RequestError = {
+      status: 400,
+      errors: [ 'Property "date" may not be defined if either "dateFrom" or "dateTo" is defined' ]
+    }
+    let params: any = {...validParams, ...{dateFrom: '2020-11-05'}}
+    await expect(axios.get(url, {params})).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
+    params = {...validParams, ...{dateTo: '2020-12-08'}}
+    await expect(axios.get(url, {params})).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
+    params = {...validParams, ...{dateFrom: '2020-11-05', dateTo: '2020-12-08'}}
+    return expect(axios.get(url, {params})).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
+  })
+
 })
 
 describe('/api/search', () => {
