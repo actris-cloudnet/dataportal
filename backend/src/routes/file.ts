@@ -100,10 +100,11 @@ export class FileRoutes {
         file.createdAt = file.updatedAt
         await this.conn.transaction(async transactionalEntityManager => {
           if (file.product == 'model') {
-            await this.removeWorseModelFile(transactionalEntityManager, file)
+            await this.updateModelSearchFile(transactionalEntityManager, file, searchFile)
+          } else {
+            await transactionalEntityManager.insert(SearchFile, searchFile)
           }
           await transactionalEntityManager.insert(File, file)
-          await transactionalEntityManager.insert(SearchFile, searchFile)
         })
         res.sendStatus(201)
       } else if (existingFile.site.isTestSite || existingFile.volatile) { // Replace existing
@@ -219,7 +220,7 @@ export class FileRoutes {
     return qb
   }
 
-  private async removeWorseModelFile(transactionalEntityManager: EntityManager, file: any) {
+  private async updateModelSearchFile(transactionalEntityManager: EntityManager, file: any, searchFile: SearchFile) {
     const {optimumOrder} = await transactionalEntityManager.findOneOrFail(Model, {id: file.model})
     const [bestModelFile] = await transactionalEntityManager.createQueryBuilder(File, 'file')
       .leftJoinAndSelect('file.site', 'site')
@@ -230,8 +231,11 @@ export class FileRoutes {
       .andWhere('file.measurementDate = :measurementDate', file)
       .orderBy('model.optimumOrder', 'ASC')
       .getMany()
-    if (bestModelFile && bestModelFile.model.optimumOrder > optimumOrder)
+    if (!bestModelFile) return transactionalEntityManager.insert(SearchFile, searchFile)
+    if (bestModelFile.model.optimumOrder > optimumOrder) { // Received model is better than existing
       await transactionalEntityManager.delete(SearchFile, {uuid: bestModelFile.uuid})
+      await transactionalEntityManager.insert(SearchFile, searchFile)
+    }
   }
 
 
