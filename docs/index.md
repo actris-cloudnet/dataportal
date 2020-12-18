@@ -6,7 +6,7 @@ This is the documentation for the API v2 provided by the Cloudnet data portal.
 
 We provide an HTTP REST API for programmatical access to the metadata at the Cloudnet data portal. 
 The API responds with JSON and can be accessed via the base URL `https://cloudnet.fmi.fi/api/`. 
-Metadata can be queried via the following routes.
+Metadata can be queried via the following routes. For examples on how to use the API programmatically, see [Examples](#examples).
 
 ## Routes
 
