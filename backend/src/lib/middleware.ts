@@ -40,7 +40,7 @@ export class Middleware {
 
     const checkFieldNames = (validKeys: string[], query: any) => Object.keys(query).filter(key => !validKeys.includes(key))
 
-    const requestError: RequestErrorArray = { status: 400, errors: [] }
+    let requestError: RequestErrorArray = { status: 400, errors: [] }
 
     if (Object.keys(req.query).length == 0) {
       requestError.errors.push('No search parameters given')
@@ -48,7 +48,8 @@ export class Middleware {
     }
 
     let validKeys = ['site', 'volatile', 'product', 'dateFrom', 'dateTo', 'developer',
-      'releasedBefore', 'allVersions', 'limit', 'showLegacy', 'model', 'allModels']
+      'releasedBefore', 'allVersions', 'limit', 'showLegacy', 'model', 'allModels', 'date']
+
     if (req.path.includes('visualization')) validKeys.push('variable')
 
     const unknownFields = checkFieldNames(validKeys, req.query)
@@ -61,6 +62,8 @@ export class Middleware {
       const keyError = this.checkField(key, req.query)
       if (keyError) requestError.errors.push(keyError)
     })
+
+    requestError = this.checkDateConflicts(requestError, req.query)
 
     requestError.errors = this.checkModelParamConflicts(requestError.errors, req.query)
 
@@ -198,5 +201,12 @@ export class Middleware {
     if (query.allModels && query.model) errors.push('Properties "allModels" and "model" can not be both defined')
     return errors
   }
+
+  private checkDateConflicts(requestError: RequestErrorArray, query: any) {
+    if (query.date && (query.dateFrom || query.dateTo))
+      requestError.errors.push('Property "date" may not be defined if either "dateFrom" or "dateTo" is defined')
+    return requestError
+  }
+
 
 }

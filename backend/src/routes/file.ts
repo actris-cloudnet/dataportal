@@ -8,7 +8,7 @@ import {
   convertToSearchResponse,
   getBucketForFile,
   hideTestDataFromNormalUsers,
-  sortByMeasurementDateAsc, toArray
+  sortByMeasurementDateAsc
 } from '../lib'
 import {augmentFiles} from '../lib/'
 import {SearchFile} from '../entity/SearchFile'
@@ -200,6 +200,7 @@ export class FileRoutes {
       )
     }
     else if (query.model) qb.andWhere('model.id IN (:...model)', query)
+    if (query.date) qb.andWhere('file.measurementDate = :date', query)
     qb.orderBy('file.measurementDate', 'DESC')
       .addOrderBy('model.optimumOrder', 'ASC')
       .addOrderBy('file.updatedAt', 'DESC')
