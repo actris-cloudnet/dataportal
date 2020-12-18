@@ -232,32 +232,9 @@ Response body:
 ]
 ```
 
-More examples can be found near the end of this document.
-
-## Errors
-
-The API responds to errors with the appropriate HTTP status code and an `Error` object, which has the properties:
-- `status`: HTTP error code.
-- `message`: Human readable error message as a string or an array of strings.
-
-Example query:
-
-`GET https://cloudnet.fmi.fi/api/files?product=sausage`
-
-Response body:
-
-```json
-{
-  "status": 404,
-  "errors": [
-    "One or more of the specified products were not found"
-  ]
-}
-```
-
 ## Examples
 
-The following examples use the `curl` and `jq` applications. They can be installed from the package 
+The following examples use the `curl` and `jq` applications. They can be installed from the package
 repositories of most UNIX-based systems.
 
 ### Multiple sites and products as parameters
@@ -284,7 +261,7 @@ Download all data since 1. October 2020, saving them to the current working dire
 curl "https://cloudnet.fmi.fi/api/files?dateFrom=2020-10-01" | jq '.[]["downloadUrl"]' | xargs -n1 curl -O
 ```
 
-That is, get the filtered list of file metadata, pick the `downloadUrl` properties from each of the `File` objects 
+That is, get the filtered list of file metadata, pick the `downloadUrl` properties from each of the `File` objects
 and pass them on to `curl` again to download.
 
 ### Python example
@@ -309,6 +286,27 @@ for row in metadata:
 
 ## Notes
 
-The API provides `gzip` compression of responses where applicable. 
-We recommend using the compression for large queries to reduce transmitted response size. 
+The API provides `gzip` compression of responses where applicable.
+We recommend using the compression for large queries to reduce transmitted response size.
 The compression can be enabled effortlessly in `curl` with the `--compressed` switch.
+
+## Errors
+
+The API responds to errors with the appropriate HTTP status code and an `Error` object, which has the properties:
+- `status`: HTTP error code.
+- `message`: Human readable error message as a string or an array of strings.
+
+Example query:
+
+`GET https://cloudnet.fmi.fi/api/files?product=sausage`
+
+Response body:
+
+```json
+{
+  "status": 404,
+  "errors": [
+    "One or more of the specified products were not found"
+  ]
+}
+```
