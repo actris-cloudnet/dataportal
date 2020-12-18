@@ -94,6 +94,26 @@ Response body:
 ]
 ```
 
+### `GET /api/models` → `Model[]`
+
+Fetch information on the different model file types served in the data portal. Responds with an array of `Model` objects, 
+each having the properties:
+- `id`: Unique identifier of the model.
+- `optimumOrder`: Signifies model quality. Better models have lower `optimumOrder`.
+
+Example query:
+
+`GET https://cloudnet.fmi.fi/api/models`
+
+Response body:
+[
+  {
+    "id": "ecmwf",
+    "optimumOrder": 0
+  },
+...
+]
+
 ### `GET /api/files/UUID` → `File`
 
 Fetch metadata for a single data object using its UUID (Universal Unique IDentifier). 
@@ -181,6 +201,8 @@ By default `measurementDate` is not limited.
 - `dateTo`: Limit query to files whose `measurementDate` is `dateTo` or earlier. Same date format as in `date`.
 If omitted will default to the current date.
 - `product`: One or more `Product` ids, by which to filter the files.
+- `model`: One or more `Model` ids, by which to filter the model files.
+- `allModels`: By default the API returns only the best model available for each day. Adding this parameter will fetch all available models.
 - `allVersions`: By default the API returns only the latest version of the files. Adding this parameter will fetch all existing versions.
 
 Note: one or more of the parameters *must* be issued. A query without any valid parameters will result in a `400 Bad Request` error.
