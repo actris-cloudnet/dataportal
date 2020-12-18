@@ -174,11 +174,11 @@ Response body:
 Queries the metadata of multiple files. On a successful query responds with an array of `File` objects. 
 The results can be filtered with the following parameters:
 - `site`: One or more `Site` ids, from which to display data files.
-- `dateFrom`: Limit query to files whose `measurementDate` is `dateFrom` or later. `YYYY-MM-DD` or any 
+- `date`: Only display data from a given date. Date format is `YYYY-MM-DD` or any 
 date format parseable by [JavaScript `Date`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) -object. 
+- `dateFrom`: Limit query to files whose `measurementDate` is `dateFrom` or later. Same date format as in `date`. 
 By default `measurementDate` is not limited.
-- `dateTo`: Limit query to files whose `measurementDate` is `dateTo` or earlier. `YYYY-MM-DD` or any 
-date format parseable by [JavaScript `Date`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) -object. 
+- `dateTo`: Limit query to files whose `measurementDate` is `dateTo` or earlier. Same date format as in `date`.
 If omitted will default to the current date.
 - `product`: One or more `Product` ids, by which to filter the files.
 - `allVersions`: By default the API returns only the latest version of the files. Adding this parameter will fetch all existing versions.
