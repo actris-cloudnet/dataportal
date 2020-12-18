@@ -1,111 +1,125 @@
 <style lang="sass">
-  @import "../sass/variables.sass"
-  @import "../sass/global.sass"
+@import "../sass/variables.sass"
+@import "../sass/global.sass"
 
-  section#fileTable
-    padding-left: 30px
-    padding-right: 30px
-    width: 100%
-    text-align: left
+section#fileTable
+  padding-left: 30px
+  padding-right: 30px
+  width: 100%
+  text-align: left
 
-    #tableContent
-      margin-top: 10px
+  #tableContent
+    margin-top: 10px
 
-    .listTitle
-      color: gray
-      font-size: 85%
-      margin-bottom: 5px
-      display: block
+  .listTitle
+    color: gray
+    font-size: 85%
+    margin-bottom: 5px
+    display: block
 
-    #pagi
-      margin-top: 30px
-      float: left
-      .page-item.active .page-link
-        background-color: $steel-warrior
-        border-color: $steel-warrior
-      .page-link:hover
-        background-color: $blue-dust
-      .page-link
-        color: $blue-sapphire
+  #pagi
+    margin-top: 30px
+    float: left
+    .page-item.active .page-link
+      background-color: $steel-warrior
+      border-color: $steel-warrior
+    .page-link:hover
+      background-color: $blue-dust
+    .page-link
+      color: $blue-sapphire
 
-    .table-striped
-      th:focus
-        outline: thin dotted
-      th:nth-child(1)
-        width: 50px
-        text-align: center
-      th:nth-child(2)
-        width: 300px
-      th:nth-child(3)
-        width: 100px
-      th:nth-child(4)
-        width: 110px
-      td
-        padding: 9px
-      tr:nth-child(2n+1) > td
-        background-color: $blue-dust
-      td:nth-child(3)
-        text-align: center
-    .table-striped[aria-busy="false"]
-      tr:hover td
-        cursor: pointer
-        background-color: #e4eff7
-      tr:focus td
-        background-color: #e4eff7
-      tr
-        outline: none
-
-    .text-center.my-2
-      display: none
-
-    .icon
-      background-repeat: no-repeat
-      background-position: center
-      background-size: 20px
-      font-size: 0
-
-    .rowtag
-      display: inline-block
-      width: 5em
-      font-size: 0.9em
-
-    .volatile
-      background: #cad7ff
-
-    .legacy
-      background: #f2f2f2
-
-    .downloadinfo
-      float: right
-      margin-top: 30px
-
-    .dlcount
-      color: gray
-      font-size: 85%
+  .table-striped
+    th:focus
+      outline: thin dotted
+    th:nth-child(1)
+      width: 50px
       text-align: center
-      display: block
+    th:nth-child(2)
+      width: 300px
+    th:nth-child(3)
+      width: 100px
+    th:nth-child(4)
+      width: 110px
+    td
+      padding: 9px
+    tr:nth-child(2n+1) > td
+      background-color: $blue-dust
+    td:nth-child(3)
+      text-align: center
+  .table-striped[aria-busy="false"]
+    tr:hover td
+      cursor: pointer
+      background-color: #e4eff7
+    tr:focus td
+      background-color: #e4eff7
+    tr
+      outline: none
 
-    .download:focus
-      outline: thin dotted black
+  .text-center.my-2
+    display: none
+
+  .icon
+    background-repeat: no-repeat
+    background-position: center
+    background-size: 20px
+    font-size: 0
+
+  .rowtag
+    display: inline-block
+    width: 5em
+    font-size: 0.9em
+
+  .volatile
+    background: #cad7ff
+
+  .legacy
+    background: #f2f2f2
+
+  .downloadinfo
+    float: right
+    margin-top: 30px
+
+  .dlcount
+    color: gray
+    font-size: 85%
+    text-align: center
+    display: block
+
+  .download:focus
+    outline: thin dotted black
+
+.noresults
+  text-align: center
+  margin-top: 3em
+
 </style>
 
 
 <template>
   <section id="fileTable">
-    <span class="listTitle" v-if="!simplifiedView"> {{ captionText }} </span>
-    <b-table id="tableContent" borderless small striped hover sort-icon-left
-             :items="apiResponse"
-             :fields="[
+    <span class="listTitle" v-if="!simplifiedView">
+      <span v-if="isBusy">Searching...</span>
+      <span v-else-if="listLength > 0">Found {{ listLength }} results</span>
+    </span>
+    <div v-if="listLength == 0" class="noresults">
+      <h2>No results</h2>
+        Are we missing some data? Send an email to
+        <a href="mailto:actris-cloudnet-feedback@fmi.fi">actris-cloudnet-feedback@fmi.fi</a>.
+    </div>
+    <b-table v-if="listLength > 0"
+        id="tableContent" borderless small striped hover sort-icon-left
+        :items="apiResponse"
+        :fields="[
                 { key: 'productId', label: '', tdClass: 'icon', tdAttr: setIcon},
                 { key: 'title', label: 'Data object', sortable: true},
                 { key: 'volatile', label: '' },
                 { key: 'measurementDate', label: 'Date', sortable: true},
                 ]"
-             :current-page="currentPage"
-             :per-page="perPage"
-             :busy="isBusy"
-             :show-empty="true"
-             @row-clicked="clickRow">
+        :current-page="currentPage"
+        :per-page="perPage"
+        :busy="isBusy"
+        :show-empty="true"
+        @row-clicked="clickRow">
       <template v-slot:cell(volatile)="data">
       <span
         v-if="data.item.volatile"
@@ -193,7 +207,8 @@ export default class DataSearchResult extends Vue {
 
   get captionText() {
     if (this.isBusy) return 'Searching...'
-    return this.listLength > 0 ? `Found ${this.listLength} results` : 'No results'
+    // eslint-disable-next-line max-len
+    return this.listLength > 0 ? `Found ${this.listLength} results` : 'No results. Are we missing some data? Send an email to <a href="mailto:actris-cloudnet-feedback@fmi.fi">actris-cloudnet-feedback@fmi.fi</a>'
   }
 
   clickRow(record: File) {
