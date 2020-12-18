@@ -178,8 +178,7 @@ describe('Search.vue', () => {
 
   describe('legacy', () => {
 
-    it('makes correct query to backend after checking show legacy data box', async () => {
-      await findElementById('showLegacyCheckbox').trigger('click')
+    it('makes correct query to backend', async () => {
       const calls = mocked(axios.get).mock.calls
       const lastCall = calls[calls.length - 1]
       expect(lastCall[1]).toMatchObject({params: {showLegacy: true}})

@@ -103,19 +103,6 @@
     &::after
       content: ':'
 
-  div.checkbox
-    position: relative
-    top: -1.5em
-    margin-bottom: 1em
-    display: flex
-    flex-direction: row
-    align-items: center
-    label
-      margin-left: 0.5em
-      margin-top: 0
-      &::after
-        content: ''
-
   #noRes
     font-size: 90%
     color: gray
@@ -349,11 +336,6 @@
       :getIconUrl="getIconUrl"
       :devMode="devMode">
     </custom-multiselect>
-    <div class="checkbox">
-      <input type="checkbox" id="showLegacyCheckbox" name="showLegacyCheckbox" v-model="showLegacy">
-      <label for="showLegacyCheckbox">Show legacy data</label>
-    </div>
-
 
     <custom-multiselect v-show="isVizMode()"
       label="Variable"
@@ -466,7 +448,6 @@ export default class Search extends Vue {
   dateInputStart = this.dateFrom
   dateInputEnd = this.dateFrom
   activeBtn = ''
-  showLegacy = false
 
   dateErrorsExist(dateError: { [key: string]: boolean }) {
     return !(dateError.isValidDateString && dateError.isAfterStart && dateError.isBeforeEnd &&
@@ -590,7 +571,7 @@ export default class Search extends Vue {
         dateTo: this.dateTo,
         product: this.selectedProductIds,
         variable: this.isVizMode() ? this.selectedVariableIds : undefined,
-        showLegacy: this.showLegacy,
+        showLegacy: true,
         developer: this.devMode.activated || undefined
       }
     }
