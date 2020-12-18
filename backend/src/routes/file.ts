@@ -34,6 +34,7 @@ export class FileRoutes {
     const qb = this.fileRepo.createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
       .leftJoinAndSelect('file.product', 'product')
+      .leftJoinAndSelect('file.model', 'model')
       .where('file.uuid = :uuid', req.params)
     hideTestDataFromNormalUsers<File>(qb, req)
       .getMany()
