@@ -36,10 +36,10 @@ import {DownloadRoutes} from './routes/download'
   const modelRoutes = new ModelRoutes(conn)
   const dlRoutes = new DownloadRoutes(conn)
 
-  const errorHandler: ErrorRequestHandler = (err: RequestError | Error, _req, res, next) => {
-    const errorStr = err instanceof Error ? err : stringify(err)
-    console.log(`Error in path ${_req.path}:`, errorStr)
-    if (!res.headersSent && !(err instanceof Error)) {
+  const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
+    if (err.status < 500) console.log(`Error ${err.status} in ${req.method} ${req.path}:`, stringify(err)) // Client error
+    else console.error(`Error ${err.status} in ${req.method} ${req.path}:`, err.errors) // Might be anything
+    if (!res.headersSent) {
       delete err.params
       const status = err.status || 500
       res.status(status)
