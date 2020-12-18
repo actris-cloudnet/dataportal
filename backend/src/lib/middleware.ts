@@ -47,26 +47,22 @@ export class Middleware {
       return next(requestError)
     }
 
-    let validKeys = ['site', 'volatile']
-
-    if (req.path.includes('model')) {
-      validKeys = validKeys.concat(['date', 'model'])
-    }
-    else {
-      validKeys = validKeys.concat(['product', 'dateFrom', 'dateTo', 'developer', 'releasedBefore', 'allVersions', 'limit', 'showLegacy'])
-      if (req.path.includes('visualization')) validKeys.push('variable')
-    }
+    let validKeys = ['site', 'volatile', 'product', 'dateFrom', 'dateTo', 'developer',
+      'releasedBefore', 'allVersions', 'limit', 'showLegacy', 'model', 'allModels']
+    if (req.path.includes('visualization')) validKeys.push('variable')
 
     const unknownFields = checkFieldNames(validKeys, req.query)
     if (unknownFields.length > 0) {
       requestError.errors.push(`Unknown query parameters: ${unknownFields}`)
     }
 
-    const keys = ['site', 'product', 'dateFrom', 'dateTo', 'volatile', 'limit', 'date', 'model']
+    const keys = ['site', 'product', 'dateFrom', 'dateTo', 'volatile', 'limit', 'date']
     keys.forEach(key => {
       const keyError = this.checkField(key, req.query)
       if (keyError) requestError.errors.push(keyError)
     })
+
+    requestError.errors = this.checkModelParamConflicts(requestError.errors, req.query)
 
     if (requestError.errors.length > 0) return next(requestError)
     return next()
@@ -91,6 +87,7 @@ export class Middleware {
     if (!('releasedBefore' in query)) query.releasedBefore = defaultDateTo()
     query.site = toArray(query.site)
     query.product = toArray(query.product)
+    query.model = toArray(query.model)
     query.volatile = setVolatile()
     query.showLegacy = setLegacy()
     next()
@@ -132,10 +129,10 @@ export class Middleware {
   }
 
   checkParamsExistInDb: RequestHandler = async (req: any, _res, next) => {
-    const param = req.path.includes('model') ? 'model' : 'product'
     Promise.all([
-      this.checkSite(param, req),
-      this.checkParam(param, req)
+      this.checkSite(req),
+      this.checkParam('product', req),
+      this.checkParam('model', req)
     ])
       .then(() => next())
       .catch(next)
@@ -146,6 +143,7 @@ export class Middleware {
   }
 
   private checkParam = async (param: string, req: any) => {
+    if (!req.query[param]) return Promise.resolve()
     await this.conn.getRepository(param)
       .findByIds(req.query[param])
       .then(res => {
@@ -153,12 +151,13 @@ export class Middleware {
       })
   }
 
-  private checkSite = async (routeType: string, req: any) => {
+  private checkSite = async (req: any) => {
+    if (!req.query['site']) return Promise.resolve()
     let qb = this.conn.getRepository<Site>('site')
       .createQueryBuilder('site')
       .select()
       .where('site.id IN (:...site)', req.query)
-    if (routeType !== 'model') qb = hideTestDataFromNormalUsers(qb, req)
+    qb = hideTestDataFromNormalUsers(qb, req)
     await qb.getMany()
       .then((res: any[]) => {
         if (res.length != req.query.site.length) this.throw404Error('site', req)
@@ -195,5 +194,9 @@ export class Middleware {
     }
   }
 
+  private checkModelParamConflicts = (errors: string[], query: any) => {
+    if (query.allModels && query.model) errors.push('Properties "allModels" and "model" can not be both defined')
+    return errors
+  }
 
 }

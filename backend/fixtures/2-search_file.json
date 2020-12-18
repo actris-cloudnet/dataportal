@@ -71,5 +71,14 @@
       "product": "classification",
       "size": 7127282,
       "site": "bucharest"
+    },
+    {
+      "uuid": "b5d1d5af-3667-41bc-b952-e684f627d91c",
+      "volatile": false,
+      "legacy": false,
+      "measurementDate": "2020-12-05",
+      "product": "model",
+      "size": 500452,
+      "site": "bucharest"
     }
 ]

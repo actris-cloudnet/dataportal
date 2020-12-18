@@ -1,9 +1,20 @@
-import {BeforeInsert, BeforeUpdate, Column, Entity, Index, ManyToOne, OneToMany, PrimaryColumn, Unique} from 'typeorm'
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  Entity,
+  Index,
+  ManyToOne,
+  OneToMany,
+  PrimaryColumn,
+  Unique
+} from 'typeorm'
 import {Site} from './Site'
 import {Product} from './Product'
 import {Visualization} from './Visualization'
 import {isValidDate} from '../lib'
 import {basename} from 'path'
+import {Model} from './Model'
 
 @Entity()
 @Unique(['checksum'])
@@ -39,6 +50,9 @@ export class File {
 
     @ManyToOne(_ => Product, product => product.files)
     product!: Product
+
+    @ManyToOne(() => Model, {nullable: true})
+    model!: Model
 
     @Column({default: ''})
     cloudnetpyVersion!: string
@@ -80,7 +94,7 @@ export class File {
     }
 }
 
-export function isFile(obj: any): obj is File {
+export function isFile(obj: any) {
   return 'uuid' in obj
       && 'measurementDate' in obj
       && isValidDate(obj.measurementDate)

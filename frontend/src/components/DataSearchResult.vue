@@ -206,6 +206,7 @@ export default class DataSearchResult extends Vue {
       .then(({data}) => this.$router.push({path: `/collection/${data}`}))
       .catch(err => {
         this.downloadFailed = true
+        // eslint-disable-next-line no-console
         console.error(err)
       })
       .finally(() => (this.downloadIsBusy = false))

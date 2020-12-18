@@ -1,17 +1,18 @@
 import {Request, RequestHandler, Response} from 'express'
 import {Collection} from '../entity/Collection'
 import config from '../config'
-import {Connection, Repository} from 'typeorm'
+import {Connection, EntityManager, Repository} from 'typeorm'
 import {File, isFile} from '../entity/File'
 import {
   checkFileExists,
   convertToSearchResponse,
   getBucketForFile,
   hideTestDataFromNormalUsers,
-  sortByMeasurementDateAsc
+  sortByMeasurementDateAsc, toArray
 } from '../lib'
 import {augmentFiles} from '../lib/'
 import {SearchFile} from '../entity/SearchFile'
+import {Model} from '../entity/Model'
 
 export class FileRoutes {
 
@@ -98,8 +99,12 @@ export class FileRoutes {
       if (existingFile == undefined) { // New file
         file.createdAt = file.updatedAt
         await this.conn.transaction(async transactionalEntityManager => {
+          if (file.product == 'model') {
+            await this.updateModelSearchFile(transactionalEntityManager, file, searchFile)
+          } else {
+            await transactionalEntityManager.insert(SearchFile, searchFile)
+          }
           await transactionalEntityManager.insert(File, file)
-          await transactionalEntityManager.insert(SearchFile, searchFile)
         })
         res.sendStatus(201)
       } else if (existingFile.site.isTestSite || existingFile.volatile) { // Replace existing
@@ -160,7 +165,31 @@ export class FileRoutes {
     const qb = this.fileRepo.createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
       .leftJoinAndSelect('file.product', 'product')
-    if (query.allVersions == undefined) {
+      .leftJoinAndSelect('file.model', 'model')
+      .andWhere('site.id IN (:...site)', query)
+      .andWhere('product.id IN (:...product)', query)
+      .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate <= :dateTo', query)
+      .andWhere('file.volatile IN (:...volatile)', query)
+      .andWhere('file.updatedAt < :releasedBefore', query)
+      .andWhere('file.legacy IN (:...showLegacy)', query)
+    if (query.allVersions == undefined && query.model == undefined && query.allModels == undefined) {
+      qb.innerJoin(sub_qb => // Default functionality
+        sub_qb
+          .from('search_file', 'searchfile'),
+      'best_version',
+      'file.uuid = best_version.uuid')
+    }
+    else if (query.allVersions && query.allModels == undefined) {
+      qb.innerJoin(sub_qb =>
+        sub_qb
+          .from('file', 'file')
+          .leftJoin('file.model', 'model')
+          .select('MIN(model.optimumOrder)', 'optimum_order')
+          .groupBy('file.site, file.measurementDate, file.product'),
+      'best_model',
+      'model.optimumOrder = best_model.optimum_order')
+    }
+    else if (query.allModels && query.allVersions == undefined) {
       qb.innerJoin(sub_qb =>
         sub_qb
           .from('file', 'file')
@@ -170,14 +199,9 @@ export class FileRoutes {
       'file.updatedAt = last_version.updated_at'
       )
     }
-    qb
-      .andWhere('site.id IN (:...site)', query)
-      .andWhere('product.id IN (:...product)', query)
-      .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate <= :dateTo', query)
-      .andWhere('file.volatile IN (:...volatile)', query)
-      .andWhere('file.updatedAt < :releasedBefore', query)
-      .andWhere('file.legacy IN (:...showLegacy)', query)
-      .orderBy('file.measurementDate', 'DESC')
+    else if (query.model) qb.andWhere('model.id IN (:...model)', query)
+    qb.orderBy('file.measurementDate', 'DESC')
+      .addOrderBy('model.optimumOrder', 'ASC')
       .addOrderBy('file.updatedAt', 'DESC')
     if ('limit' in query) qb.limit(parseInt(query.limit))
     return qb
@@ -195,5 +219,24 @@ export class FileRoutes {
       .orderBy('file.measurementDate', 'DESC')
     return qb
   }
+
+  private async updateModelSearchFile(transactionalEntityManager: EntityManager, file: any, searchFile: SearchFile) {
+    const {optimumOrder} = await transactionalEntityManager.findOneOrFail(Model, {id: file.model})
+    const [bestModelFile] = await transactionalEntityManager.createQueryBuilder(File, 'file')
+      .leftJoinAndSelect('file.site', 'site')
+      .leftJoinAndSelect('file.product', 'product')
+      .leftJoinAndSelect('file.model', 'model')
+      .andWhere('site.id = :site', file)
+      .andWhere('product.id = :product', file)
+      .andWhere('file.measurementDate = :measurementDate', file)
+      .orderBy('model.optimumOrder', 'ASC')
+      .getMany()
+    if (!bestModelFile) return transactionalEntityManager.insert(SearchFile, searchFile)
+    if (bestModelFile.model.optimumOrder > optimumOrder) { // Received model is better than existing
+      await transactionalEntityManager.delete(SearchFile, {uuid: bestModelFile.uuid})
+      await transactionalEntityManager.insert(SearchFile, searchFile)
+    }
+  }
+
 
 }

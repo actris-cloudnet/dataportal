@@ -21,6 +21,6 @@ export class Product {
     @OneToMany(_ => ProductVariable, prodVar => prodVar.product)
     variables!: ProductVariable[]
 
-    @OneToMany(_ => Upload, uploadedMetadata => uploadedMetadata.site)
-    uploadedMetadatas!: Upload[]
+    @OneToMany(_ => Upload, upload => upload.site)
+    uploads!: Upload[]
 }
