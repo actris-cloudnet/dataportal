@@ -47,7 +47,8 @@ export class Middleware {
       return next(requestError)
     }
 
-    let validKeys = ['site', 'volatile', 'product', 'dateFrom', 'dateTo', 'developer', 'releasedBefore', 'allVersions', 'limit', 'showLegacy', 'model', 'allModels']
+    let validKeys = ['site', 'volatile', 'product', 'dateFrom', 'dateTo', 'developer',
+      'releasedBefore', 'allVersions', 'limit', 'showLegacy', 'model', 'allModels']
     if (req.path.includes('visualization')) validKeys.push('variable')
 
     const unknownFields = checkFieldNames(validKeys, req.query)
