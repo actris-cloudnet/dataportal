@@ -101,12 +101,12 @@ section#fileTable
       <span v-if="isBusy">Searching...</span>
       <span v-else-if="listLength > 0">Found {{ listLength }} results</span>
     </span>
-    <div v-if="listLength == 0" class="noresults">
+    <div v-if="listLength == 0 && !isBusy" class="noresults">
       <h2>No results</h2>
         Are we missing some data? Send an email to
         <a href="mailto:actris-cloudnet-feedback@fmi.fi">actris-cloudnet-feedback@fmi.fi</a>.
     </div>
-    <b-table v-if="listLength > 0"
+    <b-table v-else
         id="tableContent" borderless small striped hover sort-icon-left
         :items="apiResponse"
         :fields="[
