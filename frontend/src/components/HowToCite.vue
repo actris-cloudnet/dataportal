@@ -51,7 +51,7 @@ export default class HowToCite extends Vue {
   }
 
   get datasetCreator() {
-    return `CLU (${this.collectionYear})`
+    return `CLU (${this.year})`
   }
 
 }
