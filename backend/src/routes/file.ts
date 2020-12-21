@@ -170,6 +170,7 @@ export class FileRoutes {
 
     // Where clauses
     qb = addCommonFilters(qb, query)
+    if (query.model) qb.andWhere('model.id IN (:...model)', query)
     if (query.releasedBefore) qb.andWhere('file.updatedAt < :releasedBefore', query)
 
     // allVersions, allModels and model flags
@@ -190,7 +191,7 @@ export class FileRoutes {
       'best_model',
       'model.optimumOrder = best_model.optimum_order OR model IS NULL')
     }
-    else if (query.allModels != undefined && query.allVersions == undefined) {
+    else if ((query.allModels != undefined || query.model) && query.allVersions == undefined) {
       qb.innerJoin(sub_qb =>
         sub_qb
           .from('file', 'file')
@@ -200,7 +201,6 @@ export class FileRoutes {
       'file.updatedAt =  last_version.updated_at'
       )
     }
-    else if (query.model) qb.andWhere('model.id IN (:...model)', query)
 
     // Ordering
     qb.orderBy('file.measurementDate', 'DESC')
