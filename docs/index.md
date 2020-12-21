@@ -106,6 +106,7 @@ Example query:
 `GET https://cloudnet.fmi.fi/api/models`
 
 Response body:
+```json
 [
   {
     "id": "ecmwf",
@@ -113,6 +114,7 @@ Response body:
   },
 ...
 ]
+```
 
 ### `GET /api/files/UUID` → `File`
 
@@ -273,7 +275,27 @@ curl "https://cloudnet.fmi.fi/api/files?site=norunda&site=granada&product=model&
 Fetch all versions of a classification product from Granada on 2020-05-20:
 
 ```shell
-curl "https://cloudnet.fmi.fi/api/files?site=granada&product=classification&dateFrom=2020-05-20&dateTo=2020-05-20&allVersions"
+curl "https://cloudnet.fmi.fi/api/files?site=granada&product=classification&date=2020-05-20&allVersions"
+```
+
+### Model data
+
+Fetch the optimum model file from Bucharest on 2020-12-10:
+
+```shell
+curl "https://cloudnet.fmi.fi/api/files?site=bucharest&date=2020-12-10&product=model"
+```
+
+Fetch all available models:
+
+```shell
+curl "https://cloudnet.fmi.fi/api/files?site=bucharest&date=2020-12-10&allModels"
+```
+
+Fetch only the `gdas1` model:
+
+```shell
+curl "https://cloudnet.fmi.fi/api/files?site=bucharest&date=2020-12-10&model=gdas1"
 ```
 
 ### Using the API to download all data objects matching a criteria
@@ -296,8 +318,7 @@ import requests
 
 url = 'https://cloudnet.fmi.fi/api/files'
 payload = {
-    'dateFrom': '2020-10-01',
-    'dateTo': '2020-10-01',
+    'date': '2020-10-01',
     'product': 'classification'
 }
 metadata = requests.get(url, payload).json()
