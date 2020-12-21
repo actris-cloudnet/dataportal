@@ -78,7 +78,7 @@
       "cloudnetpyVersion": "1.0.4",
       "createdAt": "2020-02-20T10:39:58.449Z",
       "updatedAt": "2020-02-20T10:39:58.449Z",
-      "s3key": "20190715_bucharest_categorize-22b32746.nc",
+      "s3key": "20190715_bucharest_categorize.nc",
       "checksum": "22d86b26f642a0befdcd7088ff38caab00ea3d95933f4ccc430179b4a29b74d3",
       "size": 7127282,
       "format": "HDF5 (NetCDF4)",

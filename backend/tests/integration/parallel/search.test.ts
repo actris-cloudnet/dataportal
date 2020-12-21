@@ -192,6 +192,13 @@ describe('/api/files', () => {
     expect(res.data[1]).toMatchObject({ version: '122'})
   })
 
+  it('responds with latest version using allModels flag', async () => {
+    const payload = {params: {product: 'categorize', site: 'bucharest', date: '2019-07-15', allModels: true}}
+    const res = await axios.get(url, payload)
+    expect(res.data).toHaveLength(1)
+    expect(res.data[0]).toMatchObject({ version: '123'})
+  })
+
   it('responds with data for one day when using the date parameter', async () => {
     const payload = {params: {product: 'model', site: 'bucharest', date: '2020-12-05'}}
     const res = await axios.get(url, payload)

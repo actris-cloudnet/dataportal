@@ -167,8 +167,12 @@ export class FileRoutes {
       .leftJoinAndSelect('file.site', 'site')
       .leftJoinAndSelect('file.product', 'product')
       .leftJoinAndSelect('file.model', 'model')
+
+    // Where clauses
     qb = addCommonFilters(qb, query)
     if (query.releasedBefore) qb.andWhere('file.updatedAt < :releasedBefore', query)
+
+    // allVersions, allModels and model flags
     if (query.allVersions == undefined && query.model == undefined && query.allModels == undefined) {
       qb.innerJoin(sub_qb => // Default functionality
         sub_qb
@@ -176,31 +180,36 @@ export class FileRoutes {
       'best_version',
       'file.uuid = best_version.uuid')
     }
-    else if (query.allVersions && query.allModels == undefined) {
+    else if (query.allVersions != undefined && query.allModels == undefined) {
       qb.innerJoin(sub_qb =>
         sub_qb
           .from('file', 'file')
           .leftJoin('file.model', 'model')
           .select('MIN(model.optimumOrder)', 'optimum_order')
-          .groupBy('file.site, file.measurementDate, file.product'),
+          .groupBy('file.s3key'),
       'best_model',
-      'model.optimumOrder = best_model.optimum_order')
+      'model.optimumOrder = best_model.optimum_order OR model IS NULL')
     }
-    else if (query.allModels && query.allVersions == undefined) {
+    else if (query.allModels != undefined && query.allVersions == undefined) {
       qb.innerJoin(sub_qb =>
         sub_qb
           .from('file', 'file')
           .select('MAX(file.updatedAt)', 'updated_at')
-          .groupBy('file.site, file.measurementDate, file.product'),
+          .groupBy('file.s3key'),
       'last_version',
-      'file.updatedAt = last_version.updated_at'
+      'file.updatedAt =  last_version.updated_at'
       )
     }
     else if (query.model) qb.andWhere('model.id IN (:...model)', query)
+
+    // Ordering
     qb.orderBy('file.measurementDate', 'DESC')
       .addOrderBy('model.optimumOrder', 'ASC')
       .addOrderBy('file.updatedAt', 'DESC')
+
+    // Limit
     if ('limit' in query) qb.limit(parseInt(query.limit))
+
     return qb
   }
 
