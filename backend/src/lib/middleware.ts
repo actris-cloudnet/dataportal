@@ -3,10 +3,8 @@ import {RequestErrorArray} from '../entity/RequestError'
 import {Upload} from '../entity/Upload'
 import validator from 'validator'
 import {Site} from '../entity/Site'
-import {Product} from '../entity/Product'
-import {Model} from '../entity/Model'
 import {Connection} from 'typeorm'
-import {fetchAll, hideTestDataFromNormalUsers, isValidDate, toArray, tomorrow} from '.'
+import {fetchAll, hideTestDataFromNormalUsers, isValidDate, toArray} from '.'
 import {validate as validateUuid} from 'uuid'
 
 export class Middleware {

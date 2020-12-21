@@ -8,7 +8,7 @@ import {
   convertToSearchResponse,
   getBucketForFile,
   hideTestDataFromNormalUsers,
-  sortByMeasurementDateAsc, toArray
+  sortByMeasurementDateAsc
 } from '../lib'
 import {augmentFiles} from '../lib/'
 import {SearchFile} from '../entity/SearchFile'
@@ -208,8 +208,8 @@ export class FileRoutes {
     let qb = this.searchFileRepo.createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
       .leftJoinAndSelect('file.product', 'product')
-      qb = addCommonFilters(qb, query)
-      qb.orderBy('file.measurementDate', 'DESC')
+    qb = addCommonFilters(qb, query)
+    qb.orderBy('file.measurementDate', 'DESC')
     return qb
   }
 
