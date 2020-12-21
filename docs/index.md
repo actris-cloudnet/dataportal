@@ -204,6 +204,7 @@ If omitted will default to the current date.
 - `model`: One or more `Model` ids, by which to filter the model files.
 - `allModels`: By default the API returns only the best model available for each day. Adding this parameter will fetch all available models.
 - `allVersions`: By default the API returns only the latest version of the files. Adding this parameter will fetch all existing versions.
+- `showLegacy`: By default the API does not return legacy data. Adding this parameter will fetch also legacy data.
 
 Note: one or more of the parameters *must* be issued. A query without any valid parameters will result in a `400 Bad Request` error.
 
