@@ -72,7 +72,8 @@ export const augmentFiles = (files: File[]) =>
     ...file,
     downloadUrl: `${config.downloadBaseUrl}${getDownloadPathForFile(file)}`,
     filename: basename(file.s3key),
-    s3key: undefined
+    s3key: undefined,
+    model: file.model || undefined
   }))
 
 export const ssAuthString = () =>
