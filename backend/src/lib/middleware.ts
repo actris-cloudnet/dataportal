@@ -63,8 +63,7 @@ export class Middleware {
       if (keyError) requestError.errors.push(keyError)
     })
 
-    requestError = this.checkDateConflicts(requestError, req.query)
-
+    requestError.errors = this.checkDateConflicts(requestError.errors, req.query)
     requestError.errors = this.checkModelParamConflicts(requestError.errors, req.query)
 
     if (requestError.errors.length > 0) return next(requestError)
@@ -77,35 +76,13 @@ export class Middleware {
       .filter(site => !(req.query.developer === undefined && site.isTestSite))
       .filter(site => !site.isModelOnlySite)
       .map(site => site.id)
-    const defaultProduct = async () => (await fetchAll<Product>(this.conn, Product))
-      .map(product => product.id)
-    const defaultDateFrom = () => new Date('1970-01-01')
-    const defaultDateTo = tomorrow
-    const setVolatile = () => ('volatile' in query) ? toArray(query.volatile) : [true, false]
-    const setLegacy = () => ('showLegacy' in query) && query.showLegacy.toLowerCase() == 'true' ? [true, false] : [false]
+    const setLegacy = () => ('showLegacy' in query) ? null : [false] // Don't filter by "legacy" if showLegacy is enabled
     if (!('site' in query)) query.site = await defaultSite()
-    if (!('product' in query)) query.product = await defaultProduct()
-    if (!('dateFrom' in query)) query.dateFrom = defaultDateFrom()
-    if (!('dateTo' in query)) query.dateTo = defaultDateTo()
-    if (!('releasedBefore' in query)) query.releasedBefore = defaultDateTo()
     query.site = toArray(query.site)
     query.product = toArray(query.product)
     query.model = toArray(query.model)
-    query.volatile = setVolatile()
-    query.showLegacy = setLegacy()
-    next()
-  }
-
-  modelFilesQueryAugmenter: RequestHandler = async (req, _res, next) => {
-    const query = req.query as any
-    const defaultSite = async () => (await fetchAll<Site>(this.conn, Site))
-      .map(site => site.id)
-    const defaultModel = async () => (await fetchAll<Model>(this.conn, Model))
-      .map(model => model.id)
-    if (!('site' in query)) query.site = await defaultSite()
-    if (!('model' in query)) query.model = await defaultModel()
-    query.site = toArray(query.site)
-    query.model = toArray(query.model)
+    query.volatile = toArray(query.volatile)
+    query.legacy = setLegacy()
     next()
   }
 
@@ -202,10 +179,10 @@ export class Middleware {
     return errors
   }
 
-  private checkDateConflicts(requestError: RequestErrorArray, query: any) {
+  private checkDateConflicts(errors: string[], query: any) {
     if (query.date && (query.dateFrom || query.dateTo))
-      requestError.errors.push('Property "date" may not be defined if either "dateFrom" or "dateTo" is defined')
-    return requestError
+      errors.push('Property "date" may not be defined if either "dateFrom" or "dateTo" is defined')
+    return errors
   }
 
 

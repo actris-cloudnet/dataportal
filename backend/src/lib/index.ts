@@ -46,8 +46,12 @@ export const dateNDaysAgo = (n: number) => {
   return dateInPast
 }
 
-export const toArray = (obj: string | Array<string>): Array<string> =>
-  (typeof obj == 'string') ? [obj] : obj
+export const toArray = (obj: string | Array<string> | undefined): Array<string> | null => {
+  if (!obj) return null
+  else if (typeof obj == 'string') return [obj]
+  return obj
+
+}
 
 export const rowExists = (err: any) => {
   const PG_UNIQUE_CONSTRAINT_VIOLATION = '23505'

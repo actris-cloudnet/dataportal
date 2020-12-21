@@ -1,14 +1,14 @@
 import {Request, RequestHandler, Response} from 'express'
 import {Collection} from '../entity/Collection'
 import config from '../config'
-import {Connection, EntityManager, Repository} from 'typeorm'
+import {Connection, EntityManager, Repository, SelectQueryBuilder} from 'typeorm'
 import {File, isFile} from '../entity/File'
 import {
   checkFileExists,
   convertToSearchResponse,
   getBucketForFile,
   hideTestDataFromNormalUsers,
-  sortByMeasurementDateAsc
+  sortByMeasurementDateAsc, toArray
 } from '../lib'
 import {augmentFiles} from '../lib/'
 import {SearchFile} from '../entity/SearchFile'
@@ -163,16 +163,12 @@ export class FileRoutes {
       .catch(err => next({ status: 500, errors: err }))
 
   filesQueryBuilder(query: any) {
-    const qb = this.fileRepo.createQueryBuilder('file')
+    let qb = this.fileRepo.createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
       .leftJoinAndSelect('file.product', 'product')
       .leftJoinAndSelect('file.model', 'model')
-      .andWhere('site.id IN (:...site)', query)
-      .andWhere('product.id IN (:...product)', query)
-      .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate <= :dateTo', query)
-      .andWhere('file.volatile IN (:...volatile)', query)
-      .andWhere('file.updatedAt < :releasedBefore', query)
-      .andWhere('file.legacy IN (:...showLegacy)', query)
+    qb = addCommonFilters(qb, query)
+    if (query.releasedBefore) qb.andWhere('file.updatedAt < :releasedBefore', query)
     if (query.allVersions == undefined && query.model == undefined && query.allModels == undefined) {
       qb.innerJoin(sub_qb => // Default functionality
         sub_qb
@@ -201,7 +197,6 @@ export class FileRoutes {
       )
     }
     else if (query.model) qb.andWhere('model.id IN (:...model)', query)
-    if (query.date) qb.andWhere('file.measurementDate = :date', query)
     qb.orderBy('file.measurementDate', 'DESC')
       .addOrderBy('model.optimumOrder', 'ASC')
       .addOrderBy('file.updatedAt', 'DESC')
@@ -210,15 +205,11 @@ export class FileRoutes {
   }
 
   searchFilesQueryBuilder(query: any) {
-    const qb = this.searchFileRepo.createQueryBuilder('file')
+    let qb = this.searchFileRepo.createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
       .leftJoinAndSelect('file.product', 'product')
-      .andWhere('site.id IN (:...site)', query)
-      .andWhere('product.id IN (:...product)', query)
-      .andWhere('file.measurementDate >= :dateFrom AND file.measurementDate <= :dateTo', query)
-      .andWhere('file.volatile IN (:...volatile)', query)
-      .andWhere('file.legacy IN (:...showLegacy)', query)
-      .orderBy('file.measurementDate', 'DESC')
+      qb = addCommonFilters(qb, query)
+      qb.orderBy('file.measurementDate', 'DESC')
     return qb
   }
 
@@ -240,5 +231,15 @@ export class FileRoutes {
     }
   }
 
+}
 
+function addCommonFilters<T>(qb: SelectQueryBuilder<T>, query: any) {
+  qb.andWhere('site.id IN (:...site)', query)
+  if (query.product) qb.andWhere('product.id IN (:...product)', query)
+  if (query.dateFrom) qb.andWhere('file.measurementDate >= :dateFrom', query)
+  if (query.dateTo) qb.andWhere('file.measurementDate <= :dateTo', query)
+  if (query.date) qb.andWhere('file.measurementDate = :date', query)
+  if (query.volatile) qb.andWhere('file.volatile IN (:...volatile)', query)
+  if (query.legacy) qb.andWhere('file.legacy IN (:...legacy)', query)
+  return qb as SelectQueryBuilder<T>
 }
