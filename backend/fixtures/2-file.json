@@ -236,7 +236,7 @@
       "cloudnetpyVersion": "",
       "createdAt": "2020-02-20T10:52:59.073Z",
       "updatedAt": "2020-02-20T10:52:59.073Z",
-      "s3key": "20141205_mace-head_ecmwf.nc",
+      "s3key": "20141205_mace-head_icon-iglo-12-23.nc",
       "checksum": "155bcd9deae26851992c3da6352844fb9443203c48ae4f4ad8f1aa50ef2ab26f",
       "size": 500452,
       "format": "NetCDF3",

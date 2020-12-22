@@ -187,7 +187,7 @@ export class FileRoutes {
           .from('file', 'file')
           .leftJoin('file.model', 'model')
           .select('MIN(model.optimumOrder)', 'optimum_order')
-          .groupBy('file.s3key'),
+          .groupBy('file.site, file.measurementDate, file.product'),
       'best_model',
       'model.optimumOrder = best_model.optimum_order OR model IS NULL')
     }
