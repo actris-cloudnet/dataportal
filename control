@@ -116,6 +116,13 @@ case "$action" in
     ./control test-start
     ;;
 
+    dev-start)
+    ./control restart
+    ./control test-restart
+    cd backend
+    npx tsc --build tsconfig.json -w
+    ;;
+
     purge)
     if ! is_production; then
         dropdb dataportal
