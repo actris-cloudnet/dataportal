@@ -139,7 +139,7 @@ main#filelanding
     <div v-if="response.legacy" class="note legacynote">
       This is legacy data. Quality of the data is not assured.
     </div>
-    <div v-if="newestVersion" class="note versionnote">
+    <div v-if="!isBusy && newestVersion" class="note versionnote">
       A <router-link id="newestVersion" :to="`/file/${newestVersion}`">newer version</router-link> of this file is available.
     </div>
     <main class="info">
@@ -162,12 +162,12 @@ main#filelanding
             <dd>{{ humanReadableTimestamp(response.updatedAt) }}</dd>
             <dt>Versions</dt>
             <dd>
-              <router-link v-if="previousVersion" id="previousVersion" :to="`/file/${previousVersion}`">
+              <router-link v-if="!isBusy && previousVersion" id="previousVersion" :to="`/file/${previousVersion}`">
                 previous
               </router-link>
-              <span v-if="previousVersion && nextVersion">-</span>
-              <router-link v-if="nextVersion" id="nextVersion" :to="`/file/${nextVersion}`"> next</router-link>
-              <span v-if="!previousVersion && !nextVersion" class="notAvailable"></span>
+              <span v-if="!isBusy && previousVersion && nextVersion">-</span>
+              <router-link v-if="!isBusy && nextVersion" id="nextVersion" :to="`/file/${nextVersion}`"> next</router-link>
+              <span v-if="isBusy || !previousVersion && !nextVersion" class="notAvailable"></span>
             </dd>
           </dl>
         </section>
@@ -301,6 +301,7 @@ export default class FileView extends Vue {
   showHistory = false
   showHowToCite = false
   showLicense = false
+  isBusy = false
 
   getVisualizations() {
     if (!this.allVisualizations) return this.visualizations.slice(0, 1)
@@ -380,15 +381,17 @@ export default class FileView extends Vue {
   }
 
   @Watch('uuid')
-  onUuidChange() {
+  async onUuidChange() {
+    this.isBusy = true
     const payload = { params: { developer: this.devMode.activated || undefined}}
-    return this.fetchFileMetadata(payload)
-      .then(() => {
-        if (this.response == null || this.error) return
-        this.fetchVisualizations(payload)
-        this.fetchVersions(this.response)
-        this.fetchSourceFiles(this.response)
-      })
+    await this.fetchFileMetadata(payload)
+    if (this.response == null || this.error) return
+    await Promise.all([
+      this.fetchVisualizations(payload),
+      this.fetchVersions(this.response),
+      this.fetchSourceFiles(this.response)
+    ])
+    this.isBusy = false
   }
 }
 </script>
