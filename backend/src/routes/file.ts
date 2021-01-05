@@ -171,9 +171,10 @@ export class FileRoutes {
     // Where clauses
     qb = addCommonFilters(qb, query)
     if (query.model) qb.andWhere('model.id IN (:...model)', query)
+    if (query.filename) qb.andWhere("regexp_replace(s3key, '.+/', '') IN (:...filename)", query) // eslint-disable-line quotes
     if (query.releasedBefore) qb.andWhere('file.updatedAt < :releasedBefore', query)
 
-    // allVersions, allModels and model flags
+    // No allVersions, allModels or model params (default)
     if (query.allVersions == undefined && query.model == undefined && query.allModels == undefined) {
       qb.innerJoin(sub_qb => // Default functionality
         sub_qb
@@ -181,7 +182,9 @@ export class FileRoutes {
       'best_version',
       'file.uuid = best_version.uuid')
     }
-    else if (query.allVersions != undefined && query.allModels == undefined) {
+    // Only allVersions
+    // Model is specified in filename, so if its present don't do anything
+    else if (!query.filename && (query.allVersions != undefined && query.allModels == undefined)) {
       qb.innerJoin(sub_qb =>
         sub_qb
           .from('file', 'file')
@@ -191,6 +194,7 @@ export class FileRoutes {
       'best_model',
       'model.optimumOrder = best_model.optimum_order OR model IS NULL')
     }
+    // Only allModels or model
     else if ((query.allModels != undefined || query.model) && query.allVersions == undefined) {
       qb.innerJoin(sub_qb =>
         sub_qb
