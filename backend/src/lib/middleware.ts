@@ -46,7 +46,7 @@ export class Middleware {
     }
 
     let validKeys = ['site', 'volatile', 'product', 'dateFrom', 'dateTo', 'developer',
-      'releasedBefore', 'allVersions', 'limit', 'showLegacy', 'model', 'allModels', 'date']
+      'releasedBefore', 'allVersions', 'limit', 'showLegacy', 'model', 'allModels', 'date', 'filename']
 
     if (req.path.includes('visualization')) validKeys.push('variable')
 
@@ -80,6 +80,7 @@ export class Middleware {
     query.product = toArray(query.product)
     query.model = toArray(query.model)
     query.volatile = toArray(query.volatile)
+    query.filename = toArray(query.filename)
     query.legacy = setLegacy()
     next()
   }

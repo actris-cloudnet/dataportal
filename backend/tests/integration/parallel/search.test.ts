@@ -256,6 +256,14 @@ describe('/api/files', () => {
     return expect(axios.get(url, {params})).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
 
+  it('responds with correct data using filename parameter', async () => {
+    const filename = '20181115_mace-head_mira.nc'
+    const payload = {params: {filename }}
+    const res = await axios.get(url, payload)
+    expect(res.data).toHaveLength(1)
+    return expect(res.data[0]).toMatchObject({ filename })
+  })
+
 })
 
 describe('/api/search', () => {
