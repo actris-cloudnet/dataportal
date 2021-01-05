@@ -204,6 +204,7 @@ By default `measurementDate` is not limited.
 If omitted will default to the current date.
 - `product`: One or more `Product` ids, by which to filter the files.
 - `model`: One or more `Model` ids, by which to filter the model files.
+- `filename`: One or more filenames by which to filter the files.
 - `allModels`: By default the API returns only the best model available for each day. Adding this parameter will fetch all available models.
 - `allVersions`: By default the API returns only the latest version of the files. Adding this parameter will fetch all existing versions.
 - `showLegacy`: By default the API does not return legacy data. Adding this parameter will fetch also legacy data.
