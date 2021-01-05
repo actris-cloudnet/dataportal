@@ -7,6 +7,7 @@ let conn: Connection
 let repo: any
 
 const metadataUrl = `${backendPrivateUrl}upload/metadata/`
+const modelMetadataUrl = `${backendPrivateUrl}model-upload/metadata/`
 const privateMetadataUrl = `${backendPrivateUrl}upload-metadata/`
 const dataUrl = `${backendPrivateUrl}upload/data/`
 
@@ -77,7 +78,7 @@ describe('POST /upload/metadata', () => {
     expect(md_resub.checksum).toBe(new_checksum)
   })
 
-  test('refuses to update file after certain time period', async () => {
+  test('refuses to update instrument file after certain time period', async () => {
     // new submission with allowUpdate flag
     const payload = {...validMetadata, allowUpdate: 'TrUe'}
     await expect(axios.post(metadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
@@ -86,6 +87,19 @@ describe('POST /upload/metadata', () => {
     const new_checksum = 'ac5c1f6c923cc8b259c2e22c7b258ee4'
     const payload_resub = {...payload, checksum: new_checksum}
     await expect(axios.post(metadataUrl, payload_resub, {headers})).rejects.toMatchObject({ response: { status: 409}})
+  })
+
+  test('updates model file submitted with allowUpdate flag regardless of time', async () => {
+    const payload = {...validMetadata, allowUpdate: true, model: 'ecmwf'}
+    delete payload.instrument
+    await expect(axios.post(modelMetadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
+    const md = await repo.findOne({checksum: payload.checksum})
+    await repo.update(md.uuid, {updatedAt: '2020-11-07'})
+    const new_checksum = 'ac5c1f6c923cc8b259c2e22c7b258ee4'
+    const payload_resub = {...payload, checksum: new_checksum}
+    await expect(axios.post(modelMetadataUrl, payload_resub, {headers})).resolves.toMatchObject({status: 200})
+    const md_resub = await repo.findOne(md.uuid)
+    expect(md_resub.checksum).toBe(new_checksum)
   })
 
   test('responds with 200 on existing hashsum with created status', async () => {
