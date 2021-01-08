@@ -11,9 +11,7 @@
       "longitude": -3.605,
       "altitude": 680,
       "gaw": "UGR",
-      "country": "Spain",
-      "isTestSite": true,
-      "isModelOnlySite": false
+      "country": "Spain"
     },
     "allowUpdate": true,
     "status": "created",
@@ -39,9 +37,7 @@
       "longitude": -9.9,
       "altitude": 16,
       "gaw": "MHD",
-      "country": "Ireland",
-      "isTestSite": false,
-      "isModelOnlySite": false
+      "country": "Ireland"
     },
     "allowUpdate": true,
     "status": "created",
@@ -67,9 +63,7 @@
       "longitude": -3.605,
       "altitude": 680,
       "gaw": "UGR",
-      "country": "Spain",
-      "isTestSite": true,
-      "isModelOnlySite": false
+      "country": "Spain"
     },
     "allowUpdate": true,
     "status": "created",
@@ -95,9 +89,7 @@
       "longitude": 26.029,
       "altitude": 93,
       "gaw": "Unknown",
-      "country": "Romania",
-      "isTestSite": false,
-      "isModelOnlySite": false
+      "country": "Romania"
     },
     "allowUpdate": true,
     "status": "processed",
@@ -123,9 +115,7 @@
       "longitude": -3.605,
       "altitude": 680,
       "gaw": "UGR",
-      "country": "Spain",
-      "isTestSite": true,
-      "isModelOnlySite": false
+      "country": "Spain"
     },
     "allowUpdate": false,
     "status": "uploaded",
@@ -151,9 +141,7 @@
       "longitude": -3.605,
       "altitude": 680,
       "gaw": "UGR",
-      "country": "Spain",
-      "isTestSite": true,
-      "isModelOnlySite": false
+      "country": "Spain"
     },
     "allowUpdate": false,
     "status": "created",
@@ -180,9 +168,7 @@
       "longitude": 26.029,
       "altitude": 93,
       "gaw": "Unknown",
-      "country": "Romania",
-      "isTestSite": false,
-      "isModelOnlySite": false
+      "country": "Romania"
     },
     "allowUpdate": false,
     "status": "processed",
@@ -209,9 +195,7 @@
       "longitude": 26.029,
       "altitude": 93,
       "gaw": "Unknown",
-      "country": "Romania",
-      "isTestSite": false,
-      "isModelOnlySite": false
+      "country": "Romania"
     },
     "allowUpdate": false,
     "status": "processed",
@@ -238,9 +222,7 @@
       "longitude": 26.029,
       "altitude": 93,
       "gaw": "Unknown",
-      "country": "Romania",
-      "isTestSite": false,
-      "isModelOnlySite": false
+      "country": "Romania"
     },
     "allowUpdate": false,
     "status": "uploaded",

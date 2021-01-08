@@ -44,10 +44,10 @@ export class Site {
     uploads!: Upload[]
 
     get isTestSite() {
-        return this.type.includes(SiteType.TEST)
+      return this.type.includes(SiteType.TEST)
     }
 
     get isModelOnlySite() {
-        return this.type.length == 0
+      return this.type.length == 0
     }
 }
