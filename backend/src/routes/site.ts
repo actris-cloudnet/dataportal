@@ -30,7 +30,7 @@ export class SiteRoutes {
       .select()
     if (req.query.modelSites == undefined) {
       qb
-        .where('site.isModelOnlySite = false')
+        .where('array_length(site.type, 1) > 0')
       hideTestDataFromNormalUsers(qb, req)
     }
     qb

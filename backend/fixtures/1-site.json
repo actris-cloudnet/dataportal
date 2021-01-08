@@ -4,6 +4,7 @@
     "humanReadableName": "Bucharest",
     "latitude": 44.348,
     "longitude": 26.029,
+    "type": ["cloudnet"],
     "altitude": 93,
     "gaw": "Unknown",
     "country": "Romania"
@@ -14,6 +15,7 @@
     "latitude": 53.326,
     "longitude": -9.9,
     "altitude": 16,
+    "type": ["cloudnet"],
     "gaw": "MHD",
     "country": "Ireland"
   },
@@ -23,6 +25,7 @@
     "latitude": 61.844,
     "longitude": 24.288,
     "altitude": 174,
+    "type": ["cloudnet"],
     "gaw": "SMR",
     "country": "Finland"
   },
@@ -32,28 +35,48 @@
     "latitude": 37.164,
     "longitude": -3.605,
     "altitude": 680,
+    "type": ["cloudnet", "test"],
     "gaw": "UGR",
-    "country": "Spain",
-    "isTestSite": true
+    "country": "Spain"
   },
   {
     "id": "norunda",
     "humanReadableName": "Norunda",
     "latitude": 60.086,
     "longitude": 17.479,
+    "type": [],
     "gaw": "Unknown",
     "altitude": 46,
-    "country": "Sweden",
-    "isModelOnlySite": true
+    "country": "Sweden"
   },
   {
     "id": "potenza",
     "humanReadableName": "Potenza",
     "latitude": 40.6413,
     "longitude": 15.7913,
+    "type": [],
     "gaw": "Unknown",
     "altitude": 760,
-    "country": "Italy",
-    "isModelOnlySite": true
+    "country": "Italy"
+  },
+  {
+    "id": "campaign",
+    "humanReadableName": "Campaign",
+    "latitude": 40.6413,
+    "longitude": 15.7913,
+    "type": ["campaign"],
+    "gaw": "Unknown",
+    "altitude": 760,
+    "country": "Italy"
+  },
+  {
+    "id": "arm",
+    "humanReadableName": "ARM",
+    "latitude": 40.6413,
+    "longitude": 15.7913,
+    "type": ["arm"],
+    "gaw": "Unknown",
+    "altitude": 760,
+    "country": "Italy"
   }
 ]

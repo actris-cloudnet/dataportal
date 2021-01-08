@@ -10,7 +10,7 @@ beforeAll(async () => (resources = await readResources()))
 describe('GET /api/sites', () => {
 
   it('responds with a list of all sites in dev mode', async () => {
-    const sites = ['macehead', 'hyytiala', 'bucharest', 'granada']
+    const sites = ['macehead', 'hyytiala', 'bucharest', 'granada', 'arm', 'campaign']
     const res = await axios.get(url, { params: { developer: '' }})
     expect(res.data).toHaveLength(sites.length)
     const siteList = res.data.map((d: any) => d.id)
@@ -45,7 +45,7 @@ describe('GET /api/sites?modelSites', () => {
   const modelSiteUrl = `${backendPublicUrl}sites/?modelSites`
 
   it('responds with a list of all sites', async () => {
-    const sites = ['macehead', 'hyytiala', 'bucharest', 'granada', 'potenza', 'norunda']
+    const sites = ['macehead', 'hyytiala', 'bucharest', 'granada', 'potenza', 'norunda', 'arm', 'campaign']
     const res = await axios.get(modelSiteUrl)
     expect(res.data).toHaveLength(sites.length)
     const siteList = res.data.map((d: any) => d.id)
