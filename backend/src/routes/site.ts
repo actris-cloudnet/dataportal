@@ -1,6 +1,6 @@
 import {Request, RequestHandler, Response} from 'express'
 import {Connection, Repository} from 'typeorm'
-import {hideTestDataFromNormalUsers} from '../lib'
+import {hideTestDataFromNormalUsers, toArray} from '../lib'
 import {Site} from '../entity/Site'
 
 export class SiteRoutes {
@@ -26,11 +26,23 @@ export class SiteRoutes {
   }
 
   sites: RequestHandler = async (req: Request, res: Response, next) => {
+    const query: any = req.query
     const qb = this.siteRepo.createQueryBuilder('site')
       .select()
+
     hideTestDataFromNormalUsers(qb, req)
+      .addOrderBy('site.id', 'ASC')
       .getMany()
-      .then(result => res.send(result))
+      .then(result => {
+        const typeQuery = toArray(query.type)
+        if (typeQuery) result = sitesContainAtLeastOneType(result, typeQuery)
+        res.send(result)
+      })
       .catch(err => next({ status: 500, errors: err }))
+
+    function sitesContainAtLeastOneType(result: Site[], typeQuery: Array<string>) {
+      return result.filter(site => site.type.filter(type => typeQuery.includes(type)).length > 0)
+    }
+
   }
 }
