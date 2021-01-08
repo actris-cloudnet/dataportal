@@ -2,32 +2,61 @@
   {
     "id": "bucharest",
     "humanReadableName": "Bucharest",
+    "type": [
+      "cloudnet"
+    ],
     "latitude": 44.348,
     "longitude": 26.029,
     "altitude": 93,
     "gaw": "Unknown",
-    "country": "Romania",
-    "isTestSite": false
+    "country": "Romania"
   },
   {
     "id": "macehead",
     "humanReadableName": "Mace Head",
+    "type": [
+      "cloudnet"
+    ],
     "latitude": 53.326,
     "longitude": -9.9,
     "altitude": 16,
     "gaw": "MHD",
-    "country": "Ireland",
-    "isTestSite": false
+    "country": "Ireland"
   },
   {
     "id": "hyytiala",
     "humanReadableName": "Hyytiälä",
+    "type": [
+      "cloudnet"
+    ],
     "latitude": 61.844,
     "longitude": 24.288,
     "altitude": 174,
     "gaw": "SMR",
-    "country": "Finland",
-    "isTestSite": false
+    "country": "Finland"
+  },
+  {
+    "id": "campaign",
+    "humanReadableName": "Campaign",
+    "type": [
+      "campaign"
+    ],
+    "latitude": 40.6413,
+    "longitude": 15.7913,
+    "altitude": 760,
+    "gaw": "Unknown",
+    "country": "Italy"
+  },
+  {
+    "id": "arm",
+    "humanReadableName": "ARM",
+    "type": [
+      "arm"
+    ],
+    "latitude": 40.6413,
+    "longitude": 15.7913,
+    "altitude": 760,
+    "gaw": "Unknown",
+    "country": "Italy"
   }
 ]
-

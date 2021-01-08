@@ -7,6 +7,7 @@ import config from '../config'
 import {SearchFile} from '../entity/SearchFile'
 import {Upload} from '../entity/Upload'
 import axios from 'axios'
+import {SiteType} from '../entity/Site'
 
 export const S3_BAD_HASH_ERROR_CODE = 'BadDigest'
 
@@ -59,7 +60,7 @@ export const rowExists = (err: any) => {
 }
 
 export const hideTestDataFromNormalUsers = <T>(dbQuery: SelectQueryBuilder<T>, req: Request): SelectQueryBuilder<T> =>
-  req.query.developer !== undefined ? dbQuery : dbQuery.andWhere('not site.isTestSite')
+  req.query.developer !== undefined ? dbQuery : dbQuery.andWhere('not :type = ANY(site.type)', {type: SiteType.TEST})
 
 export const convertToSearchResponse = (files: SearchFile[]) =>
   files.map(file => new SearchFileResponse(file))
