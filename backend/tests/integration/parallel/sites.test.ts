@@ -27,6 +27,14 @@ describe('GET /api/sites', () => {
     const siteList = res.data.map((d: any) => d.id)
     return expectedSites.forEach(site => expect(siteList).toContain(site))
   })
+
+  it('responds with a list of all sites of given types', async () => {
+    const params = { params: { type: ['campaign', 'arm'] }}
+    const res = await axios.get(url, params)
+    expect(res.data).toHaveLength(2)
+    expect(res.data[0].id).toEqual('arm')
+    expect(res.data[1].id).toEqual('campaign')
+  })
 })
 
 describe('GET /api/sites/:siteid', () => {
