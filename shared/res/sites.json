@@ -36,6 +36,39 @@
     "country": "Finland"
   },
   {
+    "id": "granada",
+    "humanReadableName": "Granada",
+    "type": [
+      "cloudnet",
+      "test"
+    ],
+    "latitude": 37.164,
+    "longitude": -3.605,
+    "altitude": 680,
+    "gaw": "UGR",
+    "country": "Spain"
+  },
+  {
+    "id": "norunda",
+    "humanReadableName": "Norunda",
+    "type": [],
+    "latitude": 60.086,
+    "longitude": 17.479,
+    "altitude": 46,
+    "gaw": "Unknown",
+    "country": "Sweden"
+  },
+  {
+    "id": "potenza",
+    "humanReadableName": "Potenza",
+    "type": [],
+    "latitude": 40.6413,
+    "longitude": 15.7913,
+    "altitude": 760,
+    "gaw": "Unknown",
+    "country": "Italy"
+  },
+  {
     "id": "campaign",
     "humanReadableName": "Campaign",
     "type": [

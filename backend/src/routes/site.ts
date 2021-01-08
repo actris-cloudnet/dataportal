@@ -28,12 +28,7 @@ export class SiteRoutes {
   sites: RequestHandler = async (req: Request, res: Response, next) => {
     const qb = this.siteRepo.createQueryBuilder('site')
       .select()
-    if (req.query.modelSites == undefined) {
-      qb
-        .where('array_length(site.type, 1) > 0')
-      hideTestDataFromNormalUsers(qb, req)
-    }
-    qb
+    hideTestDataFromNormalUsers(qb, req)
       .getMany()
       .then(result => res.send(result))
       .catch(err => next({ status: 500, errors: err }))
