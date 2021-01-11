@@ -5,7 +5,6 @@
 .map
   height: 300px
   width: 300px
-  margin-bottom: $filter-margin
 
 .wrapper
   position: relative

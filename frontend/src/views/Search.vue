@@ -8,6 +8,9 @@
     justify-content: center
     flex-wrap: wrap
 
+  main#search.narrowView
+    max-width: 80em
+
   .betanote
     border-color: #ffeecf
     background: #fdfce5
@@ -126,13 +129,7 @@
 
   .results
     display: inline-flex
-    flex-basis: 600px
-
-  .resultsWide
     flex-grow: 1
-
-  .resultsNarrow
-    flex-grow: 0.2
 
   .resultsViz
     flex-grow: 1
@@ -204,10 +201,16 @@
     line-height: 30px
     font-size: 80%
 
+  .widemap
+    position: absolute
+    max-width: 1000px
+
+  .widemapmargin
+    margin-top: calc(306px + #{$filter-margin})
 </style>
 
 <template>
-<main v-if="mode === 'visualizations' || mode === 'data'" id="search" v-bind:class="{ wide: isVizMode() }">
+<main v-if="mode === 'visualizations' || mode === 'data'" id="search" v-bind:class="{ narrowView: !isVizMode() }">
   <div v-if="displayBetaNotification" class="note betanote">
     This is the beta version of Cloudnet data portal.
     Click <a href="http://devcloudnet.fmi.fi/">here</a> to visit the devcloudnet data portal, or
