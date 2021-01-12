@@ -119,6 +119,32 @@ describe('POST /upload/metadata', () => {
     return expect(new Date(md.updatedAt).getTime()).toEqual(now.getTime())
   })
 
+  test('responds with 409 on existing hashsum with allowUpdate=True and instrument data', async () => {
+    const now = new Date()
+    let uploadedMetadata = {
+      ...validMetadata,
+      ...{status: Status.UPLOADED, uuid: 'ca2b8ff0-c7e4-427f-894a-e6cf1ff2b8d1',
+        allowUpdate: true, createdAt: now, updatedAt: now}}
+    const newUpload = {...validMetadata, allowUpdate: true}
+    await repo.save(uploadedMetadata)
+    await expect(axios.post(metadataUrl, newUpload, {headers})).rejects.toMatchObject({ response: { status: 409}})
+    const md = await repo.findOne({checksum: uploadedMetadata.checksum})
+    return expect(new Date(md.updatedAt).getTime()).toEqual(now.getTime())
+  })
+
+  test('responds with 409 on existing hashsum with allowUpdate=True and model data', async () => {
+    const now = new Date()
+    let uploadedMetadata = {
+      ...validMetadata,
+      ...{status: Status.UPLOADED, uuid: 'ca2b8ff0-c7e4-427f-894a-e6cf1ff2b8d2',
+        allowUpdate: true, model: 'ecmwf', createdAt: now, updatedAt: now}}
+    const newUpload = {...validMetadata, allowUpdate: true, model: 'ecmwf'}
+    await repo.save(uploadedMetadata)
+    await expect(axios.post(modelMetadataUrl, newUpload, {headers})).rejects.toMatchObject({ response: { status: 409}})
+    const md = await repo.findOne({checksum: uploadedMetadata.checksum})
+    return expect(new Date(md.updatedAt).getTime()).toEqual(now.getTime())
+  })
+
   test('responds with 422 on missing filename', async () => {
     const payload = {...validMetadata}
     delete payload.filename

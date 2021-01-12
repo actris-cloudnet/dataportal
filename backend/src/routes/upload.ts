@@ -7,7 +7,6 @@ import {
   fetchAll,
   getS3keyForUpload,
   isValidDate,
-  rowExists,
   ssAuthString,
   toArray,
   tomorrow
@@ -58,6 +57,11 @@ export class UploadRoutes {
       if (model == undefined) return next({ status: 422, errors: 'Unknown model'})
     }
 
+    const existingUploadedMetadata = await this.uploadedMetadataRepo.findOne({checksum: body.checksum, status: Status.UPLOADED})
+    if (existingUploadedMetadata != undefined) {
+      next({ status: 409, errors: 'File already uploaded' })
+    }
+
     // Remove existing metadata if its status is created
     const existingCreatedMetadata = await this.uploadedMetadataRepo.findOne({checksum: body.checksum, status: Status.CREATED})
     if (existingCreatedMetadata != undefined) {
@@ -98,9 +102,7 @@ export class UploadRoutes {
 
     return this.uploadedMetadataRepo.insert(uploadedMetadata)
       .then(() => res.sendStatus(200))
-      .catch(err => rowExists(err)
-        ? next({ status: 409, errors: 'File already exists' })
-        : next({ status: 500, errors: `Internal server error: ${err.code}`}))
+      .catch(err => next({ status: 500, errors: `Internal server error: ${err.code}`}))
   }
 
   updateMetadata: RequestHandler = async (req: Request, res: Response, next) => {
