@@ -9,7 +9,9 @@
     flex-wrap: wrap
 
   main#search.narrowView
-    max-width: 80em
+    max-width: 68em
+    padding-left: 0
+    padding-right: 0
 
   .betanote
     border-color: #ffeecf
@@ -203,10 +205,27 @@
 
   .widemap
     position: absolute
-    max-width: 1000px
+    max-width: 68em
+    width: 100%
 
-  .widemapmargin
+  .widemapmarginleft
     margin-top: calc(306px + #{$filter-margin})
+
+  .widemapmarginright
+    margin-top: 380px
+
+  div.checkbox
+    position: relative
+    top: -1.5em
+    margin-bottom: 1em
+    display: flex
+    flex-direction: row
+    align-items: center
+    label
+      margin-left: 0.5em
+      margin-top: 0
+      &::after
+        content: ''
 </style>
 
 <template>
@@ -225,25 +244,32 @@
   <section id="sideBar">
     <header class="filterOptions">Filter search</header>
 
-    <Map v-if="allSites && allSites.length > 0"
-      :key="mapKey"
-      :sites="allSites"
-      :selectedSiteIds="selectedSiteIds"
-      :onMapMarkerClick="onMapMarkerClick"
-      :center="[54.00, 14.00]"
-      :zoom="3">
-    </Map>
+    <div :class="{widemap: showAllSites}">
+      <Map v-if="allSites && allSites.length > 0"
+        :key="mapKey"
+        :sites="allSites"
+        :selectedSiteIds="selectedSiteIds"
+        :onMapMarkerClick="onMapMarkerClick"
+        :center="[54.00, 14.00]"
+        :zoom="showAllSites ? 2 : 3">
+      </Map>
+    </div>
 
-      <custom-multiselect
-          label="Location"
-          :selectedIds="selectedSiteIds"
-          :setSelectedIds="setSelectedSiteIds"
-          :options="allSites"
-          id="siteSelect"
-          :icons="false"
-          class="nobottommargin"
-          :devMode="devMode">
-      </custom-multiselect>
+    <custom-multiselect
+        label="Location"
+        :selectedIds="selectedSiteIds"
+        :setSelectedIds="setSelectedSiteIds"
+        :options="allSites"
+        id="siteSelect"
+        :icons="false"
+        class="nobottommargin"
+        :class="{widemapmarginleft: showAllSites}"
+        :devMode="devMode">
+    </custom-multiselect>
+    <div class="checkbox">
+      <input type="checkbox" id="showAllSitesCheckbox" name="showAllSitesCheckbox" v-model="showAllSites">
+      <label for="showAllSitesCheckbox">Show all sites</label>
+    </div>
 
     <span class="filterlabel" v-if="!isVizMode()">Date range</span>
     <div class="quickselectors" v-if="!isVizMode()">
@@ -357,7 +383,7 @@
     <a @click="reset" id="reset">Reset filter</a>
   </section>
 
-  <div class="results" v-bind:class="resultsWidth">
+  <div class="results" v-bind:class="{...resultsWidth, ...{widemapmarginright: showAllSites}}">
     <viz-search-result
       v-if="isVizMode()"
       :apiResponse="apiResponse"
@@ -435,6 +461,7 @@ export default class Search extends Vue {
   // site selector
   allSites: Site[] = []
   selectedSiteIds: string[] = []
+  showAllSites = false
 
   setSelectedSiteIds(siteIds: []) {
     this.selectedSiteIds = siteIds
@@ -547,7 +574,7 @@ export default class Search extends Vue {
   async initView() {
     const payload = { params: { developer: this.devMode.activated || undefined } }
     await Promise.all([
-      axios.get(`${this.apiUrl}sites/`, payload),
+      axios.get(`${this.apiUrl}sites/`, {params: {...payload.params, ...{ type: this.showAllSites ? undefined : 'cloudnet' }}}),
       axios.get(`${this.apiUrl}products/variables`, payload)
     ]).then(([sites, products]) => {
       this.allSites = sites.data.sort(this.alphabeticalSort)
@@ -724,6 +751,12 @@ export default class Search extends Vue {
 
   @Watch('devMode.activated')
   async onDevModeToggled() {
+    await this.initView()
+    this.mapKey = this.mapKey + 1
+  }
+
+  @Watch('showAllSites')
+  async onShowAllSites() {
     await this.initView()
     this.mapKey = this.mapKey + 1
   }
