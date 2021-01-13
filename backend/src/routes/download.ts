@@ -36,7 +36,7 @@ export class DownloadRoutes {
       res.setHeader('Content-Type', 'application/octet-stream')
       res.setHeader('Content-Length', file.size)
       upstreamRes.pipe(res, {end: true})
-      const dl = new Download(ObjectType.Product, file.uuid, req.ip)
+      const dl = new Download(ObjectType.Product, file.uuid, req.header('x-forwarded-for') || '')
       await this.downloadRepo.save(dl)
     } catch (e) {
       next({status: 500, errors: e})
@@ -71,7 +71,7 @@ export class DownloadRoutes {
       appendFile(0)
 
       // Update collection download count
-      const dl = new Download(ObjectType.Product, collection.uuid, req.ip)
+      const dl = new Download(ObjectType.Collection, collection.uuid, req.header('x-forwarded-for') || '')
       this.downloadRepo.save(dl)
     } catch (err) {
       res.sendStatus(500)
