@@ -251,7 +251,8 @@
         :selectedSiteIds="selectedSiteIds"
         :onMapMarkerClick="onMapMarkerClick"
         :center="[54.00, 14.00]"
-        :zoom="showAllSites ? 2 : 3">
+        :zoom="showAllSites ? 2 : 3"
+        :showLegend="showAllSites">
       </Map>
     </div>
 
