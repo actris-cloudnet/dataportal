@@ -60,23 +60,23 @@
     "country": "Italy"
   },
   {
-    "id": "campaign",
-    "humanReadableName": "Campaign",
-    "latitude": 40.6413,
-    "longitude": 15.7913,
+    "id": "newyork",
+    "humanReadableName": "New York",
+    "latitude": 43,
+    "longitude": -75,
     "type": ["campaign"],
     "gaw": "Unknown",
     "altitude": 760,
-    "country": "Italy"
+    "country": "USA"
   },
   {
-    "id": "arm",
-    "humanReadableName": "ARM",
-    "latitude": 40.6413,
-    "longitude": 15.7913,
+    "id": "shanghai",
+    "humanReadableName": "Shanghai",
+    "latitude": 31.267,
+    "longitude": 121.522,
     "type": ["arm"],
     "gaw": "Unknown",
     "altitude": 760,
-    "country": "Italy"
+    "country": "China"
   }
 ]
