@@ -39,9 +39,10 @@ export default class Map extends Vue {
   map: L.Map | null = null
   tileLayer: L.TileLayer | null = null
   allMarkers: { [key: string]: L.Marker } = {}
-  passiveMarker = L.Icon.extend({
+
+  marker = (color: string) => L.Icon.extend({
     options: {
-      iconUrl: getMarkerUrl('blue'),
+      iconUrl: getMarkerUrl(color),
       iconSize: [25, 41],
       iconAnchor: [12, 41],
       popupAnchor: [1, -34],
@@ -50,17 +51,20 @@ export default class Map extends Vue {
       shadowAnchor: [12, 41]
     }
   })
-  activeMarker = L.Icon.extend({
-    options: {
-      iconUrl: getMarkerUrl('green'),
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowUrl: getShadowUrl(),
-      shadowSize: [41, 41],
-      shadowAnchor: [12, 41]
-    }
-  })
+
+  markerColors: { [key: string]: string } = {
+    'cloudnet': 'blue',
+    'other': 'yellow',
+    'arm': 'violet',
+    'campaign': 'orange',
+    'mobile': 'green',
+    'active': 'red'
+  }
+
+  colorForSiteType(types: string[]) {
+    const validType = types.filter(type => this.markerColors[type])[0] || 'other'
+    return this.markerColors[validType]
+  }
 
   initMap() {
     this.map = L.map(this.$refs['mapElement'] as HTMLElement).setView(this.center, this.zoom)
@@ -71,7 +75,7 @@ export default class Map extends Vue {
   initLayers() {
     this.sites.map(site => {
       const mark = marker([site.latitude, site.longitude])
-      mark.setIcon(new this.passiveMarker)
+      mark.setIcon(new (this.marker(this.colorForSiteType(site.type))))
       mark.on('click', (_onClick) => {
         if (this.onMapMarkerClick) this.onMapMarkerClick(site.id)
       })
@@ -86,10 +90,11 @@ export default class Map extends Vue {
     keys.forEach((id: string) => {
       const mark = this.allMarkers[id]
       if (this.selectedSiteIds && this.selectedSiteIds.includes(id)) {
-        mark.setIcon(new this.activeMarker)
+        mark.setIcon(new (this.marker(this.markerColors.active)))
       }
       else {
-        mark.setIcon(new this.passiveMarker)
+        const site = this.sites.filter(site => site.id == id)[0]
+        mark.setIcon(new (this.marker(this.colorForSiteType(site.type))))
       }
     })
   }
