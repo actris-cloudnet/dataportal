@@ -204,7 +204,6 @@ case "$action" in
     cd frontend
     npx vue-cli-service build --mode e2e
     cd ../backend
-    set +e
     npx jest --runInBand tests/selenium
     cd ..
     ;;
