@@ -8,6 +8,7 @@
   "cloudnetpyVersion": "",
   "checksum": "c46e4c7fe4be5b38670b86f3ffc3101c6de8465eabf5c470226c733e69586031",
   "format": "NetCDF3",
+  "model": "ecmwf",
   "site": "granada",
   "size": 123,
   "version": "123"
