@@ -2,16 +2,27 @@
   @import "../sass/variables.sass"
   @import "../sass/global.sass"
 
+  $lightpadding: 1em
+  $heavypadding: 5em
+
   main#search
     position: relative
     display: flex
     justify-content: center
     flex-wrap: wrap
+    padding-left: $lightpadding
+    padding-right: $lightpadding
 
   main#search.narrowView
-    max-width: 68em
-    padding-left: 0
-    padding-right: 0
+    max-width: 70em
+
+  main#search.mediumView
+    max-width: 90em
+
+  main#search.wideView
+    max-width: none
+    padding-left: $heavypadding
+    padding-right: $heavypadding
 
   .betanote
     border-color: #ffeecf
@@ -132,10 +143,7 @@
   .results
     display: inline-flex
     flex-grow: 1
-
-  .resultsViz
-    flex-grow: 1
-    max-width: 1000px
+    min-width: 500px
 
   .widebutton
     width: 100%
@@ -205,14 +213,25 @@
 
   .widemap
     position: absolute
-    max-width: 68em
-    width: 100%
+    left: $lightpadding
+    right: $lightpadding
+
+  .widemap.wideviz
+    left: $heavypadding
+    right: $heavypadding
 
   .widemapmarginleft
     margin-top: calc(306px + #{$filter-margin})
 
   .widemapmarginright
     margin-top: 380px
+
+  @media screen and (max-width: $narrow-screen)
+    .widemap
+      left: 0
+      right: 0
+    .widemapmarginright
+      margin-top: 0
 
   div.checkbox
     position: relative
@@ -229,7 +248,7 @@
 </style>
 
 <template>
-<main v-if="mode === 'visualizations' || mode === 'data'" id="search" v-bind:class="{ narrowView: !isVizMode() }">
+<main v-if="mode === 'visualizations' || mode === 'data'" id="search" v-bind:class="mainWidth">
   <div v-if="displayBetaNotification" class="note betanote">
     This is the beta version of Cloudnet data portal.
     Click <a href="http://devcloudnet.fmi.fi/">here</a> to visit the devcloudnet data portal, or
@@ -242,9 +261,9 @@
   </div>
 
   <section id="sideBar">
-    <header class="filterOptions">Filter search</header>
+    <header class="filterOptions">Search</header>
 
-    <div :class="{widemap: showAllSites}">
+    <div :class="{widemap: showAllSites, wideviz: vizWideMode}">
       <Map v-if="allSites && allSites.length > 0"
         :key="mapKey"
         :sites="allSites"
@@ -385,7 +404,7 @@
     <a @click="reset" id="reset">Reset filter</a>
   </section>
 
-  <div class="results" v-bind:class="{...resultsWidth, ...{widemapmarginright: showAllSites}}">
+  <div class="results" v-bind:class="{widemapmarginright: showAllSites}">
     <viz-search-result
       v-if="isVizMode()"
       :apiResponse="apiResponse"
@@ -539,12 +558,12 @@ export default class Search extends Vue {
     this.vizWideMode = wide
   }
 
-  get resultsWidth() {
+  get mainWidth() {
     if (this.isVizMode()) {
-      if (this.vizWideMode) return {resultsWide: true}
-      else return { resultsViz: true }
+      if (this.vizWideMode) return { wideView: true }
+      else return { mediumView: true}
     }
-    return { resultsNarrow: true }
+    return { narrowView: true }
   }
 
   isTrueOnBothDateFields(errorId: string) {
@@ -591,6 +610,7 @@ export default class Search extends Vue {
             this.dateTo = res.data.date
             this.visualizationDate = new Date(res.data.date)
           })
+          .catch(() => '')
       }
     })
     return this.fetchData()
