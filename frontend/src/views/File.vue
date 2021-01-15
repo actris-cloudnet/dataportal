@@ -271,7 +271,7 @@ main#filelanding
 <script lang="ts">
 import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import axios from 'axios'
-import {getIconUrl, humanReadableDate, humanReadableSize, humanReadableTimestamp, sortVisualizations} from '../lib'
+import {getProductIcon, humanReadableDate, humanReadableSize, humanReadableTimestamp, sortVisualizations} from '../lib'
 import {DevMode} from '../lib/DevMode'
 import {File} from '../../../backend/src/entity/File'
 import {Visualization} from '../../../backend/src/entity/Visualization'
@@ -293,7 +293,7 @@ export default class FileView extends Vue {
   humanReadableSize = humanReadableSize
   humanReadableDate = humanReadableDate
   humanReadableTimestamp = humanReadableTimestamp
-  getIconUrl = getIconUrl
+  getIconUrl = getProductIcon
   sortVisualizations = sortVisualizations
   devMode = new DevMode()
   allVisualizations = false

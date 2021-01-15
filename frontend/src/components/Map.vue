@@ -55,8 +55,32 @@
 <script lang="ts">
 import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import L, {marker} from 'leaflet'
-import {getMarkerUrl, getShadowUrl} from '../lib'
 import {Site} from '../../../backend/src/entity/Site'
+
+
+// static marker functions
+const markerColors: { [key: string]: string } = {
+  'selected': 'red',
+  'cloudnet': 'blue',
+  'arm': 'violet',
+  'campaign': 'orange',
+  'mobile': 'green',
+  'other': 'yellow'
+}
+
+const getShadowIcon = () =>
+  require('../assets/markers/marker-shadow.png')
+
+const markerIconFromColor = (color: string) =>
+  require(`../assets/markers/marker-icon-${color}.png`)
+
+export function getMarkerIcon(site: Site, selected=false) {
+  let validType: string
+  if (selected) validType = 'selected'
+  else validType = site.type.filter(type => markerColors[type])[0] || 'other'
+  return markerIconFromColor(markerColors[validType])
+}
+
 
 @Component
 export default class Map extends Vue {
@@ -73,32 +97,21 @@ export default class Map extends Vue {
   allMarkers: { [key: string]: L.Marker } = {}
   legend = new L.Control({position: 'topright'})
 
-  marker = (color: string) => L.Icon.extend({
+  // markers
+  marker = (site: Site, selected: boolean) => L.Icon.extend({
     options: {
-      iconUrl: getMarkerUrl(color),
+      iconUrl: getMarkerIcon(site, selected),
       iconSize: [25, 41],
       iconAnchor: [12, 41],
       popupAnchor: [1, -34],
-      shadowUrl: getShadowUrl(),
+      shadowUrl: getShadowIcon(),
       shadowSize: [41, 41],
       shadowAnchor: [12, 41]
     }
   })
 
-  markerColors: { [key: string]: string } = {
-    'selected': 'red',
-    'cloudnet': 'blue',
-    'arm': 'violet',
-    'campaign': 'orange',
-    'mobile': 'green',
-    'other': 'yellow'
-  }
 
-  colorForSiteType(types: string[]) {
-    const validType = types.filter(type => this.markerColors[type])[0] || 'other'
-    return this.markerColors[validType]
-  }
-
+  // init
   initMap() {
     this.legend.onAdd = this.generateLegend
     this.map = L.map(this.$refs['mapElement'] as HTMLElement).setView(this.center, this.zoom)
@@ -110,7 +123,7 @@ export default class Map extends Vue {
   initLayers() {
     this.sites.map(site => {
       const mark = marker([site.latitude, site.longitude])
-      mark.setIcon(new (this.marker(this.colorForSiteType(site.type))))
+      mark.setIcon(new (this.marker(site, false)))
       mark.on('click', (_onClick) => {
         if (this.onMapMarkerClick) this.onMapMarkerClick(site.id)
       })
@@ -124,12 +137,12 @@ export default class Map extends Vue {
     const keys = Object.keys(this.allMarkers)
     keys.forEach((id: string) => {
       const mark = this.allMarkers[id]
+      const site = this.sites.filter(site => site.id == id)[0]
       if (this.selectedSiteIds && this.selectedSiteIds.includes(id)) {
-        mark.setIcon(new (this.marker(this.markerColors.selected)))
+        mark.setIcon(new (this.marker(site, true)))
       }
       else {
-        const site = this.sites.filter(site => site.id == id)[0]
-        mark.setIcon(new (this.marker(this.colorForSiteType(site.type))))
+        mark.setIcon(new (this.marker(site, false)))
       }
     })
   }
@@ -138,8 +151,8 @@ export default class Map extends Vue {
     const div = L.DomUtil.create('div', 'legend')
     div.innerHTML = '<h4>Site types</h4>'
     const ul = L.DomUtil.create('ul', 'legendlist')
-    for (const type in this.markerColors) {
-      const li = L.DomUtil.create('li', this.markerColors[type])
+    for (const type in markerColors) {
+      const li = L.DomUtil.create('li', markerColors[type])
       li.innerText = type
       ul.appendChild(li)
     }

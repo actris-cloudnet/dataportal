@@ -73,7 +73,7 @@ import {Site} from '../../../backend/src/entity/Site'
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 import Map from '../components/Map.vue'
 import {ReducedMetadataResponse} from '../../../backend/src/entity/ReducedMetadataResponse'
-import {getIconUrl} from '../lib'
+import {getProductIcon} from '../lib'
 import {DevMode} from '../lib/DevMode'
 
 @Component({
@@ -87,7 +87,7 @@ export default class SiteView extends Vue {
   error = false
   instruments: ReducedMetadataResponse[] | null = null
   instrumentsFromLastDays = 30
-  getIconUrl = getIconUrl
+  getIconUrl = getProductIcon
   devMode = new DevMode()
 
   payload = {developer: this.devMode.activated}

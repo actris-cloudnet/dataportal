@@ -262,9 +262,10 @@
         :setSelectedIds="setSelectedSiteIds"
         :options="allSites"
         id="siteSelect"
-        :icons="false"
         class="nobottommargin"
         :class="{widemapmarginleft: showAllSites}"
+        :icons="true"
+        :getIcon="getMarkerIcon"
         :devMode="devMode">
     </custom-multiselect>
     <div class="checkbox">
@@ -334,15 +335,15 @@
       <div class="dateButtons">
         <button id="previousBtn" class="dateBtn" @click="setPreviousDate()"
         :disabled="setDateButtonActiveStatus('previous')">
-          <img alt="calendar" class="dateIcon" :src="getIconUrl('date-previous')">
+          <img alt="calendar" class="dateIcon" :src="getProductIcon('date-previous')">
         </button>
         <button id="nextBtn" class="dateBtn" @click="setNextDate()"
         :disabled="setDateButtonActiveStatus('next')">
-          <img alt="calendar" class="dateIcon" :src="getIconUrl('date-next')">
+          <img alt="calendar" class="dateIcon" :src="getProductIcon('date-next')">
         </button>
       </div>
       <div v-if="displayKeyInfo" class="keyInfo">
-        <img alt="info" class="infoIcon" :src="getIconUrl('info')">
+        <img alt="info" class="infoIcon" :src="getProductIcon('info')">
         Use arrow keys to change dates
         <span class="closeX" @click="displayKeyInfo = !displayKeyInfo"> &#10005; </span>
       </div>
@@ -363,7 +364,7 @@
       :options="allProducts"
       id="productSelect"
       :icons="true"
-      :getIconUrl="getIconUrl"
+      :getIcon="getProductIcon"
       :devMode="devMode">
     </custom-multiselect>
 
@@ -420,7 +421,7 @@ import {
   dateToString,
   fixedRanges,
   getDateFromBeginningOfYear,
-  getIconUrl,
+  getProductIcon,
   humanReadableSize,
   isSameDay
 } from '../lib'
@@ -430,7 +431,7 @@ import {Visualization} from '../../../backend/src/entity/Visualization'
 import {Product} from '../../../backend/src/entity/Product'
 import {ProductVariable} from '../../../backend/src/entity/ProductVariable'
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
-import Map from '../components/Map.vue'
+import Map, {getMarkerIcon} from '../components/Map.vue'
 
 Vue.component('datepicker', Datepicker)
 Vue.component('custom-multiselect', CustomMultiselect)
@@ -513,7 +514,8 @@ export default class Search extends Vue {
   displayBetaNotification = true
   displayKeyInfo = true
 
-  getIconUrl = getIconUrl
+  getProductIcon = getProductIcon
+  getMarkerIcon = getMarkerIcon
   humanReadableSize = humanReadableSize
   combinedFileSize = combinedFileSize
   dateToString = dateToString
@@ -704,10 +706,6 @@ export default class Search extends Vue {
       if (isDateLatest) return true
     }
     return false
-  }
-
-  setIcon(product: string) {
-    if (product) return {'style': `background-image: url(${getIconUrl(product)})`}
   }
 
   reset() {
