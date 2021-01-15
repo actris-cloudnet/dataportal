@@ -783,6 +783,7 @@ export default class Search extends Vue {
     this.vizDateUpdate = this.vizDateUpdate += 1
     this.dataSearchUpdate = this.dataSearchUpdate += 1
     this.vizSearchUpdate = this.vizSearchUpdate += 1
+    this.mapKey = this.mapKey += 1
     this.fetchData().then(() => this.renderComplete = true)
   }
 }
