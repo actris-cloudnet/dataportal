@@ -21,7 +21,7 @@ async function selectAllSites() {
   await selenium.sendInputToMultiselect('siteSelect', 'mace head')
 }
 
-async function clearkMapSelection(by: By) {
+async function clearMapSelection(by: By) {
   const mapElement = await driver.wait(until.elementLocated(by))
   let actions = driver.actions({bridge: true})
   actions.move({origin: mapElement, x: 68, y: 78})
@@ -211,7 +211,7 @@ describe('search page', () => {
 
   it('selects site from multi-selection while clicking marker', async () => {
     await wait(500)
-    await clearkMapSelection(By.id('mapContainer'))
+    await clearMapSelection(By.id('mapContainer'))
     await wait(500)
     await clickMapMarker(By.id('mapContainer'), -140, -20)
     await wait(500)
@@ -219,8 +219,19 @@ describe('search page', () => {
     expect(content).toContain('Mace Head')
   })
 
+  it('displays clickable markers of additional sites after clicking show all sites checkbox', async () => {
+    await clearMapSelection(By.id('mapContainer'))
+    await selenium.clickId('showAllSitesCheckbox')
+    await wait(500)
+    await clickMapMarker(By.id('mapContainer'), -250, 20)
+    await wait(500)
+    const content = await selenium.getContent()
+    expect(content).toContain('New York')
+    await selenium.clickId('showAllSitesCheckbox')
+  })
+
   it('removes site from multi-selection while clicking marker twice', async () => {
-    await clearkMapSelection(By.id('mapContainer'))
+    await clearMapSelection(By.id('mapContainer'))
     await clickMapMarker(By.id('mapContainer'), -140, -20)
     await clickMapMarker(By.id('mapContainer'), -140, -20)
     const content = await selenium.getContent()
@@ -228,7 +239,7 @@ describe('search page', () => {
   })
 
   it('changes marker color by clicking marker', async () => {
-    await clearkMapSelection(By.id('mapContainer'))
+    await clearMapSelection(By.id('mapContainer'))
     const src1 = getMarkerSrc(By.id('mapContainer'))
     const s1 = (await src1).anchor('src')
     await clickAllMarkers(By.id('mapContainer'))
@@ -238,7 +249,7 @@ describe('search page', () => {
   })
 
   it('changes marker color by doupleclicking marker', async () => {
-    await clearkMapSelection(By.id('mapContainer'))
+    await clearMapSelection(By.id('mapContainer'))
     const src1 = getMarkerSrc(By.id('mapContainer'))
     const s1 = (await src1).anchor('src')
     await clickAllMarkers(By.id('mapContainer'))
@@ -249,7 +260,7 @@ describe('search page', () => {
   })
 
   it('changes marker color by clicking site from multi-selection', async () => {
-    await clearkMapSelection(By.id('mapContainer'))
+    await clearMapSelection(By.id('mapContainer'))
     const src1 = getMarkerSrc(By.id('mapContainer'))
     const s1 = (await src1).anchor('src')
     await selectAllSites()
@@ -259,7 +270,7 @@ describe('search page', () => {
   })
 
   it('changes marker color by removing site from multi-selection', async () => {
-    await clearkMapSelection(By.id('mapContainer'))
+    await clearMapSelection(By.id('mapContainer'))
     const src1 = getMarkerSrc(By.id('mapContainer'))
     const s1 = (await src1).anchor('src')
     await selectAllSites()
