@@ -153,7 +153,7 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
 import axios from 'axios'
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 import {CollectionResponse} from '../../../backend/src/entity/CollectionResponse'
-import {combinedFileSize, constructTitle, getIconUrl, humanReadableSize} from '../lib'
+import {combinedFileSize, constructTitle, getProductIcon, humanReadableSize} from '../lib'
 import {Site} from '../../../backend/src/entity/Site'
 import Map from '../components/Map.vue'
 import {Product} from '../../../backend/src/entity/Product'
@@ -182,7 +182,7 @@ export default class CollectionView extends Vue {
 
   combinedFileSize = combinedFileSize
   humanReadableSize = humanReadableSize
-  getIconUrl = getIconUrl
+  getIconUrl = getProductIcon
 
   get startDate() {
     return this.sortedFiles[this.sortedFiles.length - 1].measurementDate

@@ -1,14 +1,9 @@
 import {Visualization} from '../../../backend/src/entity/Visualization'
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
+import {Product} from '../../../backend/src/entity/Product'
 
-export const getIconUrl = (product: string) =>
-  require(`../assets/icons/${product}.png`)
-
-export const getShadowUrl = () =>
-  require('../assets/markers/marker-shadow.png')
-
-export const getMarkerUrl = (color: string) =>
-  require(`../assets/markers/marker-icon-${color}.png`)
+export const getProductIcon = (product: Product | string) =>
+  require(`../assets/icons/${typeof product == 'string' ? product : product.id}.png`)
 
 export const humanReadableSize = (size: number) => {
   if (size == 0) return '0 B'

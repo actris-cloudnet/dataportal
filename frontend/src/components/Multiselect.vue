@@ -58,14 +58,14 @@
   >
     <template slot="tag" slot-scope="props" v-if="icons">
       <span class="multiselect__tag">
-        <img alt="option" class="option__image" :src="getIconUrl(props.option.id)">
+        <img alt="option" class="option__image" :src="getIcon(props.option)">
         {{ props.option.humanReadableName }}
         <i class="multiselect__tag-icon" @click="props.remove(props.option)"></i>
       </span>
     </template>
     <template slot="option" slot-scope="props" v-if="icons">
       <span>
-        <img alt="option" v-if="icons" class="option__image" :src="getIconUrl(props.option.id)">
+        <img alt="option" v-if="icons" class="option__image" :src="getIcon(props.option)">
         {{ props.option.humanReadableName }}
       </span>
     </template>
@@ -90,7 +90,7 @@ export default class CustomMultiselect extends Vue {
   @Prop() label!: string
   @Prop() options!: Selection[]
   @Prop() icons!: boolean
-  @Prop() getIconUrl!: Function
+  @Prop() getIcon!: Function
   @Prop() devMode!: DevMode
   @Prop() setSelectedIds!: Function | null
   @Prop() selectedIds!: string[]
