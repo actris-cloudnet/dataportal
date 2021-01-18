@@ -3,8 +3,6 @@
 @import "../sass/global.sass"
 
 section#fileTable
-  padding-left: 30px
-  padding-right: 30px
   width: 100%
   text-align: left
 
