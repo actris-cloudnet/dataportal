@@ -30,7 +30,7 @@ export class DownloadRoutes {
   product: RequestHandler = async (req, res, next) => {
     const s3key = req.params[0]
     try {
-      const file = await this.fileRepo.findOne({uuid: req.params.uuid, s3key})
+      const file = await this.fileRepo.findOne({uuid: req.params.uuid, s3key}, {relations: ['site']})
       if (file === undefined) return next({status: 404, errors: ['File not found']})
       const upstreamRes = await this.makeRequest(file)
       res.setHeader('Content-Type', 'application/octet-stream')
@@ -45,7 +45,7 @@ export class DownloadRoutes {
 
   collection: RequestHandler = async (req, res, next) => {
     const collectionUuid: string = req.params.uuid
-    const collection = await this.collectionRepo.findOne(collectionUuid, {relations: ['files']})
+    const collection = await this.collectionRepo.findOne(collectionUuid, {relations: ['files', 'files.site']})
     if (collection === undefined) {
       return next({status: 404, errors: ['No collection matches this UUID.']})
     }

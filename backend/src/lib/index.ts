@@ -81,8 +81,12 @@ export const ssAuthString = () =>
   'Basic ' + // eslint-disable-line prefer-template
   Buffer.from(`${config.storageService.user}:${config.storageService.password}`).toString('base64')
 
+export const addSiteSuffix = (bucket: string, siteid: string) =>
+  `${bucket}-${siteid.replace('-', '')}`
+
 export const getBucketForFile = (file: File) =>
-  file.volatile ? 'cloudnet-product-volatile' : 'cloudnet-product'
+  // file.site is sometimes string, sometimes object
+  addSiteSuffix(file.volatile ? 'cloudnet-product-volatile' : 'cloudnet-product', file.site.id || (file.site as unknown) as string)
 
 export const getS3keyForUpload = (upload: Upload) =>
   `${upload.site.id}/${upload.uuid}/${upload.filename}`

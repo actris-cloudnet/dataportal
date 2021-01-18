@@ -3,6 +3,7 @@ import {Status, Upload} from '../entity/Upload'
 import {Connection, Repository} from 'typeorm'
 import {Request, RequestHandler, Response} from 'express'
 import {
+  addSiteSuffix,
   dateNDaysAgo,
   fetchAll,
   getS3keyForUpload,
@@ -150,7 +151,7 @@ export class UploadRoutes {
       if (!upload) return next({status: 400, errors: 'No metadata matches this hash'})
       if (upload.status != Status.CREATED) return res.sendStatus(200) // Already uploaded
 
-      const {status, body} = await this.makeRequest(getS3keyForUpload(upload), checksum, req)
+      const {status, body} = await this.makeRequest(upload, checksum, req)
 
       await this.uploadedMetadataRepo.update({checksum: checksum},
         {status: Status.UPLOADED, updatedAt: new Date(), size: body.size}
@@ -165,8 +166,11 @@ export class UploadRoutes {
     }
   }
 
-  private async makeRequest(key: string, checksum: string, inputStream: ReadableStream):
+  private async makeRequest(upload: Upload, checksum: string, inputStream: ReadableStream):
     Promise<{status: number, body: any}> {
+
+    const key = getS3keyForUpload(upload)
+    const bucket = addSiteSuffix('cloudnet-upload', upload.site.id)
 
     let headers = {
       'Authorization': ssAuthString(),
@@ -176,7 +180,7 @@ export class UploadRoutes {
     const requestOptions = {
       host: config.storageService.host,
       port: config.storageService.port,
-      path: `/cloudnet-upload/${key}`,
+      path: `/${bucket}/${key}`,
       headers,
       method: 'PUT'
     }

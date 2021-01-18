@@ -88,7 +88,7 @@ const s3key = `something/${basename(filepath)}`
 
 describe('after PUTting metadata to API', () => {
   beforeAll(async () => {
-    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${s3key}`, fs.createReadStream(filepath))
+    await axios.put(`${storageServiceUrl}cloudnet-product-volatile-bucharest/${s3key}`, fs.createReadStream(filepath))
     return axios.put(`${backendPrivateUrl}files/${s3key}`, inputJson)
   })
 
@@ -119,7 +119,7 @@ describe('after PUTting metadata to API', () => {
     beforeAll(async () => {
       const filepath = 'tests/data/20190724_bucharest_classification.nc'
       const s3key = basename(filepath)
-      await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${s3key}`, fs.createReadStream(filepath))
+      await axios.put(`${storageServiceUrl}cloudnet-product-volatile-bucharest/${s3key}`, fs.createReadStream(filepath))
       await axios.put(`${backendPrivateUrl}files/${s3key}`, inputJson2)
       const res =  await axios.post(`${backendPublicUrl}collection/`, {files: [expectedJson.uuid, inputJson2.uuid]})
       collectionUuid = res.data

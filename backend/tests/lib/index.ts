@@ -21,9 +21,10 @@ export async function clearRepo(repo: string) {
 }
 
 export async function putFile(filename: string) {
+  const site = filename.split('_')[1].replace('-', '')
   await Promise.all([
-    axios.put(`${storageServiceUrl}cloudnet-product-volatile/${filename}`, 'content'),
-    axios.put(`${storageServiceUrl}cloudnet-product/${filename}`, 'content')
+    axios.put(`${storageServiceUrl}cloudnet-product-volatile-${site}/${filename}`, 'content'),
+    axios.put(`${storageServiceUrl}cloudnet-product-${site}/${filename}`, 'content')
   ])
   const json = JSON.parse(fs.readFileSync(`tests/data/${filename}.json`, 'utf8'))
   const url = `${backendPrivateUrl}files/${filename}`
@@ -34,8 +35,6 @@ export const wait = async (ms: number) => new Promise((resolve, _) => setTimeout
 
 export const genResponse = (status: any, data: any) => ({response: {status, data}})
 
-export const inboxDir = 'tests/data/inbox'
-export const inboxSubDir = 'tests/data/inbox/inbox'
 export const publicDir = 'tests/data/public'
 export const backendProtectedUrl = 'http://localhost:3001/protected/'
 export const backendPublicUrl = 'http://localhost:3001/api/'
