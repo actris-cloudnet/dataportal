@@ -580,6 +580,7 @@ export default class Search extends Vue {
   }
 
   alphabeticalSort = (a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName
+  discardHiddenSites = (site: Site) => !(site.type as string[]).includes('hidden')
 
   async initView() {
     const payload = { params: { developer: this.devMode.activated || undefined } }
@@ -587,7 +588,9 @@ export default class Search extends Vue {
       axios.get(`${this.apiUrl}sites/`, {params: {...payload.params, ...{ type: this.showAllSites ? undefined : 'cloudnet' }}}),
       axios.get(`${this.apiUrl}products/variables`, payload)
     ]).then(([sites, products]) => {
-      this.allSites = sites.data.sort(this.alphabeticalSort)
+      this.allSites = sites.data
+        .filter(this.discardHiddenSites)
+        .sort(this.alphabeticalSort)
       this.allProducts = products.data.sort(this.alphabeticalSort)
       if (this.isVizMode()) {
         this.selectedSiteIds.push('bucharest')

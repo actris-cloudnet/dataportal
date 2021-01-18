@@ -44,7 +44,7 @@
     "humanReadableName": "Norunda",
     "latitude": 60.086,
     "longitude": 17.479,
-    "type": [],
+    "type": ["hidden"],
     "gaw": "Unknown",
     "altitude": 46,
     "country": "Sweden"
@@ -54,7 +54,7 @@
     "humanReadableName": "Potenza",
     "latitude": 40.6413,
     "longitude": 15.7913,
-    "type": [],
+    "type": ["hidden"],
     "gaw": "Unknown",
     "altitude": 760,
     "country": "Italy"

@@ -7,7 +7,8 @@ export enum SiteType {
     ARM = 'arm',
     CAMPAIGN = 'campaign',
     MOBILE = 'mobile',
-    TEST = 'test'
+    TEST = 'test',
+    HIDDEN = 'hidden'
 }
 
 @Entity()
