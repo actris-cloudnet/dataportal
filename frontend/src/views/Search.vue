@@ -46,10 +46,6 @@
     color: grey
     font-weight: normal
 
-  .filterOptions
-    font-size: 1.2em
-    margin-bottom: $filter-margin
-
   section#sideBar
     margin-right: 80px
     width: 300px
@@ -221,10 +217,10 @@
     right: $heavypadding
 
   .widemapmarginleft
-    margin-top: calc(306px + #{$filter-margin})
+    margin-top: 300px
 
   .widemapmarginright
-    margin-top: 380px
+    margin-top: 310px
 
   @media screen and (max-width: $narrow-screen)
     .widemap
@@ -255,8 +251,6 @@
   </div>
 
   <section id="sideBar">
-    <header class="filterOptions">Search</header>
-
     <div :class="{widemap: showAllSites, wideviz: vizWideMode}">
       <Map v-if="allSites && allSites.length > 0"
         :key="mapKey"
