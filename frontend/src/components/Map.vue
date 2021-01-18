@@ -24,6 +24,9 @@
   line-height: 1.2em
   li
     text-transform: capitalize
+  li.violet
+    /* for arm */
+    text-transform: uppercase
   li:before
     content: '■ '
     font-size: 1.4em
@@ -64,8 +67,7 @@ const markerColors: { [key: string]: string } = {
   'cloudnet': 'blue',
   'arm': 'violet',
   'campaign': 'orange',
-  'mobile': 'green',
-  'other': 'yellow'
+  'other': 'grey'
 }
 
 const getShadowIcon = () =>
