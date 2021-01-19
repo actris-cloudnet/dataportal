@@ -139,7 +139,12 @@
   .results
     display: inline-flex
     flex-grow: 1
-    min-width: 500px
+    min-width: 600px
+    flex-basis: min-content
+
+  @media screen and (max-width: 600px)
+    .results
+      min-width: 0
 
   .widebutton
     width: 100%
