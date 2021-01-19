@@ -125,7 +125,6 @@ export default class Map extends Vue {
   initLayers() {
     this.sites.map(site => {
       const mark = marker([site.latitude, site.longitude])
-      mark.setIcon(new (this.marker(site, false)))
       mark.on('click', (_onClick) => {
         if (this.onMapMarkerClick) this.onMapMarkerClick(site.id)
       })
@@ -135,7 +134,7 @@ export default class Map extends Vue {
     })
   }
 
-  setActiveMarkers() {
+  setMarkerIcons() {
     const keys = Object.keys(this.allMarkers)
     keys.forEach((id: string) => {
       const mark = this.allMarkers[id]
@@ -165,11 +164,12 @@ export default class Map extends Vue {
   mounted() {
     this.initMap()
     this.initLayers()
+    this.setMarkerIcons()
   }
 
   @Watch('selectedSiteIds')
   onSiteSelected() {
-    this.setActiveMarkers()
+    this.setMarkerIcons()
   }
 }
 </script>
