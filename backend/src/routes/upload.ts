@@ -1,6 +1,6 @@
 import {Site} from '../entity/Site'
 import {Status, Upload} from '../entity/Upload'
-import {Connection, Repository} from 'typeorm'
+import {Connection, Not, Repository} from 'typeorm'
 import {Request, RequestHandler, Response} from 'express'
 import {
   dateNDaysAgo,
@@ -57,15 +57,15 @@ export class UploadRoutes {
       if (model == undefined) return next({ status: 422, errors: 'Unknown model'})
     }
 
-    const existingUploadedMetadata = await this.uploadedMetadataRepo.findOne({checksum: body.checksum, status: Status.UPLOADED})
-    if (existingUploadedMetadata != undefined) {
-      next({ status: 409, errors: 'File already uploaded' })
-    }
-
     // Remove existing metadata if its status is created
     const existingCreatedMetadata = await this.uploadedMetadataRepo.findOne({checksum: body.checksum, status: Status.CREATED})
     if (existingCreatedMetadata != undefined) {
       await this.uploadedMetadataRepo.remove(existingCreatedMetadata)
+    }
+
+    const existingUploadedMetadata = await this.uploadedMetadataRepo.findOne({checksum: body.checksum})
+    if (existingUploadedMetadata != undefined) {
+      next({ status: 409, errors: 'File already uploaded' })
     }
 
     const allowUpdate = ('allowUpdate' in body && body.allowUpdate.toString().toLowerCase() === 'true')
