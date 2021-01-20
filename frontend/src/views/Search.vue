@@ -140,7 +140,7 @@
     display: inline-flex
     flex-grow: 1
     min-width: 600px
-    flex-basis: min-content
+    flex-basis: 600px
 
   @media screen and (max-width: 600px)
     .results
