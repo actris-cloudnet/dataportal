@@ -549,6 +549,7 @@ export default class Search extends Vue {
 
   setVizWideMode(wide: boolean) {
     this.vizWideMode = wide
+    this.mapKey = this.mapKey + 1
   }
 
   get mainWidth() {
