@@ -598,8 +598,8 @@ export default class Search extends Vue {
         .sort(this.alphabeticalSort)
       this.allProducts = products.data.sort(this.alphabeticalSort)
       if (this.isVizMode()) {
-        this.selectedSiteIds.push('bucharest')
-        this.selectedProductIds.push('classification')
+        if (this.selectedSiteIds.length == 0) this.selectedSiteIds.push('bucharest')
+        if (this.selectedProductIds.length == 0) this.selectedProductIds.push('classification')
         const payload = { params: { site: this.selectedSiteIds, product: this.selectedProductIds } }
         return axios.get(`${this.apiUrl}latest-visualization-date/`, payload)
           .then(res => {
