@@ -65,7 +65,7 @@ export class UploadRoutes {
 
     const existingUploadedMetadata = await this.uploadedMetadataRepo.findOne({checksum: body.checksum})
     if (existingUploadedMetadata != undefined) {
-      next({ status: 409, errors: 'File already uploaded' })
+      return next({ status: 409, errors: 'File already uploaded' })
     }
 
     const allowUpdate = ('allowUpdate' in body && body.allowUpdate.toString().toLowerCase() === 'true')
@@ -76,7 +76,7 @@ export class UploadRoutes {
         const existingMetadata = await this.uploadedMetadataRepo.findOne({filename: filename, allowUpdate: true})
         if (existingMetadata != undefined) {
           if (!('model' in body) && existingMetadata.updatedAt < dateNDaysAgo(config.allowUpdateLimitDays)) {
-            next({ status: 409, errors: 'File too old to be updated' })
+            return next({ status: 409, errors: 'File too old to be updated' })
           }
           await this.uploadedMetadataRepo.update(existingMetadata.uuid, {
             checksum: body.checksum,
