@@ -63,21 +63,36 @@ curl -u USERNAME:PASSWORD \
 
 ### Expected file types
 
-The API does **not** check types of the submitted files. If you accidentally 
+The API does **not** check the type of the submitted files. If you accidentally 
 submit some incorrect files, or files that we can't process, we still archive 
 those but perhaps do nothing more. Clearly incorrect files might get deleted.
 
 We recommend submitting the following files:
 
-|ID | Description | Files |
-|---|------------|-------|
-|`mira` | METEK MIRA-35 cloud radar | `*.mmclx` (netCDF) files. These can be compressed, e.g., `*.mmclx.gz`.|
-|`rpg-fmcw-94` | RPG FMCW-94 cloud radar | Hourly `*.LV1` and `*.LV0` (binary) files. |
-| `ct25k`, `cl31`, `cl51` | Vaisala ceilometers | Daily `*.DAT` (text) files. |
-| `chm15k`, `chm15x` | Lufft ceilometers | Daily `*.nc` (netCDF) files. |
-| `hatpro` | RPG HATPRO microwave radiometer | At least the daily `*.LWP.NC` (netCDF) files, if available, but other files are fine too. |
-| `halo-doppler-lidar` | Halo Photonics Doppler lidar | ? |
-| `parsivel` | OTT Parsivel2 disdrometer | ? |
+|ID | Description | File types |
+|---|-------------|------------|
+| `mira` | METEK MIRA-35 cloud radar | `*.mmclx` (netCDF) files. These can be compressed, e.g., `*.mmclx.gz`.|
+| `rpg-fmcw-94` | RPG FMCW-94 cloud radar | `*.LV1` and `*.LV0` (binary) files. |
+| `ct25k`, `cl31`, `cl51` | Vaisala ceilometers | `*.DAT` (text) files. File extension may be different depending on collection system.  |
+| `chm15k`, `chm15x` | Lufft ceilometers | `*.nc` (netCDF) files. |
+| `hatpro` | RPG HATPRO microwave radiometer | At least the `*.LWP.NC` (netCDF) files if available, but other files are fine too (brightness temperatures, water vapour, housekeeping). |
+| `copernicus` | Copernicus cloud radar | `*.nc` (netCDF) files. |
+| `galileo` | Galileo cloud radar | `*.nc` (netCDF) files. |
+| `halo-doppler-lidar` | Halo Photonics Doppler lidar | `*.hpl`, `Background*.txt` and `system_parameters*.txt` (text) files. `*.nc` (netCDF) files obtained from `*.hpl` may be accepted too. |
+| `parsivel` | OTT Parsivel2 disdrometer | `*.nc` (netCDF) files produced with parsivel_log_nc_convert_samdconform.py preferred. |
+| `thies-lnm` | Thies LNM disdrometer | `*.txt` (text) files. |
+
+We plan to also accept the following instrument types in the future. Note that the API will not accept these yet. If you have other instruments you would like to include (such as other disdrometers, lidars or ancillary instrumentation), please let us know and we will add them to our to-do list.
+
+|ID | Description | Possible file types|
+|---|-------------|--------------------|
+|`pollyxt` | PollyXT Raman Lidar | `*.nc` (netCDF) files. Which channels? Include water vapour and depolarisation if possible? Other ACTRIS-EARLINET type lidars? |
+|`hsrl` | ARM HSRL | `*.nc` (netCDF) files produced by ARM/Ed Eloranta.|
+|`mpl` | ARM or MPLnet Micropulse Lidar | `*.nc` (netCDF) files produced by ARM or similar. | 
+|`microwave radiometer` | Radiometrics - two-channel or three-channel | `*.nc` (netCDF) files. |
+|`basta` | BASTA cloud radar | `*.nc` (netCDF) files. |
+|`wls100s`, `wls200s`, `wls400s` |Leosphere windcube long-range scanning Doppler lidars | `*.nc` (netCDF) files. |
+
 
 ## Examples
 
