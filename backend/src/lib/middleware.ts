@@ -71,8 +71,8 @@ export class Middleware {
   filesQueryAugmenter: RequestHandler = async (req, _res, next) => {
     const query = req.query as any
     const defaultSite = async () => (await fetchAll<Site>(this.conn, Site))
-      .filter(site => !(req.query.developer === undefined && site.isTestSite))
-      .filter(site => !site.isModelOnlySite)
+      .filter(site => !(req.query.developer === undefined && site.isTestSite)) // Hide test sites
+      .filter(site => req.path.includes('search') ? !site.isHiddenSite : true) // Hide hidden sites from /search
       .map(site => site.id)
     const setLegacy = () => ('showLegacy' in query) ? null : [false] // Don't filter by "legacy" if showLegacy is enabled
     if (!('site' in query)) query.site = await defaultSite()

@@ -15,13 +15,13 @@ beforeAll(async () => {
 
 afterAll(() => conn.close())
 
+const expectedBody404: RequestError = {
+  status: 404,
+  errors: 'Not found'
+}
 
 describe('/api/files', () => {
   const url = `${backendPublicUrl}files/`
-  const expectedBody404: RequestError = {
-    status: 404,
-    errors: 'Not found'
-  }
 
   it('responds with 400 if no query parameters are given', () => {
     const expectedBody: RequestError = {
@@ -274,5 +274,14 @@ describe('/api/search', () => {
     const payload = {params: {dateFrom: new Date('2018-06-09'), dateTo: new Date('2019-09-02'), site: 'macehead', product: 'classification'}}
     const res = await axios.get(url, payload)
     return expect(res.data).toMatchObject(expectedData)
+  })
+
+  it('does not return hidden sites', async () => {
+    let expectedBody: RequestError = {
+      status: 404,
+      errors: [ 'The search yielded zero results' ]
+    }
+    const payload = {params: {date: '2021-01-22'}}
+    return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
 })
