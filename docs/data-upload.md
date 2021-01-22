@@ -69,29 +69,29 @@ those but perhaps do nothing more. Clearly incorrect files might get deleted.
 
 We recommend submitting the following files:
 
-|ID | Description | File types |
-|---|-------------|------------|
-| `mira` | METEK MIRA-35 cloud radar | `*.mmclx` (netCDF) files. These can be compressed, e.g., `*.mmclx.gz`.|
-| `rpg-fmcw-94` | RPG FMCW-94 cloud radar | `*.LV1` and `*.LV0` (binary) files. |
-| `ct25k`, `cl31`, `cl51` | Vaisala ceilometers | `*.DAT` (text) files. File extension may be different depending on collection system.  |
-| `chm15k`, `chm15x` | Lufft ceilometers | `*.nc` (netCDF) files. |
-| `hatpro` | RPG HATPRO microwave radiometer | At least the `*.LWP.NC` (netCDF) files if available, but other files are fine too (brightness temperatures, water vapour, housekeeping). |
-| `copernicus` | Copernicus cloud radar | `*.nc` (netCDF) files. |
-| `galileo` | Galileo cloud radar | `*.nc` (netCDF) files. |
-| `halo-doppler-lidar` | Halo Photonics Doppler lidar | `*.hpl`, `Background*.txt` and `system_parameters*.txt` (text) files. `*.nc` (netCDF) files obtained from `*.hpl` may be accepted too. |
-| `parsivel` | OTT Parsivel2 disdrometer | `*.nc` (netCDF) files produced with parsivel_log_nc_convert_samdconform.py preferred. |
-| `thies-lnm` | Thies LNM disdrometer | `*.txt` (text) files. |
+|ID | Instrument  | File extension / description  | Format |
+|---|-------------|--------------------------|-------------|
+| `mira` | METEK MIRA-35 cloud radar | `*.mmclx` files. These can be compressed, e.g., `*.mmclx.gz`.| netCDF |
+| `rpg-fmcw-94` | RPG FMCW-94 cloud radar | `*.LV1` and `*.LV0` files. | binary |
+| `ct25k`, `cl31`, `cl51` | Vaisala ceilometers | `*.DAT` files. File extension may be different depending on collection system.  | text |
+| `chm15k`, `chm15x` | Lufft ceilometers | `*.nc` files. | netCDF |
+| `hatpro` | RPG HATPRO microwave radiometer | At least the `*.LWP.NC` files if available, but other files are fine too (brightness temperatures, water vapour, housekeeping). | netCDF, binary |
+| `copernicus` | Copernicus cloud radar | `*.nc` files. | netCDF |
+| `galileo` | Galileo cloud radar | `*.nc` files. | netCDF |
+| `halo-doppler-lidar` | Halo Photonics Doppler lidar | `*.hpl`, `Background*.txt` and `system_parameters*.txt` files. `*.nc` files obtained from `*.hpl` may be accepted too. | text, netCDF |
+| `parsivel` | OTT Parsivel2 disdrometer | `*.nc` files produced with `parsivel_log_nc_convert_samdconform.py` preferred. | netCDF |
+| `thies-lnm` | Thies LNM disdrometer | `*.txt` files. | text |
 
 We plan to also accept the following instrument types in the future. Note that the API will not accept these yet. If you have other instruments you would like to include (such as other disdrometers, lidars or ancillary instrumentation), please let us know and we will add them to our to-do list.
 
-|ID | Description | Possible file types|
-|---|-------------|--------------------|
-|`pollyxt` | PollyXT Raman Lidar | `*.nc` (netCDF) files. Which channels? Include water vapour and depolarisation if possible? Other ACTRIS-EARLINET type lidars? |
-|`hsrl` | ARM HSRL | `*.nc` (netCDF) files produced by ARM/Ed Eloranta.|
-|`mpl` | ARM or MPLnet Micropulse Lidar | `*.nc` (netCDF) files produced by ARM or similar. | 
-|`microwave radiometer` | Radiometrics - two-channel or three-channel | `*.nc` (netCDF) files. |
-|`basta` | BASTA cloud radar | `*.nc` (netCDF) files. |
-|`wls100s`, `wls200s`, `wls400s` |Leosphere windcube long-range scanning Doppler lidars | `*.nc` (netCDF) files. |
+|ID | Instrument | Possible file extensions | Format |
+|---|-------------|--------------------|--------------
+|`pollyxt` | PollyXT Raman Lidar | `*.nc` files. Which channels? Include water vapour and depolarisation if possible? Other ACTRIS-EARLINET type lidars? | netCDF |
+|`hsrl` | ARM HSRL | `*.nc` files produced by ARM / Ed Eloranta.| netCDF |
+|`mpl` | ARM or MPLnet Micropulse Lidar | `*.nc` files produced by ARM or similar. | netCDF | 
+|`microwave radiometer` | Radiometrics - two-channel or three-channel | `*.nc` files. | netCDF |
+|`basta` | BASTA cloud radar | `*.nc` files. | netCDF |
+|`wls100s`, `wls200s`, `wls400s` |Leosphere windcube long-range scanning Doppler lidars | `*.nc` files. | netCDF |
 
 
 ## Examples
