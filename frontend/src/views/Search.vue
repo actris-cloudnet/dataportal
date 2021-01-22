@@ -616,7 +616,7 @@ export default class Search extends Vue {
   get payload() {
     return {
       params: {
-        site: this.selectedSiteIds,
+        site: this.selectedSiteIds.length ? this.selectedSiteIds : this.allSites.map(site => site.id),
         dateFrom: this.isVizMode() ? this.dateTo : this.dateFrom,
         dateTo: this.dateTo,
         product: this.selectedProductIds,
