@@ -48,7 +48,7 @@ export class Site {
       return this.type.includes(SiteType.TEST)
     }
 
-    get isModelOnlySite() {
-      return this.type.length == 0
+    get isHiddenSite() {
+      return this.type.includes(SiteType.HIDDEN)
     }
 }

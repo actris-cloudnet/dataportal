@@ -80,5 +80,14 @@
       "product": "model",
       "size": 500452,
       "site": "bucharest"
+    },
+    {
+      "uuid": "88092c00-161d-4ca2-a29d-628cf8e960f6",
+      "volatile": true,
+      "legacy": false,
+      "measurementDate": "2021-01-22",
+      "product": "model",
+      "size": 12200657,
+      "site": "potenza"
     }
 ]
