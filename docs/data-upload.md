@@ -61,6 +61,24 @@ curl -u USERNAME:PASSWORD \
   https://cloudnet.fmi.fi/upload/data/e07910a06a086c83ba41827aa00b26ed
 ```
 
+### Expected file types
+
+The API does **not** check types of the submitted files. If you accidentally 
+submit some incorrect files, or files that we can't process, we still archive 
+those but perhaps do nothing more. Clearly incorrect files might get deleted.
+
+We recommend submitting the following files:
+
+|ID | Description | Files |
+|---|------------|-------|
+|`mira` | METEK MIRA-35 cloud radar | `*.mmclx` (netCDF) files. These can be compressed, e.g., `*.mmclx.gz`.|
+|`rpg-fmcw-94` | RPG FMCW-94 cloud radar | Hourly `*.LV1` and `*.LV0` (binary) files. |
+| `ct25k`, `cl31`, `cl51` | Vaisala ceilometers | Daily `*.DAT` (text) files. |
+| `chm15k`, `chm15x` | Lufft ceilometers | Daily `*.nc` (netCDF) files. |
+| `hatpro` | RPG HATPRO microwave radiometer | At least the daily `*.LWP.NC` (netCDF) files, if available, but other files are fine too. |
+| `halo-doppler-lidar` | Halo Photonics Doppler lidar | ? |
+| `parsivel` | OTT Parsivel2 disdrometer | ? |
+
 ## Examples
 
 Here are some examples for submitting a `chmk15k` file named `file1.nc` from the current working directory.
