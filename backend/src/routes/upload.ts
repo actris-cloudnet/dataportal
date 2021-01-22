@@ -1,6 +1,6 @@
 import {Site} from '../entity/Site'
 import {Status, Upload} from '../entity/Upload'
-import {Connection, Not, Repository} from 'typeorm'
+import {Connection, Repository} from 'typeorm'
 import {Request, RequestHandler, Response} from 'express'
 import {
   dateNDaysAgo,
