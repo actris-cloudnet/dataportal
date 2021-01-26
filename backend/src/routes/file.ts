@@ -209,6 +209,7 @@ export class FileRoutes {
     // Ordering
     qb.orderBy('file.measurementDate', 'DESC')
       .addOrderBy('model.optimumOrder', 'ASC')
+      .addOrderBy('file.legacy', 'ASC')
       .addOrderBy('file.updatedAt', 'DESC')
 
     // Limit
