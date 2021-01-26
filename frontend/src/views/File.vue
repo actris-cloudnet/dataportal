@@ -360,7 +360,8 @@ export default class FileView extends Vue {
       params: {
         developer: this.devMode.activated || undefined,
         filename: file.filename,
-        allVersions: true
+        allVersions: true,
+        showLegacy: true
       }
     }
     return axios
