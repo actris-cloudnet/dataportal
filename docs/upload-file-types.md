@@ -1,12 +1,12 @@
 
-## Data submission file types
+## Data upload file types
 
-The data submission API does **not** check the type of the submitted files. 
-If you accidentally submit some incorrect files, or files that we can't process, 
+The Cloudnet data submission API does **not** check the type or content of the uploaded files. 
+If you accidentally upload some incorrect files, or files that we can't process, 
 we still archive those but perhaps do nothing more. Clearly incorrect files might 
 get deleted.
 
-We recommend submitting the following files:
+We recommend uploading the following files:
 
 |ID | Instrument  | File extension / description  | Format |
 |---|-------------|--------------------------|-------------|
@@ -21,7 +21,9 @@ We recommend submitting the following files:
 | `parsivel` | OTT Parsivel2 disdrometer | `*.nc` files produced with `parsivel_log_nc_convert_samdconform.py` preferred. | netCDF |
 | `thies-lnm` | Thies LNM disdrometer | `*.txt` files. | text |
 
-We plan to also accept the following instrument types in the future. Note that the API will not accept these yet. If you have other instruments you would like to include (such as other disdrometers, lidars or ancillary instrumentation), please let us know and we will add them to our to-do list.
+We plan to also accept the following instrument types in the future. Note that the API will not accept these yet. 
+If you have other instruments you would like to include (such as other disdrometers, lidars or ancillary instrumentation), please 
+let us know and we will add them to our to-do list.
 
 |ID | Instrument | Possible file extensions | Format |
 |---|-------------|--------------------|--------------
