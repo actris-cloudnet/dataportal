@@ -1,11 +1,12 @@
-# Data upload API v2 reference
+# Data submission API v2 reference
 
-This is the documentation for the HTTP API allowing sites to upload data files for processing and
-publication in the Cloudnet data portal. This documentation is for API v2.
+This is the documentation for the HTTP API allowing sites to submit data files for archiving, 
+processing and publication in the Cloudnet data portal. This documentation is for API v2.
 
-## Uploading files
+## Submitting files
 
-File upload has two stages: metadata and data upload. Metadata of the file must be uploaded before uploading the file itself. You can find sample scripts in [examples](#examples).
+File submission has two stages: metadata and data upload. Metadata of the file must be uploaded 
+before uploading the file itself. You can find sample scripts in [examples](#examples).
 
 ### Metadata upload
 
@@ -14,16 +15,20 @@ The route accepts `application/json` type data, and requires HTTP Basic authenti
 The JSON request should have the following fields:
 
 - `measurementDate`: UTC date in `YYYY-MM-DD` format of the first data point in the file.
-- `instrument`: Instrument name. Must be one of the ids listed in [https://cloudnet.fmi.fi/api/instruments/](https://cloudnet.fmi.fi/api/instruments/).
+- `instrument`: Instrument name. Must be one of the ids listed in [https://cloudnet.fmi.fi/api/instruments/](https://cloudnet.fmi.fi/api/instruments/). 
+  See also [expected file types](upload-file-types.md).
 - `filename`: Name of the file.
-- `checksum`: An MD5 sum of the file being sent. Used for identifying the file and verifying its integrity. Can be computed by using for instance the `md5sum` UNIX program.
+- `checksum`: An MD5 sum of the file being sent. Used for identifying the file and verifying its integrity. 
+  Can be computed by using for instance the `md5sum` UNIX program.
 
-I addition to the mandatory fields above, there is one optional field:
+In addition to the mandatory fields above, there is one optional field:
 
-- `allowUpdate`: Setting this to `true` indicates that the same file is going to be sent multiple times. Used in the real-time 
-data transfer with instruments that append data to a single daily file instead of providing multiple static files per day. New submission must happen within two days after the initial submission and the flag should be `true` also in the subsequent submissions. 
+- `allowUpdate`: Setting this to `true` indicates that the same filename is going to be sent multiple times. Used in the real-time 
+data transfer with instruments that append data to a single daily file instead of providing multiple static files per day. 
+  New submission must happen within two days after the initial submission, 
+  and the flag should be `true` also in the subsequent submissions. 
 Default is `false`, when a new version of the file is saved regardless of filename.
-**Do not set this flag if your file is complete and you only submit it once!**
+**Do not set this flag if your file is complete, and you only submit it once!**
 
 Example JSON for uploading a file named `201030_020000_P06_ZEN.LV1`:
 
@@ -44,12 +49,14 @@ curl -u USERNAME:PASSWORD \
   -d '{"measurementDate":"2020-10-30","instrument":"rpg-fmcw-94","filename":"201030_020000_P06_ZEN.LV1","checksum":"e07910a06a086c83ba41827aa00b26ed"}' \
   https://cloudnet.fmi.fi/upload/metadata/
 ```
-Replace `USERNAME` and `PASSWORD` with your station's credentials. You can acquire the credentials by contacting the CLU team at actris-cloudnet-feedback@fmi.fi.
+Replace `USERNAME` and `PASSWORD` with your station's credentials. You can acquire the credentials 
+by contacting the CLU team at actris-cloudnet-feedback@fmi.fi.
   
 ### Data upload
 
-After uploading the metadata, the file itself is uploaded by sending a `PUT` request to `https://cloudnet.fmi.fi/upload/data/<md5>`, where `<md5>` is replaced by the file's MD5 checksum.
-The body of the request should be the file contents. Use the `Transfer-Encoding: chunked` HTTP header when uploading files.
+After uploading the metadata, the file itself is uploaded by sending a `PUT` request to `https://cloudnet.fmi.fi/upload/data/<md5>`, 
+where `<md5>` is replaced by the file's MD5 checksum. The body of the request should be the file contents. 
+Use the `Transfer-Encoding: chunked` HTTP header when uploading files.
 
 Example using `curl`:
 
@@ -153,7 +160,7 @@ Each response is accompanied by a message elaborating the cause of the status co
 - `200 OK`: Metadata creation was successful.
 - `400 Bad Request`: There was a problem in handling the request. Check request headers and content type.
 - `401 Unauthorized`: Problem in authentication. Check credentials.
-- `409 Conflict`: Metadata for this file already exists and the file has been received. Do not attempt file submission.
+- `409 Conflict`: Metadata for this file already exists, and the file has been received. Do not attempt file submission.
 - `422 Unprocessable Entity`: Problem in handling metadata body. Check that the metadata JSON is correct.
 
 ### Data
