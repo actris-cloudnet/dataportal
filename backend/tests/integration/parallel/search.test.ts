@@ -138,6 +138,15 @@ describe('/api/files', () => {
     expect(new Date(res.data[1].updatedAt).getTime()).toBeGreaterThan(new Date(res.data[2].updatedAt).getTime())
   })
 
+  it('returns all versions of a file sorted by updatedAt, with legacy files listed last', async () => {
+    const res = await axios.get(url, { params: { site: 'bucharest', product: 'categorize', date: '2021-01-26', allVersions: '', showLegacy: '' }})
+    expect(res.data).toHaveLength(4)
+    expect(res.data[2].legacy).toBeTruthy()
+    expect(res.data[3].legacy).toBeTruthy()
+    expect(new Date(res.data[0].updatedAt).getTime()).toBeGreaterThan(new Date(res.data[1].updatedAt).getTime())
+    expect(new Date(res.data[2].updatedAt).getTime()).toBeGreaterThan(new Date(res.data[3].updatedAt).getTime())
+  })
+
   it('returns the latest file when limit=1', async () => {
     const res = await axios.get(url, { params: { site: 'bucharest', limit: '1' }})
     expect(res.data).toHaveLength(1)

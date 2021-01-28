@@ -13,6 +13,7 @@ import {
 import {augmentFiles} from '../lib/'
 import {SearchFile} from '../entity/SearchFile'
 import {Model} from '../entity/Model'
+import {basename} from 'path'
 
 export class FileRoutes {
 
@@ -95,7 +96,10 @@ export class FileRoutes {
     }
 
     try {
-      const existingFile = await this.fileRepo.findOne({s3key: file.s3key}, { relations: ['site']})
+      const existingFile = await this.fileRepo.createQueryBuilder('file')
+        .leftJoinAndSelect('file.site', 'site')
+        .where("regexp_replace(s3key, '.+/', '') = :filename", {filename: basename(file.s3key)}) // eslint-disable-line quotes
+        .getOne()
       const searchFile = new SearchFile(file)
       if (existingFile == undefined) { // New file
         file.createdAt = file.updatedAt
@@ -119,8 +123,10 @@ export class FileRoutes {
         await this.conn.transaction(async transactionalEntityManager => {
           file.createdAt = file.updatedAt
           await transactionalEntityManager.insert(File, file)
-          await transactionalEntityManager.delete(SearchFile, {uuid: existingFile.uuid})
-          await transactionalEntityManager.insert(SearchFile, searchFile)
+          if (!file.legacy) { // Don't display legacy files in search if cloudnet version is available
+            await transactionalEntityManager.delete(SearchFile, {uuid: existingFile.uuid})
+            await transactionalEntityManager.insert(SearchFile, searchFile)
+          }
         })
         res.sendStatus(200)
       } else {
@@ -209,6 +215,7 @@ export class FileRoutes {
     // Ordering
     qb.orderBy('file.measurementDate', 'DESC')
       .addOrderBy('model.optimumOrder', 'ASC')
+      .addOrderBy('file.legacy', 'ASC')
       .addOrderBy('file.updatedAt', 'DESC')
 
     // Limit

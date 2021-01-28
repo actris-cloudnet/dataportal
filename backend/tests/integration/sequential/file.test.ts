@@ -21,7 +21,8 @@ beforeAll(async () => {
   vizRepo = conn.getRepository('visualization')
   return Promise.all([
     axios.put(`${storageServiceUrl}cloudnet-product-volatile/${volatileFile.s3key}`, 'content'),
-    axios.put(`${storageServiceUrl}cloudnet-product/${stableFile.s3key}`, 'content')
+    axios.put(`${storageServiceUrl}cloudnet-product/${stableFile.s3key}`, 'content'),
+    axios.put(`${storageServiceUrl}cloudnet-product/legacy/${stableFile.s3key}`, 'content')
   ])
 })
 
@@ -81,6 +82,30 @@ describe('PUT /files/:s3key', () => {
     await expect(putFile(tmpfile)).resolves.toMatchObject({status: 201})
     await expect(fileRepo.findOneOrFail(volatileFile.uuid)).resolves.toMatchObject({legacy: true})
     return expect(searchFileRepo.findOneOrFail(volatileFile.uuid)).resolves.toMatchObject({legacy: true})
+  })
+
+  test('inserting a normal file and a legacy file', async () => {
+    await expect(putFile(stableFile)).resolves.toMatchObject({status: 201})
+    const tmpfile = {...stableFile}
+    tmpfile.legacy = true
+    tmpfile.uuid = '87EB042E-B247-4AC1-BC03-074DD0D74BDB'
+    tmpfile.s3key = `legacy/${stableFile.s3key}`
+    tmpfile.checksum = '610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678'
+    await expect(putFile(tmpfile)).resolves.toMatchObject({status: 200})
+    await expect(searchFileRepo.findOneOrFail(stableFile.uuid)).resolves.toMatchObject({legacy: false})
+    return expect(searchFileRepo.findOneOrFail(tmpfile.uuid)).rejects.toBeTruthy()
+  })
+
+  test('inserting a legacy file and a normal file', async () => {
+    const tmpfile = {...stableFile}
+    tmpfile.legacy = true
+    tmpfile.uuid = '87EB042E-B247-4AC1-BC03-074DD0D74BDB'
+    tmpfile.s3key = `legacy/${stableFile.s3key}`
+    tmpfile.checksum = '610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678'
+    await expect(putFile(tmpfile)).resolves.toMatchObject({status: 201})
+    await expect(putFile(stableFile)).resolves.toMatchObject({status: 200})
+    await expect(searchFileRepo.findOneOrFail(stableFile.uuid)).resolves.toMatchObject({legacy: false})
+    return expect(searchFileRepo.findOneOrFail(tmpfile.uuid)).rejects.toBeTruthy()
   })
 
   test('inserting two model files', async () => {
