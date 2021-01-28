@@ -96,7 +96,10 @@ export class FileRoutes {
     }
 
     try {
-      const existingFile = await this.fileRepo.findOne({s3key: basename(file.s3key)}, { relations: ['site']})
+      const existingFile = await this.fileRepo.createQueryBuilder('file')
+        .leftJoinAndSelect('file.site', 'site')
+        .where("regexp_replace(s3key, '.+/', '') = :filename", {filename: basename(file.s3key)}) // eslint-disable-line quotes
+        .getOne()
       const searchFile = new SearchFile(file)
       if (existingFile == undefined) { // New file
         file.createdAt = file.updatedAt
