@@ -56,9 +56,13 @@ case "$action" in
     echo "Starting backend..."
     cd backend
     target=$pid_dir/.node.pid
-    if [[ ! -f $target ]]; then
-        eval "nohup npx nodemon -w build >> $pid_dir/all.log 2>&1 &"
-        echo $! > $target
+    if $CI; then
+      node build/server.js > $pid_dir/all.log 2>&1 &
+    else
+      if [[ ! -f $target ]]; then
+          npx nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'npx ts-node --pretty' src/server.ts > $pid_dir/all.log 2>&1 &
+          echo $! > $target
+      fi
     fi
     echo
     cd ..
@@ -71,8 +75,11 @@ case "$action" in
         waitport $frontend_port
     fi
 
-    waitport $backend_port
-    exit $?
+    waitport $backend_port || (tail -n100 backend/$pid_dir/all.log && false)
+    if $CI; then
+      exit 0
+    fi
+    tail -fn100 backend/$pid_dir/all.log
     ;;
 
     stop)
