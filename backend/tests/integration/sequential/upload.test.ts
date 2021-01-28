@@ -90,8 +90,7 @@ describe('POST /upload/metadata', () => {
   })
 
   test('updates model file submitted with allowUpdate flag regardless of time', async () => {
-    const payload = {...validMetadata, allowUpdate: true, model: 'ecmwf'}
-    delete payload.instrument
+    const payload = {...validMetadata, ...{instrument: undefined, allowUpdate: true, model: 'ecmwf'}}
     await expect(axios.post(modelMetadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
     const md = await repo.findOne({checksum: payload.checksum})
     await repo.update(md.uuid, {updatedAt: '2020-11-07'})
@@ -146,14 +145,12 @@ describe('POST /upload/metadata', () => {
   })
 
   test('responds with 422 on missing filename', async () => {
-    const payload = {...validMetadata}
-    delete payload.filename
+    const payload = {...validMetadata, ...{filename: undefined}}
     return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
   })
 
   test('responds with 422 on missing measurementDate', async () => {
-    const payload = {...validMetadata}
-    delete payload.measurementDate
+    const payload = {...validMetadata, ...{measurementDate: undefined}}
     return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
   })
 
@@ -164,8 +161,7 @@ describe('POST /upload/metadata', () => {
   })
 
   test('responds with 422 on missing checksum', async () => {
-    const payload = {...validMetadata}
-    delete payload.measurementDate
+    const payload = {...validMetadata, ...{checksum: undefined}}
     return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
   })
 
@@ -176,8 +172,7 @@ describe('POST /upload/metadata', () => {
   })
 
   test('responds with 422 on missing instrument', async () => {
-    const payload = {...validMetadata}
-    delete payload.instrument
+    const payload = {...validMetadata, ...{instrument: undefined}}
     return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
   })
 
@@ -188,8 +183,7 @@ describe('POST /upload/metadata', () => {
   })
 
   test('responds with 400 on missing site', async () => {
-    let payload = {...validMetadata}
-    delete payload.site
+    let payload = {...validMetadata, ...{site: undefined}}
     return expect(axios.post(metadataUrl, payload)).rejects.toMatchObject({ response: { status: 400}})
   })
 
@@ -283,8 +277,7 @@ describe('POST /model-upload/metadata', () => {
   })
 
   test('responds with 422 on missing model', async () => {
-    const payload = {...validModelMetadata}
-    delete payload.model
+    const payload = {...validModelMetadata, ...{model: undefined}}
     return expect(axios.post(modelMetadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
   })
 
@@ -301,8 +294,7 @@ describe('POST /model-upload/metadata', () => {
   })
 
   test('responds with 422 on missing site', async () => {
-    let payload = {...validModelMetadata}
-    delete payload.site
+    let payload = {...validModelMetadata, ...{site: undefined}}
     return expect(axios.post(modelMetadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
   })
 

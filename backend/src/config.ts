@@ -66,6 +66,11 @@ const devConfig = {
   }
 }
 
+const ciConfig = {
+  ...testConfig,
+  ...{ connectionName: 'ci-test' }
+}
+
 let config: Config
 
 switch (process.env.NODE_ENV) {
@@ -77,7 +82,7 @@ case 'production':
   }
   break
 case 'test':
-  config = testConfig
+  config = (process.env.CI) ? ciConfig : testConfig
   break
 default:
   config = devConfig
