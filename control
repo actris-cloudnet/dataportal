@@ -215,6 +215,24 @@ case "$action" in
     cd ..
     ;;
 
+    fetch-and-start)
+    ./control fetch-remote-db
+    ./control start
+    ;;
+
+    fetch-remote-db)
+    echo "Fetching remote db..."
+    dropdb dataportal 2> /dev/null || true
+    createdb dataportal
+    ssh -C dataport@altocumulus.fmi.fi "pg_dump dataportal" | psql dataportal
+    ;;
+
+    reset-db)
+    dropdb dataportal || true
+    createdb dataportal
+    npx ts-node ./node_modules/.bin/typeorm schema:sync
+    ;;
+
     *)
     echo "Unknown action $action"
     exit 1
