@@ -215,6 +215,28 @@ case "$action" in
     cd ..
     ;;
 
+    fetch-and-start)
+    ./control fetch-remote-db
+    ./control start
+    ;;
+
+    fetch-remote-db)
+    if [ -z "$DATAPORTAL_SSH" ]; then
+      echo "Environment variable DATAPORTAL_SSH must be set, i.e user@host"
+      exit 1
+    fi
+    echo "Fetching remote db..."
+    dropdb dataportal 2> /dev/null || true
+    createdb dataportal
+    ssh -C "$DATAPORTAL_SSH" "pg_dump dataportal" | tee remote-db.tmp.sql | psql dataportal
+    ;;
+
+    reset-db)
+    dropdb dataportal || true
+    createdb dataportal
+    npx ts-node ./node_modules/.bin/typeorm schema:sync
+    ;;
+
     *)
     echo "Unknown action $action"
     exit 1
