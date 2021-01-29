@@ -13,7 +13,7 @@ We recommend uploading the following files:
 | `mira` | METEK MIRA-35 cloud radar | `*.mmclx` files. These can be compressed, e.g., `*.mmclx.gz`.| netCDF |
 | `rpg-fmcw-94` | RPG FMCW-94 cloud radar | `*.LV1` and compressed `*.LV0` files. | binary |
 | `ct25k`, `cl31`, `cl51` | Vaisala ceilometers | `*.DAT` files. File extension may be different depending on collection system.  | text |
-| `chm15k`, `chm15x` | Lufft ceilometers | `*.nc` files. | netCDF |
+| `chm15k`, `chm15x` | Lufft ceilometers | `*.nc` files. Either non-concatenated or concatenated files but not both. | netCDF |
 | `hatpro` | RPG HATPRO microwave radiometer | At least the `*.LWP.NC` files if available, but other files are fine too (brightness temperatures, water vapour, housekeeping). | netCDF, binary |
 | `copernicus` | Copernicus cloud radar | `*.nc` files. | netCDF |
 | `galileo` | Galileo cloud radar | `*.nc` files. | netCDF |
