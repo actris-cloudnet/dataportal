@@ -107,7 +107,9 @@ case "$action" in
     ;;
 
     test-start)
-    export NODE_ENV='test'
+    if ! is_ci; then
+      export NODE_ENV='test'
+    fi
     node backend/tests/lib/storage-service-mock.js >> backend/tests/all.log 2>&1 &
     waitport 5920
     ./control start
