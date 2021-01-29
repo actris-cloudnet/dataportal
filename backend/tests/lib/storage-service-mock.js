@@ -8,10 +8,10 @@ app.put('/*', (req, res, _next) =>{
   serverMemory[path] = new Buffer(0)
   req.on('data', chunk => {
     const chunkStr = chunk.toString()
-    if (chunkStr === 'content') return res.status(201).send({size: chunk.length})
     if (chunkStr === 'invalidhash') return res.status(400).send('Checksum does not match file contents')
     if (chunkStr === 'servererr') return res.sendStatus(400)
     serverMemory[path] = Buffer.concat([serverMemory[path], chunk])
+    if (chunkStr === 'content') return res.status(201).send({size: chunk.length})
   })
   req.on('error', console.error)
   req.on('end', () => res.headersSent || res.sendStatus(201))

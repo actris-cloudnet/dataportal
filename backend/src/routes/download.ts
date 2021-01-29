@@ -32,7 +32,7 @@ export class DownloadRoutes {
     try {
       const file = await this.fileRepo.findOne({uuid: req.params.uuid, s3key})
       if (file === undefined) return next({status: 404, errors: ['File not found']})
-      const upstreamRes = await this.makeRequest(file)
+      const upstreamRes = await this.makeFileRequest(file)
       res.setHeader('Content-Type', 'application/octet-stream')
       res.setHeader('Content-Length', file.size)
       upstreamRes.pipe(res, {end: true})
@@ -63,7 +63,7 @@ export class DownloadRoutes {
       let i = 1
       const appendFile = async (idx: number) => {
         const file = collection.files[idx]
-        const fileStream = await this.makeRequest(file)
+        const fileStream = await this.makeFileRequest(file)
         archive.append(fileStream, { name: file.filename })
         if (idx == (collection.files.length - 1)) archive.finalize()
       }
@@ -79,9 +79,28 @@ export class DownloadRoutes {
     }
   }
 
+  image: RequestHandler = async (req, res, next) => {
+    const s3key = req.params[0]
+    try {
+      const upstreamRes = await this.makeRequest('cloudnet-img', s3key)
+      if (upstreamRes.statusCode != 200) {
+        res.status(upstreamRes.statusCode || 500)
+        res.setHeader('Content-Type', 'text/plain')
+      } else {
+        res.setHeader('Content-Type', 'image/png')
+      }
+      upstreamRes.pipe(res, {end: true})
+    } catch (e) {
+      next({status: 500, errors: e})
+    }
+  }
 
-  private async makeRequest(file: File): Promise<IncomingMessage> {
+  private makeFileRequest(file: File): Promise<IncomingMessage> {
     const bucket = getBucketForFile(file)
+    return this.makeRequest(bucket, file.s3key)
+  }
+
+  private async makeRequest(bucket: string, s3key: string): Promise<IncomingMessage> {
     let headers = {
       'Authorization': ssAuthString()
     }
@@ -89,7 +108,7 @@ export class DownloadRoutes {
     const requestOptions = {
       host: config.storageService.host,
       port: config.storageService.port,
-      path: `/${bucket}/${file.s3key}`,
+      path: `/${bucket}/${s3key}`,
       headers,
       method: 'GET'
     }
