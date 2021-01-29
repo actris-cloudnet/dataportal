@@ -28,4 +28,4 @@ app.delete('/', (req, res, _next) =>{
   res.sendStatus(200)
 })
 
-app.listen(5910, () => console.log('Storage service mock running'))
+app.listen(5920, () => console.log('Storage service mock running'))

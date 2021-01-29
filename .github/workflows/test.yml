@@ -14,7 +14,7 @@ jobs:
         python-version: [3.6]
 
     env:
-      NODE_ENV: 'test' 
+      NODE_ENV: 'ci-test'
       CI: true
     steps:
     - name: Install Ubuntu dependencies

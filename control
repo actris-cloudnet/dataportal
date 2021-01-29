@@ -22,6 +22,10 @@ is_production () {
     [ "$NODE_ENV" '==' 'production' ]
 }
 
+is_ci () {
+    [ "$NODE_ENV" '==' 'ci-test' ]
+}
+
 waitport () {
     timeout=15
     interval=0.5
@@ -56,7 +60,7 @@ case "$action" in
     echo "Starting backend..."
     cd backend
     target=$pid_dir/.node.pid
-    if $CI; then
+    if is_ci; then
       node build/server.js > $pid_dir/all.log 2>&1 &
     else
       if [[ ! -f $target ]]; then
@@ -76,7 +80,7 @@ case "$action" in
     fi
 
     waitport $backend_port || (tail -n100 backend/$pid_dir/all.log && false)
-    if $CI; then
+    if is_ci; then
       exit 0
     fi
     tail -fn100 backend/$pid_dir/all.log
@@ -105,8 +109,8 @@ case "$action" in
     test-start)
     export NODE_ENV='test'
     node backend/tests/lib/storage-service-mock.js >> backend/tests/all.log 2>&1 &
+    waitport 5920
     ./control start
-    waitport 5910
     unset NODE_ENV
     ;;
 
@@ -114,7 +118,7 @@ case "$action" in
     set +e
     export NODE_ENV='test'
     ./control stop
-    kill $(lsof -t -i:5910)
+    kill $(lsof -t -i:5920)
     unset NODE_ENV
     ;;
 
