@@ -110,6 +110,7 @@ import {DownloadRoutes} from './routes/download'
   app.post('/api/generate-pid', express.json(), collRoutes.generatePid)
   app.get('/api/download/product/:uuid/*', middleware.validateUuidParam, dlRoutes.product)
   app.get('/api/download/collection/:uuid', middleware.validateUuidParam, dlRoutes.collection)
+  app.get('/api/download/image/*', dlRoutes.image)
 
   // protected (for sites)
   app.post('/upload/metadata',
