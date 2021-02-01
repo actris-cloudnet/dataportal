@@ -113,6 +113,12 @@ This is a disambiguation of the `./control` commands at your disposal.
 |`purge` | remove all built files, node modules, and drop databases. A reinstall is required after issuing this command. |
 |`ci` | install the project in a continuous integration environment. |
 |`selenium-test`| build the project and run selenium tests. |
+|`reset-db`| drop development database and instantiate it again. |
+
+For CLU internal use:
+
+|`fetch-remote-db` | retrieve remote database to development environment. |
+|`fetch-and-start` | retrieve remote database and start. |
 
 ### License
 MIT
