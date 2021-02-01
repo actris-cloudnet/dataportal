@@ -58,7 +58,7 @@ By default, there is no data in the portal's database. The following command wil
 database with test fixtures:
 
     cd backend
-    node build/fixtures.js default fixtures
+    npx ts-node -T src/fixtures.js default fixtures
 
 Note: the project will have to be built prior to running this command.
 
