@@ -1,4 +1,4 @@
-import {backendPrivateUrl, storageServiceUrl} from '../../lib'
+import {backendPrivateUrl, backendPublicUrl, storageServiceUrl} from '../../lib'
 import axios from 'axios'
 import {Connection, createConnection, Repository} from 'typeorm'
 import {Visualization} from '../../../src/entity/Visualization'
@@ -19,6 +19,7 @@ let conn: Connection
 let repo: Repository<Visualization>
 
 const privUrl = `${backendPrivateUrl}visualizations/`
+const imgUrl = `${backendPublicUrl}download/image/`
 describe('PUT /visualizations', () => {
 
   beforeAll(async () => {
@@ -40,10 +41,15 @@ describe('PUT /visualizations', () => {
     conn.close()
   )
 
-  it('on valid new visualization inserts a row to db and responds with 201', async () => {
+  it('on valid new visualization inserts a row to db and image is downloadable', async () => {
     const res = await axios.put(`${privUrl}${validId}`, validJson)
     expect(res.status).toEqual(201)
-    return expect(repo.findOneOrFail(validId)).resolves.toBeTruthy()
+    await expect(repo.findOneOrFail(validId)).resolves.toBeTruthy()
+    return expect(axios.get(`${imgUrl}${validId}`)).resolves.toMatchObject({
+      status: 200,
+      data: 'content',
+      headers: { 'content-type': 'image/png' }
+    })
   })
 
   it('on invalid path responds with 400', async () =>

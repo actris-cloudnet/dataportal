@@ -40,7 +40,7 @@ const testConfig = {
   allowUpdateLimitDays: 2,
   storageService: {
     host: 'localhost',
-    port: '5910',
+    port: '5920',
     user: 'test',
     password: 'test'
   }
@@ -66,6 +66,11 @@ const devConfig = {
   }
 }
 
+const ciConfig = {
+  ...testConfig,
+  ...{ connectionName: 'ci-test' }
+}
+
 let config: Config
 
 switch (process.env.NODE_ENV) {
@@ -78,6 +83,9 @@ case 'production':
   break
 case 'test':
   config = testConfig
+  break
+case 'ci-test':
+  config = ciConfig
   break
 default:
   config = devConfig
