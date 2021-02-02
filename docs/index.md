@@ -290,7 +290,7 @@ curl "https://cloudnet.fmi.fi/api/files?site=bucharest&date=2020-12-10&product=m
 Fetch all available models:
 
 ```shell
-curl "https://cloudnet.fmi.fi/api/files?site=bucharest&date=2020-12-10&allModels"
+curl "https://cloudnet.fmi.fi/api/files?site=bucharest&date=2020-12-10&allModels&product=model"
 ```
 
 Fetch only the `gdas1` model:
