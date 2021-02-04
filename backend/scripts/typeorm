@@ -1,0 +1,2 @@
+#!/bin/bash
+npx ts-node -T ./node_modules/.bin/typeorm $@
