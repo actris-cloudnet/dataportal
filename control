@@ -228,7 +228,7 @@ case "$action" in
 
     fetch-remote-db)
     echo "Fetching remote db..."
-    dropdb dataportal 2> /dev/null || true
+    dropdb dataportal
     createdb dataportal
     ssh -C dataport@altocumulus.fmi.fi "pg_dump dataportal" | psql dataportal
     ;;
