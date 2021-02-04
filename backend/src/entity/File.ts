@@ -51,9 +51,6 @@ export class File {
     @ManyToOne(_ => Product, product => product.files)
     product!: Product
 
-    @ManyToOne(() => Model, {nullable: true})
-    model!: Model
-
     @Column({default: ''})
     cloudnetpyVersion!: string
 
@@ -92,6 +89,13 @@ export class File {
     updateDateUpdate() {
       this.updatedAt = new Date()
     }
+}
+
+@Entity()
+export class ModelFile extends File {
+
+  @ManyToOne(_ => Model, model => model.files)
+  model!: Model
 }
 
 export function isFile(obj: any) {

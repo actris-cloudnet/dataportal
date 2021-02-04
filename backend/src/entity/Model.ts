@@ -1,6 +1,6 @@
 import {Column, Entity, OneToMany, PrimaryColumn} from 'typeorm'
 import {Upload} from './Upload'
-import {File} from './File'
+import {ModelFile} from './File'
 
 @Entity()
 export class Model {
@@ -14,6 +14,6 @@ export class Model {
     @OneToMany(_ => Upload, uploads => uploads.site)
     uploads!: Upload[]
 
-    @OneToMany(_ => File, file => file.model)
-    files!: File[]
+    @OneToMany(_ => ModelFile, modelfile => modelfile.model)
+    files!: ModelFile[]
 }
