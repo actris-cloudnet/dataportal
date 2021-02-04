@@ -230,7 +230,7 @@ case "$action" in
     echo "Fetching remote db..."
     dropdb dataportal
     createdb dataportal
-    ssh -C dataport@altocumulus.fmi.fi "pg_dump dataportal" | psql dataportal
+    ssh -C dataport@altocumulus.fmi.fi "pg_dump dataportal" | tee remote-db.tmp.sql | psql dataportal
     ;;
 
     reset-db)
