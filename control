@@ -232,7 +232,7 @@ case "$action" in
       exit 1
     fi
     echo "Fetching remote db..."
-    dropdb dataportal 2> /dev/null || true
+    dropdb dataportal
     createdb dataportal
     ssh -C "$DATAPORTAL_SSH" "pg_dump dataportal" | tee remote-db.tmp.sql | psql dataportal
     ;;
