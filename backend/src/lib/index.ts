@@ -1,6 +1,7 @@
 import {Connection, SelectQueryBuilder} from 'typeorm'
 import {basename} from 'path'
 import {Request} from 'express'
+import {ModelFile} from '../entity/File'
 import {File} from '../entity/File'
 import {SearchFileResponse} from '../entity/SearchFileResponse'
 import config from '../config'
@@ -68,13 +69,13 @@ export const convertToSearchResponse = (files: SearchFile[]) =>
 export const sortByMeasurementDateAsc = (files: File[]) =>
   files.sort((a, b) => new Date(a.measurementDate).getTime() - new Date(b.measurementDate).getTime())
 
-export const augmentFiles = (files: File[]) =>
+export const augmentFiles = (files: (File | ModelFile)[]) =>
   files.map(file => ({
     ...file,
     downloadUrl: `${config.downloadBaseUrl}${getDownloadPathForFile(file)}`,
     filename: basename(file.s3key),
     s3key: undefined,
-    model: file.model || undefined
+    model: 'model' in file || undefined
   }))
 
 export const ssAuthString = () =>
