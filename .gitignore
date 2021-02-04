@@ -131,3 +131,6 @@ config.prod.ts
 # S3 mock
 backend/buckets/*
 !backend/buckets/placeholder
+
+# remote db
+remote-db.tmp.sql
