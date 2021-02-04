@@ -14,6 +14,7 @@ import {augmentFiles} from '../lib/'
 import {SearchFile} from '../entity/SearchFile'
 import {Model} from '../entity/Model'
 import {basename} from 'path'
+import {ModelFile} from '../entity/File'
 
 export class FileRoutes {
 
@@ -235,7 +236,7 @@ export class FileRoutes {
 
   private async updateModelSearchFile(transactionalEntityManager: EntityManager, file: any, searchFile: SearchFile) {
     const {optimumOrder} = await transactionalEntityManager.findOneOrFail(Model, {id: file.model})
-    const [bestModelFile] = await transactionalEntityManager.createQueryBuilder(File, 'file')
+    const [bestModelFile] = await transactionalEntityManager.createQueryBuilder(ModelFile, 'file')
       .leftJoinAndSelect('file.site', 'site')
       .leftJoinAndSelect('file.product', 'product')
       .leftJoinAndSelect('file.model', 'model')
