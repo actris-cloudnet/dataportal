@@ -42,8 +42,9 @@ export class Collection {
     this.updatedAt = new Date()
   }
 
-  constructor(files: File[]) {
+  constructor(files: File[], modelFiles: ModelFile[]) {
     this.uuid = generateUuidV4()
     this.files = files
+    this.modelFiles = modelFiles
   }
 }

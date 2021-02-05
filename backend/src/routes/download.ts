@@ -45,10 +45,11 @@ export class DownloadRoutes {
 
   collection: RequestHandler = async (req, res, next) => {
     const collectionUuid: string = req.params.uuid
-    const collection = await this.collectionRepo.findOne(collectionUuid, {relations: ['files']})
+    const collection = await this.collectionRepo.findOne(collectionUuid, {relations: ['files', 'modelFiles']})
     if (collection === undefined) {
       return next({status: 404, errors: ['No collection matches this UUID.']})
     }
+    const allFiles = collection.files.concat(collection.modelFiles)
     try {
       const archive = archiver('zip', { store: true })
       archive.on('warning', console.error)
@@ -62,12 +63,12 @@ export class DownloadRoutes {
 
       let i = 1
       const appendFile = async (idx: number) => {
-        const file = collection.files[idx]
+        const file = allFiles[idx]
         const fileStream = await this.makeFileRequest(file)
         archive.append(fileStream, { name: file.filename })
-        if (idx == (collection.files.length - 1)) archive.finalize()
+        if (idx == (allFiles.length - 1)) archive.finalize()
       }
-      archive.on('entry', () => i < collection.files.length ? appendFile(i++) : null)
+      archive.on('entry', () => i < allFiles.length ? appendFile(i++) : null)
       appendFile(0)
 
       // Update collection download count
