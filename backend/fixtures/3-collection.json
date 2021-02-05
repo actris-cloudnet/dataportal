@@ -3,23 +3,6 @@
     "uuid": "48092c00-161d-4ca2-a29d-628cf8e960f6",
     "files": [
       {
-        "uuid": "a5d1d5af-3667-41bc-b952-e684f627d91c",
-        "pid": "",
-        "volatile": true,
-        "title": "Model file from Mace-Head",
-        "measurementDate": "2014-12-05",
-        "history": "2020-02-17 09:19:16 - global attributes fixed using attribute_modifier 0.0.1\nSun Dec  7 07:35:16 GMT 2014 - NetCDF generated from original data by update_files.pl using cnmodel2nc on anvil2",
-        "publicity": "public",
-        "product": "model",
-        "cloudnetpyVersion": "",
-        "releasedAt": "2020-02-20T10:52:59.073Z",
-        "filename": "20141205_mace-head_ecmwf.nc",
-        "checksum": "255bcd9deae26851992c3da6352844fb9443203c48ae4f4ad8f1aa50ef2ab26f",
-        "size": 500452,
-        "format": "NetCDF3",
-        "site": "macehead"
-      },
-      {
         "uuid": "d21d6a9b-6804-4465-a026-74ec429fe17d",
         "pid": "",
         "volatile": true,
@@ -35,6 +18,25 @@
         "size": 16027310,
         "format": "HDF5 (NetCDF4)",
         "site": "hyytiala"
+      }
+    ],
+    "model_files": [
+      {
+        "uuid": "a5d1d5af-3667-41bc-b952-e684f627d91c",
+        "pid": "",
+        "volatile": true,
+        "title": "Model file from Mace-Head",
+        "measurementDate": "2014-12-05",
+        "history": "2020-02-17 09:19:16 - global attributes fixed using attribute_modifier 0.0.1\nSun Dec  7 07:35:16 GMT 2014 - NetCDF generated from original data by update_files.pl using cnmodel2nc on anvil2",
+        "publicity": "public",
+        "product": "model",
+        "cloudnetpyVersion": "",
+        "releasedAt": "2020-02-20T10:52:59.073Z",
+        "filename": "20141205_mace-head_ecmwf.nc",
+        "checksum": "255bcd9deae26851992c3da6352844fb9443203c48ae4f4ad8f1aa50ef2ab26f",
+        "size": 500452,
+        "format": "NetCDF3",
+        "site": "macehead"
       }
     ],
     "createdAt": "2020-09-28T12:45:21.916Z",
