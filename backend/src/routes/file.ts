@@ -35,25 +35,23 @@ export class FileRoutes {
   readonly fileServerUrl: string
 
   file: RequestHandler = async (req: Request, res: Response, next) => {
-    const fileQueryBuilder = (mode: string) => {
-      const isModel = mode == 'model'
-      const repo = isModel ? this.modelFileRepo : this.fileRepo
+
+    const getFileByUuid = (repo: Repository<File|ModelFile>, isModel: boolean|undefined) => {
       const qb = repo.createQueryBuilder('file')
         .leftJoinAndSelect('file.site', 'site')
         .leftJoinAndSelect('file.product', 'product')
       if (isModel) qb.leftJoinAndSelect('file.model', 'model')
         qb.where('file.uuid = :uuid', req.params)
       return hideTestDataFromNormalUsers<File>(qb, req)
-        .getMany()
-        .then(result => {
-          if (result.length == 0) return Promise.reject()
-          return result
-        })
+        .getOne()
     }
-    fileQueryBuilder('file')
-      .catch(() => fileQueryBuilder('model'))
-      .then(files => res.send(augmentFiles(files)[0]))
-      .catch(_err => next({ status: 404, errors: ['No files match this UUID'] }))
+
+    this.findAnyFile(getFileByUuid)
+      .then(file => {
+        if (file == null) return next({ status: 404, errors: ['No files match this UUID'] })
+        res.send(augmentFiles([file])[0])
+      })
+      .catch(err => next(err))
   }
 
   files: RequestHandler = async (req: Request, res: Response, next) => {
@@ -102,6 +100,7 @@ export class FileRoutes {
     file.s3key = req.params[0]
     file.updatedAt = new Date()
     if (!isFile(file)) return next({status: 422, errors: ['Request body is missing fields or has invalid values in them']})
+    const isModel = file.model && true
 
     try {
       const sourceFileIds = req.body.sourceFileIds || []
@@ -118,11 +117,15 @@ export class FileRoutes {
     }
 
     try {
-      const existingFile = await this.fileRepo.createQueryBuilder('file')
-        .leftJoinAndSelect('file.site', 'site')
-        .where("regexp_replace(s3key, '.+/', '') = :filename", {filename: basename(file.s3key)}) // eslint-disable-line quotes
-        .getOne()
+      const findFileByName = (repo: Repository<File|ModelFile>) =>
+        repo.createQueryBuilder('file')
+          .leftJoinAndSelect('file.site', 'site')
+          .where("regexp_replace(s3key, '.+/', '') = :filename", {filename: basename(file.s3key)}) // eslint-disable-line quotes
+          .getOne()
+      const existingFile = await this.findAnyFile(findFileByName)
       const searchFile = new SearchFile(file)
+
+      const FileClass = isModel ? ModelFile : File
       if (existingFile == undefined) { // New file
         file.createdAt = file.updatedAt
         await this.conn.transaction(async transactionalEntityManager => {
@@ -131,20 +134,21 @@ export class FileRoutes {
           } else {
             await transactionalEntityManager.insert(SearchFile, searchFile)
           }
-          await transactionalEntityManager.insert(File, file)
+          await transactionalEntityManager.insert(FileClass, file)
         })
         res.sendStatus(201)
       } else if (existingFile.site.isTestSite || existingFile.volatile) { // Replace existing
         file.createdAt = existingFile.createdAt
         await this.conn.transaction(async transactionalEntityManager => {
           await transactionalEntityManager.update(File, {uuid: file.uuid}, file)
-          await transactionalEntityManager.update(SearchFile, {uuid: file.uuid}, searchFile)
+          await transactionalEntityManager.update(FileClass, {uuid: file.uuid}, searchFile)
         })
         res.sendStatus(200)
       } else if (existingFile.uuid != file.uuid) { // New version
+        if (isModel) return next({status: 501, errors: ['Versioning is not supported for model files.']})
         await this.conn.transaction(async transactionalEntityManager => {
           file.createdAt = file.updatedAt
-          await transactionalEntityManager.insert(File, file)
+          await transactionalEntityManager.insert(FileClass, file)
           if (!file.legacy) { // Don't display legacy files in search if cloudnet version is available
             await transactionalEntityManager.delete(SearchFile, {uuid: existingFile.uuid})
             await transactionalEntityManager.insert(SearchFile, searchFile)
@@ -256,6 +260,14 @@ export class FileRoutes {
     }
   }
 
+  private findAnyFile(searchFunc: (arg0: Repository<File|ModelFile>, arg1?: boolean) => Promise<File|ModelFile|undefined>):
+    Promise<File|ModelFile|undefined> {
+    return Promise.all([
+      searchFunc(this.fileRepo, false),
+      searchFunc(this.modelFileRepo, true)
+    ])
+      .then(([file, modelFile]) => file ? file : modelFile)
+  }
 }
 
 function addCommonFilters<T>(qb: SelectQueryBuilder<T>, query: any) {
