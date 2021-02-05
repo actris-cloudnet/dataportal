@@ -13,7 +13,7 @@ frontend_port=8000
 backend_port=3000
 pid_dir='.'
 
-if [ "$NODE_ENV" == 'test' ] || [ "$NODE_ENV" == 'ci-test' ]; then
+if [ "$NODE_ENV" '==' 'test' ] || [ "$NODE_ENV" '==' 'ci-test' ]; then
     backend_port=3001
     pid_dir='tests'
 fi
