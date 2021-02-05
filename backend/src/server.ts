@@ -82,6 +82,11 @@ import {DownloadRoutes} from './routes/download'
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
     fileRoutes.files)
+  app.get('/api/model-files',
+    middleware.filesValidator,
+    middleware.filesQueryAugmenter,
+    middleware.checkParamsExistInDb,
+    fileRoutes.modelFiles)
   app.get('/api/files/:uuid', middleware.validateUuidParam, fileRoutes.file)
   app.get('/api/sites', siteRoutes.sites)
   app.get('/api/sites/:siteid', siteRoutes.site)
