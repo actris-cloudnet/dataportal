@@ -45,7 +45,10 @@ export class CollectionRoutes {
   collection: RequestHandler = async (req: Request, res: Response, next) => {
     const uuid: string = req.params.uuid
     try {
-      const collection = await this.collectionRepo.findOne(uuid, {relations: ['files', 'files.site', 'files.product']})
+      const collection = await this.collectionRepo.findOne(uuid, {relations: [
+        'files', 'files.site', 'files.product',
+        'modelFiles', 'modelFiles.site', 'modelFiles.product',
+      ]})
       if (collection === undefined) return next({status: 404, errors: ['Collection not found']})
       res.send(new CollectionResponse(collection))
     } catch (e) {
