@@ -35,17 +35,24 @@ export class FileRoutes {
   readonly fileServerUrl: string
 
   file: RequestHandler = async (req: Request, res: Response, next) => {
-    const qb = this.fileRepo.createQueryBuilder('file')
-      .leftJoinAndSelect('file.site', 'site')
-      .leftJoinAndSelect('file.product', 'product')
-      .leftJoinAndSelect('file.model', 'model')
-      .where('file.uuid = :uuid', req.params)
-    hideTestDataFromNormalUsers<File>(qb, req)
-      .getMany()
-      .then(result => {
-        if (result.length == 0) throw new Error()
-        res.send(augmentFiles(result)[0])
-      })
+    const fileQueryBuilder = (mode: string) => {
+      const isModel = mode == 'model'
+      const repo = isModel ? this.modelFileRepo : this.fileRepo
+      const qb = repo.createQueryBuilder('file')
+        .leftJoinAndSelect('file.site', 'site')
+        .leftJoinAndSelect('file.product', 'product')
+      if (isModel) qb.leftJoinAndSelect('file.model', 'model')
+        qb.where('file.uuid = :uuid', req.params)
+      return hideTestDataFromNormalUsers<File>(qb, req)
+        .getMany()
+        .then(result => {
+          if (result.length == 0) return Promise.reject()
+          return result
+        })
+    }
+    fileQueryBuilder('file')
+      .catch(() => fileQueryBuilder('model'))
+      .then(files => res.send(augmentFiles(files)[0]))
       .catch(_err => next({ status: 404, errors: ['No files match this UUID'] }))
   }
 
