@@ -22,6 +22,7 @@ export class FileRoutes {
     this.conn = conn
     this.collectionRepo = conn.getRepository<Collection>('collection')
     this.fileRepo = conn.getRepository<File>('file')
+    this.modelFileRepo = conn.getRepository<ModelFile>('model_file')
     this.searchFileRepo = conn.getRepository<SearchFile>('search_file')
     this.fileServerUrl = config.downloadBaseUrl
   }
@@ -29,6 +30,7 @@ export class FileRoutes {
   readonly conn: Connection
   readonly collectionRepo: Repository<Collection>
   readonly fileRepo: Repository<File>
+  readonly modelFileRepo: Repository<ModelFile>
   readonly searchFileRepo: Repository<SearchFile>
   readonly fileServerUrl: string
 
@@ -49,7 +51,19 @@ export class FileRoutes {
 
   files: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query
-    this.filesQueryBuilder(query)
+    this.filesQueryBuilder(query, 'file')
+      .getMany()
+      .then(result => {
+        res.send(augmentFiles(result))
+      })
+      .catch(err => {
+        next({ status: 500, errors: err })
+      })
+  }
+
+  modelFiles: RequestHandler = async (req: Request, res: Response, next) => {
+    const query = req.query
+    this.filesQueryBuilder(query, 'model')
       .getMany()
       .then(result => {
         res.send(augmentFiles(result))
@@ -169,15 +183,21 @@ export class FileRoutes {
       })
       .catch(err => next({ status: 500, errors: err }))
 
-  filesQueryBuilder(query: any) {
-    let qb = this.fileRepo.createQueryBuilder('file')
+  filesQueryBuilder(query: any, mode: 'file'|'model') {
+    const isModel = mode == 'model'
+    let repo = this.fileRepo
+    if (isModel) {
+      repo = this.modelFileRepo
+      query.product = undefined
+    }
+    let qb = repo.createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
       .leftJoinAndSelect('file.product', 'product')
-      .leftJoinAndSelect('file.model', 'model')
+    if (isModel) qb.leftJoinAndSelect('file.model', 'model')
 
     // Where clauses
     qb = addCommonFilters(qb, query)
-    if (query.model) qb.andWhere('model.id IN (:...model)', query)
+    if (isModel && query.model) qb.andWhere('model.id IN (:...model)', query)
     if (query.filename) qb.andWhere("regexp_replace(s3key, '.+/', '') IN (:...filename)", query) // eslint-disable-line quotes
     if (query.releasedBefore) qb.andWhere('file.updatedAt < :releasedBefore', query)
 
@@ -189,34 +209,11 @@ export class FileRoutes {
       'best_version',
       'file.uuid = best_version.uuid')
     }
-    // Only allVersions
-    // Model is specified in filename, so if its present don't do anything
-    else if (!query.filename && (query.allVersions != undefined && query.allModels == undefined)) {
-      qb.innerJoin(sub_qb =>
-        sub_qb
-          .from('file', 'file')
-          .leftJoin('file.model', 'model')
-          .select('MIN(model.optimumOrder)', 'optimum_order')
-          .groupBy('file.site, file.measurementDate, file.product'),
-      'best_model',
-      'model.optimumOrder = best_model.optimum_order OR model IS NULL')
-    }
-    // Only allModels or model
-    else if ((query.allModels != undefined || query.model) && query.allVersions == undefined) {
-      qb.innerJoin(sub_qb =>
-        sub_qb
-          .from('file', 'file')
-          .select('MAX(file.updatedAt)', 'updated_at')
-          .groupBy('file.s3key'),
-      'last_version',
-      'file.updatedAt =  last_version.updated_at'
-      )
-    }
 
     // Ordering
     qb.orderBy('file.measurementDate', 'DESC')
-      .addOrderBy('model.optimumOrder', 'ASC')
-      .addOrderBy('file.legacy', 'ASC')
+    if (isModel) qb.addOrderBy('model.optimumOrder', 'ASC')
+    qb.addOrderBy('file.legacy', 'ASC')
       .addOrderBy('file.updatedAt', 'DESC')
 
     // Limit

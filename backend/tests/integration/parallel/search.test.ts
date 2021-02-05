@@ -45,16 +45,16 @@ describe('/api/files', () => {
     const payload = {params: {site: 'macehead'}}
     const res = await axios.get(url, payload)
     expect(res).toHaveProperty('data')
-    expect(res.data).toHaveLength(3)
-    return expect(res.data.map((d: any) => d.site.id)).toEqual(['macehead', 'macehead', 'macehead'])
+    expect(res.data).toHaveLength(2)
+    return expect(res.data.map((d: any) => d.site.id)).toEqual(['macehead', 'macehead'])
   })
 
   it('responds with an array of 4 objects when searching for macehead and hyytiala', async () => {
     const payload = {params: {site: ['macehead', 'hyytiala']}}
     const res = await axios.get(url, payload)
     expect(res).toHaveProperty('data')
-    expect(res.data).toHaveLength(4)
-    return expect(new Set(res.data.map((d: any) => d.site.id))).toEqual(new Set(['macehead', 'macehead', 'macehead', 'hyytiala']))
+    expect(res.data).toHaveLength(3)
+    return expect(new Set(res.data.map((d: any) => d.site.id))).toEqual(new Set(['macehead', 'macehead', 'hyytiala']))
   })
 
 
@@ -150,7 +150,7 @@ describe('/api/files', () => {
   it('returns the latest file when limit=1', async () => {
     const res = await axios.get(url, { params: { site: 'bucharest', limit: '1' }})
     expect(res.data).toHaveLength(1)
-    expect(res.data[0].measurementDate).toEqual('2020-12-05')
+    expect(res.data[0].measurementDate).toEqual('2019-07-16')
   })
 
   it('responds with 400 on malformed limit', async () => {
@@ -170,6 +170,49 @@ describe('/api/files', () => {
     const payload = { params: { site: 'bucharest', product: 'classification', dateFrom: '2009-01-01', dateTo: '2010-01-01', showLegacy: true }}
     return expect(axios.get(url, payload)).resolves.toMatchObject({data: [{legacy: true}]})
   })
+
+  it('responds with data for one day when using the date parameter', async () => {
+    const payload = {params: {date: '2018-11-15'}}
+    const res = await axios.get(url, payload)
+    expect(res.data).toHaveLength(1)
+    return expect(res.data[0]).toMatchObject({ measurementDate: '2018-11-15'})
+  })
+
+  it('responds with 400 on malformed date', async () => {
+    const payload = { params: { date: 'j' }}
+    let expectedBody: RequestError = {
+      status: 400,
+      errors: [ 'Malformed date in property "date"' ]
+    }
+    return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
+  })
+
+  it('responds with 400 on conflicting date, dateFrom and dateTo', async () => {
+    const validParams = {date: '2020-12-05'}
+    let expectedBody: RequestError = {
+      status: 400,
+      errors: [ 'Property "date" may not be defined if either "dateFrom" or "dateTo" is defined' ]
+    }
+    let params: any = {...validParams, ...{dateFrom: '2020-11-05'}}
+    await expect(axios.get(url, {params})).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
+    params = {...validParams, ...{dateTo: '2020-12-08'}}
+    await expect(axios.get(url, {params})).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
+    params = {...validParams, ...{dateFrom: '2020-11-05', dateTo: '2020-12-08'}}
+    return expect(axios.get(url, {params})).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
+  })
+
+  it('responds with correct data using filename parameter', async () => {
+    const filename = '20181115_mace-head_mira.nc'
+    const payload = {params: {filename }}
+    const res = await axios.get(url, payload)
+    expect(res.data).toHaveLength(1)
+    return expect(res.data[0]).toMatchObject({ filename })
+  })
+
+})
+
+describe('/api/model-files', () => {
+  const url = `${backendPublicUrl}model-files/`
 
   it('responds with the best model file by default', async () => {
     const payload = {params: {product: 'model', site: 'bucharest', dateFrom: '2020-12-05', dateTo: '2020-12-05'}}
@@ -191,37 +234,6 @@ describe('/api/files', () => {
     expect(res.data).toHaveLength(2)
     expect(res.data[0]).toMatchObject({ model: {id: 'ecmwf'}})
     expect(res.data[1]).toMatchObject({ model: {id: 'icon-iglo-12-23'}})
-  })
-
-  it('responds with all versions of best model file when using allVersions', async () => {
-    const payload = {params: {product: 'model', site: 'bucharest', dateFrom: '2020-12-05', dateTo: '2020-12-05', allVersions: true}}
-    const res = await axios.get(url, payload)
-    expect(res.data).toHaveLength(2)
-    expect(res.data[0]).toMatchObject({ version: '123'})
-    expect(res.data[1]).toMatchObject({ version: '122'})
-  })
-
-  it('responds with latest version using allModels flag', async () => {
-    const payload = {params: {product: 'categorize', site: 'bucharest', date: '2019-07-15', allModels: true}}
-    const res = await axios.get(url, payload)
-    expect(res.data).toHaveLength(1)
-    expect(res.data[0]).toMatchObject({ version: '123'})
-  })
-
-  it('responds with data for one day when using the date parameter', async () => {
-    const payload = {params: {product: 'model', site: 'bucharest', date: '2020-12-05'}}
-    const res = await axios.get(url, payload)
-    expect(res.data).toHaveLength(1)
-    return expect(res.data[0]).toMatchObject({ model: {id: 'ecmwf'}})
-  })
-
-  it('responds with 400 on malformed date', async () => {
-    const payload = { params: { date: 'j' }}
-    let expectedBody: RequestError = {
-      status: 400,
-      errors: [ 'Malformed date in property "date"' ]
-    }
-    return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
 
   it('responds with 400 if model and allModels are both defined', async () => {
@@ -251,27 +263,7 @@ describe('/api/files', () => {
     return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
 
-  it('responds with 400 on conflicting date, dateFrom and dateTo', async () => {
-    const validParams = {date: '2020-12-05'}
-    let expectedBody: RequestError = {
-      status: 400,
-      errors: [ 'Property "date" may not be defined if either "dateFrom" or "dateTo" is defined' ]
-    }
-    let params: any = {...validParams, ...{dateFrom: '2020-11-05'}}
-    await expect(axios.get(url, {params})).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
-    params = {...validParams, ...{dateTo: '2020-12-08'}}
-    await expect(axios.get(url, {params})).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
-    params = {...validParams, ...{dateFrom: '2020-11-05', dateTo: '2020-12-08'}}
-    return expect(axios.get(url, {params})).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
-  })
 
-  it('responds with correct data using filename parameter', async () => {
-    const filename = '20181115_mace-head_mira.nc'
-    const payload = {params: {filename }}
-    const res = await axios.get(url, payload)
-    expect(res.data).toHaveLength(1)
-    return expect(res.data[0]).toMatchObject({ filename })
-  })
 
 })
 
