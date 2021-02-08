@@ -79,7 +79,7 @@ export class VisualizationRoutes {
         .where('file.uuid = :uuid', params)
       return hideTestDataFromNormalUsers(qb, req)
         .getOne()
-      }
+    }
 
     this.fileController.findAnyFile(fetchVisualizationsForSourceFile)
       .then(file => {
