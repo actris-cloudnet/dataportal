@@ -260,13 +260,22 @@ export class FileRoutes {
     }
   }
 
-  private findAnyFile(searchFunc: (arg0: Repository<File|ModelFile>, arg1?: boolean) => Promise<File|ModelFile|undefined>):
+  findAnyFile(searchFunc: (arg0: Repository<File|ModelFile>, arg1?: boolean) => Promise<File|ModelFile|undefined>):
     Promise<File|ModelFile|undefined> {
     return Promise.all([
       searchFunc(this.fileRepo, false),
       searchFunc(this.modelFileRepo, true)
     ])
       .then(([file, modelFile]) => file ? file : modelFile)
+  }
+
+  findAllFiles(searchFunc: (arg0: Repository<File|ModelFile>, arg1?: boolean) => Promise<(File|ModelFile)[]>):
+    Promise<(File|ModelFile)[]> {
+    return Promise.all([
+      searchFunc(this.fileRepo, false),
+      searchFunc(this.modelFileRepo, true)
+    ])
+      .then(([files, modelFiles]) => files.concat(modelFiles))
   }
 }
 
