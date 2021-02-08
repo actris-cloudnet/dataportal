@@ -1,5 +1,5 @@
 import {Entity, ManyToOne, PrimaryColumn} from 'typeorm'
-import {File, ModelFile} from './File'
+import {ModelFile} from './File'
 import {ProductVariable} from './ProductVariable'
 
 

@@ -41,7 +41,7 @@ export class FileRoutes {
         .leftJoinAndSelect('file.site', 'site')
         .leftJoinAndSelect('file.product', 'product')
       if (isModel) qb.leftJoinAndSelect('file.model', 'model')
-        qb.where('file.uuid = :uuid', req.params)
+      qb.where('file.uuid = :uuid', req.params)
       return hideTestDataFromNormalUsers<File>(qb, req)
         .getOne()
     }
