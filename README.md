@@ -58,7 +58,7 @@ By default, there is no data in the portal's database. The following command wil
 database with test fixtures:
 
     cd backend
-    npx ts-node -T src/fixtures.js default fixtures
+    npx ts-node -T src/fixtures.ts default fixtures
 
 Note: the project will have to be built prior to running this command.
 
@@ -117,6 +117,8 @@ This is a disambiguation of the `./control` commands at your disposal.
 
 For CLU internal use:
 
+| command | description |
+|---------|-------------|
 |`fetch-remote-db` | retrieve remote database to development environment. |
 |`fetch-and-start` | retrieve remote database and start. |
 
