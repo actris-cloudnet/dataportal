@@ -6,7 +6,9 @@ export async function initDriver() {
   const options = new firefox.Options()
   if (process.env.CI) options.addArguments('-headless') // Run in headless on CI
   await clearRepo('visualization')
+  await clearRepo('model_visualization')
   await clearRepo('file')
+  await clearRepo('model_file')
   await clearRepo('search_file')
   return new Builder()
     .forBrowser('firefox')

@@ -129,7 +129,7 @@ export class FileRoutes {
       if (existingFile == undefined) { // New file
         file.createdAt = file.updatedAt
         await this.conn.transaction(async transactionalEntityManager => {
-          if (file.product == 'model') {
+          if (isModel) {
             await this.updateModelSearchFile(transactionalEntityManager, file, searchFile)
           } else {
             await transactionalEntityManager.insert(SearchFile, searchFile)
@@ -140,8 +140,8 @@ export class FileRoutes {
       } else if (existingFile.site.isTestSite || existingFile.volatile) { // Replace existing
         file.createdAt = existingFile.createdAt
         await this.conn.transaction(async transactionalEntityManager => {
-          await transactionalEntityManager.update(File, {uuid: file.uuid}, file)
-          await transactionalEntityManager.update(FileClass, {uuid: file.uuid}, searchFile)
+          await transactionalEntityManager.update(FileClass, {uuid: file.uuid}, file)
+          await transactionalEntityManager.update(SearchFile, {uuid: file.uuid}, searchFile)
         })
         res.sendStatus(200)
       } else if (existingFile.uuid != file.uuid) { // New version
