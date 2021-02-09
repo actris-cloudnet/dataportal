@@ -17,7 +17,6 @@ We recommend uploading the following files:
 | `hatpro` | RPG HATPRO microwave radiometer | At least the `*.LWP.NC` files if available, but other files are fine too (brightness temperatures, water vapour, housekeeping). | netCDF, binary |
 | `copernicus` | Copernicus cloud radar | `*.nc` files. | netCDF |
 | `galileo` | Galileo cloud radar | `*.nc` files. | netCDF |
-| `halo-doppler-lidar` | Halo Photonics Doppler lidar | `*.hpl`, `Background*.txt` and `system_parameters*.txt` files. `*.nc` files obtained from `*.hpl` may be accepted too. | text, netCDF |
 | `parsivel` | OTT Parsivel2 disdrometer | `*.nc` files produced with `parsivel_log_nc_convert_samdconform.py` preferred. | netCDF |
 | `thies-lnm` | Thies LNM disdrometer | `*.txt` files. | text |
 
@@ -33,3 +32,4 @@ let us know and we will add them to our to-do list.
 |`microwave radiometer` | Radiometrics - two-channel or three-channel | `*.nc` files. | netCDF |
 |`basta` | BASTA cloud radar | `*.nc` files. | netCDF |
 |`wls100s`, `wls200s`, `wls400s` |Leosphere windcube long-range scanning Doppler lidars | `*.nc` files. | netCDF |
+| `halo-doppler-lidar` | Halo Photonics Doppler lidar | `*.hpl`, `Background*.txt` and `system_parameters*.txt` files. | text |
