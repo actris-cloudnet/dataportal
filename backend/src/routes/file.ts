@@ -2,7 +2,7 @@ import {Request, RequestHandler, Response} from 'express'
 import {Collection} from '../entity/Collection'
 import config from '../config'
 import {Connection, EntityManager, Repository, SelectQueryBuilder} from 'typeorm'
-import {File, isFile} from '../entity/File'
+import {File, isFile, RegularFile} from '../entity/File'
 import {
   checkFileExists,
   convertToSearchResponse,
@@ -21,7 +21,7 @@ export class FileRoutes {
   constructor(conn: Connection) {
     this.conn = conn
     this.collectionRepo = conn.getRepository<Collection>('collection')
-    this.fileRepo = conn.getRepository<File>('file')
+    this.fileRepo = conn.getRepository<RegularFile>('regular_file')
     this.modelFileRepo = conn.getRepository<ModelFile>('model_file')
     this.searchFileRepo = conn.getRepository<SearchFile>('search_file')
     this.fileServerUrl = config.downloadBaseUrl
@@ -29,20 +29,20 @@ export class FileRoutes {
 
   readonly conn: Connection
   readonly collectionRepo: Repository<Collection>
-  readonly fileRepo: Repository<File>
+  readonly fileRepo: Repository<RegularFile>
   readonly modelFileRepo: Repository<ModelFile>
   readonly searchFileRepo: Repository<SearchFile>
   readonly fileServerUrl: string
 
   file: RequestHandler = async (req: Request, res: Response, next) => {
 
-    const getFileByUuid = (repo: Repository<File|ModelFile>, isModel: boolean|undefined) => {
+    const getFileByUuid = (repo: Repository<RegularFile|ModelFile>, isModel: boolean|undefined) => {
       const qb = repo.createQueryBuilder('file')
         .leftJoinAndSelect('file.site', 'site')
         .leftJoinAndSelect('file.product', 'product')
       if (isModel) qb.leftJoinAndSelect('file.model', 'model')
       qb.where('file.uuid = :uuid', req.params)
-      return hideTestDataFromNormalUsers<File>(qb, req)
+      return hideTestDataFromNormalUsers<RegularFile|ModelFile>(qb, req)
         .getOne()
     }
 
@@ -117,7 +117,7 @@ export class FileRoutes {
     }
 
     try {
-      const findFileByName = (repo: Repository<File|ModelFile>) =>
+      const findFileByName = (repo: Repository<RegularFile|ModelFile>) =>
         repo.createQueryBuilder('file')
           .leftJoinAndSelect('file.site', 'site')
           .where("regexp_replace(s3key, '.+/', '') = :filename", {filename: basename(file.s3key)}) // eslint-disable-line quotes
@@ -188,7 +188,7 @@ export class FileRoutes {
       .catch(err => next({ status: 500, errors: err }))
 
   allsearch: RequestHandler = async (req: Request, res: Response, next) =>
-    this.fileRepo.find({ relations: ['site', 'product'] })
+    this.searchFileRepo.find({ relations: ['site', 'product'] })
       .then(result => {
         res.send(convertToSearchResponse(sortByMeasurementDateAsc(result)))
       })
@@ -196,7 +196,7 @@ export class FileRoutes {
 
   filesQueryBuilder(query: any, mode: 'file'|'model') {
     const isModel = mode == 'model'
-    let repo = this.fileRepo
+    let repo: Repository<RegularFile|ModelFile> = this.fileRepo
     if (isModel) {
       repo = this.modelFileRepo
       query.product = undefined
@@ -260,8 +260,9 @@ export class FileRoutes {
     }
   }
 
-  findAnyFile(searchFunc: (arg0: Repository<File|ModelFile>, arg1?: boolean) => Promise<File|ModelFile|undefined>):
-    Promise<File|ModelFile|undefined> {
+  findAnyFile(searchFunc: (arg0: Repository<RegularFile|ModelFile>, arg1?: boolean) =>
+  Promise<RegularFile|ModelFile|undefined>):
+    Promise<RegularFile|ModelFile|undefined> {
     return Promise.all([
       searchFunc(this.fileRepo, false),
       searchFunc(this.modelFileRepo, true)
@@ -269,8 +270,8 @@ export class FileRoutes {
       .then(([file, modelFile]) => file ? file : modelFile)
   }
 
-  findAllFiles(searchFunc: (arg0: Repository<File|ModelFile>, arg1?: boolean) => Promise<(File|ModelFile)[]>):
-    Promise<(File|ModelFile)[]> {
+  findAllFiles(searchFunc: (arg0: Repository<RegularFile|ModelFile>, arg1?: boolean) => Promise<(RegularFile|ModelFile)[]>):
+    Promise<(RegularFile|ModelFile)[]> {
     return Promise.all([
       searchFunc(this.fileRepo, false),
       searchFunc(this.modelFileRepo, true)

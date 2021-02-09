@@ -1,5 +1,5 @@
 import {Visualization} from './Visualization'
-import {File} from './File'
+import {ModelFile, RegularFile} from './File'
 
 export class VisualizationResponse {
 
@@ -8,7 +8,7 @@ export class VisualizationResponse {
   productHumanReadable: string
   visualizations: Visualization[]
 
-  constructor(file: File) {
+  constructor(file: RegularFile|ModelFile) {
     this.sourceFileId = file.uuid
     this.visualizations = file.visualizations
       .sort((a, b) => parseInt(a.productVariable.order) - parseInt(b.productVariable.order))
