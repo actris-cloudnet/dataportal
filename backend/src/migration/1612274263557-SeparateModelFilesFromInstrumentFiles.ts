@@ -20,6 +20,8 @@ export class SeparateModelFilesFromInstrumentFiles1612274263557 implements Migra
         await queryRunner.query(`CREATE INDEX "IDX_27fd775d0627f97133310c77d0" ON "collection_model_files_model_file" ("modelFileUuid") `);
         await queryRunner.query(`ALTER TABLE "collection_model_files_model_file" ADD CONSTRAINT "FK_694ee45a95d4b031ff9776cbe81" FOREIGN KEY ("collectionUuid") REFERENCES "collection"("uuid") ON DELETE CASCADE ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "collection_model_files_model_file" ADD CONSTRAINT "FK_27fd775d0627f97133310c77d04" FOREIGN KEY ("modelFileUuid") REFERENCES "model_file"("uuid") ON DELETE CASCADE ON UPDATE NO ACTION`);
+    // RENAME FILE
+        await queryRunner.query(`ALTER TABLE "file" RENAME TO "regular_file"`);
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
@@ -38,6 +40,7 @@ export class SeparateModelFilesFromInstrumentFiles1612274263557 implements Migra
         await queryRunner.query(`DROP INDEX "IDX_18bd7d150abecbaa15dad8290c"`);
         await queryRunner.query(`DROP TABLE "model_file"`);
         await queryRunner.query(`ALTER TABLE "file" ADD CONSTRAINT "FK_5af5a3b6962dfdb21c85c530e08" FOREIGN KEY ("modelId") REFERENCES "model"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "regular_file" RENAME TO "file"`);
     }
 
 }
