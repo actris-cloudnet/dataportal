@@ -273,7 +273,7 @@ import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import axios from 'axios'
 import {getProductIcon, humanReadableDate, humanReadableSize, humanReadableTimestamp, sortVisualizations} from '../lib'
 import {DevMode} from '../lib/DevMode'
-import {File} from '../../../backend/src/entity/File'
+import {File, ModelFile, RegularFile} from '../../../backend/src/entity/File'
 import {Visualization} from '../../../backend/src/entity/Visualization'
 import HowToCite from '../components/HowToCite.vue'
 import License from '../components/License.vue'
@@ -284,7 +284,7 @@ Vue.component('license', License)
 @Component
 export default class FileView extends Vue {
   @Prop() uuid!: string
-  response: File | null = null
+  response: ModelFile | RegularFile | null = null
   visualizations: Visualization[] | [] = []
   versions: string[] = []
   error = false
@@ -297,7 +297,7 @@ export default class FileView extends Vue {
   sortVisualizations = sortVisualizations
   devMode = new DevMode()
   allVisualizations = false
-  sourceFiles: File[] = []
+  sourceFiles: RegularFile[] = []
   showHistory = false
   showHowToCite = false
   showLicense = false
@@ -372,8 +372,8 @@ export default class FileView extends Vue {
       })
   }
 
-  fetchSourceFiles(response: File) {
-    if (!response.sourceFileIds) return
+  fetchSourceFiles(response: RegularFile|ModelFile) {
+    if (!('sourceFileIds' in response) || !response.sourceFileIds) return
     return Promise.all(response.sourceFileIds.map(uuid => axios.get(`${this.apiUrl}files/${uuid}`)))
       .then(response => this.sourceFiles = response.map(res => res.data))
   }
