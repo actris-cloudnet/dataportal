@@ -19,7 +19,7 @@ import {Model} from './Model'
 @Entity()
 @Unique(['checksum'])
 @Index(['measurementDate', 'site', 'product'])
-export class File {
+export abstract class File {
 
     @PrimaryColumn('uuid')
     uuid!: string
@@ -48,12 +48,6 @@ export class File {
     @Column({default: ''})
     history!: string
 
-    @ManyToOne(_ => Product, product => product.files)
-    product!: Product
-
-    @Column({default: ''})
-    cloudnetpyVersion!: string
-
     @Column()
     checksum!: string
 
@@ -63,8 +57,8 @@ export class File {
     @Column()
     format!: string
 
-    @Column('text', {array: true, nullable: true})
-    sourceFileIds!: string[] | null
+    @ManyToOne(_ => Product, product => product.files)
+    product!: Product
 
     @OneToMany(_ => Visualization, viz => viz.sourceFile)
     visualizations!: Visualization[]
@@ -92,10 +86,22 @@ export class File {
 }
 
 @Entity()
+export class RegularFile extends File {
+
+  @Column('text', {array: true, nullable: true})
+  sourceFileIds!: string[] | null
+
+  @Column({default: ''})
+  cloudnetpyVersion!: string
+
+}
+
+@Entity()
 export class ModelFile extends File {
 
   @ManyToOne(_ => Model, model => model.files)
   model!: Model
+
 }
 
 export function isFile(obj: any) {

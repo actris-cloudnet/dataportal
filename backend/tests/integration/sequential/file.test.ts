@@ -17,7 +17,7 @@ const stableFile  = {...volatileFile, ...{volatile: false, pid: '1234'}}
 
 beforeAll(async () => {
   conn = await createConnection('test')
-  fileRepo = conn.getRepository('file')
+  fileRepo = conn.getRepository('regular_file')
   modelFileRepo = conn.getRepository('model_file')
   searchFileRepo = conn.getRepository('search_file')
   vizRepo = conn.getRepository('visualization')

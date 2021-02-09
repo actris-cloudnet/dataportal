@@ -2,7 +2,7 @@ import {RequestHandler} from 'express'
 
 import {Collection} from '../entity/Collection'
 import {Connection, Repository} from 'typeorm'
-import {File} from '../entity/File'
+import {File, RegularFile} from '../entity/File'
 import {Upload} from '../entity/Upload'
 import {Download, ObjectType} from '../entity/Download'
 import {getBucketForFile, ssAuthString} from '../lib'
@@ -18,19 +18,19 @@ export class DownloadRoutes {
     this.collectionRepo = conn.getRepository<Collection>('collection')
     this.uploadRepo = conn.getRepository<Upload>('upload')
     this.downloadRepo = conn.getRepository<Download>('download')
-    this.fileRepo = conn.getRepository<File>('file')
+    this.fileRepo = conn.getRepository<RegularFile>('regular_file')
   }
 
   readonly conn: Connection
   readonly collectionRepo: Repository<Collection>
-  readonly fileRepo: Repository<File>
+  readonly fileRepo: Repository<RegularFile>
   readonly uploadRepo: Repository<Upload>
   readonly downloadRepo: Repository<Download>
 
   product: RequestHandler = async (req, res, next) => {
     const s3key = req.params[0]
     try {
-      const file = await this.fileRepo.findOne({uuid: req.params.uuid, s3key})
+      const file = await this.fileRepo.findOne({uuid: req.params.uuid, s3key}) // FIXME
       if (file === undefined) return next({status: 404, errors: ['File not found']})
       const upstreamRes = await this.makeFileRequest(file)
       res.setHeader('Content-Type', 'application/octet-stream')

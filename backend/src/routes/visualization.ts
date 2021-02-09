@@ -5,29 +5,26 @@ import {Visualization} from '../entity/Visualization'
 import {VisualizationResponse} from '../entity/VisualizationResponse'
 import {LatestVisualizationDateResponse} from '../entity/LatestVisualizationDateResponse'
 import {FileRoutes} from './file'
-import {File, ModelFile} from '../entity/File'
+import {ModelFile, RegularFile} from '../entity/File'
 import {ProductVariable} from '../entity/ProductVariable'
-import {ModelVisualization} from '../entity/ModelVisualization'
 
 export class VisualizationRoutes {
 
   constructor(conn: Connection, fileController: FileRoutes) {
     this.conn = conn
-    this.fileRepo = conn.getRepository<File>('file')
+    this.fileRepo = conn.getRepository<RegularFile>('regular_file')
     this.modelFileRepo = conn.getRepository<ModelFile>('model_file')
     this.visualizationRepo = conn.getRepository<Visualization>('visualization')
-    this.modelVisualizationRepo = conn.getRepository<ModelVisualization>('model_visualization')
     this.productVariableRepo = conn.getRepository<ProductVariable>('product_variable')
     this.fileController = fileController
   }
 
   readonly conn: Connection
-  readonly fileRepo: Repository<File>
+  readonly fileRepo: Repository<RegularFile>
   readonly modelFileRepo: Repository<ModelFile>
   readonly visualizationRepo: Repository<Visualization>
   readonly productVariableRepo: Repository<ProductVariable>
   readonly fileController: FileRoutes
-  readonly modelVisualizationRepo: Repository<ModelVisualization>
 
   putVisualization: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body
@@ -70,7 +67,7 @@ export class VisualizationRoutes {
 
   visualizationForSourceFile: RequestHandler = async (req: Request, res: Response, next) => {
     const params = req.params
-    const fetchVisualizationsForSourceFile = (repo: Repository<File|ModelFile>) => {
+    const fetchVisualizationsForSourceFile = (repo: Repository<RegularFile|ModelFile>) => {
       const qb = repo.createQueryBuilder('file')
         .leftJoinAndSelect('file.visualizations', 'visualizations')
         .leftJoinAndSelect('visualizations.productVariable', 'product_variable')
@@ -106,7 +103,7 @@ export class VisualizationRoutes {
   }
 
   private getManyVisualizations(query: any) {
-    const fetchVisualizations = (_repo: Repository<File|ModelFile>, mode: boolean | undefined) => {
+    const fetchVisualizations = (_repo: Repository<RegularFile|ModelFile>, mode: boolean | undefined) => {
       let qb = this.fileController.filesQueryBuilder(query, mode ? 'model' : 'file')
         .innerJoinAndSelect('file.visualizations', 'visualizations')
         .leftJoinAndSelect('visualizations.productVariable', 'product_variable')

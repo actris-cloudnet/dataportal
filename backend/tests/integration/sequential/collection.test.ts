@@ -20,7 +20,7 @@ describe('POST /api/collection', () => {
   beforeAll(async () => {
     conn = await createConnection('test')
     repo = conn.getRepository('collection')
-    fileRepo = conn.getRepository('file')
+    fileRepo = conn.getRepository('regular_file')
 
     // Populate necessary table
     return fileRepo.save(JSON.parse((await fsp.readFile('fixtures/2-file.json')).toString()))
