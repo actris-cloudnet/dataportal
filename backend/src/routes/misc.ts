@@ -1,17 +1,17 @@
 import {Request, RequestHandler, Response} from 'express'
 import {Connection, Repository} from 'typeorm'
 import {dateToUTCString} from '../lib'
-import {File} from '../entity/File'
+import {RegularFile} from '../entity/File'
 
 export class MiscRoutes {
 
   constructor(conn: Connection) {
     this.conn = conn
-    this.fileRepo = conn.getRepository<File>('file')
+    this.fileRepo = conn.getRepository<RegularFile>('regular_file')
   }
 
   readonly conn: Connection
-  readonly fileRepo: Repository<File>
+  readonly fileRepo: Repository<RegularFile>
 
   status: RequestHandler = async (_req: Request, res: Response, next) =>
     this.fileRepo.createQueryBuilder('file').leftJoin('file.site', 'site')

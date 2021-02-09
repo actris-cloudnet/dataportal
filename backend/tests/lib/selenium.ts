@@ -7,7 +7,7 @@ export async function initDriver() {
   if (process.env.CI) options.addArguments('-headless') // Run in headless on CI
   await clearRepo('visualization')
   await clearRepo('model_visualization')
-  await clearRepo('file')
+  await clearRepo('regular_file')
   await clearRepo('model_file')
   await clearRepo('search_file')
   return new Builder()
