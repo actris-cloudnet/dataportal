@@ -120,6 +120,7 @@ For CLU internal use:
 | command | description |
 |---------|-------------|
 |`fetch-remote-db` | retrieve remote database to development environment. |
+|`fetch-cached-db` | retrieve cached database to development environment. |
 |`fetch-and-start` | retrieve remote database and start. |
 
 ### License
