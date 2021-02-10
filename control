@@ -12,10 +12,12 @@ fileserver_port=4000
 frontend_port=8000
 backend_port=3000
 pid_dir='.'
+ts_node_flags='--pretty'
 
 if [ "$NODE_ENV" '==' 'test' ] || [ "$NODE_ENV" '==' 'ci-test' ]; then
     backend_port=3001
     pid_dir='tests'
+    ts_node_flags='--pretty -T'
 fi
 
 is_production () {
@@ -64,7 +66,7 @@ case "$action" in
       node build/server.js > $pid_dir/all.log 2>&1 &
     else
       if [[ ! -f $target ]]; then
-          npx nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'npx ts-node --pretty' src/server.ts > $pid_dir/all.log 2>&1 &
+          npx nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec "npx ts-node $ts_node_flags" src/server.ts > $pid_dir/all.log 2>&1 &
           echo $! > $target
       fi
     fi
