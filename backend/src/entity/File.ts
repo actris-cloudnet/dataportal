@@ -15,6 +15,7 @@ import {Visualization} from './Visualization'
 import {isValidDate} from '../lib'
 import {basename} from 'path'
 import {Model} from './Model'
+import {ModelVisualization} from './ModelVisualization'
 
 @Entity()
 @Unique(['checksum'])
@@ -60,9 +61,6 @@ export abstract class File {
     @ManyToOne(_ => Product, product => product.files)
     product!: Product
 
-    @OneToMany(_ => Visualization, viz => viz.sourceFile)
-    visualizations!: Visualization[]
-
     @Column()
     createdAt!: Date
 
@@ -94,6 +92,9 @@ export class RegularFile extends File {
   @Column({default: ''})
   cloudnetpyVersion!: string
 
+  @OneToMany(_ => Visualization, viz => viz.sourceFile)
+  visualizations!: Visualization[]
+
 }
 
 @Entity()
@@ -101,6 +102,9 @@ export class ModelFile extends File {
 
   @ManyToOne(_ => Model, model => model.files)
   model!: Model
+
+  @OneToMany(_ => ModelVisualization, viz => viz.sourceFile)
+  visualizations!: ModelVisualization[]
 
 }
 
