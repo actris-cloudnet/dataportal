@@ -237,6 +237,13 @@ case "$action" in
     ssh -C "$DATAPORTAL_SSH" "pg_dump dataportal" | tee remote-db.tmp.sql | psql dataportal
     ;;
 
+    fetch-cached-db)
+    echo "Reading cached db..."
+    dropdb dataportal
+    createdb dataportal
+    psql dataportal < remote-db.tmp.sql
+    ;;
+
     reset-db)
     dropdb dataportal || true
     createdb dataportal
