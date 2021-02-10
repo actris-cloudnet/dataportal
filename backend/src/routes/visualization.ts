@@ -16,7 +16,7 @@ export class VisualizationRoutes {
     this.fileRepo = conn.getRepository<RegularFile>('regular_file')
     this.modelFileRepo = conn.getRepository<ModelFile>('model_file')
     this.visualizationRepo = conn.getRepository<Visualization>('visualization')
-    this.modelVisualizationRepo = conn.getRepository<ModelVisualization>('visualization')
+    this.modelVisualizationRepo = conn.getRepository<ModelVisualization>('model_visualization')
     this.productVariableRepo = conn.getRepository<ProductVariable>('product_variable')
     this.fileController = fileController
   }
@@ -52,8 +52,7 @@ export class VisualizationRoutes {
         insert.then(_ => res.sendStatus(201))
           .catch(err => {
             if (rowExists(err)) return res.sendStatus(200)
-            res.sendStatus(500)
-            next(err)
+            return next({status: 500, errors: err})
           })
       })
       .catch((err: any) => next({ status: 400, errors: err}))

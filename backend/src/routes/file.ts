@@ -125,7 +125,7 @@ export class FileRoutes {
       const existingFile = await this.findAnyFile(findFileByName)
       const searchFile = new SearchFile(file)
 
-      const FileClass = isModel ? ModelFile : File
+      const FileClass = isModel ? ModelFile : RegularFile
       if (existingFile == undefined) { // New file
         file.createdAt = file.updatedAt
         await this.conn.transaction(async transactionalEntityManager => {
@@ -199,7 +199,6 @@ export class FileRoutes {
     let repo: Repository<RegularFile|ModelFile> = this.fileRepo
     if (isModel) {
       repo = this.modelFileRepo
-      query.product = undefined
     }
     let qb = repo.createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
@@ -281,6 +280,7 @@ export class FileRoutes {
 }
 
 function addCommonFilters<T>(qb: SelectQueryBuilder<T>, query: any) {
+  console.log(query)
   qb.andWhere('site.id IN (:...site)', query)
   if (query.product) qb.andWhere('product.id IN (:...product)', query)
   if (query.dateFrom) qb.andWhere('file.measurementDate >= :dateFrom', query)

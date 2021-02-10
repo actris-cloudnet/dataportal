@@ -1,5 +1,5 @@
 import {BeforeInsert, BeforeUpdate, Column, Entity, JoinTable, ManyToMany, PrimaryColumn,} from 'typeorm'
-import {File, ModelFile} from './File'
+import {File, ModelFile, RegularFile} from './File'
 import {v4 as generateUuidV4} from 'uuid'
 
 @Entity()
@@ -8,7 +8,7 @@ export class Collection {
   @PrimaryColumn('uuid')
   uuid!: string
 
-  @ManyToMany(_type => File)
+  @ManyToMany(_type => RegularFile)
   @JoinTable()
   files!: File[]
 
