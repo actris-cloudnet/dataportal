@@ -27,7 +27,7 @@ const expectedModelResult = {
   visualizations: [
     {
       s3key: 'test3.png',
-      'productVariable': {'id': 'test2', 'humanReadableName': 'Kaljanhimo', 'order': '0'}
+      'productVariable': {'id': 'test1', 'humanReadableName': 'Auringonpaisteen määrä', 'order': '1'}
     },
   ]
 }
