@@ -1,5 +1,5 @@
 import {Entity, ManyToOne, PrimaryColumn} from 'typeorm'
-import {File} from './File'
+import {File, RegularFile} from './File'
 import {ProductVariable} from './ProductVariable'
 
 
@@ -8,7 +8,7 @@ export class Visualization {
   @PrimaryColumn()
   s3key!: string
 
-  @ManyToOne(_ => File, file => file.visualizations)
+  @ManyToOne(_ => RegularFile, file => file.visualizations)
   sourceFile!: File
 
   @ManyToOne(_ => ProductVariable, prodVar => prodVar.visualizations)
