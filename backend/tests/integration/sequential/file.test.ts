@@ -1,17 +1,20 @@
 import {Connection, createConnection, Repository} from 'typeorm'
-import {File, ModelFile} from '../../../src/entity/File'
+import {ModelFile, RegularFile} from '../../../src/entity/File'
 import {readFileSync} from 'fs'
 import {backendPrivateUrl, storageServiceUrl} from '../../lib'
 import axios from 'axios'
 import {Visualization} from '../../../src/entity/Visualization'
 import {SearchFile} from '../../../src/entity/SearchFile'
+import {ModelVisualization} from '../../../src/entity/ModelVisualization'
 
 
 let conn: Connection
-let fileRepo: Repository<File>
+let fileRepo: Repository<RegularFile>
 let modelFileRepo: Repository<ModelFile>
 let searchFileRepo: Repository<SearchFile>
 let vizRepo: Repository<Visualization>
+let modelVizRepo: Repository<ModelVisualization>
+
 const volatileFile = JSON.parse(readFileSync('tests/data/file.json', 'utf8'))
 const stableFile  = {...volatileFile, ...{volatile: false, pid: '1234'}}
 
@@ -21,6 +24,7 @@ beforeAll(async () => {
   modelFileRepo = conn.getRepository('model_file')
   searchFileRepo = conn.getRepository('search_file')
   vizRepo = conn.getRepository('visualization')
+  modelVizRepo = conn.getRepository('model_visualization')
   return Promise.all([
     axios.put(`${storageServiceUrl}cloudnet-product-volatile/${volatileFile.s3key}`, 'content'),
     axios.put(`${storageServiceUrl}cloudnet-product/${stableFile.s3key}`, 'content'),
@@ -30,6 +34,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   await vizRepo.delete({})
+  await modelVizRepo.delete({})
   await searchFileRepo.delete({})
   await modelFileRepo.delete({})
   return fileRepo.delete({})
@@ -37,6 +42,8 @@ beforeEach(async () => {
 
 afterAll(async () => {
   await vizRepo.delete({})
+  await modelVizRepo.delete({})
+  await modelFileRepo.delete({})
   await fileRepo.delete({})
   await conn.close()
 })
