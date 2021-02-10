@@ -7,6 +7,7 @@ import {LatestVisualizationDateResponse} from '../entity/LatestVisualizationDate
 import {FileRoutes} from './file'
 import {ModelFile, RegularFile} from '../entity/File'
 import {ProductVariable} from '../entity/ProductVariable'
+import {ModelVisualization} from '../entity/ModelVisualization'
 
 export class VisualizationRoutes {
 
@@ -15,6 +16,7 @@ export class VisualizationRoutes {
     this.fileRepo = conn.getRepository<RegularFile>('regular_file')
     this.modelFileRepo = conn.getRepository<ModelFile>('model_file')
     this.visualizationRepo = conn.getRepository<Visualization>('visualization')
+    this.modelVisualizationRepo = conn.getRepository<ModelVisualization>('visualization')
     this.productVariableRepo = conn.getRepository<ProductVariable>('product_variable')
     this.fileController = fileController
   }
@@ -23,6 +25,7 @@ export class VisualizationRoutes {
   readonly fileRepo: Repository<RegularFile>
   readonly modelFileRepo: Repository<ModelFile>
   readonly visualizationRepo: Repository<Visualization>
+  readonly modelVisualizationRepo: Repository<ModelVisualization>
   readonly productVariableRepo: Repository<ProductVariable>
   readonly fileController: FileRoutes
 
