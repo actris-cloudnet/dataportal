@@ -34,7 +34,7 @@ import {DownloadRoutes} from './routes/download'
   const miscRoutes = new MiscRoutes(conn)
   const collRoutes = new CollectionRoutes(conn)
   const modelRoutes = new ModelRoutes(conn)
-  const dlRoutes = new DownloadRoutes(conn)
+  const dlRoutes = new DownloadRoutes(conn, fileRoutes)
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     if (err.status < 500) console.log(`Error ${err.status} in ${req.method} ${req.path}:`, stringify(err)) // Client error

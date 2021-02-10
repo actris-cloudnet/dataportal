@@ -10,15 +10,17 @@ import config from '../config'
 import * as http from 'http'
 import {IncomingMessage} from 'http'
 import archiver = require('archiver')
+import {FileRoutes} from './file'
 
 export class DownloadRoutes {
 
-  constructor(conn: Connection) {
+  constructor(conn: Connection, fileController: FileRoutes) {
     this.conn = conn
     this.collectionRepo = conn.getRepository<Collection>('collection')
     this.uploadRepo = conn.getRepository<Upload>('upload')
     this.downloadRepo = conn.getRepository<Download>('download')
     this.fileRepo = conn.getRepository<RegularFile>('regular_file')
+    this.fileController = fileController
   }
 
   readonly conn: Connection
@@ -26,11 +28,12 @@ export class DownloadRoutes {
   readonly fileRepo: Repository<RegularFile>
   readonly uploadRepo: Repository<Upload>
   readonly downloadRepo: Repository<Download>
+  readonly fileController: FileRoutes
 
   product: RequestHandler = async (req, res, next) => {
     const s3key = req.params[0]
     try {
-      const file = await this.fileRepo.findOne({uuid: req.params.uuid, s3key}) // FIXME
+      const file = await this.fileController.findAnyFile(repo => repo.findOne({uuid: req.params.uuid, s3key}))
       if (file === undefined) return next({status: 404, errors: ['File not found']})
       const upstreamRes = await this.makeFileRequest(file)
       res.setHeader('Content-Type', 'application/octet-stream')
