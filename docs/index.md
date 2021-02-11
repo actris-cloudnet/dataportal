@@ -260,13 +260,23 @@ Response body:
 
 Queries the metadata of model files. In addition to the filtering parameters of `/api/files`, has the following parameters for filtering the results:
 
-- `model`: One or more `Model` ids, by which to filter the model files.
-- `allModels`: By default the API returns only the best model available for each day. Adding this parameter will fetch all available models.
+Queries the metadata of multiple product files. On a successful query responds with an array of `File` objects.
+The results can be filtered with the following parameters:
+- `site`: One or more `Site` ids, from which to display data files.
+- `date`: Only display data from a given date. Date format is `YYYY-MM-DD` or any
+  date format parseable by [JavaScript `Date`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) -object.
+- `dateFrom`: Limit query to files whose `measurementDate` is `dateFrom` or later. Same date format as in `date`.
+  By default `measurementDate` is not limited.
+- `dateTo`: Limit query to files whose `measurementDate` is `dateTo` or earlier. Same date format as in `date`.
+  If omitted will default to the current date.
+- `filename`: One or more filenames by which to filter the files.
 
-The `ModelFile` response is identical to the `File` response, with an additional `model` property. The `model` property
+The `ModelFile` response similar to the `File` response, with an additional `model` property. The `model` property
 is an object with the following properties:
 - `id`: `Model` id.
 - `optimumOrder`: An integer surmising the quality of the model. Lower is better.
+
+Furthermore, the `ModelFile` response omits the fields `cloudnetPyVersion` and `sourceFileIds`, as this information is not available for model files.
 
 Example query for fetching metadata for `gdas1` model from Lindenberg on 2. March 2021:
 
@@ -284,11 +294,9 @@ Response body:
     "legacy": false,
     "measurementDate": "2021-02-03",
     "history": "2021-02-04 08:10:26 - File content harmonized by the CLU unit.\n03-Feb-2021 18:59:45: Created from GDAS1 profiles produced with the profile binary in the HYSPLIT offline package using convert_gdas12pro.sh.",
-    "cloudnetpyVersion": "",
     "checksum": "0b8b621ad2d76ca629451f56c94b79b432caba9c2839b3fcc535910544b3b854",
     "size": 194983,
     "format": "HDF5 (NetCDF4)",
-    "sourceFileIds": null,
     "createdAt": "2021-02-04T08:10:28.001Z",
     "updatedAt": "2021-02-04T08:10:28.001Z",
     "site": {
