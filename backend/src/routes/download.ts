@@ -2,7 +2,7 @@ import {RequestHandler} from 'express'
 
 import {Collection} from '../entity/Collection'
 import {Connection, Repository} from 'typeorm'
-import {File} from '../entity/File'
+import {File, RegularFile} from '../entity/File'
 import {Upload} from '../entity/Upload'
 import {Download, ObjectType} from '../entity/Download'
 import {getBucketForFile, ssAuthString} from '../lib'
@@ -10,27 +10,30 @@ import config from '../config'
 import * as http from 'http'
 import {IncomingMessage} from 'http'
 import archiver = require('archiver')
+import {FileRoutes} from './file'
 
 export class DownloadRoutes {
 
-  constructor(conn: Connection) {
+  constructor(conn: Connection, fileController: FileRoutes) {
     this.conn = conn
     this.collectionRepo = conn.getRepository<Collection>('collection')
     this.uploadRepo = conn.getRepository<Upload>('upload')
     this.downloadRepo = conn.getRepository<Download>('download')
-    this.fileRepo = conn.getRepository<File>('file')
+    this.fileRepo = conn.getRepository<RegularFile>('regular_file')
+    this.fileController = fileController
   }
 
   readonly conn: Connection
   readonly collectionRepo: Repository<Collection>
-  readonly fileRepo: Repository<File>
+  readonly fileRepo: Repository<RegularFile>
   readonly uploadRepo: Repository<Upload>
   readonly downloadRepo: Repository<Download>
+  readonly fileController: FileRoutes
 
   product: RequestHandler = async (req, res, next) => {
     const s3key = req.params[0]
     try {
-      const file = await this.fileRepo.findOne({uuid: req.params.uuid, s3key})
+      const file = await this.fileController.findAnyFile(repo => repo.findOne({uuid: req.params.uuid, s3key}))
       if (file === undefined) return next({status: 404, errors: ['File not found']})
       const upstreamRes = await this.makeFileRequest(file)
       res.setHeader('Content-Type', 'application/octet-stream')
@@ -45,10 +48,11 @@ export class DownloadRoutes {
 
   collection: RequestHandler = async (req, res, next) => {
     const collectionUuid: string = req.params.uuid
-    const collection = await this.collectionRepo.findOne(collectionUuid, {relations: ['files']})
+    const collection = await this.collectionRepo.findOne(collectionUuid, {relations: ['files', 'modelFiles']})
     if (collection === undefined) {
       return next({status: 404, errors: ['No collection matches this UUID.']})
     }
+    const allFiles = collection.files.concat(collection.modelFiles)
     try {
       const archive = archiver('zip', { store: true })
       archive.on('warning', console.error)
@@ -62,12 +66,12 @@ export class DownloadRoutes {
 
       let i = 1
       const appendFile = async (idx: number) => {
-        const file = collection.files[idx]
+        const file = allFiles[idx]
         const fileStream = await this.makeFileRequest(file)
         archive.append(fileStream, { name: file.filename })
-        if (idx == (collection.files.length - 1)) archive.finalize()
+        if (idx == (allFiles.length - 1)) archive.finalize()
       }
-      archive.on('entry', () => i < collection.files.length ? appendFile(i++) : null)
+      archive.on('entry', () => i < allFiles.length ? appendFile(i++) : null)
       appendFile(0)
 
       // Update collection download count

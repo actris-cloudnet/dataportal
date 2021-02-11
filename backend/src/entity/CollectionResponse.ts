@@ -13,8 +13,10 @@ export class CollectionResponse {
   updatedAt: Date
 
   constructor(coll: Collection) {
+    const sortedFiles = coll.files.concat(coll.modelFiles)
+      .sort((a, b) => a.measurementDate > b.measurementDate ? 1 : -1)
     this.uuid = coll.uuid
-    this.files = convertToSearchResponse(coll.files.sort((a, b) => a.measurementDate > b.measurementDate ? 1 : -1))
+    this.files = convertToSearchResponse(sortedFiles)
     this.title = coll.title
     this.pid = coll.pid
     this.downloadCount = coll.downloadCount

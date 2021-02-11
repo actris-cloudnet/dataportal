@@ -12,10 +12,12 @@ fileserver_port=4000
 frontend_port=8000
 backend_port=3000
 pid_dir='.'
+ts_node_flags='--pretty'
 
-if [[ "$NODE_ENV" == 'test' ]]; then
+if [ "$NODE_ENV" '==' 'test' ] || [ "$NODE_ENV" '==' 'ci-test' ]; then
     backend_port=3001
     pid_dir='tests'
+    ts_node_flags='--pretty -T'
 fi
 
 is_production () {
@@ -27,7 +29,7 @@ is_ci () {
 }
 
 waitport () {
-    timeout=15
+    timeout=20
     interval=0.5
     i=0
     echo -n "Waiting for port $1... "
@@ -64,7 +66,7 @@ case "$action" in
       node build/server.js > $pid_dir/all.log 2>&1 &
     else
       if [[ ! -f $target ]]; then
-          npx nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'npx ts-node --pretty' src/server.ts > $pid_dir/all.log 2>&1 &
+          nohup npx nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec "npx ts-node $ts_node_flags" src/server.ts > $pid_dir/all.log 2>&1 &
           echo $! > $target
       fi
     fi
@@ -228,15 +230,24 @@ case "$action" in
 
     fetch-remote-db)
     echo "Fetching remote db..."
-    dropdb dataportal 2> /dev/null || true
+    dropdb dataportal
     createdb dataportal
-    ssh -C dataport@altocumulus.fmi.fi "pg_dump dataportal" | psql dataportal
+    ssh -C dataport@altocumulus.fmi.fi "pg_dump dataportal" | tee remote-db.tmp.sql | psql dataportal
+    ;;
+
+    fetch-cached-db)
+    echo "Reading cached db..."
+    dropdb dataportal
+    createdb dataportal
+    psql dataportal < remote-db.tmp.sql
     ;;
 
     reset-db)
     dropdb dataportal || true
     createdb dataportal
-    npx ts-node ./node_modules/.bin/typeorm schema:sync
+    cd backend
+    scripts/typeorm migration:run
+    cd ..
     ;;
 
     *)

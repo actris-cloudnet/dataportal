@@ -20,6 +20,18 @@ const expectedResult = {
   ]
 }
 
+const expectedModelResult = {
+  sourceFileId: 'a5d1d5af-3667-41bc-b952-e684f627d91c',
+  locationHumanReadable: 'Mace Head',
+  productHumanReadable: 'Model',
+  visualizations: [
+    {
+      s3key: 'test3.png',
+      'productVariable': {'id': 'test1', 'humanReadableName': 'Auringonpaisteen määrä', 'order': '1'}
+    },
+  ]
+}
+
 
 describe('GET /visualizations', () => {
 
@@ -30,10 +42,15 @@ describe('GET /visualizations', () => {
   })
 
   it('on valid search returns correct list of visualizations and responds with 200', async () => {
-
     const res = await axios.get(url, {headers, params: {product: 'radar'}})
     expect(res.status).toEqual(200)
     return expect(res.data).toMatchObject([expectedResult])
+  })
+
+  it('on valid search returns correct list of model visualizations and responds with 200', async () => {
+    const res = await axios.get(url, {headers, params: {product: 'model'}})
+    expect(res.status).toEqual(200)
+    return expect(res.data).toMatchObject([expectedModelResult])
   })
 })
 
@@ -49,5 +66,11 @@ describe('GET /visualizations/:uuid', () => {
     const res = await axios.get(`${url}${expectedResult.sourceFileId}`)
     expect(res.status).toEqual(200)
     return expect(res.data).toMatchObject(expectedResult)
+  })
+
+  it('returns correct list of model visualizations and responds with 200', async () => {
+    const res = await axios.get(`${url}${expectedModelResult.sourceFileId}`)
+    expect(res.status).toEqual(200)
+    return expect(res.data).toMatchObject(expectedModelResult)
   })
 })

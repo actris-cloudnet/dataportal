@@ -15,11 +15,12 @@ import {Visualization} from './Visualization'
 import {isValidDate} from '../lib'
 import {basename} from 'path'
 import {Model} from './Model'
+import {ModelVisualization} from './ModelVisualization'
 
 @Entity()
 @Unique(['checksum'])
 @Index(['measurementDate', 'site', 'product'])
-export class File {
+export abstract class File {
 
     @PrimaryColumn('uuid')
     uuid!: string
@@ -48,15 +49,6 @@ export class File {
     @Column({default: ''})
     history!: string
 
-    @ManyToOne(_ => Product, product => product.files)
-    product!: Product
-
-    @ManyToOne(() => Model, {nullable: true})
-    model!: Model
-
-    @Column({default: ''})
-    cloudnetpyVersion!: string
-
     @Column()
     checksum!: string
 
@@ -66,11 +58,8 @@ export class File {
     @Column()
     format!: string
 
-    @Column('text', {array: true, nullable: true})
-    sourceFileIds!: string[] | null
-
-    @OneToMany(_ => Visualization, viz => viz.sourceFile)
-    visualizations!: Visualization[]
+    @ManyToOne(_ => Product, product => product.files)
+    product!: Product
 
     @Column()
     createdAt!: Date
@@ -92,6 +81,31 @@ export class File {
     updateDateUpdate() {
       this.updatedAt = new Date()
     }
+}
+
+@Entity()
+export class RegularFile extends File {
+
+  @Column('text', {array: true, nullable: true})
+  sourceFileIds!: string[] | null
+
+  @Column({default: ''})
+  cloudnetpyVersion!: string
+
+  @OneToMany(_ => Visualization, viz => viz.sourceFile)
+  visualizations!: Visualization[]
+
+}
+
+@Entity()
+export class ModelFile extends File {
+
+  @ManyToOne(_ => Model, model => model.files)
+  model!: Model
+
+  @OneToMany(_ => ModelVisualization, viz => viz.sourceFile)
+  visualizations!: ModelVisualization[]
+
 }
 
 export function isFile(obj: any) {

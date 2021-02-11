@@ -1,9 +1,9 @@
-import {File} from './File'
+import {File, ModelFile} from './File'
 
 export class LatestVisualizationDateResponse {
   date: Date
 
-  constructor(file: File) {
+  constructor(file: File|ModelFile) {
     this.date = file.measurementDate
   }
 }

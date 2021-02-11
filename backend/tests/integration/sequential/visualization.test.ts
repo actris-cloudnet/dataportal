@@ -24,9 +24,9 @@ describe('PUT /visualizations', () => {
 
   beforeAll(async () => {
     conn = await createConnection('test')
-    repo = conn.getRepository('visualization')
+    repo = conn.getRepository('model_visualization')
     // File fixtures are needed here
-    await conn.getRepository('file').save(JSON.parse((await fsp.readFile('fixtures/2-file.json')).toString()))
+    await conn.getRepository('model_file').save(JSON.parse((await fsp.readFile('fixtures/2-model_file.json')).toString()))
     return axios.put(`${storageServiceUrl}cloudnet-img/${validId}`, 'content')
   })
 

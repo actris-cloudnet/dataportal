@@ -34,7 +34,7 @@ import {DownloadRoutes} from './routes/download'
   const miscRoutes = new MiscRoutes(conn)
   const collRoutes = new CollectionRoutes(conn)
   const modelRoutes = new ModelRoutes(conn)
-  const dlRoutes = new DownloadRoutes(conn)
+  const dlRoutes = new DownloadRoutes(conn, fileRoutes)
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     if (err.status < 500) console.log(`Error ${err.status} in ${req.method} ${req.path}:`, stringify(err)) // Client error
@@ -82,6 +82,12 @@ import {DownloadRoutes} from './routes/download'
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
     fileRoutes.files)
+  app.get('/api/model-files',
+    middleware.filesValidator,
+    middleware.modelFilesValidator,
+    middleware.filesQueryAugmenter,
+    middleware.checkParamsExistInDb,
+    fileRoutes.modelFiles)
   app.get('/api/files/:uuid', middleware.validateUuidParam, fileRoutes.file)
   app.get('/api/sites', siteRoutes.sites)
   app.get('/api/sites/:siteid', siteRoutes.site)

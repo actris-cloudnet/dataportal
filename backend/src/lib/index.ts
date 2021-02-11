@@ -1,6 +1,7 @@
 import {Connection, SelectQueryBuilder} from 'typeorm'
 import {basename} from 'path'
 import {Request} from 'express'
+import {ModelFile, RegularFile} from '../entity/File'
 import {File} from '../entity/File'
 import {SearchFileResponse} from '../entity/SearchFileResponse'
 import config from '../config'
@@ -65,16 +66,16 @@ export const hideTestDataFromNormalUsers = <T>(dbQuery: SelectQueryBuilder<T>, r
 export const convertToSearchResponse = (files: SearchFile[]) =>
   files.map(file => new SearchFileResponse(file))
 
-export const sortByMeasurementDateAsc = (files: File[]) =>
+export const sortByMeasurementDateAsc = <T extends File|SearchFile>(files: T[]): T[] =>
   files.sort((a, b) => new Date(a.measurementDate).getTime() - new Date(b.measurementDate).getTime())
 
-export const augmentFiles = (files: File[]) =>
+export const augmentFiles = (files: (File|RegularFile|ModelFile)[]) =>
   files.map(file => ({
     ...file,
     downloadUrl: `${config.downloadBaseUrl}${getDownloadPathForFile(file)}`,
     filename: basename(file.s3key),
     s3key: undefined,
-    model: file.model || undefined
+    model: 'model' in file ? file.model : undefined
   }))
 
 export const ssAuthString = () =>

@@ -193,7 +193,7 @@ Response body:
 
 ### `GET /api/files` → `File[]`
 
-Queries the metadata of multiple files. On a successful query responds with an array of `File` objects. 
+Queries the metadata of multiple product files. On a successful query responds with an array of `File` objects. 
 The results can be filtered with the following parameters:
 - `site`: One or more `Site` ids, from which to display data files.
 - `date`: Only display data from a given date. Date format is `YYYY-MM-DD` or any 
@@ -202,10 +202,8 @@ date format parseable by [JavaScript `Date`](https://developer.mozilla.org/en-US
 By default `measurementDate` is not limited.
 - `dateTo`: Limit query to files whose `measurementDate` is `dateTo` or earlier. Same date format as in `date`.
 If omitted will default to the current date.
-- `product`: One or more `Product` ids, by which to filter the files.
-- `model`: One or more `Model` ids, by which to filter the model files.
+- `product`: One or more `Product` ids, by which to filter the files. May NOT be `model`; for model files, see route `/api/model-files`.
 - `filename`: One or more filenames by which to filter the files.
-- `allModels`: By default the API returns only the best model available for each day. Adding this parameter will fetch all available models.
 - `allVersions`: By default the API returns only the latest version of the files. Adding this parameter will fetch all existing versions.
 - `showLegacy`: By default the API does not return legacy data. Adding this parameter will fetch also legacy data.
 
@@ -255,6 +253,76 @@ Response body:
     "filename": "20201125_bucharest_classification.nc"
   },
 ...
+]
+```
+
+### `GET /api/model-files` → `ModelFile[]`
+
+Queries the metadata of model files. In addition to the filtering parameters of `/api/files`, has the following parameters for filtering the results:
+
+Queries the metadata of multiple product files. On a successful query responds with an array of `File` objects.
+The results can be filtered with the following parameters:
+- `site`: One or more `Site` ids, from which to display data files.
+- `date`: Only display data from a given date. Date format is `YYYY-MM-DD` or any
+  date format parseable by [JavaScript `Date`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) -object.
+- `dateFrom`: Limit query to files whose `measurementDate` is `dateFrom` or later. Same date format as in `date`.
+  By default `measurementDate` is not limited.
+- `dateTo`: Limit query to files whose `measurementDate` is `dateTo` or earlier. Same date format as in `date`.
+  If omitted will default to the current date.
+- `filename`: One or more filenames by which to filter the files.
+
+The `ModelFile` response similar to the `File` response, with an additional `model` property. The `model` property
+is an object with the following properties:
+- `id`: `Model` id.
+- `optimumOrder`: An integer surmising the quality of the model. Lower is better.
+
+Furthermore, the `ModelFile` response omits the fields `cloudnetPyVersion` and `sourceFileIds`, as this information is not available for model files.
+
+Example query for fetching metadata for `gdas1` model from Lindenberg on 2. March 2021:
+
+`GET https://cloudnet.fmi.fi/api/model-files?site=lindenberg&date=2021-02-03&model=gdas1`
+
+Response body:
+
+```json
+[
+  {
+    "uuid": "90f95f81-4f45-4efb-a25d-80066652aece",
+    "version": "",
+    "pid": "",
+    "volatile": true,
+    "legacy": false,
+    "measurementDate": "2021-02-03",
+    "history": "2021-02-04 08:10:26 - File content harmonized by the CLU unit.\n03-Feb-2021 18:59:45: Created from GDAS1 profiles produced with the profile binary in the HYSPLIT offline package using convert_gdas12pro.sh.",
+    "checksum": "0b8b621ad2d76ca629451f56c94b79b432caba9c2839b3fcc535910544b3b854",
+    "size": 194983,
+    "format": "HDF5 (NetCDF4)",
+    "createdAt": "2021-02-04T08:10:28.001Z",
+    "updatedAt": "2021-02-04T08:10:28.001Z",
+    "site": {
+      "id": "lindenberg",
+      "humanReadableName": "Lindenberg",
+      "type": [
+        "cloudnet"
+      ],
+      "latitude": 52.208,
+      "longitude": 14.118,
+      "altitude": 104,
+      "gaw": "LIN",
+      "country": "Germany"
+    },
+    "product": {
+      "id": "model",
+      "humanReadableName": "Model",
+      "level": "1"
+    },
+    "model": {
+      "id": "gdas1",
+      "optimumOrder": 3
+    },
+    "downloadUrl": "http://localhost:3000/api/download/product/90f95f81-4f45-4efb-a25d-80066652aece/20210203_lindenberg_gdas1.nc",
+    "filename": "20210203_lindenberg_gdas1.nc"
+  }
 ]
 ```
 

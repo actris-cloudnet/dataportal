@@ -1,24 +1,30 @@
 import {Connection, createConnection, Repository} from 'typeorm'
-import {File} from '../../../src/entity/File'
+import {ModelFile, RegularFile} from '../../../src/entity/File'
 import {readFileSync} from 'fs'
 import {backendPrivateUrl, storageServiceUrl} from '../../lib'
 import axios from 'axios'
 import {Visualization} from '../../../src/entity/Visualization'
 import {SearchFile} from '../../../src/entity/SearchFile'
+import {ModelVisualization} from '../../../src/entity/ModelVisualization'
 
 
 let conn: Connection
-let fileRepo: Repository<File>
+let fileRepo: Repository<RegularFile>
+let modelFileRepo: Repository<ModelFile>
 let searchFileRepo: Repository<SearchFile>
 let vizRepo: Repository<Visualization>
+let modelVizRepo: Repository<ModelVisualization>
+
 const volatileFile = JSON.parse(readFileSync('tests/data/file.json', 'utf8'))
 const stableFile  = {...volatileFile, ...{volatile: false, pid: '1234'}}
 
 beforeAll(async () => {
   conn = await createConnection('test')
-  fileRepo = conn.getRepository('file')
+  fileRepo = conn.getRepository('regular_file')
+  modelFileRepo = conn.getRepository('model_file')
   searchFileRepo = conn.getRepository('search_file')
   vizRepo = conn.getRepository('visualization')
+  modelVizRepo = conn.getRepository('model_visualization')
   return Promise.all([
     axios.put(`${storageServiceUrl}cloudnet-product-volatile/${volatileFile.s3key}`, 'content'),
     axios.put(`${storageServiceUrl}cloudnet-product/${stableFile.s3key}`, 'content'),
@@ -28,12 +34,16 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   await vizRepo.delete({})
+  await modelVizRepo.delete({})
   await searchFileRepo.delete({})
+  await modelFileRepo.delete({})
   return fileRepo.delete({})
 })
 
 afterAll(async () => {
   await vizRepo.delete({})
+  await modelVizRepo.delete({})
+  await modelFileRepo.delete({})
   await fileRepo.delete({})
   await conn.close()
 })
@@ -118,11 +128,11 @@ describe('PUT /files/:s3key', () => {
     tmpfile2.s3key = 'icomodel.nc'
     tmpfile2.checksum = '610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678'
     await expect(putFile(tmpfile1)).resolves.toMatchObject({status: 201})
-    await expect(fileRepo.findOneOrFail(tmpfile1.uuid, {relations: ['model']})).resolves.toMatchObject({model: {id: tmpfile1.model}})
+    await expect(modelFileRepo.findOneOrFail(tmpfile1.uuid, {relations: ['model']})).resolves.toMatchObject({model: {id: tmpfile1.model}})
     await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeTruthy()
     await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile2.s3key}`, 'content')
     await expect(putFile(tmpfile2)).resolves.toMatchObject({status: 201})
-    await expect(fileRepo.findOneOrFail(tmpfile2.uuid, {relations: ['model']})).resolves.toMatchObject({model: {id: tmpfile2.model}})
+    await expect(modelFileRepo.findOneOrFail(tmpfile2.uuid, {relations: ['model']})).resolves.toMatchObject({model: {id: tmpfile2.model}})
     await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeFalsy()
     return expect(searchFileRepo.findOne(tmpfile2.uuid)).resolves.toBeTruthy()
   })
@@ -163,6 +173,17 @@ describe('PUT /files/:s3key', () => {
     tmpfile.uuid = '22b32746-faf0-4057-9076-ed2e698dcc34'
     tmpfile.checksum = 'dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b5'
     await expect(putFile(tmpfile)).rejects.toMatchObject({ response: {status: 422}})
+  })
+
+  test('errors on model versions', async () => {
+    const tmpfile1 = {...stableFile}
+    tmpfile1.product = 'model'
+    tmpfile1.model = 'ecmwf'
+    const tmpfile2 = {...tmpfile1}
+    tmpfile2.uuid = '87EB042E-B247-4AC1-BC03-074DD0D74BDB'
+    tmpfile2.checksum = '610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678'
+    await expect(putFile(tmpfile1)).resolves.toMatchObject({status: 201})
+    return expect(putFile(tmpfile2)).rejects.toMatchObject({response: {status: 501}})
   })
 })
 

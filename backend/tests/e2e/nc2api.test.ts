@@ -14,14 +14,14 @@ beforeAll(async () => {
   conn = await createConnection('test')
   await conn.getRepository('download').delete({})
   await conn.getRepository('visualization').delete({})
-  await conn.getRepository('file').delete({})
+  await conn.getRepository('regular_file').delete({})
   repo = conn.getRepository('download')
 })
 
 afterAll(async () => {
   await conn.getRepository('download').delete({})
   await conn.getRepository('visualization').delete({})
-  await conn.getRepository('file').delete({})
+  await conn.getRepository('regular_file').delete({})
   await conn.close()
 })
 

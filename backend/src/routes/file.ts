@@ -2,7 +2,7 @@ import {Request, RequestHandler, Response} from 'express'
 import {Collection} from '../entity/Collection'
 import config from '../config'
 import {Connection, EntityManager, Repository, SelectQueryBuilder} from 'typeorm'
-import {File, isFile} from '../entity/File'
+import {File, isFile, RegularFile} from '../entity/File'
 import {
   checkFileExists,
   convertToSearchResponse,
@@ -14,41 +14,61 @@ import {augmentFiles} from '../lib/'
 import {SearchFile} from '../entity/SearchFile'
 import {Model} from '../entity/Model'
 import {basename} from 'path'
+import {ModelFile} from '../entity/File'
 
 export class FileRoutes {
 
   constructor(conn: Connection) {
     this.conn = conn
     this.collectionRepo = conn.getRepository<Collection>('collection')
-    this.fileRepo = conn.getRepository<File>('file')
+    this.fileRepo = conn.getRepository<RegularFile>('regular_file')
+    this.modelFileRepo = conn.getRepository<ModelFile>('model_file')
     this.searchFileRepo = conn.getRepository<SearchFile>('search_file')
     this.fileServerUrl = config.downloadBaseUrl
   }
 
   readonly conn: Connection
   readonly collectionRepo: Repository<Collection>
-  readonly fileRepo: Repository<File>
+  readonly fileRepo: Repository<RegularFile>
+  readonly modelFileRepo: Repository<ModelFile>
   readonly searchFileRepo: Repository<SearchFile>
   readonly fileServerUrl: string
 
   file: RequestHandler = async (req: Request, res: Response, next) => {
-    const qb = this.fileRepo.createQueryBuilder('file')
-      .leftJoinAndSelect('file.site', 'site')
-      .leftJoinAndSelect('file.product', 'product')
-      .leftJoinAndSelect('file.model', 'model')
-      .where('file.uuid = :uuid', req.params)
-    hideTestDataFromNormalUsers<File>(qb, req)
-      .getMany()
-      .then(result => {
-        if (result.length == 0) throw new Error()
-        res.send(augmentFiles(result)[0])
+
+    const getFileByUuid = (repo: Repository<RegularFile|ModelFile>, isModel: boolean|undefined) => {
+      const qb = repo.createQueryBuilder('file')
+        .leftJoinAndSelect('file.site', 'site')
+        .leftJoinAndSelect('file.product', 'product')
+      if (isModel) qb.leftJoinAndSelect('file.model', 'model')
+      qb.where('file.uuid = :uuid', req.params)
+      return hideTestDataFromNormalUsers<RegularFile|ModelFile>(qb, req)
+        .getOne()
+    }
+
+    this.findAnyFile(getFileByUuid)
+      .then(file => {
+        if (file == null) return next({ status: 404, errors: ['No files match this UUID'] })
+        res.send(augmentFiles([file])[0])
       })
-      .catch(_err => next({ status: 404, errors: ['No files match this UUID'] }))
+      .catch(err => next(err))
   }
 
   files: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query
-    this.filesQueryBuilder(query)
+    this.filesQueryBuilder(query, 'file')
+      .getMany()
+      .then(result => {
+        res.send(augmentFiles(result))
+      })
+      .catch(err => {
+        next({ status: 500, errors: err })
+      })
+  }
+
+  modelFiles: RequestHandler = async (req: Request, res: Response, next) => {
+    const query = req.query
+    this.filesQueryBuilder(query, 'model')
       .getMany()
       .then(result => {
         res.send(augmentFiles(result))
@@ -80,6 +100,7 @@ export class FileRoutes {
     file.s3key = req.params[0]
     file.updatedAt = new Date()
     if (!isFile(file)) return next({status: 422, errors: ['Request body is missing fields or has invalid values in them']})
+    const isModel = file.model && true
 
     try {
       const sourceFileIds = req.body.sourceFileIds || []
@@ -96,33 +117,38 @@ export class FileRoutes {
     }
 
     try {
-      const existingFile = await this.fileRepo.createQueryBuilder('file')
-        .leftJoinAndSelect('file.site', 'site')
-        .where("regexp_replace(s3key, '.+/', '') = :filename", {filename: basename(file.s3key)}) // eslint-disable-line quotes
-        .getOne()
+      const findFileByName = (repo: Repository<RegularFile|ModelFile>) =>
+        repo.createQueryBuilder('file')
+          .leftJoinAndSelect('file.site', 'site')
+          .where("regexp_replace(s3key, '.+/', '') = :filename", {filename: basename(file.s3key)}) // eslint-disable-line quotes
+          .getOne()
+      const existingFile = await this.findAnyFile(findFileByName)
       const searchFile = new SearchFile(file)
+
+      const FileClass = isModel ? ModelFile : RegularFile
       if (existingFile == undefined) { // New file
         file.createdAt = file.updatedAt
         await this.conn.transaction(async transactionalEntityManager => {
-          if (file.product == 'model') {
-            await this.updateModelSearchFile(transactionalEntityManager, file, searchFile)
+          if (isModel) {
+            await FileRoutes.updateModelSearchFile(transactionalEntityManager, file, searchFile)
           } else {
             await transactionalEntityManager.insert(SearchFile, searchFile)
           }
-          await transactionalEntityManager.insert(File, file)
+          await transactionalEntityManager.insert(FileClass, file)
         })
         res.sendStatus(201)
       } else if (existingFile.site.isTestSite || existingFile.volatile) { // Replace existing
         file.createdAt = existingFile.createdAt
         await this.conn.transaction(async transactionalEntityManager => {
-          await transactionalEntityManager.update(File, {uuid: file.uuid}, file)
+          await transactionalEntityManager.update(FileClass, {uuid: file.uuid}, file)
           await transactionalEntityManager.update(SearchFile, {uuid: file.uuid}, searchFile)
         })
         res.sendStatus(200)
       } else if (existingFile.uuid != file.uuid) { // New version
+        if (isModel) return next({status: 501, errors: ['Versioning is not supported for model files.']})
         await this.conn.transaction(async transactionalEntityManager => {
           file.createdAt = file.updatedAt
-          await transactionalEntityManager.insert(File, file)
+          await transactionalEntityManager.insert(FileClass, file)
           if (!file.legacy) { // Don't display legacy files in search if cloudnet version is available
             await transactionalEntityManager.delete(SearchFile, {uuid: existingFile.uuid})
             await transactionalEntityManager.insert(SearchFile, searchFile)
@@ -162,21 +188,26 @@ export class FileRoutes {
       .catch(err => next({ status: 500, errors: err }))
 
   allsearch: RequestHandler = async (req: Request, res: Response, next) =>
-    this.fileRepo.find({ relations: ['site', 'product'] })
+    this.searchFileRepo.find({ relations: ['site', 'product'] })
       .then(result => {
         res.send(convertToSearchResponse(sortByMeasurementDateAsc(result)))
       })
       .catch(err => next({ status: 500, errors: err }))
 
-  filesQueryBuilder(query: any) {
-    let qb = this.fileRepo.createQueryBuilder('file')
+  filesQueryBuilder(query: any, mode: 'file'|'model') {
+    const isModel = mode == 'model'
+    let repo: Repository<RegularFile|ModelFile> = this.fileRepo
+    if (isModel) {
+      repo = this.modelFileRepo
+    }
+    let qb = repo.createQueryBuilder('file')
       .leftJoinAndSelect('file.site', 'site')
       .leftJoinAndSelect('file.product', 'product')
-      .leftJoinAndSelect('file.model', 'model')
+    if (isModel) qb.leftJoinAndSelect('file.model', 'model')
 
     // Where clauses
     qb = addCommonFilters(qb, query)
-    if (query.model) qb.andWhere('model.id IN (:...model)', query)
+    if (isModel && query.model) qb.andWhere('model.id IN (:...model)', query)
     if (query.filename) qb.andWhere("regexp_replace(s3key, '.+/', '') IN (:...filename)", query) // eslint-disable-line quotes
     if (query.releasedBefore) qb.andWhere('file.updatedAt < :releasedBefore', query)
 
@@ -188,34 +219,11 @@ export class FileRoutes {
       'best_version',
       'file.uuid = best_version.uuid')
     }
-    // Only allVersions
-    // Model is specified in filename, so if its present don't do anything
-    else if (!query.filename && (query.allVersions != undefined && query.allModels == undefined)) {
-      qb.innerJoin(sub_qb =>
-        sub_qb
-          .from('file', 'file')
-          .leftJoin('file.model', 'model')
-          .select('MIN(model.optimumOrder)', 'optimum_order')
-          .groupBy('file.site, file.measurementDate, file.product'),
-      'best_model',
-      'model.optimumOrder = best_model.optimum_order OR model IS NULL')
-    }
-    // Only allModels or model
-    else if ((query.allModels != undefined || query.model) && query.allVersions == undefined) {
-      qb.innerJoin(sub_qb =>
-        sub_qb
-          .from('file', 'file')
-          .select('MAX(file.updatedAt)', 'updated_at')
-          .groupBy('file.s3key'),
-      'last_version',
-      'file.updatedAt =  last_version.updated_at'
-      )
-    }
 
     // Ordering
     qb.orderBy('file.measurementDate', 'DESC')
-      .addOrderBy('model.optimumOrder', 'ASC')
-      .addOrderBy('file.legacy', 'ASC')
+    if (isModel) qb.addOrderBy('model.optimumOrder', 'ASC')
+    qb.addOrderBy('file.legacy', 'ASC')
       .addOrderBy('file.updatedAt', 'DESC')
 
     // Limit
@@ -233,9 +241,9 @@ export class FileRoutes {
     return qb
   }
 
-  private async updateModelSearchFile(transactionalEntityManager: EntityManager, file: any, searchFile: SearchFile) {
+  private static async updateModelSearchFile(transactionalEntityManager: EntityManager, file: any, searchFile: SearchFile) {
     const {optimumOrder} = await transactionalEntityManager.findOneOrFail(Model, {id: file.model})
-    const [bestModelFile] = await transactionalEntityManager.createQueryBuilder(File, 'file')
+    const [bestModelFile] = await transactionalEntityManager.createQueryBuilder(ModelFile, 'file')
       .leftJoinAndSelect('file.site', 'site')
       .leftJoinAndSelect('file.product', 'product')
       .leftJoinAndSelect('file.model', 'model')
@@ -251,9 +259,28 @@ export class FileRoutes {
     }
   }
 
+  findAnyFile(searchFunc: (arg0: Repository<RegularFile|ModelFile>, arg1?: boolean) =>
+  Promise<RegularFile|ModelFile|undefined>):
+    Promise<RegularFile|ModelFile|undefined> {
+    return Promise.all([
+      searchFunc(this.fileRepo, false),
+      searchFunc(this.modelFileRepo, true)
+    ])
+      .then(([file, modelFile]) => file ? file : modelFile)
+  }
+
+  findAllFiles(searchFunc: (arg0: Repository<RegularFile|ModelFile>, arg1?: boolean) => Promise<(RegularFile|ModelFile)[]>):
+    Promise<(RegularFile|ModelFile)[]> {
+    return Promise.all([
+      searchFunc(this.fileRepo, false),
+      searchFunc(this.modelFileRepo, true)
+    ])
+      .then(([files, modelFiles]) => files.concat(modelFiles))
+  }
 }
 
 function addCommonFilters<T>(qb: SelectQueryBuilder<T>, query: any) {
+  console.log(query)
   qb.andWhere('site.id IN (:...site)', query)
   if (query.product) qb.andWhere('product.id IN (:...product)', query)
   if (query.dateFrom) qb.andWhere('file.measurementDate >= :dateFrom', query)

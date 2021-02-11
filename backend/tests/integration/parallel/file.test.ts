@@ -11,6 +11,14 @@ describe('/api/files/:uuid', () => {
     errors: [ 'No files match this UUID' ]
   }
 
+  it('request succeeds on instrument file', async () => {
+    return expect(axios.get(`${url  }a5d1d5af-3667-41bc-b952-e684f627d91c`)).resolves.toBeTruthy()
+  })
+
+  it('request succeeds on model file', async () => {
+    return expect(axios.get(`${url  }b5d1d5af-3667-41bc-b952-e684f627d91c`)).resolves.toBeTruthy()
+  })
+
   it('responds with a 404 on test file if in normal mode', async () => {
     return expect(axios.get(url + testUuid)).rejects.toMatchObject({ response: { data: expectedBody404 }})
   })
