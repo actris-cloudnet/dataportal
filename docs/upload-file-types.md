@@ -14,11 +14,11 @@ We recommend uploading the following files:
 | `rpg-fmcw-94` | RPG FMCW-94 cloud radar | `*.LV1` and compressed `*.LV0` files. | binary |
 | `ct25k`, `cl31`, `cl51` | Vaisala ceilometers | `*.DAT` files. File extension may be different depending on collection system.  | text |
 | `chm15k`, `chm15x` | Lufft ceilometers | `*.nc` files. Either non-concatenated or concatenated files but not both. | netCDF |
-| `hatpro` | RPG HATPRO microwave radiometer | At least the `*.LWP.NC` files if available, but other files are fine too (brightness temperatures, water vapour, housekeeping). | netCDF, binary |
+| `hatpro` | RPG HATPRO microwave radiometer | At least the `*.LWP` binary files, but other files are fine too (brightness temperatures, water vapour, housekeeping). | binary |
 | `copernicus` | Copernicus cloud radar | `*.nc` files. | netCDF |
 | `galileo` | Galileo cloud radar | `*.nc` files. | netCDF |
-| `basta` | BASTA cloud radar | `*.nc` files. | netCDF |
-| `parsivel` | OTT Parsivel2 disdrometer | `*.nc` files produced with `parsivel_log_nc_convert_samdconform.py` preferred. | netCDF |
+| `basta` | BASTA cloud radar | Daily `*.nc` files. | netCDF |
+| `parsivel` | OTT Parsivel2 disdrometer | `*.txt` | text |
 | `thies-lnm` | Thies LNM disdrometer | `*.txt` files. | text |
 
 We plan to also accept the following instrument types in the future. Note that the API will not accept these yet. 
