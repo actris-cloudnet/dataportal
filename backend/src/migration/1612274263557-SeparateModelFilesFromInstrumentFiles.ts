@@ -26,6 +26,10 @@ export class SeparateModelFilesFromInstrumentFiles1612274263557 implements Migra
 
     // MOVE DATA (CUSTOM)
        await queryRunner.query(`INSERT INTO model_file SELECT uuid, s3key, version, pid, volatile, legacy, "measurementDate", history, checksum, size, format, "createdAt", "updatedAt", "siteId", "productId", "modelId" FROM regular_file WHERE "productId" = 'model'`);
+
+       await queryRunner.query(`INSERT INTO model_visualization SELECT * FROM visualization WHERE "sourceFileUuid" IN (SELECT uuid FROM model_file)`);
+       await queryRunner.query(`DELETE FROM visualization WHERE "sourceFileUuid" IN (SELECT uuid FROM model_file)`);
+
        await queryRunner.query(`DELETE FROM regular_file WHERE "productId" = 'model'`);
 
        await queryRunner.query(`ALTER TABLE "regular_file" DROP CONSTRAINT "FK_5af5a3b6962dfdb21c85c530e08"`);
