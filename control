@@ -249,7 +249,9 @@ case "$action" in
     reset-db)
     dropdb dataportal || true
     createdb dataportal
+    cd backend
     npx ts-node ./node_modules/.bin/typeorm schema:sync
+    cd ..
     ;;
 
     *)
