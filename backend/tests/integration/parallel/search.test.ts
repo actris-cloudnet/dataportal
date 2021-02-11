@@ -254,6 +254,12 @@ describe('/api/model-files', () => {
     return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
 
+  it.only('responds with 400 on invalid search params', async () => {
+    await expect(axios.get(url, {params: {allVersions: true}})).rejects.toMatchObject({ response: { status: 400 }})
+    await expect(axios.get(url, {params: {product: 'classification'}})).rejects.toMatchObject({ response: { status: 400 }})
+    return expect(axios.get(url, {params: {showLegacy: true}})).rejects.toMatchObject({ response: { status: 400 }})
+  })
+
   it('responds with 404 if a specified model is not found', async () => {
     const payload = {params: {product: 'model', model: 'sammakko'}}
     let expectedBody: RequestError = {

@@ -84,6 +84,7 @@ import {DownloadRoutes} from './routes/download'
     fileRoutes.files)
   app.get('/api/model-files',
     middleware.filesValidator,
+    middleware.modelFilesValidator,
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
     fileRoutes.modelFiles)

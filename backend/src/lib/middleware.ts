@@ -62,6 +62,20 @@ export class Middleware {
     })
 
     requestError.errors = this.checkDateConflicts(requestError.errors, req.query)
+
+    if (requestError.errors.length > 0) return next(requestError)
+    return next()
+  }
+
+  modelFilesValidator: RequestHandler = (req, _res, next) => {
+    let requestError: RequestErrorArray = { status: 400, errors: [] }
+
+    const invalidKeys = ['product', 'showLegacy', 'allVersions']
+
+    const foundInvalidKeys = Object.keys(req.query).filter(key => invalidKeys.includes(key))
+    if (foundInvalidKeys.length > 0)
+      requestError.errors = requestError.errors.concat([`Invalid query parameters for this route: ${foundInvalidKeys.join(', ')}`])
+
     requestError.errors = this.checkModelParamConflicts(requestError.errors, req.query)
 
     if (requestError.errors.length > 0) return next(requestError)
