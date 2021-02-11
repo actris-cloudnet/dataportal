@@ -130,7 +130,7 @@ export class FileRoutes {
         file.createdAt = file.updatedAt
         await this.conn.transaction(async transactionalEntityManager => {
           if (isModel) {
-            await this.updateModelSearchFile(transactionalEntityManager, file, searchFile)
+            await FileRoutes.updateModelSearchFile(transactionalEntityManager, file, searchFile)
           } else {
             await transactionalEntityManager.insert(SearchFile, searchFile)
           }
@@ -241,7 +241,7 @@ export class FileRoutes {
     return qb
   }
 
-  private async updateModelSearchFile(transactionalEntityManager: EntityManager, file: any, searchFile: SearchFile) {
+  private static async updateModelSearchFile(transactionalEntityManager: EntityManager, file: any, searchFile: SearchFile) {
     const {optimumOrder} = await transactionalEntityManager.findOneOrFail(Model, {id: file.model})
     const [bestModelFile] = await transactionalEntityManager.createQueryBuilder(ModelFile, 'file')
       .leftJoinAndSelect('file.site', 'site')
