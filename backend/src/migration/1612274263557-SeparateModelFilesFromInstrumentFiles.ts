@@ -25,8 +25,6 @@ export class SeparateModelFilesFromInstrumentFiles1612274263557 implements Migra
         await queryRunner.query(`ALTER TABLE "collection_files_file" RENAME TO "collection_files_regular_file"`);
 
     // MOVE DATA (CUSTOM)
-       await queryRunner.query(`SET session_replication_role = 'replica'`);
-
        await queryRunner.query(`INSERT INTO model_file SELECT uuid, s3key, version, pid, volatile, legacy, "measurementDate", history, checksum, size, format, "createdAt", "updatedAt", "siteId", "productId", "modelId" FROM regular_file WHERE "productId" = 'model'`);
        await queryRunner.query(`DELETE FROM regular_file WHERE "productId" = 'model'`);
 
@@ -35,8 +33,6 @@ export class SeparateModelFilesFromInstrumentFiles1612274263557 implements Migra
 
        await queryRunner.query(`INSERT INTO collection_model_files_model_file SELECT * FROM collection_files_regular_file WHERE "fileUuid" IN (SELECT uuid FROM model_file)`);
        await queryRunner.query(`DELETE FROM collection_files_regular_file WHERE "fileUuid" IN (SELECT uuid FROM model_file)`);
-
-       await queryRunner.query(`SET session_replication_role = 'origin'`);
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
