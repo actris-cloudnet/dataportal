@@ -33,8 +33,8 @@ export class SeparateModelFilesFromInstrumentFiles1612274263557 implements Migra
        await queryRunner.query(`ALTER TABLE "regular_file" DROP CONSTRAINT "FK_5af5a3b6962dfdb21c85c530e08"`);
        await queryRunner.query(`ALTER TABLE "regular_file" DROP COLUMN "modelId"`);
 
-       await queryRunner.query(`INSERT INTO collection_model_files_model_file SELECT * FROM collection_files_file WHERE "fileUuid" IN (SELECT uuid FROM model_file)`);
-       await queryRunner.query(`DELETE FROM collection_files_file WHERE "fileUuid" IN (SELECT uuid FROM model_file)`);
+       await queryRunner.query(`INSERT INTO collection_model_files_model_file SELECT * FROM collection_files_regular_file WHERE "fileUuid" IN (SELECT uuid FROM model_file)`);
+       await queryRunner.query(`DELETE FROM collection_files_regular_file WHERE "fileUuid" IN (SELECT uuid FROM model_file)`);
 
        await queryRunner.query(`SET session_replication_role = 'origin'`);
     }
