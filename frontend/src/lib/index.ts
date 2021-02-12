@@ -2,8 +2,14 @@ import {Visualization} from '../../../backend/src/entity/Visualization'
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 import {Product} from '../../../backend/src/entity/Product'
 
-export const getProductIcon = (product: Product | string) =>
-  require(`../assets/icons/${typeof product == 'string' ? product : product.id}.png`)
+export const getProductIcon = (product: Product | string) => {
+  try {
+    return require(`../assets/icons/${typeof product == 'string' ? product : product.id}.png`)
+  } catch (e) {
+    return require('../assets/icons/unknown.png')
+  }
+
+}
 
 export const humanReadableSize = (size: number) => {
   if (size == 0) return '0 B'
