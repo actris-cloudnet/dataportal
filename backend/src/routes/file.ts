@@ -283,13 +283,11 @@ function addCommonFilters<T>(qb: SelectQueryBuilder<T>, query: any) {
 
 function fileStreamHandler(stream: ReadableStream, res: Response, augmenter?: Function) {
   res.header('content-type', 'application/json')
+  res.write('[')
   let objectSent = false
   stream.on('data', data => {
     if (objectSent) res.write(',')
-    else {
-      res.write('[')
-      objectSent = true
-    }
+    else objectSent = true
     const transformedFile = transformRawFile(data)
     const augmentedFile = augmenter ? augmenter(transformedFile) : transformedFile
     res.write(JSON.stringify(augmentedFile))
