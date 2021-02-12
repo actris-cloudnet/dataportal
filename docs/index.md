@@ -333,10 +333,10 @@ repositories of most UNIX-based systems.
 
 ### Multiple sites and products as parameters
 
-Fetch all model and classification products from Norunda and Granada:
+Fetch all categorize and classification products from Norunda and Granada:
 
 ```shell
-curl "https://cloudnet.fmi.fi/api/files?site=norunda&site=granada&product=model&product=classification"
+curl "https://cloudnet.fmi.fi/api/files?site=norunda&site=granada&product=categorize&product=classification"
 ```
 
 ### Fetching all versions
@@ -352,19 +352,19 @@ curl "https://cloudnet.fmi.fi/api/files?site=granada&product=classification&date
 Fetch the optimum model file from Bucharest on 2020-12-10:
 
 ```shell
-curl "https://cloudnet.fmi.fi/api/files?site=bucharest&date=2020-12-10&product=model"
+curl "https://cloudnet.fmi.fi/api/model-files?site=bucharest&date=2020-12-10"
 ```
 
 Fetch all available models:
 
 ```shell
-curl "https://cloudnet.fmi.fi/api/files?site=bucharest&date=2020-12-10&allModels&product=model"
+curl "https://cloudnet.fmi.fi/api/model-files?site=bucharest&date=2020-12-10&allModels"
 ```
 
 Fetch only the `gdas1` model:
 
 ```shell
-curl "https://cloudnet.fmi.fi/api/files?site=bucharest&date=2020-12-10&model=gdas1"
+curl "https://cloudnet.fmi.fi/api/model-files?site=bucharest&date=2020-12-10&model=gdas1"
 ```
 
 ### Using the API to download all data objects matching a criteria
