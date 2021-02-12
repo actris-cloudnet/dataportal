@@ -70,12 +70,12 @@ export const sortByMeasurementDateAsc = <T extends File|SearchFile>(files: T[]):
   files.sort((a, b) => new Date(a.measurementDate).getTime() - new Date(b.measurementDate).getTime())
 
 export const augmentFile = (file: File|RegularFile|ModelFile) => ({
-    ...file,
-    downloadUrl: `${config.downloadBaseUrl}${getDownloadPathForFile(file)}`,
-    filename: basename(file.s3key),
-    s3key: undefined,
-    model: 'model' in file ? file.model : undefined
-  })
+  ...file,
+  downloadUrl: `${config.downloadBaseUrl}${getDownloadPathForFile(file)}`,
+  filename: basename(file.s3key),
+  s3key: undefined,
+  model: 'model' in file ? file.model : undefined
+})
 
 export const ssAuthString = () =>
   'Basic ' + // eslint-disable-line prefer-template
@@ -109,7 +109,6 @@ const translateKeyVal = (key: string, val: string|number|boolean|Date, acc: any)
       ...{ [subKey]: val }
     }
   }
-
 }
 
 export const transformRawFile = (obj: any): RegularFile|ModelFile|SearchFile => {

@@ -16,7 +16,6 @@ import {Model} from '../entity/Model'
 import {basename} from 'path'
 import {ModelFile} from '../entity/File'
 import ReadableStream = NodeJS.ReadableStream
-import {SearchFileResponse} from '../entity/SearchFileResponse'
 
 export class FileRoutes {
 
