@@ -184,6 +184,7 @@ describe('search page', () => {
     await selenium.sendInputToMultiselect('siteSelect', 'iddqd')
     await selenium.sendInputToMultiselect('siteSelect', 'granada')
     await selenium.sendInput('dateFrom', '1980')
+    await wait(100)
     const content = await selenium.getContent()
     expect(content).toContain('developer mode')
     expect(content).toContain('Model file from Granada')
@@ -192,6 +193,7 @@ describe('search page', () => {
   it('disables developer mode', async () => {
     await selenium.clickId('disableDevMode')
     await selenium.sendInputToMultiselect('siteSelect', 'granada')
+    await wait(100)
     const content = await selenium.getContent()
     expect(content).not.toContain('developer mode')
     expect(content).not.toContain('Model file from Granada')
