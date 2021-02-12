@@ -289,7 +289,7 @@ describe('/api/search', () => {
       errors: [ 'The search yielded zero results' ]
     }
     const payload = {params: {date: '2021-01-22'}}
-    return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
+    return expect(axios.get(url, payload)).resolves.toHaveLength(0)
   })
 
   it('returns the latest file when limit=1', async () => {

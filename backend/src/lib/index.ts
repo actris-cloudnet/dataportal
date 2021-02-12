@@ -63,20 +63,19 @@ export const rowExists = (err: any) => {
 export const hideTestDataFromNormalUsers = <T>(dbQuery: SelectQueryBuilder<T>, req: Request): SelectQueryBuilder<T> =>
   req.query.developer !== undefined ? dbQuery : dbQuery.andWhere('not :type = ANY(site.type)', {type: SiteType.TEST})
 
-export const convertToSearchResponse = (files: SearchFile[]) =>
-  files.map(file => new SearchFileResponse(file))
+export const convertToSearchResponse = (file: SearchFile) =>
+  new SearchFileResponse(file)
 
 export const sortByMeasurementDateAsc = <T extends File|SearchFile>(files: T[]): T[] =>
   files.sort((a, b) => new Date(a.measurementDate).getTime() - new Date(b.measurementDate).getTime())
 
-export const augmentFiles = (files: (File|RegularFile|ModelFile)[]) =>
-  files.map(file => ({
+export const augmentFile = (file: File|RegularFile|ModelFile) => ({
     ...file,
     downloadUrl: `${config.downloadBaseUrl}${getDownloadPathForFile(file)}`,
     filename: basename(file.s3key),
     s3key: undefined,
     model: 'model' in file ? file.model : undefined
-  }))
+  })
 
 export const ssAuthString = () =>
   'Basic ' + // eslint-disable-line prefer-template
@@ -98,3 +97,24 @@ export async function checkFileExists(bucket: string, s3key: string) {
   return axios.head(`http://${config.storageService.host}:${config.storageService.port}/${bucket}/${s3key}`, {headers})
 }
 
+// File stream handling
+const translateKeyVal = (key: string, val: string|number|boolean|Date, acc: any) => {
+  if (key.includes('Id')) return {}
+  key = key.replace(/^file_/, '')
+  let subKey
+  [key, subKey] = key.split('_')
+  if (!subKey) return { [key]: val }
+  else return { [key]: {
+      ...acc[key],
+      ...{ [subKey]: val }
+    }
+  }
+
+}
+
+export const transformRawFile = (obj: any): RegularFile|ModelFile|SearchFile => {
+  return Object.keys(obj).reduce((acc: {[key: string]: any}, key) => ({
+    ...acc,
+    ...translateKeyVal(key, obj[key], acc)
+  }), {}) as RegularFile|ModelFile|SearchFile
+}
