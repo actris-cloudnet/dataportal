@@ -85,7 +85,7 @@ export class CollectionRoutes {
   allcollections: RequestHandler = async (req: Request, res: Response, next) =>
     this.collectionRepo.find({ relations: ['files', 'files.product', 'files.site'] })
       .then(collections => {
-        const response = collections.map(coll => ({...coll, ...{files: convertToSearchResponse(coll.files)}}))
+        const response = collections.map(coll => ({...coll, ...{files: coll.files.map(convertToSearchResponse)}}))
         res.send(response)
       })
       .catch(err => next({ status: 500, errors: err }))

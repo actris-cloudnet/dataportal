@@ -2,19 +2,21 @@ import {Request, RequestHandler, Response} from 'express'
 import {Collection} from '../entity/Collection'
 import config from '../config'
 import {Connection, EntityManager, Repository, SelectQueryBuilder} from 'typeorm'
-import {File, isFile, RegularFile} from '../entity/File'
+import {isFile, RegularFile} from '../entity/File'
 import {
   checkFileExists,
   convertToSearchResponse,
   getBucketForFile,
   hideTestDataFromNormalUsers,
-  sortByMeasurementDateAsc
+  sortByMeasurementDateAsc, transformRawFile
 } from '../lib'
-import {augmentFiles} from '../lib/'
+import {augmentFile} from '../lib/'
 import {SearchFile} from '../entity/SearchFile'
 import {Model} from '../entity/Model'
 import {basename} from 'path'
 import {ModelFile} from '../entity/File'
+import ReadableStream = NodeJS.ReadableStream
+import {SearchFileResponse} from '../entity/SearchFileResponse'
 
 export class FileRoutes {
 
@@ -49,7 +51,7 @@ export class FileRoutes {
     this.findAnyFile(getFileByUuid)
       .then(file => {
         if (file == null) return next({ status: 404, errors: ['No files match this UUID'] })
-        res.send(augmentFiles([file])[0])
+        res.send(augmentFile(file))
       })
       .catch(err => next(err))
   }
@@ -57,10 +59,8 @@ export class FileRoutes {
   files: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query
     this.filesQueryBuilder(query, 'file')
-      .getMany()
-      .then(result => {
-        res.send(augmentFiles(result))
-      })
+      .stream()
+      .then(stream => fileStreamHandler(stream, res, augmentFile))
       .catch(err => {
         next({ status: 500, errors: err })
       })
@@ -69,10 +69,8 @@ export class FileRoutes {
   modelFiles: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query
     this.filesQueryBuilder(query, 'model')
-      .getMany()
-      .then(result => {
-        res.send(augmentFiles(result))
-      })
+      .stream()
+      .then(stream => fileStreamHandler(stream, res, augmentFile))
       .catch(err => {
         next({ status: 500, errors: err })
       })
@@ -82,14 +80,8 @@ export class FileRoutes {
     const query = req.query
 
     this.searchFilesQueryBuilder(query)
-      .getMany()
-      .then(result => {
-        if (result.length == 0) {
-          next({ status: 404, errors: ['The search yielded zero results'], params: req.query })
-          return
-        }
-        res.send(convertToSearchResponse(result))
-      })
+      .stream()
+      .then(stream => fileStreamHandler(stream, res, convertToSearchResponse))
       .catch(err => {
         next({ status: 500, errors: err })
       })
@@ -184,13 +176,13 @@ export class FileRoutes {
 
   allfiles: RequestHandler = async (req: Request, res: Response, next) =>
     this.fileRepo.find({ relations: ['site', 'product'] })
-      .then(result => res.send(augmentFiles(sortByMeasurementDateAsc(result))))
+      .then(result => res.send(sortByMeasurementDateAsc(result).map(augmentFile)))
       .catch(err => next({ status: 500, errors: err }))
 
   allsearch: RequestHandler = async (req: Request, res: Response, next) =>
     this.searchFileRepo.find({ relations: ['site', 'product'] })
       .then(result => {
-        res.send(convertToSearchResponse(sortByMeasurementDateAsc(result)))
+        res.send(sortByMeasurementDateAsc(result).map(convertToSearchResponse))
       })
       .catch(err => next({ status: 500, errors: err }))
 
@@ -238,7 +230,6 @@ export class FileRoutes {
       .leftJoinAndSelect('file.product', 'product')
     qb = addCommonFilters(qb, query)
     qb.orderBy('file.measurementDate', 'DESC')
-    if ('limit' in query) qb.limit(parseInt(query.limit))
     return qb
   }
 
@@ -281,7 +272,6 @@ export class FileRoutes {
 }
 
 function addCommonFilters<T>(qb: SelectQueryBuilder<T>, query: any) {
-  console.log(query)
   qb.andWhere('site.id IN (:...site)', query)
   if (query.product) qb.andWhere('product.id IN (:...product)', query)
   if (query.dateFrom) qb.andWhere('file.measurementDate >= :dateFrom', query)
@@ -290,4 +280,23 @@ function addCommonFilters<T>(qb: SelectQueryBuilder<T>, query: any) {
   if (query.volatile) qb.andWhere('file.volatile IN (:...volatile)', query)
   if (query.legacy) qb.andWhere('file.legacy IN (:...legacy)', query)
   return qb as SelectQueryBuilder<T>
+}
+
+function fileStreamHandler(stream: ReadableStream, res: Response, augmenter?: Function) {
+  res.header('content-type', 'application/json')
+  let objectSent = false
+  stream.on('data', data => {
+    if (objectSent) res.write(',')
+    else {
+      res.write('[')
+      objectSent = true
+    }
+    const transformedFile = transformRawFile(data)
+    const augmentedFile = augmenter ? augmenter(transformedFile) : transformedFile
+    res.write(JSON.stringify(augmentedFile))
+  })
+  stream.on('end', () => {
+    res.write(']')
+    res.end()
+  })
 }
