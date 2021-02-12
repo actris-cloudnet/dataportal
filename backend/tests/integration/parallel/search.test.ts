@@ -284,10 +284,6 @@ describe('/api/search', () => {
   })
 
   it('does not return hidden sites', async () => {
-    let expectedBody: RequestError = {
-      status: 404,
-      errors: [ 'The search yielded zero results' ]
-    }
     const payload = {params: {date: '2021-01-22'}}
     return expect(axios.get(url, payload)).resolves.toHaveLength(0)
   })
