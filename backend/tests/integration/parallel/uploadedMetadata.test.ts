@@ -56,8 +56,7 @@ describe('GET /api/uploaded-metadata', () => {
     return expect(axios.get(`${publicUrl}`, {params: {site: 'bucharest'}}))
       .resolves.toMatchObject({status: 200, data: [
         {instrument: responses[7]['instrument']},
-        {instrument: responses[8]['instrument']},
-        {model: responses[3]['model']}
+        {instrument: responses[8]['instrument']}
       ]})
   })
 })
