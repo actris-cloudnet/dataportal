@@ -291,4 +291,10 @@ describe('/api/search', () => {
     const payload = {params: {date: '2021-01-22'}}
     return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
+
+  it('returns the latest file when limit=1', async () => {
+    const res = await axios.get(url, { params: { site: 'bucharest', limit: '1' }})
+    expect(res.data).toHaveLength(1)
+    expect(res.data[0].measurementDate).toEqual('2019-07-16')
+  })
 })
