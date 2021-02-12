@@ -6,7 +6,6 @@ import {RequestError} from './entity/RequestError'
 import {stringify} from './lib'
 import config from './config'
 import {Middleware} from './lib/middleware'
-import {MiscRoutes} from './routes/misc'
 import {FileRoutes} from './routes/file'
 import {SiteRoutes} from './routes/site'
 import {CollectionRoutes} from './routes/collection'
@@ -31,7 +30,6 @@ import {DownloadRoutes} from './routes/download'
   const instrRoutes = new InstrumentRoutes(conn)
   const vizRoutes = new VisualizationRoutes(conn, fileRoutes)
   const uploadRoutes = new UploadRoutes(conn)
-  const miscRoutes = new MiscRoutes(conn)
   const collRoutes = new CollectionRoutes(conn)
   const modelRoutes = new ModelRoutes(conn)
   const dlRoutes = new DownloadRoutes(conn, fileRoutes)
@@ -96,7 +94,6 @@ import {DownloadRoutes} from './routes/download'
   app.get('/api/models', modelRoutes.models)
 
   // public/internal
-  app.get('/api/status', miscRoutes.status)
   app.get('/api/products/variables', prodRoutes.productVariables)
   app.get('/api/visualizations',
     middleware.filesValidator,
