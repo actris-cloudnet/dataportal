@@ -38,9 +38,9 @@ export class DownloadRoutes {
       const upstreamRes = await this.makeFileRequest(file)
       res.setHeader('Content-Type', 'application/octet-stream')
       res.setHeader('Content-Length', file.size)
-      upstreamRes.pipe(res, {end: true})
       const dl = new Download(ObjectType.Product, file.uuid, req.header('x-forwarded-for') || '')
       await this.downloadRepo.save(dl)
+      upstreamRes.pipe(res, {end: true})
     } catch (e) {
       next({status: 500, errors: e})
     }
@@ -48,11 +48,14 @@ export class DownloadRoutes {
 
   collection: RequestHandler = async (req, res, next) => {
     const collectionUuid: string = req.params.uuid
-    const collection = await this.collectionRepo.findOne(collectionUuid, {relations: ['files', 'modelFiles']})
+    const collection = await this.collectionRepo.findOne(collectionUuid, {relations: ['regularFiles', 'modelFiles']})
     if (collection === undefined) {
       return next({status: 404, errors: ['No collection matches this UUID.']})
     }
-    const allFiles = collection.files.concat(collection.modelFiles)
+    const allFiles = (collection.regularFiles as unknown as File[]).concat(collection.modelFiles)
+    // Update collection download count
+    const dl = new Download(ObjectType.Collection, collection.uuid, req.header('x-forwarded-for') || '')
+    await this.downloadRepo.save(dl)
     try {
       const archive = archiver('zip', { store: true })
       archive.on('warning', console.error)
@@ -72,11 +75,7 @@ export class DownloadRoutes {
         if (idx == (allFiles.length - 1)) archive.finalize()
       }
       archive.on('entry', () => i < allFiles.length ? appendFile(i++) : null)
-      appendFile(0)
-
-      // Update collection download count
-      const dl = new Download(ObjectType.Collection, collection.uuid, req.header('x-forwarded-for') || '')
-      this.downloadRepo.save(dl)
+      await appendFile(0)
     } catch (err) {
       res.sendStatus(500)
       next(err)
