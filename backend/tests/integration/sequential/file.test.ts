@@ -17,6 +17,7 @@ let modelVizRepo: Repository<ModelVisualization>
 
 const volatileFile = JSON.parse(readFileSync('tests/data/file.json', 'utf8'))
 const stableFile  = {...volatileFile, ...{volatile: false, pid: '1234'}}
+const volatileModelFile = {...volatileFile, ...{model: 'ecmwf', product: 'model'}}
 
 beforeAll(async () => {
   conn = await createConnection('test')
@@ -201,6 +202,18 @@ describe('POST /files/', () => {
     await expect(axios.post(`${backendPrivateUrl}files/`, payload)).resolves.toMatchObject({status: 200})
     const dbRow = await fileRepo.findOneOrFail(volatileFile.uuid)
     const dbRow2 = await searchFileRepo.findOneOrFail(volatileFile.uuid)
+    expect(dbRow.volatile).toEqual(false)
+    expect(dbRow.pid).toEqual(payload.pid)
+    expect(dbRow.checksum).toEqual(payload.checksum)
+    expect(dbRow2.volatile).toEqual(false)
+  })
+
+  test('freezing existing model file', async () => {
+    await putFile(volatileModelFile)
+    const payload = {uuid: volatileModelFile.uuid, volatile: false, pid: '1234', checksum: 'dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b5'}
+    await expect(axios.post(`${backendPrivateUrl}files/`, payload)).resolves.toMatchObject({status: 200})
+    const dbRow = await modelFileRepo.findOneOrFail(volatileModelFile.uuid)
+    const dbRow2 = await searchFileRepo.findOneOrFail(volatileModelFile.uuid)
     expect(dbRow.volatile).toEqual(false)
     expect(dbRow.pid).toEqual(payload.pid)
     expect(dbRow.checksum).toEqual(payload.checksum)
