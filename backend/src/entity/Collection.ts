@@ -1,5 +1,5 @@
 import {BeforeInsert, BeforeUpdate, Column, Entity, JoinTable, ManyToMany, PrimaryColumn,} from 'typeorm'
-import {File, ModelFile, RegularFile} from './File'
+import {ModelFile, RegularFile} from './File'
 import {v4 as generateUuidV4} from 'uuid'
 
 @Entity()
@@ -10,7 +10,7 @@ export class Collection {
 
   @ManyToMany(_type => RegularFile)
   @JoinTable()
-  files!: File[]
+  regularFiles!: RegularFile[]
 
   @ManyToMany(_type => ModelFile)
   @JoinTable()
@@ -42,9 +42,9 @@ export class Collection {
     this.updatedAt = new Date()
   }
 
-  constructor(files: File[], modelFiles: ModelFile[]) {
+  constructor(files: RegularFile[], modelFiles: ModelFile[]) {
     this.uuid = generateUuidV4()
-    this.files = files
+    this.regularFiles = files
     this.modelFiles = modelFiles
   }
 }

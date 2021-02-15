@@ -1,6 +1,7 @@
 import {Collection} from './Collection'
 import {SearchFileResponse} from './SearchFileResponse'
 import {convertToSearchResponse} from '../lib'
+import {File} from './File'
 
 export class CollectionResponse {
 
@@ -13,7 +14,7 @@ export class CollectionResponse {
   updatedAt: Date
 
   constructor(coll: Collection) {
-    const sortedFiles = coll.files.concat(coll.modelFiles)
+    const sortedFiles = (coll.regularFiles as unknown as File[]).concat(coll.modelFiles)
       .sort((a, b) => a.measurementDate > b.measurementDate ? 1 : -1)
     this.uuid = coll.uuid
     this.files = sortedFiles.map(convertToSearchResponse)
