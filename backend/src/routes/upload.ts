@@ -1,5 +1,5 @@
 import {Site} from '../entity/Site'
-import {Status, Upload} from '../entity/Upload'
+import {InstrumentUpload, ModelUpload, Status} from '../entity/Upload'
 import {Connection, Repository} from 'typeorm'
 import {Request, RequestHandler, Response} from 'express'
 import {
@@ -25,14 +25,16 @@ export class UploadRoutes {
 
   constructor(conn: Connection) {
     this.conn = conn
-    this.uploadedMetadataRepo = this.conn.getRepository(Upload)
+    this.instrumentUploadRepo = this.conn.getRepository(InstrumentUpload)
+    this.modelUploadRepo = this.conn.getRepository(ModelUpload)
     this.instrumentRepo = this.conn.getRepository(Instrument)
     this.modelRepo = this.conn.getRepository(Model)
     this.siteRepo = this.conn.getRepository(Site)
   }
 
   readonly conn: Connection
-  readonly uploadedMetadataRepo: Repository<Upload>
+  readonly instrumentUploadRepo: Repository<InstrumentUpload>
+  readonly modelUploadRepo: Repository<ModelUpload>
   readonly instrumentRepo: Repository<Instrument>
   readonly siteRepo: Repository<Site>
   readonly modelRepo: Repository<Model>
@@ -47,23 +49,26 @@ export class UploadRoutes {
       return next({ status: 422, errors: 'Unknown site'})
     }
 
+    let uploadRepo: Repository<InstrumentUpload|ModelUpload>
     if ('instrument' in body) {
       instrument = await this.instrumentRepo.findOne(body.instrument)
       if (instrument == undefined) return next({ status: 422, errors: 'Unknown instrument'})
+      uploadRepo = this.instrumentUploadRepo
     }
-
-    if ('model' in body) {
+    else if ('model' in body) {
       model = await this.modelRepo.findOne(body.model)
       if (model == undefined) return next({ status: 422, errors: 'Unknown model'})
+      uploadRepo = this.modelUploadRepo
     }
+    else return next({status: 422, errors: 'Metadata must have either "instrument" or "model" field'})
 
     // Remove existing metadata if its status is created
-    const existingCreatedMetadata = await this.uploadedMetadataRepo.findOne({checksum: body.checksum, status: Status.CREATED})
+    const existingCreatedMetadata = await uploadRepo.findOne({checksum: body.checksum, status: Status.CREATED})
     if (existingCreatedMetadata != undefined) {
-      await this.uploadedMetadataRepo.remove(existingCreatedMetadata)
+      await uploadRepo.remove(existingCreatedMetadata)
     }
 
-    const existingUploadedMetadata = await this.uploadedMetadataRepo.findOne({checksum: body.checksum})
+    const existingUploadedMetadata = await uploadRepo.findOne({checksum: body.checksum})
     if (existingUploadedMetadata != undefined) {
       return next({ status: 409, errors: 'File already uploaded' })
     }
@@ -73,12 +78,12 @@ export class UploadRoutes {
     // With allowUpdate flag, keep existing uuid to avoid duplicate files
     if (allowUpdate) {
       try {
-        const existingMetadata = await this.uploadedMetadataRepo.findOne({filename: filename, allowUpdate: true})
+        const existingMetadata = await uploadRepo.findOne({filename: filename, allowUpdate: true})
         if (existingMetadata != undefined) {
           if (!('model' in body) && existingMetadata.updatedAt < dateNDaysAgo(config.allowUpdateLimitDays)) {
             return next({ status: 409, errors: 'File too old to be updated' })
           }
-          await this.uploadedMetadataRepo.update(existingMetadata.uuid, {
+          await uploadRepo.update(existingMetadata.uuid, {
             checksum: body.checksum,
             updatedAt: new Date(),
             status: Status.CREATED
@@ -90,17 +95,28 @@ export class UploadRoutes {
       }
     }
 
-    const uploadedMetadata = new Upload(
-      body.checksum,
-      filename,
-      body.measurementDate,
-      site,
-      allowUpdate,
-      Status.CREATED,
-      instrument,
-      model)
+    let uploadedMetadata: InstrumentUpload | ModelUpload
+    if ('instrument' in body) {
+      uploadedMetadata = new InstrumentUpload(
+        body.checksum,
+        filename,
+        body.measurementDate,
+        site,
+        allowUpdate,
+        Status.CREATED,
+      instrument as Instrument)
+    } else {
+      uploadedMetadata = new ModelUpload(
+        body.checksum,
+        filename,
+        body.measurementDate,
+        site,
+        allowUpdate,
+        Status.CREATED,
+      model as Model)
+    }
 
-    return this.uploadedMetadataRepo.insert(uploadedMetadata)
+    return uploadRepo.insert(uploadedMetadata)
       .then(() => res.sendStatus(200))
       .catch(err => next({ status: 500, errors: `Internal server error: ${err.code}`}))
   }
@@ -109,8 +125,9 @@ export class UploadRoutes {
     const partialUpload = req.body
     if (!partialUpload.uuid) return next({status: 422, errors: 'Request body is missing uuid'})
     try {
-      const updateResult = await this.uploadedMetadataRepo.update({uuid: partialUpload.uuid}, partialUpload)
-      if (updateResult.affected == 0) return next({status: 422, errors: 'No file matches the provided uuid'})
+      const upload = await this.findAnyUpload(repo => repo.findOne({uuid: partialUpload.uuid}))
+      if (!upload) return next({status: 422, errors: 'No file matches the provided uuid'})
+      await this.findRepoForUpload(upload).update({uuid: partialUpload.uuid}, partialUpload)
       res.sendStatus(200)
     } catch (err) {
       return next({status: 500, errors: `Internal server error: ${err.code}`})
@@ -119,24 +136,23 @@ export class UploadRoutes {
 
   metadata: RequestHandler = async (req: Request, res: Response, next) => {
     const checksum = req.params.checksum
-    this.uploadedMetadataRepo.findOne({checksum: checksum}, { relations: ['site', 'instrument', 'model'] })
-      .then(uploadedMetadata => {
-        if (uploadedMetadata == undefined) return next({ status: 404, errors: 'No metadata was found with provided id'})
-        res.send(this.addS3keyToUpload(uploadedMetadata))
+    this.findAnyUpload((repo, model) =>
+      repo.findOne({checksum: checksum}, { relations: ['site', (model ? 'model' : 'instrument')] }))
+      .then(upload => {
+        if (upload == undefined) return next({ status: 404, errors: 'No metadata was found with provided id'})
+        res.send(this.addS3keyToUpload(upload))
       })
       .catch(err => next({ status: 500, errors: `Internal server error: ${err.code}`}))
   }
 
   listMetadata: RequestHandler = async (req: Request, res: Response, next) => {
-    (await this.metadataQueryBuilder(req.query))
-      .getMany()
-      .then(uploadedMetadata => res.send(uploadedMetadata.map(this.addS3keyToUpload)))
-      .catch(err => {next({status: 500, errors: `Internal server error: ${err.code}`})})
+    this.findAllUploads((repo, model) => this.metadataQueryBuilder(repo, req.query, false, model))
+      .then(uploadedMetadata => res.send(uploadedMetadata.sort((a, b) => b.size - a.size).map(this.addS3keyToUpload)))
+      .catch(err => {next({status: 500, errors: `Internal server error: ${err}`})})
   }
 
   listInstrumentsFromMetadata: RequestHandler = async (req: Request, res: Response, next) => {
-    (await this.metadataQueryBuilder(req.query, true))
-      .getMany()
+    (this.metadataQueryBuilder(this.instrumentUploadRepo, req.query, true) as Promise<InstrumentUpload[]>)
       .then(uploadedMetadata =>
         res.send(uploadedMetadata.map(md => new ReducedMetadataResponse(md))))
       .catch(err => {next({status: 500, errors: err})})
@@ -146,13 +162,14 @@ export class UploadRoutes {
     const checksum = req.params.checksum
     const site = req.params.site
     try {
-      const upload = await this.uploadedMetadataRepo.findOne({where: {checksum: checksum, site: {id: site}}, relations: ['site']})
+      const upload = await this.findAnyUpload((repo, model) =>
+        repo.findOne({where: {checksum: checksum, site: {id: site}}, relations: ['site', (model ? 'model' : 'instrument')]}))
       if (!upload) return next({status: 400, errors: 'No metadata matches this hash'})
       if (upload.status != Status.CREATED) return res.sendStatus(200) // Already uploaded
 
       const {status, body} = await this.makeRequest(getS3keyForUpload(upload), checksum, req)
 
-      await this.uploadedMetadataRepo.update({checksum: checksum},
+      await this.findRepoForUpload(upload).update({checksum: checksum},
         {status: Status.UPLOADED, updatedAt: new Date(), size: body.size}
       )
       res.sendStatus(status)
@@ -197,36 +214,47 @@ export class UploadRoutes {
     })
   }
 
-  private async metadataQueryBuilder(query: any, onlyDistinctInstruments = false) {
+  private async metadataQueryBuilder(
+    repo: Repository<InstrumentUpload|ModelUpload>,
+    query: any,
+    onlyDistinctInstruments = false,
+    model = false) {
     const augmentedQuery: any = {
       site: query.site || (await fetchAll<Site>(this.conn, Site)).map(site => site.id),
       status: query.status || [Status.UPLOADED, Status.CREATED, Status.PROCESSED],
       dateFrom: query.dateFrom || '1970-01-01',
       dateTo: query.dateTo || tomorrow(),
-      instrument: query.instrument || (await fetchAll<Instrument>(this.conn, Instrument)).map(instrument => instrument.id),
-      model: query.model || (await fetchAll<Model>(this.conn, Model)).map(model => model.id),
+      instrument:
+        model
+          ? undefined
+          : query.instrument || (await fetchAll<Instrument>(this.conn, Instrument)).map(instrument => instrument.id),
+      model:
+        model
+          ? query.model || (await fetchAll<Model>(this.conn, Model)).map(model => model.id)
+          : undefined,
     }
 
     const fieldsToArray = ['site', 'status', 'instrument', 'model']
     fieldsToArray.forEach(element => augmentedQuery[element] = toArray(augmentedQuery[element]))
 
-    const qb = this.uploadedMetadataRepo.createQueryBuilder('um')
+    const qb = repo.createQueryBuilder('um')
     qb.leftJoinAndSelect('um.site', 'site')
-      .leftJoinAndSelect('um.instrument', 'instrument')
-      .leftJoinAndSelect('um.model', 'model')
-    if (onlyDistinctInstruments) qb.distinctOn(['instrument.id'])
+    if (!model) {
+      qb.leftJoinAndSelect('um.instrument', 'instrument')
+      if (onlyDistinctInstruments) qb.distinctOn(['instrument.id'])
+    } else {
+      qb.leftJoinAndSelect('um.model', 'model')
+    }
     qb.where('um.measurementDate >= :dateFrom AND um.measurementDate <= :dateTo', augmentedQuery)
       .andWhere('site.id IN (:...site)', augmentedQuery)
       .andWhere('um.status IN (:...status)', augmentedQuery)
     if (query.instrument) qb.andWhere('instrument.id IN (:...instrument)', augmentedQuery)
     if (query.model) qb.andWhere('model.id IN (:...model)', augmentedQuery)
-    if (onlyDistinctInstruments) qb.andWhere('model.id IS NULL')
-    if (!onlyDistinctInstruments) qb.orderBy('um.size', 'DESC')
 
-    return Promise.resolve(qb)
+    return qb.getMany()
   }
 
-  private addS3keyToUpload = (upload: Upload) =>
+  private addS3keyToUpload = (upload: InstrumentUpload | ModelUpload) =>
     ({...upload, ...{s3key: getS3keyForUpload(upload)}})
 
 
@@ -253,4 +281,30 @@ export class UploadRoutes {
     }
     return next()
   }
+
+  findAnyUpload(searchFunc: (arg0: Repository<InstrumentUpload|ModelUpload>, arg1?: boolean) =>
+    Promise<InstrumentUpload|ModelUpload|undefined>):
+    Promise<InstrumentUpload|ModelUpload|undefined> {
+    return Promise.all([
+      searchFunc(this.instrumentUploadRepo, false),
+      searchFunc(this.modelUploadRepo, true)
+    ])
+      .then(([upload, modelUpload]) => upload || modelUpload)
+  }
+
+  findAllUploads(searchFunc: (arg0: Repository<InstrumentUpload|ModelUpload>, arg1?: boolean) =>
+    Promise<(InstrumentUpload|ModelUpload)[]>):
+    Promise<(InstrumentUpload|ModelUpload)[]> {
+    return Promise.all([
+      searchFunc(this.instrumentUploadRepo, false),
+      searchFunc(this.modelUploadRepo, true)
+    ])
+      .then(([files, modelFiles]) => files.concat(modelFiles))
+  }
+
+  findRepoForUpload(upload: InstrumentUpload | ModelUpload) {
+    if ('instrument' in upload) return this.instrumentUploadRepo
+    return this.modelUploadRepo
+  }
+
 }

@@ -12,7 +12,7 @@ export enum Status {
 }
 
 @Entity()
-export class Upload {
+export abstract class Upload {
 
   @PrimaryColumn('uuid')
   uuid!: string
@@ -48,12 +48,6 @@ export class Upload {
   @ManyToOne(_ => Site, site => site.uploads)
   site!: Site
 
-  @ManyToOne(_ => Instrument, instrument => instrument.uploads)
-  instrument!: Instrument
-
-  @ManyToOne(_ => Model, model => model.uploads)
-  model!: Model
-
   @BeforeInsert()
   setCreatedAt() {
     this.createdAt = new Date()
@@ -72,8 +66,6 @@ export class Upload {
     site: Site,
     allowUpdate: boolean,
     status: Status,
-    instrument?: Instrument,
-    model?: Model,
   ) {
     this.uuid = generateUuidV4()
     this.checksum = checksum
@@ -82,7 +74,32 @@ export class Upload {
     this.site = site
     this.allowUpdate = allowUpdate
     this.status = status
-    if (instrument) this.instrument = instrument
-    if (model) this.model = model
   }
 }
+
+@Entity()
+export class InstrumentUpload extends Upload {
+
+  @ManyToOne(_ => Instrument, instrument => instrument.uploads)
+  instrument!: Instrument
+
+  constructor(checksum: string, filename: string, date: string, site: Site, allowUpdate: boolean, status: Status, instrument: Instrument) { // eslint-disable-line max-len
+    super(checksum, filename, date, site, allowUpdate, status)
+    this.instrument = instrument
+  }
+}
+
+
+
+@Entity()
+export class ModelUpload extends Upload {
+
+  @ManyToOne(_ => Model, model => model.uploads)
+  model!: Model
+
+  constructor(checksum: string, filename: string, date: string, site: Site, allowUpdate: boolean, status: Status, model: Model) { // eslint-disable-line max-len
+    super(checksum, filename, date, site, allowUpdate, status)
+    this.model = model
+  }
+}
+
