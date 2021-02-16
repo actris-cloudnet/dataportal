@@ -55,7 +55,6 @@ export class CollectionRoutes {
         'modelFiles', 'modelFiles.site', 'modelFiles.product',
       ]})
       if (collection === undefined) return next({status: 404, errors: ['Collection not found']})
-      console.log(collection)
       res.send(new CollectionResponse(collection))
     } catch (e) {
       return next({status: 500, errors: e})
