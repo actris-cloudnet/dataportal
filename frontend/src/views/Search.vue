@@ -254,6 +254,9 @@
     You are using the dataportal in developer mode. Files from sites in testing mode are now visible.
     <span class="close_x" id="disableDevMode" @click="devMode.disable()">Deactivate</span>
   </div>
+  <div v-if="error" class="note rednote">
+    Error: Search backend is offline, {{ error }}
+  </div>
 
   <section id="sideBar">
     <div :class="{widemap: showAllSites, wideviz: vizWideMode}">
@@ -523,7 +526,6 @@ export default class Search extends Vue {
 
   renderComplete = false
 
-  displayBetaNotification = true
   displayKeyInfo = true
 
   getProductIcon = getProductIcon
@@ -534,6 +536,8 @@ export default class Search extends Vue {
   devMode = new DevMode()
 
   vizWideMode = false
+
+  error = null
 
   // keys
   dateFromUpdate = 10000
@@ -637,7 +641,8 @@ export default class Search extends Vue {
         this.apiResponse = constructTitle(res.data)
         this.isBusy = false
       })
-      .catch(() => {
+      .catch(err => {
+        this.error = err.response.statusText || 'unknown error'
         this.apiResponse = this.resetResponse()
         this.isBusy = false
       })
