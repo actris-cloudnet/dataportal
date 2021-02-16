@@ -1,6 +1,6 @@
 import {RequestHandler} from 'express'
 import {RequestErrorArray} from '../entity/RequestError'
-import {Upload} from '../entity/Upload'
+import {ModelUpload, Upload} from '../entity/Upload'
 import validator from 'validator'
 import {Site} from '../entity/Site'
 import {Connection} from 'typeorm'
@@ -115,7 +115,7 @@ export class Middleware {
   }
 
   getSiteNameFromMeta: RequestHandler = async (req, _res, next) => {
-    const md = await this.conn.getRepository(Upload)
+    const md = await this.conn.getRepository(ModelUpload)
       .findOne({checksum: req.params.checksum}, { relations: ['site'] })
     if (md != undefined) req.params.site = md.site.id
     next()

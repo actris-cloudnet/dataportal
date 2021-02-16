@@ -11,6 +11,7 @@ const metadataUrl = `${backendPrivateUrl}upload/metadata/`
 const modelMetadataUrl = `${backendPrivateUrl}model-upload/metadata/`
 const privateMetadataUrl = `${backendPrivateUrl}upload-metadata/`
 const dataUrl = `${backendPrivateUrl}upload/data/`
+const modelDataUrl = `${backendPrivateUrl}model-upload/data/`
 
 const validMetadata = {
   filename: 'file1.LV1',
@@ -19,6 +20,15 @@ const validMetadata = {
   instrument: 'mira',
   site: 'granada'
 }
+
+const validModelMetadata = {
+  filename: '19990101_granada_ecmwf.nc',
+  measurementDate: '1999-01-01',
+  checksum: '60b725f10c9c85c70d97880dfe8191b3',
+  model: 'ecmwf',
+  site: 'bucharest'
+}
+
 
 const str2base64 = (hex: string) =>
   Buffer.from(hex, 'utf8').toString('base64')
@@ -205,6 +215,7 @@ describe('POST /upload/metadata', () => {
 
 describe('PUT /upload/data/:checksum', () => {
   const validUrl = `${dataUrl}${validMetadata.checksum}`
+  const validModelUrl = `${modelDataUrl}${validModelMetadata.checksum}`
   const validFile = 'content'
 
   beforeEach(async () => {
@@ -212,13 +223,20 @@ describe('PUT /upload/data/:checksum', () => {
       instrumentRepo.delete({}),
       modelRepo.delete({})
     ])
-    return axios.post(metadataUrl, validMetadata, {headers})
+    await axios.post(metadataUrl, validMetadata, {headers})
+    return axios.post(modelMetadataUrl, validModelMetadata, {headers})
   })
 
   test('responds with 201 on submitting new file', async () => {
     await expect(axios.put(validUrl, validFile, {headers})).resolves.toMatchObject({ status: 201})
     const md = await instrumentRepo.findOne({checksum: validMetadata.checksum})
     expect(new Date(md.updatedAt).getTime()).toBeGreaterThan(new Date(md.createdAt).getTime())
+    return expect(md.status).toEqual(Status.UPLOADED)
+  })
+
+  test('responds with 201 on submitting new model file', async () => {
+    await expect(axios.put(validModelUrl, validFile, {headers})).resolves.toMatchObject({ status: 201})
+    const md = await modelRepo.findOne({checksum: validModelMetadata.checksum})
     return expect(md.status).toEqual(Status.UPLOADED)
   })
 
@@ -274,15 +292,6 @@ describe('POST /model-upload/metadata', () => {
     ])
   })
 
-  const modelMetadataUrl = `${backendPrivateUrl}model-upload/metadata/`
-
-  const validModelMetadata = {
-    filename: '19990101_granada_ecmwf.nc',
-    measurementDate: '1999-01-01',
-    checksum: '60b725f10c9c85c70d97880dfe8191b3',
-    model: 'ecmwf',
-    site: 'bucharest'
-  }
 
   test('inserts new model metadata and takes site from metadata', async () => {
     await expect(axios.post(modelMetadataUrl, validModelMetadata, {headers})).resolves.toMatchObject({status: 200})
