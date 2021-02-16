@@ -124,6 +124,13 @@ describe('POST /upload/metadata', () => {
     return expect(axios.post(metadataUrl, validMetadata, {headers})).resolves.toMatchObject({ status: 200})
   })
 
+  test('responds with 422 if both model and instrument fields are specified', async () => {
+    const newMetadata = {
+      ...validMetadata,
+      ...{model: 'ecmwf'}}
+    await expect(axios.post(metadataUrl, newMetadata, {headers})).rejects.toMatchObject({ response: { status: 422}})
+  })
+
   test('responds with 409 on existing hashsum with uploaded status', async () => {
     const now = new Date()
     let uploadedMetadata = {
@@ -154,11 +161,11 @@ describe('POST /upload/metadata', () => {
     let uploadedMetadata = {
       ...validMetadata,
       ...{status: Status.UPLOADED, uuid: 'ca2b8ff0-c7e4-427f-894a-e6cf1ff2b8d2',
-        allowUpdate: true, model: 'ecmwf', createdAt: now, updatedAt: now}}
-    const newUpload = {...validMetadata, allowUpdate: true, model: 'ecmwf'}
-    await instrumentRepo.save(uploadedMetadata)
+        allowUpdate: true, model: 'ecmwf', createdAt: now, updatedAt: now, instrument: undefined}}
+    const newUpload = {...validMetadata, allowUpdate: true, model: 'ecmwf', instrument: undefined}
+    await modelRepo.save(uploadedMetadata)
     await expect(axios.post(modelMetadataUrl, newUpload, {headers})).rejects.toMatchObject({ response: { status: 409}})
-    const md = await instrumentRepo.findOne({checksum: uploadedMetadata.checksum})
+    const md = await modelRepo.findOne({checksum: uploadedMetadata.checksum})
     return expect(new Date(md.updatedAt).getTime()).toEqual(now.getTime())
   })
 

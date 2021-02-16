@@ -50,6 +50,7 @@ export class UploadRoutes {
     }
 
     let uploadRepo: Repository<InstrumentUpload|ModelUpload>
+    if ('instrument' in body && 'model' in body) return next({ status: 422, errors: 'Both "instrument" and "model" fields may not be specified'})
     if ('instrument' in body) {
       instrument = await this.instrumentRepo.findOne(body.instrument)
       if (instrument == undefined) return next({ status: 422, errors: 'Unknown instrument'})

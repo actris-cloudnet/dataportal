@@ -1,6 +1,6 @@
 import {RequestHandler} from 'express'
 import {RequestErrorArray} from '../entity/RequestError'
-import {ModelUpload, Upload} from '../entity/Upload'
+import {ModelUpload} from '../entity/Upload'
 import validator from 'validator'
 import {Site} from '../entity/Site'
 import {Connection} from 'typeorm'
