@@ -10,16 +10,7 @@ import {Upload} from '../entity/Upload'
 import axios from 'axios'
 import {SiteType} from '../entity/Site'
 
-export const S3_BAD_HASH_ERROR_CODE = 'BadDigest'
-
 export const stringify = (obj: any): string => JSON.stringify(obj, null, 2)
-
-export const dateToUTCString = (date: string | Date) => {
-  const dateDate = new Date(date)
-  const minuteInMs = 60 * 1000
-  return new Date(dateDate.getTime() - (dateDate.getTimezoneOffset() * minuteInMs))
-    .toISOString().replace('T', ' ').replace(/\..*/, '')
-}
 
 export const dateToJSDate = (year: string, month: string, day: string): Date => {
   return new Date(
@@ -34,7 +25,14 @@ export const fetchAll = <T>(conn: Connection, schema: Function, options={}): Pro
   return repo.find(options) as Promise<T[]>
 }
 
-export const isValidDate = (obj: any) => !isNaN(new Date(obj).getDate())
+export const isValidDate = (obj: any) => {
+  const date = new Date(obj)
+  const now = new Date()
+  now.setHours(now.getHours() + 3)
+  return !isNaN(date.getDate())
+    && date.getTime() <= now.getTime()
+    && date.getTime() > new Date('1970-01-01').getTime()
+}
 
 export const tomorrow = () => {
   const tomorrow = new Date()
