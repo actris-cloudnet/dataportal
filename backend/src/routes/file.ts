@@ -95,7 +95,8 @@ export class FileRoutes {
 
     try {
       const sourceFileIds = req.body.sourceFileIds || []
-      await Promise.all(sourceFileIds.map((uuid: string) => this.fileRepo.findOneOrFail(uuid)))
+      await Promise.all(sourceFileIds.map(async (uuid: string) =>
+        (await this.findAnyFile(repo => repo.findOne(uuid)) || Promise.reject())))
     } catch (e) {
       return next({status: 422, errors: ['One or more of the specified source files were not found']})
     }
