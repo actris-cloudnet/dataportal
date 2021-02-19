@@ -9,9 +9,6 @@
 .widemap
   height: 450px
   width: 363%
-  right-padding: 1em
-  left-padding: 1em
-  position:fixed
 
 .wrapper
   position: relative
@@ -119,7 +116,6 @@ export default class Map extends Vue {
     }
   })
 
-
   // init
   initMap() {
     this.legend.onAdd = this.generateLegend
@@ -132,6 +128,13 @@ export default class Map extends Vue {
   initLayers() {
     this.sites.map(site => {
       const mark = marker([site.latitude, site.longitude])
+      mark.bindPopup(site.humanReadableName)
+      mark.on('mouseover', (_hoverIn) => {
+        mark.openPopup()
+      })
+      mark.on('mouseout', (_hoverOut) => {
+        mark.closePopup()
+      })
       mark.on('click', (_onClick) => {
         if (this.onMapMarkerClick) this.onMapMarkerClick(site.id)
       })
