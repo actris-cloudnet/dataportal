@@ -1,0 +1,22 @@
+{
+  "name": "dataportal",
+  "version": "1.0.0",
+  "description": "![](https://github.com/actris-cloudnet/dataportal/workflows/Test/badge.svg)",
+  "main": ".eslintrc-common.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/actris-cloudnet/dataportal.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/actris-cloudnet/dataportal/issues"
+  },
+  "homepage": "https://github.com/actris-cloudnet/dataportal#readme"
+}

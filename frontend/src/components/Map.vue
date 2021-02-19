@@ -6,8 +6,16 @@
   height: 300px
   width: 300px
 
+.widemap
+  height: 450px
+  width: 363%
+  right-padding: 1em
+  left-padding: 1em
+  position:fixed
+
 .wrapper
   position: relative
+  top: -15px
 
 .legend
   background: white
@@ -47,9 +55,8 @@
 <template>
   <div id="mapContainer" ref="mapElement" class="container wrapper" style="z-index: 4">
     <div class="row">
-      <div class="col-md-12 no-padding">
-        <div id="map" class="map"></div>
-      </div>
+      <div v-if="showLegend" id="map" class="widemap"></div>
+      <div v-else id="map" class="map"></div>
     </div>
   </div>
 </template>

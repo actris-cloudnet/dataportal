@@ -212,21 +212,15 @@
     line-height: 30px
     font-size: 80%
 
-  .widemap
-    position: absolute
-    left: $lightpadding
-    right: $lightpadding
-
   .widemap.wideviz
     left: $heavypadding
     right: $heavypadding
 
   .widemapmarginleft
-    margin-top: 300px
+    margin-top: 11px
 
   .widemapmarginright
-    margin-top: 310px
-
+    margin-top: 463px
   @media screen and (max-width: $narrow-screen)
     .widemap
       left: 0
