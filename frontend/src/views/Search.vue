@@ -217,10 +217,10 @@
     right: $heavypadding
 
   .widemapmarginleft
-    margin-top: 11px
+    margin-top: -20px
 
   .widemapmarginright
-    margin-top: 463px
+    margin-top: 432px
   @media screen and (max-width: $narrow-screen)
     .widemap
       left: 0

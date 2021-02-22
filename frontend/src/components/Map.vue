@@ -9,6 +9,7 @@
 .widemap
   height: 450px
   width: 363%
+  margin-top: -20px
 
 .wrapper
   position: relative

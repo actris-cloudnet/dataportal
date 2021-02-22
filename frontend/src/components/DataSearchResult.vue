@@ -5,6 +5,7 @@
 section#fileTable
   width: 100%
   text-align: left
+  margin-top: -15px
 
   #tableContent
     margin-top: 10px
