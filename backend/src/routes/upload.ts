@@ -147,8 +147,10 @@ export class UploadRoutes {
   }
 
   listMetadata: RequestHandler = async (req: Request, res: Response, next) => {
-    this.findAllUploads((repo, model) => this.metadataQueryBuilder(repo, req.query, false, model))
-      .then(uploadedMetadata => res.send(uploadedMetadata.sort((a, b) => b.size - a.size).map(this.addS3keyToUpload)))
+    const isModel = req.path.includes('model')
+    const repo = isModel ? this.modelUploadRepo : this.instrumentUploadRepo
+    this.metadataQueryBuilder(repo, req.query, false, isModel)
+      .then(uploadedMetadata => res.send(uploadedMetadata.map(this.addS3keyToUpload)))
       .catch(err => {next({status: 500, errors: `Internal server error: ${err}`})})
   }
 
@@ -225,14 +227,8 @@ export class UploadRoutes {
       status: query.status || [Status.UPLOADED, Status.CREATED, Status.PROCESSED],
       dateFrom: query.dateFrom || '1970-01-01',
       dateTo: query.dateTo || tomorrow(),
-      instrument:
-        model
-          ? undefined
-          : query.instrument || (await fetchAll<Instrument>(this.conn, Instrument)).map(instrument => instrument.id),
-      model:
-        model
-          ? query.model || (await fetchAll<Model>(this.conn, Model)).map(model => model.id)
-          : undefined,
+      instrument: model ? undefined : query.instrument,
+      model: model ? query.model : undefined,
     }
 
     const fieldsToArray = ['site', 'status', 'instrument', 'model']
@@ -251,6 +247,8 @@ export class UploadRoutes {
       .andWhere('um.status IN (:...status)', augmentedQuery)
     if (query.instrument) qb.andWhere('instrument.id IN (:...instrument)', augmentedQuery)
     if (query.model) qb.andWhere('model.id IN (:...model)', augmentedQuery)
+
+    if (!onlyDistinctInstruments) qb.addOrderBy('size', 'DESC')
 
     return qb.getMany()
   }
@@ -291,16 +289,6 @@ export class UploadRoutes {
       searchFunc(this.modelUploadRepo, true)
     ])
       .then(([upload, modelUpload]) => upload || modelUpload)
-  }
-
-  findAllUploads(searchFunc: (arg0: Repository<InstrumentUpload|ModelUpload>, arg1?: boolean) =>
-    Promise<(InstrumentUpload|ModelUpload)[]>):
-    Promise<(InstrumentUpload|ModelUpload)[]> {
-    return Promise.all([
-      searchFunc(this.instrumentUploadRepo, false),
-      searchFunc(this.modelUploadRepo, true)
-    ])
-      .then(([files, modelFiles]) => files.concat(modelFiles))
   }
 
   findRepoForUpload(upload: InstrumentUpload | ModelUpload) {

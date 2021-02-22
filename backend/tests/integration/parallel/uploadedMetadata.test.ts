@@ -4,13 +4,17 @@ import {readResources} from '../../../../shared/lib'
 
 const protectedUrl = `${backendPrivateUrl}upload/metadata/`
 const privateUrl = `${backendPrivateUrl}upload-metadata/`
+const privateModelUrl = `${backendPrivateUrl}upload-model-metadata/`
 
-let responses: any
+let instResp: any
+let modelResp: any
 let expected: any
 
 beforeAll(async () => {
-  responses = (await readResources())['uploaded-metadata']
-  expected = responses[0]
+  const responses = await readResources()
+  instResp = responses['uploaded-metadata']
+  modelResp = responses['uploaded-model-metadata']
+  expected = instResp[0]
 })
 
 describe('GET /upload/metadata/:checksum', () => {
@@ -33,20 +37,34 @@ describe('GET /upload/metadata/:checksum', () => {
 })
 
 describe('GET /upload-metadata', () => {
-  it('without arguments responds with a list of all uploaded metadata sorted by size', async () => {
-    return expect(axios.get(`${privateUrl}`)).resolves.toMatchObject({status: 200, data: responses})
+  it('without arguments responds with a list of all uploaded instrument files sorted by size', async () => {
+    return expect(axios.get(`${privateUrl}`)).resolves.toMatchObject({status: 200, data: instResp})
   })
 
   it('responds with correct object when filtering with date', async () => {
-    return expect(axios.get(`${privateUrl}`, {params: {dateFrom: '2020-08-11', dateTo: '2020-08-11'}})).resolves.toMatchObject({status: 200, data: [responses[5]]})
+    return expect(axios.get(`${privateUrl}`, {params: {dateFrom: '2020-08-11', dateTo: '2020-08-11'}})).resolves.toMatchObject({status: 200, data: [instResp[0]]})
   })
 
   it('responds with correct object when filtering with site', async () => {
-    return expect(axios.get(`${privateUrl}`, {params: {site: 'macehead'}})).resolves.toMatchObject({status: 200, data: [responses[1]]})
+    return expect(axios.get(`${privateUrl}`, {params: {site: 'granada'}})).resolves.toMatchObject({status: 200, data: [instResp[0]]})
   })
 
   it('responds with correct object when filtering with status', async () => {
-    return expect(axios.get(`${privateUrl}`, {params: {status: 'processed'}})).resolves.toMatchObject({status: 200, data: [responses[3], responses[6], responses[7]]})
+    return expect(axios.get(`${privateUrl}`, {params: {status: 'processed'}})).resolves.toMatchObject({status: 200, data: [instResp[1], instResp[2]]})
+  })
+
+  it('responds with correct object when filtering with instrument', async () => {
+    return expect(axios.get(`${privateUrl}`, {params: {instrument: 'mira'}})).resolves.toMatchObject({status: 200, data: [instResp[0], instResp[3]]})
+  })
+})
+
+describe('GET /upload-model-metadata', () => {
+  it('without arguments responds with a list of all uploaded instrument files sorted by size', async () => {
+    return expect(axios.get(`${privateModelUrl}`)).resolves.toMatchObject({status: 200, data: modelResp})
+  })
+
+  it('responds with correct object when filtering with model', async () => {
+    return expect(axios.get(`${privateModelUrl}`, {params: {model: 'icon-iglo-12-23'}})).resolves.toMatchObject({status: 200, data: [modelResp[2], modelResp[3]]})
   })
 })
 
@@ -55,8 +73,8 @@ describe('GET /api/uploaded-metadata', () => {
   it('responds with correct object when filtering with site', async () => {
     return expect(axios.get(`${publicUrl}`, {params: {site: 'bucharest'}}))
       .resolves.toMatchObject({status: 200, data: [
-        {instrument: responses[7]['instrument']},
-        {instrument: responses[8]['instrument']}
+        {instrument: instResp[2]['instrument']},
+        {instrument: instResp[3]['instrument']}
       ]})
   })
 })
