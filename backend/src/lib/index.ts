@@ -96,10 +96,13 @@ export async function checkFileExists(bucket: string, s3key: string) {
 }
 
 // File stream handling
+const fixDbDate = (date: Date) => // Add finnish timezone hours to make the date jump to next day
+  new Date(date.setHours(date.getHours() + 3))
+
 const translateKeyVal = (key: string, val: string|number|boolean|Date, acc: any) => {
   if (key.includes('Id')) return {}
   key = key.replace(/^file_/, '')
-  val = (val instanceof Date && key == 'measurementDate') ? val.toJSON().split('T')[0] : val
+  val = (val instanceof Date && key == 'measurementDate') ? fixDbDate(val).toISOString().split('T')[0] : val
   let subKey
   [key, subKey] = key.split('_')
   if (!subKey) return { [key]: val }
