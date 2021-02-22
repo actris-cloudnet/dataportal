@@ -48,7 +48,7 @@ const testConfig = {
 
 const devConfig = {
   port: 3000,
-  connectionName: 'default',
+  connectionName: process.env.NODE_ENV || 'default',
   downloadBaseUrl: 'http://localhost:3000/api/download/',
   pidServiceUrl: 'http://localhost:5800/pid/',
   pidServiceTimeoutMs: 2000,

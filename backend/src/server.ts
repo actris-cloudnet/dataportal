@@ -22,7 +22,9 @@ import {CalibrationRoutes} from './routes/calibration'
   const app = express()
 
   const connName = config.connectionName
+  process.stdout.write(`Connecting with ${connName} configuration... `)
   const conn = await createConnection(connName)
+  console.log('OK')
   const middleware = new Middleware(conn)
 
   const fileRoutes = new FileRoutes(conn)
@@ -159,5 +161,5 @@ import {CalibrationRoutes} from './routes/calibration'
 
   app.use(errorHandler)
 
-  app.listen(port, () => console.log(`App listening on port ${port} with ${connName} connection!`))
+  app.listen(port, () => console.log(`App listening on port ${port}!`))
 })()

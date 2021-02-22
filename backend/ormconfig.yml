@@ -47,3 +47,21 @@
     entitiesDir: src/entity
     migrationsDir: src/migration
     subscribersDir: src/subscriber
+- name: docker
+  type: postgres
+  host: dataportal-db
+  username: dataportal
+  password: dev
+  database: dataportal
+  synchronize: false
+  logging: "error"
+  entities:
+    - build/entity/**/*.ts
+  migrations:
+    - build/migration/**/*.ts
+  subscribers:
+    - build/subscriber/**/*.ts
+  cli:
+    entitiesDir: src/entity
+    migrationsDir: src/migration
+    subscribersDir: src/subscriber
