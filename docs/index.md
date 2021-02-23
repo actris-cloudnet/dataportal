@@ -340,7 +340,7 @@ Response body:
       "id": "gdas1",
       "optimumOrder": 3
     },
-    "downloadUrl": "http://localhost:3000/api/download/product/90f95f81-4f45-4efb-a25d-80066652aece/20210203_lindenberg_gdas1.nc",
+    "downloadUrl": "https://cloudnet.fmi.fi/api/download/product/90f95f81-4f45-4efb-a25d-80066652aece/20210203_lindenberg_gdas1.nc",
     "filename": "20210203_lindenberg_gdas1.nc"
   }
 ]
