@@ -18,6 +18,7 @@
 
   main#search.mediumView
     max-width: 90em
+    margin-top: 0px
 
   main#search.wideView
     max-width: none
@@ -220,13 +221,10 @@
     margin-top: -20px
 
   .widemapmarginright
-    margin-top: 432px
+    margin-top: 450px
   @media screen and (max-width: $narrow-screen)
-    .widemap
-      left: 0
-      right: 0
     .widemapmarginright
-      margin-top: 0
+      margin-top: 0px
 
   div.checkbox
     position: relative
