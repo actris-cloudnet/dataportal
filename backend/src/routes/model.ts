@@ -1,7 +1,5 @@
-import {Model} from '../entity/Model'
 import {Connection} from 'typeorm'
 import {Request, RequestHandler, Response} from 'express'
-import {fetchAll} from '../lib'
 
 
 export class ModelRoutes {
@@ -13,7 +11,12 @@ export class ModelRoutes {
   private conn: Connection
 
   models: RequestHandler = async (_: Request, res: Response, next) => {
-    fetchAll<Model>(this.conn, Model)
+    this.conn.getRepository('model')
+      .createQueryBuilder('model')
+      .select()
+      .addOrderBy('model.optimumOrder', 'ASC')
+      .addOrderBy('model.id', 'ASC')
+      .getMany()
       .then(result => res.send(result))
       .catch(err => next({ status: 500, errors: err }))
   }
