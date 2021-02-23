@@ -49,6 +49,27 @@
   li.red:before
     color: #cc2c47
 
+.custom-popup .leaflet-popup-content-wrapper
+    opacity: 0.7
+    max-Width : 78px
+    background: white
+    color: black
+    box-size: 10px 20px
+    box-shadow: 0 3px 14px rgba(0,0,0,0.4)
+    text-align: left
+    font-size: 12px
+
+.custom-popup .leaflet-popup-content
+    margin: 10px 18px
+    line-height: 0.4
+    width: 80px
+    margin-left: 0.8em
+
+.custom-popup .leaflet-popup-tip
+    opacity: 0.8
+    overflow: hidden
+
+
 </style>
 <template>
   <div id="mapContainer" ref="mapElement" class="container wrapper" style="z-index: 4">
@@ -129,7 +150,7 @@ export default class Map extends Vue {
   initLayers() {
     this.sites.map(site => {
       const mark = marker([site.latitude, site.longitude])
-      mark.bindPopup(site.humanReadableName)
+      mark.bindPopup(this.customPopup(site))
       mark.on('mouseover', (_hoverIn) => {
         mark.openPopup()
       })
@@ -138,11 +159,20 @@ export default class Map extends Vue {
       })
       mark.on('click', (_onClick) => {
         if (this.onMapMarkerClick) this.onMapMarkerClick(site.id)
+        mark.closePopup()
       })
       this.allMarkers[site.id] = mark
       if (!this.map) return
       mark.addTo(this.map)
     })
+  }
+
+  customPopup(site: Site) {
+    const popup = L.popup({
+      closeButton: false,
+      className: 'custom-popup'
+    }).setContent(site.humanReadableName)
+    return popup
   }
 
   setMarkerIcons() {
