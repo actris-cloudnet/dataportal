@@ -1,5 +1,6 @@
 import {Column, Entity, OneToMany, PrimaryColumn} from 'typeorm'
 import {InstrumentUpload} from './Upload'
+import {Calibration} from './Calibration'
 
 export enum InstrumentType {
   RADAR = 'radar',
@@ -20,6 +21,9 @@ export class Instrument {
   @Column()
   humanReadableName!: string
 
-  @OneToMany(_ => InstrumentUpload, upload => upload.site)
+  @OneToMany(_ => InstrumentUpload, upload => upload.instrument)
   uploads!: InstrumentUpload[]
+
+  @OneToMany(_ => Calibration, calib => calib.instrument)
+  calibrations!: Calibration[]
 }
