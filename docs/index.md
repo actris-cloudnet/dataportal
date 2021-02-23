@@ -8,6 +8,22 @@ We provide an HTTP REST API for programmatic access to the metadata at the Cloud
 The API responds with JSON and can be accessed via the base URL `https://cloudnet.fmi.fi/api/`. 
 Metadata can be queried via the following routes. For examples on how to use the API programmatically, see [Examples](#examples).
 
+
+## Index
+
+1. [Routes](#routes)
+   1. [Sites](#get-apisites--site)
+   1. [Products](#get-apiproducts--product)
+   1. [Instruments](#get-apiinstruments--instrument)
+   1. [Models](#get-apimodels--model)
+   1. [File by uuid](#get-apifilesuuid--file)
+   1. [Product files](#get-apifiles--file)
+   1. [Model files](#get-apimodel-files--modelfile)
+1. [Examples](#examples)
+1. [Notes](#notes)
+1. [Errors](#errors)
+
+
 ## Routes
 
 ### `GET /api/sites` → `Site[]`
