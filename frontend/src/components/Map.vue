@@ -143,9 +143,7 @@ export default class Map extends Vue {
   // init
   initMap() {
     this.legend.onAdd = this.generateLegend
-    this.map = L.map(this.$refs['mapElement'] as HTMLElement, {
-      crs: L.CRS.EPSG3857
-    }).setView(this.getMapCenter(), this.zoom)
+    this.map = L.map(this.$refs['mapElement'] as HTMLElement).setView(this.getMapCenter(), this.zoom)
     this.tileLayer = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png')
     this.tileLayer.addTo(this.map)
     if (this.showLegend) this.legend.addTo(this.map)
@@ -194,7 +192,7 @@ export default class Map extends Vue {
   }
 
   getMapCenter() {
-    var center = this.center
+    let center = this.center
     if (this.showLegend)
       center = [34.00, 14.00]
     return center
