@@ -18,7 +18,6 @@
 
   main#search.mediumView
     max-width: 90em
-    margin-top: 0px
 
   main#search.wideView
     max-width: none
@@ -223,6 +222,9 @@
   .widemapmarginright
     margin-top: 450px
   @media screen and (max-width: $narrow-screen)
+    .widemapmarginright
+      margin-top: 0px
+  @media screen and (max-width: $medium-screen)
     .widemapmarginright
       margin-top: 0px
 
