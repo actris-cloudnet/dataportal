@@ -137,6 +137,7 @@
       background: none
 
   .results
+    margin-top: 15px
     display: inline-flex
     flex-grow: 1
     min-width: 600px
