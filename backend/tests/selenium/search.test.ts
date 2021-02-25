@@ -50,6 +50,12 @@ async function clickAllMarkers(by: By) {
   await clickMapMarker(by, -140, -20) // Mace Head
 }
 
+async function clickAllMarkersPopupMovement(by: By) {
+  await clickMapMarker(by, 90, -97) // Hyytiälä
+  await clickMapMarker(by, 103, 93) //Bucharest
+  await clickMapMarker(by, -105, -5) // Mace Head
+}
+
 beforeAll(async () => {
   driver = await initDriver()
   selenium = new Selenium(driver)
@@ -225,7 +231,7 @@ describe('search page', () => {
     await clearMapSelection(By.id('mapContainer'))
     await selenium.clickId('showAllSitesCheckbox')
     await wait(500)
-    await clickMapMarker(By.id('mapContainer'), -250, 20)
+    await clickMapMarker(By.id('mapContainer'), -250, -50)
     await wait(500)
     const content = await selenium.getContent()
     expect(content).toContain('New York')
@@ -235,7 +241,8 @@ describe('search page', () => {
   it('removes site from multi-selection while clicking marker twice', async () => {
     await clearMapSelection(By.id('mapContainer'))
     await clickMapMarker(By.id('mapContainer'), -140, -20)
-    await clickMapMarker(By.id('mapContainer'), -140, -20)
+    await wait(500)
+    await clickMapMarker(By.id('mapContainer'), -105, -5)
     const content = await selenium.getContent()
     expect(content).not.toContain('Mace Head')
   })
@@ -255,7 +262,7 @@ describe('search page', () => {
     const src1 = getMarkerSrc(By.id('mapContainer'))
     const s1 = (await src1).anchor('src')
     await clickAllMarkers(By.id('mapContainer'))
-    await clickAllMarkers(By.id('mapContainer'))
+    await clickAllMarkersPopupMovement(By.id('mapContainer'))
     const src2 = getMarkerSrc(By.id('mapContainer'))
     const s2 = (await src2).anchor('src')
     expect(s1).toEqual(s2)
