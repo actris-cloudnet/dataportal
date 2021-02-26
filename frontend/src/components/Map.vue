@@ -52,25 +52,24 @@
     color: #cc2c47
 
 .custom-popup .leaflet-popup-content-wrapper
-    opacity: 0.7
-    max-Width : 78px
-    background: white
-    color: black
-    box-size: 10px 20px
-    box-shadow: 0 3px 14px rgba(0,0,0,0.4)
-    text-align: left
-    font-size: 12px
+  opacity: 0.7
+  background: white
+  color: black
+  box-size: 10px 20px
+  box-shadow: 0 3px 14px rgba(0,0,0,0.4)
+  text-align: center
+  padding-left: 1em;
+  padding-right: 1em;
 
 .custom-popup .leaflet-popup-content
-    margin: 10px 18px
-    line-height: 0.4
-    width: 80px
-    margin-left: 0.8em
+  margin: 0.8em -0.2em
+  line-height: 0.4
+  font-size: 12px
+  width: auto
 
 .custom-popup .leaflet-popup-tip
-    opacity: 0.8
-    overflow: hidden
-
+  opacity: 0.8
+  overflow: hidden
 
 </style>
 <template>
@@ -156,9 +155,9 @@ export default class Map extends Vue {
       mark.on('mouseover', (_hoverIn) => {
         mark.openPopup()
       })
-      mark.on('mouseout', (_hoverOut) => {
-        mark.closePopup()
-      })
+      //mark.on('mouseout', (_hoverOut) => {
+      //  mark.closePopup()
+      //})
       mark.on('click', (_onClick) => {
         if (this.onMapMarkerClick) this.onMapMarkerClick(site.id)
         mark.closePopup()
