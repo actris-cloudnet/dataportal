@@ -155,9 +155,9 @@ export default class Map extends Vue {
       mark.on('mouseover', (_hoverIn) => {
         mark.openPopup()
       })
-      //mark.on('mouseout', (_hoverOut) => {
-      //  mark.closePopup()
-      //})
+      mark.on('mouseout', (_hoverOut) => {
+        mark.closePopup()
+      })
       mark.on('click', (_onClick) => {
         if (this.onMapMarkerClick) this.onMapMarkerClick(site.id)
         mark.closePopup()
