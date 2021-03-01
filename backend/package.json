@@ -53,6 +53,7 @@
       "test": "npm run reset-testdb && jest tests/integration/parallel && jest --runInBand tests/integration/sequential",
       "e2e-test": "set -e; for f in tests/e2e/*; do npm run reset-testdb && jest $f; done",
       "start": "echo 'Use ./control script at project root'",
+      "start-dev": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'npx ts-node -T' src/server.ts",
       "stop": "echo 'Use ./control script at project root'",
       "build": "tsc",
       "lint": "eslint . --ext .js,.ts",
