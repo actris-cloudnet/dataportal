@@ -58,8 +58,8 @@
   box-size: 10px 20px
   box-shadow: 0 3px 14px rgba(0,0,0,0.4)
   text-align: center
-  padding-left: 1em;
-  padding-right: 1em;
+  padding-left: 1em
+  padding-right: 1em
 
 .custom-popup .leaflet-popup-content
   margin: 0.8em -0.2em
