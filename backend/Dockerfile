@@ -2,11 +2,8 @@ FROM node:14 AS test
 
 WORKDIR /app
 
-COPY package*.json ./
-COPY tsconfig.json ./
-COPY ormconfig.yml ./
-
-COPY src /app/src
+COPY backend /app
+COPY shared /shared
 
 RUN npm install
 RUN npm run build
@@ -21,6 +18,7 @@ COPY --from=test /app/ormconfig.yml ./
 
 COPY --from=test /app/build /app/build
 COPY --from=test /app/src /app/src
+COPY --from=test /shared /shared
 
 RUN npm install --only=prod
 
