@@ -541,6 +541,7 @@ export default class Search extends Vue {
   dataSearchUpdate = 40000
   vizSearchUpdate = 50000
   mapKey = 60000
+  initMapKey = 60000
 
   isVizMode() {
     return this.mode == 'visualizations'
@@ -597,9 +598,11 @@ export default class Search extends Vue {
         .filter(this.discardHiddenSites)
         .sort(this.alphabeticalSort)
       this.allProducts = products.data.sort(this.alphabeticalSort)
-      if (this.isVizMode()) {
-        if (this.selectedSiteIds.length == 0) this.selectedSiteIds.push('bucharest')
-        if (this.selectedProductIds.length == 0) this.selectedProductIds.push('classification')
+      if (this.isVizMode() && !this.showAllSites) {
+        if (this.selectedSiteIds.length == 0 && this.mapKey == this.initMapKey) {
+          this.selectedSiteIds.push('bucharest')}
+        if (this.selectedProductIds.length == 0 && this.mapKey == this.initMapKey) {
+          this.selectedProductIds.push('classification')}
         const payload = { params: { site: this.selectedSiteIds, product: this.selectedProductIds } }
         return axios.get(`${this.apiUrl}latest-visualization-date/`, payload)
           .then(res => {
