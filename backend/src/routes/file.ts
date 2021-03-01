@@ -237,6 +237,7 @@ export class FileRoutes {
       .leftJoinAndSelect('file.product', 'product')
     qb = addCommonFilters(qb, query)
     qb.orderBy('file.measurementDate', 'DESC')
+    if ('limit' in query) qb.limit(parseInt(query.limit))
     return qb
   }
 

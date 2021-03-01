@@ -215,21 +215,21 @@ describe('/api/model-files', () => {
   const url = `${backendPublicUrl}model-files/`
 
   it('responds with the best model file by default', async () => {
-    const payload = {params: {product: 'model', site: 'bucharest', dateFrom: '2020-12-05', dateTo: '2020-12-05'}}
+    const payload = {params: {site: 'bucharest', dateFrom: '2020-12-05', dateTo: '2020-12-05'}}
     const res = await axios.get(url, payload)
     expect(res.data).toHaveLength(1)
     return expect(res.data[0]).toMatchObject({ model: {id: 'ecmwf'}})
   })
 
   it('responds with the specified model file', async () => {
-    const payload = {params: {product: 'model', site: 'bucharest', dateFrom: '2020-12-05', dateTo: '2020-12-05', model: 'icon-iglo-12-23'}}
+    const payload = {params: {site: 'bucharest', dateFrom: '2020-12-05', dateTo: '2020-12-05', model: 'icon-iglo-12-23'}}
     const res = await axios.get(url, payload)
     expect(res.data).toHaveLength(1)
     return expect(res.data[0]).toMatchObject({ model: {id: 'icon-iglo-12-23'}})
   })
 
   it('responds with all model files with allModels flag ordered by model quality', async () => {
-    const payload = {params: {product: 'model', site: 'bucharest', dateFrom: '2020-12-05', dateTo: '2020-12-05', allModels: true}}
+    const payload = {params: {site: 'bucharest', dateFrom: '2020-12-05', dateTo: '2020-12-05', allModels: true}}
     const res = await axios.get(url, payload)
     expect(res.data).toHaveLength(2)
     expect(res.data[0]).toMatchObject({ model: {id: 'ecmwf'}})
@@ -237,7 +237,7 @@ describe('/api/model-files', () => {
   })
 
   it('responds with 400 if model and allModels are both defined', async () => {
-    const payload = {params: {product: 'model', model: 'ecmwf', allModels: true}}
+    const payload = {params: {model: 'ecmwf', allModels: true}}
     let expectedBody: RequestError = {
       status: 400,
       errors: [ 'Properties "allModels" and "model" can not be both defined' ]
@@ -245,23 +245,14 @@ describe('/api/model-files', () => {
     return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
 
-  it('responds with 400 if model and allModels are both defined', async () => {
-    const payload = {params: {product: 'model', model: 'ecmwf', allModels: true}}
-    let expectedBody: RequestError = {
-      status: 400,
-      errors: [ 'Properties "allModels" and "model" can not be both defined' ]
-    }
-    return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
-  })
-
-  it.only('responds with 400 on invalid search params', async () => {
+  it('responds with 400 on invalid search params', async () => {
     await expect(axios.get(url, {params: {allVersions: true}})).rejects.toMatchObject({ response: { status: 400 }})
     await expect(axios.get(url, {params: {product: 'classification'}})).rejects.toMatchObject({ response: { status: 400 }})
     return expect(axios.get(url, {params: {showLegacy: true}})).rejects.toMatchObject({ response: { status: 400 }})
   })
 
   it('responds with 404 if a specified model is not found', async () => {
-    const payload = {params: {product: 'model', model: 'sammakko'}}
+    const payload = {params: {model: 'sammakko'}}
     let expectedBody: RequestError = {
       status: 404,
       errors: [ 'One or more of the specified models were not found' ]
@@ -285,12 +276,13 @@ describe('/api/search', () => {
 
   it('does not return hidden sites', async () => {
     const payload = {params: {date: '2021-01-22'}}
-    return expect(axios.get(url, payload)).resolves.toHaveLength(0)
+    const {data} = await axios.get(url, payload)
+    return expect(data).toHaveLength(0)
   })
 
   it('returns the latest file when limit=1', async () => {
     const res = await axios.get(url, { params: { site: 'bucharest', limit: '1' }})
     expect(res.data).toHaveLength(1)
-    expect(res.data[0].measurementDate).toEqual('2019-07-16')
+    expect(res.data[0].measurementDate).toEqual('2020-12-05')
   })
 })
