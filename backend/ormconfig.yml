@@ -15,22 +15,6 @@
     entitiesDir: src/entity
     migrationsDir: src/migration
     subscribersDir: src/subscriber
-- name: test
-  type: postgres
-  host: localhost
-  database: dataportal-test
-  synchronize: true
-  logging: false
-  entities:
-  - src/entity/**/*.ts
-  migrations:
-  - src/migration/**/*.ts
-  subscribers:
-  - src/subscriber/**/*.ts
-  cli:
-    entitiesDir: src/entity
-    migrationsDir: src/migration
-    subscribersDir: src/subscriber
 - name: ci-test
   type: postgres
   host: localhost
@@ -54,13 +38,32 @@
   password: dev
   database: dataportal
   synchronize: false
+  migrationsRun: true
   logging: "error"
   entities:
-    - build/entity/**/*.ts
+    - src/entity/**/*.ts
   migrations:
-    - build/migration/**/*.ts
+    - src/migration/**/*.ts
   subscribers:
-    - build/subscriber/**/*.ts
+    - src/subscriber/**/*.ts
+  cli:
+    entitiesDir: src/entity
+    migrationsDir: src/migration
+    subscribersDir: src/subscriber
+- name: test
+  type: postgres
+  host: dataportal-db
+  username: dataportal
+  password: dev
+  database: dataportal-test
+  synchronize: true
+  logging: false
+  entities:
+    - src/entity/**/*.ts
+  migrations:
+    - src/migration/**/*.ts
+  subscribers:
+    - src/subscriber/**/*.ts
   cli:
     entitiesDir: src/entity
     migrationsDir: src/migration
