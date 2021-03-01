@@ -49,7 +49,7 @@
       "typescript": "^4.1.5"
    },
    "scripts": {
-      "reset-testdb": "node build/fixtures.js ci-test fixtures TRUNCATE",
+      "reset-testdb": "ts-node -T src/fixtures.ts test fixtures TRUNCATE",
       "test": "npm run reset-testdb && jest tests/integration/parallel && jest --runInBand tests/integration/sequential",
       "e2e-test": "set -e; for f in tests/e2e/*; do npm run reset-testdb && jest $f; done",
       "start": "node build/server.js",
