@@ -53,6 +53,10 @@
   @media screen and (max-width: $narrow-screen)
     section#sideBar
       margin-right: 0
+  @media screen and (max-width: $medium-screen)
+    section#sideBar
+      margin-left: 80px
+      margin-right: 80px
 
   .multiselect
     margin-bottom: $filter-margin
@@ -143,7 +147,7 @@
     min-width: 600px
     flex-basis: 600px
 
-  @media screen and (max-width: 600px)
+  @media screen and (max-width: 1010px)
     .results
       min-width: 0
 
