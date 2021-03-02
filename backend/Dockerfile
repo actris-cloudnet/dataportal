@@ -1,5 +1,7 @@
 FROM node:14 AS dev
 
+ENV TZ="Europe/Helsinki"
+
 WORKDIR /app
 
 COPY backend /app
