@@ -1,6 +1,9 @@
 <style lang="sass">
   @import "../sass/variables.sass"
 
+  .nobottommargin
+    margin-top: 15px
+
   .multiselect__input
     padding: 2px
     padding-left: 0

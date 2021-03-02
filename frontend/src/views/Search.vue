@@ -53,6 +53,10 @@
   @media screen and (max-width: $narrow-screen)
     section#sideBar
       margin-right: 0
+  @media screen and (max-width: $medium-screen)
+    section#sideBar
+      margin-left: 80px
+      margin-right: 80px
 
   .multiselect
     margin-bottom: $filter-margin
@@ -137,12 +141,13 @@
       background: none
 
   .results
+    margin-top: 15px
     display: inline-flex
     flex-grow: 1
     min-width: 600px
     flex-basis: 600px
 
-  @media screen and (max-width: 600px)
+  @media screen and (max-width: 1010px)
     .results
       min-width: 0
 
@@ -212,27 +217,21 @@
     line-height: 30px
     font-size: 80%
 
-  .widemap
-    position: absolute
-    left: $lightpadding
-    right: $lightpadding
-
   .widemap.wideviz
     left: $heavypadding
     right: $heavypadding
 
   .widemapmarginleft
-    margin-top: 300px
+    margin-top: -20px
 
   .widemapmarginright
-    margin-top: 310px
-
+    margin-top: 450px
   @media screen and (max-width: $narrow-screen)
-    .widemap
-      left: 0
-      right: 0
     .widemapmarginright
-      margin-top: 0
+      margin-top: 0px
+  @media screen and (max-width: $medium-screen)
+    .widemapmarginright
+      margin-top: 0px
 
   div.checkbox
     position: relative
@@ -546,6 +545,7 @@ export default class Search extends Vue {
   dataSearchUpdate = 40000
   vizSearchUpdate = 50000
   mapKey = 60000
+  initMapKey = 60000
 
   isVizMode() {
     return this.mode == 'visualizations'
@@ -602,9 +602,11 @@ export default class Search extends Vue {
         .filter(this.discardHiddenSites)
         .sort(this.alphabeticalSort)
       this.allProducts = products.data.sort(this.alphabeticalSort)
-      if (this.isVizMode()) {
-        if (this.selectedSiteIds.length == 0) this.selectedSiteIds.push('bucharest')
-        if (this.selectedProductIds.length == 0) this.selectedProductIds.push('classification')
+      if (this.isVizMode() && !this.showAllSites) {
+        if (this.selectedSiteIds.length == 0 && this.mapKey == this.initMapKey) {
+          this.selectedSiteIds.push('bucharest')}
+        if (this.selectedProductIds.length == 0 && this.mapKey == this.initMapKey) {
+          this.selectedProductIds.push('classification')}
         const payload = { params: { site: this.selectedSiteIds, product: this.selectedProductIds } }
         return axios.get(`${this.apiUrl}latest-visualization-date/`, payload)
           .then(res => {

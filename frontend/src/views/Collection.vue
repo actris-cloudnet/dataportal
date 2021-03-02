@@ -84,8 +84,8 @@ main.column
           <section class="details">
             <Map
                 :sites="sites"
-                :center="[54.00, 14.00]"
-                :zoom="3"
+                :center="[34.00, -14.00]"
+                :zoom="1"
             ></Map>
           </section>
         </section>

@@ -6,6 +6,14 @@
   height: 300px
   width: 300px
 
+.widemap
+  height: 450px
+  .wrapper
+    top: -36px
+    position: absolute
+    left: 1em
+    right: 1em
+
 .wrapper
   position: relative
 
@@ -43,13 +51,32 @@
   li.red:before
     color: #cc2c47
 
+.custom-popup .leaflet-popup-content-wrapper
+  opacity: 0.7
+  background: white
+  color: black
+  box-size: 10px 20px
+  box-shadow: 0 3px 14px rgba(0,0,0,0.4)
+  text-align: center
+  padding-left: 1em
+  padding-right: 1em
+
+.custom-popup .leaflet-popup-content
+  margin: 0.8em -0.2em
+  line-height: 0.4
+  font-size: 12px
+  width: auto
+
+.custom-popup .leaflet-popup-tip
+  opacity: 0.8
+  overflow: hidden
+
 </style>
 <template>
   <div id="mapContainer" ref="mapElement" class="container wrapper" style="z-index: 4">
     <div class="row">
-      <div class="col-md-12 no-padding">
-        <div id="map" class="map"></div>
-      </div>
+      <div v-if="showLegend" id="map" class="widemap"></div>
+      <div v-else id="map" class="map"></div>
     </div>
   </div>
 </template>
@@ -112,11 +139,11 @@ export default class Map extends Vue {
     }
   })
 
-
   // init
   initMap() {
     this.legend.onAdd = this.generateLegend
-    this.map = L.map(this.$refs['mapElement'] as HTMLElement).setView(this.center, this.zoom)
+    this.map = L.map(this.$refs['mapElement'] as HTMLElement, {
+      maxBounds: this.setMapBounds()}).setView(this.getMapCenter(), this.zoom)
     this.tileLayer = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png')
     this.tileLayer.addTo(this.map)
     if (this.showLegend) this.legend.addTo(this.map)
@@ -125,13 +152,29 @@ export default class Map extends Vue {
   initLayers() {
     this.sites.map(site => {
       const mark = marker([site.latitude, site.longitude])
+      mark.bindPopup(this.customPopup(site))
+      mark.on('mouseover', (_hoverIn) => {
+        mark.openPopup()
+      })
+      mark.on('mouseout', (_hoverOut) => {
+        mark.closePopup()
+      })
       mark.on('click', (_onClick) => {
         if (this.onMapMarkerClick) this.onMapMarkerClick(site.id)
+        mark.closePopup()
       })
       this.allMarkers[site.id] = mark
       if (!this.map) return
       mark.addTo(this.map)
     })
+  }
+
+  customPopup(site: Site) {
+    const popup = L.popup({
+      closeButton: false,
+      className: 'custom-popup'
+    }).setContent(site.humanReadableName)
+    return popup
   }
 
   setMarkerIcons() {
@@ -146,6 +189,20 @@ export default class Map extends Vue {
         mark.setIcon(new (this.marker(site, false)))
       }
     })
+  }
+
+  getMapCenter() {
+    let center = this.center
+    if (this.showLegend)
+      center = [34.00, 14.00]
+    return center
+  }
+
+  setMapBounds() {
+    const southWest = L.latLng(-90.00, -330.00),
+      northEast = L.latLng(90.00, 330.00),
+      bounds = L.latLngBounds(southWest, northEast)
+    return bounds
   }
 
   generateLegend() {
