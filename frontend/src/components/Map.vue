@@ -199,9 +199,9 @@ export default class Map extends Vue {
   }
 
   setMapBounds() {
-    var southWest = L.latLng(-90.00, -330.00),
-    northEast = L.latLng(90.00, 330.00),
-    bounds = L.latLngBounds(southWest, northEast)
+    const southWest = L.latLng(-90.00, -330.00),
+      northEast = L.latLng(90.00, 330.00),
+      bounds = L.latLngBounds(southWest, northEast)
     return bounds
   }
 
