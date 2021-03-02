@@ -71,6 +71,11 @@ const ciConfig = {
   ...{ connectionName: 'ci-test' }
 }
 
+const dockerTestConfig = {
+  ...testConfig,
+  ...{ connectionName: 'docker-test' }
+}
+
 let config: Config
 
 switch (process.env.NODE_ENV) {
@@ -86,6 +91,9 @@ case 'test':
   break
 case 'ci-test':
   config = ciConfig
+  break
+case 'docker-test':
+  config = dockerTestConfig
   break
 default:
   config = devConfig

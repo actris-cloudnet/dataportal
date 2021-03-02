@@ -15,7 +15,7 @@ export function clearDir(dir: string) {
 }
 
 export async function clearRepo(repo: string) {
-  const conn = await createConnection('test')
+  const conn = await createConnection(process.env.NODE_ENV || 'test')
   await conn.getRepository(repo).delete({})
   return conn.close()
 }

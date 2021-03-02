@@ -38,7 +38,16 @@ if (truncate) {
   console.log('NOTE: Truncating all existing data')
 }
 
-importFixture(argv[2], argv[3])
+let connName = argv[2]
+if (connName == '--') {
+  if (!process.env.NODE_ENV) {
+    console.error('FATAL: NODE_ENV must be set if no connection name provided')
+    process.exit(2)
+  }
+  connName = process.env.NODE_ENV
+}
+
+importFixture(connName, argv[3])
   .then(() => {
     console.log('Success!')
     process.exit(0)

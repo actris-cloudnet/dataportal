@@ -1,9 +1,10 @@
 const express = require('express')
 
+// Storage-service
 let serverMemory = {}
-const app = express()
+const storageApp = express()
 
-app.put('/*', (req, res, _next) =>{
+storageApp.put('/*', (req, res, _next) =>{
   const path = req.params[0]
   serverMemory[path] = new Buffer(0)
   req.on('data', chunk => {
@@ -17,15 +18,29 @@ app.put('/*', (req, res, _next) =>{
   req.on('end', () => res.headersSent || res.sendStatus(201))
 })
 
-app.get('/*', (req, res, _next) =>{
+storageApp.get('/*', (req, res, _next) =>{
   const path = req.params[0]
   if (!(path in serverMemory)) return res.sendStatus(404)
   res.send(serverMemory[path])
 })
 
-app.delete('/', (req, res, _next) =>{
+storageApp.delete('/', (req, res, _next) =>{
   serverMemory = {}
   res.sendStatus(200)
 })
 
-app.listen(5920, () => console.log('Storage service mock running'))
+storageApp.listen(5920, () => console.log('Storage service mock running'))
+
+// PID-service
+const validRequest = {
+  type: 'collection',
+  uuid: '48092c00-161d-4ca2-a29d-628cf8e960f6'
+}
+const response = {pid: 'testpid'}
+
+const pidApp = express()
+pidApp.post('/pid', express.json(), (req, res, _next) =>{
+  if (req.body.type != validRequest.type || req.body.uuid != validRequest.uuid) return res.sendStatus(400)
+  if (!req.body.wait) res.send(response)
+})
+pidApp.listen(5801, () => console.log('PID service mock running'))

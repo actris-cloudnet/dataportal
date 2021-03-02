@@ -51,7 +51,7 @@ const str2base64 = (hex: string) =>
 const headers = {'authorization': `Basic ${str2base64('granada:lol')}`}
 
 beforeAll(async () => {
-  conn = await createConnection('test')
+  conn = await createConnection(process.env.NODE_ENV || 'test')
   instrumentRepo = conn.getRepository('instrument_upload')
   modelRepo = conn.getRepository('model_upload')
   // Make sure these tables are initialized correctly
