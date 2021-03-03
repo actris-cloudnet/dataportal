@@ -50,7 +50,7 @@ const devConfig = {
   port: 3000,
   connectionName: process.env.NODE_ENV || 'default',
   downloadBaseUrl: 'http://localhost:3000/api/download/',
-  pidServiceUrl: 'http://localhost:5800/pid/',
+  pidServiceUrl: 'http://pid-service:5800/pid/',
   pidServiceTimeoutMs: 2000,
   publicDir: 'public',
   s3: {
@@ -59,7 +59,7 @@ const devConfig = {
   },
   allowUpdateLimitDays: 2,
   storageService: {
-    host: 'localhost',
+    host: 'storage-service',
     port: '5900',
     user: 'test',
     password: 'test'
