@@ -2,6 +2,7 @@ import axios from 'axios'
 import {Connection, createConnection} from 'typeorm/'
 import {backendPrivateUrl} from '../../lib'
 import {Status} from '../../../src/entity/Upload'
+import {promises as fsp} from 'fs'
 
 let conn: Connection
 let instrumentRepo: any
@@ -53,6 +54,9 @@ beforeAll(async () => {
   conn = await createConnection('test')
   instrumentRepo = conn.getRepository('instrument_upload')
   modelRepo = conn.getRepository('model_upload')
+  // Make sure these tables are initialized correctly
+  await conn.getRepository('regular_file').save(JSON.parse((await fsp.readFile('fixtures/2-regular_file.json')).toString()))
+  await conn.getRepository('model_file').save(JSON.parse((await fsp.readFile('fixtures/2-model_file.json')).toString()))
 })
 
 afterAll(async () => {
@@ -277,7 +281,7 @@ describe('PUT /model-upload/data/:checksum', () => {
     return axios.post(modelMetadataUrl, validModelMetadata, {headers})
   })
 
-  test('responds with 201 on submitting new model file', async () => {
+  test('responds with 201 on submitting new file', async () => {
     const validModelUrl = `${modelDataUrl}${validModelMetadata.checksum}`
     const validFile = 'content'
     await expect(axios.put(validModelUrl, validFile, {headers})).resolves.toMatchObject({status: 201})
@@ -297,25 +301,27 @@ describe('POST /model-upload/metadata', () => {
     site: 'bucharest',
   }
 
+  beforeEach(async () => {
+    await modelRepo.delete({})
+  })
+
   test('responds with 409 if stable file exists', async () => {
     return expect(axios.post(modelMetadataUrl, metaData, {headers})).rejects.toMatchObject({ response: { status: 409}})
   })
 
-  test('inserts model metadata if volatile exists', async () => {
+  test('inserts metadata if volatile file exists', async () => {
     const payload = {...metaData, measurementDate: '2020-05-12'}
     await expect(axios.post(modelMetadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
     return await modelRepo.findOneOrFail({checksum: metaData.checksum})
   })
 
-  test('inserts new model metadata and takes site from metadata', async () => {
-    await modelRepo.delete({})
+  test('inserts new metadata and takes site from metadata', async () => {
     await expect(axios.post(modelMetadataUrl, validModelMetadata, {headers})).resolves.toMatchObject({status: 200})
     const md = await modelRepo.findOne({checksum: validModelMetadata.checksum}, { relations: ['site', 'model'] })
     return expect(md.site.id).toBe(validModelMetadata.site)
   })
 
-  test('updates model file submitted with allowUpdate flag', async () => {
-    await modelRepo.delete({})
+  test('updates metadata submitted with allowUpdate flag', async () => {
     const payload = {...validMetadata, instrument: undefined, allowUpdate: true, model: 'ecmwf'}
     await expect(axios.post(modelMetadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
     const md = await modelRepo.findOne({checksum: payload.checksum})
@@ -327,8 +333,7 @@ describe('POST /model-upload/metadata', () => {
     return expect(md_resub.checksum).toBe(new_checksum)
   })
 
-  test('responds with 409 on existing hashsum with allowUpdate=True and model data', async () => {
-    await modelRepo.delete({})
+  test('responds with 409 on existing hashsum with allowUpdate=True', async () => {
     const now = new Date()
     const uploadedMetadata = {
       ...validMetadata,
