@@ -1,4 +1,4 @@
-FROM node:14 AS dev
+FROM node:10 AS dev
 
 ENV TZ="Europe/Helsinki"
 
