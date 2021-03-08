@@ -14,7 +14,7 @@ let conn: Connection
 let repo: Repository<Collection>
 
 beforeAll(async () => {
-  conn = await createConnection(process.env.NODE_ENV || 'test')
+  conn = await createConnection()
   repo = conn.getRepository('collection')
 })
 

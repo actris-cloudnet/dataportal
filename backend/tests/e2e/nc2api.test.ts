@@ -11,7 +11,7 @@ let conn: Connection
 let repo: Repository<Download>
 
 beforeAll(async () => {
-  conn = await createConnection(process.env.NODE_ENV || 'test')
+  conn = await createConnection()
   await conn.getRepository('download').delete({})
   await conn.getRepository('visualization').delete({})
   await conn.getRepository('regular_file').delete({})

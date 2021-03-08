@@ -3,10 +3,10 @@ import {Collection} from '../entity/Collection'
 import {CollectionResponse} from '../entity/CollectionResponse'
 import {validate as validateUuid} from 'uuid'
 import axios from 'axios'
-import config from '../config'
 import {Connection, Repository} from 'typeorm'
 import {File, ModelFile, RegularFile} from '../entity/File'
 import {convertToSearchResponse} from '../lib'
+import env from '../lib/env'
 
 export class CollectionRoutes {
 
@@ -15,14 +15,12 @@ export class CollectionRoutes {
     this.collectionRepo = conn.getRepository<Collection>('collection')
     this.fileRepo = conn.getRepository<RegularFile>('regular_file')
     this.modelFileRepo = conn.getRepository<ModelFile>('model_file')
-    this.publicDir = config.publicDir
   }
 
   readonly conn: Connection
   readonly collectionRepo: Repository<Collection>
   readonly fileRepo: Repository<RegularFile>
   readonly modelFileRepo: Repository<ModelFile>
-  readonly publicDir: string
 
   postCollection: RequestHandler = async (req: Request, res: Response, next) => {
     if (!('files' in req.body) || !req.body.files || !Array.isArray(req.body.files)) {
@@ -73,7 +71,7 @@ export class CollectionRoutes {
       const collection = await this.collectionRepo.findOne(body.uuid)
       if (collection === undefined) return next({status: 422, errors: ['Collection not found']})
       if (collection.pid) return next({status: 403, errors: ['Collection already has a PID']})
-      const pidRes = await axios.post(config.pidServiceUrl, req.body, {timeout: config.pidServiceTimeoutMs})
+      const pidRes = await axios.post(env.DP_PID_SERVICE_URL, req.body, {timeout: env.DP_PID_SERVICE_TIMEOUT_MS})
       await this.collectionRepo.update({uuid: body.uuid}, {pid: pidRes.data.pid})
       res.send(pidRes.data)
     } catch (e) {

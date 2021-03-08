@@ -4,11 +4,11 @@ import {Request} from 'express'
 import {ModelFile, RegularFile} from '../entity/File'
 import {File} from '../entity/File'
 import {SearchFileResponse} from '../entity/SearchFileResponse'
-import config from '../config'
 import {SearchFile} from '../entity/SearchFile'
 import {Upload} from '../entity/Upload'
 import axios from 'axios'
 import {SiteType} from '../entity/Site'
+import env from './env'
 
 export const stringify = (obj: any): string => JSON.stringify(obj, null, 2)
 
@@ -69,7 +69,7 @@ export const sortByMeasurementDateAsc = <T extends File|SearchFile>(files: T[]):
 
 export const augmentFile = (file: File|RegularFile|ModelFile) => ({
   ...file,
-  downloadUrl: `${config.downloadBaseUrl}${getDownloadPathForFile(file)}`,
+  downloadUrl: `${env.DP_BACKEND_URL}/download${getDownloadPathForFile(file)}`,
   filename: basename(file.s3key),
   s3key: undefined,
   model: 'model' in file ? file.model : undefined
@@ -77,7 +77,7 @@ export const augmentFile = (file: File|RegularFile|ModelFile) => ({
 
 export const ssAuthString = () =>
   'Basic ' + // eslint-disable-line prefer-template
-  Buffer.from(`${config.storageService.user}:${config.storageService.password}`).toString('base64')
+  Buffer.from(`${env.DP_SS_USER}:${env.DP_SS_PASSWORD}`).toString('base64')
 
 export const getBucketForFile = (file: File) =>
   file.volatile ? 'cloudnet-product-volatile' : 'cloudnet-product'
@@ -92,7 +92,7 @@ export async function checkFileExists(bucket: string, s3key: string) {
   let headers = {
     'Authorization': ssAuthString()
   }
-  return axios.head(`http://${config.storageService.host}:${config.storageService.port}/${bucket}/${s3key}`, {headers})
+  return axios.head(`${env.DP_SS_URL}/${bucket}/${s3key}`, {headers})
 }
 
 // File stream handling

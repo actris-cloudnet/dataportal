@@ -23,7 +23,7 @@ const imgUrl = `${backendPublicUrl}download/image/`
 describe('PUT /visualizations', () => {
 
   beforeAll(async () => {
-    conn = await createConnection(process.env.NODE_ENV || 'test')
+    conn = await createConnection()
     repo = conn.getRepository('model_visualization')
     // File fixtures are needed here
     await conn.getRepository('model_file').save(JSON.parse((await fsp.readFile('fixtures/2-model_file.json')).toString()))

@@ -1,6 +1,5 @@
 import {Request, RequestHandler, Response} from 'express'
 import {Collection} from '../entity/Collection'
-import config from '../config'
 import {Connection, EntityManager, Repository, SelectQueryBuilder} from 'typeorm'
 import {isFile, RegularFile} from '../entity/File'
 import {
@@ -25,7 +24,6 @@ export class FileRoutes {
     this.fileRepo = conn.getRepository<RegularFile>('regular_file')
     this.modelFileRepo = conn.getRepository<ModelFile>('model_file')
     this.searchFileRepo = conn.getRepository<SearchFile>('search_file')
-    this.fileServerUrl = config.downloadBaseUrl
   }
 
   readonly conn: Connection
@@ -33,7 +31,6 @@ export class FileRoutes {
   readonly fileRepo: Repository<RegularFile>
   readonly modelFileRepo: Repository<ModelFile>
   readonly searchFileRepo: Repository<SearchFile>
-  readonly fileServerUrl: string
 
   file: RequestHandler = async (req: Request, res: Response, next) => {
 

@@ -6,11 +6,11 @@ import {File, RegularFile} from '../entity/File'
 import {Upload} from '../entity/Upload'
 import {Download, ObjectType} from '../entity/Download'
 import {getBucketForFile, ssAuthString} from '../lib'
-import config from '../config'
 import * as http from 'http'
 import {IncomingMessage} from 'http'
 import archiver = require('archiver')
 import {FileRoutes} from './file'
+import env from '../lib/env'
 
 export class DownloadRoutes {
 
@@ -109,8 +109,8 @@ export class DownloadRoutes {
     }
 
     const requestOptions = {
-      host: config.storageService.host,
-      port: config.storageService.port,
+      host: env.DP_SS_HOST,
+      port: env.DP_SS_PORT,
       path: `/${bucket}/${s3key}`,
       headers,
       method: 'GET'
