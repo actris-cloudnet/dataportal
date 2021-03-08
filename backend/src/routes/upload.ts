@@ -3,7 +3,6 @@ import {InstrumentUpload, ModelUpload, Status} from '../entity/Upload'
 import {Connection, Repository} from 'typeorm'
 import {Request, RequestHandler, Response} from 'express'
 import {
-  dateNDaysAgo,
   fetchAll,
   getS3keyForUpload,
   isValidDate,
@@ -17,6 +16,7 @@ import {ReducedMetadataResponse} from '../entity/ReducedMetadataResponse'
 import validator from 'validator'
 import {Instrument} from '../entity/Instrument'
 import {Model} from '../entity/Model'
+import {ModelFile, RegularFile} from '../entity/File'
 import * as http from 'http'
 import ReadableStream = NodeJS.ReadableStream
 
@@ -30,6 +30,8 @@ export class UploadRoutes {
     this.instrumentRepo = this.conn.getRepository(Instrument)
     this.modelRepo = this.conn.getRepository(Model)
     this.siteRepo = this.conn.getRepository(Site)
+    this.modelFileRepo = this.conn.getRepository(ModelFile)
+    this.regularFileRepo = this.conn.getRepository(RegularFile)
   }
 
   readonly conn: Connection
@@ -38,52 +40,75 @@ export class UploadRoutes {
   readonly instrumentRepo: Repository<Instrument>
   readonly siteRepo: Repository<Site>
   readonly modelRepo: Repository<Model>
+  readonly modelFileRepo: Repository<ModelFile>
+  readonly regularFileRepo: Repository<RegularFile>
 
   postMetadata: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body
     const filename = basename(body.filename)
+    const isModelSubmission = 'model' in body
+    const isInstrumentSubmission = 'instrument' in body
+
     let instrument, model
+    let uploadRepo: Repository<InstrumentUpload | ModelUpload>
+    let productRepo: Repository<RegularFile | ModelFile>
 
     const site = await this.siteRepo.findOne(req.params.site)
     if (site == undefined) {
-      return next({ status: 422, errors: 'Unknown site'})
+      return next({status: 422, errors: 'Unknown site'})
     }
 
-    let uploadRepo: Repository<InstrumentUpload|ModelUpload>
-    if ('instrument' in body && 'model' in body) return next({ status: 422, errors: 'Both "instrument" and "model" fields may not be specified'})
-    if ('instrument' in body) {
+    if (isModelSubmission && isInstrumentSubmission) return next({
+      status: 422,
+      errors: 'Both "instrument" and "model" fields may not be specified'
+    })
+
+    if (isInstrumentSubmission) {
       instrument = await this.instrumentRepo.findOne(body.instrument)
-      if (instrument == undefined) return next({ status: 422, errors: 'Unknown instrument'})
+      if (instrument == undefined) return next({status: 422, errors: 'Unknown instrument'})
       uploadRepo = this.instrumentUploadRepo
-    }
-    else if ('model' in body) {
+      productRepo = this.regularFileRepo
+    } else if (isModelSubmission) {
       model = await this.modelRepo.findOne(body.model)
-      if (model == undefined) return next({ status: 422, errors: 'Unknown model'})
+      if (model == undefined) return next({status: 422, errors: 'Unknown model'})
       uploadRepo = this.modelUploadRepo
-    }
-    else return next({status: 422, errors: 'Metadata must have either "instrument" or "model" field'})
+      productRepo = this.modelFileRepo
+    } else return next({
+      status: 422,
+      errors: 'Metadata must have either "instrument" or "model" field'
+    })
 
     // Remove existing metadata if its status is created
-    const existingCreatedMetadata = await uploadRepo.findOne({checksum: body.checksum, status: Status.CREATED})
+    const existingCreatedMetadata = await uploadRepo.findOne({
+      checksum: body.checksum,
+      status: Status.CREATED
+    })
     if (existingCreatedMetadata != undefined) {
       await uploadRepo.remove(existingCreatedMetadata)
     }
 
     const existingUploadedMetadata = await uploadRepo.findOne({checksum: body.checksum})
     if (existingUploadedMetadata != undefined) {
-      return next({ status: 409, errors: 'File already uploaded' })
+      return next({status: 409, errors: 'File already uploaded'})
     }
 
-    const allowUpdate = ('allowUpdate' in body && body.allowUpdate.toString().toLowerCase() === 'true')
+    let allowUpdate = ('allowUpdate' in body && body.allowUpdate.toString().toLowerCase() === 'true')
 
-    // With allowUpdate flag, keep existing uuid to avoid duplicate files
+    const isExistingFreezedProduct = await this.isFreezedProduct(body, productRepo)
+    if (isExistingFreezedProduct) {
+      if (isModelSubmission) {
+        return next({status: 409, errors: 'Freezed model file exists'})
+      } else {
+        // Save new version of the file
+        allowUpdate = false
+      }
+    }
+
+    // With allowUpdate flag (and no stable files), keep existing uuid to avoid duplicate files
     if (allowUpdate) {
       try {
         const existingMetadata = await uploadRepo.findOne({filename: filename, allowUpdate: true})
         if (existingMetadata != undefined) {
-          if (!('model' in body) && existingMetadata.updatedAt < dateNDaysAgo(config.allowUpdateLimitDays)) {
-            return next({ status: 409, errors: 'File too old to be updated' })
-          }
           await uploadRepo.update(existingMetadata.uuid, {
             checksum: body.checksum,
             updatedAt: new Date(),
@@ -97,7 +122,7 @@ export class UploadRoutes {
     }
 
     let uploadedMetadata: InstrumentUpload | ModelUpload
-    if ('instrument' in body) {
+    if (isInstrumentSubmission) {
       uploadedMetadata = new InstrumentUpload(
         body.checksum,
         filename,
@@ -120,6 +145,18 @@ export class UploadRoutes {
     return uploadRepo.insert(uploadedMetadata)
       .then(() => res.sendStatus(200))
       .catch(err => next({ status: 500, errors: `Internal server error: ${err.code}`}))
+  }
+
+  private async isFreezedProduct(body: any, productRepo: Repository<RegularFile | ModelFile>): Promise<boolean> {
+    let payload: any = {site: body.site, measurementDate: body.measurementDate, volatile: false}
+    if ('model' in body) {
+      payload['model'] = body.model
+    } else {
+      const instrument = await this.instrumentRepo.findOneOrFail(body.instrument)
+      payload['product'] = instrument.type
+    }
+    const existingFreezedProduct = await productRepo.findOne(payload)
+    return existingFreezedProduct != undefined
   }
 
   updateMetadata: RequestHandler = async (req: Request, res: Response, next) => {
