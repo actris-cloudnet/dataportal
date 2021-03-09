@@ -1,0 +1,75 @@
+version: "3.9"
+services:
+  backend:
+    image: backend
+    pull_policy: never
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+      target: dev
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ci.env
+    command: ["npm", "run", "start-test"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "const c=new require('net').Socket();c.connect(3000);c.on('connect',()=>process.exit(0))"]
+      interval: 1s
+      retries: 20
+  db:
+    image: "postgres:13"
+    environment:
+      TZ: "Europe/Helsinki"
+      POSTGRES_DB: dataportal-test
+      POSTGRES_USER: dataportal
+      POSTGRES_PASSWORD: dev
+      PGUSER: dataportal
+    healthcheck:
+     test: ["CMD", "psql", "dataportal-test", "-c", "select 1"]
+     interval: 1s
+     retries: 120
+  frontend:
+    image: frontend
+    build:
+      context: ..
+      dockerfile: frontend/Dockerfile
+      target: dev
+    command: ["npm", "run", "serve"]
+  test-backend:
+    image: backend
+    depends_on:
+      backend:
+        condition: service_healthy
+    env_file:
+      - ci.env
+    command: ["npm", "test"]
+  e2e-test-backend:
+    image: backend
+    depends_on:
+      backend:
+        condition: service_healthy
+    env_file:
+      - ci.env
+    command: ["npm", "run", "e2e-test"]
+  test-frontend:
+    image: frontend
+    depends_on:
+      - frontend
+    env_file:
+      - ci.env
+    command: ["npm", "test"]
+  lint-backend:
+    image: backend
+    depends_on:
+      - backend
+    env_file:
+      - ci.env
+    command: ["npm", "run", "lint"]
+  lint-frontend:
+    image: frontend
+    depends_on:
+      - frontend
+    env_file:
+      - ci.env
+    command: ["npm", "run", "lint"]
