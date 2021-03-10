@@ -1,6 +1,7 @@
 module.exports = {
   lintOnSave: true,
   devServer: {
-    progress: false
+    progress: false,
+    disableHostCheck: true
   }
 }

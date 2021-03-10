@@ -1,6 +1,6 @@
 import {By, Key, WebDriver} from 'selenium-webdriver'
 import axios from 'axios'
-import {backendPrivateUrl, putFile, storageServiceUrl, visualizationPayloads, wait} from '../lib'
+import {backendPrivateUrl, frontendUrl, putFile, storageServiceUrl, visualizationPayloads, wait} from '../lib'
 import {initDriver, Selenium} from '../lib/selenium'
 import {basename} from 'path'
 
@@ -10,7 +10,7 @@ let driver: WebDriver
 jest.setTimeout(60000)
 
 async function initSearch() {
-  await selenium.driver.get('http://localhost:8000/search/visualizations')
+  await selenium.driver.get(`${frontendUrl}search/visualizations`)
   await selenium.sendInputToMultiselect('siteSelect', 'bucharest')
   return selenium.sendInput('dateTo', '2020-05-01')
 }

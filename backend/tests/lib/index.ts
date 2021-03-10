@@ -6,6 +6,8 @@ import {createConnection} from 'typeorm'
 import axios from 'axios'
 
 if (!process.env.DP_BACKEND_URL) throw new Error('DP_BACKEND_URL must be set')
+if (!process.env.DP_FRONTEND_URL) throw new Error('DP_FRONTEND_URL must be set')
+if (!process.env.DP_SS_TEST_URL) throw new Error('DP_SS_TEST_URL must be set')
 
 export function clearDir(dir: string) {
   const files = fs.readdirSync(dir)
@@ -38,14 +40,12 @@ export const wait = async (ms: number) => new Promise((resolve, _) => setTimeout
 export const genResponse = (status: any, data: any) => ({response: {status, data}})
 
 const backendUrl = process.env.DP_BACKEND_URL
-let ssUrl = new URL(backendUrl)
-ssUrl.port = '5920'
 export const publicDir = 'tests/data/public'
 export const backendProtectedUrl = `${backendUrl}/protected/`
 export const backendPublicUrl = `${backendUrl}/api/`
 export const backendPrivateUrl = `${backendUrl}/`
-export const fileServerUrl = 'http://localhost:4001/'
-export const storageServiceUrl = ssUrl.href
+export const frontendUrl = `${process.env.DP_FRONTEND_URL}/`
+export const storageServiceUrl = `${process.env.DP_SS_TEST_URL}/`
 export const visualizationPayloads = [  {
   s3key: resolve('tests/data/20200501_bucharest_classification_detection_status.png'),
   sourceFileId: '7a9c3894ef7e43d9aa7da3f25017acec',

@@ -6,6 +6,7 @@ const storageApp = express()
 
 storageApp.put('/*', (req, res, _next) =>{
   const path = req.params[0]
+  console.log('PUT', path)
   serverMemory[path] = new Buffer(0)
   req.on('data', chunk => {
     const chunkStr = chunk.toString()

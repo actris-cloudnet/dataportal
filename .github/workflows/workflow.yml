@@ -46,3 +46,23 @@ jobs:
       - name: Print logs
         if: always()
         run: docker-compose logs
+
+  selenium:
+    name: Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build docker images
+        run: docker-compose build frontend
+
+      - name: Lint frontend
+        run: docker-compose run lint-frontend
+
+      - name: Run frontend unit tests
+        run: docker-compose run test-frontend
+
+      - name: Print logs
+        if: always()
+        run: docker-compose logs

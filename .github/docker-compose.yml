@@ -36,6 +36,10 @@ services:
       dockerfile: frontend/Dockerfile
       target: dev
     command: ["npm", "run", "serve"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "const c=new require('net').Socket();c.connect(8080);c.on('connect',()=>process.exit(0))"]
+      interval: 1s
+      retries: 20
   test-backend:
     image: backend
     depends_on:
@@ -66,10 +70,33 @@ services:
     env_file:
       - ci.env
     command: ["npm", "run", "lint"]
-  lint-frontend:
-    image: frontend
+  selenium:
+    image: selenium/standalone-firefox:4.0.0-beta-1-20210215
+    shm_size: 2g
+  test-selenium:
+    image: backend
     depends_on:
-      - frontend
+      backend:
+        condition: service_healthy
+      frontend-prod:
+        condition: service_healthy
+      selenium:
+        condition: service_started
     env_file:
       - ci.env
-    command: ["npm", "run", "lint"]
+    command: ["npm", "run", "selenium-test"]
+  frontend-prod:
+    build:
+      context: ..
+      dockerfile: frontend/Dockerfile
+      target: prod
+      cache_from:
+        - frontend
+    env_file:
+      - ci.env
+    ports:
+      - "9090:80"
+    healthcheck:
+      test: ["CMD", "node", "-e", "const c=new require('net').Socket();c.connect(80);c.on('connect',()=>process.exit(0))"]
+      interval: 1s
+      retries: 20

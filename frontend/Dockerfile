@@ -32,5 +32,4 @@ FROM nginx AS prod
 
 WORKDIR /app
 
-COPY --from=dev /app/dist /app
-
+COPY --from=dev /app/dist /usr/share/nginx/html
