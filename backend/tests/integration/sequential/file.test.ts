@@ -119,6 +119,23 @@ describe('PUT /files/:s3key', () => {
     return expect(searchFileRepo.findOneOrFail(tmpfile.uuid)).rejects.toBeTruthy()
   })
 
+  test('inserting a legacy file and two normal files', async () => {
+    const tmpfile = {...stableFile}
+    tmpfile.legacy = true
+    tmpfile.uuid = '87EB042E-B247-4AC1-BC03-074DD0D74BDB'
+    tmpfile.s3key = `legacy/${stableFile.s3key}`
+    tmpfile.checksum = '610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678'
+    const tmpfile2 = {...stableFile}
+    tmpfile2.uuid = '97EB042E-B247-4AC1-BC03-074DD0D74BDB'
+    tmpfile2.checksum = '010980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678'
+    await expect(putFile(tmpfile)).resolves.toMatchObject({status: 201})
+    await expect(putFile(stableFile)).resolves.toMatchObject({status: 200})
+    await expect(putFile(tmpfile2)).resolves.toMatchObject({status: 200})
+    await expect(searchFileRepo.findOneOrFail(stableFile.uuid)).rejects.toBeTruthy()
+    await expect(searchFileRepo.findOneOrFail(tmpfile.uuid)).rejects.toBeTruthy()
+    return expect(searchFileRepo.findOneOrFail(tmpfile2.uuid)).resolves.toMatchObject({legacy: false})
+  })
+
   test('inserting two model files', async () => {
     const tmpfile1 = {...volatileFile}
     tmpfile1.product = 'model'

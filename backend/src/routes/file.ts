@@ -111,6 +111,10 @@ export class FileRoutes {
     try {
       const findFileByName = (repo: Repository<RegularFile|ModelFile>) =>
         repo.createQueryBuilder('file')
+          .innerJoin(sub_qb =>
+            sub_qb.from('search_file', 'searchfile'),
+          'best_version',
+          'file.uuid = best_version.uuid')
           .leftJoinAndSelect('file.site', 'site')
           .where("regexp_replace(s3key, '.+/', '') = :filename", {filename: basename(file.s3key)}) // eslint-disable-line quotes
           .getOne()
