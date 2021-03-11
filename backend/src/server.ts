@@ -15,6 +15,7 @@ import {ProductRoutes} from './routes/product'
 import {ModelRoutes} from './routes/model'
 import {DownloadRoutes} from './routes/download'
 import {CalibrationRoutes} from './routes/calibration'
+import {ActrisRoutes} from './routes/actris'
 
 (async function() {
   const port = 3000
@@ -33,6 +34,7 @@ import {CalibrationRoutes} from './routes/calibration'
   const modelRoutes = new ModelRoutes(conn)
   const dlRoutes = new DownloadRoutes(conn, fileRoutes, collRoutes)
   const calibRoutes = new CalibrationRoutes(conn)
+  const actrisRoutes = new ActrisRoutes(conn)
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     if (err.status < 500) console.log(`Error ${err.status} in ${req.method} ${req.path}:`, stringify(err)) // Client error
@@ -67,6 +69,7 @@ import {CalibrationRoutes} from './routes/calibration'
     app.get('/allfiles', fileRoutes.allfiles)
     app.get('/allsearch', fileRoutes.allsearch)
     app.get('/allcollections', collRoutes.allcollections)
+    app.get('/actris/:uuid', actrisRoutes.actrisfile)
   }
 
   // public (changes to these require changes to API docs)
