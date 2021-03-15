@@ -109,16 +109,19 @@ export class FileRoutes {
     }
 
     try {
-      const findFileByName = (repo: Repository<RegularFile|ModelFile>) =>
-        repo.createQueryBuilder('file')
-          .innerJoin(sub_qb =>
+      const findFileByName = (model: boolean) => {
+        const repo = model ? this.modelFileRepo : this.fileRepo
+        const qb = repo.createQueryBuilder('file')
+        if (!model)
+          qb.innerJoin(sub_qb =>
             sub_qb.from('search_file', 'searchfile'),
           'best_version',
           'file.uuid = best_version.uuid')
-          .leftJoinAndSelect('file.site', 'site')
+        return qb.leftJoinAndSelect('file.site', 'site')
           .where("regexp_replace(s3key, '.+/', '') = :filename", {filename: basename(file.s3key)}) // eslint-disable-line quotes
           .getOne()
-      const existingFile = await this.findAnyFile(findFileByName)
+      }
+      const existingFile = await findFileByName(isModel)
       const searchFile = new SearchFile(file)
 
       const FileClass = isModel ? ModelFile : RegularFile
