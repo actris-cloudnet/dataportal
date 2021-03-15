@@ -29,17 +29,14 @@ jobs:
         nginx -v
     - name: Add local bin to PATH
       run: export PATH=/usr/local/bin:$PATH
-    - name: Install nvm
-      run: | 
-          wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
     - name: Install node
       run: |
-          export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
           nvm install v10.16
     - name: Setup geckodriver
       run: |
-          wget https://github.com/mozilla/geckodriver/releases/download/v0.26.0/geckodriver-v0.26.0-linux64.tar.gz 
+          wget https://github.com/mozilla/geckodriver/releases/download/v0.26.0/geckodriver-v0.26.0-linux64.tar.gz
           tar xvzf geckodriver-v0.26.0-linux64.tar.gz
           sudo ln -s geckodriver /usr/local/bin/geckodriver
     - name: Configure postgresql
@@ -52,13 +49,13 @@ jobs:
     - name: Configure nginx
       run: |
         sudo chown -R runner /var/log/nginx
-    - name: Use Python ${{ matrix.python-version }} 
+    - name: Use Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
       with:
-        python-version: ${{ matrix.python-version }} 
+        python-version: ${{ matrix.python-version }}
     - name: Symlink Python 3
       run: sudo ln -s `which python` /usr/local/bin/python3
-    - name: Checkout  
+    - name: Checkout
       uses: actions/checkout@v2
     - name: Install project
       run: |
