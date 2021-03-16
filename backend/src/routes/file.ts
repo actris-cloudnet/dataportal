@@ -91,6 +91,7 @@ export class FileRoutes {
     file.s3key = req.params[0]
     file.updatedAt = new Date()
     if (!isFile(file)) return next({status: 422, errors: ['Request body is missing fields or has invalid values in them']})
+    if (!isValidFilename(file)) return next({status: 400, errors: ['Filename does not match file metadata']})
     const isModel = file.model && true
 
     try {
@@ -313,3 +314,12 @@ function fileStreamHandler(stream: ReadableStream, res: Response, augmenter?: Fu
     res.end()
   })
 }
+
+function isValidFilename(file: any) {
+  const [date, site] = basename(file.s3key).split('.')[0].split('_')
+  return (
+    file.measurementDate.replace(/-/g, '') == date
+    && file.site == site.replace(/-/g, '')
+  )
+}
+
