@@ -2,6 +2,8 @@ import {Connection, Repository} from 'typeorm'
 import {Request, RequestHandler, Response} from 'express'
 import {Calibration, CalibrationData} from '../entity/Calibration'
 
+type NewCalibration = Omit<Calibration, 'id'>
+
 
 export class CalibrationRoutes {
 
@@ -36,7 +38,7 @@ export class CalibrationRoutes {
       calibrationFactor: body.calibrationFactor,
       createdAt: new Date()
     }
-    const newCalib = {
+    const newCalib: NewCalibration = {
       site: body.site,
       instrument: body.instrument,
       measurementDate: body.date,
@@ -49,19 +51,9 @@ export class CalibrationRoutes {
         await this.calibRepo.update(existingCalib.id, existingCalib)
         return res.sendStatus(200)
       }
-      let result = []
       const lastCalib = await this.findLatestCalibration(req.body)
-      if (lastCalib) {
-        for (let date = new Date(lastCalib.measurementDate);
-          date < new Date(newCalib.measurementDate);
-          date.setDate(date.getDate() + 1)) {
-          result.push({...lastCalib, id: undefined, measurementDate: new Date(date)})
-        }
-        result.splice(0, 1)
-      }
-      result.push(newCalib)
-      console.log(result)
-      await this.calibRepo.insert(result)
+      const calibrations = this.createCalibrationsForInterval(lastCalib, newCalib)
+      await this.calibRepo.insert(calibrations)
       return res.sendStatus(200)
     } catch (err) {
       return next({ status: 500, errors: err })
@@ -90,5 +82,19 @@ export class CalibrationRoutes {
       .orderBy('calib.measurementDate', 'DESC')
       .limit(1)
       .getOne()
+  }
+
+  private createCalibrationsForInterval(lastCalib: Calibration | undefined, newCalib: NewCalibration) {
+    let result = []
+    if (lastCalib) {
+      for (let date = new Date(lastCalib.measurementDate);
+        date < new Date(newCalib.measurementDate);
+        date.setDate(date.getDate() + 1)) {
+        result.push({...lastCalib, id: undefined, measurementDate: new Date(date)})
+      }
+      result.splice(0, 1)
+    }
+    result.push(newCalib)
+    return result
   }
 }
