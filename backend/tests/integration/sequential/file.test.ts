@@ -143,7 +143,7 @@ describe('PUT /files/:s3key', () => {
     const tmpfile2 = {...tmpfile1}
     tmpfile2.model = 'ecmwf'
     tmpfile2.uuid = '87EB042E-B247-4AC1-BC03-074DD0D74BDB'
-    tmpfile2.s3key = '20181115_macehead_ecmwf.nc'
+    tmpfile2.s3key = '20181115_mace-head_ecmwf.nc'
     tmpfile2.checksum = '610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678'
     await expect(putFile(tmpfile1)).resolves.toMatchObject({status: 201})
     await expect(modelFileRepo.findOneOrFail(tmpfile1.uuid, {relations: ['model']})).resolves.toMatchObject({model: {id: tmpfile1.model}})
@@ -179,7 +179,7 @@ describe('PUT /files/:s3key', () => {
     tmpfile.sourceFileIds = [stableFile.uuid]
     tmpfile.uuid = '62b32746-faf0-4057-9076-ed2e698dcc34'
     tmpfile.checksum = 'dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b5'
-    tmpfile.s3key = '20181115_macehead_hatpro.nc'
+    tmpfile.s3key = '20181115_mace-head_hatpro.nc'
     await axios.put(`${storageServiceUrl}cloudnet-product/${tmpfile.s3key}`, 'content')
     await expect(putFile(tmpfile)).resolves.toMatchObject({status: 201})
     const dbRow1 = await fileRepo.findOneOrFail(tmpfile.uuid)
@@ -207,7 +207,7 @@ describe('PUT /files/:s3key', () => {
   })
 
   test('errors on invalid filename', async () => {
-    // filename: 20181115_macehead_mira.nc
+    // filename: 20181115_mace-head_mira.nc
     let tmpfile = {...volatileFile}
     tmpfile.measurementDate = '2018-11-16'
     await expect(putFile(tmpfile)).rejects.toMatchObject({ response: {status: 400}})

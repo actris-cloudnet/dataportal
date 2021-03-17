@@ -35,7 +35,7 @@ const validMetadataAndVolatileProduct = {
   measurementDate: '2018-11-15',
   checksum: '3a0364b9e99bb480dd25e1f0284c8555',
   instrument: 'mira',
-  site: 'macehead'
+  site: 'mace-head'
 }
 
 const validModelMetadata = {

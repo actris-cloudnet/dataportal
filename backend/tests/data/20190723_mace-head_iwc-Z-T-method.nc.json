@@ -8,7 +8,7 @@
   "cloudnetpyVersion": "1.0.4",
   "checksum": "6abe97f94e160fff64e23011fd897fd18ba15149be3841f0be3985cf3d242c2f",
   "format": "HDF5 (NetCDF4)",
-  "site": "macehead",
+  "site": "mace-head",
   "size": 123,
   "version": "123"
 }

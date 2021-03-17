@@ -30,7 +30,7 @@
     "filename": "20141205_mace-head_ecmwf.nc",
     "measurementDate": "2014-12-05",
     "site": {
-      "id": "macehead",
+      "id": "mace-head",
       "humanReadableName": "Mace Head",
       "latitude": 53.326,
       "longitude": -9.9,
@@ -47,7 +47,7 @@
       "id": "ecmwf",
       "optimumOrder": 0
     },
-    "s3key": "macehead/1bb32748-faf0-4057-9076-ed2e698dcf31/20141205_mace-head_ecmwf.nc"
+    "s3key": "mace-head/1bb32748-faf0-4057-9076-ed2e698dcf31/20141205_mace-head_ecmwf.nc"
   },
   {
     "uuid": "1bb32744-faf0-4057-9076-ed2e698dcf16",

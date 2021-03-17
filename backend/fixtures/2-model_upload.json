@@ -17,7 +17,7 @@
     "checksum": "7e58ba1a02bb8ecdcca06e523f926f76",
     "filename": "20141205_mace-head_ecmwf.nc",
     "measurementDate": "2014-12-05",
-    "site": "macehead",
+    "site": "mace-head",
     "status": "created",
     "size": 70,
     "allowUpdate": true,

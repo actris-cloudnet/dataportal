@@ -32,7 +32,7 @@ describe('/api/files', () => {
   })
 
   it('responds with 400 if invalid query parameters are given', () => {
-    const payload = {params: {site: 'macehead', x: '', y: 'kissa'}}
+    const payload = {params: {site: 'mace-head', x: '', y: 'kissa'}}
     const expectedBody: RequestError = {
       status: 400,
       errors: [ 'Unknown query parameters: x,y' ]
@@ -41,20 +41,20 @@ describe('/api/files', () => {
       .rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
 
-  it('responds with an array of 3 objects when searching for macehead', async () => {
-    const payload = {params: {site: 'macehead'}}
+  it('responds with an array of 3 objects when searching for mace-head', async () => {
+    const payload = {params: {site: 'mace-head'}}
     const res = await axios.get(url, payload)
     expect(res).toHaveProperty('data')
     expect(res.data).toHaveLength(2)
-    return expect(res.data.map((d: any) => d.site.id)).toEqual(['macehead', 'macehead'])
+    return expect(res.data.map((d: any) => d.site.id)).toEqual(['mace-head', 'mace-head'])
   })
 
-  it('responds with an array of 4 objects when searching for macehead and hyytiala', async () => {
-    const payload = {params: {site: ['macehead', 'hyytiala']}}
+  it('responds with an array of 4 objects when searching for mace-head and hyytiala', async () => {
+    const payload = {params: {site: ['mace-head', 'hyytiala']}}
     const res = await axios.get(url, payload)
     expect(res).toHaveProperty('data')
     expect(res.data).toHaveLength(3)
-    return expect(new Set(res.data.map((d: any) => d.site.id))).toEqual(new Set(['macehead', 'macehead', 'hyytiala']))
+    return expect(new Set(res.data.map((d: any) => d.site.id))).toEqual(new Set(['mace-head', 'mace-head', 'hyytiala']))
   })
 
 
@@ -65,7 +65,7 @@ describe('/api/files', () => {
   })
 
   it('responds 404 if one of many sites was not found', () => {
-    const payload = {params: {site: ['macehead', 'kilpikonna']}}
+    const payload = {params: {site: ['mace-head', 'kilpikonna']}}
     expectedBody404.errors = ['One or more of the specified sites were not found']
     return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody404.status, expectedBody404))
   })
@@ -83,9 +83,9 @@ describe('/api/files', () => {
   })
 
   it('responds with correct objects if dateFrom, dateTo, site, and product are specified', async () => {
-    const payload = {params: {dateFrom: new Date('2018-06-09'), dateTo: new Date('2019-09-02'), site: 'macehead', product: 'classification'}}
+    const payload = {params: {dateFrom: new Date('2018-06-09'), dateTo: new Date('2019-09-02'), site: 'mace-head', product: 'classification'}}
     const res = await axios.get(url, payload)
-    expect(res.data.map((d: any) => d.site.id)).toEqual(['macehead'])
+    expect(res.data.map((d: any) => d.site.id)).toEqual(['mace-head'])
     expect(res.data.map((d: any) => d.product.id)).toEqual(['classification'])
     return expect(res.data.map((d: any) => d.measurementDate)).toEqual(['2018-06-09'])
   })
@@ -269,7 +269,7 @@ describe('/api/search', () => {
 
   it('responds with correct objects if dateFrom, dateTo, site, and product are specified', async () => {
     const expectedData = [responses['allsearch'][2]]
-    const payload = {params: {dateFrom: new Date('2018-06-09'), dateTo: new Date('2019-09-02'), site: 'macehead', product: 'classification'}}
+    const payload = {params: {dateFrom: new Date('2018-06-09'), dateTo: new Date('2019-09-02'), site: 'mace-head', product: 'classification'}}
     const res = await axios.get(url, payload)
     return expect(res.data).toMatchObject(expectedData)
   })

@@ -13,7 +13,7 @@
       "checksum": "298688b011a511f8f0e9353371cf73ee86f60c89b0e02c6931d8c05542c64cdb",
       "size": 12200657,
       "format": "HDF5 (NetCDF4)",
-      "site": "macehead",
+      "site": "mace-head",
       "version": "123"
     },
     {
@@ -30,7 +30,7 @@
       "checksum": "b3142dd3b179e8344b30a7c38d0280eab1d122b8683445006e7691fa88ed2c42",
       "size": 130744,
       "format": "HDF5 (NetCDF4)",
-      "site": "macehead",
+      "site": "mace-head",
       "version": "123"
     },
     {
