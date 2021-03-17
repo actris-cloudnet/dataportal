@@ -8,7 +8,7 @@
     "cloudnetpyVersion": "1.0.4",
     "createdAt": "2020-02-20T10:56:19.382Z",
     "updatedAt": "2020-02-20T10:56:19.382Z",
-    "s3key": "20181115_mace-head_mira.nc",
+    "s3key": "20181115_macehead_mira.nc",
     "checksum": "298688b011a511f8f0e9353371cf73ee86f60c89b0e02c6931d8c05542c64cdb",
     "size": 12200657,
     "format": "HDF5 (NetCDF4)",
