@@ -267,6 +267,7 @@ describe('search page', () => {
     await wait(500)
     const src2 = getMarkerSrc(By.id('mapContainer'))
     const s2 = (await src2).anchor('src')
+    await wait(200)
     expect(s1).toEqual(s2)
   })
 

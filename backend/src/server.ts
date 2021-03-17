@@ -15,6 +15,7 @@ import {InstrumentRoutes} from './routes/instrument'
 import {ProductRoutes} from './routes/product'
 import {ModelRoutes} from './routes/model'
 import {DownloadRoutes} from './routes/download'
+import {CalibrationRoutes} from './routes/calibration'
 
 (async function() {
   const port = config.port
@@ -33,6 +34,7 @@ import {DownloadRoutes} from './routes/download'
   const collRoutes = new CollectionRoutes(conn)
   const modelRoutes = new ModelRoutes(conn)
   const dlRoutes = new DownloadRoutes(conn, fileRoutes)
+  const calibRoutes = new CalibrationRoutes(conn)
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     if (err.status < 500) console.log(`Error ${err.status} in ${req.method} ${req.path}:`, stringify(err)) // Client error
@@ -114,6 +116,7 @@ import {DownloadRoutes} from './routes/download'
   app.get('/api/download/product/:uuid/*', middleware.validateUuidParam, dlRoutes.product)
   app.get('/api/download/collection/:uuid', middleware.validateUuidParam, dlRoutes.collection)
   app.get('/api/download/image/*', dlRoutes.image)
+  app.get('/api/calibration', calibRoutes.calibration)
 
   // protected (for sites)
   app.post('/upload/metadata',
@@ -151,6 +154,7 @@ import {DownloadRoutes} from './routes/download'
   app.get('/upload-metadata', uploadRoutes.listMetadata)
   app.get('/upload-model-metadata', uploadRoutes.listMetadata)
   app.post('/upload-metadata', express.json(), uploadRoutes.updateMetadata)
+  app.post('/calibration', express.json(), calibRoutes.postCalibration)
   app.put('/visualizations/*', express.json(), vizRoutes.putVisualization)
 
   app.use(errorHandler)
