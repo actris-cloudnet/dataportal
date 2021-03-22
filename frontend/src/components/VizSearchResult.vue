@@ -164,6 +164,6 @@ export default class DataSearchResult extends Vue {
     this.setWideMode(this.comparisonView)
   }
 
-  quicklookUrl = process.env.VUE_APP_QUICKLOOKURL
+  quicklookUrl = `${process.env.VUE_APP_BACKENDURL}download/image/`
 }
 </script>

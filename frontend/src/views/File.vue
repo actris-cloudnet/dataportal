@@ -288,8 +288,8 @@ export default class FileView extends Vue {
   visualizations: Visualization[] | [] = []
   versions: string[] = []
   error = false
-  quicklookUrl = process.env.VUE_APP_QUICKLOOKURL
   apiUrl = process.env.VUE_APP_BACKENDURL
+  quicklookUrl = `${this.apiUrl}download/image/`
   humanReadableSize = humanReadableSize
   humanReadableDate = humanReadableDate
   humanReadableTimestamp = humanReadableTimestamp
