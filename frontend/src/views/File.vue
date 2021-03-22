@@ -329,6 +329,7 @@ export default class FileView extends Vue {
   }
 
   created() {
+    console.log(this.apiUrl)
     this.onUuidChange()
   }
 

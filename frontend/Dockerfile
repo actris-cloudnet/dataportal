@@ -19,6 +19,9 @@ RUN npm ci
 
 FROM base AS dev
 
+ARG VUE_APP_BACKENDURL
+ENV VUE_APP_BACKENDURL=$VUE_APP_BACKENDURL
+
 WORKDIR /app
 
 COPY frontend /app
@@ -32,4 +35,5 @@ FROM nginx AS prod
 
 WORKDIR /app
 
-COPY --from=dev /app/dist /usr/share/nginx/html
+COPY --from=dev /app/dist /app
+COPY frontend/nginx.conf /etc/nginx/nginx.conf

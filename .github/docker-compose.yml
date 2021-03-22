@@ -92,11 +92,9 @@ services:
       target: prod
       cache_from:
         - frontend
+      args:
+        - VUE_APP_BACKENDURL=http://localhost:3000/api/
     env_file:
       - ci.env
     ports:
       - "9090:80"
-    healthcheck:
-      test: ["CMD", "node", "-e", "const c=new require('net').Socket();c.connect(80);c.on('connect',()=>process.exit(0))"]
-      interval: 1s
-      retries: 20
