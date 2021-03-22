@@ -107,7 +107,7 @@ export class UploadRoutes {
     // With allowUpdate flag (and no stable files), keep existing uuid to avoid duplicate files
     if (allowUpdate) {
       try {
-        const existingMetadata = await uploadRepo.findOne({filename: filename, allowUpdate: true})
+        const existingMetadata = await uploadRepo.findOne({filename: filename})
         if (existingMetadata != undefined) {
           await uploadRepo.update(existingMetadata.uuid, {
             checksum: body.checksum,
@@ -128,7 +128,6 @@ export class UploadRoutes {
         filename,
         body.measurementDate,
         site,
-        allowUpdate,
         Status.CREATED,
       instrument as Instrument)
     } else {
@@ -137,7 +136,6 @@ export class UploadRoutes {
         filename,
         body.measurementDate,
         site,
-        allowUpdate,
         Status.CREATED,
       model as Model)
     }
