@@ -28,5 +28,6 @@ RUN npm ci --only=prod
 
 COPY --from=build /app/build /app/build
 COPY --from=build /app/scripts /app/scripts
+COPY --from=build /app/tests/lib/service-mocks.js /app/tests/lib/service-mocks.js
 
 CMD ["npm", "start"]

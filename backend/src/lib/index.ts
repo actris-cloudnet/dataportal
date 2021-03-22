@@ -69,7 +69,7 @@ export const sortByMeasurementDateAsc = <T extends File|SearchFile>(files: T[]):
 
 export const augmentFile = (file: File|RegularFile|ModelFile) => ({
   ...file,
-  downloadUrl: `${env.DP_BACKEND_URL}/download${getDownloadPathForFile(file)}`,
+  downloadUrl: `${env.DP_BACKEND_URL}/download/${getDownloadPathForFile(file)}`,
   filename: basename(file.s3key),
   s3key: undefined,
   model: 'model' in file ? file.model : undefined

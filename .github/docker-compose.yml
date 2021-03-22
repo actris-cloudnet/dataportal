@@ -70,28 +70,44 @@ services:
     env_file:
       - ci.env
     command: ["npm", "run", "lint"]
+  lint-frontend:
+    image: frontend
+    depends_on:
+      - frontend
+    env_file:
+      - ci.env
+    command: ["npm", "run", "lint"]
   selenium:
     image: selenium/standalone-firefox:4.0.0-beta-1-20210215
     shm_size: 2g
+    healthcheck:
+      test: ["CMD", "/opt/bin/check-grid.sh"]
+      interval: 1s
+      retries: 30
   test-selenium:
     image: backend
     depends_on:
+      backend:
+        condition: service_started
       frontend-prod:
         condition: service_started
       selenium:
-        condition: service_started
+        condition: service_healthy
     env_file:
       - ci.env
     environment:
       - DP_BACKEND_URL=http://backend-prod:3000
-    command: ["npm", "run", "selenium-test"]
+      - DP_SS_TEST_URL=http://backend-prod:5920
+    command: ["npm", "run", "selenium-test", "--", $SELENIUM_TEST_TARGET]
   backend-prod:
-    image: backend
+    image: backend-prod
     pull_policy: never
     build:
       context: ..
       dockerfile: backend/Dockerfile
       target: prod
+      cache_from:
+        - backend
     depends_on:
       db:
         condition: service_healthy
@@ -100,10 +116,12 @@ services:
     environment:
       - TYPEORM_ENTITIES=build/entity/*.js
       - TYPEORM_MIGRATIONS=build/migration/*.js
+      - DP_BACKEND_URL=http://frontend-prod/api/
     healthcheck:
       test: ["CMD", "node", "-e", "const c=new require('net').Socket();c.connect(3000);c.on('connect',()=>process.exit(0))"]
       interval: 1s
       retries: 20
+    command: ["npm", "run", "start-e2e"]
   frontend-prod:
     build:
       context: ..

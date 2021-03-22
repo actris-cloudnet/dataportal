@@ -5,7 +5,7 @@ import {initDriver} from '../lib/selenium'
 
 let driver: WebDriver
 
-jest.setTimeout(60000)
+jest.setTimeout(10000)
 
 async function awaitAndFind(by: By) {
   await driver.wait(until.elementLocated(by))
@@ -14,12 +14,13 @@ async function awaitAndFind(by: By) {
 
 beforeAll(async () => {
   driver = await initDriver()
-  console.log('jee')
 
   await putFile('20190723_bucharest_classification.nc')
 })
 
-afterAll(async () => driver.close())
+afterAll(async () => {
+  return driver.close()
+})
 
 describe('file landing page', () => {
 

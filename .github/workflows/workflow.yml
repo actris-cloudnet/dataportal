@@ -48,20 +48,27 @@ jobs:
         run: docker-compose logs
 
   selenium:
-    name: Frontend
+    name: Selenium
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Build docker images
-        run: docker-compose build frontend
+        run: docker-compose build backend backend-prod frontend-prod
 
-      - name: Lint frontend
-        run: docker-compose run lint-frontend
+      - name: Run selenium tests for file view
+        run: SELENIUM_TEST_TARGET=tests/selenium/file.test.ts docker-compose run test-selenium
 
-      - name: Run frontend unit tests
-        run: docker-compose run test-frontend
+      - name: Run selenium tests for search view
+        run: |
+          docker-compose stop selenium
+          SELENIUM_TEST_TARGET=tests/selenium/search.test.ts docker-compose run test-selenium
+
+      - name: Run selenium tests for visualization view
+        run: |
+          docker-compose stop selenium
+          SELENIUM_TEST_TARGET=tests/selenium/visualization.test.ts docker-compose run test-selenium
 
       - name: Print logs
         if: always()
