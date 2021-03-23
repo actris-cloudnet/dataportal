@@ -92,33 +92,29 @@ export class UploadRoutes {
       return next({status: 409, errors: 'File already uploaded'})
     }
 
-    let allowUpdate = ('allowUpdate' in body && body.allowUpdate.toString().toLowerCase() === 'true')
-
-    const isExistingFreezedProduct = await this.isFreezedProduct(body, productRepo)
-    if (isExistingFreezedProduct) {
-      if (isModelSubmission) {
+    if (isModelSubmission) {
+      const isExistingFreezedProduct = await this.isFreezedProduct(body, productRepo)
+      if (isExistingFreezedProduct) {
         return next({status: 409, errors: 'Freezed model file exists'})
-      } else {
-        // Save new version of the file
-        allowUpdate = false
       }
     }
 
-    // With allowUpdate flag (and no stable files), keep existing uuid to avoid duplicate files
-    if (allowUpdate) {
-      try {
-        const existingMetadata = await uploadRepo.findOne({filename: filename})
-        if (existingMetadata != undefined) {
-          await uploadRepo.update(existingMetadata.uuid, {
-            checksum: body.checksum,
-            updatedAt: new Date(),
-            status: Status.CREATED
-          })
-          return res.sendStatus(200)
-        }
-      } catch (err) {
-        return next({ status: 500, errors: `Internal server error: ${err.code}` })
+    try {
+      const existingMetadata = await uploadRepo.findOne({
+        site: site,
+        measurementDate: body.measurementDate,
+        filename: filename,
+      })
+      if (existingMetadata != undefined) {
+        await uploadRepo.update(existingMetadata.uuid, {
+          checksum: body.checksum,
+          updatedAt: new Date(),
+          status: Status.CREATED
+        })
+        return res.sendStatus(200)
       }
+    } catch (err) {
+      return next({ status: 500, errors: `Internal server error: ${err.code}` })
     }
 
     let uploadedMetadata: InstrumentUpload | ModelUpload

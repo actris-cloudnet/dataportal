@@ -83,53 +83,81 @@ describe('POST /upload/metadata', () => {
     return expect(md.status).toEqual(Status.CREATED)
   })
 
-  test('updates metadata with allowUpdate flag', async () => {
-    // new submission with allowUpdate flag
-    const payload = {...validMetadata, allowUpdate: true}
+  test('inserts new metadata if different date', async () => {
+    const payload = {...validMetadata}
+    await expect(axios.post(metadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
+    const payload_resub = {...payload, measurementDate: '2020-08-12', checksum: 'ac5c1f6c923cc8b259c2e22c7b258ee4'}
+    await expect(axios.post(metadataUrl, payload_resub, {headers})).resolves.toMatchObject({status: 200})
+    await instrumentRepo.findOneOrFail({checksum: payload.checksum})
+    return await instrumentRepo.findOneOrFail({checksum: payload_resub.checksum})
+  })
+
+  test('inserts new metadata if different filename', async () => {
+    const payload = {...validMetadata}
+    await expect(axios.post(metadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
+    const payload_resub = {...payload, filename: 'random_results.nc', checksum: 'ac5c1f6c923cc8b259c2e22c7b258ee4'}
+    await expect(axios.post(metadataUrl, payload_resub, {headers})).resolves.toMatchObject({status: 200})
+    await instrumentRepo.findOneOrFail({checksum: payload.checksum})
+    return await instrumentRepo.findOneOrFail({checksum: payload_resub.checksum})
+  })
+
+  test('updates existing metadata', async () => {
+    const payload = {...validMetadata}
     await expect(axios.post(metadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
     const md = await instrumentRepo.findOne({checksum: payload.checksum})
     expect(md.checksum).toBe(validMetadata.checksum)
     const initial_time = new Date(md.updatedAt).getTime()
-    // submit same metadata with different checksum
-    const new_checksum = 'ac5c1f6c923cc8b259c2e22c7b258ee4'
-    const payload_resub = {...payload, checksum: new_checksum}
+    const payload_resub = {...payload, checksum: 'ac5c1f6c923cc8b259c2e22c7b258ee4'}
     await expect(axios.post(metadataUrl, payload_resub, {headers})).resolves.toMatchObject({status: 200})
+    expect(await instrumentRepo.findOne({checksum: payload.checksum})).toBe(undefined)
     const md_resub = await instrumentRepo.findOne(md.uuid)
-    expect(md_resub.checksum).toBe(new_checksum)
+    expect(md_resub.checksum).toBe(payload_resub.checksum)
     const resub_time = new Date(md_resub.updatedAt).getTime()
     return expect(resub_time).toBeGreaterThan(initial_time)
   })
 
-  test('works with string type allowUpdate flag too', async () => {
-    // new submission with allowUpdate flag
-    const payload = {...validMetadata, allowUpdate: 'TrUe'}
+  test('updates existing metadata if stable product', async () => {
+    const payload = {...validMetadataAndStableProduct}
+    await expect(axios.post(metadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
+    const payload_resub = {...payload, checksum: 'ac5c1f6c923cc8b259c2e22c7b258ee4'}
+    await expect(axios.post(metadataUrl, payload_resub, {headers})).resolves.toMatchObject({status: 200})
+    await instrumentRepo.findOneOrFail({checksum: payload_resub.checksum})
+    const md = await instrumentRepo.findOne({checksum: payload.checksum})
+    return expect(md).toBe(undefined)
+  })
+
+  test('updates existing metadata if volatile product', async () => {
+    const payload = {...validMetadataAndVolatileProduct}
+    await expect(axios.post(metadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
+    const payload_resub = {...payload, checksum: 'ac5c1f6c923cc8b259c2e22c7b258ee4'}
+    await expect(axios.post(metadataUrl, payload_resub, {headers})).resolves.toMatchObject({status: 200})
+    await instrumentRepo.findOneOrFail({checksum: payload_resub.checksum})
+    const md = await instrumentRepo.findOne({checksum: payload.checksum})
+    return expect(md).toBe(undefined)
+  })
+
+  test('updates existing metadata with allowUpdate = true', async () => {
+    const payload = {...validMetadata, allowUpdate: true}
     await expect(axios.post(metadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
     const md = await instrumentRepo.findOne({checksum: payload.checksum})
     expect(md.checksum).toBe(validMetadata.checksum)
-    const new_checksum = 'ac5c1f6c923cc8b259c2e22c7b258ee4'
-    const payload_resub = {...payload, checksum: new_checksum}
+    const payload_resub = {...payload, checksum: 'ac5c1f6c923cc8b259c2e22c7b258ee4'}
     await expect(axios.post(metadataUrl, payload_resub, {headers})).resolves.toMatchObject({status: 200})
+    expect(await instrumentRepo.findOne({checksum: payload.checksum})).toBe(undefined)
     const md_resub = await instrumentRepo.findOne(md.uuid)
-    return expect(md_resub.checksum).toBe(new_checksum)
+    return expect(md_resub.checksum).toBe(payload_resub.checksum)
   })
 
-  test('creates new metadata record if allowUpdate=True and stable product', async () => {
-    const payload = {...validMetadataAndStableProduct, allowUpdate: true}
+  test('updates existing metadata with allowUpdate = false', async () => {
+    const payload = {...validMetadata, allowUpdate: false}
     await expect(axios.post(metadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
-    const payload_resub = {...payload, checksum: 'ac5c1f6c923cc8b259c2e22c7b258ee4'}
-    await expect(axios.post(metadataUrl, payload_resub, {headers})).resolves.toMatchObject({status: 200})
-    await instrumentRepo.findOneOrFail({checksum: payload.checksum})
-    await instrumentRepo.findOneOrFail({checksum: payload_resub.checksum})
-    return
-  })
-
-  test('updates existing metadata record if allowUpdate=True and volatile product', async () => {
-    const payload = {...validMetadataAndVolatileProduct, allowUpdate: true}
-    await expect(axios.post(metadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
-    const payload_resub = {...payload, checksum: 'ac5c1f6c923cc8b259c2e22c7b258ee4'}
-    await expect(axios.post(metadataUrl, payload_resub, {headers})).resolves.toMatchObject({status: 200})
     const md = await instrumentRepo.findOne({checksum: payload.checksum})
-    return expect(md).toBe(undefined)
+    expect(md.checksum).toBe(validMetadata.checksum)
+    const payload_resub = {...payload, checksum: 'ac5c1f6c923cc8b259c2e22c7b258ee4'}
+    await expect(axios.post(metadataUrl, payload_resub, {headers})).resolves.toMatchObject({status: 200})
+    expect(await instrumentRepo.findOne({checksum: payload.checksum})).toBe(undefined)
+    const md_resub = await instrumentRepo.findOne(md.uuid)
+    return expect(md_resub.checksum).toBe(payload_resub.checksum)
   })
 
   test('responds with 200 on existing hashsum with created status', async () => {
