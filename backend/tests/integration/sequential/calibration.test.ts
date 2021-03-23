@@ -11,7 +11,7 @@ const url = `${backendPrivateUrl}calibration/`
 describe('POST /calibration', () => {
 
   beforeAll(async () => {
-    conn = await createConnection('test')
+    conn = await createConnection()
     repo = conn.getRepository('calibration')
   })
 
