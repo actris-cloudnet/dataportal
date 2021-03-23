@@ -1,99 +1,48 @@
-name: Test
-
+name: Lint and test
 on: [push]
+env:
+  COMPOSE_FILE: .github/docker-compose.yml
 
 jobs:
-  build:
-
-    timeout-minutes: 10
-
+  backend:
+    name: Backend
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        python-version: [3.6]
-
-    env:
-      NODE_ENV: 'ci-test'
-      CI: true
     steps:
-    - name: Install Ubuntu dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install zsh postgresql netcdf-bin nginx-light
-    - name: Print versions
-      run: |
-        zsh --version
-        psql --version
-        ncdump
-        nginx -v
-    - name: Add local bin to PATH
-      run: export PATH=/usr/local/bin:$PATH
-    - name: Install node
-      run: |
-          export NVM_DIR="$HOME/.nvm"
-          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-          nvm install v10.16
-    - name: Setup geckodriver
-      run: |
-          wget https://github.com/mozilla/geckodriver/releases/download/v0.26.0/geckodriver-v0.26.0-linux64.tar.gz
-          tar xvzf geckodriver-v0.26.0-linux64.tar.gz
-          sudo ln -s geckodriver /usr/local/bin/geckodriver
-    - name: Configure postgresql
-      run: |
-        sudo service postgresql start
-        sudo -u postgres createuser -d -r -s -w runner
-        sudo cat /etc/postgresql/13/main/pg_hba.conf|sed 's/md5/trust/' > pg_hba.tmp
-        sudo mv pg_hba.tmp /etc/postgresql/13/main/pg_hba.conf
-        sudo service postgresql restart
-    - name: Configure nginx
-      run: |
-        sudo chown -R runner /var/log/nginx
-    - name: Use Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Symlink Python 3
-      run: sudo ln -s `which python` /usr/local/bin/python3
-    - name: Checkout
-      uses: actions/checkout@v2
-    - name: Install project
-      run: |
-          . ~/.nvm/nvm.sh
-          nvm use v10
-          ./control ci
-    - name: Build project
-      run: |
-          . ~/.nvm/nvm.sh
-          nvm use v10
-          cd frontend && npx vue-cli-service build --mode e2e && cd ..
-    - name: Start backend and frontend
-      run: |
-          . ~/.nvm/nvm.sh
-          nvm use v10
-          ./control test-start
-    - name: Run frontend unit tests
-      run: |
-          . ~/.nvm/nvm.sh
-          nvm install v12
-          cd frontend && npm test && cd ..
-    - name: Run integration tests
-      run: |
-          . ~/.nvm/nvm.sh
-          nvm use v10
-          cd backend && npm test && cd ..
-    - name: Run e2e tests
-      run: |
-          cd backend
-          . ~/.nvm/nvm.sh
-          nvm use v10
-          npm run e2e-test
-          cd ..
-    - name: Run selenium tests
-      run: |
-        . ~/.nvm/nvm.sh
-        nvm use v10
-        ./control selenium-test
-    - name: Print logs
-      if: always()
-      run: cat */tests/all.log
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build docker images
+        run: docker-compose build backend
+
+      - name: Lint
+        run: docker-compose run lint-backend
+
+      - name: Run integration tests
+        run: docker-compose run test-backend
+
+      - name: Run e2e tests
+        run: docker-compose run e2e-test-backend
+
+      - name: Print logs
+        if: always()
+        run: docker-compose logs
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build docker images
+        run: docker-compose build frontend
+
+      - name: Lint frontend
+        run: docker-compose run lint-frontend
+
+      - name: Run frontend unit tests
+        run: docker-compose run test-frontend
+
+      - name: Print logs
+        if: always()
+        run: docker-compose logs
