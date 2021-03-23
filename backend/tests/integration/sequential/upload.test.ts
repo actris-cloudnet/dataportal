@@ -103,12 +103,13 @@ describe('POST /upload/metadata', () => {
 
   test('updates existing metadata', async () => {
     const payload = {...validMetadata}
-    await expect(axios.post(metadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
+    const expectedResponse = {status: 200, data: 'OK'}
+    await expect(axios.post(metadataUrl, payload, {headers})).resolves.toMatchObject(expectedResponse)
     const md = await instrumentRepo.findOne({checksum: payload.checksum})
     expect(md.checksum).toBe(validMetadata.checksum)
     const initial_time = new Date(md.updatedAt).getTime()
     const payload_resub = {...payload, checksum: 'ac5c1f6c923cc8b259c2e22c7b258ee4'}
-    await expect(axios.post(metadataUrl, payload_resub, {headers})).resolves.toMatchObject({status: 200})
+    await expect(axios.post(metadataUrl, payload_resub, {headers})).resolves.toMatchObject(expectedResponse)
     expect(await instrumentRepo.findOne({checksum: payload.checksum})).toBe(undefined)
     const md_resub = await instrumentRepo.findOne(md.uuid)
     expect(md_resub.checksum).toBe(payload_resub.checksum)
@@ -138,11 +139,12 @@ describe('POST /upload/metadata', () => {
 
   test('updates existing metadata with allowUpdate = true', async () => {
     const payload = {...validMetadata, allowUpdate: true}
-    await expect(axios.post(metadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
+    const expectedResponse = {status: 200, data: 'Warning: Ignoring obsolete allowUpdate property'}
+    await expect(axios.post(metadataUrl, payload, {headers})).resolves.toMatchObject(expectedResponse)
     const md = await instrumentRepo.findOne({checksum: payload.checksum})
     expect(md.checksum).toBe(validMetadata.checksum)
     const payload_resub = {...payload, checksum: 'ac5c1f6c923cc8b259c2e22c7b258ee4'}
-    await expect(axios.post(metadataUrl, payload_resub, {headers})).resolves.toMatchObject({status: 200})
+    await expect(axios.post(metadataUrl, payload_resub, {headers})).resolves.toMatchObject(expectedResponse)
     expect(await instrumentRepo.findOne({checksum: payload.checksum})).toBe(undefined)
     const md_resub = await instrumentRepo.findOne(md.uuid)
     return expect(md_resub.checksum).toBe(payload_resub.checksum)
@@ -150,11 +152,12 @@ describe('POST /upload/metadata', () => {
 
   test('updates existing metadata with allowUpdate = false', async () => {
     const payload = {...validMetadata, allowUpdate: false}
-    await expect(axios.post(metadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
+    const expectedResponse = {status: 200, data: 'Warning: Ignoring obsolete allowUpdate property'}
+    await expect(axios.post(metadataUrl, payload, {headers})).resolves.toMatchObject(expectedResponse)
     const md = await instrumentRepo.findOne({checksum: payload.checksum})
     expect(md.checksum).toBe(validMetadata.checksum)
     const payload_resub = {...payload, checksum: 'ac5c1f6c923cc8b259c2e22c7b258ee4'}
-    await expect(axios.post(metadataUrl, payload_resub, {headers})).resolves.toMatchObject({status: 200})
+    await expect(axios.post(metadataUrl, payload_resub, {headers})).resolves.toMatchObject(expectedResponse)
     expect(await instrumentRepo.findOne({checksum: payload.checksum})).toBe(undefined)
     const md_resub = await instrumentRepo.findOne(md.uuid)
     return expect(md_resub.checksum).toBe(payload_resub.checksum)

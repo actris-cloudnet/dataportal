@@ -53,6 +53,11 @@ export class UploadRoutes {
     let uploadRepo: Repository<InstrumentUpload | ModelUpload>
     let productRepo: Repository<RegularFile | ModelFile>
 
+    const send200WithCustomMessage = () => {
+      const msg = ('allowUpdate' in body) ? 'Warning: Ignoring obsolete allowUpdate property' : 'OK'
+      res.status(200).send(msg)
+    }
+
     const site = await this.siteRepo.findOne(req.params.site)
     if (site == undefined) {
       return next({status: 422, errors: 'Unknown site'})
@@ -111,10 +116,10 @@ export class UploadRoutes {
           updatedAt: new Date(),
           status: Status.CREATED
         })
-        return res.sendStatus(200)
+        return send200WithCustomMessage()
       }
     } catch (err) {
-      return next({ status: 500, errors: `Internal server error: ${err.code}` })
+      return next({status: 500, errors: `Internal server error: ${err.code}`})
     }
 
     let uploadedMetadata: InstrumentUpload | ModelUpload
@@ -125,7 +130,7 @@ export class UploadRoutes {
         body.measurementDate,
         site,
         Status.CREATED,
-      instrument as Instrument)
+        instrument as Instrument)
     } else {
       uploadedMetadata = new ModelUpload(
         body.checksum,
@@ -133,12 +138,15 @@ export class UploadRoutes {
         body.measurementDate,
         site,
         Status.CREATED,
-      model as Model)
+        model as Model)
     }
 
-    return uploadRepo.insert(uploadedMetadata)
-      .then(() => res.sendStatus(200))
-      .catch(err => next({ status: 500, errors: `Internal server error: ${err.code}`}))
+    try {
+      await uploadRepo.insert(uploadedMetadata)
+      return send200WithCustomMessage()
+    } catch (err) {
+      return next({status: 500, errors: `Internal server error: ${err.code}`})
+    }
   }
 
   private async isFreezedProduct(body: any, productRepo: Repository<RegularFile | ModelFile>): Promise<boolean> {
