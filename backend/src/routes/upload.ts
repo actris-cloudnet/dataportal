@@ -48,15 +48,11 @@ export class UploadRoutes {
     const filename = basename(body.filename)
     const isModelSubmission = 'model' in body
     const isInstrumentSubmission = 'instrument' in body
+    const status200Message = ('allowUpdate' in body) ? 'Warning: Ignoring obsolete allowUpdate property' : 'OK'
 
     let instrument, model
     let uploadRepo: Repository<InstrumentUpload | ModelUpload>
     let productRepo: Repository<RegularFile | ModelFile>
-
-    const send200WithCustomMessage = () => {
-      const msg = ('allowUpdate' in body) ? 'Warning: Ignoring obsolete allowUpdate property' : 'OK'
-      res.status(200).send(msg)
-    }
 
     const site = await this.siteRepo.findOne(req.params.site)
     if (site == undefined) {
@@ -105,18 +101,16 @@ export class UploadRoutes {
     }
 
     try {
-      const existingMetadata = await uploadRepo.findOne({
-        site: site,
-        measurementDate: body.measurementDate,
-        filename: filename,
-      })
+      const params = {site: site, measurementDate: body.measurementDate, filename: filename}
+      const payload = isModelSubmission ? {...params, model: body.model} : {...params, instrument: body.instrument}
+      const existingMetadata = await uploadRepo.findOne(payload)
       if (existingMetadata != undefined) {
         await uploadRepo.update(existingMetadata.uuid, {
           checksum: body.checksum,
           updatedAt: new Date(),
           status: Status.CREATED
         })
-        return send200WithCustomMessage()
+        return res.send(status200Message)
       }
     } catch (err) {
       return next({status: 500, errors: `Internal server error: ${err.code}`})
@@ -143,7 +137,7 @@ export class UploadRoutes {
 
     try {
       await uploadRepo.insert(uploadedMetadata)
-      return send200WithCustomMessage()
+      return res.send(status200Message)
     } catch (err) {
       return next({status: 500, errors: `Internal server error: ${err.code}`})
     }
