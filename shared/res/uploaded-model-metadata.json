@@ -13,7 +13,6 @@
       "gaw": "UGR",
       "country": "Spain"
     },
-    "allowUpdate": true,
     "status": "created",
     "size": 80,
     "createdAt": "2020-09-28T12:47:21.916Z",
@@ -38,7 +37,6 @@
       "gaw": "MHD",
       "country": "Ireland"
     },
-    "allowUpdate": true,
     "status": "created",
     "size": 70,
     "createdAt": "2020-09-28T12:47:21.916Z",
@@ -63,7 +61,6 @@
       "gaw": "UGR",
       "country": "Spain"
     },
-    "allowUpdate": true,
     "status": "created",
     "size": 60,
     "createdAt": "2020-09-28T12:47:21.916Z",
@@ -88,7 +85,6 @@
       "gaw": "Unknown",
       "country": "Romania"
     },
-    "allowUpdate": true,
     "status": "processed",
     "size": 50,
     "createdAt": "2020-09-28T12:47:21.916Z",
@@ -113,7 +109,6 @@
       "gaw": "UGR",
       "country": "Spain"
     },
-    "allowUpdate": false,
     "status": "uploaded",
     "size": 40,
     "createdAt": "2020-09-28T12:47:21.916Z",
