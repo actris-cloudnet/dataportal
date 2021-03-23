@@ -48,6 +48,7 @@ export class UploadRoutes {
     const filename = basename(body.filename)
     const isModelSubmission = 'model' in body
     const isInstrumentSubmission = 'instrument' in body
+    const status200Message = ('allowUpdate' in body) ? 'Warning: Ignoring obsolete allowUpdate property' : 'OK'
 
     let instrument, model
     let uploadRepo: Repository<InstrumentUpload | ModelUpload>
@@ -92,33 +93,27 @@ export class UploadRoutes {
       return next({status: 409, errors: 'File already uploaded'})
     }
 
-    let allowUpdate = ('allowUpdate' in body && body.allowUpdate.toString().toLowerCase() === 'true')
-
-    const isExistingFreezedProduct = await this.isFreezedProduct(body, productRepo)
-    if (isExistingFreezedProduct) {
-      if (isModelSubmission) {
+    if (isModelSubmission) {
+      const isExistingFreezedProduct = await this.isFreezedProduct(body, productRepo)
+      if (isExistingFreezedProduct) {
         return next({status: 409, errors: 'Freezed model file exists'})
-      } else {
-        // Save new version of the file
-        allowUpdate = false
       }
     }
 
-    // With allowUpdate flag (and no stable files), keep existing uuid to avoid duplicate files
-    if (allowUpdate) {
-      try {
-        const existingMetadata = await uploadRepo.findOne({filename: filename, allowUpdate: true})
-        if (existingMetadata != undefined) {
-          await uploadRepo.update(existingMetadata.uuid, {
-            checksum: body.checksum,
-            updatedAt: new Date(),
-            status: Status.CREATED
-          })
-          return res.sendStatus(200)
-        }
-      } catch (err) {
-        return next({ status: 500, errors: `Internal server error: ${err.code}` })
+    try {
+      const params = {site: site, measurementDate: body.measurementDate, filename: filename}
+      const payload = isModelSubmission ? {...params, model: body.model} : {...params, instrument: body.instrument}
+      const existingMetadata = await uploadRepo.findOne(payload)
+      if (existingMetadata != undefined) {
+        await uploadRepo.update(existingMetadata.uuid, {
+          checksum: body.checksum,
+          updatedAt: new Date(),
+          status: Status.CREATED
+        })
+        return res.send(status200Message)
       }
+    } catch (err) {
+      return next({status: 500, errors: `Internal server error: ${err.code}`})
     }
 
     let uploadedMetadata: InstrumentUpload | ModelUpload
@@ -128,23 +123,24 @@ export class UploadRoutes {
         filename,
         body.measurementDate,
         site,
-        allowUpdate,
         Status.CREATED,
-      instrument as Instrument)
+        instrument as Instrument)
     } else {
       uploadedMetadata = new ModelUpload(
         body.checksum,
         filename,
         body.measurementDate,
         site,
-        allowUpdate,
         Status.CREATED,
-      model as Model)
+        model as Model)
     }
 
-    return uploadRepo.insert(uploadedMetadata)
-      .then(() => res.sendStatus(200))
-      .catch(err => next({ status: 500, errors: `Internal server error: ${err.code}`}))
+    try {
+      await uploadRepo.insert(uploadedMetadata)
+      return res.send(status200Message)
+    } catch (err) {
+      return next({status: 500, errors: `Internal server error: ${err.code}`})
+    }
   }
 
   private async isFreezedProduct(body: any, productRepo: Repository<RegularFile | ModelFile>): Promise<boolean> {

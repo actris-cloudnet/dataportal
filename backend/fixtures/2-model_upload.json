@@ -7,7 +7,6 @@
     "site": "granada",
     "status": "created",
     "size": 80,
-    "allowUpdate": true,
     "createdAt": "2020-09-28T12:47:21.916Z",
     "updatedAt": "2020-09-28T12:47:21.916Z",
     "model": "ecmwf"
@@ -20,7 +19,6 @@
     "site": "mace-head",
     "status": "created",
     "size": 70,
-    "allowUpdate": true,
     "createdAt": "2020-09-28T12:47:21.916Z",
     "updatedAt": "2020-09-28T12:47:21.916Z",
     "model": "ecmwf"
@@ -32,7 +30,6 @@
     "measurementDate": "2018-01-26",
     "site": "granada",
     "status": "created",
-    "allowUpdate": true,
     "size": 60,
     "createdAt": "2020-09-28T12:47:21.916Z",
     "updatedAt": "2020-09-28T12:47:21.916Z",
@@ -46,7 +43,6 @@
     "site": "bucharest",
     "status": "processed",
     "size": 50,
-    "allowUpdate": true,
     "createdAt": "2020-09-28T12:47:21.916Z",
     "updatedAt": "2020-09-28T12:47:21.916Z",
     "model": "icon-iglo-12-23"

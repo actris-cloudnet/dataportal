@@ -1,8 +1,7 @@
-import {Column, Entity, ManyToOne, PrimaryColumn} from 'typeorm/index'
+import {BeforeInsert, BeforeUpdate, Column, Entity, ManyToOne, PrimaryColumn} from 'typeorm'
 import {Site} from './Site'
 import {Instrument} from './Instrument'
 import {Model} from './Model'
-import {BeforeInsert, BeforeUpdate} from 'typeorm'
 import {v4 as generateUuidV4} from 'uuid'
 
 export enum Status {
@@ -36,9 +35,6 @@ export abstract class Upload {
   })
   status!: Status
 
-  @Column({default: false})
-  allowUpdate!: boolean
-
   @Column()
   createdAt!: Date
 
@@ -64,7 +60,6 @@ export abstract class Upload {
     filename: string,
     date: string,
     site: Site,
-    allowUpdate: boolean,
     status: Status,
   ) {
     this.uuid = generateUuidV4()
@@ -72,7 +67,6 @@ export abstract class Upload {
     this.filename = filename
     this.measurementDate = new Date(date)
     this.site = site
-    this.allowUpdate = allowUpdate
     this.status = status
   }
 }
@@ -83,8 +77,8 @@ export class InstrumentUpload extends Upload {
   @ManyToOne(_ => Instrument, instrument => instrument.uploads)
   instrument!: Instrument
 
-  constructor(checksum: string, filename: string, date: string, site: Site, allowUpdate: boolean, status: Status, instrument: Instrument) { // eslint-disable-line max-len
-    super(checksum, filename, date, site, allowUpdate, status)
+  constructor(checksum: string, filename: string, date: string, site: Site, status: Status, instrument: Instrument) { // eslint-disable-line max-len
+    super(checksum, filename, date, site, status)
     this.instrument = instrument
   }
 }
@@ -97,8 +91,8 @@ export class ModelUpload extends Upload {
   @ManyToOne(_ => Model, model => model.uploads)
   model!: Model
 
-  constructor(checksum: string, filename: string, date: string, site: Site, allowUpdate: boolean, status: Status, model: Model) { // eslint-disable-line max-len
-    super(checksum, filename, date, site, allowUpdate, status)
+  constructor(checksum: string, filename: string, date: string, site: Site, status: Status, model: Model) { // eslint-disable-line max-len
+    super(checksum, filename, date, site, status)
     this.model = model
   }
 }
