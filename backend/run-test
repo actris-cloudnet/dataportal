@@ -1,0 +1,3 @@
+#!/bin/bash
+
+docker exec -t dev-toolkit_dataportal-backend-test_1 "$@"

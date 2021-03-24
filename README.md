@@ -12,7 +12,8 @@ See the instructions for installing the toolkit [here](https://github.com/actris
 
 ## Running commands in the container
 
-For running commands in the data portal containers, small wrapper scripts are provided at `backend/run` and `frontend/run`.
+For running commands in the data portal containers, small wrapper scripts are provided at `backend/run-dev`, `backend/run-test` and `frontend/run`,
+for running commands in the backend development, backend test, and frontend development containers, respectively.
 Before using these scripts make sure the containers are up.
 
 ### Populating the database
@@ -21,7 +22,7 @@ By default, there is no data in the portal's database. The following command wil
 database with test fixtures:
 
     cd backend
-    ./run npx ts-node -T src/fixtures.ts default fixtures
+    ./run-dev npm run reset-db
 
 
 ### Running unit and integration tests
@@ -29,12 +30,12 @@ database with test fixtures:
 The backend unit and integration tests are run with the commands:
 
     cd backend
-    ./run npm test
+    ./run-test npm test
 
 To run backend e2e-tests, issue
 
     cd backend
-    ./run npm run e2e-test
+    ./run-test npm run e2e-test
     
 The frontend unit and integration tests are run with:
 
