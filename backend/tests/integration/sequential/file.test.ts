@@ -26,7 +26,6 @@ beforeAll(async () => {
   searchFileRepo = conn.getRepository('search_file')
   vizRepo = conn.getRepository('visualization')
   modelVizRepo = conn.getRepository('model_visualization')
-  console.log(storageServiceUrl)
   return Promise.all([
     axios.put(`${storageServiceUrl}cloudnet-product-volatile/${volatileFile.s3key}`, 'content'),
     axios.put(`${storageServiceUrl}cloudnet-product/${stableFile.s3key}`, 'content'),
