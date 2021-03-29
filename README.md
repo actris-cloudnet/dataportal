@@ -1,5 +1,6 @@
 # ACTRIS Cloudnet data portal
-![](https://github.com/actris-cloudnet/dataportal/workflows/Test/badge.svg)
+![](https://github.com/actris-cloudnet/dataportal/workflows/Lint%20and%20test/badge.svg)
+![](https://github.com/actris-cloudnet/dataportal/workflows/Selenium%20test/badge.svg)
 
 This repository contains the source code for ACTRIS Cloudnet data portal hosted at https://cloudnet.fmi.fi.
 The API documentation can be found [here](https://actris-cloudnet.github.io/dataportal/).
