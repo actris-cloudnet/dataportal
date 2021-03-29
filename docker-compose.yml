@@ -1,0 +1,19 @@
+version: "3.9"
+services:
+  dataportal-backend:
+    build: backend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - "dataportal-db"
+    volumes:
+      - ./backend:/app
+    environment:
+      NODE_ENV: production
+      TYPEORM_PASSWORD: dev
+  dataportal-db:
+    image: "postgres:13"
+    environment:
+      POSTGRES_DB: dataportal
+      POSTGRES_USER: dataportal
+      POSTGRES_PASSWORD: dev

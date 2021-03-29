@@ -1,16 +1,16 @@
 import {By, Key, WebDriver} from 'selenium-webdriver'
 import axios from 'axios'
-import {backendPrivateUrl, putFile, storageServiceUrl, visualizationPayloads, wait} from '../lib'
+import {backendPrivateUrl, frontendUrl, putFile, storageServiceUrl, visualizationPayloads, wait} from '../lib'
 import {initDriver, Selenium} from '../lib/selenium'
 import {basename} from 'path'
 
 let selenium: Selenium
 let driver: WebDriver
 
-jest.setTimeout(60000)
+jest.setTimeout(10000)
 
 async function initSearch() {
-  await selenium.driver.get('http://localhost:8000/search/visualizations')
+  await selenium.driver.get(`${frontendUrl}search/visualizations`)
   await selenium.sendInputToMultiselect('siteSelect', 'bucharest')
   return selenium.sendInput('dateTo', '2020-05-01')
 }
@@ -63,7 +63,7 @@ afterAll(async () => driver.close())
 
 describe('visualizations page before input', () => {
   it('initially contains the latest visualization', async () => {
-    await selenium.driver.get('http://localhost:8000/search/visualizations')
+    await selenium.driver.get(`${frontendUrl}search/visualizations`)
     await wait(300)
     const content = await selenium.getContent()
     expect(content).toContain('Visualizations for 1 May 2020')
@@ -86,7 +86,7 @@ describe('visualizations page', () => {
       const downloadUrl = await viz.getAttribute('src')
       const response = await axios.head(downloadUrl)
       expect(response.status).toBe(200)
-      return expect(parseInt(response.headers['content-length'])).toBeGreaterThan(0)
+      return expect(response.headers['content-type']).toBe('image/png')
     }))
   })
 
@@ -209,7 +209,7 @@ describe('visualizations page', () => {
 
 describe('file landing page', () => {
   it('shows a preview image', async () => {
-    await driver.get('http://localhost:8000/file/7a9c3894ef7e43d9aa7da3f25017acec')
+    await driver.get(`${frontendUrl}file/7a9c3894ef7e43d9aa7da3f25017acec`)
     // Wait for page to load
     await wait(300)
     const imgs = await selenium.findAllByClass('visualization')
@@ -217,11 +217,11 @@ describe('file landing page', () => {
     const downloadUrl = await imgs[0].getAttribute('src')
     const response = await axios.head(downloadUrl)
     expect(response.status).toBe(200)
-    return expect(response.headers['content-length']).toBe('91112')
+    return expect(response.headers['content-type']).toBe('image/png')
   })
 
   it('shows all plots after clicking see more plots', async () => {
-    await driver.get('http://localhost:8000/file/7a9c3894ef7e43d9aa7da3f25017acec')
+    await driver.get(`${frontendUrl}file/7a9c3894ef7e43d9aa7da3f25017acec`)
     // Wait for page to load
     await wait(300)
     await selenium.clickClass('viewAllPlots')

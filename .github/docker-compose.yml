@@ -1,0 +1,140 @@
+version: "3.9"
+services:
+  backend:
+    image: backend
+    pull_policy: never
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+      target: dev
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ci.env
+    command: ["npm", "run", "start-test"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "const c=new require('net').Socket();c.connect(3000);c.on('connect',()=>process.exit(0))"]
+      interval: 1s
+      retries: 20
+  db:
+    image: "postgres:13"
+    environment:
+      TZ: "Europe/Helsinki"
+      POSTGRES_DB: dataportal-test
+      POSTGRES_USER: dataportal
+      POSTGRES_PASSWORD: dev
+      PGUSER: dataportal
+    healthcheck:
+     test: ["CMD", "psql", "dataportal-test", "-c", "select 1"]
+     interval: 1s
+     retries: 120
+  frontend:
+    image: frontend
+    build:
+      context: ..
+      dockerfile: frontend/Dockerfile
+      target: dev
+    command: ["npm", "run", "serve"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "const c=new require('net').Socket();c.connect(8080);c.on('connect',()=>process.exit(0))"]
+      interval: 1s
+      retries: 20
+  test-backend:
+    image: backend
+    depends_on:
+      backend:
+        condition: service_healthy
+    env_file:
+      - ci.env
+    command: ["npm", "test"]
+  e2e-test-backend:
+    image: backend
+    depends_on:
+      backend:
+        condition: service_healthy
+    env_file:
+      - ci.env
+    command: ["npm", "run", "e2e-test"]
+  test-frontend:
+    image: frontend
+    depends_on:
+      - frontend
+    env_file:
+      - ci.env
+    command: ["npm", "test"]
+  lint-backend:
+    image: backend
+    depends_on:
+      - backend
+    env_file:
+      - ci.env
+    command: ["npm", "run", "lint"]
+  lint-frontend:
+    image: frontend
+    depends_on:
+      - frontend
+    env_file:
+      - ci.env
+    command: ["npm", "run", "lint"]
+  selenium:
+    image: selenium/standalone-firefox:4.0.0-beta-1-20210215
+    shm_size: 2g
+    healthcheck:
+      test: ["CMD", "/opt/bin/check-grid.sh"]
+      interval: 1s
+      retries: 30
+  test-selenium:
+    image: backend
+    depends_on:
+      backend:
+        condition: service_started
+      frontend-prod:
+        condition: service_started
+      selenium:
+        condition: service_healthy
+    env_file:
+      - ci.env
+    environment:
+      - DP_BACKEND_URL=http://backend-prod:3000
+      - DP_SS_TEST_URL=http://backend-prod:5920
+    command: ["npm", "run", "selenium-test", "--", $SELENIUM_TEST_TARGET]
+  backend-prod:
+    image: backend-prod
+    pull_policy: never
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+      target: prod
+      cache_from:
+        - backend
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ci.env
+    environment:
+      - TYPEORM_ENTITIES=build/entity/*.js
+      - TYPEORM_MIGRATIONS=build/migration/*.js
+      - DP_BACKEND_URL=http://frontend-prod/api/
+    healthcheck:
+      test: ["CMD", "node", "-e", "const c=new require('net').Socket();c.connect(3000);c.on('connect',()=>process.exit(0))"]
+      interval: 1s
+      retries: 20
+    command: ["npm", "run", "start-e2e"]
+  frontend-prod:
+    build:
+      context: ..
+      dockerfile: frontend/Dockerfile
+      target: prod
+      cache_from:
+        - frontend
+      args:
+        - VUE_APP_BACKENDURL=/api/
+    env_file:
+      - ci.env
+    ports:
+      - "9090:80"
+    depends_on:
+      backend-prod:
+        condition: service_healthy

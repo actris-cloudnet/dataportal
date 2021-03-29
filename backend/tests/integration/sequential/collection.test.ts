@@ -18,7 +18,7 @@ const validFileUuids = [
 describe('POST /api/collection', () => {
 
   beforeAll(async () => {
-    conn = await createConnection('test')
+    conn = await createConnection()
     repo = conn.getRepository('collection')
     fileRepo = conn.getRepository('regular_file')
 

@@ -20,7 +20,7 @@ const stableFile  = {...volatileFile, ...{volatile: false, pid: '1234'}}
 const volatileModelFile = {...volatileFile, ...{model: 'ecmwf', product: 'model'}}
 
 beforeAll(async () => {
-  conn = await createConnection('test')
+  conn = await createConnection()
   fileRepo = conn.getRepository('regular_file')
   modelFileRepo = conn.getRepository('model_file')
   searchFileRepo = conn.getRepository('search_file')

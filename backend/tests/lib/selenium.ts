@@ -3,8 +3,6 @@ import {Builder, By, Key, until, WebDriver,} from 'selenium-webdriver'
 import * as firefox from 'selenium-webdriver/firefox'
 
 export async function initDriver() {
-  const options = new firefox.Options()
-  if (process.env.CI) options.addArguments('-headless') // Run in headless on CI
   await clearRepo('visualization')
   await clearRepo('model_visualization')
   await clearRepo('regular_file')
@@ -12,7 +10,7 @@ export async function initDriver() {
   await clearRepo('search_file')
   return new Builder()
     .forBrowser('firefox')
-    .setFirefoxOptions(options)
+    .usingServer('http://selenium:4444/wd/hub')
     .build()
 }
 

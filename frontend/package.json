@@ -7,7 +7,7 @@
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint --no-fix",
     "lint-fix": "vue-cli-service lint",
-    "test": ". ~/.nvm/nvm.sh; nvm exec v12 jest"
+    "test": "jest"
   },
   "dependencies": {
     "@types/leaflet": "^1.5.12",

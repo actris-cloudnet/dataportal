@@ -10,7 +10,7 @@ let responses: any
 
 beforeAll(async () => {
   responses = await readResources()
-  conn = await createConnection('test')
+  conn = await createConnection()
 })
 
 afterAll(() => conn.close())

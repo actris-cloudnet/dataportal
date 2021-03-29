@@ -1,16 +1,16 @@
 import {By, until, WebDriver} from 'selenium-webdriver'
 import axios from 'axios'
-import {putFile, wait} from '../lib'
+import {frontendUrl, putFile, wait} from '../lib'
 import {initDriver, Selenium} from '../lib/selenium'
 
 let selenium: Selenium
 let driver: WebDriver
 
 
-jest.setTimeout(60000)
+jest.setTimeout(10000)
 
 async function initSearch() {
-  await driver.get('http://localhost:8000/search/data')
+  await driver.get(`${frontendUrl}search/data`)
   await selenium.sendInputToMultiselect('siteSelect', 'bucharest')
   return selenium.sendInput('dateTo', '2020-04-01')
 }

@@ -11,7 +11,6 @@ import {
   tomorrow
 } from '../lib'
 import {basename} from 'path'
-import config from '../config'
 import {ReducedMetadataResponse} from '../entity/ReducedMetadataResponse'
 import validator from 'validator'
 import {Instrument} from '../entity/Instrument'
@@ -19,6 +18,7 @@ import {Model} from '../entity/Model'
 import {ModelFile, RegularFile} from '../entity/File'
 import * as http from 'http'
 import ReadableStream = NodeJS.ReadableStream
+import env from '../lib/env'
 
 
 export class UploadRoutes {
@@ -227,8 +227,8 @@ export class UploadRoutes {
     }
 
     const requestOptions = {
-      host: config.storageService.host,
-      port: config.storageService.port,
+      host: env.DP_SS_HOST,
+      port: env.DP_SS_PORT,
       path: `/cloudnet-upload/${key}`,
       headers,
       method: 'PUT'

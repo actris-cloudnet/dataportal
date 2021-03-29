@@ -1,8 +1,13 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import {resolve} from 'path'
+import {URL} from 'url'
 import {createConnection} from 'typeorm'
 import axios from 'axios'
+
+if (!process.env.DP_BACKEND_URL) throw new Error('DP_BACKEND_URL must be set')
+if (!process.env.DP_FRONTEND_URL) throw new Error('DP_FRONTEND_URL must be set')
+if (!process.env.DP_SS_TEST_URL) throw new Error('DP_SS_TEST_URL must be set')
 
 export function clearDir(dir: string) {
   const files = fs.readdirSync(dir)
@@ -15,7 +20,7 @@ export function clearDir(dir: string) {
 }
 
 export async function clearRepo(repo: string) {
-  const conn = await createConnection('test')
+  const conn = await createConnection()
   await conn.getRepository(repo).delete({})
   return conn.close()
 }
@@ -34,12 +39,13 @@ export const wait = async (ms: number) => new Promise((resolve, _) => setTimeout
 
 export const genResponse = (status: any, data: any) => ({response: {status, data}})
 
+const backendUrl = process.env.DP_BACKEND_URL
 export const publicDir = 'tests/data/public'
-export const backendProtectedUrl = 'http://localhost:3001/protected/'
-export const backendPublicUrl = 'http://localhost:3001/api/'
-export const backendPrivateUrl = 'http://localhost:3001/'
-export const fileServerUrl = 'http://localhost:4001/'
-export const storageServiceUrl = 'http://localhost:5920/'
+export const backendProtectedUrl = `${backendUrl}/protected/`
+export const backendPublicUrl = `${backendUrl}/api/`
+export const backendPrivateUrl = `${backendUrl}/`
+export const frontendUrl = `${process.env.DP_FRONTEND_URL}/`
+export const storageServiceUrl = `${process.env.DP_SS_TEST_URL}/`
 export const visualizationPayloads = [  {
   s3key: resolve('tests/data/20200501_bucharest_classification_detection_status.png'),
   sourceFileId: '7a9c3894ef7e43d9aa7da3f25017acec',

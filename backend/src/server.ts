@@ -4,7 +4,6 @@ import * as express from 'express'
 import {ErrorRequestHandler} from 'express'
 import {RequestError} from './entity/RequestError'
 import {stringify} from './lib'
-import config from './config'
 import {Middleware} from './lib/middleware'
 import {FileRoutes} from './routes/file'
 import {SiteRoutes} from './routes/site'
@@ -18,11 +17,10 @@ import {DownloadRoutes} from './routes/download'
 import {CalibrationRoutes} from './routes/calibration'
 
 (async function() {
-  const port = config.port
+  const port = 3000
   const app = express()
 
-  const connName = config.connectionName
-  const conn = await createConnection(connName)
+  const conn = await createConnection()
   const middleware = new Middleware(conn)
 
   const fileRoutes = new FileRoutes(conn)
@@ -159,5 +157,5 @@ import {CalibrationRoutes} from './routes/calibration'
 
   app.use(errorHandler)
 
-  app.listen(port, () => console.log(`App listening on port ${port} with ${connName} connection!`))
+  app.listen(port, () => console.log(`App listening on port ${port}!`))
 })()

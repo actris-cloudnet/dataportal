@@ -3,7 +3,7 @@ import {promises as fsp} from 'fs'
 import {basename, join} from 'path'
 import {argv} from 'process'
 
-const truncate = argv[4] ? argv[4] == 'TRUNCATE' : false
+const truncate = argv[3] ? argv[3] == 'TRUNCATE' : false
 
 const isJson = (filepath: string) => filepath.substring(filepath.length - 4) == 'json'
 
@@ -26,8 +26,8 @@ async function handleDir(conn: Connection, dirpath: string) {
   }
 }
 
-async function importFixture(connName: string, path: string) {
-  const conn = await createConnection(connName)
+async function importFixture(path: string) {
+  const conn = await createConnection()
   const stat = await fsp.lstat(path)
   if (stat.isDirectory()) return handleDir(conn, path)
   else if (stat.isFile() && isJson(path)) return handleFile(conn, path)
@@ -38,7 +38,8 @@ if (truncate) {
   console.log('NOTE: Truncating all existing data')
 }
 
-importFixture(argv[2], argv[3])
+
+importFixture(argv[2])
   .then(() => {
     console.log('Success!')
     process.exit(0)
