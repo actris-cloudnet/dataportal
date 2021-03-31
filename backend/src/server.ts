@@ -134,6 +134,10 @@ import {CalibrationRoutes} from './routes/calibration'
     uploadRoutes.metadata,
     errorAsPlaintext)
 
+  // protected (for development)
+  app.get('/protected/upload-metadata', uploadRoutes.listMetadata)
+  app.get('/protected/upload-model-metadata', uploadRoutes.listMetadata)
+
   // model data upload (for Ewan only)
   app.post('/model-upload/metadata',
     express.json(),
