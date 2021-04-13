@@ -15,6 +15,7 @@ import {ProductRoutes} from './routes/product'
 import {ModelRoutes} from './routes/model'
 import {DownloadRoutes} from './routes/download'
 import {CalibrationRoutes} from './routes/calibration'
+import {CitationRoutes} from './routes/citation'
 
 (async function() {
   const port = 3000
@@ -33,6 +34,7 @@ import {CalibrationRoutes} from './routes/calibration'
   const modelRoutes = new ModelRoutes(conn)
   const dlRoutes = new DownloadRoutes(conn, fileRoutes)
   const calibRoutes = new CalibrationRoutes(conn)
+  const citRoutes = new CitationRoutes(conn)
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     if (err.status < 500) console.log(`Error ${err.status} in ${req.method} ${req.path}:`, stringify(err)) // Client error
@@ -115,6 +117,7 @@ import {CalibrationRoutes} from './routes/calibration'
   app.get('/api/download/collection/:uuid', middleware.validateUuidParam, dlRoutes.collection)
   app.get('/api/download/image/*', dlRoutes.image)
   app.get('/api/calibration', calibRoutes.calibration)
+  app.get('/api/citation', citRoutes.citations)
 
   // protected (for sites)
   app.post('/upload/metadata',

@@ -2,5 +2,9 @@
   {
     "site": "bucharest",
     "acknowledgements": "Bucharest test citation info."
+  },
+  {
+    "site": "hyytiala",
+    "acknowledgements": "Hyytiälä test citation info."
   }
 ]

@@ -1,0 +1,17 @@
+[
+  {
+    "site": {
+      "id": "bucharest",
+      "humanReadableName": "Bucharest",
+      "type": [
+        "cloudnet"
+      ],
+      "latitude": 44.348,
+      "longitude": 26.029,
+      "altitude": 93,
+      "gaw": "Unknown",
+      "country": "Romania"
+    },
+    "acknowledgements": "Bucharest test citation info."
+  }
+]
