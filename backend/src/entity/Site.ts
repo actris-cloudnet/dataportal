@@ -2,6 +2,7 @@ import {Column, Entity, OneToMany, PrimaryColumn} from 'typeorm'
 import {File} from './File'
 import {Upload} from './Upload'
 import {Calibration} from './Calibration'
+import {Citation} from './Citation'
 
 export enum SiteType {
     CLOUDNET = 'cloudnet',
@@ -47,6 +48,9 @@ export class Site {
 
     @OneToMany(_ => Calibration, calib => calib.site)
     calibrations!: Calibration[]
+
+    @OneToMany(_ => Citation, citation => citation.site)
+    citations!: Citation[]
 
     get isTestSite() {
       return this.type.includes(SiteType.TEST)
