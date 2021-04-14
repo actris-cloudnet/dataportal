@@ -114,6 +114,7 @@ main#filelanding
               :pid="response.pid"
               :products="[response.product.humanReadableName]"
               :sites="[response.site.humanReadableName]"
+              :siteIds="[response.site.id]"
               :startDate="response.measurementDate"
           ></how-to-cite>
         </div>

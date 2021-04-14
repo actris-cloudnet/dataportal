@@ -27,6 +27,8 @@ describe('File.vue', () => {
       return (url: string, req: AxiosRequestConfig | undefined): AxiosPromise => {
         if (url.includes('visualization')) {
           return Promise.resolve(augmentAxiosResponse(visualizationResponse))
+        } else if (url.includes('citation') && (req && req.params && req.params.site && req.params.site.includes('bucharest'))) {
+          return Promise.resolve(augmentAxiosResponse(resources['citation']))
         } else {
           if (req && req.params['allVersions']) return Promise.resolve(augmentAxiosResponse([
             findByUuid(resources['allfiles'], '8bb'),
@@ -126,8 +128,10 @@ describe('File.vue', () => {
     })
     await nextTick(2)
     await wrapper.find('#showCiting').trigger('click')
+    await nextTick(1)
     expect(wrapper.findAll('#howtocite').length).toEqual(1)
     expect(wrapper.text()).toContain('This is an example of how to cite Cloudnet datasets.')
+    expect(wrapper.text()).toContain('Bucharest test citation info.')
   })
 
   it('hides how to cite box by clicking a button', async () => {

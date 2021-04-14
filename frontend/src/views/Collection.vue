@@ -118,6 +118,7 @@ main.column
               :pid="response.pid"
               :products="getUnique('product')"
               :sites="getUnique('site')"
+              :siteIds="getUnique('siteId')"
               :collectionYear="collectionYear"
               :startDate="startDate"
               :endDate="endDate"

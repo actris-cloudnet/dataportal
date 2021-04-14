@@ -4,6 +4,7 @@
       {
         "uuid": "a5d1d5af-3667-41bc-b952-e684f627d91c",
         "measurementDate": "2014-12-05",
+        "siteId": "mace-head",
         "site": "Mace Head",
         "product": "Model",
         "productId": "model",
@@ -13,6 +14,7 @@
       {
         "uuid": "d21d6a9b-6804-4465-a026-74ec429fe17d",
         "measurementDate": "2019-09-01",
+        "siteId": "hyytiala",
         "site": "Hyytiälä",
         "product": "Radar",
         "productId": "radar",
