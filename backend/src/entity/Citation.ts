@@ -1,5 +1,6 @@
-import {Column, Entity, ManyToOne, PrimaryGeneratedColumn} from 'typeorm'
+import {Column, Entity, ManyToMany, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn} from 'typeorm'
 import {Site} from './Site'
+import {Model} from './Model'
 
 
 @Entity()
@@ -8,15 +9,21 @@ export class Citation {
   @PrimaryGeneratedColumn()
   id!: number
 
-  @ManyToOne(_ => Site, site => site.citations)
-  site!: Site
-
   @Column({type: 'text'})
   acknowledgements!: string
 
+}
 
-  constructor(site: Site, acknowledgements: string) {
-    this.site = site
-    this.acknowledgements = acknowledgements
-  }
+@Entity()
+export class RegularCitation extends Citation {
+
+  @ManyToMany(_ => Site)
+  sites!: Site[]
+}
+
+@Entity()
+export class ModelCitation extends Citation {
+
+  @ManyToMany(_ => Model)
+  models!: Model[]
 }

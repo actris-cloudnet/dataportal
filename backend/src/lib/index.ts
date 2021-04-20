@@ -9,6 +9,7 @@ import {Upload} from '../entity/Upload'
 import axios from 'axios'
 import {SiteType} from '../entity/Site'
 import env from './env'
+import {CollectionFileResponse} from '../entity/CollectionFileResponse'
 
 export const stringify = (obj: any): string => JSON.stringify(obj, null, 2)
 
@@ -63,6 +64,9 @@ export const hideTestDataFromNormalUsers = <T>(dbQuery: SelectQueryBuilder<T>, r
 
 export const convertToSearchResponse = (file: SearchFile) =>
   new SearchFileResponse(file)
+
+export const convertToCollectionFileResponse = (file: RegularFile | ModelFile) =>
+  new CollectionFileResponse(file)
 
 export const sortByMeasurementDateAsc = <T extends File|SearchFile>(files: T[]): T[] =>
   files.sort((a, b) => new Date(a.measurementDate).getTime() - new Date(b.measurementDate).getTime())

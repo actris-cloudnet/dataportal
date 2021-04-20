@@ -7,7 +7,12 @@
     "type": ["cloudnet"],
     "altitude": 93,
     "gaw": "Unknown",
-    "country": "Romania"
+    "country": "Romania",
+    "citations": [
+      {
+        "acknowledgements": "Bucharest test citation info."
+      }
+    ]
   },
   {
     "id": "mace-head",
@@ -27,7 +32,12 @@
     "altitude": 174,
     "type": ["cloudnet"],
     "gaw": "SMR",
-    "country": "Finland"
+    "country": "Finland",
+    "citations": [
+      {
+        "acknowledgements": "Hyytiälä test citation info."
+      }
+    ]
   },
   {
     "id": "granada",

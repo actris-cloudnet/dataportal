@@ -14,7 +14,8 @@
     "size": 500452,
     "format": "NetCDF3",
     "site": "mace-head",
-    "version": "123"
+    "version": "123",
+    "model": "ecmwf"
   },
   {
     "uuid": "9e04d8ef-0f2b-4823-835d-33e458403c67",

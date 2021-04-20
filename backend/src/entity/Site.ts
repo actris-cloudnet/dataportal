@@ -1,8 +1,8 @@
-import {Column, Entity, OneToMany, PrimaryColumn} from 'typeorm'
+import {Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn} from 'typeorm'
 import {File} from './File'
 import {Upload} from './Upload'
 import {Calibration} from './Calibration'
-import {Citation} from './Citation'
+import {Citation, RegularCitation} from './Citation'
 
 export enum SiteType {
     CLOUDNET = 'cloudnet',
@@ -49,8 +49,9 @@ export class Site {
     @OneToMany(_ => Calibration, calib => calib.site)
     calibrations!: Calibration[]
 
-    @OneToMany(_ => Citation, citation => citation.site)
-    citations!: Citation[]
+    @ManyToMany(_ => RegularCitation)
+    @JoinTable()
+    citations!: RegularCitation[]
 
     get isTestSite() {
       return this.type.includes(SiteType.TEST)
