@@ -1,6 +1,7 @@
 import {Visualization} from '../../../backend/src/entity/Visualization'
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 import {Product} from '../../../backend/src/entity/Product'
+import {CollectionFileResponse} from '../../../backend/src/entity/CollectionFileResponse'
 
 export const getProductIcon = (product: Product | string) => {
   try {
@@ -55,7 +56,7 @@ export function isSameDay(a: Date, b: Date) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate()=== b.getDate()
 }
 
-export function constructTitle(files: SearchFileResponse[]) {
+export function constructTitle(files: CollectionFileResponse[]) {
   return files.map(file => ({...file, title: `${file.product} file from ${file.site}`}))
 }
 

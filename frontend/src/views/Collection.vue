@@ -117,11 +117,12 @@ main.column
               v-else
               :pid="response.pid"
               :products="getUnique('product')"
-              :sites="getUnique('site')"
               :siteIds="getUnique('siteId')"
+              :modelIds="getUnique('modelId')"
               :collectionYear="collectionYear"
               :startDate="startDate"
               :endDate="endDate"
+              :citations="citations"
           >
           </how-to-cite>
 
@@ -152,7 +153,6 @@ main.column
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import axios from 'axios'
-import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 import {CollectionResponse} from '../../../backend/src/entity/CollectionResponse'
 import {combinedFileSize, constructTitle, getProductIcon, humanReadableSize} from '../lib'
 import {Site} from '../../../backend/src/entity/Site'
@@ -161,6 +161,7 @@ import {Product} from '../../../backend/src/entity/Product'
 import DataSearchResult from '../components/DataSearchResult.vue'
 import HowToCite from '../components/HowToCite.vue'
 import License from '../components/License.vue'
+import {CollectionFileResponse} from '../../../backend/src/entity/CollectionFileResponse'
 
 Vue.component('data-search-result', DataSearchResult)
 Vue.component('how-to-cite', HowToCite)
@@ -174,7 +175,7 @@ export default class CollectionView extends Vue {
   @Prop() mode!: string
   error = false
   response: CollectionResponse | null = null
-  sortedFiles: SearchFileResponse[] = []
+  sortedFiles: CollectionFileResponse[] = []
   sites: Site[] = []
   products: Product[] = []
   apiUrl = process.env.VUE_APP_BACKENDURL
@@ -203,7 +204,7 @@ export default class CollectionView extends Vue {
     return `${this.apiUrl}download/collection/${this.response.uuid}`
   }
 
-  getUnique(field: keyof SearchFileResponse) {
+  getUnique(field: keyof CollectionFileResponse) {
     return this.sortedFiles
       .map(file => file[field])
       .reduce((acc: string[], cur) =>

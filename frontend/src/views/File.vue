@@ -113,8 +113,8 @@ main#filelanding
           <how-to-cite
               :pid="response.pid"
               :products="[response.product.humanReadableName]"
-              :sites="[response.site.humanReadableName]"
               :siteIds="[response.site.id]"
+              :modelIds="response.model ? [response.model.id] : []"
               :startDate="response.measurementDate"
           ></how-to-cite>
         </div>

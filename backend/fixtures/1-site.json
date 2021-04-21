@@ -20,7 +20,10 @@
     "altitude": 16,
     "type": ["cloudnet"],
     "gaw": "MHD",
-    "country": "Ireland"
+    "country": "Ireland",
+    "citations": [
+      { "id": "hyytiala_test" }
+    ]
   },
   {
     "id": "hyytiala",

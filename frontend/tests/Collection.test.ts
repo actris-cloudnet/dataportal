@@ -32,8 +32,8 @@ describe('Collection.vue', () => {
           return Promise.resolve(augmentAxiosResponse(resources['sites']))
         } else if (url.includes('products')) {
           return Promise.resolve(augmentAxiosResponse(resources['products']))
-        } else if (url.includes('citation') && (req && req.params && req.params.site && req.params.site.includes('hyytiala'))) {
-          return Promise.resolve(augmentAxiosResponse(resources['citation']))
+        } else if (url.includes('models')) {
+          return Promise.resolve(augmentAxiosResponse(resources['models']))
         } else {
           return Promise.resolve(augmentAxiosResponse({pid: 'testpid'}))
         }
@@ -85,7 +85,7 @@ describe('Collection.vue', () => {
 
     it('displays custom citation info', async () => {
       await nextTick(2)
-      expect(wrapper.text()).toContain('Hyytiälä test citation info.')
+      expect((wrapper.text().match(/Hyytiälä test citation/g) || [])).toHaveLength(1)
     })
   })
 

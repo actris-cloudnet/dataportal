@@ -8,6 +8,7 @@
         "site": "Mace Head",
         "product": "Model",
         "productId": "model",
+        "modelId": "ecmwf",
         "size": 500452,
         "volatile": true
       },
