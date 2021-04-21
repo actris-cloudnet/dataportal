@@ -9,9 +9,7 @@
     "gaw": "Unknown",
     "country": "Romania",
     "citations": [
-      {
-        "acknowledgements": "Bucharest test citation info."
-      }
+      { "id": "bucharest_test" }
     ]
   },
   {
@@ -34,9 +32,7 @@
     "gaw": "SMR",
     "country": "Finland",
     "citations": [
-      {
-        "acknowledgements": "Hyytiälä test citation info."
-      }
+      { "id": "hyytiala_test" }
     ]
   },
   {

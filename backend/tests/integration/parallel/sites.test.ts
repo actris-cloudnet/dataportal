@@ -35,6 +35,27 @@ describe('GET /api/sites', () => {
     expect(res.data[0].id).toEqual('newyork')
     expect(res.data[1].id).toEqual('shanghai')
   })
+
+  it('does not show citations by default', async () => {
+    const res = await axios.get(url)
+    expect(res.data[0]).not.toHaveProperty('citations')
+    expect(res.data[1]).not.toHaveProperty('citations')
+  })
+
+  it('responds with citations with showCitations flag', async () => {
+    const params = { params: { showCitations: true }}
+    const res = await axios.get(url, params)
+    expect(res.data[0].citations).toMatchObject(
+    [{
+      "id": "bucharest_test",
+      "acknowledgements": "Bucharest test citation."
+    }])
+    expect(res.data[1].citations).toMatchObject(
+    [{
+      "id": "hyytiala_test",
+      "acknowledgements": "Hyytiälä test citation."
+    }])
+  })
 })
 
 describe('GET /api/sites/:siteid', () => {

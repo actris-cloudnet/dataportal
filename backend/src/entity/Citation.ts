@@ -6,8 +6,8 @@ import {Model} from './Model'
 @Entity()
 export class Citation {
 
-  @PrimaryGeneratedColumn()
-  id!: number
+  @PrimaryColumn()
+  id!: string
 
   @Column({type: 'text'})
   acknowledgements!: string
