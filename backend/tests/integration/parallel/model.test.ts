@@ -25,8 +25,8 @@ describe('GET /api/models', () => {
     const res = await axios.get(modelTypeUrl, params)
     expect(res.data[0].citations).toMatchObject(
       [{
-        "id": "ecmwf",
-        "acknowledgements": "ECMWF citation text."
+        'id': 'ecmwf',
+        'acknowledgements': 'ECMWF citation text.'
       }])
   })
 })

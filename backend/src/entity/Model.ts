@@ -1,7 +1,7 @@
 import {Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn} from 'typeorm'
 import {ModelUpload} from './Upload'
 import {ModelFile} from './File'
-import {Citation, ModelCitation} from './Citation'
+import {ModelCitation} from './Citation'
 
 @Entity()
 export class Model {

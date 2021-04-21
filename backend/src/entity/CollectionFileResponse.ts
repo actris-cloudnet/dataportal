@@ -1,4 +1,4 @@
-import {File, ModelFile, RegularFile} from './File'
+import {ModelFile, RegularFile} from './File'
 
 export class CollectionFileResponse {
 

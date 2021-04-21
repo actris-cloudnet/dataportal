@@ -1,4 +1,4 @@
-import {Column, Entity, ManyToMany, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn} from 'typeorm'
+import {Column, Entity, ManyToMany, PrimaryColumn} from 'typeorm'
 import {Site} from './Site'
 import {Model} from './Model'
 

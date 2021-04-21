@@ -46,15 +46,15 @@ describe('GET /api/sites', () => {
     const params = { params: { showCitations: true }}
     const res = await axios.get(url, params)
     expect(res.data[0].citations).toMatchObject(
-    [{
-      "id": "bucharest_test",
-      "acknowledgements": "Bucharest test citation."
-    }])
+      [{
+        'id': 'bucharest_test',
+        'acknowledgements': 'Bucharest test citation.'
+      }])
     expect(res.data[1].citations).toMatchObject(
-    [{
-      "id": "hyytiala_test",
-      "acknowledgements": "Hyytiälä test citation."
-    }])
+      [{
+        'id': 'hyytiala_test',
+        'acknowledgements': 'Hyytiälä test citation.'
+      }])
   })
 })
 

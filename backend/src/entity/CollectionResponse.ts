@@ -1,7 +1,6 @@
 import {Collection} from './Collection'
-import {SearchFileResponse} from './SearchFileResponse'
-import {convertToCollectionFileResponse, convertToSearchResponse} from '../lib'
-import {File, ModelFile, RegularFile} from './File'
+import {convertToCollectionFileResponse} from '../lib'
+import {ModelFile, RegularFile} from './File'
 import {CollectionFileResponse} from './CollectionFileResponse'
 
 export class CollectionResponse {

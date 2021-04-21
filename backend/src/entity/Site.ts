@@ -2,7 +2,7 @@ import {Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn} from 't
 import {File} from './File'
 import {Upload} from './Upload'
 import {Calibration} from './Calibration'
-import {Citation, RegularCitation} from './Citation'
+import {RegularCitation} from './Citation'
 
 export enum SiteType {
     CLOUDNET = 'cloudnet',

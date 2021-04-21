@@ -16,7 +16,7 @@ export class ModelRoutes {
     if (req.query.showCitations) qb.leftJoinAndSelect('model.citations', 'citations')
     else qb.select()
 
-      qb.addOrderBy('model.optimumOrder', 'ASC')
+    qb.addOrderBy('model.optimumOrder', 'ASC')
       .addOrderBy('model.id', 'ASC')
       .getMany()
       .then(result => res.send(result))

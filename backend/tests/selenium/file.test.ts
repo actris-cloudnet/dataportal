@@ -1,6 +1,6 @@
 import {By, until, WebDriver} from 'selenium-webdriver'
 import axios from 'axios'
-import {putFile, frontendUrl, wait} from '../lib'
+import {putFile, frontendUrl} from '../lib'
 import {initDriver} from '../lib/selenium'
 
 let driver: WebDriver
