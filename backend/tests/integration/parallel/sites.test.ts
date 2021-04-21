@@ -61,9 +61,9 @@ describe('GET /api/sites', () => {
 describe('GET /api/sites/:siteid', () => {
 
   it('responds with the correct json on valid id', async () => {
-    const validUrl = `${url}bucharest`
+    const validUrl = `${url}mace-head`
     const res = await axios.get(validUrl)
-    expect(res.data).toMatchObject(resources['sites'][0])
+    expect(res.data).toMatchObject(resources['sites'][1])
   })
 
   it('responds with 404 if site is not found', async () => {
