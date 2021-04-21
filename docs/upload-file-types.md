@@ -18,7 +18,7 @@ We recommend uploading the following files:
 | `copernicus` | Copernicus cloud radar | `*.nc` files. | netCDF |
 | `galileo` | Galileo cloud radar | `*.nc` files. | netCDF |
 | `basta` | BASTA cloud radar | Daily `*.nc` files. | netCDF |
-| `parsivel` | OTT Parsivel2 disdrometer | `*.txt` | text |
+| `parsivel` | OTT Parsivel2 disdrometer | `*.log` files. | text |
 | `thies-lnm` | Thies LNM disdrometer | `*.txt` files. | text |
 
 We plan to also accept the following instrument types in the future. Note that the API will not accept these yet. 
