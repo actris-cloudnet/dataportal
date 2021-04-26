@@ -112,9 +112,9 @@ main#filelanding
           <span class="closeX" id="hideCiting" @click="showHowToCite = false"> &#10005; </span>
           <how-to-cite
               :pid="response.pid"
-              :products="[response.product.humanReadableName]"
-              :sites="[response.site.humanReadableName]"
-              :modelIds="response.model ? [response.model.id] : []"
+              :products="[response.product]"
+              :sites="[site]"
+              :models="model ? [model] : []"
               :nonModelSiteIds="response.model ? [] : [response.site.id]"
               :startDate="response.measurementDate"
           ></how-to-cite>
@@ -279,6 +279,8 @@ import {File, ModelFile, RegularFile} from '../../../backend/src/entity/File'
 import {Visualization} from '../../../backend/src/entity/Visualization'
 import HowToCite from '../components/HowToCite.vue'
 import License from '../components/License.vue'
+import {Site} from '../../../backend/src/entity/Site'
+import {Model} from '../../../backend/src/entity/Model'
 
 Vue.component('how-to-cite', HowToCite)
 Vue.component('license', License)
@@ -304,6 +306,8 @@ export default class FileView extends Vue {
   showHowToCite = false
   showLicense = false
   isBusy = false
+  site!: Site
+  model: Model | null = null
 
   getVisualizations() {
     if (!this.allVisualizations) return this.visualizations.slice(0, 1)
@@ -332,6 +336,7 @@ export default class FileView extends Vue {
 
   created() {
     this.onUuidChange()
+    this.fetchCitations()
   }
 
   fetchVisualizations(payload: {}) {
@@ -380,6 +385,20 @@ export default class FileView extends Vue {
       .then(response => this.sourceFiles = response.map(res => res.data))
   }
 
+  fetchCitations() {
+    const citationQueryOptions = { params: { showCitations: true }}
+    Promise.all([
+      axios.get(`${this.apiUrl}sites/`, citationQueryOptions),
+      axios.get(`${this.apiUrl}models/`, citationQueryOptions),
+    ]).then(([sites, models]) => {
+      if (!this.response) return
+      this.site = sites.data.filter((site: Site) => site.id == (this.response as File).site.id)[0]
+      if ((this.response as ModelFile).model) {
+        this.model = models.data.filter((model: Model) => model.id == (this.response as ModelFile).model.id)[0]
+      }
+    })
+  }
+
   @Watch('uuid')
   async onUuidChange() {
     this.isBusy = true
@@ -389,7 +408,7 @@ export default class FileView extends Vue {
     await Promise.all([
       this.fetchVisualizations(payload),
       this.fetchVersions(this.response),
-      this.fetchSourceFiles(this.response)
+      this.fetchSourceFiles(this.response),
     ])
     this.isBusy = false
   }
