@@ -334,9 +334,9 @@ export default class FileView extends Vue {
     return this.versions[this.currentVersionIndex - 1]
   }
 
-  created() {
-    this.onUuidChange()
-    this.fetchCitations()
+  async created() {
+    await this.onUuidChange()
+    return this.fetchCitations()
   }
 
   fetchVisualizations(payload: {}) {
