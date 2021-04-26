@@ -1,7 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import {resolve} from 'path'
-import {URL} from 'url'
 import {createConnection} from 'typeorm'
 import axios from 'axios'
 

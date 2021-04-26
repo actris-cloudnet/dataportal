@@ -10,11 +10,13 @@ export class ModelRoutes {
 
   private conn: Connection
 
-  models: RequestHandler = async (_: Request, res: Response, next) => {
-    this.conn.getRepository('model')
+  models: RequestHandler = async (req: Request, res: Response, next) => {
+    const qb = this.conn.getRepository('model')
       .createQueryBuilder('model')
-      .select()
-      .addOrderBy('model.optimumOrder', 'ASC')
+    if (req.query.showCitations) qb.leftJoinAndSelect('model.citations', 'citations')
+    else qb.select()
+
+    qb.addOrderBy('model.optimumOrder', 'ASC')
       .addOrderBy('model.id', 'ASC')
       .getMany()
       .then(result => res.send(result))

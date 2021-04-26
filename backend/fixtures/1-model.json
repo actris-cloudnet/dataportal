@@ -1,7 +1,10 @@
 [
     {
       "id": "ecmwf",
-      "optimumOrder": 0
+      "optimumOrder": 0,
+      "citations": [
+        { "id": "ecmwf" }
+      ]
     },
     {
       "id": "icon-iglo-12-23",
@@ -20,4 +23,3 @@
       "optimumOrder": 3
     }
   ]
-  

@@ -50,7 +50,7 @@ export class CollectionRoutes {
     try {
       const collection = await this.collectionRepo.findOne(uuid, {relations: [
         'regularFiles', 'regularFiles.site', 'regularFiles.product',
-        'modelFiles', 'modelFiles.site', 'modelFiles.product',
+        'modelFiles', 'modelFiles.site', 'modelFiles.product', 'modelFiles.model',
       ]})
       if (collection === undefined) return next({status: 404, errors: ['Collection not found']})
       res.send(new CollectionResponse(collection))

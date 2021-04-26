@@ -1,6 +1,7 @@
-import {Column, Entity, OneToMany, PrimaryColumn} from 'typeorm'
+import {Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn} from 'typeorm'
 import {ModelUpload} from './Upload'
 import {ModelFile} from './File'
+import {ModelCitation} from './Citation'
 
 @Entity()
 export class Model {
@@ -16,4 +17,8 @@ export class Model {
 
     @OneToMany(_ => ModelFile, modelfile => modelfile.model)
     files!: ModelFile[]
+
+    @ManyToMany(_ => ModelCitation)
+    @JoinTable()
+    citations!: ModelCitation[]
 }

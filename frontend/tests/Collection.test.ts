@@ -23,7 +23,7 @@ describe('Collection.vue', () => {
   beforeAll(async () => {
     resources = await readResources()
     mockAxios = () => {
-      return (url: string, _: AxiosRequestConfig | undefined): AxiosPromise => {
+      return (url: string, req: AxiosRequestConfig | undefined): AxiosPromise => {
         if (url.includes('collection')) {
           return Promise.resolve(augmentAxiosResponse(resources['allcollections'][0]))
         } else if (url.includes('search')) {
@@ -32,6 +32,8 @@ describe('Collection.vue', () => {
           return Promise.resolve(augmentAxiosResponse(resources['sites']))
         } else if (url.includes('products')) {
           return Promise.resolve(augmentAxiosResponse(resources['products']))
+        } else if (url.includes('models')) {
+          return Promise.resolve(augmentAxiosResponse(resources['models']))
         } else {
           return Promise.resolve(augmentAxiosResponse({pid: 'testpid'}))
         }
@@ -79,6 +81,11 @@ describe('Collection.vue', () => {
     it('displays license', async () => {
       await nextTick(2)
       expect(wrapper.text()).toContain('Cloudnet data is licensed under a Creative Commons Attribution 4.0 international licence.')
+    })
+
+    it('displays custom citation info', async () => {
+      await nextTick(2)
+      expect((wrapper.text().match(/Hyytiälä test citation/g) || [])).toHaveLength(1)
     })
   })
 

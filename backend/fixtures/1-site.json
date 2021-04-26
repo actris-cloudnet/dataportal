@@ -7,7 +7,10 @@
     "type": ["cloudnet"],
     "altitude": 93,
     "gaw": "Unknown",
-    "country": "Romania"
+    "country": "Romania",
+    "citations": [
+      { "id": "bucharest_test" }
+    ]
   },
   {
     "id": "mace-head",
@@ -17,7 +20,10 @@
     "altitude": 16,
     "type": ["cloudnet"],
     "gaw": "MHD",
-    "country": "Ireland"
+    "country": "Ireland",
+    "citations": [
+      { "id": "hyytiala_test" }
+    ]
   },
   {
     "id": "hyytiala",
@@ -27,7 +33,10 @@
     "altitude": 174,
     "type": ["cloudnet"],
     "gaw": "SMR",
-    "country": "Finland"
+    "country": "Finland",
+    "citations": [
+      { "id": "hyytiala_test" }
+    ]
   },
   {
     "id": "granada",

@@ -9,7 +9,13 @@
     "longitude": 26.029,
     "altitude": 93,
     "gaw": "Unknown",
-    "country": "Romania"
+    "country": "Romania",
+    "citations": [
+      {
+        "id": "bucharest_test",
+        "acknowledgements": "Bucharest test citation."
+      }
+    ]
   },
   {
     "id": "mace-head",
@@ -33,7 +39,13 @@
     "longitude": 24.288,
     "altitude": 174,
     "gaw": "SMR",
-    "country": "Finland"
+    "country": "Finland",
+    "citations": [
+      {
+        "id": "hyytiala_test",
+        "acknowledgements": "Hyytiälä test citation."
+      }
+    ]
   },
   {
     "id": "granada",

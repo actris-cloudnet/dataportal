@@ -28,7 +28,8 @@ export class SiteRoutes {
   sites: RequestHandler = async (req: Request, res: Response, next) => {
     const query: any = req.query
     const qb = this.siteRepo.createQueryBuilder('site')
-      .select()
+    if (query.showCitations) qb.leftJoinAndSelect('site.citations', 'citations')
+    else qb.select()
 
     hideTestDataFromNormalUsers(qb, req)
       .addOrderBy('site.id', 'ASC')

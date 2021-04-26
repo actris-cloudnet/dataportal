@@ -14,4 +14,19 @@ describe('GET /api/models', () => {
     const siteList = res.data.map((d: any) => d.id)
     return types.forEach(mtype => expect(siteList).toContain(mtype))
   })
+
+  it('does not show citations by default', async () => {
+    const res = await axios.get(modelTypeUrl)
+    expect(res.data[0]).not.toHaveProperty('citations')
+  })
+
+  it('responds with citations with showCitations flag', async () => {
+    const params = { params: { showCitations: true }}
+    const res = await axios.get(modelTypeUrl, params)
+    expect(res.data[0].citations).toMatchObject(
+      [{
+        'id': 'ecmwf',
+        'acknowledgements': 'ECMWF citation text.'
+      }])
+  })
 })

@@ -111,13 +111,15 @@ main.column
         <section id="editCollection" class="rightView" v-if="mode === 'general'">
           <h3>How to cite</h3>
           <!-- eslint-disable max-len -->
-          <span v-if="busy">Generating persistent identifier...</span>
+          <span v-if="busy">Generating citation text...</span>
           <div v-else-if="pidServiceError" class="errormsg">PID service is unavailable. Please try again later. You may still download the collection.</div>
           <how-to-cite
               v-else
               :pid="response.pid"
-              :products="getUnique('product')"
-              :sites="getUnique('site')"
+              :products="products"
+              :sites="sites"
+              :models="models"
+              :nonModelSiteIds="nonModelSiteIds"
               :collectionYear="collectionYear"
               :startDate="startDate"
               :endDate="endDate"
@@ -151,7 +153,6 @@ main.column
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import axios from 'axios'
-import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 import {CollectionResponse} from '../../../backend/src/entity/CollectionResponse'
 import {combinedFileSize, constructTitle, getProductIcon, humanReadableSize} from '../lib'
 import {Site} from '../../../backend/src/entity/Site'
@@ -160,6 +161,8 @@ import {Product} from '../../../backend/src/entity/Product'
 import DataSearchResult from '../components/DataSearchResult.vue'
 import HowToCite from '../components/HowToCite.vue'
 import License from '../components/License.vue'
+import {CollectionFileResponse} from '../../../backend/src/entity/CollectionFileResponse'
+import {Model} from '../../../backend/src/entity/Model'
 
 Vue.component('data-search-result', DataSearchResult)
 Vue.component('how-to-cite', HowToCite)
@@ -173,12 +176,14 @@ export default class CollectionView extends Vue {
   @Prop() mode!: string
   error = false
   response: CollectionResponse | null = null
-  sortedFiles: SearchFileResponse[] = []
+  sortedFiles: CollectionFileResponse[] = []
   sites: Site[] = []
   products: Product[] = []
+  models: Model[] = []
   apiUrl = process.env.VUE_APP_BACKENDURL
   busy = false
   pidServiceError = false
+  nonModelSiteIds: string[] = []
 
   combinedFileSize = combinedFileSize
   humanReadableSize = humanReadableSize
@@ -202,8 +207,8 @@ export default class CollectionView extends Vue {
     return `${this.apiUrl}download/collection/${this.response.uuid}`
   }
 
-  getUnique(field: keyof SearchFileResponse) {
-    return this.sortedFiles
+  getUnique(arr: CollectionFileResponse[], field: keyof CollectionFileResponse) {
+    return arr
       .map(file => file[field])
       .reduce((acc: string[], cur) =>
         (typeof cur == 'string' && !acc.includes(cur))
@@ -218,7 +223,6 @@ export default class CollectionView extends Vue {
 
   async generatePid() {
     if (!this.response || this.response.pid) return
-    this.busy = true
     const payload = {
       type: 'collection',
       uuid: this.uuid
@@ -233,16 +237,18 @@ export default class CollectionView extends Vue {
         // eslint-disable-next-line no-console
         console.error(e)
       })
-      .finally(() => (this.busy = false))
   }
 
   created() {
+    this.busy = true
     return axios.get(`${this.apiUrl}collection/${this.uuid}`)
       .then(res => {
         this.response = res.data
         if (this.response == null) return
         this.sortedFiles = constructTitle(this.response.files
           .sort((a, b) => new Date(b.measurementDate).getTime() - new Date(a.measurementDate).getTime()))
+        this.nonModelSiteIds = this.getUnique(this.sortedFiles
+          .filter(file => file.productId != 'model'), 'siteId')
       })
       .catch(({response}) => {
         this.error = true
@@ -250,18 +256,23 @@ export default class CollectionView extends Vue {
       })
       .then(() => {
         this.generatePid()
-        const siteIds = this.getUnique('siteId')
-        const productIds = this.getUnique('productId')
+        const siteIds = this.getUnique(this.sortedFiles, 'siteId')
+        const productIds = this.getUnique(this.sortedFiles, 'productId')
+        const modelIds = this.getUnique(this.sortedFiles, 'modelId')
+        const citationQueryOptions = { params: { showCitations: true }}
         return Promise.all([
-          axios.get(`${this.apiUrl}sites/`),
+          axios.get(`${this.apiUrl}sites/`, citationQueryOptions),
+          axios.get(`${this.apiUrl}models/`, citationQueryOptions),
           axios.get(`${this.apiUrl}products/`),
-        ]).then(([sites, products]) => {
+        ]).then(([sites, models, products]) => {
           this.sites = sites.data.filter((site: Site) => siteIds.includes(site.id))
           this.products = products.data.filter((product: Product) => productIds.includes(product.id))
+          this.models = models.data.filter((model: Product) => modelIds.includes(model.id))
         })
       })
       // eslint-disable-next-line no-console
       .catch(console.error)
+      .finally(() => (this.busy = false))
   }
 }
 </script>
