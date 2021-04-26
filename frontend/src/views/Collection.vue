@@ -116,13 +116,13 @@ main.column
           <how-to-cite
               v-else
               :pid="response.pid"
-              :products="getUnique('product')"
-              :siteIds="getUnique('siteId')"
-              :modelIds="getUnique('modelId')"
+              :products="getUnique(this.sortedFiles, 'product')"
+              :sites="getUnique(this.sortedFiles, 'site')"
+              :nonModelSiteIds="this.nonModelSiteIds"
+              :modelIds="getUnique(this.sortedFiles, 'modelId')"
               :collectionYear="collectionYear"
               :startDate="startDate"
               :endDate="endDate"
-              :citations="citations"
           >
           </how-to-cite>
 
@@ -181,6 +181,7 @@ export default class CollectionView extends Vue {
   apiUrl = process.env.VUE_APP_BACKENDURL
   busy = false
   pidServiceError = false
+  nonModelSiteIds: string[] = []
 
   combinedFileSize = combinedFileSize
   humanReadableSize = humanReadableSize
@@ -204,8 +205,8 @@ export default class CollectionView extends Vue {
     return `${this.apiUrl}download/collection/${this.response.uuid}`
   }
 
-  getUnique(field: keyof CollectionFileResponse) {
-    return this.sortedFiles
+  getUnique(arr: CollectionFileResponse[], field: keyof CollectionFileResponse) {
+    return arr
       .map(file => file[field])
       .reduce((acc: string[], cur) =>
         (typeof cur == 'string' && !acc.includes(cur))
@@ -245,6 +246,8 @@ export default class CollectionView extends Vue {
         if (this.response == null) return
         this.sortedFiles = constructTitle(this.response.files
           .sort((a, b) => new Date(b.measurementDate).getTime() - new Date(a.measurementDate).getTime()))
+        this.nonModelSiteIds = this.getUnique(this.sortedFiles
+            .filter(file => file.productId != 'model'), 'siteId')
       })
       .catch(({response}) => {
         this.error = true
@@ -252,8 +255,8 @@ export default class CollectionView extends Vue {
       })
       .then(() => {
         this.generatePid()
-        const siteIds = this.getUnique('siteId')
-        const productIds = this.getUnique('productId')
+        const siteIds = this.getUnique(this.sortedFiles, 'siteId')
+        const productIds = this.getUnique(this.sortedFiles, 'productId')
         return Promise.all([
           axios.get(`${this.apiUrl}sites/`),
           axios.get(`${this.apiUrl}products/`),
