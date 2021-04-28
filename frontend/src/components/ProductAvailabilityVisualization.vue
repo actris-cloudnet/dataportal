@@ -122,12 +122,12 @@
           'only-legacy-data':
             date.products['lvl2'].every(prod => prod.legacy)
             && date.products['lvl1c'].every(prod => prod.legacy)
-            && date.products['lvl1b'].every(prod => prod.legacy || prod.id == 'model'),
+            && date.products['lvl1b'].every(prod => prod.legacy || prod.id === 'model'),
           'only-model-data': date.products['lvl1c'].length === 0
             && date.products['lvl2'].length === 0
             && date.products['lvl1b'].length === 1 && date.products['lvl1b'][0].id === 'model',
           'no-data': date.products['lvl1b'].length === 0}" >
-          <div class="dataviz-tooltip">
+          <div class="dataviz-tooltip" v-if="tooltips">
             <header>{{ year['year']}}-{{ date['date']}}</header>
             <section>
               <ul v-for="lvl in levels">
@@ -198,6 +198,9 @@ export default class ProductAvailabilityVisualization extends Vue {
   @Prop() loadingComplete?: () => void
   @Prop() downloadComplete?: () => void
   @Prop() legend!: boolean
+  @Prop() dateFrom?: string
+  @Prop() tooltips?: boolean
+
   apiUrl = process.env.VUE_APP_BACKENDURL
   response: ReducedSearchResponse[] = []
   years: ProductYear[] = []
@@ -216,9 +219,15 @@ export default class ProductAvailabilityVisualization extends Vue {
   busy = true
 
   mounted() {
-    const dateFrom = '2000-01-01'
+    const payload = {
+      site: this.site,
+      dateFrom: this.dateFrom || undefined,
+      showLegacy: true,
+      properties: ['measurementDate', 'productId', 'legacy']
+    }
+
     Promise.all([
-      axios.get(`${this.apiUrl}search/`, { params: { site: this.site, showLegacy: true, properties: ['measurementDate', 'productId', 'legacy'] }}),
+      axios.get(`${this.apiUrl}search/`, { params: payload } ),
       axios.get(`${this.apiUrl}products/` )
     ])
       .then(([searchRes, productsRes]) => {

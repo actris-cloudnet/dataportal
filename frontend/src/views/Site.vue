@@ -64,6 +64,7 @@
               :site="siteid"
               :loadingComplete="loadingComplete"
               :legend="true"
+              :tooltips="true"
           ></ProductAvailabilityVisualization>
         </section>
       </section>
