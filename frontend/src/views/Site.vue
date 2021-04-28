@@ -63,6 +63,7 @@
           <ProductAvailabilityVisualization
               :site="siteid"
               :loadingComplete="loadingComplete"
+              :legend="true"
           ></ProductAvailabilityVisualization>
         </section>
       </section>

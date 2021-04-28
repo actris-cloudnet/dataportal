@@ -143,7 +143,7 @@
     </div>
     <div>
     </div>
-    <div class="dav-legend">
+    <div class="dav-legend" v-if="legend">
       <div class="legendexpl"><div class="all-data legendcolor"></div> All data</div>
       <div class="legendexpl"><div class="missing-data legendcolor"></div> Missing some data</div>
       <div class="legendexpl"><div class="only-model-data legendcolor"></div> Only model data</div>
@@ -184,7 +184,9 @@ interface ProductYear {
 @Component
 export default class ProductAvailabilityVisualization extends Vue {
   @Prop() site!: string
-  @Prop() loadingComplete!: () => void
+  @Prop() loadingComplete?: () => void
+  @Prop() downloadComplete?: () => void
+  @Prop() legend!: boolean
   apiUrl = process.env.VUE_APP_BACKENDURL
   response: SearchFileResponse[] = []
   years: ProductYear[] = []
@@ -208,6 +210,7 @@ export default class ProductAvailabilityVisualization extends Vue {
       axios.get(`${this.apiUrl}products/` )
     ])
       .then(([searchRes, productsRes]) => {
+        if (this.downloadComplete) this.downloadComplete()
         this.response = searchRes.data
         this.allProducts = productsRes.data
         const initialDate = new Date(
@@ -251,7 +254,7 @@ export default class ProductAvailabilityVisualization extends Vue {
       })
       .finally(() => {
         this.busy = false
-        this.$nextTick(this.loadingComplete)
+        if (this.loadingComplete) this.$nextTick(this.loadingComplete)
       })
   }
 

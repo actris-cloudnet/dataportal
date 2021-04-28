@@ -21,6 +21,14 @@ const routes = [
     component: () => import('../views/PrivacyPolicy.vue')
   },
   {
+    path: '/data-availability',
+    name: 'Data Availability',
+    meta: {
+      title: 'Cloudnet Data Availability'
+    },
+    component: () => import('../views/DataAvailability.vue'),
+  },
+  {
     path: '/search',
     redirect: '/search/data'
   },
