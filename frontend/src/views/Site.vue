@@ -57,6 +57,15 @@
         </section>
       </section>
       <div class="forcewrap"></div>
+      <section id="product_availability">
+        <header>Data availability</header>
+        <section class="details">
+          <ProductAvailabilityVisualization
+              :site="siteid"
+              :loadingComplete="loadingComplete"
+          ></ProductAvailabilityVisualization>
+        </section>
+      </section>
       <section id="sitemap">
         <header>Map</header>
         <section class="details">
@@ -70,15 +79,6 @@
           <div v-else class="loadingoverlay">
             <div class="lds-dual-ring"></div>
           </div>
-        </section>
-      </section>
-      <section id="product_availability">
-        <header>Data availability</header>
-        <section class="details">
-          <ProductAvailabilityVisualization
-            :site="siteid"
-            :loadingComplete="loadingComplete"
-          ></ProductAvailabilityVisualization>
         </section>
       </section>
     </main>

@@ -57,7 +57,7 @@
   display: none
   position: absolute
   top: 1.3em
-  z-index: 1
+  z-index: 6
   background: white
   padding: 0.5em
   box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.2)
@@ -113,22 +113,28 @@
              v-bind:key="date['date']"
              class="dataviz-date"
              :class="{
-          'all-data': date.products.length === 9,
-          'missing-data': date.products.length < 9 && date.products.length > 1,
-          'only-model-data': date.products.length === 1 && ~date.products.findIndex(prod => prod.id === 'model'),
-          'no-data': date.products.length === 0}" >
+          'all-data': date.products['lvl2'].length === 4,
+          'missing-data': date.products['lvl2'].length < 4 && date.products['lvl1b'].length > 0,
+          'only-model-data': date.products['lvl1b'].length === 0 && date.products['model'].length,
+          'no-data': date.products['lvl1b'].length === 0 && date.products['model'].length === 0}" >
           <div class="dataviz-tooltip">
             <header>{{ year['year']}}-{{ date['date']}}</header>
             <section>
               <ul>
-                <li v-for="product in lvl1bProds" :class="{found: date.products.filter(({id}) => product.id === id).length }">{{ product.humanReadableName }}</li>
-                <li class="modelitem" :class="{found: date.products.filter(({id}) => 'model' === id).length }">Model</li>
+                <li v-for="product in filterProductsByLvl('lvl1b')"
+                  :class="{found: date.products['lvl1b'].includes(product.id) }"
+                  :key="product.id">{{ product.humanReadableName }}</li>
+                <li class="modelitem" :class="{found: date.products['model'].length }">Model</li>
               </ul>
               <ul>
-                <li v-for="product in lvl1cProds" :class="{found: date.products.filter(({id}) => product.id === id).length }">{{ product.humanReadableName }}</li>
+                <li v-for="product in filterProductsByLvl('lvl1c')"
+                  :class="{found: date.products['lvl1c'].includes(product.id) }"
+                  :key="product.id">{{ product.humanReadableName }}</li>
               </ul>
               <ul>
-                <li v-for="product in lvl2Prods" :class="{found: date.products.filter(({id}) => product.id === id).length }">{{ product.humanReadableName }}</li>
+                <li v-for="product in filterProductsByLvl('lvl2')"
+                  :class="{found: date.products['lvl2'].includes(product.id) }"
+                  :key="product.id">{{ product.humanReadableName }}</li>
               </ul>
             </section>
           </div>
@@ -139,7 +145,7 @@
     </div>
     <div class="dav-legend">
       <div class="legendexpl"><div class="all-data legendcolor"></div> All data</div>
-      <div class="legendexpl"><div class="missing-data legendcolor"></div> Missing some measurement data or products</div>
+      <div class="legendexpl"><div class="missing-data legendcolor"></div> Missing some data</div>
       <div class="legendexpl"><div class="only-model-data legendcolor"></div> Only model data</div>
       <div class="legendexpl"><div class="no-data legendcolor"></div> No data</div>
     </div>
@@ -158,9 +164,16 @@ import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse
 import {dateToString} from '@/lib'
 import {Product} from '../../../backend/src/entity/Product'
 
+interface ProductLevels {
+  lvl1b: string[];
+  lvl1c: string[];
+  lvl2: string[];
+  model: string[];
+}
+
 interface ProductDate {
   date: string;
-  products: Product[];
+  products: ProductLevels;
 }
 
 interface ProductYear {
@@ -175,9 +188,18 @@ export default class ProductAvailabilityVisualization extends Vue {
   apiUrl = process.env.VUE_APP_BACKENDURL
   response: SearchFileResponse[] = []
   years: ProductYear[] = []
-  lvl1bProds: Product[] = []
-  lvl1cProds: Product[] = []
-  lvl2Prods: Product[] = []
+  allProducts: Product[] = []
+  lvlTranslate: { [key: string]: keyof ProductLevels } = {
+    'lidar': 'lvl1b',
+    'radar': 'lvl1b',
+    'mwr': 'lvl1b',
+    'categorize': 'lvl1c',
+    'classification': 'lvl2',
+    'lwc': 'lvl2',
+    'iwc': 'lvl2',
+    'drizzle': 'lvl2',
+    'model': 'model'
+  }
   busy = true
 
   mounted() {
@@ -187,9 +209,9 @@ export default class ProductAvailabilityVisualization extends Vue {
     ])
       .then(([searchRes, productsRes]) => {
         this.response = searchRes.data
-        const products: Product[] = productsRes.data
+        this.allProducts = productsRes.data
         const initialDate = new Date(
-    `${this.response[this.response.length - 1].measurementDate.toString().substr(0,4)}-01-01`)
+          `${this.response[this.response.length - 1].measurementDate.toString().substr(0,4)}-01-01`)
         const endDate = new Date(this.response[0].measurementDate)
         console.log(initialDate, endDate)
         const allDates: string[] = []
@@ -200,9 +222,9 @@ export default class ProductAvailabilityVisualization extends Vue {
         console.log(allDates[0], allDates[allDates.length - 1])
         this.years = this.response
           .reduce((acc: ProductYear[], cur) => {
-            const product = products[products.findIndex(prod => prod.id == cur.productId)]
             const [year, month, day] = cur.measurementDate.toString().split('-')
             const date = `${month}-${day}`
+            const {productId} = cur
             const yearIndex = acc.findIndex(obj => obj.year == year)
             if (yearIndex == -1) {
               const newObj = {
@@ -213,7 +235,7 @@ export default class ProductAvailabilityVisualization extends Vue {
                     const dateSubstr = dateStr.substr(5)
                     return {
                       date: dateSubstr,
-                      products: dateSubstr == date ? [product] : []
+                      products: dateSubstr == date ? this.createProductLevels(productId) : this.createProductLevels()
                     }
                   })
               }
@@ -221,16 +243,11 @@ export default class ProductAvailabilityVisualization extends Vue {
             } else {
               const foundObj = acc[yearIndex]
               const dateIndex = foundObj.dates.findIndex(obj => obj.date == date)
-              if (dateIndex != -1) {
-                acc[yearIndex].dates[dateIndex].products.push(product)
-                acc[yearIndex].dates[dateIndex].products = acc[yearIndex].dates[dateIndex].products.sort((a, b) => a.id > b.id ? 1 : -1)
-              }
+              const existingProducts = acc[yearIndex].dates[dateIndex].products
+              acc[yearIndex].dates[dateIndex].products = this.createProductLevels(productId, existingProducts)
               return acc
             }
           }, [])
-        this.lvl1bProds = products.filter(({id}) => 'lidar,radar,mwr'.split(',').includes(id))
-        this.lvl1cProds = products.filter(({id}) => id == 'categorize')
-        this.lvl2Prods = products.filter(({id}) => 'classification,lwc,iwc,drizzle'.split(',').includes(id))
       })
       .finally(() => {
         this.busy = false
@@ -238,8 +255,22 @@ export default class ProductAvailabilityVisualization extends Vue {
       })
   }
 
-  displayInfo(year: string, date: string) {
-    console.log(year, date)
+  createProductLevels(productId?: string, existingObj?: ProductLevels) {
+    if (!existingObj) {
+      existingObj = {
+        lvl1b: [],
+        lvl1c: [],
+        lvl2: [],
+        model: []
+      }
+    }
+    if (productId) existingObj[this.lvlTranslate[productId]].push(productId)
+    return existingObj
   }
+
+  filterProductsByLvl(lvl: string) {
+    return this.allProducts.filter(({id}) => this.lvlTranslate[id] == lvl)
+  }
+
 }
 </script>
