@@ -116,38 +116,26 @@
              v-bind:key="date['date']"
              class="dataviz-date"
              :class="{
-          'all-data': date.products['lvl2'].length === 4,
-          'missing-data': date.products['lvl2'].length < 4 && date.products['lvl1b'].length > 0,
+          'all-data': date.products['lvl2'].length === 4 && date.products['lvl2'].every(prod => !prod.legacy),
+          'missing-data': date.products['lvl2'].length < 4
+            && date.products['lvl1b'].length > 1,
           'only-legacy-data':
             date.products['lvl2'].every(prod => prod.legacy)
             && date.products['lvl1c'].every(prod => prod.legacy)
-            && date.products['lvl1b'].every(prod => prod.legacy),
-          'only-model-data': date.products['lvl1b'].length === 0
-            && date.products['lvl1c'].length === 0
+            && date.products['lvl1b'].every(prod => prod.legacy || prod.id == 'model'),
+          'only-model-data': date.products['lvl1c'].length === 0
             && date.products['lvl2'].length === 0
-            && date.products['model'].length,
-          'no-data': date.products['lvl1b'].length === 0 && date.products['model'].length === 0}" >
+            && date.products['lvl1b'].length === 1 && date.products['lvl1b'][0].id === 'model',
+          'no-data': date.products['lvl1b'].length === 0}" >
           <div class="dataviz-tooltip">
             <header>{{ year['year']}}-{{ date['date']}}</header>
             <section>
-              <ul>
-                <li v-for="product in filterProductsByLvl('lvl1b')"
-                    :class="{found: getExistingProduct(date.products['lvl1b'], product) }"
+              <ul v-for="lvl in levels">
+                <li v-for="product in filterProductsByLvl(lvl)"
+                    :class="{found: getExistingProduct(date.products[lvl], product) }"
                     :key="product.id">{{ product.humanReadableName }}
-                  <span v-if="getExistingProduct(date.products['lvl1b'], product) && getExistingProduct(date.products['lvl1b'], product).legacy">(Legacy)</span></li>
-                <li class="modelitem" :class="{found: date.products['model'].length }">Model</li>
-              </ul>
-              <ul>
-                <li v-for="product in filterProductsByLvl('lvl1c')"
-                    :class="{found: getExistingProduct(date.products['lvl1c'], product) }"
-                    :key="product.id">{{ product.humanReadableName }}
-                  <span v-if="getExistingProduct(date.products['lvl1c'], product) && getExistingProduct(date.products['lvl1c'], product).legacy">(Legacy)</span></li>
-              </ul>
-              <ul>
-                <li v-for="product in filterProductsByLvl('lvl2')"
-                  :class="{found: getExistingProduct(date.products['lvl2'], product) }"
-                  :key="product.id">{{ product.humanReadableName }}
-                <span v-if="getExistingProduct(date.products['lvl2'], product) && getExistingProduct(date.products['lvl2'], product).legacy">(Legacy)</span></li>
+                  <span v-if="getExistingProduct(date.products[lvl], product) && getExistingProduct(date.products[lvl], product).legacy">(Legacy)</span></li>
+                <li v-if="lvl === 'lvl1b'" class="modelitem" :class="{found: getExistingProduct(date.products[lvl], {id: 'model'}) }">Model</li>
               </ul>
             </section>
           </div>
@@ -186,7 +174,6 @@ interface ProductLevels {
   lvl1b: ProductInfo[];
   lvl1c: ProductInfo[];
   lvl2: ProductInfo[];
-  model: ProductInfo[];
 }
 
 interface ProductDate {
@@ -224,7 +211,7 @@ export default class ProductAvailabilityVisualization extends Vue {
     'lwc': 'lvl2',
     'iwc': 'lvl2',
     'drizzle': 'lvl2',
-    'model': 'model'
+    'model': 'lvl1b'
   }
   busy = true
 
@@ -289,7 +276,6 @@ export default class ProductAvailabilityVisualization extends Vue {
         lvl1b: [],
         lvl1c: [],
         lvl2: [],
-        model: []
       }
     }
     if (productInfo) {
@@ -303,12 +289,15 @@ export default class ProductAvailabilityVisualization extends Vue {
   }
 
   filterProductsByLvl(lvl: string) {
-    return this.allProducts.filter(({id}) => this.lvlTranslate[id] == lvl)
+    return this.allProducts.filter(({id}) => this.lvlTranslate[id] == lvl && id != 'model')
   }
 
   getExistingProduct(existingProducts: ProductInfo[], product: Product) {
     return existingProducts.find(prod => prod.id == product.id)
+  }
 
+  get levels() {
+    return new Set(Object.values(this.lvlTranslate))
   }
 
 }
