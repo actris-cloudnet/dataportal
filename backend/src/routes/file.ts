@@ -3,11 +3,11 @@ import {Collection} from '../entity/Collection'
 import {Connection, EntityManager, Repository, SelectQueryBuilder} from 'typeorm'
 import {isFile, RegularFile} from '../entity/File'
 import {
-  checkFileExists,
+  checkFileExists, convertToReducedResponse,
   convertToSearchResponse,
   getBucketForFile,
   hideTestDataFromNormalUsers,
-  sortByMeasurementDateAsc, transformRawFile
+  sortByMeasurementDateAsc, toArray, transformRawFile
 } from '../lib'
 import {augmentFile} from '../lib/'
 import {SearchFile} from '../entity/SearchFile'
@@ -15,6 +15,7 @@ import {Model} from '../entity/Model'
 import {basename} from 'path'
 import {ModelFile} from '../entity/File'
 import ReadableStream = NodeJS.ReadableStream
+import {SearchFileResponse} from '../entity/SearchFileResponse'
 
 export class FileRoutes {
 
@@ -73,11 +74,14 @@ export class FileRoutes {
   }
 
   search: RequestHandler = async (req: Request, res: Response, next) => {
-    const query = req.query
+    const query = req.query as any
+    const converterFunction = query.properties
+      ? convertToReducedResponse(toArray(query.properties) as (keyof SearchFileResponse)[])
+      : convertToSearchResponse
 
     this.searchFilesQueryBuilder(query)
       .stream()
-      .then(stream => fileStreamHandler(stream, res, convertToSearchResponse))
+      .then(stream => fileStreamHandler(stream, res, converterFunction))
       .catch(err => {
         next({ status: 500, errors: err })
       })

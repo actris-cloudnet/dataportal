@@ -181,6 +181,11 @@ interface ProductYear {
   dates: ProductDate[];
 }
 
+interface ReducedSearchResponse {
+  measurementDate: string;
+  productId: string;
+}
+
 @Component
 export default class ProductAvailabilityVisualization extends Vue {
   @Prop() site!: string
@@ -188,7 +193,7 @@ export default class ProductAvailabilityVisualization extends Vue {
   @Prop() downloadComplete?: () => void
   @Prop() legend!: boolean
   apiUrl = process.env.VUE_APP_BACKENDURL
-  response: SearchFileResponse[] = []
+  response: ReducedSearchResponse[] = []
   years: ProductYear[] = []
   allProducts: Product[] = []
   lvlTranslate: { [key: string]: keyof ProductLevels } = {
@@ -206,7 +211,7 @@ export default class ProductAvailabilityVisualization extends Vue {
 
   mounted() {
     Promise.all([
-      axios.get(`${this.apiUrl}search/`, { params: { site: this.site }}),
+      axios.get(`${this.apiUrl}search/`, { params: { site: this.site, properties: ['measurementDate', 'productId'] }}),
       axios.get(`${this.apiUrl}products/` )
     ])
       .then(([searchRes, productsRes]) => {
