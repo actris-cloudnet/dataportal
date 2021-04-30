@@ -41,7 +41,7 @@
   <main id="data_availability">
     <div class="slider">
       <label for="yearrange">Show last years:</label><br>
-      3 <input type="range" id="yearrange" v-model="yearRange" min="3" max="11" step="1"
+      1 <input type="range" id="yearrange" v-model="yearRange" min="1" max="11" step="1"
         :title="yearRange" @mouseup="refreshViz()"> All
     </div>
     <div class="firstcolumn" :key="allKey">
@@ -85,7 +85,7 @@ export default class DataAvailabilityView extends Vue {
   apiUrl = process.env.VUE_APP_BACKENDURL
   sites: Site[] = []
   completedDownloads = 0
-  yearRange = "3"
+  yearRange = "1"
   allKey = 0
   dateFrom = '1971-01-01'
 
