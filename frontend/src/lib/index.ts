@@ -60,3 +60,7 @@ export function constructTitle(files: CollectionFileResponse[]) {
   return files.map(file => ({...file, title: `${file.product} file from ${file.site}`}))
 }
 
+export const idToHumanReadable = (id: string) => {
+  if (id.length < 4) return id.toUpperCase()
+  return id.charAt(0).toUpperCase() + id.slice(1)
+}

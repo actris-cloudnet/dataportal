@@ -3,6 +3,8 @@
 @import "../sass/global.sass"
 @import "../sass/spinner.sass"
 
+$legacy-color: #adadad
+
 .dataviz-yearblock
   display: inline-block
   height: 100%
@@ -40,13 +42,16 @@
   background: #f7e91b
 
 .only-legacy-data
-  background: #adadad
+  background: $legacy-color
 
 .only-model-data
   background: #D3D3D3
 
 .no-data
   background: white
+
+.legacy-label
+  color: grey
 
 .dav-legend
   margin-top: 1em
@@ -85,10 +90,11 @@
     padding: 0.5em
 
     ul
-      min-width: 7.5em
+      min-width: 8em
       padding-left: 0
       list-style: none
       white-space: pre-wrap
+      margin-bottom: 0
 
       li.found::before
         content: '✓'
@@ -135,8 +141,8 @@
               <ul v-for="lvl in levels">
                 <li v-for="product in filterProductsByLvl(lvl)"
                     :class="{found: getExistingProduct(date.products[lvl], product) }"
-                    :key="product.id">{{ product.humanReadableName }}
-                  <span v-if="getExistingProduct(date.products[lvl], product) && getExistingProduct(date.products[lvl], product).legacy">(Legacy)</span></li>
+                    :key="product.id">{{ idToHumanReadable(product.id) }}
+                  <sup class="legacy-label" v-if="getExistingProduct(date.products[lvl], product) && getExistingProduct(date.products[lvl], product).legacy">L</sup></li>
                 <li v-if="lvl === 'lvl1b'" class="modelitem" :class="{found: getExistingProduct(date.products[lvl], {id: 'model'}) }">Model</li>
               </ul>
             </section>
@@ -151,7 +157,8 @@
       <div class="legendexpl"><div class="missing-data legendcolor"></div> Missing some data</div>
       <div class="legendexpl"><div class="only-legacy-data legendcolor"></div> Only legacy data</div>
       <div class="legendexpl"><div class="only-model-data legendcolor"></div> Only model data</div>
-      <div class="legendexpl"><div class="no-data legendcolor"></div> No data</div>
+      <div class="legendexpl"><div class="no-data legendcolor"></div> No data</div><br>
+      <div class="legendexpl"><span class="legacy-label">L</span> Legacy file</div>
     </div>
   </div>
   <div v-else class="loadingoverlay">
@@ -164,7 +171,7 @@
 import {Component, Prop} from 'vue-property-decorator'
 import Vue from 'vue'
 import axios from 'axios'
-import {dateToString} from '@/lib'
+import {dateToString, idToHumanReadable} from '@/lib'
 import {Product} from '../../../backend/src/entity/Product'
 
 interface ProductInfo {
@@ -219,6 +226,8 @@ export default class ProductAvailabilityVisualization extends Vue {
     'model': 'lvl1b'
   }
   busy = true
+
+  idToHumanReadable = idToHumanReadable
 
   mounted() {
     const payload = {
