@@ -14,6 +14,9 @@
 #sitelanding .details
   height: 100%
 
+#sitemap .details
+  padding: 0
+
 </style>
 
 
