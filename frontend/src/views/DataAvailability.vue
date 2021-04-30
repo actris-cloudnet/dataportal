@@ -52,7 +52,6 @@
             :site="site.id"
             :legend="false"
             :dateFrom="dateFrom"
-            :tooltips="false"
             :downloadComplete="() => completedDownloads += 1">
         </ProductAvailabilityVisualization>
       </section>
@@ -65,7 +64,6 @@
             :site="site.id"
             :legend="false"
             :dateFrom="dateFrom"
-            :tooltips="false"
             :downloadComplete="() => completedDownloads += 1">
         </ProductAvailabilityVisualization>
       </section>

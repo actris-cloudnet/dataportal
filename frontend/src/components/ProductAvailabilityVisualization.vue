@@ -18,6 +18,14 @@
   height: 1em
   display: inline-block
   position: relative
+  border-top: 1px solid gray
+  border-bottom: 1px solid gray
+
+.dataviz-date:last-child
+  border-right: 1px solid gray
+
+.dataviz-date:first-child
+  border-left: 1px solid gray
 
 .dataviz-skippedyears
   text-align: center
@@ -116,17 +124,11 @@
              v-bind:key="date['date']"
              class="dataviz-date"
              :class="{
-          'all-data': date.products['lvl2'].length === 4 && date.products['lvl2'].every(prod => !prod.legacy),
-          'missing-data': date.products['lvl2'].length < 4
-            && date.products['lvl1b'].length > 1,
-          'only-legacy-data':
-            date.products['lvl2'].every(prod => prod.legacy)
-            && date.products['lvl1c'].every(prod => prod.legacy)
-            && date.products['lvl1b'].every(prod => prod.legacy || prod.id === 'model'),
-          'only-model-data': date.products['lvl1c'].length === 0
-            && date.products['lvl2'].length === 0
-            && date.products['lvl1b'].length === 1 && date.products['lvl1b'][0].id === 'model',
-          'no-data': date.products['lvl1b'].length === 0}" >
+          'all-data': allData(date.products),
+          'missing-data': missingData(date.products),
+          'only-legacy-data': onlyLegacy(date.products),
+          'only-model-data': onlyModel(date.products),
+          'no-data': noData(date.products)}" >
           <div class="dataviz-tooltip" v-if="tooltips">
             <header>{{ year['year']}}-{{ date['date']}}</header>
             <section>
@@ -309,5 +311,33 @@ export default class ProductAvailabilityVisualization extends Vue {
     return new Set(Object.values(this.lvlTranslate))
   }
 
+  allData(products: ProductLevels) {
+    return products['lvl2'].length === 4
+      && products['lvl2'].every(prod => !prod.legacy)
+  }
+
+  missingData(products: ProductLevels) {
+    return products['lvl2'].length < 4
+      && products['lvl1b'].length > 1
+  }
+
+  onlyLegacy(products: ProductLevels) {
+    return products['lvl2'].every(prod => prod.legacy)
+      && products['lvl1c'].every(prod => prod.legacy)
+      && products['lvl1b'].every(prod => prod.legacy || prod.id === 'model')
+  }
+
+  onlyModel(products: ProductLevels) {
+    return products['lvl1c'].length === 0
+      && products['lvl2'].length === 0
+      && products['lvl1b'].length === 1
+      && products['lvl1b'][0].id === 'model'
+  }
+
+  noData(products: ProductLevels) {
+    return products['lvl1b'].length === 0
+      && products['lvl1c'].length === 0
+      && products['lvl2'].length === 0
+  }
 }
 </script>
