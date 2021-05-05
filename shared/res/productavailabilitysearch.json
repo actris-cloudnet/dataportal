@@ -1,0 +1,87 @@
+[
+  {
+    "measurementDate": "2021-05-05",
+    "productId": "classification",
+    "legacy": false
+  },
+  {
+    "measurementDate": "2021-05-05",
+    "productId": "drizzle",
+    "legacy": false
+  },
+  {
+    "measurementDate": "2021-05-05",
+    "productId": "iwc",
+    "legacy": false
+  },
+  {
+    "measurementDate": "2021-05-05",
+    "productId": "lwc",
+    "legacy": false
+  },
+  {
+    "measurementDate": "2021-05-05",
+    "productId": "categorize",
+    "legacy": false
+  },
+  {
+    "measurementDate": "2021-05-05",
+    "productId": "radar",
+    "legacy": false
+  },
+  {
+    "measurementDate": "2021-05-05",
+    "productId": "lidar",
+    "legacy": false
+  },
+  {
+    "measurementDate": "2021-05-05",
+    "productId": "mwr",
+    "legacy": false
+  },
+  {
+    "measurementDate": "2021-05-05",
+    "productId": "model",
+    "legacy": false
+  },
+  {
+    "measurementDate": "2021-05-04",
+    "productId": "drizzle",
+    "legacy": false
+  },
+  {
+    "measurementDate": "2021-05-04",
+    "productId": "iwc",
+    "legacy": false
+  },
+  {
+    "measurementDate": "2021-05-04",
+    "productId": "lwc",
+    "legacy": false
+  },
+  {
+    "measurementDate": "2021-05-04",
+    "productId": "categorize",
+    "legacy": false
+  },
+  {
+    "measurementDate": "2021-05-04",
+    "productId": "radar",
+    "legacy": false
+  },
+  {
+    "measurementDate": "2021-05-04",
+    "productId": "lidar",
+    "legacy": false
+  },
+  {
+    "measurementDate": "2021-05-03",
+    "productId": "classification",
+    "legacy": true
+  },
+  {
+    "measurementDate": "2021-05-02",
+    "productId": "model",
+    "legacy": false
+  }
+]
