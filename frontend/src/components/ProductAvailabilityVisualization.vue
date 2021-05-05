@@ -129,16 +129,12 @@ $legacy-color: #adadad
         <div v-for="date in year.dates"
              v-bind:key="date['date']"
              class="dataviz-date"
-             :class="{
-          'all-data': allData(date.products),
-          'missing-data': missingData(date.products),
-          'only-legacy-data': onlyLegacy(date.products),
-          'only-model-data': onlyModel(date.products),
-          'no-data': noData(date.products)}" >
+             :id="`dataviz-color-${site}-${year['year']}-${date['date']}`"
+             :class="createColorClass(date.products)" >
           <div class="dataviz-tooltip" v-if="tooltips">
             <header>{{ year['year']}}-{{ date['date']}}</header>
             <section>
-              <ul v-for="lvl in levels">
+              <ul v-for="lvl in allLevels">
                 <li v-for="product in filterProductsByLvl(lvl)"
                     :class="{found: getExistingProduct(date.products[lvl], product) }"
                     :key="product.id">{{ idToHumanReadable(product.id) }}
@@ -171,7 +167,7 @@ $legacy-color: #adadad
 import {Component, Prop} from 'vue-property-decorator'
 import Vue from 'vue'
 import axios from 'axios'
-import {dateToString, idToHumanReadable} from '@/lib'
+import {dateToString, idToHumanReadable} from '../lib'
 import {Product} from '../../../backend/src/entity/Product'
 
 interface ProductInfo {
@@ -248,13 +244,11 @@ export default class ProductAvailabilityVisualization extends Vue {
         const initialDate = new Date(
           `${this.response[this.response.length - 1].measurementDate.toString().substr(0,4)}-01-01`)
         const endDate = new Date(this.response[0].measurementDate)
-        console.log(initialDate, endDate)
         const allDates: string[] = []
         while (initialDate <= endDate) {
           allDates.push(dateToString(new Date(initialDate)))
           initialDate.setDate(initialDate.getDate() + 1)
         }
-        console.log(allDates[0], allDates[allDates.length - 1])
         this.years = this.response
           .reduce((acc: ProductYear[], cur) => {
             const [year, month, day] = cur.measurementDate.toString().split('-')
@@ -316,37 +310,64 @@ export default class ProductAvailabilityVisualization extends Vue {
     return existingProducts.find(prod => prod.id == product.id)
   }
 
-  get levels() {
-    return new Set(Object.values(this.lvlTranslate))
+  get allLevels() {
+    return Array.from(new Set(Object.values(this.lvlTranslate)))
+  }
+
+  createColorClass(products: ProductLevels) {
+    if (this.noData(products)) return 'no-data'
+    else if (this.onlyModel(products)) return 'only-model-data'
+    else if (this.allData(products)) return 'all-data'
+    else if (this.missingData(products)) return 'missing-data'
+    else if (this.onlyLegacy(products)) return 'only-legacy-data'
+    else return 'error-data'
   }
 
   allData(products: ProductLevels) {
-    return products['lvl2'].length === 4
-      && products['lvl2'].every(prod => !prod.legacy)
+    return products['lvl2'].filter(this.isNotLegacy).length == 4
+        && products['lvl1c'].filter(this.isNotLegacy).length == 1
+        && products['lvl1b'].filter(this.isNotLegacy).length >= 3
+        && this.hasModel(products['lvl1b'])
   }
 
   missingData(products: ProductLevels) {
-    return products['lvl2'].length < 4
-      && products['lvl1b'].length > 1
+    return products['lvl2'].filter(this.isNotLegacy).length
+        || products['lvl1c'].filter(this.isNotLegacy).length
+        || products['lvl1b'].filter(this.isNotLegacy).length
   }
 
   onlyLegacy(products: ProductLevels) {
-    return products['lvl2'].every(prod => prod.legacy)
-      && products['lvl1c'].every(prod => prod.legacy)
-      && products['lvl1b'].every(prod => prod.legacy || prod.id === 'model')
+    return (products['lvl2'].every(this.isLegacy)
+        && products['lvl1c'].every(this.isLegacy)
+        && products['lvl1b'].every(this.isLegacyOrModel))
   }
 
   onlyModel(products: ProductLevels) {
-    return products['lvl1c'].length === 0
-      && products['lvl2'].length === 0
-      && products['lvl1b'].length === 1
-      && products['lvl1b'][0].id === 'model'
+    return products['lvl2'].length == 0
+        && products['lvl1c'].length == 0
+        && products['lvl1b'].length == 1 && products['lvl1b'][0].id == 'model'
   }
 
   noData(products: ProductLevels) {
-    return products['lvl1b'].length === 0
-      && products['lvl1c'].length === 0
-      && products['lvl2'].length === 0
+    return products['lvl2'].length == 0
+        && products['lvl1c'].length == 0
+        && products['lvl1b'].length == 0
+  }
+
+  isLegacy(prod: ProductInfo) {
+    return prod.legacy
+  }
+
+  isLegacyOrModel(prod: ProductInfo) {
+    return prod.legacy || prod.id == 'model'
+  }
+
+  isNotLegacy(prod: ProductInfo) {
+    return ! this.isLegacy(prod)
+  }
+
+  hasModel(prod: ProductInfo[]) {
+    return prod.filter(p => p.id == 'model').length == 1
   }
 }
 </script>
