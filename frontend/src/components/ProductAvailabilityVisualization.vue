@@ -50,6 +50,9 @@ $legacy-color: #adadad
 .no-data
   background: white
 
+.error-data
+  background: #bd1919
+
 .legacy-label
   color: grey
 
@@ -109,6 +112,15 @@ $legacy-color: #adadad
       li.modelitem
         margin-top: 0.8em
 
+.incorrect-info
+  display: none
+
+.error-data .incorrect-info
+  display: inline-block
+  font-size: 0.7em
+  color: #bd1919
+  float: right
+
 .dataviz-date:hover .dataviz-tooltip
   display: block
 </style>
@@ -132,7 +144,10 @@ $legacy-color: #adadad
              :id="`dataviz-color-${site}-${year['year']}-${date['date']}`"
              :class="createColorClass(date.products)" >
           <div class="dataviz-tooltip" v-if="tooltips">
-            <header>{{ year['year']}}-{{ date['date']}}</header>
+            <header>
+              {{ year['year']}}-{{ date['date']}}
+              <span class="incorrect-info">This information may be incorrect.</span>
+            </header>
             <section>
               <ul v-for="lvl in allLevels">
                 <li v-for="product in filterProductsByLvl(lvl)"
@@ -151,6 +166,7 @@ $legacy-color: #adadad
     <div class="dav-legend" v-if="legend">
       <div class="legendexpl"><div class="all-data legendcolor"></div> All data</div>
       <div class="legendexpl"><div class="missing-data legendcolor"></div> Missing some data</div>
+      <div class="legendexpl"><div class="error-data legendcolor"></div> Unknown data status</div>
       <div class="legendexpl"><div class="only-legacy-data legendcolor"></div> Only legacy data</div>
       <div class="legendexpl"><div class="only-model-data legendcolor"></div> Only model data</div>
       <div class="legendexpl"><div class="no-data legendcolor"></div> No data</div><br>
@@ -317,9 +333,10 @@ export default class ProductAvailabilityVisualization extends Vue {
   createColorClass(products: ProductLevels) {
     if (this.noData(products)) return 'no-data'
     else if (this.onlyModel(products)) return 'only-model-data'
+    else if (this.weirdModel(products)) return 'error-data'
     else if (this.allData(products)) return 'all-data'
-    else if (this.missingData(products)) return 'missing-data'
     else if (this.onlyLegacy(products)) return 'only-legacy-data'
+    else if (this.missingData(products)) return 'missing-data'
     else return 'error-data'
   }
 
@@ -327,7 +344,7 @@ export default class ProductAvailabilityVisualization extends Vue {
     return products['lvl2'].filter(this.isNotLegacy).length == 4
         && products['lvl1c'].filter(this.isNotLegacy).length == 1
         && products['lvl1b'].filter(this.isNotLegacy).length >= 3
-        && this.hasModel(products['lvl1b'])
+        && products['lvl1b'].filter(this.isModel).length == 1
   }
 
   missingData(products: ProductLevels) {
@@ -348,6 +365,10 @@ export default class ProductAvailabilityVisualization extends Vue {
         && products['lvl1b'].length == 1 && products['lvl1b'][0].id == 'model'
   }
 
+  weirdModel(products: ProductLevels) {
+    return products['lvl1b'].filter(this.isModel).length > 1
+  }
+
   noData(products: ProductLevels) {
     return products['lvl2'].length == 0
         && products['lvl1c'].length == 0
@@ -362,12 +383,12 @@ export default class ProductAvailabilityVisualization extends Vue {
     return prod.legacy || prod.id == 'model'
   }
 
-  isNotLegacy(prod: ProductInfo) {
-    return ! this.isLegacy(prod)
+  isModel(prod: ProductInfo) {
+    return prod.id == 'model'
   }
 
-  hasModel(prod: ProductInfo[]) {
-    return prod.filter(p => p.id == 'model').length == 1
+  isNotLegacy(prod: ProductInfo) {
+    return ! this.isLegacy(prod)
   }
 }
 </script>
