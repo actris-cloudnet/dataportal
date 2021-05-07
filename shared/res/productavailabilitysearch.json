@@ -71,6 +71,16 @@
   },
   {
     "measurementDate": "2021-05-04",
+    "productId": "mwr",
+    "legacy": false
+  },
+  {
+    "measurementDate": "2021-05-04",
+    "productId": "model",
+    "legacy": false
+  },
+  {
+    "measurementDate": "2021-05-04",
     "productId": "lidar",
     "legacy": false
   },
@@ -81,6 +91,16 @@
   },
   {
     "measurementDate": "2021-05-02",
+    "productId": "model",
+    "legacy": false
+  },
+  {
+    "measurementDate": "2021-04-01",
+    "productId": "model",
+    "legacy": false
+  },
+  {
+    "measurementDate": "2021-04-01",
     "productId": "model",
     "legacy": false
   }
