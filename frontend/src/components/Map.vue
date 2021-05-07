@@ -71,9 +71,12 @@
   opacity: 0.8
   overflow: hidden
 
+.fullHeight
+  height: 100%
+
 </style>
 <template>
-  <div id="mapContainer" ref="mapElement" class="container wrapper" style="z-index: 4">
+  <div id="mapContainer" ref="mapElement" class="container wrapper" :class="{fullHeight}" style="z-index: 4">
     <div class="row">
       <div v-if="showLegend" id="map" class="widemap"></div>
       <div v-else id="map" class="map"></div>
@@ -119,6 +122,7 @@ export default class Map extends Vue {
   @Prop() zoom!: number
   @Prop() center!: [number, number]
   @Prop() showLegend?: boolean
+  @Prop() fullHeight?: boolean
 
   // map
   map: L.Map | null = null

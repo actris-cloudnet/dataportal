@@ -11,7 +11,7 @@
       "aws-sdk": "^2.869.0",
       "axios": "^0.21.1",
       "express": "^4.17.1",
-      "mock-aws-s3": "^4.0.1",
+      "mock-aws-s3": "^4.0.2",
       "nodemon": "^2.0.7",
       "pg": "^8.0.3",
       "pg-query-stream": "^4.0.0",

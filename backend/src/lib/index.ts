@@ -65,6 +65,9 @@ export const hideTestDataFromNormalUsers = <T>(dbQuery: SelectQueryBuilder<T>, r
 export const convertToSearchResponse = (file: SearchFile) =>
   new SearchFileResponse(file)
 
+export const convertToReducedResponse = (parameters: (keyof SearchFileResponse)[]) =>
+  (file: SearchFile) => parameters.reduce((acc, cur) => ({...acc, [cur]: convertToSearchResponse(file)[cur]}), {})
+
 export const convertToCollectionFileResponse = (file: RegularFile | ModelFile) =>
   new CollectionFileResponse(file)
 

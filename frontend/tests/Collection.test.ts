@@ -23,7 +23,7 @@ describe('Collection.vue', () => {
   beforeAll(async () => {
     resources = await readResources()
     mockAxios = () => {
-      return (url: string, req: AxiosRequestConfig | undefined): AxiosPromise => {
+      return (url: string, _req: AxiosRequestConfig | undefined): AxiosPromise => {
         if (url.includes('collection')) {
           return Promise.resolve(augmentAxiosResponse(resources['allcollections'][0]))
         } else if (url.includes('search')) {

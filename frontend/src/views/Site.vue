@@ -2,10 +2,20 @@
 @import "../sass/variables.sass"
 @import "../sass/global.sass"
 @import "../sass/landing.sass"
+@import "../sass/spinner.sass"
 
 .forcewrap
   flex-basis: 100%
   height: 0
+
+#product_availability
+  flex-grow: 0.7
+
+#sitelanding .details
+  height: 100%
+
+#sitemap .details
+  padding: 0
 
 </style>
 
@@ -50,14 +60,30 @@
         </section>
       </section>
       <div class="forcewrap"></div>
+      <section id="product_availability">
+        <header>Data availability</header>
+        <section class="details">
+          <ProductAvailabilityVisualization
+              :site="siteid"
+              :loadingComplete="loadingComplete"
+              :legend="true"
+              :tooltips="true"
+          ></ProductAvailabilityVisualization>
+        </section>
+      </section>
       <section id="sitemap">
         <header>Map</header>
         <section class="details">
-          <Map
+          <Map v-if="!busy"
             :sites="[response]"
             :center="[response.latitude, response.longitude]"
             :zoom="5"
+            :fullHeight="true"
+            :key="mapKey"
           ></Map>
+          <div v-else class="loadingoverlay">
+            <div class="lds-dual-ring"></div>
+          </div>
         </section>
       </section>
     </main>
@@ -72,12 +98,13 @@ import axios from 'axios'
 import {Site} from '../../../backend/src/entity/Site'
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 import Map from '../components/Map.vue'
+import ProductAvailabilityVisualization from '../components/ProductAvailabilityVisualization.vue'
 import {ReducedMetadataResponse} from '../../../backend/src/entity/ReducedMetadataResponse'
 import {getProductIcon} from '../lib'
 import {DevMode} from '../lib/DevMode'
 
 @Component({
-  components: {Map}
+  components: {Map, ProductAvailabilityVisualization}
 })
 export default class SiteView extends Vue {
   @Prop() siteid!: string
@@ -87,6 +114,8 @@ export default class SiteView extends Vue {
   error = false
   instruments: ReducedMetadataResponse[] | null = null
   instrumentsFromLastDays = 30
+  mapKey = 0
+  busy = true
   getIconUrl = getProductIcon
   devMode = new DevMode()
 
@@ -111,6 +140,10 @@ export default class SiteView extends Vue {
       .get(`${this.apiUrl}uploaded-metadata/`, {params: {...this.payload, ...{ site: this.siteid, dateFrom: date30daysago}}})
       .then(({data}) => (this.instruments = data))
       .catch()
+  }
+
+  loadingComplete() {
+    this.busy = false
   }
 }
 </script>
