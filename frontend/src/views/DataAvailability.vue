@@ -85,16 +85,16 @@ export default class DataAvailabilityView extends Vue {
   apiUrl = process.env.VUE_APP_BACKENDURL
   sites: Site[] = []
   completedDownloads = 0
-  yearRange = "1"
+  yearRange = '1'
   allKey = 0
   dateFrom = '1971-01-01'
 
   created() {
     this.refreshViz()
     axios.get(`${this.apiUrl}sites/`)
-    .then(({data}) => {
-      this.sites = data.filter((site: Site) => site.type.includes('cloudnet' as SiteType))
-    })
+      .then(({data}) => {
+        this.sites = data.filter((site: Site) => site.type.includes('cloudnet' as SiteType))
+      })
   }
 
   get evenSites() {

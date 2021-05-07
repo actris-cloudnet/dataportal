@@ -2,7 +2,7 @@
 import {Wrapper} from '@vue/test-utils'
 import axios, {AxiosPromise, AxiosRequestConfig} from 'axios'
 import Vue from 'vue'
-import {augmentAxiosResponse, getMockedAxiosLastCallSecondArgument, init, mountVue, nextTick} from './lib'
+import {augmentAxiosResponse, init, mountVue, nextTick} from './lib'
 import {mocked} from 'ts-jest/dist/util/testing'
 import {readResources} from '../../shared/lib'
 import ProductAvailabilityVisualization from '../src/components/ProductAvailabilityVisualization.vue'

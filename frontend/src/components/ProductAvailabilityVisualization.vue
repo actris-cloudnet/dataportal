@@ -127,6 +127,7 @@ $legacy-color: #adadad
 
 
 <template>
+  <!-- eslint-disable vue/require-v-for-key -->
   <div id="data_availability_visualization" v-if="!busy">
     <div v-for="(year, index) in years"
          v-bind:key="year['year']"
@@ -139,7 +140,6 @@ $legacy-color: #adadad
       <div class="dataviz-year">{{ year['year'] }}</div>
       <div class="dataviz-yearblock">
         <div v-for="date in year.dates"
-             v-bind:key="date['date']"
              class="dataviz-date"
              :id="`dataviz-color-${site}-${year['year']}-${date['date']}`"
              :class="createColorClass(date.products)" >
@@ -153,8 +153,15 @@ $legacy-color: #adadad
                 <li v-for="product in filterProductsByLvl(lvl)"
                     :class="{found: getExistingProduct(date.products[lvl], product) }"
                     :key="product.id">{{ idToHumanReadable(product.id) }}
-                  <sup class="legacy-label" v-if="getExistingProduct(date.products[lvl], product) && getExistingProduct(date.products[lvl], product).legacy">L</sup></li>
-                <li v-if="lvl === 'lvl1b'" class="modelitem" :class="{found: getExistingProduct(date.products[lvl], {id: 'model'}) }">Model</li>
+                  <sup class="legacy-label"
+                    v-if="getExistingProduct(date.products[lvl], product)
+                      && getExistingProduct(date.products[lvl], product).legacy">
+                    L
+                  </sup></li>
+                <li v-if="lvl === 'lvl1b'" class="modelitem"
+                  :class="{found: getExistingProduct(date.products[lvl], {id: 'model'}) }">
+                  Model
+                </li>
               </ul>
             </section>
           </div>
