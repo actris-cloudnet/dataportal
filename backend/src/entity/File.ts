@@ -52,7 +52,7 @@ export abstract class File {
     @Column()
     checksum!: string
 
-    @Column()
+    @Column({type: 'bigint'})
     size!: number
 
     @Column()
