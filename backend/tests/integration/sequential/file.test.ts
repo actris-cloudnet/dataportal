@@ -136,15 +136,15 @@ describe('PUT /files/:s3key', () => {
     return expect(searchFileRepo.findOneOrFail(tmpfile2.uuid)).resolves.toMatchObject({legacy: false})
   })
 
-  test('inserting two model files', async () => {
-    const tmpfile1 = {...volatileFile}
-    tmpfile1.product = 'model'
-    tmpfile1.model = 'icon-iglo-12-23'
-    const tmpfile2 = {...tmpfile1}
-    tmpfile2.model = 'ecmwf'
-    tmpfile2.uuid = '87EB042E-B247-4AC1-BC03-074DD0D74BDB'
-    tmpfile2.s3key = '20181115_mace-head_ecmwf.nc'
-    tmpfile2.checksum = '610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678'
+  test('inserting two model files (first worse, then better)', async () => {
+    const tmpfile1 = {...volatileFile,
+      product: 'model',
+      model: 'icon-iglo-12-23'}
+    const tmpfile2 = {...tmpfile1,
+      model: 'ecmwf',
+      uuid: '87EB042E-B247-4AC1-BC03-074DD0D74BDB',
+      s3key: '20181115_mace-head_ecmwf.nc',
+      checksum: '610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678'}
     await expect(putFile(tmpfile1)).resolves.toMatchObject({status: 201})
     await expect(modelFileRepo.findOneOrFail(tmpfile1.uuid, {relations: ['model']})).resolves.toMatchObject({model: {id: tmpfile1.model}})
     await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeTruthy()
@@ -153,6 +153,53 @@ describe('PUT /files/:s3key', () => {
     await expect(modelFileRepo.findOneOrFail(tmpfile2.uuid, {relations: ['model']})).resolves.toMatchObject({model: {id: tmpfile2.model}})
     await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeFalsy()
     return expect(searchFileRepo.findOne(tmpfile2.uuid)).resolves.toBeTruthy()
+  })
+
+  test('inserting two model files (first better, then worse)', async () => {
+    const tmpfile1 = {...volatileFile,
+      product: 'model',
+      model: 'ecmwf'}
+    const tmpfile2 = {...tmpfile1,
+      model: 'icon-iglo-24-35',
+      uuid: '87EB042E-B247-4AC1-BC03-074DD0D74BDB',
+      s3key: '20181115_mace-head_icon-iglo-24-35.nc',
+      checksum: '610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678'}
+    await expect(putFile(tmpfile1)).resolves.toMatchObject({status: 201})
+    await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeTruthy()
+    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile2.s3key}`, 'content')
+    await expect(putFile(tmpfile2)).resolves.toMatchObject({status: 201})
+    await expect(searchFileRepo.findOne(tmpfile2.uuid)).resolves.toBeFalsy()
+    return expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeTruthy()
+  })
+
+  test('inserting several model files with different optimumOrder', async () => {
+    const tmpfile1 = {...volatileFile,
+      product: 'model',
+      model: 'icon-iglo-24-35'}
+    const tmpfile2 = {...tmpfile1,
+      model: 'icon-iglo-36-47',
+      uuid: '87EB042E-B247-4AC1-BC03-074DD0D74BDB',
+      s3key: '20181115_mace-head_icon-iglo-36-47.nc',
+      checksum: '610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678'}
+    const tmpfile3 = {...tmpfile1,
+      model: 'ecmwf',
+      uuid: 'abde0a2a-40e7-4463-9266-06f50153d974',
+      s3key: '20181115_mace-head_ecmwf.nc',
+      checksum: 'deb5a92691553bcac4cfb57f5917d7cbf9ccfae9592c40626d9615bd64ebeffe'}
+    await expect(putFile(tmpfile1)).resolves.toMatchObject({status: 201})
+    await expect(modelFileRepo.findOneOrFail(tmpfile1.uuid, {relations: ['model']})).resolves.toMatchObject({model: {id: tmpfile1.model}})
+    await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeTruthy()
+    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile2.s3key}`, 'content')
+    await expect(putFile(tmpfile2)).resolves.toMatchObject({status: 201})
+    await expect(modelFileRepo.findOneOrFail(tmpfile2.uuid, {relations: ['model']})).resolves.toMatchObject({model: {id: tmpfile2.model}})
+    await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeFalsy()
+    await expect(searchFileRepo.findOne(tmpfile2.uuid)).resolves.toBeTruthy()
+    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile3.s3key}`, 'content')
+    await expect(putFile(tmpfile3)).resolves.toMatchObject({status: 201})
+    await expect(modelFileRepo.findOneOrFail(tmpfile3.uuid, {relations: ['model']})).resolves.toMatchObject({model: {id: tmpfile3.model}})
+    await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeFalsy()
+    await expect(searchFileRepo.findOne(tmpfile2.uuid)).resolves.toBeFalsy()
+    return expect(searchFileRepo.findOne(tmpfile3.uuid)).resolves.toBeTruthy()
   })
 
   test('errors on invalid site', async () => {
