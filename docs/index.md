@@ -280,10 +280,8 @@ Response body:
 
 ### `GET /api/model-files` → `ModelFile[]`
 
-Queries the metadata of model files. In addition to the filtering parameters of `/api/files`, has the following parameters for filtering the results:
+Queries the metadata of model files. It offers the following parameters for filtering the results:
 
-Queries the metadata of multiple product files. On a successful query responds with an array of `File` objects.
-The results can be filtered with the following parameters:
 - `site`: One or more `Site` ids, from which to fetch file metadata.
 - `date`: Only fetch data from a given date. Date format is `YYYY-MM-DD` or any
   date format parseable by [JavaScript `Date`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) -object.
