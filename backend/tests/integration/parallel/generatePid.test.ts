@@ -15,10 +15,11 @@ let repo: Repository<Collection>
 
 beforeAll(async () => {
   conn = await createConnection()
-  repo = conn.getRepository('collection')
+  repo = conn.getRepository(Collection)
 })
 
 describe('POST /api/generate-pid', () => {
+
   afterAll(async () => conn.close())
 
   it('responds with a pid and adds it to the collection', async () => {

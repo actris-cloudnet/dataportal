@@ -281,7 +281,7 @@ describe('PUT /upload/data/:checksum', () => {
   test('saves correct file size', async () => {
     await axios.put(validUrl, validFile, {headers})
     const md = await instrumentRepo.findOne({checksum: validMetadata.checksum})
-    return expect(md.size).toBe(validFile.length)
+    return expect(md.size).toBe(validFile.length + "")
   })
 
   test('responds with 400 on invalid hash', async () => {

@@ -2,18 +2,13 @@ import 'reflect-metadata'
 import {backendPublicUrl, genResponse} from '../../lib'
 import axios from 'axios'
 import {RequestError} from '../../../src/entity/RequestError'
-import {Connection, createConnection} from 'typeorm'
 import {readResources} from '../../../../shared/lib'
 
-let conn: Connection
 let responses: any
 
 beforeAll(async () => {
   responses = await readResources()
-  conn = await createConnection()
 })
-
-afterAll(() => conn.close())
 
 const expectedBody404: RequestError = {
   status: 404,
