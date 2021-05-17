@@ -21,7 +21,7 @@ export class CollectionFileResponse {
     this.product = file.product.humanReadableName
     this.productId = file.product.id
     this.modelId = 'model' in file ? file.model.id : null
-    this.size = file.size
+    this.size = parseInt(file.size as unknown as string, 10)
     this.volatile = file.volatile
     this.legacy = file.legacy
   }

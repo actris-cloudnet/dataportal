@@ -78,11 +78,15 @@ section#fileTable
     float: right
     margin-top: 30px
 
+  .downloadinfo > .download
+    float: right
+
   .dlcount
     color: gray
     font-size: 85%
     text-align: center
     display: block
+    float: right
 
   .download:focus
     outline: thin dotted black
@@ -153,7 +157,7 @@ section#fileTable
         {{ listLength }} files ({{ humanReadableSize(combinedFileSize(apiResponse)) }})
       </span>
       <div v-else class="dlcount errormsg">
-        Download failed!
+        {{ dlFailedMessage || 'Download failed!' }}
       </div><br>
     </div>
   </section>
@@ -181,6 +185,7 @@ export default class DataSearchResult extends Vue {
   @Prop() simplifiedView?: boolean
   downloadIsBusy = false
   downloadFailed = false
+  dlFailedMessage = ''
   apiUrl = process.env.VUE_APP_BACKENDURL
 
   sortBy = 'title'
@@ -215,6 +220,10 @@ export default class DataSearchResult extends Vue {
   }
 
   createCollection() {
+    if (this.listLength > 10000) {
+      this.downloadFailed = true
+      this.dlFailedMessage = 'You may only download a maximum of 10 000 files!'
+    }
     this.downloadIsBusy = true
     axios.post(`${this.apiUrl}collection`, { files: this.apiResponse.map(file => file.uuid)})
       .then(({data}) => this.$router.push({path: `/collection/${data}`}))
@@ -240,6 +249,7 @@ export default class DataSearchResult extends Vue {
     if (!this.isBusy) {
       this.currentPage = 1
     }
+    this.downloadFailed = false
   }
 }
 </script>

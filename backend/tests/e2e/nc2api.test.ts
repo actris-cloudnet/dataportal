@@ -63,7 +63,7 @@ const expectedJson = {
   'cloudnetpyVersion': '1.0.4',
   'filename': '20190723_bucharest_classification.nc',
   'checksum': 'b77b731aaae54f403aae6765ad1d20e1603b4454e2bc0d461aab4985a4a82ca4',
-  'size': 139021,
+  'size': '139021',
   'format': 'HDF5 (NetCDF4)',
   'product': {
     'humanReadableName': 'Classification',
