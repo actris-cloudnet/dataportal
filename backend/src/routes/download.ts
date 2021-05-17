@@ -2,7 +2,7 @@ import {RequestHandler} from 'express'
 
 import {Collection} from '../entity/Collection'
 import {Connection, Repository} from 'typeorm'
-import {File, ModelFile, RegularFile} from '../entity/File'
+import {File, RegularFile} from '../entity/File'
 import {Upload} from '../entity/Upload'
 import {Download, ObjectType} from '../entity/Download'
 import {getBucketForFile, ssAuthString} from '../lib'

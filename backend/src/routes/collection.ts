@@ -5,7 +5,7 @@ import {validate as validateUuid} from 'uuid'
 import axios from 'axios'
 import {Connection, Repository} from 'typeorm'
 import {File, ModelFile, RegularFile} from '../entity/File'
-import {convertToCollectionFileResponse, convertToSearchResponse} from '../lib'
+import {convertToSearchResponse} from '../lib'
 import env from '../lib/env'
 
 export class CollectionRoutes {
