@@ -5,7 +5,7 @@ import {validate as validateUuid} from 'uuid'
 import axios from 'axios'
 import {Connection, Repository} from 'typeorm'
 import {File, ModelFile, RegularFile} from '../entity/File'
-import {convertToSearchResponse} from '../lib'
+import {convertToCollectionFileResponse, convertToSearchResponse} from '../lib'
 import env from '../lib/env'
 
 export class CollectionRoutes {
@@ -48,11 +48,9 @@ export class CollectionRoutes {
   collection: RequestHandler = async (req: Request, res: Response, next) => {
     const uuid: string = req.params.uuid
     try {
-      const collection = await this.collectionRepo.findOne(uuid, {relations: [
-        'regularFiles', 'regularFiles.site', 'regularFiles.product',
-        'modelFiles', 'modelFiles.site', 'modelFiles.product', 'modelFiles.model',
-      ]})
-      if (collection === undefined) return next({status: 404, errors: ['Collection not found']})
+      const collection = await this.findCollection(uuid)
+      if (!collection) return next({status: 404, errors: ['Collection not found']})
+
       res.send(new CollectionResponse(collection))
     } catch (e) {
       return next({status: 500, errors: e})
@@ -90,4 +88,15 @@ export class CollectionRoutes {
         res.send(response)
       })
       .catch(err => next({ status: 500, errors: err }))
+
+  public async findCollection(uuid: string) {
+    const collection = await this.collectionRepo.findOne(uuid)
+    if (!collection) return undefined
+    const regularFileIds = await this.collectionRepo.query('SELECT "regularFileUuid" from collection_regular_files_regular_file WHERE "collectionUuid" = $1', [uuid])
+    const regularFiles = await this.fileRepo.findByIds(regularFileIds.map((obj: any) => obj.regularFileUuid), {relations: ['site', 'product']})
+
+    const modelFileIds = await this.collectionRepo.query('SELECT "modelFileUuid" from collection_model_files_model_file WHERE "collectionUuid" = $1', [uuid])
+    const modelFiles = await this.modelFileRepo.findByIds(modelFileIds.map((obj: any) => obj.modelFileUuid), {relations: ['site', 'product', 'model']})
+    return {...collection, regularFiles, modelFiles} as Collection
+  }
 }

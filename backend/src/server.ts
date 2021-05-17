@@ -31,7 +31,7 @@ import {CalibrationRoutes} from './routes/calibration'
   const uploadRoutes = new UploadRoutes(conn)
   const collRoutes = new CollectionRoutes(conn)
   const modelRoutes = new ModelRoutes(conn)
-  const dlRoutes = new DownloadRoutes(conn, fileRoutes)
+  const dlRoutes = new DownloadRoutes(conn, fileRoutes, collRoutes)
   const calibRoutes = new CalibrationRoutes(conn)
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {

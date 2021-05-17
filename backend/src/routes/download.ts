@@ -2,7 +2,7 @@ import {RequestHandler} from 'express'
 
 import {Collection} from '../entity/Collection'
 import {Connection, Repository} from 'typeorm'
-import {File, RegularFile} from '../entity/File'
+import {File, ModelFile, RegularFile} from '../entity/File'
 import {Upload} from '../entity/Upload'
 import {Download, ObjectType} from '../entity/Download'
 import {getBucketForFile, ssAuthString} from '../lib'
@@ -11,16 +11,18 @@ import {IncomingMessage} from 'http'
 import archiver = require('archiver')
 import {FileRoutes} from './file'
 import env from '../lib/env'
+import {CollectionRoutes} from './collection'
 
 export class DownloadRoutes {
 
-  constructor(conn: Connection, fileController: FileRoutes) {
+  constructor(conn: Connection, fileController: FileRoutes, collController: CollectionRoutes) {
     this.conn = conn
     this.collectionRepo = conn.getRepository<Collection>('collection')
     this.uploadRepo = conn.getRepository<Upload>('upload')
     this.downloadRepo = conn.getRepository<Download>('download')
     this.fileRepo = conn.getRepository<RegularFile>('regular_file')
     this.fileController = fileController
+    this.collController = collController
   }
 
   readonly conn: Connection
@@ -29,6 +31,7 @@ export class DownloadRoutes {
   readonly uploadRepo: Repository<Upload>
   readonly downloadRepo: Repository<Download>
   readonly fileController: FileRoutes
+  readonly collController: CollectionRoutes
 
   product: RequestHandler = async (req, res, next) => {
     const s3key = req.params[0]
@@ -48,10 +51,11 @@ export class DownloadRoutes {
 
   collection: RequestHandler = async (req, res, next) => {
     const collectionUuid: string = req.params.uuid
-    const collection = await this.collectionRepo.findOne(collectionUuid, {relations: ['regularFiles', 'modelFiles']})
+    const collection = await this.collController.findCollection(collectionUuid)
     if (collection === undefined) {
       return next({status: 404, errors: ['No collection matches this UUID.']})
     }
+
     const allFiles = (collection.regularFiles as unknown as File[]).concat(collection.modelFiles)
     // Update collection download count
     const dl = new Download(ObjectType.Collection, collection.uuid, req.header('x-forwarded-for') || '')
