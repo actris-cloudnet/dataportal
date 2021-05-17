@@ -14,7 +14,7 @@
       "country": "Spain"
     },
     "status": "created",
-    "size": 30,
+    "size": "30",
     "createdAt": "2020-09-28T12:45:21.916Z",
     "updatedAt": "2020-09-28T12:45:21.916Z",
     "instrument": {
@@ -39,7 +39,7 @@
       "country": "Romania"
     },
     "status": "processed",
-    "size": 20,
+    "size": "20",
     "createdAt": "2020-09-28T12:47:21.916Z",
     "updatedAt": "2020-09-28T12:47:21.916Z",
     "instrument": {
@@ -64,7 +64,7 @@
       "country": "Romania"
     },
     "status": "processed",
-    "size": 10,
+    "size": "10",
     "createdAt": "2020-09-28T12:46:21.916Z",
     "updatedAt": "2020-09-28T12:46:21.916Z",
     "instrument": {
@@ -89,7 +89,7 @@
       "country": "Romania"
     },
     "status": "uploaded",
-    "size": 0,
+    "size": "0",
     "createdAt": "2020-09-28T12:48:21.916Z",
     "updatedAt": "2020-09-28T12:48:21.916Z",
     "instrument": {

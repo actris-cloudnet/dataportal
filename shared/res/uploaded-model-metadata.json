@@ -14,7 +14,7 @@
       "country": "Spain"
     },
     "status": "created",
-    "size": 80,
+    "size": "80",
     "createdAt": "2020-09-28T12:47:21.916Z",
     "updatedAt": "2020-09-28T12:47:21.916Z",
     "model": {
@@ -38,7 +38,7 @@
       "country": "Ireland"
     },
     "status": "created",
-    "size": 70,
+    "size": "70",
     "createdAt": "2020-09-28T12:47:21.916Z",
     "updatedAt": "2020-09-28T12:47:21.916Z",
     "model": {
@@ -62,7 +62,7 @@
       "country": "Spain"
     },
     "status": "created",
-    "size": 60,
+    "size": "60",
     "createdAt": "2020-09-28T12:47:21.916Z",
     "updatedAt": "2020-09-28T12:47:21.916Z",
     "model": {
@@ -86,7 +86,7 @@
       "country": "Romania"
     },
     "status": "processed",
-    "size": 50,
+    "size": "50",
     "createdAt": "2020-09-28T12:47:21.916Z",
     "updatedAt": "2020-09-28T12:47:21.916Z",
     "model": {
@@ -110,7 +110,7 @@
       "country": "Spain"
     },
     "status": "uploaded",
-    "size": 40,
+    "size": "40",
     "createdAt": "2020-09-28T12:47:21.916Z",
     "updatedAt": "2020-09-28T12:47:21.916Z",
     "model": {
