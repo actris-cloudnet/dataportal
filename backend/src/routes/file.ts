@@ -259,8 +259,8 @@ export class FileRoutes {
       .andWhere('site.id = :site', file)
       .andWhere('product.id = :product', file)
       .andWhere('file.measurementDate = :measurementDate', file)
-      .orderBy('model.optimumOrder', 'ASC')
-      .orderBy('file.updatedAt', 'DESC')
+      .addOrderBy('model.optimumOrder', 'ASC')
+      .addOrderBy('file.updatedAt', 'DESC')
       .getMany()
     if (!bestModelFile) return transactionalEntityManager.insert(SearchFile, searchFile)
     if (bestModelFile.model.optimumOrder >= optimumOrder) {
