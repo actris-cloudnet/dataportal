@@ -334,9 +334,33 @@ export default class FileView extends Vue {
     return this.versions[this.currentVersionIndex - 1]
   }
 
+  hideBoxes(e: MouseEvent) {
+    let target = e.target as HTMLElement
+    const clickTargetId = target.id
+
+    if (['showLicense', 'showHowToCite'].includes(clickTargetId))
+      return
+
+    // Check if clicked inside hoverbox
+    let hoverboxClicked = false
+    while (!hoverboxClicked && target.parentElement) {
+      if (target.parentElement.className == 'hoverbox') (hoverboxClicked = true)
+      target = target.parentElement
+    }
+    if (hoverboxClicked) return
+
+    this.showLicense = false
+    this.showHowToCite = false
+  }
+
   async created() {
+    document.addEventListener('click', this.hideBoxes)
     await this.onUuidChange()
     return this.fetchCitations()
+  }
+
+  destroyed() {
+    document.removeEventListener('click', this.hideBoxes)
   }
 
   fetchVisualizations(payload: {}) {
