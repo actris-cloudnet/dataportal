@@ -2,7 +2,7 @@
   {
     "id": "categorize",
     "humanReadableName": "Categorize",
-    "level": "1"
+    "level": "1c"
   },
   {
     "id": "classification",
@@ -22,7 +22,7 @@
   {
     "id": "lidar",
     "humanReadableName": "Lidar",
-    "level": "1"
+    "level": "1b"
   },
   {
     "id": "lwc",
@@ -32,16 +32,16 @@
   {
     "id": "model",
     "humanReadableName": "Model",
-    "level": "1"
+    "level": "1b"
   },
   {
     "id": "mwr",
     "humanReadableName": "Microwave radiometer",
-    "level": "1"
+    "level": "1b"
   },
   {
     "id": "radar",
     "humanReadableName": "Radar",
-    "level": "1"
+    "level": "1b"
   }
 ]

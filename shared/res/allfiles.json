@@ -62,7 +62,7 @@
     "product": {
       "id": "model",
       "humanReadableName": "Model",
-      "level": "1"
+      "level": "1b"
     },
     "downloadUrl": "http://localhost:3001/api/download/product/a5d1d5af-3667-41bc-b952-e684f627d91c/20141205_mace-head_ecmwf.nc",
     "filename": "20141205_mace-head_ecmwf.nc"
@@ -130,7 +130,7 @@
     "product": {
       "id": "radar",
       "humanReadableName": "Radar",
-      "level": "1"
+      "level": "1b"
     },
     "downloadUrl": "http://localhost:3001/api/download/product/38092c00-161d-4ca2-a29d-628cf8e960f6/20181115_mace-head_mira.nc",
     "filename": "20181115_mace-head_mira.nc"
@@ -164,7 +164,7 @@
     "product": {
       "id": "categorize",
       "humanReadableName": "Categorize",
-      "level": "1"
+      "level": "1c"
     },
     "downloadUrl": "http://localhost:3001/api/download/product/22b32746-faf0-4057-9076-ed2e698dcc34/20190715_bucharest_categorize-22b32746.nc",
     "filename": "20190715_bucharest_categorize-22b32746.nc"
@@ -198,7 +198,7 @@
     "product": {
       "id": "categorize",
       "humanReadableName": "Categorize",
-      "level": "1"
+      "level": "1c"
     },
     "downloadUrl": "http://localhost:3001/api/download/product/8bb32746-faf0-4057-9076-ed2e698dcf36/20190715_bucharest_categorize.nc",
     "filename": "20190715_bucharest_categorize.nc"
@@ -232,7 +232,7 @@
     "product": {
       "id": "categorize",
       "humanReadableName": "Categorize",
-      "level": "1"
+      "level": "1c"
     },
     "downloadUrl": "http://localhost:3001/api/download/product/6cb32746-faf0-4057-9076-ed2e698dcf36/20190715_bucharest_categorize.nc",
     "filename": "20190715_bucharest_categorize.nc"
@@ -266,7 +266,7 @@
     "product": {
       "id": "categorize",
       "humanReadableName": "Categorize",
-      "level": "1"
+      "level": "1c"
     },
     "downloadUrl": "http://localhost:3001/api/download/product/1bb32746-faf0-4057-9076-ed2e698dcf36/20190715_bucharest_categorize.nc",
     "filename": "20190715_bucharest_categorize.nc"
@@ -336,7 +336,7 @@
     "product": {
       "id": "radar",
       "humanReadableName": "Radar",
-      "level": "1"
+      "level": "1b"
     },
     "downloadUrl": "http://localhost:3001/api/download/product/d21d6a9b-6804-4465-a026-74ec429fe17d/20190901_hyytiala_rpg-fmcw-94.nc",
     "filename": "20190901_hyytiala_rpg-fmcw-94.nc"
@@ -370,7 +370,7 @@
     "product": {
       "id": "model",
       "humanReadableName": "Model",
-      "level": "1"
+      "level": "1b"
     },
     "downloadUrl": "http://localhost:3001/api/download/product/9e04d8ef-0f2b-4823-835d-33e458403c67/20200126_granada_ecmwf.nc",
     "filename": "20200126_granada_ecmwf.nc"
