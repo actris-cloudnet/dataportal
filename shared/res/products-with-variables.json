@@ -29,14 +29,14 @@
     "level": "1c",
     "variables": [
       {
-        "id": "test1",
-        "humanReadableName": "Auringonpaisteen määrä",
-        "order": "1"
-      },
-      {
         "id": "test2",
         "humanReadableName": "Kaljanhimo",
         "order": "0"
+      },
+      {
+        "id": "test1",
+        "humanReadableName": "Auringonpaisteen määrä",
+        "order": "1"
       }
     ]
   },
