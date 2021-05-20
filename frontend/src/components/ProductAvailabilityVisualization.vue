@@ -89,7 +89,7 @@ $legacy-color: #adadad
     flex-grow: 2
     font-size: 0.9em
     justify-content: center
-    align-items: center
+    align-items: start
     padding: 0.5em
 
     ul
@@ -99,15 +99,18 @@ $legacy-color: #adadad
       white-space: pre-wrap
       margin-bottom: 0
 
-      li.found::before
+      li.productitem.found::before
         content: '✓'
         color: green
         padding-right: 0.3em
 
-      li:not(.found)::before
+      li.productitem:not(.found)::before
         content: '✘'
         color: #c60000
         padding-right: 0.3em
+
+      li.header
+        font-weight: bold
 
       li.modelitem
         margin-top: 0.8em
@@ -150,7 +153,9 @@ $legacy-color: #adadad
             </header>
             <section>
               <ul v-for="lvl in allLevels">
+                <li class="header">{{ lvl }}</li>
                 <li v-for="product in filterProductsByLvl(lvl)"
+                    class="productitem"
                     :class="{found: getExistingProduct(date.products[lvl], product) }"
                     :key="product.id">{{ idToHumanReadable(product.id) }}
                   <sup class="legacy-label"
@@ -158,7 +163,7 @@ $legacy-color: #adadad
                       && getExistingProduct(date.products[lvl], product).legacy">
                     L
                   </sup></li>
-                <li v-if="lvl === '1b'" class="modelitem"
+                <li v-if="lvl === '1b'" class="productitem modelitem"
                   :class="{found: getExistingProduct(date.products[lvl], {id: 'model'}) }">
                   Model
                 </li>
