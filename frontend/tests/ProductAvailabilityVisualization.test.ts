@@ -20,7 +20,7 @@ const props = {
 }
 
 const getLiWrappers = (element: Wrapper<Vue>) =>
-  element.findAll('.dataviz-tooltip li').wrappers
+  element.findAll('.dataviz-tooltip li.productitem').wrappers
 
 const getColorElementByDate = (wrapper: Wrapper<Vue>, date: string) => {
   const element = wrapper.find(`#dataviz-color-palaiseau-${date}`)
