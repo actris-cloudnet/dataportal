@@ -8,6 +8,8 @@ const expectedResult = {
   sourceFileId: '38092c00-161d-4ca2-a29d-628cf8e960f6',
   locationHumanReadable: 'Mace Head',
   productHumanReadable: 'Radar',
+  volatile: true,
+  legacy: false,
   visualizations: [
     {
       s3key: 'test1.png',
@@ -24,6 +26,8 @@ const expectedModelResult = {
   sourceFileId: 'a5d1d5af-3667-41bc-b952-e684f627d91c',
   locationHumanReadable: 'Mace Head',
   productHumanReadable: 'Model',
+  volatile: true,
+  legacy: false,
   visualizations: [
     {
       s3key: 'test3.png',
