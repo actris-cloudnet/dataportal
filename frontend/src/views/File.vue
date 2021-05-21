@@ -164,11 +164,13 @@ main#filelanding
             <dd>{{ humanReadableTimestamp(response.updatedAt) }}</dd>
             <dt>Versions</dt>
             <dd>
-              <router-link v-if="!isBusy && previousVersion" id="previousVersion" :to="`/file/${previousVersion}`">
+              <router-link v-if="!isBusy && previousVersion"
+                id="previousVersion" :to="`/file/${previousVersion}`" replace>
                 previous
               </router-link>
               <span v-if="!isBusy && previousVersion && nextVersion">-</span>
-              <router-link v-if="!isBusy && nextVersion" id="nextVersion" :to="`/file/${nextVersion}`"> next</router-link>
+              <router-link v-if="!isBusy && nextVersion"
+                id="nextVersion" :to="`/file/${nextVersion}`" replace> next</router-link>
               <span v-if="isBusy || !previousVersion && !nextVersion" class="notAvailable"></span>
             </dd>
           </dl>
