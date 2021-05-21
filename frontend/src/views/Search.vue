@@ -245,6 +245,19 @@
       margin-top: 0
       &::after
         content: ''
+
+  .rowtag
+    display: inline-block
+    width: 5em
+    font-size: 0.9em
+    text-align: center
+    padding: 0.2em
+
+  .volatile
+    background: #cad7ff
+
+  .legacy
+    background: #f2f2f2
 </style>
 
 <template>
