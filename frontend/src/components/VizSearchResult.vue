@@ -100,7 +100,10 @@
         </div>
       </div>
     </header>
-    <section v-if="searchYieldedResults" class="vizContainer" v-bind:class="{ sideBySide: comparisonView }">
+    <section v-if="noSelectionsMade" class="notfound">
+      Please make a selection in the search filters to display visualizations.
+    </section>
+    <section v-else-if="searchYieldedResults" class="vizContainer" v-bind:class="{ sideBySide: comparisonView }">
     <div v-for="(file, index) in sortedApiResponse" :key="index" class="sourceFile"
       v-bind:class="{ paddedSourceFile: !comparisonView }">
       <h3 @click="navigateToFile(file.sourceFileId)" title="View data object" class="sourceFileLink">
@@ -145,6 +148,7 @@ export default class DataSearchResult extends Vue {
   @Prop() isBusy!: boolean
   @Prop() date!: Date
   @Prop() setWideMode!: Function
+  @Prop() noSelectionsMade!: boolean
 
   comparisonView = false
   sortVisualizations = sortVisualizations

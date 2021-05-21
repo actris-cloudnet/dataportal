@@ -397,7 +397,8 @@
 
     <custom-multiselect v-show="isVizMode()"
       label="Variable"
-      v-model="selectedVariableIds"
+      :selectedIds="selectedVariableIds"
+      :setSelectedIds="setSelectedVariableIds"
       :options="selectableVariables"
       id="variableSelect">
     </custom-multiselect>
@@ -419,6 +420,7 @@
       :isBusy="isBusy"
       :date="dateTo"
       :key="vizSearchUpdate"
+      :noSelectionsMade="noSelectionsMade"
       :setWideMode="setVizWideMode">
     </viz-search-result>
 
@@ -521,6 +523,10 @@ export default class Search extends Vue {
     this.selectedProductIds = productIds
   }
 
+  setSelectedVariableIds(variableIds: []) {
+    this.selectedVariableIds = variableIds
+  }
+
   getInitialDateFrom() {
     const date = new Date()
     return new Date(date.setDate(date.getDate() - fixedRanges.month))
@@ -577,6 +583,10 @@ export default class Search extends Vue {
     return { narrowView: true }
   }
 
+  get noSelectionsMade() {
+    return !(this.selectedProductIds.length || this.selectedSiteIds.length || this.selectedVariableIds.length)
+  }
+
   isTrueOnBothDateFields(errorId: string) {
     return (this.isVizMode() || this.dateFromError[errorId]) && this.dateToError[errorId]
   }
@@ -615,19 +625,6 @@ export default class Search extends Vue {
         .filter(this.discardHiddenSites)
         .sort(this.alphabeticalSort)
       this.allProducts = products.data.sort(this.alphabeticalSort)
-      if (this.isVizMode() && !this.showAllSites) {
-        if (this.selectedSiteIds.length == 0 && this.mapKey == this.initMapKey) {
-          this.selectedSiteIds.push('bucharest')}
-        if (this.selectedProductIds.length == 0 && this.mapKey == this.initMapKey) {
-          this.selectedProductIds.push('classification')}
-        const payload = { params: { site: this.selectedSiteIds, product: this.selectedProductIds } }
-        return axios.get(`${this.apiUrl}latest-visualization-date/`, payload)
-          .then(res => {
-            this.dateTo = res.data.date
-            this.visualizationDate = new Date(res.data.date)
-          })
-          .catch(() => '')
-      }
     })
     return this.fetchData()
   }
@@ -647,6 +644,7 @@ export default class Search extends Vue {
   }
 
   fetchData() {
+    if (this.isVizMode() && this.noSelectionsMade) return Promise.resolve()
     this.isBusy = true
     const apiPath = this.isVizMode() ? 'visualizations/' : 'search/'
     if (!this.isVizMode()) this.checkIfButtonShouldBeActive()

@@ -62,11 +62,11 @@ beforeAll(async () => {
 afterAll(async () => driver.close())
 
 describe('visualizations page before input', () => {
-  it('initially contains the latest visualization', async () => {
+  it('asks the user to make a selection', async () => {
     await selenium.driver.get(`${frontendUrl}search/visualizations`)
     await wait(300)
     const content = await selenium.getContent()
-    expect(content).toContain('Visualizations for 1 May 2020')
+    expect(content).toContain('Please make a selection in the search filters to display visualizations.')
   })
 })
 
