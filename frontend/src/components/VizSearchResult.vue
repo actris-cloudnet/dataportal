@@ -80,6 +80,8 @@
     padding-right: 5px
     cursor: pointer
 
+  h3 > .rowtag
+    margin-left: 1em
 </style>
 
 
@@ -98,7 +100,10 @@
         </div>
       </div>
     </header>
-    <section v-if="searchYieldedResults" class="vizContainer" v-bind:class="{ sideBySide: comparisonView }">
+    <section v-if="noSelectionsMade" class="notfound">
+      Please make a selection in the search filters to display visualizations.
+    </section>
+    <section v-else-if="searchYieldedResults" class="vizContainer" v-bind:class="{ sideBySide: comparisonView }">
     <div v-for="(file, index) in sortedApiResponse" :key="index" class="sourceFile"
       v-bind:class="{ paddedSourceFile: !comparisonView }">
       <h3 @click="navigateToFile(file.sourceFileId)" title="View data object" class="sourceFileLink">
@@ -106,6 +111,18 @@
         <svg
           fill="#000000" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="60px" height="60px"><path d="M 25.980469 2.9902344 A 1.0001 1.0001 0 0 0 25.869141 3 L 20 3 A 1.0001 1.0001 0 1 0 20 5 L 23.585938 5 L 13.292969 15.292969 A 1.0001 1.0001 0 1 0 14.707031 16.707031 L 25 6.4140625 L 25 10 A 1.0001 1.0001 0 1 0 27 10 L 27 4.1269531 A 1.0001 1.0001 0 0 0 25.980469 2.9902344 z M 6 7 C 4.9069372 7 4 7.9069372 4 9 L 4 24 C 4 25.093063 4.9069372 26 6 26 L 21 26 C 22.093063 26 23 25.093063 23 24 L 23 14 L 23 11.421875 L 21 13.421875 L 21 16 L 21 24 L 6 24 L 6 9 L 14 9 L 16 9 L 16.578125 9 L 18.578125 7 L 16 7 L 14 7 L 6 7 z"/>
         </svg>
+        <span
+            v-if="file.volatile"
+            class="rowtag volatile"
+            title="The data for this day may be incomplete. This file is updating in real time.">
+        volatile
+        </span>
+        <span
+            v-if="file.legacy"
+            class="rowtag legacy"
+            title="This is legacy data. Quality of the data is not assured.">
+        legacy
+        </span>
       </h3>
       <div v-for="viz in sortVisualizations(file.visualizations)"
            :key="viz.s3key" class="variable">
@@ -131,6 +148,7 @@ export default class DataSearchResult extends Vue {
   @Prop() isBusy!: boolean
   @Prop() date!: Date
   @Prop() setWideMode!: Function
+  @Prop() noSelectionsMade!: boolean
 
   comparisonView = false
   sortVisualizations = sortVisualizations

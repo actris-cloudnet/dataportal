@@ -101,12 +101,6 @@ import {CalibrationRoutes} from './routes/calibration'
     middleware.checkParamsExistInDb,
     vizRoutes.visualization)
   app.get('/api/visualizations/:uuid', middleware.validateUuidParam, vizRoutes.visualizationForSourceFile)
-  app.get('/api/latest-visualization-date',
-    middleware.filesValidator,
-    middleware.filesQueryAugmenter,
-    middleware.checkParamsExistInDb,
-    vizRoutes.latestVisualizationDate
-  )
   app.get('/api/uploaded-metadata', uploadRoutes.listInstrumentsFromMetadata)
   app.post('/api/collection', express.json({limit: '1mb'}), collRoutes.postCollection)
   app.get('/api/collection/:uuid', middleware.validateUuidParam, collRoutes.collection)

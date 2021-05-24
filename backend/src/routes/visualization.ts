@@ -91,19 +91,6 @@ export class VisualizationRoutes {
       .catch(err => next({status: 500, errors: err}))
   }
 
-  latestVisualizationDate: RequestHandler = async (req: Request, res: Response, next) => {
-    const query = req.query
-    this.getManyVisualizations(query)
-      .then(result => {
-        if (result.length == 0) {
-          next(next({ status: 404, errors: ['No visualizations were found with the selected query parameters'] }))
-          return
-        }
-        res.send(new LatestVisualizationDateResponse(result[0]))
-      })
-      .catch(err => next({ status: 500, errors: err }))
-  }
-
   private getManyVisualizations(query: any) {
     const fetchVisualizations = (_repo: Repository<RegularFile|ModelFile>, mode: boolean | undefined) => {
       let qb = this.fileController.filesQueryBuilder(query, mode ? 'model' : 'file')
