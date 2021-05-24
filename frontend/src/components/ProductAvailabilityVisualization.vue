@@ -89,7 +89,7 @@ $legacy-color: #adadad
     flex-grow: 2
     font-size: 0.9em
     justify-content: center
-    align-items: center
+    align-items: flex-start
     padding: 0.5em
 
     ul
@@ -99,15 +99,18 @@ $legacy-color: #adadad
       white-space: pre-wrap
       margin-bottom: 0
 
-      li.found::before
+      li.productitem.found::before
         content: '✓'
         color: green
         padding-right: 0.3em
 
-      li:not(.found)::before
+      li.productitem:not(.found)::before
         content: '✘'
         color: #c60000
         padding-right: 0.3em
+
+      li.header
+        font-weight: bold
 
       li.modelitem
         margin-top: 0.8em
@@ -150,7 +153,9 @@ $legacy-color: #adadad
             </header>
             <section>
               <ul v-for="lvl in allLevels">
+                <li class="header">Level {{ lvl }}</li>
                 <li v-for="product in filterProductsByLvl(lvl)"
+                    class="productitem"
                     :class="{found: getExistingProduct(date.products[lvl], product) }"
                     :key="product.id">{{ idToHumanReadable(product.id) }}
                   <sup class="legacy-label"
@@ -158,7 +163,7 @@ $legacy-color: #adadad
                       && getExistingProduct(date.products[lvl], product).legacy">
                     L
                   </sup></li>
-                <li v-if="lvl === 'lvl1b'" class="modelitem"
+                <li v-if="lvl === '1b'" class="productitem modelitem"
                   :class="{found: getExistingProduct(date.products[lvl], {id: 'model'}) }">
                   Model
                 </li>
@@ -199,9 +204,9 @@ interface ProductInfo {
 }
 
 interface ProductLevels {
-  lvl1b: ProductInfo[];
-  lvl1c: ProductInfo[];
-  lvl2: ProductInfo[];
+  '1b': ProductInfo[];
+  '1c': ProductInfo[];
+  '2': ProductInfo[];
 }
 
 interface ProductDate {
@@ -233,17 +238,7 @@ export default class ProductAvailabilityVisualization extends Vue {
   response: ReducedSearchResponse[] = []
   years: ProductYear[] = []
   allProducts: Product[] = []
-  lvlTranslate: { [key: string]: keyof ProductLevels } = {
-    'lidar': 'lvl1b',
-    'radar': 'lvl1b',
-    'mwr': 'lvl1b',
-    'categorize': 'lvl1c',
-    'classification': 'lvl2',
-    'lwc': 'lvl2',
-    'iwc': 'lvl2',
-    'drizzle': 'lvl2',
-    'model': 'lvl1b'
-  }
+  lvlTranslate: { [key: string]: keyof ProductLevels } = {}
   busy = true
 
   idToHumanReadable = idToHumanReadable
@@ -264,6 +259,7 @@ export default class ProductAvailabilityVisualization extends Vue {
         if (this.downloadComplete) this.downloadComplete()
         this.response = searchRes.data
         this.allProducts = productsRes.data
+        this.lvlTranslate = this.allProducts.reduce((acc, cur) => ({...acc, [cur.id]: cur.level as keyof ProductLevels}), {})
         const initialDate = new Date(
           `${this.response[this.response.length - 1].measurementDate.toString().substr(0,4)}-01-01`)
         const endDate = new Date(this.response[0].measurementDate)
@@ -310,9 +306,9 @@ export default class ProductAvailabilityVisualization extends Vue {
   createProductLevels(productInfo?: ProductInfo, existingObj?: ProductLevels) {
     if (!existingObj) {
       existingObj = {
-        lvl1b: [],
-        lvl1c: [],
-        lvl2: [],
+        '1b': [],
+        '1c': [],
+        '2': [],
       }
     }
     if (productInfo) {
@@ -334,7 +330,7 @@ export default class ProductAvailabilityVisualization extends Vue {
   }
 
   get allLevels() {
-    return Array.from(new Set(Object.values(this.lvlTranslate)))
+    return Array.from(new Set(Object.values(this.lvlTranslate))).sort()
   }
 
   createColorClass(products: ProductLevels) {
@@ -348,38 +344,38 @@ export default class ProductAvailabilityVisualization extends Vue {
   }
 
   allData(products: ProductLevels) {
-    return products['lvl2'].filter(this.isNotLegacy).length == 4
-        && products['lvl1c'].filter(this.isNotLegacy).length == 1
-        && products['lvl1b'].filter(this.isNotLegacy).length >= 3
-        && products['lvl1b'].filter(this.isModel).length == 1
+    return products['2'].filter(this.isNotLegacy).length == 4
+        && products['1c'].filter(this.isNotLegacy).length == 1
+        && products['1b'].filter(this.isNotLegacy).length >= 3
+        && products['1b'].filter(this.isModel).length == 1
   }
 
   missingData(products: ProductLevels) {
-    return products['lvl2'].filter(this.isNotLegacy).length
-        || products['lvl1c'].filter(this.isNotLegacy).length
-        || products['lvl1b'].filter(this.isNotLegacy).length
+    return products['2'].filter(this.isNotLegacy).length
+        || products['1c'].filter(this.isNotLegacy).length
+        || products['1b'].filter(this.isNotLegacy).length
   }
 
   onlyLegacy(products: ProductLevels) {
-    return (products['lvl2'].every(this.isLegacy)
-        && products['lvl1c'].every(this.isLegacy)
-        && products['lvl1b'].every(this.isLegacyOrModel))
+    return (products['2'].every(this.isLegacy)
+        && products['1c'].every(this.isLegacy)
+        && products['1b'].every(this.isLegacyOrModel))
   }
 
   onlyModel(products: ProductLevels) {
-    return products['lvl2'].length == 0
-        && products['lvl1c'].length == 0
-        && products['lvl1b'].length == 1 && products['lvl1b'][0].id == 'model'
+    return products['2'].length == 0
+        && products['1c'].length == 0
+        && products['1b'].length == 1 && products['1b'][0].id == 'model'
   }
 
   weirdModel(products: ProductLevels) {
-    return products['lvl1b'].filter(this.isModel).length > 1
+    return products['1b'].filter(this.isModel).length > 1
   }
 
   noData(products: ProductLevels) {
-    return products['lvl2'].length == 0
-        && products['lvl1c'].length == 0
-        && products['lvl1b'].length == 0
+    return products['2'].length == 0
+        && products['1c'].length == 0
+        && products['1b'].length == 0
   }
 
   isLegacy(prod: ProductInfo) {
