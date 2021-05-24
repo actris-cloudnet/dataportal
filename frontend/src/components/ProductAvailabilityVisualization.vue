@@ -89,7 +89,7 @@ $legacy-color: #adadad
     flex-grow: 2
     font-size: 0.9em
     justify-content: center
-    align-items: start
+    align-items: flex-start
     padding: 0.5em
 
     ul
@@ -153,7 +153,7 @@ $legacy-color: #adadad
             </header>
             <section>
               <ul v-for="lvl in allLevels">
-                <li class="header">{{ lvl }}</li>
+                <li class="header">Level {{ lvl }}</li>
                 <li v-for="product in filterProductsByLvl(lvl)"
                     class="productitem"
                     :class="{found: getExistingProduct(date.products[lvl], product) }"
