@@ -85,7 +85,7 @@ Response body:
   {
     "id": "categorize",
     "humanReadableName": "Categorize",
-    "level": "1"
+    "level": "1c"
   },
 ...
 ]
@@ -207,7 +207,7 @@ Response body:
   "product": {
     "id": "categorize",
     "humanReadableName": "Categorize",
-    "level": "1"
+    "level": "1c"
   },
   "downloadUrl": "https://cloudnet.fmi.fi/api/download/product/911bd5b1-3104-4732-9bd3-34ed8208adad/20200105_bucharest_categorize.nc",
   "filename": "20200105_bucharest_categorize.nc"
@@ -332,7 +332,7 @@ Response body:
     "product": {
       "id": "model",
       "humanReadableName": "Model",
-      "level": "1"
+      "level": "1b"
     },
     "model": {
       "id": "gdas1",
