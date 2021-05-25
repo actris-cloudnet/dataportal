@@ -46,7 +46,8 @@ export class Middleware {
     }
 
     let validKeys = ['site', 'volatile', 'product', 'dateFrom', 'dateTo', 'developer',
-      'releasedBefore', 'allVersions', 'limit', 'showLegacy', 'model', 'allModels', 'date', 'filename', 'properties']
+      'releasedBefore', 'allVersions', 'limit', 'showLegacy', 'model', 'allModels', 'date', 'filename', 'properties',
+      'updatedAtFrom', 'updatedAtTo']
 
     if (req.path.includes('visualization')) validKeys.push('variable')
 

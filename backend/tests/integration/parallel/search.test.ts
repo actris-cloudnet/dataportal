@@ -204,6 +204,15 @@ describe('/api/files', () => {
     return expect(res.data[0]).toMatchObject({ filename })
   })
 
+  it('filters with updatedAt', async () => {
+    const payload = {params: {allVersions: true, showLegacy: true, updatedAtFrom: '2020-02-21T00:00:00.000Z', updatedAtTo: '2020-02-22T00:00:00.000Z'}}
+    const res = await axios.get(url, payload)
+    expect(res.data).toHaveLength(2)
+    expect(res.data[0]).toMatchObject({ uuid: '62b32746-faf0-4057-9076-ed2e698dcc34' })
+    return expect(res.data[1]).toMatchObject({ uuid: '72b32746-faf0-4057-9076-ed2e698dcc34' })
+  })
+
+
 })
 
 describe('/api/model-files', () => {
@@ -254,8 +263,6 @@ describe('/api/model-files', () => {
     }
     return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
-
-
 
 })
 

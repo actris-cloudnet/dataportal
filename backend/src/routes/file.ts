@@ -215,6 +215,8 @@ export class FileRoutes {
     if (isModel && query.model) qb.andWhere('model.id IN (:...model)', query)
     if (query.filename) qb.andWhere("regexp_replace(s3key, '.+/', '') IN (:...filename)", query) // eslint-disable-line quotes
     if (query.releasedBefore) qb.andWhere('file.updatedAt < :releasedBefore', query)
+    if (query.updatedAtFrom) qb.andWhere('file.updatedAt >= :updatedAtFrom', query)
+    if (query.updatedAtTo) qb.andWhere('file.updatedAt <= :updatedAtTo', query)
 
     // No allVersions, allModels or model/filename params (default)
     if (query.allVersions == undefined
