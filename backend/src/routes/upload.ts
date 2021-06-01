@@ -1,9 +1,9 @@
 import {Site} from '../entity/Site'
-import {InstrumentUpload, ModelUpload, Status} from '../entity/Upload'
+import {InstrumentUpload, ModelUpload, Status, Upload} from '../entity/Upload'
 import {Connection, Repository} from 'typeorm'
 import {Request, RequestHandler, Response} from 'express'
 import {
-  fetchAll,
+  fetchAll, getDownloadPathForFile,
   getS3keyForUpload,
   isValidDate,
   ssAuthString,
@@ -174,7 +174,7 @@ export class UploadRoutes {
       repo.findOne({checksum: checksum}, { relations: ['site', (model ? 'model' : 'instrument')] }))
       .then(upload => {
         if (upload == undefined) return next({ status: 404, errors: 'No metadata was found with provided id'})
-        res.send(this.addS3keyToUpload(upload))
+        res.send(this.addDownloadUrlToUpload(upload))
       })
       .catch(err => next({ status: 500, errors: `Internal server error: ${err.code}`}))
   }
@@ -183,7 +183,7 @@ export class UploadRoutes {
     const isModel = req.path.includes('model')
     const repo = isModel ? this.modelUploadRepo : this.instrumentUploadRepo
     this.metadataQueryBuilder(repo, req.query, false, isModel)
-      .then(uploadedMetadata => res.send(uploadedMetadata.map(this.addS3keyToUpload)))
+      .then(uploadedMetadata => res.send(uploadedMetadata.map(this.addDownloadUrlToUpload)))
       .catch(err => {next({status: 500, errors: `Internal server error: ${err}`})})
   }
 
@@ -289,8 +289,12 @@ export class UploadRoutes {
     return qb.getMany()
   }
 
-  private addS3keyToUpload = (upload: InstrumentUpload | ModelUpload) =>
-    ({...upload, ...{s3key: getS3keyForUpload(upload)}})
+
+  private getDownloadPathForUpload = (file: Upload) =>
+    `raw/${file.uuid}/${file.filename}`
+
+  private addDownloadUrlToUpload = (upload: InstrumentUpload | ModelUpload) =>
+    ({...upload, ...{downloadUrl: `${env.DP_BACKEND_URL}/download/${this.getDownloadPathForUpload(upload)}`}})
 
 
   validateMetadata: RequestHandler = async (req, res, next) => {

@@ -38,7 +38,7 @@ export const wait = async (ms: number) => new Promise((resolve, _) => setTimeout
 
 export const genResponse = (status: any, data: any) => ({response: {status, data}})
 
-const backendUrl = process.env.DP_BACKEND_URL
+const backendUrl = process.env.DP_BACKEND_URL.replace('/api', '')
 export const publicDir = 'tests/data/public'
 export const backendProtectedUrl = `${backendUrl}/protected/`
 export const backendPublicUrl = `${backendUrl}/api/`
@@ -54,3 +54,6 @@ export const visualizationPayloads = [  {
   sourceFileId: '7a9c3894ef7e43d9aa7da3f25017acec',
   variableId: 'classification-target_classification'
 } ]
+
+export const str2base64 = (hex: string) =>
+  Buffer.from(hex, 'utf8').toString('base64')

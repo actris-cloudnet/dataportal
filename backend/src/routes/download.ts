@@ -5,17 +5,18 @@ import {Connection, Repository} from 'typeorm'
 import {File, RegularFile} from '../entity/File'
 import {Upload} from '../entity/Upload'
 import {Download, ObjectType} from '../entity/Download'
-import {getBucketForFile, ssAuthString} from '../lib'
+import {getBucketForFile, getS3keyForUpload, ssAuthString} from '../lib'
 import * as http from 'http'
 import {IncomingMessage} from 'http'
 import archiver = require('archiver')
 import {FileRoutes} from './file'
 import env from '../lib/env'
 import {CollectionRoutes} from './collection'
+import {UploadRoutes} from './upload'
 
 export class DownloadRoutes {
 
-  constructor(conn: Connection, fileController: FileRoutes, collController: CollectionRoutes) {
+  constructor(conn: Connection, fileController: FileRoutes, collController: CollectionRoutes, uploadController) {
     this.conn = conn
     this.collectionRepo = conn.getRepository<Collection>('collection')
     this.uploadRepo = conn.getRepository<Upload>('upload')
@@ -23,6 +24,7 @@ export class DownloadRoutes {
     this.fileRepo = conn.getRepository<RegularFile>('regular_file')
     this.fileController = fileController
     this.collController = collController
+    this.uploadController = uploadController
   }
 
   readonly conn: Connection
@@ -31,6 +33,7 @@ export class DownloadRoutes {
   readonly uploadRepo: Repository<Upload>
   readonly downloadRepo: Repository<Download>
   readonly fileController: FileRoutes
+  readonly uploadController: UploadRoutes
   readonly collController: CollectionRoutes
 
   product: RequestHandler = async (req, res, next) => {
@@ -42,6 +45,23 @@ export class DownloadRoutes {
       res.setHeader('Content-Type', 'application/octet-stream')
       res.setHeader('Content-Length', file.size)
       const dl = new Download(ObjectType.Product, file.uuid, req.header('x-forwarded-for') || '')
+      await this.downloadRepo.save(dl)
+      upstreamRes.pipe(res, {end: true})
+    } catch (e) {
+      next({status: 500, errors: e})
+    }
+  }
+
+  raw: RequestHandler = async (req, res, next) => {
+    const filename = req.params[0]
+    try {
+      const file = await this.uploadController.findAnyUpload(repo =>
+        repo.findOne({uuid: req.params.uuid, filename}, {relations: ['site']}))
+      if (file === undefined) return next({status: 404, errors: ['File not found']})
+      const upstreamRes = await this.makeRawFileRequest(file)
+      res.setHeader('Content-Type', 'application/octet-stream')
+      res.setHeader('Content-Length', file.size)
+      const dl = new Download(ObjectType.Raw, file.uuid, req.header('x-forwarded-for') || '')
       await this.downloadRepo.save(dl)
       upstreamRes.pipe(res, {end: true})
     } catch (e) {
@@ -105,6 +125,11 @@ export class DownloadRoutes {
   private makeFileRequest(file: File): Promise<IncomingMessage> {
     const bucket = getBucketForFile(file)
     return this.makeRequest(bucket, file.s3key)
+  }
+
+  private makeRawFileRequest(file: Upload): Promise<IncomingMessage> {
+    const bucket = 'cloudnet-upload'
+    return this.makeRequest(bucket, getS3keyForUpload(file))
   }
 
   private async makeRequest(bucket: string, s3key: string): Promise<IncomingMessage> {

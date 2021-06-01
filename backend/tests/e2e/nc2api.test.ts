@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 import axios from 'axios'
-import {backendPrivateUrl, backendPublicUrl, storageServiceUrl} from '../lib'
+import {backendPrivateUrl, backendPublicUrl, storageServiceUrl, str2base64} from '../lib'
 import * as AdmZip from 'adm-zip'
 import {createHash} from 'crypto'
 import {Connection, createConnection, Repository} from 'typeorm'
@@ -139,5 +139,40 @@ describe('after PUTting metadata to API', () => {
       fs.unlinkSync(tmpZip)
       return expect(repo.findOne({objectUuid: collectionUuid})).resolves.toBeTruthy()
     })
+  })
+})
+
+describe('after PUTting a raw instrument file', () => {
+  const validMetadata = {
+    filename: 'file1.LV1',
+    measurementDate: '2020-08-11',
+    checksum: '9a0364b9e99bb480dd25e1f0284c8555',
+    instrument: 'mira',
+    site: 'granada'
+  }
+  const rawFile = 'content'
+  const headers = {'authorization': `Basic ${str2base64('granada:lol')}`}
+  const metadataUrl = `${backendPrivateUrl}upload/metadata/`
+  const dataUrl = `${backendPrivateUrl}upload/data/`
+  const uploadUrl = `${dataUrl}${validMetadata.checksum}`
+
+  beforeAll(async () => {
+    await conn.getRepository('instrument_upload').delete({})
+    await conn.getRepository('download').delete({})
+    await axios.post(metadataUrl, validMetadata, {headers})
+    return axios.put(uploadUrl, rawFile, {headers})
+  })
+
+  it('serves the file and increases download count', async () => {
+    const {data} = await axios.get(`${backendPrivateUrl}upload/metadata/${validMetadata.checksum}`, {headers})
+    return axios
+      .get(data.downloadUrl, {responseType: 'arraybuffer'})
+      .then(response => {
+        expect(response.status).toEqual(200)
+        const hash = createHash('md5')
+        hash.update(response.data)
+        expect(hash.digest('hex')).toEqual(validMetadata.checksum)
+        return expect(repo.findOne({objectUuid: data.uuid})).resolves.toBeTruthy()
+      })
   })
 })
