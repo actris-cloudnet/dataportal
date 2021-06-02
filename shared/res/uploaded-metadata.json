@@ -21,8 +21,7 @@
       "id": "mira",
       "type": "radar",
       "humanReadableName": "METEK MIRA-35 cloud radar"
-    },
-    "s3key": "granada/b8e96ee1-d3e1-49ba-a557-c131d56beeab/file1-dc460da4ad72c48223.LV1"
+    }
   },
   {
     "uuid": "b4633e6b-a3fc-4d55-b9f4-8033b4896117",
@@ -46,8 +45,7 @@
       "id": "chm15k",
       "type": "lidar",
       "humanReadableName": "Lufft CHM15k ceilometer"
-    },
-    "s3key": "bucharest/b4633e6b-a3fc-4d55-b9f4-8033b4896117/file4-ab460da4ad72c48223.LV1"
+    }
   },
   {
     "uuid": "5bc638ba-d38f-4b98-b771-3f16ec59570b",
@@ -71,8 +69,7 @@
       "id": "chm15k",
       "type": "lidar",
       "humanReadableName": "Lufft CHM15k ceilometer"
-    },
-    "s3key": "bucharest/5bc638ba-d38f-4b98-b771-3f16ec59570b/file3-ab460da4ad72c48223.LV1"
+    }
   },
   {
     "uuid": "1fa2b98c-e415-4e5e-b73d-87d050e2c61c",
@@ -96,7 +93,6 @@
       "id": "mira",
       "type": "radar",
       "humanReadableName": "METEK MIRA-35 cloud radar"
-    },
-    "s3key": "bucharest/1fa2b98c-e415-4e5e-b73d-87d050e2c61c/file4-ab460da4ad72c48223.LV1"
+    }
   }
 ]

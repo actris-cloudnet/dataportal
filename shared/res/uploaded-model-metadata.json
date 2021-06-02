@@ -20,8 +20,7 @@
     "model": {
       "id": "ecmwf",
       "optimumOrder": 0
-    },
-    "s3key": "granada/1bb32743-faf0-4057-9076-ed2e698dcf26/20100102_granada_ecmwf.nc"
+    }
   },
   {
     "uuid": "1bb32748-faf0-4057-9076-ed2e698dcf31",
@@ -44,8 +43,7 @@
     "model": {
       "id": "ecmwf",
       "optimumOrder": 0
-    },
-    "s3key": "mace-head/1bb32748-faf0-4057-9076-ed2e698dcf31/20141205_mace-head_ecmwf.nc"
+    }
   },
   {
     "uuid": "1bb32744-faf0-4057-9076-ed2e698dcf16",
@@ -68,8 +66,7 @@
     "model": {
       "id": "icon-iglo-12-23",
       "optimumOrder": 1
-    },
-    "s3key": "granada/1bb32744-faf0-4057-9076-ed2e698dcf16/20180126_granada_icon-iglo-12-23.nc"
+    }
   },
   {
     "uuid": "1bb32742-faf0-4057-9076-ed2e698dcf33",
@@ -92,8 +89,7 @@
     "model": {
       "id": "icon-iglo-12-23",
       "optimumOrder": 1
-    },
-    "s3key": "bucharest/1bb32742-faf0-4057-9076-ed2e698dcf33/20200122_bucharest_icon-iglo-12-23.nc"
+    }
   },
   {
     "uuid": "1bb32741-faf0-4057-9076-ed2e698dcf32",
@@ -116,7 +112,6 @@
     "model": {
       "id": "ecmwf",
       "optimumOrder": 0
-    },
-    "s3key": "granada/1bb32741-faf0-4057-9076-ed2e698dcf32/20200126_granada_ecmwf.nc"
+    }
   }
 ]
