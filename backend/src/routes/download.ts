@@ -16,7 +16,8 @@ import {UploadRoutes} from './upload'
 
 export class DownloadRoutes {
 
-  constructor(conn: Connection, fileController: FileRoutes, collController: CollectionRoutes, uploadController) {
+  constructor(conn: Connection, fileController: FileRoutes, collController: CollectionRoutes,
+    uploadController: UploadRoutes) {
     this.conn = conn
     this.collectionRepo = conn.getRepository<Collection>('collection')
     this.uploadRepo = conn.getRepository<Upload>('upload')
