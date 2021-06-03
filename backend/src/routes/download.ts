@@ -125,7 +125,7 @@ export class DownloadRoutes {
 
   private makeFileRequest(file: File): Promise<IncomingMessage> {
     const bucket = getBucketForFile(file)
-    return this.makeRequest(bucket, file.s3key)
+    return this.makeRequest(bucket, file.s3key, file.version)
   }
 
   private makeRawFileRequest(file: Upload): Promise<IncomingMessage> {
@@ -133,15 +133,20 @@ export class DownloadRoutes {
     return this.makeRequest(bucket, getS3keyForUpload(file))
   }
 
-  private async makeRequest(bucket: string, s3key: string): Promise<IncomingMessage> {
+  private async makeRequest(bucket: string, s3key: string, version?: string): Promise<IncomingMessage> {
     let headers = {
       'Authorization': ssAuthString()
+    }
+
+    let path = `/${bucket}/${s3key}`
+    if (version) {
+      path = `${path}?version=${version}`
     }
 
     const requestOptions = {
       host: env.DP_SS_HOST,
       port: env.DP_SS_PORT,
-      path: `/${bucket}/${s3key}`,
+      path,
       headers,
       method: 'GET'
     }
