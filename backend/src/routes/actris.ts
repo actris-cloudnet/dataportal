@@ -62,10 +62,10 @@ export class ActrisRoutes {
       'md_identification': { // mandatory
         'abstract': this.createTitle(origfile), // mandatory
         'title': this.createTitle(origfile), // mandatory
-        'identifier': file.pid ? {
-          'id': file.pid,
-          'type': 'N/A'
-        } : undefined, // optional
+        'identifier': { // mandatory
+          'id': file.pid.replace('https://hdl.handle.net/', '') || null,
+          'type': file.pid ? 'Handle' : 'N/A'
+        },
         'date': new Date(file.measurementDate), // mandatory
         'date_type': 'creation', // mandatory, fixed list ['publication', 'revision', 'creation'
         'contact': [{ // mandatory
