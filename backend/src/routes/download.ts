@@ -5,7 +5,7 @@ import {Connection, Repository} from 'typeorm'
 import {File, RegularFile} from '../entity/File'
 import {Upload} from '../entity/Upload'
 import {Download, ObjectType} from '../entity/Download'
-import {getBucketForFile, getS3keyForUpload, ssAuthString} from '../lib'
+import {getBucketForFile, getS3pathForFile, getS3pathForUpload, ssAuthString} from '../lib'
 import * as http from 'http'
 import {IncomingMessage} from 'http'
 import archiver = require('archiver')
@@ -124,29 +124,26 @@ export class DownloadRoutes {
   }
 
   private makeFileRequest(file: File): Promise<IncomingMessage> {
-    const bucket = getBucketForFile(file)
-    return this.makeRequest(bucket, file.s3key, file.version)
+    return this.makeRequest(getS3pathForFile(file), file.version)
   }
 
   private makeRawFileRequest(file: Upload): Promise<IncomingMessage> {
-    const bucket = 'cloudnet-upload'
-    return this.makeRequest(bucket, getS3keyForUpload(file))
+    return this.makeRequest(getS3pathForUpload(file))
   }
 
-  private async makeRequest(bucket: string, s3key: string, version?: string): Promise<IncomingMessage> {
+  private async makeRequest(s3path: string, version?: string): Promise<IncomingMessage> {
     let headers = {
       'Authorization': ssAuthString()
     }
 
-    let path = `/${bucket}/${s3key}`
     if (version) {
-      path = `${path}?version=${version}`
+      s3path= `${s3path}?version=${version}`
     }
 
     const requestOptions = {
       host: env.DP_SS_HOST,
       port: env.DP_SS_PORT,
-      path,
+      path: s3path,
       headers,
       method: 'GET'
     }

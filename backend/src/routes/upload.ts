@@ -4,7 +4,7 @@ import {Connection, Repository} from 'typeorm'
 import {Request, RequestHandler, Response} from 'express'
 import {
   fetchAll, getDownloadPathForFile,
-  getS3keyForUpload,
+  getS3keyForUpload, getS3pathForUpload,
   isValidDate,
   ssAuthString,
   toArray,
@@ -203,7 +203,7 @@ export class UploadRoutes {
       if (!upload) return next({status: 400, errors: 'No metadata matches this hash'})
       if (upload.status != Status.CREATED) return res.sendStatus(200) // Already uploaded
 
-      const {status, body} = await this.makeRequest(getS3keyForUpload(upload), checksum, req)
+      const {status, body} = await this.makeRequest(getS3pathForUpload(upload), checksum, req)
 
       await this.findRepoForUpload(upload).update({checksum: checksum},
         {status: Status.UPLOADED, updatedAt: new Date(), size: body.size}
@@ -218,7 +218,7 @@ export class UploadRoutes {
     }
   }
 
-  private async makeRequest(key: string, checksum: string, inputStream: ReadableStream):
+  private async makeRequest(s3path: string, checksum: string, inputStream: ReadableStream):
     Promise<{status: number, body: any}> {
 
     let headers = {
@@ -229,7 +229,7 @@ export class UploadRoutes {
     const requestOptions = {
       host: env.DP_SS_HOST,
       port: env.DP_SS_PORT,
-      path: `/cloudnet-upload/${key}`,
+      path: s3path,
       headers,
       method: 'PUT'
     }
@@ -294,7 +294,10 @@ export class UploadRoutes {
     `raw/${file.uuid}/${file.filename}`
 
   private addDownloadUrlToUpload = (upload: InstrumentUpload | ModelUpload) =>
-    ({...upload, ...{downloadUrl: `${env.DP_BACKEND_URL}/download/${this.getDownloadPathForUpload(upload)}`}})
+    ({...upload, ...{
+      downloadUrl: `${env.DP_BACKEND_URL}/download/${this.getDownloadPathForUpload(upload)}`,
+      s3path: getS3pathForUpload(upload)
+    }})
 
 
   validateMetadata: RequestHandler = async (req, res, next) => {

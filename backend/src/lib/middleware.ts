@@ -47,7 +47,7 @@ export class Middleware {
 
     let validKeys = ['site', 'volatile', 'product', 'dateFrom', 'dateTo', 'developer',
       'releasedBefore', 'allVersions', 'limit', 'showLegacy', 'model', 'allModels', 'date', 'filename', 'properties',
-      'updatedAtFrom', 'updatedAtTo']
+      'updatedAtFrom', 'updatedAtTo', 's3path']
 
     if (req.path.includes('visualization')) validKeys.push('variable')
 
@@ -97,6 +97,7 @@ export class Middleware {
     query.volatile = toArray(query.volatile)
     query.filename = toArray(query.filename)
     query.legacy = setLegacy()
+    query.s3path = (query.s3path || '').toLowerCase() == 'true' ? true : false
     next()
   }
 

@@ -48,7 +48,7 @@ export class FileRoutes {
     this.findAnyFile(getFileByUuid)
       .then(file => {
         if (file == null) return next({ status: 404, errors: ['No files match this UUID'] })
-        res.send(augmentFile(file))
+        res.send(augmentFile(false)(file))
       })
       .catch(err => next(err))
   }
@@ -57,7 +57,7 @@ export class FileRoutes {
     const query = req.query
     this.filesQueryBuilder(query, 'file')
       .stream()
-      .then(stream => fileStreamHandler(stream, res, augmentFile))
+      .then(stream => fileStreamHandler(stream, res, augmentFile(query.s3path as boolean)))
       .catch(err => {
         next({ status: 500, errors: err })
       })
@@ -67,7 +67,7 @@ export class FileRoutes {
     const query = req.query
     this.filesQueryBuilder(query, 'model')
       .stream()
-      .then(stream => fileStreamHandler(stream, res, augmentFile))
+      .then(stream => fileStreamHandler(stream, res, augmentFile(query.s3path as boolean)))
       .catch(err => {
         next({ status: 500, errors: err })
       })
@@ -189,7 +189,7 @@ export class FileRoutes {
 
   allfiles: RequestHandler = async (req: Request, res: Response, next) =>
     this.fileRepo.find({ relations: ['site', 'product'] })
-      .then(result => res.send(sortByMeasurementDateAsc(result).map(augmentFile)))
+      .then(result => res.send(sortByMeasurementDateAsc(result).map(augmentFile(false))))
       .catch(err => next({ status: 500, errors: err }))
 
   allsearch: RequestHandler = async (req: Request, res: Response, next) =>

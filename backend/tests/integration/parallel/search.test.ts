@@ -166,6 +166,13 @@ describe('/api/files', () => {
     return expect(axios.get(url, payload)).resolves.toMatchObject({data: [{legacy: true}]})
   })
 
+  it('includes s3path when requested', async () => {
+    const payload = {params: {site: 'bucharest', product: 'classification', dateFrom: '2009-01-01', dateTo: '2010-01-01',
+      showLegacy: true, s3path: true}}
+    const res = await axios.get(url, payload)
+    return expect(res.data[0]).toMatchObject({ s3path: '/cloudnet-product/legacy/20090716_bucharest_classification.nc'})
+  })
+
   it('responds with data for one day when using the date parameter', async () => {
     const payload = {params: {date: '2018-11-15'}}
     const res = await axios.get(url, payload)
@@ -223,6 +230,12 @@ describe('/api/model-files', () => {
     const res = await axios.get(url, payload)
     expect(res.data).toHaveLength(1)
     return expect(res.data[0]).toMatchObject({ model: {id: 'ecmwf'}})
+  })
+
+  it('includes s3path when requests', async () => {
+    const payload = {params: {site: 'bucharest', dateFrom: '2020-12-05', dateTo: '2020-12-05', s3path: true}}
+    const res = await axios.get(url, payload)
+    return expect(res.data[0]).toMatchObject({ s3path: '/cloudnet-product-volatile/20141205_mace-head_ecmwf.nc'})
   })
 
   it('responds with the specified model file', async () => {
