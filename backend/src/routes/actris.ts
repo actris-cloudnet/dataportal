@@ -133,8 +133,8 @@ export class ActrisRoutes {
         'instrument_type': [(file.product.level == '2') || (file.product.id == 'model') ? 'UNKNOWN' : file.product], // mandatory
         'program_affiliation': ['ACTRIS'], // mandatory, fixed list ['ACTRIS', 'AMAP', 'AMAP_public','EUSAAR','EMEP','ACTRIS_preliminary','GAW-WDCA','GAW-WDCRG','NOAA-ESRL']
         'legacy_data': false, // mandatory
-        'data_level': file.product.level, // mandatory, fixed list [0, 1, 2, 3]
-        'data_sublevel': null, // optional
+        'data_level': file.product.level[0],   // mandatory, fixed list [0, 1, 2, 3]
+        'data_sublevel': file.product.level[1] || null,  // optional
         'data_product': 'near-realtime-data' // mandatory, need fixed list e.g. ['higher level data','quality assured data', 'near-realtime-data']
       },
       'dq_data_quality_information': { // optional
