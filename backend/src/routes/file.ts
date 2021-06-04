@@ -5,7 +5,7 @@ import {isFile, RegularFile} from '../entity/File'
 import {
   checkFileExists, convertToReducedResponse,
   convertToSearchResponse,
-  getBucketForFile,
+  getS3pathForFile,
   hideTestDataFromNormalUsers,
   sortByMeasurementDateAsc, toArray, transformRawFile
 } from '../lib'
@@ -104,7 +104,7 @@ export class FileRoutes {
     }
 
     try {
-      await checkFileExists(getBucketForFile(file), file.s3key)
+      await checkFileExists(getS3pathForFile(file))
     } catch (e) {
       console.error(e)
       return next({status: 400, errors: ['The specified file was not found in storage service']})

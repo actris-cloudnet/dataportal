@@ -97,14 +97,17 @@ export const getS3pathForUpload = (upload: Upload) =>
 export const getS3pathForFile = (file: File) =>
   `/${getBucketForFile(file)}/${file.s3key}`
 
+export const getS3pathForImage = (s3key: string) =>
+  `/cloudnet-img/${s3key}`
+
 export const getDownloadPathForFile = (file: File) =>
   `product/${file.uuid}/${file.s3key}`
 
-export async function checkFileExists(bucket: string, s3key: string) {
+export async function checkFileExists(s3path: string) {
   let headers = {
     'Authorization': ssAuthString()
   }
-  return axios.head(`${env.DP_SS_URL}/${bucket}/${s3key}`, {headers})
+  return axios.head(`${env.DP_SS_URL}${s3path}`, {headers})
 }
 
 // File stream handling

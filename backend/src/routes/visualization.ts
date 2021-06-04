@@ -1,6 +1,6 @@
 import {Request, RequestHandler, Response} from 'express'
 import {Connection, Repository} from 'typeorm'
-import {checkFileExists, hideTestDataFromNormalUsers, rowExists} from '../lib'
+import {checkFileExists, getS3pathForImage, hideTestDataFromNormalUsers, rowExists} from '../lib'
 import {Visualization} from '../entity/Visualization'
 import {VisualizationResponse} from '../entity/VisualizationResponse'
 import {FileRoutes} from './file'
@@ -34,7 +34,7 @@ export class VisualizationRoutes {
     Promise.all([
       this.fileController.findAnyFile(repo => repo.findOne(body.sourceFileId, {relations: ['product']})),
       this.productVariableRepo.findOneOrFail(body.variableId),
-      checkFileExists('cloudnet-img', s3key)
+      checkFileExists(getS3pathForImage(s3key))
     ])
       .then(([file, productVariable, _]) => {
         if (!file) throw Error('Source file not found')

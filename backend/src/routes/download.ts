@@ -5,7 +5,7 @@ import {Connection, Repository} from 'typeorm'
 import {File, RegularFile} from '../entity/File'
 import {Upload} from '../entity/Upload'
 import {Download, ObjectType} from '../entity/Download'
-import {getBucketForFile, getS3pathForFile, getS3pathForUpload, ssAuthString} from '../lib'
+import {getS3pathForFile, getS3pathForImage, getS3pathForUpload, ssAuthString} from '../lib'
 import * as http from 'http'
 import {IncomingMessage} from 'http'
 import archiver = require('archiver')
@@ -110,7 +110,7 @@ export class DownloadRoutes {
   image: RequestHandler = async (req, res, next) => {
     const s3key = req.params[0]
     try {
-      const upstreamRes = await this.makeRequest('cloudnet-img', s3key)
+      const upstreamRes = await this.makeRequest(getS3pathForImage(s3key))
       if (upstreamRes.statusCode != 200) {
         res.status(upstreamRes.statusCode || 500)
         res.setHeader('Content-Type', 'text/plain')
