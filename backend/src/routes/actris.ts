@@ -110,7 +110,9 @@ export class ActrisRoutes {
         'unit_of_measure': 'm above sea level' // optional
       },
       'md_content_information': { // mandatory
-        'attribute_descriptions': file.product.variables.map(variable => variable.id.replace(/[-_]/g, '.')), // mandatory, list of parameters
+        'attribute_descriptions': file.product.variables
+          .map(variable => variable.id.replace(/[-_]/g, '.')) // mandatory, list of parameters
+          .map(variable => variable.replace(/^(.*?)\./, '')),
         'content_type': 'physicalMeasurement' // mandatory, fixed list ['image','thematicClassification','physicalMeasurement']
       },
       'md_distribution_information': { // mandatory
