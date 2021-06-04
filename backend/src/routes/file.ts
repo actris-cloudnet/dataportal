@@ -54,20 +54,20 @@ export class FileRoutes {
   }
 
   files: RequestHandler = async (req: Request, res: Response, next) => {
-    const query = req.query
+    const query = req.query as any
     this.filesQueryBuilder(query, 'file')
       .stream()
-      .then(stream => fileStreamHandler(stream, res, augmentFile(query.s3path as boolean)))
+      .then(stream => fileStreamHandler(stream, res, augmentFile(query.s3path)))
       .catch(err => {
         next({ status: 500, errors: err })
       })
   }
 
   modelFiles: RequestHandler = async (req: Request, res: Response, next) => {
-    const query = req.query
+    const query = req.query as any
     this.filesQueryBuilder(query, 'model')
       .stream()
-      .then(stream => fileStreamHandler(stream, res, augmentFile(query.s3path as boolean)))
+      .then(stream => fileStreamHandler(stream, res, augmentFile(query.s3path)))
       .catch(err => {
         next({ status: 500, errors: err })
       })

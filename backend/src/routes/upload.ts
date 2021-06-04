@@ -3,8 +3,8 @@ import {InstrumentUpload, ModelUpload, Status, Upload} from '../entity/Upload'
 import {Connection, Repository} from 'typeorm'
 import {Request, RequestHandler, Response} from 'express'
 import {
-  fetchAll, getDownloadPathForFile,
-  getS3keyForUpload, getS3pathForUpload,
+  fetchAll,
+  getS3pathForUpload,
   isValidDate,
   ssAuthString,
   toArray,
