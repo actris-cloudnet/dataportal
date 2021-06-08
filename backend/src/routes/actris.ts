@@ -2,6 +2,8 @@ import {ModelFile, RegularFile} from '../entity/File'
 import {augmentFile} from '../lib'
 import {Request, RequestHandler, Response} from 'express'
 import {Connection, Repository} from 'typeorm'
+import {SiteType} from '../entity/Site'
+import {Product} from '../entity/Product'
 
 export class ActrisRoutes {
 
@@ -92,7 +94,7 @@ export class ActrisRoutes {
         'language': 'en', // mandatory
         'topic_category': 'climatologyMeteorologyAtmosphere', // mandatory
         'description': 'time series of point measurements', // mandatory
-        'station_identifier': 'INO' // mandatory, fixed list will be provided
+        'station_identifier': site.gaw // mandatory, fixed list will be provided
       },
       'ex_geographic_bounding_box': { // mandatory
         'west_bound_longitude': site.longitude, // mandatory
@@ -132,8 +134,8 @@ export class ActrisRoutes {
         'product_type': file.product.id == 'model' ? 'model' : 'observation', // mandatory ["model", "observation", "fundamental_parameter"]
         'matrix': 'cloud', // mandatory ["cloud", "gas", "particle", "met"]
         'sub_matrix': 'Unknown', // mandatory
-        'instrument_type': [(file.product.level == '2') || (file.product.id == 'model') ? 'UNKNOWN' : file.product], // mandatory
-        'program_affiliation': ['ACTRIS'], // mandatory, fixed list ['ACTRIS', 'AMAP', 'AMAP_public','EUSAAR','EMEP','ACTRIS_preliminary','GAW-WDCA','GAW-WDCRG','NOAA-ESRL']
+        'instrument_type': findInstrumentType(file.product), // mandatory
+        'program_affiliation': findAffiliation(site.type), // mandatory list, see https://prod-actris-md.nilu.no/Networks
         'legacy_data': file.legacy, // mandatory
         'data_level': file.product.level[0],   // mandatory, fixed list [0, 1, 2, 3]
         'data_sublevel': file.product.level[1] || null,  // optional
@@ -153,4 +155,17 @@ export class ActrisRoutes {
     ])
       .then(([file, modelFile]) => file ? file : modelFile)
   }
+}
+
+function findAffiliation(siteType: SiteType[]): Array<any> {
+  let affiliation = ['CLOUDNET']
+  if (siteType.includes(<SiteType>'arm')) affiliation.push('ARM')
+  if (siteType.includes(<SiteType>'cloudnet')) affiliation.push('ACTRIS_NRT')
+  return affiliation
+}
+
+function findInstrumentType(product: Product): Array<any> {
+  if (product.id === 'model') return ['UNKNOWN']
+  else if (product.level === '1b') return [product.id]
+  else return ['radar', 'lidar', 'mwr']
 }
