@@ -323,7 +323,7 @@ function isValidFilename(file: any) {
   const [date, site] = basename(file.s3key).split('.')[0].split('_')
   return (
     file.measurementDate.replace(/-/g, '') == date
-    && file.site == site
+    && (file.site == site || typeof file.site == 'object')
   )
 }
 

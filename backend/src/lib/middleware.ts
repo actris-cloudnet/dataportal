@@ -97,6 +97,8 @@ export class Middleware {
     query.volatile = toArray(query.volatile)
     query.filename = toArray(query.filename)
     query.legacy = setLegacy()
+    if (query.updatedAtTo) query.updatedAtTo = new Date(query.updatedAtTo)
+    if (query.updatedAtFrom) query.updatedAtFrom = new Date(query.updatedAtFrom)
     query.s3path = (query.s3path || '').toLowerCase() == 'true' ? true : false
     next()
   }

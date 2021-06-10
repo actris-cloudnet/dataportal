@@ -262,8 +262,8 @@ export class UploadRoutes {
       dateTo: query.dateTo || tomorrow(),
       instrument: model ? undefined : query.instrument,
       model: model ? query.model : undefined,
-      updatedAtFrom: query.updatedAtFrom || '1970-01-01T00:00:00.000Z',
-      updatedAtTo: query.updatedAtTo || tomorrow()
+      updatedAtFrom: query.updatedAtFrom ? new Date(query.updatedAtFrom) : '1970-01-01T00:00:00.000Z',
+      updatedAtTo: query.updatedAtTo ? new Date(query.updatedAtTo) : tomorrow()
     }
 
     const fieldsToArray = ['site', 'status', 'instrument', 'model']
