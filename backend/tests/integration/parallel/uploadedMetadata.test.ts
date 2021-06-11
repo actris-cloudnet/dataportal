@@ -56,6 +56,10 @@ describe('GET /upload-metadata', () => {
   it('responds with correct object when filtering with instrument', async () => {
     return expect(axios.get(`${privateUrl}`, {params: {instrument: 'mira'}})).resolves.toMatchObject({status: 200, data: [instResp[0], instResp[3]]})
   })
+
+  it('responds with correct object when filtering with updatedAt', async () => {
+    return expect(axios.get(`${privateUrl}`, {params: {updatedAtFrom: '2020-09-27T00:00:00.000Z', updatedAtTo: '2020-09-28T00:00:00.000Z'}})).resolves.toMatchObject({status: 200, data: [instResp[0]]})
+  })
 })
 
 describe('GET /upload-model-metadata', () => {

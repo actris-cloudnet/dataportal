@@ -5,17 +5,19 @@ import {Connection, Repository} from 'typeorm'
 import {File, RegularFile} from '../entity/File'
 import {Upload} from '../entity/Upload'
 import {Download, ObjectType} from '../entity/Download'
-import {getBucketForFile, ssAuthString} from '../lib'
+import {getS3pathForFile, getS3pathForImage, getS3pathForUpload, ssAuthString} from '../lib'
 import * as http from 'http'
 import {IncomingMessage} from 'http'
 import archiver = require('archiver')
 import {FileRoutes} from './file'
 import env from '../lib/env'
 import {CollectionRoutes} from './collection'
+import {UploadRoutes} from './upload'
 
 export class DownloadRoutes {
 
-  constructor(conn: Connection, fileController: FileRoutes, collController: CollectionRoutes) {
+  constructor(conn: Connection, fileController: FileRoutes, collController: CollectionRoutes,
+    uploadController: UploadRoutes) {
     this.conn = conn
     this.collectionRepo = conn.getRepository<Collection>('collection')
     this.uploadRepo = conn.getRepository<Upload>('upload')
@@ -23,6 +25,7 @@ export class DownloadRoutes {
     this.fileRepo = conn.getRepository<RegularFile>('regular_file')
     this.fileController = fileController
     this.collController = collController
+    this.uploadController = uploadController
   }
 
   readonly conn: Connection
@@ -31,6 +34,7 @@ export class DownloadRoutes {
   readonly uploadRepo: Repository<Upload>
   readonly downloadRepo: Repository<Download>
   readonly fileController: FileRoutes
+  readonly uploadController: UploadRoutes
   readonly collController: CollectionRoutes
 
   product: RequestHandler = async (req, res, next) => {
@@ -42,6 +46,23 @@ export class DownloadRoutes {
       res.setHeader('Content-Type', 'application/octet-stream')
       res.setHeader('Content-Length', file.size)
       const dl = new Download(ObjectType.Product, file.uuid, req.header('x-forwarded-for') || '')
+      await this.downloadRepo.save(dl)
+      upstreamRes.pipe(res, {end: true})
+    } catch (e) {
+      next({status: 500, errors: e})
+    }
+  }
+
+  raw: RequestHandler = async (req, res, next) => {
+    const filename = req.params[0]
+    try {
+      const file = await this.uploadController.findAnyUpload(repo =>
+        repo.findOne({uuid: req.params.uuid, filename}, {relations: ['site']}))
+      if (file === undefined) return next({status: 404, errors: ['File not found']})
+      const upstreamRes = await this.makeRawFileRequest(file)
+      res.setHeader('Content-Type', 'application/octet-stream')
+      res.setHeader('Content-Length', file.size)
+      const dl = new Download(ObjectType.Raw, file.uuid, req.header('x-forwarded-for') || '')
       await this.downloadRepo.save(dl)
       upstreamRes.pipe(res, {end: true})
     } catch (e) {
@@ -89,7 +110,7 @@ export class DownloadRoutes {
   image: RequestHandler = async (req, res, next) => {
     const s3key = req.params[0]
     try {
-      const upstreamRes = await this.makeRequest('cloudnet-img', s3key)
+      const upstreamRes = await this.makeRequest(getS3pathForImage(s3key))
       if (upstreamRes.statusCode != 200) {
         res.status(upstreamRes.statusCode || 500)
         res.setHeader('Content-Type', 'text/plain')
@@ -103,19 +124,26 @@ export class DownloadRoutes {
   }
 
   private makeFileRequest(file: File): Promise<IncomingMessage> {
-    const bucket = getBucketForFile(file)
-    return this.makeRequest(bucket, file.s3key)
+    return this.makeRequest(getS3pathForFile(file), file.version)
   }
 
-  private async makeRequest(bucket: string, s3key: string): Promise<IncomingMessage> {
+  private makeRawFileRequest(file: Upload): Promise<IncomingMessage> {
+    return this.makeRequest(getS3pathForUpload(file))
+  }
+
+  private async makeRequest(s3path: string, version?: string): Promise<IncomingMessage> {
     let headers = {
       'Authorization': ssAuthString()
+    }
+
+    if (version) {
+      s3path= `${s3path}?version=${version}`
     }
 
     const requestOptions = {
       host: env.DP_SS_HOST,
       port: env.DP_SS_PORT,
-      path: `/${bucket}/${s3key}`,
+      path: s3path,
       headers,
       method: 'GET'
     }

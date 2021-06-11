@@ -1,6 +1,6 @@
 import axios from 'axios'
 import {Connection, createConnection} from 'typeorm/'
-import {backendPrivateUrl} from '../../lib'
+import {backendPrivateUrl, str2base64} from '../../lib'
 import {Status} from '../../../src/entity/Upload'
 import {promises as fsp} from 'fs'
 
@@ -46,8 +46,6 @@ const validModelMetadata = {
   site: 'bucharest'
 }
 
-const str2base64 = (hex: string) =>
-  Buffer.from(hex, 'utf8').toString('base64')
 const headers = {'authorization': `Basic ${str2base64('granada:lol')}`}
 
 beforeAll(async () => {

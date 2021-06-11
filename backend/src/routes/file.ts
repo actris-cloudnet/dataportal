@@ -5,7 +5,7 @@ import {isFile, RegularFile} from '../entity/File'
 import {
   checkFileExists, convertToReducedResponse,
   convertToSearchResponse,
-  getBucketForFile,
+  getS3pathForFile,
   hideTestDataFromNormalUsers,
   sortByMeasurementDateAsc, toArray, transformRawFile
 } from '../lib'
@@ -48,26 +48,26 @@ export class FileRoutes {
     this.findAnyFile(getFileByUuid)
       .then(file => {
         if (file == null) return next({ status: 404, errors: ['No files match this UUID'] })
-        res.send(augmentFile(file))
+        res.send(augmentFile(false)(file))
       })
       .catch(err => next(err))
   }
 
   files: RequestHandler = async (req: Request, res: Response, next) => {
-    const query = req.query
+    const query = req.query as any
     this.filesQueryBuilder(query, 'file')
       .stream()
-      .then(stream => fileStreamHandler(stream, res, augmentFile))
+      .then(stream => fileStreamHandler(stream, res, augmentFile(query.s3path)))
       .catch(err => {
         next({ status: 500, errors: err })
       })
   }
 
   modelFiles: RequestHandler = async (req: Request, res: Response, next) => {
-    const query = req.query
+    const query = req.query as any
     this.filesQueryBuilder(query, 'model')
       .stream()
-      .then(stream => fileStreamHandler(stream, res, augmentFile))
+      .then(stream => fileStreamHandler(stream, res, augmentFile(query.s3path)))
       .catch(err => {
         next({ status: 500, errors: err })
       })
@@ -104,7 +104,7 @@ export class FileRoutes {
     }
 
     try {
-      await checkFileExists(getBucketForFile(file), file.s3key)
+      await checkFileExists(getS3pathForFile(file))
     } catch (e) {
       console.error(e)
       return next({status: 400, errors: ['The specified file was not found in storage service']})
@@ -189,7 +189,7 @@ export class FileRoutes {
 
   allfiles: RequestHandler = async (req: Request, res: Response, next) =>
     this.fileRepo.find({ relations: ['site', 'product'] })
-      .then(result => res.send(sortByMeasurementDateAsc(result).map(augmentFile)))
+      .then(result => res.send(sortByMeasurementDateAsc(result).map(augmentFile(false))))
       .catch(err => next({ status: 500, errors: err }))
 
   allsearch: RequestHandler = async (req: Request, res: Response, next) =>
@@ -215,6 +215,8 @@ export class FileRoutes {
     if (isModel && query.model) qb.andWhere('model.id IN (:...model)', query)
     if (query.filename) qb.andWhere("regexp_replace(s3key, '.+/', '') IN (:...filename)", query) // eslint-disable-line quotes
     if (query.releasedBefore) qb.andWhere('file.updatedAt < :releasedBefore', query)
+    if (query.updatedAtFrom) qb.andWhere('file.updatedAt >= :updatedAtFrom', query)
+    if (query.updatedAtTo) qb.andWhere('file.updatedAt <= :updatedAtTo', query)
 
     // No allVersions, allModels or model/filename params (default)
     if (query.allVersions == undefined
@@ -321,7 +323,7 @@ function isValidFilename(file: any) {
   const [date, site] = basename(file.s3key).split('.')[0].split('_')
   return (
     file.measurementDate.replace(/-/g, '') == date
-    && file.site == site
+    && (file.site == site || typeof file.site == 'object')
   )
 }
 

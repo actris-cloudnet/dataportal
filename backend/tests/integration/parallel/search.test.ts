@@ -166,6 +166,13 @@ describe('/api/files', () => {
     return expect(axios.get(url, payload)).resolves.toMatchObject({data: [{legacy: true}]})
   })
 
+  it('includes s3path when requested', async () => {
+    const payload = {params: {site: 'bucharest', product: 'classification', dateFrom: '2009-01-01', dateTo: '2010-01-01',
+      showLegacy: true, s3path: true}}
+    const res = await axios.get(url, payload)
+    return expect(res.data[0]).toMatchObject({ s3path: '/cloudnet-product/legacy/20090716_bucharest_classification.nc'})
+  })
+
   it('responds with data for one day when using the date parameter', async () => {
     const payload = {params: {date: '2018-11-15'}}
     const res = await axios.get(url, payload)
@@ -204,6 +211,15 @@ describe('/api/files', () => {
     return expect(res.data[0]).toMatchObject({ filename })
   })
 
+  it('filters with updatedAt', async () => {
+    const payload = {params: {allVersions: true, showLegacy: true, updatedAtFrom: '2020-02-21T00:00:00.000Z', updatedAtTo: '2020-02-22T00:00:00.000Z'}}
+    const res = await axios.get(url, payload)
+    expect(res.data).toHaveLength(2)
+    expect(res.data[0]).toMatchObject({ uuid: '62b32746-faf0-4057-9076-ed2e698dcc34' })
+    return expect(res.data[1]).toMatchObject({ uuid: '72b32746-faf0-4057-9076-ed2e698dcc34' })
+  })
+
+
 })
 
 describe('/api/model-files', () => {
@@ -214,6 +230,12 @@ describe('/api/model-files', () => {
     const res = await axios.get(url, payload)
     expect(res.data).toHaveLength(1)
     return expect(res.data[0]).toMatchObject({ model: {id: 'ecmwf'}})
+  })
+
+  it('includes s3path when requests', async () => {
+    const payload = {params: {site: 'bucharest', dateFrom: '2020-12-05', dateTo: '2020-12-05', s3path: true}}
+    const res = await axios.get(url, payload)
+    return expect(res.data[0]).toMatchObject({ s3path: '/cloudnet-product-volatile/20141205_mace-head_ecmwf.nc'})
   })
 
   it('responds with the specified model file', async () => {
@@ -254,8 +276,6 @@ describe('/api/model-files', () => {
     }
     return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
-
-
 
 })
 

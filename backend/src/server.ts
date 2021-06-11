@@ -31,7 +31,7 @@ import {CalibrationRoutes} from './routes/calibration'
   const uploadRoutes = new UploadRoutes(conn)
   const collRoutes = new CollectionRoutes(conn)
   const modelRoutes = new ModelRoutes(conn)
-  const dlRoutes = new DownloadRoutes(conn, fileRoutes, collRoutes)
+  const dlRoutes = new DownloadRoutes(conn, fileRoutes, collRoutes, uploadRoutes)
   const calibRoutes = new CalibrationRoutes(conn)
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
@@ -106,6 +106,7 @@ import {CalibrationRoutes} from './routes/calibration'
   app.get('/api/collection/:uuid', middleware.validateUuidParam, collRoutes.collection)
   app.post('/api/generate-pid', express.json(), collRoutes.generatePid)
   app.get('/api/download/product/:uuid/*', middleware.validateUuidParam, dlRoutes.product)
+  app.get('/api/download/raw/:uuid/*', middleware.validateUuidParam, dlRoutes.raw)
   app.get('/api/download/collection/:uuid', middleware.validateUuidParam, dlRoutes.collection)
   app.get('/api/download/image/*', dlRoutes.image)
   app.get('/api/calibration', calibRoutes.calibration)

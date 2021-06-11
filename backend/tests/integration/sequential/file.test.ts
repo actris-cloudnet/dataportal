@@ -331,4 +331,14 @@ describe('POST /files/', () => {
     await putFile(stableFile)
     return expect(putFile(stableFile)).rejects.toMatchObject({response: {status: 403, data: { errors: ['File exists and cannot be updated since it is freezed and not from a test site']}}})
   })
+
+  test('updating version id does not update updatedAt', async () => {
+    await putFile(stableFile)
+    const dbRow1 = await fileRepo.findOneOrFail(stableFile.uuid)
+    const payload = {uuid: stableFile.uuid, version: '999'}
+    await expect(axios.post(`${backendPrivateUrl}files/`, payload)).resolves.toMatchObject({status: 200})
+    const dbRow2 = await fileRepo.findOneOrFail(stableFile.uuid)
+    expect(dbRow2.version).toEqual('999')
+    expect(dbRow2.updatedAt).toEqual(dbRow1.updatedAt)
+  })
 })

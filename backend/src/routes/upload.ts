@@ -1,10 +1,10 @@
 import {Site} from '../entity/Site'
-import {InstrumentUpload, ModelUpload, Status} from '../entity/Upload'
+import {InstrumentUpload, ModelUpload, Status, Upload} from '../entity/Upload'
 import {Connection, Repository} from 'typeorm'
 import {Request, RequestHandler, Response} from 'express'
 import {
   fetchAll,
-  getS3keyForUpload,
+  getS3pathForUpload,
   isValidDate,
   ssAuthString,
   toArray,
@@ -174,7 +174,7 @@ export class UploadRoutes {
       repo.findOne({checksum: checksum}, { relations: ['site', (model ? 'model' : 'instrument')] }))
       .then(upload => {
         if (upload == undefined) return next({ status: 404, errors: 'No metadata was found with provided id'})
-        res.send(this.addS3keyToUpload(upload))
+        res.send(this.addDownloadUrlToUpload(upload))
       })
       .catch(err => next({ status: 500, errors: `Internal server error: ${err.code}`}))
   }
@@ -183,7 +183,7 @@ export class UploadRoutes {
     const isModel = req.path.includes('model')
     const repo = isModel ? this.modelUploadRepo : this.instrumentUploadRepo
     this.metadataQueryBuilder(repo, req.query, false, isModel)
-      .then(uploadedMetadata => res.send(uploadedMetadata.map(this.addS3keyToUpload)))
+      .then(uploadedMetadata => res.send(uploadedMetadata.map(this.addDownloadUrlToUpload)))
       .catch(err => {next({status: 500, errors: `Internal server error: ${err}`})})
   }
 
@@ -203,7 +203,7 @@ export class UploadRoutes {
       if (!upload) return next({status: 400, errors: 'No metadata matches this hash'})
       if (upload.status != Status.CREATED) return res.sendStatus(200) // Already uploaded
 
-      const {status, body} = await this.makeRequest(getS3keyForUpload(upload), checksum, req)
+      const {status, body} = await this.makeRequest(getS3pathForUpload(upload), checksum, req)
 
       await this.findRepoForUpload(upload).update({checksum: checksum},
         {status: Status.UPLOADED, updatedAt: new Date(), size: body.size}
@@ -218,7 +218,7 @@ export class UploadRoutes {
     }
   }
 
-  private async makeRequest(key: string, checksum: string, inputStream: ReadableStream):
+  private async makeRequest(s3path: string, checksum: string, inputStream: ReadableStream):
     Promise<{status: number, body: any}> {
 
     let headers = {
@@ -229,7 +229,7 @@ export class UploadRoutes {
     const requestOptions = {
       host: env.DP_SS_HOST,
       port: env.DP_SS_PORT,
-      path: `/cloudnet-upload/${key}`,
+      path: s3path,
       headers,
       method: 'PUT'
     }
@@ -262,6 +262,8 @@ export class UploadRoutes {
       dateTo: query.dateTo || tomorrow(),
       instrument: model ? undefined : query.instrument,
       model: model ? query.model : undefined,
+      updatedAtFrom: query.updatedAtFrom ? new Date(query.updatedAtFrom) : '1970-01-01T00:00:00.000Z',
+      updatedAtTo: query.updatedAtTo ? new Date(query.updatedAtTo) : tomorrow()
     }
 
     const fieldsToArray = ['site', 'status', 'instrument', 'model']
@@ -276,6 +278,7 @@ export class UploadRoutes {
       qb.leftJoinAndSelect('um.model', 'model')
     }
     qb.where('um.measurementDate >= :dateFrom AND um.measurementDate <= :dateTo', augmentedQuery)
+      .andWhere('um.updatedAt >= :updatedAtFrom AND um.updatedAt <= :updatedAtTo', augmentedQuery)
       .andWhere('site.id IN (:...site)', augmentedQuery)
       .andWhere('um.status IN (:...status)', augmentedQuery)
     if (query.instrument) qb.andWhere('instrument.id IN (:...instrument)', augmentedQuery)
@@ -286,8 +289,15 @@ export class UploadRoutes {
     return qb.getMany()
   }
 
-  private addS3keyToUpload = (upload: InstrumentUpload | ModelUpload) =>
-    ({...upload, ...{s3key: getS3keyForUpload(upload)}})
+
+  private getDownloadPathForUpload = (file: Upload) =>
+    `raw/${file.uuid}/${file.filename}`
+
+  private addDownloadUrlToUpload = (upload: InstrumentUpload | ModelUpload) =>
+    ({...upload, ...{
+      downloadUrl: `${env.DP_BACKEND_URL}/download/${this.getDownloadPathForUpload(upload)}`,
+      s3path: getS3pathForUpload(upload)
+    }})
 
 
   validateMetadata: RequestHandler = async (req, res, next) => {

@@ -116,7 +116,6 @@ export function isFile(obj: any) {
       && 'product' in obj
       && 'checksum' in obj
       && 'size' in obj
-      && typeof obj.size == 'number'
       && 'format' in obj
       && 's3key' in obj
       && 'version' in obj

@@ -74,13 +74,15 @@ export const convertToCollectionFileResponse = (file: RegularFile | ModelFile) =
 export const sortByMeasurementDateAsc = <T extends File|SearchFile>(files: T[]): T[] =>
   files.sort((a, b) => new Date(a.measurementDate).getTime() - new Date(b.measurementDate).getTime())
 
-export const augmentFile = (file: File|RegularFile|ModelFile) => ({
-  ...file,
-  downloadUrl: `${env.DP_BACKEND_URL}/download/${getDownloadPathForFile(file)}`,
-  filename: basename(file.s3key),
-  s3key: undefined,
-  model: 'model' in file ? file.model : undefined
-})
+export const augmentFile = (includeS3path: boolean) =>
+  (file: RegularFile|ModelFile) => ({
+    ...file,
+    downloadUrl: `${env.DP_BACKEND_URL}/download/${getDownloadPathForFile(file)}`,
+    filename: basename(file.s3key),
+    s3key: undefined,
+    s3path: includeS3path ? getS3pathForFile(file) : undefined,
+    model: 'model' in file ? file.model : undefined
+  })
 
 export const ssAuthString = () =>
   'Basic ' + // eslint-disable-line prefer-template
@@ -89,17 +91,23 @@ export const ssAuthString = () =>
 export const getBucketForFile = (file: File) =>
   file.volatile ? 'cloudnet-product-volatile' : 'cloudnet-product'
 
-export const getS3keyForUpload = (upload: Upload) =>
-  `${upload.site.id}/${upload.uuid}/${upload.filename}`
+export const getS3pathForUpload = (upload: Upload) =>
+  `/cloudnet-upload/${upload.site.id}/${upload.uuid}/${upload.filename}`
+
+export const getS3pathForFile = (file: File) =>
+  `/${getBucketForFile(file)}/${file.s3key}`
+
+export const getS3pathForImage = (s3key: string) =>
+  `/cloudnet-img/${s3key}`
 
 export const getDownloadPathForFile = (file: File) =>
   `product/${file.uuid}/${file.s3key}`
 
-export async function checkFileExists(bucket: string, s3key: string) {
+export async function checkFileExists(s3path: string) {
   let headers = {
     'Authorization': ssAuthString()
   }
-  return axios.head(`${env.DP_SS_URL}/${bucket}/${s3key}`, {headers})
+  return axios.head(`${env.DP_SS_URL}${s3path}`, {headers})
 }
 
 // File stream handling
