@@ -7,7 +7,7 @@
     "site": "granada",
     "instrument": "mira",
     "status": "created",
-    "size": 30,
+    "size": "32212254720",
     "createdAt": "2020-09-27T12:45:21.916Z",
     "updatedAt": "2020-09-27T12:45:21.916Z"
   },
@@ -19,7 +19,7 @@
     "site": "bucharest",
     "instrument": "chm15k",
     "status": "processed",
-    "size": 10,
+    "size": "12212254720",
     "createdAt": "2020-09-28T12:46:21.916Z",
     "updatedAt": "2020-09-28T12:46:21.916Z"
   },
@@ -31,7 +31,7 @@
     "site": "bucharest",
     "instrument": "chm15k",
     "status": "processed",
-    "size": 20,
+    "size": "22212254720",
     "createdAt": "2020-09-28T12:47:21.916Z",
     "updatedAt": "2020-09-28T12:47:21.916Z"
   },
@@ -43,7 +43,7 @@
     "site": "bucharest",
     "instrument": "mira",
     "status": "uploaded",
-    "size": 0,
+    "size": "2212254720",
     "createdAt": "2020-09-28T12:48:21.916Z",
     "updatedAt": "2020-09-28T12:48:21.916Z"
   }
