@@ -334,6 +334,20 @@ export class UploadRoutes {
       .then(([upload, modelUpload]) => upload || modelUpload)
   }
 
+  dateforsize: RequestHandler = async (req, res, next) => {
+    const query = req.query as any
+    const startDate = new Date(query.startDate)
+    const sizeBytes = parseInt(query.targetSize) * 1024 * 1024 * 1024
+
+    const result = await this.instrumentUploadRepo.query(`SELECT "updatedAt" FROM (
+      SELECT "updatedAt", sum(size) OVER (ORDER BY "updatedAt")
+      FROM instrument_upload where date("updatedAt") > $1) as asd
+    WHERE sum > $2 LIMIT 1`, [startDate, sizeBytes])
+
+    if (result.length == 0) return res.sendStatus(400)
+    res.send(result[0].updatedAt)
+  }
+
   findRepoForUpload(upload: InstrumentUpload | ModelUpload) {
     if ('instrument' in upload) return this.instrumentUploadRepo
     return this.modelUploadRepo
