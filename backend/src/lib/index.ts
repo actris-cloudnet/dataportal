@@ -1,6 +1,6 @@
-import {Connection, SelectQueryBuilder} from 'typeorm'
+import {Connection, Repository, SelectQueryBuilder} from 'typeorm'
 import {basename} from 'path'
-import {Request} from 'express'
+import {NextFunction, Request, RequestHandler, Response} from 'express'
 import {ModelFile, RegularFile} from '../entity/File'
 import {File} from '../entity/File'
 import {SearchFileResponse} from '../entity/SearchFileResponse'
@@ -133,4 +133,18 @@ export const transformRawFile = (obj: any): RegularFile|ModelFile|SearchFile => 
     ...acc,
     ...translateKeyVal(key, obj[key], acc)
   }), {}) as RegularFile|ModelFile|SearchFile
+}
+
+export const dateforsize = async (repo: Repository<any>, table: string, req: Request, res: Response, _: NextFunction) => {
+  const query = req.query as any
+  const startDate = new Date(query.startDate)
+  const sizeBytes = parseInt(query.targetSize) * 1024 * 1024 * 1024
+
+  const result = await repo.query(`SELECT "updatedAt" FROM (
+    SELECT "updatedAt", sum(size) OVER (ORDER BY "updatedAt")
+    FROM ${table} where date("updatedAt") > $1) as asd
+  WHERE sum > $2 LIMIT 1`, [startDate, sizeBytes])
+
+  if (result.length == 0) return res.sendStatus(400)
+  return res.send(result[0].updatedAt)
 }

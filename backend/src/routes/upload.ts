@@ -3,6 +3,7 @@ import {InstrumentUpload, ModelUpload, Status, Upload} from '../entity/Upload'
 import {Connection, Repository} from 'typeorm'
 import {Request, RequestHandler, Response} from 'express'
 import {
+  dateforsize,
   fetchAll,
   getS3pathForUpload,
   isValidDate,
@@ -335,17 +336,7 @@ export class UploadRoutes {
   }
 
   dateforsize: RequestHandler = async (req, res, next) => {
-    const query = req.query as any
-    const startDate = new Date(query.startDate)
-    const sizeBytes = parseInt(query.targetSize) * 1024 * 1024 * 1024
-
-    const result = await this.instrumentUploadRepo.query(`SELECT "updatedAt" FROM (
-      SELECT "updatedAt", sum(size) OVER (ORDER BY "updatedAt")
-      FROM instrument_upload where date("updatedAt") > $1) as asd
-    WHERE sum > $2 LIMIT 1`, [startDate, sizeBytes])
-
-    if (result.length == 0) return res.sendStatus(400)
-    res.send(result[0].updatedAt)
+    return dateforsize(this.instrumentUploadRepo, 'instrument_upload', req, res, next)
   }
 
   findRepoForUpload(upload: InstrumentUpload | ModelUpload) {

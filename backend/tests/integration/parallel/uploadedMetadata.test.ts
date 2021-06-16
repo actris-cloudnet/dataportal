@@ -83,8 +83,8 @@ describe('GET /api/uploaded-metadata', () => {
   })
 })
 
-describe('GET /dateforsize', () => {
-  const publicUrl = `${backendPrivateUrl}dateforsize/`
+describe('GET /upload-dateforsize', () => {
+  const publicUrl = `${backendPrivateUrl}upload-dateforsize/`
   it('responds with date corresponding with the target size', async () => {
     return expect(axios.get(`${publicUrl}`, {params: {startDate: '2020-09-27T12:45:21.916Z', targetSize: '30'}}))
       .resolves.toMatchObject({status: 200, data: '2020-09-28T12:47:21.916Z'})

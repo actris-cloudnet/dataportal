@@ -153,7 +153,8 @@ import {CalibrationRoutes} from './routes/calibration'
   app.post('/upload-metadata', express.json(), uploadRoutes.updateMetadata)
   app.post('/calibration', express.json(), calibRoutes.postCalibration)
   app.put('/visualizations/*', express.json(), vizRoutes.putVisualization)
-  app.get('/dateforsize', uploadRoutes.dateforsize)
+  app.get('/upload-dateforsize', uploadRoutes.dateforsize)
+  app.get('/file-dateforsize', fileRoutes.dateforsize)
 
   app.use(errorHandler)
 

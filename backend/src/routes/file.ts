@@ -7,7 +7,8 @@ import {
   convertToSearchResponse,
   getS3pathForFile,
   hideTestDataFromNormalUsers,
-  sortByMeasurementDateAsc, toArray, transformRawFile
+  sortByMeasurementDateAsc, toArray, transformRawFile,
+  dateforsize
 } from '../lib'
 import {augmentFile} from '../lib/'
 import {SearchFile} from '../entity/SearchFile'
@@ -288,6 +289,10 @@ export class FileRoutes {
       searchFunc(this.modelFileRepo, true)
     ])
       .then(([files, modelFiles]) => files.concat(modelFiles))
+  }
+
+  dateforsize: RequestHandler = async (req, res, next) => {
+    return dateforsize(this.fileRepo, 'regular_file', req, res, next)
   }
 }
 
