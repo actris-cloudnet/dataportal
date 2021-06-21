@@ -142,7 +142,7 @@ export const dateforsize = async (repo: Repository<any>, table: string, req: Req
 
   const result = await repo.query(`SELECT "updatedAt" FROM (
     SELECT "updatedAt", sum(size) OVER (ORDER BY "updatedAt")
-    FROM ${table} where date("updatedAt") > $1) as asd
+    FROM ${table} where "updatedAt" > $1) as asd
   WHERE sum > $2 LIMIT 1`, [startDate, sizeBytes])
 
   if (result.length == 0) return res.sendStatus(400)
