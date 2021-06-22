@@ -292,7 +292,8 @@ export class FileRoutes {
   }
 
   dateforsize: RequestHandler = async (req, res, next) => {
-    return dateforsize(this.fileRepo, 'regular_file', req, res, next)
+    const isModel = 'model' in req.query
+    return dateforsize(isModel ? this.modelFileRepo : this.fileRepo, isModel ? 'model_file' : 'regular_file', req, res, next)
   }
 }
 

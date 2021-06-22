@@ -336,7 +336,8 @@ export class UploadRoutes {
   }
 
   dateforsize: RequestHandler = async (req, res, next) => {
-    return dateforsize(this.instrumentUploadRepo, 'instrument_upload', req, res, next)
+    const isModel = 'model' in req.query
+    return dateforsize(isModel ? this.modelUploadRepo : this.instrumentUploadRepo, isModel ? 'model_upload' : 'instrument_upload', req, res, next)
   }
 
   findRepoForUpload(upload: InstrumentUpload | ModelUpload) {
