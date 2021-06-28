@@ -46,7 +46,6 @@ export class UploadRoutes {
   readonly modelFileRepo: Repository<ModelFile>
   readonly regularFileRepo: Repository<RegularFile>
 
-  readonly miscInstruments = ['halo-doppler-lidar']
 
   postMetadata: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body
@@ -368,7 +367,7 @@ export class UploadRoutes {
 
   isMiscUpload(instrument: Instrument | undefined) {
     if (!instrument) return false
-    return this.miscInstruments.includes(instrument.id)
+    return instrument.auxiliary
   }
 
 }
