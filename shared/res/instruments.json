@@ -20,6 +20,11 @@
     "humanReadableName": "Vaisala CT25K ceilometer"
   },
   {
+    "id": "halo-doppler-lidar",
+    "type": "lidar",
+    "humanReadableName": "Halo Photonics Doppler lidar"
+  },
+  {
     "id": "hatpro",
     "type": "mwr",
     "humanReadableName": "RPG HATPRO microwave radiometer"

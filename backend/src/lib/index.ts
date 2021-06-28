@@ -1,6 +1,6 @@
 import {Connection, Repository, SelectQueryBuilder} from 'typeorm'
 import {basename} from 'path'
-import {NextFunction, Request, RequestHandler, Response} from 'express'
+import {NextFunction, Request, Response} from 'express'
 import {ModelFile, RegularFile} from '../entity/File'
 import {File} from '../entity/File'
 import {SearchFileResponse} from '../entity/SearchFileResponse'

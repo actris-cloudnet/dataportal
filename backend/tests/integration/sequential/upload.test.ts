@@ -7,6 +7,7 @@ import {promises as fsp} from 'fs'
 let conn: Connection
 let instrumentRepo: any
 let modelRepo: any
+let miscUploadRepo: any
 
 const metadataUrl = `${backendPrivateUrl}upload/metadata/`
 const modelMetadataUrl = `${backendPrivateUrl}model-upload/metadata/`
@@ -52,6 +53,7 @@ beforeAll(async () => {
   conn = await createConnection()
   instrumentRepo = conn.getRepository('instrument_upload')
   modelRepo = conn.getRepository('model_upload')
+  miscUploadRepo = conn.getRepository('misc_upload')
   // Make sure these tables are initialized correctly
   await conn.getRepository('regular_file').save(JSON.parse((await fsp.readFile('fixtures/2-regular_file.json')).toString()))
   await conn.getRepository('model_file').save(JSON.parse((await fsp.readFile('fixtures/2-model_file.json')).toString()))
@@ -106,6 +108,17 @@ describe('POST /upload/metadata', () => {
     await expect(axios.post(metadataUrl, payloadResub, {headers})).resolves.toMatchObject({status: 200})
     await instrumentRepo.findOneOrFail({checksum: payload.checksum})
     return await instrumentRepo.findOneOrFail({checksum: payloadResub.checksum})
+  })
+
+  test('inserts new metadata for misc upload', async () => {
+    const now = new Date()
+    const payload = {...validMetadata, instrument: 'halo-doppler-lidar'}
+    await expect(axios.post(metadataUrl, payload, {headers})).resolves.toMatchObject({status: 200})
+    const md = await miscUploadRepo.findOne({checksum: validMetadata.checksum})
+    expect(md).toBeTruthy()
+    expect(new Date(md.createdAt).getTime()).toBeGreaterThan(now.getTime())
+    expect(new Date(md.updatedAt).getTime()).toEqual(new Date(md.createdAt).getTime())
+    return expect(md.status).toEqual(Status.CREATED)
   })
 
   test('updates existing metadata', async () => {
