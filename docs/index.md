@@ -98,6 +98,7 @@ each having the properties:
 - `id`: Unique identifier of the instrument.
 - `humanReadableName`: Name of the instrument in a human readable format.
 - `type`: Instrument type. May be, for example, `radar`, `lidar`, or `mwr`.
+- `auxiliary`: Boolean. `true` if the instrument data is only stored and not used in operational processing. Otherwise `false`.
 
 Example query:
 
@@ -109,7 +110,8 @@ Response body:
   {
     "id": "mira",
     "humanReadableName": "METEK MIRA-35 cloud radar",
-    "type": "radar"
+    "type": "radar",
+    "auxiliary": false
   },
 ...
 ]
