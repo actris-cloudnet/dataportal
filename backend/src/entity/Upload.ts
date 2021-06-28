@@ -97,3 +97,15 @@ export class ModelUpload extends Upload {
   }
 }
 
+@Entity()
+export class MiscUpload extends Upload {
+
+  @ManyToOne(_ => Instrument, instrument => instrument.uploads)
+  instrument!: Instrument
+
+  constructor(checksum: string, filename: string, date: string, site: Site, status: Status, instrument: Instrument) { // eslint-disable-line max-len
+    super(checksum, filename, date, site, status)
+    this.instrument = instrument
+  }
+}
+

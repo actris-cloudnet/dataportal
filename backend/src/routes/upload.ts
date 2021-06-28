@@ -1,5 +1,5 @@
 import {Site} from '../entity/Site'
-import {InstrumentUpload, ModelUpload, Status, Upload} from '../entity/Upload'
+import {InstrumentUpload, MiscUpload, ModelUpload, Status, Upload} from '../entity/Upload'
 import {Connection, Repository} from 'typeorm'
 import {Request, RequestHandler, Response} from 'express'
 import {
@@ -27,6 +27,7 @@ export class UploadRoutes {
   constructor(conn: Connection) {
     this.conn = conn
     this.instrumentUploadRepo = this.conn.getRepository(InstrumentUpload)
+    this.miscUploadRepo = this.conn.getRepository(MiscUpload)
     this.modelUploadRepo = this.conn.getRepository(ModelUpload)
     this.instrumentRepo = this.conn.getRepository(Instrument)
     this.modelRepo = this.conn.getRepository(Model)
@@ -37,12 +38,14 @@ export class UploadRoutes {
 
   readonly conn: Connection
   readonly instrumentUploadRepo: Repository<InstrumentUpload>
+  readonly miscUploadRepo: Repository<MiscUpload>
   readonly modelUploadRepo: Repository<ModelUpload>
   readonly instrumentRepo: Repository<Instrument>
   readonly siteRepo: Repository<Site>
   readonly modelRepo: Repository<Model>
   readonly modelFileRepo: Repository<ModelFile>
   readonly regularFileRepo: Repository<RegularFile>
+
 
   postMetadata: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body
@@ -69,6 +72,7 @@ export class UploadRoutes {
       instrument = await this.instrumentRepo.findOne(body.instrument)
       if (instrument == undefined) return next({status: 422, errors: 'Unknown instrument'})
       uploadRepo = this.instrumentUploadRepo
+      if (this.isMiscUpload(instrument)) uploadRepo = this.miscUploadRepo
       productRepo = this.regularFileRepo
     } else if (isModelSubmission) {
       model = await this.modelRepo.findOne(body.model)
@@ -119,13 +123,24 @@ export class UploadRoutes {
 
     let uploadedMetadata: InstrumentUpload | ModelUpload
     if (isInstrumentSubmission) {
-      uploadedMetadata = new InstrumentUpload(
-        body.checksum,
-        filename,
-        body.measurementDate,
-        site,
-        Status.CREATED,
-        instrument as Instrument)
+      if (this.isMiscUpload(instrument)) {
+        uploadedMetadata = new MiscUpload(
+          body.checksum,
+          filename,
+          body.measurementDate,
+          site,
+          Status.CREATED,
+          instrument as Instrument)
+
+      } else {
+        uploadedMetadata = new InstrumentUpload(
+          body.checksum,
+          filename,
+          body.measurementDate,
+          site,
+          Status.CREATED,
+          instrument as Instrument)
+      }
     } else {
       uploadedMetadata = new ModelUpload(
         body.checksum,
@@ -160,7 +175,8 @@ export class UploadRoutes {
     const partialUpload = req.body
     if (!partialUpload.uuid) return next({status: 422, errors: 'Request body is missing uuid'})
     try {
-      const upload = await this.findAnyUpload(repo => repo.findOne({uuid: partialUpload.uuid}))
+      const upload = await this.findAnyUpload((repo, model) =>
+        repo.findOne({uuid: partialUpload.uuid}, { relations: ['site', (model ? 'model' : 'instrument')] }))
       if (!upload) return next({status: 422, errors: 'No file matches the provided uuid'})
       await this.findRepoForUpload(upload).update({uuid: partialUpload.uuid}, partialUpload)
       res.sendStatus(200)
@@ -325,14 +341,15 @@ export class UploadRoutes {
     return next()
   }
 
-  findAnyUpload(searchFunc: (arg0: Repository<InstrumentUpload|ModelUpload>, arg1?: boolean) =>
-    Promise<InstrumentUpload|ModelUpload|undefined>):
-    Promise<InstrumentUpload|ModelUpload|undefined> {
+  findAnyUpload(searchFunc: (arg0: Repository<ModelUpload|InstrumentUpload|MiscUpload>, arg1?: boolean) =>
+    Promise<ModelUpload|InstrumentUpload|MiscUpload|undefined>):
+    Promise<ModelUpload|InstrumentUpload|MiscUpload|undefined> {
     return Promise.all([
       searchFunc(this.instrumentUploadRepo, false),
-      searchFunc(this.modelUploadRepo, true)
+      searchFunc(this.modelUploadRepo, true),
+      searchFunc(this.miscUploadRepo, false)
     ])
-      .then(([upload, modelUpload]) => upload || modelUpload)
+      .then(([upload, modelUpload, miscUpload]) => upload || modelUpload || miscUpload)
   }
 
   dateforsize: RequestHandler = async (req, res, next) => {
@@ -340,9 +357,17 @@ export class UploadRoutes {
     return dateforsize(isModel ? this.modelUploadRepo : this.instrumentUploadRepo, isModel ? 'model_upload' : 'instrument_upload', req, res, next)
   }
 
-  findRepoForUpload(upload: InstrumentUpload | ModelUpload) {
-    if ('instrument' in upload) return this.instrumentUploadRepo
+  findRepoForUpload(upload: InstrumentUpload | ModelUpload | MiscUpload) {
+    if ('instrument' in upload) {
+      if (this.isMiscUpload(upload.instrument)) return this.miscUploadRepo
+      return this.instrumentUploadRepo
+    }
     return this.modelUploadRepo
+  }
+
+  isMiscUpload(instrument: Instrument | undefined) {
+    if (!instrument) return false
+    return instrument.auxiliary
   }
 
 }
