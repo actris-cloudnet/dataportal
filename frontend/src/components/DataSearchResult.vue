@@ -96,7 +96,7 @@ section#fileTable
     <div v-if="listLength == 0 && !isBusy" class="noresults">
       <h2>No results</h2>
         Are we missing some data? Send an email to
-        <a href="mailto:actris-cloudnet-feedback@fmi.fi">actris-cloudnet-feedback@fmi.fi</a>.
+        <a href="mailto:actris-cloudnet@fmi.fi">actris-cloudnet@fmi.fi</a>.
     </div>
     <b-table v-else
         id="tableContent" borderless small striped hover sort-icon-left

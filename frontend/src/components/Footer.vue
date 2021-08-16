@@ -49,7 +49,7 @@ footer.global
   <footer class="global">
     <div class="vertical-center footeritem">
       Contact:
-      <a href="mailto:actris-cloudnet-feedback@fmi.fi">actris-cloudnet-feedback@fmi.fi</a>
+      <a href="mailto:actris-cloudnet@fmi.fi">actris-cloudnet@fmi.fi</a>
       <a href="https://forum.cloudnet.fmi.fi/">Cloudnet forum</a>
     </div>
     <div class="vertical-center footeritem centered hidden-links">
@@ -58,7 +58,7 @@ footer.global
       Icons from <a href="https://icons8.com/">icons8.com</a>.</span>
     </div>
     <div class="vertical-center footeritem">
-      <a href="https://actris-cloudnet.github.io/dataportal/">API documentation</a>
+      <a href="https://docs.cloudnet.fmi.fi/api/data-portal.html">API documentation</a>
       <a href="https://github.com/actris-cloudnet/">GitHub organization</a>
       <router-link to="/privacy">Privacy policy</router-link>
     </div>
