@@ -49,7 +49,7 @@ footer.global
   <footer class="global">
     <div class="vertical-center footeritem">
       Contact:
-      <a href="mailto:actris-cloudnet-feedback@fmi.fi">actris-cloudnet-feedback@fmi.fi</a>
+      <a href="mailto:actris-cloudnet@fmi.fi">actris-cloudnet@fmi.fi</a>
       <a href="https://forum.cloudnet.fmi.fi/">Cloudnet forum</a>
     </div>
     <div class="vertical-center footeritem centered hidden-links">
