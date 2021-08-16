@@ -67,6 +67,10 @@ This node is physically hosted by FMI in Helsinki, Finland. You can find our con
           <img alt="magnifying glass" :src="require('../assets/icons/search-white.png')"><br>
           Search and download data
         </router-link>
+        <a href="https://docs.cloudnet.fmi.fi" class="download">
+          <img alt="documents" :src="require('../assets/icons/docs-white.png')"><br>
+          Read documentation
+        </a>
       </div>
     </main>
   </main>
