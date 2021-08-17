@@ -441,4 +441,9 @@ describe('POST /upload-metadata/', () => {
     await expect(axios.post(privateMetadataUrl, {uuid, status: Status.PROCESSED})).resolves.toMatchObject({status: 200})
     return expect(instrumentRepo.findOne(uuid)).resolves.toMatchObject({status: Status.PROCESSED})
   })
+
+  test('updates status to invalid', async () => {
+    await expect(axios.post(privateMetadataUrl, {uuid, status: 'invalid'})).resolves.toMatchObject({status: 200})
+    return expect(instrumentRepo.findOne(uuid)).resolves.toMatchObject({status: 'invalid'})
+  })
 })

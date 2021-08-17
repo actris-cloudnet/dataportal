@@ -7,7 +7,8 @@ import {v4 as generateUuidV4} from 'uuid'
 export enum Status {
   CREATED = 'created',
   UPLOADED = 'uploaded',
-  PROCESSED = 'processed'
+  PROCESSED = 'processed',
+  INVALID = 'invalid'
 }
 
 @Entity()
