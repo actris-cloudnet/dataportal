@@ -198,12 +198,6 @@ export default class DataSearchResult extends Vue {
     return this.apiResponse.length
   }
 
-  get captionText() {
-    if (this.isBusy) return 'Searching...'
-    // eslint-disable-next-line max-len
-    return this.listLength > 0 ? `Found ${this.listLength} results` : 'No results. Are we missing some data? Send an email to <a href="mailto:actris-cloudnet-feedback@fmi.fi">actris-cloudnet-feedback@fmi.fi</a>'
-  }
-
   clickRow(record: File) {
     if (this.listLength > 0) this.$router.push(`/file/${record.uuid}`)
   }
