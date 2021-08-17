@@ -27,8 +27,6 @@ main#frontpage
 
   .buttons
     text-align: center
-    display: flex
-    justify-content: center
     margin-top: 2em
     a
       margin: 1em
