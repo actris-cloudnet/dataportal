@@ -13,9 +13,6 @@
     padding-left: $lightpadding
     padding-right: $lightpadding
 
-  main#search.narrowView
-    max-width: 70em
-
   main#search.mediumView
     max-width: 90em
 
@@ -248,7 +245,8 @@
 
   .rowtag
     display: inline-block
-    width: 5em
+    min-width: 1em
+    min-height: 1em
     font-size: 0.9em
     text-align: center
     padding: 0.2em

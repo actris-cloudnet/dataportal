@@ -84,70 +84,97 @@ section#fileTable
   text-align: center
   margin-top: 3em
 
+.column1
+  float: left
+  width: 50%
+
+.column2
+  width: 45%
+  margin-left: 1em
+  float: right
+
+.previewdescription
+  font-size: 0.8em
+
+.listLegend
+  display: inline-block
+  float: right
+  text-align: right
+
 </style>
 
 
 <template>
   <section id="fileTable">
+    <div class="column1">
     <span class="listTitle" v-if="!simplifiedView">
       <span v-if="isBusy">Searching...</span>
       <span v-else-if="listLength > 0">Found {{ listLength }} results</span>
+      <span class="listLegend">
+        <span class="rowtag volatile"></span> volatile
+        <span class="rowtag legacy"></span> legacy
+      </span>
     </span>
-    <div v-if="listLength == 0 && !isBusy" class="noresults">
-      <h2>No results</h2>
+      <div v-if="listLength == 0 && !isBusy" class="noresults">
+        <h2>No results</h2>
         Are we missing some data? Send an email to
         <a href="mailto:actris-cloudnet@fmi.fi">actris-cloudnet@fmi.fi</a>.
-    </div>
-    <b-table v-else
-        id="tableContent" borderless small striped hover sort-icon-left
-        :items="apiResponse"
-        :fields="[
+      </div>
+      <b-table v-else
+               id="tableContent" borderless small striped hover sort-icon-left
+               :items="apiResponse"
+               :fields="[
                 { key: 'productId', label: '', tdClass: 'icon', tdAttr: setIcon},
                 { key: 'title', label: 'Data object', sortable: true},
                 { key: 'volatile', label: '' },
                 { key: 'measurementDate', label: 'Date', sortable: true},
                 ]"
-        :current-page="currentPage"
-        :per-page="perPage"
-        :busy="isBusy"
-        :show-empty="true"
-        @row-clicked="clickRow">
-      <template v-slot:cell(volatile)="data">
+               :current-page="currentPage"
+               :per-page="perPage"
+               :busy="isBusy"
+               :show-empty="true"
+               @row-clicked="clickRow"
+               @row-hovered="debouncedLoadPreview">
+        <template v-slot:cell(volatile)="data">
       <span
           v-if="data.item.volatile"
           class="rowtag volatile"
           title="The data for this day may be incomplete. This file is updating in real time.">
-        volatile
       </span>
-      <span
-          v-if="data.item.legacy"
-          class="rowtag legacy"
-          title="This is legacy data. Quality of the data is not assured.">
-      legacy
+          <span
+              v-if="data.item.legacy"
+              class="rowtag legacy"
+              title="This is legacy data. Quality of the data is not assured.">
       </span>
-      </template>
-    </b-table>
-    <b-pagination id="pagi" v-if="listLength > perPage"
-                  v-model="currentPage"
-                  :total-rows="listLength"
-                  :per-page="perPage"
-                  :disabled="isBusy"
-                  aria-controls="fileTable"
-                  align="center"
-    ></b-pagination>
-    <div class="downloadinfo" v-if="listLength > 0 && !simplifiedView">
-      <a class="download"
-         v-bind:class="{ disabled: isBusy || downloadIsBusy }"
-         href=""
-         @click.prevent="createCollection()">
-        Download all
-      </a><br>
-      <span v-if="!downloadFailed" class="dlcount" v-bind:class="{ disabled: isBusy || downloadIsBusy }">
+        </template>
+      </b-table>
+      <b-pagination id="pagi" v-if="listLength > perPage"
+                    v-model="currentPage"
+                    :total-rows="listLength"
+                    :per-page="perPage"
+                    :disabled="isBusy"
+                    aria-controls="fileTable"
+                    align="center"
+      ></b-pagination>
+      <div class="downloadinfo" v-if="listLength > 0 && !simplifiedView">
+        <a class="download"
+           v-bind:class="{ disabled: isBusy || downloadIsBusy }"
+           href=""
+           @click.prevent="createCollection()">
+          Download all
+        </a><br>
+        <span v-if="!downloadFailed" class="dlcount" v-bind:class="{ disabled: isBusy || downloadIsBusy }">
         {{ listLength }} files ({{ humanReadableSize(combinedFileSize(apiResponse)) }})
       </span>
-      <div v-else class="dlcount errormsg">
-        {{ dlFailedMessage || 'Download failed!' }}
-      </div><br>
+        <div v-else class="dlcount errormsg">
+          {{ dlFailedMessage || 'Download failed!' }}
+        </div><br>
+      </div>
+    </div>
+    <div class="column2">
+      <h3>Preview</h3>
+      <span class="previewdescription">{{ previewTitle }}</span>
+      <img v-if="previewImgUrl" class="overlay" :src="previewImgUrl">
     </div>
   </section>
 </template>
@@ -162,6 +189,7 @@ import {combinedFileSize, getProductIcon, humanReadableSize} from '../lib'
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 import {BTable} from 'bootstrap-vue/esm/components/table'
 import {BPagination} from 'bootstrap-vue/esm/components/pagination'
+import { debounce } from 'debounce'
 
 Vue.component('b-table', BTable)
 Vue.component('b-pagination', BPagination)
@@ -182,8 +210,13 @@ export default class DataSearchResult extends Vue {
   currentPage = 1
   perPage = 15
 
+  previewImgUrl = ''
+  previewTitle = ''
+
   humanReadableSize = humanReadableSize
   combinedFileSize = combinedFileSize
+
+  debouncedLoadPreview = debounce(this.loadPreview, 200)
 
   mounted() {
     window.addEventListener('resize', this.adjustPerPageAccordingToWindowHeight)
@@ -200,6 +233,14 @@ export default class DataSearchResult extends Vue {
 
   clickRow(record: File) {
     if (this.listLength > 0) this.$router.push(`/file/${record.uuid}`)
+  }
+
+  loadPreview(record: File) {
+    axios.get(`${this.apiUrl}visualizations/${record.uuid}`).then(({data}) => {
+      const viz = data.visualizations[0]
+      this.previewImgUrl = `${this.apiUrl}download/image/${viz.s3key}`
+      this.previewTitle = viz.productVariable.humanReadableName
+    })
   }
 
   createCollection() {
