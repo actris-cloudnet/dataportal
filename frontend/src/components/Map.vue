@@ -1,6 +1,7 @@
 <style lang="sass">
 @import "../sass/variables.sass"
 @import "../sass/global.sass"
+@import "~leaflet-draw/dist/leaflet.draw.css"
 
 .map
   height: 300px
@@ -88,6 +89,7 @@
 <script lang="ts">
 import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import L, {marker} from 'leaflet'
+import 'leaflet-draw'
 import {Site} from '../../../backend/src/entity/Site'
 
 
@@ -147,7 +149,8 @@ export default class Map extends Vue {
   initMap() {
     this.legend.onAdd = this.generateLegend
     this.map = L.map(this.$refs['mapElement'] as HTMLElement, {
-      maxBounds: this.setMapBounds()}).setView(this.getMapCenter(), this.zoom)
+      maxBounds: this.setMapBounds(),
+    }).setView(this.getMapCenter(), this.zoom)
     this.tileLayer = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png')
     this.tileLayer.addTo(this.map)
     if (this.showLegend) this.legend.addTo(this.map)
@@ -164,12 +167,58 @@ export default class Map extends Vue {
         mark.closePopup()
       })
       mark.on('click', (_onClick) => {
-        if (this.onMapMarkerClick) this.onMapMarkerClick(site.id)
+        if (this.onMapMarkerClick) this.onMapMarkerClick([site.id])
         mark.closePopup()
       })
       this.allMarkers[site.id] = mark
       if (!this.map) return
       mark.addTo(this.map)
+    })
+  }
+
+  initDrawTool() {
+    const map = this.map
+    if (!map) return
+
+    // Initialise the FeatureGroup to store editable layers
+    const editableLayers = new L.FeatureGroup()
+
+    const drawPluginOptions = {
+      position: 'bottomleft' as 'bottomleft',
+      draw: {
+        polygon: false as false,
+        // disable toolbar item by setting it to false
+        polyline: false as false,
+        circle: false as false, // Turns off this drawing tool
+        rectangle: {
+          showArea: false,
+          shapeOptions: {
+            color: '#3c90ce'
+          },
+        },
+        marker: false as false,
+        circlemarker: false as false,
+      },
+      edit: {
+        featureGroup: editableLayers, //REQUIRED!!
+        remove: false as false,
+        edit: false as false
+      }
+    }
+
+    L.drawLocal.draw.toolbar.buttons.rectangle = 'Draw a bounding box'
+
+    // Initialise the draw control and pass it the FeatureGroup of editable layers
+    const drawControl = new L.Control.Draw(drawPluginOptions)
+    map.addControl(drawControl)
+
+    map.addLayer(editableLayers)
+
+
+    map.on(L.Draw.Event.CREATED, (e) => {
+      const keys = Object.keys(this.allMarkers)
+      const clickedSites = keys.filter(key => L.latLngBounds(e.layer.getBounds()).contains(this.allMarkers[key].getLatLng()))
+      if (this.onMapMarkerClick && clickedSites.length) this.onMapMarkerClick(clickedSites)
     })
   }
 
@@ -226,6 +275,7 @@ export default class Map extends Vue {
     this.initMap()
     this.initLayers()
     this.setMarkerIcons()
+    this.initDrawTool()
   }
 
   @Watch('selectedSiteIds')

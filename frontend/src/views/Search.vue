@@ -603,13 +603,11 @@ export default class Search extends Vue {
     this.addKeyPressListener()
   }
 
-  onMapMarkerClick(id: string) {
-    if (this.selectedSiteIds.includes(id)) {
-      this.selectedSiteIds = this.selectedSiteIds.filter(e => e !== id)
-    }
-    else {
-      this.selectedSiteIds.push(id)
-    }
+  onMapMarkerClick(ids: Array<string>) {
+    const union = this.selectedSiteIds.concat(ids)
+    const intersection = this.selectedSiteIds.filter(id => ids.includes(id))
+    const xor = union.filter(id => ! intersection.includes(id))
+    this.selectedSiteIds = xor
   }
 
   alphabeticalSort = (a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName

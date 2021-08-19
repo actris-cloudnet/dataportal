@@ -13,7 +13,7 @@
     "@types/leaflet": "^1.5.12",
     "axios": "^0.21.1",
     "bootstrap-vue": "^2.6.0",
-    "leaflet": "^1.6.0",
+    "leaflet": "^1.7.1",
     "leaflet-draw": "^1.0.4",
     "v-calendar": "^1.0.8",
     "vue": "^2.6.11",
