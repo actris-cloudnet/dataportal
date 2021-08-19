@@ -106,7 +106,7 @@ section#fileTable
 
 <template>
   <section id="fileTable">
-    <div class="column1">
+    <div class="column1" @mouseleave="debouncedClearPreview">
     <span class="listTitle" v-if="!simplifiedView">
       <span v-if="isBusy">Searching...</span>
       <span v-else-if="listLength > 0">Found {{ listLength }} results</span>
@@ -173,8 +173,8 @@ section#fileTable
     </div>
     <div class="column2">
       <h3>Preview</h3>
-      <span class="previewdescription">{{ previewTitle }}</span>
-      <img v-if="previewImgUrl" class="overlay" :src="previewImgUrl">
+      <span v-if="previewImgUrl" class="previewdescription">{{ previewTitle }}</span>
+      <img v-if="previewImgUrl" class="overlay" :src="previewImgUrl" @load="changePreviewTitle">
     </div>
   </section>
 </template>
@@ -212,11 +212,13 @@ export default class DataSearchResult extends Vue {
 
   previewImgUrl = ''
   previewTitle = ''
+  pendingPreviewTitle = ''
 
   humanReadableSize = humanReadableSize
   combinedFileSize = combinedFileSize
 
-  debouncedLoadPreview = debounce(this.loadPreview, 200)
+  debouncedLoadPreview = debounce(this.loadPreview, 150)
+  debouncedClearPreview = debounce(this.clearPreview, 300)
 
   mounted() {
     window.addEventListener('resize', this.adjustPerPageAccordingToWindowHeight)
@@ -239,8 +241,16 @@ export default class DataSearchResult extends Vue {
     axios.get(`${this.apiUrl}visualizations/${record.uuid}`).then(({data}) => {
       const viz = data.visualizations[0]
       this.previewImgUrl = `${this.apiUrl}download/image/${viz.s3key}`
-      this.previewTitle = viz.productVariable.humanReadableName
+      this.pendingPreviewTitle = viz.productVariable.humanReadableName
     })
+  }
+
+  clearPreview() {
+    this.previewImgUrl = ''
+  }
+
+  changePreviewTitle() {
+    this.previewTitle = this.pendingPreviewTitle
   }
 
   createCollection() {
