@@ -220,6 +220,12 @@ export default class Map extends Vue {
       const clickedSites = keys.filter(key => L.latLngBounds(e.layer.getBounds()).contains(this.allMarkers[key].getLatLng()))
       if (this.onMapMarkerClick && clickedSites.length) this.onMapMarkerClick(clickedSites)
     })
+
+    map.on(L.Draw.Event.DRAWSTART, () => {
+      Vue.nextTick(() => {
+        if (this.onMapMarkerClick) this.onMapMarkerClick(this.selectedSiteIds)
+      })
+    })
   }
 
   customPopup(site: Site) {
