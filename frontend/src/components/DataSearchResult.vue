@@ -97,6 +97,16 @@ section#fileTable
   .info
     margin: 0
 
+  #file
+    width: 100%
+
+
+@media screen and (max-width: $medium-screen)
+  .column2
+    display: none
+  .column1
+    width: 100%
+
 .previewdescription
   font-size: 0.8em
 
@@ -107,6 +117,9 @@ section#fileTable
 
 .inlineblock
   display: inline-block
+
+.center
+  text-align: center
 
 </style>
 
@@ -180,7 +193,7 @@ section#fileTable
     <div class="column2">
       <div>
         <h3 class="inlineblock">Preview</h3>
-        <router-link v-if="previewResponse" :to="`/file/${previewResponse.uuid}`" class="listLegend">Go to landing page &rarr;</router-link>
+        <router-link v-if="previewResponse" :to="`/file/${previewResponse.uuid}`" class="listLegend">Show file &rarr;</router-link>
       </div>
       <main class="info" v-if="previewResponse">
         <section id="file">
@@ -192,12 +205,10 @@ section#fileTable
               <dd v-else class="notAvailable"></dd>
               <dt>Filename</dt>
               <dd>{{ previewResponse.filename }}</dd>
-              <dt>Format</dt>
-              <dd>{{ previewResponse.format }}</dd>
               <dt>Size</dt>
-              <dd>{{ previewResponse.size }} bytes ({{ humanReadableSize(previewResponse.size) }})</dd>
-              <dt>Hash (SHA-256)</dt>
-              <dd>{{ previewResponse.checksum }}</dd>
+              <dd>{{ humanReadableSize(previewResponse.size) }}</dd>
+              <dt>Last modified</dt>
+              <dd>{{ humanReadableTimestamp(previewResponse.updatedAt) }}</dd>
             </dl>
           </section>
         </section>
@@ -218,6 +229,7 @@ section#fileTable
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
         </a>
       </main>
+      <div v-else class="center">Click a search result to show a preview.</div>
     </div>
   </section>
 </template>
@@ -228,7 +240,7 @@ import axios from 'axios'
 import {Component, Prop, Watch} from 'vue-property-decorator'
 import {File} from '../../../backend/src/entity/File'
 import Vue from 'vue'
-import {combinedFileSize, getProductIcon, humanReadableSize} from '../lib'
+import {combinedFileSize, getProductIcon, humanReadableSize, humanReadableTimestamp} from '../lib'
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 import {BTable} from 'bootstrap-vue/esm/components/table'
 import {BPagination} from 'bootstrap-vue/esm/components/pagination'
@@ -260,6 +272,7 @@ export default class DataSearchResult extends Vue {
   pendingPreviewTitle = ''
 
   humanReadableSize = humanReadableSize
+  humanReadableTimestamp = humanReadableTimestamp
   combinedFileSize = combinedFileSize
 
   debouncedLoadPreview = debounce(this.loadPreview, 150)
@@ -279,13 +292,14 @@ export default class DataSearchResult extends Vue {
   }
 
   clickRow(record: File) {
+    if (window.innerWidth < 1010) this.$router.push(`/file/${record.uuid}`)
     axios.get(`${this.apiUrl}files/${record.uuid}`).then(({data}) => {
       this.pendingPreviewResponse = data
+      if (!this.previewResponse) {
+        this.previewResponse = this.pendingPreviewResponse
+      }
     })
     this.loadPreview(record)
-    if (!this.previewResponse) {
-      this.previewResponse = this.pendingPreviewResponse
-    }
   }
 
   loadPreview(record: File) {
@@ -336,6 +350,7 @@ export default class DataSearchResult extends Vue {
       this.currentPage = 1
     }
     this.downloadFailed = false
+    this.previewResponse = null
   }
 }
 </script>
