@@ -1,6 +1,7 @@
 <style lang="sass">
 @import "../sass/variables.sass"
 @import "../sass/global.sass"
+@import "../sass/landing.sass"
 
 section#fileTable
   width: 100%
@@ -93,6 +94,9 @@ section#fileTable
   margin-left: 1em
   float: right
 
+  .info
+    margin: 0
+
 .previewdescription
   font-size: 0.8em
 
@@ -101,12 +105,15 @@ section#fileTable
   float: right
   text-align: right
 
+.inlineblock
+  display: inline-block
+
 </style>
 
 
 <template>
   <section id="fileTable">
-    <div class="column1" @mouseleave="debouncedClearPreview">
+    <div class="column1">
     <span class="listTitle" v-if="!simplifiedView">
       <span v-if="isBusy">Searching...</span>
       <span v-else-if="listLength > 0">Found {{ listLength }} results</span>
@@ -133,8 +140,7 @@ section#fileTable
                :per-page="perPage"
                :busy="isBusy"
                :show-empty="true"
-               @row-clicked="clickRow"
-               @row-hovered="debouncedLoadPreview">
+               @row-clicked="clickRow">
         <template v-slot:cell(volatile)="data">
       <span
           v-if="data.item.volatile"
@@ -172,9 +178,46 @@ section#fileTable
       </div>
     </div>
     <div class="column2">
-      <h3>Preview</h3>
-      <span v-if="previewImgUrl" class="previewdescription">{{ previewTitle }}</span>
-      <img v-if="previewImgUrl" class="overlay" :src="previewImgUrl" @load="changePreviewTitle">
+      <div>
+        <h3 class="inlineblock">Preview</h3>
+        <router-link v-if="previewResponse" :to="`/file/${previewResponse.uuid}`" class="listLegend">Go to landing page &rarr;</router-link>
+      </div>
+      <main class="info" v-if="previewResponse">
+        <section id="file">
+          <header>File information</header>
+          <section class="details">
+            <dl>
+              <dt>PID</dt>
+              <dd v-if="previewResponse.pid.length > 2"> <a :href=previewResponse.pid> {{ previewResponse.pid }} </a></dd>
+              <dd v-else class="notAvailable"></dd>
+              <dt>Filename</dt>
+              <dd>{{ previewResponse.filename }}</dd>
+              <dt>Format</dt>
+              <dd>{{ previewResponse.format }}</dd>
+              <dt>Size</dt>
+              <dd>{{ previewResponse.size }} bytes ({{ humanReadableSize(previewResponse.size) }})</dd>
+              <dt>Hash (SHA-256)</dt>
+              <dd>{{ previewResponse.checksum }}</dd>
+            </dl>
+          </section>
+        </section>
+        <section id="preview">
+          <header>Preview</header>
+          <section class="details">
+            <div v-if="previewImgUrl">
+              <div class="variable">
+                <h4>{{ previewTitle }}</h4>
+                <img :src="previewImgUrl" class="visualization" @load="changePreview">
+              </div>
+            </div>
+            <span v-else>Preview not available.</span>
+          </section>
+        </section>
+        <a class="download" :href="previewResponse.downloadUrl">
+          Download file
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+        </a>
+      </main>
     </div>
   </section>
 </template>
@@ -204,6 +247,8 @@ export default class DataSearchResult extends Vue {
   downloadFailed = false
   dlFailedMessage = ''
   apiUrl = process.env.VUE_APP_BACKENDURL
+  previewResponse: File|null = null
+  pendingPreviewResponse: File|null = null
 
   sortBy = 'title'
   sortDesc = false
@@ -234,7 +279,13 @@ export default class DataSearchResult extends Vue {
   }
 
   clickRow(record: File) {
-    if (this.listLength > 0) this.$router.push(`/file/${record.uuid}`)
+    axios.get(`${this.apiUrl}files/${record.uuid}`).then(({data}) => {
+      this.pendingPreviewResponse = data
+    })
+    this.loadPreview(record)
+    if (!this.previewResponse) {
+      this.previewResponse = this.pendingPreviewResponse
+    }
   }
 
   loadPreview(record: File) {
@@ -249,8 +300,9 @@ export default class DataSearchResult extends Vue {
     this.previewImgUrl = ''
   }
 
-  changePreviewTitle() {
+  changePreview() {
     this.previewTitle = this.pendingPreviewTitle
+    this.previewResponse = this.pendingPreviewResponse
   }
 
   createCollection() {
