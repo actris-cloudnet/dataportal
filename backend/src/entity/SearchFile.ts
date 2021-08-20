@@ -1,9 +1,10 @@
-import {Column, Entity, ManyToOne, PrimaryColumn} from 'typeorm'
+import {Column, Entity, ManyToOne, PrimaryColumn, Unique} from 'typeorm'
 import {Site} from './Site'
 import {Product} from './Product'
 import {File} from './File'
 
 @Entity()
+@Unique(['measurementDate', 'site', 'product'])
 export class SearchFile {
 
   @PrimaryColumn('uuid')

@@ -258,6 +258,7 @@ describe('PUT /files/:s3key', () => {
     tmpfile.uuid = '62b32746-faf0-4057-9076-ed2e698dcc34'
     tmpfile.checksum = 'dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b5'
     tmpfile.s3key = '20181115_mace-head_hatpro.nc'
+    tmpfile.product = 'categorize'
     await axios.put(`${storageServiceUrl}cloudnet-product/${tmpfile.s3key}`, 'content')
     await expect(putFile(tmpfile)).resolves.toMatchObject({status: 201})
     const dbRow1 = await fileRepo.findOneOrFail(tmpfile.uuid)
