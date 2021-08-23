@@ -130,7 +130,7 @@ section#fileTable
       <h3>Results</h3>
     <span class="listTitle" v-if="!simplifiedView && listLength > 0">
       <span v-if="isBusy">Searching...</span>
-      <span v-else="listLength > 0">Found {{ listLength }} results</span>
+      <span v-else>Found {{ listLength }} results</span>
       <span class="listLegend">
         <span class="rowtag volatile"></span> volatile
         <span class="rowtag legacy"></span> legacy

@@ -171,9 +171,8 @@ describe('Search.vue', () => {
 
   describe('volatility', () => {
 
-    it('displays text "volatile" only next to volatile items', async () => {
-      expect(findElementById('tableContent').text()).toContain('volatile')
-      return expect(findElementById('tableContent').text().match('volatile')).toHaveLength(1)
+    it('displays volatile label only next to volatile items', async () => {
+      return expect(findElementById('tableContent').findAll('.volatile')).toHaveLength(4)
     })
   })
 
@@ -185,9 +184,8 @@ describe('Search.vue', () => {
       expect(lastCall[1]).toMatchObject({params: {showLegacy: true}})
     })
 
-    it('displays text "legacy" only next to volatile items', async () => {
-      expect(findElementById('tableContent').text()).toContain('legacy')
-      return expect(findElementById('tableContent').text().match('volatile')).toHaveLength(1)
+    it('displays legacy label next to volatile items', async () => {
+      return expect(findElementById('tableContent').findAll('.legacy')).toHaveLength(1)
     })
   })
 })
