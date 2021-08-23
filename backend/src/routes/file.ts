@@ -263,11 +263,14 @@ export class FileRoutes {
       .andWhere('product.id = :product', file)
       .andWhere('file.measurementDate = :measurementDate', file)
       .addOrderBy('model.optimumOrder', 'ASC')
-      .addOrderBy('file.updatedAt', 'DESC')
       .getMany()
     if (!bestModelFile) return transactionalEntityManager.insert(SearchFile, searchFile)
     if (bestModelFile.model.optimumOrder >= optimumOrder) {
-      await transactionalEntityManager.delete(SearchFile, {uuid: bestModelFile.uuid})
+      await transactionalEntityManager.delete(SearchFile, {
+        site: file.site,
+        product: file.product,
+        measurementDate: file.measurementDate
+      })
       await transactionalEntityManager.insert(SearchFile, searchFile)
     }
   }

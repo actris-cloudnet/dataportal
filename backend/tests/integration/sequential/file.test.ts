@@ -233,6 +233,42 @@ describe('PUT /files/:s3key', () => {
     return await expect(searchFileRepo.findOne(tmpfile3.uuid)).resolves.toBeFalsy()
   })
 
+  test('inserting several model files with different optimumOrder III', async () => {
+    const tmpfile1 = {...volatileFile,
+      product: 'model',
+      model: 'icon-iglo-24-35',
+    }
+    delete tmpfile1.cloudnetpyVersion
+    const tmpfile2 = {...tmpfile1,
+      model: 'icon-iglo-36-47',
+      uuid: 'abde0a2a-40e7-4463-9266-06f50153d974',
+      s3key: '20181115_mace-head_icon-iglo-36.nc',
+      checksum: 'deb5a92691553bcac4cfb57f5917d7cbf9ccfae9592c40626d9615bd64ebeffe'
+    }
+    const tmpfile3 = {...tmpfile1,
+      model: 'ecmwf',
+      uuid: 'abde0a2a-40e7-4463-9266-06f50153d972',
+      s3key: '20181115_mace-head_ecmwf.nc',
+      checksum: 'a3d5a47545c4cf41cca176799da13930389925dc5d04ee62a83a494ee0f04c57'
+    }
+    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile1.s3key}`, 'content')
+    await expect(putFile(tmpfile1)).resolves.toMatchObject({status: 201})
+    await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeTruthy()
+    await expect(searchFileRepo.findOne(tmpfile2.uuid)).resolves.toBeFalsy()
+    await expect(searchFileRepo.findOne(tmpfile3.uuid)).resolves.toBeFalsy()
+    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile2.s3key}`, 'content')
+    await expect(putFile(tmpfile2)).resolves.toMatchObject({status: 201})
+    await expect(putFile(tmpfile1)).resolves.toMatchObject({status: 200})
+    await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeFalsy()
+    await expect(searchFileRepo.findOne(tmpfile2.uuid)).resolves.toBeTruthy()
+    await expect(searchFileRepo.findOne(tmpfile3.uuid)).resolves.toBeFalsy()
+    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile3.s3key}`, 'content')
+    await expect(putFile(tmpfile3)).resolves.toMatchObject({status: 201})
+    await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeFalsy()
+    await expect(searchFileRepo.findOne(tmpfile2.uuid)).resolves.toBeFalsy()
+    return await expect(searchFileRepo.findOne(tmpfile3.uuid)).resolves.toBeTruthy()
+  })
+
   test('errors on invalid site', async () => {
     const tmpfile = {...stableFile}
     tmpfile.site = 'bökärest'
