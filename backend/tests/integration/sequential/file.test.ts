@@ -95,6 +95,13 @@ describe('PUT /files/:s3key', () => {
     return expect(searchFileRepo.findOneOrFail(volatileFile.uuid)).resolves.toMatchObject({legacy: true})
   })
 
+  test('inserting quality controlled file', async () => {
+    const tmpfile = {...stableFile}
+    tmpfile.quality = 'qc'
+    await expect(putFile(tmpfile)).resolves.toMatchObject({status: 201})
+    await expect(fileRepo.findOneOrFail(volatileFile.uuid)).resolves.toMatchObject({quality: 'qc'})
+  })
+
   test('inserting a normal file and a legacy file', async () => {
     await expect(putFile(stableFile)).resolves.toMatchObject({status: 201})
     const tmpfile = {...stableFile}
