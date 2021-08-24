@@ -125,6 +125,7 @@ export default class Map extends Vue {
   @Prop() center!: [number, number]
   @Prop() showLegend?: boolean
   @Prop() fullHeight?: boolean
+  @Prop() enableBoundingBox?: boolean
 
   // map
   map: L.Map | null = null
@@ -176,7 +177,7 @@ export default class Map extends Vue {
     })
   }
 
-  initDrawTool() {
+  initBoundingBoxTool() {
     const map = this.map
     if (!map) return
 
@@ -281,7 +282,7 @@ export default class Map extends Vue {
     this.initMap()
     this.initLayers()
     this.setMarkerIcons()
-    this.initDrawTool()
+    if (this.enableBoundingBox) this.initBoundingBoxTool()
   }
 
   @Watch('selectedSiteIds')
