@@ -244,7 +244,7 @@ main#filelanding
         </section>
       </section>
       <section id="preview" v-bind:class="{ wide: allVisualizations }">
-        <header>Preview</header>
+        <header>Visualizations</header>
         <section class="details">
           <div v-if="visualizations.length" v-bind:class="{sourceFile: allVisualizations}">
             <div v-for="viz in getVisualizations(visualizations)"

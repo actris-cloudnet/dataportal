@@ -101,7 +101,7 @@ section#fileTable
     width: 100%
 
 
-@media screen and (max-width: $medium-screen)
+@media screen and (max-width: 1200px)
   .column2
     display: none
   .column1
@@ -132,8 +132,8 @@ section#fileTable
       <span v-if="isBusy">Searching...</span>
       <span v-else>Found {{ listLength }} results</span>
       <span class="listLegend">
-        <span class="rowtag volatile"></span> volatile
-        <span class="rowtag legacy"></span> legacy
+        <span class="rowtag volatile rounded"></span> volatile
+        <span class="rowtag legacy rounded"></span> legacy
       </span>
     </span>
       <div v-if="listLength == 0 && !isBusy" class="noresults">
@@ -158,12 +158,12 @@ section#fileTable
         <template v-slot:cell(volatile)="data">
       <span
           v-if="data.item.volatile"
-          class="rowtag volatile"
+          class="rowtag volatile rounded"
           title="The data for this day may be incomplete. This file is updating in real time.">
       </span>
           <span
               v-if="data.item.legacy"
-              class="rowtag legacy"
+              class="rowtag legacy rounded"
               title="This is legacy data. Quality of the data is not assured.">
       </span>
         </template>
@@ -216,7 +216,7 @@ section#fileTable
           </section>
         </section>
         <section id="preview">
-          <header>Preview</header>
+          <header>Visualization</header>
           <section class="details">
             <div v-if="previewImgUrl">
               <div class="variable">

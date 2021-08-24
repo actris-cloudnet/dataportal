@@ -250,6 +250,7 @@
     font-size: 0.9em
     text-align: center
     padding: 0.2em
+    margin-left: 0.5em
 
   .volatile
     background: #cad7ff
