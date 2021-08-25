@@ -13,9 +13,6 @@
     padding-left: $lightpadding
     padding-right: $lightpadding
 
-  main#search.narrowView
-    max-width: 70em
-
   main#search.mediumView
     max-width: 90em
 
@@ -248,10 +245,12 @@
 
   .rowtag
     display: inline-block
-    width: 5em
+    min-width: 1em
+    min-height: 1em
     font-size: 0.9em
     text-align: center
     padding: 0.2em
+    margin-left: 0.5em
 
   .volatile
     background: #cad7ff
@@ -279,7 +278,8 @@
         :onMapMarkerClick="onMapMarkerClick"
         :center="[54.00, 14.00]"
         :zoom="showAllSites ? 2 : 3"
-        :showLegend="showAllSites">
+        :showLegend="showAllSites"
+        :enableBoundingBox="true">
       </Map>
     </div>
 
@@ -603,13 +603,11 @@ export default class Search extends Vue {
     this.addKeyPressListener()
   }
 
-  onMapMarkerClick(id: string) {
-    if (this.selectedSiteIds.includes(id)) {
-      this.selectedSiteIds = this.selectedSiteIds.filter(e => e !== id)
-    }
-    else {
-      this.selectedSiteIds.push(id)
-    }
+  onMapMarkerClick(ids: Array<string>) {
+    const union = this.selectedSiteIds.concat(ids)
+    const intersection = this.selectedSiteIds.filter(id => ids.includes(id))
+    const xor = union.filter(id => ! intersection.includes(id))
+    this.selectedSiteIds = xor
   }
 
   alphabeticalSort = (a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName
