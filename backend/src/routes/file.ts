@@ -272,7 +272,7 @@ export class FileRoutes {
     }
   }
 
-  findAnyFile(searchFunc: (arg0: Repository<RegularFile|ModelFile>, arg1?: boolean) =>
+  public findAnyFile(searchFunc: (arg0: Repository<RegularFile|ModelFile>, arg1?: boolean) =>
   Promise<RegularFile|ModelFile|undefined>):
     Promise<RegularFile|ModelFile|undefined> {
     return Promise.all([
@@ -289,6 +289,11 @@ export class FileRoutes {
       searchFunc(this.modelFileRepo, true)
     ])
       .then(([files, modelFiles]) => files.concat(modelFiles))
+  }
+
+  public getRepoForFile(file: RegularFile|ModelFile) {
+    if ('model' in file) return this.modelFileRepo
+    return this.fileRepo
   }
 
   dateforsize: RequestHandler = async (req, res, next) => {

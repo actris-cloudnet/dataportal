@@ -5,7 +5,7 @@ import {
   Entity,
   Index,
   ManyToOne,
-  OneToMany,
+  OneToMany, OneToOne,
   PrimaryColumn,
   Unique
 } from 'typeorm'
@@ -16,6 +16,7 @@ import {isValidDate} from '../lib'
 import {basename} from 'path'
 import {Model} from './Model'
 import {ModelVisualization} from './ModelVisualization'
+import {QualityReport} from './QualityReport'
 
 export enum Quality {
   NRT='nrt',
@@ -68,6 +69,9 @@ export abstract class File {
 
     @ManyToOne(_ => Product, product => product.files)
     product!: Product
+
+    @Column({type: 'float', nullable: true})
+    qualityScore!: number
 
     @Column()
     createdAt!: Date
