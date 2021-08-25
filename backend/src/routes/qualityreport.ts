@@ -36,7 +36,7 @@ export class QualityReportRoutes {
       }
       existingFile.qualityScore = body.overallScore
       const updateResult = await this.fileRoutes.getRepoForFile(existingFile).update(existingFile.uuid, existingFile)
-      if (!updateResult.affected) throw('No rows updated in file table')
+      if (!updateResult.affected) throw ('No rows updated in file table')
 
       const existingReport = await this.qualityReportRepo.findOne(uuid)
       if (existingReport === undefined) {

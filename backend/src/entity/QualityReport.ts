@@ -1,5 +1,4 @@
-import {Column, Entity, OneToOne, PrimaryColumn, PrimaryGeneratedColumn} from 'typeorm'
-import {File} from './File'
+import {Column, Entity, PrimaryColumn} from 'typeorm'
 
 
 @Entity()

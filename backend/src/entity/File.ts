@@ -5,7 +5,7 @@ import {
   Entity,
   Index,
   ManyToOne,
-  OneToMany, OneToOne,
+  OneToMany,
   PrimaryColumn,
   Unique
 } from 'typeorm'
@@ -16,7 +16,6 @@ import {isValidDate} from '../lib'
 import {basename} from 'path'
 import {Model} from './Model'
 import {ModelVisualization} from './ModelVisualization'
-import {QualityReport} from './QualityReport'
 
 export enum Quality {
   NRT='nrt',
