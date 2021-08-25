@@ -242,6 +242,7 @@
       "size": 3327282,
       "format": "HDF5 (NetCDF4)",
       "site": "bucharest",
-      "version": "123"
+      "version": "123",
+      "quality": "qc"
     }
 ]

@@ -188,7 +188,7 @@ main#filelanding
             <dt>Level</dt>
             <dd>{{ response.product.level }}</dd>
             <dt>Quality</dt>
-            <dd>Near Real Time (NRT)</dd>
+            <dd>{{ response.quality === 'qc' ? 'Quality Controlled (QC)' : 'Near Real Time (NRT)' }}</dd>
             <dt v-if="response.cloudnetpyVersion">Software version</dt>
             <dd v-if="response.cloudnetpyVersion">
               CloudnetPy {{ response.cloudnetpyVersion }}

@@ -45,7 +45,7 @@ describe('File.vue', () => {
     }
   })
   it('displays a note on volatile file', async () => {
-    mocked(axios.get).mockImplementation(axiosMockWithFileUuid('a5d'))
+    mocked(axios.get).mockImplementation(axiosMockWithFileUuid('bde'))
     wrapper = mountVue(File)
     await Vue.nextTick()
     return expect(wrapper.text()).toContain('This is a volatile file.')
@@ -169,5 +169,19 @@ describe('File.vue', () => {
     expect(wrapper.findAll('#license').length).toEqual(1)
     await wrapper.find('#hideLicense').trigger('click')
     expect(wrapper.findAll('#license').length).toEqual(0)
+  })
+
+  it('displays a note on quality controlled file', async () => {
+    mocked(axios.get).mockImplementation(axiosMockWithFileUuid('acf'))
+    wrapper = mountVue(File)
+    await Vue.nextTick()
+    return expect(wrapper.text()).toContain('Quality Controlled (QC)')
+  })
+
+  it('displays a note on nrt file', async () => {
+    mocked(axios.get).mockImplementation(axiosMockWithFileUuid('22b'))
+    wrapper = mountVue(File)
+    await Vue.nextTick()
+    return expect(wrapper.text()).toContain('Near Real Time (NRT)')
   })
 })
