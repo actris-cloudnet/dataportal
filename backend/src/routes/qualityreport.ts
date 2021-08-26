@@ -30,7 +30,7 @@ export class QualityReportRoutes {
     const body = req.body as any
 
     try {
-      const existingFile = await this.fileRoutes.findAnyFile((repo, _) => repo.findOne(uuid))
+      const existingFile = await this.fileRoutes.findAnyFile((repo, _) => repo.findOne(uuid, {relations: ['product']}))
       if (existingFile === undefined)  {
         return next({status: 400, errors: ['No files match this UUID']})
       }
@@ -41,7 +41,7 @@ export class QualityReportRoutes {
       const existingReport = await this.qualityReportRepo.findOne(uuid)
       if (existingReport === undefined) {
         await this.qualityReportRepo.insert({fileUuid: uuid, report: body})
-        res.sendStatus(201)
+        return res.sendStatus(201)
       }
       await this.qualityReportRepo.update(uuid, {report: body})
       res.sendStatus(200)

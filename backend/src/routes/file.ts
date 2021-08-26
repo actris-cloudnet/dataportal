@@ -292,7 +292,7 @@ export class FileRoutes {
   }
 
   public getRepoForFile(file: RegularFile|ModelFile) {
-    if ('model' in file) return this.modelFileRepo
+    if (file.product.id == 'model') return this.modelFileRepo
     return this.fileRepo
   }
 
