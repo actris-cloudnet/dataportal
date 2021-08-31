@@ -184,4 +184,26 @@ describe('File.vue', () => {
     await Vue.nextTick()
     return expect(wrapper.text()).toContain('Near Real Time (NRT)')
   })
+
+  it('displays Pass on passing quality check', async () => {
+    mocked(axios.get).mockImplementation(axiosMockWithFileUuid('62b'))
+    wrapper = mountVue(File)
+    await Vue.nextTick()
+    return expect(wrapper.text()).toContain('Pass')
+  })
+
+  it('displays Some problems on passing quality check', async () => {
+    mocked(axios.get).mockImplementation(axiosMockWithFileUuid('acf'))
+    wrapper = mountVue(File)
+    await Vue.nextTick()
+    return expect(wrapper.text()).toContain('Some problems')
+  })
+
+  it('displays n/a on no quality check', async () => {
+    mocked(axios.get).mockImplementation(axiosMockWithFileUuid('72b'))
+    wrapper = mountVue(File)
+    await Vue.nextTick()
+    expect(wrapper.text()).not.toContain('Some problems')
+    expect(wrapper.text()).not.toContain('Pass')
+  })
 })

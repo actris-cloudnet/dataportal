@@ -1,0 +1,45 @@
+{
+  "data": [
+    {
+      "name": "Out of bounds",
+      "report": [
+        {
+          "lowerBound": 0,
+          "upperBound": 24,
+          "variableName": "time",
+          "exceedingValue": 651542365
+        }
+      ],
+      "description": "Find data values that are unexpectedly large or small."
+    }
+  ],
+  "metadata": [
+    {
+      "name": "Missing variables",
+      "report": [
+        "altitude"
+      ],
+      "description": "Find variables that should be included."
+    },
+    {
+      "name": "Missing global attributes",
+      "report": [
+        "references",
+        "cloudnetpy_version",
+        "Conventions"
+      ],
+      "description": "Find global attributes that should be included."
+    },
+    {
+      "name": "Invalid global attribute values",
+      "report": [],
+      "description": "Find attribute values that are unexpectedly large or small."
+    },
+    {
+      "name": "Invalid units",
+      "report": [],
+      "description": "Find unexpected variable units."
+    }
+  ],
+  "overallScore": 0.69
+}

@@ -11,6 +11,7 @@
     "checksum": "44d86b26f642a0befdcd7088ff38caab00ea3d95933f4ccc430179b4a29b74d3",
     "size": "7127282",
     "format": "HDF5 (NetCDF4)",
+    "qualityScore": null,
     "createdAt": "2020-02-19T10:59:58.449Z",
     "updatedAt": "2020-02-19T10:59:58.449Z",
     "sourceFileIds": null,
@@ -47,6 +48,7 @@
     "checksum": "b3142dd3b179e8344b30a7c38d0280eab1d122b8683445006e7691fa88ed2c42",
     "size": "130744",
     "format": "HDF5 (NetCDF4)",
+    "qualityScore": null,
     "createdAt": "2020-02-20T10:56:19.382Z",
     "updatedAt": "2020-02-20T10:56:19.382Z",
     "sourceFileIds": null,
@@ -83,6 +85,7 @@
     "checksum": "298688b011a511f8f0e9353371cf73ee86f60c89b0e02c6931d8c05542c64cdb",
     "size": "12200657",
     "format": "HDF5 (NetCDF4)",
+    "qualityScore": null,
     "createdAt": "2020-02-20T10:56:19.382Z",
     "updatedAt": "2020-02-20T10:56:19.382Z",
     "sourceFileIds": null,
@@ -108,78 +111,6 @@
     "filename": "20181115_mace-head_mira.nc"
   },
   {
-    "uuid": "8bb32746-faf0-4057-9076-ed2e698dcf36",
-    "version": "123",
-    "pid": "",
-    "volatile": false,
-    "legacy": false,
-    "quality": "nrt",
-    "measurementDate": "2019-07-15",
-    "history": "2019-09-16 11:10:33 - categorize file created\n2019-09-16 11:10:10 - radar file created\nLidar backscatter derived from raw values in arbitrary units: calibrated by user Ewan O'Connor <ewan.oconnor@fmi.fi> on 17-Jul-2019.",
-    "checksum": "64d86b26f642a0befdcd7088ff38caab00ea3d95933f4ccc430179b4a29b74d3",
-    "size": "7127282",
-    "format": "HDF5 (NetCDF4)",
-    "createdAt": "2020-02-20T10:59:58.449Z",
-    "updatedAt": "2020-02-20T10:59:58.449Z",
-    "sourceFileIds": null,
-    "cloudnetpyVersion": "1.0.4",
-    "site": {
-      "id": "bucharest",
-      "humanReadableName": "Bucharest",
-      "type": [
-        "cloudnet"
-      ],
-      "latitude": 44.348,
-      "longitude": 26.029,
-      "altitude": 93,
-      "gaw": "Unknown",
-      "country": "Romania"
-    },
-    "product": {
-      "id": "categorize",
-      "humanReadableName": "Categorize",
-      "level": "1c"
-    },
-    "downloadUrl": "http://localhost:3000/api/download/product/8bb32746-faf0-4057-9076-ed2e698dcf36/20190715_bucharest_categorize.nc",
-    "filename": "20190715_bucharest_categorize.nc"
-  },
-  {
-    "uuid": "6cb32746-faf0-4057-9076-ed2e698dcf36",
-    "version": "123",
-    "pid": "",
-    "volatile": false,
-    "legacy": false,
-    "quality": "nrt",
-    "measurementDate": "2019-07-15",
-    "history": "2019-09-16 11:10:33 - categorize file created\n2019-09-16 11:10:10 - radar file created\nLidar backscatter derived from raw values in arbitrary units: calibrated by user Ewan O'Connor <ewan.oconnor@fmi.fi> on 17-Jul-2019.",
-    "checksum": "43d86b26f642a0befdcd7088ff38caab00ea3d95933f4ccc430179b4a29b74d3",
-    "size": "7127282",
-    "format": "HDF5 (NetCDF4)",
-    "createdAt": "2020-02-20T10:49:58.449Z",
-    "updatedAt": "2020-02-20T10:49:58.449Z",
-    "sourceFileIds": null,
-    "cloudnetpyVersion": "1.0.4",
-    "site": {
-      "id": "bucharest",
-      "humanReadableName": "Bucharest",
-      "type": [
-        "cloudnet"
-      ],
-      "latitude": 44.348,
-      "longitude": 26.029,
-      "altitude": 93,
-      "gaw": "Unknown",
-      "country": "Romania"
-    },
-    "product": {
-      "id": "categorize",
-      "humanReadableName": "Categorize",
-      "level": "1c"
-    },
-    "downloadUrl": "http://localhost:3000/api/download/product/6cb32746-faf0-4057-9076-ed2e698dcf36/20190715_bucharest_categorize.nc",
-    "filename": "20190715_bucharest_categorize.nc"
-  },
-  {
     "uuid": "22b32746-faf0-4057-9076-ed2e698dcc34",
     "version": "123",
     "pid": "http://pidservice.example/pidhandle",
@@ -191,6 +122,7 @@
     "checksum": "22d86b26f642a0befdcd7088ff38caab00ea3d95933f4ccc430179b4a29b74d3",
     "size": "7127282",
     "format": "HDF5 (NetCDF4)",
+    "qualityScore": null,
     "createdAt": "2020-02-20T10:39:58.449Z",
     "updatedAt": "2020-02-20T10:39:58.449Z",
     "sourceFileIds": null,
@@ -216,6 +148,80 @@
     "filename": "20190715_bucharest_categorize.nc"
   },
   {
+    "uuid": "6cb32746-faf0-4057-9076-ed2e698dcf36",
+    "version": "123",
+    "pid": "",
+    "volatile": false,
+    "legacy": false,
+    "quality": "nrt",
+    "measurementDate": "2019-07-15",
+    "history": "2019-09-16 11:10:33 - categorize file created\n2019-09-16 11:10:10 - radar file created\nLidar backscatter derived from raw values in arbitrary units: calibrated by user Ewan O'Connor <ewan.oconnor@fmi.fi> on 17-Jul-2019.",
+    "checksum": "43d86b26f642a0befdcd7088ff38caab00ea3d95933f4ccc430179b4a29b74d3",
+    "size": "7127282",
+    "format": "HDF5 (NetCDF4)",
+    "qualityScore": null,
+    "createdAt": "2020-02-20T10:49:58.449Z",
+    "updatedAt": "2020-02-20T10:49:58.449Z",
+    "sourceFileIds": null,
+    "cloudnetpyVersion": "1.0.4",
+    "site": {
+      "id": "bucharest",
+      "humanReadableName": "Bucharest",
+      "type": [
+        "cloudnet"
+      ],
+      "latitude": 44.348,
+      "longitude": 26.029,
+      "altitude": 93,
+      "gaw": "Unknown",
+      "country": "Romania"
+    },
+    "product": {
+      "id": "categorize",
+      "humanReadableName": "Categorize",
+      "level": "1c"
+    },
+    "downloadUrl": "http://localhost:3000/api/download/product/6cb32746-faf0-4057-9076-ed2e698dcf36/20190715_bucharest_categorize.nc",
+    "filename": "20190715_bucharest_categorize.nc"
+  },
+  {
+    "uuid": "8bb32746-faf0-4057-9076-ed2e698dcf36",
+    "version": "123",
+    "pid": "",
+    "volatile": false,
+    "legacy": false,
+    "quality": "nrt",
+    "measurementDate": "2019-07-15",
+    "history": "2019-09-16 11:10:33 - categorize file created\n2019-09-16 11:10:10 - radar file created\nLidar backscatter derived from raw values in arbitrary units: calibrated by user Ewan O'Connor <ewan.oconnor@fmi.fi> on 17-Jul-2019.",
+    "checksum": "64d86b26f642a0befdcd7088ff38caab00ea3d95933f4ccc430179b4a29b74d3",
+    "size": "7127282",
+    "format": "HDF5 (NetCDF4)",
+    "qualityScore": null,
+    "createdAt": "2020-02-20T10:59:58.449Z",
+    "updatedAt": "2020-02-20T10:59:58.449Z",
+    "sourceFileIds": null,
+    "cloudnetpyVersion": "1.0.4",
+    "site": {
+      "id": "bucharest",
+      "humanReadableName": "Bucharest",
+      "type": [
+        "cloudnet"
+      ],
+      "latitude": 44.348,
+      "longitude": 26.029,
+      "altitude": 93,
+      "gaw": "Unknown",
+      "country": "Romania"
+    },
+    "product": {
+      "id": "categorize",
+      "humanReadableName": "Categorize",
+      "level": "1c"
+    },
+    "downloadUrl": "http://localhost:3000/api/download/product/8bb32746-faf0-4057-9076-ed2e698dcf36/20190715_bucharest_categorize.nc",
+    "filename": "20190715_bucharest_categorize.nc"
+  },
+  {
     "uuid": "1bb32746-faf0-4057-9076-ed2e698dcf36",
     "version": "123",
     "pid": "",
@@ -227,6 +233,7 @@
     "checksum": "14d86b26f642a0befdcd7088ff38caab00ea3d95933f4ccc430179b4a29b74d3",
     "size": "7127282",
     "format": "HDF5 (NetCDF4)",
+    "qualityScore": null,
     "createdAt": "2020-02-19T10:59:58.449Z",
     "updatedAt": "2020-02-19T10:59:58.449Z",
     "sourceFileIds": null,
@@ -263,6 +270,7 @@
     "checksum": "24d86b26f642a0befdcd7088ff38caab00ea3d95933f4ccc430179b4a29b74d3",
     "size": "7127282",
     "format": "HDF5 (NetCDF4)",
+    "qualityScore": null,
     "createdAt": "2020-02-19T10:59:58.449Z",
     "updatedAt": "2020-02-19T10:59:58.449Z",
     "sourceFileIds": [
@@ -301,6 +309,7 @@
     "checksum": "9e7c4d902494a254b80d873f13806fd0f01e83564a13a053d3902db98a372ad1",
     "size": "16027310",
     "format": "HDF5 (NetCDF4)",
+    "qualityScore": null,
     "createdAt": "2020-02-20T10:47:33.775Z",
     "updatedAt": "2020-02-20T10:47:33.775Z",
     "sourceFileIds": null,
@@ -326,42 +335,6 @@
     "filename": "20190901_hyytiala_rpg-fmcw-94.nc"
   },
   {
-    "uuid": "52b32746-faf0-4057-9076-ed2e698dcc34",
-    "version": "123",
-    "pid": "http://pidservice.example/pidhandle",
-    "volatile": false,
-    "legacy": false,
-    "quality": "nrt",
-    "measurementDate": "2021-01-26",
-    "history": "2019-09-15 11:10:33 - categorize file created\n2019-09-16 11:10:10 - radar file created\nLidar backscatter derived from raw values in arbitrary units: calibrated by user Ewan O'Connor <ewan.oconnor@fmi.fi> on 17-Jul-2019.",
-    "checksum": "52d86b26f642a0befdcd7088ff38caab00ea3d95933f4ccc430179b4a29b74d3",
-    "size": "7127282",
-    "format": "HDF5 (NetCDF4)",
-    "createdAt": "2020-02-20T10:39:58.449Z",
-    "updatedAt": "2020-02-20T10:39:58.449Z",
-    "sourceFileIds": null,
-    "cloudnetpyVersion": "1.0.4",
-    "site": {
-      "id": "bucharest",
-      "humanReadableName": "Bucharest",
-      "type": [
-        "cloudnet"
-      ],
-      "latitude": 44.348,
-      "longitude": 26.029,
-      "altitude": 93,
-      "gaw": "Unknown",
-      "country": "Romania"
-    },
-    "product": {
-      "id": "categorize",
-      "humanReadableName": "Categorize",
-      "level": "1c"
-    },
-    "downloadUrl": "http://localhost:3000/api/download/product/52b32746-faf0-4057-9076-ed2e698dcc34/20210126_bucharest_categorize.nc",
-    "filename": "20210126_bucharest_categorize.nc"
-  },
-  {
     "uuid": "62b32746-faf0-4057-9076-ed2e698dcc34",
     "version": "123",
     "pid": "http://pidservice.example/pidhandle",
@@ -373,6 +346,7 @@
     "checksum": "62d86b26f642a0befdcd7088ff38caab00ea3d95933f4ccc430179b4a29b74d3",
     "size": "7127282",
     "format": "HDF5 (NetCDF4)",
+    "qualityScore": 1,
     "createdAt": "2020-02-20T10:39:58.449Z",
     "updatedAt": "2020-02-21T10:49:58.449Z",
     "sourceFileIds": null,
@@ -409,6 +383,7 @@
     "checksum": "82d86b26f642a0befdcd7088ff38caab00ea3d95933f4ccc430179b4a29b74d3",
     "size": "7127282",
     "format": "HDF5 (NetCDF4)",
+    "qualityScore": null,
     "createdAt": "2020-02-20T10:39:58.449Z",
     "updatedAt": "2020-02-22T10:39:58.449Z",
     "sourceFileIds": null,
@@ -434,6 +409,43 @@
     "filename": "20210126_bucharest_categorize.nc"
   },
   {
+    "uuid": "52b32746-faf0-4057-9076-ed2e698dcc34",
+    "version": "123",
+    "pid": "http://pidservice.example/pidhandle",
+    "volatile": false,
+    "legacy": false,
+    "quality": "nrt",
+    "measurementDate": "2021-01-26",
+    "history": "2019-09-15 11:10:33 - categorize file created\n2019-09-16 11:10:10 - radar file created\nLidar backscatter derived from raw values in arbitrary units: calibrated by user Ewan O'Connor <ewan.oconnor@fmi.fi> on 17-Jul-2019.",
+    "checksum": "52d86b26f642a0befdcd7088ff38caab00ea3d95933f4ccc430179b4a29b74d3",
+    "size": "7127282",
+    "format": "HDF5 (NetCDF4)",
+    "qualityScore": null,
+    "createdAt": "2020-02-20T10:39:58.449Z",
+    "updatedAt": "2020-02-20T10:39:58.449Z",
+    "sourceFileIds": null,
+    "cloudnetpyVersion": "1.0.4",
+    "site": {
+      "id": "bucharest",
+      "humanReadableName": "Bucharest",
+      "type": [
+        "cloudnet"
+      ],
+      "latitude": 44.348,
+      "longitude": 26.029,
+      "altitude": 93,
+      "gaw": "Unknown",
+      "country": "Romania"
+    },
+    "product": {
+      "id": "categorize",
+      "humanReadableName": "Categorize",
+      "level": "1c"
+    },
+    "downloadUrl": "http://localhost:3000/api/download/product/52b32746-faf0-4057-9076-ed2e698dcc34/20210126_bucharest_categorize.nc",
+    "filename": "20210126_bucharest_categorize.nc"
+  },
+  {
     "uuid": "72b32746-faf0-4057-9076-ed2e698dcc34",
     "version": "123",
     "pid": "http://pidservice.example/pidhandle",
@@ -445,6 +457,7 @@
     "checksum": "72d86b26f642a0befdcd7088ff38caab00ea3d95933f4ccc430179b4a29b74d3",
     "size": "7127282",
     "format": "HDF5 (NetCDF4)",
+    "qualityScore": null,
     "createdAt": "2020-02-20T10:39:58.449Z",
     "updatedAt": "2020-02-21T10:39:58.449Z",
     "sourceFileIds": null,
@@ -481,6 +494,7 @@
     "checksum": "96307ce8dd4fabbc2353cc3c4f32e384bd70280edceb9fb69509cf2db15ad70c",
     "size": "3327282",
     "format": "HDF5 (NetCDF4)",
+    "qualityScore": 0.9,
     "createdAt": "2021-02-20T10:39:58.449Z",
     "updatedAt": "2021-02-22T10:39:58.449Z",
     "sourceFileIds": null,
