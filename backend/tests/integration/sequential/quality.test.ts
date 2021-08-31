@@ -2,6 +2,7 @@ import {Connection, createConnection, Repository} from 'typeorm'
 import {QualityReport} from '../../../src/entity/QualityReport'
 import axios from 'axios'
 import {backendPrivateUrl, backendPublicUrl} from '../../lib'
+import {promises as fsp} from 'fs'
 
 
 let conn: Connection
@@ -27,11 +28,17 @@ beforeAll(async () => {
 })
 
 beforeEach(async () => {
-  return qualityRepo.delete({})
+  await qualityRepo.delete({})
+  // File fixtures are needed here
+  await conn.getRepository('regular_file').save(JSON.parse((await fsp.readFile('fixtures/2-regular_file.json')).toString()))
+  return conn.getRepository('model_file').save(JSON.parse((await fsp.readFile('fixtures/2-model_file.json')).toString()))
 })
 
 afterAll(async () => {
   await qualityRepo.delete({})
+  await conn.getRepository('visualization').delete({})
+  await conn.getRepository('regular_file').delete({})
+  await conn.getRepository('model_file').delete({})
   await conn.close()
 })
 

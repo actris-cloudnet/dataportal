@@ -170,7 +170,7 @@ export default class QualityReportView extends Vue {
   }
 
   get totalTests() {
-    if (!this.qualityResponse) return null
+    if (!this.qualityResponse || this.failedTests === null) return null
     return Math.round(this.failedTests / (1 - this.qualityResponse.overallScore))
   }
 }
