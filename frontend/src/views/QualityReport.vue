@@ -7,6 +7,28 @@
   .info
     flex-direction: row-reverse
 
+  .description
+    font-size: 1.2em
+    cursor: pointer
+    padding: 0.4em
+    width: 1em
+  .description::after
+    content: '\24D8'
+
+  .tooltip
+    position: absolute
+
+  .reltip
+    position: relative
+    top: 2em
+    right: 50%
+    background: white
+    padding: 1em
+    font-family: $content-font
+    border: 1px solid grey
+    display: inline-block
+    max-width: 30em
+
 #metadatatests
   li
     list-style-type: none
