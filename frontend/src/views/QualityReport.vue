@@ -165,6 +165,7 @@ export default class QualityReportView extends Vue {
   }
 
   get failedTests() {
+    if (this.failedMetadataTests === null || this.failedDataTests === null) return null
     return this.failedMetadataTests + this.failedDataTests
   }
 
