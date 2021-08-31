@@ -85,6 +85,10 @@ main#filelanding
 .secondaryButton
   margin-right: 1em
 
+.qualitycheck
+  img
+    height: 1.2em
+
 </style>
 
 
@@ -189,6 +193,22 @@ main#filelanding
             <dd>{{ response.product.level }}</dd>
             <dt>Quality</dt>
             <dd>{{ response.quality === 'qc' ? 'Quality Controlled (QC)' : 'Near Real Time (NRT)' }}</dd>
+            <dt>Quality check</dt>
+            <dd>
+                <span v-if="response.qualityScore === 1" class="qualitycheck">
+                  <router-link :to="`/quality/${response.uuid}`">
+                    <img :src="require('../assets/icons/pass.png')">
+                  </router-link>
+                  Pass.
+                </span>
+              <span v-else-if="typeof response.qualityScore === 'number'" class="qualitycheck">
+                  <router-link :to="`/quality/${response.uuid}`">
+                    <img :src="require('../assets/icons/pass-fail.png')">
+                  </router-link>
+                  Some problems, <router-link :to="`/quality/${response.uuid}`">see report.</router-link>
+                </span>
+              <span v-else class="notAvailable"></span>
+            </dd>
             <dt v-if="response.cloudnetpyVersion">Software version</dt>
             <dd v-if="response.cloudnetpyVersion">
               CloudnetPy {{ response.cloudnetpyVersion }}

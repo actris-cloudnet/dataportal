@@ -72,6 +72,15 @@ const routes = [
     path: '/collection/:uuid', redirect: '/collection/:uuid/general'
   },
   {
+    path: '/quality/:uuid',
+    name: 'Quality Report',
+    meta: {
+      title: 'Cloudnet Data Quality Report'
+    },
+    component: () => import('../views/QualityReport.vue'),
+    props: true,
+  },
+  {
     path: '*',
     name: 'ApiError',
     meta: {
