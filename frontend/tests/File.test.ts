@@ -196,14 +196,14 @@ describe('File.vue', () => {
     mocked(axios.get).mockImplementation(axiosMockWithFileUuid('acf'))
     wrapper = mountVue(File)
     await Vue.nextTick()
-    return expect(wrapper.text()).toContain('Some problems')
+    return expect(wrapper.text()).toContain('Some issues')
   })
 
   it('displays n/a on no quality check', async () => {
     mocked(axios.get).mockImplementation(axiosMockWithFileUuid('72b'))
     wrapper = mountVue(File)
     await Vue.nextTick()
-    expect(wrapper.text()).not.toContain('Some problems')
+    expect(wrapper.text()).not.toContain('Some issues')
     expect(wrapper.text()).not.toContain('Pass')
   })
 })

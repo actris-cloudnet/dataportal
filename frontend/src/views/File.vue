@@ -88,6 +88,7 @@ main#filelanding
 .qualitycheck
   img
     height: 1.2em
+    margin-top: -4px
 
 </style>
 
@@ -205,7 +206,7 @@ main#filelanding
                   <router-link :to="`/quality/${response.uuid}`">
                     <img :src="require('../assets/icons/pass-fail.png')">
                   </router-link>
-                  Some problems, <router-link :to="`/quality/${response.uuid}`">see report.</router-link>
+                  Some issues, <router-link :to="`/quality/${response.uuid}`">see report.</router-link>
                 </span>
               <span v-else class="notAvailable"></span>
             </dd>

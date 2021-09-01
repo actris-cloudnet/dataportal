@@ -124,6 +124,7 @@ section#fileTable
 .qualitycheck
   img
     height: 1.2em
+    margin-top: -4px
 
 </style>
 
@@ -228,7 +229,7 @@ section#fileTable
                   <router-link :to="`/quality/${previewResponse.uuid}`">
                     <img :src="require('../assets/icons/pass-fail.png')">
                   </router-link>
-                  Some problems, <router-link :to="`/quality/${previewResponse.uuid}`">see report.</router-link>
+                  Some issues, <router-link :to="`/quality/${previewResponse.uuid}`">see report.</router-link>
                 </span>
                 <span v-else class="notAvailable">
                 </span>
