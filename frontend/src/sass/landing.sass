@@ -37,7 +37,7 @@ main.info
   justify-content: center
   flex-wrap: wrap
 
-  > section
+  > section, > div > section
     flex-grow: 0.5
     border: 1px solid $border-color
     border-radius: 3px
@@ -75,11 +75,6 @@ main.info
     dd
       text-align: left
       margin: 0
-
-.notAvailable
-  color: grey
-.notAvailable::after
-  content: 'n/a'
 
 img.product, svg.link
   height: auto

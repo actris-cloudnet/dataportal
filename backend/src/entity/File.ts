@@ -17,6 +17,11 @@ import {basename} from 'path'
 import {Model} from './Model'
 import {ModelVisualization} from './ModelVisualization'
 
+export enum Quality {
+  NRT='nrt',
+  QC='qc'
+}
+
 @Entity()
 @Unique(['checksum'])
 @Index(['measurementDate', 'site', 'product'])
@@ -40,6 +45,9 @@ export abstract class File {
     @Column({default: false})
     legacy!: boolean
 
+    @Column({type: 'enum', enum: Quality, default: Quality.NRT})
+    quality!: Quality
+
     @Column({type: 'date'})
     measurementDate!: Date
 
@@ -60,6 +68,9 @@ export abstract class File {
 
     @ManyToOne(_ => Product, product => product.files)
     product!: Product
+
+    @Column({type: 'float', nullable: true})
+    qualityScore!: number
 
     @Column()
     createdAt!: Date

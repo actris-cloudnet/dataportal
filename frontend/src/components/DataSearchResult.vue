@@ -121,6 +121,11 @@ section#fileTable
 .center
   text-align: center
 
+.qualitycheck
+  img
+    height: 1.2em
+    margin-top: -4px
+
 </style>
 
 
@@ -212,6 +217,23 @@ section#fileTable
               <dd>{{ humanReadableSize(previewResponse.size) }}</dd>
               <dt>Last modified</dt>
               <dd>{{ humanReadableTimestamp(previewResponse.updatedAt) }}</dd>
+              <dt>Quality check</dt>
+              <dd>
+                <span v-if="previewResponse.qualityScore === 1" class="qualitycheck">
+                  <router-link :to="`/quality/${previewResponse.uuid}`">
+                    <img :src="require('../assets/icons/pass.png')">
+                  </router-link>
+                  Pass.
+                </span>
+                <span v-else-if="typeof previewResponse.qualityScore === 'number'" class="qualitycheck">
+                  <router-link :to="`/quality/${previewResponse.uuid}`">
+                    <img :src="require('../assets/icons/pass-fail.png')">
+                  </router-link>
+                  Some issues, <router-link :to="`/quality/${previewResponse.uuid}`">see report.</router-link>
+                </span>
+                <span v-else class="notAvailable">
+                </span>
+              </dd>
             </dl>
           </section>
         </section>

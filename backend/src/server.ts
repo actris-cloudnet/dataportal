@@ -15,6 +15,7 @@ import {ProductRoutes} from './routes/product'
 import {ModelRoutes} from './routes/model'
 import {DownloadRoutes} from './routes/download'
 import {CalibrationRoutes} from './routes/calibration'
+import {QualityReportRoutes} from './routes/qualityreport'
 
 (async function() {
   const port = 3000
@@ -33,6 +34,7 @@ import {CalibrationRoutes} from './routes/calibration'
   const modelRoutes = new ModelRoutes(conn)
   const dlRoutes = new DownloadRoutes(conn, fileRoutes, collRoutes, uploadRoutes)
   const calibRoutes = new CalibrationRoutes(conn)
+  const qualityRoutes = new QualityReportRoutes(conn, fileRoutes)
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     if (err.status < 500) console.log(`Error ${err.status} in ${req.method} ${req.path}:`, stringify(err)) // Client error
@@ -110,6 +112,7 @@ import {CalibrationRoutes} from './routes/calibration'
   app.get('/api/download/collection/:uuid', middleware.validateUuidParam, dlRoutes.collection)
   app.get('/api/download/image/*', dlRoutes.image)
   app.get('/api/calibration', calibRoutes.calibration)
+  app.get('/api/quality/:uuid', qualityRoutes.qualityReport)
 
   // protected (for sites)
   app.post('/upload/metadata',
@@ -155,6 +158,7 @@ import {CalibrationRoutes} from './routes/calibration'
   app.put('/visualizations/*', express.json(), vizRoutes.putVisualization)
   app.get('/upload-dateforsize', uploadRoutes.dateforsize)
   app.get('/file-dateforsize', fileRoutes.dateforsize)
+  app.put('/quality/:uuid', express.json(), qualityRoutes.putQualityReport)
 
   app.use(errorHandler)
 

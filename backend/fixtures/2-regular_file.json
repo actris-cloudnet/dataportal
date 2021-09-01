@@ -188,7 +188,8 @@
       "size": 7127282,
       "format": "HDF5 (NetCDF4)",
       "site": "bucharest",
-      "version": "123"
+      "version": "123",
+      "qualityScore": 1
     },
     {
       "uuid": "72b32746-faf0-4057-9076-ed2e698dcc34",
@@ -242,6 +243,8 @@
       "size": 3327282,
       "format": "HDF5 (NetCDF4)",
       "site": "bucharest",
-      "version": "123"
+      "version": "123",
+      "quality": "qc",
+      "qualityScore": 0.9
     }
 ]
