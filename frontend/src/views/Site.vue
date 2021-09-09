@@ -63,12 +63,18 @@
       <section id="product_availability">
         <header>Data availability</header>
         <section class="details">
-          <ProductAvailabilityVisualization
+          <ProductAvailabilityVisualization v-if="dataStatusGraphParser"
               :site="siteid"
               :loadingComplete="loadingComplete"
               :legend="true"
               :tooltips="true"
+              :searchResponse="searchResponse"
+              :allProducts="allProducts"
+              :dataStatusGraphParser="dataStatusGraphParser"
           ></ProductAvailabilityVisualization>
+          <div v-else class="loadingoverlay">
+            <div class="lds-dual-ring"></div>
+          </div>
         </section>
       </section>
       <section id="sitemap">
@@ -102,6 +108,15 @@ import ProductAvailabilityVisualization from '../components/ProductAvailabilityV
 import {ReducedMetadataResponse} from '../../../backend/src/entity/ReducedMetadataResponse'
 import {getProductIcon} from '../lib'
 import {DevMode} from '../lib/DevMode'
+import {Product} from '../../../backend/src/entity/Product'
+import {DataStatusGraphParser} from '@/lib/DataStatusGraphParser'
+
+export interface ReducedSearchResponse {
+  measurementDate: string;
+  productId: string;
+  legacy: boolean;
+  qualityScore?: number;
+}
 
 @Component({
   components: {Map, ProductAvailabilityVisualization}
@@ -114,10 +129,13 @@ export default class SiteView extends Vue {
   error = false
   instruments: ReducedMetadataResponse[] | null = null
   instrumentsFromLastDays = 30
+  searchResponse: ReducedSearchResponse[] | null = null
+  allProducts: Product[] | null = null
   mapKey = 0
-  busy = true
+  busy = false
   getIconUrl = getProductIcon
   devMode = new DevMode()
+  dataStatusGraphParser: DataStatusGraphParser | null = null
 
   payload = {developer: this.devMode.activated}
   created() {
@@ -140,10 +158,22 @@ export default class SiteView extends Vue {
       .get(`${this.apiUrl}uploaded-metadata/`, {params: {...this.payload, ...{ site: this.siteid, dateFrom: date30daysago}}})
       .then(({data}) => (this.instruments = data))
       .catch()
+    this.fetchSearchData()
   }
 
   loadingComplete() {
-    this.busy = false
+    this.mapKey = this.mapKey + 1
+  }
+
+  async fetchSearchData() {
+    const properties = ['measurementDate', 'productId', 'legacy', 'qualityScore']
+    const payload = {
+      site: this.siteid,
+      showLegacy: true,
+      properties
+    }
+
+    this.dataStatusGraphParser = await (new DataStatusGraphParser(payload).engage())
   }
 }
 </script>
