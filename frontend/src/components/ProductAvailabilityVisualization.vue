@@ -22,7 +22,6 @@ $legacy-color: #adadad
   position: relative
   border-top: 1px solid gray
   border-bottom: 1px solid gray
-  cursor: crosshair
 
 .dataviz-date:last-child
   border-right: 1px solid gray
@@ -90,10 +89,11 @@ $legacy-color: #adadad
     justify-content: center
     align-items: flex-start
     padding: 0.5em
+    width: 350px
 
     ul
-      min-width: 8em
-      padding-left: 0
+      padding-left: 0.5em
+      padding-right: 0.5em
       list-style: none
       white-space: pre-wrap
       margin-bottom: 0
@@ -156,12 +156,13 @@ $legacy-color: #adadad
         No data for years {{ parseInt(year['year']) + 1 }} - {{ parseInt(years[index - 1]['year']) - 1 }}.
       </div>
       <div class="dataviz-year">{{ year['year'] }}</div>
-      <div class="dataviz-yearblock" @mouseleave="hideTooltip()">
+      <div class="dataviz-yearblock" @mouseleave="debouncedHideTooltip()">
         <div v-for="date in year.dates"
              class="dataviz-date"
              :id="`dataviz-color-${site}-${year['year']}-${date['date']}`"
              :class="createColorClass(date.products)"
-             @mouseenter="debouncedSetCurrentYearDate(year, date, $event)">
+             @mouseenter="debouncedSetCurrentYearDate(year, date, $event)"
+             >
         </div>
       </div>
     </div>
@@ -170,20 +171,17 @@ $legacy-color: #adadad
     <div class="dav-legend" v-if="legend && !qualityScores">
       <div class="legendexpl"><div class="all-data legendcolor"></div> All data</div>
       <div class="legendexpl"><div class="missing-data legendcolor"></div> Missing some data</div>
-      <div class="legendexpl"><div class="error-data legendcolor"></div> Unknown data status</div>
+      <div class="legendexpl"><div class="error-data legendcolor"></div> Unknown status</div>
       <div class="legendexpl"><div class="only-legacy-data legendcolor"></div> Only legacy data</div>
       <div class="legendexpl"><div class="only-model-data legendcolor"></div> Only model data</div>
       <div class="legendexpl"><div class="no-data legendcolor"></div> No data</div><br>
       <div class="legendexpl"><span class="legacy-label">L</span> Legacy file</div>
     </div>
     <div class="dav-legend" v-if="legend && qualityScores">
-      <div class="legendexpl"><div class="all-data legendcolor"></div> All tests pass</div>
-      <div class="legendexpl"><div class="missing-data legendcolor"></div> Some tests fail</div>
-      <div class="legendexpl"><div class="only-model-data legendcolor"></div> Quality report not available</div>
+      <div class="legendexpl"><div class="all-data legendcolor"></div> <span class="testspass">✓</span> All tests pass</div>
+      <div class="legendexpl"><div class="missing-data legendcolor"></div> <span class="testsfail">✘</span> Some tests fail</div>
+      <div class="legendexpl"><div class="only-model-data legendcolor"></div> <span class="noquality">?</span> Quality report not available</div>
       <div class="legendexpl"><div class="no-data legendcolor"></div> No data</div><br>
-      <div class="legendexpl"><span class="testspass">✓</span> All tests pass</div>
-      <div class="legendexpl"><span class="testsfail">✘</span> Some tests fail</div>
-      <div class="legendexpl"><span class="noquality">?</span> No quality report</div>
       <div class="legendexpl"><span class="legacy-label">L</span> Legacy file</div>
     </div>
     <div class="dataviz-tooltip" v-if="tooltips && hover" v-bind:style="tooltipStyle">
@@ -287,7 +285,7 @@ export default class ProductAvailabilityVisualization extends Vue {
   setCurrentYearDate(year: ProductYear, date: ProductDate, event) {
     this.tooltipStyle = {
       top: `${event.clientY + 10}px`,
-      left: `${event.clientX}px`
+      left: `${event.clientX - 175}px`
     }
     this.currentDate = date
     this.currentYear = year
@@ -295,6 +293,7 @@ export default class ProductAvailabilityVisualization extends Vue {
   }
 
   debouncedSetCurrentYearDate = debounce(this.setCurrentYearDate, 100)
+  debouncedHideTooltip = debounce(this.hideTooltip, 100)
 
   hideTooltip() {
     this.hover = false

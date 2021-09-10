@@ -8,8 +8,10 @@
   flex-basis: 100%
   height: 0
 
-#product_availability
-  flex-grow: 0.7
+#sitelanding .graph
+  flex-grow: 1
+  flex-basis: 0
+  min-width: 600px
 
 #sitelanding .details
   height: 100%
@@ -59,13 +61,27 @@
           <div class="detailslistNotAvailable" v-else>Instrument information not available.</div>
         </section>
       </section>
+      <section id="sitemap">
+        <header>Map</header>
+        <section class="details">
+          <Map v-if="!busy"
+               :sites="[response]"
+               :center="[response.latitude, response.longitude]"
+               :zoom="5"
+               :fullHeight="true"
+               :key="mapKey"
+          ></Map>
+          <div v-else class="loadingoverlay">
+            <div class="lds-dual-ring"></div>
+          </div>
+        </section>
+      </section>
       <div class="forcewrap"></div>
-      <section id="product_availability">
+      <section id="product_availability" class="graph">
         <header>Data availability</header>
         <section class="details">
           <ProductAvailabilityVisualization v-if="dataStatusGraphParser"
               :site="siteid"
-              :loadingComplete="loadingComplete"
               :legend="true"
               :tooltips="true"
               :dataStatusGraphParser="dataStatusGraphParser"
@@ -75,31 +91,15 @@
           </div>
         </section>
       </section>
-      <section id="sitemap">
-        <header>Map</header>
-        <section class="details">
-          <Map v-if="!busy"
-            :sites="[response]"
-            :center="[response.latitude, response.longitude]"
-            :zoom="5"
-            :fullHeight="true"
-            :key="mapKey"
-          ></Map>
-          <div v-else class="loadingoverlay">
-            <div class="lds-dual-ring"></div>
-          </div>
-        </section>
-      </section>
-      <section id="product_quality">
+      <section id="product_quality" class="graph">
         <header>Data quality</header>
         <section class="details">
           <ProductAvailabilityVisualization v-if="dataStatusGraphParser"
-            :site="siteid"
-            :loadingComplete="loadingComplete"
-            :legend="true"
-            :tooltips="true"
-            :qualityScores="true"
-            :dataStatusGraphParser="dataStatusGraphParser"
+                                            :site="siteid"
+                                            :legend="true"
+                                            :tooltips="true"
+                                            :qualityScores="true"
+                                            :dataStatusGraphParser="dataStatusGraphParser"
           ></ProductAvailabilityVisualization>
           <div v-else class="loadingoverlay">
             <div class="lds-dual-ring"></div>
@@ -175,10 +175,6 @@ export default class SiteView extends Vue {
     this.fetchSearchData()
   }
 
-  loadingComplete() {
-    this.mapKey = this.mapKey + 1
-  }
-
   async fetchSearchData() {
     const properties = ['measurementDate', 'productId', 'legacy', 'qualityScore']
     const payload = {
@@ -188,7 +184,6 @@ export default class SiteView extends Vue {
     }
 
     this.dataStatusGraphParser = await (new DataStatusGraphParser(payload).engage())
-    console.log('PARSER READY')
   }
 }
 </script>
