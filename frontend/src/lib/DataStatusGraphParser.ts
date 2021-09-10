@@ -18,6 +18,7 @@ export class DataStatusGraphParser {
 
 
   async engage() {
+    console.log('START')
     const [searchRes, prodRes] = await Promise.all([
       axios.get(`${this.apiUrl}search/`, { params: this.searchPayload }),
       axios.get(`${this.apiUrl}products/`),

@@ -22,6 +22,7 @@ $legacy-color: #adadad
   position: relative
   border-top: 1px solid gray
   border-bottom: 1px solid gray
+  cursor: crosshair
 
 .dataviz-date:last-child
   border-right: 1px solid gray
@@ -73,9 +74,7 @@ $legacy-color: #adadad
   margin-right: 1em
 
 .dataviz-tooltip
-  display: none
-  position: absolute
-  top: 1.3em
+  position: fixed
   z-index: 6
   background: white
   padding: 0.5em
@@ -157,37 +156,12 @@ $legacy-color: #adadad
         No data for years {{ parseInt(year['year']) + 1 }} - {{ parseInt(years[index - 1]['year']) - 1 }}.
       </div>
       <div class="dataviz-year">{{ year['year'] }}</div>
-      <div class="dataviz-yearblock">
+      <div class="dataviz-yearblock" @mouseleave="hideTooltip()">
         <div v-for="date in year.dates"
              class="dataviz-date"
              :id="`dataviz-color-${site}-${year['year']}-${date['date']}`"
-             :class="createColorClass(date.products)" >
-          <div class="dataviz-tooltip" v-if="tooltips">
-            <header>
-              {{ year['year']}}-{{ date['date']}}
-              <span class="incorrect-info">This information may be incorrect.</span>
-            </header>
-            <section>
-              <ul v-for="lvl in allLevels">
-                <li class="header">Level {{ lvl }}</li>
-                <li v-for="product in filterProductsByLvl(lvl)"
-                    class="productitem"
-                    :class="{found: getProductStatus(date.products[lvl], product),
-                      na: qualityScores && !getReportExists(date.products[lvl], product) }"
-                    :key="product.id">{{ idToHumanReadable(product.id) }}
-                  <sup class="legacy-label"
-                    v-if="getProductStatus(date.products[lvl], product)
-                      && getProductStatus(date.products[lvl], product).legacy">
-                    L
-                  </sup></li>
-                <li v-if="lvl === '1b'" class="productitem modelitem"
-                  :class="{found: getProductStatus(date.products[lvl], {id: 'model'}),
-                    na: qualityScores && !getReportExists(date.products[lvl], {id: 'model'})}">
-                  Model
-                </li>
-              </ul>
-            </section>
-          </div>
+             :class="createColorClass(date.products)"
+             @mouseenter="debouncedSetCurrentYearDate(year, date, $event)">
         </div>
       </div>
     </div>
@@ -212,6 +186,32 @@ $legacy-color: #adadad
       <div class="legendexpl"><span class="noquality">?</span> No quality report</div>
       <div class="legendexpl"><span class="legacy-label">L</span> Legacy file</div>
     </div>
+    <div class="dataviz-tooltip" v-if="tooltips && hover" v-bind:style="tooltipStyle">
+      <header>
+        {{ year['year']}}-{{ date['date']}}
+        <span class="incorrect-info">This information may be incorrect.</span>
+      </header>
+      <section>
+        <ul v-for="lvl in allLevels">
+          <li class="header">Level {{ lvl }}</li>
+          <li v-for="product in filterProductsByLvl(lvl)"
+              class="productitem"
+              :class="{found: getProductStatus(date.products[lvl], product),
+                      na: qualityScores && !getReportExists(date.products[lvl], product) }"
+              :key="product.id">{{ idToHumanReadable(product.id) }}
+            <sup class="legacy-label"
+                 v-if="getProductStatus(date.products[lvl], product)
+                      && getProductStatus(date.products[lvl], product).legacy">
+              L
+            </sup></li>
+          <li v-if="lvl === '1b'" class="productitem modelitem"
+              :class="{found: getProductStatus(date.products[lvl], {id: 'model'}),
+                    na: qualityScores && !getReportExists(date.products[lvl], {id: 'model'})}">
+            Model
+          </li>
+        </ul>
+      </section>
+    </div>
   </div>
   <div v-else class="loadingoverlay">
     <div class="lds-dual-ring"></div>
@@ -222,12 +222,10 @@ $legacy-color: #adadad
 <script lang="ts">
 import {Component, Prop} from 'vue-property-decorator'
 import Vue from 'vue'
-import axios from 'axios'
-import {dateToString, idToHumanReadable} from '../lib'
+import {idToHumanReadable} from '../lib'
 import {Product} from '../../../backend/src/entity/Product'
-import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
-import {ReducedSearchResponse} from '@/views/Site.vue'
 import {DataStatusGraphParser} from '@/lib/DataStatusGraphParser'
+import debounce from 'debounce'
 
 export interface ProductInfo {
   id: string;
@@ -265,15 +263,49 @@ export default class ProductAvailabilityVisualization extends Vue {
   years: ProductYear[] = []
   lvlTranslate: { [key: string]: keyof ProductLevels } = {}
   allProducts: Product[] | null = null
+  currentYear: ProductYear | null = null
+  currentDate: ProductDate | null = null
+  tooltipKey = 0
   busy = false
+  hover = false
+  tooltipStyle = {
+    top: '0px',
+    left: '0px'
+  }
 
   idToHumanReadable = idToHumanReadable
+  debounce = debounce
 
   mounted() {
     this.years = this.dataStatusGraphParser.years
     this.lvlTranslate = this.dataStatusGraphParser.lvlTranslate
     this.allProducts = this.dataStatusGraphParser.allProducts
+    if (this.loadingComplete) this.loadingComplete()
     if (this.loadingComplete) this.$nextTick(this.loadingComplete)
+  }
+
+  setCurrentYearDate(year: ProductYear, date: ProductDate, event) {
+    this.tooltipStyle = {
+      top: `${event.clientY + 10}px`,
+      left: `${event.clientX}px`
+    }
+    this.currentDate = date
+    this.currentYear = year
+    this.hover = true
+  }
+
+  debouncedSetCurrentYearDate = debounce(this.setCurrentYearDate, 100)
+
+  hideTooltip() {
+    this.hover = false
+  }
+
+  get year() {
+    return this.currentYear
+  }
+
+  get date() {
+    return this.currentDate
   }
 
 

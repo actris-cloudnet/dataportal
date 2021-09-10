@@ -68,8 +68,6 @@
               :loadingComplete="loadingComplete"
               :legend="true"
               :tooltips="true"
-              :searchResponse="searchResponse"
-              :allProducts="allProducts"
               :dataStatusGraphParser="dataStatusGraphParser"
           ></ProductAvailabilityVisualization>
           <div v-else class="loadingoverlay">
@@ -87,6 +85,22 @@
             :fullHeight="true"
             :key="mapKey"
           ></Map>
+          <div v-else class="loadingoverlay">
+            <div class="lds-dual-ring"></div>
+          </div>
+        </section>
+      </section>
+      <section id="product_quality">
+        <header>Data quality</header>
+        <section class="details">
+          <ProductAvailabilityVisualization v-if="dataStatusGraphParser"
+            :site="siteid"
+            :loadingComplete="loadingComplete"
+            :legend="true"
+            :tooltips="true"
+            :qualityScores="true"
+            :dataStatusGraphParser="dataStatusGraphParser"
+          ></ProductAvailabilityVisualization>
           <div v-else class="loadingoverlay">
             <div class="lds-dual-ring"></div>
           </div>
@@ -129,13 +143,13 @@ export default class SiteView extends Vue {
   error = false
   instruments: ReducedMetadataResponse[] | null = null
   instrumentsFromLastDays = 30
-  searchResponse: ReducedSearchResponse[] | null = null
   allProducts: Product[] | null = null
   mapKey = 0
   busy = false
   getIconUrl = getProductIcon
   devMode = new DevMode()
   dataStatusGraphParser: DataStatusGraphParser | null = null
+
 
   payload = {developer: this.devMode.activated}
   created() {
@@ -174,6 +188,7 @@ export default class SiteView extends Vue {
     }
 
     this.dataStatusGraphParser = await (new DataStatusGraphParser(payload).engage())
+    console.log('PARSER READY')
   }
 }
 </script>
