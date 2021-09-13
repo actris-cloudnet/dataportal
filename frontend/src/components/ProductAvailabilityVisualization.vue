@@ -159,7 +159,7 @@ $legacy-color: #adadad
       <div class="dataviz-yearblock" @mouseleave="debouncedHideTooltip()">
         <div v-for="date in year.dates"
              class="dataviz-date"
-             :id="`dataviz-color-${site}-${year['year']}-${date['date']}`"
+             :id="`dataviz-color-${year['year']}-${date['date']}`"
              :class="createColorClass(date.products)"
              @mouseenter="debouncedSetCurrentYearDate(year, date, $event)"
              >
@@ -222,30 +222,8 @@ import {Component, Prop} from 'vue-property-decorator'
 import Vue from 'vue'
 import {idToHumanReadable} from '../lib'
 import {Product} from '../../../backend/src/entity/Product'
-import {DataStatusGraphParser} from '@/lib/DataStatusGraphParser'
+import {DataStatusGraphParser, ProductDate, ProductInfo, ProductLevels, ProductYear} from '../lib/DataStatusGraphParser'
 import debounce from 'debounce'
-
-export interface ProductInfo {
-  id: string;
-  legacy: boolean;
-  qualityScore?: number | null;
-}
-
-export interface ProductLevels {
-  '1b': ProductInfo[];
-  '1c': ProductInfo[];
-  '2': ProductInfo[];
-}
-
-export interface ProductDate {
-  date: string;
-  products: ProductLevels;
-}
-
-export interface ProductYear {
-  year: string;
-  dates: ProductDate[];
-}
 
 @Component
 export default class ProductAvailabilityVisualization extends Vue {
@@ -255,7 +233,8 @@ export default class ProductAvailabilityVisualization extends Vue {
   @Prop() dateFrom?: string
   @Prop() tooltips?: boolean
   @Prop() qualityScores?: boolean
-  @Prop() dataStatusGraphParser: DataStatusGraphParser
+  @Prop() dataStatusGraphParser!: DataStatusGraphParser
+  @Prop({default: 100}) debounceMs!: number
 
   apiUrl = process.env.VUE_APP_BACKENDURL
   years: ProductYear[] = []
@@ -279,7 +258,6 @@ export default class ProductAvailabilityVisualization extends Vue {
     this.lvlTranslate = this.dataStatusGraphParser.lvlTranslate
     this.allProducts = this.dataStatusGraphParser.allProducts
     if (this.loadingComplete) this.loadingComplete()
-    if (this.loadingComplete) this.$nextTick(this.loadingComplete)
   }
 
   setCurrentYearDate(year: ProductYear, date: ProductDate, event) {
@@ -292,8 +270,8 @@ export default class ProductAvailabilityVisualization extends Vue {
     this.hover = true
   }
 
-  debouncedSetCurrentYearDate = debounce(this.setCurrentYearDate, 100)
-  debouncedHideTooltip = debounce(this.hideTooltip, 100)
+  debouncedSetCurrentYearDate = debounce(this.setCurrentYearDate, this.debounceMs)
+  debouncedHideTooltip = debounce(this.hideTooltip, this.debounceMs)
 
   hideTooltip() {
     this.hover = false
@@ -308,113 +286,113 @@ export default class ProductAvailabilityVisualization extends Vue {
   }
 
 
-filterProductsByLvl(lvl: string) {
-  if (!this.allProducts) return null
-  return this.allProducts.filter(({id}) => this.lvlTranslate[id] == lvl && id != 'model')
-}
-
-getProductStatus(existingProducts: ProductInfo[], product: Product) {
-  const existingProduct = existingProducts.find(prod => prod.id == product.id)
-  if (this.qualityScores && existingProduct) {
-    return this.topQuality(existingProduct)
+  filterProductsByLvl(lvl: string) {
+    if (!this.allProducts) return null
+    return this.allProducts.filter(({id}) => this.lvlTranslate[id] == lvl && id != 'model')
   }
-  return existingProduct
-}
 
-getReportExists(existingProducts: ProductInfo[], product: Product) {
-  const existingProduct = existingProducts.find(prod => prod.id == product.id)
-  return existingProduct && this.qualityExists(existingProduct)
-}
+  getProductStatus(existingProducts: ProductInfo[], product: Product) {
+    const existingProduct = existingProducts.find(prod => prod.id == product.id)
+    if (this.qualityScores && existingProduct) {
+      return this.topQuality(existingProduct)
+    }
+    return existingProduct
+  }
 
-get allLevels() {
-  return Array.from(new Set(Object.values(this.lvlTranslate))).sort()
-}
+  getReportExists(existingProducts: ProductInfo[], product: Product) {
+    const existingProduct = existingProducts.find(prod => prod.id == product.id)
+    return existingProduct && this.qualityExists(existingProduct)
+  }
 
-createColorClass(products: ProductLevels) {
-  if (this.qualityScores) {
+  get allLevels() {
+    return Array.from(new Set(Object.values(this.lvlTranslate))).sort()
+  }
+
+  createColorClass(products: ProductLevels) {
+    if (this.qualityScores) {
+      if (this.noData(products)) return 'no-data'
+      if (this.allPass(products)) return 'all-data'
+      if (this.hasSomeTests(products)) return 'missing-data'
+      return 'only-model-data'
+    }
     if (this.noData(products)) return 'no-data'
-    if (this.allPass(products)) return 'all-data'
-    if (this.hasSomeTests(products)) return 'missing-data'
-    return 'only-model-data'
+    else if (this.onlyModel(products)) return 'only-model-data'
+    else if (this.weirdModel(products)) return 'error-data'
+    else if (this.allData(products)) return 'all-data'
+    else if (this.onlyLegacy(products)) return 'only-legacy-data'
+    else if (this.missingData(products)) return 'missing-data'
+    else return 'error-data'
   }
-  if (this.noData(products)) return 'no-data'
-  else if (this.onlyModel(products)) return 'only-model-data'
-  else if (this.weirdModel(products)) return 'error-data'
-  else if (this.allData(products)) return 'all-data'
-  else if (this.onlyLegacy(products)) return 'only-legacy-data'
-  else if (this.missingData(products)) return 'missing-data'
-  else return 'error-data'
-}
 
-allPass(products: ProductLevels) {
-  return products['2'].filter(this.topQuality).length == products['2'].length
-      && products['1c'].filter(this.topQuality).length == products['1b'].length
-      && products['1b'].filter(this.topQuality).length == products['1b'].length
-}
+  allPass(products: ProductLevels) {
+    return products['2'].filter(this.topQuality).length == products['2'].length
+        && products['1c'].filter(this.topQuality).length == products['1c'].length
+        && products['1b'].filter(this.topQuality).length == products['1b'].length
+  }
 
-hasSomeTests(products: ProductLevels) {
-  return products['2'].filter(this.qualityExists).length > 0
-      || products['1c'].filter(this.qualityExists).length > 0
-      || products['1b'].filter(this.qualityExists).length > 0
-}
+  hasSomeTests(products: ProductLevels) {
+    return products['2'].filter(this.qualityExists).length > 0
+        || products['1c'].filter(this.qualityExists).length > 0
+        || products['1b'].filter(this.qualityExists).length > 0
+  }
 
-topQuality(prod: ProductInfo) {
-  return 'qualityScore' in prod && prod.qualityScore === 1
-}
+  topQuality(prod: ProductInfo) {
+    return 'qualityScore' in prod && prod.qualityScore === 1
+  }
 
-qualityExists(prod: ProductInfo) {
-  return 'qualityScore' in prod && typeof prod.qualityScore === 'number'
-}
+  qualityExists(prod: ProductInfo) {
+    return 'qualityScore' in prod && typeof prod.qualityScore === 'number'
+  }
 
-allData(products: ProductLevels) {
-  return products['2'].filter(this.isNotLegacy).length == 4
-      && products['1c'].filter(this.isNotLegacy).length == 1
-      && products['1b'].filter(this.isNotLegacy).length >= 3
-      && products['1b'].filter(this.isModel).length == 1
-}
+  allData(products: ProductLevels) {
+    return products['2'].filter(this.isNotLegacy).length == 4
+        && products['1c'].filter(this.isNotLegacy).length == 1
+        && products['1b'].filter(this.isNotLegacy).length >= 3
+        && products['1b'].filter(this.isModel).length == 1
+  }
 
-missingData(products: ProductLevels) {
-  return products['2'].filter(this.isNotLegacy).length
-      || products['1c'].filter(this.isNotLegacy).length
-      || products['1b'].filter(this.isNotLegacy).length
-}
+  missingData(products: ProductLevels) {
+    return products['2'].filter(this.isNotLegacy).length
+        || products['1c'].filter(this.isNotLegacy).length
+        || products['1b'].filter(this.isNotLegacy).length
+  }
 
-onlyLegacy(products: ProductLevels) {
-  return (products['2'].every(this.isLegacy)
-      && products['1c'].every(this.isLegacy)
-      && products['1b'].every(this.isLegacyOrModel))
-}
+  onlyLegacy(products: ProductLevels) {
+    return (products['2'].every(this.isLegacy)
+        && products['1c'].every(this.isLegacy)
+        && products['1b'].every(this.isLegacyOrModel))
+  }
 
-onlyModel(products: ProductLevels) {
-  return products['2'].length == 0
-      && products['1c'].length == 0
-      && products['1b'].length == 1 && products['1b'][0].id == 'model'
-}
+  onlyModel(products: ProductLevels) {
+    return products['2'].length == 0
+        && products['1c'].length == 0
+        && products['1b'].length == 1 && products['1b'][0].id == 'model'
+  }
 
-weirdModel(products: ProductLevels) {
-  return products['1b'].filter(this.isModel).length > 1
-}
+  weirdModel(products: ProductLevels) {
+    return products['1b'].filter(this.isModel).length > 1
+  }
 
-noData(products: ProductLevels) {
-  return products['2'].length == 0
-      && products['1c'].length == 0
-      && products['1b'].length == 0
-}
+  noData(products: ProductLevels) {
+    return products['2'].length == 0
+        && products['1c'].length == 0
+        && products['1b'].length == 0
+  }
 
-isLegacy(prod: ProductInfo) {
-  return prod.legacy
-}
+  isLegacy(prod: ProductInfo) {
+    return prod.legacy
+  }
 
-isLegacyOrModel(prod: ProductInfo) {
-  return prod.legacy || prod.id == 'model'
-}
+  isLegacyOrModel(prod: ProductInfo) {
+    return prod.legacy || prod.id == 'model'
+  }
 
-isModel(prod: ProductInfo) {
-  return prod.id == 'model'
-}
+  isModel(prod: ProductInfo) {
+    return prod.id == 'model'
+  }
 
-isNotLegacy(prod: ProductInfo) {
-  return ! this.isLegacy(prod)
-}
+  isNotLegacy(prod: ProductInfo) {
+    return ! this.isLegacy(prod)
+  }
 }
 </script>

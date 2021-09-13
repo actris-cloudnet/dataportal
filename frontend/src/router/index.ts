@@ -60,15 +60,6 @@ const routes = [
     props: true,
   },
   {
-    path: '/quality-viz/:siteid',
-    name: 'Site',
-    meta: {
-      title: 'Cloudnet Site'
-    },
-    component: () => import('../views/QualityViz.vue'),
-    props: true,
-  },
-  {
     path: '/collection/:uuid/:mode',
     name: 'Collection',
     meta: {

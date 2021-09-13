@@ -1,8 +1,35 @@
 import {dateToString} from '../lib/index'
 import {Product} from '../../../backend/src/entity/Product'
-import {ReducedSearchResponse} from '@/views/Site.vue'
-import {ProductInfo, ProductLevels, ProductYear} from '@/components/ProductAvailabilityVisualization.vue'
 import axios from 'axios'
+
+export interface ReducedSearchResponse {
+  measurementDate: string;
+  productId: string;
+  legacy: boolean;
+  qualityScore?: number;
+}
+
+export interface ProductInfo {
+  id: string;
+  legacy: boolean;
+  qualityScore?: number | null;
+}
+
+export interface ProductLevels {
+  '1b': ProductInfo[];
+  '1c': ProductInfo[];
+  '2': ProductInfo[];
+}
+
+export interface ProductDate {
+  date: string;
+  products: ProductLevels;
+}
+
+export interface ProductYear {
+  year: string;
+  dates: ProductDate[];
+}
 
 export class DataStatusGraphParser {
   constructor(searchPayload: any) {
@@ -18,7 +45,6 @@ export class DataStatusGraphParser {
 
 
   async engage() {
-    console.log('START')
     const [searchRes, prodRes] = await Promise.all([
       axios.get(`${this.apiUrl}search/`, { params: this.searchPayload }),
       axios.get(`${this.apiUrl}products/`),

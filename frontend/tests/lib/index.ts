@@ -46,6 +46,8 @@ const axiosResponse: AxiosResponse = {
 
 export const augmentAxiosResponse = (data: any) => ({...axiosResponse, ...{data}})
 
+export const wait = async (ms: number) => new Promise((resolve, _) => setTimeout(resolve, ms))
+
 export const mountVue = (classObject: VueClass<Vue>, options: ShallowMountOptions<Vue> = {}) =>
   shallowMount(classObject, {...{
     stubs: ['router-link', 'router-view']

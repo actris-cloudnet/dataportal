@@ -125,13 +125,6 @@ import {DevMode} from '../lib/DevMode'
 import {Product} from '../../../backend/src/entity/Product'
 import {DataStatusGraphParser} from '@/lib/DataStatusGraphParser'
 
-export interface ReducedSearchResponse {
-  measurementDate: string;
-  productId: string;
-  legacy: boolean;
-  qualityScore?: number;
-}
-
 @Component({
   components: {Map, ProductAvailabilityVisualization}
 })
