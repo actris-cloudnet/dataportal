@@ -5,9 +5,9 @@ import Vue from 'vue'
 import {augmentAxiosResponse, init, mountVue, nextTick, wait} from './lib'
 import {mocked} from 'ts-jest/dist/util/testing'
 import {readResources} from '../../shared/lib'
-import ProductAvailabilityVisualization from '../src/components/ProductAvailabilityVisualization.vue'
+import ProductAvailabilityVisualization from '../src/components/DataStatusVisualization.vue'
 import {Prop} from 'vue-property-decorator'
-import {DataStatusGraphParser} from '../src/lib/DataStatusGraphParser'
+import {DataStatusParser} from '../src/lib/DataStatusParser'
 
 init()
 
@@ -42,7 +42,7 @@ describe('Data availability mode', () => {
       legacy: true,
       properties
     }
-    const dataStatusGraphParser =  await (new DataStatusGraphParser(searchPayload).engage())
+    const dataStatusGraphParser =  await (new DataStatusParser(searchPayload).engage())
     props = {
       legend: true,
       tooltips: true,
@@ -162,7 +162,7 @@ describe('Data quality mode', () => {
       legacy: true,
       properties
     }
-    const dataStatusGraphParser =  await (new DataStatusGraphParser(searchPayload).engage())
+    const dataStatusGraphParser =  await (new DataStatusParser(searchPayload).engage())
     props = {
       legend: true,
       tooltips: true,

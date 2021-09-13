@@ -179,8 +179,10 @@ $legacy-color: #adadad
     </div>
     <div class="dav-legend" v-if="legend && qualityScores">
       <div class="legendexpl"><div class="all-data legendcolor"></div> <span class="testspass">✓</span> All tests pass</div>
-      <div class="legendexpl"><div class="missing-data legendcolor"></div> <span class="testsfail">✘</span> Some tests fail</div>
-      <div class="legendexpl"><div class="only-model-data legendcolor"></div> <span class="noquality">?</span> Quality report not available</div>
+      <div class="legendexpl"><div class="missing-data legendcolor"></div>
+        &nbsp;<span class="testsfail">✘</span> Some tests fail</div>
+      <div class="legendexpl"><div class="only-model-data legendcolor"></div>
+        &nbsp;<span class="noquality">?</span> Quality report not available</div>
       <div class="legendexpl"><div class="no-data legendcolor"></div> No data</div><br>
       <div class="legendexpl"><span class="legacy-label">L</span> Legacy file</div>
     </div>
@@ -222,7 +224,7 @@ import {Component, Prop} from 'vue-property-decorator'
 import Vue from 'vue'
 import {idToHumanReadable} from '../lib'
 import {Product} from '../../../backend/src/entity/Product'
-import {DataStatusGraphParser, ProductDate, ProductInfo, ProductLevels, ProductYear} from '../lib/DataStatusGraphParser'
+import {DataStatusParser, ProductDate, ProductInfo, ProductLevels, ProductYear} from '../lib/DataStatusParser'
 import debounce from 'debounce'
 
 @Component
@@ -233,7 +235,7 @@ export default class ProductAvailabilityVisualization extends Vue {
   @Prop() dateFrom?: string
   @Prop() tooltips?: boolean
   @Prop() qualityScores?: boolean
-  @Prop() dataStatusGraphParser!: DataStatusGraphParser
+  @Prop() dataStatusGraphParser!: DataStatusParser
   @Prop({default: 100}) debounceMs!: number
 
   apiUrl = process.env.VUE_APP_BACKENDURL
@@ -260,7 +262,7 @@ export default class ProductAvailabilityVisualization extends Vue {
     if (this.loadingComplete) this.loadingComplete()
   }
 
-  setCurrentYearDate(year: ProductYear, date: ProductDate, event) {
+  setCurrentYearDate(year: ProductYear, date: ProductDate, event: MouseEvent) {
     this.tooltipStyle = {
       top: `${event.clientY + 10}px`,
       left: `${event.clientX - 175}px`

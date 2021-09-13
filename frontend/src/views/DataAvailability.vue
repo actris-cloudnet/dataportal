@@ -76,7 +76,7 @@
 import {Component, Vue} from 'vue-property-decorator'
 import axios from 'axios'
 import {Site, SiteType} from '../../../backend/src/entity/Site'
-import ProductAvailabilityVisualization from '../components/ProductAvailabilityVisualization.vue'
+import ProductAvailabilityVisualization from '../components/DataStatusVisualization.vue'
 
 @Component({
   components: {ProductAvailabilityVisualization}

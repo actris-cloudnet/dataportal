@@ -31,12 +31,12 @@ export interface ProductYear {
   dates: ProductDate[];
 }
 
-export class DataStatusGraphParser {
-  constructor(searchPayload: any) {
+export class DataStatusParser {
+  constructor(searchPayload: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     this.searchPayload = searchPayload
   }
 
-  private readonly searchPayload: any
+  private readonly searchPayload: any // eslint-disable-line @typescript-eslint/no-explicit-any
   private readonly apiUrl = process.env.VUE_APP_BACKENDURL
   private searchResponse: ReducedSearchResponse[] | null = null
   allProducts: Product[] | null = null

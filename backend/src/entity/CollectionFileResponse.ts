@@ -12,6 +12,7 @@ export class CollectionFileResponse {
   size: number
   volatile: boolean
   legacy: boolean
+  qualityScore: number
 
   constructor(file: RegularFile | ModelFile) {
     this.uuid = file.uuid
@@ -24,5 +25,6 @@ export class CollectionFileResponse {
     this.size = parseInt(file.size as unknown as string, 10)
     this.volatile = file.volatile
     this.legacy = file.legacy
+    this.qualityScore = file.qualityScore
   }
 }

@@ -99,7 +99,7 @@
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import axios from 'axios'
 import Map from '../components/Map.vue'
-import ProductAvailabilityVisualization from '../components/ProductAvailabilityVisualization.vue'
+import ProductAvailabilityVisualization from '../components/DataStatusVisualization.vue'
 import {humanReadableDate} from '../lib'
 import {DevMode} from '../lib/DevMode'
 import QualityTestResult from '../components/QualityTestResult.vue'

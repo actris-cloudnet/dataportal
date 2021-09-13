@@ -118,12 +118,12 @@ import axios from 'axios'
 import {Site} from '../../../backend/src/entity/Site'
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 import Map from '../components/Map.vue'
-import ProductAvailabilityVisualization from '../components/ProductAvailabilityVisualization.vue'
+import ProductAvailabilityVisualization from '../components/DataStatusVisualization.vue'
 import {ReducedMetadataResponse} from '../../../backend/src/entity/ReducedMetadataResponse'
 import {getProductIcon} from '../lib'
 import {DevMode} from '../lib/DevMode'
 import {Product} from '../../../backend/src/entity/Product'
-import {DataStatusGraphParser} from '@/lib/DataStatusGraphParser'
+import {DataStatusParser} from '../lib/DataStatusParser'
 
 @Component({
   components: {Map, ProductAvailabilityVisualization}
@@ -141,7 +141,7 @@ export default class SiteView extends Vue {
   busy = false
   getIconUrl = getProductIcon
   devMode = new DevMode()
-  dataStatusGraphParser: DataStatusGraphParser | null = null
+  dataStatusGraphParser: DataStatusParser | null = null
 
 
   payload = {developer: this.devMode.activated}
@@ -161,14 +161,14 @@ export default class SiteView extends Vue {
       .catch()
     const date30daysago = new Date()
     date30daysago.setDate(date30daysago.getDate() - this.instrumentsFromLastDays)
+    this.initDataStatusParser()
     axios
       .get(`${this.apiUrl}uploaded-metadata/`, {params: {...this.payload, ...{ site: this.siteid, dateFrom: date30daysago}}})
       .then(({data}) => (this.instruments = data))
       .catch()
-    this.fetchSearchData()
   }
 
-  async fetchSearchData() {
+  async initDataStatusParser() {
     const properties = ['measurementDate', 'productId', 'legacy', 'qualityScore']
     const payload = {
       site: this.siteid,
@@ -176,7 +176,7 @@ export default class SiteView extends Vue {
       properties
     }
 
-    this.dataStatusGraphParser = await (new DataStatusGraphParser(payload).engage())
+    this.dataStatusGraphParser = await (new DataStatusParser(payload).engage())
   }
 }
 </script>
