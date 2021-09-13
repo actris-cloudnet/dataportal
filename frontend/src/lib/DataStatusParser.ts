@@ -51,7 +51,7 @@ export class DataStatusParser {
     ])
     this.searchResponse = searchRes.data
     this.allProducts = prodRes.data
-    if (!this.searchResponse || !this.allProducts) return this
+    if (!this.searchResponse || !this.allProducts || this.searchResponse.length == 0) return this
 
     this.lvlTranslate = this.allProducts.reduce((acc, cur) => ({...acc, [cur.id]: cur.level as keyof ProductLevels}), {})
     const initialDate = new Date(

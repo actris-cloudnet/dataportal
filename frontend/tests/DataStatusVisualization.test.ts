@@ -6,7 +6,6 @@ import {augmentAxiosResponse, init, mountVue, nextTick, wait} from './lib'
 import {mocked} from 'ts-jest/dist/util/testing'
 import {readResources} from '../../shared/lib'
 import ProductAvailabilityVisualization from '../src/components/DataStatusVisualization.vue'
-import {Prop} from 'vue-property-decorator'
 import {DataStatusParser} from '../src/lib/DataStatusParser'
 
 init()
@@ -42,13 +41,13 @@ describe('Data availability mode', () => {
       legacy: true,
       properties
     }
-    const dataStatusGraphParser =  await (new DataStatusParser(searchPayload).engage())
+    const dataStatusParser =  await (new DataStatusParser(searchPayload).engage())
     props = {
       legend: true,
       tooltips: true,
       qualityScores: false,
       debounceMs: 0,
-      dataStatusGraphParser
+      dataStatusParser
     }
     wrapper = mountVue(ProductAvailabilityVisualization, { propsData: props })
     await nextTick(1)
@@ -162,13 +161,13 @@ describe('Data quality mode', () => {
       legacy: true,
       properties
     }
-    const dataStatusGraphParser =  await (new DataStatusParser(searchPayload).engage())
+    const dataStatusParser =  await (new DataStatusParser(searchPayload).engage())
     props = {
       legend: true,
       tooltips: true,
       qualityScores: true,
       debounceMs: 0,
-      dataStatusGraphParser
+      dataStatusParser
     }
     wrapper = mountVue(ProductAvailabilityVisualization, { propsData: props })
     await nextTick(1)

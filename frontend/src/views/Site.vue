@@ -80,11 +80,11 @@
       <section id="product_availability" class="graph">
         <header>Data availability</header>
         <section class="details">
-          <ProductAvailabilityVisualization v-if="dataStatusGraphParser"
+          <ProductAvailabilityVisualization v-if="dataStatusParser"
               :site="siteid"
               :legend="true"
               :tooltips="true"
-              :dataStatusGraphParser="dataStatusGraphParser"
+                                            :dataStatusParser="dataStatusParser"
           ></ProductAvailabilityVisualization>
           <div v-else class="loadingoverlay">
             <div class="lds-dual-ring"></div>
@@ -94,12 +94,12 @@
       <section id="product_quality" class="graph">
         <header>Data quality</header>
         <section class="details">
-          <ProductAvailabilityVisualization v-if="dataStatusGraphParser"
+          <ProductAvailabilityVisualization v-if="dataStatusParser"
                                             :site="siteid"
                                             :legend="true"
                                             :tooltips="true"
                                             :qualityScores="true"
-                                            :dataStatusGraphParser="dataStatusGraphParser"
+                                            :dataStatusParser="dataStatusParser"
           ></ProductAvailabilityVisualization>
           <div v-else class="loadingoverlay">
             <div class="lds-dual-ring"></div>
@@ -141,7 +141,7 @@ export default class SiteView extends Vue {
   busy = false
   getIconUrl = getProductIcon
   devMode = new DevMode()
-  dataStatusGraphParser: DataStatusParser | null = null
+  dataStatusParser: DataStatusParser | null = null
 
 
   payload = {developer: this.devMode.activated}
@@ -176,7 +176,7 @@ export default class SiteView extends Vue {
       properties
     }
 
-    this.dataStatusGraphParser = await (new DataStatusParser(payload).engage())
+    this.dataStatusParser = await (new DataStatusParser(payload).engage())
   }
 }
 </script>

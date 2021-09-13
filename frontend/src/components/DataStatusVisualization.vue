@@ -235,7 +235,7 @@ export default class ProductAvailabilityVisualization extends Vue {
   @Prop() dateFrom?: string
   @Prop() tooltips?: boolean
   @Prop() qualityScores?: boolean
-  @Prop() dataStatusGraphParser!: DataStatusParser
+  @Prop() dataStatusParser!: DataStatusParser
   @Prop({default: 100}) debounceMs!: number
 
   apiUrl = process.env.VUE_APP_BACKENDURL
@@ -256,9 +256,9 @@ export default class ProductAvailabilityVisualization extends Vue {
   debounce = debounce
 
   mounted() {
-    this.years = this.dataStatusGraphParser.years
-    this.lvlTranslate = this.dataStatusGraphParser.lvlTranslate
-    this.allProducts = this.dataStatusGraphParser.allProducts
+    this.years = this.dataStatusParser.years
+    this.lvlTranslate = this.dataStatusParser.lvlTranslate
+    this.allProducts = this.dataStatusParser.allProducts
     if (this.loadingComplete) this.loadingComplete()
   }
 
