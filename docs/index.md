@@ -167,6 +167,8 @@ is not curated in any way and may or may not contain helpful information.
 - `product`: `Product` object containing information of the data product.
 - `downloadUrl`: The full URL to the data object. Useful for downloading the file.
 - `filename`: The name of the file.
+- `quality`: Quality status of the product. Either `nrt` (Near Real Time) or `qc` (Quality Controlled).
+- `qualityScore`: A float in the range [0, 1] signifying the results of automatic quality tests, or `null` when the quality test report is not available. `1` means that all tests passed, `0` that no tests pass.
 
 
 Example query:
@@ -212,7 +214,9 @@ Response body:
     "level": "1c"
   },
   "downloadUrl": "https://cloudnet.fmi.fi/api/download/product/911bd5b1-3104-4732-9bd3-34ed8208adad/20200105_bucharest_categorize.nc",
-  "filename": "20200105_bucharest_categorize.nc"
+  "filename": "20200105_bucharest_categorize.nc",
+  "quality": "nrt",
+  "qualityScore": 0.9
 }
 ```
 
@@ -274,7 +278,9 @@ Response body:
       "level": "2"
     },
     "downloadUrl": "https://cloudnet.fmi.fi/api/download/product/f63628b4-7e68-4c98-87ea-86a247f7fcfd/20210221_bucharest_classification.nc",
-    "filename": "20210221_bucharest_classification.nc"
+    "filename": "20210221_bucharest_classification.nc",
+    "quality": "nrt",
+    "qualityScore": 0.9
   },
 ...
 ]
