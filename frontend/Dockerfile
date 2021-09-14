@@ -31,9 +31,8 @@ COPY shared /shared
 
 RUN npm run build
 
-FROM nginx AS prod
+FROM nginxinc/nginx-unprivileged AS prod
+COPY frontend/nginx.conf.template /etc/nginx/templates/default.conf.template
 
 WORKDIR /app
-
 COPY --from=dev /app/dist /app
-COPY frontend/nginx.conf /etc/nginx/nginx.conf

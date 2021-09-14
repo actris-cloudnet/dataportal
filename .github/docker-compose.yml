@@ -128,7 +128,7 @@ services:
     environment:
       - TYPEORM_ENTITIES=build/entity/*.js
       - TYPEORM_MIGRATIONS=build/migration/*.js
-      - DP_BACKEND_URL=http://frontend-prod/api/
+      - DP_BACKEND_URL=http://frontend-prod:8080/api
     healthcheck:
       test:
         [
@@ -151,8 +151,8 @@ services:
         - VUE_APP_BACKENDURL=/api/
     env_file:
       - ci.env
-    ports:
-      - "9090:80"
+    environment:
+      - DP_BACKEND_URL=http://backend-prod:3000
     depends_on:
       backend-prod:
         condition: service_healthy

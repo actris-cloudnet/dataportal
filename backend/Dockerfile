@@ -1,4 +1,4 @@
-FROM node:10 AS base
+FROM node:14 AS base
 
 WORKDIR /app
 
@@ -18,11 +18,11 @@ FROM dev AS build
 
 RUN npm run build
 
-FROM node:10 AS prod
-
-WORKDIR /app
+FROM node:14 AS prod
 
 COPY --from=build /app/package*.json /app/
+
+WORKDIR /app
 
 RUN npm ci --only=prod
 
