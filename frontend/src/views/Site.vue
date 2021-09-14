@@ -8,8 +8,10 @@
   flex-basis: 100%
   height: 0
 
-#product_availability
-  flex-grow: 0.7
+#sitelanding .graph
+  flex-grow: 1
+  flex-basis: 0
+  min-width: 600px
 
 #sitelanding .details
   height: 100%
@@ -59,28 +61,46 @@
           <div class="detailslistNotAvailable" v-else>Instrument information not available.</div>
         </section>
       </section>
-      <div class="forcewrap"></div>
-      <section id="product_availability">
-        <header>Data availability</header>
-        <section class="details">
-          <ProductAvailabilityVisualization
-              :site="siteid"
-              :loadingComplete="loadingComplete"
-              :legend="true"
-              :tooltips="true"
-          ></ProductAvailabilityVisualization>
-        </section>
-      </section>
       <section id="sitemap">
         <header>Map</header>
         <section class="details">
           <Map v-if="!busy"
-            :sites="[response]"
-            :center="[response.latitude, response.longitude]"
-            :zoom="5"
-            :fullHeight="true"
-            :key="mapKey"
+               :sites="[response]"
+               :center="[response.latitude, response.longitude]"
+               :zoom="5"
+               :fullHeight="true"
+               :key="mapKey"
           ></Map>
+          <div v-else class="loadingoverlay">
+            <div class="lds-dual-ring"></div>
+          </div>
+        </section>
+      </section>
+      <div class="forcewrap"></div>
+      <section id="product_availability" class="graph">
+        <header>Data availability</header>
+        <section class="details">
+          <ProductAvailabilityVisualization v-if="dataStatusParser"
+              :site="siteid"
+              :legend="true"
+              :tooltips="true"
+                                            :dataStatusParser="dataStatusParser"
+          ></ProductAvailabilityVisualization>
+          <div v-else class="loadingoverlay">
+            <div class="lds-dual-ring"></div>
+          </div>
+        </section>
+      </section>
+      <section id="product_quality" class="graph">
+        <header>Data quality</header>
+        <section class="details">
+          <ProductAvailabilityVisualization v-if="dataStatusParser"
+                                            :site="siteid"
+                                            :legend="true"
+                                            :tooltips="true"
+                                            :qualityScores="true"
+                                            :dataStatusParser="dataStatusParser"
+          ></ProductAvailabilityVisualization>
           <div v-else class="loadingoverlay">
             <div class="lds-dual-ring"></div>
           </div>
@@ -98,10 +118,12 @@ import axios from 'axios'
 import {Site} from '../../../backend/src/entity/Site'
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 import Map from '../components/Map.vue'
-import ProductAvailabilityVisualization from '../components/ProductAvailabilityVisualization.vue'
+import ProductAvailabilityVisualization from '../components/DataStatusVisualization.vue'
 import {ReducedMetadataResponse} from '../../../backend/src/entity/ReducedMetadataResponse'
 import {getProductIcon} from '../lib'
 import {DevMode} from '../lib/DevMode'
+import {Product} from '../../../backend/src/entity/Product'
+import {DataStatusParser} from '../lib/DataStatusParser'
 
 @Component({
   components: {Map, ProductAvailabilityVisualization}
@@ -114,10 +136,13 @@ export default class SiteView extends Vue {
   error = false
   instruments: ReducedMetadataResponse[] | null = null
   instrumentsFromLastDays = 30
+  allProducts: Product[] | null = null
   mapKey = 0
-  busy = true
+  busy = false
   getIconUrl = getProductIcon
   devMode = new DevMode()
+  dataStatusParser: DataStatusParser | null = null
+
 
   payload = {developer: this.devMode.activated}
   created() {
@@ -136,14 +161,22 @@ export default class SiteView extends Vue {
       .catch()
     const date30daysago = new Date()
     date30daysago.setDate(date30daysago.getDate() - this.instrumentsFromLastDays)
+    this.initDataStatusParser()
     axios
       .get(`${this.apiUrl}uploaded-metadata/`, {params: {...this.payload, ...{ site: this.siteid, dateFrom: date30daysago}}})
       .then(({data}) => (this.instruments = data))
       .catch()
   }
 
-  loadingComplete() {
-    this.busy = false
+  async initDataStatusParser() {
+    const properties = ['measurementDate', 'productId', 'legacy', 'qualityScore']
+    const payload = {
+      site: this.siteid,
+      showLegacy: true,
+      properties
+    }
+
+    this.dataStatusParser = await (new DataStatusParser(payload).engage())
   }
 }
 </script>

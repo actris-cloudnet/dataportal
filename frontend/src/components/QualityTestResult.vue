@@ -1,4 +1,5 @@
 <template>
+  <!-- eslint-disable vue/require-v-for-key -->
   <ul>
     <li v-for="test in qualityTestResult" :key="test.name">
       {{ test.name }}
@@ -6,7 +7,7 @@
       <span v-if="showTooltip(test.name)" class="tooltip"><span class="reltip">{{ test.description }}</span></span>
       <ul>
         <li v-if="test.report.length === 0">All pass</li>
-        <li v-else v-for="report in test.report" :key="report" class="circled">
+        <li v-else v-for="report in test.report" class="circled">
           <span v-if="typeof report == 'string'">{{ report }}</span>
           <ul v-else class="report">
             <li v-for="key in Object.keys(report)" :key="key">
