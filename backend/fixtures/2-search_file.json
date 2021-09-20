@@ -89,5 +89,14 @@
       "product": "model",
       "size": 12200657,
       "site": "potenza"
+    },
+    {
+      "uuid": "acf78456-11b1-41a6-b2de-aa7590a75675",
+      "legacy": false,
+      "volatile": false,
+      "measurementDate": "2021-02-20",
+      "product": "radar",
+      "size": 3327282,
+      "site": "bucharest"
     }
 ]

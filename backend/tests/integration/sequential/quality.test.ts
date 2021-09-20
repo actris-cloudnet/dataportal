@@ -31,7 +31,8 @@ beforeEach(async () => {
   await qualityRepo.delete({})
   // File fixtures are needed here
   await conn.getRepository('regular_file').save(JSON.parse((await fsp.readFile('fixtures/2-regular_file.json')).toString()))
-  return conn.getRepository('model_file').save(JSON.parse((await fsp.readFile('fixtures/2-model_file.json')).toString()))
+  await conn.getRepository('model_file').save(JSON.parse((await fsp.readFile('fixtures/2-model_file.json')).toString()))
+  return conn.getRepository('search_file').save(JSON.parse((await fsp.readFile('fixtures/2-search_file.json')).toString()))
 })
 
 afterAll(async () => {
@@ -39,6 +40,7 @@ afterAll(async () => {
   await conn.getRepository('visualization').delete({})
   await conn.getRepository('regular_file').delete({})
   await conn.getRepository('model_file').delete({})
+  await conn.getRepository('search_file').delete({})
   await conn.close()
 })
 
@@ -47,12 +49,15 @@ describe('PUT /quality/:uuid', () => {
   const privateUrl = `${backendPrivateUrl}quality/`
   const publicUrl = `${backendPublicUrl}quality/`
   const fileUrl = `${backendPublicUrl}files/`
+  const searchUrl = `${backendPublicUrl}search/`
 
   it('on new report responds with 201 and creates report', async () => {
     await expect(axios.put(`${privateUrl}acf78456-11b1-41a6-b2de-aa7590a75675`, validPayload))
       .resolves.toMatchObject({status: 201})
     await expect(axios.get(`${fileUrl}acf78456-11b1-41a6-b2de-aa7590a75675`))
       .resolves.toMatchObject({status: 200, data: {qualityScore: validPayload.overallScore}})
+    const res = await axios.get(searchUrl, {params: { dateFrom: '2021-02-20' }})
+    expect(res.data[0]).toMatchObject({qualityScore: validPayload.overallScore})
     return expect(axios.get(`${publicUrl}acf78456-11b1-41a6-b2de-aa7590a75675`))
       .resolves.toMatchObject({status: 200, data: validPayload})
   })

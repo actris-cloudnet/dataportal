@@ -74,7 +74,7 @@ describe('/api/files', () => {
   it('responds with correct objects if product is specified', async () => {
     const payload = {params: {product: 'radar'}}
     const res = await axios.get(url, payload)
-    return expect(res.data.map((d: any) => d.product.id)).toEqual(['radar', 'radar'])
+    return expect(res.data.map((d: any) => d.product.id)).toEqual(['radar', 'radar', 'radar'])
   })
 
   it('responds with correct objects if dateFrom, dateTo, site, and product are specified', async () => {
@@ -103,10 +103,10 @@ describe('/api/files', () => {
     return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
 
-  it('has exactly three stable files', async () => {
+  it('has exactly fourd stable files', async () => {
     const payload = {params: {volatile: 'false'}}
     const res = await axios.get(url, payload)
-    return expect(res.data).toHaveLength(3)
+    return expect(res.data).toHaveLength(4)
   })
 
   it('does not show test files in normal mode', async () => {
@@ -145,7 +145,7 @@ describe('/api/files', () => {
   it('returns the latest file when limit=1', async () => {
     const res = await axios.get(url, { params: { site: 'bucharest', limit: '1' }})
     expect(res.data).toHaveLength(1)
-    expect(res.data[0].measurementDate).toEqual('2019-07-16')
+    expect(res.data[0].measurementDate).toEqual('2021-02-20')
   })
 
   it('responds with 400 on malformed limit', async () => {
@@ -298,6 +298,6 @@ describe('/api/search', () => {
   it('returns the latest file when limit=1', async () => {
     const res = await axios.get(url, { params: { site: 'bucharest', limit: '1' }})
     expect(res.data).toHaveLength(1)
-    expect(res.data[0].measurementDate).toEqual('2020-12-05')
+    expect(res.data[0].measurementDate).toEqual('2021-02-20')
   })
 })
