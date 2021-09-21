@@ -268,6 +268,9 @@
   <div v-if="error" class="note rednote">
     Error: Search backend is offline, {{ error }}
   </div>
+  <div class="note betanote">
+    <b>Note:</b> Scheduled maintenance on 22-09-2021 starting at 6 AM UTC.
+  </div>
 
   <section id="sideBar">
     <div :class="{widemap: showAllSites, wideviz: vizWideMode}">
