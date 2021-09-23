@@ -89,6 +89,8 @@
       border-color: $blue-dust
     &>svg
       color: black
+      width: 1em
+      height: 1em
 
   div.keyInfo
     border-style: solid
