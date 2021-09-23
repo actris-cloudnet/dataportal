@@ -126,6 +126,9 @@ section#fileTable
     height: 1.2em
     margin-top: -4px
 
+#preview
+  width: 100%
+
 </style>
 
 
