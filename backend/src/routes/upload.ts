@@ -58,54 +58,54 @@ export class UploadRoutes {
     let uploadRepo: Repository<InstrumentUpload | ModelUpload>
     let productRepo: Repository<RegularFile | ModelFile>
 
-    const site = await this.siteRepo.findOne(req.params.site)
-    if (site == undefined) {
-      return next({status: 422, errors: 'Unknown site'})
-    }
-
-    if (isModelSubmission && isInstrumentSubmission) return next({
-      status: 422,
-      errors: 'Both "instrument" and "model" fields may not be specified'
-    })
-
-    if (isInstrumentSubmission) {
-      instrument = await this.instrumentRepo.findOne(body.instrument)
-      if (instrument == undefined) return next({status: 422, errors: 'Unknown instrument'})
-      uploadRepo = this.instrumentUploadRepo
-      if (this.isMiscUpload(instrument)) uploadRepo = this.miscUploadRepo
-      productRepo = this.regularFileRepo
-    } else if (isModelSubmission) {
-      model = await this.modelRepo.findOne(body.model)
-      if (model == undefined) return next({status: 422, errors: 'Unknown model'})
-      uploadRepo = this.modelUploadRepo
-      productRepo = this.modelFileRepo
-    } else return next({
-      status: 422,
-      errors: 'Metadata must have either "instrument" or "model" field'
-    })
-
-    // Remove existing metadata if its status is created
-    const existingCreatedMetadata = await uploadRepo.findOne({
-      checksum: body.checksum,
-      status: Status.CREATED
-    })
-    if (existingCreatedMetadata != undefined) {
-      await uploadRepo.remove(existingCreatedMetadata)
-    }
-
-    const existingUploadedMetadata = await uploadRepo.findOne({checksum: body.checksum})
-    if (existingUploadedMetadata != undefined) {
-      return next({status: 409, errors: 'File already uploaded'})
-    }
-
-    if (isModelSubmission) {
-      const isExistingFreezedProduct = await this.isFreezedProduct(body, productRepo)
-      if (isExistingFreezedProduct) {
-        return next({status: 409, errors: 'Freezed model file exists'})
-      }
-    }
-
     try {
+      const site = await this.siteRepo.findOne(req.params.site)
+      if (site == undefined) {
+        return next({status: 422, errors: 'Unknown site'})
+      }
+
+      if (isModelSubmission && isInstrumentSubmission) return next({
+        status: 422,
+        errors: 'Both "instrument" and "model" fields may not be specified'
+      })
+
+      if (isInstrumentSubmission) {
+        instrument = await this.instrumentRepo.findOne(body.instrument)
+        if (instrument == undefined) return next({status: 422, errors: 'Unknown instrument'})
+        uploadRepo = this.instrumentUploadRepo
+        if (this.isMiscUpload(instrument)) uploadRepo = this.miscUploadRepo
+        productRepo = this.regularFileRepo
+      } else if (isModelSubmission) {
+        model = await this.modelRepo.findOne(body.model)
+        if (model == undefined) return next({status: 422, errors: 'Unknown model'})
+        uploadRepo = this.modelUploadRepo
+        productRepo = this.modelFileRepo
+      } else return next({
+        status: 422,
+        errors: 'Metadata must have either "instrument" or "model" field'
+      })
+
+      // Remove existing metadata if its status is created
+      const existingCreatedMetadata = await uploadRepo.findOne({
+        checksum: body.checksum,
+        status: Status.CREATED
+      })
+      if (existingCreatedMetadata != undefined) {
+        await uploadRepo.remove(existingCreatedMetadata)
+      }
+
+      const existingUploadedMetadata = await uploadRepo.findOne({checksum: body.checksum})
+      if (existingUploadedMetadata != undefined) {
+        return next({status: 409, errors: 'File already uploaded'})
+      }
+
+      if (isModelSubmission) {
+        const isExistingFreezedProduct = await this.isFreezedProduct(body, productRepo)
+        if (isExistingFreezedProduct) {
+          return next({status: 409, errors: 'Freezed model file exists'})
+        }
+      }
+
       const params = {site: site, measurementDate: body.measurementDate, filename: filename}
       const payload = isModelSubmission ? {...params, model: body.model} : {...params, instrument: body.instrument}
       const existingMetadata = await uploadRepo.findOne(payload)
@@ -117,41 +117,37 @@ export class UploadRoutes {
         })
         return res.send(status200Message)
       }
-    } catch (err) {
-      return next({status: 500, errors: `Internal server error: ${err.code}`})
-    }
 
-    let uploadedMetadata: InstrumentUpload | ModelUpload
-    if (isInstrumentSubmission) {
-      if (this.isMiscUpload(instrument)) {
-        uploadedMetadata = new MiscUpload(
-          body.checksum,
-          filename,
-          body.measurementDate,
-          site,
-          Status.CREATED,
-          instrument as Instrument)
+      let uploadedMetadata: InstrumentUpload | ModelUpload
+      if (isInstrumentSubmission) {
+        if (this.isMiscUpload(instrument)) {
+          uploadedMetadata = new MiscUpload(
+            body.checksum,
+            filename,
+            body.measurementDate,
+            site,
+            Status.CREATED,
+            instrument as Instrument)
 
+        } else {
+          uploadedMetadata = new InstrumentUpload(
+            body.checksum,
+            filename,
+            body.measurementDate,
+            site,
+            Status.CREATED,
+            instrument as Instrument)
+        }
       } else {
-        uploadedMetadata = new InstrumentUpload(
+        uploadedMetadata = new ModelUpload(
           body.checksum,
           filename,
           body.measurementDate,
           site,
           Status.CREATED,
-          instrument as Instrument)
+          model as Model)
       }
-    } else {
-      uploadedMetadata = new ModelUpload(
-        body.checksum,
-        filename,
-        body.measurementDate,
-        site,
-        Status.CREATED,
-        model as Model)
-    }
 
-    try {
       await uploadRepo.insert(uploadedMetadata)
       return res.send(status200Message)
     } catch (err) {
