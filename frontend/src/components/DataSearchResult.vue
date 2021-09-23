@@ -246,7 +246,9 @@ section#fileTable
             <div v-if="previewImgUrl">
               <div class="variable">
                 <h4>{{ previewTitle }}</h4>
-                <img :src="previewImgUrl" class="visualization" @load="changePreview">
+                <router-link :to="`/file/${previewResponse.uuid}`">
+                  <img :src="previewImgUrl" class="visualization" @load="changePreview">
+                </router-link>
               </div>
             </div>
             <span v-else>Preview not available.</span>
