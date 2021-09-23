@@ -82,6 +82,9 @@
 
   h3 > .rowtag
     margin-left: 1em
+    padding: 0.4em
+    font-size: 0.8em
+    border-radius: 5px
 </style>
 
 
