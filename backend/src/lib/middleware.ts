@@ -165,6 +165,9 @@ export class Middleware {
 
     const isArrayWithElements = (obj: any) => Array.isArray(obj) && obj.length > 0
 
+    if (key in query && query[key].length == 0)
+      return (`Property ${key} is empty`)
+
     switch (key) {
     case 'product':
       if (key in query && !((typeof query[key] == 'string' && validator.isAlphanumeric(query[key]))
