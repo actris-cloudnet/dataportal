@@ -361,7 +361,7 @@ export default class FileView extends Vue {
     let target = e.target as HTMLElement
     const clickTargetId = target.id
 
-    if (['showLicense', 'showHowToCite'].includes(clickTargetId))
+    if (['showLicense', 'showCiting'].includes(clickTargetId))
       return
 
     // Check if clicked inside hoverbox
