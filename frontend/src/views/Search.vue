@@ -258,7 +258,7 @@
     background: #cad7ff
 
   .legacy
-    background: #f2f2f2
+    background: #cecece
 </style>
 
 <template>
