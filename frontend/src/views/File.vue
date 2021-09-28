@@ -271,7 +271,12 @@ main#filelanding
             <div v-for="viz in getVisualizations(visualizations)"
                  :key="viz.productVariable.id" class="variable">
               <h4>{{ viz.productVariable.humanReadableName }}</h4>
-              <img :alt="visualization" v-bind:src="`${quicklookUrl}${viz.s3key}`" class="visualization">
+              <a v-if="visualizations.length > 1 && !allVisualizations"
+                 class="viewAllPlots"
+                 @click="allVisualizations = true">
+                <img :alt="visualization" v-bind:src="`${quicklookUrl}${viz.s3key}`" class="visualization">
+              </a>
+              <img v-else :alt="visualization" v-bind:src="`${quicklookUrl}${viz.s3key}`" class="visualization">
             </div>
           </div>
           <a v-if="visualizations.length > 1 && !allVisualizations"
