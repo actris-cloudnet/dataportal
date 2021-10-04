@@ -78,13 +78,13 @@
       </section>
       <div class="forcewrap"></div>
       <section id="product_availability" class="graph">
-        <header>Data availability</header>
+        <header>Product availability</header>
         <section class="details">
           <ProductAvailabilityVisualization v-if="dataStatusParser"
               :site="siteid"
               :legend="true"
               :tooltips="true"
-                                            :dataStatusParser="dataStatusParser"
+              :dataStatusParser="dataStatusParser"
           ></ProductAvailabilityVisualization>
           <div v-else class="loadingoverlay">
             <div class="lds-dual-ring"></div>
@@ -92,7 +92,7 @@
         </section>
       </section>
       <section id="product_quality" class="graph">
-        <header>Data quality</header>
+        <header>Product quality</header>
         <section class="details">
           <ProductAvailabilityVisualization v-if="dataStatusParser"
                                             :site="siteid"
