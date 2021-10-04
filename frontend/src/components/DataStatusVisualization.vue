@@ -3,7 +3,7 @@
 @import "../sass/global.sass"
 @import "../sass/spinner.sass"
 
-$legacy-color: #adadad
+$legacy-color: #9fb4c4
 
 .dataviz-yearblock
   display: inline-block
@@ -37,6 +37,9 @@ $legacy-color: #adadad
 
 .all-data
   background: #5ac413
+
+.all-raw
+  background: #a0df7b
 
 .missing-data
   background: #f7e91b
@@ -169,12 +172,12 @@ $legacy-color: #adadad
     <div>
     </div>
     <div class="dav-legend" v-if="legend && !qualityScores">
-      <div class="legendexpl"><div class="all-data legendcolor"></div> All data</div>
-      <div class="legendexpl"><div class="missing-data legendcolor"></div> Missing some data</div>
-      <div class="legendexpl"><div class="error-data legendcolor"></div> Unknown status</div>
-      <div class="legendexpl"><div class="only-legacy-data legendcolor"></div> Only legacy data</div>
-      <div class="legendexpl"><div class="only-model-data legendcolor"></div> Only model data</div>
-      <div class="legendexpl"><div class="no-data legendcolor"></div> No data</div><br>
+      <div class="legendexpl"><div class="all-data legendcolor"></div> All level 2</div>
+      <div class="legendexpl"><div class="all-raw legendcolor"></div> Some level 1b</div>
+      <div class="legendexpl"><div class="only-legacy-data legendcolor"></div> Only legacy</div>
+      <div class="legendexpl"><div class="only-model-data legendcolor"></div> Only model</div>
+      <div class="legendexpl"><div class="no-data legendcolor"></div> No data</div>
+      <div class="legendexpl"><div class="error-data legendcolor"></div> Unknown</div><br>
       <div class="legendexpl"><span class="legacy-label">L</span> Legacy file</div>
     </div>
     <div class="dav-legend" v-if="legend && qualityScores">
@@ -320,9 +323,9 @@ export default class ProductAvailabilityVisualization extends Vue {
     if (this.noData(products)) return 'no-data'
     else if (this.onlyModel(products)) return 'only-model-data'
     else if (this.weirdModel(products)) return 'error-data'
-    else if (this.allData(products)) return 'all-data'
+    else if (this.allLvl2(products)) return 'all-data'
     else if (this.onlyLegacy(products)) return 'only-legacy-data'
-    else if (this.missingData(products)) return 'missing-data'
+    else if (this.missingData(products)) return 'all-raw'
     else return 'error-data'
   }
 
@@ -346,11 +349,8 @@ export default class ProductAvailabilityVisualization extends Vue {
     return 'qualityScore' in prod && typeof prod.qualityScore === 'number'
   }
 
-  allData(products: ProductLevels) {
+  allLvl2(products: ProductLevels) {
     return products['2'].filter(this.isNotLegacy).length == 4
-        && products['1c'].filter(this.isNotLegacy).length == 1
-        && products['1b'].filter(this.isNotLegacy).length >= 3
-        && products['1b'].filter(this.isModel).length == 1
   }
 
   missingData(products: ProductLevels) {
