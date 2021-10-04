@@ -63,7 +63,7 @@ describe('Data availability mode', () => {
     expect(classes).toContain('all-data')
   })
 
-  it('displays yellow color for days that have incomplete data', async () => {
+  it('displays light green color for days that have incomplete data', async () => {
     const {element, classes} = getColorElementByDate(wrapper, '2021-05-04')
     await element.trigger('mouseenter')
     await wait(50)
@@ -75,7 +75,7 @@ describe('Data availability mode', () => {
           : wrapClasses.includes('found')
       })).toBeTruthy()
     expect(classes.length).toEqual(2)
-    expect(classes).toContain('missing-data')
+    expect(classes).toContain('all-raw')
   })
 
   it('displays dark gray color for days that have only legacy data', async () => {
