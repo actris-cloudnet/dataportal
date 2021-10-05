@@ -113,6 +113,8 @@ import {QualityReportRoutes} from './routes/qualityreport'
   app.get('/api/download/image/*', dlRoutes.image)
   app.get('/api/calibration', calibRoutes.calibration)
   app.get('/api/quality/:uuid', qualityRoutes.qualityReport)
+  app.get('/api/raw-files', uploadRoutes.listMetadata)
+  app.get('/api/raw-model-files', uploadRoutes.listMetadata)
 
   // protected (for sites)
   app.post('/upload/metadata',
@@ -151,8 +153,6 @@ import {QualityReportRoutes} from './routes/qualityreport'
   // private
   app.put('/files/*', express.json(), fileRoutes.putFile)
   app.post('/files/', express.json(), fileRoutes.postFile)
-  app.get('/upload-metadata', uploadRoutes.listMetadata)
-  app.get('/upload-model-metadata', uploadRoutes.listMetadata)
   app.post('/upload-metadata', express.json(), uploadRoutes.updateMetadata)
   app.post('/calibration', express.json(), calibRoutes.postCalibration)
   app.put('/visualizations/*', express.json(), vizRoutes.putVisualization)

@@ -3,8 +3,8 @@ import axios from 'axios'
 import {readResources} from '../../../../shared/lib'
 
 const protectedUrl = `${backendPrivateUrl}upload/metadata/`
-const privateUrl = `${backendPrivateUrl}upload-metadata/`
-const privateModelUrl = `${backendPrivateUrl}upload-model-metadata/`
+const privateUrl = `${backendPublicUrl}raw-files/`
+const privateModelUrl = `${backendPublicUrl}raw-model-files/`
 
 let instResp: any
 let modelResp: any
