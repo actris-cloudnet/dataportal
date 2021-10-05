@@ -26,8 +26,7 @@
       "type": "radar",
       "auxiliary": false,
       "humanReadableName": "METEK MIRA-35 cloud radar"
-    },
-    "downloadUrl": "http://localhost:3000/api/download/raw/b8e96ee1-d3e1-49ba-a557-c131d56beeab/file1-dc460da4ad72c48223.LV1"
+    }
   },
   {
     "uuid": "b4633e6b-a3fc-4d55-b9f4-8033b4896117",
@@ -55,8 +54,7 @@
       "type": "lidar",
       "auxiliary": false,
       "humanReadableName": "Lufft CHM15k ceilometer"
-    },
-    "downloadUrl": "http://localhost:3000/api/download/raw/b4633e6b-a3fc-4d55-b9f4-8033b4896117/file4-ab460da4ad72c48223.LV1"
+    }
   },
   {
     "uuid": "5bc638ba-d38f-4b98-b771-3f16ec59570b",
@@ -84,8 +82,7 @@
       "type": "lidar",
       "auxiliary": false,
       "humanReadableName": "Lufft CHM15k ceilometer"
-    },
-    "downloadUrl": "http://localhost:3000/api/download/raw/5bc638ba-d38f-4b98-b771-3f16ec59570b/file3-ab460da4ad72c48223.LV1"
+    }
   },
   {
     "uuid": "1fa2b98c-e415-4e5e-b73d-87d050e2c61c",
@@ -113,7 +110,6 @@
       "type": "radar",
       "auxiliary": false,
       "humanReadableName": "METEK MIRA-35 cloud radar"
-    },
-    "downloadUrl": "http://localhost:3000/api/download/raw/1fa2b98c-e415-4e5e-b73d-87d050e2c61c/file4-ab460da4ad72c48223.LV1"
+    }
   }
 ]

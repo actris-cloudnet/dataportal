@@ -47,7 +47,7 @@ export class Middleware {
 
     let validKeys = ['site', 'volatile', 'product', 'dateFrom', 'dateTo', 'developer',
       'releasedBefore', 'allVersions', 'limit', 'showLegacy', 'model', 'allModels', 'date', 'filename', 'properties',
-      'updatedAtFrom', 'updatedAtTo', 's3path']
+      'updatedAtFrom', 'updatedAtTo', 's3path', 'status', 'instrument']
 
     if (req.path.includes('visualization')) validKeys.push('variable')
 
@@ -56,7 +56,7 @@ export class Middleware {
       requestError.errors.push(`Unknown query parameters: ${unknownFields}`)
     }
 
-    const keys = ['site', 'product', 'dateFrom', 'dateTo', 'volatile', 'limit', 'date']
+    const keys = ['site', 'product', 'dateFrom', 'dateTo', 'updatedAtFrom', 'updatedAtTo', 'volatile', 'limit', 'date']
     keys.forEach(key => {
       const keyError = this.checkField(key, req.query)
       if (keyError) requestError.errors.push(keyError)
@@ -97,6 +97,10 @@ export class Middleware {
     query.volatile = toArray(query.volatile)
     query.filename = toArray(query.filename)
     query.legacy = setLegacy()
+    if (query.date) {
+      query.dateFrom = query.date
+      query.dateTo = query.date
+    }
     if (query.updatedAtTo) query.updatedAtTo = new Date(query.updatedAtTo)
     if (query.updatedAtFrom) query.updatedAtFrom = new Date(query.updatedAtFrom)
     query.s3path = (query.s3path || '').toLowerCase() == 'true' ? true : false
@@ -177,6 +181,8 @@ export class Middleware {
       break
     case 'dateTo':
     case 'dateFrom':
+    case 'updatedAtFrom':
+    case 'updatedAtTo':
     case 'date':
       if (key in query && !isValidDate(query[key])) {
         return (`Malformed date in property "${key}"`)

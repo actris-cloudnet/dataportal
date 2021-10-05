@@ -7,7 +7,7 @@ import {
   convertToSearchResponse,
   getS3pathForFile,
   hideTestDataFromNormalUsers,
-  sortByMeasurementDateAsc, toArray, transformRawFile,
+  sortByMeasurementDateAsc, toArray,
   dateforsize, streamHandler
 } from '../lib'
 import {augmentFile} from '../lib/'
@@ -15,7 +15,6 @@ import {SearchFile} from '../entity/SearchFile'
 import {Model} from '../entity/Model'
 import {basename} from 'path'
 import {ModelFile} from '../entity/File'
-import ReadableStream = NodeJS.ReadableStream
 import {SearchFileResponse} from '../entity/SearchFileResponse'
 
 export class FileRoutes {
@@ -310,7 +309,6 @@ function addCommonFilters<T>(qb: SelectQueryBuilder<T>, query: any) {
   if (query.product) qb.andWhere('product.id IN (:...product)', query)
   if (query.dateFrom) qb.andWhere('file.measurementDate >= :dateFrom', query)
   if (query.dateTo) qb.andWhere('file.measurementDate <= :dateTo', query)
-  if (query.date) qb.andWhere('file.measurementDate = :date', query)
   if (query.volatile) qb.andWhere('file.volatile IN (:...volatile)', query)
   if (query.legacy) qb.andWhere('file.legacy IN (:...legacy)', query)
   return qb as SelectQueryBuilder<T>

@@ -113,8 +113,16 @@ import {QualityReportRoutes} from './routes/qualityreport'
   app.get('/api/download/image/*', dlRoutes.image)
   app.get('/api/calibration', calibRoutes.calibration)
   app.get('/api/quality/:uuid', qualityRoutes.qualityReport)
-  app.get('/api/raw-files', uploadRoutes.listMetadata)
-  app.get('/api/raw-model-files', uploadRoutes.listMetadata)
+  app.get('/api/raw-files',
+    middleware.filesValidator,
+    middleware.filesQueryAugmenter,
+    middleware.checkParamsExistInDb,
+    uploadRoutes.listMetadata)
+  app.get('/api/raw-model-files',
+    middleware.filesValidator,
+    middleware.filesQueryAugmenter,
+    middleware.checkParamsExistInDb,
+    uploadRoutes.listMetadata)
 
 
   // protected (for sites)
