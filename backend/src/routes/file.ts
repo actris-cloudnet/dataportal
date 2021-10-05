@@ -8,7 +8,7 @@ import {
   getS3pathForFile,
   hideTestDataFromNormalUsers,
   sortByMeasurementDateAsc, toArray, transformRawFile,
-  dateforsize
+  dateforsize, streamHandler
 } from '../lib'
 import {augmentFile} from '../lib/'
 import {SearchFile} from '../entity/SearchFile'
@@ -58,7 +58,7 @@ export class FileRoutes {
     const query = req.query as any
     this.filesQueryBuilder(query, 'file')
       .stream()
-      .then(stream => fileStreamHandler(stream, res, augmentFile(query.s3path)))
+      .then(stream => streamHandler(stream, res, 'file', augmentFile(query.s3path)))
       .catch(err => {
         next({ status: 500, errors: err })
       })
@@ -68,7 +68,7 @@ export class FileRoutes {
     const query = req.query as any
     this.filesQueryBuilder(query, 'model')
       .stream()
-      .then(stream => fileStreamHandler(stream, res, augmentFile(query.s3path)))
+      .then(stream => streamHandler(stream, res, 'file', augmentFile(query.s3path)))
       .catch(err => {
         next({ status: 500, errors: err })
       })
@@ -82,7 +82,7 @@ export class FileRoutes {
 
     this.searchFilesQueryBuilder(query)
       .stream()
-      .then(stream => fileStreamHandler(stream, res, converterFunction))
+      .then(stream => streamHandler(stream, res, 'file', converterFunction))
       .catch(err => {
         next({ status: 500, errors: err })
       })
@@ -314,23 +314,6 @@ function addCommonFilters<T>(qb: SelectQueryBuilder<T>, query: any) {
   if (query.volatile) qb.andWhere('file.volatile IN (:...volatile)', query)
   if (query.legacy) qb.andWhere('file.legacy IN (:...legacy)', query)
   return qb as SelectQueryBuilder<T>
-}
-
-function fileStreamHandler(stream: ReadableStream, res: Response, augmenter?: Function) {
-  res.header('content-type', 'application/json')
-  res.write('[')
-  let objectSent = false
-  stream.on('data', data => {
-    if (objectSent) res.write(',')
-    else objectSent = true
-    const transformedFile = transformRawFile(data)
-    const augmentedFile = augmenter ? augmenter(transformedFile) : transformedFile
-    res.write(JSON.stringify(augmentedFile))
-  })
-  stream.on('end', () => {
-    res.write(']')
-    res.end()
-  })
 }
 
 function isValidFilename(file: any) {

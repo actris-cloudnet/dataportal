@@ -7,7 +7,7 @@ import {
   fetchAll,
   getS3pathForUpload,
   isValidDate,
-  ssAuthString,
+  ssAuthString, streamHandler,
   toArray,
   tomorrow
 } from '../lib'
@@ -196,7 +196,9 @@ export class UploadRoutes {
     const isModel = req.path.includes('model')
     const repo = isModel ? this.modelUploadRepo : this.instrumentUploadRepo
     this.metadataQueryBuilder(repo, req.query, false, isModel)
-      .then(uploadedMetadata => res.send(uploadedMetadata.map(this.addDownloadUrlToUpload)))
+      .then(uploadedMetadata => {
+        streamHandler(uploadedMetadata, res, 'um', this.addDownloadUrlToUpload)
+      })
       .catch(err => {next({status: 500, errors: `Internal server error: ${err}`})})
   }
 
@@ -299,7 +301,7 @@ export class UploadRoutes {
 
     if (!onlyDistinctInstruments) qb.addOrderBy('size', 'DESC')
 
-    return qb.getMany()
+    return qb.stream()
   }
 
 
@@ -309,7 +311,6 @@ export class UploadRoutes {
   private addDownloadUrlToUpload = (upload: InstrumentUpload | ModelUpload) =>
     ({...upload, ...{
       downloadUrl: `${env.DP_BACKEND_URL}/download/${this.getDownloadPathForUpload(upload)}`,
-      s3path: getS3pathForUpload(upload)
     }})
 
 
