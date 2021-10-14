@@ -1,7 +1,7 @@
 import {Site} from '../entity/Site'
 import {InstrumentUpload, MiscUpload, ModelUpload, Status, Upload} from '../entity/Upload'
 import {Connection, Repository} from 'typeorm'
-import {Request, RequestHandler, Response} from 'express'
+import {NextFunction, Request, RequestHandler, Response} from 'express'
 import {
   dateforsize,
   fetchAll,
@@ -187,19 +187,23 @@ export class UploadRoutes {
       repo.findOne({checksum: checksum}, { relations: ['site', (model ? 'model' : 'instrument')] }))
       .then(upload => {
         if (upload == undefined) return next({ status: 404, errors: 'No metadata was found with provided id'})
-        res.send(this.addDownloadUrlToUpload(upload))
+        res.send(this.augmentUploadResponse(true)(upload))
       })
       .catch(err => next({ status: 500, errors: `Internal server error: ${err.code}`}))
   }
 
-  listMetadata: RequestHandler = async (req: Request, res: Response, next) => {
-    const isModel = req.path.includes('model')
-    const repo = isModel ? this.modelUploadRepo : this.instrumentUploadRepo
-    this.metadataStream(repo, req.query, false, isModel)
-      .then(uploadedMetadata => {
-        streamHandler(uploadedMetadata, res, 'um', this.addDownloadUrlToUpload)
-      })
-      .catch(err => {next({status: 500, errors: `Internal server error: ${err}`})})
+  listMetadata = (includeS3path: boolean) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+      const isModel = req.path.includes('model')
+      const repo = isModel ? this.modelUploadRepo : this.instrumentUploadRepo
+      this.metadataStream(repo, req.query, false, isModel)
+        .then(uploadedMetadata => {
+          streamHandler(uploadedMetadata, res, 'um', this.augmentUploadResponse(includeS3path))
+        })
+        .catch(err => {
+          next({status: 500, errors: `Internal server error: ${err}`})
+        })
+    }
   }
 
   listInstrumentsFromMetadata: RequestHandler = async (req: Request, res: Response, next) => {
@@ -320,10 +324,12 @@ export class UploadRoutes {
   private getDownloadPathForUpload = (file: Upload) =>
     `raw/${file.uuid}/${file.filename}`
 
-  private addDownloadUrlToUpload = (upload: InstrumentUpload | ModelUpload) =>
-    ({...upload, ...{
-      downloadUrl: `${env.DP_BACKEND_URL}/download/${this.getDownloadPathForUpload(upload)}`,
-    }})
+  private augmentUploadResponse = (includeS3Path: boolean) =>
+    (upload: InstrumentUpload | ModelUpload) =>
+      ({...upload, ...{
+        downloadUrl: `${env.DP_BACKEND_URL}/download/${this.getDownloadPathForUpload(upload)}`,
+        s3path: includeS3Path ? getS3pathForUpload(upload) : undefined
+      }})
 
 
   validateMetadata: RequestHandler = async (req, res, next) => {
