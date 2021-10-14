@@ -113,6 +113,17 @@ import {QualityReportRoutes} from './routes/qualityreport'
   app.get('/api/download/image/*', dlRoutes.image)
   app.get('/api/calibration', calibRoutes.calibration)
   app.get('/api/quality/:uuid', qualityRoutes.qualityReport)
+  app.get('/api/raw-files',
+    middleware.filesValidator,
+    middleware.filesQueryAugmenter,
+    middleware.checkParamsExistInDb,
+    uploadRoutes.listMetadata(false))
+  app.get('/api/raw-model-files',
+    middleware.filesValidator,
+    middleware.filesQueryAugmenter,
+    middleware.checkParamsExistInDb,
+    uploadRoutes.listMetadata(false))
+
 
   // protected (for sites)
   app.post('/upload/metadata',
@@ -132,10 +143,6 @@ import {QualityReportRoutes} from './routes/qualityreport'
     uploadRoutes.metadata,
     errorAsPlaintext)
 
-  // protected (for development)
-  app.get('/protected/upload-metadata', uploadRoutes.listMetadata)
-  app.get('/protected/upload-model-metadata', uploadRoutes.listMetadata)
-
   // model data upload (for Ewan only)
   app.post('/model-upload/metadata',
     express.json(),
@@ -151,9 +158,9 @@ import {QualityReportRoutes} from './routes/qualityreport'
   // private
   app.put('/files/*', express.json(), fileRoutes.putFile)
   app.post('/files/', express.json(), fileRoutes.postFile)
-  app.get('/upload-metadata', uploadRoutes.listMetadata)
-  app.get('/upload-model-metadata', uploadRoutes.listMetadata)
   app.post('/upload-metadata', express.json(), uploadRoutes.updateMetadata)
+  app.get('/upload-metadata', express.json(), uploadRoutes.listMetadata(true))
+  app.get('/upload-model-metadata', express.json(), uploadRoutes.listMetadata(true))
   app.post('/calibration', express.json(), calibRoutes.postCalibration)
   app.put('/visualizations/*', express.json(), vizRoutes.putVisualization)
   app.get('/upload-dateforsize', uploadRoutes.dateforsize)

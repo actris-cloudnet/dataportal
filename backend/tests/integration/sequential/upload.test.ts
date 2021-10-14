@@ -1,6 +1,6 @@
 import axios from 'axios'
 import {Connection, createConnection} from 'typeorm/'
-import {backendPrivateUrl, str2base64} from '../../lib'
+import {backendPrivateUrl, backendPublicUrl, str2base64} from '../../lib'
 import {Status} from '../../../src/entity/Upload'
 import {promises as fsp} from 'fs'
 
@@ -11,6 +11,7 @@ let miscUploadRepo: any
 
 const metadataUrl = `${backendPrivateUrl}upload/metadata/`
 const modelMetadataUrl = `${backendPrivateUrl}model-upload/metadata/`
+const publicMetadataUrl = `${backendPublicUrl}raw-files/`
 const privateMetadataUrl = `${backendPrivateUrl}upload-metadata/`
 const dataUrl = `${backendPrivateUrl}upload/data/`
 const modelDataUrl = `${backendPrivateUrl}model-upload/data/`
@@ -433,7 +434,7 @@ describe('POST /upload-metadata/', () => {
 
   beforeAll(async () => {
     await axios.post(metadataUrl, validMetadata, {headers})
-    const {data} = await axios.get(privateMetadataUrl)
+    const {data} = await axios.get(publicMetadataUrl, {params: {developer: true}})
     uuid = data[0].uuid
   })
 

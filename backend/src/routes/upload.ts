@@ -1,13 +1,13 @@
 import {Site} from '../entity/Site'
 import {InstrumentUpload, MiscUpload, ModelUpload, Status, Upload} from '../entity/Upload'
 import {Connection, Repository} from 'typeorm'
-import {Request, RequestHandler, Response} from 'express'
+import {NextFunction, Request, RequestHandler, Response} from 'express'
 import {
   dateforsize,
   fetchAll,
   getS3pathForUpload,
   isValidDate,
-  ssAuthString,
+  ssAuthString, streamHandler,
   toArray,
   tomorrow
 } from '../lib'
@@ -187,21 +187,27 @@ export class UploadRoutes {
       repo.findOne({checksum: checksum}, { relations: ['site', (model ? 'model' : 'instrument')] }))
       .then(upload => {
         if (upload == undefined) return next({ status: 404, errors: 'No metadata was found with provided id'})
-        res.send(this.addDownloadUrlToUpload(upload))
+        res.send(this.augmentUploadResponse(true)(upload))
       })
       .catch(err => next({ status: 500, errors: `Internal server error: ${err.code}`}))
   }
 
-  listMetadata: RequestHandler = async (req: Request, res: Response, next) => {
-    const isModel = req.path.includes('model')
-    const repo = isModel ? this.modelUploadRepo : this.instrumentUploadRepo
-    this.metadataQueryBuilder(repo, req.query, false, isModel)
-      .then(uploadedMetadata => res.send(uploadedMetadata.map(this.addDownloadUrlToUpload)))
-      .catch(err => {next({status: 500, errors: `Internal server error: ${err}`})})
+  listMetadata = (includeS3path: boolean) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+      const isModel = req.path.includes('model')
+      const repo = isModel ? this.modelUploadRepo : this.instrumentUploadRepo
+      this.metadataStream(repo, req.query, false, isModel)
+        .then(uploadedMetadata => {
+          streamHandler(uploadedMetadata, res, 'um', this.augmentUploadResponse(includeS3path))
+        })
+        .catch(err => {
+          next({status: 500, errors: `Internal server error: ${err}`})
+        })
+    }
   }
 
   listInstrumentsFromMetadata: RequestHandler = async (req: Request, res: Response, next) => {
-    (this.metadataQueryBuilder(this.instrumentUploadRepo, req.query, true) as Promise<InstrumentUpload[]>)
+    (this.metadataMany(this.instrumentUploadRepo, req.query, true) as Promise<InstrumentUpload[]>)
       .then(uploadedMetadata =>
         res.send(uploadedMetadata.map(md => new ReducedMetadataResponse(md))))
       .catch(err => {next({status: 500, errors: err})})
@@ -270,7 +276,7 @@ export class UploadRoutes {
     model = false) {
     const augmentedQuery: any = {
       site: query.site || (await fetchAll<Site>(this.conn, Site)).map(site => site.id),
-      status: query.status || [Status.UPLOADED, Status.CREATED, Status.PROCESSED],
+      status: query.status || [Status.UPLOADED, Status.CREATED, Status.PROCESSED, Status.INVALID],
       dateFrom: query.dateFrom || '1970-01-01',
       dateTo: query.dateTo || tomorrow(),
       instrument: model ? undefined : query.instrument,
@@ -299,6 +305,18 @@ export class UploadRoutes {
 
     if (!onlyDistinctInstruments) qb.addOrderBy('size', 'DESC')
 
+    return qb
+  }
+
+  private async metadataStream(repo: Repository<InstrumentUpload|ModelUpload>, query: any,
+    onlyDistinctInstruments = false, model = false) {
+    const qb = await this.metadataQueryBuilder(repo, query, onlyDistinctInstruments, model)
+    return qb.stream()
+  }
+
+  private async metadataMany(repo: Repository<InstrumentUpload|ModelUpload>, query: any,
+    onlyDistinctInstruments = false, model = false) {
+    const qb = await this.metadataQueryBuilder(repo, query, onlyDistinctInstruments, model)
     return qb.getMany()
   }
 
@@ -306,11 +324,12 @@ export class UploadRoutes {
   private getDownloadPathForUpload = (file: Upload) =>
     `raw/${file.uuid}/${file.filename}`
 
-  private addDownloadUrlToUpload = (upload: InstrumentUpload | ModelUpload) =>
-    ({...upload, ...{
-      downloadUrl: `${env.DP_BACKEND_URL}/download/${this.getDownloadPathForUpload(upload)}`,
-      s3path: getS3pathForUpload(upload)
-    }})
+  private augmentUploadResponse = (includeS3Path: boolean) =>
+    (upload: InstrumentUpload | ModelUpload) =>
+      ({...upload, ...{
+        downloadUrl: `${env.DP_BACKEND_URL}/download/${this.getDownloadPathForUpload(upload)}`,
+        s3path: includeS3Path ? getS3pathForUpload(upload) : undefined
+      }})
 
 
   validateMetadata: RequestHandler = async (req, res, next) => {

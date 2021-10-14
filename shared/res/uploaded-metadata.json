@@ -4,99 +4,112 @@
     "checksum": "dc460da4ad72c482231e28e688e01f27",
     "filename": "file1-dc460da4ad72c48223.LV1",
     "measurementDate": "2020-08-11",
+    "size": "32212254720",
+    "status": "created",
+    "createdAt": "2020-09-27T12:45:21.916Z",
+    "updatedAt": "2020-09-27T12:45:21.916Z",
     "site": {
       "id": "granada",
       "humanReadableName": "Granada",
+      "type": [
+        "cloudnet",
+        "test"
+      ],
       "latitude": 37.164,
       "longitude": -3.605,
       "altitude": 680,
       "gaw": "UGR",
       "country": "Spain"
     },
-    "status": "created",
-    "size": "32212254720",
-    "createdAt": "2020-09-27T12:45:21.916Z",
-    "updatedAt": "2020-09-27T12:45:21.916Z",
     "instrument": {
       "id": "mira",
       "type": "radar",
+      "auxiliary": false,
       "humanReadableName": "METEK MIRA-35 cloud radar"
-    },
-    "s3path": "/cloudnet-upload/granada/b8e96ee1-d3e1-49ba-a557-c131d56beeab/file1-dc460da4ad72c48223.LV1"
+    }
   },
   {
     "uuid": "b4633e6b-a3fc-4d55-b9f4-8033b4896117",
     "checksum": "bb460da4ad72c482231e28e688e01f27",
     "filename": "file4-ab460da4ad72c48223.LV1",
     "measurementDate": "2020-08-12",
+    "size": "22212254720",
+    "status": "processed",
+    "createdAt": "2020-09-28T12:47:21.916Z",
+    "updatedAt": "2020-09-28T12:47:21.916Z",
     "site": {
       "id": "bucharest",
       "humanReadableName": "Bucharest",
+      "type": [
+        "cloudnet"
+      ],
       "latitude": 44.348,
       "longitude": 26.029,
       "altitude": 93,
       "gaw": "Unknown",
       "country": "Romania"
     },
-    "status": "processed",
-    "size": "22212254720",
-    "createdAt": "2020-09-28T12:47:21.916Z",
-    "updatedAt": "2020-09-28T12:47:21.916Z",
     "instrument": {
       "id": "chm15k",
       "type": "lidar",
+      "auxiliary": false,
       "humanReadableName": "Lufft CHM15k ceilometer"
-    },
-    "s3path": "/cloudnet-upload/bucharest/b4633e6b-a3fc-4d55-b9f4-8033b4896117/file4-ab460da4ad72c48223.LV1"
+    }
   },
   {
     "uuid": "5bc638ba-d38f-4b98-b771-3f16ec59570b",
     "checksum": "ab460da4ad72c482231e28e688e01f27",
     "filename": "file3-ab460da4ad72c48223.LV1",
     "measurementDate": "2020-08-12",
+    "size": "12212254720",
+    "status": "processed",
+    "createdAt": "2020-09-28T12:46:21.916Z",
+    "updatedAt": "2020-09-28T12:46:21.916Z",
     "site": {
       "id": "bucharest",
       "humanReadableName": "Bucharest",
+      "type": [
+        "cloudnet"
+      ],
       "latitude": 44.348,
       "longitude": 26.029,
       "altitude": 93,
       "gaw": "Unknown",
       "country": "Romania"
     },
-    "status": "processed",
-    "size": "12212254720",
-    "createdAt": "2020-09-28T12:46:21.916Z",
-    "updatedAt": "2020-09-28T12:46:21.916Z",
     "instrument": {
       "id": "chm15k",
       "type": "lidar",
+      "auxiliary": false,
       "humanReadableName": "Lufft CHM15k ceilometer"
-    },
-    "s3path": "/cloudnet-upload/bucharest/5bc638ba-d38f-4b98-b771-3f16ec59570b/file3-ab460da4ad72c48223.LV1"
+    }
   },
   {
     "uuid": "1fa2b98c-e415-4e5e-b73d-87d050e2c61c",
     "checksum": "cb460da4ad72c482231e28e688e01f27",
     "filename": "file4-ab460da4ad72c48223.LV1",
     "measurementDate": "2020-08-13",
+    "size": "2212254720",
+    "status": "uploaded",
+    "createdAt": "2020-09-28T12:48:21.916Z",
+    "updatedAt": "2020-09-28T12:48:21.916Z",
     "site": {
       "id": "bucharest",
       "humanReadableName": "Bucharest",
+      "type": [
+        "cloudnet"
+      ],
       "latitude": 44.348,
       "longitude": 26.029,
       "altitude": 93,
       "gaw": "Unknown",
       "country": "Romania"
     },
-    "status": "uploaded",
-    "size": "2212254720",
-    "createdAt": "2020-09-28T12:48:21.916Z",
-    "updatedAt": "2020-09-28T12:48:21.916Z",
     "instrument": {
       "id": "mira",
       "type": "radar",
+      "auxiliary": false,
       "humanReadableName": "METEK MIRA-35 cloud radar"
-    },
-    "s3path": "/cloudnet-upload/bucharest/1fa2b98c-e415-4e5e-b73d-87d050e2c61c/file4-ab460da4ad72c48223.LV1"
+    }
   }
 ]

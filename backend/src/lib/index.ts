@@ -10,6 +10,7 @@ import axios from 'axios'
 import {SiteType} from '../entity/Site'
 import env from './env'
 import {CollectionFileResponse} from '../entity/CollectionFileResponse'
+import ReadableStream = NodeJS.ReadableStream
 
 export const stringify = (obj: any): string => JSON.stringify(obj, null, 2)
 
@@ -114,9 +115,10 @@ export async function checkFileExists(s3path: string) {
 const fixDbDate = (date: Date) => // Add finnish timezone hours to make the date jump to next day
   new Date(date.setHours(date.getHours() + 3))
 
-const translateKeyVal = (key: string, val: string|number|boolean|Date, acc: any) => {
+const translateKeyVal = (key: string, val: string|number|boolean|Date, acc: any, prefix: string) => {
   if (key.includes('Id')) return {}
-  key = key.replace(/^file_/, '')
+  const regexp = new RegExp(`^${prefix}_`)
+  key = key.replace(regexp, '')
   val = (val instanceof Date && key == 'measurementDate') ? fixDbDate(val).toISOString().split('T')[0] : val
   let subKey
   [key, subKey] = key.split('_')
@@ -128,10 +130,10 @@ const translateKeyVal = (key: string, val: string|number|boolean|Date, acc: any)
   }
 }
 
-export const transformRawFile = (obj: any): RegularFile|ModelFile|SearchFile => {
+export const transformRawFile = (obj: any, prefix: string): RegularFile|ModelFile|SearchFile => {
   return Object.keys(obj).reduce((acc: {[key: string]: any}, key) => ({
     ...acc,
-    ...translateKeyVal(key, obj[key], acc)
+    ...translateKeyVal(key, obj[key], acc, prefix)
   }), {}) as RegularFile|ModelFile|SearchFile
 }
 
@@ -148,3 +150,21 @@ export const dateforsize = async (repo: Repository<any>, table: string, req: Req
   if (result.length == 0) return res.sendStatus(400)
   return res.send(result[0].updatedAt)
 }
+
+export function streamHandler(stream: ReadableStream, res: Response, prefix: string, augmenter?: Function) {
+  res.header('content-type', 'application/json')
+  res.write('[')
+  let objectSent = false
+  stream.on('data', data => {
+    if (objectSent) res.write(',')
+    else objectSent = true
+    const transformedFile = transformRawFile(data, prefix)
+    const augmentedFile = augmenter ? augmenter(transformedFile) : transformedFile
+    res.write(JSON.stringify(augmentedFile))
+  })
+  stream.on('end', () => {
+    res.write(']')
+    res.end()
+  })
+}
+

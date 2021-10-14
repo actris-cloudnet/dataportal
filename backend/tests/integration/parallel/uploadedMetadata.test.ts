@@ -5,6 +5,8 @@ import {readResources} from '../../../../shared/lib'
 const protectedUrl = `${backendPrivateUrl}upload/metadata/`
 const privateUrl = `${backendPrivateUrl}upload-metadata/`
 const privateModelUrl = `${backendPrivateUrl}upload-model-metadata/`
+const rawFilesUrl = `${backendPublicUrl}raw-files/`
+const rawModelFilesUrl = `${backendPublicUrl}raw-model-files/`
 
 let instResp: any
 let modelResp: any
@@ -36,39 +38,63 @@ describe('GET /upload/metadata/:checksum', () => {
 
 })
 
-describe('GET /upload-metadata', () => {
-  it('without arguments responds with a list of all uploaded instrument files sorted by size', async () => {
-    return expect(axios.get(`${privateUrl}`)).resolves.toMatchObject({status: 200, data: instResp})
+describe('GET /api/raw-files', () => {
+
+  it('without arguments responds with 400', async () => {
+    return expect(axios.get(`${rawFilesUrl}`)).rejects.toMatchObject({response: {status: 400}})
   })
 
   it('responds with correct object when filtering with date', async () => {
-    return expect(axios.get(`${privateUrl}`, {params: {dateFrom: '2020-08-11', dateTo: '2020-08-11'}})).resolves.toMatchObject({status: 200, data: [instResp[0]]})
+    return expect(axios.get(`${rawFilesUrl}`, {params: {dateFrom: '2020-08-11', dateTo: '2020-08-11', developer: true}})).resolves.toMatchObject({status: 200, data: [instResp[0]]})
+  })
+
+  it('responds with correct object when filtering with date 2', async () => {
+    return expect(axios.get(`${rawFilesUrl}`, {params: {date: '2020-08-11', developer: true}})).resolves.toMatchObject({status: 200, data: [instResp[0]]})
   })
 
   it('responds with correct object when filtering with site', async () => {
-    return expect(axios.get(`${privateUrl}`, {params: {site: 'granada'}})).resolves.toMatchObject({status: 200, data: [instResp[0]]})
+    return expect(axios.get(`${rawFilesUrl}`, {params: {site: 'granada', developer: true}})).resolves.toMatchObject({status: 200, data: [instResp[0]]})
   })
 
   it('responds with correct object when filtering with status', async () => {
-    return expect(axios.get(`${privateUrl}`, {params: {status: 'processed'}})).resolves.toMatchObject({status: 200, data: [instResp[1], instResp[2]]})
+    return expect(axios.get(`${rawFilesUrl}`, {params: {status: 'processed', developer: true}})).resolves.toMatchObject({status: 200, data: [instResp[1], instResp[2]]})
   })
 
   it('responds with correct object when filtering with instrument', async () => {
-    return expect(axios.get(`${privateUrl}`, {params: {instrument: 'mira'}})).resolves.toMatchObject({status: 200, data: [instResp[0], instResp[3]]})
+    return expect(axios.get(`${rawFilesUrl}`, {params: {instrument: 'mira', developer: true}})).resolves.toMatchObject({status: 200, data: [instResp[0], instResp[3]]})
   })
 
   it('responds with correct object when filtering with updatedAt', async () => {
-    return expect(axios.get(`${privateUrl}`, {params: {updatedAtFrom: '2020-09-27T00:00:00.000Z', updatedAtTo: '2020-09-28T00:00:00.000Z'}})).resolves.toMatchObject({status: 200, data: [instResp[0]]})
+    return expect(axios.get(`${rawFilesUrl}`, {params: {updatedAtFrom: '2020-09-27T00:00:00.000Z', updatedAtTo: '2020-09-28T00:00:00.000Z', developer: true}})).resolves.toMatchObject({status: 200, data: [instResp[0]]})
+  })
+
+  it('response does not have s3path', async () => {
+    const res = await axios.get(`${rawFilesUrl}`, {params: {dateFrom: '2020-08-11', dateTo: '2020-08-11', developer: true}})
+    expect(res.data[0]).not.toHaveProperty('s3path')
+  })
+})
+
+describe('GET /api/raw-model-files', () => {
+  it('without arguments responds with 400', async () => {
+    return expect(axios.get(`${rawModelFilesUrl}`)).rejects.toMatchObject({response: {status: 400}})
+  })
+
+  it('responds with correct object when filtering with model', async () => {
+    return expect(axios.get(`${rawModelFilesUrl}`, {params: {model: 'icon-iglo-12-23', developer: true}})).resolves.toMatchObject({status: 200, data: [modelResp[2], modelResp[3]]})
+  })
+})
+
+describe('GET /upload-metadata', () => {
+  it('response has s3path', async () => {
+    const res = await axios.get(`${privateUrl}`, {params: {dateFrom: '2020-08-11', dateTo: '2020-08-11', developer: true}})
+    expect(res.data[0]).toHaveProperty('s3path')
   })
 })
 
 describe('GET /upload-model-metadata', () => {
-  it('without arguments responds with a list of all uploaded instrument files sorted by size', async () => {
-    return expect(axios.get(`${privateModelUrl}`)).resolves.toMatchObject({status: 200, data: modelResp})
-  })
-
-  it('responds with correct object when filtering with model', async () => {
-    return expect(axios.get(`${privateModelUrl}`, {params: {model: 'icon-iglo-12-23'}})).resolves.toMatchObject({status: 200, data: [modelResp[2], modelResp[3]]})
+  it('response has s3path', async () => {
+    const res = await axios.get(`${privateModelUrl}`, {params: {model: 'icon-iglo-12-23', developer: true}})
+    expect(res.data[0]).toHaveProperty('s3path')
   })
 })
 
