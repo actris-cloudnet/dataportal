@@ -37,6 +37,9 @@ export class Site {
     @Column()
     gaw!: string
 
+    @Column({nullable: true})
+    dvasId!: string
+
     @Column()
     country!: string
 
