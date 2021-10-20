@@ -29,10 +29,7 @@ export const fetchAll = <T>(conn: Connection, schema: Function, options={}): Pro
 
 export const isValidDate = (obj: any) => {
   const date = new Date(obj)
-  const now = new Date()
-  now.setHours(now.getHours() + 3)
   return !isNaN(date.getDate())
-    && date.getTime() <= now.getTime()
     && date.getTime() > new Date('1970-01-01').getTime()
 }
 

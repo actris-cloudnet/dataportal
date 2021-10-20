@@ -94,6 +94,11 @@ describe('/api/files', () => {
     return expect(axios.get(url, payload1)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
 
+  it('accepts a dateTo that is in the future', () => {
+    const payload1 = {params: {dateTo: '2100-01-01'}}
+    return expect(axios.get(url, payload1)).resolves.toBeTruthy()
+  })
+
   it('responds with 400 on malformed dateTo', () => {
     let expectedBody: RequestError = {
       status: 400,
@@ -103,7 +108,7 @@ describe('/api/files', () => {
     return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody))
   })
 
-  it('has exactly fourd stable files', async () => {
+  it('has exactly four stable files', async () => {
     const payload = {params: {volatile: 'false'}}
     const res = await axios.get(url, payload)
     return expect(res.data).toHaveLength(4)
