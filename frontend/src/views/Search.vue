@@ -308,11 +308,11 @@
         @click="setDateRangeForCurrentYear()"
         :class="{activeBtn: activeBtn === 'btn1' }">Current year</button>
       <button id="monthBtn" class="quickBtn"
-        @click="setDateRange(29)"
+        @click="setDateRange(fixedRanges.month)"
         :class="{activeBtn: activeBtn === 'btn2' }">Last 30 days</button>
       <button id="weekBtn" class="quickBtn"
-        @click="setDateRange(6)"
-        :class="{activeBtn: activeBtn === 'btn3' }">Last 7 days</button>
+        @click="setDateRange(fixedRanges.day)"
+        :class="{activeBtn: activeBtn === 'btn3' }">Today</button>
     </div>
 
     <div class="date" v-if="!isVizMode()">
@@ -531,7 +531,7 @@ export default class Search extends Vue {
 
   getInitialDateFrom() {
     const date = new Date()
-    return new Date(date.setDate(date.getDate() - fixedRanges.month))
+    return new Date(date.setDate(date.getDate() - fixedRanges.day))
   }
 
   // variables
@@ -553,6 +553,7 @@ export default class Search extends Vue {
   humanReadableSize = humanReadableSize
   combinedFileSize = combinedFileSize
   dateToString = dateToString
+  fixedRanges = fixedRanges
   devMode = new DevMode()
 
   vizWideMode = false
@@ -727,7 +728,7 @@ export default class Search extends Vue {
     const isDateFromBeginningOfYear = isSameDay(new Date(this.dateFrom), getDateFromBeginningOfYear())
     if (isDateToToday && isDateFromBeginningOfYear) this.activeBtn = 'btn1'
     else if (isDateToToday && diffDays === fixedRanges.month) this.activeBtn = 'btn2'
-    else if (isDateToToday && diffDays === fixedRanges.week) this.activeBtn = 'btn3'
+    else if (isDateToToday && diffDays === fixedRanges.day) this.activeBtn = 'btn3'
     else this.activeBtn = ''
   }
 

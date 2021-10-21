@@ -45,7 +45,7 @@ export const sortVisualizations = (visualizations: Visualization[]) => {
   })
 }
 
-export const fixedRanges = Object.freeze({'week':6, 'month':29})
+export const fixedRanges = Object.freeze({'week':6, 'month':29, 'day': 0})
 
 export function getDateFromBeginningOfYear(): Date {
   const currentYear = new Date().getFullYear().toString()

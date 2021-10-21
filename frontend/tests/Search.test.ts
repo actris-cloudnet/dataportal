@@ -19,7 +19,6 @@ init()
 jest.mock('axios')
 
 const date = new Date()
-date.setDate(date.getDate() - 29)
 const dateFromDefault = date.toISOString().substring(0,10)
 const dateToDefault = new Date().toISOString().substring(0,10)
 let filesSortedByDate: any
@@ -77,7 +76,7 @@ describe('Search.vue', () => {
 
     it('sets correct date ranges from quickselector buttons', async () => {
       await findElementById('weekBtn').trigger('click')
-      expect(getInputValueByName('dateFrom')).toBe(dateFromPast(6))
+      expect(getInputValueByName('dateFrom')).toBe(dateFromPast(0))
       expect(getInputValueByName('dateTo')).toBe(dateToDefault)
       await findElementById('yearBtn').trigger('click')
       const year = new Date().getFullYear()
