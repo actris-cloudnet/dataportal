@@ -128,7 +128,6 @@ const translateKeyVal = (key: string, val: string|number|boolean|Date, acc: any,
 }
 
 export const transformRawFile = (obj: any, prefix: string): RegularFile|ModelFile|SearchFile => {
-  console.log(obj)
   return Object.keys(obj).reduce((acc: {[key: string]: any}, key) => ({
     ...acc,
     ...translateKeyVal(key, obj[key], acc, prefix)
