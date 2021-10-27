@@ -94,8 +94,6 @@ import {QualityReportRoutes} from './routes/qualityreport'
   app.get('/api/products', prodRoutes.products)
   app.get('/api/instruments', instrRoutes.instruments)
   app.get('/api/models', modelRoutes.models)
-
-  // public/internal
   app.get('/api/products/variables', prodRoutes.productVariables)
   app.get('/api/visualizations',
     middleware.filesValidator,
@@ -103,16 +101,7 @@ import {QualityReportRoutes} from './routes/qualityreport'
     middleware.checkParamsExistInDb,
     vizRoutes.visualization)
   app.get('/api/visualizations/:uuid', middleware.validateUuidParam, vizRoutes.visualizationForSourceFile)
-  app.get('/api/uploaded-metadata', uploadRoutes.listInstrumentsFromMetadata)
-  app.post('/api/collection', express.json({limit: '1mb'}), collRoutes.postCollection)
-  app.get('/api/collection/:uuid', middleware.validateUuidParam, collRoutes.collection)
-  app.post('/api/generate-pid', express.json(), collRoutes.generatePid)
-  app.get('/api/download/product/:uuid/*', middleware.validateUuidParam, dlRoutes.product)
-  app.get('/api/download/raw/:uuid/*', middleware.validateUuidParam, dlRoutes.raw)
-  app.get('/api/download/collection/:uuid', middleware.validateUuidParam, dlRoutes.collection)
-  app.get('/api/download/image/*', dlRoutes.image)
   app.get('/api/calibration', calibRoutes.calibration)
-  app.get('/api/quality/:uuid', qualityRoutes.qualityReport)
   app.get('/api/raw-files',
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
@@ -124,6 +113,17 @@ import {QualityReportRoutes} from './routes/qualityreport'
     middleware.checkParamsExistInDb,
     uploadRoutes.listMetadata(false))
 
+
+  // public/internal
+  app.get('/api/uploaded-metadata', uploadRoutes.listInstrumentsFromMetadata)
+  app.post('/api/collection', express.json({limit: '1mb'}), collRoutes.postCollection)
+  app.get('/api/collection/:uuid', middleware.validateUuidParam, collRoutes.collection)
+  app.post('/api/generate-pid', express.json(), collRoutes.generatePid)
+  app.get('/api/download/product/:uuid/*', middleware.validateUuidParam, dlRoutes.product)
+  app.get('/api/download/raw/:uuid/*', middleware.validateUuidParam, dlRoutes.raw)
+  app.get('/api/download/collection/:uuid', middleware.validateUuidParam, dlRoutes.collection)
+  app.get('/api/download/image/*', dlRoutes.image)
+  app.get('/api/quality/:uuid', qualityRoutes.qualityReport)
 
   // protected (for sites)
   app.post('/upload/metadata',
