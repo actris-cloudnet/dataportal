@@ -174,7 +174,7 @@ export class Middleware {
 
     switch (key) {
     case 'product':
-      if (key in query && !((typeof query[key] == 'string' && validator.isAlphanumeric(query[key]))
+      if (key in query && !((typeof query[key] == 'string' && validator.matches(query[key], /[a-zA-Z-_]/))
           || isArrayWithElements(query[key]))) {
         return (`Malformed ${key}`)
       }
