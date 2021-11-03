@@ -1,15 +1,5 @@
 [
   {
-    "id": "lwc",
-    "humanReadableName": "Liquid water content",
-    "level": "2"
-  },
-  {
-    "id": "mwr",
-    "humanReadableName": "Microwave radiometer",
-    "level": "1b"
-  },
-  {
     "id": "classification",
     "humanReadableName": "Classification",
     "level": "2"
@@ -25,9 +15,9 @@
     "level": "2"
   },
   {
-    "id": "lidar",
-    "humanReadableName": "Lidar",
-    "level": "1b"
+    "id": "lwc",
+    "humanReadableName": "Liquid water content",
+    "level": "2"
   },
   {
     "id": "categorize",
@@ -35,8 +25,23 @@
     "level": "1c"
   },
   {
+    "id": "disdrometer",
+    "humanReadableName": "Disdrometer",
+    "level": "1b"
+  },
+  {
+    "id": "lidar",
+    "humanReadableName": "Lidar",
+    "level": "1b"
+  },
+  {
     "id": "model",
     "humanReadableName": "Model",
+    "level": "1b"
+  },
+  {
+    "id": "mwr",
+    "humanReadableName": "Microwave radiometer",
     "level": "1b"
   },
   {
@@ -45,4 +50,3 @@
     "level": "1b"
   }
 ]
-

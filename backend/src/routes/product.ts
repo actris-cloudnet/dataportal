@@ -11,14 +11,16 @@ export class ProductRoutes {
 
   readonly conn: Connection
 
-  products: RequestHandler = async (_req: Request, res: Response, next) => {
-    fetchAll<Product>(this.conn, Product)
+  products: RequestHandler = async (req: Request, res: Response, next) => {
+    fetchAll<Product>(this.conn, Product, {order: {level: 'DESC', id: 'ASC'}})
+      .then(this.filterProducts(req))
       .then(result => res.send(result))
       .catch(err => next({ status: 500, errors: err }))
   }
 
-  productVariables: RequestHandler = async (_req: Request, res: Response, next) => {
-    fetchAll<Product>(this.conn, Product, {relations: ['variables'], order: {level: 'ASC', id: 'ASC'}})
+  productVariables: RequestHandler = async (req: Request, res: Response, next) => {
+    fetchAll<Product>(this.conn, Product, {relations: ['variables'], order: {level: 'DESC', id: 'ASC'}})
+      .then(this.filterProducts(req))
       .then(result => result.map(prod =>
         ({...prod,
           variables: prod.variables.sort((a, b) => parseInt(a.order) - parseInt(b.order))})))
@@ -26,4 +28,9 @@ export class ProductRoutes {
       .catch(err => next({ status: 500, errors: err }))
   }
 
+  private filterProducts = (req: Request) => {
+    if (!req.query.developer)
+      return (prods: Product[]) => prods.filter(prod => prod.level != '3')
+    return (prods: Product[]) => prods
+  }
 }

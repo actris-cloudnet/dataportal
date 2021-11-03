@@ -1,46 +1,5 @@
 [
   {
-    "id": "lidar",
-    "humanReadableName": "Lidar",
-    "level": "1b",
-    "variables": []
-  },
-  {
-    "id": "model",
-    "humanReadableName": "Model",
-    "level": "1b",
-    "variables": []
-  },
-  {
-    "id": "mwr",
-    "humanReadableName": "Microwave radiometer",
-    "level": "1b",
-    "variables": []
-  },
-  {
-    "id": "radar",
-    "humanReadableName": "Radar",
-    "level": "1b",
-    "variables": []
-  },
-  {
-    "id": "categorize",
-    "humanReadableName": "Categorize",
-    "level": "1c",
-    "variables": [
-      {
-        "id": "test2",
-        "humanReadableName": "Kaljanhimo",
-        "order": "0"
-      },
-      {
-        "id": "test1",
-        "humanReadableName": "Auringonpaisteen määrä",
-        "order": "1"
-      }
-    ]
-  },
-  {
     "id": "classification",
     "humanReadableName": "Classification",
     "level": "2",
@@ -73,6 +32,53 @@
     "id": "lwc",
     "humanReadableName": "Liquid water content",
     "level": "2",
+    "variables": []
+  },
+  {
+    "id": "categorize",
+    "humanReadableName": "Categorize",
+    "level": "1c",
+    "variables": [
+      {
+        "id": "test2",
+        "humanReadableName": "Kaljanhimo",
+        "order": "0"
+      },
+      {
+        "id": "test1",
+        "humanReadableName": "Auringonpaisteen määrä",
+        "order": "1"
+      }
+    ]
+  },
+  {
+    "id": "disdrometer",
+    "humanReadableName": "Disdrometer",
+    "level": "1b",
+    "variables": []
+  },
+  {
+    "id": "lidar",
+    "humanReadableName": "Lidar",
+    "level": "1b",
+    "variables": []
+  },
+  {
+    "id": "model",
+    "humanReadableName": "Model",
+    "level": "1b",
+    "variables": []
+  },
+  {
+    "id": "mwr",
+    "humanReadableName": "Microwave radiometer",
+    "level": "1b",
+    "variables": []
+  },
+  {
+    "id": "radar",
+    "humanReadableName": "Radar",
+    "level": "1b",
     "variables": []
   }
 ]
