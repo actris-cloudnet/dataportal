@@ -40,8 +40,28 @@
     "level": "1b"
   },
   {
+    "id": "disdrometer",
+    "humanReadableName": "Disdrometer",
+    "level": "1b"
+  },
+  {
     "id": "radar",
     "humanReadableName": "Radar",
     "level": "1b"
+  },
+  {
+    "id": "l3-cf",
+    "humanReadableName": "Cloud fraction",
+    "level": "3"
+  },
+  {
+    "id": "l3-iwc",
+    "humanReadableName": "L3 Ice water content",
+    "level": "3"
+  },
+  {
+    "id": "l3-lwc",
+    "humanReadableName": "L3 Liquid water content",
+    "level": "3"
   }
 ]
