@@ -39,6 +39,7 @@ describe('Data availability mode', () => {
     const searchPayload = {
       site: 'palaiseau',
       legacy: true,
+      developer: false,
       properties
     }
     const dataStatusParser =  await (new DataStatusParser(searchPayload).engage())
@@ -58,7 +59,7 @@ describe('Data availability mode', () => {
     await element.trigger('mouseenter')
     await wait(50)
     expect(getLiWrappers(wrapper)
-      .every(wrap => wrap.classes().includes('found'))).toBeTruthy()
+      .every(wrap => (wrap.text().includes('Disdrometer') || wrap.classes().includes('found')))).toBeTruthy()
     expect(classes.length).toEqual(2)
     expect(classes).toContain('all-data')
   })
@@ -70,7 +71,7 @@ describe('Data availability mode', () => {
     expect(getLiWrappers(wrapper)
       .every(wrap => {
         const wrapClasses = wrap.classes()
-        return wrap.text().includes('Classification')
+        return wrap.text().includes('Classification') || wrap.text().includes('Disdrometer')
           ? !wrapClasses.includes('found')
           : wrapClasses.includes('found')
       })).toBeTruthy()
@@ -178,7 +179,7 @@ describe('Data quality mode', () => {
     await element.trigger('mouseenter')
     await wait(50)
     expect(getLiWrappers(wrapper)
-      .every(wrap => wrap.classes().includes('found')
+      .every(wrap => (wrap.text().includes('Disdrometer') || wrap.classes().includes('found'))
       )).toBeTruthy()
     expect(classes.length).toEqual(2)
     expect(classes).toContain('all-data')
@@ -191,7 +192,7 @@ describe('Data quality mode', () => {
     expect(getLiWrappers(wrapper)
       .every(wrap => {
         const wrapClasses = wrap.classes()
-        return wrap.text().includes('Model')
+        return wrap.text().includes('Model') || wrap.text().includes('Disdrometer')
           ? !wrapClasses.includes('found')
           : wrapClasses.includes('found')
       })).toBeTruthy()
