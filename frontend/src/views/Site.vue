@@ -173,6 +173,7 @@ export default class SiteView extends Vue {
     const payload = {
       site: this.siteid,
       showLegacy: true,
+      developer: this.devMode.activated,
       properties
     }
 

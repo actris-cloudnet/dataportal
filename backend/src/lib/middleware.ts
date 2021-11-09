@@ -6,6 +6,7 @@ import {Site} from '../entity/Site'
 import {Connection} from 'typeorm'
 import {fetchAll, hideTestDataFromNormalUsers, isValidDate, toArray} from '.'
 import {validate as validateUuid} from 'uuid'
+import {Product} from '../entity/Product'
 
 export class Middleware {
 
@@ -89,8 +90,12 @@ export class Middleware {
       .filter(site => !(req.query.developer === undefined && site.isTestSite)) // Hide test sites
       .filter(site => req.path.includes('search') ? !site.isHiddenSite : true) // Hide hidden sites from /search
       .map(site => site.id)
+    const defaultProduct = async () => (await fetchAll<Product>(this.conn, Product))
+      .filter(prod => (req.query.developer == 'true' || prod.level != '3')) // Hide experimental products
+      .map(prod => prod.id)
     const setLegacy = () => ('showLegacy' in query) ? null : [false] // Don't filter by "legacy" if showLegacy is enabled
     if (!('site' in query)) query.site = await defaultSite()
+    if (!('product' in query)) query.product = await defaultProduct()
     query.site = toArray(query.site)
     query.product = toArray(query.product)
     query.model = toArray(query.model)
