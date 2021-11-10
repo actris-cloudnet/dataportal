@@ -1,4 +1,4 @@
-import {Column, Entity, ManyToOne, PrimaryGeneratedColumn} from 'typeorm'
+import {Column, Entity, ManyToOne, PrimaryGeneratedColumn, Unique} from 'typeorm'
 import {Site} from './Site'
 import {Instrument} from './Instrument'
 
@@ -8,6 +8,7 @@ export interface CalibrationData {
 }
 
 @Entity()
+@Unique(['measurementDate', 'site', 'instrument'])
 export class Calibration {
 
   @PrimaryGeneratedColumn()
