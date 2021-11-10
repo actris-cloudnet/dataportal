@@ -61,9 +61,19 @@ These rights apply if certain conditions are met.
     <h3>Changes to this policy</h3>
 We will inform you of any material changes to this policy with a notice on our website.
     <p></p>
-    <!-- REMEMBER TO CHANGE LAST UPDATED DATE WHEN MAKING MODIFICATIONS TO THIS PAGE -->
-    This policy has been last updated in <b>December 18, 2020</b>.
+    <!-- REMEMBER TO CHANGE LAST UPDATED DATE WHEN MAKING MODIFICATIONS TO THIS PAGE. SEE ../lib/ActiveConsent.ts -->
+    This policy has been last updated in <b>{{ lastEdited }}</b>.
   </main>
 </template>
 
 
+<script lang="ts">
+import {ActiveConsent} from '../lib/ActiveConsent'
+import {Vue} from 'vue-property-decorator'
+
+
+export default class PrivacyPolicyView extends Vue {
+  lastEdited = new ActiveConsent().privacyPolicyEdited
+}
+
+</script>
