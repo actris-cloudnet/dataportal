@@ -47,6 +47,7 @@ async function pressRightKey() {
 beforeAll(async () => {
   driver = await initDriver()
   selenium = new Selenium(driver)
+  await driver.manage().window().setRect({width: 1440, height: 2048, x: 0, y: 0})
 
   await putFile('20200501_bucharest_classification.nc')
   await Promise.all([
