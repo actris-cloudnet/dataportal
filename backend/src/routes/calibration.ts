@@ -14,6 +14,9 @@ export class CalibrationRoutes {
   private calibRepo: Repository<Calibration>
 
   calibration: RequestHandler = async (req: Request, res: Response, next) => {
+    const query = req.query
+    if (!(query['date'] && query['instrument'] && query['site']))
+      return next({status: 400, errors: 'Following parameters must all be specified: date, instrument, site'})
     try {
       let result = await this.findCalibration(req.query)
       if (result == undefined) {

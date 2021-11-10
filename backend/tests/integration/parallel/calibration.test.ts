@@ -27,6 +27,10 @@ describe('GET /api/calibration', () => {
     return expect(axios.get(url, { params })).rejects.toMatchObject({ response: { status: 404 }})
   })
 
+  it('responds with 400 if one of the mandatory arguments is not set', async () => {
+    const params = {site: 'hyytiala', instrument: 'chm15k' }
+    return expect(axios.get(url, { params })).rejects.toMatchObject({ response: { status: 400 }})
+  })
 
   it('responds with a list of all calibrations', async () => {
     const res = await axios.get(url, { params: {site: 'hyytiala', instrument: 'mira', date: '2021-01-01', showAll: true }})
