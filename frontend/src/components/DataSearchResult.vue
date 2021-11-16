@@ -334,6 +334,10 @@ export default class DataSearchResult extends Vue {
 
   loadPreview(record: File) {
     axios.get(`${this.apiUrl}visualizations/${record.uuid}`).then(({data}) => {
+      if (data.visualizations.length === 0) {
+        this.previewImgUrl = ''
+        return
+      }
       const viz = data.visualizations[0]
       this.previewImgUrl = `${this.apiUrl}download/image/${viz.s3key}`
       this.pendingPreviewTitle = viz.productVariable.humanReadableName
