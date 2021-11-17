@@ -65,7 +65,7 @@ h1, h2, h3, h4, h5, h6
     </keep-alive>
     <app-footer/>
     <div id="consent" v-if="askConsent">
-      We log and analyze site traffic. Read our <router-link to="/privacy">privacy policy</router-link>.
+      We monitor site traffic. Read our <router-link to="/privacy">privacy policy</router-link>.
       <button class="secondaryButton" @click="consent()">OK</button>
     </div>
   </div>
