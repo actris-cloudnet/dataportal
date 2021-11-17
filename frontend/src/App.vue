@@ -13,6 +13,7 @@
 
 @import "~vue-multiselect/dist/vue-multiselect.min.css"
 @import "./sass/variables.sass"
+@import "./sass/global.sass"
 
 html
   position: relative
@@ -27,6 +28,19 @@ body
   padding-left: 5em
   padding-right: 5em
   font-family: $content-font
+
+#consent
+  position: fixed
+  background: white
+  width: 100%
+  bottom: 0
+  text-align: center
+  z-index: 100
+  padding: 1em
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3)
+
+  .secondaryButton
+    margin-left: 2em
 
 
 @media screen and (max-width: $narrow-screen)
@@ -50,5 +64,28 @@ h1, h2, h3, h4, h5, h6
       <router-view/>
     </keep-alive>
     <app-footer/>
+    <div id="consent" v-if="askConsent">
+      We monitor site traffic. Read our <router-link to="/privacy">privacy policy</router-link>.
+      <button class="secondaryButton" @click="consent()">OK</button>
+    </div>
   </div>
 </template>
+
+<script lang="ts">
+import {ActiveConsent} from './lib/ActiveConsent'
+import {Vue} from 'vue-property-decorator'
+import Component from 'vue-class-component'
+
+
+@Component
+export default class AppView extends Vue {
+  activeConsent = new ActiveConsent()
+  askConsent = this.activeConsent.askConsent
+
+  consent() {
+    this.activeConsent.consent()
+    this.askConsent = false
+  }
+}
+
+</script>

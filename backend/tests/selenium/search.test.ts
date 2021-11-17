@@ -59,6 +59,7 @@ async function clickAllMarkersPopupMovement(by: By) {
 beforeAll(async () => {
   driver = await initDriver()
   selenium = new Selenium(driver)
+  await driver.manage().window().setRect({width: 1440, height: 1024, x: 0, y: 0})
 })
 
 afterAll(async () => driver.close())
