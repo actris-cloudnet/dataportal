@@ -99,12 +99,12 @@ export class UploadRoutes {
         return next({status: 409, errors: 'File already uploaded'})
       }
 
-      if (isModelSubmission) {
-        const isExistingFreezedProduct = await this.isFreezedProduct(body, productRepo)
-        if (isExistingFreezedProduct) {
-          return next({status: 409, errors: 'Freezed model file exists'})
-        }
-      }
+      // if (isModelSubmission) {
+      //   const isExistingFreezedProduct = await this.isFreezedProduct(body, productRepo)
+      //   if (isExistingFreezedProduct) {
+      //     return next({status: 409, errors: 'Freezed model file exists'})
+      //   }
+      // }
 
       const params = {site: site, measurementDate: body.measurementDate, filename: filename}
       const payload = isModelSubmission ? {...params, model: body.model} : {...params, instrument: body.instrument}

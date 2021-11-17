@@ -357,9 +357,9 @@ describe('POST /model-upload/metadata', () => {
     await modelRepo.delete({})
   })
 
-  test('responds with 409 if stable file exists', async () => {
-    return expect(axios.post(modelMetadataUrl, metaData, {headers})).rejects.toMatchObject({ response: { status: 409}})
-  })
+  //test('responds with 409 if stable file exists', async () => {
+  //  return expect(axios.post(modelMetadataUrl, metaData, {headers})).rejects.toMatchObject({ response: { status: 409}})
+  //})
 
   test('inserts metadata if volatile file exists', async () => {
     const payload = {...metaData, measurementDate: '2020-05-12'}
