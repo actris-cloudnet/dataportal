@@ -396,6 +396,10 @@
       :getIcon="getProductIcon"
       :devMode="devMode">
     </custom-multiselect>
+    <div class="checkbox">
+      <input type="checkbox" id="showExpProductsCheckbox" name="showExpProductsCheckbox" v-model="showExpProducts">
+      <label for="showExpProductsCheckbox">Show experimental products</label>
+    </div>
 
     <custom-multiselect v-show="isVizMode()"
       label="Variable"
@@ -520,6 +524,7 @@ export default class Search extends Vue {
   // products
   allProducts: Product[] = []
   selectedProductIds: string[] = []
+  showExpProducts = false
 
   setSelectedProductIds(productIds: []) {
     this.selectedProductIds = productIds
@@ -617,10 +622,12 @@ export default class Search extends Vue {
   discardHiddenSites = (site: Site) => !(site.type as string[]).includes('hidden')
 
   async initView() {
-    const payload = { params: { developer: this.devMode.activated || undefined } }
+    const payload = { developer: this.devMode.activated || undefined }
+    const sitesPayload = {params: {...payload, ...{ type: this.showAllSites ? undefined : 'cloudnet' }}}
+    const prodPayload = {params: {...payload, ...{developer: this.devMode.activated || this.showExpProducts || undefined }}}
     await Promise.all([
-      axios.get(`${this.apiUrl}sites/`, {params: {...payload.params, ...{ type: this.showAllSites ? undefined : 'cloudnet' }}}),
-      axios.get(`${this.apiUrl}products/variables`, payload)
+      axios.get(`${this.apiUrl}sites/`, sitesPayload),
+      axios.get(`${this.apiUrl}products/variables`, prodPayload)
     ]).then(([sites, products]) => {
       this.allSites = sites.data
         .filter(this.discardHiddenSites)
@@ -636,7 +643,7 @@ export default class Search extends Vue {
         site: this.selectedSiteIds.length ? this.selectedSiteIds : this.allSites.map(site => site.id),
         dateFrom: this.isVizMode() ? this.dateTo : this.dateFrom,
         dateTo: this.dateTo,
-        product: this.selectedProductIds,
+        product: this.selectedProductIds.length ? this.selectedProductIds : this.allProducts.map(prod => prod.id),
         variable: this.isVizMode() ? this.selectedVariableIds : undefined,
         showLegacy: true,
         developer: this.devMode.activated || undefined
@@ -794,6 +801,11 @@ export default class Search extends Vue {
   async onShowAllSites() {
     await this.initView()
     this.mapKey = this.mapKey + 1
+  }
+
+  @Watch('showExpProducts')
+  async onShowExpProducts() {
+    await this.initView()
   }
 
   @Watch('mode')

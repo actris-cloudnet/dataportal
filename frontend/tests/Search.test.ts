@@ -8,7 +8,7 @@ import {
   dateFromPast,
   dateToISOString,
   getMockedAxiosLastCallSecondArgument,
-  init,
+  init, nextTick,
   tomorrow
 } from './lib'
 import {mocked} from 'ts-jest/dist/util/testing'
@@ -187,4 +187,15 @@ describe('Search.vue', () => {
       return expect(findElementById('tableContent').findAll('.legacy')).toHaveLength(1)
     })
   })
+
+  describe('experimental products', () => {
+
+    it('fetches experimental products when clicking show exp prods checkbox', async () => {
+      await findElementById('showExpProductsCheckbox').trigger('click')
+      let calls = mocked(axios.get).mock.calls
+      let lastCall = calls[calls.length - 1]
+      expect(lastCall[1]).toMatchObject({params: {developer: true}})
+    })
+  })
+
 })
