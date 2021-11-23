@@ -2,66 +2,79 @@
   {
     "id": "categorize",
     "humanReadableName": "Categorize",
-    "level": "1c"
+    "level": "1c",
+    "experimental": false
   },
   {
     "id": "classification",
     "humanReadableName": "Classification",
-    "level": "2"
+    "level": "2",
+    "experimental": false
   },
   {
     "id": "drizzle",
     "humanReadableName": "Drizzle",
-    "level": "2"
+    "level": "2",
+    "experimental": false
   },
   {
     "id": "iwc",
     "humanReadableName": "Ice water content",
-    "level": "2"
+    "level": "2",
+    "experimental": false
   },
   {
     "id": "lidar",
     "humanReadableName": "Lidar",
-    "level": "1b"
+    "level": "1b",
+    "experimental": false
   },
   {
     "id": "lwc",
     "humanReadableName": "Liquid water content",
-    "level": "2"
+    "level": "2",
+    "experimental": false
   },
   {
     "id": "model",
     "humanReadableName": "Model",
-    "level": "1b"
+    "level": "1b",
+    "experimental": false
   },
   {
     "id": "mwr",
     "humanReadableName": "Microwave radiometer",
-    "level": "1b"
+    "level": "1b",
+    "experimental": false
   },
   {
     "id": "disdrometer",
     "humanReadableName": "Disdrometer",
-    "level": "1b"
+    "level": "1b",
+    "experimental": false
   },
   {
     "id": "radar",
     "humanReadableName": "Radar",
-    "level": "1b"
+    "level": "1b",
+    "experimental": false
   },
   {
     "id": "l3-cf",
     "humanReadableName": "L3 Cloud fraction",
-    "level": "3"
+    "level": "3",
+    "experimental": true
   },
   {
     "id": "l3-iwc",
     "humanReadableName": "L3 Ice water content",
-    "level": "3"
+    "level": "3",
+    "experimental": true
   },
   {
     "id": "l3-lwc",
     "humanReadableName": "L3 Liquid water content",
-    "level": "3"
+    "level": "3",
+    "experimental": true
   }
 ]
