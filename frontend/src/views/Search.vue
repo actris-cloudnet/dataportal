@@ -620,19 +620,23 @@ export default class Search extends Vue {
 
   alphabeticalSort = (a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName
   discardHiddenSites = (site: Site) => !(site.type as string[]).includes('hidden')
+  discardExperimentalProducts(prod: Product) {
+    return  this.showExpProducts || !prod.experimental
+  }
 
   async initView() {
     const payload = { developer: this.devMode.activated || undefined }
     const sitesPayload = {params: {...payload, ...{ type: this.showAllSites ? undefined : 'cloudnet' }}}
-    const prodPayload = {params: {...payload, ...{developer: this.devMode.activated || this.showExpProducts || undefined }}}
     await Promise.all([
       axios.get(`${this.apiUrl}sites/`, sitesPayload),
-      axios.get(`${this.apiUrl}products/variables`, prodPayload)
+      axios.get(`${this.apiUrl}products/variables`,{params: payload })
     ]).then(([sites, products]) => {
       this.allSites = sites.data
         .filter(this.discardHiddenSites)
         .sort(this.alphabeticalSort)
-      this.allProducts = products.data.sort(this.alphabeticalSort)
+      this.allProducts = products.data
+        .filter(this.discardExperimentalProducts)
+        .sort(this.alphabeticalSort)
     })
     return this.fetchData()
   }

@@ -50,7 +50,7 @@ export class DataStatusParser {
       axios.get(`${this.apiUrl}products/`),
     ])
     this.searchResponse = searchRes.data
-    this.allProducts = prodRes.data
+    this.allProducts = prodRes.data.filter((prod: Product) => !prod.experimental)
     if (!this.searchResponse || !this.allProducts || this.searchResponse.length == 0) return this
 
     this.lvlTranslate = this.allProducts.reduce((acc, cur) => ({...acc, [cur.id]: cur.level as keyof ProductLevels}), {})

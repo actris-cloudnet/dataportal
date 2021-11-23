@@ -191,10 +191,14 @@ describe('Search.vue', () => {
   describe('experimental products', () => {
 
     it('fetches experimental products when clicking show exp prods checkbox', async () => {
-      await findElementById('showExpProductsCheckbox').trigger('click')
       let calls = mocked(axios.get).mock.calls
-      let lastCall = calls[calls.length - 1]
-      expect(lastCall[1]).toMatchObject({params: {developer: true}})
+      let lastCall = calls[calls.length - 1][1] as any
+      expect(lastCall.params.product).not.toContain('l3-cf')
+      await findElementById('showExpProductsCheckbox').trigger('click')
+      await nextTick(1)
+      calls = mocked(axios.get).mock.calls
+      lastCall = calls[calls.length - 1][1] as any
+      expect(lastCall.params.product).toContain('l3-cf')
     })
   })
 

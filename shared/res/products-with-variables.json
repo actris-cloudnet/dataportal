@@ -1,8 +1,30 @@
 [
   {
+    "id": "l3-cf",
+    "humanReadableName": "L3 Cloud fraction",
+    "level": "3",
+    "experimental": true,
+    "variables": []
+  },
+  {
+    "id": "l3-iwc",
+    "humanReadableName": "L3 Ice water content",
+    "level": "3",
+    "experimental": true,
+    "variables": []
+  },
+  {
+    "id": "l3-lwc",
+    "humanReadableName": "L3 Liquid water content",
+    "level": "3",
+    "experimental": true,
+    "variables": []
+  },
+  {
     "id": "classification",
     "humanReadableName": "Classification",
     "level": "2",
+    "experimental": false,
     "variables": [
       {
         "id": "classification-target_classification",
@@ -20,24 +42,28 @@
     "id": "drizzle",
     "humanReadableName": "Drizzle",
     "level": "2",
+    "experimental": false,
     "variables": []
   },
   {
     "id": "iwc",
     "humanReadableName": "Ice water content",
     "level": "2",
+    "experimental": false,
     "variables": []
   },
   {
     "id": "lwc",
     "humanReadableName": "Liquid water content",
     "level": "2",
+    "experimental": false,
     "variables": []
   },
   {
     "id": "categorize",
     "humanReadableName": "Categorize",
     "level": "1c",
+    "experimental": false,
     "variables": [
       {
         "id": "test2",
@@ -55,30 +81,35 @@
     "id": "disdrometer",
     "humanReadableName": "Disdrometer",
     "level": "1b",
+    "experimental": false,
     "variables": []
   },
   {
     "id": "lidar",
     "humanReadableName": "Lidar",
     "level": "1b",
+    "experimental": false,
     "variables": []
   },
   {
     "id": "model",
     "humanReadableName": "Model",
     "level": "1b",
+    "experimental": false,
     "variables": []
   },
   {
     "id": "mwr",
     "humanReadableName": "Microwave radiometer",
     "level": "1b",
+    "experimental": false,
     "variables": []
   },
   {
     "id": "radar",
     "humanReadableName": "Radar",
     "level": "1b",
+    "experimental": false,
     "variables": []
   }
 ]
