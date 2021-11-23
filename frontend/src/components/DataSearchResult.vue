@@ -275,6 +275,7 @@ import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse
 import {BTable} from 'bootstrap-vue/esm/components/table'
 import {BPagination} from 'bootstrap-vue/esm/components/pagination'
 import { debounce } from 'debounce'
+import {Visualization} from '../../../backend/src/entity/Visualization'
 
 Vue.component('b-table', BTable)
 Vue.component('b-pagination', BPagination)
@@ -334,12 +335,12 @@ export default class DataSearchResult extends Vue {
 
   loadPreview(record: File) {
     axios.get(`${this.apiUrl}visualizations/${record.uuid}`).then(({data}) => {
-      if (data.visualizations.length === 0) {
+      const viz = data.visualizations.find((viz: Visualization) => parseInt(viz.productVariable.order) == 0)
+      if (!viz) {
         this.clearPreview()
         this.changePreview()
         return
       }
-      const viz = data.visualizations[0]
       this.previewImgUrl = `${this.apiUrl}download/image/${viz.s3key}`
       this.pendingPreviewTitle = viz.productVariable.humanReadableName
     })
