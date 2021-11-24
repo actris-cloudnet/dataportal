@@ -15,6 +15,9 @@ export class Product {
     @Column()
     level!: string
 
+    @Column({default: false})
+    experimental!: boolean
+
     @OneToMany(_ => File, file => file.site)
     files!: File[]
 
