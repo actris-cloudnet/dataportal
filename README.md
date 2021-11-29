@@ -24,6 +24,20 @@ database with test fixtures:
 
     cd backend
     ./run-dev npm run reset-db
+    
+To load other other data to the db, for instance the sites used in production, use:
+    
+    cd backend
+    ./run-dev npx ts-node -T src/fixtures.ts /dataportal-resources/1-site.json
+    
+ ### Migrations
+ 
+ The dataportal uses typeorm for automatic database schema manipulation. This repo provides a wrapper script for typeorm's own migration tool.
+ 
+     cd backend
+    ./run-dev scripts/typeorm
+    
+ The migrations are stored in `backend/src/migration`. For more information on how to use typeorm's migrations, see: https://github.com/typeorm/typeorm/blob/master/docs/migrations.md
 
 
 ### Running unit and integration tests
