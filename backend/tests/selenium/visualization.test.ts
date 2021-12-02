@@ -119,7 +119,7 @@ describe('visualizations page', () => {
     await selenium.clickClass('secondaryButton')
     const content = await selenium.getContent()
     expect(content).toContain('Found 1 results')
-    expect(content).toContain('Classification file from Bucharest')
+    expect(content).toContain('Classification from Bucharest')
   })
 
   it('preserves search when switching between searches', async () => {

@@ -57,7 +57,7 @@ export function isSameDay(a: Date, b: Date) {
 }
 
 export function constructTitle(files: CollectionFileResponse[]) {
-  return files.map(file => ({...file, title: `${file.product} file from ${file.site}`}))
+  return files.map(file => ({...file, title: `${file.product} from ${file.site}`}))
 }
 
 export const idToHumanReadable = (id: string) => {

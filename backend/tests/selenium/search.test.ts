@@ -96,7 +96,7 @@ describe('search page', () => {
     await selenium.sendInput('dateFrom', '2010')
     const content = await selenium.getContent()
     expect(content).toContain('Found 5 results')
-    expect(content).toContain('Classification file from Bucharest')
+    expect(content).toContain('Classification from Bucharest')
     for (let i = 23; i <= 27; i++) {
       expect(content).toContain(`2019-07-${i}`)
     }
@@ -165,8 +165,8 @@ describe('search page', () => {
     await selenium.sendInputToMultiselect('siteSelect', 'mace')
     const content = await selenium.getContent()
     expect(content).toContain('Found 7 results')
-    expect(content).toContain('Classification file from Bucharest')
-    expect(content).toContain('Ice water content file from Mace Head')
+    expect(content).toContain('Classification from Bucharest')
+    expect(content).toContain('Ice water content from Mace Head')
   })
 
   it('works with different product selectors', async () => {
@@ -176,7 +176,7 @@ describe('search page', () => {
     const content = await selenium.getContent()
     await wait(300)
     expect(content).toContain('Found 2 results')
-    expect(content).toContain('Ice water content file from Mace Head')
+    expect(content).toContain('Ice water content from Mace Head')
   })
 
   it('preserves search state after visiting a landing page', async () => {
@@ -200,7 +200,7 @@ describe('search page', () => {
     await wait(100)
     const content = await selenium.getContent()
     expect(content).toContain('developer mode')
-    expect(content).toContain('Model file from Granada')
+    expect(content).toContain('Model from Granada')
   })
 
   it('disables developer mode', async () => {
@@ -209,7 +209,7 @@ describe('search page', () => {
     await wait(100)
     const content = await selenium.getContent()
     expect(content).not.toContain('developer mode')
-    expect(content).not.toContain('Model file from Granada')
+    expect(content).not.toContain('Model from Granada')
   })
 
   it('starts download from collection page', async () => {

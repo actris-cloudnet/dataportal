@@ -99,8 +99,8 @@ describe('Collection.vue', () => {
     })
 
     it('displays a list of files', () => {
-      expect(wrapper.text()).toContain('Radar file from Hyytiälä')
-      expect(wrapper.text()).toContain('Model file from Mace Head')
+      expect(wrapper.text()).toContain('Radar from Hyytiälä')
+      expect(wrapper.text()).toContain('Model from Mace Head')
     })
   })
 })
