@@ -130,13 +130,8 @@
       <div v-for="viz in sortVisualizations(file.visualizations)"
            :key="viz.s3key" class="variable">
         <h4>{{ viz.productVariable.humanReadableName }}</h4>
-        <img alt="visualization"
-             :src="quicklookUrl + viz.s3key"
-             :width="viz.dimensions && viz.dimensions.width"
-             :height="viz.dimensions && viz.dimensions.height"
-             class="visualization"
-             :style="viz.style"
-        ><br>
+        <visualization :data="viz" :maxMarginLeft="maxMarginLeft" :maxMarginRight="maxMarginRight" />
+        <br>
       </div>
     </div>
     </section>
@@ -150,6 +145,9 @@ import {Component, Prop, Watch} from 'vue-property-decorator'
 import Vue from 'vue'
 import {VisualizationResponse} from '../../../backend/src/entity/VisualizationResponse'
 import {humanReadableDate, sortVisualizations, notEmpty} from '../lib'
+import Visualization from './Visualization.vue'
+
+Vue.component('visualization', Visualization)
 
 @Component
 export default class DataSearchResult extends Vue {
@@ -165,35 +163,22 @@ export default class DataSearchResult extends Vue {
   get humanReadableDate() {
     return humanReadableDate(this.date.toString())
   }
-  get sortedApiResponse() {
-    const maxMarginRight = Math.max(
+  get maxMarginRight() {
+    return Math.max(
       ...this.apiResponse.flatMap(file => file.visualizations
         .map(viz => viz.dimensions && viz.dimensions.marginRight)
         .filter(notEmpty))
     )
-    const maxMarginLeft = Math.max(
+  }
+  get maxMarginLeft() {
+    return Math.max(
       ...this.apiResponse.flatMap(file => file.visualizations
         .map(viz => viz.dimensions && viz.dimensions.marginLeft)
         .filter(notEmpty))
     )
-    return this.apiResponse.map(file => {
-      return {
-        ...file,
-        visualizations: file.visualizations.map(viz => {
-          if (!viz.dimensions) return viz
-          const paddingLeft  = maxMarginLeft  - viz.dimensions.marginLeft
-          const paddingRight = maxMarginRight - viz.dimensions.marginRight
-          const paddingWidth = viz.dimensions.width + paddingLeft + paddingRight
-          return {
-            ...viz,
-            style: {
-              paddingLeft:  `${100 * paddingLeft  / paddingWidth}%`,
-              paddingRight: `${100 * paddingRight / paddingWidth}%`,
-            }
-          }
-        })
-      }
-    }).sort(this.alphabeticalSort)
+  }
+  get sortedApiResponse() {
+    return this.apiResponse.concat().sort(this.alphabeticalSort)
   }
   get searchYieldedResults() {
     return this.apiResponse.length > 0
@@ -217,7 +202,5 @@ export default class DataSearchResult extends Vue {
   onViewModeChange() {
     this.setWideMode(this.comparisonView)
   }
-
-  quicklookUrl = `${process.env.VUE_APP_BACKENDURL}download/image/`
 }
 </script>

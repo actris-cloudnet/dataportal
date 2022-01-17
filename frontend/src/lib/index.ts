@@ -1,4 +1,4 @@
-import {Visualization} from '../../../backend/src/entity/Visualization'
+import {VisualizationItem} from '../../../backend/src/entity/VisualizationResponse'
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 import {Product} from '../../../backend/src/entity/Product'
 import {CollectionFileResponse} from '../../../backend/src/entity/CollectionFileResponse'
@@ -37,8 +37,8 @@ export const dateToString = (date: Date) => {
   return utcTime.toISOString().substring(0,10)
 }
 
-export const sortVisualizations = (visualizations: Visualization[]) => {
-  return visualizations.concat().sort((a: Visualization, b: Visualization) => {
+export const sortVisualizations = (visualizations: VisualizationItem[]) => {
+  return visualizations.concat().sort((a: VisualizationItem, b: VisualizationItem) => {
     if (a.productVariable.order == b.productVariable.order) return 0
     if (a.productVariable.order < b.productVariable.order) return -1
     return 1

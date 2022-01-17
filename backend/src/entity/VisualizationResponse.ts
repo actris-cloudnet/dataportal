@@ -3,6 +3,12 @@ import {ModelVisualization} from './ModelVisualization'
 import {ModelFile, RegularFile} from './File'
 import {ProductVariable} from './ProductVariable'
 
+export interface VisualizationItem {
+  s3key: string,
+  productVariable: ProductVariable,
+  dimensions: Dimensions|null,
+}
+
 export class VisualizationResponse {
 
   sourceFileId: string
@@ -10,11 +16,7 @@ export class VisualizationResponse {
   productHumanReadable: string
   volatile: boolean
   legacy: boolean
-  visualizations: {
-    s3key: string,
-    productVariable: ProductVariable,
-    dimensions: Dimensions|null,
-  }[]
+  visualizations: VisualizationItem[]
 
   constructor(file: RegularFile|ModelFile) {
     this.sourceFileId = file.uuid
