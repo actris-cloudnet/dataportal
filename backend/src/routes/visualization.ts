@@ -1,6 +1,6 @@
 import {Request, RequestHandler, Response} from 'express'
 import {Connection, Repository} from 'typeorm'
-import {checkFileExists, getS3pathForImage, hideTestDataFromNormalUsers, rowExists} from '../lib'
+import {checkFileExists, getS3pathForImage, hideTestDataFromNormalUsers} from '../lib'
 import {Visualization} from '../entity/Visualization'
 import {VisualizationResponse} from '../entity/VisualizationResponse'
 import {FileRoutes} from './file'
@@ -39,20 +39,17 @@ export class VisualizationRoutes {
       .then(([file, productVariable, _]) => {
         if (!file) throw Error('Source file not found')
 
-        let insert
+        let save
         if (file.product.id == 'model') {
-          const viz = new ModelVisualization(req.params[0], file as ModelFile, productVariable)
-          insert =  this.modelVisualizationRepo.insert(viz)
+          const viz = new ModelVisualization(req.params[0], file as ModelFile, productVariable, body.dimensions)
+          save = this.modelVisualizationRepo.save(viz)
         } else {
-          const viz = new Visualization(req.params[0], file, productVariable)
-          insert =  this.visualizationRepo.insert(viz)
+          const viz = new Visualization(req.params[0], file, productVariable, body.dimensions)
+          save = this.visualizationRepo.save(viz)
         }
 
-        insert.then(_ => res.sendStatus(201))
-          .catch(err => {
-            if (rowExists(err)) return res.sendStatus(200)
-            return next({status: 500, errors: err})
-          })
+        save.then(_ => res.sendStatus(201))
+          .catch(err => next({status: 500, errors: err}))
       })
       .catch((err: any) => next({ status: 400, errors: err}))
   }
