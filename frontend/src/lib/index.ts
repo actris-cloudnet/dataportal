@@ -64,3 +64,7 @@ export const idToHumanReadable = (id: string) => {
   if (id.length < 4) return id.toUpperCase()
   return id.charAt(0).toUpperCase() + id.slice(1)
 }
+
+export function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
+  return value !== null && value !== undefined
+}
