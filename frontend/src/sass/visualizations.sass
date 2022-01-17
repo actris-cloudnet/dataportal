@@ -20,8 +20,10 @@ div.paddedSourceFile + div.paddedSourceFile, .sideBySide div.sourceFile:nth-chil
     padding: 0
     border: none
     margin: 0
+  div.sourceFile:nth-child(odd)
+    padding-right: $column-spacing/2
   div.sourceFile:nth-child(even)
-    padding-left: $column-spacing
+    padding-left: $column-spacing/2
   div.sourceFile:only-child
     flex-basis: 100%
 img

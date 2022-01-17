@@ -274,9 +274,9 @@ main#filelanding
               <a v-if="visualizations.length > 1 && !allVisualizations"
                  class="viewAllPlots"
                  @click="allVisualizations = true">
-                <img :alt="visualization" v-bind:src="`${quicklookUrl}${viz.s3key}`" class="visualization">
+                <visualization :data="viz" :maxMarginLeft="maxMarginLeft" :maxMarginRight="maxMarginRight" />
               </a>
-              <img v-else :alt="visualization" v-bind:src="`${quicklookUrl}${viz.s3key}`" class="visualization">
+              <visualization v-else :data="viz" :maxMarginLeft="maxMarginLeft" :maxMarginRight="maxMarginRight" />
             </div>
           </div>
           <a v-if="visualizations.length > 1 && !allVisualizations"
@@ -301,27 +301,28 @@ main#filelanding
 <script lang="ts">
 import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import axios from 'axios'
-import {getProductIcon, humanReadableDate, humanReadableSize, humanReadableTimestamp, sortVisualizations} from '../lib'
+import {getProductIcon, humanReadableDate, humanReadableSize, humanReadableTimestamp, sortVisualizations, notEmpty} from '../lib'
 import {DevMode} from '../lib/DevMode'
 import {File, ModelFile, RegularFile} from '../../../backend/src/entity/File'
-import {Visualization} from '../../../backend/src/entity/Visualization'
+import {VisualizationItem} from '../../../backend/src/entity/VisualizationResponse'
 import HowToCite from '../components/HowToCite.vue'
 import License from '../components/License.vue'
+import Visualization from '../components/Visualization.vue'
 import {Site} from '../../../backend/src/entity/Site'
 import {Model} from '../../../backend/src/entity/Model'
 
 Vue.component('how-to-cite', HowToCite)
 Vue.component('license', License)
+Vue.component('visualization', Visualization)
 
 @Component
 export default class FileView extends Vue {
   @Prop() uuid!: string
   response: ModelFile | RegularFile | null = null
-  visualizations: Visualization[] | [] = []
+  visualizations: VisualizationItem[] = []
   versions: string[] = []
   error = false
   apiUrl = process.env.VUE_APP_BACKENDURL
-  quicklookUrl = `${this.apiUrl}download/image/`
   humanReadableSize = humanReadableSize
   humanReadableDate = humanReadableDate
   humanReadableTimestamp = humanReadableTimestamp
@@ -336,6 +337,21 @@ export default class FileView extends Vue {
   isBusy = false
   site!: Site
   model: Model | null = null
+
+  get maxMarginRight() {
+    return Math.max(
+      ...this.visualizations
+        .map(viz => viz.dimensions && viz.dimensions.marginRight)
+        .filter(notEmpty)
+    )
+  }
+  get maxMarginLeft() {
+    return Math.max(
+      ...this.visualizations
+        .map(viz => viz.dimensions && viz.dimensions.marginLeft)
+        .filter(notEmpty)
+    )
+  }
 
   getVisualizations() {
     if (!this.allVisualizations) return this.visualizations.slice(0, 1)

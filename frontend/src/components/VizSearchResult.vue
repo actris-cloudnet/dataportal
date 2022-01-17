@@ -130,7 +130,8 @@
       <div v-for="viz in sortVisualizations(file.visualizations)"
            :key="viz.s3key" class="variable">
         <h4>{{ viz.productVariable.humanReadableName }}</h4>
-        <img alt="visualization" :src="quicklookUrl + viz.s3key" class="visualization"><br>
+        <visualization :data="viz" :maxMarginLeft="maxMarginLeft" :maxMarginRight="maxMarginRight" />
+        <br>
       </div>
     </div>
     </section>
@@ -143,7 +144,10 @@
 import {Component, Prop, Watch} from 'vue-property-decorator'
 import Vue from 'vue'
 import {VisualizationResponse} from '../../../backend/src/entity/VisualizationResponse'
-import {humanReadableDate, sortVisualizations} from '../lib'
+import {humanReadableDate, sortVisualizations, notEmpty} from '../lib'
+import Visualization from './Visualization.vue'
+
+Vue.component('visualization', Visualization)
 
 @Component
 export default class DataSearchResult extends Vue {
@@ -158,6 +162,20 @@ export default class DataSearchResult extends Vue {
 
   get humanReadableDate() {
     return humanReadableDate(this.date.toString())
+  }
+  get maxMarginRight() {
+    return Math.max(
+      ...this.apiResponse.flatMap(file => file.visualizations
+        .map(viz => viz.dimensions && viz.dimensions.marginRight)
+        .filter(notEmpty))
+    )
+  }
+  get maxMarginLeft() {
+    return Math.max(
+      ...this.apiResponse.flatMap(file => file.visualizations
+        .map(viz => viz.dimensions && viz.dimensions.marginLeft)
+        .filter(notEmpty))
+    )
   }
   get sortedApiResponse() {
     return this.apiResponse.concat().sort(this.alphabeticalSort)
@@ -184,7 +202,5 @@ export default class DataSearchResult extends Vue {
   onViewModeChange() {
     this.setWideMode(this.comparisonView)
   }
-
-  quicklookUrl = `${process.env.VUE_APP_BACKENDURL}download/image/`
 }
 </script>
