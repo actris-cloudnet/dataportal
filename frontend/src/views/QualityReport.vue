@@ -77,7 +77,7 @@
               <dt>Failed data tests</dt>
               <dd>{{ failedDataTests }}</dd>
               <template v-if="qualityResponse.checkedAt">
-                <dt>Checked at</dt>
+                <dt>Check timestamp</dt>
                 <dd>{{ humanReadableDate(qualityResponse.checkedAt) }}</dd>
               </template>
             </dl>
