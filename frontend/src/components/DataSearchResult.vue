@@ -129,6 +129,10 @@ section#fileTable
 #preview
   width: 100%
 
+.visualization
+  width: 100%
+  height: auto
+
 </style>
 
 

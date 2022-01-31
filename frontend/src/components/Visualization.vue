@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Watch} from 'vue-property-decorator'
+import {Component, Prop} from 'vue-property-decorator'
 import Vue from 'vue'
 import {VisualizationItem} from '../../../backend/src/entity/VisualizationResponse'
 
