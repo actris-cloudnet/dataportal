@@ -90,4 +90,20 @@ describe('PUT /quality/:uuid', () => {
     return expect(axios.put(`${privateUrl}4FC4577C-84BF-4557-86D8-1A1FB8D1D81E`, validPayload))
       .rejects.toMatchObject({response: {status: 400}})
   })
+
+  it('doesn\'t update file\'s updatedAt when creating or updating report', async () => {
+    await expect(axios.get(`${fileUrl}acf78456-11b1-41a6-b2de-aa7590a75675`))
+      .resolves.toMatchObject({status: 200, data: {updatedAt: '2021-02-22T10:39:58.449Z'}})
+
+    await expect(axios.put(`${privateUrl}acf78456-11b1-41a6-b2de-aa7590a75675`, validPayload))
+      .resolves.toMatchObject({status: 201})
+    await expect(axios.get(`${fileUrl}acf78456-11b1-41a6-b2de-aa7590a75675`))
+      .resolves.toMatchObject({status: 200, data: {updatedAt: '2021-02-22T10:39:58.449Z'}})
+
+    const tmpPayload = {...validPayload, overallScore: 0.8}
+    await expect(axios.put(`${privateUrl}acf78456-11b1-41a6-b2de-aa7590a75675`, tmpPayload))
+      .resolves.toMatchObject({status: 200})
+    await expect(axios.get(`${fileUrl}acf78456-11b1-41a6-b2de-aa7590a75675`))
+      .resolves.toMatchObject({status: 200, data: {updatedAt: '2021-02-22T10:39:58.449Z'}})
+  })
 })

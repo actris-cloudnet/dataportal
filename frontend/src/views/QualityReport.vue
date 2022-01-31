@@ -76,6 +76,10 @@
               <dd>{{ failedMetadataTests }}</dd>
               <dt>Failed data tests</dt>
               <dd>{{ failedDataTests }}</dd>
+              <template v-if="qualityResponse.checkedAt">
+                <dt>Check timestamp</dt>
+                <dd>{{ humanReadableDate(qualityResponse.checkedAt) }}</dd>
+              </template>
             </dl>
           </section>
         </section>
