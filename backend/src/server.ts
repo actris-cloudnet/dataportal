@@ -2,8 +2,9 @@ import 'reflect-metadata'
 import {createConnection} from 'typeorm'
 import * as express from 'express'
 import {ErrorRequestHandler} from 'express'
+
 import {RequestError} from './entity/RequestError'
-import {stringify} from './lib'
+import {stringify, getIpLookup} from './lib'
 import {Middleware} from './lib/middleware'
 import {FileRoutes} from './routes/file'
 import {SiteRoutes} from './routes/site'
@@ -22,6 +23,7 @@ import {QualityReportRoutes} from './routes/qualityreport'
   const app = express()
 
   const conn = await createConnection()
+  const ipLookup = await getIpLookup({ watchForUpdates: true })
   const middleware = new Middleware(conn)
 
   const fileRoutes = new FileRoutes(conn)
@@ -32,7 +34,7 @@ import {QualityReportRoutes} from './routes/qualityreport'
   const uploadRoutes = new UploadRoutes(conn)
   const collRoutes = new CollectionRoutes(conn)
   const modelRoutes = new ModelRoutes(conn)
-  const dlRoutes = new DownloadRoutes(conn, fileRoutes, collRoutes, uploadRoutes)
+  const dlRoutes = new DownloadRoutes(conn, fileRoutes, collRoutes, uploadRoutes, ipLookup)
   const calibRoutes = new CalibrationRoutes(conn)
   const qualityRoutes = new QualityReportRoutes(conn, fileRoutes)
 
@@ -166,6 +168,7 @@ import {QualityReportRoutes} from './routes/qualityreport'
   app.get('/upload-dateforsize', uploadRoutes.dateforsize)
   app.get('/file-dateforsize', fileRoutes.dateforsize)
   app.put('/quality/:uuid', express.json(), qualityRoutes.putQualityReport)
+  app.get('/api/download/stats', dlRoutes.stats)
 
   app.use(errorHandler)
 
