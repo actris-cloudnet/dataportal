@@ -92,6 +92,9 @@ export class ModelUpload extends Upload {
   @ManyToOne(_ => Model, model => model.uploads)
   model!: Model
 
+  @Column({'unique': true})
+  filename!: string
+
   constructor(checksum: string, filename: string, date: string, site: Site, status: Status, model: Model) { // eslint-disable-line max-len
     super(checksum, filename, date, site, status)
     this.model = model
