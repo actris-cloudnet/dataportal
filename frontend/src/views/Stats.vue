@@ -26,7 +26,6 @@ td, th
 
 .bar-number
   font-size: 50%
-  color: gray
   margin-left: 4px
 </style>
 
@@ -35,15 +34,15 @@ td, th
   <main>
     <h1>Download statistics</h1>
     <label>
-      Dimension:
+      Metric:
       <select v-model="selectedDimensions">
-        <option value="date,downloads">Downloads by date</option>
-        <option value="date,uniqueIps">Unique IPs by date</option>
+        <option value="date,downloads">Monthly downloads</option>
+        <option value="date,uniqueIps">Monthly unique IPs</option>
         <option value="country,downloads">Downloads by country</option>
       </select>
     </label><br>
     <label>
-      File country:
+      Country (of file):
       <select v-model="fileCountry" :disabled="loadingCountries">
         <option :value="null">--- any ---</option>
         <option v-for="country in countries" :key="country" :value="country">
@@ -121,7 +120,7 @@ export default class StatsView extends Vue {
   maxValue = 0
   selectedDimensions = 'date,downloads'
   DIMENSION_LABEL = {
-    'date': 'Date',
+    'date': 'Month',
     'country': 'Country',
     'downloads': 'Downloads',
     'uniqueIps': 'Unique IPs',
