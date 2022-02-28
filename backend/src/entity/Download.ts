@@ -21,14 +21,18 @@ export class Download {
   @Column()
   ip!: string
 
+  @Column({ type: 'char', length: 2, nullable: true })
+  country!: string | null
+
   @Column()
   createdAt!: Date
 
 
-  constructor(objectType: ObjectType, objectUuid: string, ip: string) {
+  constructor(objectType: ObjectType, objectUuid: string, ip: string, country?: string) {
     this.objectType = objectType
     this.objectUuid = objectUuid
     this.ip = ip
+    this.country = country || null
     this.createdAt = new Date()
   }
 }

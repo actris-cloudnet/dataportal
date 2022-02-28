@@ -11,6 +11,7 @@ import {SiteType} from '../entity/Site'
 import env from './env'
 import {CollectionFileResponse} from '../entity/CollectionFileResponse'
 import ReadableStream = NodeJS.ReadableStream
+import maxmind, { CountryResponse, OpenOpts, Reader } from 'maxmind'
 
 export const stringify = (obj: any): string => JSON.stringify(obj, null, 2)
 
@@ -165,3 +166,6 @@ export function streamHandler(stream: ReadableStream, res: Response, prefix: str
   })
 }
 
+export function getIpLookup(options?: OpenOpts): Promise<Reader<CountryResponse>> {
+  return maxmind.open<CountryResponse>(env.GEOLITE2_COUNTRY_PATH, options)
+}

@@ -1,4 +1,5 @@
-import {RequestHandler} from 'express'
+import {Request, RequestHandler} from 'express'
+import { CountryResponse, Reader } from 'maxmind'
 
 import {Collection} from '../entity/Collection'
 import {Connection, Repository} from 'typeorm'
@@ -17,7 +18,7 @@ import {UploadRoutes} from './upload'
 export class DownloadRoutes {
 
   constructor(conn: Connection, fileController: FileRoutes, collController: CollectionRoutes,
-    uploadController: UploadRoutes) {
+    uploadController: UploadRoutes, ipLookup: Reader<CountryResponse>) {
     this.conn = conn
     this.collectionRepo = conn.getRepository<Collection>('collection')
     this.uploadRepo = conn.getRepository<Upload>('upload')
@@ -26,6 +27,7 @@ export class DownloadRoutes {
     this.fileController = fileController
     this.collController = collController
     this.uploadController = uploadController
+    this.ipLookup = ipLookup
   }
 
   readonly conn: Connection
@@ -36,6 +38,7 @@ export class DownloadRoutes {
   readonly fileController: FileRoutes
   readonly uploadController: UploadRoutes
   readonly collController: CollectionRoutes
+  readonly ipLookup: Reader<CountryResponse>
 
   product: RequestHandler = async (req, res, next) => {
     const s3key = req.params[0]
@@ -45,8 +48,7 @@ export class DownloadRoutes {
       const upstreamRes = await this.makeFileRequest(file)
       res.setHeader('Content-Type', 'application/octet-stream')
       res.setHeader('Content-Length', file.size)
-      const dl = new Download(ObjectType.Product, file.uuid, req.header('x-forwarded-for') || '')
-      await this.downloadRepo.save(dl)
+      await this.trackDownload(req, ObjectType.Product, file.uuid)
       upstreamRes.pipe(res, {end: true})
     } catch (e) {
       next({status: 500, errors: e})
@@ -62,8 +64,7 @@ export class DownloadRoutes {
       const upstreamRes = await this.makeRawFileRequest(file)
       res.setHeader('Content-Type', 'application/octet-stream')
       res.setHeader('Content-Length', file.size)
-      const dl = new Download(ObjectType.Raw, file.uuid, req.header('x-forwarded-for') || '')
-      await this.downloadRepo.save(dl)
+      await this.trackDownload(req, ObjectType.Raw, file.uuid)
       upstreamRes.pipe(res, {end: true})
     } catch (e) {
       next({status: 500, errors: e})
@@ -78,9 +79,7 @@ export class DownloadRoutes {
     }
 
     const allFiles = (collection.regularFiles as unknown as File[]).concat(collection.modelFiles)
-    // Update collection download count
-    const dl = new Download(ObjectType.Collection, collection.uuid, req.header('x-forwarded-for') || '')
-    await this.downloadRepo.save(dl)
+    await this.trackDownload(req, ObjectType.Collection, collection.uuid)
     try {
       const archive = archiver('zip', { store: true })
       archive.on('warning', console.error)
@@ -123,6 +122,105 @@ export class DownloadRoutes {
     }
   }
 
+  stats: RequestHandler = async (req, res, next) => {
+    let select, group, order
+    switch (req.query.dimension) {
+    case 'date,downloads':
+      select =
+        `SELECT to_char(download."createdAt", 'YYYY-MM') AS date
+              , SUM(files) AS downloads`
+      group = 'GROUP BY date'
+      order = 'ORDER BY date'
+      break
+    case 'date,uniqueIps':
+      select =
+        `SELECT to_char(download."createdAt", 'YYYY-MM') AS date
+              , COUNT(DISTINCT ip) AS "uniqueIps"`
+      group = 'GROUP BY date'
+      order = 'ORDER BY date'
+      break
+    case 'country,downloads':
+      select = 'SELECT country, SUM(files) AS downloads'
+      group = 'GROUP BY country'
+      order = 'ORDER BY downloads DESC'
+      break
+    default:
+      return next({status: 400, errors: 'invalid dimension'})
+    }
+
+    let fileFilter = ''
+    const params = []
+    if (req.query.fileCountry) {
+      fileFilter = 'JOIN site ON "siteId" = site.id WHERE country = $1'
+      params.push(req.query.fileCountry)
+    }
+
+    const fileSelects = []
+    if (typeof req.query.type == 'string') {
+      for (const type of req.query.type.split(',')) {
+        switch (type) {
+        case 'file':
+          fileSelects.push(
+            `SELECT uuid, 1 AS files FROM regular_file
+             ${fileFilter}
+             UNION
+             SELECT uuid, 1 AS files FROM model_file
+             ${fileFilter}`
+          )
+          break
+        case 'rawFile':
+          fileSelects.push(
+            `SELECT uuid, 1 AS files FROM instrument_upload
+             ${fileFilter}
+             UNION
+             SELECT uuid, 1 AS files FROM model_upload
+             ${fileFilter}`
+          )
+          break
+        case 'fileInCollection':
+          fileSelects.push(
+            `SELECT "collectionUuid" as uuid, count(*) as files
+             FROM (SELECT "collectionUuid", "regularFileUuid" AS "fileUuid"
+                   FROM collection_regular_files_regular_file
+                   JOIN regular_file ON "regularFileUuid" = regular_file.uuid
+                   ${fileFilter}
+                   UNION
+                   SELECT "collectionUuid", "modelFileUuid" AS "fileUuid"
+                   FROM collection_model_files_model_file
+                   JOIN model_file ON "modelFileUuid" = model_file.uuid
+                   ${fileFilter}) collection_file
+             GROUP BY "collectionUuid"`
+          )
+          break
+        default:
+          return next({status: 400, errors: 'invalid type'})
+        }
+      }
+    }
+    if (fileSelects.length === 0) {
+      return next({status: 400, errors: 'invalid type'})
+    }
+
+    const query =
+      `${select}
+       FROM download
+       JOIN (${fileSelects.join(' UNION ')}) object ON "objectUuid" = object.uuid
+       WHERE ip NOT IN ('', '::ffff:127.0.0.1') AND ip NOT LIKE '192.168.%'
+       ${group}
+       ${order}`
+
+    try {
+      const rows = await this.conn.query(query, params)
+      rows.forEach((row: any) => {
+        if (row.downloads) row.downloads = parseInt(row.downloads)
+        if (row.uniqueIps) row.uniqueIps = parseInt(row.uniqueIps)
+      })
+      res.send(rows)
+    } catch (e) {
+      return next({status: 500, errors: e})
+    }
+  }
+
   private makeFileRequest(file: File): Promise<IncomingMessage> {
     return this.makeRequest(getS3pathForFile(file), file.version)
   }
@@ -153,5 +251,12 @@ export class DownloadRoutes {
       req.on('error', err => reject({status: 500, errors: err}))
       req.end()
     })
+  }
+
+  private async trackDownload(req: Request, type: ObjectType, uuid: string) {
+    const ip = req.header('x-forwarded-for') || ''
+    const result = this.ipLookup.get(ip)
+    const dl = new Download(type, uuid, ip, result?.country?.iso_code)
+    await this.downloadRepo.save(dl)
   }
 }

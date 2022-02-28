@@ -81,6 +81,15 @@ const routes = [
     props: true,
   },
   {
+    path: '/stats',
+    name: 'Download statistics',
+    meta: {
+      title: 'Cloudnet Download statistics'
+    },
+    component: () => import('../views/Stats.vue'),
+    props: true,
+  },
+  {
     path: '*',
     name: 'ApiError',
     meta: {

@@ -9,6 +9,7 @@ import {basename} from 'path'
 
 let conn: Connection
 let repo: Repository<Download>
+axios.defaults.headers.common['X-Forwarded-For'] = '2.125.160.216'
 
 beforeAll(async () => {
   conn = await createConnection()
@@ -106,7 +107,14 @@ describe('after PUTting metadata to API', () => {
         const hash = createHash('sha256')
         hash.update(response.data)
         expect(hash.digest('hex')).toEqual(expectedJson.checksum)
-        return expect(repo.findOne({objectUuid: expectedJson.uuid})).resolves.toBeTruthy()
+        return expect(repo.findOne({
+          where: {
+            objectUuid: expectedJson.uuid,
+            objectType: 'product',
+            ip: '2.125.160.216',
+            country: 'GB',
+          }
+        })).resolves.toBeTruthy()
       })
   })
 
@@ -137,7 +145,14 @@ describe('after PUTting metadata to API', () => {
       })
       expect(shas.sort()).toMatchObject(expectedShas.sort())
       fs.unlinkSync(tmpZip)
-      return expect(repo.findOne({objectUuid: collectionUuid})).resolves.toBeTruthy()
+      return expect(repo.findOne({
+        where: {
+          objectUuid: collectionUuid,
+          objectType: 'collection',
+          ip: '2.125.160.216',
+          country: 'GB',
+        }
+      })).resolves.toBeTruthy()
     })
   })
 })
@@ -172,7 +187,14 @@ describe('after PUTting a raw instrument file', () => {
         const hash = createHash('md5')
         hash.update(response.data)
         expect(hash.digest('hex')).toEqual(validMetadata.checksum)
-        return expect(repo.findOne({objectUuid: data.uuid})).resolves.toBeTruthy()
+        return expect(repo.findOne({
+          where: {
+            objectUuid: data.uuid,
+            objectType: 'raw',
+            ip: '2.125.160.216',
+            country: 'GB',
+          }
+        })).resolves.toBeTruthy()
       })
   })
 })
