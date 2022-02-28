@@ -25,7 +25,7 @@ td, th
   border-radius: 2px
 
 .bar-number
-  font-size: 50%
+  font-size: 70%
   margin-left: 4px
 </style>
 
