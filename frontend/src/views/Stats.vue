@@ -156,7 +156,7 @@ export default class StatsView extends Vue {
       fileCountry: this.fileCountry || undefined,
     }
     try {
-      const response = await axios.get(`${this.apiUrl}download/stats`, { params })
+      const response = await axios.get(`${this.apiUrl}download/stats`, { params, withCredentials: true })
       this.loading = false
       this.statistics = response.data
       this.dimensions = this.selectedDimensions.split(',')

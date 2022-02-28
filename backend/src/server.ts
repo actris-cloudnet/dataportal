@@ -1,7 +1,9 @@
 import 'reflect-metadata'
 import {createConnection} from 'typeorm'
 import * as express from 'express'
+import {RequestHandler} from 'express'
 import {ErrorRequestHandler} from 'express'
+import * as basicAuth from 'express-basic-auth'
 
 import {RequestError} from './entity/RequestError'
 import {stringify, getIpLookup} from './lib'
@@ -61,9 +63,13 @@ import {QualityReportRoutes} from './routes/qualityreport'
     next(err)
   }
 
+  // In production, authentication is handled by nginx.
+  let authMiddleware: RequestHandler = (req, res, next) => next()
+
   if (process.env.NODE_ENV != 'production') {
     app.use(function(_req, res, next) {
-      res.header('Access-Control-Allow-Origin', '*')
+      res.header('Access-Control-Allow-Origin', 'http://localhost:8080')
+      res.header('Access-Control-Allow-Credentials', 'true')
       res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
       next()
     })
@@ -71,6 +77,11 @@ import {QualityReportRoutes} from './routes/qualityreport'
     app.get('/allfiles', fileRoutes.allfiles)
     app.get('/allsearch', fileRoutes.allsearch)
     app.get('/allcollections', collRoutes.allcollections)
+
+    authMiddleware = basicAuth({
+      users: { 'admin': 'admin' },
+      challenge: true,
+    })
   }
 
   // public (changes to these require changes to API docs)
@@ -168,7 +179,7 @@ import {QualityReportRoutes} from './routes/qualityreport'
   app.get('/upload-dateforsize', uploadRoutes.dateforsize)
   app.get('/file-dateforsize', fileRoutes.dateforsize)
   app.put('/quality/:uuid', express.json(), qualityRoutes.putQualityReport)
-  app.get('/api/download/stats', dlRoutes.stats)
+  app.get('/api/download/stats', authMiddleware, dlRoutes.stats)
 
   app.use(errorHandler)
 
