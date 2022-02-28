@@ -29,5 +29,6 @@ RUN npm ci --only=prod
 COPY --from=build /app/build /app/build
 COPY --from=build /app/scripts /app/scripts
 COPY --from=build /app/tests/lib/service-mocks.js /app/tests/lib/service-mocks.js
+COPY --from=build /app/tests/data/GeoLite2-Country-Test.mmdb /app/tests/data/GeoLite2-Country-Test.mmdb
 
 CMD ["npm", "start"]
