@@ -19,6 +19,7 @@ import {ModelRoutes} from './routes/model'
 import {DownloadRoutes} from './routes/download'
 import {CalibrationRoutes} from './routes/calibration'
 import {QualityReportRoutes} from './routes/qualityreport'
+import env from './lib/env'
 
 (async function() {
   const port = 3000
@@ -64,7 +65,10 @@ import {QualityReportRoutes} from './routes/qualityreport'
   }
 
   // In production, authentication is handled by nginx.
-  let authMiddleware: RequestHandler = (req, res, next) => next()
+  let authMiddleware = basicAuth({
+    users: { 'admin': env.STATS_PASSWORD },
+    challenge: true,
+  })
 
   if (process.env.NODE_ENV != 'production') {
     app.use(function(_req, res, next) {
@@ -77,11 +81,6 @@ import {QualityReportRoutes} from './routes/qualityreport'
     app.get('/allfiles', fileRoutes.allfiles)
     app.get('/allsearch', fileRoutes.allsearch)
     app.get('/allcollections', collRoutes.allcollections)
-
-    authMiddleware = basicAuth({
-      users: { 'admin': 'admin' },
-      challenge: true,
-    })
   }
 
   // public (changes to these require changes to API docs)
