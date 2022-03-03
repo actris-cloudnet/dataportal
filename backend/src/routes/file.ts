@@ -216,7 +216,7 @@ export class FileRoutes {
         site: existingFile.site,
         measurementDate: existingFile.measurementDate,
         product: In(higherLevelProductNames)
-        }})
+      }})
       if (ignoreHigherProducts || products.length == 0) {
         await FileRoutes.deleteFileAndVisualizations(fileRepo, visuRepo, uuid)
         return res.sendStatus(200)
@@ -353,33 +353,33 @@ export class FileRoutes {
   }
 
   private static async deleteFileAndVisualizations(fileRepo: Repository<RegularFile|ModelFile>,
-                                                   visualizationRepo: Repository<Visualization|ModelVisualization>,
-                                                   uuid: string) {
+    visualizationRepo: Repository<Visualization|ModelVisualization>,
+    uuid: string) {
     await visualizationRepo.createQueryBuilder()
-        .delete()
-        .where({ sourceFile: uuid })
-        .execute()
+      .delete()
+      .where({ sourceFile: uuid })
+      .execute()
     await fileRepo.createQueryBuilder()
-        .delete()
-        .where({ uuid: uuid })
-        .execute()
+      .delete()
+      .where({ uuid: uuid })
+      .execute()
   }
 
   private async getHigherLevelProducts(product: Product):Promise<string[]> {
     // Returns Cloudnet products that are of higher level than the given product.
     let uniqueLevels = await this.productRepo
-        .createQueryBuilder()
-        .select('DISTINCT level')
-        .orderBy('level')
-        .getRawMany()
+      .createQueryBuilder()
+      .select('DISTINCT level')
+      .orderBy('level')
+      .getRawMany()
     uniqueLevels = uniqueLevels.map(level => level.level)
     const index = uniqueLevels.indexOf(product.level)
     const levels =  uniqueLevels.slice(index + 1)
     let products = await this.productRepo
-        .createQueryBuilder()
-        .where({level: In(levels)})
-        .select('id')
-        .getRawMany()
+      .createQueryBuilder()
+      .where({level: In(levels)})
+      .select('id')
+      .getRawMany()
     return products.map(prod => prod.id)
   }
 

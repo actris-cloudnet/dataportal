@@ -467,11 +467,11 @@ describe('DELETE /files/', () => {
 
   async function put_categorize(volatile: boolean = true) {
     const categorizeFile  = {...volatileFile, ...{
-        product: 'categorize',
-        uuid: '27325787-6cbe-4e2c-a749-4bc9191b55a6',
-        checksum: '46ceff4e71f5acc8f8b1d20cccb9995d4bf353093b8e9a817ee5943f6d5d554c',
-        s3key: '20181115_mace-head_categorize.nc',
-        volatile: volatile}
+      product: 'categorize',
+      uuid: '27325787-6cbe-4e2c-a749-4bc9191b55a6',
+      checksum: '46ceff4e71f5acc8f8b1d20cccb9995d4bf353093b8e9a817ee5943f6d5d554c',
+      s3key: '20181115_mace-head_categorize.nc',
+      volatile: volatile}
     }
     const bucketFix = volatile ? '-volatile' : ''
     await axios.put(`${storageServiceUrl}cloudnet-product${bucketFix}/${categorizeFile.s3key}`, 'content')
@@ -482,7 +482,7 @@ describe('DELETE /files/', () => {
   async function put_image(id: string, file: any) {
     const payload = {
       sourceFileId: file.uuid,
-      variableId: id.replace(/\.[^/.]+$/, "")
+      variableId: id.replace(/\.[^/.]+$/, '')
     }
     await axios.put(`${storageServiceUrl}cloudnet-img/${id}`, 'content')
     await axios.put(`${privUrl}${id}`, payload)
