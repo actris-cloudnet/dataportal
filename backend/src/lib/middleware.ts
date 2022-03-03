@@ -108,7 +108,7 @@ export class Middleware {
     }
     if (query.updatedAtTo) query.updatedAtTo = new Date(query.updatedAtTo)
     if (query.updatedAtFrom) query.updatedAtFrom = new Date(query.updatedAtFrom)
-    query.s3path = (query.s3path || '').toLowerCase() == 'true' ? true : false
+    query.s3path = (query.s3path || '').toLowerCase() == 'true'
     next()
   }
 

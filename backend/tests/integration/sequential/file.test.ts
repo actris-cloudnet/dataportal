@@ -6,7 +6,8 @@ import axios from 'axios'
 import {Visualization} from '../../../src/entity/Visualization'
 import {SearchFile} from '../../../src/entity/SearchFile'
 import {ModelVisualization} from '../../../src/entity/ModelVisualization'
-
+const uuidGen = require('uuid')
+const crypto = require('crypto')
 
 let conn: Connection
 let fileRepo: Repository<RegularFile>
@@ -46,6 +47,7 @@ afterAll(async () => {
   await modelVizRepo.delete({})
   await modelFileRepo.delete({})
   await fileRepo.delete({})
+  await searchFileRepo.delete({})
   await conn.close()
 })
 
@@ -86,10 +88,8 @@ describe('PUT /files/:s3key', () => {
     }
     await expect(putFile(newVersion)).resolves.toMatchObject({status: 200})
     await expect(fileRepo.findOneOrFail({where: {uuid: newVersion.uuid}})).resolves.toBeTruthy()
-    await expect(searchFileRepo.findOneOrFail({where: {uuid: stableFile.uuid}})).rejects
-      .toBeTruthy()
-    return expect(searchFileRepo.findOneOrFail({where: {uuid: newVersion.uuid}})).resolves
-      .toBeTruthy()
+    await expect(searchFileRepo.findOneOrFail({where: {uuid: stableFile.uuid}})).rejects.toBeTruthy()
+    return await expect(searchFileRepo.findOneOrFail({where: {uuid: newVersion.uuid}})).resolves.toBeTruthy()
   })
 
   test('inserting legacy file', async () => {
@@ -97,14 +97,14 @@ describe('PUT /files/:s3key', () => {
     tmpfile.legacy = true
     await expect(putFile(tmpfile)).resolves.toMatchObject({status: 201})
     await expect(fileRepo.findOneOrFail(volatileFile.uuid)).resolves.toMatchObject({legacy: true})
-    return expect(searchFileRepo.findOneOrFail(volatileFile.uuid)).resolves.toMatchObject({legacy: true})
+    return await expect(searchFileRepo.findOneOrFail(volatileFile.uuid)).resolves.toMatchObject({legacy: true})
   })
 
   test('inserting quality controlled file', async () => {
     const tmpfile = {...stableFile}
     tmpfile.quality = 'qc'
     await expect(putFile(tmpfile)).resolves.toMatchObject({status: 201})
-    await expect(fileRepo.findOneOrFail(volatileFile.uuid)).resolves.toMatchObject({quality: 'qc'})
+    return await expect(fileRepo.findOneOrFail(volatileFile.uuid)).resolves.toMatchObject({quality: 'qc'})
   })
 
   test('inserting a normal file and a legacy file', async () => {
@@ -116,7 +116,7 @@ describe('PUT /files/:s3key', () => {
     tmpfile.checksum = '610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678'
     await expect(putFile(tmpfile)).resolves.toMatchObject({status: 200})
     await expect(searchFileRepo.findOneOrFail(stableFile.uuid)).resolves.toMatchObject({legacy: false})
-    return expect(searchFileRepo.findOneOrFail(tmpfile.uuid)).rejects.toBeTruthy()
+    return await expect(searchFileRepo.findOneOrFail(tmpfile.uuid)).rejects.toBeTruthy()
   })
 
   test('inserting a legacy file and a normal file', async () => {
@@ -128,7 +128,7 @@ describe('PUT /files/:s3key', () => {
     await expect(putFile(tmpfile)).resolves.toMatchObject({status: 201})
     await expect(putFile(stableFile)).resolves.toMatchObject({status: 200})
     await expect(searchFileRepo.findOneOrFail(stableFile.uuid)).resolves.toMatchObject({legacy: false})
-    return expect(searchFileRepo.findOneOrFail(tmpfile.uuid)).rejects.toBeTruthy()
+    return await expect(searchFileRepo.findOneOrFail(tmpfile.uuid)).rejects.toBeTruthy()
   })
 
   test('inserting a legacy file and two normal files', async () => {
@@ -145,7 +145,7 @@ describe('PUT /files/:s3key', () => {
     await expect(putFile(tmpfile2)).resolves.toMatchObject({status: 200})
     await expect(searchFileRepo.findOneOrFail(stableFile.uuid)).rejects.toBeTruthy()
     await expect(searchFileRepo.findOneOrFail(tmpfile.uuid)).rejects.toBeTruthy()
-    return expect(searchFileRepo.findOneOrFail(tmpfile2.uuid)).resolves.toMatchObject({legacy: false})
+    return await expect(searchFileRepo.findOneOrFail(tmpfile2.uuid)).resolves.toMatchObject({legacy: false})
   })
 
   test('inserting two model files (first worse, then better)', async () => {
@@ -164,7 +164,7 @@ describe('PUT /files/:s3key', () => {
     await expect(putFile(tmpfile2)).resolves.toMatchObject({status: 201})
     await expect(modelFileRepo.findOneOrFail(tmpfile2.uuid, {relations: ['model']})).resolves.toMatchObject({model: {id: tmpfile2.model}})
     await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeFalsy()
-    return expect(searchFileRepo.findOne(tmpfile2.uuid)).resolves.toBeTruthy()
+    return await expect(searchFileRepo.findOne(tmpfile2.uuid)).resolves.toBeTruthy()
   })
 
   test('inserting two model files (first better, then worse)', async () => {
@@ -181,7 +181,7 @@ describe('PUT /files/:s3key', () => {
     await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile2.s3key}`, 'content')
     await expect(putFile(tmpfile2)).resolves.toMatchObject({status: 201})
     await expect(searchFileRepo.findOne(tmpfile2.uuid)).resolves.toBeFalsy()
-    return expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeTruthy()
+    return await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeTruthy()
   })
 
   test('inserting several model files with different optimumOrder', async () => {
@@ -211,7 +211,7 @@ describe('PUT /files/:s3key', () => {
     await expect(modelFileRepo.findOneOrFail(tmpfile3.uuid, {relations: ['model']})).resolves.toMatchObject({model: {id: tmpfile3.model}})
     await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeFalsy()
     await expect(searchFileRepo.findOne(tmpfile2.uuid)).resolves.toBeFalsy()
-    return expect(searchFileRepo.findOne(tmpfile3.uuid)).resolves.toBeTruthy()
+    return await expect(searchFileRepo.findOne(tmpfile3.uuid)).resolves.toBeTruthy()
   })
 
   test('inserting several model files with different optimumOrder II', async () => {
@@ -284,7 +284,7 @@ describe('PUT /files/:s3key', () => {
   test('errors on invalid site', async () => {
     const tmpfile = {...stableFile}
     tmpfile.site = 'bökärest'
-    return expect(putFile(tmpfile)).rejects.toMatchObject({response: { status: 400}})
+    return await expect(putFile(tmpfile)).rejects.toMatchObject({response: { status: 400}})
   })
 
   test('overwrites existing freezed files on test site', async () => {
@@ -296,7 +296,7 @@ describe('PUT /files/:s3key', () => {
     const dbRow1 = await fileRepo.findOneOrFail(stableFile.uuid)
     await expect(putFile(tmpfile)).resolves.toMatchObject({status: 200})
     const dbRow2 = await fileRepo.findOneOrFail(stableFile.uuid)
-    expect(dbRow1.updatedAt < dbRow2.updatedAt)
+    return expect(dbRow1.updatedAt < dbRow2.updatedAt)
   })
 
   test('inserting new file with source files', async () => {
@@ -319,7 +319,7 @@ describe('PUT /files/:s3key', () => {
     tmpfile.sourceFileIds = ['42b32746-faf0-4057-9076-ed2e698dcc34']
     tmpfile.uuid = '22b32746-faf0-4057-9076-ed2e698dcc34'
     tmpfile.checksum = 'dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b5'
-    await expect(putFile(tmpfile)).rejects.toMatchObject({ response: {status: 422}})
+    return await expect(putFile(tmpfile)).rejects.toMatchObject({ response: {status: 422}})
   })
 
   test('errors on model versions', async () => {
@@ -330,7 +330,7 @@ describe('PUT /files/:s3key', () => {
     tmpfile2.uuid = '87EB042E-B247-4AC1-BC03-074DD0D74BDB'
     tmpfile2.checksum = '610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678'
     await expect(putFile(tmpfile1)).resolves.toMatchObject({status: 201})
-    return expect(putFile(tmpfile2)).rejects.toMatchObject({response: {status: 501}})
+    return await expect(putFile(tmpfile2)).rejects.toMatchObject({response: {status: 501}})
   })
 
   test('errors on invalid filename', async () => {
@@ -340,7 +340,7 @@ describe('PUT /files/:s3key', () => {
     await expect(putFile(tmpfile)).rejects.toMatchObject({ response: {status: 400}})
     tmpfile = {...volatileFile}
     tmpfile.site = 'hyytiala'
-    await expect(putFile(tmpfile)).rejects.toMatchObject({ response: {status: 400}})
+    return await expect(putFile(tmpfile)).rejects.toMatchObject({ response: {status: 400}})
   })
 })
 
@@ -349,7 +349,7 @@ describe('POST /files/', () => {
   test('refuse freezing a file without pid', async () => {
     const tmpfile = {...stableFile}
     delete tmpfile.pid
-    return expect(putFile(tmpfile)).rejects.toMatchObject({response: { status: 422}})
+    return await expect(putFile(tmpfile)).rejects.toMatchObject({response: { status: 422}})
   })
 
   test('freezing existing file', async () => {
@@ -378,7 +378,7 @@ describe('POST /files/', () => {
 
   test('refuse updating freezed file', async () => {
     await putFile(stableFile)
-    return expect(putFile(stableFile)).rejects.toMatchObject({response: {status: 403, data: { errors: ['File exists and cannot be updated since it is freezed and not from a test site']}}})
+    return await expect(putFile(stableFile)).rejects.toMatchObject({response: {status: 403, data: { errors: ['File exists and cannot be updated since it is freezed and not from a test site']}}})
   })
 
   test('updating version id does not update updatedAt', async () => {
@@ -398,7 +398,7 @@ describe('DELETE /files/', () => {
   const privUrl = `${backendPrivateUrl}visualizations/`
 
   test('refuse freezing a stable file', async () => {
-    const radarFile = await put_radar(false)
+    const radarFile = await put_file('radar', false)
     await expect(deleteFile(radarFile.uuid)).rejects.toMatchObject({response: {status: 422}})
     return await fileRepo.findOneOrFail(radarFile.uuid)
   })
@@ -409,7 +409,7 @@ describe('DELETE /files/', () => {
   })
 
   test('deletes regular volatile file and images', async () => {
-    const radarFile = await put_radar()
+    const radarFile = await put_file()
     await put_image('radar-v.png', radarFile)
     await put_image('radar-ldr.png', radarFile)
     await expect(deleteFile(radarFile.uuid)).resolves.toMatchObject({status: 200})
@@ -419,9 +419,9 @@ describe('DELETE /files/', () => {
   })
 
   test('deletes higher-level volatile products too', async () => {
-    const radarFile = await put_radar()
+    const radarFile = await put_file()
     await put_image('radar-v.png', radarFile)
-    const categorizeFile = await put_categorize()
+    const categorizeFile = await put_file('categorize')
     await put_image('categorize-ldr.png', categorizeFile)
     await expect(deleteFile(radarFile.uuid)).resolves.toMatchObject({status: 200})
     await expect(fileRepo.findOne(radarFile.uuid)).resolves.toBeFalsy()
@@ -431,52 +431,52 @@ describe('DELETE /files/', () => {
   })
 
   test('refuses deleting if higher-level products contain stable product', async () => {
-    const radarFile = await put_radar()
-    await put_categorize(false)
-    return await expect(deleteFile(radarFile.uuid)).rejects.toMatchObject({ response: {status: 422} })
+    const file = await put_file()
+    await put_file('categorize', false)
+    return await expect(deleteFile(file.uuid)).rejects.toMatchObject({ response: {status: 422} })
   })
 
-  test('deleting using ignoreHigherProducts parameter', async () => {
-    const radarFile = await put_radar()
-    const categorizeFile = await put_categorize(false)
+  test('deleting using ignoreHigherProducts parameter I', async () => {
+    const radarFile = await put_file()
+    const categorizeFile = await put_file('categorize', false)
     await expect(deleteFile(radarFile.uuid, {ignoreHigherProducts: true})).resolves.toMatchObject({status: 200})
     await expect(fileRepo.findOne(radarFile.uuid)).resolves.toBeFalsy()
     return await expect(fileRepo.findOne(categorizeFile.uuid)).resolves.toBeTruthy()
   })
 
   test('deleting using ignoreHigherProducts parameter II', async () => {
-    const radarFile = await put_radar()
-    const categorizeFile = await put_categorize()
+    const radarFile = await put_file()
+    const categorizeFile = await put_file('categorize')
     await expect(deleteFile(radarFile.uuid, {ignoreHigherProducts: true})).resolves.toMatchObject({status: 200})
     await expect(fileRepo.findOne(radarFile.uuid)).resolves.toBeFalsy()
     return await expect(fileRepo.findOne(categorizeFile.uuid)).resolves.toBeTruthy()
   })
 
-  async function put_radar(volatile: boolean = true) {
-    const radarFile = {
-      ...volatileFile, ...{
-        product: 'radar',
-        uuid: 'db9156e5-8b97-4e9f-8974-55757d873e5e',
-        volatile: volatile
-      }
-    }
-    await expect(putFile(radarFile)).resolves.toMatchObject({status: 201})
-    await fileRepo.findOneOrFail(radarFile.uuid)
-    return radarFile
-  }
+  test('deletes model file', async () => {
+    const file = await put_file('model')
+    await expect(deleteFile(file.uuid)).resolves.toMatchObject({status: 200})
+    return await expect(fileRepo.findOne(file.uuid)).resolves.toBeFalsy()
+  })
 
-  async function put_categorize(volatile: boolean = true) {
-    const categorizeFile  = {...volatileFile, ...{
-      product: 'categorize',
-      uuid: '27325787-6cbe-4e2c-a749-4bc9191b55a6',
-      checksum: '46ceff4e71f5acc8f8b1d20cccb9995d4bf353093b8e9a817ee5943f6d5d554c',
-      s3key: '20181115_mace-head_categorize.nc',
-      volatile: volatile}
+  test('refuses deleting model file if higher-level products contain stable product', async () => {
+    const file = await put_file('model')
+    await put_file('categorize', false)
+    return await expect(deleteFile(file.uuid)).rejects.toMatchObject({ response: {status: 422} })
+  })
+
+  async function put_file(fileType: string = 'radar', volatile: boolean = true) {
+    const file  = {...volatileFile, ...{
+      product: fileType,
+      uuid: uuidGen.v4(),
+      volatile: volatile},
+    s3key: `20181115_mace-head_${fileType}.nc`,
+    checksum: generateHash()
     }
+    if (fileType === 'model') file.model = 'ecmwf'
     const bucketFix = volatile ? '-volatile' : ''
-    await axios.put(`${storageServiceUrl}cloudnet-product${bucketFix}/${categorizeFile.s3key}`, 'content')
-    await expect(putFile(categorizeFile)).resolves.toMatchObject({status: 201})
-    return categorizeFile
+    await axios.put(`${storageServiceUrl}cloudnet-product${bucketFix}/${file.s3key}`, 'content')
+    await expect(putFile(file)).resolves.toMatchObject({status: 201})
+    return file
   }
 
   async function put_image(id: string, file: any) {
@@ -490,3 +490,7 @@ describe('DELETE /files/', () => {
   }
 
 })
+
+function generateHash() {
+  return crypto.randomBytes(20).toString('hex')
+}
