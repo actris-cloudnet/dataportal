@@ -218,7 +218,7 @@ export class FileRoutes {
         product: In(higherLevelProductNames)
       }})
       if (ignoreHigherProducts || products.length == 0) {
-        await FileRoutes.deleteFileAndVisualizations(fileRepo, visuRepo, uuid)
+        await this.deleteFileAndVisualizations(fileRepo, visuRepo, uuid)
         return res.sendStatus(200)
       }
       const onlyVolatileProducts = products.every(product => product.volatile)
@@ -226,10 +226,10 @@ export class FileRoutes {
         return next({status: 422, errors: ['Forbidden to delete due to higher level stable files']})
       } else {
         for (const product of products) {
-          await FileRoutes.deleteFileAndVisualizations(this.fileRepo, this.visualizationRepo, product.uuid)
+          await this.deleteFileAndVisualizations(this.fileRepo, this.visualizationRepo, product.uuid)
         }
       }
-      await FileRoutes.deleteFileAndVisualizations(fileRepo, visuRepo, uuid)
+      await this.deleteFileAndVisualizations(fileRepo, visuRepo, uuid)
       res.sendStatus(200)
     } catch (e) {
       return next({status: 500, errors: e})
@@ -352,7 +352,7 @@ export class FileRoutes {
     return dateforsize(isModel ? this.modelFileRepo : this.fileRepo, isModel ? 'model_file' : 'regular_file', req, res, next)
   }
 
-  private static async deleteFileAndVisualizations(fileRepo: Repository<RegularFile|ModelFile>,
+  private async deleteFileAndVisualizations(fileRepo: Repository<RegularFile|ModelFile>,
     visualizationRepo: Repository<Visualization|ModelVisualization>,
     uuid: string) {
     await visualizationRepo.createQueryBuilder()
@@ -360,6 +360,10 @@ export class FileRoutes {
       .where({ sourceFile: uuid })
       .execute()
     await fileRepo.createQueryBuilder()
+      .delete()
+      .where({ uuid: uuid })
+      .execute()
+    await this.searchFileRepo.createQueryBuilder()
       .delete()
       .where({ uuid: uuid })
       .execute()
