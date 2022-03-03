@@ -54,6 +54,11 @@ async function putFile(json: any) {
   return await axios.put(url, json)
 }
 
+async function deleteFile(uuid: string, params: any = {}) {
+  const url = `${backendPrivateUrl}files/${uuid}`
+  return await axios.delete(url, { params: params })
+}
+
 describe('PUT /files/:s3key', () => {
   test('inserting new volatile file', async () => {
     await expect(putFile(volatileFile)).resolves.toMatchObject({status: 201})
@@ -385,4 +390,103 @@ describe('POST /files/', () => {
     expect(dbRow2.version).toEqual('999')
     expect(dbRow2.updatedAt).toEqual(dbRow1.updatedAt)
   })
+})
+
+
+describe('DELETE /files/', () => {
+
+  const privUrl = `${backendPrivateUrl}visualizations/`
+
+  test('refuse freezing a stable file', async () => {
+    const radarFile = await put_radar(false)
+    await expect(deleteFile(radarFile.uuid)).rejects.toMatchObject({response: {status: 422}})
+    return await fileRepo.findOneOrFail(radarFile.uuid)
+  })
+
+  test('refuses deleting non-existent file', async () => {
+    const uuid = 'db9156e5-8b97-4e9f-8974-55757d873e5e'
+    return await expect(deleteFile(uuid)).rejects.toMatchObject({response: {status: 422}})
+  })
+
+  test('deletes regular volatile file and images', async () => {
+    const radarFile = await put_radar()
+    await put_image('radar-v.png', radarFile)
+    await put_image('radar-ldr.png', radarFile)
+    await expect(deleteFile(radarFile.uuid)).resolves.toMatchObject({status: 200})
+    await expect(fileRepo.findOne(radarFile.uuid)).resolves.toBeFalsy()
+    await expect(vizRepo.findOne('radar-v.png')).resolves.toBeFalsy()
+    return await expect(vizRepo.findOne('radar-ldr.png')).resolves.toBeFalsy()
+  })
+
+  test('deletes higher-level volatile products too', async () => {
+    const radarFile = await put_radar()
+    await put_image('radar-v.png', radarFile)
+    const categorizeFile = await put_categorize()
+    await put_image('categorize-ldr.png', categorizeFile)
+    await expect(deleteFile(radarFile.uuid)).resolves.toMatchObject({status: 200})
+    await expect(fileRepo.findOne(radarFile.uuid)).resolves.toBeFalsy()
+    await expect(fileRepo.findOne(categorizeFile.uuid)).resolves.toBeFalsy()
+    await expect(vizRepo.findOne('radar-v.png')).resolves.toBeFalsy()
+    return await expect(vizRepo.findOne('categorize-ldr.png')).resolves.toBeFalsy()
+  })
+
+  test('refuses deleting if higher-level products contain stable product', async () => {
+    const radarFile = await put_radar()
+    await put_categorize(false)
+    return await expect(deleteFile(radarFile.uuid)).rejects.toMatchObject({ response: {status: 422} })
+  })
+
+  test('deleting using ignoreHigherProducts parameter', async () => {
+    const radarFile = await put_radar()
+    const categorizeFile = await put_categorize(false)
+    await expect(deleteFile(radarFile.uuid, {ignoreHigherProducts: true})).resolves.toMatchObject({status: 200})
+    await expect(fileRepo.findOne(radarFile.uuid)).resolves.toBeFalsy()
+    return await expect(fileRepo.findOne(categorizeFile.uuid)).resolves.toBeTruthy()
+  })
+
+  test('deleting using ignoreHigherProducts parameter II', async () => {
+    const radarFile = await put_radar()
+    const categorizeFile = await put_categorize()
+    await expect(deleteFile(radarFile.uuid, {ignoreHigherProducts: true})).resolves.toMatchObject({status: 200})
+    await expect(fileRepo.findOne(radarFile.uuid)).resolves.toBeFalsy()
+    return await expect(fileRepo.findOne(categorizeFile.uuid)).resolves.toBeTruthy()
+  })
+
+  async function put_radar(volatile: boolean = true) {
+    const radarFile = {
+      ...volatileFile, ...{
+        product: 'radar',
+        uuid: 'db9156e5-8b97-4e9f-8974-55757d873e5e',
+        volatile: volatile
+      }
+    }
+    await expect(putFile(radarFile)).resolves.toMatchObject({status: 201})
+    await fileRepo.findOneOrFail(radarFile.uuid)
+    return radarFile
+  }
+
+  async function put_categorize(volatile: boolean = true) {
+    const categorizeFile  = {...volatileFile, ...{
+        product: 'categorize',
+        uuid: '27325787-6cbe-4e2c-a749-4bc9191b55a6',
+        checksum: '46ceff4e71f5acc8f8b1d20cccb9995d4bf353093b8e9a817ee5943f6d5d554c',
+        s3key: '20181115_mace-head_categorize.nc',
+        volatile: volatile}
+    }
+    const bucketFix = volatile ? '-volatile' : ''
+    await axios.put(`${storageServiceUrl}cloudnet-product${bucketFix}/${categorizeFile.s3key}`, 'content')
+    await expect(putFile(categorizeFile)).resolves.toMatchObject({status: 201})
+    return categorizeFile
+  }
+
+  async function put_image(id: string, file: any) {
+    const payload = {
+      sourceFileId: file.uuid,
+      variableId: id.replace(/\.[^/.]+$/, "")
+    }
+    await axios.put(`${storageServiceUrl}cloudnet-img/${id}`, 'content')
+    await axios.put(`${privUrl}${id}`, payload)
+    return await expect(vizRepo.findOneOrFail(id)).resolves.toBeTruthy()
+  }
+
 })

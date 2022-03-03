@@ -35,6 +35,16 @@
         "id": "classification-detection_status",
         "humanReadableName": "Classification detection status",
         "order": "1"
+      },
+      {
+        "id": "classification-v",
+        "humanReadableName": "Classification velocity",
+        "order": "2"
+      },
+      {
+        "id": "classification-ldr",
+        "humanReadableName": "Classification LDR",
+        "order": "3"
       }
     ]
   },
@@ -74,6 +84,16 @@
         "id": "test1",
         "humanReadableName": "Auringonpaisteen määrä",
         "order": "1"
+      },
+      {
+        "id": "categorize-v",
+        "humanReadableName": "Categorize velocity",
+        "order": "2"
+      },
+      {
+        "id": "categorize-ldr",
+        "humanReadableName": "Categorize LDR",
+        "order": "3"
       }
     ]
   },
@@ -110,6 +130,17 @@
     "humanReadableName": "Radar",
     "level": "1b",
     "experimental": false,
-    "variables": []
+    "variables": [
+      {
+        "id": "radar-v",
+        "humanReadableName": "Radar velocity",
+        "order": "2"
+      },
+      {
+        "id": "radar-ldr",
+        "humanReadableName": "Radar LDR",
+        "order": "3"
+      }
+    ]
   }
 ]
