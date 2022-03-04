@@ -217,14 +217,9 @@ export class FileRoutes {
         measurementDate: existingFile.measurementDate,
         product: In(higherLevelProductNames)
       }})
-      if (ignoreHigherProducts || products.length == 0) {
-        await this.deleteFileAndVisualizations(fileRepo, visuRepo, uuid)
-        return res.sendStatus(200)
-      }
-      const onlyVolatileProducts = products.every(product => product.volatile)
-      if (!onlyVolatileProducts) {
-        return next({status: 422, errors: ['Forbidden to delete due to higher level stable files']})
-      } else {
+      if (!ignoreHigherProducts && products.length > 0) {
+        const onlyVolatileProducts = products.every(product => product.volatile)
+        if (!onlyVolatileProducts) return next({status: 422, errors: ['Forbidden to delete due to higher level stable files']})
         for (const product of products) {
           await this.deleteFileAndVisualizations(this.fileRepo, this.visualizationRepo, product.uuid)
         }
