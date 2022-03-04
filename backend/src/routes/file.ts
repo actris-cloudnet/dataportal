@@ -200,7 +200,7 @@ export class FileRoutes {
   deleteFile: RequestHandler = async (req: Request, res: Response, next) => {
     const uuid = req.params.uuid
     const query: any = req.query
-    const ignoreHigherProducts = 'ignoreHigherProducts' in query && query.ignoreHigherProducts.toLowerCase() === 'true'
+    const deleteHigherProducts = query.deleteHigherProducts
     try {
       const existingFile = await this.findAnyFile((repo) => repo.findOne(uuid, {relations: ['product', 'site']}))
       if (!existingFile) return next({status: 422, errors: ['No file matches the provided uuid']})
@@ -217,7 +217,7 @@ export class FileRoutes {
         measurementDate: existingFile.measurementDate,
         product: In(higherLevelProductNames)
       }})
-      if (!ignoreHigherProducts && products.length > 0) {
+      if (deleteHigherProducts && products.length > 0) {
         const onlyVolatileProducts = products.every(product => product.volatile)
         if (!onlyVolatileProducts) return next({status: 422, errors: ['Forbidden to delete due to higher level stable files']})
         for (const product of products) {

@@ -56,8 +56,10 @@ async function putFile(json: any) {
   return await axios.put(url, json)
 }
 
-async function deleteFile(uuid: string, params: any = {}) {
+async function deleteFile(uuid: string, deleteHigherProducts: any = null) {
   const url = `${backendPrivateUrl}files/${uuid}`
+  let params = {}
+  if (!(deleteHigherProducts === null)) params = { deleteHigherProducts: deleteHigherProducts }
   return await axios.delete(url, { params: params })
 }
 
@@ -397,22 +399,34 @@ describe('DELETE /files/', () => {
 
   const privUrl = `${backendPrivateUrl}visualizations/`
 
+  test('missing mandatory parameter', async () => {
+    const file = await put_file('radar', false)
+    await expect(deleteFile(file.uuid)).rejects.toMatchObject({response: {status: 404}})
+  })
+
+  test('incorrect parameter value', async () => {
+    const file = await put_file('radar', false)
+    await expect(deleteFile(file.uuid, 'kissa')).rejects.toMatchObject({response: {status: 400}})
+    await expect(deleteFile(file.uuid, 'treu')).rejects.toMatchObject({response: {status: 400}})
+    await expect(deleteFile(file.uuid, 'fales')).rejects.toMatchObject({response: {status: 400}})
+  })
+
   test('refuse freezing a stable file', async () => {
     const radarFile = await put_file('radar', false)
-    await expect(deleteFile(radarFile.uuid)).rejects.toMatchObject({response: {status: 422}})
+    await expect(deleteFile(radarFile.uuid, false)).rejects.toMatchObject({response: {status: 422}})
     return await fileRepo.findOneOrFail(radarFile.uuid)
   })
 
   test('refuses deleting non-existent file', async () => {
     const uuid = 'db9156e5-8b97-4e9f-8974-55757d873e5e'
-    return await expect(deleteFile(uuid)).rejects.toMatchObject({response: {status: 422}})
+    return await expect(deleteFile(uuid, false)).rejects.toMatchObject({response: {status: 422}})
   })
 
   test('deletes regular volatile file and images', async () => {
     const radarFile = await put_file()
     await put_image('radar-v.png', radarFile)
     await put_image('radar-ldr.png', radarFile)
-    await expect(deleteFile(radarFile.uuid)).resolves.toMatchObject({status: 200})
+    await expect(deleteFile(radarFile.uuid, false)).resolves.toMatchObject({status: 200})
     await expect(fileRepo.findOne(radarFile.uuid)).resolves.toBeFalsy()
     await expect(vizRepo.findOne('radar-v.png')).resolves.toBeFalsy()
     return await expect(vizRepo.findOne('radar-ldr.png')).resolves.toBeFalsy()
@@ -423,7 +437,7 @@ describe('DELETE /files/', () => {
     await put_image('radar-v.png', radarFile)
     const categorizeFile = await put_file('categorize')
     await put_image('categorize-ldr.png', categorizeFile)
-    await expect(deleteFile(radarFile.uuid)).resolves.toMatchObject({status: 200})
+    await expect(deleteFile(radarFile.uuid, true)).resolves.toMatchObject({status: 200})
     await expect(fileRepo.findOne(radarFile.uuid)).resolves.toBeFalsy()
     await expect(fileRepo.findOne(categorizeFile.uuid)).resolves.toBeFalsy()
     await expect(vizRepo.findOne('radar-v.png')).resolves.toBeFalsy()
@@ -433,35 +447,35 @@ describe('DELETE /files/', () => {
   test('refuses deleting if higher-level products contain stable product', async () => {
     const file = await put_file()
     await put_file('categorize', false)
-    return await expect(deleteFile(file.uuid)).rejects.toMatchObject({ response: {status: 422} })
+    return await expect(deleteFile(file.uuid, true)).rejects.toMatchObject({ response: {status: 422} })
   })
 
-  test('deleting using ignoreHigherProducts parameter I', async () => {
+  test('deleting using deleteHigherProducts parameter I', async () => {
     const radarFile = await put_file()
     const categorizeFile = await put_file('categorize', false)
-    await expect(deleteFile(radarFile.uuid, {ignoreHigherProducts: true})).resolves.toMatchObject({status: 200})
+    await expect(deleteFile(radarFile.uuid, false)).resolves.toMatchObject({status: 200})
     await expect(fileRepo.findOne(radarFile.uuid)).resolves.toBeFalsy()
     return await expect(fileRepo.findOne(categorizeFile.uuid)).resolves.toBeTruthy()
   })
 
-  test('deleting using ignoreHigherProducts parameter II', async () => {
+  test('deleting using deleteHigherProducts parameter II', async () => {
     const radarFile = await put_file()
     const categorizeFile = await put_file('categorize')
-    await expect(deleteFile(radarFile.uuid, {ignoreHigherProducts: true})).resolves.toMatchObject({status: 200})
+    await expect(deleteFile(radarFile.uuid, false)).resolves.toMatchObject({status: 200})
     await expect(fileRepo.findOne(radarFile.uuid)).resolves.toBeFalsy()
     return await expect(fileRepo.findOne(categorizeFile.uuid)).resolves.toBeTruthy()
   })
 
   test('deletes model file', async () => {
     const file = await put_file('model')
-    await expect(deleteFile(file.uuid)).resolves.toMatchObject({status: 200})
+    await expect(deleteFile(file.uuid, false)).resolves.toMatchObject({status: 200})
     return await expect(fileRepo.findOne(file.uuid)).resolves.toBeFalsy()
   })
 
   test('refuses deleting model file if higher-level products contain stable product', async () => {
     const file = await put_file('model')
     await put_file('categorize', false)
-    return await expect(deleteFile(file.uuid)).rejects.toMatchObject({ response: {status: 422} })
+    return await expect(deleteFile(file.uuid, true)).rejects.toMatchObject({ response: {status: 422} })
   })
 
   async function put_file(fileType: string = 'radar', volatile: boolean = true) {

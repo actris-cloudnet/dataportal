@@ -144,6 +144,17 @@ export class Middleware {
       .catch(next)
   }
 
+  checkDeleteParams: RequestHandler = async (req, _res, next) => {
+    const query: any = req.query
+    const key = 'deleteHigherProducts'
+    if (!query[key]) next({status: 404, errors: [`Missing mandatory parameter: ${key}`]})
+    const value = query[key].toLowerCase()
+    if (value === 'true') query[key] = true
+    else if (value === 'false') query[key] = false
+    else next({status: 400, errors: [`Invalid value for parameter ${key}: ${value}`]})
+    next()
+  }
+
   private throw404Error = (param: string, req: any) => {
     throw { status: 404, errors: [`One or more of the specified ${param}s were not found`], params: req.query }
   }
