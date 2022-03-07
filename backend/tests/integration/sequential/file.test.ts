@@ -60,7 +60,7 @@ async function deleteFile(uuid: string, deleteHigherProducts: any = null) {
   const url = `${backendPrivateUrl}files/${uuid}`
   let params = {}
   if (!(deleteHigherProducts === null)) params = { deleteHigherProducts: deleteHigherProducts }
-  return await axios.delete(url, { params: params })
+  return await axios.delete(url, { params: params, auth: { username: 'admin', password: 'admin' } })
 }
 
 describe('PUT /files/:s3key', () => {

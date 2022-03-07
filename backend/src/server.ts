@@ -64,7 +64,6 @@ import env from './lib/env'
     next(err)
   }
 
-  // In production, authentication is handled by nginx.
   let authMiddleware = basicAuth({
     users: { 'admin': env.STATS_PASSWORD },
     challenge: true,
@@ -179,7 +178,7 @@ import env from './lib/env'
   app.get('/file-dateforsize', fileRoutes.dateforsize)
   app.put('/quality/:uuid', express.json(), qualityRoutes.putQualityReport)
   app.get('/api/download/stats', authMiddleware, dlRoutes.stats)
-  app.delete('/files/:uuid', middleware.checkDeleteParams, fileRoutes.deleteFile)
+  app.delete('/files/:uuid', authMiddleware, middleware.checkDeleteParams, fileRoutes.deleteFile)
 
   app.use(errorHandler)
 
