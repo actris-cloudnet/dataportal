@@ -108,7 +108,7 @@ export class Middleware {
     }
     if (query.updatedAtTo) query.updatedAtTo = new Date(query.updatedAtTo)
     if (query.updatedAtFrom) query.updatedAtFrom = new Date(query.updatedAtFrom)
-    query.s3path = (query.s3path || '').toLowerCase() == 'true' ? true : false
+    query.s3path = (query.s3path || '').toLowerCase() == 'true'
     next()
   }
 
@@ -142,6 +142,17 @@ export class Middleware {
     ])
       .then(() => next())
       .catch(next)
+  }
+
+  checkDeleteParams: RequestHandler = async (req, _res, next) => {
+    const query: any = req.query
+    const key = 'deleteHigherProducts'
+    if (!query[key]) next({status: 404, errors: [`Missing mandatory parameter: ${key}`]})
+    const value = query[key].toLowerCase()
+    if (value === 'true') query[key] = true
+    else if (value === 'false') query[key] = false
+    else next({status: 400, errors: [`Invalid value for parameter ${key}: ${value}`]})
+    next()
   }
 
   private throw404Error = (param: string, req: any) => {

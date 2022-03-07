@@ -22,5 +22,41 @@
     "humanReadableName": "Classification detection status",
     "product": "classification",
     "order": "1"
+  },
+  {
+    "id": "radar-v",
+    "humanReadableName": "Radar velocity",
+    "product": "radar",
+    "order": "2"
+  },
+  {
+    "id": "radar-ldr",
+    "humanReadableName": "Radar LDR",
+    "product": "radar",
+    "order": "3"
+  },
+  {
+    "id": "categorize-v",
+    "humanReadableName": "Categorize velocity",
+    "product": "categorize",
+    "order": "2"
+  },
+  {
+    "id": "categorize-ldr",
+    "humanReadableName": "Categorize LDR",
+    "product": "categorize",
+    "order": "3"
+  },
+  {
+    "id": "classification-v",
+    "humanReadableName": "Classification velocity",
+    "product": "classification",
+    "order": "2"
+  },
+  {
+    "id": "classification-ldr",
+    "humanReadableName": "Classification LDR",
+    "product": "classification",
+    "order": "3"
   }
 ]

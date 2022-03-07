@@ -1,6 +1,6 @@
 import {Request, RequestHandler, Response} from 'express'
 import {Collection} from '../entity/Collection'
-import {Connection, EntityManager, Repository, SelectQueryBuilder} from 'typeorm'
+import {Connection, EntityManager, Repository, SelectQueryBuilder, In} from 'typeorm'
 import {isFile, RegularFile} from '../entity/File'
 import {
   checkFileExists, convertToReducedResponse,
@@ -16,6 +16,10 @@ import {Model} from '../entity/Model'
 import {basename} from 'path'
 import {ModelFile} from '../entity/File'
 import {SearchFileResponse} from '../entity/SearchFileResponse'
+import {Visualization} from '../entity/Visualization'
+import {ModelVisualization} from '../entity/ModelVisualization'
+import {Product} from '../entity/Product'
+
 
 export class FileRoutes {
 
@@ -25,6 +29,9 @@ export class FileRoutes {
     this.fileRepo = conn.getRepository<RegularFile>('regular_file')
     this.modelFileRepo = conn.getRepository<ModelFile>('model_file')
     this.searchFileRepo = conn.getRepository<SearchFile>('search_file')
+    this.visualizationRepo = conn.getRepository<Visualization>('visualization')
+    this.modelVisualizationRepo = conn.getRepository<ModelVisualization>('model_visualization')
+    this.productRepo = conn.getRepository<Product>('product')
   }
 
   readonly conn: Connection
@@ -32,6 +39,9 @@ export class FileRoutes {
   readonly fileRepo: Repository<RegularFile>
   readonly modelFileRepo: Repository<ModelFile>
   readonly searchFileRepo: Repository<SearchFile>
+  readonly visualizationRepo: Repository<Visualization>
+  readonly modelVisualizationRepo: Repository<ModelVisualization>
+  readonly productRepo: Repository<Product>
 
   file: RequestHandler = async (req: Request, res: Response, next) => {
 
@@ -187,6 +197,40 @@ export class FileRoutes {
     }
   }
 
+  deleteFile: RequestHandler = async (req: Request, res: Response, next) => {
+    const uuid = req.params.uuid
+    const query: any = req.query
+    const deleteHigherProducts = query.deleteHigherProducts
+    try {
+      const existingFile = await this.findAnyFile((repo) => repo.findOne(uuid, {relations: ['product', 'site']}))
+      if (!existingFile) return next({status: 422, errors: ['No file matches the provided uuid']})
+      if (!existingFile.volatile) return next({status: 422, errors: ['Forbidden to delete a stable file']})
+      let fileRepo: Repository<RegularFile|ModelFile> = this.fileRepo
+      let visuRepo: Repository<Visualization|ModelVisualization> = this.visualizationRepo
+      if (existingFile.product.id == 'model') {
+        fileRepo = this.modelFileRepo
+        visuRepo = this.modelVisualizationRepo
+      }
+      const higherLevelProductNames = await this.getHigherLevelProducts(existingFile.product)
+      let products = await this.fileRepo.find({where: {
+        site: existingFile.site,
+        measurementDate: existingFile.measurementDate,
+        product: In(higherLevelProductNames)
+      }})
+      if (deleteHigherProducts && products.length > 0) {
+        const onlyVolatileProducts = products.every(product => product.volatile)
+        if (!onlyVolatileProducts) return next({status: 422, errors: ['Forbidden to delete due to higher level stable files']})
+        for (const product of products) {
+          await this.deleteFileAndVisualizations(this.fileRepo, this.visualizationRepo, product.uuid)
+        }
+      }
+      await this.deleteFileAndVisualizations(fileRepo, visuRepo, uuid)
+      res.sendStatus(200)
+    } catch (e) {
+      return next({status: 500, errors: e})
+    }
+  }
+
   allfiles: RequestHandler = async (req: Request, res: Response, next) =>
     this.fileRepo.find({ relations: ['site', 'product'] })
       .then(result => res.send(sortByMeasurementDateAsc(result).map(augmentFile(false))))
@@ -302,6 +346,42 @@ export class FileRoutes {
     const isModel = 'model' in req.query
     return dateforsize(isModel ? this.modelFileRepo : this.fileRepo, isModel ? 'model_file' : 'regular_file', req, res, next)
   }
+
+  private async deleteFileAndVisualizations(fileRepo: Repository<RegularFile|ModelFile>,
+    visualizationRepo: Repository<Visualization|ModelVisualization>,
+    uuid: string) {
+    await visualizationRepo.createQueryBuilder()
+      .delete()
+      .where({ sourceFile: uuid })
+      .execute()
+    await fileRepo.createQueryBuilder()
+      .delete()
+      .where({ uuid: uuid })
+      .execute()
+    await this.searchFileRepo.createQueryBuilder()
+      .delete()
+      .where({ uuid: uuid })
+      .execute()
+  }
+
+  private async getHigherLevelProducts(product: Product):Promise<string[]> {
+    // Returns Cloudnet products that are of higher level than the given product.
+    let uniqueLevels = await this.productRepo
+      .createQueryBuilder()
+      .select('DISTINCT level')
+      .orderBy('level')
+      .getRawMany()
+    uniqueLevels = uniqueLevels.map(level => level.level)
+    const index = uniqueLevels.indexOf(product.level)
+    const levels =  uniqueLevels.slice(index + 1)
+    let products = await this.productRepo
+      .createQueryBuilder()
+      .where({level: In(levels)})
+      .select('id')
+      .getRawMany()
+    return products.map(prod => prod.id)
+  }
+
 }
 
 function addCommonFilters<T>(qb: SelectQueryBuilder<T>, query: any) {
