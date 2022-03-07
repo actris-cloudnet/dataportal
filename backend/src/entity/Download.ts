@@ -28,11 +28,11 @@ export class Download {
   createdAt!: Date
 
 
-  constructor(objectType: ObjectType, objectUuid: string, ip: string, country?: string) {
+  constructor(objectType: ObjectType, objectUuid: string, ip: string, country?: string, createdAt = new Date()) {
     this.objectType = objectType
     this.objectUuid = objectUuid
     this.ip = ip
     this.country = country || null
-    this.createdAt = new Date()
+    this.createdAt = createdAt
   }
 }
