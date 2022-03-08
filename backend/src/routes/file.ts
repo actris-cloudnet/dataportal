@@ -198,9 +198,10 @@ export class FileRoutes {
   }
 
   deleteFile: RequestHandler = async (req: Request, res: Response, next) => {
-    const uuid = req.params.uuid
     const query: any = req.query
-    const deleteHigherProducts = query.deleteHigherProducts
+    const dryRun = query.dryRun
+    const uuid = req.params.uuid
+    const filenames: string[] = []
     try {
       const existingFile = await this.findAnyFile((repo) => repo.findOne(uuid, {relations: ['product', 'site']}))
       if (!existingFile) return next({status: 422, errors: ['No file matches the provided uuid']})
@@ -217,15 +218,15 @@ export class FileRoutes {
         measurementDate: existingFile.measurementDate,
         product: In(higherLevelProductNames)
       }})
-      if (deleteHigherProducts && products.length > 0) {
+      if (query.deleteHigherProducts && products.length > 0) {
         const onlyVolatileProducts = products.every(product => product.volatile)
         if (!onlyVolatileProducts) return next({status: 422, errors: ['Forbidden to delete due to higher level stable files']})
         for (const product of products) {
-          await this.deleteFileAndVisualizations(this.fileRepo, this.visualizationRepo, product.uuid)
+          filenames.push(...await this.deleteFileAndVisualizations(this.fileRepo, this.visualizationRepo, product.uuid, dryRun))
         }
       }
-      await this.deleteFileAndVisualizations(fileRepo, visuRepo, uuid)
-      res.sendStatus(200)
+      filenames.push(...await this.deleteFileAndVisualizations(fileRepo, visuRepo, uuid, dryRun))
+      res.send(filenames)
     } catch (e) {
       return next({status: 500, errors: e})
     }
@@ -348,20 +349,31 @@ export class FileRoutes {
   }
 
   private async deleteFileAndVisualizations(fileRepo: Repository<RegularFile|ModelFile>,
-    visualizationRepo: Repository<Visualization|ModelVisualization>,
-    uuid: string) {
-    await visualizationRepo.createQueryBuilder()
-      .delete()
+    visualizationRepo: Repository<Visualization|ModelVisualization>, uuid: string, dryRun: boolean) {
+    const filenames: string[] = []
+    const file = await fileRepo.createQueryBuilder()
+      .where({ uuid: uuid })
+      .getOneOrFail()
+    filenames.push(file.s3key)
+    const images = await visualizationRepo.createQueryBuilder()
       .where({ sourceFile: uuid })
-      .execute()
-    await fileRepo.createQueryBuilder()
-      .delete()
-      .where({ uuid: uuid })
-      .execute()
-    await this.searchFileRepo.createQueryBuilder()
-      .delete()
-      .where({ uuid: uuid })
-      .execute()
+      .getMany()
+    for (const image of images) filenames.push(image.s3key)
+    if (!dryRun) {
+      await visualizationRepo.createQueryBuilder()
+        .delete()
+        .where({sourceFile: uuid})
+        .execute()
+      await fileRepo.createQueryBuilder()
+        .delete()
+        .where({uuid: uuid})
+        .execute()
+      await this.searchFileRepo.createQueryBuilder()
+        .delete()
+        .where({uuid: uuid})
+        .execute()
+    }
+    return filenames
   }
 
   private async getHigherLevelProducts(product: Product):Promise<string[]> {
