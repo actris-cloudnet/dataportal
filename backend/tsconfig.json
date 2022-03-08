@@ -1,7 +1,7 @@
 {
    "compilerOptions": {
       "lib": [
-        "es2018.promise",
+	"es2018.promise",
         "es5",
         "es6",
         "es2017"
@@ -13,8 +13,7 @@
       "emitDecoratorMetadata": true,
       "experimentalDecorators": true,
       "sourceMap": true,
-      "strict": true,
-      "types": ["jest", "node"]
+      "strict": true
    },
-   "include": ["src/**/*.ts", "tests/**/*.ts"]
+   "include": ["src/**/*"]
 }
