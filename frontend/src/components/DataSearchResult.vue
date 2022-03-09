@@ -101,6 +101,7 @@ section#fileTable
     width: 100%
 
 
+// NOTE: Keep the breakpoint in sync with JavaScript below.
 @media screen and (max-width: 1200px)
   .column2
     display: none
@@ -327,14 +328,18 @@ export default class DataSearchResult extends Vue {
   }
 
   clickRow(record: File) {
-    if (window.innerWidth < 1010) this.$router.push(`/file/${record.uuid}`)
-    axios.get(`${this.apiUrl}files/${record.uuid}`).then(({data}) => {
-      this.pendingPreviewResponse = data
-      if (!this.previewResponse) {
-        this.previewResponse = this.pendingPreviewResponse
-      }
-    })
-    this.loadPreview(record)
+    // NOTE: Keep the breakpoint in sync with SASS above.
+    if (window.innerWidth <= 1200) {
+      this.$router.push(`/file/${record.uuid}`)
+    } else {
+      axios.get(`${this.apiUrl}files/${record.uuid}`).then(({data}) => {
+        this.pendingPreviewResponse = data
+        if (!this.previewResponse) {
+          this.previewResponse = this.pendingPreviewResponse
+        }
+      })
+      this.loadPreview(record)
+    }
   }
 
   loadPreview(record: File) {
