@@ -178,7 +178,7 @@ import env from './lib/env'
   app.get('/file-dateforsize', fileRoutes.dateforsize)
   app.put('/quality/:uuid', express.json(), qualityRoutes.putQualityReport)
   app.get('/api/download/stats', authMiddleware, dlRoutes.stats)
-  app.delete('/files/:uuid', authMiddleware, middleware.checkDeleteParams, fileRoutes.deleteFile)
+  app.delete('/api/files/:uuid', authMiddleware, middleware.checkDeleteParams, fileRoutes.deleteFile)
 
   app.use(errorHandler)
 

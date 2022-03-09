@@ -57,7 +57,7 @@ async function putFile(json: any) {
 }
 
 async function deleteFile(uuid: string, deleteHigherProducts: any = null, dryRun: any = null) {
-  const url = `${backendPrivateUrl}files/${uuid}`
+  const url = `${backendPrivateUrl}api/files/${uuid}`
   let params: any = {}
   if (!(deleteHigherProducts === null)) params['deleteHigherProducts'] = deleteHigherProducts
   if (!(dryRun === null)) params['dryRun'] = dryRun
@@ -396,7 +396,7 @@ describe('POST /files/', () => {
 })
 
 
-describe('DELETE /files/', () => {
+describe('DELETE /api/files/', () => {
 
   const privUrl = `${backendPrivateUrl}visualizations/`
 
