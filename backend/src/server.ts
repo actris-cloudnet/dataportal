@@ -19,6 +19,7 @@ import {CalibrationRoutes} from './routes/calibration'
 import {QualityReportRoutes} from './routes/qualityreport'
 import {SiteContactRoutes} from './routes/siteContact'
 import {UserAccountRoutes} from './routes/userAccount'
+import {PublicationRoutes} from './routes/publication'
 import env from './lib/env'
 import {Authenticator, Authorizator} from './lib/auth'
 import { PermissionType, permissionTypeFromString } from './entity/Permission'
@@ -46,6 +47,7 @@ import { PermissionType, permissionTypeFromString } from './entity/Permission'
   const dlRoutes = new DownloadRoutes(conn, fileRoutes, collRoutes, uploadRoutes, ipLookup)
   const calibRoutes = new CalibrationRoutes(conn)
   const qualityRoutes = new QualityReportRoutes(conn, fileRoutes)
+  const publicationRoutes = new PublicationRoutes(conn)
 
   const siteContactRoutes = new SiteContactRoutes(conn)
   const userAccountRoutes = new UserAccountRoutes(conn)
@@ -226,6 +228,8 @@ import { PermissionType, permissionTypeFromString } from './entity/Permission'
   app.put('/quality/:uuid', express.json(), qualityRoutes.putQualityReport)
   app.get('/api/download/stats', authMiddleware, dlRoutes.stats)
   app.delete('/api/files/:uuid', authMiddleware, middleware.checkDeleteParams, fileRoutes.deleteFile)
+  app.post('/api/publications/', authMiddleware, publicationRoutes.postPublication)
+  app.get('/api/publications/', publicationRoutes.getPublications)
 
   // site contacts private
   app.post('/site-contacts',express.json(),siteContactRoutes.postSiteContact)
