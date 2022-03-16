@@ -2,6 +2,7 @@ import {Request, RequestHandler, Response} from 'express'
 import {Connection, Repository} from 'typeorm'
 import {Publication} from '../entity/Publication'
 import axios from 'axios'
+import env from '../lib/env'
 
 export class PublicationRoutes {
 
@@ -20,10 +21,10 @@ export class PublicationRoutes {
         headers: { accept: 'application/json' },
         params: { 'uri': uri }
       }
-      const url = 'http://citation-service'
-      pub.year = (await axios.get(url, config)).data.year
+      const citation_service_url = env.CITATION_SERVICE_URL
+      pub.year = (await axios.get(citation_service_url, config)).data.year
       config.headers.accept = 'text/html'
-      pub.citation = (await axios.get(url, config)).data
+      pub.citation = (await axios.get(citation_service_url, config)).data
       await this.publicationRepo.save(pub)
     } catch (err) {
       next({ status: 500, errors: err })

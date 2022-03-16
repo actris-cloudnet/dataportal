@@ -3,7 +3,7 @@ import {URL} from 'url'
 const envVars = ['NODE_ENV', 'DP_PID_SERVICE_URL', 'DP_SS_URL',
   'DP_PID_SERVICE_TIMEOUT_MS', 'DP_SS_USER', 'DP_SS_PASSWORD',
   'DP_PID_SERVICE_TIMEOUT_MS', 'DP_BACKEND_URL', 'GEOLITE2_COUNTRY_PATH',
-  'STATS_PASSWORD']
+  'STATS_PASSWORD', 'CITATION_SERVICE_URL']
 
 const missingVars = envVars.filter(env => !process.env[env])
 if (missingVars.length > 0) throw new Error(`FATAL: Following environment variables must be set: ${missingVars.join(', ')}`)
@@ -26,6 +26,7 @@ interface Env {
   DP_BACKEND_URL: string
   GEOLITE2_COUNTRY_PATH: string
   STATS_PASSWORD: string
+  CITATION_SERVICE_URL: string
 }
 
 export default envs as Env
