@@ -51,6 +51,15 @@ const routes = [
     props: true
   },
   {
+    path: '/sites',
+    name: 'Sites',
+    meta: {
+      title: 'Cloudnet Sites'
+    },
+    component: () => import('../views/Sites.vue'),
+    props: true,
+  },
+  {
     path: '/site/:siteid',
     name: 'Site',
     meta: {

@@ -71,6 +71,11 @@ This node is physically hosted by FMI in Helsinki, Finland. You can find our con
         </a>
       </div>
     </main>
+    <div class="publications">
+      <router-link to="/sites">
+        Cloudnet sites &#8594;
+      </router-link>
+    </div>
   </main>
 </template>
 
