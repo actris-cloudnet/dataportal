@@ -1,0 +1,14 @@
+[
+  {
+    "pid": "https://doi.org/10.21105/joss.02123",
+    "citation": "Tukiainen et al. (2020). CloudnetPy: A Python package for processing cloud remote sensing data. <i>JOSS</i>, <i>5</i>(53), 2123. <a href=\"https://doi.org/10.21105/joss.02123\">https://doi.org/10.21105/joss.02123</a>",
+    "year": 2020,
+    "updatedAt": "2020-09-28T12:45:21.916Z"
+  },
+  {
+    "pid": "https://doi.org/10.1175/BAMS-88-6-883",
+    "citation": "Illingworth et al. (2007). Cloudnet. <i>Bulletin of the American Meteorological Society</i>, <i>88</i>(6), 883-898. <a href=\"https://doi.org/10.1175/BAMS-88-6-883\">https://doi.org/10.1175/BAMS-88-6-883</a>",
+    "year": 2007,
+    "updatedAt": "2020-09-28T12:45:21.916Z"
+  }
+]
