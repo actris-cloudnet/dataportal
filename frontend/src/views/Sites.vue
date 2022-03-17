@@ -47,10 +47,10 @@ h1
         @row-clicked="clickRow"
       >
         <template #cell(latitude)="data">
-          {{ data.item.latitude }}&deg;&nbsp;N
+          {{ formatLatitude(data.item.latitude) }}
         </template>
         <template #cell(longitude)="data">
-          {{ data.item.longitude }}&deg;&nbsp;E
+          {{ formatLongitude(data.item.longitude) }}
         </template>
         <template #cell(altitude)="data">
           {{ data.item.altitude }}&nbsp;m
@@ -69,6 +69,7 @@ import {Component, Vue} from 'vue-property-decorator'
 import {BTable} from 'bootstrap-vue/esm/components/table'
 import {Site, SiteType} from '../../../backend/src/entity/Site'
 import axios from 'axios'
+import {formatLatitude, formatLongitude} from '../lib'
 
 @Component({
   components: {BTable}
@@ -76,6 +77,8 @@ import axios from 'axios'
 export default class SitesView extends Vue {
   apiUrl = process.env.VUE_APP_BACKENDURL
   items: { title: string; sites: Site[] }[] = []
+  formatLatitude = formatLatitude
+  formatLongitude = formatLongitude
 
   data() {
     return {

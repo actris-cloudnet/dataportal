@@ -49,7 +49,7 @@
             <dt>Location</dt>
             <dd>{{ response.humanReadableName }}, {{ response.country }}</dd>
             <dt>Coordinates</dt>
-            <dd>{{ response.latitude }}&deg; N, {{ response.longitude }}&deg; E</dd>
+            <dd>{{ formatCoordinates(response.latitude, response.longitude) }}</dd>
             <dt>Site altitude</dt>
             <dd>{{ response.altitude }} m</dd>
             <dt>Last measurement</dt>
@@ -180,7 +180,7 @@ import Map from '../components/Map.vue'
 import ProductAvailabilityVisualization from '../components/DataStatusVisualization.vue'
 import ProductAvailabilityVisualizationSingle from '../components/DataStatusVisualizationSingleProduct.vue'
 import {ReducedMetadataResponse} from '../../../backend/src/entity/ReducedMetadataResponse'
-import {getProductIcon} from '../lib'
+import {getProductIcon, formatCoordinates} from '../lib'
 import {DevMode} from '../lib/DevMode'
 import {Product} from '../../../backend/src/entity/Product'
 import {DataStatusParser} from '../lib/DataStatusParser'
@@ -205,6 +205,7 @@ export default class SiteView extends Vue {
   mapKey = 0
   busy = false
   getIconUrl = getProductIcon
+  formatCoordinates = formatCoordinates
   devMode = new DevMode()
   dataStatusParser: DataStatusParser | null = null
   singleProductView = false
