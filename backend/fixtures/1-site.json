@@ -9,6 +9,8 @@
     "gaw": "Unknown",
     "dvasId": "INO",
     "country": "Romania",
+    "iso_3166_1_alpha_2": "RO",
+    "iso_3166_2": null,
     "citations": [
       { "id": "bucharest_test" }
     ]
@@ -22,6 +24,8 @@
     "type": ["cloudnet"],
     "gaw": "MHD",
     "country": "Ireland",
+    "iso_3166_1_alpha_2": "IE",
+    "iso_3166_2": null,
     "citations": [
       { "id": "hyytiala_test" }
     ]
@@ -35,6 +39,8 @@
     "type": ["cloudnet"],
     "gaw": "SMR",
     "country": "Finland",
+    "iso_3166_1_alpha_2": "FI",
+    "iso_3166_2": null,
     "citations": [
       { "id": "hyytiala_test" }
     ]
@@ -47,7 +53,9 @@
     "altitude": 680,
     "type": ["cloudnet", "test"],
     "gaw": "UGR",
-    "country": "Spain"
+    "country": "Spain",
+    "iso_3166_1_alpha_2": "ES",
+    "iso_3166_2": null
   },
   {
     "id": "norunda",
@@ -57,7 +65,9 @@
     "type": ["hidden"],
     "gaw": "Unknown",
     "altitude": 46,
-    "country": "Sweden"
+    "country": "Sweden",
+    "iso_3166_1_alpha_2": "SE",
+    "iso_3166_2": null
   },
   {
     "id": "potenza",
@@ -67,7 +77,9 @@
     "type": ["hidden"],
     "gaw": "Unknown",
     "altitude": 760,
-    "country": "Italy"
+    "country": "Italy",
+    "iso_3166_1_alpha_2": "IT",
+    "iso_3166_2": null
   },
   {
     "id": "newyork",
@@ -77,7 +89,9 @@
     "type": ["campaign"],
     "gaw": "Unknown",
     "altitude": 760,
-    "country": "USA"
+    "country": "USA",
+    "iso_3166_1_alpha_2": "US",
+    "iso_3166_2": null
   },
   {
     "id": "shanghai",
@@ -87,6 +101,8 @@
     "type": ["arm"],
     "gaw": "Unknown",
     "altitude": 760,
-    "country": "China"
+    "country": "China",
+    "iso_3166_1_alpha_2": "CN",
+    "iso_3166_2": null
   }
 ]
