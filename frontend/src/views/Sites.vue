@@ -88,7 +88,7 @@ export default class SitesView extends Vue {
 
   async created() {
     const response = await axios.get(`${this.apiUrl}sites`)
-    const sites: Site[] = response.data
+    const sites = (response.data as Site[]).filter(site => !site.type.includes('hidden' as SiteType))
     this.items = [
       {
         title: 'Cloudnet sites',
