@@ -78,6 +78,9 @@ export abstract class File {
     @Column()
     updatedAt!: Date
 
+    @Column({default: ''})
+    dataProcessingVersion!: string
+
     get filename() {
       return basename(this.s3key)
     }
@@ -132,4 +135,3 @@ export function isFile(obj: any) {
       && 'version' in obj
       && (obj.volatile === true || (obj.volatile === false && 'pid' in obj))
 }
-
