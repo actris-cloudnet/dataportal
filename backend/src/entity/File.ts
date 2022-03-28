@@ -79,7 +79,7 @@ export abstract class File {
     updatedAt!: Date
 
     @Column({default: ''})
-    dataProcessingVersion!: string
+    processingVersion!: string
 
     get filename() {
       return basename(this.s3key)
