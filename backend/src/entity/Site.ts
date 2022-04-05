@@ -3,6 +3,7 @@ import {File} from './File'
 import {Upload} from './Upload'
 import {Calibration} from './Calibration'
 import {RegularCitation} from './Citation'
+import {SiteContact} from './SiteContact'
 
 export enum SiteType {
     CLOUDNET = 'cloudnet',
@@ -61,6 +62,9 @@ export class Site {
     @ManyToMany(_ => RegularCitation)
     @JoinTable()
     citations!: RegularCitation[]
+
+    @OneToMany( _ => SiteContact, siteContact => siteContact.site )
+    contacts!: SiteContact[]
 
     get isTestSite() {
       return this.type.includes(SiteType.TEST)
