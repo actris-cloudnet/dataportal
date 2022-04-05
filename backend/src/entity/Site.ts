@@ -46,7 +46,7 @@ export class Site {
     @Column({type: 'char', length: 2, nullable: true})
     iso_3166_1_alpha_2!: string|null
 
-    @Column({type: 'char', length: 6, nullable: true})
+    @Column({type: 'varchar', length: 6, nullable: true})
     iso_3166_2!: string|null
 
     @OneToMany(_ => File, file => file.site)
