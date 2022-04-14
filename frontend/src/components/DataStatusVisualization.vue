@@ -127,16 +127,15 @@
       <div class="legendexpl"><div class="only-model-data legendcolor"></div> Only model</div>
       <div class="legendexpl"><div class="no-data legendcolor"></div> No data</div>
       <div class="legendexpl"><div class="error-data legendcolor"></div> Unknown</div><br>
-      <div class="legendexpl"><span class="legacy-label">L</span> Legacy file</div>
+      <div class="legendexpl"><span class="legacy-label">L</span> Legacy</div>
     </div>
     <div class="dav-legend" v-if="legend && qualityScores">
-      <div class="legendexpl"><div class="all-data legendcolor"></div> <span class="testspass">✓</span> All tests pass</div>
-      <div class="legendexpl"><div class="missing-data legendcolor"></div>
-        &nbsp;<span class="testsfail">✘</span> Some tests fail</div>
-      <div class="legendexpl"><div class="only-model-data legendcolor"></div>
-        &nbsp;<span class="noquality">?</span> Quality report not available</div>
+      <div class="legendexpl"><div class="all-data legendcolor"></div> All tests pass</div>
+      <div class="legendexpl"><div class="missing-data legendcolor"></div> Some tests fail or missing</div>
+      <div class="legendexpl"><div class="only-model-data legendcolor"></div> All tests missing</div>
       <div class="legendexpl"><div class="no-data legendcolor"></div> No data</div><br>
-      <div class="legendexpl"><span class="legacy-label">L</span> Legacy file</div>
+      <div class="legendexpl"><span class="legacy-label testsfail">✘</span> Fail</div>
+      <div class="legendexpl"><span class="legacy-label">?</span> Missing</div>
     </div>
     <div class="dataviz-tooltip" v-if="tooltips && hover" v-bind:style="tooltipStyle">
       <header>
