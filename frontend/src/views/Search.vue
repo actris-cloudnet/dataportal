@@ -294,6 +294,7 @@
         class="nobottommargin"
         :class="{widemapmarginleft: showAllSites}"
         :icons="true"
+        :multiple="true"
         :getIcon="getMarkerIcon"
         :devMode="devMode">
     </custom-multiselect>
@@ -392,6 +393,7 @@
       :setSelectedIds="setSelectedProductIds"
       :options="allProducts"
       id="productSelect"
+      :multiple="true"
       :icons="true"
       :getIcon="getProductIcon"
       :devMode="devMode">
@@ -406,6 +408,7 @@
       :selectedIds="selectedVariableIds"
       :setSelectedIds="setSelectedVariableIds"
       :options="selectableVariables"
+      :multiple="true"
       id="variableSelect">
     </custom-multiselect>
 

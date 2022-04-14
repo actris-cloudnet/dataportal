@@ -19,6 +19,18 @@
 #sitemap .details
   padding: 0
 
+#siteselect
+  padding-top: 25px
+  width: 250px
+
+#reset
+  cursor: pointer
+  text-decoration: underline
+  color: #bcd2e2
+  margin-bottom: $filter-margin
+  margin-top: 20px
+  display: block
+
 </style>
 
 
@@ -77,23 +89,47 @@
         </section>
       </section>
       <div class="forcewrap"></div>
+
       <section id="product_availability" class="graph">
-        <header>Product availability</header>
-        <section class="details">
+        <header>Product availability {{selectedProduct}}</header>
+
+        <section class="details" v-if="singleProductView">
+          <ProductAvailabilityVisualizationSingle
+                                                  :site="siteid"
+                                                  :legend="true"
+                                                  :tooltips="true"
+                                                  :product="selectedProductId"
+                                                  :dataStatusParser="dataStatusParser"
+          ></ProductAvailabilityVisualizationSingle>
+        </section>
+        <section class="details" v-else>
           <ProductAvailabilityVisualization v-if="dataStatusParser"
-              :site="siteid"
-              :legend="true"
-              :tooltips="true"
-              :dataStatusParser="dataStatusParser"
+                                            :site="siteid"
+                                            :legend="true"
+                                            :tooltips="true"
+                                            :dataStatusParser="dataStatusParser"
           ></ProductAvailabilityVisualization>
           <div v-else class="loadingoverlay">
             <div class="lds-dual-ring"></div>
           </div>
         </section>
       </section>
+
       <section id="product_quality" class="graph">
-        <header>Product quality</header>
-        <section class="details">
+        <header>Product quality {{selectedProduct}}</header>
+
+        <section class="details" v-if="singleProductView">
+          <ProductAvailabilityVisualizationSingle
+                                            :site="siteid"
+                                            :legend="true"
+                                            :tooltips="true"
+                                            :product="selectedProductId"
+                                            :qualityScores="true"
+                                            :dataStatusParser="dataStatusParser"
+          ></ProductAvailabilityVisualizationSingle>
+        </section>
+
+        <section class="details" v-else>
           <ProductAvailabilityVisualization v-if="dataStatusParser"
                                             :site="siteid"
                                             :legend="true"
@@ -105,9 +141,32 @@
             <div class="lds-dual-ring"></div>
           </div>
         </section>
+
       </section>
+
     </main>
+
+    <div v-if="dataStatusParser">
+    <div id="siteselect">
+    <custom-multiselect v-if="dataStatusParser"
+                        ref="productFilter"
+      :multiple="false"
+      label="Product filter"
+      :setSelectedIds="setSelectedProductIds"
+      :options="allProducts"
+      id="singleProductSelect"
+      :icons="true"
+      :getIcon="getIconUrl"
+    >
+    </custom-multiselect>
+    </div>
+      <a @click="reset" id="reset">Reset filter</a>
+    </div>
+
+
   </main>
+
+
   <app-error v-else-if="error" :response="response"></app-error>
 </template>
 
@@ -119,14 +178,19 @@ import {Site} from '../../../backend/src/entity/Site'
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 import Map from '../components/Map.vue'
 import ProductAvailabilityVisualization from '../components/DataStatusVisualization.vue'
+import ProductAvailabilityVisualizationSingle from '../components/DataStatusVisualizationSingleProduct.vue'
 import {ReducedMetadataResponse} from '../../../backend/src/entity/ReducedMetadataResponse'
 import {getProductIcon} from '../lib'
 import {DevMode} from '../lib/DevMode'
 import {Product} from '../../../backend/src/entity/Product'
 import {DataStatusParser} from '../lib/DataStatusParser'
+import CustomMultiselect from '../components/Multiselect.vue'
+import {Selection} from '../views/Search.vue'
+
 
 @Component({
-  components: {Map, ProductAvailabilityVisualization}
+  name: 'app-site',
+  components: { Map, ProductAvailabilityVisualization, CustomMultiselect, ProductAvailabilityVisualizationSingle}
 })
 export default class SiteView extends Vue {
   @Prop() siteid!: string
@@ -137,15 +201,21 @@ export default class SiteView extends Vue {
   instruments: ReducedMetadataResponse[] | null = null
   instrumentsFromLastDays = 30
   allProducts: Product[] | null = null
+  selectedProductId: string[] = []
   mapKey = 0
   busy = false
   getIconUrl = getProductIcon
   devMode = new DevMode()
   dataStatusParser: DataStatusParser | null = null
-
-
+  singleProductView = false
   payload = {developer: this.devMode.activated}
+
   created() {
+    axios
+      .get(`${this.apiUrl}products/`)
+      .then(({data}) => {
+        this.allProducts = data.filter((product: Product) => product.level != '3')
+      })
     axios
       .get(`${this.apiUrl}sites/${this.siteid}`, {params: this.payload})
       .then(({data}) => (this.response = data))
@@ -168,15 +238,34 @@ export default class SiteView extends Vue {
       .catch()
   }
 
-  async initDataStatusParser() {
-    const properties = ['measurementDate', 'productId', 'legacy', 'qualityScore']
+  setSelectedProductIds(product: Selection) {
+    this.singleProductView = true
+    this.selectedProductId = [product.id]
+  }
+
+  get selectedProduct() {
+    if (this.singleProductView  && this.allProducts) {
+      return `(${this.allProducts.filter(prod => prod.id == this.selectedProductId[0])[0].humanReadableName})` || ''
+    }
+    return ''
+  }
+
+  reset() {
+    const filter = this.$refs.productFilter as any
+    filter.setSelect([])
+    this.singleProductView = false
+    this.selectedProductId = []
+  }
+
+  async initDataStatusParser(product: string | null = null) {
+    const properties = ['measurementDate', 'productId', 'legacy', 'uuid', 'qualityScore']
     const payload = {
       site: this.siteid,
       showLegacy: true,
       developer: this.devMode.activated,
-      properties
+      product: product,
+      properties,
     }
-
     this.dataStatusParser = await (new DataStatusParser(payload).engage())
   }
 }

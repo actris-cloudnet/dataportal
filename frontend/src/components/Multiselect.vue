@@ -55,7 +55,7 @@
     label="humanReadableName"
     :options="options"
     :show-labels="false"
-    :multiple="true"
+    :multiple="multiple"
     :hideSelected="false"
     @search-change="isIddqd"
   >
@@ -97,13 +97,19 @@ export default class CustomMultiselect extends Vue {
   @Prop() devMode!: DevMode
   @Prop() setSelectedIds!: Function | null
   @Prop() selectedIds!: string[]
+  @Prop() multiple!: boolean
 
   selection: Selection[] = []
 
-  set value(selection) {
+  set value(selection) {   // Can be array or not
     this.selection = selection
     if (this.setSelectedIds) {
-      this.setSelectedIds(this.selection.map(product => product.id))
+      if (!this.multiple) {  // Single product selector for the site landing page
+        this.setSelectedIds(selection)
+      }
+      else {
+        this.setSelectedIds(this.selection.map(product => product.id))
+      }
     }
     this.$emit('input', this.getSelectionIds())
   }
@@ -120,6 +126,10 @@ export default class CustomMultiselect extends Vue {
   getSelectionIds() {
     // Return all options by default
     return this.selection.length > 0 ? this.selection.map(d => d.id) : this.options.map(d => d.id)
+  }
+
+  setSelect(value: any) {
+    this.value = value
   }
 
   isIddqd(target: string, _: string) {

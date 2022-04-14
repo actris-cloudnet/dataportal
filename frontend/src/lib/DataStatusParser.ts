@@ -6,12 +6,14 @@ export interface ReducedSearchResponse {
   measurementDate: string;
   productId: string;
   legacy: boolean;
+  uuid: string;
   qualityScore?: number;
 }
 
 export interface ProductInfo {
   id: string;
   legacy: boolean;
+  uuid: string;
   qualityScore?: number | null;
 }
 
@@ -69,6 +71,7 @@ export class DataStatusParser {
         const productInfo = {
           id: cur.productId,
           legacy: cur.legacy,
+          uuid: cur.uuid,
           qualityScore: 'qualityScore' in cur ? cur.qualityScore : undefined
         }
         const yearIndex = acc.findIndex(obj => obj.year == year)
@@ -106,11 +109,12 @@ export class DataStatusParser {
       }
     }
     if (productInfo) {
-      const {id, legacy, qualityScore} = productInfo
+      const {id, legacy, qualityScore, uuid} = productInfo
       existingObj[this.lvlTranslate[id]].push({
         id,
         legacy,
-        qualityScore
+        qualityScore,
+        uuid,
       })
     }
     return existingObj

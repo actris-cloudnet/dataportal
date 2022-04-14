@@ -2,18 +2,7 @@
 @import "../sass/variables.sass"
 @import "../sass/global.sass"
 @import "../sass/spinner.sass"
-
-$legacy-color: #9fb4c4
-
-.dataviz-yearblock
-  display: inline-block
-  height: 100%
-  width: calc(100% - 3em)
-
-.dataviz-year
-  display: inline-block
-  width: 3em
-  font-family: monospace
+@import "../sass/availability.sass"
 
 .dataviz-date
   width: calc(1%/3.66)
@@ -23,57 +12,17 @@ $legacy-color: #9fb4c4
   border-top: 1px solid gray
   border-bottom: 1px solid gray
 
-.dataviz-date:last-child
-  border-right: 1px solid gray
-
-.dataviz-date:first-child
-  border-left: 1px solid gray
-
-.dataviz-skippedyears
-  text-align: center
-  color: lightgrey
-  font-style: italic
-
-
-.all-data
-  background: #5ac413
-
 .all-raw
   background: #a0df7b
 
-.missing-data
-  background: #f7e91b
-
-.only-legacy-data
-  background: $legacy-color
-
 .only-model-data
   background: #D3D3D3
-
-.no-data
-  background: white
 
 .error-data
   background: #bd1919
 
 .legacy-label
   color: grey
-
-.dav-legend
-  margin-top: 1em
-
-.legendcolor
-  width: 1em
-  height: 1em
-  border: solid 1px black
-  display: inline-block
-  position: relative
-  bottom: -2px
-
-.legendexpl
-  font-size: 0.8em
-  display: inline-block
-  margin-right: 1em
 
 .dataviz-tooltip
   position: fixed
@@ -92,7 +41,7 @@ $legacy-color: #9fb4c4
     justify-content: center
     align-items: flex-start
     padding: 0.5em
-    width: 350px
+    width: 370px
 
     ul
       padding-left: 0.5em
@@ -178,16 +127,15 @@ $legacy-color: #9fb4c4
       <div class="legendexpl"><div class="only-model-data legendcolor"></div> Only model</div>
       <div class="legendexpl"><div class="no-data legendcolor"></div> No data</div>
       <div class="legendexpl"><div class="error-data legendcolor"></div> Unknown</div><br>
-      <div class="legendexpl"><span class="legacy-label">L</span> Legacy file</div>
+      <div class="legendexpl"><span class="legacy-label">L</span> Legacy</div>
     </div>
     <div class="dav-legend" v-if="legend && qualityScores">
-      <div class="legendexpl"><div class="all-data legendcolor"></div> <span class="testspass">✓</span> All tests pass</div>
-      <div class="legendexpl"><div class="missing-data legendcolor"></div>
-        &nbsp;<span class="testsfail">✘</span> Some tests fail</div>
-      <div class="legendexpl"><div class="only-model-data legendcolor"></div>
-        &nbsp;<span class="noquality">?</span> Quality report not available</div>
+      <div class="legendexpl"><div class="all-data legendcolor"></div> All tests pass</div>
+      <div class="legendexpl"><div class="missing-data legendcolor"></div> Some tests fail or missing</div>
+      <div class="legendexpl"><div class="only-model-data legendcolor"></div> All tests missing</div>
       <div class="legendexpl"><div class="no-data legendcolor"></div> No data</div><br>
-      <div class="legendexpl"><span class="legacy-label">L</span> Legacy file</div>
+      <div class="legendexpl"><span class="legacy-label testsfail">✘</span> Fail</div>
+      <div class="legendexpl"><span class="legacy-label">?</span> Missing</div>
     </div>
     <div class="dataviz-tooltip" v-if="tooltips && hover" v-bind:style="tooltipStyle">
       <header>
@@ -239,7 +187,7 @@ export default class ProductAvailabilityVisualization extends Vue {
   @Prop() tooltips?: boolean
   @Prop() qualityScores?: boolean
   @Prop() dataStatusParser!: DataStatusParser
-  @Prop({default: 100}) debounceMs!: number
+  @Prop({default: 1000/60}) debounceMs!: number
 
   apiUrl = process.env.VUE_APP_BACKENDURL
   years: ProductYear[] = []

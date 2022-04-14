@@ -1,0 +1,51 @@
+
+$legacy-color: #9fb4c4
+
+.dataviz-yearblock
+  display: inline-block
+  height: 100%
+  width: calc(100% - 3em)
+
+.dataviz-year
+  display: inline-block
+  width: 3em
+  font-family: monospace
+
+.dataviz-date:last-child
+  border-right: 1px solid gray
+
+.dataviz-date:first-child
+  border-left: 1px solid gray
+
+.dataviz-skippedyears
+  text-align: center
+  color: lightgrey
+  font-style: italic
+
+.legendcolor
+  width: 1em
+  height: 1em
+  border: solid 1px black
+  display: inline-block
+  position: relative
+  bottom: -2px
+
+.legendexpl
+  font-size: 0.8em
+  display: inline-block
+  margin-right: 1em
+
+.dav-legend
+  margin-top: 1em
+
+.all-data
+  background: #5ac413
+
+.no-data
+  background: white
+
+.missing-data
+  background: #f7e91b
+
+.only-legacy-data
+  background: $legacy-color
