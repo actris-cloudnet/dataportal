@@ -275,12 +275,17 @@ import axios from 'axios'
 import {Component, Prop, Watch} from 'vue-property-decorator'
 import {File} from '../../../backend/src/entity/File'
 import Vue from 'vue'
-import {combinedFileSize, getProductIcon, humanReadableSize, humanReadableTimestamp} from '../lib'
+import {
+  combinedFileSize,
+  getProductIcon,
+  humanReadableSize,
+  humanReadableTimestamp,
+  sortVisualizations
+} from '../lib'
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 import {BTable} from 'bootstrap-vue/esm/components/table'
 import {BPagination} from 'bootstrap-vue/esm/components/pagination'
 import { debounce } from 'debounce'
-import {Visualization} from '../../../backend/src/entity/Visualization'
 
 Vue.component('b-table', BTable)
 Vue.component('b-pagination', BPagination)
@@ -344,12 +349,12 @@ export default class DataSearchResult extends Vue {
 
   loadPreview(record: File) {
     axios.get(`${this.apiUrl}visualizations/${record.uuid}`).then(({data}) => {
-      const viz = data.visualizations.find((viz: Visualization) => parseInt(viz.productVariable.order) == 0)
-      if (!viz) {
+      if (data.visualizations.length === 0) {
         this.clearPreview()
         this.changePreview()
         return
       }
+      const viz = sortVisualizations(data.visualizations)[0]
       this.previewImgUrl = `${this.apiUrl}download/image/${viz.s3key}`
       this.pendingPreviewTitle = viz.productVariable.humanReadableName
     })
