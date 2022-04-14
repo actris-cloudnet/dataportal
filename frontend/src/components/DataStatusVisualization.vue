@@ -41,7 +41,7 @@
     justify-content: center
     align-items: flex-start
     padding: 0.5em
-    width: 350px
+    width: 370px
 
     ul
       padding-left: 0.5em
