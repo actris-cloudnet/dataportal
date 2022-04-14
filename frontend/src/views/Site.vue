@@ -214,7 +214,7 @@ export default class SiteView extends Vue {
     axios
       .get(`${this.apiUrl}products/`)
       .then(({data}) => {
-        this.allProducts = data.filter((product: { level: string }) => product.level != '3')
+        this.allProducts = data.filter((product: Product) => product.level != '3')
       })
     axios
       .get(`${this.apiUrl}sites/${this.siteid}`, {params: this.payload})
