@@ -18,7 +18,7 @@ export class Person {
   @Column()
   surname?: string;
 
-  @Column({ nullable: true })
+  @Column({ unique: true, nullable: true })
   orcid?: string;
 
   @OneToMany(() => SiteContact, (siteContact) => siteContact.person)
