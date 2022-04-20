@@ -14,10 +14,13 @@ beforeAll(async () => {
   // Remove site contacts
   let req = await axios.get(SITE_CONTACTS_URL)
   const data: ContactData[] = req.data
-  data.forEach(async (contact) => {
-    let id = contact.siteContactId
-    await axios.delete(`${SITE_CONTACTS_URL}/${id}`)
-  })
+  //data.forEach(async (contact) => {
+  //  let id = contact.siteContactId
+  //  await axios.delete(`${SITE_CONTACTS_URL}/${id}`)
+  //})
+  for (const contact of data) {
+    await axios.delete(`${SITE_CONTACTS_URL}/${contact.siteContactId}`)
+  }
   // Remove persons
   await axios.delete(PERSONS_URL)
 })
