@@ -46,16 +46,16 @@ export class SiteContactRoutes {
       Array.from(datakeys).filter((key) => mandatory_keys.has(key))
     )
     if (intersection.size != mandatory_keys.size) {
-      return next({ status: 404, error: 'missing fields' })
+      return next({ status: 400, error: 'missing fields' })
     }
     const role: RoleType | undefined = this.roleFromString(postData.role!)
     if (role === undefined) {
-      return next({ status: 404, error: 'unexpected role' })
+      return next({ status: 400, error: 'unexpected role' })
     }
     let existingSite: Site | undefined = await this.postExistingSite(postData)
     let site: Site
     if (existingSite === undefined) {
-      return next({ status: 404, error: 'site does not exist' })
+      return next({ status: 400, error: 'site does not exist' })
     } else {
       site = existingSite
     }
@@ -72,7 +72,7 @@ export class SiteContactRoutes {
       )
       if (existingSiteContact !== undefined) {
         return next({
-          status: 404,
+          status: 400,
           error: 'person already has this role for the site',
         })
       } else {
@@ -85,7 +85,7 @@ export class SiteContactRoutes {
         try {
           await this.siteContactRepository.save(siteContact)
         } catch (err) {
-          return next({ status: 404, error: err })
+          return next({ status: 400, error: err })
         }
         res.sendStatus(200)
         return
@@ -107,17 +107,17 @@ export class SiteContactRoutes {
       try {
         await this.personRepository.save(person)
       } catch (err) {
-        return next({ status: 404, error: err })
+        return next({ status: 400, error: err })
       }
       try {
         await this.siteContactRepository.save(siteContact)
       } catch (err) {
-        return next({ status: 404, error: err })
+        return next({ status: 400, error: err })
       }
       res.sendStatus(200)
       return
     }
-    return next({ status: 404, error: 'assert: unexpected' })
+    return next({ status: 400, error: 'assert: unexpected' })
   };
 
   private async postExistingPerson(
@@ -209,7 +209,7 @@ export class SiteContactRoutes {
     let siteContact: SiteContact
     if (requestedSiteContact === undefined) {
       return next({
-        status: 404,
+        status: 400,
         error: 'requested site contact does not exist',
       })
     }
@@ -225,7 +225,7 @@ export class SiteContactRoutes {
     )
     if (keydiff.size > 0) {
       return next({
-        status: 404,
+        status: 400,
         error: 'you can only change siteId, role or email from this endpoint',
       })
     }
@@ -236,7 +236,7 @@ export class SiteContactRoutes {
         .where('site.id = :id', { id: data.siteId })
         .getOne()
       if (updatedSite === undefined) {
-        return next({ status: 404, error: 'site does not exist' })
+        return next({ status: 400, error: 'site does not exist' })
       }
       siteContact.site = updatedSite!
     }
@@ -245,7 +245,7 @@ export class SiteContactRoutes {
       let role: RoleType | undefined = this.roleFromString(data.role!)
       if (role === undefined) {
         return next({
-          status: 404,
+          status: 400,
           error: 'unexpected role',
         })
       }
@@ -259,7 +259,7 @@ export class SiteContactRoutes {
     try {
       await this.siteContactRepository.save(siteContact)
     } catch (err) {
-      return next({ status: 404, error: err })
+      return next({ status: 400, error: err })
     }
 
     res.sendStatus(200)
@@ -281,7 +281,7 @@ export class SiteContactRoutes {
         .where('id = :id', { id: siteContactId })
         .execute()
     } catch (err) {
-      return next({ status: 404, error: err })
+      return next({ status: 400, error: err })
     }
     res.sendStatus(200)
     return
@@ -316,7 +316,7 @@ export class SiteContactRoutes {
       .getOne()
     let person: Person
     if (requestedPerson === undefined) {
-      return next({ status: 404, error: 'requested person does not exist' })
+      return next({ status: 400, error: 'requested person does not exist' })
     }
     person = requestedPerson
 
@@ -329,7 +329,7 @@ export class SiteContactRoutes {
     try {
       await this.personRepository.save(person)
     } catch (err) {
-      return next({ status: 404, error: err })
+      return next({ status: 400, error: err })
     }
     res.sendStatus(200)
     return
@@ -346,10 +346,10 @@ export class SiteContactRoutes {
       .where('person.id = :id', {id: personId})
       .getRawOne()
     if (requestedPersonRaw === undefined){
-      return next({status: 404, error: 'requested person does not exist'})
+      return next({status: 400, error: 'requested person does not exist'})
     }
     if (requestedPersonRaw.site_contact_id !== null) {
-      return next({status: 404, error: 'requested person cannot be deleted, since at least one site contact role exists'})
+      return next({status: 400, error: 'requested person cannot be deleted, since at least one site contact role exists'})
     } else {
       await this.personRepository.delete(personId)
     }
