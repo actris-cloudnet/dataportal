@@ -19,6 +19,7 @@ import {ModelRoutes} from './routes/model'
 import {DownloadRoutes} from './routes/download'
 import {CalibrationRoutes} from './routes/calibration'
 import {QualityReportRoutes} from './routes/qualityreport'
+import {SiteContactRoutes} from './routes/siteContact'
 import env from './lib/env'
 
 (async function() {
@@ -40,6 +41,8 @@ import env from './lib/env'
   const dlRoutes = new DownloadRoutes(conn, fileRoutes, collRoutes, uploadRoutes, ipLookup)
   const calibRoutes = new CalibrationRoutes(conn)
   const qualityRoutes = new QualityReportRoutes(conn, fileRoutes)
+
+  const siteContactRoutes = new SiteContactRoutes(conn)
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     if (err.status < 500) console.log(`Error ${err.status} in ${req.method} ${req.path}:`, stringify(err)) // Client error
@@ -179,6 +182,17 @@ import env from './lib/env'
   app.put('/quality/:uuid', express.json(), qualityRoutes.putQualityReport)
   app.get('/api/download/stats', authMiddleware, dlRoutes.stats)
   app.delete('/api/files/:uuid', authMiddleware, middleware.checkDeleteParams, fileRoutes.deleteFile)
+
+  // site contacts private
+  app.post('/site-contacts',express.json(),siteContactRoutes.postSiteContact)
+  app.get('/site-contacts', siteContactRoutes.getSiteContacts)
+  app.put('/site-contacts/:id',express.json(),siteContactRoutes.putSiteContact)
+  app.delete('/site-contacts/:id',siteContactRoutes.deleteSiteContact)
+  // persons private
+  app.get('/persons', siteContactRoutes.getPersons)
+  app.put('/persons/:id', express.json(),siteContactRoutes.putPerson)
+  app.delete('/persons/:id', siteContactRoutes.deletePerson)
+  app.delete('/persons', siteContactRoutes.deletePersons)
 
   app.use(errorHandler)
 

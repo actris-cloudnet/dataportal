@@ -47,6 +47,11 @@ The backend unit and integration tests are run with the commands:
     cd backend
     ./run-test npm test
 
+Individual tests can be run as:
+
+    cd backend
+    ./run-test npx jest tests/integration/sequential/siteContact.test.ts
+
 To run backend e2e-tests, issue
 
     cd backend
