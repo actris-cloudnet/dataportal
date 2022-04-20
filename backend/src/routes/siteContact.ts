@@ -178,20 +178,16 @@ export class SiteContactRoutes {
         .getMany()
     }
 
-    let getResults: SiteContactApiData[] = []
-
-    results.forEach((r) => {
-      getResults.push({
-        siteId: r.site.id,
-        siteContactId: r.id,
-        role: r.role,
-        email: r.email,
-        personId: r.person.id,
-        firstname: r.person.firstname,
-        surname: r.person.surname,
-        orcid: r.person.orcid,
-      })
-    })
+    const getResults: SiteContactApiData[] = results.map(r => ({
+      siteId: r.site.id,
+      siteContactId: r.id,
+      role: r.role,
+      email: r.email,
+      personId: r.person.id,
+      firstname: r.person.firstname,
+      surname: r.person.surname,
+      orcid: r.person.orcid,
+    }))
 
     res.json(getResults)
     return
@@ -299,15 +295,13 @@ export class SiteContactRoutes {
     const persons: Person[] = await this.personRepository
       .createQueryBuilder('person')
       .getMany()
-    let responseResults: SiteContactApiData[] = []
-    persons.forEach((p) => {
-      responseResults.push({
-        personId: p.id,
-        firstname: p.firstname,
-        surname: p.surname,
-        orcid: p.orcid,
-      })
-    })
+
+    const responseResults: SiteContactApiData[] = persons.map(p => ({
+      personId: p.id,
+      firstname: p.firstname,
+      surname: p.surname,
+      orcid: p.orcid,
+    }))
 
     res.json(responseResults)
     return
