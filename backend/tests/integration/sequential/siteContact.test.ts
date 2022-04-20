@@ -120,10 +120,10 @@ describe('test /site-contacts and /persons private api', () => {
     )
     expect(putRes.status).toBe(200)
     const resMaceHead = await axios.get(
-      `${SITE_CONTACTS_URL}?siteid=mace-head`
+      `${SITE_CONTACTS_URL}?siteId=mace-head`
     )
     expect(resMaceHead.data).toHaveLength(0)
-    const resHyytiala = await axios.get(`${SITE_CONTACTS_URL}?siteid=hyytiala`)
+    const resHyytiala = await axios.get(`${SITE_CONTACTS_URL}?siteId=hyytiala`)
     expect(resHyytiala.data).toHaveLength(2)
   })
 })

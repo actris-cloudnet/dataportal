@@ -2,7 +2,7 @@
   "firstname": "Alice",
   "surname": "Manabe",
   "orcid": "0000-0000-0000-0000",
-  "siteid": "mace-head",
+  "siteId": "mace-head",
   "role": "expert",
   "email": "a.manabe@e.mail"
 }

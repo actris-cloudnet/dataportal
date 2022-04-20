@@ -1,7 +1,7 @@
 {
   "firstname": "Bob",
   "surname": "Gulmala",
-  "siteid": "hyytiala",
+  "siteId": "hyytiala",
   "role": "scientist",
   "email": "bee@g.ee"
 }

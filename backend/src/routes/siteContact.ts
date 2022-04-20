@@ -5,7 +5,7 @@ import { Person } from '../entity/Person'
 import { Site } from '../entity/Site'
 
 interface SiteContactApiData {
-  siteid?: string;
+  siteId?: string;
   sitecontactid?: number;
   role?: string;
   email?: string;
@@ -38,7 +38,7 @@ export class SiteContactRoutes {
       'surname',
       'role',
       'email',
-      'siteid',
+      'siteId',
     ])
     const datakeys = new Set<string>()
     Object.keys(postData).forEach((key) => datakeys.add(key))
@@ -136,7 +136,7 @@ export class SiteContactRoutes {
   ): Promise<Site | undefined> {
     let sitePromise: Promise<Site | undefined> = this.siteRepository
       .createQueryBuilder('site')
-      .where('site.id = :siteid', { siteid: postData.siteid })
+      .where('site.id = :siteId', { siteId: postData.siteId })
       .getOne()
     return sitePromise
   }
@@ -148,7 +148,7 @@ export class SiteContactRoutes {
     let siteContactPromise: Promise<SiteContact | undefined> =
       this.siteContactRepository
         .createQueryBuilder('site_contact')
-        .where('site_contact.siteId = :siteid', { siteid: site.id })
+        .where('site_contact.siteId = :siteId', { siteId: site.id })
         .andWhere('site_contact.personId = :personid', { personid: person.id })
         .andWhere('site_contact.role = :role', { role: role })
         .getOne()
@@ -163,12 +163,12 @@ export class SiteContactRoutes {
   ) => {
     const query: SiteContactApiData = req.query
     let results
-    if (query.siteid !== undefined) {
+    if (query.siteId !== undefined) {
       results = await this.siteContactRepository
         .createQueryBuilder('site_contact')
         .leftJoinAndSelect('site_contact.person', 'person')
         .leftJoinAndSelect('site_contact.site', 'site')
-        .where('site_contact.siteId = :siteid', { siteid: query.siteid })
+        .where('site_contact.siteId = :siteId', { siteId: query.siteId })
         .getMany()
     } else {
       results = await this.siteContactRepository
@@ -182,7 +182,7 @@ export class SiteContactRoutes {
 
     results.forEach((r) => {
       getResults.push({
-        siteid: r.site.id,
+        siteId: r.site.id,
         sitecontactid: r.id,
         role: r.role,
         email: r.email,
@@ -221,7 +221,7 @@ export class SiteContactRoutes {
 
     const data: SiteContactApiData = req.body
     // Check that PUT request tries to update only site, role or email field
-    const accepted_keys = new Set<string>(['siteid', 'role', 'email'])
+    const accepted_keys = new Set<string>(['siteId', 'role', 'email'])
     let datakeys = new Set<string>()
     Object.keys(data).forEach((k) => datakeys.add(k))
     let keydiff = new Set<string>(
@@ -230,14 +230,14 @@ export class SiteContactRoutes {
     if (keydiff.size > 0) {
       return next({
         status: 404,
-        error: 'you can only change siteid, role or email from this endpoint',
+        error: 'you can only change siteId, role or email from this endpoint',
       })
     }
     // Update site
-    if (datakeys.has('siteid')) {
+    if (datakeys.has('siteId')) {
       const updatedSite: Site | undefined = await this.siteRepository
         .createQueryBuilder('site')
-        .where('site.id = :id', { id: data.siteid })
+        .where('site.id = :id', { id: data.siteId })
         .getOne()
       if (updatedSite === undefined) {
         return next({ status: 404, error: 'site does not exist' })
