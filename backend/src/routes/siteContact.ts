@@ -52,25 +52,25 @@ export class SiteContactRoutes {
     if (role === undefined) {
       return next({ status: 404, error: 'unexpected role' })
     }
-    let existing_site: Site | undefined = await this.postExistingSite(postData)
+    let existingSite: Site | undefined = await this.postExistingSite(postData)
     let site: Site
-    if (existing_site === undefined) {
+    if (existingSite === undefined) {
       return next({ status: 404, error: 'site does not exist' })
     } else {
-      site = existing_site
+      site = existingSite
     }
-    let existing_person: Person | undefined = await this.postExistingPerson(
+    let existingPerson: Person | undefined = await this.postExistingPerson(
       postData
     )
-    let existing_siteContact: SiteContact | undefined
-    if (existing_person !== undefined) {
-      let person: Person = existing_person
-      existing_siteContact = await this.postExistingSiteContact(
+    let existingSiteContact: SiteContact | undefined
+    if (existingPerson !== undefined) {
+      let person: Person = existingPerson
+      existingSiteContact = await this.postExistingSiteContact(
         site,
         person,
         role
       )
-      if (existing_siteContact !== undefined) {
+      if (existingSiteContact !== undefined) {
         return next({
           status: 404,
           error: 'person already has this role for the site',
