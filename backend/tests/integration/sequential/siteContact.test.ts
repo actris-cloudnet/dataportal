@@ -60,15 +60,15 @@ describe('test /site-contacts and /persons private api', () => {
   })
   it('adds orcid to persons B and changes his role and email', async () => {
     const res = await axios.get(SITE_CONTACTS_URL)
-    let personid: Number | undefined = undefined
+    let personId: Number | undefined = undefined
     let siteContactId: Number | undefined = undefined
     res.data.forEach((result: any) => {
       if (result.firstname === 'Bob') {
         siteContactId = result.siteContactId
-        personid = result.personid
+        personId = result.personId
       }
     })
-    expect(personid).not.toBe(undefined)
+    expect(personId).not.toBe(undefined)
     expect(siteContactId).not.toBe(undefined)
     // Update Site contact
     const siteContactPutRawData = readFileSync(
@@ -83,7 +83,7 @@ describe('test /site-contacts and /persons private api', () => {
     // Update person
     const personPutRawData = readFileSync('tests/data/person-put.json', 'utf8')
     const resPutPerson = await axios.put(
-      `${PERSONS_URL}/${personid}`,
+      `${PERSONS_URL}/${personId}`,
       JSON.parse(personPutRawData)
     )
     expect(resPutPerson.status).toBe(200)

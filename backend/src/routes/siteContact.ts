@@ -9,7 +9,7 @@ interface SiteContactApiData {
   siteContactId?: number;
   role?: string;
   email?: string;
-  personid?: number;
+  personId?: number;
   firstname?: string;
   surname?: string;
   orcid?: string;
@@ -149,7 +149,7 @@ export class SiteContactRoutes {
       this.siteContactRepository
         .createQueryBuilder('site_contact')
         .where('site_contact.siteId = :siteId', { siteId: site.id })
-        .andWhere('site_contact.personId = :personid', { personid: person.id })
+        .andWhere('site_contact.personId = :personId', { personId: person.id })
         .andWhere('site_contact.role = :role', { role: role })
         .getOne()
     return siteContactPromise
@@ -186,7 +186,7 @@ export class SiteContactRoutes {
         siteContactId: r.id,
         role: r.role,
         email: r.email,
-        personid: r.person.id,
+        personId: r.person.id,
         firstname: r.person.firstname,
         surname: r.person.surname,
         orcid: r.person.orcid,
@@ -302,7 +302,7 @@ export class SiteContactRoutes {
     let responseResults: SiteContactApiData[] = []
     persons.forEach((p) => {
       responseResults.push({
-        personid: p.id,
+        personId: p.id,
         firstname: p.firstname,
         surname: p.surname,
         orcid: p.orcid,
@@ -315,10 +315,10 @@ export class SiteContactRoutes {
 
   // PUT Update person by id
   putPerson: RequestHandler = async (req: Request, res: Response, next) => {
-    const personid: number = Number(req.params.id)
+    const personId: number = Number(req.params.id)
     const requestedPerson: Person | undefined = await this.personRepository
       .createQueryBuilder('person')
-      .where('person.id = :id', { id: personid })
+      .where('person.id = :id', { id: personId })
       .getOne()
     let person: Person
     if (requestedPerson === undefined) {
@@ -341,7 +341,7 @@ export class SiteContactRoutes {
     return
   };
   deletePerson: RequestHandler = async (req: Request, res: Response, next) => {
-    const personid: number = Number(req.params.id)
+    const personId: number = Number(req.params.id)
     const requestedPersonRaw: any | undefined = await this.personRepository
       .createQueryBuilder('person')
       .leftJoinAndSelect(
@@ -349,7 +349,7 @@ export class SiteContactRoutes {
         'site_contact',
         'site_contact.personId = person.id'
       )
-      .where('person.id = :id', {id: personid})
+      .where('person.id = :id', {id: personId})
       .getRawOne()
     if (requestedPersonRaw === undefined){
       return next({status: 404, error: 'requested person does not exist'})
@@ -357,7 +357,7 @@ export class SiteContactRoutes {
     if (requestedPersonRaw.site_contact_id !== null) {
       return next({status: 404, error: 'requested person cannot be deleted, since at least one site contact role exists'})
     } else {
-      await this.personRepository.delete(personid)
+      await this.personRepository.delete(personId)
     }
     return res.sendStatus(200)
 
