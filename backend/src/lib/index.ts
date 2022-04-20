@@ -119,7 +119,8 @@ const translateKeyVal = (key: string, val: string|number|boolean|Date, acc: any,
   key = key.replace(regexp, '')
   val = (val instanceof Date && key == 'measurementDate') ? fixDbDate(val).toISOString().split('T')[0] : val
   let subKey
-  [key, subKey] = key.split('_')
+  [key, ...subKey] = key.split('_')
+  subKey = subKey.join('_')
   if (!subKey) return { [key]: val }
   else return { [key]: {
     ...acc[key],
