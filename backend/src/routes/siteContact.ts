@@ -6,7 +6,7 @@ import { Site } from '../entity/Site'
 
 interface SiteContactApiData {
   siteId?: string;
-  sitecontactid?: number;
+  siteContactId?: number;
   role?: string;
   email?: string;
   personid?: number;
@@ -183,7 +183,7 @@ export class SiteContactRoutes {
     results.forEach((r) => {
       getResults.push({
         siteId: r.site.id,
-        sitecontactid: r.id,
+        siteContactId: r.id,
         role: r.role,
         email: r.email,
         personid: r.person.id,
@@ -203,12 +203,12 @@ export class SiteContactRoutes {
     res: Response,
     next
   ) => {
-    const sitecontactid: number = Number(req.params.id)
+    const siteContactId: number = Number(req.params.id)
     const requestedSiteContact: SiteContact | undefined =
       await this.siteContactRepository
         .createQueryBuilder('site_contact')
         .leftJoinAndSelect('site_contact.site', 'site')
-        .where('site_contact.id = :id', { id: sitecontactid })
+        .where('site_contact.id = :id', { id: siteContactId })
         .getOne()
     let siteContact: SiteContact
     if (requestedSiteContact === undefined) {
@@ -276,13 +276,13 @@ export class SiteContactRoutes {
     res: Response,
     next
   ) => {
-    const sitecontactid = req.params.id
+    const siteContactId = req.params.id
     try {
       await this.siteContactRepository
         .createQueryBuilder()
         .delete()
         .from(SiteContact)
-        .where('id = :id', { id: sitecontactid })
+        .where('id = :id', { id: siteContactId })
         .execute()
     } catch (err) {
       return next({ status: 404, error: err })

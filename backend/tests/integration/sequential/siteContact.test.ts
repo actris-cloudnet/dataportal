@@ -7,7 +7,7 @@ const SITE_CONTACTS_URL = `${backendPrivateUrl}site-contacts`
 const PERSONS_URL = `${backendPrivateUrl}persons`
 
 interface ContactData {
-  sitecontactid: number;
+  siteContactId: number;
 }
 
 beforeAll(async () => {
@@ -15,7 +15,7 @@ beforeAll(async () => {
   let req = await axios.get(SITE_CONTACTS_URL)
   const data: ContactData[] = req.data
   data.forEach(async (contact) => {
-    let id = contact.sitecontactid
+    let id = contact.siteContactId
     await axios.delete(`${SITE_CONTACTS_URL}/${id}`)
   })
   // Remove persons
@@ -61,22 +61,22 @@ describe('test /site-contacts and /persons private api', () => {
   it('adds orcid to persons B and changes his role and email', async () => {
     const res = await axios.get(SITE_CONTACTS_URL)
     let personid: Number | undefined = undefined
-    let sitecontactid: Number | undefined = undefined
+    let siteContactId: Number | undefined = undefined
     res.data.forEach((result: any) => {
       if (result.firstname === 'Bob') {
-        sitecontactid = result.sitecontactid
+        siteContactId = result.siteContactId
         personid = result.personid
       }
     })
     expect(personid).not.toBe(undefined)
-    expect(sitecontactid).not.toBe(undefined)
+    expect(siteContactId).not.toBe(undefined)
     // Update Site contact
     const siteContactPutRawData = readFileSync(
       'tests/data/siteContact-put.json',
       'utf8'
     )
     const resPutSiteContact = await axios.put(
-      `${SITE_CONTACTS_URL}/${sitecontactid}`,
+      `${SITE_CONTACTS_URL}/${siteContactId}`,
       JSON.parse(siteContactPutRawData)
     )
     expect(resPutSiteContact.status).toBe(200)
@@ -94,7 +94,7 @@ describe('test /site-contacts and /persons private api', () => {
     let newOrcid: string | undefined = undefined
     const updatedRes = await axios.get(SITE_CONTACTS_URL)
     updatedRes.data.forEach((result: any) => {
-      if (result.sitecontactid === sitecontactid) {
+      if (result.siteContactId === siteContactId) {
         newRole = result.role
         newEmail = result.email
         newOrcid = result.orcid
@@ -107,15 +107,15 @@ describe('test /site-contacts and /persons private api', () => {
 
   it('changes the site of A', async () => {
     const res = await axios.get(SITE_CONTACTS_URL)
-    let sitecontactid: Number | undefined
+    let siteContactId: Number | undefined
     res.data.forEach((result: any) => {
       if (result.firstname === 'Alice') {
-        sitecontactid = result.sitecontactid
+        siteContactId = result.siteContactId
       }
     })
-    expect(sitecontactid).not.toBe(undefined)
+    expect(siteContactId).not.toBe(undefined)
     const putRes = await axios.put(
-      `${SITE_CONTACTS_URL}/${sitecontactid}`,
+      `${SITE_CONTACTS_URL}/${siteContactId}`,
       JSON.parse(readFileSync('tests/data/siteContact-put-site.json', 'utf8'))
     )
     expect(putRes.status).toBe(200)
