@@ -19,6 +19,7 @@ import {CalibrationRoutes} from './routes/calibration'
 import {QualityReportRoutes} from './routes/qualityreport'
 import {SiteContactRoutes} from './routes/siteContact'
 import env from './lib/env'
+import {Authenticator} from './lib/auth'
 
 (async function() {
   const port = 3000
@@ -27,6 +28,7 @@ import env from './lib/env'
   const conn = await createConnection()
   const ipLookup = await getIpLookup({ watchForUpdates: true })
   const middleware = new Middleware(conn)
+  const authenticator = new Authenticator(conn)
 
   const fileRoutes = new FileRoutes(conn)
   const siteRoutes = new SiteRoutes(conn)
@@ -68,6 +70,12 @@ import env from './lib/env'
   let authMiddleware = basicAuth({
     users: { 'admin': env.STATS_PASSWORD },
     challenge: true,
+  })
+
+  let authWithDatabaseMiddleware = basicAuth({
+    authorizer: authenticator.authorizer,
+    challenge: true,
+    unauthorizedResponse: {status: 403, error: 'no access'}
   })
 
   if (process.env.NODE_ENV != 'production') {
@@ -187,7 +195,7 @@ import env from './lib/env'
   app.put('/site-contacts/:id',express.json(),siteContactRoutes.putSiteContact)
   app.delete('/site-contacts/:id',siteContactRoutes.deleteSiteContact)
   // persons private
-  app.get('/persons', siteContactRoutes.getPersons)
+  app.get('/persons', authWithDatabaseMiddleware,  siteContactRoutes.getPersons)
   app.put('/persons/:id', express.json(),siteContactRoutes.putPerson)
   app.delete('/persons/:id', siteContactRoutes.deletePerson)
   app.delete('/persons', siteContactRoutes.deletePersons)
