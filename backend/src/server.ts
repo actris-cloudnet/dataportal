@@ -28,7 +28,9 @@ import {Authenticator} from './lib/auth'
   const conn = await createConnection()
   const ipLookup = await getIpLookup({ watchForUpdates: true })
   const middleware = new Middleware(conn)
+
   const authenticator = new Authenticator(conn)
+
 
   const fileRoutes = new FileRoutes(conn)
   const siteRoutes = new SiteRoutes(conn)
@@ -72,11 +74,12 @@ import {Authenticator} from './lib/auth'
     challenge: true,
   })
 
-  let authWithDatabaseMiddleware = basicAuth({
-    authorizer: authenticator.authorizer,
-    challenge: true,
-    unauthorizedResponse: {status: 403, error: 'no access'}
-  })
+  //let authWithDatabaseMiddleware = basicAuth({
+  //  authorizer: authenticator.authorizer,
+  //  authorizeAsync: true,
+  //  challenge: true,
+  //  unauthorizedResponse: {status: 403, error: 'no access'}
+  //})
 
   if (process.env.NODE_ENV != 'production') {
     app.use(function(_req, res, next) {
@@ -191,11 +194,11 @@ import {Authenticator} from './lib/auth'
 
   // site contacts private
   app.post('/site-contacts',express.json(),siteContactRoutes.postSiteContact)
-  app.get('/site-contacts', siteContactRoutes.getSiteContacts)
+  app.get('/site-contacts', authenticator.middleware , siteContactRoutes.getSiteContacts)
   app.put('/site-contacts/:id',express.json(),siteContactRoutes.putSiteContact)
   app.delete('/site-contacts/:id',siteContactRoutes.deleteSiteContact)
   // persons private
-  app.get('/persons', authWithDatabaseMiddleware,  siteContactRoutes.getPersons)
+  app.get('/persons', authenticator.middleware,  siteContactRoutes.getPersons)
   app.put('/persons/:id', express.json(),siteContactRoutes.putPerson)
   app.delete('/persons/:id', siteContactRoutes.deletePerson)
   app.delete('/persons', siteContactRoutes.deletePersons)
