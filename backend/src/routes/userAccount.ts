@@ -10,7 +10,7 @@ export class UserAccountRoutes {
     this.userAccountRepository = conn.getRepository<UserAccount>('user_account')
   }
 
-  postUser: RequestHandler = async (req: Request, res: Response, next) => {
+  postUser: RequestHandler = async (req: Request, res: Response) => {
     // Expects valid array of "user:passwordHash" strings in the req.body
     // Validity should be checked in middleware earlier
     for (let credentialString of req.body){
@@ -85,6 +85,21 @@ export class UserAccountRoutes {
     }
     next()
     
+  }
+
+  deleteUserById: RequestHandler = async (req: Request, res: Response) => {
+    try {
+      await this.userAccountRepository
+        .createQueryBuilder()
+        .delete()
+        .from(UserAccount)
+        .where('id = :id', {id: req.params.id})
+        .execute()
+    } catch {
+        res.status(400).send('Bad request: cannot delete the user\n')
+    }
+    res.status(200).send('User deleted\n')
+
   }
 
 }
