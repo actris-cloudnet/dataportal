@@ -13,6 +13,7 @@ import {
 } from './lib'
 import {mocked} from 'ts-jest/dist/util/testing'
 import {readResources} from '../../shared/lib'
+import VueRouter from 'vue-router'
 
 init()
 
@@ -22,6 +23,9 @@ const date = new Date()
 const dateFromDefault = date.toISOString().substring(0,10)
 const dateToDefault = new Date().toISOString().substring(0,10)
 let filesSortedByDate: any
+
+Vue.use(VueRouter)
+const router = new VueRouter()
 
 describe('Search.vue', () => {
   let wrapper: Wrapper<Vue>
@@ -56,12 +60,20 @@ describe('Search.vue', () => {
       }
     }
     mocked(axios.get).mockImplementation(defaultAxiosMock)
-    wrapper = mount(Search, { propsData: { mode: 'data'}, stubs: { Map: true }})
+    wrapper = mount(Search, {
+      propsData: {
+        mode: 'data'
+      },
+      stubs: {
+        Map: true
+      },
+      router
+    })
   })
 
-  it('makes less than four api request on mount', () => {
+  it('makes less than 7 api request on mount', () => {
     // files and sites
-    expect(mocked(axios.get).mock.calls.length).toBeLessThan(4)
+    expect(mocked(axios.get).mock.calls.length).toBeLessThan(7)
   })
 
   describe('date selectors', () => {

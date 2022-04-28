@@ -460,6 +460,7 @@ import {
   getDateFromBeginningOfYear,
   getProductIcon,
   isSameDay,
+  isValidDate
 } from '../lib'
 import {DevMode} from '../lib/DevMode'
 import VizSearchResult from '../components/VizSearchResult.vue'
@@ -468,6 +469,7 @@ import {Product} from '../../../backend/src/entity/Product'
 import {ProductVariable} from '../../../backend/src/entity/ProductVariable'
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 import Map, {getMarkerIcon} from '../components/Map.vue'
+import equal from 'fast-deep-equal'
 
 Vue.component('datepicker', Datepicker)
 Vue.component('custom-multiselect', CustomMultiselect)
@@ -521,7 +523,11 @@ export default class Search extends Vue {
   }
 
   // products
+  normalProducts: Product[] = []
   allProducts: Product[] = []
+  allProductsIncludingExperimental: Product[] = []
+  experimentalProductIds: string[] = []
+  experimentalVariableIds: string[] = []
   selectedProductIds: string[] = []
   showExpProducts = false
 
@@ -589,8 +595,67 @@ export default class Search extends Vue {
     return (this.isVizMode() || this.dateFromError[errorId]) && this.dateToError[errorId]
   }
 
-  created() {
-    this.initView()
+  async created() {
+    await this.initView()
+    const query = this.$route.query
+    const params = ['site', 'product', 'variable', 'dateFrom', 'dateTo']
+    const paramsSet = params.filter(param => param in query && query[param] != null)
+    for (const param of paramsSet) {
+      if (param === 'site') this.selectedSiteIds = this.parseQuery(param)
+      if (param === 'product') this.selectedProductIds = this.parseQuery(param)
+      if (param === 'variable') this.selectedVariableIds = this.parseQuery(param)
+      if (param === 'dateFrom') {
+        const date = this.parseQueryDate(param)
+        if (date) {
+          this[param] = date
+          this.dateInputStart = date
+        }
+      }
+      if (param === 'dateTo') {
+        const date = this.parseQueryDate(param)
+        if (date) {
+          this[param] = date
+          this.dateInputEnd = date
+        }
+      }
+    }
+  }
+
+  parseQuery(param: string): string[] {
+    let valueArray: string[] = []
+    const value = this.$route.query[param]
+    if (typeof value === 'string') {
+      valueArray = this.parseValidParamValues(param, value)
+    }
+    return valueArray
+  }
+
+  parseValidParamValues(param: string, value: string): string[] {
+    const valueArray = value.split(',')
+    let validChoices: string | string[]
+    if (param === 'product') {
+      for (const productId of valueArray) {
+        if (this.experimentalProductIds.includes(productId)) {
+          this.showExpProducts = true
+          this.allProducts = this.allProductsIncludingExperimental
+        }
+      }
+      validChoices = this.allProducts.map(prod => prod.id).concat(this.experimentalProductIds)
+    }
+    if (param === 'variable') {
+      validChoices = this.allProducts
+        .flatMap(prod => prod.variables)
+        .map(variable => variable.id)
+    }
+    if (param === 'site') validChoices = this.allSites.map(site => site.id)
+    return valueArray.filter(value => validChoices.includes(value))
+  }
+
+  parseQueryDate(param: string): Date | undefined {
+    const query = this.$route.query
+    if (param in query && isValidDate(query[param])) {
+      return new Date(query[param] as string)
+    }
   }
 
   mounted() {
@@ -627,6 +692,18 @@ export default class Search extends Vue {
       this.allProducts = products.data
         .filter(this.discardExperimentalProducts)
         .sort(this.alphabeticalSort)
+      this.normalProducts = products.data
+        .filter((prod: Product) => !prod.experimental)
+        .sort(this.alphabeticalSort)
+      this.allProductsIncludingExperimental = products.data
+        .sort(this.alphabeticalSort)
+      this.experimentalProductIds = products.data
+        .filter((prod: Product) => prod.experimental)
+        .map((prod: Product) => prod.id)
+      this.experimentalVariableIds = products.data
+        .filter((prod: Product) => prod.experimental)
+        .flatMap((prod: Product) => prod.variables)
+        .map((prod: Product) => prod.id)
     })
     return this.fetchData()
   }
@@ -672,7 +749,7 @@ export default class Search extends Vue {
   }
 
   navigateToSearch(mode: string) {
-    this.$router.push({ name: 'Search', params: { mode }})
+    this.$router.push({ name: 'Search', params: { mode }, query: this.$route.query })
   }
 
   setDateRange(n: number) {
@@ -746,17 +823,30 @@ export default class Search extends Vue {
   }
 
   reset() {
+    this.$router.replace({path: this.$route.path, query: {} })
     this.$router.go(0)
+  }
+
+  replaceQuery(param: string, value: Date | string[]) {
+    const query = { ...this.$route.query }
+    const valueToUrl = value instanceof Date ? dateToString(value) : value.join(',')
+    query[param] = valueToUrl
+    if (!equal(this.$route.query, query)) {
+      query[param] = valueToUrl === '' ? [] : valueToUrl
+      this.$router.replace({path: this.$route.path, query: query})
+    }
   }
 
   @Watch('selectedSiteIds')
   onSiteSelected() {
+    this.replaceQuery('site', this.selectedSiteIds)
     this.fetchData()
   }
 
   @Watch('dateFrom')
   onDateFromChanged() {
     if (!this.renderComplete || this.dateErrorsExist(this.dateFromError)) return
+    this.replaceQuery('dateFrom', this.dateFrom)
     this.fetchData()
   }
 
@@ -767,16 +857,20 @@ export default class Search extends Vue {
       this.dateFrom = this.dateTo
       this.visualizationDate = new Date(this.dateTo)
     }
+    this.replaceQuery('dateTo', this.dateTo)
+    this.replaceQuery('dateFrom', this.dateFrom)
     this.fetchData()
   }
 
   @Watch('selectedProductIds')
   onProductSelected() {
+    this.replaceQuery('product', this.selectedProductIds)
     this.fetchData()
   }
 
   @Watch('selectedVariableIds')
   onVariableSelected() {
+    this.replaceQuery('variable', this.selectedVariableIds)
     this.fetchData()
   }
 
@@ -799,7 +893,19 @@ export default class Search extends Vue {
 
   @Watch('showExpProducts')
   async onShowExpProducts() {
+    if (!this.showExpProducts) {
+      this.allProducts = this.normalProducts
+      this.selectedProductIds = this.selectedProductIds
+        .filter(prod => !this.experimentalProductIds.includes(prod))
+      this.selectedVariableIds = this.selectedVariableIds
+        .filter(variable => !this.experimentalVariableIds.includes(variable))
+    }
     await this.initView()
+  }
+
+  @Watch('allProducts')
+  async onSelectedL3Product() {
+    this.showExpProducts = this.allProducts.length > this.normalProducts.length
   }
 
   @Watch('mode')

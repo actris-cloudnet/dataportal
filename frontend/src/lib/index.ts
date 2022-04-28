@@ -80,3 +80,9 @@ export function formatLongitude(longitude: number): string {
 export function formatCoordinates(latitude: number, longitude: number): string {
   return `${formatLatitude(latitude)}, ${formatLongitude(longitude)}`
 }
+
+export const isValidDate = (obj: any) => {
+  const date = new Date(obj)
+  return !isNaN(date.getDate())
+    && date.getTime() > new Date('1970-01-01').getTime()
+}
