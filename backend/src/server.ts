@@ -18,6 +18,7 @@ import {DownloadRoutes} from './routes/download'
 import {CalibrationRoutes} from './routes/calibration'
 import {QualityReportRoutes} from './routes/qualityreport'
 import {SiteContactRoutes} from './routes/siteContact'
+import {UserAccountRoutes} from './routes/userAccount'
 import env from './lib/env'
 import {Authenticator} from './lib/auth'
 
@@ -45,6 +46,7 @@ import {Authenticator} from './lib/auth'
   const qualityRoutes = new QualityReportRoutes(conn, fileRoutes)
 
   const siteContactRoutes = new SiteContactRoutes(conn)
+  const userAccountRoutes = new UserAccountRoutes(conn)
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     if (err.status < 500) console.log(`Error ${err.status} in ${req.method} ${req.path}:`, stringify(err)) // Client error
@@ -202,6 +204,17 @@ import {Authenticator} from './lib/auth'
   app.put('/persons/:id', express.json(),siteContactRoutes.putPerson)
   app.delete('/persons/:id', siteContactRoutes.deletePerson)
   app.delete('/persons', siteContactRoutes.deletePersons)
+
+  // Private UserAccount and Permission routes
+  app.post('/user-accounts',
+           express.json(),
+           userAccountRoutes.postUserValidateFormat,
+           userAccountRoutes.postUserCheckDuplicates,
+           userAccountRoutes.postUser)
+  app.delete('/user-accounts/:id',          (req,res) => res.send('DELETE user account by id\n'))
+  app.get('/user-accounts',                 (req,res) => res.send('GET user accounts\n'))
+  app.put('/user-accounts/:id/permissions', (req,res) => res.send('POST permission for user account by id\n'))
+  app.post('/permissions',                  (req,res) => res.send('POST permission\n'))
 
   app.use(errorHandler)
 
