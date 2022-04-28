@@ -212,7 +212,7 @@ import {Authenticator} from './lib/auth'
            userAccountRoutes.postUserCheckDuplicates,
            userAccountRoutes.postUser)
   app.delete('/user-accounts/:id', userAccountRoutes.deleteUserById)
-  app.get('/user-accounts',                 (req,res) => res.send('GET user accounts\n'))
+  app.get('/user-accounts', userAccountRoutes.getAllUsers)
   app.put('/user-accounts/:id/permissions', (req,res) => res.send('POST permission for user account by id\n'))
   app.post('/permissions',                  (req,res) => res.send('POST permission\n'))
 

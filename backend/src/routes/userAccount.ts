@@ -3,6 +3,11 @@ import { Request, RequestHandler, Response } from 'express'
 
 import {UserAccount} from '../entity/UserAccount'
 
+interface UserAccountInterface {
+  id?: number;
+  username?: string;
+}
+
 export class UserAccountRoutes {
   private userAccountRepository: Repository<UserAccount>;
 
@@ -96,10 +101,28 @@ export class UserAccountRoutes {
         .where('id = :id', {id: req.params.id})
         .execute()
     } catch {
-        res.status(400).send('Bad request: cannot delete the user\n')
+      res.status(400).send('Bad request: cannot delete the user\n')
     }
     res.status(200).send('User deleted\n')
-
   }
+
+  getAllUsers: RequestHandler = async (req: Request, res: Response) =>{
+    try {
+      const users: UserAccount[] = await this.userAccountRepository
+        .createQueryBuilder('user_account')
+        .getMany()
+      const returnUsers: UserAccountInterface[] = users.map(u => ({
+        id: u.id,
+        username: u.username,
+      }))
+      res.json(returnUsers)
+      return
+
+    } catch {
+      res.status(400).send('Bad request: cannot get users from the database\n')
+    }
+    
+  }
+
 
 }
