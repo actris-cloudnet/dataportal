@@ -3,6 +3,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   ManyToOne,
+  Unique,
 } from 'typeorm'
 
 import { Site } from './Site'
@@ -15,6 +16,7 @@ export enum PermissionType {
 }
 
 @Entity()
+@Unique(['permission', 'site'])
 export class Permission {
   @PrimaryGeneratedColumn()
   id?: number; 
