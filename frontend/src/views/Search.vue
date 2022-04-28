@@ -454,14 +454,12 @@ import Datepicker from '../components/Datepicker.vue'
 import CustomMultiselect from '../components/Multiselect.vue'
 import DataSearchResult from '../components/DataSearchResult.vue'
 import {
-  combinedFileSize,
   constructTitle,
   dateToString,
   fixedRanges,
   getDateFromBeginningOfYear,
   getProductIcon,
-  humanReadableSize,
-  isSameDay
+  isSameDay,
 } from '../lib'
 import {DevMode} from '../lib/DevMode'
 import VizSearchResult from '../components/VizSearchResult.vue'
@@ -494,8 +492,6 @@ export default class Search extends Vue {
   apiResponse: SearchFileResponse[] | Visualization[] = this.resetResponse()
 
   // file list
-  sortBy = 'title'
-  sortDesc = false
   isBusy = false
 
   // site selector
@@ -551,21 +547,13 @@ export default class Search extends Vue {
       .filter(prod => this.selectedProductIds.includes(prod.id))
       .flatMap(prod => prod.variables)
   }
-
   renderComplete = false
-
   displayKeyInfo = true
-
   getProductIcon = getProductIcon
   getMarkerIcon = getMarkerIcon
-  humanReadableSize = humanReadableSize
-  combinedFileSize = combinedFileSize
-  dateToString = dateToString
   fixedRanges = fixedRanges
   devMode = new DevMode()
-
   vizWideMode = false
-
   error = null
 
   // keys
@@ -575,7 +563,6 @@ export default class Search extends Vue {
   dataSearchUpdate = 40000
   vizSearchUpdate = 50000
   mapKey = 60000
-  initMapKey = 60000
 
   isVizMode() {
     return this.mode == 'visualizations'

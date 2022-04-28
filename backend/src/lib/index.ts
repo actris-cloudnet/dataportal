@@ -15,14 +15,6 @@ import maxmind, { CountryResponse, OpenOpts, Reader } from 'maxmind'
 
 export const stringify = (obj: any): string => JSON.stringify(obj, null, 2)
 
-export const dateToJSDate = (year: string, month: string, day: string): Date => {
-  return new Date(
-    parseInt(year),
-    parseInt(month) - 1,
-    parseInt(day)
-  )
-}
-
 export const fetchAll = <T>(conn: Connection, schema: Function, options={}): Promise<T[]> => {
   const repo = conn.getRepository(schema)
   return repo.find(options) as Promise<T[]>
@@ -40,22 +32,10 @@ export const tomorrow = () => {
   return tomorrow
 }
 
-export const dateNDaysAgo = (n: number) => {
-  const dateInPast = new Date()
-  dateInPast.setDate(dateInPast.getDate() - n)
-  return dateInPast
-}
-
 export const toArray = (obj: string | Array<string> | undefined): Array<string> | null => {
   if (!obj) return null
   else if (typeof obj == 'string') return [obj]
   return obj
-
-}
-
-export const rowExists = (err: any) => {
-  const PG_UNIQUE_CONSTRAINT_VIOLATION = '23505'
-  return typeof err == 'object' && 'code' in err && err.code == PG_UNIQUE_CONSTRAINT_VIOLATION
 }
 
 export const hideTestDataFromNormalUsers = <T>(dbQuery: SelectQueryBuilder<T>, req: Request): SelectQueryBuilder<T> =>
