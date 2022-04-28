@@ -2,7 +2,11 @@ import {
   Column,
   Entity,
   PrimaryGeneratedColumn,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm'
+
+import {Permission} from './Permission'
 
 @Entity()
 export class UserAccount {
@@ -10,8 +14,13 @@ export class UserAccount {
   id?: number;
 
   @Column({unique: true})
-  username?: string;
+  username!: string;
 
   @Column()
-  passwordHash?: string;
+  passwordHash!: string;
+
+  @ManyToMany( () => Permission)
+  @JoinTable()
+  permissions!: Permission[];
+
 }

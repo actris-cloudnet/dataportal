@@ -4,6 +4,7 @@ import {Upload} from './Upload'
 import {Calibration} from './Calibration'
 import {RegularCitation} from './Citation'
 import {SiteContact} from './SiteContact'
+import {Permission} from './Permission'
 
 export enum SiteType {
     CLOUDNET = 'cloudnet',
@@ -65,6 +66,9 @@ export class Site {
 
     @OneToMany( _ => SiteContact, siteContact => siteContact.site )
     contacts!: SiteContact[]
+
+    @OneToMany( _ => Permission, permission => permission.site )
+    permissions!: Permission[]
 
     get isTestSite() {
       return this.type.includes(SiteType.TEST)
