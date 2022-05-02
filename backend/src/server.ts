@@ -213,8 +213,12 @@ import {Authenticator} from './lib/auth'
            userAccountRoutes.postUser)
   app.delete('/user-accounts/:id', userAccountRoutes.deleteUserById)
   app.get('/user-accounts', userAccountRoutes.getAllUsers)
-  app.put('/user-accounts/:id/permissions', (req,res) => res.send('POST permission for user account by id\n'))
-  app.post('/permissions',                  (req,res) => res.send('POST permission\n'))
+  app.post('/user-accounts/:id/permissions',
+           userAccountRoutes.postPermissionValidate,
+           userAccountRoutes.postPermission,
+          )
+  app.get('/user-accounts/:id/permissions', userAccountRoutes.getPermissions)
+  app.delete('/user-accounts/:id/permissions', userAccountRoutes.deletePermissions)
 
   app.use(errorHandler)
 
