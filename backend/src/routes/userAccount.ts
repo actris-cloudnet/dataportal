@@ -256,13 +256,13 @@ export class UserAccountRoutes {
     const permissions: PermissionInterface[] = user.permissions.map((p) =>
       p.site
         ? {
-            permission: p.permission,
-            siteId: p.site.id,
-          }
+          permission: p.permission,
+          siteId: p.site.id,
+        }
         : {
-            permission: p.permission,
-            siteId: null,
-          }
+          permission: p.permission,
+          siteId: null,
+        }
     )
     res.json({
       id: user.id,

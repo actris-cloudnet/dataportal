@@ -19,7 +19,7 @@ export enum PermissionType {
 @Unique(['permission', 'site'])
 export class Permission {
   @PrimaryGeneratedColumn()
-  id?: number; 
+  id?: number;
 
   @Column()
   permission!: PermissionType;

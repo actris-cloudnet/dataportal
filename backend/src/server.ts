@@ -207,16 +207,16 @@ import {Authenticator} from './lib/auth'
 
   // Private UserAccount and Permission routes
   app.post('/user-accounts',
-           express.json(),
-           userAccountRoutes.postUserValidateFormat,
-           userAccountRoutes.postUserCheckDuplicates,
-           userAccountRoutes.postUser)
+    express.json(),
+    userAccountRoutes.postUserValidateFormat,
+    userAccountRoutes.postUserCheckDuplicates,
+    userAccountRoutes.postUser)
   app.delete('/user-accounts/:id', userAccountRoutes.deleteUserById)
   app.get('/user-accounts', userAccountRoutes.getAllUsers)
   app.post('/user-accounts/:id/permissions',
-           userAccountRoutes.postPermissionValidate,
-           userAccountRoutes.postPermission,
-          )
+    userAccountRoutes.postPermissionValidate,
+    userAccountRoutes.postPermission,
+  )
   app.get('/user-accounts/:id/permissions', userAccountRoutes.getPermissions)
   app.delete('/user-accounts/:id/permissions', userAccountRoutes.deletePermissions)
 
