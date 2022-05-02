@@ -196,11 +196,11 @@ import {Authenticator} from './lib/auth'
 
   // site contacts private
   app.post('/site-contacts',express.json(),siteContactRoutes.postSiteContact)
-  app.get('/site-contacts', authenticator.middleware , siteContactRoutes.getSiteContacts)
+  app.get('/site-contacts', siteContactRoutes.getSiteContacts)
   app.put('/site-contacts/:id',express.json(),siteContactRoutes.putSiteContact)
   app.delete('/site-contacts/:id',siteContactRoutes.deleteSiteContact)
   // persons private
-  app.get('/persons', authenticator.middleware,  siteContactRoutes.getPersons)
+  app.get('/persons', siteContactRoutes.getPersons)
   app.put('/persons/:id', express.json(),siteContactRoutes.putPerson)
   app.delete('/persons/:id', siteContactRoutes.deletePerson)
   app.delete('/persons', siteContactRoutes.deletePersons)
