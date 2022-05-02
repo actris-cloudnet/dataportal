@@ -235,7 +235,7 @@ main#filelanding
               {{ response.site.humanReadableName }}, {{ response.site.country }}
             </router-link></dd>
             <dt>Coordinates</dt>
-            <dd>{{ response.site.latitude }}&deg; N, {{ response.site.longitude }}&deg; E</dd>
+            <dd>{{ formatCoordinates(response.site.latitude, response.site.longitude) }}</dd>
             <dt>Site altitude</dt>
             <dd>{{ response.site.altitude }} m</dd>
           </dl>
@@ -301,7 +301,7 @@ main#filelanding
 <script lang="ts">
 import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
 import axios from 'axios'
-import {getProductIcon, humanReadableDate, humanReadableSize, humanReadableTimestamp, sortVisualizations, notEmpty} from '../lib'
+import {getProductIcon, humanReadableDate, humanReadableSize, humanReadableTimestamp, sortVisualizations, notEmpty, formatCoordinates} from '../lib'
 import {DevMode} from '../lib/DevMode'
 import {File, ModelFile, RegularFile} from '../../../backend/src/entity/File'
 import {VisualizationItem} from '../../../backend/src/entity/VisualizationResponse'
@@ -328,6 +328,7 @@ export default class FileView extends Vue {
   humanReadableTimestamp = humanReadableTimestamp
   getIconUrl = getProductIcon
   sortVisualizations = sortVisualizations
+  formatCoordinates = formatCoordinates
   devMode = new DevMode()
   allVisualizations = false
   sourceFiles: RegularFile[] = []
