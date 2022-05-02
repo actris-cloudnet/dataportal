@@ -28,6 +28,7 @@ main#frontpage
   .buttons
     text-align: center
     margin-top: 2em
+    margin-bottom: 1em
     a
       margin: 1em
       padding: 1em
@@ -73,7 +74,7 @@ This node is physically hosted by FMI in Helsinki, Finland. You can find our con
     </main>
     <div class="publications">
       <router-link to="/sites">
-        Cloudnet sites &#8594;
+        Measurement sites &#8594;
       </router-link>
     </div>
   </main>

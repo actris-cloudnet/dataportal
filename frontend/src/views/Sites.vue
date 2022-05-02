@@ -2,7 +2,10 @@
 @import "../sass/variables.sass"
 
 h1
-  margin-bottom: 2rem
+  margin-bottom: 3rem
+
+h2
+  margin-bottom: 1rem
 
 .table
   width: unset
@@ -31,8 +34,9 @@ h1
 
 <template>
   <main>
+    <h1>Measurement sites</h1>
     <div v-for="item in items" :key="item.title" class="item">
-      <h1>{{ item.title }}</h1>
+      <h2>{{ item.title }}</h2>
       <b-table
         borderless small striped hover sort-icon-left
         :items="item.sites"
