@@ -253,11 +253,13 @@ export class UserAccountRoutes {
     await this.userAccountRepository.save(user)
     res.status(200).send('User permissions removed\n')
   }
+
   getPermissions: RequestHandler = async (req: Request, res: Response) => {
     const user: UserAccount | undefined = await this.userAccountRepository
       .createQueryBuilder('user_account')
       .leftJoinAndSelect('user_account.permissions', 'permission')
       .leftJoinAndSelect('permission.site', 'site')
+      .where('user_account.id = :id', { id: req.params.id })
       .getOne()
 
     if (user === undefined) {
@@ -283,25 +285,25 @@ export class UserAccountRoutes {
   }
   getAllPermissions: RequestHandler = async (req: Request, res: Response) => {
     const perms = await this.permissionRepository.find({
-      relations: ['userAccounts', 'site']
+      relations: ['userAccounts', 'site'],
     })
-    const respData: PermissionInterface[] = perms.map(p => ({
+    const respData: PermissionInterface[] = perms.map((p) => ({
       permission: p.permission,
       siteId: p.site ? p.site.id : null,
-      userAccounts: p.userAccounts.map( user => ({
+      userAccounts: p.userAccounts.map((user) => ({
         userId: user.id,
-        username: user.username
+        username: user.username,
       })),
     }))
-    
+
     res.json(respData)
     return
   }
   deleteAllUnusedPermissions: RequestHandler = async (req: Request, res: Response) => {
     const perms = await this.permissionRepository.find({
-      relations: ['userAccounts']
+      relations: ['userAccounts'],
     })
-    const unusedPerms = perms.filter(p => p.userAccounts.length === 0)
+    const unusedPerms = perms.filter((p) => p.userAccounts.length === 0)
     await this.permissionRepository.remove(unusedPerms)
     res.status(200).send('Unused permission removed\n')
   }
