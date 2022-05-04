@@ -19,7 +19,7 @@ export class UserAccount {
   @Column()
   passwordHash!: string;
 
-  @ManyToMany( () => Permission)
+  @ManyToMany( () => Permission, (permission) => permission.userAccounts)
   @JoinTable()
   permissions!: Permission[];
 

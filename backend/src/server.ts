@@ -220,6 +220,9 @@ import {Authenticator} from './lib/auth'
   app.get('/user-accounts/:id/permissions', userAccountRoutes.getPermissions)
   app.delete('/user-accounts/:id/permissions', userAccountRoutes.deletePermissions)
 
+  app.get('/permissions', userAccountRoutes.getAllPermissions)
+  app.delete('/permissions', userAccountRoutes.deleteAllUnusedPermissions)
+
   app.use(errorHandler)
 
   app.listen(port, () => console.log(`App listening on port ${port}!`))

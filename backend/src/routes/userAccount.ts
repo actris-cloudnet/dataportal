@@ -5,15 +5,26 @@ import { UserAccount } from '../entity/UserAccount'
 import { Permission, PermissionType } from '../entity/Permission'
 import { Site } from '../entity/Site'
 
+interface UserAccountInterface {
+  userId?: number
+  username?: string
+}
+
 interface PermissionInterface {
+  permission?: string
+  siteId?: string | null
+  userAccounts?: UserAccountInterface[]
+}
+
+interface UserPermissionInterface {
   permission?: string
   siteId?: string | null
 }
 
-interface UserAccountInterface {
+interface UserAccountPermissionInterface {
   id?: number
   username?: string
-  permissions?: PermissionInterface[]
+  permissions?: UserPermissionInterface[]
 }
 
 export class UserAccountRoutes {
@@ -120,7 +131,7 @@ export class UserAccountRoutes {
   getAllUsers: RequestHandler = async (req: Request, res: Response) => {
     try {
       const users: UserAccount[] = await this.userAccountRepository.createQueryBuilder('user_account').getMany()
-      const returnUsers: UserAccountInterface[] = users.map((u) => ({
+      const returnUsers: UserAccountPermissionInterface[] = users.map((u) => ({
         id: u.id,
         username: u.username,
       }))
@@ -270,6 +281,23 @@ export class UserAccountRoutes {
       permissions: permissions,
     })
   }
+  getAllPermissions: RequestHandler = async (req: Request, res: Response) => {
+    const perms = await this.permissionRepository.find({
+      relations: ['userAccounts', 'site']
+    })
+    const respData: PermissionInterface[] = perms.map(p => ({
+      permission: p.permission,
+      siteId: p.site ? p.site.id : null,
+      userAccounts: p.userAccounts.map( user => ({
+        userId: user.id,
+        username: user.username
+      })),
+    }))
+    
+    res.json(respData)
+    return
+  }
+  deleteAllUnusedPermissions: RequestHandler = async (req: Request, res: Response) => {res.status(200).send('Req handled\n')}
 
   private permissionTypeFromString(roleStr: string): PermissionType | undefined {
     return (<any>PermissionType)[roleStr]

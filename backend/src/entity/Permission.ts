@@ -3,10 +3,12 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   ManyToOne,
+  ManyToMany,
   Unique,
 } from 'typeorm'
 
 import { Site } from './Site'
+import { UserAccount } from './UserAccount'
 
 export enum PermissionType {
   canUpload = 'canUpload',
@@ -26,4 +28,8 @@ export class Permission {
 
   @ManyToOne(() => Site, (site) => site.permissions, {nullable: true} )
   site?: Site;
+
+  @ManyToMany(() => UserAccount, (userAccount) => userAccount.permissions)
+  userAccounts!: UserAccount[]
+
 }
