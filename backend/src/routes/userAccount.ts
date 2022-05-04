@@ -297,7 +297,14 @@ export class UserAccountRoutes {
     res.json(respData)
     return
   }
-  deleteAllUnusedPermissions: RequestHandler = async (req: Request, res: Response) => {res.status(200).send('Req handled\n')}
+  deleteAllUnusedPermissions: RequestHandler = async (req: Request, res: Response) => {
+    const perms = await this.permissionRepository.find({
+      relations: ['userAccounts']
+    })
+    const unusedPerms = perms.filter(p => p.userAccounts.length === 0)
+    await this.permissionRepository.remove(unusedPerms)
+    res.status(200).send('Unused permission removed\n')
+  }
 
   private permissionTypeFromString(roleStr: string): PermissionType | undefined {
     return (<any>PermissionType)[roleStr]
