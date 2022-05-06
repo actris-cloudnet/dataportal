@@ -170,11 +170,13 @@ import {Authenticator} from './lib/auth'
 
   // model data upload (for Ewan only)
   app.post('/model-upload/metadata',
+    authenticator.middleware,
     express.json(),
     middleware.getSiteNameFromBody,
     uploadRoutes.validateMetadata,
     uploadRoutes.postMetadata)
   app.put('/model-upload/data/:checksum',
+    authenticator.middleware,
     middleware.validateMD5Param,
     middleware.getSiteNameFromMeta,
     express.raw({limit: '1gb'}),
@@ -214,6 +216,7 @@ import {Authenticator} from './lib/auth'
   app.delete('/user-accounts/:id', userAccountRoutes.deleteUserById)
   app.get('/user-accounts', userAccountRoutes.getAllUsers)
   app.post('/user-accounts/:id/permissions',
+    express.json(),
     userAccountRoutes.postPermissionValidate,
     userAccountRoutes.postPermission,
   )

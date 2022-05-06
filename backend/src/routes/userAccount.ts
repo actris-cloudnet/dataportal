@@ -152,10 +152,10 @@ export class UserAccountRoutes {
       .where('user.id = :id', { id: req.params.id })
       .getOne()) as UserAccount
 
-    const perm: PermissionType = this.permissionTypeFromString(req.query.permission as string)!
+    const perm: PermissionType = this.permissionTypeFromString(req.body.permission as string)!
     let permission: Permission | undefined
 
-    if (req.query.siteId === undefined) {
+    if (req.body.siteId === undefined) {
       permission = await this.permissionRepository
         .createQueryBuilder('permission')
         .leftJoinAndSelect('permission.site', 'site')
@@ -172,7 +172,7 @@ export class UserAccountRoutes {
     } else {
       const site: Site = (await this.siteRepository
         .createQueryBuilder('site')
-        .where('site.id = :siteId', { siteId: req.query.siteId })
+        .where('site.id = :siteId', { siteId: req.body.siteId })
         .getOne()) as Site
       permission = await this.permissionRepository
         .createQueryBuilder('permission')
@@ -216,25 +216,25 @@ export class UserAccountRoutes {
       res.status(400).send('Bad request: User with requested ID does not exist\n')
       return
     }
-    if (req.query.siteId !== undefined) {
-      if (typeof req.query.siteId !== 'string') {
+    if (req.body.siteId !== undefined) {
+      if (typeof req.body.siteId !== 'string') {
         res.status(400).send('Bad request: specify only one siteId per request\n')
         return
       }
       let site = await this.siteRepository
         .createQueryBuilder('site')
-        .where('site.id = :siteId', { siteId: req.query.siteId })
+        .where('site.id = :siteId', { siteId: req.body.siteId })
         .getOne()
       if (site === undefined) {
         res.status(400).send('Bad request: unexpected siteId\n')
         return
       }
     }
-    if (req.query.permission === undefined || typeof req.query.permission !== 'string') {
+    if (req.body.permission === undefined || typeof req.body.permission !== 'string') {
       res.status(400).send('Bad request: define exactly one permission per request\n')
       return
     }
-    if (this.permissionTypeFromString(req.query.permission) === undefined) {
+    if (this.permissionTypeFromString(req.body.permission) === undefined) {
       res.status(400).send('Bad request: unexpected permission type\n')
       return
     }

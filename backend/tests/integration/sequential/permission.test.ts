@@ -28,9 +28,10 @@ describe('userAccount permission tests', () => {
   it('adds canUpload permission for mace-head for all users', async () => {
     const resp = await axios.get(USER_ACCOUNTS_URL)
     for (const user of resp.data) {
-      const respPost = await axios.post(
-        USER_ACCOUNTS_URL.concat('/', user.id, '/permissions?siteId=mace-head&permission=canUpload')
-      )
+      const respPost = await axios.post(USER_ACCOUNTS_URL.concat('/', user.id, '/permissions'), {
+        siteId: 'mace-head',
+        permission: 'canUpload',
+      })
       expect(respPost.status).toBe(200)
     }
   })
@@ -38,9 +39,10 @@ describe('userAccount permission tests', () => {
     const resp = await axios.get(USER_ACCOUNTS_URL)
     for (const user of resp.data) {
       await expect(
-        axios.post(
-          USER_ACCOUNTS_URL.concat('/', user.id, '/permissions?siteId=mace-head&permission=canUpload&siteId=hyytiala')
-        )
+        axios.post(USER_ACCOUNTS_URL.concat('/', user.id, '/permissions'), {
+          siteId: ['mace-head', 'hyytiala'],
+          permission: 'canUpload',
+        })
       ).rejects.toMatchObject({ response: { status: 400 } })
     }
   })
@@ -48,7 +50,10 @@ describe('userAccount permission tests', () => {
     const resp = await axios.get(USER_ACCOUNTS_URL)
     for (const user of resp.data) {
       await expect(
-        axios.post(USER_ACCOUNTS_URL.concat('/', user.id, '/permissions?siteId=mace-head&permission=canTypoUpload'))
+        axios.post(USER_ACCOUNTS_URL.concat('/', user.id, '/permissions'), {
+          siteId: 'mace-head',
+          permission: 'canTypoUpload',
+        })
       ).rejects.toMatchObject({ response: { status: 400 } })
     }
   })
@@ -56,7 +61,9 @@ describe('userAccount permission tests', () => {
   it('adds canProcess permission all sites (ie site is null) for all users', async () => {
     const resp = await axios.get(USER_ACCOUNTS_URL)
     for (const user of resp.data) {
-      const respPost = await axios.post(USER_ACCOUNTS_URL.concat('/', user.id, '/permissions?permission=canProcess'))
+      const respPost = await axios.post(USER_ACCOUNTS_URL.concat('/', user.id, '/permissions'), {
+        permission: 'canProcess',
+      })
       expect(respPost.status).toBe(200)
     }
   })
