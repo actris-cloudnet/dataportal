@@ -2,7 +2,7 @@ import { Connection, Repository } from 'typeorm'
 import { Request, RequestHandler, Response } from 'express'
 
 import { UserAccount } from '../entity/UserAccount'
-import { Permission, PermissionType } from '../entity/Permission'
+import { Permission, PermissionType, permissionTypeFromString } from '../entity/Permission'
 import { Site } from '../entity/Site'
 
 interface UserAccountInterface {
@@ -152,7 +152,7 @@ export class UserAccountRoutes {
       .where('user.id = :id', { id: req.params.id })
       .getOne()) as UserAccount
 
-    const perm: PermissionType = this.permissionTypeFromString(req.body.permission as string)!
+    const perm: PermissionType = permissionTypeFromString(req.body.permission as string)!
     let permission: Permission | undefined
 
     if (req.body.siteId === undefined) {
@@ -234,7 +234,7 @@ export class UserAccountRoutes {
       res.status(400).send('Bad request: define exactly one permission per request\n')
       return
     }
-    if (this.permissionTypeFromString(req.body.permission) === undefined) {
+    if (permissionTypeFromString(req.body.permission) === undefined) {
       res.status(400).send('Bad request: unexpected permission type\n')
       return
     }
@@ -306,9 +306,5 @@ export class UserAccountRoutes {
     const unusedPerms = perms.filter((p) => p.userAccounts.length === 0)
     await this.permissionRepository.remove(unusedPerms)
     res.status(200).send('Unused permission removed\n')
-  }
-
-  private permissionTypeFromString(roleStr: string): PermissionType | undefined {
-    return (<any>PermissionType)[roleStr]
   }
 }

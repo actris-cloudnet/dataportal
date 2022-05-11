@@ -1,11 +1,4 @@
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  ManyToOne,
-  ManyToMany,
-  Unique,
-} from 'typeorm'
+import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, ManyToMany, Unique } from 'typeorm'
 
 import { Site } from './Site'
 import { UserAccount } from './UserAccount'
@@ -21,15 +14,18 @@ export enum PermissionType {
 @Unique(['permission', 'site'])
 export class Permission {
   @PrimaryGeneratedColumn()
-  id?: number;
+  id?: number
 
   @Column()
-  permission!: PermissionType;
+  permission!: PermissionType
 
-  @ManyToOne(() => Site, (site) => site.permissions, {nullable: true} )
-  site?: Site;
+  @ManyToOne(() => Site, (site) => site.permissions, { nullable: true })
+  site?: Site
 
   @ManyToMany(() => UserAccount, (userAccount) => userAccount.permissions)
   userAccounts!: UserAccount[]
+}
 
+export function permissionTypeFromString(roleStr: string): PermissionType | undefined {
+  return (<any>PermissionType)[roleStr]
 }

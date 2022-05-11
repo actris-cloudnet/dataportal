@@ -3,6 +3,7 @@ import {Connection, createConnection} from 'typeorm/'
 import {backendPrivateUrl, backendPublicUrl, str2base64} from '../../lib'
 import {Status} from '../../../src/entity/Upload'
 import {promises as fsp} from 'fs'
+import { readFileSync } from 'fs'
 
 let conn: Connection
 let instrumentRepo: any
@@ -48,7 +49,7 @@ const validModelMetadata = {
   site: 'bucharest'
 }
 
-const headers = {'authorization': `Basic ${str2base64('granada:lol')}`}
+const headers = {'authorization': `Basic ${str2base64('granada:PASSWORDFORgranada')}`}
 
 beforeAll(async () => {
   conn = await createConnection()
@@ -58,6 +59,52 @@ beforeAll(async () => {
   // Make sure these tables are initialized correctly
   await conn.getRepository('regular_file').save(JSON.parse((await fsp.readFile('fixtures/2-regular_file.json')).toString()))
   await conn.getRepository('model_file').save(JSON.parse((await fsp.readFile('fixtures/2-model_file.json')).toString()))
+
+  // Init userAccounts and permissions
+  const USER_ACCOUNTS_URL = `${backendPrivateUrl}user-accounts`
+  const PERMISSIONS_URL = `${backendPrivateUrl}permissions`
+
+  const respGet = await axios.get(USER_ACCOUNTS_URL)
+  // Remove users from the db in the beginning
+  for (const user of respGet.data) {
+    await axios.delete(USER_ACCOUNTS_URL.concat('/', user.id))
+  }
+  // remove all unused permissions, that is, all permissions since there is no users
+  const respDelete = await axios.delete(PERMISSIONS_URL)
+  expect(respDelete.status).toBe(200)
+  const respGetAfterDelete = await axios.get(PERMISSIONS_URL)
+  expect(respGetAfterDelete.data).toHaveLength(0)
+
+  // Add users
+  const rawData = readFileSync('tests/data/userAccountCredentials.json', 'utf8')
+  const data = JSON.parse(rawData)
+  expect(data).toHaveLength(6)
+  const respPost = await axios.post(USER_ACCOUNTS_URL, data)
+  expect(respPost.status).toBe(200)
+  // Give permissions
+  const respUsers = await axios.get(USER_ACCOUNTS_URL)
+  for (const user of respUsers.data){
+    let permission = undefined
+    if (user.username === 'alice'){
+      permission = {permission: 'canUpload'} // Alice can upload to all sites
+    } else if (user.username === 'bob'){
+      permission = {permission: 'canUploadModel'} // Bob can upload models to all sites
+    } else if (user.username === 'bucharest'){
+      permission = {permission: 'canUpload', siteId: 'bucharest'}
+    } else if (user.username === 'granada'){
+      permission = {permission: 'canUpload', siteId: 'granada'}
+    } else if (user.username === 'mace-head'){
+      permission = {permission: 'canUpload', siteId: 'mace-head'}
+    }
+    if (permission !== undefined){
+      const respPermission = await axios.post(USER_ACCOUNTS_URL.concat('/',user.id,'/permissions'),permission)
+      expect(respPermission.status).toBe(200)
+    } else {
+      expect(user.username).toBe('eve')
+    }
+  }
+
+
 })
 
 afterAll(async () => {
@@ -71,7 +118,9 @@ afterAll(async () => {
 describe('POST /upload/metadata', () => {
 
   beforeEach(async () => {
-    return await instrumentRepo.delete({})
+    await instrumentRepo.delete({})
+    await miscUploadRepo.delete({})
+    return
   })
 
   test('inserts new metadata', async () => {
@@ -254,15 +303,24 @@ describe('POST /upload/metadata', () => {
     return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
   })
 
-  test('responds with 400 on missing site', async () => {
+  //test('responds with 400 on missing site', async () => {
+  //  const payload = {...validMetadata, site: undefined}
+  //  return expect(axios.post(metadataUrl, payload)).rejects.toMatchObject({ response: { status: 400}})
+  //})
+  test('responds with 401 on missing authentication', async () => {
     const payload = {...validMetadata, site: undefined}
-    return expect(axios.post(metadataUrl, payload)).rejects.toMatchObject({ response: { status: 400}})
+    return expect(axios.post(metadataUrl, payload)).rejects.toMatchObject({ response: { status: 401}})
   })
 
-  test('responds with 422 on invalid site', async () => {
+  //test('responds with 422 on invalid site', async () => {
+  //  const badHeaders = {'authorization':  `Basic ${str2base64('espoo:lol')}`}
+  //  return expect(axios.post(metadataUrl, validMetadata, {headers: badHeaders})).rejects
+  //    .toMatchObject({ response: { status: 422}})
+  //})
+  test('responds with 401 on non-existent username', async () => {
     const badHeaders = {'authorization':  `Basic ${str2base64('espoo:lol')}`}
     return expect(axios.post(metadataUrl, validMetadata, {headers: badHeaders})).rejects
-      .toMatchObject({ response: { status: 422}})
+      .toMatchObject({ response: { status: 401}})
   })
 })
 

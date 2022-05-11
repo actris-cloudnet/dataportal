@@ -20,7 +20,7 @@ import {QualityReportRoutes} from './routes/qualityreport'
 import {SiteContactRoutes} from './routes/siteContact'
 import {UserAccountRoutes} from './routes/userAccount'
 import env from './lib/env'
-import {Authenticator} from './lib/auth'
+import {Authenticator, Authorizator} from './lib/auth'
 
 (async function() {
   const port = 3000
@@ -31,6 +31,7 @@ import {Authenticator} from './lib/auth'
   const middleware = new Middleware(conn)
 
   const authenticator = new Authenticator(conn)
+  const authorizator = new Authorizator(conn)
 
 
   const fileRoutes = new FileRoutes(conn)
@@ -75,13 +76,6 @@ import {Authenticator} from './lib/auth'
     users: { 'admin': env.STATS_PASSWORD },
     challenge: true,
   })
-
-  //let authWithDatabaseMiddleware = basicAuth({
-  //  authorizer: authenticator.authorizer,
-  //  authorizeAsync: true,
-  //  challenge: true,
-  //  unauthorizedResponse: {status: 403, error: 'no access'}
-  //})
 
   if (process.env.NODE_ENV != 'production') {
     app.use(function(_req, res, next) {
@@ -152,7 +146,9 @@ import {Authenticator} from './lib/auth'
 
   // protected (for sites)
   app.post('/upload/metadata',
-    middleware.getSiteNameFromAuth,
+    authenticator.middleware,
+    authorizator.uploadMiddleware,
+    middleware.getSiteNameFromAuth,// Remove this when auth mw is ready
     express.json(),
     uploadRoutes.validateMetadata,
     uploadRoutes.postMetadata,
@@ -171,14 +167,16 @@ import {Authenticator} from './lib/auth'
   // model data upload (for Ewan only)
   app.post('/model-upload/metadata',
     authenticator.middleware,
+    authorizator.modelUploadMiddleware,
     express.json(),
-    middleware.getSiteNameFromBody,
+    middleware.getSiteNameFromBody, // Remove this when ready
     uploadRoutes.validateMetadata,
     uploadRoutes.postMetadata)
   app.put('/model-upload/data/:checksum',
     authenticator.middleware,
+    authorizator.modelUploadMiddleware,
     middleware.validateMD5Param,
-    middleware.getSiteNameFromMeta,
+    middleware.getSiteNameFromMeta, // Remove this when ready
     express.raw({limit: '1gb'}),
     uploadRoutes.putData)
 
