@@ -71,6 +71,8 @@ In addition to unit and integration tests, the project includes selenium tests.
 To run selenium tests testing both backend and frontend, issue
 
     cd .github
+    docker compose down
+    docker compose build
     SELENIUM_TEST_TARGET=tests/selenium docker compose run test-selenium
     
     
