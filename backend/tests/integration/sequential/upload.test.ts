@@ -332,18 +332,18 @@ describe('PUT /upload/data/:checksum', () => {
     return expect(axios.put(url, validFile, {headers})).rejects.toMatchObject({ response: { status: 400}})
   })
 
-  test('responds with 400 when submitting data from a wrong site', async () => {
+  test('responds with 401 when submitting data with wrong credentials', async () => {
     const now = new Date()
     const headers = {'authorization': `Basic ${str2base64('martinlaakso:lol')}`}
     await expect(axios.put(validUrl, validFile, {headers}))
-      .rejects.toMatchObject({ response: { status: 400}})
+      .rejects.toMatchObject({ response: { status: 401}})
     const md = await instrumentRepo.findOne({checksum: validMetadata.checksum})
     return expect(new Date(md.updatedAt).getTime()).toBeLessThan(now.getTime())
   })
 })
 
 describe('PUT /model-upload/data/:checksum', () => {
-
+  const headers = {'authorization': `Basic ${str2base64('bob:bobs_pass')}`}
   beforeEach(async () => {
     await modelRepo.delete({})
     return axios.post(modelMetadataUrl, validModelMetadata, {headers})
@@ -360,7 +360,7 @@ describe('PUT /model-upload/data/:checksum', () => {
 })
 
 describe('POST /model-upload/metadata', () => {
-
+  const headers = {'authorization': `Basic ${str2base64('bob:bobs_pass')}`}
   const metaData = {
     filename: '20200122_bucharest_icon-iglo-12-23.nc',
     measurementDate: '2020-01-22',
@@ -428,9 +428,9 @@ describe('POST /model-upload/metadata', () => {
     return expect(axios.post(modelMetadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
   })
 
-  test('responds with 422 on missing site', async () => {
+  test('responds with 400 on missing site', async () => {
     const payload = {...validModelMetadata, site: undefined}
-    return expect(axios.post(modelMetadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
+    return expect(axios.post(modelMetadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 400}})
   })
 
   test('responds with 422 on empty site', async () => {

@@ -21,6 +21,7 @@ import {SiteContactRoutes} from './routes/siteContact'
 import {UserAccountRoutes} from './routes/userAccount'
 import env from './lib/env'
 import {Authenticator, Authorizator} from './lib/auth'
+import { PermissionType, permissionTypeFromString } from './entity/Permission'
 
 (async function() {
   const port = 3000
@@ -48,6 +49,8 @@ import {Authenticator, Authorizator} from './lib/auth'
 
   const siteContactRoutes = new SiteContactRoutes(conn)
   const userAccountRoutes = new UserAccountRoutes(conn)
+  const canUpload: PermissionType = permissionTypeFromString('canUpload')!
+  const canUploadModel: PermissionType = permissionTypeFromString('canUploadModel')!
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     if (err.status < 500) console.log(`Error ${err.status} in ${req.method} ${req.path}:`, stringify(err)) // Client error
@@ -144,18 +147,21 @@ import {Authenticator, Authorizator} from './lib/auth'
   app.get('/api/download/image/*', dlRoutes.image)
   app.get('/api/quality/:uuid', qualityRoutes.qualityReport)
 
+  
   // protected (for sites)
   app.post('/upload/metadata',
     authenticator.middleware,
-    authorizator.uploadMiddleware,
-    middleware.getSiteNameFromAuth,// Remove this when auth mw is ready
     express.json(),
+    authorizator.uploadMiddleware(canUpload),
+    //middleware.getSiteNameFromAuth,// Remove this when auth mw is ready
     uploadRoutes.validateMetadata,
     uploadRoutes.postMetadata,
     errorAsPlaintext)
   app.put('/upload/data/:checksum',
+    authenticator.middleware,
+    authorizator.uploadMiddleware(canUpload),
     middleware.validateMD5Param,
-    middleware.getSiteNameFromAuth,
+    //middleware.getSiteNameFromAuth,
     express.raw({limit: '100gb'}),
     uploadRoutes.putData,
     errorAsPlaintext)
@@ -167,16 +173,18 @@ import {Authenticator, Authorizator} from './lib/auth'
   // model data upload (for Ewan only)
   app.post('/model-upload/metadata',
     authenticator.middleware,
-    authorizator.modelUploadMiddleware,
     express.json(),
-    middleware.getSiteNameFromBody, // Remove this when ready
+    authorizator.uploadMiddleware(canUploadModel),
+    //middleware.getSiteNameFromBody, // Remove this when ready
     uploadRoutes.validateMetadata,
     uploadRoutes.postMetadata)
+
+  const isModelDataUpload = true
   app.put('/model-upload/data/:checksum',
     authenticator.middleware,
-    authorizator.modelUploadMiddleware,
+    authorizator.uploadMiddleware(canUploadModel, isModelDataUpload),
     middleware.validateMD5Param,
-    middleware.getSiteNameFromMeta, // Remove this when ready
+    //middleware.getSiteNameFromMeta, // Remove this when ready
     express.raw({limit: '1gb'}),
     uploadRoutes.putData)
 

@@ -1,6 +1,8 @@
 import { Connection, Repository } from 'typeorm'
 import { RequestHandler } from 'express'
 import { UserAccount } from '../entity/UserAccount'
+import {ModelUpload} from '../entity/Upload'
+import { PermissionType, permissionTypeFromString } from '../entity/Permission'
 import { Site } from '../entity/Site'
 const auth = require('basic-auth')
 const md5 = require('apache-md5')
@@ -51,55 +53,68 @@ export class Authenticator {
 export class Authorizator {
   private userAccountRepository: Repository<UserAccount>
   private siteRepository: Repository<Site>
+  private modelUploadRepository: Repository<ModelUpload>
 
   constructor(conn: Connection) {
     this.userAccountRepository = conn.getRepository<UserAccount>('user_account')
     this.siteRepository = conn.getRepository<Site>('site')
+    this.modelUploadRepository= conn.getRepository<ModelUpload>('model_upload')
   }
 
-  uploadMiddleware: RequestHandler = async (req, res, next) => {
-    // Authenticator should handle authentication first and add username into res.locals
-    if (!res.locals.authenticated || !res.locals.username) {
-      console.error('Authorizator received unauthenticated request')
-      res.status(401).send('Unauthorized')
-      return
-    }
+  uploadMiddleware = (permission: PermissionType, isModelDataUpload: boolean = false): RequestHandler => {
+    return async (req,res,next)  => {
+      // Authenticator should handle authentication first and add username into res.locals
+      if (!res.locals.authenticated || !res.locals.username) {
+        console.error('Authorizator received unauthenticated request')
+        res.status(401).send('Unauthorized')
+        return
+      }
 
-    // Handle legacy upload
-    let site: Site
-    if (!req.body || !req.body.site) {
-      console.log('Hoi from Authorizator, no site in body', res.locals.username)
-      // username should match some site
-      const siteCandidate: Site | undefined = await this.siteRepository.findOne(res.locals.username)
-      if (siteCandidate === undefined) {
-        res.status(400).send('Bad request: Add site')
+      let site: Site
+      if( !isModelDataUpload) {
+        // Handle legacy upload
+        if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('site')) {
+          // username should match some site
+          const siteCandidate: Site | undefined = await this.siteRepository.findOne(res.locals.username)
+          if (siteCandidate === undefined) {
+            res.status(400).send('Bad request: Add site')
+            return
+          }
+          site = siteCandidate!
+        } else {
+          const siteCandidate: Site | undefined = await this.siteRepository.findOne(req.body.site)
+          if (siteCandidate === undefined) {
+            res.status(422).send('Unprocessable Entity: site does not exist')
+            return
+          }
+          site = siteCandidate!
+        }
+      } else { // modeldata upload checks site from db based on the checksum
+        const modelUploadCandidate: ModelUpload | undefined = await this.modelUploadRepository.findOne(
+          {checksum: req.params.checksum}, { relations: ['site'] })
+        if( modelUploadCandidate === undefined) {
+          res.status(422).send('Unprocessable Entity: checksum does not exist in the database')
+          return
+        }
+        site = modelUploadCandidate!.site
+      }
+      // check that username has permission for the given site
+      const userWithProperPermission = await this.userAccountRepository
+        .createQueryBuilder('user_account')
+        .leftJoinAndSelect('user_account.permissions', 'permission')
+        .leftJoinAndSelect('permission.site', 'site')
+        .where('user_account.username = :username')
+        .andWhere('site IS NULL OR site.id = :siteId')
+        .andWhere('permission.permission = :permission')
+        .setParameters({ username: res.locals.username, siteId: site.id, permission: permission })
+        .getOne()
+      if (userWithProperPermission === undefined) {
+        res.status(401).send('Unauthorized: missing permission to upload for the site')
         return
       }
-      site = siteCandidate!
-    } else {
-      const siteCandidate: Site | undefined = await this.siteRepository.findOne(req.body.site)
-      if (siteCandidate === undefined) {
-        res.status(400).send('Bad request: site does not exist')
-        return
+      req.params.site = site.id
+      return next()
+
       }
-      site = siteCandidate!
-    }
-    // check that username has permission for the given site
-    const userWithProperPermission = await this.userAccountRepository
-      .createQueryBuilder('user_account')
-      .leftJoinAndSelect('user_account.permissions', 'permission')
-      .leftJoinAndSelect('permission.site', 'site')
-      .where('user_account.username = :username')
-      .andWhere('site IS NULL OR site.id = :siteId')
-      .setParameters({ username: res.locals.username, siteId: site.id })
-      .getOne()
-    if (userWithProperPermission === undefined) {
-      res.status(401).send('Unauthorized: missing permission to upload for the site')
-      return
-    }
-    return next()
-  }
-  modelUploadMiddleware: RequestHandler = async (req, res, next) => {
-    return next()
-  }
+  } 
 }
