@@ -1,7 +1,6 @@
 import { Connection, Repository } from 'typeorm'
 import { RequestHandler } from 'express'
 import { UserAccount } from '../entity/UserAccount'
-import { permissionTypeFromString } from '../entity/Permission'
 import { Site } from '../entity/Site'
 const auth = require('basic-auth')
 const md5 = require('apache-md5')
