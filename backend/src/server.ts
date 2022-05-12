@@ -147,7 +147,7 @@ import { PermissionType, permissionTypeFromString } from './entity/Permission'
   app.get('/api/download/image/*', dlRoutes.image)
   app.get('/api/quality/:uuid', qualityRoutes.qualityReport)
 
-  
+
   // protected (for sites)
   app.post('/upload/metadata',
     authenticator.middleware,

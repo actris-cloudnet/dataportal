@@ -1,8 +1,8 @@
 import { Connection, Repository } from 'typeorm'
 import { RequestHandler } from 'express'
 import { UserAccount } from '../entity/UserAccount'
-import {ModelUpload} from '../entity/Upload'
-import { PermissionType, permissionTypeFromString } from '../entity/Permission'
+import { ModelUpload } from '../entity/Upload'
+import { PermissionType } from '../entity/Permission'
 import { Site } from '../entity/Site'
 const auth = require('basic-auth')
 const md5 = require('apache-md5')
@@ -58,11 +58,11 @@ export class Authorizator {
   constructor(conn: Connection) {
     this.userAccountRepository = conn.getRepository<UserAccount>('user_account')
     this.siteRepository = conn.getRepository<Site>('site')
-    this.modelUploadRepository= conn.getRepository<ModelUpload>('model_upload')
+    this.modelUploadRepository = conn.getRepository<ModelUpload>('model_upload')
   }
 
   uploadMiddleware = (permission: PermissionType, isModelDataUpload: boolean = false): RequestHandler => {
-    return async (req,res,next)  => {
+    return async (req, res, next) => {
       // Authenticator should handle authentication first and add username into res.locals
       if (!res.locals.authenticated || !res.locals.username) {
         console.error('Authorizator received unauthenticated request')
@@ -71,9 +71,12 @@ export class Authorizator {
       }
 
       let site: Site
-      if( !isModelDataUpload) {
+      if (!isModelDataUpload) {
         // Handle legacy upload
-        if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('site')) {
+        if (
+          !Object.prototype.hasOwnProperty.call(req, 'body') ||
+          !Object.prototype.hasOwnProperty.call(req.body, 'site')
+        ) {
           // username should match some site
           const siteCandidate: Site | undefined = await this.siteRepository.findOne(res.locals.username)
           if (siteCandidate === undefined) {
@@ -89,10 +92,13 @@ export class Authorizator {
           }
           site = siteCandidate!
         }
-      } else { // modeldata upload checks site from db based on the checksum
+      } else {
+        // modeldata upload checks site from db based on the checksum
         const modelUploadCandidate: ModelUpload | undefined = await this.modelUploadRepository.findOne(
-          {checksum: req.params.checksum}, { relations: ['site'] })
-        if( modelUploadCandidate === undefined) {
+          { checksum: req.params.checksum },
+          { relations: ['site'] }
+        )
+        if (modelUploadCandidate === undefined) {
           res.status(422).send('Unprocessable Entity: checksum does not exist in the database')
           return
         }
@@ -114,7 +120,6 @@ export class Authorizator {
       }
       req.params.site = site.id
       return next()
-
-      }
-  } 
+    }
+  }
 }
