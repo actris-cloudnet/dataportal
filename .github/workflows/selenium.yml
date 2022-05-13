@@ -1,5 +1,9 @@
 name: Selenium test
-on: [pull_request]
+on:
+  pull_request:
+  push:
+    branches:
+      - master
 env:
   COMPOSE_FILE: .github/docker-compose.yml
 
