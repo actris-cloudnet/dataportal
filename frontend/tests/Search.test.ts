@@ -113,6 +113,16 @@ describe('Search.vue', () => {
       return expect(dateToISOString(secondArg.params.dateFrom)).toEqual(newValue)
     })
 
+    it('Inserts correct parameters to url query string', async () => {
+      const dateFrom = '2019-01-01'
+      const dateTo = '2020-01-01'
+      await changeInputAndNextTick('dateFrom', dateFrom)
+      await changeInputAndNextTick('dateTo', dateTo)
+      const url = document.URL
+      const query = url.substring(url.indexOf('?') + 1)
+      return expect(query).toMatch(`dateFrom=${dateFrom}&dateTo=${dateTo}`)
+    })
+
     it('fetches updated list of files from api on dateTo change', async () => {
       const newValue = filesSortedByDate[3].measurementDate
       await changeInputAndNextTick('dateTo', newValue)
