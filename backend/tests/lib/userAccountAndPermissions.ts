@@ -21,27 +21,33 @@ export async function initUsersAndPermissions() {
   // Add users
   const rawData = readFileSync('tests/data/userAccountCredentials.json', 'utf8')
   const data = JSON.parse(rawData)
-  expect(data).toHaveLength(6)
+  expect(data).toHaveLength(8)
   const respPost = await axios.post(USER_ACCOUNTS_URL, data)
   expect(respPost.status).toBe(200)
   // Give permissions
   const respUsers = await axios.get(USER_ACCOUNTS_URL)
   for (const user of respUsers.data) {
-    let permission = undefined
+    let permissions: any[] = []
     if (user.username === 'alice') {
-      permission = { permission: 'canUpload' } // Alice can upload to all sites
+      permissions = [ { permission: 'canUpload' }] // Alice can upload to all sites
     } else if (user.username === 'bob') {
-      permission = { permission: 'canUploadModel' } // Bob can upload models to all sites
+      permissions = [{ permission: 'canUploadModel' }] // Bob can upload models to all sites
+    } else if (user.username === 'carol') {
+      permissions = [{permission: 'canUpload', siteId: 'bucharest'},{permission: 'canUpload', siteId: 'mace-head'} ]
+    } else if (user.username === 'david') {
+      permissions = [{permission: 'canUploadModel', siteId: 'granada'},{permission: 'canUpload', siteId: 'mace-head'} ]
     } else if (user.username === 'bucharest') {
-      permission = { permission: 'canUpload', siteId: 'bucharest' }
+      permissions = [{ permission: 'canUpload', siteId: 'bucharest' }]
     } else if (user.username === 'granada') {
-      permission = { permission: 'canUpload', siteId: 'granada' }
+      permissions = [{ permission: 'canUpload', siteId: 'granada' }]
     } else if (user.username === 'mace-head') {
-      permission = { permission: 'canUpload', siteId: 'mace-head' }
+      permissions = [{ permission: 'canUpload', siteId: 'mace-head' }]
     }
-    if (permission !== undefined) {
-      const respPermission = await axios.post(USER_ACCOUNTS_URL.concat('/', user.id, '/permissions'), permission)
-      expect(respPermission.status).toBe(200)
+    if (permissions.length > 0) {
+      for (const permission of permissions){
+        const respPermission = await axios.post(USER_ACCOUNTS_URL.concat('/', user.id, '/permissions'), permission)
+        expect(respPermission.status).toBe(200)
+      }
     } else {
       expect(user.username).toBe('eve')
     }

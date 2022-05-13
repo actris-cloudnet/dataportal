@@ -20,7 +20,7 @@ beforeAll(async () => {
   // Add users
   const rawData = readFileSync('tests/data/userAccountCredentials.json', 'utf8')
   const data = JSON.parse(rawData)
-  expect(data).toHaveLength(6)
+  expect(data).toHaveLength(8)
   const respPost = await axios.post(USER_ACCOUNTS_URL, data)
   expect(respPost.status).toBe(200)
 })

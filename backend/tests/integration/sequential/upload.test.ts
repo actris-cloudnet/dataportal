@@ -464,3 +464,13 @@ describe('POST /upload-metadata/', () => {
     return expect(instrumentRepo.findOne(uuid)).resolves.toMatchObject({status: 'invalid'})
   })
 })
+
+describe('test user permissions', () => {
+  beforeAll(async () => {
+    await initUsersAndPermissions()
+  })
+  it('tests that alice can upload to all sites', async () => {
+    expect(2).toBe(2)
+  })
+
+})

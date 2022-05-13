@@ -20,18 +20,18 @@ describe('userAccount tests', () => {
   it('adds six users succesfully', async () => {
     const rawData = readFileSync('tests/data/userAccountCredentials.json', 'utf8')
     const data = JSON.parse(rawData)
-    expect(data).toHaveLength(6)
+    expect(data).toHaveLength(8)
     let resp = await axios.post(USER_ACCOUNTS_URL, data)
     expect(resp.status).toBe(200)
   })
   it('responds with six users', async () => {
     let req = await axios.get(USER_ACCOUNTS_URL)
-    expect(req.data).toHaveLength(6)
+    expect(req.data).toHaveLength(8)
   })
   it('deletes all users one at the time', async () => {
     let req = await axios.get(USER_ACCOUNTS_URL)
     let nUsers = req.data.length
-    expect(nUsers).toBe(6)
+    expect(nUsers).toBe(8)
     for (const user of req.data) {
       await axios.delete(USER_ACCOUNTS_URL.concat('/', user.id))
       let reqGet = await axios.get(USER_ACCOUNTS_URL)
