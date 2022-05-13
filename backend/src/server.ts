@@ -150,18 +150,14 @@ import { PermissionType, permissionTypeFromString } from './entity/Permission'
 
   // protected (for sites)
   app.post('/upload/metadata',
-    authenticator.middleware,
+    middleware.getSiteNameFromAuth,
     express.json(),
-    authorizator.uploadMiddleware(canUpload),
-    //middleware.getSiteNameFromAuth,// Remove this when auth mw is ready
     uploadRoutes.validateMetadata,
     uploadRoutes.postMetadata,
     errorAsPlaintext)
   app.put('/upload/data/:checksum',
-    authenticator.middleware,
-    authorizator.uploadMiddleware(canUpload),
     middleware.validateMD5Param,
-    //middleware.getSiteNameFromAuth,
+    middleware.getSiteNameFromAuth,
     express.raw({limit: '100gb'}),
     uploadRoutes.putData,
     errorAsPlaintext)
@@ -172,21 +168,48 @@ import { PermissionType, permissionTypeFromString } from './entity/Permission'
 
   // model data upload (for Ewan only)
   app.post('/model-upload/metadata',
+    express.json(),
+    middleware.getSiteNameFromBody,
+    uploadRoutes.validateMetadata,
+    uploadRoutes.postMetadata)
+  app.put('/model-upload/data/:checksum',
+    middleware.validateMD5Param,
+    middleware.getSiteNameFromMeta,
+    express.raw({limit: '1gb'}),
+    uploadRoutes.putData)
+
+  // \BEGIN TEST routes
+  // replace protected upload sites with these after they have been tested in production
+  app.post('/api/test/upload/metadata',
     authenticator.middleware,
     express.json(),
-    authorizator.uploadMiddleware(canUploadModel),
-    //middleware.getSiteNameFromBody, // Remove this when ready
+    authorizator.uploadMiddleware({permission:canUpload}),
+    uploadRoutes.validateMetadata,
+    uploadRoutes.postMetadata,
+    errorAsPlaintext)
+  app.put('/api/test/upload/data/:checksum',
+    authenticator.middleware,
+    authorizator.uploadMiddleware({permission:canUpload, isDataUpload: true}),
+    middleware.validateMD5Param,
+    express.raw({limit: '100gb'}),
+    uploadRoutes.putData,
+    errorAsPlaintext)
+
+  // model data upload (for Ewan only)
+  app.post('/api/test/model-upload/metadata',
+    authenticator.middleware,
+    express.json(),
+    authorizator.uploadMiddleware({permission:canUploadModel}),
     uploadRoutes.validateMetadata,
     uploadRoutes.postMetadata)
 
-  const isModelDataUpload = true
-  app.put('/model-upload/data/:checksum',
+  app.put('/api/test/model-upload/data/:checksum',
     authenticator.middleware,
-    authorizator.uploadMiddleware(canUploadModel, isModelDataUpload),
+    authorizator.uploadMiddleware({permission:canUploadModel, isModelDataUpload: true}),
     middleware.validateMD5Param,
-    //middleware.getSiteNameFromMeta, // Remove this when ready
     express.raw({limit: '1gb'}),
     uploadRoutes.putData)
+  // \END test routes
 
   // private
   app.put('/files/*', express.json(), fileRoutes.putFile)

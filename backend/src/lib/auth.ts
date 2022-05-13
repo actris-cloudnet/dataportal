@@ -50,6 +50,12 @@ export class Authenticator {
   }
 }
 
+interface UploadMiddlewareParams {
+  permission: PermissionType;
+  isDataUpload?: boolean;
+  isModelDataUpload?: boolean;
+}
+
 export class Authorizator {
   private userAccountRepository: Repository<UserAccount>
   private siteRepository: Repository<Site>
@@ -61,7 +67,7 @@ export class Authorizator {
     this.modelUploadRepository = conn.getRepository<ModelUpload>('model_upload')
   }
 
-  uploadMiddleware = (permission: PermissionType, isModelDataUpload: boolean = false): RequestHandler => {
+  uploadMiddleware = ({permission, isDataUpload = false, isModelDataUpload = false }: UploadMiddlewareParams): RequestHandler => {
     return async (req, res, next) => {
       // Authenticator should handle authentication first and add username into res.locals
       if (!res.locals.authenticated || !res.locals.username) {
@@ -71,7 +77,7 @@ export class Authorizator {
       }
 
       let site: Site
-      if (!isModelDataUpload) {
+      if (!isModelDataUpload && !isDataUpload) {
         // Handle legacy upload
         if (
           !Object.prototype.hasOwnProperty.call(req, 'body') ||
@@ -93,16 +99,24 @@ export class Authorizator {
           site = siteCandidate!
         }
       } else {
-        // modeldata upload checks site from db based on the checksum
-        const modelUploadCandidate: ModelUpload | undefined = await this.modelUploadRepository.findOne(
-          { checksum: req.params.checksum },
-          { relations: ['site'] }
-        )
-        if (modelUploadCandidate === undefined) {
-          res.status(422).send('Unprocessable Entity: checksum does not exist in the database')
+        if(isDataUpload){
+          res.status(501).send('Write some code')
+          return
+        } else if (isModelDataUpload){
+          // modeldata upload checks site from db based on the checksum
+          const modelUploadCandidate: ModelUpload | undefined = await this.modelUploadRepository.findOne(
+            { checksum: req.params.checksum },
+            { relations: ['site'] }
+          )
+          if (modelUploadCandidate === undefined) {
+            res.status(422).send('Unprocessable Entity: checksum does not exist in the database')
+            return
+          }
+          site = modelUploadCandidate!.site
+        } else {
+          res.status(500).send('Write some code')
           return
         }
-        site = modelUploadCandidate!.site
       }
       // check that username has permission for the given site
       const userWithProperPermission = await this.userAccountRepository

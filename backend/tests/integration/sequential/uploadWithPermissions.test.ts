@@ -3,18 +3,21 @@ import {Connection, createConnection} from 'typeorm/'
 import {backendPrivateUrl, backendPublicUrl, str2base64} from '../../lib'
 import {Status} from '../../../src/entity/Upload'
 import {promises as fsp} from 'fs'
+import {initUsersAndPermissions} from '../../lib/userAccountAndPermissions'
+
+const md5 = require('blueimp-md5')
 
 let conn: Connection
 let instrumentRepo: any
 let modelRepo: any
 let miscUploadRepo: any
 
-const metadataUrl = `${backendPrivateUrl}upload/metadata/`
-const modelMetadataUrl = `${backendPrivateUrl}model-upload/metadata/`
+const metadataUrl = `${backendPrivateUrl}api/test/upload/metadata/`
+const modelMetadataUrl = `${backendPrivateUrl}api/test/model-upload/metadata/`
 const publicMetadataUrl = `${backendPublicUrl}raw-files/`
 const privateMetadataUrl = `${backendPrivateUrl}upload-metadata/`
-const dataUrl = `${backendPrivateUrl}upload/data/`
-const modelDataUrl = `${backendPrivateUrl}model-upload/data/`
+const dataUrl = `${backendPrivateUrl}api/test/upload/data/`
+const modelDataUrl = `${backendPrivateUrl}api/test/model-upload/data/`
 
 const validMetadata = {
   filename: 'file1.LV1',
@@ -48,7 +51,7 @@ const validModelMetadata = {
   site: 'bucharest'
 }
 
-const headers = {'authorization': `Basic ${str2base64('granada:lol')}`}
+const headers = {'authorization': `Basic ${str2base64('granada:PASSWORDFORgranada')}`}
 
 beforeAll(async () => {
   conn = await createConnection()
@@ -58,6 +61,10 @@ beforeAll(async () => {
   // Make sure these tables are initialized correctly
   await conn.getRepository('regular_file').save(JSON.parse((await fsp.readFile('fixtures/2-regular_file.json')).toString()))
   await conn.getRepository('model_file').save(JSON.parse((await fsp.readFile('fixtures/2-model_file.json')).toString()))
+
+  await initUsersAndPermissions()
+
+
 })
 
 afterAll(async () => {
@@ -71,7 +78,9 @@ afterAll(async () => {
 describe('POST /upload/metadata', () => {
 
   beforeEach(async () => {
-    return await instrumentRepo.delete({})
+    await instrumentRepo.delete({})
+    await miscUploadRepo.delete({})
+    return
   })
 
   test('inserts new metadata', async () => {
@@ -254,15 +263,24 @@ describe('POST /upload/metadata', () => {
     return expect(axios.post(metadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
   })
 
-  test('responds with 400 on missing site', async () => {
+  //test('responds with 400 on missing site', async () => {
+  //  const payload = {...validMetadata, site: undefined}
+  //  return expect(axios.post(metadataUrl, payload)).rejects.toMatchObject({ response: { status: 400}})
+  //})
+  test('responds with 401 on missing authentication', async () => {
     const payload = {...validMetadata, site: undefined}
-    return expect(axios.post(metadataUrl, payload)).rejects.toMatchObject({ response: { status: 400}})
+    return expect(axios.post(metadataUrl, payload)).rejects.toMatchObject({ response: { status: 401}})
   })
 
-  test('responds with 422 on invalid site', async () => {
+  //test('responds with 422 on invalid site', async () => {
+  //  const badHeaders = {'authorization':  `Basic ${str2base64('espoo:lol')}`}
+  //  return expect(axios.post(metadataUrl, validMetadata, {headers: badHeaders})).rejects
+  //    .toMatchObject({ response: { status: 422}})
+  //})
+  test('responds with 401 on non-existent username', async () => {
     const badHeaders = {'authorization':  `Basic ${str2base64('espoo:lol')}`}
     return expect(axios.post(metadataUrl, validMetadata, {headers: badHeaders})).rejects
-      .toMatchObject({ response: { status: 422}})
+      .toMatchObject({ response: { status: 401}})
   })
 })
 
@@ -316,18 +334,18 @@ describe('PUT /upload/data/:checksum', () => {
     return expect(axios.put(url, validFile, {headers})).rejects.toMatchObject({ response: { status: 400}})
   })
 
-  test('responds with 400 when submitting data from a wrong site', async () => {
+  test('responds with 401 when submitting data with wrong credentials', async () => {
     const now = new Date()
     const headers = {'authorization': `Basic ${str2base64('martinlaakso:lol')}`}
     await expect(axios.put(validUrl, validFile, {headers}))
-      .rejects.toMatchObject({ response: { status: 400}})
+      .rejects.toMatchObject({ response: { status: 401}})
     const md = await instrumentRepo.findOne({checksum: validMetadata.checksum})
     return expect(new Date(md.updatedAt).getTime()).toBeLessThan(now.getTime())
   })
 })
 
 describe('PUT /model-upload/data/:checksum', () => {
-
+  const headers = {'authorization': `Basic ${str2base64('bob:bobs_pass')}`}
   beforeEach(async () => {
     await modelRepo.delete({})
     return axios.post(modelMetadataUrl, validModelMetadata, {headers})
@@ -344,7 +362,7 @@ describe('PUT /model-upload/data/:checksum', () => {
 })
 
 describe('POST /model-upload/metadata', () => {
-
+  const headers = {'authorization': `Basic ${str2base64('bob:bobs_pass')}`}
   const metaData = {
     filename: '20200122_bucharest_icon-iglo-12-23.nc',
     measurementDate: '2020-01-22',
@@ -412,9 +430,9 @@ describe('POST /model-upload/metadata', () => {
     return expect(axios.post(modelMetadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
   })
 
-  test('responds with 422 on missing site', async () => {
+  test('responds with 400 on missing site', async () => {
     const payload = {...validModelMetadata, site: undefined}
-    return expect(axios.post(modelMetadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 422}})
+    return expect(axios.post(modelMetadataUrl, payload, {headers})).rejects.toMatchObject({ response: { status: 400}})
   })
 
   test('responds with 422 on empty site', async () => {
@@ -447,4 +465,55 @@ describe('POST /upload-metadata/', () => {
     await expect(axios.post(privateMetadataUrl, {uuid, status: 'invalid'})).resolves.toMatchObject({status: 200})
     return expect(instrumentRepo.findOne(uuid)).resolves.toMatchObject({status: 'invalid'})
   })
+})
+
+describe('test user permissions', () => {
+  const validMetadata = {
+    filename: 'file1.LV1',
+    measurementDate: '2020-08-11',
+    //checksum: '9a0364b9e99bb480dd25e1f0284c8555',
+    instrument: 'mira',
+    //site: 'granada'
+  }
+  beforeAll(async () => {
+    await initUsersAndPermissions()
+  })
+  afterAll(async () => {
+    await Promise.all([
+      instrumentRepo.delete({}),
+    ])
+  })
+  beforeEach(async () => {
+    //await instrumentRepo.delete({})
+    //await miscUploadRepo.delete({})
+    return
+  })
+
+  it('tests that alice can upload to all sites', async () => {
+    const headers = {'authorization': `Basic ${str2base64('alice:alices_password')}`}
+    const resp = await axios.get(backendPublicUrl.concat('sites'))
+    const sites: any[] = resp.data
+    const contentPrefix = 'content'
+    for (const site of sites){
+      // POST  metadata
+      const now = new Date()
+      const content = contentPrefix.concat(site.id)
+      const checksum = md5(content)
+      console.log(content, checksum)
+      await expect(axios.post(metadataUrl,
+                              {...validMetadata, site: site.id, checksum: checksum },
+                              {headers})).resolves.toMatchObject({status: 200})
+      const md = await instrumentRepo.findOne({checksum: checksum })
+      expect(md).toBeTruthy()
+      expect(new Date(md.createdAt).getTime()).toBeGreaterThan(now.getTime())
+      expect(new Date(md.updatedAt).getTime()).toEqual(new Date(md.createdAt).getTime())
+      expect(md.status).toEqual(Status.CREATED)
+      // Post data
+      const postDataUrl = dataUrl.concat(checksum)
+      await expect(axios.put(postDataUrl, content, {headers})).resolves.toMatchObject({ status: 201})
+      const metadata = await instrumentRepo.findOne({checksum: checksum})
+      expect(new Date(metadata.updatedAt).getTime()).toBeGreaterThan(new Date(metadata.createdAt).getTime())
+    }
+  })
+
 })
