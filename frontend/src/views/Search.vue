@@ -501,10 +501,6 @@ export default class Search extends Vue {
   selectedSiteIds: string[] = []
   showAllSites = false
 
-  setSelectedSiteIds(siteIds: []) {
-    this.selectedSiteIds = siteIds
-  }
-
   // dates
   beginningOfHistory = new Date('1970-01-01')
   today = new Date()
@@ -517,50 +513,26 @@ export default class Search extends Vue {
   dateInputEnd = this.dateFrom
   activeBtn = ''
 
-  dateErrorsExist(dateError: { [key: string]: boolean }) {
-    return !(dateError.isValidDateString && dateError.isAfterStart && dateError.isBeforeEnd &&
-      dateError.isNotInFuture)
-  }
-
   // products
   normalProducts: Product[] = []
-  allProducts: Product[] = []
-  allProductsIncludingExperimental: Product[] = []
+  experimentalProducts: Product[] = []
+  allProducts: Product[] = []  // options in the product selector
+  normalProductIds: string[] = []
   experimentalProductIds: string[] = []
-  experimentalVariableIds: string[] = []
   selectedProductIds: string[] = []
   showExpProducts = false
 
-  setSelectedProductIds(productIds: []) {
-    this.selectedProductIds = productIds
-  }
-
-  setSelectedVariableIds(variableIds: []) {
-    this.selectedVariableIds = variableIds
-  }
-
-  getInitialDateFrom() {
-    const date = new Date()
-    return new Date(date.setDate(date.getDate() - fixedRanges.day))
-  }
-
   // variables
+  experimentalVariableIds: string[] = []
   selectedVariableIds: string[] = []
-  get selectableVariables(): ProductVariable[] {
-    if (this.selectedProductIds.length == 0)
-      return this.allProducts.flatMap(prod => prod.variables)
-    return this.allProducts
-      .filter(prod => this.selectedProductIds.includes(prod.id))
-      .flatMap(prod => prod.variables)
-  }
+
+  // other
   renderComplete = false
   displayKeyInfo = true
-  getProductIcon = getProductIcon
-  getMarkerIcon = getMarkerIcon
-  fixedRanges = fixedRanges
-  devMode = new DevMode()
   vizWideMode = false
   error = null
+  fixedRanges = fixedRanges
+  devMode = new DevMode()
 
   // keys
   dateFromUpdate = 10000
@@ -570,29 +542,14 @@ export default class Search extends Vue {
   vizSearchUpdate = 50000
   mapKey = 60000
 
-  isVizMode() {
-    return this.mode == 'visualizations'
-  }
+  getProductIcon = getProductIcon
+  getMarkerIcon = getMarkerIcon
 
-  setVizWideMode(wide: boolean) {
-    this.vizWideMode = wide
-    this.mapKey = this.mapKey + 1
-  }
-
-  get mainWidth() {
-    if (this.isVizMode()) {
-      if (this.vizWideMode) return { wideView: true }
-      else return { mediumView: true}
-    }
-    return { narrowView: true }
-  }
-
-  get noSelectionsMade() {
-    return !(this.selectedProductIds.length || this.selectedSiteIds.length || this.selectedVariableIds.length)
-  }
-
-  isTrueOnBothDateFields(errorId: string) {
-    return (this.isVizMode() || this.dateFromError[errorId]) && this.dateToError[errorId]
+  mounted() {
+    this.$nextTick(() => {
+      this.renderComplete = true
+    })
+    this.addKeyPressListener()
   }
 
   async created() {
@@ -601,82 +558,18 @@ export default class Search extends Vue {
     const params = ['site', 'product', 'variable', 'dateFrom', 'dateTo']
     const paramsSet = params.filter(param => param in query && query[param] != null)
     for (const param of paramsSet) {
-      if (param === 'site') this.selectedSiteIds = this.parseQuery(param)
-      if (param === 'product') this.selectedProductIds = this.parseQuery(param)
-      if (param === 'variable') this.selectedVariableIds = this.parseQuery(param)
-      if (param === 'dateFrom') {
-        const date = this.parseQueryDate(param)
-        if (date) {
+      const value = this.$route.query[param] as string
+      if (param === 'site') this.selectedSiteIds = this.parseQuery(param, value)
+      if (param === 'product') this.selectedProductIds = this.parseQuery(param, value)
+      if (param === 'variable') this.selectedVariableIds = this.parseQuery(param, value)
+      if (param === 'dateFrom' || param === 'dateTo') {
+        if (isValidDate(value)) {
+          const date = new Date(value)
           this[param] = date
-          this.dateInputStart = date
-        }
-      }
-      if (param === 'dateTo') {
-        const date = this.parseQueryDate(param)
-        if (date) {
-          this[param] = date
-          this.dateInputEnd = date
+          param === 'dateFrom' ? this.dateInputStart = date : this.dateInputEnd = date
         }
       }
     }
-  }
-
-  parseQuery(param: string): string[] {
-    let valueArray: string[] = []
-    const value = this.$route.query[param]
-    if (typeof value === 'string') {
-      valueArray = this.parseValidParamValues(param, value)
-    }
-    return valueArray
-  }
-
-  parseValidParamValues(param: string, value: string): string[] {
-    const valueArray = value.split(',')
-    let validChoices: string | string[]
-    if (param === 'product') {
-      for (const productId of valueArray) {
-        if (this.experimentalProductIds.includes(productId)) {
-          this.showExpProducts = true
-          this.allProducts = this.allProductsIncludingExperimental
-        }
-      }
-      validChoices = this.allProducts.map(prod => prod.id).concat(this.experimentalProductIds)
-    }
-    if (param === 'variable') {
-      validChoices = this.allProducts
-        .flatMap(prod => prod.variables)
-        .map(variable => variable.id)
-    }
-    if (param === 'site') validChoices = this.allSites.map(site => site.id)
-    return valueArray.filter(value => validChoices.includes(value))
-  }
-
-  parseQueryDate(param: string): Date | undefined {
-    const query = this.$route.query
-    if (param in query && isValidDate(query[param])) {
-      return new Date(query[param] as string)
-    }
-  }
-
-  mounted() {
-    // Wait until all child components have rendered
-    this.$nextTick(() => {
-      this.renderComplete = true
-    })
-    this.addKeyPressListener()
-  }
-
-  onMapMarkerClick(ids: Array<string>) {
-    const union = this.selectedSiteIds.concat(ids)
-    const intersection = this.selectedSiteIds.filter(id => ids.includes(id))
-    const xor = union.filter(id => ! intersection.includes(id))
-    this.selectedSiteIds = xor
-  }
-
-  alphabeticalSort = (a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName
-  discardHiddenSites = (site: Site) => !(site.type as string[]).includes('hidden')
-  discardExperimentalProducts(prod: Product) {
-    return  this.showExpProducts || !prod.experimental
   }
 
   async initView() {
@@ -695,31 +588,39 @@ export default class Search extends Vue {
       this.normalProducts = products.data
         .filter((prod: Product) => !prod.experimental)
         .sort(this.alphabeticalSort)
-      this.allProductsIncludingExperimental = products.data
+      this.experimentalProducts = products.data
+        .filter((prod: Product) => prod.experimental)
         .sort(this.alphabeticalSort)
-      this.experimentalProductIds = products.data
-        .filter((prod: Product) => prod.experimental)
-        .map((prod: Product) => prod.id)
-      this.experimentalVariableIds = products.data
-        .filter((prod: Product) => prod.experimental)
-        .flatMap((prod: Product) => prod.variables)
-        .map((prod: Product) => prod.id)
+      this.normalProductIds = this.normalProducts
+        .map(prod => prod.id)
+      this.experimentalProductIds = this.experimentalProducts
+        .map(prod => prod.id)
+      this.experimentalVariableIds = this.experimentalProducts
+        .flatMap(prod => prod.variables)
+        .map(prod => prod.id)
     })
     return this.fetchData()
   }
 
-  get payload() {
-    return {
-      params: {
-        site: this.selectedSiteIds.length ? this.selectedSiteIds : this.allSites.map(site => site.id),
-        dateFrom: this.isVizMode() ? this.dateTo : this.dateFrom,
-        dateTo: this.dateTo,
-        product: this.selectedProductIds.length ? this.selectedProductIds : this.allProducts.map(prod => prod.id),
-        variable: this.isVizMode() ? this.selectedVariableIds : undefined,
-        showLegacy: true,
-        developer: this.devMode.activated || undefined
+  parseQuery(param: string, value: string): string[] {
+    let validChoices: string | string[]
+    const valueArray = value.split(',')
+    if (param === 'product') {
+      for (const productId of valueArray) {
+        if (this.experimentalProductIds.includes(productId) && !this.showExpProducts) {
+          this.showExpProducts = true
+          this.allProducts = this.normalProducts.concat(this.experimentalProducts)
+        }
       }
+      validChoices = this.normalProductIds.concat(this.experimentalProductIds)
     }
+    if (param === 'variable') {
+      validChoices = this.allProducts
+        .flatMap(prod => prod.variables)
+        .map(variable => variable.id)
+    }
+    if (param === 'site') validChoices = this.allSites.map(site => site.id)
+    return valueArray.filter(value => validChoices.includes(value))
   }
 
   fetchData() {
@@ -740,8 +641,53 @@ export default class Search extends Vue {
       })
   }
 
-  get downloadUri() {
-    return axios.getUri({...{ method: 'post', url: `${this.apiUrl}download/`}, ...this.payload })
+  setSelectedSiteIds(siteIds: []) {
+    this.selectedSiteIds = siteIds
+  }
+
+  dateErrorsExist(dateError: { [key: string]: boolean }) {
+    return !(dateError.isValidDateString && dateError.isAfterStart && dateError.isBeforeEnd &&
+      dateError.isNotInFuture)
+  }
+
+  setSelectedProductIds(productIds: []) {
+    this.selectedProductIds = productIds
+  }
+
+  setSelectedVariableIds(variableIds: []) {
+    this.selectedVariableIds = variableIds
+  }
+
+  getInitialDateFrom() {
+    const date = new Date()
+    return new Date(date.setDate(date.getDate() - fixedRanges.day))
+  }
+
+  isVizMode() {
+    return this.mode == 'visualizations'
+  }
+
+  setVizWideMode(wide: boolean) {
+    this.vizWideMode = wide
+    this.mapKey = this.mapKey + 1
+  }
+
+  isTrueOnBothDateFields(errorId: string) {
+    return (this.isVizMode() || this.dateFromError[errorId]) && this.dateToError[errorId]
+  }
+
+  onMapMarkerClick(ids: Array<string>) {
+    const union = this.selectedSiteIds.concat(ids)
+    const intersection = this.selectedSiteIds.filter(id => ids.includes(id))
+    this.selectedSiteIds = union.filter(id => ! intersection.includes(id))
+  }
+
+  alphabeticalSort = (a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName
+
+  discardHiddenSites = (site: Site) => !(site.type as string[]).includes('hidden')
+
+  discardExperimentalProducts(prod: Product) {
+    return this.showExpProducts || !prod.experimental
   }
 
   resetResponse() {
@@ -750,6 +696,11 @@ export default class Search extends Vue {
 
   navigateToSearch(mode: string) {
     this.$router.push({ name: 'Search', params: { mode }, query: this.$route.query })
+  }
+
+  reset() {
+    this.$router.replace({path: this.$route.path, query: {} })
+    this.$router.go(0)
   }
 
   setDateRange(n: number) {
@@ -822,12 +773,7 @@ export default class Search extends Vue {
     return false
   }
 
-  reset() {
-    this.$router.replace({path: this.$route.path, query: {} })
-    this.$router.go(0)
-  }
-
-  replaceQuery(param: string, value: Date | string[]) {
+  replaceUrlQueryString(param: string, value: Date | string[]) {
     const query = { ...this.$route.query }
     const valueToUrl = value instanceof Date ? dateToString(value) : value.join(',')
     query[param] = valueToUrl
@@ -837,16 +783,54 @@ export default class Search extends Vue {
     }
   }
 
+  get downloadUri() {
+    return axios.getUri({...{ method: 'post', url: `${this.apiUrl}download/`}, ...this.payload })
+  }
+
+  get payload() {
+    return {
+      params: {
+        site: this.selectedSiteIds.length ? this.selectedSiteIds : this.allSites.map(site => site.id),
+        dateFrom: this.isVizMode() ? this.dateTo : this.dateFrom,
+        dateTo: this.dateTo,
+        product: this.selectedProductIds.length ? this.selectedProductIds : this.allProducts.map(prod => prod.id),
+        variable: this.isVizMode() ? this.selectedVariableIds : undefined,
+        showLegacy: true,
+        developer: this.devMode.activated || undefined
+      }
+    }
+  }
+
+  get mainWidth() {
+    if (this.isVizMode()) {
+      if (this.vizWideMode) return { wideView: true }
+      else return { mediumView: true}
+    }
+    return { narrowView: true }
+  }
+
+  get selectableVariables(): ProductVariable[] {
+    if (this.selectedProductIds.length == 0)
+      return this.allProducts.flatMap(prod => prod.variables)
+    return this.allProducts
+      .filter(prod => this.selectedProductIds.includes(prod.id))
+      .flatMap(prod => prod.variables)
+  }
+
+  get noSelectionsMade() {
+    return !(this.selectedProductIds.length || this.selectedSiteIds.length || this.selectedVariableIds.length)
+  }
+
   @Watch('selectedSiteIds')
   onSiteSelected() {
-    this.replaceQuery('site', this.selectedSiteIds)
+    this.replaceUrlQueryString('site', this.selectedSiteIds)
     this.fetchData()
   }
 
   @Watch('dateFrom')
   onDateFromChanged() {
     if (!this.renderComplete || this.dateErrorsExist(this.dateFromError)) return
-    this.replaceQuery('dateFrom', this.dateFrom)
+    this.replaceUrlQueryString('dateFrom', this.dateFrom)
     this.fetchData()
   }
 
@@ -857,20 +841,20 @@ export default class Search extends Vue {
       this.dateFrom = this.dateTo
       this.visualizationDate = new Date(this.dateTo)
     }
-    this.replaceQuery('dateTo', this.dateTo)
-    this.replaceQuery('dateFrom', this.dateFrom)
+    this.replaceUrlQueryString('dateTo', this.dateTo)
+    this.replaceUrlQueryString('dateFrom', this.dateFrom)
     this.fetchData()
   }
 
   @Watch('selectedProductIds')
   onProductSelected() {
-    this.replaceQuery('product', this.selectedProductIds)
+    this.replaceUrlQueryString('product', this.selectedProductIds)
     this.fetchData()
   }
 
   @Watch('selectedVariableIds')
   onVariableSelected() {
-    this.replaceQuery('variable', this.selectedVariableIds)
+    this.replaceUrlQueryString('variable', this.selectedVariableIds)
     this.fetchData()
   }
 
