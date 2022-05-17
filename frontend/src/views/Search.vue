@@ -497,7 +497,11 @@ export default class Search extends Vue {
   isBusy = false
 
   // site selector
-  allSites: Site[] = []
+  normalSites: Site[] = []
+  extraSites: Site[] = []
+  allSites: Site[] = []  // options in site selector
+  normalSiteIds: string[] = []
+  extraSiteIds: string[] = []
   selectedSiteIds: string[] = []
   showAllSites = false
 
@@ -516,7 +520,7 @@ export default class Search extends Vue {
   // products
   normalProducts: Product[] = []
   experimentalProducts: Product[] = []
-  allProducts: Product[] = []  // options in the product selector
+  allProducts: Product[] = []  // options in product selector
   normalProductIds: string[] = []
   experimentalProductIds: string[] = []
   selectedProductIds: string[] = []
@@ -574,14 +578,24 @@ export default class Search extends Vue {
 
   async initView() {
     const payload = { developer: this.devMode.activated || undefined }
-    const sitesPayload = {params: {...payload, ...{ type: this.showAllSites ? undefined : 'cloudnet' }}}
+    const sitesPayload = {params: {...payload, ...{ type: ['cloudnet', 'campaign', 'arm'] }}}
     await Promise.all([
       axios.get(`${this.apiUrl}sites/`, sitesPayload),
       axios.get(`${this.apiUrl}products/variables`,{params: payload })
     ]).then(([sites, products]) => {
       this.allSites = sites.data
-        .filter(this.discardHiddenSites)
         .sort(this.alphabeticalSort)
+        .filter(this.selectNormalSites)
+      this.normalSites = sites.data
+        .sort(this.alphabeticalSort)
+        .filter(this.selectNormalSites)
+      this.extraSites = sites.data
+        .sort(this.alphabeticalSort)
+        .filter(this.selectExtraSites)
+      this.normalSiteIds = this.normalSites
+        .map(site => site.id)
+      this.extraSiteIds = this.extraSites
+        .map(site => site.id)
       this.allProducts = products.data
         .filter(this.discardExperimentalProducts)
         .sort(this.alphabeticalSort)
@@ -614,12 +628,20 @@ export default class Search extends Vue {
       }
       validChoices = this.normalProductIds.concat(this.experimentalProductIds)
     }
+    if (param === 'site') {
+      for (const siteId of valueArray) {
+        if (this.extraSiteIds.includes(siteId) && !this.showAllSites) {
+          this.showAllSites = true
+          this.allSites = this.normalSites.concat(this.extraSites)
+        }
+      }
+      validChoices = this.allSites.map(site => site.id)
+    }
     if (param === 'variable') {
       validChoices = this.allProducts
         .flatMap(prod => prod.variables)
         .map(variable => variable.id)
     }
-    if (param === 'site') validChoices = this.allSites.map(site => site.id)
     return valueArray.filter(value => validChoices.includes(value))
   }
 
@@ -684,7 +706,9 @@ export default class Search extends Vue {
 
   alphabeticalSort = (a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName
 
-  discardHiddenSites = (site: Site) => !(site.type as string[]).includes('hidden')
+  selectNormalSites = (site: Site) => (site.type as string[]).includes('cloudnet')
+
+  selectExtraSites = (site: Site) => !(site.type as string[]).includes('cloudnet')
 
   discardExperimentalProducts(prod: Product) {
     return this.showExpProducts || !prod.experimental
@@ -871,7 +895,13 @@ export default class Search extends Vue {
 
   @Watch('showAllSites')
   async onShowAllSites() {
-    await this.initView()
+    if (!this.showAllSites) {
+      this.allSites = this.normalSites
+      this.selectedSiteIds = this.selectedSiteIds
+        .filter(site => !this.extraSiteIds.includes(site))
+    } else {
+      this.allSites = this.normalSites.concat(this.extraSites)
+    }
     this.mapKey = this.mapKey + 1
   }
 
