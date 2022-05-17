@@ -492,6 +492,7 @@ export default class Search extends Vue {
   // api call
   apiUrl = process.env.VUE_APP_BACKENDURL
   apiResponse: SearchFileResponse[] | Visualization[] = this.resetResponse()
+  pendingUpdates = false
 
   // file list
   isBusy = false
@@ -646,21 +647,34 @@ export default class Search extends Vue {
   }
 
   fetchData() {
-    if (this.isVizMode() && this.noSelectionsMade) return Promise.resolve()
-    this.isBusy = true
-    const apiPath = this.isVizMode() ? 'visualizations/' : 'search/'
-    if (!this.isVizMode()) this.checkIfButtonShouldBeActive()
-    return axios
-      .get(`${this.apiUrl}${apiPath}`, this.payload)
-      .then(res => {
-        this.apiResponse = constructTitle(res.data)
-        this.isBusy = false
+    if (this.pendingUpdates) return Promise.resolve()
+    this.pendingUpdates = true
+    return new Promise((resolve, reject) => {
+      this.$nextTick(() => {
+        this.pendingUpdates = false
+        if (this.isVizMode() && this.noSelectionsMade) {
+          resolve(undefined)
+          return
+        }
+        this.isBusy = true
+        const apiPath = this.isVizMode() ? 'visualizations/' : 'search/'
+        if (!this.isVizMode()) this.checkIfButtonShouldBeActive()
+        return axios
+          .get(`${this.apiUrl}${apiPath}`, this.payload)
+          .then(res => {
+            this.apiResponse = constructTitle(res.data)
+            this.isBusy = false
+            resolve(undefined)
+          })
+          .catch(err => {
+            this.error = err.response.statusText || 'unknown error'
+            this.apiResponse = this.resetResponse()
+            this.isBusy = false
+            reject()
+          })
       })
-      .catch(err => {
-        this.error = err.response.statusText || 'unknown error'
-        this.apiResponse = this.resetResponse()
-        this.isBusy = false
-      })
+    })
+
   }
 
   setSelectedSiteIds(siteIds: []) {
