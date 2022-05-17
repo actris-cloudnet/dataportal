@@ -16,7 +16,7 @@ storageApp.put('/*', (req, res, _next) =>{
     if (chunkStr === 'content') return res.status(201).send({size: chunk.length})
   })
   req.on('error', console.error)
-  req.on('end', () => res.headersSent || res.sendStatus(201))
+  req.on('end', () => res.headersSent || res.status(201).send({size: serverMemory[path].length}))
 })
 
 storageApp.get('/*', (req, res, _next) =>{

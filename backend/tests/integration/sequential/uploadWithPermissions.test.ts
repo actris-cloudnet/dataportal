@@ -6,6 +6,7 @@ import {promises as fsp} from 'fs'
 import {initUsersAndPermissions} from '../../lib/userAccountAndPermissions'
 
 const md5 = require('blueimp-md5')
+const crypto = require('crypto')
 
 let conn: Connection
 let instrumentRepo: any
@@ -329,9 +330,9 @@ describe('PUT /upload/data/:checksum', () => {
     return expect(axios.put(validUrl, invalidFile, {headers})).rejects.toMatchObject({ response: {status: 500}})
   })
 
-  test('responds with 400 on nonexistent hash', async () => {
+  test('responds with 422 on nonexistent hash', async () => {
     const url = `${dataUrl}9a0364b9e99bb480dd25e1f0284c8554`
-    return expect(axios.put(url, validFile, {headers})).rejects.toMatchObject({ response: { status: 400}})
+    return expect(axios.put(url, validFile, {headers})).rejects.toMatchObject({ response: { status: 422}})
   })
 
   test('responds with 401 when submitting data with wrong credentials', async () => {
@@ -467,14 +468,16 @@ describe('POST /upload-metadata/', () => {
   })
 })
 
-describe('test user permissions', () => {
+describe('test content upload', () => {
+  const headers = {'authorization': `Basic ${str2base64('alice:alices_password')}`}
   const validMetadata = {
     filename: 'file1.LV1',
     measurementDate: '2020-08-11',
-    //checksum: '9a0364b9e99bb480dd25e1f0284c8555',
+    checksum: '9a0364b9e99bb480dd25e1f0284c8555',
     instrument: 'mira',
-    //site: 'granada'
+    site: 'granada'
   }
+  const content = 'content'
   beforeAll(async () => {
     await initUsersAndPermissions()
   })
@@ -484,22 +487,76 @@ describe('test user permissions', () => {
     ])
   })
   beforeEach(async () => {
-    //await instrumentRepo.delete({})
-    //await miscUploadRepo.delete({})
+    await instrumentRepo.delete({})
     return
   })
+  it('tests content upload', async () => {
+    await expect(axios.post(metadataUrl, validMetadata, {headers})).resolves.toMatchObject({status: 200})
+    const checksum = validMetadata.checksum
+    const postDataUrl = dataUrl.concat(checksum)
+    await expect(axios.put(postDataUrl, content, {headers})).resolves.toMatchObject({ status: 201})
+    const metadata = await instrumentRepo.findOne({checksum: checksum})
+    expect(new Date(metadata.updatedAt).getTime()).toBeGreaterThan(new Date(metadata.createdAt).getTime())
+  })
+
+})
+
+function swap(A: any[], i:number, j: number){
+  let temp = A[i]
+  A[i] = A[j]
+  A[j] = temp
+}
+
+function* permute(A: any[], l: number, r: number){
+  if (l === r){yield A}
+  else{
+    for (let i = l; i < r; i++){
+      swap(A,l,i)
+      permute(A,l+1,r)
+      swap(A,l,i)
+    }
+  }
+}
+
+describe('test user permissions', () => {
+  const validMetadata = {
+    filename: 'file1.LV1',
+    measurementDate: '2020-08-11',
+    //checksum: '9a0364b9e99bb480dd25e1f0284c8555',
+    instrument: 'mira',
+    //site: 'granada'
+  }
+  let sites: any[] 
+
+  beforeAll(async () => {
+    await initUsersAndPermissions()
+    sites = (await axios.get(backendPublicUrl.concat('sites'))).data
+  })
+  afterAll(async () => {
+    await Promise.all([
+      instrumentRepo.delete({}),
+    ])
+  })
+  beforeEach(async () => {
+    await instrumentRepo.delete({})
+    return
+  })
+
 
   it('tests that alice can upload to all sites', async () => {
     const headers = {'authorization': `Basic ${str2base64('alice:alices_password')}`}
     const resp = await axios.get(backendPublicUrl.concat('sites'))
     const sites: any[] = resp.data
+    var content = 'content'
     const contentPrefix = 'content'
+    const checksum = '9a0364b9e99bb480dd25e1f0284c8555'
     for (const site of sites){
+      successfullyUpload('alice', 'alices_password', 'mace-head')
+      //await instrumentRepo.delete({})
       // POST  metadata
-      const now = new Date()
-      const content = contentPrefix.concat(site.id)
+      content = contentPrefix.concat(site.id)
       const checksum = md5(content)
-      console.log(content, checksum)
+      const now = new Date()
       await expect(axios.post(metadataUrl,
                               {...validMetadata, site: site.id, checksum: checksum },
                               {headers})).resolves.toMatchObject({status: 200})
@@ -515,5 +572,26 @@ describe('test user permissions', () => {
       expect(new Date(metadata.updatedAt).getTime()).toBeGreaterThan(new Date(metadata.createdAt).getTime())
     }
   })
+  it('tests that bob can upload model to all sites', async () => {})
+  it('tests that carol can upload only to bucharest and mace-head', async () => {})
+  it('tests that david can upload only model to granada and  instrument to mace-head', async () => {})
+  it('tests that bucharest can upload only to bucharest', async () => {})
+  it('tests that granada can upload only to granada', async () => {})
+  it('tests that mace-head can upload only to mace-head', async () => {})
 
 })
+
+function successfullyUpload(username: string, password: string, siteId: string){
+  const credentials = username.concat(':',password)
+  const headers = {'authorization': `Basic ${str2base64(credentials)}`}
+  const contentLength = randomInt(4,128)
+  const content = crypto.randomBytes(contentLength).toString('hex')
+  console.log(credentials, content)
+
+}
+
+function randomInt(min: number, max: number): number {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
