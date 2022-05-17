@@ -38,6 +38,8 @@ describe('search page', () => {
     const content = await selenium.getContent()
     expect(content).toContain('Found 5 results')
     testBucharestFiles(content)
+    const url = await selenium.driver.getCurrentUrl()
+    expect(url).toMatch(`${frontendUrl}search/data?site=bucharest&dateFrom=2010-01-01`)
   })
 
   it('contains correct number of files after setting a date range', async () => {
@@ -48,6 +50,8 @@ describe('search page', () => {
     for (let i = 23; i <= 26; i++) {
       expect(content).toContain(`2019-07-${i}`)
     }
+    const url = await selenium.driver.getCurrentUrl()
+    expect(url).toMatch(`${frontendUrl}search/data?site=bucharest&dateFrom=2019-07-23&dateTo=2019-07-26`)
   })
 
   it('forwards to correct landing page after sorting and clicking certain row', async () => {
@@ -74,7 +78,8 @@ describe('search page', () => {
     const backButton = await selenium.findElement(By.id('backButton'))
     expect(backButton).toBeTruthy()
     await backButton.click()
-    expect(await driver.getCurrentUrl()).toContain('search/data')
+    const url = await selenium.driver.getCurrentUrl()
+    expect(url).toMatch(`${frontendUrl}search/data?site=bucharest&dateFrom=2010-01-01`)
   })
 
   it('resets the search after clicking the reset button', async () => {
@@ -105,6 +110,8 @@ describe('search page', () => {
     expect(content).toContain('Found 7 results')
     testBucharestFiles(content)
     testMaceHeadFiles(content)
+    const url = await selenium.driver.getCurrentUrl()
+    expect(url).toMatch(`${frontendUrl}search/data?site=bucharest,mace-head&dateFrom=1980-01-01`)
   })
 
   it('works with different product selectors', async () => {
@@ -115,6 +122,8 @@ describe('search page', () => {
     await wait(timeout_short)
     expect(content).toContain('Found 2 results')
     testMaceHeadFiles(content)
+    const url = await selenium.driver.getCurrentUrl()
+    expect(url).toMatch(`${frontendUrl}search/data?dateFrom=1980-01-01&product=iwc`)
   })
 
   it('preserves search state after visiting a landing page', async () => {
@@ -249,6 +258,8 @@ describe('search page with url parameters', () => {
     await selenium.driver.get(`${frontendUrl}search/data?${query}`)
     const content = await selenium.getContent()
     expect(content).toContain('Found 8 results')
+    const url = await selenium.driver.getCurrentUrl()
+    expect(url).toMatch(`${frontendUrl}search/data?dateFrom=2010-01-01`)
   })
 
   it('contains correct files after setting dateFrom and dateTo', async () => {
@@ -314,6 +325,8 @@ describe('search page with url parameters', () => {
     expect(content).toContain('Found 2 results')
     expect(content).not.toContain('L3 Cloud fraction from Bucharest 2022-03-10')
     testMaceHeadFiles(content)
+    const url = await selenium.driver.getCurrentUrl()
+    expect(url).toMatch(`${frontendUrl}search/data?dateFrom=1980-03-09&product=iwc&site=mace-head,bucharest`)
   })
 })
 
