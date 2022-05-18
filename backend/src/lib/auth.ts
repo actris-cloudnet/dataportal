@@ -20,7 +20,7 @@ export class Authenticator {
     // Check that request has credentials included
     let credentials = auth(req)
     if (!credentials) {
-      return next({status: 401, errors: 'Unauthorized'})
+      return next({ status: 401, errors: 'Unauthorized' })
     }
     let userAccount: UserAccount | undefined = await this.userAccountRepository
       .createQueryBuilder('user_account')
@@ -28,7 +28,7 @@ export class Authenticator {
       .getOne()
     // Check that user exists in the database
     if (userAccount === undefined) {
-      return next({status: 401, errors: 'Unauthorized'})
+      return next({ status: 401, errors: 'Unauthorized' })
     }
     // Check that password in the request is correct
     if (
@@ -42,15 +42,15 @@ export class Authenticator {
       next()
       return
     } else {
-      return next({status: 401, errors: 'Unauthorized'})
+      return next({ status: 401, errors: 'Unauthorized' })
     }
   }
 }
 
 interface UploadMiddlewareParams {
-  permission: PermissionType;
-  isDataUpload?: boolean;
-  isModelDataUpload?: boolean;
+  permission: PermissionType
+  isDataUpload?: boolean
+  isModelDataUpload?: boolean
 }
 
 export class Authorizator {
@@ -66,12 +66,16 @@ export class Authorizator {
     this.modelUploadRepository = conn.getRepository<ModelUpload>('model_upload')
   }
 
-  uploadMiddleware = ({permission, isDataUpload = false, isModelDataUpload = false }: UploadMiddlewareParams): RequestHandler => {
+  uploadMiddleware = ({
+    permission,
+    isDataUpload = false,
+    isModelDataUpload = false,
+  }: UploadMiddlewareParams): RequestHandler => {
     return async (req, res, next) => {
       // Authenticator should handle authentication first and add username into res.locals
       if (!res.locals.authenticated || !res.locals.username) {
         console.error('Authorizator received unauthenticated request')
-        return next({status: 401, errors: 'Unauthorized'})
+        return next({ status: 401, errors: 'Unauthorized' })
       }
 
       let site: Site
@@ -79,42 +83,43 @@ export class Authorizator {
         if (
           !Object.prototype.hasOwnProperty.call(req, 'body') ||
           !Object.prototype.hasOwnProperty.call(req.body, 'site')
-        ) { // Handle legacy upload
+        ) {
+          // Handle legacy upload
           // username should match some site
           const siteCandidate: Site | undefined = await this.siteRepository.findOne(res.locals.username)
           if (siteCandidate === undefined) {
-            return next({status: 400, errors: 'Add site to the request body'})
+            return next({ status: 400, errors: 'Add site to the request body' })
           }
           site = siteCandidate!
         } else {
           const siteCandidate: Site | undefined = await this.siteRepository.findOne(req.body.site)
           if (siteCandidate === undefined) {
-            return next({status: 422, errors: 'Site does not exist'})
+            return next({ status: 422, errors: 'Site does not exist' })
           }
           site = siteCandidate!
         }
       } else {
-        if(isDataUpload){
+        if (isDataUpload) {
           const uploadCandidate: InstrumentUpload | undefined = await this.instrumentUploadRepository.findOne(
             { checksum: req.params.checksum },
             { relations: ['site'] }
           )
-          if (uploadCandidate === undefined ){
-            return next({status: 422, errors: 'Checksum does not exist in the database'})
+          if (uploadCandidate === undefined) {
+            return next({ status: 422, errors: 'Checksum does not exist in the database' })
           }
           site = uploadCandidate!.site
-        } else if (isModelDataUpload){
+        } else if (isModelDataUpload) {
           // modeldata upload checks site from db based on the checksum
           const modelUploadCandidate: ModelUpload | undefined = await this.modelUploadRepository.findOne(
             { checksum: req.params.checksum },
             { relations: ['site'] }
           )
           if (modelUploadCandidate === undefined) {
-            return next({status: 422, errors: 'Checksum does not exist in the database'})
+            return next({ status: 422, errors: 'Checksum does not exist in the database' })
           }
           site = modelUploadCandidate!.site
         } else {
-          return next({status: 500, errors: 'Oops, something went wrong'})
+          return next({ status: 500, errors: 'Oops, something went wrong' })
         }
       }
       // check that username has permission for the given site
@@ -128,7 +133,7 @@ export class Authorizator {
         .setParameters({ username: res.locals.username, siteId: site.id, permission: permission })
         .getOne()
       if (userWithProperPermission === undefined) {
-        return next({status: 401, errors: 'Missing permission'})
+        return next({ status: 401, errors: 'Missing permission' })
       }
       req.params.site = site.id
       return next()

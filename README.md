@@ -76,6 +76,11 @@ To run selenium tests testing both backend and frontend, issue
     SELENIUM_TEST_TARGET=tests/selenium docker compose run test-selenium
     
     
+### Running code formatters
+
+    ./run-dev npx prettier --write FILENAME
+    ./run-dev npm run lint-fix 
+
 
 ### License
 MIT
