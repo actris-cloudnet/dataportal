@@ -123,15 +123,15 @@ export class Authorizator {
         }
       }
       // check that username has permission for the given site
-      const userWithProperPermission = await this.userAccountRepository
+      const userQuery = this.userAccountRepository
         .createQueryBuilder('user_account')
         .leftJoinAndSelect('user_account.permissions', 'permission')
         .leftJoinAndSelect('permission.site', 'site')
         .where('user_account.username = :username')
-        .andWhere('site IS NULL OR site.id = :siteId')
+        .andWhere('(site IS NULL OR site.id = :siteId)') // parentheses!
         .andWhere('permission.permission = :permission')
         .setParameters({ username: res.locals.username, siteId: site.id, permission: permission })
-        .getOne()
+      const userWithProperPermission = await userQuery.getOne()
       if (userWithProperPermission === undefined) {
         return next({ status: 401, errors: 'Missing permission' })
       }

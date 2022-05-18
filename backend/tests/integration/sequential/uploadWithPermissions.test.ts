@@ -145,6 +145,7 @@ describe('POST /upload/metadata', () => {
   })
 
   test('updates existing metadata if stable product', async () => {
+    const headers = { authorization: `Basic ${str2base64('bucharest:passWordForBucharest')}` }
     const payload = { ...validMetadataAndStableProduct }
     await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 })
     const payloadResub = { ...payload, checksum: 'ac5c1f6c923cc8b259c2e22c7b258ee4' }
@@ -155,6 +156,7 @@ describe('POST /upload/metadata', () => {
   })
 
   test('updates existing metadata if volatile product', async () => {
+    const headers = { authorization: `Basic ${str2base64('mace-head:SfSCHhnU5cjrMiLdgcW3ixkTQRo')}` }
     const payload = { ...validMetadataAndVolatileProduct }
     await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 })
     const payloadResub = { ...payload, checksum: 'ac5c1f6c923cc8b259c2e22c7b258ee4' }
@@ -526,10 +528,8 @@ describe('test content upload', () => {
 })
 
 describe('test user permissions', () => {
-
   beforeAll(async () => {
     await initUsersAndPermissions()
-    //sites = (await axios.get(backendPublicUrl.concat('sites'))).data
   })
   afterAll(async () => {
     await Promise.all([instrumentRepo.delete({})])
@@ -544,20 +544,77 @@ describe('test user permissions', () => {
     const sites: any[] = (await axios.get(backendPublicUrl.concat('sites'))).data
     for (const site of sites) {
       await expectSuccessfulUploadInstrument('alice', 'alices_password', site.id)
+      await expectFailedUploadModel('alice', 'alices_password', site.id)
     }
   })
   it('tests that bob can upload model to all sites', async () => {
     const sites: any[] = (await axios.get(backendPublicUrl.concat('sites'))).data
     for (const site of sites) {
-      console.log('siteId: ', site.id)
       await expectSuccessfulUploadModel('bob', 'bobs_pass', site.id)
+      await expectFailedUploadInstrument('bob', 'bobs_pass', site.id)
     }
   })
-  it('tests that carol can upload only to bucharest and mace-head', async () => {})
-  it('tests that david can upload only model to granada and  instrument to mace-head', async () => {})
-  it('tests that bucharest can upload only to bucharest', async () => {})
-  it('tests that granada can upload only to granada', async () => {})
-  it('tests that mace-head can upload only to mace-head', async () => {})
+  it('tests that carol can upload only to bucharest and mace-head', async () => {
+    const sites: any[] = (await axios.get(backendPublicUrl.concat('sites'))).data
+    for (const site of sites) {
+      if (['bucharest', 'mace-head'].includes(site.id)) {
+        await expectSuccessfulUploadInstrument('carol', 'carols-passphrase', site.id)
+      } else {
+        await expectFailedUploadInstrument('carol', 'carols-passphrase', site.id)
+      }
+    }
+  })
+  it('tests that david can upload only model to granada and  instrument to mace-head', async () => {
+    const sites: any[] = (await axios.get(backendPublicUrl.concat('sites'))).data
+    for (const site of sites) {
+      if (site.id === 'granada') {
+        await expectSuccessfulUploadModel('david', 'davids^passphrase', site.id)
+        await expectFailedUploadInstrument('david', 'davids^passphrase', site.id)
+      } else if (site.id === 'mace-head') {
+        await expectSuccessfulUploadInstrument('david', 'davids^passphrase', site.id)
+        await expectFailedUploadModel('david', 'davids^passphrase', site.id)
+      } else {
+        await expectFailedUploadInstrument('david', 'davids^passphrase', site.id)
+        await expectFailedUploadModel('david', 'davids^passphrase', site.id)
+      }
+    }
+  })
+  it('tests that bucharest can upload only to bucharest', async () => {
+    const sites: any[] = (await axios.get(backendPublicUrl.concat('sites'))).data
+    for (const site of sites) {
+      if (site.id === 'bucharest') {
+        await expectSuccessfulUploadInstrument('bucharest', 'passWordForBucharest', site.id)
+        await expectFailedUploadModel('bucharest', 'passWordForBucharest', site.id)
+      } else {
+        await expectFailedUploadInstrument('bucharest', 'passWordForBucharest', site.id)
+        await expectFailedUploadModel('bucharest', 'passWordForBucharest', site.id)
+      }
+    }
+  })
+  it('tests that granada can upload only to granada', async () => {
+    const sites: any[] = (await axios.get(backendPublicUrl.concat('sites'))).data
+    for (const site of sites) {
+      if (site.id === 'granada') {
+        await expectSuccessfulUploadInstrument('granada', 'PASSWORDFORgranada', site.id)
+        await expectFailedUploadModel('granada', 'PASSWORDFORgranada', site.id)
+      } else {
+        await expectFailedUploadInstrument('granada', 'PASSWORDFORgranada', site.id)
+        await expectFailedUploadModel('granada', 'PASSWORDFORgranada', site.id)
+      }
+    }
+  })
+  it('tests that mace-head can upload only to mace-head', async () => {
+    const sites: any[] = (await axios.get(backendPublicUrl.concat('sites'))).data
+    for (const site of sites) {
+      if (site.id === 'mace-head') {
+        await expectSuccessfulUploadInstrument('mace-head', 'SfSCHhnU5cjrMiLdgcW3ixkTQRo', site.id)
+        await expectFailedUploadModel('mace-head', 'SfSCHhnU5cjrMiLdgcW3ixkTQRo', site.id)
+      } else {
+        await expectFailedUploadInstrument('mace-head', 'SfSCHhnU5cjrMiLdgcW3ixkTQRo', site.id)
+        await expectFailedUploadModel('mace-head', 'SfSCHhnU5cjrMiLdgcW3ixkTQRo', site.id)
+      }
+    }
+  })
 })
 
 async function expectSuccessfulUploadInstrument(username: string, password: string, siteId: string) {
@@ -590,12 +647,33 @@ async function expectSuccessfulUploadInstrument(username: string, password: stri
   )
 }
 
+async function expectFailedUploadInstrument(username: string, password: string, siteId: string) {
+  const contentLength = randomInt(4, 128)
+  const content = crypto.randomBytes(contentLength).toString('hex')
+  const checksum = md5(content)
+  const postMetadata = {
+    filename: 'file1.LV1',
+    measurementDate: '2020-08-11',
+    instrument: 'mira',
+    checksum: checksum,
+    site: siteId,
+  }
+  const credentials = username.concat(':', password)
+  const headers = { authorization: `Basic ${str2base64(credentials)}` }
+  // POST metadata
+  await expect(axios.post(metadataUrl, postMetadata, { headers })).rejects.toMatchObject({ response: { status: 401 } })
+  // PUT data
+  const putDataUrl = dataUrl.concat(checksum)
+  await expect(axios.put(putDataUrl, content, { headers })).rejects.toMatchObject({ response: { status: 422 } })
+  await expect(instrumentRepo.findOne({ checksum: checksum })).resolves.toBeUndefined()
+}
+
 async function expectSuccessfulUploadModel(username: string, password: string, siteId: string) {
   const contentLength = randomInt(4, 128)
   const content = crypto.randomBytes(contentLength).toString('hex')
   const checksum = md5(content)
   const postMetadata = {
-    filename: '20200122_'.concat(siteId,'_icon-iglo-12-23.nc'),
+    filename: '20200122_'.concat(siteId, '_icon-iglo-12-23.nc'),
     measurementDate: '2020-08-11',
     model: 'icon-iglo-12-23',
     checksum: checksum,
@@ -605,24 +683,49 @@ async function expectSuccessfulUploadModel(username: string, password: string, s
   const headers = { authorization: `Basic ${str2base64(credentials)}` }
 
   // POST metadata
-  const timeBeforePost = (new Date()).getTime()
+  const timeBeforePost = new Date().getTime()
   await expect(axios.post(modelMetadataUrl, postMetadata, { headers })).resolves.toMatchObject({ status: 200 })
   const metadata = await modelRepo.findOne({ checksum: postMetadata.checksum }, { relations: ['site', 'model'] })
   const timeCreated = new Date(metadata.createdAt).getTime()
   expect(metadata.site.id).toEqual(siteId)
   expect(timeCreated).toBeGreaterThan(timeBeforePost)
   // PUT data
-  const timeBeforePut = (new Date()).getTime()
+  const timeBeforePut = new Date().getTime()
   const putDataUrl = modelDataUrl.concat(checksum)
   await expect(axios.put(putDataUrl, content, { headers })).resolves.toMatchObject({ status: 201 })
-  const metadataAfterPut = await modelRepo.findOne({ checksum: postMetadata.checksum }, { relations: ['site', 'model'] })
+  const metadataAfterPut = await modelRepo.findOne(
+    { checksum: postMetadata.checksum },
+    { relations: ['site', 'model'] }
+  )
   const timeUpdated = new Date(metadataAfterPut.updatedAt).getTime()
   expect(timeUpdated).toBeGreaterThan(timeBeforePut)
 }
 
+async function expectFailedUploadModel(username: string, password: string, siteId: string) {
+  const contentLength = randomInt(4, 128)
+  const content = crypto.randomBytes(contentLength).toString('hex')
+  const checksum = md5(content)
+  const postMetadata = {
+    filename: '20200122_'.concat(siteId, '_icon-iglo-12-23.nc'),
+    measurementDate: '2020-08-11',
+    model: 'icon-iglo-12-23',
+    checksum: checksum,
+    site: siteId,
+  }
+  const credentials = username.concat(':', password)
+  const headers = { authorization: `Basic ${str2base64(credentials)}` }
+
+  // POST metadata
+  await expect(axios.post(modelMetadataUrl, postMetadata, { headers })).rejects.toMatchObject({
+    response: { status: 401 },
+  })
+  // PUT data
+  const putDataUrl = modelDataUrl.concat(checksum)
+  await expect(axios.put(putDataUrl, content, { headers })).rejects.toMatchObject({ response: { status: 422 } })
+  await expect(modelRepo.findOne({ checksum: checksum })).resolves.toBeUndefined()
+}
 function randomInt(min: number, max: number): number {
   min = Math.ceil(min)
   max = Math.floor(max)
   return Math.floor(Math.random() * (max - min + 1) + min)
-  const timeNow = new Date()
 }
