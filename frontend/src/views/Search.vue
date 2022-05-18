@@ -454,14 +454,13 @@ import Datepicker from '../components/Datepicker.vue'
 import CustomMultiselect from '../components/Multiselect.vue'
 import DataSearchResult from '../components/DataSearchResult.vue'
 import {
-  combinedFileSize,
   constructTitle,
   dateToString,
   fixedRanges,
   getDateFromBeginningOfYear,
   getProductIcon,
-  humanReadableSize,
-  isSameDay
+  isSameDay,
+  isValidDate
 } from '../lib'
 import {DevMode} from '../lib/DevMode'
 import VizSearchResult from '../components/VizSearchResult.vue'
@@ -470,6 +469,7 @@ import {Product} from '../../../backend/src/entity/Product'
 import {ProductVariable} from '../../../backend/src/entity/ProductVariable'
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 import Map, {getMarkerIcon} from '../components/Map.vue'
+import equal from 'fast-deep-equal'
 
 Vue.component('datepicker', Datepicker)
 Vue.component('custom-multiselect', CustomMultiselect)
@@ -492,20 +492,19 @@ export default class Search extends Vue {
   // api call
   apiUrl = process.env.VUE_APP_BACKENDURL
   apiResponse: SearchFileResponse[] | Visualization[] = this.resetResponse()
+  pendingUpdates = false
 
   // file list
-  sortBy = 'title'
-  sortDesc = false
   isBusy = false
 
   // site selector
-  allSites: Site[] = []
+  normalSites: Site[] = []
+  extraSites: Site[] = []
+  allSites: Site[] = []  // options in site selector
+  normalSiteIds: string[] = []
+  extraSiteIds: string[] = []
   selectedSiteIds: string[] = []
   showAllSites = false
-
-  setSelectedSiteIds(siteIds: []) {
-    this.selectedSiteIds = siteIds
-  }
 
   // dates
   beginningOfHistory = new Date('1970-01-01')
@@ -519,15 +518,173 @@ export default class Search extends Vue {
   dateInputEnd = this.dateFrom
   activeBtn = ''
 
+  // products
+  normalProducts: Product[] = []
+  experimentalProducts: Product[] = []
+  allProducts: Product[] = []  // options in product selector
+  normalProductIds: string[] = []
+  experimentalProductIds: string[] = []
+  selectedProductIds: string[] = []
+  showExpProducts = false
+
+  // variables
+  experimentalVariableIds: string[] = []
+  selectedVariableIds: string[] = []
+
+  // other
+  renderComplete = false
+  displayKeyInfo = true
+  vizWideMode = false
+  error = null
+  fixedRanges = fixedRanges
+  devMode = new DevMode()
+
+  // keys
+  dateFromUpdate = 10000
+  dateToUpdate = 20000
+  vizDateUpdate = 30000
+  dataSearchUpdate = 40000
+  vizSearchUpdate = 50000
+  mapKey = 60000
+
+  getProductIcon = getProductIcon
+  getMarkerIcon = getMarkerIcon
+
+  mounted() {
+    this.$nextTick(() => {
+      this.renderComplete = true
+    })
+    this.addKeyPressListener()
+  }
+
+  async created() {
+    await this.initView()
+    const query = this.$route.query
+    const params = ['site', 'product', 'variable', 'dateFrom', 'dateTo']
+    const paramsSet = params.filter(param => param in query && query[param] != null)
+    for (const param of paramsSet) {
+      const value = this.$route.query[param] as string
+      if (param === 'site') this.selectedSiteIds = this.parseQuery(param, value)
+      if (param === 'product') this.selectedProductIds = this.parseQuery(param, value)
+      if (param === 'variable') this.selectedVariableIds = this.parseQuery(param, value)
+      if (param === 'dateFrom' || param === 'dateTo') {
+        if (isValidDate(value)) {
+          const date = new Date(value)
+          this[param] = date
+          param === 'dateFrom' ? this.dateInputStart = date : this.dateInputEnd = date
+        }
+      }
+    }
+  }
+
+  async initView() {
+    const payload = { developer: this.devMode.activated || undefined }
+    const sitesPayload = {params: {...payload, ...{ type: ['cloudnet', 'campaign', 'arm'] }}}
+    await Promise.all([
+      axios.get(`${this.apiUrl}sites/`, sitesPayload),
+      axios.get(`${this.apiUrl}products/variables`,{params: payload })
+    ]).then(([sites, products]) => {
+      this.allSites = sites.data
+        .sort(this.alphabeticalSort)
+        .filter(this.selectNormalSites)
+      this.normalSites = sites.data
+        .sort(this.alphabeticalSort)
+        .filter(this.selectNormalSites)
+      this.extraSites = sites.data
+        .sort(this.alphabeticalSort)
+        .filter(this.selectExtraSites)
+      this.normalSiteIds = this.normalSites
+        .map(site => site.id)
+      this.extraSiteIds = this.extraSites
+        .map(site => site.id)
+      this.allProducts = products.data
+        .filter(this.discardExperimentalProducts)
+        .sort(this.alphabeticalSort)
+      this.normalProducts = products.data
+        .filter((prod: Product) => !prod.experimental)
+        .sort(this.alphabeticalSort)
+      this.experimentalProducts = products.data
+        .filter((prod: Product) => prod.experimental)
+        .sort(this.alphabeticalSort)
+      this.normalProductIds = this.normalProducts
+        .map(prod => prod.id)
+      this.experimentalProductIds = this.experimentalProducts
+        .map(prod => prod.id)
+      this.experimentalVariableIds = this.experimentalProducts
+        .flatMap(prod => prod.variables)
+        .map(prod => prod.id)
+    })
+    return this.fetchData()
+  }
+
+  parseQuery(param: string, value: string): string[] {
+    let validChoices: string | string[]
+    const valueArray = value.split(',')
+    if (param === 'product') {
+      for (const productId of valueArray) {
+        if (this.experimentalProductIds.includes(productId) && !this.showExpProducts) {
+          this.showExpProducts = true
+          this.allProducts = this.normalProducts.concat(this.experimentalProducts)
+        }
+      }
+      validChoices = this.normalProductIds.concat(this.experimentalProductIds)
+    }
+    if (param === 'site') {
+      for (const siteId of valueArray) {
+        if (this.extraSiteIds.includes(siteId) && !this.showAllSites) {
+          this.showAllSites = true
+          this.allSites = this.normalSites.concat(this.extraSites)
+        }
+      }
+      validChoices = this.allSites.map(site => site.id)
+    }
+    if (param === 'variable') {
+      validChoices = this.allProducts
+        .flatMap(prod => prod.variables)
+        .map(variable => variable.id)
+    }
+    return valueArray.filter(value => validChoices.includes(value))
+  }
+
+  fetchData() {
+    if (this.pendingUpdates) return Promise.resolve()
+    this.pendingUpdates = true
+    return new Promise((resolve, reject) => {
+      this.$nextTick(() => {
+        this.pendingUpdates = false
+        if (this.isVizMode() && this.noSelectionsMade) {
+          resolve(undefined)
+          return
+        }
+        this.isBusy = true
+        const apiPath = this.isVizMode() ? 'visualizations/' : 'search/'
+        if (!this.isVizMode()) this.checkIfButtonShouldBeActive()
+        return axios
+          .get(`${this.apiUrl}${apiPath}`, this.payload)
+          .then(res => {
+            this.apiResponse = constructTitle(res.data)
+            this.isBusy = false
+            resolve(undefined)
+          })
+          .catch(err => {
+            this.error = err.response.statusText || 'unknown error'
+            this.apiResponse = this.resetResponse()
+            this.isBusy = false
+            reject()
+          })
+      })
+    })
+
+  }
+
+  setSelectedSiteIds(siteIds: []) {
+    this.selectedSiteIds = siteIds
+  }
+
   dateErrorsExist(dateError: { [key: string]: boolean }) {
     return !(dateError.isValidDateString && dateError.isAfterStart && dateError.isBeforeEnd &&
       dateError.isNotInFuture)
   }
-
-  // products
-  allProducts: Product[] = []
-  selectedProductIds: string[] = []
-  showExpProducts = false
 
   setSelectedProductIds(productIds: []) {
     this.selectedProductIds = productIds
@@ -542,41 +699,6 @@ export default class Search extends Vue {
     return new Date(date.setDate(date.getDate() - fixedRanges.day))
   }
 
-  // variables
-  selectedVariableIds: string[] = []
-  get selectableVariables(): ProductVariable[] {
-    if (this.selectedProductIds.length == 0)
-      return this.allProducts.flatMap(prod => prod.variables)
-    return this.allProducts
-      .filter(prod => this.selectedProductIds.includes(prod.id))
-      .flatMap(prod => prod.variables)
-  }
-
-  renderComplete = false
-
-  displayKeyInfo = true
-
-  getProductIcon = getProductIcon
-  getMarkerIcon = getMarkerIcon
-  humanReadableSize = humanReadableSize
-  combinedFileSize = combinedFileSize
-  dateToString = dateToString
-  fixedRanges = fixedRanges
-  devMode = new DevMode()
-
-  vizWideMode = false
-
-  error = null
-
-  // keys
-  dateFromUpdate = 10000
-  dateToUpdate = 20000
-  vizDateUpdate = 30000
-  dataSearchUpdate = 40000
-  vizSearchUpdate = 50000
-  mapKey = 60000
-  initMapKey = 60000
-
   isVizMode() {
     return this.mode == 'visualizations'
   }
@@ -586,98 +708,24 @@ export default class Search extends Vue {
     this.mapKey = this.mapKey + 1
   }
 
-  get mainWidth() {
-    if (this.isVizMode()) {
-      if (this.vizWideMode) return { wideView: true }
-      else return { mediumView: true}
-    }
-    return { narrowView: true }
-  }
-
-  get noSelectionsMade() {
-    return !(this.selectedProductIds.length || this.selectedSiteIds.length || this.selectedVariableIds.length)
-  }
-
   isTrueOnBothDateFields(errorId: string) {
     return (this.isVizMode() || this.dateFromError[errorId]) && this.dateToError[errorId]
-  }
-
-  created() {
-    this.initView()
-  }
-
-  mounted() {
-    // Wait until all child components have rendered
-    this.$nextTick(() => {
-      this.renderComplete = true
-    })
-    this.addKeyPressListener()
   }
 
   onMapMarkerClick(ids: Array<string>) {
     const union = this.selectedSiteIds.concat(ids)
     const intersection = this.selectedSiteIds.filter(id => ids.includes(id))
-    const xor = union.filter(id => ! intersection.includes(id))
-    this.selectedSiteIds = xor
+    this.selectedSiteIds = union.filter(id => ! intersection.includes(id))
   }
 
   alphabeticalSort = (a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName
-  discardHiddenSites = (site: Site) => !(site.type as string[]).includes('hidden')
+
+  selectNormalSites = (site: Site) => (site.type as string[]).includes('cloudnet')
+
+  selectExtraSites = (site: Site) => !(site.type as string[]).includes('cloudnet')
+
   discardExperimentalProducts(prod: Product) {
-    return  this.showExpProducts || !prod.experimental
-  }
-
-  async initView() {
-    const payload = { developer: this.devMode.activated || undefined }
-    const sitesPayload = {params: {...payload, ...{ type: this.showAllSites ? undefined : 'cloudnet' }}}
-    await Promise.all([
-      axios.get(`${this.apiUrl}sites/`, sitesPayload),
-      axios.get(`${this.apiUrl}products/variables`,{params: payload })
-    ]).then(([sites, products]) => {
-      this.allSites = sites.data
-        .filter(this.discardHiddenSites)
-        .sort(this.alphabeticalSort)
-      this.allProducts = products.data
-        .filter(this.discardExperimentalProducts)
-        .sort(this.alphabeticalSort)
-    })
-    return this.fetchData()
-  }
-
-  get payload() {
-    return {
-      params: {
-        site: this.selectedSiteIds.length ? this.selectedSiteIds : this.allSites.map(site => site.id),
-        dateFrom: this.isVizMode() ? this.dateTo : this.dateFrom,
-        dateTo: this.dateTo,
-        product: this.selectedProductIds.length ? this.selectedProductIds : this.allProducts.map(prod => prod.id),
-        variable: this.isVizMode() ? this.selectedVariableIds : undefined,
-        showLegacy: true,
-        developer: this.devMode.activated || undefined
-      }
-    }
-  }
-
-  fetchData() {
-    if (this.isVizMode() && this.noSelectionsMade) return Promise.resolve()
-    this.isBusy = true
-    const apiPath = this.isVizMode() ? 'visualizations/' : 'search/'
-    if (!this.isVizMode()) this.checkIfButtonShouldBeActive()
-    return axios
-      .get(`${this.apiUrl}${apiPath}`, this.payload)
-      .then(res => {
-        this.apiResponse = constructTitle(res.data)
-        this.isBusy = false
-      })
-      .catch(err => {
-        this.error = err.response.statusText || 'unknown error'
-        this.apiResponse = this.resetResponse()
-        this.isBusy = false
-      })
-  }
-
-  get downloadUri() {
-    return axios.getUri({...{ method: 'post', url: `${this.apiUrl}download/`}, ...this.payload })
+    return this.showExpProducts || !prod.experimental
   }
 
   resetResponse() {
@@ -685,7 +733,12 @@ export default class Search extends Vue {
   }
 
   navigateToSearch(mode: string) {
-    this.$router.push({ name: 'Search', params: { mode }})
+    this.$router.push({ name: 'Search', params: { mode }, query: this.$route.query })
+  }
+
+  reset() {
+    this.$router.replace({path: this.$route.path, query: {} })
+    this.$router.go(0)
   }
 
   setDateRange(n: number) {
@@ -758,18 +811,64 @@ export default class Search extends Vue {
     return false
   }
 
-  reset() {
-    this.$router.go(0)
+  replaceUrlQueryString(param: string, value: Date | string[]) {
+    const query = { ...this.$route.query }
+    const valueToUrl = value instanceof Date ? dateToString(value) : value.join(',')
+    query[param] = valueToUrl
+    if (!equal(this.$route.query, query)) {
+      query[param] = valueToUrl === '' ? [] : valueToUrl
+      this.$router.replace({path: this.$route.path, query: query})
+    }
+  }
+
+  get downloadUri() {
+    return axios.getUri({...{ method: 'post', url: `${this.apiUrl}download/`}, ...this.payload })
+  }
+
+  get payload() {
+    return {
+      params: {
+        site: this.selectedSiteIds.length ? this.selectedSiteIds : this.allSites.map(site => site.id),
+        dateFrom: this.isVizMode() ? this.dateTo : this.dateFrom,
+        dateTo: this.dateTo,
+        product: this.selectedProductIds.length ? this.selectedProductIds : this.allProducts.map(prod => prod.id),
+        variable: this.isVizMode() ? this.selectedVariableIds : undefined,
+        showLegacy: true,
+        developer: this.devMode.activated || undefined
+      }
+    }
+  }
+
+  get mainWidth() {
+    if (this.isVizMode()) {
+      if (this.vizWideMode) return { wideView: true }
+      else return { mediumView: true}
+    }
+    return { narrowView: true }
+  }
+
+  get selectableVariables(): ProductVariable[] {
+    if (this.selectedProductIds.length == 0)
+      return this.allProducts.flatMap(prod => prod.variables)
+    return this.allProducts
+      .filter(prod => this.selectedProductIds.includes(prod.id))
+      .flatMap(prod => prod.variables)
+  }
+
+  get noSelectionsMade() {
+    return !(this.selectedProductIds.length || this.selectedSiteIds.length || this.selectedVariableIds.length)
   }
 
   @Watch('selectedSiteIds')
   onSiteSelected() {
+    this.replaceUrlQueryString('site', this.selectedSiteIds)
     this.fetchData()
   }
 
   @Watch('dateFrom')
   onDateFromChanged() {
     if (!this.renderComplete || this.dateErrorsExist(this.dateFromError)) return
+    this.replaceUrlQueryString('dateFrom', this.dateFrom)
     this.fetchData()
   }
 
@@ -780,16 +879,20 @@ export default class Search extends Vue {
       this.dateFrom = this.dateTo
       this.visualizationDate = new Date(this.dateTo)
     }
+    this.replaceUrlQueryString('dateTo', this.dateTo)
+    this.replaceUrlQueryString('dateFrom', this.dateFrom)
     this.fetchData()
   }
 
   @Watch('selectedProductIds')
   onProductSelected() {
+    this.replaceUrlQueryString('product', this.selectedProductIds)
     this.fetchData()
   }
 
   @Watch('selectedVariableIds')
   onVariableSelected() {
+    this.replaceUrlQueryString('variable', this.selectedVariableIds)
     this.fetchData()
   }
 
@@ -806,13 +909,31 @@ export default class Search extends Vue {
 
   @Watch('showAllSites')
   async onShowAllSites() {
-    await this.initView()
+    if (!this.showAllSites) {
+      this.allSites = this.normalSites
+      this.selectedSiteIds = this.selectedSiteIds
+        .filter(site => !this.extraSiteIds.includes(site))
+    } else {
+      this.allSites = this.normalSites.concat(this.extraSites)
+    }
     this.mapKey = this.mapKey + 1
   }
 
   @Watch('showExpProducts')
   async onShowExpProducts() {
+    if (!this.showExpProducts) {
+      this.allProducts = this.normalProducts
+      this.selectedProductIds = this.selectedProductIds
+        .filter(prod => !this.experimentalProductIds.includes(prod))
+      this.selectedVariableIds = this.selectedVariableIds
+        .filter(variable => !this.experimentalVariableIds.includes(variable))
+    }
     await this.initView()
+  }
+
+  @Watch('allProducts')
+  async onSelectedL3Product() {
+    this.showExpProducts = this.allProducts.length > this.normalProducts.length
   }
 
   @Watch('mode')

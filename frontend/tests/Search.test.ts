@@ -9,10 +9,11 @@ import {
   dateToISOString,
   getMockedAxiosLastCallSecondArgument,
   init, nextTick,
-  tomorrow
+  tomorrow, wait
 } from './lib'
 import {mocked} from 'ts-jest/dist/util/testing'
 import {readResources} from '../../shared/lib'
+import VueRouter from 'vue-router'
 
 init()
 
@@ -22,6 +23,9 @@ const date = new Date()
 const dateFromDefault = date.toISOString().substring(0,10)
 const dateToDefault = new Date().toISOString().substring(0,10)
 let filesSortedByDate: any
+
+Vue.use(VueRouter)
+const router = new VueRouter()
 
 describe('Search.vue', () => {
   let wrapper: Wrapper<Vue>
@@ -56,12 +60,20 @@ describe('Search.vue', () => {
       }
     }
     mocked(axios.get).mockImplementation(defaultAxiosMock)
-    wrapper = mount(Search, { propsData: { mode: 'data'}, stubs: { Map: true }})
+    wrapper = mount(Search, {
+      propsData: {
+        mode: 'data'
+      },
+      stubs: {
+        Map: true
+      },
+      router
+    })
   })
 
-  it('makes less than four api request on mount', () => {
+  it('makes less than 7 api request on mount', () => {
     // files and sites
-    expect(mocked(axios.get).mock.calls.length).toBeLessThan(4)
+    expect(mocked(axios.get).mock.calls.length).toBeLessThan(7)
   })
 
   describe('date selectors', () => {
@@ -101,6 +113,16 @@ describe('Search.vue', () => {
       return expect(dateToISOString(secondArg.params.dateFrom)).toEqual(newValue)
     })
 
+    it('Inserts correct parameters to url query string', async () => {
+      const dateFrom = '2019-01-01'
+      const dateTo = '2020-01-01'
+      await changeInputAndNextTick('dateFrom', dateFrom)
+      await changeInputAndNextTick('dateTo', dateTo)
+      const url = document.URL
+      const query = url.substring(url.indexOf('?') + 1)
+      return expect(query).toMatch(`dateFrom=${dateFrom}&dateTo=${dateTo}`)
+    })
+
     it('fetches updated list of files from api on dateTo change', async () => {
       const newValue = filesSortedByDate[3].measurementDate
       await changeInputAndNextTick('dateTo', newValue)
@@ -112,6 +134,7 @@ describe('Search.vue', () => {
       mocked(axios.get).mockImplementationOnce((_1, _2) => Promise.resolve(augmentAxiosResponse(resources['allsearch'].slice(3))))
       const newValue = filesSortedByDate[0].measurementDate
       await changeInputAndNextTick('dateFrom', newValue)
+      await wait(100)
       // Contains the dates of all files except the first
       resources['allsearch']
         .slice(3)
