@@ -9,7 +9,7 @@ import {
   dateToISOString,
   getMockedAxiosLastCallSecondArgument,
   init, nextTick,
-  tomorrow
+  tomorrow, wait
 } from './lib'
 import {mocked} from 'ts-jest/dist/util/testing'
 import {readResources} from '../../shared/lib'
@@ -134,6 +134,7 @@ describe('Search.vue', () => {
       mocked(axios.get).mockImplementationOnce((_1, _2) => Promise.resolve(augmentAxiosResponse(resources['allsearch'].slice(3))))
       const newValue = filesSortedByDate[0].measurementDate
       await changeInputAndNextTick('dateFrom', newValue)
+      await wait(100)
       // Contains the dates of all files except the first
       resources['allsearch']
         .slice(3)
