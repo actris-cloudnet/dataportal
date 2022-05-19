@@ -20,14 +20,14 @@ const dataUrl = `${backendPrivateUrl}api/test/upload/data/`
 const modelDataUrl = `${backendPrivateUrl}api/test/model-upload/data/`
 
 const userCredentials = {
-  'alice':'alices_password',
-  'bob':'bobs_pass',
-  'carol':'carols-passphrase',
-  'david':'davids^passphrase',
-  'eve':'eves_passphraase',
-  'bucharest':'passWordForBucharest',
-  'granada':'PASSWORDFORgranada',
-  'mace-head':'SfSCHhnU5cjrMiLdgcW3ixkTQRo'
+  alice: 'alices_password',
+  bob: 'bobs_pass',
+  carol: 'carols-passphrase',
+  david: 'davids^passphrase',
+  eve: 'eves_passphraase',
+  bucharest: 'passWordForBucharest',
+  granada: 'PASSWORDFORgranada',
+  'mace-head': 'SfSCHhnU5cjrMiLdgcW3ixkTQRo',
 }
 
 const validMetadata = {
@@ -629,8 +629,8 @@ describe('test user permissions', () => {
   it('tests that eve cannot upload anywhere', async () => {
     const sites: any[] = (await axios.get(backendPublicUrl.concat('sites'))).data
     for (const site of sites) {
-      await expectFailedUploadInstrument('eve','eves_passphraase', site.id)
-      await expectFailedUploadModel('eve','eves_passphraase', site.id)
+      await expectFailedUploadInstrument('eve', 'eves_passphraase', site.id)
+      await expectFailedUploadModel('eve', 'eves_passphraase', site.id)
     }
   })
   it('tests that users cannot upload with wrong passwords', async () => {
@@ -638,7 +638,7 @@ describe('test user permissions', () => {
     const sites: any[] = (await axios.get(backendPublicUrl.concat('sites'))).data
     const users: any[] = (await axios.get(user_accounts_url)).data
     for (const site of sites) {
-      for(const user of users){
+      for (const user of users) {
         const length = randomInt(1, 512)
         const randomPassword = crypto.randomBytes(length).toString('hex')
         await expectFailedUploadInstrument(user.username, randomPassword, site.id, false)
@@ -649,31 +649,31 @@ describe('test user permissions', () => {
     }
   })
   it('tests that users cannot use others passwords', async () => {
-    const user_accounts_url = `${backendPrivateUrl}user-accounts`
     const sites: any[] = (await axios.get(backendPublicUrl.concat('sites'))).data
     for (const site of sites) {
-      for (const [usernameA, passwordA] of Object.entries(userCredentials)){
-        for (const [usernameB, passwordB] of Object.entries(userCredentials)){
-          if(usernameA == usernameB){continue}
+      for (const usernameA of Object.keys(userCredentials)) {
+        for (const [usernameB, passwordB] of Object.entries(userCredentials)) {
+          if (usernameA == usernameB) {
+            continue
+          }
           await expectFailedUploadInstrument(usernameA, passwordB, site.id, false)
           await expectFailedUploadModel(usernameA, passwordB, site.id, false)
         }
       }
     }
-  },10000)
+  }, 10000)
   it('tests that nonexistent users cannot upload with correct or incorrect passwords', async () => {
-    const user_accounts_url = `${backendPrivateUrl}user-accounts`
     const sites: any[] = (await axios.get(backendPublicUrl.concat('sites'))).data
-    const usernamelength = randomInt(1, 512)
-    const randomUsername = crypto.randomBytes(usernamelength).toString('hex')
+    const usernameLength = randomInt(1, 512)
+    const randomUsername = crypto.randomBytes(usernameLength).toString('hex')
     for (const site of sites) {
-      for (const [username, password] of Object.entries(userCredentials)){
+      for (const password of Object.values(userCredentials)) {
         // Random username, some correct password
         await expectFailedUploadInstrument(randomUsername, password, site.id, false)
         await expectFailedUploadModel(randomUsername, password, site.id, false)
         // Random username, some random password
-        const passwordlength = randomInt(1, 512)
-        const randomPassword = crypto.randomBytes(usernamelength).toString('hex')
+        const passwordLength = randomInt(1, 512)
+        const randomPassword = crypto.randomBytes(passwordLength).toString('hex')
         await expectFailedUploadInstrument(randomUsername, randomPassword, site.id, false)
         await expectFailedUploadModel(randomUsername, randomPassword, site.id, false)
         // Empty password
@@ -682,7 +682,7 @@ describe('test user permissions', () => {
         // empty username
         await expectFailedUploadInstrument('', password, site.id, false)
         await expectFailedUploadModel('', password, site.id, false)
-        await expectFailedUploadInstrument('','', site.id, false)
+        await expectFailedUploadInstrument('', '', site.id, false)
         await expectFailedUploadModel('', '', site.id, false)
       }
     }
@@ -719,7 +719,12 @@ async function expectSuccessfulUploadInstrument(username: string, password: stri
   )
 }
 
-async function expectFailedUploadInstrument(username: string, password: string, siteId: string, correctPassword: boolean = true) {
+async function expectFailedUploadInstrument(
+  username: string,
+  password: string,
+  siteId: string,
+  correctPassword: boolean = true
+) {
   const putStatus: number = correctPassword ? 422 : 401
   const contentLength = randomInt(4, 128)
   const content = crypto.randomBytes(contentLength).toString('hex')
@@ -774,7 +779,12 @@ async function expectSuccessfulUploadModel(username: string, password: string, s
   expect(timeUpdated).toBeGreaterThan(timeBeforePut)
 }
 
-async function expectFailedUploadModel(username: string, password: string, siteId: string, correctPassword: boolean = true ) {
+async function expectFailedUploadModel(
+  username: string,
+  password: string,
+  siteId: string,
+  correctPassword: boolean = true
+) {
   const putStatus: number = correctPassword ? 422 : 401
   const contentLength = randomInt(4, 128)
   const content = crypto.randomBytes(contentLength).toString('hex')
@@ -804,6 +814,6 @@ function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
-function md5(str: string){
+function md5(str: string) {
   return crypto.createHash('md5').update(str).digest('hex')
 }
