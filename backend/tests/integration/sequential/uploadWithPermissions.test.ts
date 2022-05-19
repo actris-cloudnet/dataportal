@@ -5,7 +5,6 @@ import { Status } from '../../../src/entity/Upload'
 import { promises as fsp } from 'fs'
 import { initUsersAndPermissions } from '../../lib/userAccountAndPermissions'
 
-const md5 = require('blueimp-md5')
 const crypto = require('crypto')
 
 let conn: Connection
@@ -728,4 +727,8 @@ function randomInt(min: number, max: number): number {
   min = Math.ceil(min)
   max = Math.floor(max)
   return Math.floor(Math.random() * (max - min + 1) + min)
+}
+
+function md5(str: string){
+  return crypto.createHash('md5').update(str).digest('hex')
 }
