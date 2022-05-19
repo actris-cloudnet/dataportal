@@ -661,7 +661,7 @@ describe('test user permissions', () => {
         }
       }
     }
-  }, 10000)
+  }, 40000)
   it('tests that nonexistent users cannot upload with correct or incorrect passwords', async () => {
     const sites: any[] = (await axios.get(backendPublicUrl.concat('sites'))).data
     const usernameLength = randomInt(1, 512)
