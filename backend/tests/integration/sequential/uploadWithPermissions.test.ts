@@ -19,6 +19,17 @@ const privateMetadataUrl = `${backendPrivateUrl}upload-metadata/`
 const dataUrl = `${backendPrivateUrl}api/test/upload/data/`
 const modelDataUrl = `${backendPrivateUrl}api/test/model-upload/data/`
 
+const userCredentials = {
+  'alice':'alices_password',
+  'bob':'bobs_pass',
+  'carol':'carols-passphrase',
+  'david':'davids^passphrase',
+  'eve':'eves_passphraase',
+  'bucharest':'passWordForBucharest',
+  'granada':'PASSWORDFORgranada',
+  'mace-head':'SfSCHhnU5cjrMiLdgcW3ixkTQRo'
+}
+
 const validMetadata = {
   filename: 'file1.LV1',
   measurementDate: '2020-08-11',
@@ -614,6 +625,68 @@ describe('test user permissions', () => {
       }
     }
   })
+
+  it('tests that eve cannot upload anywhere', async () => {
+    const sites: any[] = (await axios.get(backendPublicUrl.concat('sites'))).data
+    for (const site of sites) {
+      await expectFailedUploadInstrument('eve','eves_passphraase', site.id)
+      await expectFailedUploadModel('eve','eves_passphraase', site.id)
+    }
+  })
+  it('tests that users cannot upload with wrong passwords', async () => {
+    const user_accounts_url = `${backendPrivateUrl}user-accounts`
+    const sites: any[] = (await axios.get(backendPublicUrl.concat('sites'))).data
+    const users: any[] = (await axios.get(user_accounts_url)).data
+    for (const site of sites) {
+      for(const user of users){
+        const length = randomInt(1, 512)
+        const randomPassword = crypto.randomBytes(length).toString('hex')
+        await expectFailedUploadInstrument(user.username, randomPassword, site.id, false)
+        await expectFailedUploadModel(user.username, randomPassword, site.id, false)
+        await expectFailedUploadInstrument(user.username, '', site.id, false)
+        await expectFailedUploadModel(user.username, '', site.id, false)
+      }
+    }
+  })
+  it('tests that users cannot use others passwords', async () => {
+    const user_accounts_url = `${backendPrivateUrl}user-accounts`
+    const sites: any[] = (await axios.get(backendPublicUrl.concat('sites'))).data
+    for (const site of sites) {
+      for (const [usernameA, passwordA] of Object.entries(userCredentials)){
+        for (const [usernameB, passwordB] of Object.entries(userCredentials)){
+          if(usernameA == usernameB){continue}
+          await expectFailedUploadInstrument(usernameA, passwordB, site.id, false)
+          await expectFailedUploadModel(usernameA, passwordB, site.id, false)
+        }
+      }
+    }
+  },10000)
+  it('tests that nonexistent users cannot upload with correct or incorrect passwords', async () => {
+    const user_accounts_url = `${backendPrivateUrl}user-accounts`
+    const sites: any[] = (await axios.get(backendPublicUrl.concat('sites'))).data
+    const usernamelength = randomInt(1, 512)
+    const randomUsername = crypto.randomBytes(usernamelength).toString('hex')
+    for (const site of sites) {
+      for (const [username, password] of Object.entries(userCredentials)){
+        // Random username, some correct password
+        await expectFailedUploadInstrument(randomUsername, password, site.id, false)
+        await expectFailedUploadModel(randomUsername, password, site.id, false)
+        // Random username, some random password
+        const passwordlength = randomInt(1, 512)
+        const randomPassword = crypto.randomBytes(usernamelength).toString('hex')
+        await expectFailedUploadInstrument(randomUsername, randomPassword, site.id, false)
+        await expectFailedUploadModel(randomUsername, randomPassword, site.id, false)
+        // Empty password
+        await expectFailedUploadInstrument(randomUsername, '', site.id, false)
+        await expectFailedUploadModel(randomUsername, '', site.id, false)
+        // empty username
+        await expectFailedUploadInstrument('', password, site.id, false)
+        await expectFailedUploadModel('', password, site.id, false)
+        await expectFailedUploadInstrument('','', site.id, false)
+        await expectFailedUploadModel('', '', site.id, false)
+      }
+    }
+  })
 })
 
 async function expectSuccessfulUploadInstrument(username: string, password: string, siteId: string) {
@@ -646,7 +719,8 @@ async function expectSuccessfulUploadInstrument(username: string, password: stri
   )
 }
 
-async function expectFailedUploadInstrument(username: string, password: string, siteId: string) {
+async function expectFailedUploadInstrument(username: string, password: string, siteId: string, correctPassword: boolean = true) {
+  const putStatus: number = correctPassword ? 422 : 401
   const contentLength = randomInt(4, 128)
   const content = crypto.randomBytes(contentLength).toString('hex')
   const checksum = md5(content)
@@ -663,7 +737,7 @@ async function expectFailedUploadInstrument(username: string, password: string, 
   await expect(axios.post(metadataUrl, postMetadata, { headers })).rejects.toMatchObject({ response: { status: 401 } })
   // PUT data
   const putDataUrl = dataUrl.concat(checksum)
-  await expect(axios.put(putDataUrl, content, { headers })).rejects.toMatchObject({ response: { status: 422 } })
+  await expect(axios.put(putDataUrl, content, { headers })).rejects.toMatchObject({ response: { status: putStatus } })
   await expect(instrumentRepo.findOne({ checksum: checksum })).resolves.toBeUndefined()
 }
 
@@ -700,7 +774,8 @@ async function expectSuccessfulUploadModel(username: string, password: string, s
   expect(timeUpdated).toBeGreaterThan(timeBeforePut)
 }
 
-async function expectFailedUploadModel(username: string, password: string, siteId: string) {
+async function expectFailedUploadModel(username: string, password: string, siteId: string, correctPassword: boolean = true ) {
+  const putStatus: number = correctPassword ? 422 : 401
   const contentLength = randomInt(4, 128)
   const content = crypto.randomBytes(contentLength).toString('hex')
   const checksum = md5(content)
@@ -720,7 +795,7 @@ async function expectFailedUploadModel(username: string, password: string, siteI
   })
   // PUT data
   const putDataUrl = modelDataUrl.concat(checksum)
-  await expect(axios.put(putDataUrl, content, { headers })).rejects.toMatchObject({ response: { status: 422 } })
+  await expect(axios.put(putDataUrl, content, { headers })).rejects.toMatchObject({ response: { status: putStatus } })
   await expect(modelRepo.findOne({ checksum: checksum })).resolves.toBeUndefined()
 }
 function randomInt(min: number, max: number): number {
