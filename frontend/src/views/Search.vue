@@ -575,6 +575,7 @@ export default class Search extends Vue {
         }
       }
     }
+    if (paramsSet.length === 0) await this.fetchData()
   }
 
   async initView() {
@@ -614,7 +615,6 @@ export default class Search extends Vue {
         .flatMap(prod => prod.variables)
         .map(prod => prod.id)
     })
-    return this.fetchData()
   }
 
   parseQuery(param: string, value: string): string[] {
@@ -910,6 +910,7 @@ export default class Search extends Vue {
   @Watch('showAllSites')
   async onShowAllSites() {
     if (!this.showAllSites) {
+      // remove selected campaign and arm sites
       this.allSites = this.normalSites
       this.selectedSiteIds = this.selectedSiteIds
         .filter(site => !this.extraSiteIds.includes(site))
@@ -917,18 +918,22 @@ export default class Search extends Vue {
       this.allSites = this.normalSites.concat(this.extraSites)
     }
     this.mapKey = this.mapKey + 1
+    await this.fetchData()
   }
 
   @Watch('showExpProducts')
   async onShowExpProducts() {
     if (!this.showExpProducts) {
+      // remove selected experimental products and variables
       this.allProducts = this.normalProducts
       this.selectedProductIds = this.selectedProductIds
         .filter(prod => !this.experimentalProductIds.includes(prod))
       this.selectedVariableIds = this.selectedVariableIds
         .filter(variable => !this.experimentalVariableIds.includes(variable))
+    } else {
+      this.allProducts = this.normalProducts.concat(this.experimentalProducts)
     }
-    await this.initView()
+    await this.fetchData()
   }
 
   @Watch('allProducts')
