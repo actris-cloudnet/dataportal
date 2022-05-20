@@ -214,19 +214,6 @@ describe('search page', () => {
     expect(s1).not.toEqual(s2)
   })
 
-  it('changes marker color by double clicking marker', async () => {
-    await clearMapSelection(By.id('mapContainer'))
-    const src1 = getMarkerSrc(By.id('mapContainer'))
-    const s1 = (await src1).anchor('src')
-    await clickAllMarkers(By.id('mapContainer'))
-    await wait(timeout_long)
-    await clickAllMarkersPopupMovement(By.id('mapContainer'))
-    await wait(timeout_long)
-    const src2 = await getMarkerSrc(By.id('mapContainer'))
-    const s2 = src2.anchor('src')
-    expect(s1).toEqual(s2)
-  })
-
   it('changes marker color by clicking site from multi-selection', async () => {
     await clearMapSelection(By.id('mapContainer'))
     const src1 = getMarkerSrc(By.id('mapContainer'))
