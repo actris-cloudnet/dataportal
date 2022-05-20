@@ -42,9 +42,7 @@ export class UserAccountRoutes {
     // Expects valid array of "user:passwordHash" strings in the req.body
     // Validity should be checked in middleware earlier
     for (let credentialString of req.body) {
-      let username: string
-      let passwordHash: string
-      ;[username, passwordHash] = credentialString.split(':')
+      const [username, passwordHash] = credentialString.split(':')
       try {
         await this.userAccountRepository.save({
           username: username,
