@@ -183,14 +183,18 @@ import { PermissionType, permissionTypeFromString } from './entity/Permission'
   app.post('/api/test/upload/metadata',
     authenticator.middleware,
     express.json(),
-    authorizator.uploadMiddleware({permission:canUpload}),
+    authorizator.metadataMiddleware,
+    authorizator.authorizeSiteMiddleware({permission: canUpload}),
+    //authorizator.uploadMiddleware({permission:canUpload}),
     uploadRoutes.validateMetadata,
     uploadRoutes.postMetadata,
     errorAsPlaintext)
   app.put('/api/test/upload/data/:checksum',
     middleware.validateMD5Param,
     authenticator.middleware,
-    authorizator.uploadMiddleware({permission:canUpload, isDataUpload: true}),
+    authorizator.instrumentDataUploadMiddleware,
+    authorizator.authorizeSiteMiddleware({permission: canUpload}),
+    //authorizator.uploadMiddleware({permission:canUpload, isDataUpload: true}),
     express.raw({limit: '100gb'}),
     uploadRoutes.putData,
     errorAsPlaintext)
@@ -199,14 +203,18 @@ import { PermissionType, permissionTypeFromString } from './entity/Permission'
   app.post('/api/test/model-upload/metadata',
     authenticator.middleware,
     express.json(),
-    authorizator.uploadMiddleware({permission:canUploadModel}),
+    authorizator.metadataMiddleware,
+    authorizator.authorizeSiteMiddleware({permission: canUploadModel}),
+    //authorizator.uploadMiddleware({permission:canUploadModel}),
     uploadRoutes.validateMetadata,
     uploadRoutes.postMetadata)
 
   app.put('/api/test/model-upload/data/:checksum',
     middleware.validateMD5Param,
     authenticator.middleware,
-    authorizator.uploadMiddleware({permission:canUploadModel, isModelDataUpload: true}),
+    authorizator.modelDataUploadMiddleware,
+    authorizator.authorizeSiteMiddleware({permission: canUploadModel}),
+    //authorizator.uploadMiddleware({permission:canUploadModel, isModelDataUpload: true}),
     express.raw({limit: '1gb'}),
     uploadRoutes.putData)
   // \END test routes
