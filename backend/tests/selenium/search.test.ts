@@ -193,7 +193,9 @@ describe('search page', () => {
   })
 
   it('removes site from multi-selection while clicking marker twice', async () => {
+    await wait(timeout_short)
     await clearMapSelection(By.id('mapContainer'))
+    await wait(timeout_short)
     await clickMapMarker(By.id('mapContainer'), -140, -20)
     await wait(timeout_long)
     await clickMapMarker(By.id('mapContainer'), -105, -5)
