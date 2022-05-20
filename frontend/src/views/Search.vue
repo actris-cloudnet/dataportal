@@ -469,7 +469,6 @@ import {Product} from '../../../backend/src/entity/Product'
 import {ProductVariable} from '../../../backend/src/entity/ProductVariable'
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 import Map, {getMarkerIcon} from '../components/Map.vue'
-import equal from 'fast-deep-equal'
 
 Vue.component('datepicker', Datepicker)
 Vue.component('custom-multiselect', CustomMultiselect)
@@ -737,7 +736,9 @@ export default class Search extends Vue {
   }
 
   reset() {
-    this.$router.replace({path: this.$route.path, query: {} })
+    this.$router.replace({path: this.$route.path, query: {} }).catch(() => {
+      // Ignore useless error when URL doesn't change.
+    })
     this.$router.go(0)
   }
 
@@ -814,11 +815,10 @@ export default class Search extends Vue {
   replaceUrlQueryString(param: string, value: Date | string[]) {
     const query = { ...this.$route.query }
     const valueToUrl = value instanceof Date ? dateToString(value) : value.join(',')
-    query[param] = valueToUrl
-    if (!equal(this.$route.query, query)) {
-      query[param] = valueToUrl === '' ? [] : valueToUrl
-      this.$router.replace({path: this.$route.path, query: query})
-    }
+    query[param] = valueToUrl === '' ? [] : valueToUrl
+    this.$router.replace({path: this.$route.path, query: query}).catch(() => {
+      // Ignore useless error when URL doesn't change.
+    })
   }
 
   get downloadUri() {
