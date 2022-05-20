@@ -193,7 +193,9 @@ describe('search page', () => {
   })
 
   it('removes site from multi-selection while clicking marker twice', async () => {
+    await wait(timeout_short)
     await clearMapSelection(By.id('mapContainer'))
+    await wait(timeout_short)
     await clickMapMarker(By.id('mapContainer'), -140, -20)
     await wait(timeout_long)
     await clickMapMarker(By.id('mapContainer'), -105, -5)
@@ -210,19 +212,6 @@ describe('search page', () => {
     const src2 = getMarkerSrc(By.id('mapContainer'))
     const s2 = (await src2).anchor('src')
     expect(s1).not.toEqual(s2)
-  })
-
-  it('changes marker color by double clicking marker', async () => {
-    await clearMapSelection(By.id('mapContainer'))
-    const src1 = getMarkerSrc(By.id('mapContainer'))
-    const s1 = (await src1).anchor('src')
-    await clickAllMarkers(By.id('mapContainer'))
-    await wait(timeout_long)
-    await clickAllMarkersPopupMovement(By.id('mapContainer'))
-    await wait(timeout_long)
-    const src2 = await getMarkerSrc(By.id('mapContainer'))
-    const s2 = src2.anchor('src')
-    expect(s1).toEqual(s2)
   })
 
   it('changes marker color by clicking site from multi-selection', async () => {

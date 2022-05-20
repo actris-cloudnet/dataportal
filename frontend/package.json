@@ -14,7 +14,7 @@
     "axios": "^0.21.4",
     "bootstrap-vue": "^2.6.0",
     "debounce": "^1.2.1",
-    "leaflet": "^1.7.1",
+    "leaflet": "^1.8.0",
     "leaflet-draw": "^1.0.4",
     "v-calendar": "^1.0.8",
     "vue": "^2.6.11",
