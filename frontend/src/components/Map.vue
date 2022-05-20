@@ -285,6 +285,16 @@ export default class Map extends Vue {
     if (this.enableBoundingBox) this.initBoundingBoxTool()
   }
 
+  beforeDestroy() {
+    if (!this.map) return
+    this.map.remove()
+  }
+
+  activated() {
+    if (!this.map) return
+    this.map.invalidateSize()
+  }
+
   @Watch('selectedSiteIds')
   onSiteSelected() {
     this.setMarkerIcons()
