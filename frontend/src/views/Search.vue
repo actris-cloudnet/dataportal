@@ -642,7 +642,8 @@ export default class Search extends Vue {
         .flatMap(prod => prod.variables)
         .map(variable => variable.id)
     }
-    return valueArray.filter(value => validChoices.includes(value))
+    const validValues = valueArray.filter(value => validChoices.includes(value))
+    return Array.from(new Set(validValues))
   }
 
   fetchData() {
