@@ -151,7 +151,6 @@ export default class Map extends Vue {
     this.legend.onAdd = this.generateLegend
     this.map = L.map(this.$refs['mapElement'] as HTMLElement, {
       maxBounds: this.setMapBounds(),
-      tap: false, // fixes Safari location clicking issue
     }).setView(this.getMapCenter(), this.zoom)
     this.tileLayer = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png')
     this.tileLayer.addTo(this.map)
