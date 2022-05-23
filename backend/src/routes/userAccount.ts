@@ -49,7 +49,7 @@ export class UserAccountRoutes {
           passwordHash: passwordHash,
         })
       } catch (err) {
-        console.log(err)
+        console.error(err)
         res.status(400).send('Bad request: cannot save user into the database\n')
         return
       }
@@ -64,10 +64,8 @@ export class UserAccountRoutes {
     let reqUsers = new Set<string>()
     for (let credentialString of req.body) {
       const username: string = credentialString.split(':')[0]
-      const user: UserAccount | undefined = await this.userAccountRepository
-        .createQueryBuilder('user_account')
-        .where('user_account.username = :username', { username: username })
-        .getOne()
+      
+      const user = await this.userAccountRepository.findOne({username:username})
       if (user !== undefined) {
         res.status(400).send('Bad request: some user accounts already exists in the database\n')
         return
