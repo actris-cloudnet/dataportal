@@ -7,7 +7,7 @@ const USER_ACCOUNTS_URL = `${backendPrivateUrl}user-accounts`
 beforeAll(async () => {
   let req = await axios.get(USER_ACCOUNTS_URL)
   // Remove users from the db in the beginning
-  for (const user of req.data) {
+  for (const  user of req.data) {
     await axios.delete(USER_ACCOUNTS_URL.concat('/', user.id))
   }
 })

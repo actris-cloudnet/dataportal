@@ -1,0 +1,85 @@
+[
+  {
+    "username": "alice",
+    "password": "alices_password",
+    "permissions": [
+      {
+        "siteId": null,
+        "permission": "canUpload"
+      }
+    ]
+  },
+  {
+    "username": "bob",
+    "password": "bobs_pass",
+    "permissions": [
+      {
+        "siteId": null,
+        "permission": "canUploadModel"
+      }
+    ]
+  },
+  {
+    "username": "carol",
+    "password": "carols-passphrase",
+    "permissions": [
+      {
+        "siteId": "bucharest",
+        "permission": "canUpload"
+      },
+      {
+        "siteId": "mace-head",
+        "permission": "canUpload"
+      }
+    ]
+  },
+  {
+    "username": "david",
+    "password": "davids^passphrase",
+    "permissions": [
+      {
+        "siteId": "granada",
+        "permission": "canUploadModel"
+      },
+      {
+        "siteId": "mace-head",
+        "permission": "canUpload"
+      }
+    ]
+  },
+  {
+    "username": "eve",
+    "password": "eves_passphraase",
+    "permissions": []
+  },
+  {
+    "username": "bucharest",
+    "password": "passWordForBucharest",
+    "permissions": [
+      {
+        "siteId": "bucharest",
+        "permission": "canUpload"
+      }
+    ]
+  },
+  {
+    "username": "granada",
+    "password": "PASSWORDFORgranada",
+    "permissions": [
+      {
+        "siteId": "granada",
+        "permission": "canUpload"
+      }
+    ]
+  },
+  {
+    "username": "mace-head",
+    "password": "SfSCHhnU5cjrMiLdgcW3ixkTQRo",
+    "permissions": [
+      {
+        "siteId": "mace-head",
+        "permission": "canUpload"
+      }
+    ]
+  }
+]

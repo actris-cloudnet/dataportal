@@ -19,6 +19,7 @@ import {CalibrationRoutes} from './routes/calibration'
 import {QualityReportRoutes} from './routes/qualityreport'
 import {SiteContactRoutes} from './routes/siteContact'
 import {UserAccountRoutes} from './routes/userAccount'
+import {UserAccountRoutes as UserAccountRoutesREFACTORED} from './routes/userAccountREFACTORED'
 import env from './lib/env'
 import {Authenticator, Authorizator} from './lib/auth'
 import { PermissionType, permissionTypeFromString } from './entity/Permission'
@@ -49,6 +50,7 @@ import { PermissionType, permissionTypeFromString } from './entity/Permission'
 
   const siteContactRoutes = new SiteContactRoutes(conn)
   const userAccountRoutes = new UserAccountRoutes(conn)
+  const userAccountRoutesREFACTORED = new UserAccountRoutesREFACTORED(conn)
   const canUpload: PermissionType = permissionTypeFromString('canUpload')!
   const canUploadModel: PermissionType = permissionTypeFromString('canUploadModel')!
 
@@ -262,6 +264,20 @@ import { PermissionType, permissionTypeFromString } from './entity/Permission'
 
   app.get('/permissions', userAccountRoutes.getAllPermissions)
   app.delete('/permissions', userAccountRoutes.deleteAllUnusedPermissions)
+
+  // Refactor userAccounts
+  app.post('/refactored/user-accounts',
+    express.json(),
+    userAccountRoutesREFACTORED.validatePost,
+    userAccountRoutesREFACTORED.postUserAccount
+  )
+  app.get('/refactored/user-accounts/:id',
+          userAccountRoutesREFACTORED.getUserAccount
+  )
+  app.delete('/refactored/user-accounts/:id',
+          userAccountRoutesREFACTORED.deleteUserAccount
+  )
+
 
   app.use(errorHandler)
 
