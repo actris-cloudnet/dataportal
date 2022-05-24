@@ -36,4 +36,18 @@ describe('test user accounts and permissions', () => {
       expect(getResp.data.username).toBe(user.username)
     }
   })
+
+  it('changes alices username', async () => {
+    const getResp = await axios.get(USER_ACCOUNTS_URL)
+    const alice = getResp.data.find( (u: any) => u.username === 'alice')
+    expect(alice).not.toBeUndefined()
+    expect(alice.username).toBe('alice')
+    //const putResp = await axios.put(USER_ACCOUNTS_URL.concat('/',alice.id),
+    //                                {username: 'Ecila'}
+    //                               )
+    console.log('alice: ', alice)
+  
+  })
+
+
 })

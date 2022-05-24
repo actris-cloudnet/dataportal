@@ -277,6 +277,14 @@ import { PermissionType, permissionTypeFromString } from './entity/Permission'
   app.delete('/refactored/user-accounts/:id',
           userAccountRoutesREFACTORED.deleteUserAccount
   )
+  // TODO 
+  //app.put('/refactored/user-accounts',
+  //  express.json(),
+  //)
+  app.get('/refactored/user-accounts/',
+          userAccountRoutesREFACTORED.getAllUserAccounts
+  )
+
 
 
   app.use(errorHandler)

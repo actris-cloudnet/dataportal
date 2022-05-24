@@ -122,29 +122,49 @@ export class UserAccountRoutes {
       return next({ status: 404, errors: 'UserAccount not found' })
     }
   }
+
+  getAllUserAccounts: RequestHandler = async (req: Request, res: Response, next) => {
+    const users = await this.userAccountRepository.find({ relations: ['permissions', 'permissions.site'] })
+    res.json(users.map(u => this.userResponse(u)))
+  }
+
   validatePost: RequestHandler = async (req: Request, res: Response, next) => {
     if (!req.body.hasOwnProperty('username')) {
       return next({ status: 401, errors: 'Missing the username' })
-    } else if (typeof req.body.username !== 'string') {
+    }
+    await this.validateUsername(req, res, next)
+    if (!req.body.hasOwnProperty('password')) {
+      return next({ status: 401, errors: 'Missing the password' })
+    }
+    await this.validatePassword(req, res, next)
+
+    if (req.body.hasOwnProperty('permissions')) {
+      await this.validatePermissions(req, res, next)
+    }
+    return next()
+  }
+
+  validateUsername: RequestHandler = async (req: Request, res: Response, next) => {
+    if (typeof req.body.username !== 'string') {
       return next({ status: 401, errors: 'username must be a string' })
     } else if (req.body.username.length === 0) {
       return next({ status: 401, errors: 'username must be nonempty' })
     }
-    if (!req.body.hasOwnProperty('password')) {
-      return next({ status: 401, errors: 'Missing the password' })
-    } else if (typeof req.body.password !== 'string') {
+  }
+  validatePassword: RequestHandler = async (req: Request, res: Response, next) => {
+    if (typeof req.body.password !== 'string') {
       return next({ status: 401, errors: 'password must be a string' })
     } else if (req.body.password.length === 0) {
       return next({ status: 401, errors: 'password must be nonempty' })
     }
-    if (req.body.hasOwnProperty('permissions')) {
-      if (Array.isArray(req.body.permissions)) {
-        await this.validatePermissionList(req, res, next)
-      } else {
-        return next({ status: 401, errors: 'Give permissions as a list' })
-      }
+  }
+
+  validatePermissions: RequestHandler = async (req: Request, res: Response, next) => {
+    if (Array.isArray(req.body.permissions)) {
+      await this.validatePermissionList(req, res, next)
+    } else {
+      return next({ status: 401, errors: 'Give permissions as a list' })
     }
-    return next()
   }
   validatePermissionList: RequestHandler = async (req: Request, res: Response, next) => {
     for (const permission of req.body.permissions) {
