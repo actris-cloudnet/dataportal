@@ -44,7 +44,7 @@ export class UserAccountRoutes {
     }
   }
   postUserAccount: RequestHandler = async (req: Request, res: Response, next) => {
-    var user = await this.userAccountRepository.findOne(
+    let user = await this.userAccountRepository.findOne(
       { username: req.body.username },
       { relations: ['permissions', 'permissions.site'] }
     )
@@ -53,6 +53,18 @@ export class UserAccountRoutes {
       res.json(this.userResponse(user))
       return
     }
+    await this.createPermissions(req, res, next)
+
+    user = await this.userAccountRepository.save({
+      username: req.body.username,
+      passwordHash: md5(req.body.password),
+      permissions: res.locals.permissions,
+    })
+    res.status(201)
+    res.json(this.userResponse(user))
+  }
+
+  createPermissions: RequestHandler = async (req: Request, res: Response, next) => {
     let permissions: Permission[] = []
     for (const perm of req.body.permissions) {
       let permission: Permission
@@ -83,7 +95,6 @@ export class UserAccountRoutes {
             permission: permissionType,
             site: site,
           })
-          console.log('save permission: ', permission)
         } catch (err) {
           console.error(err)
           return next({ status: 500, errors: err })
@@ -93,18 +104,34 @@ export class UserAccountRoutes {
       }
       permissions.push(permission)
     }
-    user = await this.userAccountRepository.save({
-      username: req.body.username,
-      passwordHash: md5(req.body.password),
-      permissions: permissions,
-    })
-    res.status(201)
-    res.json(this.userResponse(user))
+    res.locals.permissions = permissions
   }
 
+  putUserAccount: RequestHandler = async (req: Request, res: Response, next) => {
+    let user = await this.userAccountRepository.findOne(
+      { id: Number(req.params.id) },
+      { relations: ['permissions', 'permissions.site'] }
+    )
+    if (user === undefined) {
+      return next({ status: 404, errors: 'UserAccount not found' })
+    }
+    if (req.body.hasOwnProperty('username')) {
+      user.username = req.body.username
+    }
+    if (req.body.hasOwnProperty('password')) {
+      user.passwordHash = md5(req.body.password)
+    }
+    if (req.body.hasOwnProperty('permissions')) {
+      await this.createPermissions(req,res,next)
+      user.permissions = res.locals.permissions
+    }
+    await this.userAccountRepository.save(user)
+    console.log(user)
+    res.json(this.userResponse(user))
+  }
   getUserAccount: RequestHandler = async (req: Request, res: Response, next) => {
     const user = await this.userAccountRepository.findOne(
-      { id: req.params.id },
+      { id: Number(req.params.id) },
       { relations: ['permissions', 'permissions.site'] }
     )
     if (user !== undefined) {
@@ -114,7 +141,7 @@ export class UserAccountRoutes {
     }
   }
   deleteUserAccount: RequestHandler = async (req: Request, res: Response, next) => {
-    const user = await this.userAccountRepository.findOne({ id: req.params.id })
+    const user = await this.userAccountRepository.findOne({ id: Number(req.params.id) })
     if (user !== undefined) {
       await this.userAccountRepository.remove(user)
       res.sendStatus(200)
@@ -125,9 +152,22 @@ export class UserAccountRoutes {
 
   getAllUserAccounts: RequestHandler = async (req: Request, res: Response, next) => {
     const users = await this.userAccountRepository.find({ relations: ['permissions', 'permissions.site'] })
-    res.json(users.map(u => this.userResponse(u)))
+    res.json(users.map((u) => this.userResponse(u)))
   }
 
+  validatePut: RequestHandler = async (req: Request, res: Response, next) => {
+    if (req.body.hasOwnProperty('username')) {
+      await this.validateUsername(req, res, next)
+    }
+    if (req.body.hasOwnProperty('password')) {
+      await this.validatePassword(req, res, next)
+    }
+
+    if (req.body.hasOwnProperty('permissions')) {
+      await this.validatePermissions(req, res, next)
+    }
+    return next()
+  }
   validatePost: RequestHandler = async (req: Request, res: Response, next) => {
     if (!req.body.hasOwnProperty('username')) {
       return next({ status: 401, errors: 'Missing the username' })
