@@ -375,7 +375,7 @@
       <div v-if="displayKeyInfo" class="keyInfo">
         <img alt="info" class="infoIcon" :src="getProductIcon('info')">
         Use arrow keys to change dates
-        <span class="closeX" @click="displayKeyInfo = !displayKeyInfo"> &#10005; </span>
+        <span class="closeX" @click="hideKeyInfo"> &#10005; </span>
       </div>
       <div v-if="!dateToError.isValidDateString" class="errormsg">
         Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.
@@ -532,7 +532,7 @@ export default class Search extends Vue {
 
   // other
   renderComplete = false
-  displayKeyInfo = true
+  displayKeyInfo = this.showKeyInfo()
   vizWideMode = false
   error = null
   fixedRanges = fixedRanges
@@ -820,6 +820,15 @@ export default class Search extends Vue {
     this.$router.replace({path: this.$route.path, query: query}).catch(() => {
       // Ignore useless error when URL doesn't change.
     })
+  }
+
+  showKeyInfo() {
+    return localStorage.getItem('hideInfoBox') !== '1'
+  }
+
+  hideKeyInfo() {
+    localStorage.setItem('hideInfoBox', '1')
+    this.displayKeyInfo = false
   }
 
   get downloadUri() {
