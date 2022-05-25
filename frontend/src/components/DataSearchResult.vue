@@ -149,7 +149,7 @@ section#fileTable
         <span class="rowtag legacy rounded"></span> legacy
       </span>
     </span>
-      <div v-if="listLength == 0 && !isBusy" class="noresults">
+      <div v-if="listLength === 0 && !isBusy" class="noresults">
         <h2>No results</h2>
         Are we missing some data? Send an email to
         <a href="mailto:actris-cloudnet@fmi.fi">actris-cloudnet@fmi.fi</a>.
@@ -285,7 +285,6 @@ import {
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 import {BTable} from 'bootstrap-vue/esm/components/table'
 import {BPagination} from 'bootstrap-vue/esm/components/pagination'
-import { debounce } from 'debounce'
 
 Vue.component('b-table', BTable)
 Vue.component('b-pagination', BPagination)
@@ -303,8 +302,6 @@ export default class DataSearchResult extends Vue {
   previewResponse: File|null = null
   pendingPreviewResponse: File|null = null
 
-  sortBy = 'title'
-  sortDesc = false
   currentPage = 1
   perPage = 15
 
@@ -315,9 +312,6 @@ export default class DataSearchResult extends Vue {
   humanReadableSize = humanReadableSize
   humanReadableTimestamp = humanReadableTimestamp
   combinedFileSize = combinedFileSize
-
-  debouncedLoadPreview = debounce(this.loadPreview, 150)
-  debouncedClearPreview = debounce(this.clearPreview, 300)
 
   mounted() {
     window.addEventListener('resize', this.adjustPerPageAccordingToWindowHeight)
