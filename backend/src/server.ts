@@ -19,7 +19,6 @@ import {CalibrationRoutes} from './routes/calibration'
 import {QualityReportRoutes} from './routes/qualityreport'
 import {SiteContactRoutes} from './routes/siteContact'
 import {UserAccountRoutes} from './routes/userAccount'
-import {UserAccountRoutes as UserAccountRoutesREFACTORED} from './routes/userAccountREFACTORED'
 import env from './lib/env'
 import {Authenticator, Authorizator} from './lib/auth'
 import { PermissionType, permissionTypeFromString } from './entity/Permission'
@@ -50,7 +49,6 @@ import { PermissionType, permissionTypeFromString } from './entity/Permission'
 
   const siteContactRoutes = new SiteContactRoutes(conn)
   const userAccountRoutes = new UserAccountRoutes(conn)
-  const userAccountRoutesREFACTORED = new UserAccountRoutesREFACTORED(conn)
   const canUpload: PermissionType = permissionTypeFromString('canUpload')!
   const canUploadModel: PermissionType = permissionTypeFromString('canUploadModel')!
 
@@ -249,47 +247,27 @@ import { PermissionType, permissionTypeFromString } from './entity/Permission'
   // Private UserAccount and Permission routes
   app.post('/user-accounts',
     express.json(),
-    userAccountRoutes.postUserValidateFormat,
-    userAccountRoutes.postUserCheckDuplicates,
-    userAccountRoutes.postUser)
-  app.delete('/user-accounts/:id', userAccountRoutes.deleteUserById)
-  app.get('/user-accounts', userAccountRoutes.getAllUsers)
-  app.post('/user-accounts/:id/permissions',
+    userAccountRoutes.validatePost,
+    userAccountRoutes.postUserAccount
+  )
+  app.get('/user-accounts/:id',
+    userAccountRoutes.getUserAccount
+  )
+  app.delete('/user-accounts/:id',
+    userAccountRoutes.deleteUserAccount
+  )
+  app.put('/user-accounts/:id',
     express.json(),
-    userAccountRoutes.postPermissionValidate,
-    userAccountRoutes.postPermission,
+    userAccountRoutes.validatePut,
+    userAccountRoutes.putUserAccount
   )
-  app.get('/user-accounts/:id/permissions', userAccountRoutes.getPermissions)
-  app.delete('/user-accounts/:id/permissions', userAccountRoutes.deletePermissions)
-
-  app.get('/permissions', userAccountRoutes.getAllPermissions)
-  app.delete('/permissions', userAccountRoutes.deleteAllUnusedPermissions)
-
-  // Refactor userAccounts
-  app.post('/refactored/user-accounts',
+  app.get('/user-accounts/',
+    userAccountRoutes.getAllUserAccounts
+  )
+  app.post('/user-accounts/migrate-legacy',
     express.json(),
-    userAccountRoutesREFACTORED.validatePost,
-    userAccountRoutesREFACTORED.postUserAccount
-  )
-  app.get('/refactored/user-accounts/:id',
-    userAccountRoutesREFACTORED.getUserAccount
-  )
-  app.delete('/refactored/user-accounts/:id',
-    userAccountRoutesREFACTORED.deleteUserAccount
-  )
-  app.put('/refactored/user-accounts/:id',
-    express.json(),
-    userAccountRoutesREFACTORED.validatePut,
-    userAccountRoutesREFACTORED.putUserAccount
-  )
-  app.get('/refactored/user-accounts/',
-    userAccountRoutesREFACTORED.getAllUserAccounts
-  )
-  // migrate old users
-  app.post('/refactored/user-accounts/migrate-legacy',
-    express.json(),
-    userAccountRoutesREFACTORED.validateMigrateLegacyPost,
-    userAccountRoutesREFACTORED.migrateLegacyPostUserAccount
+    userAccountRoutes.validateMigrateLegacyPost,
+    userAccountRoutes.migrateLegacyPostUserAccount
   )
 
 

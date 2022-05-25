@@ -5,26 +5,25 @@ import { UserAccount } from '../entity/UserAccount'
 import { Permission, PermissionType, permissionTypeFromString } from '../entity/Permission'
 import { Site } from '../entity/Site'
 
-interface UserAccountInterface {
-  userId?: number
-  username?: string
-}
+const md5 = require('apache-md5')
+const md5Regex = new RegExp('^\\$apr1\\$.+$')
 
 interface PermissionInterface {
-  permission?: string
-  siteId?: string | null
-  userAccounts?: UserAccountInterface[]
-}
-
-interface UserPermissionInterface {
-  permission?: string
-  siteId?: string | null
-}
-
-interface UserAccountPermissionInterface {
   id?: number
-  username?: string
-  permissions?: UserPermissionInterface[]
+  permission: PermissionType
+  siteId: string | null
+}
+
+interface UserAccountInterface {
+  id?: number
+  username: string
+  password?: string
+  passwordHash?: string
+  permissions: PermissionInterface[]
+}
+
+function hasProperty(obj: object, prop: string) {
+  return Object.prototype.hasOwnProperty.call(obj, prop)
 }
 
 export class UserAccountRoutes {
@@ -37,270 +36,256 @@ export class UserAccountRoutes {
     this.permissionRepository = conn.getRepository<Permission>('permission')
     this.siteRepository = conn.getRepository<Site>('site')
   }
-
-  postUser: RequestHandler = async (req: Request, res: Response) => {
-    // Expects valid array of "user:passwordHash" strings in the req.body
-    // Validity should be checked in middleware earlier
-    for (let credentialString of req.body) {
-      const [username, passwordHash] = credentialString.split(':')
-      try {
-        await this.userAccountRepository.save({
-          username: username,
-          passwordHash: passwordHash,
-        })
-      } catch (err) {
-        console.error(err)
-        res.status(400).send('Bad request: cannot save user into the database\n')
-        return
-      }
-    }
-
-    res.status(200).send('Users created successfully\n')
-  }
-
-  postUserCheckDuplicates: RequestHandler = async (req: Request, res: Response, next) => {
-    // Expects valid array of "user:passwordHash" strings in the req.body
-    // Validity should be checked in middleware earlier
-    let reqUsers = new Set<string>()
-    for (let credentialString of req.body) {
-      const username: string = credentialString.split(':')[0]
-
-      const user = await this.userAccountRepository.findOne({username:username})
-      if (user !== undefined) {
-        res.status(400).send('Bad request: some user accounts already exists in the database\n')
-        return
-      }
-      if (reqUsers.has(username)) {
-        res.status(400).send('Bad request: contains duplicate users\n')
-        return
-      }
-      reqUsers.add(username)
-    }
-    next()
-  }
-
-  postUserValidateFormat: RequestHandler = async (req: Request, res: Response, next) => {
-    if (!Array.isArray(req.body)) {
-      res.status(400).send('Bad request: json should be an array\n')
-      return
-    }
-    for (let element of req.body) {
-      if (!(typeof element === 'string')) {
-        res.status(400).send('Bad request: elements of the array should be strings\n')
-        return
-      }
-      // elements should be in form: "username:passwordHash"
-      const arr = element.split(':')
-      if (arr.length != 2) {
-        res.status(400).send('Bad request: strings should be in a format: "username:passwordHash"\n')
-        return
-      }
-      const hash = arr[1]
-      const hashArr = hash.split('$')
-      if (hashArr.length != 4) {
-        res.status(400).send('Bad request: hash should be in format: "$method$salt$hash"\n')
-        return
-      }
-      const hashMethod = hashArr[1]
-      if (hashMethod !== 'apr1') {
-        res.status(400).send('Bad request: hash not supported\n')
-        return
-      }
-    }
-    next()
-  }
-
-  deleteUserById: RequestHandler = async (req: Request, res: Response) => {
-    try {
-      await this.userAccountRepository
-        .createQueryBuilder()
-        .delete()
-        .from(UserAccount)
-        .where('id = :id', { id: req.params.id })
-        .execute()
-    } catch {
-      res.status(400).send('Bad request: cannot delete the user\n')
-    }
-    res.status(200).send('User deleted\n')
-  }
-
-  getAllUsers: RequestHandler = async (req: Request, res: Response) => {
-    try {
-      const users: UserAccount[] = await this.userAccountRepository.createQueryBuilder('user_account').getMany()
-      const returnUsers: UserAccountPermissionInterface[] = users.map((u) => ({
-        id: u.id,
-        username: u.username,
-      }))
-      res.json(returnUsers)
-      return
-    } catch {
-      res.status(400).send('Bad request: cannot get users from the database\n')
-    }
-  }
-
-  postPermission: RequestHandler = async (req: Request, res: Response) => {
-    // Expects request with valid user, site and permission type
-    // site can be undefined
-
-    const user: UserAccount = (await this.userAccountRepository
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.permissions', 'permission')
-      .where('user.id = :id', { id: req.params.id })
-      .getOne()) as UserAccount
-
-    const perm: PermissionType = permissionTypeFromString(req.body.permission as string)!
-    let permission: Permission | undefined
-
-    if (req.body.siteId === undefined) {
-      permission = await this.permissionRepository
-        .createQueryBuilder('permission')
-        .leftJoinAndSelect('permission.site', 'site')
-        .where('permission.permission = :perm')
-        .andWhere('permission.site IS NULL')
-        .setParameters({ perm: perm })
-        .getOne()
-      if (permission === undefined) {
-        permission = await this.permissionRepository.save({
-          permission: perm,
-          site: undefined,
-        })
-      }
-    } else {
-      const site: Site = (await this.siteRepository
-        .createQueryBuilder('site')
-        .where('site.id = :siteId', { siteId: req.body.siteId })
-        .getOne()) as Site
-      permission = await this.permissionRepository
-        .createQueryBuilder('permission')
-        .leftJoinAndSelect('permission.site', 'site')
-        .where('permission.permission = :perm')
-        .andWhere('permission.site = :siteId')
-        .setParameters({ perm: perm, siteId: site.id })
-        .getOne()
-      if (permission === undefined) {
-        permission = await this.permissionRepository.save({
-          permission: perm,
-          site: site,
-        })
-      }
-    }
-
-    const userWithPermission = await this.userAccountRepository
-      .createQueryBuilder('user_account')
-      .leftJoinAndSelect('user_account.permissions', 'permission')
-      .where('user_account.id = :userId')
-      .andWhere('permission.id = :permId')
-      .setParameters({ userId: user.id, permId: permission.id })
-      .getOne()
-
-    if (userWithPermission === undefined) {
-      await this.userAccountRepository
-        .createQueryBuilder()
-        .relation(UserAccount, 'permissions')
-        .of(user)
-        .add(permission)
-      res.status(200).send('Permission added\n')
-      return
-    } else {
-      res.status(200).send('User already has the permission\n')
-    }
-  }
-
-  postPermissionValidate: RequestHandler = async (req: Request, res: Response, next) => {
-    const user: UserAccount | undefined = await this.userAccountRepository.findOne(req.params.id)
-    if (user === undefined) {
-      res.status(400).send('Bad request: User with requested ID does not exist\n')
-      return
-    }
-    if (req.body.siteId !== undefined) {
-      if (typeof req.body.siteId !== 'string') {
-        res.status(400).send('Bad request: specify only one siteId per request\n')
-        return
-      }
-      let site = await this.siteRepository
-        .createQueryBuilder('site')
-        .where('site.id = :siteId', { siteId: req.body.siteId })
-        .getOne()
-      if (site === undefined) {
-        res.status(400).send('Bad request: unexpected siteId\n')
-        return
-      }
-    }
-    if (req.body.permission === undefined || typeof req.body.permission !== 'string') {
-      res.status(400).send('Bad request: define exactly one permission per request\n')
-      return
-    }
-    if (permissionTypeFromString(req.body.permission) === undefined) {
-      res.status(400).send('Bad request: unexpected permission type\n')
-      return
-    }
-    next()
-  }
-
-  deletePermissions: RequestHandler = async (req: Request, res: Response) => {
-    const user: UserAccount | undefined = await this.userAccountRepository.findOne(req.params.id, {
-      relations: ['permissions'],
-    })
-    if (user === undefined) {
-      res.status(400).send('Bad request: user does not exist\n')
-      return
-    }
-    user.permissions = []
-    await this.userAccountRepository.save(user)
-    res.status(200).send('User permissions removed\n')
-  }
-
-  getPermissions: RequestHandler = async (req: Request, res: Response) => {
-    const user: UserAccount | undefined = await this.userAccountRepository
-      .createQueryBuilder('user_account')
-      .leftJoinAndSelect('user_account.permissions', 'permission')
-      .leftJoinAndSelect('permission.site', 'site')
-      .where('user_account.id = :id', { id: req.params.id })
-      .getOne()
-
-    if (user === undefined) {
-      res.status(400).send('Bad request: user does not exist\n')
-      return
-    }
-    const permissions: PermissionInterface[] = user.permissions.map((p) =>
-      p.site
-        ? {
-          permission: p.permission,
-          siteId: p.site.id,
-        }
-        : {
-          permission: p.permission,
-          siteId: null,
-        }
-    )
-    res.json({
+  userResponse = (user: UserAccount): UserAccountInterface => {
+    return {
       id: user.id,
       username: user.username,
-      permissions: permissions,
-    })
-  }
-  getAllPermissions: RequestHandler = async (req: Request, res: Response) => {
-    const perms = await this.permissionRepository.find({
-      relations: ['userAccounts', 'site'],
-    })
-    const respData: PermissionInterface[] = perms.map((p) => ({
-      permission: p.permission,
-      siteId: p.site ? p.site.id : null,
-      userAccounts: p.userAccounts.map((user) => ({
-        userId: user.id,
-        username: user.username,
+      passwordHash: user.passwordHash,
+      permissions: user.permissions.map((p) => ({
+        id: p.id,
+        permission: p.permission,
+        siteId: p.site ? p.site.id : null,
       })),
-    }))
-
-    res.json(respData)
-    return
+    }
   }
-  deleteAllUnusedPermissions: RequestHandler = async (req: Request, res: Response) => {
-    const perms = await this.permissionRepository.find({
-      relations: ['userAccounts'],
+  postUserAccount: RequestHandler = async (req: Request, res: Response, next) => {
+    let user = await this.userAccountRepository.findOne(
+      { username: req.body.username },
+      { relations: ['permissions', 'permissions.site'] }
+    )
+    if (user !== undefined) {
+      res.status(200)
+      res.json(this.userResponse(user))
+      return
+    }
+    await this.createPermissions(req, res, next)
+
+    user = await this.userAccountRepository.save({
+      username: req.body.username,
+      passwordHash: md5(req.body.password),
+      permissions: res.locals.permissions,
     })
-    const unusedPerms = perms.filter((p) => p.userAccounts.length === 0)
-    await this.permissionRepository.remove(unusedPerms)
-    res.status(200).send('Unused permission removed\n')
+    res.status(201)
+    res.json(this.userResponse(user))
+  }
+  migrateLegacyPostUserAccount: RequestHandler = async (req: Request, res: Response, next) => {
+    const site = !['ewan', 'simo'].includes(req.body.username)
+      ? await this.siteRepository.findOne({ id: req.body.username })
+      : null
+    if (site === undefined) {
+      return next({ status: 404, errors: 'Username does not match any site' })
+    }
+    let user = await this.userAccountRepository.findOne(
+      { username: req.body.username },
+      { relations: ['permissions', 'permissions.site'] }
+    )
+    if (user !== undefined) {
+      res.status(200)
+      res.json(this.userResponse(user))
+      return
+    }
+    // Add proper permission to the body
+    if (req.body.username === 'simo') {
+      req.body.permissions = [{ siteId: null, permission: 'canUpload' }]
+    } else if (req.body.username === 'ewan') {
+      req.body.permissions = [{ siteId: null, permission: 'canUploadModel' }]
+    } else {
+      req.body.permissions = [{ siteId: site.id, permission: 'canUpload' }]
+    }
+    await this.createPermissions(req, res, next)
+    user = await this.userAccountRepository.save({
+      username: req.body.username,
+      passwordHash: req.body.passwordHash,
+      permissions: res.locals.permissions,
+    })
+    res.status(201)
+    res.json(this.userResponse(user))
+  }
+
+  createPermissions: RequestHandler = async (req: Request, res: Response, next) => {
+    let permissions: Permission[] = []
+    for (const perm of req.body.permissions) {
+      let permission: Permission
+      const permissionType = permissionTypeFromString(perm.permission)
+      let permissionCandidate: Permission | undefined
+      let site: Site | undefined
+      if (perm.siteId === null) {
+        permissionCandidate = await this.permissionRepository
+          .createQueryBuilder('permission')
+          .leftJoinAndSelect('permission.site', 'site')
+          .where('permission.permission = :permissionType')
+          .andWhere('permission.site IS NULL')
+          .setParameters({ permissionType: permissionType })
+          .getOne()
+      } else {
+        site = await this.siteRepository.findOne({ id: perm.siteId })!
+        permissionCandidate = await this.permissionRepository
+          .createQueryBuilder('permission')
+          .leftJoinAndSelect('permission.site', 'site')
+          .where('permission.permission = :permissionType')
+          .andWhere('permission.site = :siteId')
+          .setParameters({ permissionType: permissionType, siteId: perm.siteId })
+          .getOne()
+      }
+      if (permissionCandidate === undefined) {
+        try {
+          permission = await this.permissionRepository.save({
+            permission: permissionType,
+            site: site,
+          })
+        } catch (err) {
+          console.error(err)
+          return next({ status: 500, errors: err })
+        }
+      } else {
+        permission = permissionCandidate
+      }
+      permissions.push(permission)
+    }
+    res.locals.permissions = permissions
+  }
+
+  putUserAccount: RequestHandler = async (req: Request, res: Response, next) => {
+    let user = await this.userAccountRepository.findOne(
+      { id: Number(req.params.id) },
+      { relations: ['permissions', 'permissions.site'] }
+    )
+    if (user === undefined) {
+      return next({ status: 404, errors: 'UserAccount not found' })
+    }
+    if (hasProperty(req.body, 'username')) {
+      user.username = req.body.username
+    }
+    if (hasProperty(req.body, 'password')) {
+      user.passwordHash = md5(req.body.password)
+    }
+    if (hasProperty(req.body, 'permissions')) {
+      await this.createPermissions(req, res, next)
+      user.permissions = res.locals.permissions
+    }
+    await this.userAccountRepository.save(user)
+    res.json(this.userResponse(user))
+  }
+  getUserAccount: RequestHandler = async (req: Request, res: Response, next) => {
+    const user = await this.userAccountRepository.findOne(
+      { id: Number(req.params.id) },
+      { relations: ['permissions', 'permissions.site'] }
+    )
+    if (user !== undefined) {
+      res.json(this.userResponse(user))
+    } else {
+      return next({ status: 404, errors: 'UserAccount not found' })
+    }
+  }
+  deleteUserAccount: RequestHandler = async (req: Request, res: Response, next) => {
+    const user = await this.userAccountRepository.findOne({ id: Number(req.params.id) })
+    if (user !== undefined) {
+      await this.userAccountRepository.remove(user)
+      res.sendStatus(200)
+    } else {
+      return next({ status: 404, errors: 'UserAccount not found' })
+    }
+  }
+
+  getAllUserAccounts: RequestHandler = async (req: Request, res: Response) => {
+    const users = await this.userAccountRepository.find({ relations: ['permissions', 'permissions.site'] })
+    res.json(users.map((u) => this.userResponse(u)))
+  }
+
+  validatePost: RequestHandler = async (req: Request, res: Response, next) => {
+    if (!hasProperty(req.body, 'username')) {
+      return next({ status: 401, errors: 'Missing the username' })
+    }
+    await this.validateUsername(req, res, next)
+    if (!hasProperty(req.body, 'password')) {
+      return next({ status: 401, errors: 'Missing the password' })
+    }
+    await this.validatePassword(req, res, next)
+
+    if (hasProperty(req.body, 'permissions')) {
+      await this.validatePermissions(req, res, next)
+    }
+    return next()
+  }
+  validateMigrateLegacyPost: RequestHandler = async (req: Request, res: Response, next) => {
+    if (!hasProperty(req.body, 'username')) {
+      return next({ status: 401, errors: 'Missing the username' })
+    }
+    await this.validateUsername(req, res, next)
+    if (!hasProperty(req.body, 'passwordHash')) {
+      return next({ status: 401, errors: 'Missing the passwordHash' })
+    }
+    await this.validatePasswordHash(req, res, next)
+    return next()
+  }
+  validatePut: RequestHandler = async (req: Request, res: Response, next) => {
+    if (hasProperty(req.body, 'username')) {
+      await this.validateUsername(req, res, next)
+    }
+    if (hasProperty(req.body, 'password')) {
+      await this.validatePassword(req, res, next)
+    }
+
+    if (hasProperty(req.body, 'permissions')) {
+      await this.validatePermissions(req, res, next)
+    }
+    return next()
+  }
+
+  validateUsername: RequestHandler = async (req: Request, res: Response, next) => {
+    if (typeof req.body.username !== 'string') {
+      return next({ status: 401, errors: 'username must be a string' })
+    } else if (req.body.username.length === 0) {
+      return next({ status: 401, errors: 'username must be nonempty' })
+    }
+  }
+  validatePassword: RequestHandler = async (req: Request, res: Response, next) => {
+    if (typeof req.body.password !== 'string') {
+      return next({ status: 401, errors: 'password must be a string' })
+    } else if (req.body.password.length === 0) {
+      return next({ status: 401, errors: 'password must be nonempty' })
+    }
+  }
+  validatePasswordHash: RequestHandler = async (req: Request, res: Response, next) => {
+    if (typeof req.body.passwordHash !== 'string') {
+      return next({ status: 401, errors: 'passwordHash must be a string' })
+    } else if (req.body.passwordHash.length === 0) {
+      return next({ status: 401, errors: 'passwordHash must be nonempty' })
+    } else if (!md5Regex.test(req.body.passwordHash)) {
+      return next({ status: 401, errors: 'passwordHash has an unexpected form' })
+    }
+  }
+
+  validatePermissions: RequestHandler = async (req: Request, res: Response, next) => {
+    if (Array.isArray(req.body.permissions)) {
+      await this.validatePermissionList(req, res, next)
+    } else {
+      return next({ status: 401, errors: 'Give permissions as a list' })
+    }
+  }
+  validatePermissionList: RequestHandler = async (req: Request, res: Response, next) => {
+    for (const permission of req.body.permissions) {
+      res.locals.permission = permission
+      await this.validatePermission(req, res, next)
+    }
+  }
+  validatePermission: RequestHandler = async (req: Request, res: Response, next) => {
+    const permission = res.locals.permission
+    if (!hasProperty(permission, 'siteId')) {
+      return next({ status: 401, errors: 'Missing the siteId from permission' })
+    }
+    if (!hasProperty(permission, 'permission')) {
+      return next({ status: 401, errors: 'Missing the permission type from permission' })
+    }
+    if (permission.siteId !== null) {
+      let site = await this.siteRepository.findOne({ id: permission.siteId })
+      if (site === undefined) {
+        return next({ status: 422, errors: 'SiteId does not exist' })
+      }
+    }
+    if (permissionTypeFromString(permission.permission) === undefined) {
+      return next({ status: 422, errors: 'Unexpected permission type' })
+    }
+    return
   }
 }

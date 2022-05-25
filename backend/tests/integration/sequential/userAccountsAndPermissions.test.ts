@@ -3,7 +3,7 @@ import { readFileSync } from 'fs'
 import { backendPrivateUrl } from '../../lib'
 import { Connection, createConnection } from 'typeorm/'
 
-const USER_ACCOUNTS_URL = backendPrivateUrl.concat('refactored/user-accounts')
+const USER_ACCOUNTS_URL = backendPrivateUrl.concat('user-accounts')
 
 let conn: Connection
 let userAccountRepository: any
@@ -213,7 +213,7 @@ describe('test user accounts and permissions', () => {
         username: username,
         passwordHash: passwordHash,
       })
-      expect(resp).toMatchObject({status: 201})
+      expect(resp).toMatchObject({ status: 201 })
       await expect(axios.get(USER_ACCOUNTS_URL.concat('/', resp.data.id))).resolves.toMatchObject({
         status: 200,
         data: { username: username, passwordHash: passwordHash },

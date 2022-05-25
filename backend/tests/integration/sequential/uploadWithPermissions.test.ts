@@ -75,6 +75,10 @@ beforeAll(async () => {
     .save(JSON.parse((await fsp.readFile('fixtures/2-regular_file.json')).toString()))
   await conn.getRepository('model_file').save(JSON.parse((await fsp.readFile('fixtures/2-model_file.json')).toString()))
 
+  await instrumentRepo.delete({})
+  await modelRepo.delete({})
+  await miscUploadRepo.delete({})
+
   await initUsersAndPermissions()
 })
 
@@ -82,6 +86,7 @@ afterAll(async () => {
   await Promise.all([instrumentRepo.delete({}), modelRepo.delete({})])
   return conn.close()
 })
+
 
 describe('POST /upload/metadata', () => {
   beforeEach(async () => {
