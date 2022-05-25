@@ -47,11 +47,12 @@ section#fileTable
     td:nth-child(3)
       text-align: center
   .table-striped[aria-busy="false"]
+    tr:hover td, tr:focus td
+      border-top: 1px solid darkgray
+      border-bottom: 1px solid darkgray
+      background-color: #e4eff7
     tr:hover td
       cursor: pointer
-      background-color: #e4eff7
-    tr:focus td
-      background-color: #e4eff7
     tr
       outline: none
 
