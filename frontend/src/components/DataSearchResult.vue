@@ -42,15 +42,22 @@ section#fileTable
       width: 110px
     td
       padding: 9px
-    tr:nth-child(2n+1) > td
+    tbody tr
+      border-top: 1px solid transparent
+      &:last-child
+        border-bottom: 1px solid transparent
+    tbody tr:nth-child(odd)
       background-color: $blue-dust
     td:nth-child(3)
       text-align: center
-  .table-striped[aria-busy="false"]
-    tr:hover td, tr:focus td
-      border-top: 1px solid darkgray
-      border-bottom: 1px solid darkgray
+  .table-striped[aria-busy="false"] tbody
+    tr:hover, tr:focus
+      border-top-color: darkgray
       background-color: #e4eff7
+      & + tr
+        border-top-color: darkgray
+      &:last-child
+        border-bottom: 1px solid darkgray
     tr:hover td
       cursor: pointer
     tr
