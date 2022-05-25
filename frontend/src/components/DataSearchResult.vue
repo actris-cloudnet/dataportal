@@ -42,16 +42,27 @@ section#fileTable
       width: 110px
     td
       padding: 9px
-    tr:nth-child(2n+1) > td
+    tbody tr
+      border-top: 1px solid transparent
+      &:last-child
+        border-bottom: 1px solid transparent
+    tbody tr:nth-child(odd)
       background-color: $blue-dust
     td:nth-child(3)
       text-align: center
-  .table-striped[aria-busy="false"]
+  .table-striped[aria-busy="false"] tbody
+    tr:hover, tr:focus, tr.b-table-row-selected
+      background-color: #e4eff7
+    tr.b-table-row-selected
+      border-top-color: darkgray
+      & + tr
+        border-top-color: darkgray
+      &:last-child
+        border-bottom: 1px solid darkgray
+      td
+        background: none
     tr:hover td
       cursor: pointer
-      background-color: #e4eff7
-    tr:focus td
-      background-color: #e4eff7
     tr
       outline: none
 
@@ -59,9 +70,9 @@ section#fileTable
     display: none
 
   .icon
-    background-repeat: no-repeat
-    background-position: center
-    background-size: 20px
+    background-repeat: no-repeat !important
+    background-position: center !important
+    background-size: 20px !important
     font-size: 0
 
   .downloadinfo
@@ -80,6 +91,12 @@ section#fileTable
 
   .download:focus
     outline: thin dotted black
+
+.previewTitle, .previewSubTitle
+  margin-left: 15px
+
+.linkToDoPage
+  margin-right: 15px
 
 .noresults
   text-align: center
@@ -149,7 +166,7 @@ section#fileTable
         <span class="rowtag legacy rounded"></span> legacy
       </span>
     </span>
-      <div v-if="listLength == 0 && !isBusy" class="noresults">
+      <div v-if="listLength === 0 && !isBusy" class="noresults">
         <h2>No results</h2>
         Are we missing some data? Send an email to
         <a href="mailto:actris-cloudnet@fmi.fi">actris-cloudnet@fmi.fi</a>.
@@ -167,7 +184,9 @@ section#fileTable
                :per-page="perPage"
                :busy="isBusy"
                :show-empty="true"
-               @row-clicked="clickRow">
+               selectable
+               select-mode="single"
+               @row-selected="rowSelected">
         <template v-slot:cell(volatile)="data">
       <span
           v-if="data.item.volatile"
@@ -206,8 +225,8 @@ section#fileTable
     </div>
     <div class="column2">
       <div>
-        <h3 class="inlineblock">Preview</h3>
-        <router-link v-if="previewResponse" :to="`/file/${previewResponse.uuid}`" class="listLegend">
+        <h3 class="inlineblock previewTitle">Preview</h3>
+        <router-link v-if="previewResponse" :to="`/file/${previewResponse.uuid}`" class="listLegend linkToDoPage">
           Show file &rarr;
         </router-link>
       </div>
@@ -264,7 +283,7 @@ section#fileTable
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
         </a>
       </main>
-      <div v-else class="listTitle">Click a search result to show a preview.</div>
+      <div v-else class="listTitle previewSubTitle">Click a search result to show a preview.</div>
     </div>
   </section>
 </template>
@@ -285,7 +304,6 @@ import {
 import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
 import {BTable} from 'bootstrap-vue/esm/components/table'
 import {BPagination} from 'bootstrap-vue/esm/components/pagination'
-import { debounce } from 'debounce'
 
 Vue.component('b-table', BTable)
 Vue.component('b-pagination', BPagination)
@@ -303,8 +321,6 @@ export default class DataSearchResult extends Vue {
   previewResponse: File|null = null
   pendingPreviewResponse: File|null = null
 
-  sortBy = 'title'
-  sortDesc = false
   currentPage = 1
   perPage = 15
 
@@ -315,9 +331,6 @@ export default class DataSearchResult extends Vue {
   humanReadableSize = humanReadableSize
   humanReadableTimestamp = humanReadableTimestamp
   combinedFileSize = combinedFileSize
-
-  debouncedLoadPreview = debounce(this.loadPreview, 150)
-  debouncedClearPreview = debounce(this.clearPreview, 300)
 
   mounted() {
     window.addEventListener('resize', this.adjustPerPageAccordingToWindowHeight)
@@ -332,7 +345,14 @@ export default class DataSearchResult extends Vue {
     return this.apiResponse.length
   }
 
-  clickRow(record: File) {
+  rowSelected(records: File[]) {
+    if (records.length === 0) {
+      this.clearPreview()
+      this.previewTitle = ''
+      this.previewResponse = null
+      return
+    }
+    const record = records[0]
     // NOTE: Keep the breakpoint in sync with SASS above.
     if (window.innerWidth <= 1200) {
       this.$router.push(`/file/${record.uuid}`)
