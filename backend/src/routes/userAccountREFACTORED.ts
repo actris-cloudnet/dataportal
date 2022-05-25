@@ -6,6 +6,7 @@ import { Permission, PermissionType, permissionTypeFromString } from '../entity/
 import { Site } from '../entity/Site'
 
 const md5 = require('apache-md5')
+const md5Regex = new RegExp('^\\$apr1\\$.+$')
 
 interface PermissionInterface {
   id?: number
@@ -19,6 +20,10 @@ interface UserAccountInterface {
   password?: string
   passwordHash?: string
   permissions: PermissionInterface[]
+}
+
+function hasProperty(obj: object, prop: string) {
+  return Object.prototype.hasOwnProperty.call(obj, prop)
 }
 
 export class UserAccountRoutes {
@@ -58,6 +63,39 @@ export class UserAccountRoutes {
     user = await this.userAccountRepository.save({
       username: req.body.username,
       passwordHash: md5(req.body.password),
+      permissions: res.locals.permissions,
+    })
+    res.status(201)
+    res.json(this.userResponse(user))
+  }
+  migrateLegacyPostUserAccount: RequestHandler = async (req: Request, res: Response, next) => {
+    const site = !['ewan', 'simo'].includes(req.body.username)
+      ? await this.siteRepository.findOne({ id: req.body.username })
+      : null
+    if (site === undefined) {
+      return next({ status: 404, errors: 'Username does not match any site' })
+    }
+    let user = await this.userAccountRepository.findOne(
+      { username: req.body.username },
+      { relations: ['permissions', 'permissions.site'] }
+    )
+    if (user !== undefined) {
+      res.status(200)
+      res.json(this.userResponse(user))
+      return
+    }
+    // Add proper permission to the body
+    if (req.body.username === 'simo') {
+      req.body.permissions = [{ siteId: null, permission: 'canUpload' }]
+    } else if (req.body.username === 'ewan') {
+      req.body.permissions = [{ siteId: null, permission: 'canUploadModel' }]
+    } else {
+      req.body.permissions = [{ siteId: site.id, permission: 'canUpload' }]
+    }
+    await this.createPermissions(req, res, next)
+    user = await this.userAccountRepository.save({
+      username: req.body.username,
+      passwordHash: req.body.passwordHash,
       permissions: res.locals.permissions,
     })
     res.status(201)
@@ -115,18 +153,17 @@ export class UserAccountRoutes {
     if (user === undefined) {
       return next({ status: 404, errors: 'UserAccount not found' })
     }
-    if (req.body.hasOwnProperty('username')) {
+    if (hasProperty(req.body, 'username')) {
       user.username = req.body.username
     }
-    if (req.body.hasOwnProperty('password')) {
+    if (hasProperty(req.body, 'password')) {
       user.passwordHash = md5(req.body.password)
     }
-    if (req.body.hasOwnProperty('permissions')) {
-      await this.createPermissions(req,res,next)
+    if (hasProperty(req.body, 'permissions')) {
+      await this.createPermissions(req, res, next)
       user.permissions = res.locals.permissions
     }
     await this.userAccountRepository.save(user)
-    console.log(user)
     res.json(this.userResponse(user))
   }
   getUserAccount: RequestHandler = async (req: Request, res: Response, next) => {
@@ -155,30 +192,41 @@ export class UserAccountRoutes {
     res.json(users.map((u) => this.userResponse(u)))
   }
 
-  validatePut: RequestHandler = async (req: Request, res: Response, next) => {
-    if (req.body.hasOwnProperty('username')) {
-      await this.validateUsername(req, res, next)
-    }
-    if (req.body.hasOwnProperty('password')) {
-      await this.validatePassword(req, res, next)
-    }
-
-    if (req.body.hasOwnProperty('permissions')) {
-      await this.validatePermissions(req, res, next)
-    }
-    return next()
-  }
   validatePost: RequestHandler = async (req: Request, res: Response, next) => {
-    if (!req.body.hasOwnProperty('username')) {
+    if (!hasProperty(req.body, 'username')) {
       return next({ status: 401, errors: 'Missing the username' })
     }
     await this.validateUsername(req, res, next)
-    if (!req.body.hasOwnProperty('password')) {
+    if (!hasProperty(req.body, 'password')) {
       return next({ status: 401, errors: 'Missing the password' })
     }
     await this.validatePassword(req, res, next)
 
-    if (req.body.hasOwnProperty('permissions')) {
+    if (hasProperty(req.body, 'permissions')) {
+      await this.validatePermissions(req, res, next)
+    }
+    return next()
+  }
+  validateMigrateLegacyPost: RequestHandler = async (req: Request, res: Response, next) => {
+    if (!hasProperty(req.body, 'username')) {
+      return next({ status: 401, errors: 'Missing the username' })
+    }
+    await this.validateUsername(req, res, next)
+    if (!hasProperty(req.body, 'passwordHash')) {
+      return next({ status: 401, errors: 'Missing the passwordHash' })
+    }
+    await this.validatePasswordHash(req, res, next)
+    return next()
+  }
+  validatePut: RequestHandler = async (req: Request, res: Response, next) => {
+    if (hasProperty(req.body, 'username')) {
+      await this.validateUsername(req, res, next)
+    }
+    if (hasProperty(req.body, 'password')) {
+      await this.validatePassword(req, res, next)
+    }
+
+    if (hasProperty(req.body, 'permissions')) {
       await this.validatePermissions(req, res, next)
     }
     return next()
@@ -198,6 +246,15 @@ export class UserAccountRoutes {
       return next({ status: 401, errors: 'password must be nonempty' })
     }
   }
+  validatePasswordHash: RequestHandler = async (req: Request, res: Response, next) => {
+    if (typeof req.body.passwordHash !== 'string') {
+      return next({ status: 401, errors: 'passwordHash must be a string' })
+    } else if (req.body.passwordHash.length === 0) {
+      return next({ status: 401, errors: 'passwordHash must be nonempty' })
+    } else if (!md5Regex.test(req.body.passwordHash)) {
+      return next({ status: 401, errors: 'passwordHash has an unexpected form' })
+    }
+  }
 
   validatePermissions: RequestHandler = async (req: Request, res: Response, next) => {
     if (Array.isArray(req.body.permissions)) {
@@ -214,13 +271,12 @@ export class UserAccountRoutes {
   }
   validatePermission: RequestHandler = async (req: Request, res: Response, next) => {
     const permission = res.locals.permission
-    if (!permission.hasOwnProperty('siteId')) {
+    if (!hasProperty(permission, 'siteId')) {
       return next({ status: 401, errors: 'Missing the siteId from permission' })
     }
-    if (!permission.hasOwnProperty('permission')) {
+    if (!hasProperty(permission, 'permission')) {
       return next({ status: 401, errors: 'Missing the permission type from permission' })
     }
-
     if (permission.siteId !== null) {
       let site = await this.siteRepository.findOne({ id: permission.siteId })
       if (site === undefined) {

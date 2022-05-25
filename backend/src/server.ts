@@ -272,19 +272,24 @@ import { PermissionType, permissionTypeFromString } from './entity/Permission'
     userAccountRoutesREFACTORED.postUserAccount
   )
   app.get('/refactored/user-accounts/:id',
-          userAccountRoutesREFACTORED.getUserAccount
+    userAccountRoutesREFACTORED.getUserAccount
   )
   app.delete('/refactored/user-accounts/:id',
-          userAccountRoutesREFACTORED.deleteUserAccount
+    userAccountRoutesREFACTORED.deleteUserAccount
   )
-  // TODO 
   app.put('/refactored/user-accounts/:id',
     express.json(),
     userAccountRoutesREFACTORED.validatePut,
     userAccountRoutesREFACTORED.putUserAccount
   )
   app.get('/refactored/user-accounts/',
-          userAccountRoutesREFACTORED.getAllUserAccounts
+    userAccountRoutesREFACTORED.getAllUserAccounts
+  )
+  // migrate old users
+  app.post('/refactored/user-accounts/migrate-legacy',
+    express.json(),
+    userAccountRoutesREFACTORED.validateMigrateLegacyPost,
+    userAccountRoutesREFACTORED.migrateLegacyPostUserAccount
   )
 
 

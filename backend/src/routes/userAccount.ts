@@ -64,7 +64,7 @@ export class UserAccountRoutes {
     let reqUsers = new Set<string>()
     for (let credentialString of req.body) {
       const username: string = credentialString.split(':')[0]
-      
+
       const user = await this.userAccountRepository.findOne({username:username})
       if (user !== undefined) {
         res.status(400).send('Bad request: some user accounts already exists in the database\n')
