@@ -68,8 +68,9 @@
       outline: none
 
   button.calendar
-    width: 2em
-    height: 2em
+    vertical-align: bottom
+    height: 2.04em
+    width: 2.0em
     background-color: $blue-dust
     color: white
     border-style: solid
@@ -79,6 +80,8 @@
     font-size: 1em
     cursor: pointer
     font-family: $content-font
+    padding: 0
+    margin: 0
     &:focus
       background-color: $steel-warrior
       outline: none
@@ -89,8 +92,9 @@
       border-color: $blue-dust
     &>svg
       color: black
-      width: 1em
-      height: 1em
+      width: 60%
+      height: 60%
+      margin-bottom: 3px
 
   div.keyInfo
     border-style: solid
