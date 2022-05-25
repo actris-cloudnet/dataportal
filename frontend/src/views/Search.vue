@@ -68,20 +68,19 @@
       outline: none
 
   button.calendar
-    vertical-align: bottom
-    height: 2.04em
-    width: 2.0em
+    display: flex
+    align-items: center
+    justify-content: center
+
+    width: 2em
+    height: 100%
     background-color: $blue-dust
     color: white
-    border-style: solid
-    border-width: 1px
-    border-color: $steel-warrior
-    border-radius: 2px
+    border: 1px solid $steel-warrior
+    border-radius: 0 2px 2px 0
     font-size: 1em
     cursor: pointer
     font-family: $content-font
-    padding: 0
-    margin: 0
     &:focus
       background-color: $steel-warrior
       outline: none
@@ -92,9 +91,8 @@
       border-color: $blue-dust
     &>svg
       color: black
-      width: 60%
-      height: 60%
-      margin-bottom: 3px
+      width: 1em
+      height: 1em
 
   div.keyInfo
     border-style: solid
