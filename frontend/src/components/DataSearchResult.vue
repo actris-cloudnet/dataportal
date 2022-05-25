@@ -82,6 +82,12 @@ section#fileTable
   .download:focus
     outline: thin dotted black
 
+.previewTitle, .previewSubTitle
+  margin-left: 15px
+
+.linkToDoPage
+  margin-right: 15px
+
 .noresults
   text-align: center
   margin-top: 3em
@@ -207,8 +213,8 @@ section#fileTable
     </div>
     <div class="column2">
       <div>
-        <h3 class="inlineblock">Preview</h3>
-        <router-link v-if="previewResponse" :to="`/file/${previewResponse.uuid}`" class="listLegend">
+        <h3 class="inlineblock previewTitle">Preview</h3>
+        <router-link v-if="previewResponse" :to="`/file/${previewResponse.uuid}`" class="listLegend linkToDoPage">
           Show file &rarr;
         </router-link>
       </div>
@@ -265,7 +271,7 @@ section#fileTable
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
         </a>
       </main>
-      <div v-else class="listTitle">Click a search result to show a preview.</div>
+      <div v-else class="listTitle previewSubTitle">Click a search result to show a preview.</div>
     </div>
   </section>
 </template>
