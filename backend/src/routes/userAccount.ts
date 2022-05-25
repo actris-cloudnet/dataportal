@@ -90,7 +90,7 @@ export class UserAccountRoutes {
     } else if (req.body.username === 'ewan') {
       req.body.permissions = [{ siteId: null, permission: 'canUploadModel' }]
     } else {
-      req.body.permissions = [{ siteId: site.id, permission: 'canUpload' }]
+      req.body.permissions = [{ siteId: site!.id, permission: 'canUpload' }]
     }
     await this.createPermissions(req, res, next)
     user = await this.userAccountRepository.save({
