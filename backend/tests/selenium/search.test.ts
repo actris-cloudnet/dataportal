@@ -352,12 +352,6 @@ async function clickAllMarkers(by: By) {
   await clickMapMarker(by, -140, -20) // Mace Head
 }
 
-async function clickAllMarkersPopupMovement(by: By) {
-  await clickMapMarker(by, 90, -97) // Hyytiälä
-  await clickMapMarker(by, 103, 93) //Bucharest
-  await clickMapMarker(by, -105, -5) // Mace Head
-}
-
 async function clickMapMarker(by: By, x: number, y: number) {
   const mapElement = await driver.wait(until.elementLocated(by))
   let actions = driver.actions({bridge: true})

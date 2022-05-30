@@ -1,10 +1,8 @@
 import 'reflect-metadata'
 import {createConnection} from 'typeorm'
 import * as express from 'express'
-import {RequestHandler} from 'express'
 import {ErrorRequestHandler} from 'express'
 import * as basicAuth from 'express-basic-auth'
-
 import {RequestError} from './entity/RequestError'
 import {stringify, getIpLookup} from './lib'
 import {Middleware} from './lib/middleware'
