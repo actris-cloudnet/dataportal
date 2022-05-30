@@ -205,12 +205,16 @@ describe('search page', () => {
   })
 
   it('changes marker color by clicking marker', async () => {
+    await wait(timeout_short)
     await clearMapSelection(By.id('mapContainer'))
+    await wait(timeout_short)
     const src1 = getMarkerSrc(By.id('mapContainer'))
     const s1 = (await src1).anchor('src')
     await clickAllMarkers(By.id('mapContainer'))
+    await wait(timeout_short)
     const src2 = getMarkerSrc(By.id('mapContainer'))
     const s2 = (await src2).anchor('src')
+    await wait(timeout_short)
     expect(s1).not.toEqual(s2)
   })
 
