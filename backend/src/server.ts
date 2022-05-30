@@ -49,8 +49,6 @@ import { PermissionType, permissionTypeFromString } from './entity/Permission'
 
   const siteContactRoutes = new SiteContactRoutes(conn)
   const userAccountRoutes = new UserAccountRoutes(conn)
-  const canUpload = permissionTypeFromString('canUpload')!
-  const canUploadModel = permissionTypeFromString('canUploadModel')!
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     if (err.status < 500) console.log(`Error ${err.status} in ${req.method} ${req.path}:`, stringify(err)) // Client error
@@ -184,8 +182,7 @@ import { PermissionType, permissionTypeFromString } from './entity/Permission'
     authenticator.middleware,
     express.json(),
     authorizator.metadataMiddleware,
-    authorizator.authorizeSiteMiddleware({permission: canUpload}),
-    //authorizator.uploadMiddleware({permission:canUpload}),
+    authorizator.authorizeSiteMiddleware({permission: PermissionType.canUpload}),
     uploadRoutes.validateMetadata,
     uploadRoutes.postMetadata,
     errorAsPlaintext)
@@ -193,8 +190,7 @@ import { PermissionType, permissionTypeFromString } from './entity/Permission'
     middleware.validateMD5Param,
     authenticator.middleware,
     authorizator.instrumentDataUploadMiddleware,
-    authorizator.authorizeSiteMiddleware({permission: canUpload}),
-    //authorizator.uploadMiddleware({permission:canUpload, isDataUpload: true}),
+    authorizator.authorizeSiteMiddleware({permission: PermissionType.canUpload}),
     express.raw({limit: '100gb'}),
     uploadRoutes.putData,
     errorAsPlaintext)
@@ -204,8 +200,7 @@ import { PermissionType, permissionTypeFromString } from './entity/Permission'
     authenticator.middleware,
     express.json(),
     authorizator.metadataMiddleware,
-    authorizator.authorizeSiteMiddleware({permission: canUploadModel}),
-    //authorizator.uploadMiddleware({permission:canUploadModel}),
+    authorizator.authorizeSiteMiddleware({permission: PermissionType.canUploadModel}),
     uploadRoutes.validateMetadata,
     uploadRoutes.postMetadata)
 
@@ -213,8 +208,7 @@ import { PermissionType, permissionTypeFromString } from './entity/Permission'
     middleware.validateMD5Param,
     authenticator.middleware,
     authorizator.modelDataUploadMiddleware,
-    authorizator.authorizeSiteMiddleware({permission: canUploadModel}),
-    //authorizator.uploadMiddleware({permission:canUploadModel, isModelDataUpload: true}),
+    authorizator.authorizeSiteMiddleware({permission: PermissionType.canUploadModel}),
     express.raw({limit: '1gb'}),
     uploadRoutes.putData)
   // \END test routes
