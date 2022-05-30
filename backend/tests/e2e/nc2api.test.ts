@@ -6,6 +6,7 @@ import {createHash} from 'crypto'
 import {Connection, createConnection, Repository} from 'typeorm'
 import {Download} from '../../src/entity/Download'
 import {basename} from 'path'
+import {initUsersAndPermissions} from '../lib/userAccountAndPermissions'
 
 let conn: Connection
 let repo: Repository<Download>
@@ -166,16 +167,20 @@ describe('after PUTting a raw instrument file', () => {
     site: 'granada'
   }
   const rawFile = 'content'
-  const headers = {'authorization': `Basic ${str2base64('granada:lol')}`}
+  const headers = {'authorization': `Basic ${str2base64('granada:PASSWORDFORgranada')}`}
   const metadataUrl = `${backendPrivateUrl}upload/metadata/`
   const dataUrl = `${backendPrivateUrl}upload/data/`
   const uploadUrl = `${dataUrl}${validMetadata.checksum}`
 
   beforeAll(async () => {
+
+    await initUsersAndPermissions()
+
     await conn.getRepository('instrument_upload').delete({})
     await conn.getRepository('download').delete({})
     await axios.post(metadataUrl, validMetadata, {headers})
     return axios.put(uploadUrl, rawFile, {headers})
+
   })
 
   it('serves the file and increases download count', async () => {

@@ -18,7 +18,10 @@ import {DownloadRoutes} from './routes/download'
 import {CalibrationRoutes} from './routes/calibration'
 import {QualityReportRoutes} from './routes/qualityreport'
 import {SiteContactRoutes} from './routes/siteContact'
+import {UserAccountRoutes} from './routes/userAccount'
 import env from './lib/env'
+import {Authenticator, Authorizator} from './lib/auth'
+import { PermissionType, permissionTypeFromString } from './entity/Permission'
 
 (async function() {
   const port = 3000
@@ -27,6 +30,10 @@ import env from './lib/env'
   const conn = await createConnection()
   const ipLookup = await getIpLookup({ watchForUpdates: true })
   const middleware = new Middleware(conn)
+
+  const authenticator = new Authenticator(conn)
+  const authorizator = new Authorizator(conn)
+
 
   const fileRoutes = new FileRoutes(conn)
   const siteRoutes = new SiteRoutes(conn)
@@ -41,6 +48,7 @@ import env from './lib/env'
   const qualityRoutes = new QualityReportRoutes(conn, fileRoutes)
 
   const siteContactRoutes = new SiteContactRoutes(conn)
+  const userAccountRoutes = new UserAccountRoutes(conn)
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     if (err.status < 500) console.log(`Error ${err.status} in ${req.method} ${req.path}:`, stringify(err)) // Client error
@@ -137,6 +145,7 @@ import env from './lib/env'
   app.get('/api/download/image/*', dlRoutes.image)
   app.get('/api/quality/:uuid', qualityRoutes.qualityReport)
 
+
   // protected (for sites)
   app.post('/upload/metadata',
     middleware.getSiteNameFromAuth,
@@ -167,6 +176,43 @@ import env from './lib/env'
     express.raw({limit: '1gb'}),
     uploadRoutes.putData)
 
+  // \BEGIN TEST routes
+  // replace protected upload sites with these after they have been tested in production
+  app.post('/api/test/upload/metadata',
+    authenticator.middleware,
+    express.json(),
+    authorizator.metadataMiddleware,
+    authorizator.authorizeSiteMiddleware({permission: PermissionType.canUpload}),
+    uploadRoutes.validateMetadata,
+    uploadRoutes.postMetadata,
+    errorAsPlaintext)
+  app.put('/api/test/upload/data/:checksum',
+    middleware.validateMD5Param,
+    authenticator.middleware,
+    authorizator.instrumentDataUploadMiddleware,
+    authorizator.authorizeSiteMiddleware({permission: PermissionType.canUpload}),
+    express.raw({limit: '100gb'}),
+    uploadRoutes.putData,
+    errorAsPlaintext)
+
+  // model data upload (for Ewan only)
+  app.post('/api/test/model-upload/metadata',
+    authenticator.middleware,
+    express.json(),
+    authorizator.metadataMiddleware,
+    authorizator.authorizeSiteMiddleware({permission: PermissionType.canUploadModel}),
+    uploadRoutes.validateMetadata,
+    uploadRoutes.postMetadata)
+
+  app.put('/api/test/model-upload/data/:checksum',
+    middleware.validateMD5Param,
+    authenticator.middleware,
+    authorizator.modelDataUploadMiddleware,
+    authorizator.authorizeSiteMiddleware({permission: PermissionType.canUploadModel}),
+    express.raw({limit: '1gb'}),
+    uploadRoutes.putData)
+  // \END test routes
+
   // private
   app.put('/files/*', express.json(), fileRoutes.putFile)
   app.post('/files/', express.json(), fileRoutes.postFile)
@@ -191,6 +237,34 @@ import env from './lib/env'
   app.put('/persons/:id', express.json(),siteContactRoutes.putPerson)
   app.delete('/persons/:id', siteContactRoutes.deletePerson)
   app.delete('/persons', siteContactRoutes.deletePersons)
+
+  // Private UserAccount and Permission routes
+  app.post('/user-accounts',
+    express.json(),
+    userAccountRoutes.validatePost,
+    userAccountRoutes.postUserAccount
+  )
+  app.get('/user-accounts/:id',
+    userAccountRoutes.getUserAccount
+  )
+  app.delete('/user-accounts/:id',
+    userAccountRoutes.deleteUserAccount
+  )
+  app.put('/user-accounts/:id',
+    express.json(),
+    userAccountRoutes.validatePut,
+    userAccountRoutes.putUserAccount
+  )
+  app.get('/user-accounts/',
+    userAccountRoutes.getAllUserAccounts
+  )
+  app.post('/user-accounts/migrate-legacy',
+    express.json(),
+    userAccountRoutes.validateMigrateLegacyPost,
+    userAccountRoutes.migrateLegacyPostUserAccount
+  )
+
+
 
   app.use(errorHandler)
 
