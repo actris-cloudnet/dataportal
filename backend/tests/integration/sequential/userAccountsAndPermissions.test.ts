@@ -69,8 +69,9 @@ describe('test user accounts and permissions', () => {
       data: { id: alice.id },
     })
     const respGetWithNewPassword = await axios.get(USER_ACCOUNTS_URL.concat('/', alice.id))
-    expect(respGetWithNewPassword.data.passwordHash).toMatch('$apr1$')
-    expect(respGetWithNewPassword.data.passwordHash).not.toEqual(alice.passwordHash)
+    const aliceFromDb = await userAccountRepository.findOne({ id: alice.id })
+    expect(aliceFromDb.passwordHash).toMatch('$apr1$')
+    expect(aliceFromDb.passwordHash).not.toEqual(alice.passwordHash)
     expect(respGetWithNewPassword.data.permissions).toEqual(alice.permissions)
   })
 
@@ -216,8 +217,10 @@ describe('test user accounts and permissions', () => {
       expect(resp).toMatchObject({ status: 201 })
       await expect(axios.get(USER_ACCOUNTS_URL.concat('/', resp.data.id))).resolves.toMatchObject({
         status: 200,
-        data: { username: username, passwordHash: passwordHash },
+        data: { username: username },
       })
+      const userFromDb = await userAccountRepository.findOne({ id: resp.data.id })
+      expect(userFromDb.passwordHash).toEqual(passwordHash)
     }
   })
 })

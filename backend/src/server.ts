@@ -49,8 +49,8 @@ import { PermissionType, permissionTypeFromString } from './entity/Permission'
 
   const siteContactRoutes = new SiteContactRoutes(conn)
   const userAccountRoutes = new UserAccountRoutes(conn)
-  const canUpload: PermissionType = permissionTypeFromString('canUpload')!
-  const canUploadModel: PermissionType = permissionTypeFromString('canUploadModel')!
+  const canUpload = permissionTypeFromString('canUpload')!
+  const canUploadModel = permissionTypeFromString('canUploadModel')!
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     if (err.status < 500) console.log(`Error ${err.status} in ${req.method} ${req.path}:`, stringify(err)) // Client error

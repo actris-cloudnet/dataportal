@@ -40,7 +40,6 @@ export class UserAccountRoutes {
     return {
       id: user.id,
       username: user.username,
-      passwordHash: user.passwordHash,
       permissions: user.permissions.map((p) => ({
         id: p.id,
         permission: p.permission,
