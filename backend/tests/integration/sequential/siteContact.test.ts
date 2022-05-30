@@ -22,25 +22,28 @@ beforeAll(async () => {
 })
 
 describe('test /site-contacts and /persons private api', () => {
+
   it('responds with zero site contacts in the beginning', async () => {
     const res = await axios.get(SITE_CONTACTS_URL)
     expect(res.data).toHaveLength(0)
   })
+
   it('adds person A to site M with role E', async () => {
     const rawData = readFileSync(
       'tests/data/siteContact-post-AEM.json',
       'utf8'
     )
     const data = JSON.parse(rawData)
-    let resp = await axios.post(SITE_CONTACTS_URL, data)
+    await expect(axios.post(SITE_CONTACTS_URL, data)).resolves.toMatchObject({status: 200})
   })
+
   it('adds person B to site H with role S', async () => {
     const rawData = readFileSync(
       'tests/data/siteContact-post-BSH.json',
       'utf8'
     )
     const data = JSON.parse(rawData)
-    let resp = await axios.post(SITE_CONTACTS_URL, data)
+    await expect(axios.post(SITE_CONTACTS_URL, data)).resolves.toMatchObject({status: 200})
   })
 
   it('responds with two site contacts and two persons', async () => {
@@ -49,6 +52,7 @@ describe('test /site-contacts and /persons private api', () => {
     expect(resSiteContacs.data).toHaveLength(2)
     expect(resPersons.data).toHaveLength(2)
   })
+
   it('deletes all (zero) persons without site contact roles ', async () => {
     const resDelete = await axios.delete(PERSONS_URL)
     expect(resDelete.status).toBe(200)
@@ -57,6 +61,7 @@ describe('test /site-contacts and /persons private api', () => {
     expect(resSiteContacs.data).toHaveLength(2)
     expect(resPersons.data).toHaveLength(2)
   })
+
   it('adds orcid to persons B and changes his role and email', async () => {
     const res = await axios.get(SITE_CONTACTS_URL)
     let personId: Number | undefined = undefined
