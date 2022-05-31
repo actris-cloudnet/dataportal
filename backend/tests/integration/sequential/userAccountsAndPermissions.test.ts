@@ -14,7 +14,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  conn.close()
+  await conn.close()
 })
 
 describe('test user accounts and permissions', () => {
@@ -204,7 +204,7 @@ describe('test user accounts and permissions', () => {
     const getRespAllUsers = await axios.get(USER_ACCOUNTS_URL)
     for (const legacyUserStr of ['bucharest', 'granada', 'mace-head']) {
       const user = getRespAllUsers.data.find((u: any) => u.username === legacyUserStr)
-      axios.delete(USER_ACCOUNTS_URL.concat('/', user.id))
+      await axios.delete(USER_ACCOUNTS_URL.concat('/', user.id))
     }
     const legacyUsers = JSON.parse(readFileSync('tests/data/legacyUserAccountCredentials.json', 'utf8'))
     for (const legacyLine of legacyUsers) {
