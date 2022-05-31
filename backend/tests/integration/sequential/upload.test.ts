@@ -81,7 +81,8 @@ describe('POST /upload/metadata', () => {
       'filename-with-dashes.dat',
       '234234.LV1',
       'filename_with_numbers-and-other-123123-222.txt',
-      'filename-without-suffix'
+      'filename-without-suffix',
+      '/foo?bar/jee*joo/filename.nc',
     ]
     for (const validName of validNames) {
       const validMeta = {...validMetadata, filename: validName}
@@ -100,6 +101,11 @@ describe('POST /upload/metadata', () => {
       'filename😁filename.LV1',
       'ääööö.dat',
       'simosimo?simo',
+      '-filename.nc',
+      '_filename.nc',
+      'filename.nc_',
+      'filename.nc-',
+      'filename.'
     ]
     for (const badName of badNames) {
       const badMeta = {...validMetadata, filename: badName}

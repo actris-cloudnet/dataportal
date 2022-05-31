@@ -46,7 +46,6 @@ export class UploadRoutes {
   readonly modelFileRepo: Repository<ModelFile>
   readonly regularFileRepo: Repository<RegularFile>
 
-
   postMetadata: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body
     const filename = basename(body.filename)
@@ -353,9 +352,9 @@ export class UploadRoutes {
 
   validateFilename: RequestHandler = async (req, res, next) => {
     const filename = req.body.filename
-    const pattern = '^\\.|/\\.|[^a-zA-Z0-9\\.\\/_-]'
-    const isInvalid = new RegExp(pattern).test(filename)
-    if (isInvalid) return next({ status: 422, errors: `Filename contains forbidden characters: ${filename}`})
+    const validFilenamePattern = /^(.*\/)?(?=[a-zA-Z\d])([-_.a-zA-Z\d]*[a-zA-Z\d])$/
+    const isValid = validFilenamePattern.test(filename)
+    if (!isValid) return next({ status: 422, errors: `Filename contains forbidden characters: ${filename}`})
     if (filename.includes('/')) console.log(`Warning: filename contains slashes (site: ${req.body.site}, filename: ${req.body.filename})`)
     return next()
   }
