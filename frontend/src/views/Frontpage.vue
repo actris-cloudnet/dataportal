@@ -42,6 +42,9 @@ main#frontpage
     a:focus
       outline: thin dotted black
 
+.publications a:not(:first-child)
+  margin-left: 2em
+
 </style>
 
 
