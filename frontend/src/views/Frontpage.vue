@@ -42,9 +42,6 @@ main#frontpage
     a:focus
       outline: thin dotted black
 
-.publications a:not(:first-child)
-  margin-left: 2em
-
 </style>
 
 
@@ -78,7 +75,7 @@ This node is physically hosted by FMI in Helsinki, Finland. <!--You can find our
     <div class="publications">
       <router-link to="/sites">
         Measurement sites &#8594;
-      </router-link>
+      </router-link><br>
       <router-link to="/publications">
         Cloudnet publications &#8594;
       </router-link>
