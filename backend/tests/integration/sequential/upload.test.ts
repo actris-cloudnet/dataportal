@@ -74,6 +74,48 @@ describe('POST /upload/metadata', () => {
     return await instrumentRepo.delete({})
   })
 
+  test('accepts valid filenames', async () => {
+    const validNames = [
+      'filename.LV1',
+      '/file/name/with/slashes.txt',
+      'filename-with-dashes.dat',
+      '234234.LV1',
+      'filename_with_numbers-and-other-123123-222.txt',
+      'filename-without-suffix',
+      '/foo?bar/jee*joo/filename.nc',
+      './filename.nc',
+      '../filename.nc'
+    ]
+    for (const validName of validNames) {
+      const validMeta = {...validMetadata, filename: validName}
+      await expect(axios.post(metadataUrl, validMeta, {headers})).resolves.toMatchObject({status: 200})
+    }
+    return
+  })
+
+  test('rejects invalid filenames', async () => {
+    const badNames = [
+      'windows\\\\on\\tyhma.LV1',
+      'file with.whitespace',
+      '.filename.LV1',
+      '/foo/bar/.filename.LV1',
+      'øäææ.nc',
+      'filename😁filename.LV1',
+      'ääööö.dat',
+      'simosimo?simo',
+      '-filename.nc',
+      '_filename.nc',
+      'filename.nc_',
+      'filename.nc-',
+      'filename.'
+    ]
+    for (const badName of badNames) {
+      const badMeta = {...validMetadata, filename: badName}
+      await expect(axios.post(metadataUrl, badMeta, {headers})).rejects.toMatchObject({response: {status: 422}})
+    }
+    return
+  })
+
   test('inserts new metadata', async () => {
     const now = new Date()
     await expect(axios.post(metadataUrl, validMetadata, {headers})).resolves.toMatchObject({status: 200})

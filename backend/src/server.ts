@@ -153,6 +153,7 @@ import { PermissionType, permissionTypeFromString } from './entity/Permission'
     middleware.getSiteNameFromAuth,
     express.json(),
     uploadRoutes.validateMetadata,
+    uploadRoutes.validateFilename,
     uploadRoutes.postMetadata,
     errorAsPlaintext)
   app.put('/upload/data/:checksum',

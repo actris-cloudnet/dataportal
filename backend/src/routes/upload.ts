@@ -46,7 +46,6 @@ export class UploadRoutes {
   readonly modelFileRepo: Repository<ModelFile>
   readonly regularFileRepo: Repository<RegularFile>
 
-
   postMetadata: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body
     const filename = basename(body.filename)
@@ -334,25 +333,29 @@ export class UploadRoutes {
 
   validateMetadata: RequestHandler = async (req, res, next) => {
     const body = req.body
-
     if (!('filename' in body) || !body.filename) {
-      next({ status: 422, errors: 'Request is missing filename'})
-      return
+      return next({ status: 422, errors: 'Request is missing filename'})
     }
     if (!('checksum' in body) || !validator.isMD5(body.checksum)) {
-      next({ status: 422, errors: 'Request is missing checksum or checksum is invalid'})
-      return
+      return next({ status: 422, errors: 'Request is missing checksum or checksum is invalid'})
     }
     if (!('measurementDate' in body) || !body.measurementDate || !isValidDate(body.measurementDate)) {
-      next({ status: 422, errors: 'Request is missing measurementDate or measurementDate is invalid'})
-      return
+      return next({ status: 422, errors: 'Request is missing measurementDate or measurementDate is invalid'})
     }
-
     if (req.path.includes('model')) {
       if (!('model' in body && body.model)) return next({ status: 422, errors: 'Request is missing model'})
     } else {
       if (!('instrument' in body && body.instrument)) return next({ status: 422, errors: 'Request is missing instrument'})
     }
+    return next()
+  }
+
+  validateFilename: RequestHandler = async (req, res, next) => {
+    const filename = req.body.filename
+    const validFilenamePattern = /^(.*\/)?(?=[a-zA-Z\d])([-_.a-zA-Z\d]*[a-zA-Z\d])$/
+    const isValid = validFilenamePattern.test(filename)
+    if (!isValid) return next({ status: 422, errors: `Filename contains forbidden characters: ${filename}`})
+    if (filename.includes('/')) console.log(`Warning: filename contains slashes (site: ${req.body.site}, filename: ${req.body.filename})`)
     return next()
   }
 
