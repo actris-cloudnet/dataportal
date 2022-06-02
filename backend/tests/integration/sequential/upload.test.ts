@@ -83,6 +83,8 @@ describe('POST /upload/metadata', () => {
       'filename_with_numbers-and-other-123123-222.txt',
       'filename-without-suffix',
       '/foo?bar/jee*joo/filename.nc',
+      './filename.nc',
+      '../filename.nc'
     ]
     for (const validName of validNames) {
       const validMeta = {...validMetadata, filename: validName}
