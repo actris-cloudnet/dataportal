@@ -1,31 +1,29 @@
-import {Column, Entity, ManyToOne, OneToMany, PrimaryColumn} from 'typeorm'
-import {Visualization} from './Visualization'
-import {Product} from './Product'
-
+import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
+import { Visualization } from "./Visualization";
+import { Product } from "./Product";
 
 @Entity()
 export class ProductVariable {
-
   @PrimaryColumn()
-  id!: string
+  id!: string;
 
   @Column()
-  humanReadableName!: string
+  humanReadableName!: string;
 
   @Column()
-  order!: string
+  order!: string;
 
-  @OneToMany(_ => Visualization, viz => viz.productVariable)
-  visualizations!: Visualization[]
+  @OneToMany((_) => Visualization, (viz) => viz.productVariable)
+  visualizations!: Visualization[];
 
-  @ManyToOne(_ => Product, prod => prod.variables)
-  product!: Product
+  @ManyToOne((_) => Product, (prod) => prod.variables)
+  product!: Product;
 
   constructor(id: string, humanReadableName: string, order: string, visualizations: Visualization[], product: Product) {
-    this.id = id
-    this.humanReadableName = humanReadableName
-    this.order = order
-    this.visualizations = visualizations
-    this.product = product
+    this.id = id;
+    this.humanReadableName = humanReadableName;
+    this.order = order;
+    this.visualizations = visualizations;
+    this.product = product;
   }
 }

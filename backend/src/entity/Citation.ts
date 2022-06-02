@@ -1,29 +1,24 @@
-import {Column, Entity, ManyToMany, PrimaryColumn} from 'typeorm'
-import {Site} from './Site'
-import {Model} from './Model'
-
+import { Column, Entity, ManyToMany, PrimaryColumn } from "typeorm";
+import { Site } from "./Site";
+import { Model } from "./Model";
 
 @Entity()
 export class Citation {
-
   @PrimaryColumn()
-  id!: string
+  id!: string;
 
-  @Column({type: 'text'})
-  acknowledgements!: string
-
+  @Column({ type: "text" })
+  acknowledgements!: string;
 }
 
 @Entity()
 export class RegularCitation extends Citation {
-
-  @ManyToMany(_ => Site)
-  sites!: Site[]
+  @ManyToMany((_) => Site)
+  sites!: Site[];
 }
 
 @Entity()
 export class ModelCitation extends Citation {
-
-  @ManyToMany(_ => Model)
-  models!: Model[]
+  @ManyToMany((_) => Model)
+  models!: Model[];
 }

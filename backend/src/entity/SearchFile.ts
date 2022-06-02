@@ -1,50 +1,46 @@
-import {Column, Entity, ManyToOne, PrimaryColumn, Unique} from 'typeorm'
-import {Site} from './Site'
-import {Product} from './Product'
-import {File} from './File'
+import { Column, Entity, ManyToOne, PrimaryColumn, Unique } from "typeorm";
+import { Site } from "./Site";
+import { Product } from "./Product";
+import { File } from "./File";
 
 @Entity()
-@Unique(['measurementDate', 'site', 'product'])
+@Unique(["measurementDate", "site", "product"])
 export class SearchFile {
+  @PrimaryColumn("uuid")
+  uuid!: string;
 
-  @PrimaryColumn('uuid')
-  uuid!: string
+  @Column({ type: "date" })
+  measurementDate!: Date;
 
-  @Column({type: 'date'})
-  measurementDate!: Date
+  @ManyToOne((_) => Site, (site) => site.files)
+  site!: Site;
 
-  @ManyToOne(_ => Site, site => site.files)
-  site!: Site
-
-  @ManyToOne(_ => Product, product => product.files)
-  product!: Product
+  @ManyToOne((_) => Product, (product) => product.files)
+  product!: Product;
 
   @Column()
-  size!: number
+  size!: number;
 
-  @Column({default: true})
-  volatile!: boolean
+  @Column({ default: true })
+  volatile!: boolean;
 
-  @Column({default: false})
-  legacy!: boolean
+  @Column({ default: false })
+  legacy!: boolean;
 
-  @Column({type: 'float', nullable: true})
-  qualityScore!: number
-
+  @Column({ type: "float", nullable: true })
+  qualityScore!: number;
 
   constructor(file: File) {
     // A typeorm hack, see https://github.com/typeorm/typeorm/issues/3903
-    if (typeof file == 'undefined') return
+    if (typeof file == "undefined") return;
 
-    this.uuid = file.uuid
-    this.measurementDate = file.measurementDate
-    this.site = file.site
-    this.product = file.product
-    this.size = file.size
-    this.volatile = file.volatile
-    this.legacy = file.legacy || false
-    this.qualityScore = file.qualityScore
+    this.uuid = file.uuid;
+    this.measurementDate = file.measurementDate;
+    this.site = file.site;
+    this.product = file.product;
+    this.size = file.size;
+    this.volatile = file.volatile;
+    this.legacy = file.legacy || false;
+    this.qualityScore = file.qualityScore;
   }
 }
-
-

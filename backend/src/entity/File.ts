@@ -7,131 +7,128 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryColumn,
-  Unique
-} from 'typeorm'
-import {Site} from './Site'
-import {Product} from './Product'
-import {Visualization} from './Visualization'
-import {isValidDate} from '../lib'
-import {basename} from 'path'
-import {Model} from './Model'
-import {ModelVisualization} from './ModelVisualization'
+  Unique,
+} from "typeorm";
+import { Site } from "./Site";
+import { Product } from "./Product";
+import { Visualization } from "./Visualization";
+import { isValidDate } from "../lib";
+import { basename } from "path";
+import { Model } from "./Model";
+import { ModelVisualization } from "./ModelVisualization";
 
 export enum Quality {
-  NRT='nrt',
-  QC='qc'
+  NRT = "nrt",
+  QC = "qc",
 }
 
 @Entity()
-@Unique(['checksum'])
-@Index(['measurementDate', 'site', 'product'])
+@Unique(["checksum"])
+@Index(["measurementDate", "site", "product"])
 export abstract class File {
+  @PrimaryColumn("uuid")
+  uuid!: string;
 
-    @PrimaryColumn('uuid')
-    uuid!: string
+  @Column()
+  s3key!: string;
 
-    @Column()
-    s3key!: string
+  @Column()
+  version!: string;
 
-    @Column()
-    version!: string
+  @Column({ default: "" })
+  pid!: string;
 
-    @Column({default: ''})
-    pid!: string
+  @Column({ default: true })
+  volatile!: boolean;
 
-    @Column({default: true})
-    volatile!: boolean
+  @Column({ default: false })
+  legacy!: boolean;
 
-    @Column({default: false})
-    legacy!: boolean
+  @Column({ type: "enum", enum: Quality, default: Quality.NRT })
+  quality!: Quality;
 
-    @Column({type: 'enum', enum: Quality, default: Quality.NRT})
-    quality!: Quality
+  @Column({ type: "date" })
+  measurementDate!: Date;
 
-    @Column({type: 'date'})
-    measurementDate!: Date
+  @ManyToOne((_) => Site, (site) => site.files)
+  site!: Site;
 
-    @ManyToOne(_ => Site, site => site.files)
-    site!: Site
+  @Column({ default: "" })
+  history!: string;
 
-    @Column({default: ''})
-    history!: string
+  @Column()
+  checksum!: string;
 
-    @Column()
-    checksum!: string
+  @Column({ type: "bigint" })
+  size!: number;
 
-    @Column({type: 'bigint'})
-    size!: number
+  @Column()
+  format!: string;
 
-    @Column()
-    format!: string
+  @ManyToOne((_) => Product, (product) => product.files)
+  product!: Product;
 
-    @ManyToOne(_ => Product, product => product.files)
-    product!: Product
+  @Column({ type: "float", nullable: true })
+  qualityScore!: number;
 
-    @Column({type: 'float', nullable: true})
-    qualityScore!: number
+  @Column()
+  createdAt!: Date;
 
-    @Column()
-    createdAt!: Date
+  @Column()
+  updatedAt!: Date;
 
-    @Column()
-    updatedAt!: Date
+  @Column({ default: "" })
+  processingVersion!: string;
 
-    @Column({default: ''})
-    processingVersion!: string
+  get filename() {
+    return basename(this.s3key);
+  }
 
-    get filename() {
-      return basename(this.s3key)
-    }
+  @BeforeInsert()
+  updateDateCreation() {
+    this.createdAt = new Date();
+    this.updatedAt = this.createdAt;
+  }
 
-    @BeforeInsert()
-    updateDateCreation() {
-      this.createdAt = new Date()
-      this.updatedAt = this.createdAt
-    }
-
-    @BeforeUpdate()
-    updateDateUpdate() {
-      this.updatedAt = new Date()
-    }
+  @BeforeUpdate()
+  updateDateUpdate() {
+    this.updatedAt = new Date();
+  }
 }
 
 @Entity()
 export class RegularFile extends File {
+  @Column("text", { array: true, nullable: true })
+  sourceFileIds!: string[] | null;
 
-  @Column('text', {array: true, nullable: true})
-  sourceFileIds!: string[] | null
+  @Column({ default: "" })
+  cloudnetpyVersion!: string;
 
-  @Column({default: ''})
-  cloudnetpyVersion!: string
-
-  @OneToMany(_ => Visualization, viz => viz.sourceFile)
-  visualizations!: Visualization[]
-
+  @OneToMany((_) => Visualization, (viz) => viz.sourceFile)
+  visualizations!: Visualization[];
 }
 
 @Entity()
 export class ModelFile extends File {
+  @ManyToOne((_) => Model, (model) => model.files)
+  model!: Model;
 
-  @ManyToOne(_ => Model, model => model.files)
-  model!: Model
-
-  @OneToMany(_ => ModelVisualization, viz => viz.sourceFile)
-  visualizations!: ModelVisualization[]
-
+  @OneToMany((_) => ModelVisualization, (viz) => viz.sourceFile)
+  visualizations!: ModelVisualization[];
 }
 
 export function isFile(obj: any) {
-  return 'uuid' in obj
-      && 'measurementDate' in obj
-      && isValidDate(obj.measurementDate)
-      && 'site' in obj
-      && 'product' in obj
-      && 'checksum' in obj
-      && 'size' in obj
-      && 'format' in obj
-      && 's3key' in obj
-      && 'version' in obj
-      && (obj.volatile === true || (obj.volatile === false && 'pid' in obj))
+  return (
+    "uuid" in obj &&
+    "measurementDate" in obj &&
+    isValidDate(obj.measurementDate) &&
+    "site" in obj &&
+    "product" in obj &&
+    "checksum" in obj &&
+    "size" in obj &&
+    "format" in obj &&
+    "s3key" in obj &&
+    "version" in obj &&
+    (obj.volatile === true || (obj.volatile === false && "pid" in obj))
+  );
 }

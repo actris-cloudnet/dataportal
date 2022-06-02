@@ -1,28 +1,30 @@
-import {Request, RequestHandler, Response} from 'express'
-import {Connection} from 'typeorm'
-import {fetchAll} from '../lib'
-import {Product} from '../entity/Product'
+import { Request, RequestHandler, Response } from "express";
+import { Connection } from "typeorm";
+import { fetchAll } from "../lib";
+import { Product } from "../entity/Product";
 
 export class ProductRoutes {
-
   constructor(conn: Connection) {
-    this.conn = conn
+    this.conn = conn;
   }
 
-  readonly conn: Connection
+  readonly conn: Connection;
 
   products: RequestHandler = async (req: Request, res: Response, next) => {
-    fetchAll<Product>(this.conn, Product, {order: {level: 'DESC', id: 'ASC'}})
-      .then(result => res.send(result))
-      .catch(err => next({ status: 500, errors: err }))
-  }
+    fetchAll<Product>(this.conn, Product, { order: { level: "DESC", id: "ASC" } })
+      .then((result) => res.send(result))
+      .catch((err) => next({ status: 500, errors: err }));
+  };
 
   productVariables: RequestHandler = async (req: Request, res: Response, next) => {
-    fetchAll<Product>(this.conn, Product, {relations: ['variables'], order: {level: 'DESC', id: 'ASC'}})
-      .then(result => result.map(prod =>
-        ({...prod,
-          variables: prod.variables.sort((a, b) => parseInt(a.order) - parseInt(b.order))})))
-      .then(result => res.send(result))
-      .catch(err => next({ status: 500, errors: err }))
-  }
+    fetchAll<Product>(this.conn, Product, { relations: ["variables"], order: { level: "DESC", id: "ASC" } })
+      .then((result) =>
+        result.map((prod) => ({
+          ...prod,
+          variables: prod.variables.sort((a, b) => parseInt(a.order) - parseInt(b.order)),
+        }))
+      )
+      .then((result) => res.send(result))
+      .catch((err) => next({ status: 500, errors: err }));
+  };
 }

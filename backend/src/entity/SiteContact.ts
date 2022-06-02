@@ -1,17 +1,12 @@
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm'
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
-import { Site } from './Site'
-import { Person } from './Person'
+import { Site } from "./Site";
+import { Person } from "./Person";
 
 export enum RoleType {
-  EXPERT = 'expert',
-  SCIENTIST = 'scientist',
-  TECHNICIAN = 'technician',
+  EXPERT = "expert",
+  SCIENTIST = "scientist",
+  TECHNICIAN = "technician",
 }
 
 @Entity()

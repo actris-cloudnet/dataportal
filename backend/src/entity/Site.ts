@@ -1,80 +1,79 @@
-import {Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn} from 'typeorm'
-import {File} from './File'
-import {Upload} from './Upload'
-import {Calibration} from './Calibration'
-import {RegularCitation} from './Citation'
-import {SiteContact} from './SiteContact'
-import {Permission} from './Permission'
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn } from "typeorm";
+import { File } from "./File";
+import { Upload } from "./Upload";
+import { Calibration } from "./Calibration";
+import { RegularCitation } from "./Citation";
+import { SiteContact } from "./SiteContact";
+import { Permission } from "./Permission";
 
 export enum SiteType {
-    CLOUDNET = 'cloudnet',
-    ARM = 'arm',
-    CAMPAIGN = 'campaign',
-    MOBILE = 'mobile',
-    TEST = 'test',
-    HIDDEN = 'hidden'
+  CLOUDNET = "cloudnet",
+  ARM = "arm",
+  CAMPAIGN = "campaign",
+  MOBILE = "mobile",
+  TEST = "test",
+  HIDDEN = "hidden",
 }
 
 @Entity()
 export class Site {
+  @PrimaryColumn()
+  id!: string;
 
-    @PrimaryColumn()
-    id!: string
+  @Column()
+  humanReadableName!: string;
 
-    @Column()
-    humanReadableName!: string
+  @Column("text", { array: true, nullable: true })
+  type!: SiteType[];
 
-    @Column('text', {array: true, nullable: true})
-    type!: SiteType[]
+  @Column({ type: "float" })
+  latitude!: number;
 
-    @Column({type: 'float'})
-    latitude!: number
+  @Column({ type: "float" })
+  longitude!: number;
 
-    @Column({type: 'float'})
-    longitude!: number
+  @Column()
+  altitude!: number;
 
-    @Column()
-    altitude!: number
+  @Column()
+  gaw!: string;
 
-    @Column()
-    gaw!: string
+  @Column({ nullable: true })
+  dvasId!: string;
 
-    @Column({nullable: true})
-    dvasId!: string
+  @Column()
+  country!: string;
 
-    @Column()
-    country!: string
+  @Column({ type: "char", length: 2, nullable: true })
+  iso_3166_1_alpha_2!: string | null;
 
-    @Column({type: 'char', length: 2, nullable: true})
-    iso_3166_1_alpha_2!: string|null
+  @Column({ type: "varchar", length: 6, nullable: true })
+  iso_3166_2!: string | null;
 
-    @Column({type: 'varchar', length: 6, nullable: true})
-    iso_3166_2!: string|null
+  @OneToMany((_) => File, (file) => file.site)
+  files!: File[];
 
-    @OneToMany(_ => File, file => file.site)
-    files!: File[]
+  @OneToMany((_) => Upload, (upload) => upload.site)
+  uploads!: Upload[];
 
-    @OneToMany(_ => Upload, upload => upload.site)
-    uploads!: Upload[]
+  @OneToMany((_) => Calibration, (calib) => calib.site)
+  calibrations!: Calibration[];
 
-    @OneToMany(_ => Calibration, calib => calib.site)
-    calibrations!: Calibration[]
+  @ManyToMany((_) => RegularCitation)
+  @JoinTable()
+  citations!: RegularCitation[];
 
-    @ManyToMany(_ => RegularCitation)
-    @JoinTable()
-    citations!: RegularCitation[]
+  @OneToMany((_) => SiteContact, (siteContact) => siteContact.site)
+  contacts!: SiteContact[];
 
-    @OneToMany( _ => SiteContact, siteContact => siteContact.site )
-    contacts!: SiteContact[]
+  @OneToMany((_) => Permission, (permission) => permission.site)
+  permissions!: Permission[];
 
-    @OneToMany( _ => Permission, permission => permission.site )
-    permissions!: Permission[]
+  get isTestSite() {
+    return this.type.includes(SiteType.TEST);
+  }
 
-    get isTestSite() {
-      return this.type.includes(SiteType.TEST)
-    }
-
-    get isHiddenSite() {
-      return this.type.includes(SiteType.HIDDEN)
-    }
+  get isHiddenSite() {
+    return this.type.includes(SiteType.HIDDEN);
+  }
 }

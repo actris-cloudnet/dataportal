@@ -1,50 +1,49 @@
-import {BeforeInsert, BeforeUpdate, Column, Entity, JoinTable, ManyToMany, PrimaryColumn,} from 'typeorm'
-import {ModelFile, RegularFile} from './File'
-import {v4 as generateUuidV4} from 'uuid'
+import { BeforeInsert, BeforeUpdate, Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from "typeorm";
+import { ModelFile, RegularFile } from "./File";
+import { v4 as generateUuidV4 } from "uuid";
 
 @Entity()
 export class Collection {
+  @PrimaryColumn("uuid")
+  uuid!: string;
 
-  @PrimaryColumn('uuid')
-  uuid!: string
-
-  @ManyToMany(_type => RegularFile)
+  @ManyToMany((_type) => RegularFile)
   @JoinTable()
-  regularFiles!: RegularFile[]
+  regularFiles!: RegularFile[];
 
-  @ManyToMany(_type => ModelFile)
+  @ManyToMany((_type) => ModelFile)
   @JoinTable()
-  modelFiles!: ModelFile[]
+  modelFiles!: ModelFile[];
 
-  @Column({default: ''})
-  title!: string
+  @Column({ default: "" })
+  title!: string;
 
-  @Column({default: ''})
-  pid!: string
+  @Column({ default: "" })
+  pid!: string;
 
-  @Column({default: 0})
-  downloadCount!: number
+  @Column({ default: 0 })
+  downloadCount!: number;
 
   @Column()
-  createdAt!: Date
+  createdAt!: Date;
 
   @Column()
-  updatedAt!: Date
+  updatedAt!: Date;
 
   @BeforeInsert()
   setCreatedAt() {
-    this.createdAt = new Date()
-    this.updatedAt = this.createdAt
+    this.createdAt = new Date();
+    this.updatedAt = this.createdAt;
   }
 
   @BeforeUpdate()
   setUpdatedAt() {
-    this.updatedAt = new Date()
+    this.updatedAt = new Date();
   }
 
   constructor(files: RegularFile[], modelFiles: ModelFile[]) {
-    this.uuid = generateUuidV4()
-    this.regularFiles = files
-    this.modelFiles = modelFiles
+    this.uuid = generateUuidV4();
+    this.regularFiles = files;
+    this.modelFiles = modelFiles;
   }
 }

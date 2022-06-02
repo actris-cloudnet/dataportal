@@ -1,11 +1,6 @@
-import {
-  Column,
-  Entity,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm'
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
-import { SiteContact } from './SiteContact'
+import { SiteContact } from "./SiteContact";
 
 @Entity()
 export class Person {

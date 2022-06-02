@@ -1,33 +1,32 @@
-import {Column, Entity, ManyToOne, PrimaryGeneratedColumn, Unique} from 'typeorm'
-import {Site} from './Site'
-import {Instrument} from './Instrument'
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
+import { Site } from "./Site";
+import { Instrument } from "./Instrument";
 
 export interface CalibrationData {
-  calibrationFactor: number
-  createdAt: Date
+  calibrationFactor: number;
+  createdAt: Date;
 }
 
 @Entity()
-@Unique(['measurementDate', 'site', 'instrument'])
+@Unique(["measurementDate", "site", "instrument"])
 export class Calibration {
-
   @PrimaryGeneratedColumn()
-  id!: number
+  id!: number;
 
-  @ManyToOne(_ => Instrument, instrument => instrument.calibrations)
-  instrument!: Instrument
+  @ManyToOne((_) => Instrument, (instrument) => instrument.calibrations)
+  instrument!: Instrument;
 
-  @ManyToOne(_ => Site, site => site.calibrations)
-  site!: Site
+  @ManyToOne((_) => Site, (site) => site.calibrations)
+  site!: Site;
 
-  @Column({type: 'date'})
-  measurementDate!: Date
+  @Column({ type: "date" })
+  measurementDate!: Date;
 
   @Column({
-    type: 'jsonb',
+    type: "jsonb",
     array: false,
-    default: () => '\'[]\'',
-    nullable: false
+    default: () => "'[]'",
+    nullable: false,
   })
-  calibration!: Array<CalibrationData>
+  calibration!: Array<CalibrationData>;
 }

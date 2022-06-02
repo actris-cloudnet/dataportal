@@ -1,10 +1,10 @@
-import {Instrument} from './Instrument'
-import {InstrumentUpload} from './Upload'
+import { Instrument } from "./Instrument";
+import { InstrumentUpload } from "./Upload";
 
 export class ReducedMetadataResponse {
-  instrument: Instrument
+  instrument: Instrument;
 
   constructor(md: InstrumentUpload) {
-    this.instrument = md.instrument
+    this.instrument = md.instrument;
   }
 }

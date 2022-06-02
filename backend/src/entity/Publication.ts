@@ -1,25 +1,22 @@
-import {Column, Entity, PrimaryColumn, BeforeInsert, BeforeUpdate} from 'typeorm'
-
+import { Column, Entity, PrimaryColumn, BeforeInsert, BeforeUpdate } from "typeorm";
 
 @Entity()
 export class Publication {
+  @PrimaryColumn()
+  pid!: string;
 
-    @PrimaryColumn()
-    pid!: string
+  @Column({ type: "text" })
+  citation!: string;
 
-    @Column({type: 'text'})
-    citation!: string
+  @Column()
+  year!: number;
 
-    @Column()
-    year!: number
+  @Column()
+  updatedAt!: Date;
 
-    @Column()
-    updatedAt!: Date
-
-    @BeforeInsert()
-    @BeforeUpdate()
-    updateDateInsert() {
-      this.updatedAt = new Date()
-    }
-
+  @BeforeInsert()
+  @BeforeUpdate()
+  updateDateInsert() {
+    this.updatedAt = new Date();
+  }
 }

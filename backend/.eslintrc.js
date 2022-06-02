@@ -9,7 +9,8 @@ module.exports = {
   },
   'extends': [
     'eslint:recommended',
-    'plugin:@typescript-eslint/eslint-recommended'
+    'plugin:@typescript-eslint/eslint-recommended',
+    'prettier'
   ],
   'globals': {
     'Atomics': 'readonly',
