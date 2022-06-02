@@ -30,13 +30,11 @@
   margin-bottom: $filter-margin
   margin-top: 20px
   display: block
-
 </style>
-
 
 <template>
   <main id="sitelanding" v-if="!error && response">
-    <img alt="back" id="backButton" :src="require('../assets/icons/back.png')" @click="$router.back()">
+    <img alt="back" id="backButton" :src="require('../assets/icons/back.png')" @click="$router.back()" />
     <header>
       <h2>{{ response.humanReadableName }}</h2>
       <span>Measurement station in {{ response.country }}.</span>
@@ -62,13 +60,14 @@
         <header>Instruments</header>
         <section class="details">
           <div v-if="instruments && instruments.length" class="detailslist">
-          <span class="notice">
-            The site has submitted data from the following instruments in the last {{ instrumentsFromLastDays }} days:<br>
-          </span>
-           <div v-for="instrument in instruments" :key="instrument.id" class="detailslistItem">
-               <img alt="instrument icon" :src="getIconUrl(instrument.instrument.type)" class="product">
-               {{ instrument.instrument.humanReadableName }}
-           </div>
+            <span class="notice">
+              The site has submitted data from the following instruments in the last
+              {{ instrumentsFromLastDays }} days:<br />
+            </span>
+            <div v-for="instrument in instruments" :key="instrument.id" class="detailslistItem">
+              <img alt="instrument icon" :src="getIconUrl(instrument.instrument.type)" class="product" />
+              {{ instrument.instrument.humanReadableName }}
+            </div>
           </div>
           <div class="detailslistNotAvailable" v-else>Instrument information not available.</div>
         </section>
@@ -76,12 +75,13 @@
       <section id="sitemap">
         <header>Map</header>
         <section class="details">
-          <Map v-if="!busy"
-               :sites="[response]"
-               :center="[response.latitude, response.longitude]"
-               :zoom="5"
-               :fullHeight="true"
-               :key="mapKey"
+          <Map
+            v-if="!busy"
+            :sites="[response]"
+            :center="[response.latitude, response.longitude]"
+            :zoom="5"
+            :fullHeight="true"
+            :key="mapKey"
           ></Map>
           <div v-else class="loadingoverlay">
             <div class="lds-dual-ring"></div>
@@ -91,23 +91,24 @@
       <div class="forcewrap"></div>
 
       <section id="product_availability" class="graph">
-        <header>Product availability {{selectedProduct}}</header>
+        <header>Product availability {{ selectedProduct }}</header>
 
         <section class="details" v-if="singleProductView">
           <ProductAvailabilityVisualizationSingle
-                                                  :site="siteid"
-                                                  :legend="true"
-                                                  :tooltips="true"
-                                                  :product="selectedProductId"
-                                                  :dataStatusParser="dataStatusParser"
+            :site="siteid"
+            :legend="true"
+            :tooltips="true"
+            :product="selectedProductId"
+            :dataStatusParser="dataStatusParser"
           ></ProductAvailabilityVisualizationSingle>
         </section>
         <section class="details" v-else>
-          <ProductAvailabilityVisualization v-if="dataStatusParser"
-                                            :site="siteid"
-                                            :legend="true"
-                                            :tooltips="true"
-                                            :dataStatusParser="dataStatusParser"
+          <ProductAvailabilityVisualization
+            v-if="dataStatusParser"
+            :site="siteid"
+            :legend="true"
+            :tooltips="true"
+            :dataStatusParser="dataStatusParser"
           ></ProductAvailabilityVisualization>
           <div v-else class="loadingoverlay">
             <div class="lds-dual-ring"></div>
@@ -116,158 +117,156 @@
       </section>
 
       <section id="product_quality" class="graph">
-        <header>Product quality {{selectedProduct}}</header>
+        <header>Product quality {{ selectedProduct }}</header>
 
         <section class="details" v-if="singleProductView">
           <ProductAvailabilityVisualizationSingle
-                                            :site="siteid"
-                                            :legend="true"
-                                            :tooltips="true"
-                                            :product="selectedProductId"
-                                            :qualityScores="true"
-                                            :dataStatusParser="dataStatusParser"
+            :site="siteid"
+            :legend="true"
+            :tooltips="true"
+            :product="selectedProductId"
+            :qualityScores="true"
+            :dataStatusParser="dataStatusParser"
           ></ProductAvailabilityVisualizationSingle>
         </section>
 
         <section class="details" v-else>
-          <ProductAvailabilityVisualization v-if="dataStatusParser"
-                                            :site="siteid"
-                                            :legend="true"
-                                            :tooltips="true"
-                                            :qualityScores="true"
-                                            :dataStatusParser="dataStatusParser"
+          <ProductAvailabilityVisualization
+            v-if="dataStatusParser"
+            :site="siteid"
+            :legend="true"
+            :tooltips="true"
+            :qualityScores="true"
+            :dataStatusParser="dataStatusParser"
           ></ProductAvailabilityVisualization>
           <div v-else class="loadingoverlay">
             <div class="lds-dual-ring"></div>
           </div>
         </section>
-
       </section>
-
     </main>
 
     <div v-if="dataStatusParser">
-    <div id="siteselect">
-    <custom-multiselect v-if="dataStatusParser"
-                        ref="productFilter"
-      :multiple="false"
-      label="Product filter"
-      :setSelectedIds="setSelectedProductIds"
-      :options="allProducts"
-      id="singleProductSelect"
-      :icons="true"
-      :getIcon="getIconUrl"
-    >
-    </custom-multiselect>
-    </div>
+      <div id="siteselect">
+        <custom-multiselect
+          v-if="dataStatusParser"
+          ref="productFilter"
+          :multiple="false"
+          label="Product filter"
+          :setSelectedIds="setSelectedProductIds"
+          :options="allProducts"
+          id="singleProductSelect"
+          :icons="true"
+          :getIcon="getIconUrl"
+        >
+        </custom-multiselect>
+      </div>
       <a @click="reset" id="reset">Reset filter</a>
     </div>
-
-
   </main>
-
 
   <app-error v-else-if="error" :response="response"></app-error>
 </template>
 
-
 <script lang="ts">
-import {Component, Prop, Vue} from 'vue-property-decorator'
-import axios from 'axios'
-import {Site} from '../../../backend/src/entity/Site'
-import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
-import Map from '../components/Map.vue'
-import ProductAvailabilityVisualization from '../components/DataStatusVisualization.vue'
-import ProductAvailabilityVisualizationSingle from '../components/DataStatusVisualizationSingleProduct.vue'
-import {ReducedMetadataResponse} from '../../../backend/src/entity/ReducedMetadataResponse'
-import {getProductIcon, formatCoordinates} from '../lib'
-import {DevMode} from '../lib/DevMode'
-import {Product} from '../../../backend/src/entity/Product'
-import {DataStatusParser} from '../lib/DataStatusParser'
-import CustomMultiselect from '../components/Multiselect.vue'
-import {Selection} from '../views/Search.vue'
-
+import { Component, Prop, Vue } from "vue-property-decorator";
+import axios from "axios";
+import { Site } from "../../../backend/src/entity/Site";
+import { SearchFileResponse } from "../../../backend/src/entity/SearchFileResponse";
+import Map from "../components/Map.vue";
+import ProductAvailabilityVisualization from "../components/DataStatusVisualization.vue";
+import ProductAvailabilityVisualizationSingle from "../components/DataStatusVisualizationSingleProduct.vue";
+import { ReducedMetadataResponse } from "../../../backend/src/entity/ReducedMetadataResponse";
+import { getProductIcon, formatCoordinates } from "../lib";
+import { DevMode } from "../lib/DevMode";
+import { Product } from "../../../backend/src/entity/Product";
+import { DataStatusParser } from "../lib/DataStatusParser";
+import CustomMultiselect from "../components/Multiselect.vue";
+import { Selection } from "../views/Search.vue";
 
 @Component({
-  name: 'app-site',
-  components: { Map, ProductAvailabilityVisualization, CustomMultiselect, ProductAvailabilityVisualizationSingle}
+  name: "app-site",
+  components: { Map, ProductAvailabilityVisualization, CustomMultiselect, ProductAvailabilityVisualizationSingle },
 })
 export default class SiteView extends Vue {
-  @Prop() siteid!: string
-  apiUrl = process.env.VUE_APP_BACKENDURL
-  response: Site | null = null
-  latestFile: SearchFileResponse | null = null
-  error = false
-  instruments: ReducedMetadataResponse[] | null = null
-  instrumentsFromLastDays = 30
-  allProducts: Product[] | null = null
-  selectedProductId: string[] = []
-  mapKey = 0
-  busy = false
-  getIconUrl = getProductIcon
-  formatCoordinates = formatCoordinates
-  devMode = new DevMode()
-  dataStatusParser: DataStatusParser | null = null
-  singleProductView = false
-  payload = {developer: this.devMode.activated}
+  @Prop() siteid!: string;
+  apiUrl = process.env.VUE_APP_BACKENDURL;
+  response: Site | null = null;
+  latestFile: SearchFileResponse | null = null;
+  error = false;
+  instruments: ReducedMetadataResponse[] | null = null;
+  instrumentsFromLastDays = 30;
+  allProducts: Product[] | null = null;
+  selectedProductId: string[] = [];
+  mapKey = 0;
+  busy = false;
+  getIconUrl = getProductIcon;
+  formatCoordinates = formatCoordinates;
+  devMode = new DevMode();
+  dataStatusParser: DataStatusParser | null = null;
+  singleProductView = false;
+  payload = { developer: this.devMode.activated };
 
   created() {
+    axios.get(`${this.apiUrl}products/`).then(({ data }) => {
+      this.allProducts = data.filter((product: Product) => product.level != "3");
+    });
     axios
-      .get(`${this.apiUrl}products/`)
-      .then(({data}) => {
-        this.allProducts = data.filter((product: Product) => product.level != '3')
+      .get(`${this.apiUrl}sites/${this.siteid}`, { params: this.payload })
+      .then(({ data }) => (this.response = data))
+      .catch(({ response }) => {
+        this.error = true;
+        this.response = response;
+      });
+    axios
+      .get(`${this.apiUrl}search/`, {
+        params: {
+          ...this.payload,
+          ...{ site: this.siteid, product: ["radar", "lidar", "mwr"], limit: 1 },
+        },
       })
+      .then(({ data }) => (this.latestFile = data[0]))
+      .catch();
+    const date30daysago = new Date();
+    date30daysago.setDate(date30daysago.getDate() - this.instrumentsFromLastDays);
+    this.initDataStatusParser();
     axios
-      .get(`${this.apiUrl}sites/${this.siteid}`, {params: this.payload})
-      .then(({data}) => (this.response = data))
-      .catch(({response}) => {
-        this.error = true
-        this.response = response
+      .get(`${this.apiUrl}uploaded-metadata/`, {
+        params: { ...this.payload, ...{ site: this.siteid, dateFrom: date30daysago } },
       })
-    axios
-      .get(`${this.apiUrl}search/`, {params: {
-        ...this.payload,
-        ...{site: this.siteid, product: ['radar', 'lidar', 'mwr'], limit: 1}}})
-      .then(({data}) => (this.latestFile = data[0]))
-      .catch()
-    const date30daysago = new Date()
-    date30daysago.setDate(date30daysago.getDate() - this.instrumentsFromLastDays)
-    this.initDataStatusParser()
-    axios
-      .get(`${this.apiUrl}uploaded-metadata/`, {params: {...this.payload, ...{ site: this.siteid, dateFrom: date30daysago}}})
-      .then(({data}) => (this.instruments = data))
-      .catch()
+      .then(({ data }) => (this.instruments = data))
+      .catch();
   }
 
   setSelectedProductIds(product: Selection) {
-    this.singleProductView = true
-    this.selectedProductId = [product.id]
+    this.singleProductView = true;
+    this.selectedProductId = [product.id];
   }
 
   get selectedProduct() {
-    if (this.singleProductView  && this.allProducts) {
-      return `(${this.allProducts.filter(prod => prod.id == this.selectedProductId[0])[0].humanReadableName})` || ''
+    if (this.singleProductView && this.allProducts) {
+      return `(${this.allProducts.filter((prod) => prod.id == this.selectedProductId[0])[0].humanReadableName})` || "";
     }
-    return ''
+    return "";
   }
 
   reset() {
-    const filter = this.$refs.productFilter as any
-    filter.setSelect([])
-    this.singleProductView = false
-    this.selectedProductId = []
+    const filter = this.$refs.productFilter as any;
+    filter.setSelect([]);
+    this.singleProductView = false;
+    this.selectedProductId = [];
   }
 
   async initDataStatusParser(product: string | null = null) {
-    const properties = ['measurementDate', 'productId', 'legacy', 'uuid', 'qualityScore']
+    const properties = ["measurementDate", "productId", "legacy", "uuid", "qualityScore"];
     const payload = {
       site: this.siteid,
       showLegacy: true,
       developer: this.devMode.activated,
       product: product,
       properties,
-    }
-    this.dataStatusParser = await (new DataStatusParser(payload).engage())
+    };
+    this.dataStatusParser = await new DataStatusParser(payload).engage();
   }
 }
 </script>

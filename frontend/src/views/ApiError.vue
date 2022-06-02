@@ -16,28 +16,26 @@ section
 </style>
 
 <template>
-    <main id="error">
-        <h1>{{ response.status }}</h1>
-        <h2 v-if="response.status !== 500">{{ message }}</h2>
-        <h2 v-else>Internal server error</h2>
-        <section v-if="response.status === 404">
-        The file you are looking for does not exist.<br>
-        If you are looking for the legacy cloudnet site, click <a href="http://legacy-cloudnet.fmi.fi">here</a>.
-        </section>
-        <section v-if="response.status > 500">
-          Service temporarily offline
-        </section>
-    </main>
+  <main id="error">
+    <h1>{{ response.status }}</h1>
+    <h2 v-if="response.status !== 500">{{ message }}</h2>
+    <h2 v-else>Internal server error</h2>
+    <section v-if="response.status === 404">
+      The file you are looking for does not exist.<br />
+      If you are looking for the legacy cloudnet site, click <a href="http://legacy-cloudnet.fmi.fi">here</a>.
+    </section>
+    <section v-if="response.status > 500">Service temporarily offline</section>
+  </main>
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue} from 'vue-property-decorator'
-import {AxiosResponse} from 'axios'
+import { Component, Prop, Vue } from "vue-property-decorator";
+import { AxiosResponse } from "axios";
 
 @Component
 export default class ApiError extends Vue {
-  @Prop() response!: AxiosResponse
+  @Prop() response!: AxiosResponse;
 
-  message = typeof this.response.data == 'string' ? this.response.data : this.response.data.errors.join('<br>')
+  message = typeof this.response.data == "string" ? this.response.data : this.response.data.errors.join("<br>");
 }
 </script>

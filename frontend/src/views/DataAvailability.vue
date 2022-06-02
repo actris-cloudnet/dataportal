@@ -33,25 +33,34 @@
   top: -5em
   margin-bottom: -5em
   z-index: 4
-
 </style>
-
 
 <template>
   <main id="data_availability">
     <div class="slider">
-      <label for="yearrange">Show last years:</label><br>
-      1 <input type="range" id="yearrange" v-model="yearRange" min="1" max="11" step="1"
-        :title="yearRange" @mouseup="refreshViz()"> All
+      <label for="yearrange">Show last years:</label><br />
+      1
+      <input
+        type="range"
+        id="yearrange"
+        v-model="yearRange"
+        min="1"
+        max="11"
+        step="1"
+        :title="yearRange"
+        @mouseup="refreshViz()"
+      />
+      All
     </div>
     <div class="firstcolumn" :key="allKey">
-      <section class="availabilityviz" v-for="(site) in evenSites" :key="site.id">
+      <section class="availabilityviz" v-for="site in evenSites" :key="site.id">
         <h3>{{ site.humanReadableName }}</h3>
         <ProductAvailabilityVisualization
-            v-if="readysites.includes(site.id)"
-            :legend="false"
-            :dataStatusParser="dataStatusParsers[site.id]"
-            :downloadComplete="() => completedDownloads += 1">
+          v-if="readysites.includes(site.id)"
+          :legend="false"
+          :dataStatusParser="dataStatusParsers[site.id]"
+          :downloadComplete="() => (completedDownloads += 1)"
+        >
         </ProductAvailabilityVisualization>
         <div v-else class="loadingoverlay">
           <div class="lds-dual-ring"></div>
@@ -59,13 +68,14 @@
       </section>
     </div>
     <div class="secondcolumn" :key="allKey">
-      <section class="availabilityviz" v-for="(site) in oddSites" :key="site.id">
+      <section class="availabilityviz" v-for="site in oddSites" :key="site.id">
         <h3>{{ site.humanReadableName }}</h3>
         <ProductAvailabilityVisualization
-            v-if="readysites.includes(site.id)"
-            :legend="false"
-            :dataStatusParser="dataStatusParsers[site.id]"
-            :downloadComplete="() => completedDownloads += 1">
+          v-if="readysites.includes(site.id)"
+          :legend="false"
+          :dataStatusParser="dataStatusParsers[site.id]"
+          :downloadComplete="() => (completedDownloads += 1)"
+        >
         </ProductAvailabilityVisualization>
         <div v-else class="loadingoverlay">
           <div class="lds-dual-ring"></div>
@@ -75,64 +85,61 @@
   </main>
 </template>
 
-
 <script lang="ts">
-import {Component, Vue} from 'vue-property-decorator'
-import axios from 'axios'
-import {Site, SiteType} from '../../../backend/src/entity/Site'
-import ProductAvailabilityVisualization from '../components/DataStatusVisualization.vue'
-import {DataStatusParser} from '../lib/DataStatusParser'
+import { Component, Vue } from "vue-property-decorator";
+import axios from "axios";
+import { Site, SiteType } from "../../../backend/src/entity/Site";
+import ProductAvailabilityVisualization from "../components/DataStatusVisualization.vue";
+import { DataStatusParser } from "../lib/DataStatusParser";
 
 @Component({
-  components: {ProductAvailabilityVisualization}
+  components: { ProductAvailabilityVisualization },
 })
 export default class DataAvailabilityView extends Vue {
-  apiUrl = process.env.VUE_APP_BACKENDURL
-  sites: Site[] = []
-  completedDownloads = 0
-  yearRange = '1'
-  allKey = 0
-  dateFrom = '1971-01-01'
-  dataStatusParsers: { [key: string]: DataStatusParser } = {}
-  readysites: string[] = []
-
+  apiUrl = process.env.VUE_APP_BACKENDURL;
+  sites: Site[] = [];
+  completedDownloads = 0;
+  yearRange = "1";
+  allKey = 0;
+  dateFrom = "1971-01-01";
+  dataStatusParsers: { [key: string]: DataStatusParser } = {};
+  readysites: string[] = [];
 
   created() {
-    axios.get(`${this.apiUrl}sites/`)
-      .then(({data}) => {
-        this.sites = data.filter((site: Site) => site.type.includes('cloudnet' as SiteType))
-        this.refreshViz()
-      })
+    axios.get(`${this.apiUrl}sites/`).then(({ data }) => {
+      this.sites = data.filter((site: Site) => site.type.includes("cloudnet" as SiteType));
+      this.refreshViz();
+    });
   }
 
   get evenSites() {
-    return this.sites.filter((site, index) => ! (index % 2))
+    return this.sites.filter((site, index) => !(index % 2));
   }
 
   get oddSites() {
-    return this.sites.filter((site, index) => index % 2)
+    return this.sites.filter((site, index) => index % 2);
   }
 
   async refreshViz() {
-    this.readysites = []
-    const yearNow = new Date().getFullYear()
-    const dateFromYear = this.yearRange === '11' ? 1971 : yearNow - parseInt(this.yearRange)
-    this.dateFrom = `${dateFromYear}-01-01`
-    this.completedDownloads = 0
-    await Promise.all(this.sites.map(this.initDataStatusParser))
-    this.allKey += 1
+    this.readysites = [];
+    const yearNow = new Date().getFullYear();
+    const dateFromYear = this.yearRange === "11" ? 1971 : yearNow - parseInt(this.yearRange);
+    this.dateFrom = `${dateFromYear}-01-01`;
+    this.completedDownloads = 0;
+    await Promise.all(this.sites.map(this.initDataStatusParser));
+    this.allKey += 1;
   }
 
   async initDataStatusParser(site: Site) {
-    const properties = ['measurementDate', 'productId', 'legacy']
+    const properties = ["measurementDate", "productId", "legacy"];
     const payload = {
       site: site.id,
       showLegacy: true,
       dateFrom: this.dateFrom,
-      properties
-    }
-    this.dataStatusParsers[site.id] = await (new DataStatusParser(payload).engage())
-    this.readysites.push(site.id)
+      properties,
+    };
+    this.dataStatusParsers[site.id] = await new DataStatusParser(payload).engage();
+    this.readysites.push(site.id);
   }
 }
 </script>

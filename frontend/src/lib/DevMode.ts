@@ -1,18 +1,17 @@
 export class DevMode {
-
   constructor() {
-    this.activated = !!localStorage.getItem('devmode')
+    this.activated = !!localStorage.getItem("devmode");
   }
 
-  activated: boolean
+  activated: boolean;
 
   enable() {
-    localStorage.setItem('devmode', 'yes')
-    this.activated = true
+    localStorage.setItem("devmode", "yes");
+    this.activated = true;
   }
 
   disable() {
-    localStorage.removeItem('devmode')
-    this.activated = false
+    localStorage.removeItem("devmode");
+    this.activated = false;
   }
 }

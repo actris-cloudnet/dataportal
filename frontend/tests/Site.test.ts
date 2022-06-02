@@ -88,9 +88,13 @@ describe('Site.vue', () => {
     await nextTick(1)
     const instrumentText = await wrapper.find('#instruments').text()
     expect(instrumentText).toContain(expectedString)
-    const numberOfDays = parseDaysFromInstrumentString(instrumentText)
+    const instrumentTextClean = instrumentText.replace(/\s+/g, ' ')
+    const nDaysRe = /^Instruments The site has submitted data from the following instruments in the last ([0-9]+) days:.*$/
+    const nDaysMatch = instrumentTextClean.match(nDaysRe)
+    const nDays = nDaysMatch ? parseInt(nDaysMatch[1]) : undefined
     const date30daysago = new Date()
-    date30daysago.setDate(date30daysago.getDate() - numberOfDays)
+    expect(nDays).toBeDefined()
+    date30daysago.setDate(date30daysago.getDate() - nDays!)
     const secondArg = getMockedAxiosLastCallSecondArgument()
     // Expect to be within 5 seconds
     return expect(new Date(secondArg.params.dateFrom).getTime() / 1000).toBeCloseTo(date30daysago.getTime() / 1000, -1)

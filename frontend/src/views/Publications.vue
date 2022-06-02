@@ -1,7 +1,6 @@
 <style scoped lang="sass">
 h1
   margin-bottom: 2rem
-
 </style>
 
 <template>
@@ -15,30 +14,25 @@ h1
   </main>
 </template>
 
-
 <script lang="ts">
-import {Component, Vue} from 'vue-property-decorator'
-import axios from 'axios'
+import { Component, Vue } from "vue-property-decorator";
+import axios from "axios";
 
 @Component({
-  components: {}
+  components: {},
 })
 export default class PubView extends Vue {
-  apiUrl = process.env.VUE_APP_BACKENDURL
-  publications: any
+  apiUrl = process.env.VUE_APP_BACKENDURL;
+  publications: any;
 
   data() {
     return {
-      publications: null
-    }
+      publications: null,
+    };
   }
 
   async created() {
-    axios
-      .get(`${this.apiUrl}publications`)
-      .then(response => (this.publications = response.data))
+    axios.get(`${this.apiUrl}publications`).then((response) => (this.publications = response.data));
   }
-
 }
-
 </script>

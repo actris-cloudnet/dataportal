@@ -150,77 +150,88 @@ section#fileTable
 .visualization
   width: 100%
   height: auto
-
 </style>
-
 
 <template>
   <section id="fileTable">
     <div class="column1">
       <h3>Results</h3>
-    <span class="listTitle" v-if="!simplifiedView && listLength > 0">
-      <span v-if="isBusy">Searching...</span>
-      <span v-else>Found {{ listLength }} results</span>
-      <span class="listLegend">
-        <span class="rowtag volatile rounded"></span> volatile
-        <span class="rowtag legacy rounded"></span> legacy
+      <span class="listTitle" v-if="!simplifiedView && listLength > 0">
+        <span v-if="isBusy">Searching...</span>
+        <span v-else>Found {{ listLength }} results</span>
+        <span class="listLegend">
+          <span class="rowtag volatile rounded"></span> volatile <span class="rowtag legacy rounded"></span> legacy
+        </span>
       </span>
-    </span>
       <div v-if="listLength === 0 && !isBusy" class="noresults">
         <h2>No results</h2>
         Are we missing some data? Send an email to
         <a href="mailto:actris-cloudnet@fmi.fi">actris-cloudnet@fmi.fi</a>.
       </div>
-      <b-table v-else
-               id="tableContent" borderless small striped hover sort-icon-left
-               :items="apiResponse"
-               :fields="[
-                { key: 'productId', label: '', tdClass: 'icon', tdAttr: setIcon},
-                { key: 'title', label: 'Data object', sortable: true},
-                { key: 'volatile', label: '' },
-                { key: 'measurementDate', label: 'Date', sortable: true},
-                ]"
-               :current-page="currentPage"
-               :per-page="perPage"
-               :busy="isBusy"
-               :show-empty="true"
-               selectable
-               select-mode="single"
-               @row-selected="rowSelected">
+      <b-table
+        v-else
+        id="tableContent"
+        borderless
+        small
+        striped
+        hover
+        sort-icon-left
+        :items="apiResponse"
+        :fields="[
+          { key: 'productId', label: '', tdClass: 'icon', tdAttr: setIcon },
+          { key: 'title', label: 'Data object', sortable: true },
+          { key: 'volatile', label: '' },
+          { key: 'measurementDate', label: 'Date', sortable: true },
+        ]"
+        :current-page="currentPage"
+        :per-page="perPage"
+        :busy="isBusy"
+        :show-empty="true"
+        selectable
+        select-mode="single"
+        @row-selected="rowSelected"
+      >
         <template v-slot:cell(volatile)="data">
-      <span
-          v-if="data.item.volatile"
-          class="rowtag volatile rounded"
-          title="The data for this day may be incomplete. This file is updating in real time.">
-      </span>
           <span
-              v-if="data.item.legacy"
-              class="rowtag legacy rounded"
-              title="This is legacy data. Quality of the data is not assured.">
-      </span>
+            v-if="data.item.volatile"
+            class="rowtag volatile rounded"
+            title="The data for this day may be incomplete. This file is updating in real time."
+          >
+          </span>
+          <span
+            v-if="data.item.legacy"
+            class="rowtag legacy rounded"
+            title="This is legacy data. Quality of the data is not assured."
+          >
+          </span>
         </template>
       </b-table>
-      <b-pagination id="pagi" v-if="listLength > perPage"
-                    v-model="currentPage"
-                    :total-rows="listLength"
-                    :per-page="perPage"
-                    :disabled="isBusy"
-                    aria-controls="fileTable"
-                    align="center"
+      <b-pagination
+        id="pagi"
+        v-if="listLength > perPage"
+        v-model="currentPage"
+        :total-rows="listLength"
+        :per-page="perPage"
+        :disabled="isBusy"
+        aria-controls="fileTable"
+        align="center"
       ></b-pagination>
       <div class="downloadinfo" v-if="listLength > 0 && !simplifiedView">
-        <a class="download"
-           v-bind:class="{ disabled: isBusy || downloadIsBusy }"
-           href=""
-           @click.prevent="createCollection()">
-          Download all
-        </a><br>
+        <a
+          class="download"
+          v-bind:class="{ disabled: isBusy || downloadIsBusy }"
+          href=""
+          @click.prevent="createCollection()"
+        >
+          Download all </a
+        ><br />
         <span v-if="!downloadFailed" class="dlcount" v-bind:class="{ disabled: isBusy || downloadIsBusy }">
-        {{ listLength }} files ({{ humanReadableSize(combinedFileSize(apiResponse)) }})
-      </span>
+          {{ listLength }} files ({{ humanReadableSize(combinedFileSize(apiResponse)) }})
+        </span>
         <div v-else class="dlcount errormsg">
-          {{ dlFailedMessage || 'Download failed!' }}
-        </div><br>
+          {{ dlFailedMessage || "Download failed!" }}
+        </div>
+        <br />
       </div>
     </div>
     <div class="column2">
@@ -236,7 +247,9 @@ section#fileTable
           <section class="details">
             <dl>
               <dt>PID</dt>
-              <dd v-if="previewResponse.pid.length > 2"> <a :href=previewResponse.pid> {{ previewResponse.pid }} </a></dd>
+              <dd v-if="previewResponse.pid.length > 2">
+                <a :href="previewResponse.pid"> {{ previewResponse.pid }} </a>
+              </dd>
               <dd v-else class="notAvailable"></dd>
               <dt>Filename</dt>
               <dd>{{ previewResponse.filename }}</dd>
@@ -248,18 +261,17 @@ section#fileTable
               <dd>
                 <span v-if="previewResponse.qualityScore === 1" class="qualitycheck">
                   <router-link :to="`/quality/${previewResponse.uuid}`">
-                    <img :src="require('../assets/icons/pass.png')">
+                    <img :src="require('../assets/icons/pass.png')" />
                   </router-link>
                   Pass.
                 </span>
                 <span v-else-if="typeof previewResponse.qualityScore === 'number'" class="qualitycheck">
                   <router-link :to="`/quality/${previewResponse.uuid}`">
-                    <img :src="require('../assets/icons/pass-fail.png')">
+                    <img :src="require('../assets/icons/pass-fail.png')" />
                   </router-link>
                   Some issues, <router-link :to="`/quality/${previewResponse.uuid}`">see report.</router-link>
                 </span>
-                <span v-else class="notAvailable">
-                </span>
+                <span v-else class="notAvailable"> </span>
               </dd>
             </dl>
           </section>
@@ -271,7 +283,7 @@ section#fileTable
               <div class="variable">
                 <h4>{{ previewTitle }}</h4>
                 <router-link :to="`/file/${previewResponse.uuid}`">
-                  <img :src="previewImgUrl" class="visualization" @load="changePreview">
+                  <img :src="previewImgUrl" class="visualization" @load="changePreview" />
                 </router-link>
               </div>
             </div>
@@ -280,7 +292,9 @@ section#fileTable
         </section>
         <a class="download" :href="previewResponse.downloadUrl">
           Download file
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+          </svg>
         </a>
       </main>
       <div v-else class="listTitle previewSubTitle">Click a search result to show a preview.</div>
@@ -288,139 +302,139 @@ section#fileTable
   </section>
 </template>
 
-
 <script lang="ts">
-import axios from 'axios'
-import {Component, Prop, Watch} from 'vue-property-decorator'
-import {File} from '../../../backend/src/entity/File'
-import Vue from 'vue'
+import axios from "axios";
+import { Component, Prop, Watch } from "vue-property-decorator";
+import { File } from "../../../backend/src/entity/File";
+import Vue from "vue";
 import {
   combinedFileSize,
   getProductIcon,
   humanReadableSize,
   humanReadableTimestamp,
-  sortVisualizations
-} from '../lib'
-import {SearchFileResponse} from '../../../backend/src/entity/SearchFileResponse'
-import {BTable} from 'bootstrap-vue/esm/components/table'
-import {BPagination} from 'bootstrap-vue/esm/components/pagination'
+  sortVisualizations,
+} from "../lib";
+import { SearchFileResponse } from "../../../backend/src/entity/SearchFileResponse";
+import { BTable } from "bootstrap-vue/esm/components/table";
+import { BPagination } from "bootstrap-vue/esm/components/pagination";
 
-Vue.component('b-table', BTable)
-Vue.component('b-pagination', BPagination)
+Vue.component("b-table", BTable);
+Vue.component("b-pagination", BPagination);
 
 @Component
 export default class DataSearchResult extends Vue {
-  @Prop() apiResponse!: SearchFileResponse[]
-  @Prop() isBusy!: boolean
-  @Prop() downloadUri!: string
-  @Prop() simplifiedView?: boolean
-  downloadIsBusy = false
-  downloadFailed = false
-  dlFailedMessage = ''
-  apiUrl = process.env.VUE_APP_BACKENDURL
-  previewResponse: File|null = null
-  pendingPreviewResponse: File|null = null
+  @Prop() apiResponse!: SearchFileResponse[];
+  @Prop() isBusy!: boolean;
+  @Prop() downloadUri!: string;
+  @Prop() simplifiedView?: boolean;
+  downloadIsBusy = false;
+  downloadFailed = false;
+  dlFailedMessage = "";
+  apiUrl = process.env.VUE_APP_BACKENDURL;
+  previewResponse: File | null = null;
+  pendingPreviewResponse: File | null = null;
 
-  currentPage = 1
-  perPage = 15
+  currentPage = 1;
+  perPage = 15;
 
-  previewImgUrl = ''
-  previewTitle = ''
-  pendingPreviewTitle = ''
+  previewImgUrl = "";
+  previewTitle = "";
+  pendingPreviewTitle = "";
 
-  humanReadableSize = humanReadableSize
-  humanReadableTimestamp = humanReadableTimestamp
-  combinedFileSize = combinedFileSize
+  humanReadableSize = humanReadableSize;
+  humanReadableTimestamp = humanReadableTimestamp;
+  combinedFileSize = combinedFileSize;
 
   mounted() {
-    window.addEventListener('resize', this.adjustPerPageAccordingToWindowHeight)
-    this.adjustPerPageAccordingToWindowHeight()
+    window.addEventListener("resize", this.adjustPerPageAccordingToWindowHeight);
+    this.adjustPerPageAccordingToWindowHeight();
   }
 
   beforeDestroy() {
-    window.removeEventListener('resize', this.adjustPerPageAccordingToWindowHeight)
+    window.removeEventListener("resize", this.adjustPerPageAccordingToWindowHeight);
   }
 
   get listLength() {
-    return this.apiResponse.length
+    return this.apiResponse.length;
   }
 
   rowSelected(records: File[]) {
     if (records.length === 0) {
-      this.clearPreview()
-      this.previewTitle = ''
-      this.previewResponse = null
-      return
+      this.clearPreview();
+      this.previewTitle = "";
+      this.previewResponse = null;
+      return;
     }
-    const record = records[0]
+    const record = records[0];
     // NOTE: Keep the breakpoint in sync with SASS above.
     if (window.innerWidth <= 1200) {
-      this.$router.push(`/file/${record.uuid}`)
+      this.$router.push(`/file/${record.uuid}`);
     } else {
-      axios.get(`${this.apiUrl}files/${record.uuid}`).then(({data}) => {
-        this.pendingPreviewResponse = data
+      axios.get(`${this.apiUrl}files/${record.uuid}`).then(({ data }) => {
+        this.pendingPreviewResponse = data;
         if (!this.previewResponse) {
-          this.previewResponse = this.pendingPreviewResponse
+          this.previewResponse = this.pendingPreviewResponse;
         }
-      })
-      this.loadPreview(record)
+      });
+      this.loadPreview(record);
     }
   }
 
   loadPreview(record: File) {
-    axios.get(`${this.apiUrl}visualizations/${record.uuid}`).then(({data}) => {
+    axios.get(`${this.apiUrl}visualizations/${record.uuid}`).then(({ data }) => {
       if (data.visualizations.length === 0) {
-        this.clearPreview()
-        this.changePreview()
-        return
+        this.clearPreview();
+        this.changePreview();
+        return;
       }
-      const viz = sortVisualizations(data.visualizations)[0]
-      this.previewImgUrl = `${this.apiUrl}download/image/${viz.s3key}`
-      this.pendingPreviewTitle = viz.productVariable.humanReadableName
-    })
+      const viz = sortVisualizations(data.visualizations)[0];
+      this.previewImgUrl = `${this.apiUrl}download/image/${viz.s3key}`;
+      this.pendingPreviewTitle = viz.productVariable.humanReadableName;
+    });
   }
 
   clearPreview() {
-    this.previewImgUrl = ''
+    this.previewImgUrl = "";
   }
 
   changePreview() {
-    this.previewTitle = this.pendingPreviewTitle
-    this.previewResponse = this.pendingPreviewResponse
+    this.previewTitle = this.pendingPreviewTitle;
+    this.previewResponse = this.pendingPreviewResponse;
   }
 
   createCollection() {
     if (this.listLength > 10000) {
-      this.downloadFailed = true
-      this.dlFailedMessage = 'You may only download a maximum of 10 000 files!'
+      this.downloadFailed = true;
+      this.dlFailedMessage = "You may only download a maximum of 10 000 files!";
     }
-    this.downloadIsBusy = true
-    axios.post(`${this.apiUrl}collection`, { files: this.apiResponse.map(file => file.uuid)})
-      .then(({data}) => this.$router.push({path: `/collection/${data}`}))
-      .catch(err => {
-        this.downloadFailed = true
+    this.downloadIsBusy = true;
+    axios
+      .post(`${this.apiUrl}collection`, { files: this.apiResponse.map((file) => file.uuid) })
+      .then(({ data }) => this.$router.push({ path: `/collection/${data}` }))
+      .catch((err) => {
+        this.downloadFailed = true;
         // eslint-disable-next-line no-console
-        console.error(err)
+        console.error(err);
       })
-      .finally(() => (this.downloadIsBusy = false))
+      .finally(() => (this.downloadIsBusy = false));
   }
 
   setIcon(product: string) {
-    if (product) return {'style': `background-image: url(${getProductIcon(product)})`}
+    if (product) return { style: `background-image: url(${getProductIcon(product)})` };
   }
 
   adjustPerPageAccordingToWindowHeight() {
-    this.perPage = Math.max(Math.floor(document.documentElement.clientHeight / 70), 10)
+    this.perPage = Math.max(Math.floor(document.documentElement.clientHeight / 70), 10);
   }
 
-  @Watch('isBusy')
+  @Watch("isBusy")
   onBusyChanged() {
     // Reset page on filter change
     if (!this.isBusy) {
-      this.currentPage = 1
+      this.currentPage = 1;
     }
-    this.downloadFailed = false
-    this.previewResponse = null
+    this.downloadFailed = false;
+    this.previewResponse = null;
   }
 }
 </script>

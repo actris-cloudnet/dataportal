@@ -156,7 +156,7 @@ describe('File.vue', () => {
     await nextTick(2)
     await wrapper.find('#showLicense').trigger('click')
     expect(wrapper.findAll('#license').length).toEqual(1)
-    expect(wrapper.text()).toContain('Cloudnet data is licensed under a Creative Commons Attribution 4.0 international licence.')
+    expect(wrapper.text()).toMatch(/.*Cloudnet data is licensed under a[\s\n]*Creative Commons Attribution 4\.0 international licence\..*/)
   })
 
   it('hides license box by clicking a button', async () => {

@@ -53,11 +53,12 @@ footer.global
       <a href="https://forum.cloudnet.fmi.fi/">Cloudnet forum</a>
     </div>
     <div class="vertical-center footeritem centered hidden-links">
-      <span>&copy; <a href="https://en.ilmatieteenlaitos.fi/">Finnish Meteorological Institute</a></span><br>
+      <span>&copy; <a href="https://en.ilmatieteenlaitos.fi/">Finnish Meteorological Institute</a></span
+      ><br />
       <span class="small">
         <a href="https://www.flickr.com/photos/theaucitron/5810163712/">Header photo</a>
         by <a href="https://www.flickr.com/photos/theaucitron/">theaucitron</a>,
-        <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a>.<br>
+        <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a>.<br />
         Icons from <a href="https://icons8.com/">icons8.com</a>.
       </span>
     </div>

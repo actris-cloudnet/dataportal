@@ -52,15 +52,13 @@ main.column
     margin-top: 1em
   .infobox
     padding: 1em
-
 </style>
-
 
 <template>
   <main id="collectionlanding" v-if="!error && response">
-    <img id="backButton" :src="require('../assets/icons/back.png')" @click="$router.back()">
+    <img id="backButton" :src="require('../assets/icons/back.png')" @click="$router.back()" />
     <header>
-      <h2>{{ response.title || 'Custom collection' }}</h2>
+      <h2>{{ response.title || "Custom collection" }}</h2>
     </header>
     <div class="flex">
       <main class="info column">
@@ -73,7 +71,7 @@ main.column
               <dt>File count</dt>
               <dd>{{ sortedFiles.length }}</dd>
               <dt>Total size</dt>
-              <dd>{{humanReadableSize(combinedFileSize(this.sortedFiles)) }}</dd>
+              <dd>{{ humanReadableSize(combinedFileSize(this.sortedFiles)) }}</dd>
               <dt v-if="response.downloadCount">Download count</dt>
               <dd v-if="response.downloadCount">{{ response.downloadCount }}</dd>
             </dl>
@@ -82,18 +80,14 @@ main.column
         <section id="sitemap" v-if="sites.length > 0">
           <header>Sites</header>
           <section class="details">
-            <Map
-                :sites="sites"
-                :center="[34.00, -14.00]"
-                :zoom="1"
-            ></Map>
+            <Map :sites="sites" :center="[34.0, -14.0]" :zoom="1"></Map>
           </section>
         </section>
         <section id="products">
           <header>Products</header>
           <section class="details">
             <div v-for="product in products" :key="product.id">
-              <img :src="getIconUrl(product.id)" class="product">
+              <img :src="getIconUrl(product.id)" class="product" />
               {{ product.humanReadableName }}
             </div>
           </section>
@@ -101,10 +95,19 @@ main.column
       </main>
       <div class="rightView">
         <nav class="internalNavi">
-          <router-link :to="{path: `general`}" :replace="true" v-bind:class="{ 'router-link-active': mode === 'general' }">
+          <router-link
+            :to="{ path: `general` }"
+            :replace="true"
+            v-bind:class="{ 'router-link-active': mode === 'general' }"
+          >
             General
-          </router-link> |
-          <router-link :to="{path: `files`}" :replace="true" v-bind:class="{ 'router-link-active': mode === 'files' }">
+          </router-link>
+          |
+          <router-link
+            :to="{ path: `files` }"
+            :replace="true"
+            v-bind:class="{ 'router-link-active': mode === 'files' }"
+          >
             All files
           </router-link>
         </nav>
@@ -112,17 +115,19 @@ main.column
           <h3>How to cite</h3>
           <!-- eslint-disable max-len -->
           <span v-if="busy">Generating citation text...</span>
-          <div v-else-if="pidServiceError" class="errormsg">PID service is unavailable. Please try again later. You may still download the collection.</div>
+          <div v-else-if="pidServiceError" class="errormsg">
+            PID service is unavailable. Please try again later. You may still download the collection.
+          </div>
           <how-to-cite
-              v-else
-              :pid="response.pid"
-              :products="products"
-              :sites="sites"
-              :models="models"
-              :nonModelSiteIds="nonModelSiteIds"
-              :collectionYear="collectionYear"
-              :startDate="startDate"
-              :endDate="endDate"
+            v-else
+            :pid="response.pid"
+            :products="products"
+            :sites="sites"
+            :models="models"
+            :nonModelSiteIds="nonModelSiteIds"
+            :collectionYear="collectionYear"
+            :startDate="startDate"
+            :endDate="endDate"
           >
           </how-to-cite>
 
@@ -130,18 +135,22 @@ main.column
           <license></license>
 
           <h3>Download</h3>
-          By clicking the download button you confirm that you have taken notice of the above data licensing information.<br>
+          By clicking the download button you confirm that you have taken notice of the above data licensing
+          information.<br />
           <a class="download" :href="downloadUrl" id="downloadCollection">
             Download collection
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+              <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+            </svg>
           </a>
         </section>
         <data-search-result
-            v-else
-            :simplifiedView="true"
-            :apiResponse="sortedFiles"
-            :isBusy="busy"
-            :downloadUri="downloadUrl">
+          v-else
+          :simplifiedView="true"
+          :apiResponse="sortedFiles"
+          :isBusy="busy"
+          :downloadUri="downloadUrl"
+        >
         </data-search-result>
       </div>
     </div>
@@ -149,130 +158,134 @@ main.column
   <app-error v-else-if="error" :response="response"></app-error>
 </template>
 
-
 <script lang="ts">
-import {Component, Prop, Vue} from 'vue-property-decorator'
-import axios from 'axios'
-import {CollectionResponse} from '../../../backend/src/entity/CollectionResponse'
-import {combinedFileSize, constructTitle, getProductIcon, humanReadableSize} from '../lib'
-import {Site} from '../../../backend/src/entity/Site'
-import Map from '../components/Map.vue'
-import {Product} from '../../../backend/src/entity/Product'
-import DataSearchResult from '../components/DataSearchResult.vue'
-import HowToCite from '../components/HowToCite.vue'
-import License from '../components/License.vue'
-import {CollectionFileResponse} from '../../../backend/src/entity/CollectionFileResponse'
-import {Model} from '../../../backend/src/entity/Model'
+import { Component, Prop, Vue } from "vue-property-decorator";
+import axios from "axios";
+import { CollectionResponse } from "../../../backend/src/entity/CollectionResponse";
+import { combinedFileSize, constructTitle, getProductIcon, humanReadableSize } from "../lib";
+import { Site } from "../../../backend/src/entity/Site";
+import Map from "../components/Map.vue";
+import { Product } from "../../../backend/src/entity/Product";
+import DataSearchResult from "../components/DataSearchResult.vue";
+import HowToCite from "../components/HowToCite.vue";
+import License from "../components/License.vue";
+import { CollectionFileResponse } from "../../../backend/src/entity/CollectionFileResponse";
+import { Model } from "../../../backend/src/entity/Model";
 
-Vue.component('data-search-result', DataSearchResult)
-Vue.component('how-to-cite', HowToCite)
-Vue.component('license', License)
+Vue.component("data-search-result", DataSearchResult);
+Vue.component("how-to-cite", HowToCite);
+Vue.component("license", License);
 
 @Component({
-  components: {Map}
+  components: { Map },
 })
 export default class CollectionView extends Vue {
-  @Prop() uuid!: string
-  @Prop() mode!: string
-  error = false
-  response: CollectionResponse | null = null
-  sortedFiles: CollectionFileResponse[] = []
-  sites: Site[] = []
-  products: Product[] = []
-  models: Model[] = []
-  apiUrl = process.env.VUE_APP_BACKENDURL
-  busy = false
-  pidServiceError = false
-  nonModelSiteIds: string[] = []
+  @Prop() uuid!: string;
+  @Prop() mode!: string;
+  error = false;
+  response: CollectionResponse | null = null;
+  sortedFiles: CollectionFileResponse[] = [];
+  sites: Site[] = [];
+  products: Product[] = [];
+  models: Model[] = [];
+  apiUrl = process.env.VUE_APP_BACKENDURL;
+  busy = false;
+  pidServiceError = false;
+  nonModelSiteIds: string[] = [];
 
-  combinedFileSize = combinedFileSize
-  humanReadableSize = humanReadableSize
-  getIconUrl = getProductIcon
+  combinedFileSize = combinedFileSize;
+  humanReadableSize = humanReadableSize;
+  getIconUrl = getProductIcon;
 
   get startDate() {
-    return this.sortedFiles[this.sortedFiles.length - 1].measurementDate
+    return this.sortedFiles[this.sortedFiles.length - 1].measurementDate;
   }
 
   get endDate() {
-    return this.sortedFiles[0].measurementDate
+    return this.sortedFiles[0].measurementDate;
   }
 
   get collectionYear() {
-    if (!this.response) return null
-    return new Date(this.response.createdAt).getFullYear()
+    if (!this.response) return null;
+    return new Date(this.response.createdAt).getFullYear();
   }
 
   get downloadUrl() {
-    if (!this.response) return null
-    return `${this.apiUrl}download/collection/${this.response.uuid}`
+    if (!this.response) return null;
+    return `${this.apiUrl}download/collection/${this.response.uuid}`;
   }
 
   getUnique(arr: CollectionFileResponse[], field: keyof CollectionFileResponse) {
     return arr
-      .map(file => file[field])
-      .reduce((acc: string[], cur) =>
-        (typeof cur == 'string' && !acc.includes(cur))
-          ? acc.concat([cur])
-          : acc,
-      [])
+      .map((file) => file[field])
+      .reduce((acc: string[], cur) => (typeof cur == "string" && !acc.includes(cur) ? acc.concat([cur]) : acc), []);
   }
 
   get size() {
-    return combinedFileSize(this.sortedFiles)
+    return combinedFileSize(this.sortedFiles);
   }
 
   async generatePid() {
-    if (!this.response || this.response.pid) return
+    if (!this.response || this.response.pid) return;
     const payload = {
-      type: 'collection',
-      uuid: this.uuid
-    }
-    return axios.post(`${this.apiUrl}generate-pid`, payload)
-      .then(({data}) => {
-        if (!this.response) return
-        this.response.pid = data.pid
+      type: "collection",
+      uuid: this.uuid,
+    };
+    return axios
+      .post(`${this.apiUrl}generate-pid`, payload)
+      .then(({ data }) => {
+        if (!this.response) return;
+        this.response.pid = data.pid;
       })
-      .catch(e => {
-        this.pidServiceError = true
+      .catch((e) => {
+        this.pidServiceError = true;
         // eslint-disable-next-line no-console
-        console.error(e)
-      })
+        console.error(e);
+      });
   }
 
   created() {
-    this.busy = true
-    return axios.get(`${this.apiUrl}collection/${this.uuid}`)
-      .then(res => {
-        this.response = res.data
-        if (this.response == null) return
-        this.sortedFiles = constructTitle(this.response.files
-          .sort((a, b) => new Date(b.measurementDate).getTime() - new Date(a.measurementDate).getTime()))
-        this.nonModelSiteIds = this.getUnique(this.sortedFiles
-          .filter(file => file.productId != 'model'), 'siteId')
-      })
-      .catch(({response}) => {
-        this.error = true
-        this.response = response
-      })
-      .then(() => {
-        this.generatePid()
-        const siteIds = this.getUnique(this.sortedFiles, 'siteId')
-        const productIds = this.getUnique(this.sortedFiles, 'productId')
-        const modelIds = this.getUnique(this.sortedFiles, 'modelId')
-        const citationQueryOptions = { params: { showCitations: true }}
-        return Promise.all([
-          axios.get(`${this.apiUrl}sites/`, citationQueryOptions),
-          axios.get(`${this.apiUrl}models/`, citationQueryOptions),
-          axios.get(`${this.apiUrl}products/`),
-        ]).then(([sites, models, products]) => {
-          this.sites = sites.data.filter((site: Site) => siteIds.includes(site.id))
-          this.products = products.data.filter((product: Product) => productIds.includes(product.id))
-          this.models = models.data.filter((model: Product) => modelIds.includes(model.id))
+    this.busy = true;
+    return (
+      axios
+        .get(`${this.apiUrl}collection/${this.uuid}`)
+        .then((res) => {
+          this.response = res.data;
+          if (this.response == null) return;
+          this.sortedFiles = constructTitle(
+            this.response.files.sort(
+              (a, b) => new Date(b.measurementDate).getTime() - new Date(a.measurementDate).getTime()
+            )
+          );
+          this.nonModelSiteIds = this.getUnique(
+            this.sortedFiles.filter((file) => file.productId != "model"),
+            "siteId"
+          );
         })
-      })
-      // eslint-disable-next-line no-console
-      .catch(console.error)
-      .finally(() => (this.busy = false))
+        .catch(({ response }) => {
+          this.error = true;
+          this.response = response;
+        })
+        .then(() => {
+          this.generatePid();
+          const siteIds = this.getUnique(this.sortedFiles, "siteId");
+          const productIds = this.getUnique(this.sortedFiles, "productId");
+          const modelIds = this.getUnique(this.sortedFiles, "modelId");
+          const citationQueryOptions = { params: { showCitations: true } };
+          return Promise.all([
+            axios.get(`${this.apiUrl}sites/`, citationQueryOptions),
+            axios.get(`${this.apiUrl}models/`, citationQueryOptions),
+            axios.get(`${this.apiUrl}products/`),
+          ]).then(([sites, models, products]) => {
+            this.sites = sites.data.filter((site: Site) => siteIds.includes(site.id));
+            this.products = products.data.filter((product: Product) => productIds.includes(product.id));
+            this.models = models.data.filter((model: Product) => modelIds.includes(model.id));
+          });
+        })
+        // eslint-disable-next-line no-console
+        .catch(console.error)
+        .finally(() => (this.busy = false))
+    );
   }
 }
 </script>

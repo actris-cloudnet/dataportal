@@ -47,19 +47,16 @@
   li.circled
     list-style-type: '\2717'
     color: darkred
-
 </style>
-
 
 <template>
   <main id="qualitylanding" v-if="!error && response && qualityResponse">
-    <img alt="back" id="backButton" :src="require('../assets/icons/back.png')" @click="$router.back()">
+    <img alt="back" id="backButton" :src="require('../assets/icons/back.png')" @click="$router.back()" />
     <header>
       <h2>Quality report</h2>
-      <span>For
-      {{ response.product.humanReadableName }} data from
-      {{ response.site.humanReadableName }} on
-      {{ humanReadableDate(response.measurementDate) }}.
+      <span
+        >For {{ response.product.humanReadableName }} data from {{ response.site.humanReadableName }} on
+        {{ humanReadableDate(response.measurementDate) }}.
       </span>
     </header>
     <main class="info">
@@ -91,24 +88,23 @@
           <quality-test-result :qualityTestResult="qualityResponse.metadata"></quality-test-result>
           <h3>Data tests</h3>
           <quality-test-result :qualityTestResult="qualityResponse.data"></quality-test-result>
-      </section>
+        </section>
       </section>
     </main>
   </main>
   <app-error v-else-if="error" :response="response"></app-error>
 </template>
 
-
 <script lang="ts">
-import {Component, Prop, Vue} from 'vue-property-decorator'
-import axios from 'axios'
-import Map from '../components/Map.vue'
-import ProductAvailabilityVisualization from '../components/DataStatusVisualization.vue'
-import {humanReadableDate} from '../lib'
-import {DevMode} from '../lib/DevMode'
-import QualityTestResult from '../components/QualityTestResult.vue'
+import { Component, Prop, Vue } from "vue-property-decorator";
+import axios from "axios";
+import Map from "../components/Map.vue";
+import ProductAvailabilityVisualization from "../components/DataStatusVisualization.vue";
+import { humanReadableDate } from "../lib";
+import { DevMode } from "../lib/DevMode";
+import QualityTestResult from "../components/QualityTestResult.vue";
 
-Vue.component('quality-test-result', QualityTestResult)
+Vue.component("quality-test-result", QualityTestResult);
 
 interface Test {
   name: string;
@@ -123,59 +119,59 @@ export interface QualityResponse {
 }
 
 @Component({
-  components: {Map, ProductAvailabilityVisualization}
+  components: { Map, ProductAvailabilityVisualization },
 })
 export default class QualityReportView extends Vue {
-  @Prop() uuid!: string
-  apiUrl = process.env.VUE_APP_BACKENDURL
-  response: File | null = null
-  qualityResponse: QualityResponse | null = null
-  error = false
-  busy = true
-  devMode = new DevMode()
+  @Prop() uuid!: string;
+  apiUrl = process.env.VUE_APP_BACKENDURL;
+  response: File | null = null;
+  qualityResponse: QualityResponse | null = null;
+  error = false;
+  busy = true;
+  devMode = new DevMode();
 
-  humanReadableDate = humanReadableDate
+  humanReadableDate = humanReadableDate;
 
-  payload = {developer: this.devMode.activated}
+  payload = { developer: this.devMode.activated };
   created() {
     axios
-      .get(`${this.apiUrl}files/${this.uuid}`, {params: this.payload})
-      .then(({data}) => (this.response = data))
-      .catch(({response}) => {
-        this.error = true
-        this.response = response
-      })
+      .get(`${this.apiUrl}files/${this.uuid}`, { params: this.payload })
+      .then(({ data }) => (this.response = data))
+      .catch(({ response }) => {
+        this.error = true;
+        this.response = response;
+      });
     axios
-      .get(`${this.apiUrl}quality/${this.uuid}`, {params: this.payload})
-      .then(({data}) => (this.qualityResponse = data))
-      .catch(({response}) => {
-        this.error = true
-        this.response = response
-      })
+      .get(`${this.apiUrl}quality/${this.uuid}`, { params: this.payload })
+      .then(({ data }) => (this.qualityResponse = data))
+      .catch(({ response }) => {
+        this.error = true;
+        this.response = response;
+      });
   }
 
   loadingComplete() {
-    this.busy = false
+    this.busy = false;
   }
 
   get failedMetadataTests() {
-    if (!this.qualityResponse) return null
-    return this.qualityResponse.metadata.reduce((acc, cur) => acc + cur.report.length, 0)
+    if (!this.qualityResponse) return null;
+    return this.qualityResponse.metadata.reduce((acc, cur) => acc + cur.report.length, 0);
   }
 
   get failedDataTests() {
-    if (!this.qualityResponse) return null
-    return this.qualityResponse.data.reduce((acc, cur) => acc + cur.report.length, 0)
+    if (!this.qualityResponse) return null;
+    return this.qualityResponse.data.reduce((acc, cur) => acc + cur.report.length, 0);
   }
 
   get failedTests() {
-    if (this.failedMetadataTests === null || this.failedDataTests === null) return null
-    return this.failedMetadataTests + this.failedDataTests
+    if (this.failedMetadataTests === null || this.failedDataTests === null) return null;
+    return this.failedMetadataTests + this.failedDataTests;
   }
 
   get totalTests() {
-    if (!this.qualityResponse || this.failedTests === null) return null
-    return Math.round(this.failedTests / (1 - this.qualityResponse.overallScore))
+    if (!this.qualityResponse || this.failedTests === null) return null;
+    return Math.round(this.failedTests / (1 - this.qualityResponse.overallScore));
   }
 }
 </script>

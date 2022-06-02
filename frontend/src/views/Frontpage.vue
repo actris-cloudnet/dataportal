@@ -41,46 +41,42 @@ main#frontpage
         margin-bottom: 0.5em
     a:focus
       outline: thin dotted black
-
 </style>
-
 
 <template>
   <main id="frontpage">
     <header class="logos">
-      <img alt="Actris logo" src="../assets/actris_logo.gif">
-      <img alt="Cloudnet logo" src="../assets/cloudnet_logo_large_2020.png">
+      <img alt="Actris logo" src="../assets/actris_logo.gif" />
+      <img alt="Cloudnet logo" src="../assets/cloudnet_logo_large_2020.png" />
     </header>
     <main>
       <h3>Welcome to the ACTRIS Data Centre node for cloud profiling (CLU).</h3>
       <!-- eslint-disable-next-line -->
-CLU provides vertical profiles of cloud and turbulent properties at high temporal and spatial resolution from a network of ground-based stations using the Cloudnet processing suite. Major objectives also include the development and validation of new synergetic remote sensing algorithms, and the continuous evaluation of the representation of clouds and other atmospheric parameters in climate and weather forecast models.
+      CLU provides vertical profiles of cloud and turbulent properties at high temporal and spatial resolution from a
+      network of ground-based stations using the Cloudnet processing suite. Major objectives also include the
+      development and validation of new synergetic remote sensing algorithms, and the continuous evaluation of the
+      representation of clouds and other atmospheric parameters in climate and weather forecast models.
       <!-- eslint-disable-next-line -->
-This node is physically hosted by FMI in Helsinki, Finland. <!--You can find our contact information and API documentation at the bottom of this page.-->
+      This node is physically hosted by FMI in Helsinki, Finland.
+      <!--You can find our contact information and API documentation at the bottom of this page.-->
       <div class="buttons">
         <router-link to="search/data" class="download">
-          <img alt="magnifying glass" :src="require('../assets/icons/search-white.png')"><br>
+          <img alt="magnifying glass" :src="require('../assets/icons/search-white.png')" /><br />
           Search and download data
         </router-link>
         <router-link to="search/visualizations" class="download">
-          <img alt="graph" :src="require('../assets/icons/graph-white.png')"><br>
+          <img alt="graph" :src="require('../assets/icons/graph-white.png')" /><br />
           View data visualizations
         </router-link>
         <a href="https://docs.cloudnet.fmi.fi" class="download">
-          <img alt="documents" :src="require('../assets/icons/docs-white.png')"><br>
+          <img alt="documents" :src="require('../assets/icons/docs-white.png')" /><br />
           Read documentation
         </a>
       </div>
     </main>
     <div class="publications">
-      <router-link to="/sites">
-        Measurement sites &#8594;
-      </router-link><br>
-      <router-link to="/publications">
-        Cloudnet publications &#8594;
-      </router-link>
+      <router-link to="/sites"> Measurement sites &#8594; </router-link><br />
+      <router-link to="/publications"> Cloudnet publications &#8594; </router-link>
     </div>
   </main>
 </template>
-
-

@@ -1,22 +1,22 @@
-import Vue from 'vue'
-import App from './App.vue'
-import Header from './components/Header.vue'
-import Footer from './components/Footer.vue'
-import ApiError from './views/ApiError.vue'
-import router from './router'
+import Vue from "vue";
+import App from "./App.vue";
+import Header from "./components/Header.vue";
+import Footer from "./components/Footer.vue";
+import ApiError from "./views/ApiError.vue";
+import router from "./router";
 
-Vue.config.productionTip = false
+Vue.config.productionTip = false;
 
-Vue.component('app-header', Header)
-Vue.component('app-footer', Footer)
-Vue.component('app-error', ApiError)
+Vue.component("app-header", Header);
+Vue.component("app-footer", Footer);
+Vue.component("app-error", ApiError);
 
 new Vue({
   router,
-  render: h => h(App),
+  render: (h) => h(App),
   watch: {
-    '$route'(to, _from) {
-      document.title = to.meta.title || 'Cloudnet Data Portal'
-    }
-  }
-}).$mount('#app')
+    $route(to, _from) {
+      document.title = to.meta.title || "Cloudnet Data Portal";
+    },
+  },
+}).$mount("#app");
