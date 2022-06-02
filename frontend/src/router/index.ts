@@ -99,6 +99,15 @@ const routes = [
     props: true,
   },
   {
+    path: '/publications',
+    name: 'Cloudnet Publications',
+    meta: {
+      title: 'Cloudnet Publications'
+    },
+    component: () => import('../views/Publications.vue'),
+    props: true,
+  },
+  {
     path: '*',
     name: 'ApiError',
     meta: {
