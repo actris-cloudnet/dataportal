@@ -26,23 +26,23 @@ export class Site {
   @Column("text", { array: true, nullable: true })
   type!: SiteType[];
 
-  @Column({ type: "float" })
-  latitude!: number;
+  @Column({ type: "float", nullable: true })
+  latitude!: number | null;
 
-  @Column({ type: "float" })
-  longitude!: number;
+  @Column({ type: "float", nullable: true })
+  longitude!: number | null;
 
-  @Column()
-  altitude!: number;
+  @Column({ type: "int", nullable: true })
+  altitude!: number | null;
 
-  @Column()
-  gaw!: string;
+  @Column({ type: "char", length: 3, nullable: true })
+  gaw!: string | null;
 
-  @Column({ nullable: true })
-  dvasId!: string;
+  @Column({ type: "char", length: 3, nullable: true })
+  dvasId!: string | null;
 
-  @Column()
-  country!: string;
+  @Column({ type: "text", nullable: true })
+  country!: string | null;
 
   @Column({ type: "char", length: 2, nullable: true })
   iso_3166_1_alpha_2!: string | null;

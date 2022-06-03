@@ -8,7 +8,7 @@
     "latitude": 44.348,
     "longitude": 26.029,
     "altitude": 93,
-    "gaw": "Unknown",
+    "gaw": null,
     "country": "Romania",
     "citations": [
       {
@@ -67,7 +67,7 @@
     "latitude": 60.086,
     "longitude": 17.479,
     "altitude": 46,
-    "gaw": "Unknown",
+    "gaw": null,
     "country": "Sweden"
   },
   {
@@ -77,7 +77,7 @@
     "latitude": 40.6413,
     "longitude": 15.7913,
     "altitude": 760,
-    "gaw": "Unknown",
+    "gaw": null,
     "country": "Italy"
   },
   {
@@ -89,7 +89,7 @@
     "latitude": 43,
     "longitude": -75,
     "altitude": 760,
-    "gaw": "Unknown",
+    "gaw": null,
     "country": "USA"
   },
   {
@@ -101,7 +101,7 @@
     "latitude": 31.267,
     "longitude": 121.522,
     "altitude": 760,
-    "gaw": "Unknown",
+    "gaw": null,
     "country": "China"
   }
 ]

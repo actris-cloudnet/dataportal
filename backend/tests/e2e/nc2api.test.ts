@@ -80,7 +80,7 @@ const expectedJson = {
     latitude: 44.348,
     longitude: 26.029,
     altitude: 93,
-    gaw: "Unknown",
+    gaw: null,
     country: "Romania",
   },
   volatile: true,

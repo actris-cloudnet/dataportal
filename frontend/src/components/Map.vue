@@ -156,21 +156,23 @@ export default class Map extends Vue {
 
   initLayers() {
     this.sites.map((site) => {
-      const mark = marker([site.latitude, site.longitude]);
-      mark.bindPopup(this.customPopup(site));
-      mark.on("mouseover", (_hoverIn) => {
-        mark.openPopup();
-      });
-      mark.on("mouseout", (_hoverOut) => {
-        mark.closePopup();
-      });
-      mark.on("click", (_onClick) => {
-        if (this.onMapMarkerClick) this.onMapMarkerClick([site.id]);
-        mark.closePopup();
-      });
-      this.allMarkers[site.id] = mark;
-      if (!this.map) return;
-      mark.addTo(this.map);
+      if (site.latitude !== null && site.longitude !== null) {
+        const mark = marker([site.latitude, site.longitude]);
+        mark.bindPopup(this.customPopup(site));
+        mark.on("mouseover", (_hoverIn) => {
+          mark.openPopup();
+        });
+        mark.on("mouseout", (_hoverOut) => {
+          mark.closePopup();
+        });
+        mark.on("click", (_onClick) => {
+          if (this.onMapMarkerClick) this.onMapMarkerClick([site.id]);
+          mark.closePopup();
+        });
+        this.allMarkers[site.id] = mark;
+        if (!this.map) return;
+        mark.addTo(this.map);
+      }
     });
   }
 
