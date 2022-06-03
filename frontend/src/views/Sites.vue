@@ -62,7 +62,7 @@ h2
         </template>
         <template #cell(altitude)="data"> {{ data.item.altitude }}&nbsp;m </template>
         <template #cell(gaw)="data">
-          {{ data.item.gaw != "Unknown" ? data.item.gaw : "-" }}
+          {{ data.item.gaw !== null ? data.item.gaw : "-" }}
         </template>
       </b-table>
     </div>
