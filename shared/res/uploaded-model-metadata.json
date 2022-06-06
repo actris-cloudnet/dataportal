@@ -11,10 +11,7 @@
     "site": {
       "id": "granada",
       "humanReadableName": "Granada",
-      "type": [
-        "cloudnet",
-        "test"
-      ],
+      "type": ["cloudnet", "test"],
       "latitude": 37.164,
       "longitude": -3.605,
       "altitude": 680,
@@ -38,9 +35,7 @@
     "site": {
       "id": "mace-head",
       "humanReadableName": "Mace Head",
-      "type": [
-        "cloudnet"
-      ],
+      "type": ["cloudnet"],
       "latitude": 53.326,
       "longitude": -9.9,
       "altitude": 16,
@@ -64,10 +59,7 @@
     "site": {
       "id": "granada",
       "humanReadableName": "Granada",
-      "type": [
-        "cloudnet",
-        "test"
-      ],
+      "type": ["cloudnet", "test"],
       "latitude": 37.164,
       "longitude": -3.605,
       "altitude": 680,
@@ -91,9 +83,7 @@
     "site": {
       "id": "bucharest",
       "humanReadableName": "Bucharest",
-      "type": [
-        "cloudnet"
-      ],
+      "type": ["cloudnet"],
       "latitude": 44.348,
       "longitude": 26.029,
       "altitude": 93,
@@ -117,10 +107,7 @@
     "site": {
       "id": "granada",
       "humanReadableName": "Granada",
-      "type": [
-        "cloudnet",
-        "test"
-      ],
+      "type": ["cloudnet", "test"],
       "latitude": 37.164,
       "longitude": -3.605,
       "altitude": 680,

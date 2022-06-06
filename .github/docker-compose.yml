@@ -14,7 +14,13 @@ services:
       - ci.env
     command: ["npm", "run", "start-test"]
     healthcheck:
-      test: ["CMD", "node", "-e", "const c=new require('net').Socket();c.connect(3000);c.on('connect',()=>process.exit(0))"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "const c=new require('net').Socket();c.connect(3000);c.on('connect',()=>process.exit(0))",
+        ]
       interval: 1s
       retries: 20
   db:
@@ -26,9 +32,9 @@ services:
       POSTGRES_PASSWORD: dev
       PGUSER: dataportal
     healthcheck:
-     test: ["CMD", "psql", "dataportal-test", "-c", "select 1"]
-     interval: 1s
-     retries: 120
+      test: ["CMD", "psql", "dataportal-test", "-c", "select 1"]
+      interval: 1s
+      retries: 120
   frontend:
     image: frontend
     build:
@@ -37,7 +43,13 @@ services:
       target: dev
     command: ["npm", "run", "serve"]
     healthcheck:
-      test: ["CMD", "node", "-e", "const c=new require('net').Socket();c.connect(8080);c.on('connect',()=>process.exit(0))"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "const c=new require('net').Socket();c.connect(8080);c.on('connect',()=>process.exit(0))",
+        ]
       interval: 1s
       retries: 20
   test-backend:
@@ -118,7 +130,13 @@ services:
       - TYPEORM_MIGRATIONS=build/migration/*.js
       - DP_BACKEND_URL=http://frontend-prod/api/
     healthcheck:
-      test: ["CMD", "node", "-e", "const c=new require('net').Socket();c.connect(3000);c.on('connect',()=>process.exit(0))"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "const c=new require('net').Socket();c.connect(3000);c.on('connect',()=>process.exit(0))",
+        ]
       interval: 1s
       retries: 20
     command: ["npm", "run", "start-e2e"]
