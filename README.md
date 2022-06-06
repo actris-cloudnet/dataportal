@@ -10,6 +10,10 @@ This repository contains the source code for ACTRIS Cloudnet data portal hosted 
 The data portal is distributed as a docker container as a part of the Cloudnet development toolkit.
 See the instructions for installing the toolkit [here](https://github.com/actris-cloudnet/dev-toolkit/).
 
+### Development dependencies
+
+Install [pre-commit](https://pre-commit.com/#install) to run pre-commit hooks.
+
 ## Running commands in the container
 
 For running commands in the data portal containers, small wrapper scripts are provided at `backend/run-dev`, `backend/run-test` and `frontend/run`,
