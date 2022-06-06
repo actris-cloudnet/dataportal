@@ -3,13 +3,11 @@
 [![Selenium test](https://github.com/actris-cloudnet/dataportal/actions/workflows/selenium.yml/badge.svg)](https://github.com/actris-cloudnet/dataportal/actions/workflows/selenium.yml)
 
 This repository contains the source code for ACTRIS Cloudnet data portal hosted at https://cloudnet.fmi.fi.
-The API documentation can be found [here](https://docs.cloudnet.fmi.fi/).
 
 ## Install
 
 The data portal is distributed as a docker container as a part of the Cloudnet development toolkit.
 See the instructions for installing the toolkit [here](https://github.com/actris-cloudnet/dev-toolkit/).
-
 
 ## Running commands in the container
 
@@ -25,7 +23,7 @@ database with test fixtures:
     cd backend
     ./run-dev npm run reset-db
     
-To load other other data to the db, for instance the sites used in production, use:
+To load other data to the db, for instance the sites used in production, use:
     
     cd backend
     ./run-dev npx ts-node -T src/fixtures.ts /dataportal-resources/1-site.json
@@ -65,22 +63,19 @@ The frontend unit and integration tests are run with:
     
 ### Running selenium tests
 
-In addition to unit and integration tests, the project includes selenium tests.
-
-    
-To run selenium tests testing both backend and frontend, issue
+To run selenium tests for both backend and frontend, issue
 
     cd .github
     docker compose down
     docker compose build
     SELENIUM_TEST_TARGET=tests/selenium docker compose run test-selenium
-    
-    
+
 ### Running code formatters
 
-    ./run-dev npx prettier --write FILENAME
-    ./run-dev npm run lint-fix 
+    WRAPPER npx prettier --write FILENAME
+    WRAPPER npm run lint-fix
 
+where `WRAPPER` is, depending on the backend or frontend, `./run-dev` or `./run`, respectively.
 
 ### License
 MIT
