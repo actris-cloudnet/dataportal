@@ -12,7 +12,7 @@ See the instructions for installing the toolkit [here](https://github.com/actris
 
 ### Development dependencies
 
-Install [pre-commit](https://pre-commit.com/#install) to run pre-commit hooks.
+Install [pre-commit](https://pre-commit.com/#install) to your machine and run `pre-commit install` to setup the hooks.
 
 ## Running commands in the container
 
