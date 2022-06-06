@@ -11,9 +11,7 @@
     "country": "Romania",
     "iso_3166_1_alpha_2": "RO",
     "iso_3166_2": null,
-    "citations": [
-      { "id": "bucharest_test" }
-    ]
+    "citations": [{ "id": "bucharest_test" }]
   },
   {
     "id": "mace-head",
@@ -26,9 +24,7 @@
     "country": "Ireland",
     "iso_3166_1_alpha_2": "IE",
     "iso_3166_2": null,
-    "citations": [
-      { "id": "hyytiala_test" }
-    ]
+    "citations": [{ "id": "hyytiala_test" }]
   },
   {
     "id": "hyytiala",
@@ -41,9 +37,7 @@
     "country": "Finland",
     "iso_3166_1_alpha_2": "FI",
     "iso_3166_2": null,
-    "citations": [
-      { "id": "hyytiala_test" }
-    ]
+    "citations": [{ "id": "hyytiala_test" }]
   },
   {
     "id": "granada",

@@ -11,10 +11,7 @@
     "site": {
       "id": "granada",
       "humanReadableName": "Granada",
-      "type": [
-        "cloudnet",
-        "test"
-      ],
+      "type": ["cloudnet", "test"],
       "latitude": 37.164,
       "longitude": -3.605,
       "altitude": 680,
@@ -40,9 +37,7 @@
     "site": {
       "id": "bucharest",
       "humanReadableName": "Bucharest",
-      "type": [
-        "cloudnet"
-      ],
+      "type": ["cloudnet"],
       "latitude": 44.348,
       "longitude": 26.029,
       "altitude": 93,
@@ -68,9 +63,7 @@
     "site": {
       "id": "bucharest",
       "humanReadableName": "Bucharest",
-      "type": [
-        "cloudnet"
-      ],
+      "type": ["cloudnet"],
       "latitude": 44.348,
       "longitude": 26.029,
       "altitude": 93,
@@ -96,9 +89,7 @@
     "site": {
       "id": "bucharest",
       "humanReadableName": "Bucharest",
-      "type": [
-        "cloudnet"
-      ],
+      "type": ["cloudnet"],
       "latitude": 44.348,
       "longitude": 26.029,
       "altitude": 93,

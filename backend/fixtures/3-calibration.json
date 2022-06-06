@@ -3,31 +3,37 @@
     "instrument": "mira",
     "site": "hyytiala",
     "measurementDate": "2021-01-02",
-    "calibration": [{
-      "createdAt": "2021-02-23T18:25:43.511Z",
-      "calibrationFactor": 0.9
-    }]
+    "calibration": [
+      {
+        "createdAt": "2021-02-23T18:25:43.511Z",
+        "calibrationFactor": 0.9
+      }
+    ]
   },
   {
     "instrument": "mira",
     "site": "hyytiala",
     "measurementDate": "2021-01-01",
-    "calibration": [{
-      "createdAt": "2021-02-23T18:25:43.511Z",
-      "calibrationFactor": 0.5
-    },
-    {
-      "createdAt": "2021-02-23T17:25:43.511Z",
-      "calibrationFactor": 0.2
-    }]
+    "calibration": [
+      {
+        "createdAt": "2021-02-23T18:25:43.511Z",
+        "calibrationFactor": 0.5
+      },
+      {
+        "createdAt": "2021-02-23T17:25:43.511Z",
+        "calibrationFactor": 0.2
+      }
+    ]
   },
   {
     "instrument": "mira",
     "site": "bucharest",
     "measurementDate": "2021-01-01",
-    "calibration": [{
-      "createdAt": "2021-02-23T17:25:43.511Z",
-      "calibrationFactor": 0.2
-    }]
+    "calibration": [
+      {
+        "createdAt": "2021-02-23T17:25:43.511Z",
+        "calibrationFactor": 0.2
+      }
+    ]
   }
 ]

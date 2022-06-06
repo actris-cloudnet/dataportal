@@ -16,18 +16,12 @@
   "metadata": [
     {
       "name": "Missing variables",
-      "report": [
-        "altitude"
-      ],
+      "report": ["altitude"],
       "description": "Find variables that should be included."
     },
     {
       "name": "Missing global attributes",
-      "report": [
-        "references",
-        "cloudnetpy_version",
-        "Conventions"
-      ],
+      "report": ["references", "cloudnetpy_version", "Conventions"],
       "description": "Find global attributes that should be included."
     },
     {

@@ -1,4 +1,5 @@
 # ACTRIS Cloudnet data portal
+
 [![Lint and test](https://github.com/actris-cloudnet/dataportal/actions/workflows/test.yml/badge.svg)](https://github.com/actris-cloudnet/dataportal/actions/workflows/test.yml)
 [![Selenium test](https://github.com/actris-cloudnet/dataportal/actions/workflows/selenium.yml/badge.svg)](https://github.com/actris-cloudnet/dataportal/actions/workflows/selenium.yml)
 
@@ -27,19 +28,18 @@ To load other data to the db, for instance the sites used in production, use:
     
     cd backend
     ./run-dev npx ts-node -T src/fixtures.ts /dataportal-resources/1-site.json
-    
- ### Migrations
- 
- The dataportal uses typeorm for automatic database schema manipulation. This repo provides a wrapper script for typeorm's own migration tool.
- 
+
+### Migrations
+
+The dataportal uses typeorm for automatic database schema manipulation. This repo provides a wrapper script for typeorm's own migration tool.
+
      cd backend
     ./run-dev scripts/typeorm
-    
- The migrations are stored in `backend/src/migration`. For more information on how to use typeorm's migrations, see: https://github.com/typeorm/typeorm/blob/master/docs/migrations.md
 
+The migrations are stored in `backend/src/migration`. For more information on how to use typeorm's migrations, see: https://github.com/typeorm/typeorm/blob/master/docs/migrations.md
 
 ### Running unit and integration tests
-    
+
 The backend unit and integration tests are run with the commands:
 
     cd backend
@@ -54,13 +54,12 @@ To run backend e2e-tests, issue
 
     cd backend
     ./run-test npm run e2e-test
-    
+
 The frontend unit and integration tests are run with:
 
     cd frontend
     ./run npm test
-    
-    
+
 ### Running selenium tests
 
 To run selenium tests for both backend and frontend, issue
@@ -78,4 +77,5 @@ To run selenium tests for both backend and frontend, issue
 where `WRAPPER` is, depending on the backend or frontend, `./run-dev` or `./run`, respectively.
 
 ### License
+
 MIT
