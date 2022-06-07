@@ -131,8 +131,8 @@ export default class CustomMultiselect extends Vue {
     return this.selection.length > 0 ? this.selection.map((d) => d.id) : this.options.map((d) => d.id);
   }
 
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   setSelect(value: any) {
-    // eslint-disable-line  @typescript-eslint/no-explicit-any
     this.value = value;
   }
 

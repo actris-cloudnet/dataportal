@@ -79,8 +79,8 @@ export function formatCoordinates(latitude: number, longitude: number): string {
   return `${formatLatitude(latitude)}, ${formatLongitude(longitude)}`;
 }
 
+// eslint-disable-next-line  @typescript-eslint/no-explicit-any
 export const isValidDate = (obj: any) => {
-  // eslint-disable-line  @typescript-eslint/no-explicit-any
   const date = new Date(obj);
   return !isNaN(date.getDate()) && date.getTime() > new Date("1970-01-01").getTime();
 };
