@@ -27,9 +27,9 @@ database with test fixtures:
 
     cd backend
     ./run-dev npm run reset-db
-    
+
 To load other data to the db, for instance the sites used in production, use:
-    
+
     cd backend
     ./run-dev npx ts-node -T src/fixtures.ts /dataportal-resources/1-site.json
 
