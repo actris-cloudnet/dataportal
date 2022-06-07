@@ -54,7 +54,6 @@ export class UploadRoutes {
 
     let instrument, model;
     let uploadRepo: Repository<InstrumentUpload | ModelUpload>;
-    let productRepo: Repository<RegularFile | ModelFile>;
 
     try {
       const site = await this.siteRepo.findOne(req.params.site);
@@ -73,12 +72,10 @@ export class UploadRoutes {
         if (instrument == undefined) return next({ status: 422, errors: "Unknown instrument" });
         uploadRepo = this.instrumentUploadRepo;
         if (this.isMiscUpload(instrument)) uploadRepo = this.miscUploadRepo;
-        productRepo = this.regularFileRepo;
       } else if (isModelSubmission) {
         model = await this.modelRepo.findOne(body.model);
         if (model == undefined) return next({ status: 422, errors: "Unknown model" });
         uploadRepo = this.modelUploadRepo;
-        productRepo = this.modelFileRepo;
       } else
         return next({
           status: 422,
@@ -98,13 +95,6 @@ export class UploadRoutes {
       if (existingUploadedMetadata != undefined) {
         return next({ status: 409, errors: "File already uploaded" });
       }
-
-      // if (isModelSubmission) {
-      //   const isExistingFreezedProduct = await this.isFreezedProduct(body, productRepo)
-      //   if (isExistingFreezedProduct) {
-      //     return next({status: 409, errors: 'Freezed model file exists'})
-      //   }
-      // }
 
       const params = { site: site, measurementDate: body.measurementDate, filename: filename };
       const payload = isModelSubmission ? { ...params, model: body.model } : { ...params, instrument: body.instrument };
@@ -156,18 +146,6 @@ export class UploadRoutes {
       return next({ status: 500, errors: `Internal server error: ${err.code}` });
     }
   };
-
-  private async isFreezedProduct(body: any, productRepo: Repository<RegularFile | ModelFile>): Promise<boolean> {
-    let payload: any = { site: body.site, measurementDate: body.measurementDate, volatile: false };
-    if ("model" in body) {
-      payload["model"] = body.model;
-    } else {
-      const instrument = await this.instrumentRepo.findOneOrFail(body.instrument);
-      payload["product"] = instrument.type;
-    }
-    const existingFreezedProduct = await productRepo.findOne(payload);
-    return existingFreezedProduct != undefined;
-  }
 
   updateMetadata: RequestHandler = async (req: Request, res: Response, next) => {
     const partialUpload = req.body;

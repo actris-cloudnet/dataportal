@@ -22,7 +22,7 @@ import { UserAccountRoutes } from "./routes/userAccount";
 import { PublicationRoutes } from "./routes/publication";
 import env from "./lib/env";
 import { Authenticator, Authorizator } from "./lib/auth";
-import { PermissionType, permissionTypeFromString } from "./entity/Permission";
+import { PermissionType } from "./entity/Permission";
 (async function () {
   const port = 3000;
   const app = express();
