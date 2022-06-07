@@ -46,35 +46,36 @@ h2
         :items="item.sites"
         :fields="[
           { key: 'humanReadableName', label: 'Site', sortable: true },
-          { key: 'country', label: 'Country', sortable: true },
-          { key: 'latitude', label: 'Latitude', sortable: true },
-          { key: 'longitude', label: 'Longitude', sortable: true },
-          { key: 'altitude', label: 'Altitude', sortable: true },
-          { key: 'gaw', label: 'GAW ID' },
+          { key: 'country', label: 'Country', sortable: true, formatter: formatNull },
+          { key: 'latitude', label: 'Latitude', sortable: true, formatter: formatNull(formatLatitude) },
+          { key: 'longitude', label: 'Longitude', sortable: true, formatter: formatNull(formatLongitude) },
+          { key: 'altitude', label: 'Altitude', sortable: true, formatter: formatNull(formatUnit('m')) },
+          { key: 'gaw', label: 'GAW ID', formatter: formatNull },
         ]"
         @row-clicked="clickRow"
-      >
-        <template #cell(latitude)="data">
-          {{ formatLatitude(data.item.latitude) }}
-        </template>
-        <template #cell(longitude)="data">
-          {{ formatLongitude(data.item.longitude) }}
-        </template>
-        <template #cell(altitude)="data"> {{ data.item.altitude }}&nbsp;m </template>
-        <template #cell(gaw)="data">
-          {{ data.item.gaw !== null ? data.item.gaw : "-" }}
-        </template>
-      </b-table>
+      />
     </div>
   </main>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import { BTable } from "bootstrap-vue/esm/components/table";
+import { BTable, BvTableFormatterCallback } from "bootstrap-vue/esm/components/table";
 import { Site, SiteType } from "../../../backend/src/entity/Site";
 import axios from "axios";
 import { formatLatitude, formatLongitude } from "../lib";
+
+function formatUnit(unit: string): BvTableFormatterCallback {
+  return (value) => `${value} ${unit}`;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function formatNull(value: any): string | BvTableFormatterCallback {
+  if (typeof value === "function") {
+    return (value) => formatNull(value);
+  }
+  return value != null ? value : "-";
+}
 
 @Component({
   components: { BTable },
@@ -84,6 +85,8 @@ export default class SitesView extends Vue {
   items: { title: string; sites: Site[] }[] = [];
   formatLatitude = formatLatitude;
   formatLongitude = formatLongitude;
+  formatUnit = formatUnit;
+  formatNull = formatNull;
 
   data() {
     return {
