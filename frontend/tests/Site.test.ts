@@ -69,8 +69,6 @@ describe("Site.vue", () => {
 
   it("fetches instruments from last n days", async () => {
     const expectedString = "The site has submitted data from the following instruments in the last";
-    const parseDaysFromInstrumentString = (instrumentString: string) =>
-      parseInt(instrumentString.split(expectedString)[1].split(" ")[1]);
     mocked(axios.get).mockImplementation(axiosMockWithIdx(0, 8, resources["uploaded-metadata-public"]));
     wrapper = mountVue(Site);
     await nextTick(1);
@@ -83,6 +81,7 @@ describe("Site.vue", () => {
     const nDays = nDaysMatch ? parseInt(nDaysMatch[1]) : undefined;
     const date30daysago = new Date();
     expect(nDays).toBeDefined();
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     date30daysago.setDate(date30daysago.getDate() - nDays!);
     const secondArg = getMockedAxiosLastCallSecondArgument();
     // Expect to be within 5 seconds

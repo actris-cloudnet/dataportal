@@ -35,6 +35,7 @@ export interface ProductYear {
 
 export class DataStatusParser {
   constructor(searchPayload: any) {
+    // eslint-disable-line  @typescript-eslint/no-explicit-any
     // eslint-disable-line @typescript-eslint/no-explicit-any
     this.searchPayload = searchPayload;
   }

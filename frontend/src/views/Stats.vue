@@ -113,7 +113,7 @@ import COUNTRY_NAMES from "../assets/country-io-names.json";
 })
 export default class StatsView extends Vue {
   apiUrl = process.env.VUE_APP_BACKENDURL;
-  statistics: any[] = [];
+  statistics: any[] = []; // eslint-disable-line  @typescript-eslint/no-explicit-any
   dimensions: string[] = [];
   loading = false;
   fileCountry = null;

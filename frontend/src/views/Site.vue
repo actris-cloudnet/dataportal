@@ -251,7 +251,7 @@ export default class SiteView extends Vue {
   }
 
   reset() {
-    const filter = this.$refs.productFilter as any;
+    const filter = this.$refs.productFilter as any; // eslint-disable-line  @typescript-eslint/no-explicit-any
     filter.setSelect([]);
     this.singleProductView = false;
     this.selectedProductId = [];

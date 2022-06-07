@@ -23,7 +23,7 @@ import axios from "axios";
 })
 export default class PubView extends Vue {
   apiUrl = process.env.VUE_APP_BACKENDURL;
-  publications: any;
+  publications: any; // eslint-disable-line  @typescript-eslint/no-explicit-any
 
   data() {
     return {

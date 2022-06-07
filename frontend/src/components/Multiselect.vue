@@ -132,6 +132,7 @@ export default class CustomMultiselect extends Vue {
   }
 
   setSelect(value: any) {
+    // eslint-disable-line  @typescript-eslint/no-explicit-any
     this.value = value;
   }
 
