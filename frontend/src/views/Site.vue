@@ -37,7 +37,10 @@
     <img alt="back" id="backButton" :src="require('../assets/icons/back.png')" @click="$router.back()" />
     <header>
       <h2>{{ response.humanReadableName }}</h2>
-      <span>Measurement station in {{ response.country }}.</span>
+      <span>
+        Measurement station<template v-if="response.country"> in {{ response.country }}</template
+        >.
+      </span>
     </header>
     <main class="info">
       <section id="summary">
@@ -45,11 +48,17 @@
         <section class="details">
           <dl>
             <dt>Location</dt>
-            <dd>{{ response.humanReadableName }}, {{ response.country }}</dd>
-            <dt>Coordinates</dt>
-            <dd>{{ formatCoordinates(response.latitude, response.longitude) }}</dd>
-            <dt>Site altitude</dt>
-            <dd>{{ response.altitude }} m</dd>
+            <dd>
+              {{ response.humanReadableName }}<template v-if="response.country">, {{ response.country }}</template>
+            </dd>
+            <template v-if="response.latitude != null && response.longitude != null">
+              <dt>Coordinates</dt>
+              <dd>{{ formatCoordinates(response.latitude, response.longitude) }}</dd>
+            </template>
+            <template v-if="response.altitude != null">
+              <dt>Site altitude</dt>
+              <dd>{{ response.altitude }} m</dd>
+            </template>
             <dt>Last measurement</dt>
             <dd v-if="latestFile">{{ latestFile.measurementDate }}</dd>
             <dd class="notAvailable" v-else></dd>
@@ -72,7 +81,7 @@
           <div class="detailslistNotAvailable" v-else>Instrument information not available.</div>
         </section>
       </section>
-      <section id="sitemap">
+      <section id="sitemap" v-if="response.latitude != null && response.longitude != null">
         <header>Map</header>
         <section class="details">
           <Map
