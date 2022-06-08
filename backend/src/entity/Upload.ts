@@ -11,6 +11,14 @@ export enum Status {
   INVALID = "invalid",
 }
 
+export type UploadOptions = {
+  checksum: string;
+  filename: string;
+  date: string;
+  site: Site;
+  status: Status;
+};
+
 @Entity()
 export abstract class Upload {
   @PrimaryColumn("uuid")
@@ -55,13 +63,14 @@ export abstract class Upload {
     this.updatedAt = new Date();
   }
 
-  constructor(checksum: string, filename: string, date: string, site: Site, status: Status) {
+  protected constructor(args: UploadOptions) {
+    if (!args) return;
     this.uuid = generateUuidV4();
-    this.checksum = checksum;
-    this.filename = filename;
-    this.measurementDate = new Date(date);
-    this.site = site;
-    this.status = status;
+    this.checksum = args.checksum;
+    this.filename = args.filename;
+    this.measurementDate = new Date(args.date);
+    this.site = args.site;
+    this.status = args.status;
   }
 }
 
@@ -70,10 +79,28 @@ export class InstrumentUpload extends Upload {
   @ManyToOne((_) => Instrument, (instrument) => instrument.uploads)
   instrument!: Instrument;
 
-  constructor(checksum: string, filename: string, date: string, site: Site, status: Status, instrument: Instrument) {
-    // eslint-disable-line max-len
-    super(checksum, filename, date, site, status);
+  @Column({ type: "text", nullable: true })
+  instrumentPid!: string | null;
+
+  constructor(args: UploadOptions, instrument: Instrument, instrumentPid: string) {
+    super(args);
     this.instrument = instrument;
+    this.instrumentPid = instrumentPid;
+  }
+}
+
+@Entity()
+export class MiscUpload extends Upload {
+  @ManyToOne((_) => Instrument, (instrument) => instrument.uploads)
+  instrument!: Instrument;
+
+  @Column({ type: "text", nullable: true })
+  instrumentPid!: string | null;
+
+  constructor(args: UploadOptions, instrument: Instrument, instrumentPid: string) {
+    super(args);
+    this.instrument = instrument;
+    this.instrumentPid = instrumentPid;
   }
 }
 
@@ -85,21 +112,8 @@ export class ModelUpload extends Upload {
   @Column({ unique: true })
   filename!: string;
 
-  constructor(checksum: string, filename: string, date: string, site: Site, status: Status, model: Model) {
-    // eslint-disable-line max-len
-    super(checksum, filename, date, site, status);
+  constructor(args: UploadOptions, model: Model) {
+    super(args);
     this.model = model;
-  }
-}
-
-@Entity()
-export class MiscUpload extends Upload {
-  @ManyToOne((_) => Instrument, (instrument) => instrument.uploads)
-  instrument!: Instrument;
-
-  constructor(checksum: string, filename: string, date: string, site: Site, status: Status, instrument: Instrument) {
-    // eslint-disable-line max-len
-    super(checksum, filename, date, site, status);
-    this.instrument = instrument;
   }
 }
