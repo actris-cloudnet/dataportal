@@ -25,6 +25,7 @@ export class SiteContactRoutes {
     this.siteContactRepository = conn.getRepository<SiteContact>("site_contact");
     this.siteRepository = conn.getRepository<Site>("site");
   }
+
   // POST: Create a new site contact
   postSiteContact: RequestHandler = async (req: Request, res: Response, next) => {
     const postData: SiteContactApiData = req.body;
@@ -57,7 +58,7 @@ export class SiteContactRoutes {
           error: "person already has this role for the site",
         });
       } else {
-        let siteContact: SiteContact = {
+        const siteContact: SiteContact = {
           site: site,
           person: person,
           email: postData.email!,
@@ -73,12 +74,12 @@ export class SiteContactRoutes {
       }
     } else {
       // Create a new person and a new site contact role
-      let person: Person = {
+      const person: Person = {
         firstname: postData.firstname!,
         surname: postData.surname!,
         orcid: postData.orcid,
       };
-      let siteContact: SiteContact = {
+      const siteContact: SiteContact = {
         site: site,
         person: person,
         email: postData.email!,
@@ -98,41 +99,33 @@ export class SiteContactRoutes {
       res.sendStatus(200);
       return;
     }
-    return next({ status: 400, error: "assert: unexpected" });
   };
 
   private async postExistingPerson(postData: SiteContactApiData): Promise<Person | undefined> {
-    let personPromise: Promise<Person | undefined> = this.personRepository
+    return this.personRepository
       .createQueryBuilder("person")
       .where("person.firstname = :firstname", { firstname: postData.firstname })
       .andWhere("person.surname = :surname", { surname: postData.surname })
       .andWhere("person.orcid = :orcid", { orcid: postData.orcid })
       .getOne();
-    return personPromise;
   }
   private async postExistingSite(postData: SiteContactApiData): Promise<Site | undefined> {
-    let sitePromise: Promise<Site | undefined> = this.siteRepository
+    return this.siteRepository
       .createQueryBuilder("site")
       .where("site.id = :siteId", { siteId: postData.siteId })
       .getOne();
-    return sitePromise;
   }
   private async postExistingSiteContact(site: Site, person: Person, role: RoleType): Promise<SiteContact | undefined> {
-    let siteContactPromise: Promise<SiteContact | undefined> = this.siteContactRepository
+    return this.siteContactRepository
       .createQueryBuilder("site_contact")
       .where("site_contact.siteId = :siteId", { siteId: site.id })
       .andWhere("site_contact.personId = :personId", { personId: person.id })
       .andWhere("site_contact.role = :role", { role: role })
       .getOne();
-    return siteContactPromise;
   }
 
   // GET get list site contacts
-  getSiteContacts: RequestHandler = async (
-    req: Request,
-    res: Response,
-    next // eslint-disable-line @typescript-eslint/no-unused-vars
-  ) => {
+  getSiteContacts: RequestHandler = async (req: Request, res: Response) => {
     const query: SiteContactApiData = req.query;
     let results;
     if (query.siteId !== undefined) {
@@ -248,11 +241,7 @@ export class SiteContactRoutes {
     return;
   };
 
-  getPersons: RequestHandler = async (
-    req: Request,
-    res: Response,
-    next // eslint-disable-line @typescript-eslint/no-unused-vars
-  ) => {
+  getPersons: RequestHandler = async (req: Request, res: Response) => {
     const persons: Person[] = await this.personRepository.createQueryBuilder("person").getMany();
 
     const responseResults: SiteContactApiData[] = persons.map((p) => ({
@@ -293,6 +282,7 @@ export class SiteContactRoutes {
     res.sendStatus(200);
     return;
   };
+
   deletePerson: RequestHandler = async (req: Request, res: Response, next) => {
     const personId: number = Number(req.params.id);
     const requestedPersonRaw: any | undefined = await this.personRepository
@@ -313,25 +303,21 @@ export class SiteContactRoutes {
     }
     return res.sendStatus(200);
   };
+
   // DELETE Delete persons that are not associated with any site contact
-  deletePersons: RequestHandler = async (
-    req: Request,
-    res: Response,
-    next // eslint-disable-line @typescript-eslint/no-unused-vars
-  ) => {
+  deletePersons: RequestHandler = async (req: Request, res: Response) => {
     let orphans: Person[] = await this.personRepository
       .createQueryBuilder("person")
       .leftJoinAndSelect(SiteContact, "site_contact", "site_contact.personId = person.id")
       .where("site_contact.personId is null")
       .getMany();
 
-    this.personRepository.remove(orphans);
+    await this.personRepository.remove(orphans);
     res.sendStatus(200);
     return;
   };
 
   private roleFromString(role_str: string): RoleType | undefined {
-    let role: RoleType | undefined = (<any>RoleType)[role_str.toUpperCase()];
-    return role;
+    return (<any>RoleType)[role_str.toUpperCase()];
   }
 }
