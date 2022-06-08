@@ -74,6 +74,18 @@ describe("test user accounts and permissions", () => {
     expect(aliceFromDb.passwordHash).not.toEqual(alice.passwordHash);
     expect(respGetWithNewPassword.data.permissions).toEqual(alice.permissions);
   });
+  it("fails to change alices username to already existing one", async () => {
+    const getRespAllUsers = await axios.get(USER_ACCOUNTS_URL);
+    const alice = getRespAllUsers.data.find((u: any) => u.username === "alice");
+    for (const user of getRespAllUsers.data) {
+      if (user.username === alice.username) continue;
+      await expect(
+        axios.put(USER_ACCOUNTS_URL.concat("/", alice.id), { username: user.username })
+      ).rejects.toMatchObject({
+        response: { status: 400 },
+      });
+    }
+  });
 
   it("removes alices permissions and then adds some", async () => {
     const getRespAllUsers = await axios.get(USER_ACCOUNTS_URL);

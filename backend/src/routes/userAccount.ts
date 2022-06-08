@@ -6,7 +6,6 @@ import { Permission, PermissionType, permissionTypeFromString } from "../entity/
 import { Site } from "../entity/Site";
 
 const md5 = require("apache-md5");
-const md5Regex = new RegExp("^\\$apr1\\$.+$");
 
 interface PermissionInterface {
   id?: number;
@@ -144,6 +143,11 @@ export class UserAccountRoutes {
     res.locals.permissions = permissions;
   };
 
+  usernameAvailable = async (username: string): Promise<boolean> => {
+    const user = await this.userAccountRepository.findOne({ username: username });
+    return user === undefined ? true : false;
+  };
+
   putUserAccount: RequestHandler = async (req: Request, res: Response, next) => {
     let user = await this.userAccountRepository.findOne(
       { id: Number(req.params.id) },
@@ -153,7 +157,11 @@ export class UserAccountRoutes {
       return next({ status: 404, errors: "UserAccount not found" });
     }
     if (hasProperty(req.body, "username")) {
-      user.username = req.body.username;
+      if (user.username !== req.body.username && (await this.usernameAvailable(req.body.username))) {
+        user.username = req.body.username;
+      } else {
+        return next({ status: 400, errors: "username is already taken" });
+      }
     }
     if (hasProperty(req.body, "password")) {
       user.passwordHash = md5(req.body.password);
@@ -250,7 +258,7 @@ export class UserAccountRoutes {
       return next({ status: 401, errors: "passwordHash must be a string" });
     } else if (req.body.passwordHash.length === 0) {
       return next({ status: 401, errors: "passwordHash must be nonempty" });
-    } else if (!md5Regex.test(req.body.passwordHash)) {
+    } else if (!/^\$apr1\$.+\$.+$/.test(req.body.passwordHash)) {
       return next({ status: 401, errors: "passwordHash has an unexpected form" });
     }
   };
