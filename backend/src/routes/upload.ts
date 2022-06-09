@@ -270,7 +270,7 @@ export class UploadRoutes {
     qb.leftJoinAndSelect("um.site", "site");
     if (!model) {
       qb.leftJoinAndSelect("um.instrument", "instrument");
-      if (onlyDistinctInstruments) qb.distinctOn(["instrument.id"]);
+      if (onlyDistinctInstruments) qb.distinctOn(["instrument.id", "um.instrumentPid"]);
     } else {
       qb.leftJoinAndSelect("um.model", "model");
     }
