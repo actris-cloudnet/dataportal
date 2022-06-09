@@ -153,6 +153,22 @@ describe("POST /upload/metadata", () => {
     return await instrumentRepo.findOneOrFail({ checksum: payloadResub.checksum });
   });
 
+  test("inserts new metadata containing instrumentPid", async () => {
+    const payload = { ...validMetadata, instrumentPid: "https://hdl.handle.net/21.12132/3.191564170f8a4686" };
+    await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
+    return await instrumentRepo.findOneOrFail({ instrumentPid: payload.instrumentPid });
+  });
+
+  test("inserts new misc upload metadata containing instrumentPid", async () => {
+    const payload = {
+      ...validMetadata,
+      instrument: "halo-doppler-lidar",
+      instrumentPid: "https://hdl.handle.net/21.12132/3.191564170f8a4686",
+    };
+    await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
+    return await miscUploadRepo.findOneOrFail({ instrumentPid: payload.instrumentPid });
+  });
+
   test("inserts new metadata for misc upload", async () => {
     const now = new Date();
     const payload = { ...validMetadata, instrument: "halo-doppler-lidar" };
