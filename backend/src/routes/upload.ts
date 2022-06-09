@@ -1,5 +1,5 @@
 import { Site } from "../entity/Site";
-import { InstrumentUpload, MiscUpload, ModelUpload, Status, Upload } from "../entity/Upload";
+import { InstrumentUpload, MiscUpload, ModelUpload, Status, Upload, UploadOptions } from "../entity/Upload";
 import { Connection, Repository } from "typeorm";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import {
@@ -108,36 +108,23 @@ export class UploadRoutes {
         return res.send(status200Message);
       }
 
+      const args: UploadOptions = {
+        checksum: body.checksum,
+        filename: filename,
+        date: body.measurementDate,
+        site: site,
+        status: Status.CREATED,
+      };
+
       let uploadedMetadata: InstrumentUpload | ModelUpload;
       if (isInstrumentSubmission) {
         if (this.isMiscUpload(instrument)) {
-          uploadedMetadata = new MiscUpload(
-            body.checksum,
-            filename,
-            body.measurementDate,
-            site,
-            Status.CREATED,
-            instrument as Instrument
-          );
+          uploadedMetadata = new MiscUpload(args, instrument as Instrument, body.instrumentPid);
         } else {
-          uploadedMetadata = new InstrumentUpload(
-            body.checksum,
-            filename,
-            body.measurementDate,
-            site,
-            Status.CREATED,
-            instrument as Instrument
-          );
+          uploadedMetadata = new InstrumentUpload(args, instrument as Instrument, body.instrumentPid);
         }
       } else {
-        uploadedMetadata = new ModelUpload(
-          body.checksum,
-          filename,
-          body.measurementDate,
-          site,
-          Status.CREATED,
-          model as Model
-        );
+        uploadedMetadata = new ModelUpload(args, model as Model);
       }
 
       await uploadRepo.insert(uploadedMetadata);
@@ -283,7 +270,7 @@ export class UploadRoutes {
     qb.leftJoinAndSelect("um.site", "site");
     if (!model) {
       qb.leftJoinAndSelect("um.instrument", "instrument");
-      if (onlyDistinctInstruments) qb.distinctOn(["instrument.id"]);
+      if (onlyDistinctInstruments) qb.distinctOn(["instrument.id", "um.instrumentPid"]);
     } else {
       qb.leftJoinAndSelect("um.model", "model");
     }

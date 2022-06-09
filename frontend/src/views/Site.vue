@@ -75,7 +75,10 @@
             </span>
             <div v-for="instrument in instruments" :key="instrument.id" class="detailslistItem">
               <img alt="instrument icon" :src="getIconUrl(instrument.instrument.type)" class="product" />
-              {{ instrument.instrument.humanReadableName }}
+              <span v-if="instrument.instrumentPid">
+                <a :href="instrument.instrumentPid"> {{ instrument.instrument.humanReadableName }} </a>
+              </span>
+              <span v-else> {{ instrument.instrument.humanReadableName }} </span>
             </div>
           </div>
           <div class="detailslistNotAvailable" v-else>Instrument information not available.</div>
