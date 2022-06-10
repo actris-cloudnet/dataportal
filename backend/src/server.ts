@@ -157,46 +157,8 @@ import { PermissionType } from "./entity/Permission";
   app.get("/api/download/image/*", dlRoutes.image);
   app.get("/api/quality/:uuid", qualityRoutes.qualityReport);
 
-  // protected (for sites)
   app.post(
     "/upload/metadata",
-    middleware.getSiteNameFromAuth,
-    express.json(),
-    uploadRoutes.validateMetadata,
-    uploadRoutes.validateFilename,
-    uploadRoutes.postMetadata,
-    errorAsPlaintext
-  );
-  app.put(
-    "/upload/data/:checksum",
-    middleware.validateMD5Param,
-    middleware.getSiteNameFromAuth,
-    express.raw({ limit: "100gb" }),
-    uploadRoutes.putData,
-    errorAsPlaintext
-  );
-  app.get("/upload/metadata/:checksum", middleware.validateMD5Param, uploadRoutes.metadata, errorAsPlaintext);
-
-  // model data upload (for Ewan only)
-  app.post(
-    "/model-upload/metadata",
-    express.json(),
-    middleware.getSiteNameFromBody,
-    uploadRoutes.validateMetadata,
-    uploadRoutes.postMetadata
-  );
-  app.put(
-    "/model-upload/data/:checksum",
-    middleware.validateMD5Param,
-    middleware.getSiteNameFromMeta,
-    express.raw({ limit: "1gb" }),
-    uploadRoutes.putData
-  );
-
-  // \BEGIN TEST routes
-  // replace protected upload sites with these after they have been tested in production
-  app.post(
-    "/api/test/upload/metadata",
     authenticator.middleware,
     express.json(),
     authorizator.metadataMiddleware,
@@ -206,7 +168,7 @@ import { PermissionType } from "./entity/Permission";
     errorAsPlaintext
   );
   app.put(
-    "/api/test/upload/data/:checksum",
+    "/upload/data/:checksum",
     middleware.validateMD5Param,
     authenticator.middleware,
     authorizator.instrumentDataUploadMiddleware,
@@ -218,7 +180,7 @@ import { PermissionType } from "./entity/Permission";
 
   // model data upload (for Ewan only)
   app.post(
-    "/api/test/model-upload/metadata",
+    "/model-upload/metadata",
     authenticator.middleware,
     express.json(),
     authorizator.metadataMiddleware,
@@ -228,7 +190,7 @@ import { PermissionType } from "./entity/Permission";
   );
 
   app.put(
-    "/api/test/model-upload/data/:checksum",
+    "/model-upload/data/:checksum",
     middleware.validateMD5Param,
     authenticator.middleware,
     authorizator.modelDataUploadMiddleware,
@@ -236,7 +198,6 @@ import { PermissionType } from "./entity/Permission";
     express.raw({ limit: "1gb" }),
     uploadRoutes.putData
   );
-  // \END test routes
 
   // private
   app.put("/files/*", express.json(), fileRoutes.putFile);
