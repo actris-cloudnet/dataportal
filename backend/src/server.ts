@@ -157,6 +157,8 @@ import { PermissionType } from "./entity/Permission";
   app.get("/api/download/image/*", dlRoutes.image);
   app.get("/api/quality/:uuid", qualityRoutes.qualityReport);
 
+  app.get("/upload/metadata/:checksum", middleware.validateMD5Param, uploadRoutes.metadata, errorAsPlaintext);
+
   app.post(
     "/upload/metadata",
     authenticator.middleware,
@@ -164,6 +166,7 @@ import { PermissionType } from "./entity/Permission";
     authorizator.metadataMiddleware,
     authorizator.authorizeSiteMiddleware({ permission: PermissionType.canUpload }),
     uploadRoutes.validateMetadata,
+    uploadRoutes.validateFilename,
     uploadRoutes.postMetadata,
     errorAsPlaintext
   );
@@ -186,6 +189,7 @@ import { PermissionType } from "./entity/Permission";
     authorizator.metadataMiddleware,
     authorizator.authorizeSiteMiddleware({ permission: PermissionType.canUploadModel }),
     uploadRoutes.validateMetadata,
+    uploadRoutes.validateFilename,
     uploadRoutes.postMetadata
   );
 

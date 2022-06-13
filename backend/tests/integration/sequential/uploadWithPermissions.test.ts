@@ -12,12 +12,12 @@ let instrumentRepo: any;
 let modelRepo: any;
 let miscUploadRepo: any;
 
-const metadataUrl = `${backendPrivateUrl}api/test/upload/metadata/`;
-const modelMetadataUrl = `${backendPrivateUrl}api/test/model-upload/metadata/`;
+const metadataUrl = `${backendPrivateUrl}upload/metadata/`;
+const modelMetadataUrl = `${backendPrivateUrl}model-upload/metadata/`;
 const publicMetadataUrl = `${backendPublicUrl}raw-files/`;
 const privateMetadataUrl = `${backendPrivateUrl}upload-metadata/`;
-const dataUrl = `${backendPrivateUrl}api/test/upload/data/`;
-const modelDataUrl = `${backendPrivateUrl}api/test/model-upload/data/`;
+const dataUrl = `${backendPrivateUrl}upload/data/`;
+const modelDataUrl = `${backendPrivateUrl}model-upload/data/`;
 
 const userCredentials = {
   alice: "alices_password",
@@ -96,6 +96,47 @@ describe("POST /upload/metadata", () => {
     return;
   });
 
+  test("accepts valid filenames", async () => {
+    const validNames = [
+      "filename.LV1",
+      "/file/name/with/slashes.txt",
+      "filename-with-dashes.dat",
+      "234234.LV1",
+      "filename_with_numbers-and-other-123123-222.txt",
+      "filename-without-suffix",
+      "/foo?bar/jee*joo/filename.nc",
+      "./filename.nc",
+      "../filename.nc",
+    ];
+    for (const validName of validNames) {
+      const validMeta = { ...validMetadata, filename: validName };
+      await expect(axios.post(metadataUrl, validMeta, { headers })).resolves.toMatchObject({ status: 200 });
+    }
+    return;
+  });
+
+  test("rejects invalid filenames", async () => {
+    const badNames = [
+      "windows\\\\on\\tyhma.LV1",
+      "file with.whitespace",
+      ".filename.LV1",
+      "/foo/bar/.filename.LV1",
+      "øäææ.nc",
+      "filename😁filename.LV1",
+      "ääööö.dat",
+      "simosimo?simo",
+      "-filename.nc",
+      "_filename.nc",
+      "filename.nc_",
+      "filename.nc-",
+      "filename.",
+    ];
+    for (const badName of badNames) {
+      const badMeta = { ...validMetadata, filename: badName };
+      await expect(axios.post(metadataUrl, badMeta, { headers })).rejects.toMatchObject({ response: { status: 422 } });
+    }
+    return;
+  });
   test("inserts new metadata", async () => {
     const now = new Date();
     await expect(axios.post(metadataUrl, validMetadata, { headers })).resolves.toMatchObject({ status: 200 });
@@ -104,6 +145,22 @@ describe("POST /upload/metadata", () => {
     expect(new Date(md.createdAt).getTime()).toBeGreaterThan(now.getTime());
     expect(new Date(md.updatedAt).getTime()).toEqual(new Date(md.createdAt).getTime());
     return expect(md.status).toEqual(Status.CREATED);
+  });
+
+  test("inserts new metadata containing instrumentPid", async () => {
+    const payload = { ...validMetadata, instrumentPid: "https://hdl.handle.net/21.12132/3.191564170f8a4686" };
+    await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
+    return await instrumentRepo.findOneOrFail({ instrumentPid: payload.instrumentPid });
+  });
+
+  test("inserts new misc upload metadata containing instrumentPid", async () => {
+    const payload = {
+      ...validMetadata,
+      instrument: "halo-doppler-lidar",
+      instrumentPid: "https://hdl.handle.net/21.12132/3.191564170f8a4686",
+    };
+    await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
+    return await miscUploadRepo.findOneOrFail({ instrumentPid: payload.instrumentPid });
   });
 
   test("inserts new metadata if different date", async () => {
@@ -289,20 +346,11 @@ describe("POST /upload/metadata", () => {
     return expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject({ response: { status: 422 } });
   });
 
-  //test('responds with 400 on missing site', async () => {
-  //  const payload = {...validMetadata, site: undefined}
-  //  return expect(axios.post(metadataUrl, payload)).rejects.toMatchObject({ response: { status: 400}})
-  //})
   test("responds with 401 on missing authentication", async () => {
     const payload = { ...validMetadata, site: undefined };
     return expect(axios.post(metadataUrl, payload)).rejects.toMatchObject({ response: { status: 401 } });
   });
 
-  //test('responds with 422 on invalid site', async () => {
-  //  const badHeaders = {'authorization':  `Basic ${str2base64('espoo:lol')}`}
-  //  return expect(axios.post(metadataUrl, validMetadata, {headers: badHeaders})).rejects
-  //    .toMatchObject({ response: { status: 422}})
-  //})
   test("responds with 401 on non-existent username", async () => {
     const badHeaders = { authorization: `Basic ${str2base64("espoo:lol")}` };
     return expect(axios.post(metadataUrl, validMetadata, { headers: badHeaders })).rejects.toMatchObject({
