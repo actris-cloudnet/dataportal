@@ -45,10 +45,10 @@ export class Site {
   country!: string | null;
 
   @Column({ type: "char", length: 2, nullable: true })
-  iso_3166_1_alpha_2!: string | null;
+  countryCode!: string | null;
 
   @Column({ type: "varchar", length: 6, nullable: true })
-  iso_3166_2!: string | null;
+  countrySubdivisionCode!: string | null;
 
   @OneToMany((_) => File, (file) => file.site)
   files!: File[];
