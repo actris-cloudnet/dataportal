@@ -9,8 +9,8 @@
     "gaw": null,
     "dvasId": "INO",
     "country": "Romania",
-    "iso_3166_1_alpha_2": "RO",
-    "iso_3166_2": null,
+    "countryCode": "RO",
+    "countrySubdivisionCode": null,
     "citations": [{ "id": "bucharest_test" }]
   },
   {
@@ -22,8 +22,8 @@
     "type": ["cloudnet"],
     "gaw": "MHD",
     "country": "Ireland",
-    "iso_3166_1_alpha_2": "IE",
-    "iso_3166_2": null,
+    "countryCode": "IE",
+    "countrySubdivisionCode": null,
     "citations": [{ "id": "hyytiala_test" }]
   },
   {
@@ -35,8 +35,8 @@
     "type": ["cloudnet"],
     "gaw": "SMR",
     "country": "Finland",
-    "iso_3166_1_alpha_2": "FI",
-    "iso_3166_2": null,
+    "countryCode": "FI",
+    "countrySubdivisionCode": null,
     "citations": [{ "id": "hyytiala_test" }]
   },
   {
@@ -48,8 +48,8 @@
     "type": ["cloudnet", "test"],
     "gaw": "UGR",
     "country": "Spain",
-    "iso_3166_1_alpha_2": "ES",
-    "iso_3166_2": null
+    "countryCode": "ES",
+    "countrySubdivisionCode": null
   },
   {
     "id": "norunda",
@@ -60,8 +60,8 @@
     "gaw": null,
     "altitude": 46,
     "country": "Sweden",
-    "iso_3166_1_alpha_2": "SE",
-    "iso_3166_2": null
+    "countryCode": "SE",
+    "countrySubdivisionCode": null
   },
   {
     "id": "potenza",
@@ -72,8 +72,8 @@
     "gaw": null,
     "altitude": 760,
     "country": "Italy",
-    "iso_3166_1_alpha_2": "IT",
-    "iso_3166_2": null
+    "countryCode": "IT",
+    "countrySubdivisionCode": null
   },
   {
     "id": "newyork",
@@ -84,8 +84,8 @@
     "gaw": null,
     "altitude": 760,
     "country": "USA",
-    "iso_3166_1_alpha_2": "US",
-    "iso_3166_2": null
+    "countryCode": "US",
+    "countrySubdivisionCode": null
   },
   {
     "id": "shanghai",
@@ -96,7 +96,7 @@
     "gaw": null,
     "altitude": 760,
     "country": "China",
-    "iso_3166_1_alpha_2": "CN",
-    "iso_3166_2": null
+    "countryCode": "CN",
+    "countrySubdivisionCode": null
   }
 ]
