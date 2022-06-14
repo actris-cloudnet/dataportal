@@ -241,7 +241,7 @@ describe("POST /upload/metadata", () => {
 
   test("updates existing metadata with allowUpdate = true", async () => {
     const payload = { ...validMetadata, allowUpdate: true };
-    const expectedResponse = { status: 200, data: "Warning: Ignoring obsolete allowUpdate property" };
+    const expectedResponse = { status: 200 };
     await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject(expectedResponse);
     const md = await instrumentRepo.findOne({ checksum: payload.checksum });
     expect(md.checksum).toBe(validMetadata.checksum);
@@ -254,7 +254,7 @@ describe("POST /upload/metadata", () => {
 
   test("updates existing metadata with allowUpdate = false", async () => {
     const payload = { ...validMetadata, allowUpdate: false };
-    const expectedResponse = { status: 200, data: "Warning: Ignoring obsolete allowUpdate property" };
+    const expectedResponse = { status: 200 };
     await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject(expectedResponse);
     const md = await instrumentRepo.findOne({ checksum: payload.checksum });
     expect(md.checksum).toBe(validMetadata.checksum);

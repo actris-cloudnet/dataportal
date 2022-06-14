@@ -1,5 +1,5 @@
 import { Site } from "../entity/Site";
-import { InstrumentUpload, MiscUpload, ModelUpload, Status, Upload, UploadOptions } from "../entity/Upload";
+import { InstrumentUpload, MiscUpload, ModelUpload, Status, Upload } from "../entity/Upload";
 import { Connection, Repository } from "typeorm";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import {
@@ -48,39 +48,28 @@ export class UploadRoutes {
   postMetadata: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body;
     const filename = basename(body.filename);
-    const isModelSubmission = "model" in body;
-    const isInstrumentSubmission = "instrument" in body;
-    const status200Message = "allowUpdate" in body ? "Warning: Ignoring obsolete allowUpdate property" : "OK";
-
-    let instrument, model;
     let uploadRepo: Repository<InstrumentUpload | ModelUpload>;
+    const instrumentUpload = "instrument" in body;
+    let dataSource, uploadedMetadata;
 
     try {
       const site = await this.siteRepo.findOne(req.params.site);
       if (site == undefined) {
         return next({ status: 422, errors: "Unknown site" });
       }
-
-      if (isModelSubmission && isInstrumentSubmission)
-        return next({
-          status: 422,
-          errors: 'Both "instrument" and "model" fields may not be specified',
-        });
-
-      if (isInstrumentSubmission) {
-        instrument = await this.instrumentRepo.findOne(body.instrument);
-        if (instrument == undefined) return next({ status: 422, errors: "Unknown instrument" });
-        uploadRepo = this.instrumentUploadRepo;
-        if (this.isMiscUpload(instrument)) uploadRepo = this.miscUploadRepo;
-      } else if (isModelSubmission) {
-        model = await this.modelRepo.findOne(body.model);
-        if (model == undefined) return next({ status: 422, errors: "Unknown model" });
+      if (instrumentUpload) {
+        dataSource = await this.instrumentRepo.findOne(body.instrument);
+        if (dataSource == undefined) {
+          return next({ status: 422, errors: "Unknown instrument" });
+        }
+        uploadRepo = this.isMiscUpload(dataSource) ? this.miscUploadRepo : this.instrumentUploadRepo;
+      } else {
+        dataSource = await this.modelRepo.findOne(body.model);
+        if (dataSource == undefined) {
+          return next({ status: 422, errors: "Unknown model" });
+        }
         uploadRepo = this.modelUploadRepo;
-      } else
-        return next({
-          status: 422,
-          errors: 'Metadata must have either "instrument" or "model" field',
-        });
+      }
 
       // Remove existing metadata if its status is created
       const existingCreatedMetadata = await uploadRepo.findOne({
@@ -97,7 +86,7 @@ export class UploadRoutes {
       }
 
       const params = { site: site, measurementDate: body.measurementDate, filename: filename };
-      const payload = isModelSubmission ? { ...params, model: body.model } : { ...params, instrument: body.instrument };
+      const payload = instrumentUpload ? { ...params, instrument: body.instrument } : { ...params, model: body.model };
       const existingMetadata = await uploadRepo.findOne(payload);
       if (existingMetadata != undefined) {
         await uploadRepo.update(existingMetadata.uuid, {
@@ -105,30 +94,21 @@ export class UploadRoutes {
           updatedAt: new Date(),
           status: Status.CREATED,
         });
-        return res.send(status200Message);
+        return res.sendStatus(200);
       }
 
-      const args: UploadOptions = {
-        checksum: body.checksum,
-        filename: filename,
-        date: body.measurementDate,
-        site: site,
-        status: Status.CREATED,
-      };
+      const args = { ...params, checksum: body.checksum, status: Status.CREATED };
 
-      let uploadedMetadata: InstrumentUpload | ModelUpload;
-      if (isInstrumentSubmission) {
-        if (this.isMiscUpload(instrument)) {
-          uploadedMetadata = new MiscUpload(args, instrument as Instrument, body.instrumentPid);
-        } else {
-          uploadedMetadata = new InstrumentUpload(args, instrument as Instrument, body.instrumentPid);
-        }
+      if (instrumentUpload) {
+        uploadedMetadata = this.isMiscUpload(dataSource as Instrument)
+          ? new MiscUpload(args, dataSource as Instrument, body.instrumentPid)
+          : new InstrumentUpload(args, dataSource as Instrument, body.instrumentPid);
       } else {
-        uploadedMetadata = new ModelUpload(args, model as Model);
+        uploadedMetadata = new ModelUpload(args, dataSource as Model);
       }
 
       await uploadRepo.insert(uploadedMetadata);
-      return res.send(status200Message);
+      return res.sendStatus(200);
     } catch (err) {
       return next({ status: 500, errors: `Internal server error: ${err.code}` });
     }
@@ -333,6 +313,18 @@ export class UploadRoutes {
       if (!("instrument" in body && body.instrument))
         return next({ status: 422, errors: "Request is missing instrument" });
     }
+    if ("instrument" in body && "model" in body) {
+      return next({
+        status: 422,
+        errors: 'Both "instrument" and "model" fields may not be specified',
+      });
+    }
+    if (!("instrument" in body || "model" in body)) {
+      return next({
+        status: 422,
+        errors: 'Metadata must have either "instrument" or "model" field',
+      });
+    }
     return next();
   };
 
@@ -378,8 +370,7 @@ export class UploadRoutes {
     return this.modelUploadRepo;
   }
 
-  isMiscUpload(instrument: Instrument | undefined) {
-    if (!instrument) return false;
+  isMiscUpload(instrument: Instrument) {
     return instrument.auxiliary;
   }
 }

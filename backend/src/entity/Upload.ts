@@ -14,7 +14,7 @@ export enum Status {
 export type UploadOptions = {
   checksum: string;
   filename: string;
-  date: string;
+  measurementDate: string;
   site: Site;
   status: Status;
 };
@@ -68,7 +68,7 @@ export abstract class Upload {
     this.uuid = generateUuidV4();
     this.checksum = args.checksum;
     this.filename = args.filename;
-    this.measurementDate = new Date(args.date);
+    this.measurementDate = new Date(args.measurementDate);
     this.site = args.site;
     this.status = args.status;
   }
