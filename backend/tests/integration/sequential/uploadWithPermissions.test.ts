@@ -153,6 +153,17 @@ describe("POST /upload/metadata", () => {
     return await instrumentRepo.findOneOrFail({ instrumentPid: payload.instrumentPid });
   });
 
+  test("inserts new metadata with the current date as measurementDate", async () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const payload = { ...validMetadata, measurementDate: today };
+    return await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
+  });
+
+  test("responds with 422 on measurementDate in the future", async () => {
+    const payload = { ...validMetadata, measurementDate: "2032-01-01" };
+    return expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject({ response: { status: 422 } });
+  });
+
   test("inserts new misc upload metadata containing instrumentPid", async () => {
     const payload = {
       ...validMetadata,

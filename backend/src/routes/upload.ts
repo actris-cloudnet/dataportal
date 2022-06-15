@@ -307,6 +307,9 @@ export class UploadRoutes {
     if (!("measurementDate" in body) || !body.measurementDate || !isValidDate(body.measurementDate)) {
       return next({ status: 422, errors: "Request is missing measurementDate or measurementDate is invalid" });
     }
+    if (this.isFutureDate(body.measurementDate)) {
+      return next({ status: 422, errors: "MeasurementDate is in the future" });
+    }
     if (req.path.includes("model")) {
       if (!("model" in body && body.model)) return next({ status: 422, errors: "Request is missing model" });
     } else {
@@ -327,6 +330,13 @@ export class UploadRoutes {
     }
     return next();
   };
+
+  isFutureDate(measurementDate: string): boolean {
+    const referenceDate = new Date();
+    const howManyDaysOKToBeInFuture = 5;
+    referenceDate.setDate(referenceDate.getDate() + howManyDaysOKToBeInFuture);
+    return new Date(measurementDate) > referenceDate;
+  }
 
   validateFilename: RequestHandler = async (req, res, next) => {
     const filename = req.body.filename;
