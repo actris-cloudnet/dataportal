@@ -53,9 +53,6 @@ export abstract class File {
   @ManyToOne((_) => Site, (site) => site.files)
   site!: Site;
 
-  @Column({ default: "" })
-  history!: string;
-
   @Column()
   checksum!: string;
 

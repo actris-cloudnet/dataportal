@@ -133,17 +133,6 @@ describe("File.vue", () => {
     expect(wrapper.findAll(".sourceFileList").length).toEqual(0);
   });
 
-  it("shows history by clicking a link", async () => {
-    mocked(axios.get).mockImplementation(axiosMockWithFileUuid("380"));
-    wrapper = mountVue(File);
-    await Vue.nextTick();
-    expect(wrapper.text()).not.toContain("2019-09-14 22:56:17 - radar file created");
-    await wrapper.find("#showHistory").trigger("click");
-    expect(wrapper.text()).toContain("2019-09-14 22:56:17 - radar file created");
-    await wrapper.find("#hideHistory").trigger("click");
-    expect(wrapper.text()).not.toContain("2019-09-14 22:56:17 - radar file created");
-  });
-
   it("shows how to cite box by clicking a button", async () => {
     mocked(axios.get).mockImplementation(axiosMockWithFileUuid("22b"));
     wrapper = mountVue(File, {
