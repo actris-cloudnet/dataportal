@@ -10,7 +10,6 @@
   <attribute name="month" type="int" value="2" />
   <attribute name="day" type="int" value="26" />
   <attribute name="location" value="Bucharest" />
-  <attribute name="history" value="2020-04-07 12:26:42 - ceilometer file created" />
   <attribute name="source" value="chm15k" />
   <attribute name="file_uuid" value="04ddd0c2f74e481198465c33b95f06af" />
   <variable name="beta_raw" shape="time range" type="float">

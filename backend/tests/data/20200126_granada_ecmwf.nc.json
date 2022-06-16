@@ -3,7 +3,6 @@
   "pid": "",
   "volatile": true,
   "measurementDate": "2020-01-26",
-  "history": "2020-03-25 16:23:35 - global attributes fixed using attribute_modifier 0.0.1\nWed Jan 29 21:34:06 EET 2020 - NetCDF generated from original data by Ewan O'Connor <ewan.oconnor@fmi.fi> using cnmodel2nc on cloudnet.fmi.fi",
   "product": "model",
   "checksum": "c46e4c7fe4be5b38670b86f3ffc3101c6de8465eabf5c470226c733e69586031",
   "format": "NetCDF3",

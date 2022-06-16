@@ -3,7 +3,6 @@
   "pid": "",
   "volatile": true,
   "measurementDate": "2019-07-27",
-  "history": "2019-09-16 11:27:40 - classification file created\n2019-09-16 11:27:29 - categorize file created\n2019-09-16 11:27:06 - radar file created\nLidar backscatter derived from raw values in arbitrary units: calibrated by user Ewan O'Connor <ewan.oconnor@fmi.fi> on 29-Jul-2019.",
   "product": "classification",
   "cloudnetpyVersion": "1.0.4",
   "checksum": "4a06acf6a43feafb8b2f59890ee6ee2e4898da656cb496af06aea3778b46024a",

@@ -292,15 +292,6 @@ main#filelanding
             </div>
           </div>
           <div class="detailslistNotAvailable" v-else>Source file information not available.</div>
-          <div v-if="showHistory">
-            <span class="notice">Details:</span>
-            <span class="monospace">{{ response.history.trim() }}</span>
-            <span class="notice"
-              >This is a non-standardized history provided by the file creator/processor.
-              <a href="" @click.prevent="showHistory = false" id="hideHistory">Hide details</a>.
-            </span>
-          </div>
-          <a href="" @click.prevent="showHistory = true" id="showHistory" class="notice" v-else>Show details</a>
         </section>
       </section>
       <section id="preview" v-bind:class="{ wide: allVisualizations }">
@@ -379,7 +370,6 @@ export default class FileView extends Vue {
   devMode = new DevMode();
   allVisualizations = false;
   sourceFiles: RegularFile[] = [];
-  showHistory = false;
   showHowToCite = false;
   showLicense = false;
   isBusy = false;
