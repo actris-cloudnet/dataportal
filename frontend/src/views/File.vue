@@ -199,6 +199,12 @@ main#filelanding
             </dd>
             <dt>Level</dt>
             <dd>{{ response.product.level }}</dd>
+            <template v-if="response.instrumentPid">
+              <dt>Instrument</dt>
+              <dd>
+                <a :href="response.instrumentPid">{{ instrument }}</a>
+              </dd>
+            </template>
             <dt>Quality</dt>
             <dd>{{ response.quality === "qc" ? "Quality Controlled (QC)" : "Near Real Time (NRT)" }}</dd>
             <dt>Quality check</dt>
@@ -375,6 +381,7 @@ export default class FileView extends Vue {
   isBusy = false;
   site!: Site;
   model: Model | null = null;
+  instrument = "";
 
   get maxMarginRight() {
     return Math.max(...this.visualizations.map((viz) => viz.dimensions && viz.dimensions.marginRight).filter(notEmpty));
@@ -502,11 +509,26 @@ export default class FileView extends Vue {
     await this.fetchFileMetadata(payload);
     if (this.response == null || this.error) return;
     await Promise.all([
+      this.fetchInstrument(this.response),
       this.fetchVisualizations(payload),
       this.fetchVersions(this.response),
       this.fetchSourceFiles(this.response),
     ]);
     this.isBusy = false;
+  }
+
+  async fetchInstrument(file: RegularFile | ModelFile) {
+    if (!("instrumentPid" in file) || file.instrumentPid == null) return;
+    const pid = (file as RegularFile).instrumentPid;
+    const url = pid.replace("handle.net", "handle.net/api/handles");
+    try {
+      const response = await axios.get(url);
+      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+      const modelInfo = response.data.values.find((ele: any) => ele.type == "21.T11148/c1a0ec5ad347427f25d6");
+      this.instrument = JSON.parse(modelInfo.data.value).modelName;
+    } catch (err) {
+      console.log(err);
+    }
   }
 }
 </script>
