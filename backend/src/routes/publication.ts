@@ -33,11 +33,7 @@ export class PublicationRoutes {
 
   getPublications: RequestHandler = async (req: Request, res: Response, next) => {
     try {
-      const publications = await this.publicationRepo
-        .createQueryBuilder("publication")
-        .select("publication.citation")
-        .orderBy("publication.year", "DESC")
-        .getMany();
+      const publications = await this.publicationRepo.find({ order: { year: "DESC" } });
       res.send(publications);
     } catch (err) {
       next({ status: 500, errors: err });
