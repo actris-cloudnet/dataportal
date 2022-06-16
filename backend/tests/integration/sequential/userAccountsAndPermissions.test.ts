@@ -38,6 +38,16 @@ describe("test user accounts and permissions", () => {
     }
   });
 
+  it("changes alices username to alice ie does nothing", async () => {
+    const getRespAllUsers = await axios.get(USER_ACCOUNTS_URL);
+    const alice = getRespAllUsers.data.find((u: any) => u.username === "alice");
+    expect(alice).not.toBeUndefined();
+    expect(alice.username).toBe("alice");
+    await expect(axios.put(USER_ACCOUNTS_URL.concat("/", alice.id), { username: "alice" })).resolves.toMatchObject({
+      status: 200,
+      data: { id: alice.id, username: "alice" },
+    });
+  });
   it("changes alices username and then resets it back", async () => {
     const getRespAllUsers = await axios.get(USER_ACCOUNTS_URL);
     const alice = getRespAllUsers.data.find((u: any) => u.username === "alice");

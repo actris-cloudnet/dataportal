@@ -157,10 +157,12 @@ export class UserAccountRoutes {
       return next({ status: 404, errors: "UserAccount not found" });
     }
     if (hasProperty(req.body, "username")) {
-      if (user.username !== req.body.username && (await this.usernameAvailable(req.body.username))) {
-        user.username = req.body.username;
-      } else {
-        return next({ status: 400, errors: "username is already taken" });
+      if (user.username !== req.body.username) {
+        if (await this.usernameAvailable(req.body.username)) {
+          user.username = req.body.username;
+        } else {
+          return next({ status: 400, errors: "username is already taken" });
+        }
       }
     }
     if (hasProperty(req.body, "password")) {
