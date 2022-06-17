@@ -527,7 +527,7 @@ export default class FileView extends Vue {
       const modelInfo = response.data.values.find((ele: any) => ele.type == "21.T11148/c1a0ec5ad347427f25d6");
       this.instrument = JSON.parse(modelInfo.data.value).modelName;
     } catch (err) {
-      console.log(err);
+      console.log(err); // eslint-disable-line  no-console
     }
   }
 }
