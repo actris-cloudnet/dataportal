@@ -286,7 +286,7 @@ main#filelanding
         </section>
       </section>
       <section id="history">
-        <header>History</header>
+        <header>Provenance</header>
         <section class="details history">
           <div v-if="response.sourceFileIds && response.sourceFileIds.length > 0" class="detailslist">
             <span class="notice">This file was generated using the following files:<br /></span>
