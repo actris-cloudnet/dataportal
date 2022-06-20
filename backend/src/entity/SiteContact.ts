@@ -7,6 +7,7 @@ export enum RoleType {
   EXPERT = "expert",
   SCIENTIST = "scientist",
   TECHNICIAN = "technician",
+  DATASUBMITTER = "dataSubmitter",
 }
 
 @Entity()
