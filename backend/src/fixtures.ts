@@ -10,7 +10,7 @@ const isJson = (filepath: string) => filepath.substring(filepath.length - 4) == 
 async function handleFile(conn: Connection, filepath: string) {
   const repoName = basename(filepath).split("-")[1].split(".")[0];
   const repo = conn.getRepository(repoName);
-  if (truncate) await repo.query(`TRUNCATE TABLE ${repoName} CASCADE`);
+  if (truncate) await repo.query(`TRUNCATE TABLE ${repoName} RESTART IDENTITY CASCADE`);
   return repo.save(JSON.parse((await fsp.readFile(filepath)).toString()));
 }
 
