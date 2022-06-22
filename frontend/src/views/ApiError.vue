@@ -20,10 +20,7 @@ section
     <h1>{{ response.status }}</h1>
     <h2 v-if="response.status !== 500">{{ message }}</h2>
     <h2 v-else>Internal server error</h2>
-    <section v-if="response.status === 404">
-      The file you are looking for does not exist.<br />
-      If you are looking for the legacy cloudnet site, click <a href="http://legacy-cloudnet.fmi.fi">here</a>.
-    </section>
+    <section v-if="response.status === 404">The page you are looking for does not exist.</section>
     <section v-if="response.status > 500">Service temporarily offline</section>
   </main>
 </template>
