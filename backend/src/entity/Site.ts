@@ -5,6 +5,7 @@ import { Calibration } from "./Calibration";
 import { RegularCitation } from "./Citation";
 import { SiteContact } from "./SiteContact";
 import { Permission } from "./Permission";
+import { Person } from "./Person";
 
 export enum SiteType {
   CLOUDNET = "cloudnet",
@@ -58,6 +59,10 @@ export class Site {
 
   @OneToMany((_) => Calibration, (calib) => calib.site)
   calibrations!: Calibration[];
+
+  @ManyToMany((_) => Person, (person) => person.sites)
+  @JoinTable()
+  persons!: Person[];
 
   @ManyToMany((_) => RegularCitation)
   @JoinTable()

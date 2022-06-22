@@ -230,6 +230,8 @@ import { PermissionType } from "./entity/Permission";
   app.delete("/persons/:id", siteContactRoutes.deletePerson);
   app.delete("/persons", siteContactRoutes.deletePersons);
 
+  app.get("/contacts", siteContactRoutes.getContacts);
+
   // Private UserAccount and Permission routes
   app.post("/user-accounts", express.json(), userAccountRoutes.validatePost, userAccountRoutes.postUserAccount);
   app.get("/user-accounts/:id", userAccountRoutes.getUserAccount);

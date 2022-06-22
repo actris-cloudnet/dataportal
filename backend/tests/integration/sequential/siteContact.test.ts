@@ -92,7 +92,6 @@ describe("test /site-contacts and /persons private api", () => {
       }
     });
     expect(newRole).toBe("technician");
-    expect(newEmail).toBe("B@G.EE");
     expect(newOrcid).toBe("9999-9999-9999-9999");
   });
 

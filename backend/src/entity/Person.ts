@@ -1,6 +1,7 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
 
 import { SiteContact } from "./SiteContact";
+import { Site } from "./Site";
 
 @Entity()
 export class Person {
@@ -16,6 +17,12 @@ export class Person {
   @Column({ unique: true, nullable: true })
   orcid?: string;
 
+  @Column({ nullable: true })
+  email?: string;
+
   @OneToMany(() => SiteContact, (siteContact) => siteContact.person)
   siteContactRoles?: SiteContact[];
+
+  @ManyToMany((_) => Site, (site) => site.persons)
+  sites?: Site[];
 }

@@ -18,9 +18,6 @@ export class SiteContact {
   @Column()
   role!: RoleType;
 
-  @Column()
-  email!: string;
-
   @ManyToOne(() => Site, (site) => site.contacts)
   site!: Site;
 

@@ -13,6 +13,7 @@ interface SiteContactApiData {
   firstname?: string;
   surname?: string;
   orcid?: string;
+  sites?: Site[];
 }
 
 export class SiteContactRoutes {
@@ -26,205 +27,154 @@ export class SiteContactRoutes {
     this.siteRepository = conn.getRepository<Site>("site");
   }
 
-  // POST: Create a new site contact
-  postSiteContact: RequestHandler = async (req: Request, res: Response, next) => {
-    const postData: SiteContactApiData = req.body;
-    const mandatory_keys = new Set<string>(["firstname", "surname", "role", "email", "siteId"]);
-    const datakeys = new Set<string>();
-    Object.keys(postData).forEach((key) => datakeys.add(key));
-    const intersection = new Set<string>(Array.from(datakeys).filter((key) => mandatory_keys.has(key)));
-    if (intersection.size != mandatory_keys.size) {
-      return next({ status: 400, error: "missing fields" });
+  getPersons: RequestHandler = async (req: Request, res: Response) => {
+    const data = await this.personRepository.find();
+    return res.send(data);
+  };
+
+  getContacts: RequestHandler = async (req: Request, res: Response, next) => {
+    try {
+      const contacts = (await this.siteRepository.find({ relations: ["persons"] }))
+        .filter((ele) => !(ele.type[0].includes("arm") || ele.type[0].includes("hidden")))
+        .map((ele) => ({
+          site: ele.id,
+          contacts: ele.persons,
+        }));
+      return res.send(contacts);
+    } catch (err) {
+      return next({ status: 400, error: err });
     }
-    const role: RoleType | undefined = this.roleFromString(postData.role!);
+  };
+
+  getSiteContacts: RequestHandler = async (req: Request, res: Response) => {
+    let qb = this.siteContactRepository
+      .createQueryBuilder("site_contact")
+      .leftJoinAndSelect("site_contact.person", "person")
+      .leftJoinAndSelect("site_contact.site", "site");
+    if (req.query.siteId !== undefined) {
+      qb = qb.where("site_contact.siteId = :siteId", { siteId: req.query.siteId });
+    }
+    const siteContacts = (await qb.getMany()).map((contact) => ({
+      siteId: contact.site.id,
+      siteContactId: contact.id,
+      role: contact.role,
+      email: contact.person.email,
+      personId: contact.person.id,
+      firstname: contact.person.firstname,
+      surname: contact.person.surname,
+      orcid: contact.person.orcid,
+    }));
+    return res.send(siteContacts);
+  };
+
+  postSiteContact: RequestHandler = async (req: Request, res: Response, next) => {
+    const body = req.body;
+    const mandatoryKeys = ["firstname", "surname", "role", "siteId"];
+    mandatoryKeys.forEach((key) => {
+      if (!Object.keys(body).includes(key)) {
+        return next({ status: 400, error: "missing fields" });
+      }
+    });
+    const role = this.validateRole(body.role);
     if (role === undefined) {
       return next({ status: 400, error: "unexpected role" });
     }
-    let existingSite: Site | undefined = await this.postExistingSite(postData);
-    let site: Site;
-    if (existingSite === undefined) {
+    const site = await this.findExistingSite(body);
+    if (site === undefined) {
       return next({ status: 400, error: "site does not exist" });
-    } else {
-      site = existingSite;
     }
-    let existingPerson: Person | undefined = await this.postExistingPerson(postData);
-    let existingSiteContact: SiteContact | undefined;
-    if (existingPerson !== undefined) {
-      let person: Person = existingPerson;
-      existingSiteContact = await this.postExistingSiteContact(site, person, role);
-      if (existingSiteContact !== undefined) {
-        return next({
-          status: 400,
-          error: "person already has this role for the site",
-        });
-      } else {
-        const siteContact: SiteContact = {
-          site: site,
-          person: person,
-          email: postData.email!,
-          role: role!,
-        };
-        try {
-          await this.siteContactRepository.save(siteContact);
-        } catch (err) {
-          return next({ status: 400, error: err });
-        }
-        res.sendStatus(200);
-        return;
+    let person: Person | undefined;
+    person = await this.findExistingPerson(body);
+    if (person !== undefined) {
+      const existingSiteContact = await this.findExistingSiteContact(site, person, role);
+      if (existingSiteContact) {
+        return next({ status: 400, error: "person already has this role for the site" });
       }
     } else {
-      // Create a new person and a new site contact role
-      const person: Person = {
-        firstname: postData.firstname!,
-        surname: postData.surname!,
-        orcid: postData.orcid,
+      person = {
+        firstname: body.firstname,
+        surname: body.surname,
+        orcid: body.orcid,
+        email: body.email,
+        sites: body.sites,
       };
-      const siteContact: SiteContact = {
-        site: site,
-        person: person,
-        email: postData.email!,
-        role: role!,
-      };
-
       try {
         await this.personRepository.save(person);
       } catch (err) {
         return next({ status: 400, error: err });
       }
-      try {
-        await this.siteContactRepository.save(siteContact);
-      } catch (err) {
-        return next({ status: 400, error: err });
-      }
-      res.sendStatus(200);
-      return;
     }
-  };
-
-  private async postExistingPerson(postData: SiteContactApiData): Promise<Person | undefined> {
-    return this.personRepository
-      .createQueryBuilder("person")
-      .where("person.firstname = :firstname", { firstname: postData.firstname })
-      .andWhere("person.surname = :surname", { surname: postData.surname })
-      .andWhere("person.orcid = :orcid", { orcid: postData.orcid })
-      .getOne();
-  }
-  private async postExistingSite(postData: SiteContactApiData): Promise<Site | undefined> {
-    return this.siteRepository
-      .createQueryBuilder("site")
-      .where("site.id = :siteId", { siteId: postData.siteId })
-      .getOne();
-  }
-  private async postExistingSiteContact(site: Site, person: Person, role: RoleType): Promise<SiteContact | undefined> {
-    return this.siteContactRepository
-      .createQueryBuilder("site_contact")
-      .where("site_contact.siteId = :siteId", { siteId: site.id })
-      .andWhere("site_contact.personId = :personId", { personId: person.id })
-      .andWhere("site_contact.role = :role", { role: role })
-      .getOne();
-  }
-
-  // GET get list site contacts
-  getSiteContacts: RequestHandler = async (req: Request, res: Response) => {
-    const query: SiteContactApiData = req.query;
-    let results;
-    if (query.siteId !== undefined) {
-      results = await this.siteContactRepository
-        .createQueryBuilder("site_contact")
-        .leftJoinAndSelect("site_contact.person", "person")
-        .leftJoinAndSelect("site_contact.site", "site")
-        .where("site_contact.siteId = :siteId", { siteId: query.siteId })
-        .getMany();
-    } else {
-      results = await this.siteContactRepository
-        .createQueryBuilder("site_contact")
-        .leftJoinAndSelect("site_contact.person", "person")
-        .leftJoinAndSelect("site_contact.site", "site")
-        .getMany();
-    }
-
-    const getResults: SiteContactApiData[] = results.map((r) => ({
-      siteId: r.site.id,
-      siteContactId: r.id,
-      role: r.role,
-      email: r.email,
-      personId: r.person.id,
-      firstname: r.person.firstname,
-      surname: r.person.surname,
-      orcid: r.person.orcid,
-    }));
-
-    res.json(getResults);
-    return;
-  };
-
-  // Update
-  putSiteContact: RequestHandler = async (req: Request, res: Response, next) => {
-    const siteContactId: number = Number(req.params.id);
-    const requestedSiteContact: SiteContact | undefined = await this.siteContactRepository
-      .createQueryBuilder("site_contact")
-      .leftJoinAndSelect("site_contact.site", "site")
-      .where("site_contact.id = :id", { id: siteContactId })
-      .getOne();
-    let siteContact: SiteContact;
-    if (requestedSiteContact === undefined) {
-      return next({
-        status: 400,
-        error: "requested site contact does not exist",
-      });
-    }
-    siteContact = requestedSiteContact;
-
-    const data: SiteContactApiData = req.body;
-    // Check that PUT request tries to update only site, role or email field
-    const accepted_keys = new Set<string>(["siteId", "role", "email"]);
-    let datakeys = new Set<string>();
-    Object.keys(data).forEach((k) => datakeys.add(k));
-    let keydiff = new Set<string>(Array.from(datakeys).filter((k) => !accepted_keys.has(k)));
-    if (keydiff.size > 0) {
-      return next({
-        status: 400,
-        error: "you can only change siteId, role or email from this endpoint",
-      });
-    }
-    // Update site
-    if (datakeys.has("siteId")) {
-      const updatedSite: Site | undefined = await this.siteRepository
-        .createQueryBuilder("site")
-        .where("site.id = :id", { id: data.siteId })
-        .getOne();
-      if (updatedSite === undefined) {
-        return next({ status: 400, error: "site does not exist" });
-      }
-      siteContact.site = updatedSite!;
-    }
-    // Update role
-    if (datakeys.has("role")) {
-      let role: RoleType | undefined = this.roleFromString(data.role!);
-      if (role === undefined) {
-        return next({
-          status: 400,
-          error: "unexpected role",
-        });
-      }
-      siteContact.role = role!;
-    }
-    // Update email
-    if (datakeys.has("email")) {
-      siteContact.email = data.email!;
-    }
-    // Save changes
+    const siteContact = {
+      site: site,
+      person: person,
+      role: role,
+    };
     try {
       await this.siteContactRepository.save(siteContact);
     } catch (err) {
       return next({ status: 400, error: err });
     }
-
-    res.sendStatus(200);
-    return;
+    return res.sendStatus(200);
   };
 
-  // DELETE remove site contact by id
+  putSiteContact: RequestHandler = async (req: Request, res: Response, next) => {
+    const siteContact = await this.siteContactRepository
+      .createQueryBuilder("site_contact")
+      .leftJoinAndSelect("site_contact.site", "site")
+      .where("site_contact.id = :id", { id: req.params.id })
+      .getOne();
+    if (siteContact === undefined) {
+      return next({ status: 400, error: "requested site contact does not exist" });
+    }
+    const body = req.body;
+    const acceptedKeys = ["siteId", "role"];
+    const validKeys = new Set(Object.keys(body).filter((key) => acceptedKeys.includes(key)));
+    if (validKeys.size == 0) {
+      return next({ status: 400, error: "you can only change siteId or role from this endpoint" });
+    }
+    if (validKeys.has("siteId")) {
+      const updatedSite = await this.findExistingSite(body);
+      if (updatedSite === undefined) {
+        return next({ status: 400, error: "site does not exist" });
+      }
+      siteContact.site = updatedSite;
+    }
+    if (validKeys.has("role")) {
+      const role = this.validateRole(body.role);
+      if (role === undefined) {
+        return next({ status: 400, error: "unexpected role" });
+      }
+      siteContact.role = role;
+    }
+    try {
+      await this.siteContactRepository.save(siteContact);
+    } catch (err) {
+      return next({ status: 400, error: err });
+    }
+    return res.sendStatus(200);
+  };
+
+  putPerson: RequestHandler = async (req: Request, res: Response, next) => {
+    const body = req.body;
+    const person = await this.personRepository
+      .createQueryBuilder("person")
+      .where("person.id = :id", { id: req.params.id })
+      .getOne();
+    if (person === undefined) {
+      return next({ status: 400, error: "requested person does not exist" });
+    }
+    try {
+      person.firstname = body.firstname;
+      person.surname = body.surname;
+      person.orcid = body.orcid;
+      person.email = body.email;
+      await this.personRepository.save(person);
+    } catch (err) {
+      return next({ status: 400, error: err });
+    }
+    return res.sendStatus(200);
+  };
+
   deleteSiteContact: RequestHandler = async (req: Request, res: Response, next) => {
     const siteContactId = req.params.id;
     try {
@@ -237,55 +187,12 @@ export class SiteContactRoutes {
     } catch (err) {
       return next({ status: 400, error: err });
     }
-    res.sendStatus(200);
-    return;
-  };
-
-  getPersons: RequestHandler = async (req: Request, res: Response) => {
-    const persons: Person[] = await this.personRepository.createQueryBuilder("person").getMany();
-
-    const responseResults: SiteContactApiData[] = persons.map((p) => ({
-      personId: p.id,
-      firstname: p.firstname,
-      surname: p.surname,
-      orcid: p.orcid,
-    }));
-
-    res.json(responseResults);
-    return;
-  };
-
-  // PUT Update person by id
-  putPerson: RequestHandler = async (req: Request, res: Response, next) => {
-    const personId: number = Number(req.params.id);
-    const requestedPerson: Person | undefined = await this.personRepository
-      .createQueryBuilder("person")
-      .where("person.id = :id", { id: personId })
-      .getOne();
-    let person: Person;
-    if (requestedPerson === undefined) {
-      return next({ status: 400, error: "requested person does not exist" });
-    }
-    person = requestedPerson;
-
-    const data: SiteContactApiData = req.body;
-
-    person.firstname = data.firstname;
-    person.surname = data.surname;
-    person.orcid = data.orcid;
-
-    try {
-      await this.personRepository.save(person);
-    } catch (err) {
-      return next({ status: 400, error: err });
-    }
-    res.sendStatus(200);
-    return;
+    return res.sendStatus(200);
   };
 
   deletePerson: RequestHandler = async (req: Request, res: Response, next) => {
-    const personId: number = Number(req.params.id);
-    const requestedPersonRaw: any | undefined = await this.personRepository
+    const personId = req.params.id;
+    const requestedPersonRaw = await this.personRepository
       .createQueryBuilder("person")
       .leftJoinAndSelect(SiteContact, "site_contact", "site_contact.personId = person.id")
       .where("person.id = :id", { id: personId })
@@ -299,25 +206,53 @@ export class SiteContactRoutes {
         error: "requested person cannot be deleted, since at least one site contact role exists",
       });
     } else {
-      await this.personRepository.delete(personId);
+      try {
+        await this.personRepository.delete(personId);
+      } catch (err) {
+        return next({ status: 400, error: err });
+      }
     }
     return res.sendStatus(200);
   };
 
   // DELETE Delete persons that are not associated with any site contact
-  deletePersons: RequestHandler = async (req: Request, res: Response) => {
-    let orphans: Person[] = await this.personRepository
+  deletePersons: RequestHandler = async (req: Request, res: Response, next) => {
+    const orphans: Person[] = await this.personRepository
       .createQueryBuilder("person")
       .leftJoinAndSelect(SiteContact, "site_contact", "site_contact.personId = person.id")
       .where("site_contact.personId is null")
       .getMany();
-
-    await this.personRepository.remove(orphans);
-    res.sendStatus(200);
-    return;
+    try {
+      await this.personRepository.remove(orphans);
+    } catch (err) {
+      return next({ status: 400, error: err });
+    }
+    return res.sendStatus(200);
   };
 
-  private roleFromString(role_str: string): RoleType | undefined {
-    return (<any>RoleType)[role_str.toUpperCase()];
+  private async findExistingPerson(postData: SiteContactApiData): Promise<Person | undefined> {
+    return this.personRepository
+      .createQueryBuilder("person")
+      .where("person.firstname = :firstname", { firstname: postData.firstname })
+      .andWhere("person.surname = :surname", { surname: postData.surname })
+      .andWhere("person.orcid = :orcid", { orcid: postData.orcid })
+      .getOne();
+  }
+
+  private async findExistingSite(body: SiteContactApiData): Promise<Site | undefined> {
+    return this.siteRepository.createQueryBuilder("site").where("site.id = :siteId", { siteId: body.siteId }).getOne();
+  }
+
+  private async findExistingSiteContact(site: Site, person: Person, role: RoleType): Promise<SiteContact | undefined> {
+    return this.siteContactRepository
+      .createQueryBuilder("site_contact")
+      .where("site_contact.siteId = :siteId", { siteId: site.id })
+      .andWhere("site_contact.personId = :personId", { personId: person.id })
+      .andWhere("site_contact.role = :role", { role: role })
+      .getOne();
+  }
+
+  private validateRole(role: string): RoleType | undefined {
+    return (<any>RoleType)[role.toUpperCase()];
   }
 }
