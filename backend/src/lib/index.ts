@@ -12,6 +12,7 @@ import env from "./env";
 import { CollectionFileResponse } from "../entity/CollectionFileResponse";
 import ReadableStream = NodeJS.ReadableStream;
 import maxmind, { CountryResponse, OpenOpts, Reader } from "maxmind";
+import { randomBytes } from "crypto";
 
 export const stringify = (obj: any): string => JSON.stringify(obj, null, 2);
 
@@ -156,4 +157,10 @@ export function streamHandler(stream: ReadableStream, res: Response, prefix: str
 
 export function getIpLookup(options?: OpenOpts): Promise<Reader<CountryResponse>> {
   return maxmind.open<CountryResponse>(env.GEOLITE2_COUNTRY_PATH, options);
+}
+
+export function randomString(length: number): string {
+  return randomBytes(Math.ceil(length / 2))
+    .toString("hex")
+    .slice(0, length);
 }
