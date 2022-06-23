@@ -8,7 +8,8 @@ This repository contains the source code for ACTRIS Cloudnet data portal hosted 
 ## Install
 
 The data portal is distributed as a docker container as a part of the Cloudnet development toolkit.
-See the instructions for installing the toolkit [here](https://github.com/actris-cloudnet/dev-toolkit/).
+Refer to [README of the dev-toolkit repository](https://github.com/actris-cloudnet/dev-toolkit/)
+on how to set up the CLU development environment.
 
 ### Development dependencies
 
