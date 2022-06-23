@@ -5,13 +5,6 @@ import { InstrumentUpload, ModelUpload } from "../entity/Upload";
 import { PermissionType } from "../entity/Permission";
 import { Site } from "../entity/Site";
 const auth = require("basic-auth");
-const md5 = require("apache-md5");
-const { timingSafeEqual } = require("crypto");
-const { Buffer } = require("buffer");
-
-function passwordMatchesHash(password: string, hashWithSalt: string): boolean {
-  return timingSafeEqual(Buffer.from(md5(password, hashWithSalt)), Buffer.from(hashWithSalt));
-}
 
 export class Authenticator {
   private userAccountRepository: Repository<UserAccount>;
@@ -28,11 +21,11 @@ export class Authenticator {
     }
     let userAccount = await this.userAccountRepository.findOne({ username: credentials.name });
     // Check that user exists in the database
-    if (userAccount === undefined) {
+    if (!userAccount) {
       return next({ status: 401, errors: "Unauthorized" });
     }
     // Check that password in the request is correct
-    if (passwordMatchesHash(credentials.pass, userAccount!.passwordHash)) {
+    if (userAccount.comparePassword(credentials.pass)) {
       res.locals.username = userAccount.username;
       res.locals.authenticated = true;
       next();

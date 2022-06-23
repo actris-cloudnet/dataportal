@@ -23,6 +23,7 @@ import { PublicationRoutes } from "./routes/publication";
 import env from "./lib/env";
 import { Authenticator, Authorizator } from "./lib/auth";
 import { PermissionType } from "./entity/Permission";
+import { UserActivationRoutes } from "./routes/userActivation";
 (async function () {
   const port = 3000;
   const app = express();
@@ -46,6 +47,7 @@ import { PermissionType } from "./entity/Permission";
   const calibRoutes = new CalibrationRoutes(conn);
   const qualityRoutes = new QualityReportRoutes(conn, fileRoutes);
   const publicationRoutes = new PublicationRoutes(conn);
+  const userActivationRoutes = new UserActivationRoutes(conn);
 
   const siteContactRoutes = new SiteContactRoutes(conn);
   const userAccountRoutes = new UserAccountRoutes(conn);
@@ -202,6 +204,9 @@ import { PermissionType } from "./entity/Permission";
     express.raw({ limit: "1gb" }),
     uploadRoutes.putData
   );
+
+  app.get("/credentials/:token", userActivationRoutes.get);
+  app.post("/credentials/:token", userActivationRoutes.post);
 
   // private
   app.put("/files/*", express.json(), fileRoutes.putFile);

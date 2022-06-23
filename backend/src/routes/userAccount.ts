@@ -4,8 +4,7 @@ import { Request, RequestHandler, Response } from "express";
 import { UserAccount } from "../entity/UserAccount";
 import { Permission, PermissionType, permissionTypeFromString } from "../entity/Permission";
 import { Site } from "../entity/Site";
-
-const md5 = require("apache-md5");
+import { randomString } from "../lib";
 
 interface PermissionInterface {
   id?: number;
@@ -18,6 +17,7 @@ interface UserAccountInterface {
   username: string;
   password?: string;
   passwordHash?: string;
+  activationToken?: string;
   permissions: PermissionInterface[];
 }
 
@@ -39,6 +39,7 @@ export class UserAccountRoutes {
     return {
       id: user.id,
       username: user.username,
+      activationToken: user.activationToken || undefined,
       permissions: user.permissions.map((p) => ({
         id: p.id,
         permission: p.permission,
@@ -51,18 +52,23 @@ export class UserAccountRoutes {
       { username: req.body.username },
       { relations: ["permissions", "permissions.site"] }
     );
-    if (user !== undefined) {
+    if (user) {
       res.status(200);
       res.json(this.userResponse(user));
       return;
     }
     await this.createPermissions(req, res, next);
 
-    user = await this.userAccountRepository.save({
-      username: req.body.username,
-      passwordHash: md5(req.body.password),
-      permissions: res.locals.permissions,
-    });
+    user = new UserAccount();
+    user.username = req.body.username;
+    if (req.body.password) {
+      user.setPassword(req.body.password);
+    } else {
+      user.activationToken = randomString(32);
+    }
+    user.permissions = res.locals.permissions;
+
+    await this.userAccountRepository.save(user);
     res.status(201);
     res.json(this.userResponse(user));
   };
@@ -166,7 +172,7 @@ export class UserAccountRoutes {
       }
     }
     if (hasProperty(req.body, "password")) {
-      user.passwordHash = md5(req.body.password);
+      user.setPassword(req.body.password);
     }
     if (hasProperty(req.body, "permissions")) {
       await this.createPermissions(req, res, next);
@@ -206,10 +212,9 @@ export class UserAccountRoutes {
       return next({ status: 401, errors: "Missing the username" });
     }
     await this.validateUsername(req, res, next);
-    if (!hasProperty(req.body, "password")) {
-      return next({ status: 401, errors: "Missing the password" });
+    if (hasProperty(req.body, "password")) {
+      await this.validatePassword(req, res, next);
     }
-    await this.validatePassword(req, res, next);
 
     if (hasProperty(req.body, "permissions")) {
       await this.validatePermissions(req, res, next);
