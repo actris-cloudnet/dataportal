@@ -14,6 +14,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  await userAccountRepository.delete({});
   await conn.close();
 });
 
