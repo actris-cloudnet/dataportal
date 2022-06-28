@@ -11,13 +11,11 @@ interface ContactData {
 }
 
 beforeAll(async () => {
-  // Remove site contacts
   let req = await axios.get(SITE_CONTACTS_URL);
   const data: ContactData[] = req.data;
   for (const contact of data) {
     await axios.delete(`${SITE_CONTACTS_URL}/${contact.siteContactId}`);
   }
-  // Remove persons
   await axios.delete(PERSONS_URL);
 });
 
@@ -81,13 +79,11 @@ describe("test /site-contacts and /persons private api", () => {
 
     // Check updated values
     let newRole: string | undefined = undefined;
-    let newEmail: string | undefined = undefined;
     let newOrcid: string | undefined = undefined;
     const updatedRes = await axios.get(SITE_CONTACTS_URL);
     updatedRes.data.forEach((result: any) => {
       if (result.siteContactId === siteContactId) {
         newRole = result.role;
-        newEmail = result.email;
         newOrcid = result.orcid;
       }
     });

@@ -31,25 +31,25 @@ describe("POST /api/generate-pid", () => {
   it("responds with 403 if collection already has a PID", async () => {
     await repo.update({ uuid: validRequest.uuid }, { pid: "asd" });
     const error = { errors: ["Collection already has a PID"] };
-    await expect(axios.post(url, validRequest)).rejects.toMatchObject(genResponse(403, error));
+    return await expect(axios.post(url, validRequest)).rejects.toMatchObject(genResponse(403, error));
   });
 
   it("responds with 422 if type or uuid is missing", async () => {
     const error = { errors: ["Missing or invalid uuid or type"] };
     await expect(axios.post(url, { type: "collection" })).rejects.toMatchObject(genResponse(422, error));
-    return expect(axios.post(url, { uuid: validRequest.uuid })).rejects.toMatchObject(genResponse(422, error));
+    return await expect(axios.post(url, { uuid: validRequest.uuid })).rejects.toMatchObject(genResponse(422, error));
   });
 
   it("responds with 422 on invalid type", async () => {
     const error = { errors: ["Type must be collection"] };
-    await expect(axios.post(url, { type: "file", uuid: validRequest.uuid })).rejects.toMatchObject(
+    return await expect(axios.post(url, { type: "file", uuid: validRequest.uuid })).rejects.toMatchObject(
       genResponse(422, error)
     );
   });
 
   it("responds with 422 on missing uuid", async () => {
     const error = { errors: ["Collection not found"] };
-    return expect(
+    return await expect(
       axios.post(url, { type: "collection", uuid: "11092c00-161d-4ca2-a29d-628cf8e960f6" })
     ).rejects.toMatchObject(genResponse(422, error));
   });

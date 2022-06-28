@@ -16,6 +16,14 @@
       {
         "siteId": null,
         "permission": "canUploadModel"
+      },
+      {
+        "siteId": null,
+        "permission": "canDelete"
+      },
+      {
+        "siteId": null,
+        "permission": "canGetStats"
       }
     ]
   },

@@ -14,21 +14,21 @@ describe("POST /calibration", () => {
   });
 
   beforeEach(async () => {
-    return repo.delete({});
+    await repo.delete({});
   });
 
   afterAll(() => conn.close());
 
   it("on valid new calibration inserts it to the table", async () => {
     await axios.post(url, { site: "hyytiala", instrument: "mira", date: "2021-01-01", calibrationFactor: 0.5 });
-    return expect(repo.findOneOrFail()).resolves.toBeTruthy();
+    await expect(repo.findOneOrFail()).resolves.toBeTruthy();
   });
 
   it("inserts two calibrations for same date", async () => {
     await axios.post(url, { site: "hyytiala", instrument: "mira", date: "2021-01-01", calibrationFactor: 0.5 });
     await axios.post(url, { site: "hyytiala", instrument: "mira", date: "2021-01-01", calibrationFactor: 0.8 });
     const res = await repo.findOneOrFail();
-    return expect(res.calibration.length).toEqual(2);
+    expect(res.calibration.length).toEqual(2);
   });
 
   it("sets calibration for all dates between existing and new calibration", async () => {

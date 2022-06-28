@@ -1,7 +1,7 @@
 import { Connection, Repository } from "typeorm";
 import { RequestHandler } from "express";
 import { UserAccount } from "../entity/UserAccount";
-import { InstrumentUpload, MiscUpload, ModelUpload } from "../entity/Upload";
+import { Upload } from "../entity/Upload";
 import { PermissionType } from "../entity/Permission";
 import { Site } from "../entity/Site";
 const auth = require("basic-auth");
@@ -13,126 +13,110 @@ export class Authenticator {
     this.userAccountRepository = conn.getRepository<UserAccount>("user_account");
   }
 
-  middleware: RequestHandler = async (req, res, next) => {
-    // Check that request has credentials included
-    let credentials = auth(req);
+  verifyCredentials: RequestHandler = async (req, res, next) => {
+    const credentials = auth(req);
     if (!credentials) {
       return next({ status: 401, errors: "Unauthorized" });
     }
-    let userAccount = await this.userAccountRepository.findOne({ username: credentials.name });
-    // Check that user exists in the database
-    if (!userAccount) {
-      return next({ status: 401, errors: "Unauthorized" });
-    }
-    // Check that password in the request is correct
-    if (userAccount.comparePassword(credentials.pass)) {
-      res.locals.username = userAccount.username;
-      res.locals.authenticated = true;
-      next();
-      return;
-    } else {
-      return next({ status: 401, errors: "Unauthorized" });
+    try {
+      const userAccount = await this.userAccountRepository.findOne({ username: credentials.name });
+      if (!userAccount) {
+        return next({ status: 401, errors: "Unauthorized" });
+      }
+      if (userAccount.comparePassword(credentials.pass)) {
+        res.locals.username = userAccount.username;
+        res.locals.authenticated = true;
+        return next();
+      } else {
+        return next({ status: 401, errors: "Unauthorized" });
+      }
+    } catch (err) {
+      next({ status: 500, errors: `Internal server error: ${err}` });
     }
   };
-}
-
-interface authorizeSiteMiddlewareParams {
-  permission: PermissionType;
 }
 
 export class Authorizator {
   private userAccountRepository: Repository<UserAccount>;
   private siteRepository: Repository<Site>;
-  private instrumentUploadRepository: Repository<InstrumentUpload>;
-  private miscUploadRepository: Repository<MiscUpload>;
-  private modelUploadRepository: Repository<ModelUpload>;
+  readonly instrumentUploadRepository: Repository<Upload>;
+  readonly miscUploadRepository: Repository<Upload>;
+  readonly modelUploadRepository: Repository<Upload>;
 
   constructor(conn: Connection) {
     this.userAccountRepository = conn.getRepository<UserAccount>("user_account");
     this.siteRepository = conn.getRepository<Site>("site");
-    this.instrumentUploadRepository = conn.getRepository<InstrumentUpload>("instrument_upload");
-    this.miscUploadRepository = conn.getRepository<MiscUpload>("misc_upload");
-    this.modelUploadRepository = conn.getRepository<ModelUpload>("model_upload");
+    this.instrumentUploadRepository = conn.getRepository<Upload>("instrument_upload");
+    this.miscUploadRepository = conn.getRepository<Upload>("misc_upload");
+    this.modelUploadRepository = conn.getRepository<Upload>("model_upload");
   }
 
-  metadataMiddleware: RequestHandler = async (req, res, next) => {
-    let site: Site;
-    if (!Object.prototype.hasOwnProperty.call(req, "body") || !Object.prototype.hasOwnProperty.call(req.body, "site")) {
-      // The legacy upload takes siteId from the username
-      const siteCandidate: Site | undefined = await this.siteRepository.findOne(res.locals.username);
-      if (siteCandidate === undefined) {
-        return next({ status: 400, errors: "Add site to the request body" });
-      }
-      site = siteCandidate!;
-    } else {
-      const siteCandidate: Site | undefined = await this.siteRepository.findOne(req.body.site);
-      if (siteCandidate === undefined) {
+  verifySite: RequestHandler = async (req, res, next) => {
+    try {
+      const siteName = "body" in req && "site" in req.body ? req.body.site : res.locals.username;
+      const site = await this.siteRepository.findOne(siteName);
+      if (site === undefined) {
         return next({ status: 422, errors: "Site does not exist" });
       }
-      site = siteCandidate!;
+      res.locals.site = site;
+      return next();
+    } catch (err) {
+      return next({ status: 500, errors: `Internal server error: ${err}` });
     }
-    res.locals.site = site;
-    next();
-    return;
-  };
-  instrumentDataUploadMiddleware: RequestHandler = async (req, res, next) => {
-    let uploadCandidate: InstrumentUpload | MiscUpload | undefined;
-    uploadCandidate = await this.instrumentUploadRepository.findOne(
-      { checksum: req.params.checksum },
-      { relations: ["site"] }
-    );
-    if (uploadCandidate === undefined) {
-      uploadCandidate = await this.miscUploadRepository.findOne(
-        { checksum: req.params.checksum },
-        { relations: ["site"] }
-      );
-      if (uploadCandidate === undefined) {
-        return next({ status: 422, errors: "Checksum does not exist in the database" });
-      }
-    }
-    const site: Site = uploadCandidate!.site;
-    res.locals.site = site;
-    next();
-    return;
-  };
-  modelDataUploadMiddleware: RequestHandler = async (req, res, next) => {
-    const modelUploadCandidate: ModelUpload | undefined = await this.modelUploadRepository.findOne(
-      { checksum: req.params.checksum },
-      { relations: ["site"] }
-    );
-    if (modelUploadCandidate === undefined) {
-      return next({ status: 422, errors: "Checksum does not exist in the database" });
-    }
-    const site: Site = modelUploadCandidate!.site;
-    res.locals.site = site;
-    next();
-    return;
   };
 
-  authorizeSiteMiddleware = ({ permission }: authorizeSiteMiddlewareParams): RequestHandler => {
+  findSiteFromChecksum: RequestHandler = async (req, res, next) => {
+    let uploadMetadata: Upload | undefined;
+    const repos = [this.instrumentUploadRepository, this.miscUploadRepository, this.modelUploadRepository];
+    try {
+      for (const repo of repos) {
+        uploadMetadata = await repo.findOne({ checksum: req.params.checksum }, { relations: ["site"] });
+        if (uploadMetadata) break;
+      }
+      if (uploadMetadata === undefined) {
+        return next({ status: 422, errors: "Checksum does not exist in the database" });
+      }
+      res.locals.site = uploadMetadata.site;
+      return next();
+    } catch (err) {
+      return next({ status: 500, errors: `Internal server error: ${err}` });
+    }
+  };
+
+  verifyPermission = (permission: PermissionType): RequestHandler => {
     return async (req, res, next) => {
       if (!res.locals.authenticated || !res.locals.username) {
-        console.error("Authorizator received unauthenticated request");
-        return next({ status: 500, errors: "Oops" });
+        return next({ status: 500, errors: "Authorizator received unauthenticated request" });
       }
-      if (!res.locals.site) {
-        console.error("Authorizator received request without site");
-        return next({ status: 500, errors: "Oops" });
+      const isSite = "site" in res.locals;
+      let params: any = {
+        username: res.locals.username,
+        permission: permission,
+      };
+      if (isSite) {
+        params.siteId = res.locals.site.id;
       }
-      const userQuery = this.userAccountRepository
+      let userQuery = this.userAccountRepository
         .createQueryBuilder("user_account")
         .leftJoinAndSelect("user_account.permissions", "permission")
         .leftJoinAndSelect("permission.site", "site")
-        .where("user_account.username = :username")
-        .andWhere("(site IS NULL OR site.id = :siteId)") // parentheses!
-        .andWhere("permission.permission = :permission")
-        .setParameters({ username: res.locals.username, siteId: res.locals.site.id, permission: permission });
-      const userWithProperPermission = await userQuery.getOne();
-      if (userWithProperPermission === undefined) {
-        return next({ status: 401, errors: "Missing permission" });
+        .where("user_account.username = :username");
+      if (isSite) {
+        userQuery = userQuery.andWhere("(site IS NULL OR site.id = :siteId)");
       }
-      req.params.site = res.locals.site.id;
-      return next();
+      userQuery = userQuery.andWhere("permission.permission = :permission").setParameters(params);
+      try {
+        const userWithProperPermission = await userQuery.getOne();
+        if (userWithProperPermission === undefined) {
+          return next({ status: 401, errors: "Missing permission" });
+        }
+        if (isSite) {
+          req.params.site = res.locals.site.id;
+        }
+        return next();
+      } catch (err) {
+        return next({ status: 500, errors: `Internal server error: ${err}` });
+      }
     };
   };
 }

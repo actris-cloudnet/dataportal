@@ -11,6 +11,7 @@ let userAccountRepository: any;
 beforeAll(async () => {
   conn = await createConnection();
   userAccountRepository = conn.getRepository("user_account");
+  await userAccountRepository.delete({});
 });
 
 afterAll(async () => {
@@ -39,21 +40,16 @@ describe("test user accounts and permissions", () => {
     }
   });
 
-  it("changes alices username to alice ie does nothing", async () => {
-    const getRespAllUsers = await axios.get(USER_ACCOUNTS_URL);
-    const alice = getRespAllUsers.data.find((u: any) => u.username === "alice");
-    expect(alice).not.toBeUndefined();
-    expect(alice.username).toBe("alice");
+  it("changes alice's username to alice ie does nothing", async () => {
+    const alice = await handlePerson("alice");
     await expect(axios.put(USER_ACCOUNTS_URL.concat("/", alice.id), { username: "alice" })).resolves.toMatchObject({
       status: 200,
       data: { id: alice.id, username: "alice" },
     });
   });
-  it("changes alices username and then resets it back", async () => {
-    const getRespAllUsers = await axios.get(USER_ACCOUNTS_URL);
-    const alice = getRespAllUsers.data.find((u: any) => u.username === "alice");
-    expect(alice).not.toBeUndefined();
-    expect(alice.username).toBe("alice");
+
+  it("changes alice's username and then resets it back", async () => {
+    const alice = await handlePerson("alice");
     await expect(axios.put(USER_ACCOUNTS_URL.concat("/", alice.id), { username: "Ecila" })).resolves.toMatchObject({
       status: 200,
       data: { id: alice.id },
@@ -66,11 +62,9 @@ describe("test user accounts and permissions", () => {
       data: { username: "alice" },
     });
   });
-  it("changes alices password", async () => {
-    const getRespAllUsers = await axios.get(USER_ACCOUNTS_URL);
-    const alice = getRespAllUsers.data.find((u: any) => u.username === "alice");
-    expect(alice).not.toBeUndefined();
-    expect(alice.username).toBe("alice");
+
+  it("changes alice's password", async () => {
+    const alice = await handlePerson("alice");
     await expect(
       axios.put(USER_ACCOUNTS_URL.concat("/", alice.id), {
         password: "alices_new_password",
@@ -85,7 +79,8 @@ describe("test user accounts and permissions", () => {
     expect(aliceFromDb.passwordHash).not.toEqual(alice.passwordHash);
     expect(respGetWithNewPassword.data.permissions).toEqual(alice.permissions);
   });
-  it("fails to change alices username to already existing one", async () => {
+
+  it("fails to change alice's username to already existing one", async () => {
     const getRespAllUsers = await axios.get(USER_ACCOUNTS_URL);
     const alice = getRespAllUsers.data.find((u: any) => u.username === "alice");
     for (const user of getRespAllUsers.data) {
@@ -98,11 +93,8 @@ describe("test user accounts and permissions", () => {
     }
   });
 
-  it("removes alices permissions and then adds some", async () => {
-    const getRespAllUsers = await axios.get(USER_ACCOUNTS_URL);
-    const alice = getRespAllUsers.data.find((u: any) => u.username === "alice");
-    expect(alice).not.toBeUndefined();
-    expect(alice.username).toBe("alice");
+  it("removes alice's permissions and then adds some", async () => {
+    const alice = await handlePerson("alice");
     await expect(
       axios.put(USER_ACCOUNTS_URL.concat("/", alice.id), {
         permissions: [],
@@ -132,11 +124,9 @@ describe("test user accounts and permissions", () => {
       },
     });
   });
+
   it("changes bobs permissions", async () => {
-    const getRespAllUsers = await axios.get(USER_ACCOUNTS_URL);
-    const bob = getRespAllUsers.data.find((u: any) => u.username === "bob");
-    expect(bob).not.toBeUndefined();
-    expect(bob.username).toBe("bob");
+    const bob = await handlePerson("bob");
     await expect(
       axios.put(USER_ACCOUNTS_URL.concat("/", bob.id), {
         permissions: [
@@ -155,11 +145,9 @@ describe("test user accounts and permissions", () => {
       },
     });
   });
+
   it("tries to add permission for alice for a nonexistence site", async () => {
-    const getRespAllUsers = await axios.get(USER_ACCOUNTS_URL);
-    const alice = getRespAllUsers.data.find((u: any) => u.username === "alice");
-    expect(alice).not.toBeUndefined();
-    expect(alice.username).toBe("alice");
+    const alice = await handlePerson("alice");
     await expect(
       axios.put(USER_ACCOUNTS_URL.concat("/", alice.id), {
         permissions: [
@@ -169,11 +157,9 @@ describe("test user accounts and permissions", () => {
       })
     ).rejects.toMatchObject({ response: { status: 422 } });
   });
+
   it("tries to add nonexistence permission", async () => {
-    const getRespAllUsers = await axios.get(USER_ACCOUNTS_URL);
-    const alice = getRespAllUsers.data.find((u: any) => u.username === "alice");
-    expect(alice).not.toBeUndefined();
-    expect(alice.username).toBe("alice");
+    const alice = await handlePerson("alice");
     await expect(
       axios.put(USER_ACCOUNTS_URL.concat("/", alice.id), {
         permissions: [
@@ -183,45 +169,41 @@ describe("test user accounts and permissions", () => {
       })
     ).rejects.toMatchObject({ response: { status: 422 } });
   });
+
   it("tries to change empty password", async () => {
-    const getRespAllUsers = await axios.get(USER_ACCOUNTS_URL);
-    const alice = getRespAllUsers.data.find((u: any) => u.username === "alice");
-    expect(alice).not.toBeUndefined();
-    expect(alice.username).toBe("alice");
+    const alice = await handlePerson("alice");
     await expect(
       axios.put(USER_ACCOUNTS_URL.concat("/", alice.id), {
         password: "",
       })
     ).rejects.toMatchObject({ response: { status: 401 } });
   });
+
   it("tries to change empty username", async () => {
-    const getRespAllUsers = await axios.get(USER_ACCOUNTS_URL);
-    const alice = getRespAllUsers.data.find((u: any) => u.username === "alice");
-    expect(alice).not.toBeUndefined();
-    expect(alice.username).toBe("alice");
+    const alice = await handlePerson("alice");
     await expect(
       axios.put(USER_ACCOUNTS_URL.concat("/", alice.id), {
         username: "",
       })
     ).rejects.toMatchObject({ response: { status: 401 } });
   });
+
   it("deletes alices account", async () => {
-    const getRespAllUsers = await axios.get(USER_ACCOUNTS_URL);
-    const alice = getRespAllUsers.data.find((u: any) => u.username === "alice");
-    expect(alice).not.toBeUndefined();
-    expect(alice.username).toBe("alice");
+    const alice = await handlePerson("alice");
     await expect(axios.delete(USER_ACCOUNTS_URL.concat("/", alice.id))).resolves.toMatchObject({ status: 200 });
     await expect(axios.get(USER_ACCOUNTS_URL.concat("/", alice.id))).rejects.toMatchObject({
       response: { status: 404 },
     });
   });
+
   it("gets all accounts", async () => {
     const getRespAllUsers = await axios.get(USER_ACCOUNTS_URL);
     const users = getRespAllUsers.data.map((u: any) => u.username);
     const expectedUsers = new Set(["bob", "carol", "david", "eve", "bucharest", "granada", "mace-head"]);
-    const intersec = users.filter((u: string) => expectedUsers.has(u));
-    expect(intersec).toHaveLength(7);
+    const intersection = users.filter((u: string) => expectedUsers.has(u));
+    expect(intersection).toHaveLength(7);
   });
+
   it("migrates legacy user accounts", async () => {
     // Delete existing legacy users from the database
     const getRespAllUsers = await axios.get(USER_ACCOUNTS_URL);
@@ -246,4 +228,12 @@ describe("test user accounts and permissions", () => {
       expect(userFromDb.passwordHash).toEqual(passwordHash);
     }
   });
+
+  async function handlePerson(userName: string) {
+    const getRespAllUsers = await axios.get(USER_ACCOUNTS_URL);
+    const user = getRespAllUsers.data.find((u: any) => u.username === userName);
+    expect(userName).not.toBeUndefined();
+    expect(user.username).toBe(userName);
+    return user;
+  }
 });

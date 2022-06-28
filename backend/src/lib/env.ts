@@ -10,7 +10,6 @@ const envVars = [
   "DP_PID_SERVICE_TIMEOUT_MS",
   "DP_BACKEND_URL",
   "GEOLITE2_COUNTRY_PATH",
-  "STATS_PASSWORD",
   "CITATION_SERVICE_URL",
 ];
 
@@ -35,7 +34,6 @@ interface Env {
   DP_PID_SERVICE_TIMEOUT_MS: number;
   DP_BACKEND_URL: string;
   GEOLITE2_COUNTRY_PATH: string;
-  STATS_PASSWORD: string;
   CITATION_SERVICE_URL: string;
 }
 

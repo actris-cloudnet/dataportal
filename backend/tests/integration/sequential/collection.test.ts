@@ -17,31 +17,29 @@ describe("POST /api/collection", () => {
     conn = await createConnection();
     repo = conn.getRepository("collection");
     fileRepo = conn.getRepository("regular_file");
-
-    // Populate necessary table
-    return fileRepo.save(JSON.parse((await fsp.readFile("fixtures/2-regular_file.json")).toString()));
+    await fileRepo.save(JSON.parse((await fsp.readFile("fixtures/2-regular_file.json")).toString()));
   });
 
   beforeEach(async () => {
-    return repo.delete({});
+    await repo.delete({});
   });
 
   afterAll(() => conn.close());
 
   it("on valid new collection inserts a row to db and responds with uuid", async () => {
     const res = await axios.post(url, { files: validFileUuids });
-    return expect(repo.findOneOrFail(res.data)).resolves.toBeTruthy();
+    await expect(repo.findOneOrFail(res.data)).resolves.toBeTruthy();
   });
 
   it("on invalid request responds with 422", async () => {
-    return expect(axios.post(url, { file: validFileUuids })).rejects.toMatchObject(
+    await expect(axios.post(url, { file: validFileUuids })).rejects.toMatchObject(
       genResponse(422, { errors: ['Request is missing field "files"'] })
     );
   });
 
   it("on missing files responds with 422", async () => {
     const missingUuid = validFileUuids.concat(["48092c00-161d-4ca2-a29d-628cf8e960f6"]);
-    return expect(axios.post(url, { files: missingUuid })).rejects.toMatchObject(
+    await expect(axios.post(url, { files: missingUuid })).rejects.toMatchObject(
       genResponse(422, { errors: ["Following files do not exist: 48092c00-161d-4ca2-a29d-628cf8e960f6"] })
     );
   });

@@ -1,22 +1,23 @@
 import axios from "axios";
 import { backendPrivateUrl } from "../../lib";
-import { Connection, createConnection, Repository } from "typeorm/";
-import { UserAccount } from "../../../src/entity/UserAccount";
+import { Connection, createConnection } from "typeorm/";
+
+let conn: Connection;
+let userAccountRepository: any;
+
+beforeAll(async () => {
+  conn = await createConnection();
+  userAccountRepository = conn.getRepository("user_account");
+  await userAccountRepository.delete({});
+});
+
+afterAll(async () => {
+  await userAccountRepository.delete({});
+  await conn.close();
+});
 
 describe("test user account activation", () => {
-  let conn: Connection;
-  let userAccountRepository: Repository<UserAccount>;
   let activationToken: string;
-
-  beforeAll(async () => {
-    conn = await createConnection();
-    userAccountRepository = conn.getRepository("user_account");
-  });
-
-  afterAll(async () => {
-    await userAccountRepository.delete({});
-    await conn.close();
-  });
 
   it("creates user with activation token", async () => {
     const res = await axios.post(`${backendPrivateUrl}user-accounts`, {
@@ -51,7 +52,6 @@ describe("test user account activation", () => {
     const match = res.data.match(/<strong>Password:<\/strong> (\w+)/);
     expect(match).not.toBeNull();
     const password = match![1];
-
     const user = await userAccountRepository.findOneOrFail({ username: "liisa" });
     expect(user.activationToken).toBeNull();
     expect(user.passwordHash).not.toBeNull();
