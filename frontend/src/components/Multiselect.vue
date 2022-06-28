@@ -51,7 +51,7 @@
     <multiselect
       :name="id"
       :id="id"
-      v-model="value"
+      :value="selectedOption"
       placeholder="Select"
       track-by="id"
       label="humanReadableName"
@@ -59,6 +59,7 @@
       :show-labels="false"
       :multiple="multiple"
       :hideSelected="false"
+      @input="onInput"
       @search-change="isIddqd"
     >
       <template slot="tag" slot-scope="props" v-if="icons">
@@ -84,56 +85,41 @@ import Component from "vue-class-component";
 import Vue from "vue";
 import { Prop, Watch } from "vue-property-decorator";
 import Multiselect from "vue-multiselect";
-import { Selection } from "../views/Search.vue";
 import { DevMode } from "../lib/DevMode";
+import { notEmpty } from "../lib";
 
-Vue.component("multiselect", Multiselect);
+export interface Option {
+  id: string;
+  humanReadableName: string;
+}
 
-@Component
+type OptionId = Option["id"];
+
+@Component({ components: { Multiselect } })
 export default class CustomMultiselect extends Vue {
   @Prop() id!: string;
   @Prop() label!: string;
-  @Prop() options!: Selection[];
+  @Prop() options!: Option[];
   @Prop() icons!: boolean;
   @Prop() getIcon!: Function;
   @Prop() devMode!: DevMode;
-  @Prop() setSelectedIds!: Function | null;
-  @Prop() selectedIds!: string[];
   @Prop() multiple!: boolean;
+  @Prop() value!: OptionId | OptionId[] | null;
 
-  selection: Selection[] = [];
+  selectedOption: Option | Option[] | null = null;
 
-  set value(selection) {
-    // Can be array or not
-    this.selection = selection;
-    if (this.setSelectedIds) {
-      if (!this.multiple) {
-        // Single product selector for the site landing page
-        this.setSelectedIds(selection);
-      } else {
-        this.setSelectedIds(this.selection.map((product) => product.id));
-      }
+  @Watch("value")
+  onValueChanged(value: OptionId | OptionId[] | null) {
+    if (Array.isArray(value)) {
+      this.selectedOption = value.map((v) => this.options.find((option) => option.id === v)).filter(notEmpty);
+    } else {
+      const result = this.options.find((option) => option.id === value);
+      this.selectedOption = result !== undefined ? result : null;
     }
-    this.$emit("input", this.getSelectionIds());
   }
 
-  get value() {
-    return this.selection;
-  }
-
-  @Watch("selectedIds")
-  onSelectedIdsChange() {
-    this.selection = this.options.filter((selection: Selection) => this.selectedIds.includes(selection.id));
-  }
-
-  getSelectionIds() {
-    // Return all options by default
-    return this.selection.length > 0 ? this.selection.map((d) => d.id) : this.options.map((d) => d.id);
-  }
-
-  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-  setSelect(value: any) {
-    this.value = value;
+  onInput(input: Option | Option[]) {
+    this.$emit("input", Array.isArray(input) ? input.map((v) => v.id) : input.id);
   }
 
   isIddqd(target: string, _: string) {

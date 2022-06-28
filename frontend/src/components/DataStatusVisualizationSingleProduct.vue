@@ -99,7 +99,7 @@ import Header from "../components/Header.vue";
   components: { Header },
 })
 export default class ProductAvailabilityVisualizationSingle extends ProductAvailabilityVisualization {
-  @Prop() product!: string[];
+  @Prop() product!: string;
 
   get yearsReduced() {
     return this.years.map((year) => ({
@@ -107,9 +107,9 @@ export default class ProductAvailabilityVisualizationSingle extends ProductAvail
       dates: year.dates.map((date) => ({
         date: date.date,
         products: {
-          "2": date.products["2"].filter((x) => x.id == this.product[0]),
-          "1b": date.products["1b"].filter((x) => x.id == this.product[0]),
-          "1c": date.products["1c"].filter((x) => x.id == this.product[0]),
+          "2": date.products["2"].filter((x) => x.id == this.product),
+          "1b": date.products["1b"].filter((x) => x.id == this.product),
+          "1c": date.products["1c"].filter((x) => x.id == this.product),
         },
       })),
     }));
