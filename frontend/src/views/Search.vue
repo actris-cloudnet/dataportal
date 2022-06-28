@@ -283,14 +283,12 @@ div.checkbox
           :zoom="showAllSites ? 2 : 3"
           :showLegend="showAllSites"
           :enableBoundingBox="true"
-        >
-        </Map>
+        />
       </div>
 
       <custom-multiselect
         label="Location"
-        :selectedIds="selectedSiteIds"
-        :setSelectedIds="setSelectedSiteIds"
+        v-model="selectedSiteIds"
         :options="allSites"
         id="siteSelect"
         class="nobottommargin"
@@ -299,8 +297,7 @@ div.checkbox
         :multiple="true"
         :getIcon="getMarkerIcon"
         :devMode="devMode"
-      >
-      </custom-multiselect>
+      />
       <div class="checkbox">
         <input type="checkbox" id="showAllSitesCheckbox" name="showAllSitesCheckbox" v-model="showAllSites" />
         <label for="showAllSitesCheckbox">Show all sites</label>
@@ -412,16 +409,14 @@ div.checkbox
 
       <custom-multiselect
         label="Product"
-        :selectedIds="selectedProductIds"
-        :setSelectedIds="setSelectedProductIds"
+        v-model="selectedProductIds"
         :options="allProducts"
         id="productSelect"
         :multiple="true"
         :icons="true"
         :getIcon="getProductIcon"
         :devMode="devMode"
-      >
-      </custom-multiselect>
+      />
       <div class="checkbox">
         <input type="checkbox" id="showExpProductsCheckbox" name="showExpProductsCheckbox" v-model="showExpProducts" />
         <label for="showExpProductsCheckbox">Show experimental products</label>
@@ -430,13 +425,11 @@ div.checkbox
       <custom-multiselect
         v-show="isVizMode()"
         label="Variable"
-        :selectedIds="selectedVariableIds"
-        :setSelectedIds="setSelectedVariableIds"
+        v-model="selectedVariableIds"
         :options="selectableVariables"
         :multiple="true"
         id="variableSelect"
-      >
-      </custom-multiselect>
+      />
 
       <button v-if="isVizMode()" @click="navigateToSearch('data')" class="secondaryButton widebutton">
         View in data search &rarr;
@@ -479,7 +472,7 @@ import VCalendar from "v-calendar";
 import axios from "axios";
 import { Site } from "../../../backend/src/entity/Site";
 import Datepicker from "../components/Datepicker.vue";
-import CustomMultiselect from "../components/Multiselect.vue";
+import CustomMultiselect, { Option } from "../components/Multiselect.vue";
 import DataSearchResult from "../components/DataSearchResult.vue";
 import {
   constructTitle,
@@ -498,19 +491,12 @@ import { ProductVariable } from "../../../backend/src/entity/ProductVariable";
 import { SearchFileResponse } from "../../../backend/src/entity/SearchFileResponse";
 import Map, { getMarkerIcon } from "../components/Map.vue";
 
-Vue.component("datepicker", Datepicker);
-Vue.component("custom-multiselect", CustomMultiselect);
-Vue.component("data-search-result", DataSearchResult);
-Vue.component("viz-search-result", VizSearchResult);
-
 Vue.use(VCalendar);
 
-export interface Selection {
-  id: string;
-  humanReadableName: string;
-}
-
-@Component({ name: "app-search", components: { Map } })
+@Component({
+  name: "app-search",
+  components: { Map, Datepicker, CustomMultiselect, DataSearchResult, VizSearchResult },
+})
 export default class Search extends Vue {
   @Prop() mode!: string;
 
@@ -684,10 +670,6 @@ export default class Search extends Vue {
     });
   }
 
-  setSelectedSiteIds(siteIds: []) {
-    this.selectedSiteIds = siteIds;
-  }
-
   dateErrorsExist(dateError: { [key: string]: boolean }) {
     return !(dateError.isValidDateString && dateError.isAfterStart && dateError.isBeforeEnd && dateError.isNotInFuture);
   }
@@ -718,13 +700,13 @@ export default class Search extends Vue {
     return (this.isVizMode() || this.dateFromError[errorId]) && this.dateToError[errorId];
   }
 
-  onMapMarkerClick(ids: Array<string>) {
+  onMapMarkerClick(ids: string[]) {
     const union = this.selectedSiteIds.concat(ids);
     const intersection = this.selectedSiteIds.filter((id) => ids.includes(id));
     this.selectedSiteIds = union.filter((id) => !intersection.includes(id));
   }
 
-  alphabeticalSort = (a: Selection, b: Selection) => a.humanReadableName > b.humanReadableName;
+  alphabeticalSort = (a: Option, b: Option) => a.humanReadableName > b.humanReadableName;
 
   selectNormalSites = (site: Site) => (site.type as string[]).includes("cloudnet");
 

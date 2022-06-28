@@ -103,7 +103,10 @@
       <div class="forcewrap"></div>
 
       <section id="product_availability" class="graph">
-        <header>Product availability {{ selectedProduct }}</header>
+        <header>
+          Product availability
+          <template v-if="selectedProduct">({{ selectedProduct }})</template>
+        </header>
 
         <section class="details" v-if="singleProductView">
           <ProductAvailabilityVisualizationSingle
@@ -129,7 +132,10 @@
       </section>
 
       <section id="product_quality" class="graph">
-        <header>Product quality {{ selectedProduct }}</header>
+        <header>
+          Product quality
+          <template v-if="selectedProduct">({{ selectedProduct }})</template>
+        </header>
 
         <section class="details" v-if="singleProductView">
           <ProductAvailabilityVisualizationSingle
@@ -162,10 +168,9 @@
       <div id="siteselect">
         <custom-multiselect
           v-if="dataStatusParser"
-          ref="productFilter"
+          v-model="selectedProductId"
           :multiple="false"
           label="Product filter"
-          :setSelectedIds="setSelectedProductIds"
           :options="allProducts"
           id="singleProductSelect"
           :icons="true"
@@ -194,7 +199,6 @@ import { DevMode } from "../lib/DevMode";
 import { Product } from "../../../backend/src/entity/Product";
 import { DataStatusParser } from "../lib/DataStatusParser";
 import CustomMultiselect from "../components/Multiselect.vue";
-import { Selection } from "../views/Search.vue";
 
 @Component({
   name: "app-site",
@@ -209,14 +213,13 @@ export default class SiteView extends Vue {
   instruments: ReducedMetadataResponse[] | null = null;
   instrumentsFromLastDays = 30;
   allProducts: Product[] | null = null;
-  selectedProductId: string[] = [];
+  selectedProductId: string | null = null;
   mapKey = 0;
   busy = false;
   getIconUrl = getProductIcon;
   formatCoordinates = formatCoordinates;
   devMode = new DevMode();
   dataStatusParser: DataStatusParser | null = null;
-  singleProductView = false;
   payload = { developer: this.devMode.activated };
 
   created() {
@@ -250,23 +253,19 @@ export default class SiteView extends Vue {
       .catch();
   }
 
-  setSelectedProductIds(product: Selection) {
-    this.singleProductView = true;
-    this.selectedProductId = [product.id];
+  get selectedProduct() {
+    if (!this.selectedProductId || !this.allProducts) return null;
+    const product = this.allProducts.find((product) => product.id === this.selectedProductId);
+    if (!product) return null;
+    return product.humanReadableName;
   }
 
-  get selectedProduct() {
-    if (this.singleProductView && this.allProducts) {
-      return `(${this.allProducts.filter((prod) => prod.id == this.selectedProductId[0])[0].humanReadableName})` || "";
-    }
-    return "";
+  get singleProductView(): boolean {
+    return this.selectedProductId != null;
   }
 
   reset() {
-    const filter = this.$refs.productFilter as any; // eslint-disable-line  @typescript-eslint/no-explicit-any
-    filter.setSelect([]);
-    this.singleProductView = false;
-    this.selectedProductId = [];
+    this.selectedProductId = null;
   }
 
   async initDataStatusParser(product: string | null = null) {
