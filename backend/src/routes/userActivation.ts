@@ -63,7 +63,7 @@ export class UserActivationRoutes {
       const password = randomString(32);
       user.setPassword(password);
       user.activationToken = null;
-      this.userAccountRepository.save(user);
+      await this.userAccountRepository.save(user);
       res.status(201).contentType("text/html; charset=utf-8").send(postTemplate(user.username, password));
     } catch (err) {
       next({ status: 500, errors: err });

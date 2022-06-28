@@ -2,7 +2,6 @@ import "reflect-metadata";
 import { createConnection } from "typeorm";
 import * as express from "express";
 import { ErrorRequestHandler } from "express";
-import * as basicAuth from "express-basic-auth";
 import { RequestError } from "./entity/RequestError";
 import { stringify, getIpLookup } from "./lib";
 import { Middleware } from "./lib/middleware";
@@ -20,7 +19,6 @@ import { QualityReportRoutes } from "./routes/qualityreport";
 import { SiteContactRoutes } from "./routes/siteContact";
 import { UserAccountRoutes } from "./routes/userAccount";
 import { PublicationRoutes } from "./routes/publication";
-import env from "./lib/env";
 import { Authenticator, Authorizator } from "./lib/auth";
 import { PermissionType } from "./entity/Permission";
 import { UserActivationRoutes } from "./routes/userActivation";
@@ -75,11 +73,6 @@ import { UserActivationRoutes } from "./routes/userActivation";
     }
     next(err);
   };
-
-  let authMiddleware = basicAuth({
-    users: { admin: env.STATS_PASSWORD },
-    challenge: true,
-  });
 
   if (process.env.NODE_ENV != "production") {
     app.use(function (_req, res, next) {
@@ -163,10 +156,10 @@ import { UserActivationRoutes } from "./routes/userActivation";
 
   app.post(
     "/upload/metadata",
-    authenticator.middleware,
+    authenticator.verifyCredentials,
     express.json(),
-    authorizator.metadataMiddleware,
-    authorizator.authorizeSiteMiddleware({ permission: PermissionType.canUpload }),
+    authorizator.verifySite,
+    authorizator.verifyPermission(PermissionType.canUpload),
     uploadRoutes.validateMetadata,
     uploadRoutes.validateFilename,
     uploadRoutes.postMetadata,
@@ -175,9 +168,9 @@ import { UserActivationRoutes } from "./routes/userActivation";
   app.put(
     "/upload/data/:checksum",
     middleware.validateMD5Param,
-    authenticator.middleware,
-    authorizator.instrumentDataUploadMiddleware,
-    authorizator.authorizeSiteMiddleware({ permission: PermissionType.canUpload }),
+    authenticator.verifyCredentials,
+    authorizator.findSiteFromChecksum,
+    authorizator.verifyPermission(PermissionType.canUpload),
     express.raw({ limit: "100gb" }),
     uploadRoutes.putData,
     errorAsPlaintext
@@ -186,10 +179,10 @@ import { UserActivationRoutes } from "./routes/userActivation";
   // model data upload (for Ewan only)
   app.post(
     "/model-upload/metadata",
-    authenticator.middleware,
+    authenticator.verifyCredentials,
     express.json(),
-    authorizator.metadataMiddleware,
-    authorizator.authorizeSiteMiddleware({ permission: PermissionType.canUploadModel }),
+    authorizator.verifySite,
+    authorizator.verifyPermission(PermissionType.canUploadModel),
     uploadRoutes.validateMetadata,
     uploadRoutes.validateFilename,
     uploadRoutes.postMetadata
@@ -198,9 +191,9 @@ import { UserActivationRoutes } from "./routes/userActivation";
   app.put(
     "/model-upload/data/:checksum",
     middleware.validateMD5Param,
-    authenticator.middleware,
-    authorizator.modelDataUploadMiddleware,
-    authorizator.authorizeSiteMiddleware({ permission: PermissionType.canUploadModel }),
+    authenticator.verifyCredentials,
+    authorizator.findSiteFromChecksum,
+    authorizator.verifyPermission(PermissionType.canUploadModel),
     express.raw({ limit: "1gb" }),
     uploadRoutes.putData
   );
@@ -219,9 +212,20 @@ import { UserActivationRoutes } from "./routes/userActivation";
   app.get("/upload-dateforsize", uploadRoutes.dateforsize);
   app.get("/file-dateforsize", fileRoutes.dateforsize);
   app.put("/quality/:uuid", express.json(), qualityRoutes.putQualityReport);
-  app.get("/api/download/stats", authMiddleware, dlRoutes.stats);
-  app.delete("/api/files/:uuid", authMiddleware, middleware.checkDeleteParams, fileRoutes.deleteFile);
-  app.post("/api/publications/", authMiddleware, publicationRoutes.postPublication);
+  app.get(
+    "/api/download/stats",
+    authenticator.verifyCredentials,
+    authorizator.verifyPermission(PermissionType.canGetStats),
+    dlRoutes.stats
+  );
+  app.delete(
+    "/api/files/:uuid",
+    authenticator.verifyCredentials,
+    middleware.checkDeleteParams,
+    authorizator.verifyPermission(PermissionType.canDelete),
+    fileRoutes.deleteFile
+  );
+  app.post("/api/publications/", publicationRoutes.postPublication);
   app.get("/api/publications/", publicationRoutes.getPublications);
 
   // site contacts private

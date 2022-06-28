@@ -8,6 +8,8 @@ export enum PermissionType {
   canUploadModel = "canUploadModel",
   canCalibrate = "canCalibrate",
   canProcess = "canProcess",
+  canDelete = "canDelete",
+  canGetStats = "canGetStats",
 }
 
 @Entity()

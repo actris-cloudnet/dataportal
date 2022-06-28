@@ -34,7 +34,7 @@ beforeEach(async () => {
   await conn
     .getRepository("model_file")
     .save(JSON.parse((await fsp.readFile("fixtures/2-model_file.json")).toString()));
-  return conn
+  await conn
     .getRepository("search_file")
     .save(JSON.parse((await fsp.readFile("fixtures/2-search_file.json")).toString()));
 });
@@ -64,7 +64,7 @@ describe("PUT /quality/:uuid", () => {
     });
     const res = await axios.get(searchUrl, { params: { dateFrom: "2021-02-20" } });
     expect(res.data[0]).toMatchObject({ qualityScore: validPayload.overallScore });
-    return expect(axios.get(`${publicUrl}acf78456-11b1-41a6-b2de-aa7590a75675`)).resolves.toMatchObject({
+    await expect(axios.get(`${publicUrl}acf78456-11b1-41a6-b2de-aa7590a75675`)).resolves.toMatchObject({
       status: 200,
       data: validPayload,
     });
@@ -82,7 +82,7 @@ describe("PUT /quality/:uuid", () => {
       status: 200,
       data: { qualityScore: tmpPayload.overallScore },
     });
-    return expect(axios.get(`${publicUrl}acf78456-11b1-41a6-b2de-aa7590a75675`)).resolves.toMatchObject({
+    await expect(axios.get(`${publicUrl}acf78456-11b1-41a6-b2de-aa7590a75675`)).resolves.toMatchObject({
       status: 200,
       data: tmpPayload,
     });
@@ -100,14 +100,14 @@ describe("PUT /quality/:uuid", () => {
       status: 200,
       data: { qualityScore: tmpPayload.overallScore },
     });
-    return expect(axios.get(`${publicUrl}b5d1d5af-3667-41bc-b952-e684f627d91c`)).resolves.toMatchObject({
+    await expect(axios.get(`${publicUrl}b5d1d5af-3667-41bc-b952-e684f627d91c`)).resolves.toMatchObject({
       status: 200,
       data: tmpPayload,
     });
   });
 
   it("fails with 400 if file does not exist", async () => {
-    return expect(axios.put(`${privateUrl}4FC4577C-84BF-4557-86D8-1A1FB8D1D81E`, validPayload)).rejects.toMatchObject({
+    await expect(axios.put(`${privateUrl}4FC4577C-84BF-4557-86D8-1A1FB8D1D81E`, validPayload)).rejects.toMatchObject({
       response: { status: 400 },
     });
   });
@@ -117,7 +117,6 @@ describe("PUT /quality/:uuid", () => {
       status: 200,
       data: { updatedAt: "2021-02-22T10:39:58.449Z" },
     });
-
     await expect(axios.put(`${privateUrl}acf78456-11b1-41a6-b2de-aa7590a75675`, validPayload)).resolves.toMatchObject({
       status: 201,
     });
@@ -125,7 +124,6 @@ describe("PUT /quality/:uuid", () => {
       status: 200,
       data: { updatedAt: "2021-02-22T10:39:58.449Z" },
     });
-
     const tmpPayload = { ...validPayload, overallScore: 0.8 };
     await expect(axios.put(`${privateUrl}acf78456-11b1-41a6-b2de-aa7590a75675`, tmpPayload)).resolves.toMatchObject({
       status: 200,

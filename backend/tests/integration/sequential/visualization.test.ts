@@ -19,6 +19,7 @@ let repo: Repository<Visualization>;
 
 const privUrl = `${backendPrivateUrl}visualizations/`;
 const imgUrl = `${backendPublicUrl}download/image/`;
+
 describe("PUT /visualizations", () => {
   beforeAll(async () => {
     conn = await createConnection();
@@ -27,7 +28,7 @@ describe("PUT /visualizations", () => {
     await conn
       .getRepository("model_file")
       .save(JSON.parse((await fsp.readFile("fixtures/2-model_file.json")).toString()));
-    return axios.put(`${storageServiceUrl}cloudnet-img/${validId}`, "content");
+    await axios.put(`${storageServiceUrl}cloudnet-img/${validId}`, "content");
   });
 
   afterEach(async () => Promise.all([repo.delete(badId), repo.delete(validId)]).catch());
@@ -38,7 +39,7 @@ describe("PUT /visualizations", () => {
     const res = await axios.put(`${privUrl}${validId}`, validJson);
     expect(res.status).toEqual(201);
     await expect(repo.findOneOrFail(validId)).resolves.toBeTruthy();
-    return expect(axios.get(`${imgUrl}${validId}`)).resolves.toMatchObject({
+    await expect(axios.get(`${imgUrl}${validId}`)).resolves.toMatchObject({
       status: 200,
       data: "content",
       headers: { "content-type": "image/png" },
@@ -46,8 +47,8 @@ describe("PUT /visualizations", () => {
   });
 
   it("on invalid path responds with 400", async () =>
-    expect(axios.put(`${privUrl}${badId}`, validJson)).rejects.toMatchObject({ response: { status: 400 } }));
+    await expect(axios.put(`${privUrl}${badId}`, validJson)).rejects.toMatchObject({ response: { status: 400 } }));
 
   it("on invalid source file uuid responds with 400", async () =>
-    expect(axios.put(`${privUrl}${validId}`, badUuid)).rejects.toMatchObject({ response: { status: 400 } }));
+    await expect(axios.put(`${privUrl}${validId}`, badUuid)).rejects.toMatchObject({ response: { status: 400 } }));
 });

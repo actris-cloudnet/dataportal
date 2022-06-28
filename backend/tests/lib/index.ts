@@ -14,13 +14,11 @@ export async function clearRepo(repo: string) {
 }
 
 export async function putFile(filename: string) {
-  await Promise.all([
-    axios.put(`${storageServiceUrl}cloudnet-product-volatile/${filename}`, "content"),
-    axios.put(`${storageServiceUrl}cloudnet-product/${filename}`, "content"),
-  ]);
+  await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${filename}`, "content");
+  await axios.put(`${storageServiceUrl}cloudnet-product/${filename}`, "content");
   const json = JSON.parse(fs.readFileSync(`tests/data/${filename}.json`, "utf8"));
   const url = `${backendPrivateUrl}files/${filename}`;
-  return axios.put(url, json);
+  return await axios.put(url, json);
 }
 
 export const wait = async (ms: number) => new Promise((resolve, _) => setTimeout(resolve, ms));

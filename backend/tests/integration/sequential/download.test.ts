@@ -1,12 +1,13 @@
-import axios, { AxiosBasicCredentials } from "axios";
+import axios from "axios";
 import { promises as fsp } from "fs";
 
-import { backendPublicUrl } from "../../lib";
+import { backendPublicUrl, str2base64 } from "../../lib";
 import { Connection, createConnection, Repository } from "typeorm";
 import { Download, ObjectType } from "../../../src/entity/Download";
 import { ModelFile, RegularFile } from "../../../src/entity/File";
 import { Collection } from "../../../src/entity/Collection";
 import { InstrumentUpload } from "../../../src/entity/Upload";
+import { initUsersAndPermissions } from "../../lib/userAccountAndPermissions";
 
 let conn: Connection;
 let regularFileRepo: Repository<RegularFile>;
@@ -21,10 +22,11 @@ interface Params {
   fileCountry?: string;
 }
 
-const doRequest = async (params: Params, auth?: AxiosBasicCredentials) =>
-  axios.get(`${backendPublicUrl}download/stats`, { params, auth });
+async function doRequest(params: Params, headers: any = { authorization: `Basic ${str2base64("bob:bobs_pass")}` }) {
+  return await axios.get(`${backendPublicUrl}download/stats`, { params: params, headers: headers });
+}
 
-const getStats = async (params: Params) => (await doRequest(params, { username: "admin", password: "admin" })).data;
+const getStats = async (params: Params) => (await doRequest(params)).data;
 
 describe("GET /api/download/stats", () => {
   beforeAll(async () => {
@@ -34,6 +36,7 @@ describe("GET /api/download/stats", () => {
     modelFileRepo = conn.getRepository("model_file");
     collectionRepo = conn.getRepository("collection");
     instrumentUploadRepo = conn.getRepository("instrument_upload");
+    await initUsersAndPermissions();
     await regularFileRepo.save(JSON.parse((await fsp.readFile("fixtures/2-regular_file.json")).toString()));
     await modelFileRepo.save(JSON.parse((await fsp.readFile("fixtures/2-model_file.json")).toString()));
     await collectionRepo.save(JSON.parse((await fsp.readFile("fixtures/3-collection.json")).toString()));
@@ -65,7 +68,7 @@ describe("GET /api/download/stats", () => {
   });
 
   it("fails without authentication", () =>
-    expect(doRequest({ dimension: "date,downloads", type: "file" })).rejects.toMatchObject({
+    expect(doRequest({ dimension: "date,downloads", type: "file" }, null)).rejects.toMatchObject({
       response: { status: 401 },
     }));
 
