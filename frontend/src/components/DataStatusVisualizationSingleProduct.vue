@@ -11,7 +11,6 @@
   position: relative
   border-top: 1px solid gray
   border-bottom: 1px solid gray
-  cursor: default
 
 .dataviz-tooltip
   position: fixed
@@ -39,7 +38,7 @@
           v-for="date in year.dates"
           v-bind:key="date.date"
           class="dataviz-date"
-          :id="`dataviz-color-${year['year']}-${date['date']}`"
+          :id="`dataviz-color-${year.year}-${date.date}`"
           :href="createLinkToLandingPage(date.products)"
           :class="createColorClassForSingleProduct(date.products)"
           @mouseenter="debouncedSetCurrentYearDate(year, date, $event)"
@@ -115,7 +114,7 @@ export default class ProductAvailabilityVisualizationSingle extends ProductAvail
     }));
   }
 
-  createLinkToLandingPage(products: ProductLevels) {
+  createLinkToLandingPage(products: ProductLevels): string | undefined {
     const prodsAll = products["2"].concat(products["1b"], products["1c"]);
     if (prodsAll.length > 0) {
       const uuid = prodsAll[0].uuid;
