@@ -11,6 +11,10 @@
   position: relative
   border-top: 1px solid gray
   border-bottom: 1px solid gray
+  cursor: default
+
+.dataviz-date[href]
+  cursor: pointer
 
 .all-raw
   background: #a0df7b
@@ -105,13 +109,14 @@
       </div>
       <div class="dataviz-year">{{ year["year"] }}</div>
       <div class="dataviz-yearblock" @mouseleave="debouncedHideTooltip()">
-        <div
+        <a
           v-for="date in year.dates"
           class="dataviz-date"
-          :id="`dataviz-color-${year['year']}-${date['date']}`"
+          :id="`dataviz-color-${year.year}-${date.date}`"
           :class="createColorClass(date.products)"
+          :href="createLinkToSearchPage(`${year.year}-${date.date}`, date.products)"
           @mouseenter="debouncedSetCurrentYearDate(year, date, $event)"
-        ></div>
+        ></a>
       </div>
     </div>
     <div></div>
@@ -391,6 +396,12 @@ export default class ProductAvailabilityVisualization extends Vue {
 
   isNotLegacy(prod: ProductInfo) {
     return !this.isLegacy(prod);
+  }
+
+  createLinkToSearchPage(date: string, products: ProductLevels): string | undefined {
+    if (!this.qualityScores && !this.noData(products)) {
+      return `/search/data?site=${this.site}&dateFrom=${date}&dateTo=${date}`;
+    }
   }
 }
 </script>
