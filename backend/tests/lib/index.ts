@@ -1,5 +1,4 @@
 import * as fs from "fs";
-import * as path from "path";
 import { resolve } from "path";
 import { createConnection } from "typeorm";
 import axios from "axios";
@@ -7,16 +6,6 @@ import axios from "axios";
 if (!process.env.DP_BACKEND_URL) throw new Error("DP_BACKEND_URL must be set");
 if (!process.env.DP_FRONTEND_URL) throw new Error("DP_FRONTEND_URL must be set");
 if (!process.env.DP_SS_TEST_URL) throw new Error("DP_SS_TEST_URL must be set");
-
-export function clearDir(dir: string) {
-  const files = fs.readdirSync(dir);
-  for (const file of files) {
-    const full_path = path.join(dir, file);
-    if (!fs.lstatSync(full_path).isDirectory()) {
-      fs.unlinkSync(full_path);
-    }
-  }
-}
 
 export async function clearRepo(repo: string) {
   const conn = await createConnection();
@@ -39,8 +28,6 @@ export const wait = async (ms: number) => new Promise((resolve, _) => setTimeout
 export const genResponse = (status: any, data: any) => ({ response: { status, data } });
 
 const backendUrl = process.env.DP_BACKEND_URL.replace("/api", "");
-export const publicDir = "tests/data/public";
-export const backendProtectedUrl = `${backendUrl}/protected/`;
 export const backendPublicUrl = `${backendUrl}/api/`;
 export const backendPrivateUrl = `${backendUrl}/`;
 export const frontendUrl = `${process.env.DP_FRONTEND_URL}/`;
