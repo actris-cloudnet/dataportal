@@ -12,11 +12,12 @@ header
   height: 4.5em
 
 .portal-name
-  cursor: pointer
   font-family: $header-font
   color: white
   margin: 0
   line-height: 1
+  &:hover
+    text-decoration: none
   &>h1
     display: inline
     margin: 0
@@ -29,9 +30,9 @@ header
 
 <template functional>
   <header class="global">
-    <div onclick="window.location = '/'" class="vertical-center portal-name">
+    <a href="/" class="vertical-center portal-name">
       <h1>Cloudnet</h1>
       <span>data portal</span>
-    </div>
+    </a>
   </header>
 </template>
