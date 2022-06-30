@@ -17,7 +17,7 @@ main#frontpage
   main
     text-align: justify
     display: inline-block
-    max-width: 51em
+    max-width: 40em
     width: 100%
     h3
       text-align: center
@@ -50,15 +50,17 @@ main#frontpage
       <img alt="Cloudnet logo" src="../assets/cloudnet_logo_large_2020.png" />
     </header>
     <main>
-      <h3>Welcome to the ACTRIS Data Centre node for cloud profiling (CLU).</h3>
-      <!-- eslint-disable-next-line -->
-      CLU provides vertical profiles of cloud and turbulent properties at high temporal and spatial resolution from a
-      network of ground-based stations using the Cloudnet processing suite. Major objectives also include the
-      development and validation of new synergetic remote sensing algorithms, and the continuous evaluation of the
-      representation of clouds and other atmospheric parameters in climate and weather forecast models.
-      <!-- eslint-disable-next-line -->
-      This node is physically hosted by FMI in Helsinki, Finland.
-      <!--You can find our contact information and API documentation at the bottom of this page.-->
+      <h3>Welcome to ACTRIS Cloudnet data portal</h3>
+      <p>
+        The ACTRIS Cloudnet data portal provides data processing and curation service of ground-based cloud remote
+        sensing measurements. This includes centralized processing, quality control, provenance, data harmonization and
+        archiving.
+      </p>
+      <p>
+        The data portal is developed by the Cloud remote sensing data centre unit (CLU) as part of the
+        <a href="https://www.actris.eu/">ACTRIS</a> research infrastructure, and operated at the
+        <a href="https://en.ilmatieteenlaitos.fi/">Finnish Meteorological Institute</a>.
+      </p>
       <div class="buttons">
         <router-link to="search/data" class="download">
           <img alt="magnifying glass" :src="require('../assets/icons/search-white.png')" /><br />
