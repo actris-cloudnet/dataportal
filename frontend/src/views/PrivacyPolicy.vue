@@ -27,7 +27,7 @@ h4
     <!-- eslint-disable max-len -->
     <h2>Cloudnet privacy policy</h2>
     <h3>Scope</h3>
-    This policy describes how we, ACTRIS Data Centre node for cloud profiling (later Cloudnet) at the Finnish
+    This policy describes how we, ACTRIS Cloud remote sensing data centre unit (later Cloudnet) at the Finnish
     Meteorological Institute (later FMI), use your personal data when you visit the Cloudnet website cloudnet.fmi.fi
     (later Cloudnet data portal).
     <h3>Who is responsible for my data?</h3>
