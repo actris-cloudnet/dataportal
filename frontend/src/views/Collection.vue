@@ -225,13 +225,13 @@ export default class CollectionView extends Vue {
     return combinedFileSize(this.sortedFiles);
   }
 
-  async generatePid() {
+  generatePidInBackground() {
     if (!this.response || this.response.pid) return;
     const payload = {
       type: "collection",
       uuid: this.uuid,
     };
-    return axios
+    axios
       .post(`${this.apiUrl}generate-pid`, payload)
       .then(({ data }) => {
         if (!this.response) return;
@@ -267,7 +267,7 @@ export default class CollectionView extends Vue {
           this.response = response;
         })
         .then(() => {
-          this.generatePid();
+          this.generatePidInBackground();
           const siteIds = this.getUnique(this.sortedFiles, "siteId");
           const productIds = this.getUnique(this.sortedFiles, "productId");
           const modelIds = this.getUnique(this.sortedFiles, "modelId");

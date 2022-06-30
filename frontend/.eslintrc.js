@@ -8,6 +8,7 @@ module.exports = {
   extends: ["plugin:vue/essential", "eslint:recommended", "@vue/typescript/recommended", "prettier"],
   parserOptions: {
     ecmaVersion: 2020,
+    project: "./tsconfig.eslint.json",
   },
   rules: {
     ...commonRules,

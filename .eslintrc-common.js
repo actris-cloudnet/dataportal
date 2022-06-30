@@ -10,5 +10,6 @@ module.exports = {
         argsIgnorePattern: "^_",
       },
     ],
+    "@typescript-eslint/no-floating-promises": "error",
   },
 };

@@ -436,7 +436,7 @@ export default class FileView extends Vue {
   async created() {
     document.addEventListener("click", this.hideBoxes);
     await this.onUuidChange();
-    return this.fetchCitations();
+    await this.fetchCitations();
   }
 
   destroyed() {
@@ -488,18 +488,17 @@ export default class FileView extends Vue {
     );
   }
 
-  fetchCitations() {
+  async fetchCitations() {
     const citationQueryOptions = { params: { showCitations: true } };
-    Promise.all([
+    const [sites, models] = await Promise.all([
       axios.get(`${this.apiUrl}sites/`, citationQueryOptions),
       axios.get(`${this.apiUrl}models/`, citationQueryOptions),
-    ]).then(([sites, models]) => {
-      if (!this.response) return;
-      this.site = sites.data.filter((site: Site) => site.id == (this.response as File).site.id)[0];
-      if ((this.response as ModelFile).model) {
-        this.model = models.data.filter((model: Model) => model.id == (this.response as ModelFile).model.id)[0];
-      }
-    });
+    ]);
+    if (!this.response) return;
+    this.site = sites.data.filter((site: Site) => site.id == (this.response as File).site.id)[0];
+    if ((this.response as ModelFile).model) {
+      this.model = models.data.filter((model: Model) => model.id == (this.response as ModelFile).model.id)[0];
+    }
   }
 
   @Watch("uuid")

@@ -22,7 +22,8 @@ import { PublicationRoutes } from "./routes/publication";
 import { Authenticator, Authorizator } from "./lib/auth";
 import { PermissionType } from "./entity/Permission";
 import { UserActivationRoutes } from "./routes/userActivation";
-(async function () {
+
+async function createServer() {
   const port = 3000;
   const app = express();
 
@@ -257,4 +258,8 @@ import { UserActivationRoutes } from "./routes/userActivation";
   app.use(errorHandler);
 
   app.listen(port, () => console.log(`App listening on port ${port}!`));
-})();
+}
+
+createServer().catch((err) => {
+  console.error(`Fatal error: ${err}`);
+});

@@ -87,7 +87,10 @@ export default class SiteView extends Vue {
         },
       })
       .then(({ data }) => (this.latestFile = data[0]))
-      .catch();
+      .catch(({ response }) => {
+        this.error = true;
+        this.response = response;
+      });
     const date30daysago = new Date();
     date30daysago.setDate(date30daysago.getDate() - this.instrumentsFromLastDays);
     axios
@@ -95,7 +98,10 @@ export default class SiteView extends Vue {
         params: { ...this.payload, ...{ site: this.siteid, dateFrom: date30daysago } },
       })
       .then(({ data }) => (this.instruments = data))
-      .catch();
+      .catch(({ response }) => {
+        this.error = true;
+        this.response = response;
+      });
   }
 
   loadingComplete() {

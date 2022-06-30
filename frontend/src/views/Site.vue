@@ -223,9 +223,14 @@ export default class SiteView extends Vue {
   payload = { developer: this.devMode.activated };
 
   created() {
-    axios.get(`${this.apiUrl}products/`).then(({ data }) => {
-      this.allProducts = data.filter((product: Product) => product.level != "3");
-    });
+    axios
+      .get(`${this.apiUrl}products/`)
+      .then(({ data }) => {
+        this.allProducts = data.filter((product: Product) => product.level != "3");
+      })
+      .catch(() => {
+        /* */
+      });
     axios
       .get(`${this.apiUrl}sites/${this.siteid}`, { params: this.payload })
       .then(({ data }) => (this.response = data))
@@ -241,16 +246,22 @@ export default class SiteView extends Vue {
         },
       })
       .then(({ data }) => (this.latestFile = data[0]))
-      .catch();
+      .catch(() => {
+        /* */
+      });
     const date30daysago = new Date();
     date30daysago.setDate(date30daysago.getDate() - this.instrumentsFromLastDays);
-    this.initDataStatusParser();
+    this.initDataStatusParser().catch(() => {
+      /* */
+    });
     axios
       .get(`${this.apiUrl}uploaded-metadata/`, {
         params: { ...this.payload, ...{ site: this.siteid, dateFrom: date30daysago } },
       })
       .then(({ data }) => (this.instruments = data))
-      .catch();
+      .catch(() => {
+        /* */
+      });
   }
 
   get selectedProduct() {

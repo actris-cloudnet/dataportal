@@ -105,11 +105,10 @@ export default class DataAvailabilityView extends Vue {
   dataStatusParsers: { [key: string]: DataStatusParser } = {};
   readysites: string[] = [];
 
-  created() {
-    axios.get(`${this.apiUrl}sites/`).then(({ data }) => {
-      this.sites = data.filter((site: Site) => site.type.includes("cloudnet" as SiteType));
-      this.refreshViz();
-    });
+  async created() {
+    const res = await axios.get(`${this.apiUrl}sites/`);
+    this.sites = res.data.filter((site: Site) => site.type.includes("cloudnet" as SiteType));
+    await this.refreshViz();
   }
 
   get evenSites() {

@@ -721,7 +721,9 @@ export default class Search extends Vue {
   }
 
   navigateToSearch(mode: string) {
-    this.$router.push({ name: "Search", params: { mode }, query: this.$route.query });
+    this.$router.push({ name: "Search", params: { mode }, query: this.$route.query }).catch(() => {
+      // Ignore useless error when URL doesn't change.
+    });
   }
 
   reset() {
@@ -855,20 +857,20 @@ export default class Search extends Vue {
   }
 
   @Watch("selectedSiteIds")
-  onSiteSelected() {
+  async onSiteSelected() {
     this.replaceUrlQueryString("site", this.selectedSiteIds);
-    this.fetchData();
+    await this.fetchData();
   }
 
   @Watch("dateFrom")
-  onDateFromChanged() {
+  async onDateFromChanged() {
     if (!this.renderComplete || this.dateErrorsExist(this.dateFromError)) return;
     this.replaceUrlQueryString("dateFrom", this.dateFrom);
-    this.fetchData();
+    await this.fetchData();
   }
 
   @Watch("dateTo")
-  onDateToChanged() {
+  async onDateToChanged() {
     if (!this.renderComplete || this.dateErrorsExist(this.dateToError)) return;
     if (this.isVizMode()) {
       this.dateFrom = this.dateTo;
@@ -876,24 +878,24 @@ export default class Search extends Vue {
     }
     this.replaceUrlQueryString("dateTo", this.dateTo);
     this.replaceUrlQueryString("dateFrom", this.dateFrom);
-    this.fetchData();
+    await this.fetchData();
   }
 
   @Watch("selectedProductIds")
-  onProductSelected() {
+  async onProductSelected() {
     this.replaceUrlQueryString("product", this.selectedProductIds);
-    this.fetchData();
+    await this.fetchData();
   }
 
   @Watch("selectedVariableIds")
-  onVariableSelected() {
+  async onVariableSelected() {
     this.replaceUrlQueryString("variable", this.selectedVariableIds);
-    this.fetchData();
+    await this.fetchData();
   }
 
   @Watch("showLegacy")
-  onShowLegacy() {
-    this.fetchData();
+  async onShowLegacy() {
+    await this.fetchData();
   }
 
   @Watch("devMode.activated")
@@ -936,7 +938,7 @@ export default class Search extends Vue {
   }
 
   @Watch("mode")
-  onModeChange() {
+  async onModeChange() {
     this.renderComplete = false;
     this.apiResponse = this.resetResponse();
     this.dateFromUpdate = this.dateFromUpdate += 1;
@@ -945,7 +947,8 @@ export default class Search extends Vue {
     this.dataSearchUpdate = this.dataSearchUpdate += 1;
     this.vizSearchUpdate = this.vizSearchUpdate += 1;
     this.mapKey = this.mapKey += 1;
-    this.fetchData().then(() => (this.renderComplete = true));
+    await this.fetchData();
+    this.renderComplete = true;
   }
 }
 </script>

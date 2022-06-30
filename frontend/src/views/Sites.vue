@@ -114,7 +114,9 @@ export default class SitesView extends Vue {
   }
 
   clickRow(site: Site) {
-    this.$router.push({ name: "Site", params: { siteid: site.id } });
+    this.$router.push({ name: "Site", params: { siteid: site.id } }).catch(() => {
+      /**/
+    });
   }
 }
 </script>
