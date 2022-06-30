@@ -368,29 +368,37 @@ export default class DataSearchResult extends Vue {
     const record = records[0];
     // NOTE: Keep the breakpoint in sync with SASS above.
     if (window.innerWidth <= 1200) {
-      this.$router.push(`/file/${record.uuid}`);
-    } else {
-      axios.get(`${this.apiUrl}files/${record.uuid}`).then(({ data }) => {
-        this.pendingPreviewResponse = data;
-        if (!this.previewResponse) {
-          this.previewResponse = this.pendingPreviewResponse;
-        }
+      this.$router.push(`/file/${record.uuid}`).catch(() => {
+        /* */
       });
+    } else {
+      axios
+        .get(`${this.apiUrl}files/${record.uuid}`)
+        .then(({ data }) => {
+          this.pendingPreviewResponse = data;
+          if (!this.previewResponse) {
+            this.previewResponse = this.pendingPreviewResponse;
+          }
+        })
+        .catch((error) => console.error(`Failed to load preview: ${error}`));
       this.loadPreview(record);
     }
   }
 
   loadPreview(record: File) {
-    axios.get(`${this.apiUrl}visualizations/${record.uuid}`).then(({ data }) => {
-      if (data.visualizations.length === 0) {
-        this.clearPreview();
-        this.changePreview();
-        return;
-      }
-      const viz = sortVisualizations(data.visualizations)[0];
-      this.previewImgUrl = `${this.apiUrl}download/image/${viz.s3key}`;
-      this.pendingPreviewTitle = viz.productVariable.humanReadableName;
-    });
+    axios
+      .get(`${this.apiUrl}visualizations/${record.uuid}`)
+      .then(({ data }) => {
+        if (data.visualizations.length === 0) {
+          this.clearPreview();
+          this.changePreview();
+          return;
+        }
+        const viz = sortVisualizations(data.visualizations)[0];
+        this.previewImgUrl = `${this.apiUrl}download/image/${viz.s3key}`;
+        this.pendingPreviewTitle = viz.productVariable.humanReadableName;
+      })
+      .catch((error) => console.error(`Failed to load preview: ${error}`));
   }
 
   clearPreview() {

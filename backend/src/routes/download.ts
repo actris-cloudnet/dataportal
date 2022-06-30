@@ -101,7 +101,9 @@ export class DownloadRoutes {
         const file = allFiles[idx];
         const fileStream = await this.makeFileRequest(file);
         archive.append(fileStream, { name: file.filename });
-        if (idx == allFiles.length - 1) archive.finalize();
+        if (idx == allFiles.length - 1) {
+          await archive.finalize();
+        }
       };
       archive.on("entry", () => (i < allFiles.length ? appendFile(i++) : null));
       await appendFile(0);

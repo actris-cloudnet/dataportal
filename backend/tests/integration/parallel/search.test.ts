@@ -23,7 +23,7 @@ describe("/api/files", () => {
       status: 400,
       errors: ["No search parameters given"],
     };
-    expect(axios.get(`${backendPublicUrl}files/`)).rejects.toMatchObject(
+    return expect(axios.get(`${backendPublicUrl}files/`)).rejects.toMatchObject(
       genResponse(expectedBody.status, expectedBody)
     );
   });
@@ -34,7 +34,7 @@ describe("/api/files", () => {
       status: 400,
       errors: ["Unknown query parameters: x,y"],
     };
-    expect(axios.get(`${backendPublicUrl}files/`, payload)).rejects.toMatchObject(
+    return expect(axios.get(`${backendPublicUrl}files/`, payload)).rejects.toMatchObject(
       genResponse(expectedBody.status, expectedBody)
     );
   });

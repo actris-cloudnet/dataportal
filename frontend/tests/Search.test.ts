@@ -42,7 +42,7 @@ describe("Search.vue", () => {
     const input = findInputByName(inputName);
     const inputElement = input.element as HTMLInputElement;
     inputElement.value = newValue;
-    input.trigger("change");
+    await input.trigger("change");
     await Vue.nextTick();
   };
 
