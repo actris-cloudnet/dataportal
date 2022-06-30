@@ -376,6 +376,7 @@ describe("PUT /upload/data/:checksum", () => {
 
   beforeEach(async () => {
     await instrumentRepo.delete({});
+    await miscUploadRepo.delete({});
     return await axios.post(metadataUrl, validMetadata, { headers });
   });
 
@@ -384,6 +385,17 @@ describe("PUT /upload/data/:checksum", () => {
     const md = await instrumentRepo.findOne({ checksum: validMetadata.checksum });
     expect(new Date(md.updatedAt).getTime()).toBeGreaterThan(new Date(md.createdAt).getTime());
     return expect(md.status).toEqual(Status.UPLOADED);
+  });
+
+  test("responds with 201 on submitting new doppler-lidar file", async () => {
+    await instrumentRepo.delete({}); // important
+    const miscMetadata = { ...validMetadata, instrument: "halo-doppler-lidar" };
+    await expect(axios.post(metadataUrl, miscMetadata, { headers })).resolves.toMatchObject({ status: 200 });
+    let md = await miscUploadRepo.findOne({ checksum: validMetadata.checksum });
+    expect(md.status).toEqual(Status.CREATED);
+    await expect(axios.put(validUrl, validFile, { headers })).resolves.toMatchObject({ status: 201 });
+    md = await miscUploadRepo.findOne({ checksum: validMetadata.checksum });
+    expect(md.status).toEqual(Status.UPLOADED);
   });
 
   test("responds with 200 on submitting existing file", async () => {

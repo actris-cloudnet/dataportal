@@ -1,7 +1,7 @@
 import { Connection, Repository } from "typeorm";
 import { RequestHandler } from "express";
 import { UserAccount } from "../entity/UserAccount";
-import { InstrumentUpload, ModelUpload } from "../entity/Upload";
+import { InstrumentUpload, MiscUpload, ModelUpload } from "../entity/Upload";
 import { PermissionType } from "../entity/Permission";
 import { Site } from "../entity/Site";
 const auth = require("basic-auth");
@@ -44,12 +44,14 @@ export class Authorizator {
   private userAccountRepository: Repository<UserAccount>;
   private siteRepository: Repository<Site>;
   private instrumentUploadRepository: Repository<InstrumentUpload>;
+  private miscUploadRepository: Repository<MiscUpload>;
   private modelUploadRepository: Repository<ModelUpload>;
 
   constructor(conn: Connection) {
     this.userAccountRepository = conn.getRepository<UserAccount>("user_account");
     this.siteRepository = conn.getRepository<Site>("site");
     this.instrumentUploadRepository = conn.getRepository<InstrumentUpload>("instrument_upload");
+    this.miscUploadRepository = conn.getRepository<MiscUpload>("misc_upload");
     this.modelUploadRepository = conn.getRepository<ModelUpload>("model_upload");
   }
 
@@ -74,12 +76,19 @@ export class Authorizator {
     return;
   };
   instrumentDataUploadMiddleware: RequestHandler = async (req, res, next) => {
-    const uploadCandidate: InstrumentUpload | undefined = await this.instrumentUploadRepository.findOne(
+    let uploadCandidate: InstrumentUpload | MiscUpload | undefined;
+    uploadCandidate = await this.instrumentUploadRepository.findOne(
       { checksum: req.params.checksum },
       { relations: ["site"] }
     );
     if (uploadCandidate === undefined) {
-      return next({ status: 422, errors: "Checksum does not exist in the database" });
+      uploadCandidate = await this.miscUploadRepository.findOne(
+        { checksum: req.params.checksum },
+        { relations: ["site"] }
+      );
+      if (uploadCandidate === undefined) {
+        return next({ status: 422, errors: "Checksum does not exist in the database" });
+      }
     }
     const site: Site = uploadCandidate!.site;
     res.locals.site = site;
