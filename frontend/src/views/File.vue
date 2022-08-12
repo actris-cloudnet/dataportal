@@ -166,7 +166,15 @@ main#filelanding
             <dt>Size</dt>
             <dd>{{ response.size }} bytes ({{ humanReadableSize(response.size) }})</dd>
             <dt>Hash (SHA-256)</dt>
-            <dd>{{ response.checksum }}</dd>
+            <dd>
+              <template v-if="truncateHash">
+                {{ response.checksum.slice(0, 16) }}...
+                <a href="javascript:void(0)" @click="truncateHash = false">show full</a>
+              </template>
+              <template v-else>
+                {{ response.checksum }}
+              </template>
+            </dd>
             <dt>Last modified</dt>
             <dd>{{ humanReadableTimestamp(response.updatedAt) }}</dd>
             <dt>Versions</dt>
@@ -398,6 +406,7 @@ export default class FileView extends Vue {
   site!: Site;
   model: Model | null = null;
   instrument = "";
+  truncateHash = true;
 
   get maxMarginRight() {
     return Math.max(...this.visualizations.map((viz) => viz.dimensions && viz.dimensions.marginRight).filter(notEmpty));

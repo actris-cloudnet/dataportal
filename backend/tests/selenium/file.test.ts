@@ -36,7 +36,7 @@ describe("file landing page", () => {
       "Classification",
       "1.0.4",
       "20190723_bucharest_classification.nc",
-      "b77b731aaae54f403aae6765ad1d20e1603b4454e2bc0d461aab4985a4a82ca4",
+      "b77b731aaae54f40... show full",
       123,
       "HDF5 (NetCDF4)",
       "Bucharest, Romania",
