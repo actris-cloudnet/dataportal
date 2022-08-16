@@ -198,8 +198,6 @@ case "$action" in
     npm run lint
     cd ../backend
     npm run lint
-    cd ../shared
-    npm run lint
     cd ..
     ;;
 
