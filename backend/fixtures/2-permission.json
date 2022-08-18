@@ -1,0 +1,26 @@
+[
+  {
+    "id": "1",
+    "permission": "canUpload"
+  },
+  {
+    "id": "2",
+    "permission": "canUploadModel"
+  },
+  {
+    "id": "3",
+    "permission": "canDelete"
+  },
+  {
+    "id": "4",
+    "permission": "canProcess"
+  },
+  {
+    "id": "5",
+    "permission": "canCalibrate"
+  },
+  {
+    "id": "6",
+    "permission": "canGetStats"
+  }
+]
