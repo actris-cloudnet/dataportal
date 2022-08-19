@@ -14,7 +14,8 @@
     "format": "NetCDF3",
     "site": "mace-head",
     "version": "123",
-    "model": "ecmwf"
+    "model": "ecmwf",
+    "errorLevel": null
   },
   {
     "uuid": "9e04d8ef-0f2b-4823-835d-33e458403c67",
@@ -30,7 +31,8 @@
     "format": "NetCDF3",
     "product": "model",
     "site": "granada",
-    "version": "123"
+    "version": "123",
+    "errorLevel": null
   },
   {
     "uuid": "b5d1d5af-3667-41bc-b952-e684f627d91c",
@@ -47,7 +49,8 @@
     "size": 500452,
     "format": "NetCDF3",
     "site": "bucharest",
-    "version": "123"
+    "version": "123",
+    "errorLevel": null
   },
   {
     "uuid": "c5d1d5af-3667-41bc-b952-e684f627d91c",
@@ -64,7 +67,8 @@
     "size": 500452,
     "format": "NetCDF3",
     "site": "bucharest",
-    "version": "123"
+    "version": "123",
+    "errorLevel": null
   },
   {
     "uuid": "88092c00-161d-4ca2-a29d-628cf8e960f6",
@@ -81,6 +85,7 @@
     "size": 12200657,
     "format": "HDF5 (NetCDF4)",
     "site": "bucharest",
-    "version": "123"
+    "version": "123",
+    "errorLevel": "pass"
   }
 ]

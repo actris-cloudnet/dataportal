@@ -19,6 +19,6 @@ module.exports = {
     project: ["./tsconfig.eslint.json"],
   },
   plugins: ["@typescript-eslint"],
-  ignorePatterns: ["dist/", "node_modules/", "build/", "public/", "src/migration/"],
+  ignorePatterns: ["dist/", "node_modules/", "build/", "public/", "src/migration/", ".eslintrc.js"],
   rules: { ...commonRules },
 };

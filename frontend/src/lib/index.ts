@@ -1,5 +1,3 @@
-import axios from "axios";
-
 import { VisualizationItem } from "../../../backend/src/entity/VisualizationResponse";
 import { SearchFileResponse } from "../../../backend/src/entity/SearchFileResponse";
 import { Product } from "../../../backend/src/entity/Product";
@@ -19,11 +17,11 @@ export const humanReadableSize = (size: number) => {
   return `${(size / Math.pow(1024, i)).toFixed(1)} ${["B", "kB", "MB", "GB", "TB"][i]}`;
 };
 
-export const humanReadableDate = (date: string) =>
+export const humanReadableDate = (date: string | Date) =>
   new Date(date).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" });
 
-export const humanReadableTimestamp = (date: string) => {
-  const [timestamp, suffix] = date.replace("T", " ").split(".");
+export const humanReadableTimestamp = (date: string | Date) => {
+  const [timestamp, suffix] = date.toString().replace("T", " ").split(".");
   return suffix.includes("Z") ? `${timestamp} UTC` : timestamp;
 };
 
@@ -94,38 +92,11 @@ export function compareValues(a: any, b: any): number {
   return 0;
 }
 
-export async function fetchInstrumentName(pid: string): Promise<string> {
-  const match = pid.match("^https?://hdl\\.handle\\.net/(.+)");
-  if (!match) {
-    throw new Error("Invalid PID format");
+export function getQcIcon(errorLevel: string) {
+  if (errorLevel === "error") {
+    return require("../assets/icons/test-fail.png");
+  } else if (errorLevel === "warning") {
+    return require("../assets/icons/test-warning.png");
   }
-  const url = "https://hdl.handle.net/api/handles/" + match[1];
-  const response = await axios.get(url);
-
-  const values = response.data.values;
-  if (!Array.isArray(values)) {
-    throw new Error("Invalid PID response");
-  }
-
-  const nameItem = values.find((ele) => ele.type === "21.T11148/709a23220f2c3d64d1e1");
-  if (!nameItem || !nameItem.data || nameItem.data.format !== "string" || !nameItem.data.value) {
-    throw new Error("Invalid PID structure");
-  }
-  let nameValue = JSON.parse(nameItem.data.value);
-  if (typeof nameValue !== "string") {
-    throw new Error("Invalid PID content");
-  }
-
-  const typeItem = values.find((ele) => ele.type === "21.T11148/f76ad9d0324302fc47dd");
-  if (typeItem && typeItem.data && typeItem.data.format === "string" && typeItem.data.value) {
-    const typeValue = JSON.parse(typeItem.data.value);
-    if (Array.isArray(typeValue) && typeValue.length > 0) {
-      const firstValue = typeValue[0];
-      if (firstValue && firstValue.instrumentType && firstValue.instrumentType.instrumentTypeName) {
-        nameValue += " " + firstValue.instrumentType.instrumentTypeName;
-      }
-    }
-  }
-
-  return nameValue;
+  return require("../assets/icons/test-pass.png");
 }

@@ -1,4 +1,5 @@
 import { SearchFile } from "./SearchFile";
+import { ErrorLevel } from "./QualityReport";
 
 export class SearchFileResponse {
   uuid: string;
@@ -10,7 +11,7 @@ export class SearchFileResponse {
   size: number;
   volatile: boolean;
   legacy: boolean;
-  qualityScore: number;
+  errorLevel: ErrorLevel | null;
 
   constructor(file: SearchFile) {
     this.uuid = file.uuid;
@@ -22,6 +23,6 @@ export class SearchFileResponse {
     this.size = file.size;
     this.volatile = file.volatile;
     this.legacy = file.legacy;
-    this.qualityScore = file.qualityScore;
+    this.errorLevel = file.errorLevel;
   }
 }

@@ -2,109 +2,109 @@
   {
     "measurementDate": "2021-05-06",
     "productId": "classification",
-    "qualityScore": 1,
+    "errorLevel": "pass",
     "legacy": false
   },
   {
     "measurementDate": "2021-05-06",
     "productId": "drizzle",
-    "qualityScore": 1,
+    "errorLevel": "pass",
     "legacy": false
   },
   {
     "measurementDate": "2021-05-06",
     "productId": "iwc",
-    "qualityScore": 1,
+    "errorLevel": "pass",
     "legacy": false
   },
   {
     "measurementDate": "2021-05-06",
     "productId": "lwc",
-    "qualityScore": 1,
+    "errorLevel": "pass",
     "legacy": false
   },
   {
     "measurementDate": "2021-05-06",
     "productId": "categorize",
-    "qualityScore": 1,
+    "errorLevel": "pass",
     "legacy": false
   },
   {
     "measurementDate": "2021-05-06",
     "productId": "radar",
-    "qualityScore": 1,
+    "errorLevel": "pass",
     "legacy": false
   },
   {
     "measurementDate": "2021-05-06",
     "productId": "lidar",
-    "qualityScore": 1,
+    "errorLevel": "pass",
     "legacy": false
   },
   {
     "measurementDate": "2021-05-06",
     "productId": "mwr",
-    "qualityScore": 1,
+    "errorLevel": "pass",
     "legacy": false
   },
   {
     "measurementDate": "2021-05-06",
     "productId": "model",
-    "qualityScore": 1,
+    "errorLevel": "pass",
     "legacy": false
   },
   {
     "measurementDate": "2021-05-05",
     "productId": "classification",
-    "qualityScore": 1,
+    "errorLevel": "pass",
     "legacy": false
   },
   {
     "measurementDate": "2021-05-05",
     "productId": "drizzle",
-    "qualityScore": 1,
+    "errorLevel": "pass",
     "legacy": false
   },
   {
     "measurementDate": "2021-05-05",
     "productId": "iwc",
-    "qualityScore": 1,
+    "errorLevel": "pass",
     "legacy": false
   },
   {
     "measurementDate": "2021-05-05",
     "productId": "lwc",
-    "qualityScore": 1,
+    "errorLevel": "pass",
     "legacy": false
   },
   {
     "measurementDate": "2021-05-05",
     "productId": "categorize",
-    "qualityScore": 1,
+    "errorLevel": "pass",
     "legacy": false
   },
   {
     "measurementDate": "2021-05-05",
     "productId": "radar",
-    "qualityScore": 1,
+    "errorLevel": "pass",
     "legacy": false
   },
   {
     "measurementDate": "2021-05-05",
     "productId": "lidar",
-    "qualityScore": 1,
+    "errorLevel": "pass",
     "legacy": false
   },
   {
     "measurementDate": "2021-05-05",
     "productId": "mwr",
-    "qualityScore": 1,
+    "errorLevel": "pass",
     "legacy": false
   },
   {
     "measurementDate": "2021-05-05",
     "productId": "model",
-    "qualityScore": 0.9,
+    "errorLevel": "error",
     "legacy": false
   },
   {
@@ -155,7 +155,7 @@
   {
     "measurementDate": "2021-05-02",
     "productId": "model",
-    "qualityScore": 1,
+    "errorLevel": "pass",
     "legacy": false
   },
   {

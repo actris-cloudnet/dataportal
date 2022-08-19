@@ -1,4 +1,5 @@
 import { ModelFile, RegularFile } from "./File";
+import { ErrorLevel } from "./QualityReport";
 
 export class CollectionFileResponse {
   uuid: string;
@@ -11,7 +12,7 @@ export class CollectionFileResponse {
   size: number;
   volatile: boolean;
   legacy: boolean;
-  qualityScore: number;
+  errorLevel: ErrorLevel | null;
 
   constructor(file: RegularFile | ModelFile) {
     this.uuid = file.uuid;
@@ -24,6 +25,6 @@ export class CollectionFileResponse {
     this.size = parseInt(file.size as unknown as string, 10);
     this.volatile = file.volatile;
     this.legacy = file.legacy;
-    this.qualityScore = file.qualityScore;
+    this.errorLevel = file.errorLevel;
   }
 }

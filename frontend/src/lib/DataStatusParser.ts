@@ -7,14 +7,14 @@ export interface ReducedSearchResponse {
   productId: string;
   legacy: boolean;
   uuid: string;
-  qualityScore?: number;
+  errorLevel?: string;
 }
 
 export interface ProductInfo {
   id: string;
   legacy: boolean;
   uuid: string;
-  qualityScore?: number | null;
+  errorLevel?: string | null;
 }
 
 export interface ProductLevels {
@@ -75,7 +75,7 @@ export class DataStatusParser {
         id: cur.productId,
         legacy: cur.legacy,
         uuid: cur.uuid,
-        qualityScore: "qualityScore" in cur ? cur.qualityScore : undefined,
+        errorLevel: "errorLevel" in cur ? cur.errorLevel : undefined,
       };
       const yearIndex = acc.findIndex((obj) => obj.year == year);
       if (yearIndex == -1) {
@@ -112,11 +112,11 @@ export class DataStatusParser {
       };
     }
     if (productInfo) {
-      const { id, legacy, qualityScore, uuid } = productInfo;
+      const { id, legacy, errorLevel, uuid } = productInfo;
       existingObj[this.lvlTranslate[id]].push({
         id,
         legacy,
-        qualityScore,
+        errorLevel,
         uuid,
       });
     }

@@ -34,7 +34,7 @@ describe("Data availability mode", () => {
       }
     };
     mocked(axios.get).mockImplementation(axiosMock);
-    const properties = ["measurementDate", "productId", "legacy", "qualityScore"];
+    const properties = ["measurementDate", "productId", "legacy", "errorLevel"];
     const searchPayload = {
       site: "palaiseau",
       legacy: true,
@@ -154,7 +154,7 @@ describe("Data quality mode", () => {
       }
     };
     mocked(axios.get).mockImplementation(axiosMock);
-    const properties = ["measurementDate", "productId", "legacy", "qualityScore"];
+    const properties = ["measurementDate", "productId", "legacy", "errorLevel"];
     const searchPayload = {
       site: "palaiseau",
       legacy: true,
@@ -210,7 +210,6 @@ describe("Data quality mode", () => {
       })
     );
     expect(classes.length).toEqual(2);
-    expect(classes).toContain("only-model-data");
   });
 
   it("displays white color for days that have no data", async () => {
