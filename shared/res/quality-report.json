@@ -1,39 +1,85 @@
 {
-  "data": [
+  "uuid": "acf78456-11b1-41a6-b2de-aa7590a75675",
+  "errorLevel": "error",
+  "qcVersion": "1.20",
+  "timestamp": "2022-02-20T10:56:19.382Z",
+  "tests": 8,
+  "errors": 2,
+  "warnings": 1,
+  "testReports": [
     {
-      "name": "Out of bounds",
-      "report": [
+      "testId": "TestStandardNames",
+      "description": "Test standard names",
+      "result": "error",
+      "exceptions": [
         {
-          "lowerBound": 0,
-          "upperBound": 24,
-          "variableName": "time",
-          "exceedingValue": 651542365
+          "result": "warning",
+          "expected": "beta",
+          "received": "ateb",
+          "variable": "foo2"
+        },
+        {
+          "result": "error",
+          "expected": "beta",
+          "received": "ateb",
+          "variable": "foo3"
+        },
+        {
+          "result": "warning",
+          "expected": "dfff",
+          "received": "fadeff",
+          "variable": "foo4"
         }
-      ],
-      "description": "Find data values that are unexpectedly large or small."
+      ]
+    },
+    {
+      "testId": "TestDimensions",
+      "description": "A longer description of the test",
+      "result": "error",
+      "exceptions": [{ "result": "error" }]
+    },
+    {
+      "testId": "TestDataTypes",
+      "description": "Test variable data types asdklfjalsdkf öaskldf asödklfj aösdfkj aösdkfjöasdkfj aösdlkfjö asdfkjaösdfk jöasldkfjasödf",
+      "result": "warning",
+      "exceptions": [
+        {
+          "result": "warning",
+          "expected": "int32",
+          "received": "float32",
+          "variable": "count"
+        }
+      ]
+    },
+    {
+      "testId": "TestMissingSomething",
+      "description": "Test if something else missing",
+      "result": "pass",
+      "exceptions": null
+    },
+    {
+      "testId": "TestMissingVariables",
+      "description": "Test if any variables are missing",
+      "result": "pass",
+      "exceptions": null
+    },
+    {
+      "testId": "TestLongNames",
+      "description": "Test variable long names",
+      "result": "pass",
+      "exceptions": null
+    },
+    {
+      "testId": "TestMissingGlobalAttributes",
+      "description": "Test if any global attributes are missing",
+      "result": "pass",
+      "exceptions": null
+    },
+    {
+      "testId": "TestUnits",
+      "description": "A longer description of the test",
+      "result": "pass",
+      "exceptions": null
     }
-  ],
-  "metadata": [
-    {
-      "name": "Missing variables",
-      "report": ["altitude"],
-      "description": "Find variables that should be included."
-    },
-    {
-      "name": "Missing global attributes",
-      "report": ["references", "cloudnetpy_version", "Conventions"],
-      "description": "Find global attributes that should be included."
-    },
-    {
-      "name": "Invalid global attribute values",
-      "report": [],
-      "description": "Find attribute values that are unexpectedly large or small."
-    },
-    {
-      "name": "Invalid units",
-      "report": [],
-      "description": "Find unexpected variable units."
-    }
-  ],
-  "overallScore": 0.69
+  ]
 }

@@ -16,6 +16,7 @@ import { isValidDate } from "../lib";
 import { basename } from "path";
 import { Model } from "./Model";
 import { ModelVisualization } from "./ModelVisualization";
+import { ErrorLevel } from "./QualityReport";
 
 export enum Quality {
   NRT = "nrt",
@@ -65,8 +66,12 @@ export abstract class File {
   @ManyToOne((_) => Product, (product) => product.files)
   product!: Product;
 
-  @Column({ type: "float", nullable: true })
-  qualityScore!: number;
+  @Column({
+    type: "enum",
+    enum: ErrorLevel,
+    nullable: true,
+  })
+  errorLevel!: ErrorLevel | null;
 
   @Column()
   createdAt!: Date;

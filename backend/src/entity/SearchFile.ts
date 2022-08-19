@@ -2,6 +2,7 @@ import { Column, Entity, ManyToOne, PrimaryColumn, Unique } from "typeorm";
 import { Site } from "./Site";
 import { Product } from "./Product";
 import { File } from "./File";
+import { ErrorLevel } from "./QualityReport";
 
 @Entity()
 @Unique(["measurementDate", "site", "product"])
@@ -27,8 +28,12 @@ export class SearchFile {
   @Column({ default: false })
   legacy!: boolean;
 
-  @Column({ type: "float", nullable: true })
-  qualityScore!: number;
+  @Column({
+    type: "enum",
+    enum: ErrorLevel,
+    nullable: true,
+  })
+  errorLevel!: ErrorLevel | null;
 
   constructor(file: File) {
     // A typeorm hack, see https://github.com/typeorm/typeorm/issues/3903
@@ -41,6 +46,6 @@ export class SearchFile {
     this.size = file.size;
     this.volatile = file.volatile;
     this.legacy = file.legacy || false;
-    this.qualityScore = file.qualityScore;
+    this.errorLevel = file.errorLevel;
   }
 }

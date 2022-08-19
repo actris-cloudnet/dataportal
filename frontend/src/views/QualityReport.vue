@@ -3,175 +3,245 @@
 @import "../sass/global.sass"
 @import "../sass/landing.sass"
 
-#qualitylanding
-  .info
-    flex-direction: row-reverse
+.qualityHeader
+  padding-top: 10px
 
-  .description
-    font-size: 1.2em
-    cursor: pointer
-    padding: 0.4em
-    width: 1em
-  .description::after
-    content: '\24D8'
+#infoBoxes
+  display: flex
+  align-items: flex-start
 
-  .tooltip
-    position: absolute
+  caption
+    font-size: 20px
+    caption-side: top
+    font-weight: bold
+    font-variant-caps: all-small-caps
+    color: #212529
 
-  .reltip
-    position: relative
-    top: 2em
-    right: 50%
+.infoBox
+  tr
+    height: 30px
+
+  th
+    padding-right: 15px
+    font-weight: normal
+
+  .missingInfo
+    color: gray
+
+.qcSummary
+  margin-right: 70px
+  margin-left: 30px
+
+  td
+    padding-right: 40px
+    text-align: center
+
+#testResults
+  margin-top: 30px
+
+  .singleTest
+    border-bottom: 1px solid silver
+    border-top: 1px solid silver
+
+    .description
+      max-width: 400px
+      padding-left: 30px
+      padding-bottom: 15px
+
+  .labels
+    td
+      font-weight: bold
+      min-width: 250px
+
+  .idLabel
+    padding-left: 30px
+    padding-bottom: 8px
+
+  .descriptionLabel
+    padding-left: 30px
+
+  .exceptionsLabel
+    padding-left: 20px
+
+  img
+    height: 20px
+    margin-right: 10px
+
+  th
+   vertical-align: top
+   padding-top: 15px
+   padding-bottom: 15px
+   font-weight: normal
+
+  td
+    vertical-align: top
+    padding-top: 15px
+
+  #exceptions
+    margin-left: 20px
+    margin-bottom: 15px
+
+  .detailsMissing
+    color: gray
+    padding-left: 8px
+
+  .variable
+    color: #555
     background: white
-    padding: 1em
-    font-family: $content-font
-    border: 1px solid grey
-    display: inline-block
-    max-width: 30em
-
-#metadatatests
-  li
-    list-style-type: none
-    padding-left: 0.3em
-
-  ul
-    margin-bottom: 2em
     font-family: monospace
 
-  ul.report
-    padding: 0
-    margin-bottom: 1em
-    li
-      padding-left: 0.1em
+  .rawData
+    padding-right: 10px
 
-  li.circled
-    list-style-type: '\2717'
-    color: darkred
+#qualityFooter
+  padding-top: 30px
+  color: gray
 </style>
 
 <template>
-  <main id="qualitylanding" v-if="!error && response && qualityResponse">
+  <main v-if="!error && qualityResponse">
     <img alt="back" id="backButton" :src="require('../assets/icons/back.png')" @click="$router.back()" />
     <header>
-      <h2>Quality report</h2>
-      <span
-        >For {{ response.product.humanReadableName }} data from {{ response.site.humanReadableName }} on
-        {{ humanReadableDate(response.measurementDate) }}.
-      </span>
+      <h2 class="qualityHeader">Quality report</h2>
     </header>
-    <main class="info">
-      <div v-if="qualityResponse.overallScore < 1">
-        <section id="summary">
-          <header>Summary</header>
-          <section class="details">
-            <dl>
-              <dt>Tests run</dt>
-              <dd>{{ totalTests }}</dd>
-              <dt>Total failed tests</dt>
-              <dd>{{ failedTests }}</dd>
-              <dt>Failed metadata tests</dt>
-              <dd>{{ failedMetadataTests }}</dd>
-              <dt>Failed data tests</dt>
-              <dd>{{ failedDataTests }}</dd>
-              <template v-if="qualityResponse.checkedAt">
-                <dt>Check timestamp</dt>
-                <dd>{{ humanReadableDate(qualityResponse.checkedAt) }}</dd>
+
+    <div id="infoBoxes">
+      <table>
+        <Donut :qualityResponse="this.qualityResponse"></Donut>
+      </table>
+      <table class="qcSummary infoBox">
+        <caption>
+          QC summary
+        </caption>
+        <tr>
+          <th>Number of tests:</th>
+          <td>{{ qualityResponse.tests }}</td>
+        </tr>
+        <tr>
+          <th>Number of errors:</th>
+          <td>{{ qualityResponse.errors }}</td>
+        </tr>
+        <tr>
+          <th>Number of warnings:</th>
+          <td>{{ qualityResponse.warnings }}</td>
+        </tr>
+      </table>
+      <table class="infoBox">
+        <caption>
+          File information
+        </caption>
+        <tr>
+          <th>Filename:</th>
+          <router-link :to="`/file/${this.uuid}`">
+            <td>{{ fileResponse.filename }}</td>
+          </router-link>
+        </tr>
+        <tr>
+          <th>Processed:</th>
+          <td>{{ humanReadableTimestamp(fileResponse.updatedAt) }}</td>
+        </tr>
+        <tr>
+          <th>CloudnetPy version:</th>
+          <td v-if="fileResponse.cloudnetpyVersion">{{ fileResponse.cloudnetpyVersion }}</td>
+          <td v-else class="missingInfo">n/a</td>
+        </tr>
+        <tr v-if="fileResponse.processingVersion">
+          <th>Processing version:</th>
+          <td v-if="fileResponse.processingVersion">{{ fileResponse.processingVersion }}</td>
+          <td v-else class="missingInfo">n/a</td>
+        </tr>
+      </table>
+    </div>
+
+    <table id="testResults">
+      <tr class="labels">
+        <td class="idLabel">Test</td>
+        <td class="descriptionLabel">Description</td>
+        <td v-if="qualityResponse.errorLevel !== 'pass'" class="exceptionsLabel">Issues</td>
+      </tr>
+      <tr v-for="test in qualityResponse.testReports" :key="test.testId" class="singleTest">
+        <th><img :src="getQcIcon(test.result)" alt="" />{{ test.testId }}</th>
+        <td class="description">{{ test.description }}</td>
+        <template>
+          <table id="exceptions">
+            <tr v-for="(exp, index) in test.exceptions" :key="exp.result + index">
+              <template v-if="Object.keys(exp).length <= 1 || !('message' in exp)">
+                <td class="detailsMissing">Test failed without further details.</td>
               </template>
-            </dl>
-          </section>
-        </section>
-      </div>
-      <section id="metadatatests">
-        <header>Diagnostics</header>
-        <section class="details">
-          <h3>Metadata tests</h3>
-          <quality-test-result :qualityTestResult="qualityResponse.metadata"></quality-test-result>
-          <h3>Data tests</h3>
-          <quality-test-result :qualityTestResult="qualityResponse.data"></quality-test-result>
-        </section>
-      </section>
-    </main>
+              <template v-else>
+                <td>• {{ exp.message }}</td>
+              </template>
+            </tr>
+          </table>
+        </template>
+      </tr>
+    </table>
+
+    <div id="qualityFooter">
+      Tests run at {{ humanReadableTimestamp(qualityResponse.timestamp) }} using
+      <a href="https://github.com/actris-cloudnet/cloudnetpy-qc">cloudnetpy-qc</a> v{{ qualityResponse.qcVersion }}
+    </div>
   </main>
-  <app-error v-else-if="error" :response="response"></app-error>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
 import axios from "axios";
-import Map from "../components/Map.vue";
-import ProductAvailabilityVisualization from "../components/DataStatusVisualization.vue";
-import { humanReadableDate } from "../lib";
-import { DevMode } from "../lib/DevMode";
-import QualityTestResult from "../components/QualityTestResult.vue";
-
-Vue.component("quality-test-result", QualityTestResult);
+import { humanReadableTimestamp, getQcIcon } from "../lib";
+import Donut from "../components/Donut.vue";
 
 interface Test {
-  name: string;
-  report: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+  testId: string;
   description: string;
+  result: string;
+  exceptions: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export interface QualityResponse {
-  overallScore: number;
-  data: Test[];
-  metadata: Test[];
+  errorLevel: string;
+  qcVersion: string;
+  timestamp: Date;
+  tests: number;
+  errors: number;
+  warnings: number;
+  testReports: Test[];
+}
+
+export interface FileResponse {
+  measurementDate: string;
+  filename: string;
+  cloudnetpyVersion: string;
+  processingVersion: string;
+  updatedAt: string;
 }
 
 @Component({
-  components: { Map, ProductAvailabilityVisualization },
+  components: { Donut },
 })
 export default class QualityReportView extends Vue {
   @Prop() uuid!: string;
   apiUrl = process.env.VUE_APP_BACKENDURL;
-  response: File | null = null;
   qualityResponse: QualityResponse | null = null;
+  fileResponse: FileResponse | null = null;
   error = false;
-  busy = true;
-  devMode = new DevMode();
+  tests = this.qualityResponse?.tests;
 
-  humanReadableDate = humanReadableDate;
+  humanReadableTimestamp = humanReadableTimestamp;
+  getQcIcon = getQcIcon;
 
-  payload = { developer: this.devMode.activated };
   created() {
     axios
-      .get(`${this.apiUrl}files/${this.uuid}`, { params: this.payload })
-      .then(({ data }) => (this.response = data))
-      .catch(({ response }) => {
+      .get(`${this.apiUrl}files/${this.uuid}`)
+      .then(({ data }) => (this.fileResponse = data))
+      .catch(() => {
         this.error = true;
-        this.response = response;
       });
     axios
-      .get(`${this.apiUrl}quality/${this.uuid}`, { params: this.payload })
+      .get(`${this.apiUrl}quality/${this.uuid}`)
       .then(({ data }) => (this.qualityResponse = data))
-      .catch(({ response }) => {
+      .catch(() => {
         this.error = true;
-        this.response = response;
       });
-  }
-
-  loadingComplete() {
-    this.busy = false;
-  }
-
-  get failedMetadataTests() {
-    if (!this.qualityResponse) return null;
-    return this.qualityResponse.metadata.reduce((acc, cur) => acc + cur.report.length, 0);
-  }
-
-  get failedDataTests() {
-    if (!this.qualityResponse) return null;
-    return this.qualityResponse.data.reduce((acc, cur) => acc + cur.report.length, 0);
-  }
-
-  get failedTests() {
-    if (this.failedMetadataTests === null || this.failedDataTests === null) return null;
-    return this.failedMetadataTests + this.failedDataTests;
-  }
-
-  get totalTests() {
-    if (!this.qualityResponse || this.failedTests === null) return null;
-    return Math.round(this.failedTests / (1 - this.qualityResponse.overallScore));
   }
 }
 </script>

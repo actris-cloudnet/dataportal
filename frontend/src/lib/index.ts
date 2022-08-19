@@ -19,11 +19,11 @@ export const humanReadableSize = (size: number) => {
   return `${(size / Math.pow(1024, i)).toFixed(1)} ${["B", "kB", "MB", "GB", "TB"][i]}`;
 };
 
-export const humanReadableDate = (date: string) =>
+export const humanReadableDate = (date: string | Date) =>
   new Date(date).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" });
 
-export const humanReadableTimestamp = (date: string) => {
-  const [timestamp, suffix] = date.replace("T", " ").split(".");
+export const humanReadableTimestamp = (date: string | Date) => {
+  const [timestamp, suffix] = date.toString().replace("T", " ").split(".");
   return suffix.includes("Z") ? `${timestamp} UTC` : timestamp;
 };
 
@@ -92,6 +92,15 @@ export function compareValues(a: any, b: any): number {
   if (a < b) return -1;
   if (a > b) return 1;
   return 0;
+}
+
+export function getQcIcon(errorLevel: string) {
+  if (errorLevel === "error") {
+    return require("../assets/icons/test-fail.svg");
+  } else if (errorLevel === "warning") {
+    return require("../assets/icons/test-warning.svg");
+  }
+  return require("../assets/icons/test-pass.svg");
 }
 
 export async function fetchInstrumentName(pid: string): Promise<string> {

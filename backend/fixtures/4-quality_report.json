@@ -1,0 +1,157 @@
+[
+  {
+    "testId": "TestUnits",
+    "description": "A longer description of the test",
+    "result": "pass",
+    "quality": {
+      "uuid": "acf78456-11b1-41a6-b2de-aa7590a75675"
+    }
+  },
+  {
+    "testId": "TestMissingGlobalAttributes",
+    "description": "Test if any global attributes are missing",
+    "result": "pass",
+    "quality": {
+      "uuid": "acf78456-11b1-41a6-b2de-aa7590a75675"
+    }
+  },
+  {
+    "testId": "TestLongNames",
+    "description": "Test variable long names",
+    "result": "pass",
+    "quality": {
+      "uuid": "acf78456-11b1-41a6-b2de-aa7590a75675"
+    }
+  },
+  {
+    "testId": "TestMissingVariables",
+    "description": "Test if any variables are missing",
+    "result": "pass",
+    "quality": {
+      "uuid": "acf78456-11b1-41a6-b2de-aa7590a75675"
+    }
+  },
+  {
+    "testId": "TestDataTypes",
+    "description": "Test variable data types asdklfjalsdkf öaskldf asödklfj aösdfkj aösdkfjöasdkfj aösdlkfjö asdfkjaösdfk jöasldkfjasödf",
+    "result": "warning",
+    "quality": {
+      "uuid": "acf78456-11b1-41a6-b2de-aa7590a75675"
+    },
+    "exceptions": [
+      {
+        "result": "warning",
+        "variable": "count",
+        "expected": "int32",
+        "received": "float32"
+      }
+    ]
+  },
+  {
+    "quality": {
+      "uuid": "acf78456-11b1-41a6-b2de-aa7590a75675"
+    },
+    "result": "error",
+    "testId": "TestDimensions",
+    "description": "A longer description of the test",
+    "exceptions": [
+      {
+        "result": "error"
+      }
+    ]
+  },
+  {
+    "testId": "TestMissingSomething",
+    "description": "Test if something else missing",
+    "result": "pass",
+    "quality": {
+      "uuid": "acf78456-11b1-41a6-b2de-aa7590a75675"
+    }
+  },
+  {
+    "quality": {
+      "uuid": "acf78456-11b1-41a6-b2de-aa7590a75675"
+    },
+    "testId": "TestStandardNames",
+    "description": "Test standard names",
+    "result": "error",
+    "exceptions": [
+      {
+        "result": "warning",
+        "message": "Some error message."
+      },
+      {
+        "result": "error",
+        "message": "Some error message."
+      },
+      {
+        "result": "warning",
+        "message": "Some error message."
+      }
+    ]
+  },
+  {
+    "testId": "TestUnits",
+    "description": "A longer description of the test",
+    "result": "pass",
+    "quality": {
+      "uuid": "2bb32746-faf0-4057-9076-ed2e698dcf36"
+    }
+  },
+  {
+    "testId": "TestMissingGlobalAttributes",
+    "description": "Test if any global attributes are missing",
+    "result": "pass",
+    "quality": {
+      "uuid": "2bb32746-faf0-4057-9076-ed2e698dcf36"
+    }
+  },
+  {
+    "testId": "TestLongNames",
+    "description": "Test variable long names",
+    "result": "pass",
+    "quality": {
+      "uuid": "2bb32746-faf0-4057-9076-ed2e698dcf36"
+    }
+  },
+  {
+    "testId": "TestMissingVariables",
+    "description": "Test if any variables are missing",
+    "result": "pass",
+    "quality": {
+      "uuid": "2bb32746-faf0-4057-9076-ed2e698dcf36"
+    }
+  },
+  {
+    "testId": "TestDataTypes",
+    "description": "Test variable data types",
+    "result": "pass",
+    "quality": {
+      "uuid": "2bb32746-faf0-4057-9076-ed2e698dcf36"
+    }
+  },
+  {
+    "quality": {
+      "uuid": "2bb32746-faf0-4057-9076-ed2e698dcf36"
+    },
+    "result": "pass",
+    "testId": "TestDimensions",
+    "description": "A longer description of the test"
+  },
+  {
+    "quality": {
+      "uuid": "2bb32746-faf0-4057-9076-ed2e698dcf36"
+    },
+    "testId": "TestMissingSomething",
+    "description": "Test if something else missing",
+    "result": "pass"
+  },
+  {
+    "quality": {
+      "uuid": "2bb32746-faf0-4057-9076-ed2e698dcf36"
+    },
+    "testId": "TestStandardNames",
+    "description": "Test standard names",
+    "result": "pass"
+  }
+]
