@@ -13,6 +13,7 @@ export class PublicationRoutes {
 
   postPublication: RequestHandler = async (req: Request, res: Response, next) => {
     const uri: any = req.query.uri;
+    if (!uri) next({ status: 400, error: "uri query parameter is missing" });
     try {
       const pub = new Publication();
       pub.pid = uri;
@@ -25,10 +26,10 @@ export class PublicationRoutes {
       config.headers.accept = "text/html";
       pub.citation = (await axios.get(citation_service_url, config)).data;
       await this.publicationRepo.save(pub);
+      res.sendStatus(200);
     } catch (err) {
       next({ status: 500, errors: err });
     }
-    res.sendStatus(200);
   };
 
   getPublications: RequestHandler = async (req: Request, res: Response, next) => {
