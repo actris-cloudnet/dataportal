@@ -22,5 +22,9 @@
   {
     "id": "6",
     "permission": "canGetStats"
+  },
+  {
+    "id": "7",
+    "permission": "canAddPublication"
   }
 ]

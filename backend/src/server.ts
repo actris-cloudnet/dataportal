@@ -226,7 +226,12 @@ async function createServer() {
     authorizator.verifyPermission(PermissionType.canDelete),
     fileRoutes.deleteFile
   );
-  app.post("/api/publications/", publicationRoutes.postPublication);
+  app.post(
+    "/api/publications/",
+    authenticator.verifyCredentials,
+    authorizator.verifyPermission(PermissionType.canAddPublication),
+    publicationRoutes.postPublication
+  );
   app.get("/api/publications/", publicationRoutes.getPublications);
 
   // site contacts private

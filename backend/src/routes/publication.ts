@@ -1,7 +1,7 @@
 import { Request, RequestHandler, Response } from "express";
 import { Connection, Repository } from "typeorm";
 import { Publication } from "../entity/Publication";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import env from "../lib/env";
 
 export class PublicationRoutes {
@@ -11,24 +11,26 @@ export class PublicationRoutes {
 
   readonly publicationRepo: Repository<Publication>;
 
+  private fetchCitation(uri: string, accept: string): Promise<AxiosResponse<any>> {
+    return axios.get(env.CITATION_SERVICE_URL, {
+      headers: { accept },
+      params: { uri },
+    });
+  }
+
   postPublication: RequestHandler = async (req: Request, res: Response, next) => {
     const uri: any = req.query.uri;
+    if (!uri) next({ status: 400, error: "uri query parameter is missing" });
     try {
       const pub = new Publication();
       pub.pid = uri;
-      let config: any = {
-        headers: { accept: "application/json" },
-        params: { uri: uri },
-      };
-      const citation_service_url = env.CITATION_SERVICE_URL;
-      pub.year = (await axios.get(citation_service_url, config)).data.year;
-      config.headers.accept = "text/html";
-      pub.citation = (await axios.get(citation_service_url, config)).data;
+      pub.year = (await this.fetchCitation(uri, "application/json")).data.year;
+      pub.citation = (await this.fetchCitation(uri, "text/html")).data;
       await this.publicationRepo.save(pub);
+      res.sendStatus(200);
     } catch (err) {
       next({ status: 500, errors: err });
     }
-    res.sendStatus(200);
   };
 
   getPublications: RequestHandler = async (req: Request, res: Response, next) => {
