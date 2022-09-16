@@ -13,27 +13,30 @@ export class Authenticator {
     this.userAccountRepository = conn.getRepository<UserAccount>("user_account");
   }
 
-  verifyCredentials: RequestHandler = async (req, res, next) => {
-    const credentials = auth(req);
-    if (!credentials) {
-      return next({ status: 401, errors: "Unauthorized" });
-    }
-    try {
-      const userAccount = await this.userAccountRepository.findOne({ username: credentials.name });
-      if (!userAccount) {
+  verifyCredentials(realm: string | null = null): RequestHandler {
+    return async (req, res, next) => {
+      const credentials = auth(req);
+      if (!credentials) {
+        if (realm) res.set("WWW-Authenticate", `Basic realm="${realm}"`);
         return next({ status: 401, errors: "Unauthorized" });
       }
-      if (userAccount.comparePassword(credentials.pass)) {
-        res.locals.username = userAccount.username;
-        res.locals.authenticated = true;
-        return next();
-      } else {
-        return next({ status: 401, errors: "Unauthorized" });
+      try {
+        const userAccount = await this.userAccountRepository.findOne({ username: credentials.name });
+        if (!userAccount) {
+          return next({ status: 401, errors: "Unauthorized" });
+        }
+        if (userAccount.comparePassword(credentials.pass)) {
+          res.locals.username = userAccount.username;
+          res.locals.authenticated = true;
+          return next();
+        } else {
+          return next({ status: 401, errors: "Unauthorized" });
+        }
+      } catch (err) {
+        next({ status: 500, errors: `Internal server error: ${err}` });
       }
-    } catch (err) {
-      next({ status: 500, errors: `Internal server error: ${err}` });
-    }
-  };
+    };
+  }
 }
 
 export class Authorizator {
