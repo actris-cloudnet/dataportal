@@ -131,18 +131,18 @@ export class DownloadRoutes {
 
   stats: RequestHandler = async (req, res, next) => {
     let select, group, order;
-    switch (req.query.dimension) {
-      case "date,downloads":
-        select = `SELECT to_char(download."createdAt", 'YYYY-MM') AS date
+    switch (req.query.dimensions) {
+      case "yearMonth,downloads":
+        select = `SELECT to_char(download."createdAt", 'YYYY-MM') AS "yearMonth"
               , SUM(files) AS downloads`;
-        group = "GROUP BY date";
-        order = "ORDER BY date";
+        group = 'GROUP BY "yearMonth"';
+        order = 'ORDER BY "yearMonth"';
         break;
-      case "date,uniqueIps":
-        select = `SELECT to_char(download."createdAt", 'YYYY-MM') AS date
+      case "yearMonth,uniqueIps":
+        select = `SELECT to_char(download."createdAt", 'YYYY-MM') AS "yearMonth"
               , COUNT(DISTINCT ip) AS "uniqueIps"`;
-        group = "GROUP BY date";
-        order = "ORDER BY date";
+        group = 'GROUP BY "yearMonth"';
+        order = 'ORDER BY "yearMonth"';
         break;
       case "country,downloads":
         select = "SELECT country, SUM(files) AS downloads";
@@ -150,19 +150,26 @@ export class DownloadRoutes {
         order = "ORDER BY downloads DESC";
         break;
       default:
-        return next({ status: 400, errors: "invalid dimension" });
+        return next({ status: 400, errors: "invalid dimensions" });
     }
 
     let fileFilter = "";
     const params = [];
-    if (req.query.fileCountry) {
-      fileFilter = 'JOIN site ON "siteId" = site.id WHERE country = $1';
-      params.push(req.query.fileCountry);
+    if (req.query.site && req.query.country) {
+      return next({ status: 400, errors: "site and country parameters cannot be used at the same time" });
+    }
+    if (req.query.site) {
+      fileFilter = 'WHERE "siteId" = $1';
+      params.push(req.query.site);
+    }
+    if (req.query.country) {
+      fileFilter = 'JOIN site ON "siteId" = site.id WHERE "countryCode" = $1';
+      params.push(req.query.country);
     }
 
     const fileSelects = [];
-    if (typeof req.query.type == "string") {
-      for (const type of req.query.type.split(",")) {
+    if (typeof req.query.types == "string") {
+      for (const type of req.query.types.split(",")) {
         switch (type) {
           case "file":
             fileSelects.push(
@@ -198,12 +205,12 @@ export class DownloadRoutes {
             );
             break;
           default:
-            return next({ status: 400, errors: "invalid type" });
+            return next({ status: 400, errors: "invalid types" });
         }
       }
     }
     if (fileSelects.length === 0) {
-      return next({ status: 400, errors: "invalid type" });
+      return next({ status: 400, errors: "invalid types" });
     }
 
     const query = `${select}

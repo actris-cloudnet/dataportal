@@ -17,13 +17,14 @@ let instrumentUploadRepo: Repository<InstrumentUpload>;
 let downloadRepo: Repository<Download>;
 
 interface Params {
-  dimension: string;
-  type: string;
-  fileCountry?: string;
+  dimensions: string;
+  types: string;
+  country?: string;
+  site?: string;
 }
 
-async function doRequest(params: Params, headers: any = { authorization: `Basic ${str2base64("bob:bobs_pass")}` }) {
-  return await axios.get(`${backendPublicUrl}download/stats`, { params: params, headers: headers });
+function doRequest(params: Params, headers: any = { authorization: `Basic ${str2base64("bob:bobs_pass")}` }) {
+  return axios.get(`${backendPublicUrl}download/stats`, { params, headers });
 }
 
 const getStats = async (params: Params) => (await doRequest(params)).data;
@@ -36,6 +37,7 @@ describe("GET /api/download/stats", () => {
     modelFileRepo = conn.getRepository("model_file");
     collectionRepo = conn.getRepository("collection");
     instrumentUploadRepo = conn.getRepository("instrument_upload");
+    await downloadRepo.delete({});
     await initUsersAndPermissions();
     await regularFileRepo.save(JSON.parse((await fsp.readFile("fixtures/2-regular_file.json")).toString()));
     await modelFileRepo.save(JSON.parse((await fsp.readFile("fixtures/2-model_file.json")).toString()));
@@ -68,59 +70,77 @@ describe("GET /api/download/stats", () => {
   });
 
   it("fails without authentication", () =>
-    expect(doRequest({ dimension: "date,downloads", type: "file" }, null)).rejects.toMatchObject({
+    expect(doRequest({ dimensions: "yearMonth,downloads", types: "file" }, null)).rejects.toMatchObject({
       response: { status: 401 },
     }));
 
   it("calculates file downloads by date", () =>
-    expect(getStats({ dimension: "date,downloads", type: "file" })).resolves.toMatchObject([
-      { date: "2022-01", downloads: 2 },
-      { date: "2022-02", downloads: 2 },
+    expect(getStats({ dimensions: "yearMonth,downloads", types: "file" })).resolves.toMatchObject([
+      { yearMonth: "2022-01", downloads: 2 },
+      { yearMonth: "2022-02", downloads: 2 },
     ]));
 
   it("calculates unique IPs by date", () =>
-    expect(getStats({ dimension: "date,uniqueIps", type: "file" })).resolves.toMatchObject([
-      { date: "2022-01", uniqueIps: 1 },
-      { date: "2022-02", uniqueIps: 2 },
+    expect(getStats({ dimensions: "yearMonth,uniqueIps", types: "file" })).resolves.toMatchObject([
+      { yearMonth: "2022-01", uniqueIps: 1 },
+      { yearMonth: "2022-02", uniqueIps: 2 },
     ]));
 
   it("calculates file downloads by country", () =>
-    expect(getStats({ dimension: "country,downloads", type: "file" })).resolves.toMatchObject([
+    expect(getStats({ dimensions: "country,downloads", types: "file" })).resolves.toMatchObject([
       { country: "FI", downloads: 3 },
       { country: "SE", downloads: 1 },
     ]));
 
   it("calculates fileInCollection downloads by date", () =>
-    expect(getStats({ dimension: "date,downloads", type: "fileInCollection" })).resolves.toMatchObject([
-      { date: "2022-02", downloads: 2 },
+    expect(getStats({ dimensions: "yearMonth,downloads", types: "fileInCollection" })).resolves.toMatchObject([
+      { yearMonth: "2022-02", downloads: 2 },
     ]));
 
   it("calculates rawFile downloads by date", () =>
-    expect(getStats({ dimension: "date,downloads", type: "rawFile" })).resolves.toMatchObject([
-      { date: "2022-02", downloads: 1 },
+    expect(getStats({ dimensions: "yearMonth,downloads", types: "rawFile" })).resolves.toMatchObject([
+      { yearMonth: "2022-02", downloads: 1 },
     ]));
 
   it("sums downloads of all types", () =>
-    expect(getStats({ dimension: "date,downloads", type: "file,rawFile,fileInCollection" })).resolves.toMatchObject([
-      { date: "2022-01", downloads: 2 },
-      { date: "2022-02", downloads: 5 },
+    expect(
+      getStats({ dimensions: "yearMonth,downloads", types: "file,rawFile,fileInCollection" })
+    ).resolves.toMatchObject([
+      { yearMonth: "2022-01", downloads: 2 },
+      { yearMonth: "2022-02", downloads: 5 },
     ]));
 
   it("sums uniqueIps of all types", () =>
-    expect(getStats({ dimension: "date,uniqueIps", type: "file,rawFile,fileInCollection" })).resolves.toMatchObject([
-      { date: "2022-01", uniqueIps: 1 },
-      { date: "2022-02", uniqueIps: 3 },
+    expect(
+      getStats({ dimensions: "yearMonth,uniqueIps", types: "file,rawFile,fileInCollection" })
+    ).resolves.toMatchObject([
+      { yearMonth: "2022-01", uniqueIps: 1 },
+      { yearMonth: "2022-02", uniqueIps: 3 },
     ]));
 
   it("sums country downloads of all types", () =>
-    expect(getStats({ dimension: "country,downloads", type: "file,rawFile,fileInCollection" })).resolves.toMatchObject([
+    expect(
+      getStats({ dimensions: "country,downloads", types: "file,rawFile,fileInCollection" })
+    ).resolves.toMatchObject([
       { country: "FI", downloads: 3 },
       { country: "NO", downloads: 3 },
       { country: "SE", downloads: 1 },
     ]));
 
+  it("fails to filter by both site and country", () =>
+    expect(
+      getStats({ dimensions: "yearMonth,downloads", types: "file", country: "FI", site: "mace-head" })
+    ).rejects.toMatchObject({
+      response: { status: 400 },
+    }));
+
   it("can filter by country of files", () =>
-    expect(getStats({ dimension: "date,downloads", type: "file", fileCountry: "Finland" })).resolves.toMatchObject([
-      { date: "2022-02", downloads: 1 },
+    expect(getStats({ dimensions: "yearMonth,downloads", types: "file", country: "FI" })).resolves.toMatchObject([
+      { yearMonth: "2022-02", downloads: 1 },
+    ]));
+
+  it("can filter by site", () =>
+    expect(getStats({ dimensions: "yearMonth,downloads", types: "file", site: "hyytiala" })).resolves.toMatchObject([
+      { yearMonth: "2022-02", downloads: 1 },
     ]));
 });
