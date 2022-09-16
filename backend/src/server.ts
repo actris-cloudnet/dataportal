@@ -157,7 +157,7 @@ async function createServer() {
 
   app.post(
     "/upload/metadata",
-    authenticator.verifyCredentials,
+    authenticator.verifyCredentials(),
     express.json(),
     authorizator.verifySite,
     authorizator.verifyPermission(PermissionType.canUpload),
@@ -169,7 +169,7 @@ async function createServer() {
   app.put(
     "/upload/data/:checksum",
     middleware.validateMD5Param,
-    authenticator.verifyCredentials,
+    authenticator.verifyCredentials(),
     authorizator.findSiteFromChecksum,
     authorizator.verifyPermission(PermissionType.canUpload),
     express.raw({ limit: "100gb" }),
@@ -180,7 +180,7 @@ async function createServer() {
   // model data upload (for Ewan only)
   app.post(
     "/model-upload/metadata",
-    authenticator.verifyCredentials,
+    authenticator.verifyCredentials(),
     express.json(),
     authorizator.verifySite,
     authorizator.verifyPermission(PermissionType.canUploadModel),
@@ -192,7 +192,7 @@ async function createServer() {
   app.put(
     "/model-upload/data/:checksum",
     middleware.validateMD5Param,
-    authenticator.verifyCredentials,
+    authenticator.verifyCredentials(),
     authorizator.findSiteFromChecksum,
     authorizator.verifyPermission(PermissionType.canUploadModel),
     express.raw({ limit: "1gb" }),
@@ -215,20 +215,20 @@ async function createServer() {
   app.put("/quality/:uuid", express.json(), qualityRoutes.putQualityReport);
   app.get(
     "/api/download/stats",
-    authenticator.verifyCredentials,
+    authenticator.verifyCredentials("View download statistics"),
     authorizator.verifyPermission(PermissionType.canGetStats),
     dlRoutes.stats
   );
   app.delete(
     "/api/files/:uuid",
-    authenticator.verifyCredentials,
+    authenticator.verifyCredentials(),
     middleware.checkDeleteParams,
     authorizator.verifyPermission(PermissionType.canDelete),
     fileRoutes.deleteFile
   );
   app.post(
     "/api/publications/",
-    authenticator.verifyCredentials,
+    authenticator.verifyCredentials(),
     authorizator.verifyPermission(PermissionType.canAddPublication),
     publicationRoutes.postPublication
   );
