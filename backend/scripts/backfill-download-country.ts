@@ -9,9 +9,8 @@ async function main() {
   const rows = await repo.createQueryBuilder().select("ip").distinct(true).where({ country: null }).getRawMany();
   for (const row of rows) {
     const country = ipLookup.get(row.ip)?.country?.iso_code;
-    console.log(row.ip, "=>", country);
     if (country) {
-      await repo.update({ ip: row.ip, country: null }, { country });
+      console.log(`UPDATE "download" SET "country" = '${country}' WHERE "ip" = '${row.ip}' AND "country" IS NULL;`);
     }
   }
 }
