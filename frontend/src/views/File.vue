@@ -239,8 +239,8 @@ main#filelanding
                 <a v-else :href="response.instrumentPid">{{ instrument }}</a>
               </dd>
             </template>
-            <dt>Quality</dt>
-            <dd>{{ response.quality === "qc" ? "Quality Controlled (QC)" : "Near Real Time (NRT)" }}</dd>
+            <dt>Timeliness</dt>
+            <dd>{{ response.quality === "qc" ? "Regular" : "Near Real Time (NRT)" }}</dd>
             <dt>Quality check</dt>
             <dd>
               <span v-if="response.qualityScore === 1" class="qualitycheck">
