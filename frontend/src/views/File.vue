@@ -79,6 +79,12 @@ main#filelanding
 .na
   color: grey
 
+.loading
+  color: grey
+
+.error
+  color: red
+
 .download:focus, .secondaryButton:focus
   outline: thin dotted black
 
@@ -226,7 +232,11 @@ main#filelanding
             <template v-if="response.instrumentPid">
               <dt>Instrument</dt>
               <dd>
-                <a :href="response.instrumentPid">{{ instrument }}</a>
+                <span v-if="instrumentStatus === 'loading'" class="loading">Loading...</span>
+                <a v-else-if="instrumentStatus === 'error'" :href="response.instrumentPid" class="error">
+                  Failed to load information
+                </a>
+                <a v-else :href="response.instrumentPid">{{ instrument }}</a>
               </dd>
             </template>
             <dt>Quality</dt>
@@ -369,6 +379,7 @@ import {
   sortVisualizations,
   notEmpty,
   formatCoordinates,
+  fetchInstrumentName,
 } from "../lib";
 import { DevMode } from "../lib/DevMode";
 import { File, ModelFile, RegularFile } from "../../../backend/src/entity/File";
@@ -406,6 +417,7 @@ export default class FileView extends Vue {
   site!: Site;
   model: Model | null = null;
   instrument = "";
+  instrumentStatus: "loading" | "error" | "ready" = "loading";
   truncateHash = true;
 
   get maxMarginRight() {
@@ -542,16 +554,16 @@ export default class FileView extends Vue {
   }
 
   async fetchInstrument(file: RegularFile | ModelFile) {
-    if (!("instrumentPid" in file) || file.instrumentPid == null) return;
+    if (!("instrumentPid" in file) || file.instrumentPid == null) {
+      return;
+    }
     const pid = (file as RegularFile).instrumentPid;
-    const url = pid.replace("handle.net", "handle.net/api/handles");
     try {
-      const response = await axios.get(url);
-      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-      const modelInfo = response.data.values.find((ele: any) => ele.type == "21.T11148/c1a0ec5ad347427f25d6");
-      this.instrument = JSON.parse(modelInfo.data.value).modelName;
+      this.instrument = await fetchInstrumentName(pid);
+      this.instrumentStatus = "ready";
     } catch (err) {
-      console.log(err); // eslint-disable-line  no-console
+      console.error("Failed to load instrument:", err);
+      this.instrumentStatus = "error";
     }
   }
 }

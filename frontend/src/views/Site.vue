@@ -30,6 +30,14 @@
   margin-bottom: $filter-margin
   margin-top: 20px
   display: block
+
+#instruments
+  max-width: 650px
+
+.warningnote
+  margin: 1em 0 0
+  border-color: #fff2ca
+  background: #fffdee
 </style>
 
 <template>
@@ -68,17 +76,28 @@
       <section id="instruments">
         <header>Instruments</header>
         <section class="details">
-          <div v-if="instruments && instruments.length" class="detailslist">
+          <div v-if="instrumentsStatus === 'loading'" class="loadingoverlay">
+            <div class="lds-dual-ring"></div>
+          </div>
+          <div class="detailslistNotAvailable" v-else-if="instrumentsStatus === 'error'">
+            Failed to load instrument information.
+          </div>
+          <div v-else-if="instruments && instruments.length" class="detailslist">
             <span class="notice">
               The site has submitted data from the following instruments in the last
               {{ instrumentsFromLastDays }} days:<br />
             </span>
-            <div v-for="instrument in instruments" :key="instrument.id" class="detailslistItem">
-              <img alt="instrument icon" :src="getIconUrl(instrument.instrument.type)" class="product" />
-              <span v-if="instrument.instrumentPid">
-                <a :href="instrument.instrumentPid"> {{ instrument.instrument.humanReadableName }} </a>
+            <div v-for="(instrument, index) in instruments" :key="index" class="detailslistItem">
+              <img alt="instrument icon" :src="instrument.icon" class="product" />
+              <span v-if="instrument.pid">
+                <a :href="instrument.pid">{{ instrument.name }}</a>
               </span>
-              <span v-else> {{ instrument.instrument.humanReadableName }} </span>
+              <span v-else>{{ instrument.name }}</span>
+            </div>
+            <div v-if="hasMissingInstrumentPids" class="notice note warningnote">
+              Data was submitted without an instrument PID. If you're the one submitting the data, please consult
+              <a href="https://docs.cloudnet.fmi.fi/api/data-upload.html">our documentation</a> to identify your
+              instruments.
             </div>
           </div>
           <div class="detailslistNotAvailable" v-else>Instrument information not available.</div>
@@ -193,12 +212,18 @@ import { SearchFileResponse } from "../../../backend/src/entity/SearchFileRespon
 import Map from "../components/Map.vue";
 import ProductAvailabilityVisualization from "../components/DataStatusVisualization.vue";
 import ProductAvailabilityVisualizationSingle from "../components/DataStatusVisualizationSingleProduct.vue";
-import { ReducedMetadataResponse } from "../../../backend/src/entity/ReducedMetadataResponse";
-import { getProductIcon, formatCoordinates } from "../lib";
+import { getProductIcon, formatCoordinates, fetchInstrumentName } from "../lib";
 import { DevMode } from "../lib/DevMode";
 import { Product } from "../../../backend/src/entity/Product";
 import { DataStatusParser } from "../lib/DataStatusParser";
 import CustomMultiselect from "../components/Multiselect.vue";
+import { ReducedMetadataResponse } from "../../../backend/src/entity/ReducedMetadataResponse";
+
+interface Instrument {
+  pid: string | null;
+  name: string;
+  icon: string;
+}
 
 @Component({
   name: "app-site",
@@ -210,8 +235,9 @@ export default class SiteView extends Vue {
   response: Site | null = null;
   latestFile: SearchFileResponse | null = null;
   error = false;
-  instruments: ReducedMetadataResponse[] | null = null;
+  instruments: Instrument[] = [];
   instrumentsFromLastDays = 30;
+  instrumentsStatus: "loading" | "error" | "ready" = "loading";
   allProducts: Product[] | null = null;
   selectedProductId: string | null = null;
   mapKey = 0;
@@ -249,19 +275,13 @@ export default class SiteView extends Vue {
       .catch(() => {
         /* */
       });
-    const date30daysago = new Date();
-    date30daysago.setDate(date30daysago.getDate() - this.instrumentsFromLastDays);
     this.initDataStatusParser().catch(() => {
       /* */
     });
-    axios
-      .get(`${this.apiUrl}uploaded-metadata/`, {
-        params: { ...this.payload, ...{ site: this.siteid, dateFrom: date30daysago } },
-      })
-      .then(({ data }) => (this.instruments = data))
-      .catch(() => {
-        /* */
-      });
+    this.loadInstruments().catch((error) => {
+      console.error(error);
+      this.instrumentsStatus = "error";
+    });
   }
 
   get selectedProduct() {
@@ -289,6 +309,39 @@ export default class SiteView extends Vue {
       properties,
     };
     this.dataStatusParser = await new DataStatusParser(payload).engage();
+  }
+
+  async handleInstrument(response: ReducedMetadataResponse): Promise<Instrument> {
+    if (response.instrumentPid) {
+      return {
+        pid: response.instrumentPid,
+        name: await fetchInstrumentName(response.instrumentPid).catch((error) => {
+          console.error("Failed to load instrument information", error);
+          return response.instrument.humanReadableName;
+        }),
+        icon: this.getIconUrl(response.instrument.type),
+      };
+    } else {
+      return {
+        pid: null,
+        name: `Unidentified ${response.instrument.humanReadableName}`,
+        icon: this.getIconUrl(response.instrument.type),
+      };
+    }
+  }
+
+  async loadInstruments() {
+    const dateFrom = new Date();
+    dateFrom.setDate(dateFrom.getDate() - this.instrumentsFromLastDays);
+    const instruments = await axios.get(`${this.apiUrl}uploaded-metadata/`, {
+      params: { ...this.payload, ...{ site: this.siteid, dateFrom } },
+    });
+    this.instruments = await Promise.all(instruments.data.map(this.handleInstrument));
+    this.instrumentsStatus = "ready";
+  }
+
+  get hasMissingInstrumentPids(): boolean {
+    return this.instruments.some((instrument) => !instrument.pid);
   }
 }
 </script>
