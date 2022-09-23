@@ -94,9 +94,9 @@ export function compareValues(a: any, b: any): number {
 
 export function getQcIcon(errorLevel: string) {
   if (errorLevel === "error") {
-    return require("../assets/icons/test-fail.png");
+    return require("../assets/icons/test-fail.svg");
   } else if (errorLevel === "warning") {
-    return require("../assets/icons/test-warning.png");
+    return require("../assets/icons/test-warning.svg");
   }
-  return require("../assets/icons/test-pass.png");
+  return require("../assets/icons/test-pass.svg");
 }
