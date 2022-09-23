@@ -34,6 +34,9 @@ table,
 .placeholder
   margin-top: 1rem
 
+button
+  margin-top: .5rem
+
 legend
   font-size: inherit
   font-weight: bold
@@ -77,22 +80,7 @@ legend
           </select>
         </label>
       </div>
-      <fieldset>
-        <legend class="label">File type:</legend>
-        <label>
-          <input type="checkbox" value="file" v-model="type" />
-          File
-        </label>
-        <label style="margin-left: 0.5rem">
-          <input type="checkbox" value="rawFile" v-model="type" />
-          Raw file
-        </label>
-        <label style="margin-left: 0.5rem">
-          <input type="checkbox" value="fileInCollection" v-model="type" />
-          File in collection
-        </label>
-      </fieldset>
-      <button @click="onSearch" :disabled="type.length == 0 || loading">
+      <button @click="onSearch" :disabled="loading">
         {{ loading ? "Loading..." : "Search" }}
       </button>
       <template v-if="!initial">
@@ -158,13 +146,12 @@ export default class StatsView extends Vue {
   dimensions: string[] = [];
   loading = false;
   initial = true;
-  type = ["file"];
   maxValue = 0;
   selectedDimensions = "yearMonth,downloads";
   DIMENSION_LABEL = {
     yearMonth: "Month",
     country: "Country",
-    downloads: "Downloads",
+    downloads: "Downloads (in variable years)",
     uniqueIps: "Unique IPs",
   };
   numberFormat = (Intl && Intl.NumberFormat && new Intl.NumberFormat("en-GB")) || {
@@ -228,7 +215,6 @@ export default class StatsView extends Vue {
     this.loading = true;
     const params = {
       dimensions: this.selectedDimensions,
-      types: this.type.join(","),
       country: this.currentCountry || undefined,
       site: this.currentSite || undefined,
     };
@@ -239,6 +225,9 @@ export default class StatsView extends Vue {
       this.statistics = response.data;
       this.dimensions = this.selectedDimensions.split(",");
       this.maxValue = Math.max(...this.statistics.map((d) => d[this.dimensions[1]]));
+      if (this.selectedDimensions === "country,downloads") {
+        this.statistics.sort((a, b) => compareValues(b.downloads, a.downloads));
+      }
     } catch (e) {
       this.loading = false;
       alert("Failed to download statistics");

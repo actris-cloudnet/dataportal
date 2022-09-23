@@ -134,96 +134,81 @@ export class DownloadRoutes {
     switch (req.query.dimensions) {
       case "yearMonth,downloads":
         select = `SELECT to_char(download."createdAt", 'YYYY-MM') AS "yearMonth"
-              , SUM(files) AS downloads`;
+                       , SUM("variableDays") / 365.25 AS downloads`;
         group = 'GROUP BY "yearMonth"';
         order = 'ORDER BY "yearMonth"';
         break;
       case "yearMonth,uniqueIps":
         select = `SELECT to_char(download."createdAt", 'YYYY-MM') AS "yearMonth"
-              , COUNT(DISTINCT ip) AS "uniqueIps"`;
+                       , COUNT(DISTINCT ip) AS "uniqueIps"`;
         group = 'GROUP BY "yearMonth"';
         order = 'ORDER BY "yearMonth"';
         break;
       case "country,downloads":
-        select = "SELECT country, SUM(files) AS downloads";
+        select = 'SELECT country, SUM("variableDays") / 365.25 AS downloads';
         group = "GROUP BY country";
-        order = "ORDER BY downloads DESC";
+        order = "ORDER BY country";
         break;
       default:
         return next({ status: 400, errors: "invalid dimensions" });
     }
 
-    let fileFilter = "";
+    const productFileJoin = 'JOIN product_variable USING ("productId")';
+    const productFileWhere = 'WHERE product_variable."actrisVocabUri" IS NOT NULL';
+    let fileJoin = "";
+    let fileWhere = "";
     const params = [];
     if (req.query.site && req.query.country) {
       return next({ status: 400, errors: "site and country parameters cannot be used at the same time" });
     }
     if (req.query.site) {
-      fileFilter = 'WHERE "siteId" = $1';
+      fileWhere = 'AND "siteId" = $1';
       params.push(req.query.site);
     }
     if (req.query.country) {
-      fileFilter = 'JOIN site ON "siteId" = site.id WHERE "countryCode" = $1';
+      fileJoin = 'JOIN site ON "siteId" = site.id';
+      fileWhere = 'AND "countryCode" = $1';
       params.push(req.query.country);
     }
 
-    const fileSelects = [];
-    if (typeof req.query.types == "string") {
-      for (const type of req.query.types.split(",")) {
-        switch (type) {
-          case "file":
-            fileSelects.push(
-              `SELECT uuid, 1 AS files FROM regular_file
-             ${fileFilter}
-             UNION
-             SELECT uuid, 1 AS files FROM model_file
-             ${fileFilter}`
-            );
-            break;
-          case "rawFile":
-            fileSelects.push(
-              `SELECT uuid, 1 AS files FROM instrument_upload
-             ${fileFilter}
-             UNION
-             SELECT uuid, 1 AS files FROM model_upload
-             ${fileFilter}`
-            );
-            break;
-          case "fileInCollection":
-            fileSelects.push(
-              `SELECT "collectionUuid" as uuid, count(*) as files
-             FROM (SELECT "collectionUuid", "regularFileUuid" AS "fileUuid"
-                   FROM collection_regular_files_regular_file
-                   JOIN regular_file ON "regularFileUuid" = regular_file.uuid
-                   ${fileFilter}
-                   UNION
-                   SELECT "collectionUuid", "modelFileUuid" AS "fileUuid"
-                   FROM collection_model_files_model_file
-                   JOIN model_file ON "modelFileUuid" = model_file.uuid
-                   ${fileFilter}) collection_file
-             GROUP BY "collectionUuid"`
-            );
-            break;
-          default:
-            return next({ status: 400, errors: "invalid types" });
-        }
-      }
-    }
-    if (fileSelects.length === 0) {
-      return next({ status: 400, errors: "invalid types" });
-    }
+    const fileSelects = [
+      `SELECT uuid, count(*) AS "variableDays"
+       FROM (SELECT uuid
+             FROM regular_file
+             ${productFileJoin} ${fileJoin}
+             ${productFileWhere} ${fileWhere}
+             UNION ALL
+             SELECT uuid
+             FROM model_file
+             ${productFileJoin} ${fileJoin}
+             ${productFileWhere} ${fileWhere}) AS file
+       GROUP BY uuid`,
+      `SELECT "collectionUuid" AS uuid, COUNT(*) AS "variableDays"
+       FROM (SELECT "collectionUuid", "regularFileUuid" AS "fileUuid"
+             FROM collection_regular_files_regular_file
+             JOIN regular_file ON "regularFileUuid" = regular_file.uuid
+             ${productFileJoin} ${fileJoin}
+             ${productFileWhere} ${fileWhere}
+             UNION ALL
+             SELECT "collectionUuid", "modelFileUuid" AS "fileUuid"
+             FROM collection_model_files_model_file
+             JOIN model_file ON "modelFileUuid" = model_file.uuid
+             ${productFileJoin} ${fileJoin}
+             ${productFileWhere} ${fileWhere}) AS collection_file
+       GROUP BY "collectionUuid"`,
+    ];
 
     const query = `${select}
-       FROM download
-       JOIN (${fileSelects.join(" UNION ")}) object ON "objectUuid" = object.uuid
-       WHERE ip NOT IN ('', '::ffff:127.0.0.1') AND ip NOT LIKE '192.168.%'
-       ${group}
-       ${order}`;
+      FROM download
+      JOIN (${fileSelects.join(" UNION ")}) object ON "objectUuid" = object.uuid
+      WHERE ip NOT IN ('', '::ffff:127.0.0.1') AND ip NOT LIKE '192.168.%'
+      ${group}
+      ${order}`;
 
     try {
       const rows = await this.conn.query(query, params);
       rows.forEach((row: any) => {
-        if (row.downloads) row.downloads = parseInt(row.downloads);
+        if (row.downloads) row.downloads = parseFloat(row.downloads);
         if (row.uniqueIps) row.uniqueIps = parseInt(row.uniqueIps);
       });
       res.send(rows);

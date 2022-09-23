@@ -18,7 +18,6 @@ let downloadRepo: Repository<Download>;
 
 interface Params {
   dimensions: string;
-  types: string;
   country?: string;
   site?: string;
 }
@@ -42,22 +41,48 @@ describe("GET /api/download/stats", () => {
     await regularFileRepo.save(JSON.parse((await fsp.readFile("fixtures/2-regular_file.json")).toString()));
     await modelFileRepo.save(JSON.parse((await fsp.readFile("fixtures/2-model_file.json")).toString()));
     await collectionRepo.save(JSON.parse((await fsp.readFile("fixtures/3-collection.json")).toString()));
-    await instrumentUploadRepo.save(JSON.parse((await fsp.readFile("fixtures/2-instrument_upload.json")).toString()));
-    await downloadRepo.save([
-      new Download(ObjectType.Product, "38092c00-161d-4ca2-a29d-628cf8e960f6", "1.1.1.1", "FI", new Date(2022, 0, 10)),
-      new Download(ObjectType.Product, "bde7a35f-03aa-4bff-acfb-b4974ea9f217", "1.1.1.1", "FI", new Date(2022, 0, 11)),
-      new Download(ObjectType.Product, "00000000-0000-0000-0000-000000000000", "1.1.1.1", "FI", new Date(2022, 0, 10)),
-      new Download(ObjectType.Product, "38092c00-161d-4ca2-a29d-628cf8e960f6", "1.1.1.2", "SE", new Date(2022, 1, 10)),
-      new Download(ObjectType.Product, "d21d6a9b-6804-4465-a026-74ec429fe17d", "1.1.1.1", "FI", new Date(2022, 1, 11)),
-      new Download(ObjectType.Raw, "b8e96ee1-d3e1-49ba-a557-c131d56beeab", "1.1.1.3", "NO", new Date(2022, 1, 12)),
-      new Download(
-        ObjectType.Collection,
-        "48092c00-161d-4ca2-a29d-628cf8e960f6",
-        "1.1.1.3",
-        "NO",
-        new Date(2022, 1, 12)
-      ),
-    ]);
+    // Download half year of Mace Head data with two variables ≈ 1 variable year.
+    await downloadRepo.save(
+      Array.from(
+        { length: 181 },
+        (_, day) =>
+          new Download(
+            ObjectType.Product,
+            "38092c00-161d-4ca2-a29d-628cf8e960f6",
+            "1.1.1.1",
+            "FI",
+            new Date(2022, 0, day + 1)
+          )
+      )
+    );
+    // Download half year of Hyytiälä data with two variables ≈ 1 variable year.
+    await downloadRepo.save(
+      Array.from(
+        { length: 181 },
+        (_, day) =>
+          new Download(
+            ObjectType.Product,
+            "d21d6a9b-6804-4465-a026-74ec429fe17d",
+            "1.1.1.2",
+            "NO",
+            new Date(2022, 0, day + 1)
+          )
+      )
+    );
+    // Download half year of collection data with two variables ≈ 1 variable year.
+    await downloadRepo.save(
+      Array.from(
+        { length: 184 },
+        (_, day) =>
+          new Download(
+            ObjectType.Collection,
+            "48092c00-161d-4ca2-a29d-628cf8e960f6",
+            "1.1.1.3",
+            "SE",
+            new Date(2022, 0, 182 + day)
+          )
+      )
+    );
   });
 
   afterAll(async () => {
@@ -70,77 +95,77 @@ describe("GET /api/download/stats", () => {
   });
 
   it("fails without authentication", () =>
-    expect(doRequest({ dimensions: "yearMonth,downloads", types: "file" }, null)).rejects.toMatchObject({
+    expect(doRequest({ dimensions: "yearMonth,downloads" }, null)).rejects.toMatchObject({
       response: { status: 401 },
     }));
 
   it("calculates file downloads by date", () =>
-    expect(getStats({ dimensions: "yearMonth,downloads", types: "file" })).resolves.toMatchObject([
-      { yearMonth: "2022-01", downloads: 2 },
-      { yearMonth: "2022-02", downloads: 2 },
+    expect(getStats({ dimensions: "yearMonth,downloads" })).resolves.toMatchObject([
+      { yearMonth: "2022-01", downloads: expect.toBeAround((2 * 2 * 31) / 365.25, 10) },
+      { yearMonth: "2022-02", downloads: expect.toBeAround((2 * 2 * 28) / 365.25, 10) },
+      { yearMonth: "2022-03", downloads: expect.toBeAround((2 * 2 * 31) / 365.25, 10) },
+      { yearMonth: "2022-04", downloads: expect.toBeAround((2 * 2 * 30) / 365.25, 10) },
+      { yearMonth: "2022-05", downloads: expect.toBeAround((2 * 2 * 31) / 365.25, 10) },
+      { yearMonth: "2022-06", downloads: expect.toBeAround((2 * 2 * 30) / 365.25, 10) },
+      { yearMonth: "2022-07", downloads: expect.toBeAround((2 * 31) / 365.25, 10) },
+      { yearMonth: "2022-08", downloads: expect.toBeAround((2 * 31) / 365.25, 10) },
+      { yearMonth: "2022-09", downloads: expect.toBeAround((2 * 30) / 365.25, 10) },
+      { yearMonth: "2022-10", downloads: expect.toBeAround((2 * 31) / 365.25, 10) },
+      { yearMonth: "2022-11", downloads: expect.toBeAround((2 * 30) / 365.25, 10) },
+      { yearMonth: "2022-12", downloads: expect.toBeAround((2 * 31) / 365.25, 10) },
     ]));
 
   it("calculates unique IPs by date", () =>
-    expect(getStats({ dimensions: "yearMonth,uniqueIps", types: "file" })).resolves.toMatchObject([
-      { yearMonth: "2022-01", uniqueIps: 1 },
+    expect(getStats({ dimensions: "yearMonth,uniqueIps" })).resolves.toMatchObject([
+      { yearMonth: "2022-01", uniqueIps: 2 },
       { yearMonth: "2022-02", uniqueIps: 2 },
+      { yearMonth: "2022-03", uniqueIps: 2 },
+      { yearMonth: "2022-04", uniqueIps: 2 },
+      { yearMonth: "2022-05", uniqueIps: 2 },
+      { yearMonth: "2022-06", uniqueIps: 2 },
+      { yearMonth: "2022-07", uniqueIps: 1 },
+      { yearMonth: "2022-08", uniqueIps: 1 },
+      { yearMonth: "2022-09", uniqueIps: 1 },
+      { yearMonth: "2022-10", uniqueIps: 1 },
+      { yearMonth: "2022-11", uniqueIps: 1 },
+      { yearMonth: "2022-12", uniqueIps: 1 },
     ]));
 
   it("calculates file downloads by country", () =>
-    expect(getStats({ dimensions: "country,downloads", types: "file" })).resolves.toMatchObject([
-      { country: "FI", downloads: 3 },
-      { country: "SE", downloads: 1 },
-    ]));
-
-  it("calculates fileInCollection downloads by date", () =>
-    expect(getStats({ dimensions: "yearMonth,downloads", types: "fileInCollection" })).resolves.toMatchObject([
-      { yearMonth: "2022-02", downloads: 2 },
-    ]));
-
-  it("calculates rawFile downloads by date", () =>
-    expect(getStats({ dimensions: "yearMonth,downloads", types: "rawFile" })).resolves.toMatchObject([
-      { yearMonth: "2022-02", downloads: 1 },
-    ]));
-
-  it("sums downloads of all types", () =>
-    expect(
-      getStats({ dimensions: "yearMonth,downloads", types: "file,rawFile,fileInCollection" })
-    ).resolves.toMatchObject([
-      { yearMonth: "2022-01", downloads: 2 },
-      { yearMonth: "2022-02", downloads: 5 },
-    ]));
-
-  it("sums uniqueIps of all types", () =>
-    expect(
-      getStats({ dimensions: "yearMonth,uniqueIps", types: "file,rawFile,fileInCollection" })
-    ).resolves.toMatchObject([
-      { yearMonth: "2022-01", uniqueIps: 1 },
-      { yearMonth: "2022-02", uniqueIps: 3 },
-    ]));
-
-  it("sums country downloads of all types", () =>
-    expect(
-      getStats({ dimensions: "country,downloads", types: "file,rawFile,fileInCollection" })
-    ).resolves.toMatchObject([
-      { country: "FI", downloads: 3 },
-      { country: "NO", downloads: 3 },
-      { country: "SE", downloads: 1 },
+    expect(getStats({ dimensions: "country,downloads" })).resolves.toMatchObject([
+      { country: "FI", downloads: expect.toBeAround((2 * 181) / 365.25, 10) },
+      { country: "NO", downloads: expect.toBeAround((2 * 181) / 365.25, 10) },
+      { country: "SE", downloads: expect.toBeAround((2 * 184) / 365.25, 10) },
     ]));
 
   it("fails to filter by both site and country", () =>
-    expect(
-      getStats({ dimensions: "yearMonth,downloads", types: "file", country: "FI", site: "mace-head" })
-    ).rejects.toMatchObject({
+    expect(getStats({ dimensions: "yearMonth,downloads", country: "FI", site: "mace-head" })).rejects.toMatchObject({
       response: { status: 400 },
     }));
 
   it("can filter by country of files", () =>
-    expect(getStats({ dimensions: "yearMonth,downloads", types: "file", country: "FI" })).resolves.toMatchObject([
-      { yearMonth: "2022-02", downloads: 1 },
+    expect(getStats({ dimensions: "yearMonth,downloads", country: "FI" })).resolves.toMatchObject([
+      { yearMonth: "2022-01", downloads: expect.toBeAround((2 * 31) / 365.25, 10) },
+      { yearMonth: "2022-02", downloads: expect.toBeAround((2 * 28) / 365.25, 10) },
+      { yearMonth: "2022-03", downloads: expect.toBeAround((2 * 31) / 365.25, 10) },
+      { yearMonth: "2022-04", downloads: expect.toBeAround((2 * 30) / 365.25, 10) },
+      { yearMonth: "2022-05", downloads: expect.toBeAround((2 * 31) / 365.25, 10) },
+      { yearMonth: "2022-06", downloads: expect.toBeAround((2 * 30) / 365.25, 10) },
+      { yearMonth: "2022-07", downloads: expect.toBeAround((2 * 31) / 365.25, 10) },
+      { yearMonth: "2022-08", downloads: expect.toBeAround((2 * 31) / 365.25, 10) },
+      { yearMonth: "2022-09", downloads: expect.toBeAround((2 * 30) / 365.25, 10) },
+      { yearMonth: "2022-10", downloads: expect.toBeAround((2 * 31) / 365.25, 10) },
+      { yearMonth: "2022-11", downloads: expect.toBeAround((2 * 30) / 365.25, 10) },
+      { yearMonth: "2022-12", downloads: expect.toBeAround((2 * 31) / 365.25, 10) },
     ]));
 
   it("can filter by site", () =>
-    expect(getStats({ dimensions: "yearMonth,downloads", types: "file", site: "hyytiala" })).resolves.toMatchObject([
-      { yearMonth: "2022-02", downloads: 1 },
+    expect(getStats({ dimensions: "yearMonth,downloads", site: "mace-head" })).resolves.toMatchObject([
+      { yearMonth: "2022-01", downloads: expect.toBeAround((2 * 31) / 365.25, 10) },
+      { yearMonth: "2022-02", downloads: expect.toBeAround((2 * 28) / 365.25, 10) },
+      { yearMonth: "2022-03", downloads: expect.toBeAround((2 * 31) / 365.25, 10) },
+      { yearMonth: "2022-04", downloads: expect.toBeAround((2 * 30) / 365.25, 10) },
+      { yearMonth: "2022-05", downloads: expect.toBeAround((2 * 31) / 365.25, 10) },
+      { yearMonth: "2022-06", downloads: expect.toBeAround((2 * 30) / 365.25, 10) },
     ]));
 });

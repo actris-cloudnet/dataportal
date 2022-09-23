@@ -27,13 +27,15 @@
     "id": "radar-v",
     "humanReadableName": "Radar velocity",
     "product": "radar",
-    "order": "2"
+    "order": "2",
+    "actrisVocabUri": "http://example.org/radarv"
   },
   {
     "id": "radar-ldr",
     "humanReadableName": "Radar LDR",
     "product": "radar",
-    "order": "3"
+    "order": "3",
+    "actrisVocabUri": "http://example.org/radarldr"
   },
   {
     "id": "categorize-v",
