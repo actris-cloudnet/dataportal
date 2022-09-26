@@ -54,9 +54,15 @@ export class QualityReportRoutes {
     if (qualityReport === undefined) {
       return next({ status: 404, errors: ["No files match this UUID"] });
     }
-    const tests = qualityReport.testReports;
-    tests.sort((a, b) => (a.result === "pass" ? -1 : 1));
-    tests.sort((a, b) => (a.result === "error" ? -1 : 1));
+    let tests = qualityReport.testReports;
+    const sortByObject = [ErrorLevel.ERROR, ErrorLevel.WARNING, ErrorLevel.PASS].reduce((obj, item, index) => {
+      return {
+        ...obj,
+        [item]: index,
+      };
+    }, {});
+    // @ts-ignore
+    tests = tests.sort((a, b) => sortByObject[a.result] - sortByObject[b.result]);
     qualityReport.testReports = tests;
     res.send(qualityReport);
   };
