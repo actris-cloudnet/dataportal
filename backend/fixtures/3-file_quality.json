@@ -13,8 +13,6 @@
     "errorLevel": "pass",
     "qcVersion": "1.20",
     "timestamp": "2022-02-20T10:56:19.382Z",
-    "tests": 8,
-    "errors": 0,
-    "warnings": 0
+    "tests": 8
   }
 ]

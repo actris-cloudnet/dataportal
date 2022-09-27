@@ -24,14 +24,14 @@ export class FileQuality {
   @Column()
   timestamp!: Date;
 
-  @Column({ type: "smallint", nullable: true })
-  tests!: number | null;
+  @Column({ type: "smallint", default: 0 })
+  tests!: number;
 
-  @Column({ type: "smallint", nullable: true })
-  errors!: number | null;
+  @Column({ type: "smallint", default: 0 })
+  errors!: number;
 
-  @Column({ type: "smallint", nullable: true })
-  warnings!: number | null;
+  @Column({ type: "smallint", default: 0 })
+  warnings!: number;
 
   @OneToMany(() => QualityReport, (report) => report.quality)
   testReports!: QualityReport[];
