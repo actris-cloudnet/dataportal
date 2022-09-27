@@ -161,20 +161,11 @@
         <template>
           <table id="exceptions">
             <tr v-for="(exp, index) in test.exceptions" :key="exp.result + index">
-              <template v-if="Object.keys(exp).length < 2"
-                ><td class="detailsMissing">Test failed without further details</td></template
-              >
-              <template v-else-if="exp.expected && exp.received && exp.variable"
-                ><td>
-                  • Expected <mark class="variable">{{ exp.expected }}</mark> but received
-                  <mark class="variable">{{ exp.received }}</mark> with variable
-                  <mark class="variable">{{ exp.variable }}</mark>
-                </td></template
-              >
+              <template v-if="Object.keys(exp).length <= 1 || !('message' in exp)">
+                <td class="detailsMissing">Test failed without further details.</td>
+              </template>
               <template v-else>
-                <span v-for="(value, key) in exp" :key="key">
-                  <td class="rawData" v-if="key !== 'result'">{{ key }}: {{ value }}</td>
-                </span>
+                <td>• {{ exp.message }}</td>
               </template>
             </tr>
           </table>

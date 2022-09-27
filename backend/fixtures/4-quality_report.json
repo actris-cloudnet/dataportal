@@ -78,21 +78,15 @@
     "exceptions": [
       {
         "result": "warning",
-        "variable": "foo2",
-        "expected": "beta",
-        "received": "ateb"
+        "message": "Some error message."
       },
       {
         "result": "error",
-        "variable": "foo3",
-        "expected": "beta",
-        "received": "ateb"
+        "message": "Some error message."
       },
       {
         "result": "warning",
-        "variable": "foo4",
-        "expected": "dfff",
-        "received": "fadeff"
+        "message": "Some error message."
       }
     ]
   },
