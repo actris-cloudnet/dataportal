@@ -48,7 +48,7 @@ describe("QualityReport.vue", () => {
   });
 
   it("shows failing tests", async () => {
-    expect(content).toContain("Expected beta but received");
+    expect(content).toContain("Test failed without further details");
   });
 
   it("shows number of total tests", async () => {
