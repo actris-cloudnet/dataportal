@@ -1,3 +1,5 @@
+import axios from "axios";
+
 import { VisualizationItem } from "../../../backend/src/entity/VisualizationResponse";
 import { SearchFileResponse } from "../../../backend/src/entity/SearchFileResponse";
 import { Product } from "../../../backend/src/entity/Product";
@@ -99,4 +101,40 @@ export function getQcIcon(errorLevel: string) {
     return require("../assets/icons/test-warning.svg");
   }
   return require("../assets/icons/test-pass.svg");
+}
+
+export async function fetchInstrumentName(pid: string): Promise<string> {
+  const match = pid.match("^https?://hdl\\.handle\\.net/(.+)");
+  if (!match) {
+    throw new Error("Invalid PID format");
+  }
+  const url = "https://hdl.handle.net/api/handles/" + match[1];
+  const response = await axios.get(url);
+
+  const values = response.data.values;
+  if (!Array.isArray(values)) {
+    throw new Error("Invalid PID response");
+  }
+
+  const nameItem = values.find((ele) => ele.type === "21.T11148/709a23220f2c3d64d1e1");
+  if (!nameItem || !nameItem.data || nameItem.data.format !== "string" || !nameItem.data.value) {
+    throw new Error("Invalid PID structure");
+  }
+  let nameValue = JSON.parse(nameItem.data.value);
+  if (typeof nameValue !== "string") {
+    throw new Error("Invalid PID content");
+  }
+
+  const typeItem = values.find((ele) => ele.type === "21.T11148/f76ad9d0324302fc47dd");
+  if (typeItem && typeItem.data && typeItem.data.format === "string" && typeItem.data.value) {
+    const typeValue = JSON.parse(typeItem.data.value);
+    if (Array.isArray(typeValue) && typeValue.length > 0) {
+      const firstValue = typeValue[0];
+      if (firstValue && firstValue.instrumentType && firstValue.instrumentType.instrumentTypeName) {
+        nameValue += " " + firstValue.instrumentType.instrumentTypeName;
+      }
+    }
+  }
+
+  return nameValue;
 }
