@@ -25,6 +25,8 @@
     padding-right: 15px
     font-weight: normal
 
+  .missingInfo
+    color: gray
 
 .qcSummary
   margin-right: 70px
@@ -140,11 +142,13 @@
         </tr>
         <tr>
           <th>CloudnetPy version:</th>
-          <td>{{ fileResponse.cloudnetpyVersion }}</td>
+          <td v-if="fileResponse.cloudnetpyVersion">{{ fileResponse.cloudnetpyVersion }}</td>
+          <td v-else class="missingInfo">n/a</td>
         </tr>
         <tr v-if="fileResponse.processingVersion">
           <th>Processing version:</th>
-          <td>{{ fileResponse.processingVersion }}</td>
+          <td v-if="fileResponse.processingVersion">{{ fileResponse.processingVersion }}</td>
+          <td v-else class="missingInfo">n/a</td>
         </tr>
       </table>
     </div>
