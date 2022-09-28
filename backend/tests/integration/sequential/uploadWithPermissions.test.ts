@@ -145,6 +145,17 @@ describe("POST /upload/metadata", () => {
     expect(md.status).toEqual(Status.CREATED);
   });
 
+  test("rejects invalid instrumentPid", async () => {
+    const payload = { ...validMetadata, instrumentPid: "https://hdl.handle.net/21.04578/093475435" };
+    await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject({ response: { status: 422 } });
+  });
+
+  test("allows empty instrumentPid", async () => {
+    const payload = { ...validMetadata, instrumentPid: "" };
+    await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
+    await instrumentRepo.findOneOrFail({ filename: validMetadata.filename, instrumentPid: null });
+  });
+
   test("inserts new metadata containing instrumentPid", async () => {
     const payload = { ...validMetadata, instrumentPid: "https://hdl.handle.net/21.12132/3.191564170f8a4686" };
     await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
