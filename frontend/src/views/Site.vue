@@ -38,6 +38,10 @@
   margin: 1em 0 0
   border-color: #fff2ca
   background: #fffdee
+
+.errornote
+  border-color: #ffcaca;
+  background: #fee;
 </style>
 
 <template>
@@ -94,8 +98,11 @@
               </span>
               <span v-else>{{ instrument.name }}</span>
             </div>
-            <div v-if="hasMissingInstrumentPids" class="notice note warningnote">
-              Data was submitted without an instrument PID. If you're the one submitting the data, please consult
+            <div v-if="instrumentPidStatus === 'someMissing'" class="notice note warningnote">
+              Some files were submitted without an instrument PID in the last 30 days.
+            </div>
+            <div v-if="instrumentPidStatus === 'allMissing'" class="notice note errornote">
+              All files were submitted without an instrument PID in the last 30 days. Please consult
               <a href="https://docs.cloudnet.fmi.fi/api/data-upload.html">our documentation</a> to identify your
               instruments.
             </div>
@@ -340,8 +347,15 @@ export default class SiteView extends Vue {
     this.instrumentsStatus = "ready";
   }
 
-  get hasMissingInstrumentPids(): boolean {
-    return this.instruments.some((instrument) => !instrument.pid);
+  get instrumentPidStatus(): "ok" | "someMissing" | "allMissing" {
+    const okCount = this.instruments.reduce((count, instrument) => (instrument.pid ? count + 1 : count), 0);
+    if (okCount == this.instruments.length) {
+      return "ok";
+    }
+    if (okCount == 0) {
+      return "allMissing";
+    }
+    return "someMissing";
   }
 }
 </script>
