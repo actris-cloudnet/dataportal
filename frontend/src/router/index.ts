@@ -42,6 +42,15 @@ const routes = [
     props: true,
   },
   {
+    path: "/beta/file/:uuid",
+    name: "FileBeta",
+    meta: {
+      title: "Cloudnet Data Object",
+    },
+    component: () => import("../views/FileBeta.vue"),
+    props: true,
+  },
+  {
     path: "/search/:mode",
     name: "Search",
     meta: {

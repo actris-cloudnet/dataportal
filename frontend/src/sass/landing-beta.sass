@@ -1,0 +1,567 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800&display=swap')
+
+
+$RED-1-hex: #BF3235
+$RED-2-hex: #7F2123
+$RED-3-hex: #401112
+$RED-4-hex: #FF4347
+$RED-5-hex: #E53C40
+
+$RED-4-rgba: rgba(255,67,71,0.75)
+$RED-4-rgb: rgb(255,67,71)
+
+$BLUE-1-hex: #385465
+$BLUE-2-hex: #4FADE9
+$BLUE-3-hex: #7DBCE5
+$BLUE-4-hex: #0B588A
+$BLUE-5-hex: #699EC0
+
+$GRAY-1-hex: #D9D9D9;
+$GRAY-2-hex: #BFBFBF;
+$GRAY-3-hex: #A6A6A6;
+$GRAY-4-hex: #737373;
+$GRAY-5-hex: #404040;
+
+/* Color Theme Swatches in Hex */
+$YELLOW-1-hex: #F2CB07;
+$YELLOW-2-hex: #F2B705;
+$YELLOW-3-hex: #F29F05;
+$YELLOW-4-hex: #BF6B04;
+$YELLOW-5-hex: #8C4303;
+
+
+
+
+
+$red: #F57E76
+$blue: #57A5F2
+$green: #7EC76D
+$greendark: #71B369
+
+$gray: #EDF0F2
+$lightgray: #F6F8FA
+
+$basespacing: 1rem
+$baseradius: 0.3rem
+
+$shadow: 0 0.1em 0.6em 0 rgba(0,0,0,0.15)
+$shadowdark: 0 0.1em 0.6em 0 rgba(0,0,0,0.25)
+$shadowlight: 0 0.1em 0.6em 0 rgba(0,0,0,0.10)
+
+main#landing
+  font-family: 'Montserrat', sans-serif
+  font-size: 0.9em //clamp(0.7em, calc(1vw) ,1.1em)
+  font-weight: 300
+  display: flex
+  flex-direction: column
+  margin: 0
+  padding: 0
+  min-inline-size: 100%
+  min-block-size: max-content
+
+
+  .landing-header-container, .tab-container, .landing-summary-container, .landing-version-banner, .landing-visualisations-container, .landing-beta-banner
+    inline-size: calc(min(95%, 140rem))
+    max-inline-size: 1350px
+    align-self: center
+  .landing-quality-report-container
+    inline-size: calc(min(95%, 900px))
+    max-inline-size: 900px
+    align-self: center
+
+  .landing-beta-banner-container
+    position: absolute
+    top: 12px
+    left: 200px
+    inline-size: max-content
+    //display: flex
+    //flex-direction: column
+    align-self: center
+    //min-inline-size: 100%
+    //max-inline-size: 100%
+    //background-color: rgba(0,0,0,1)
+    .landing-beta-banner
+      color: white
+      inline-size: max-content
+      padding: $basespacing 0
+      align-self: center
+      font-size: 140%
+      font-weight: 400
+
+  .landing-header-container //:first-child
+    margin-top: 2*$basespacing
+
+  .landing-version-banner-container:first-child
+    margin-bottom: 2*$basespacing
+
+
+  .landing-version-banner-container
+    display: flex
+    flex-direction: column
+    color: white
+    align-self: center
+    min-inline-size: 100%
+    max-inline-size: 100%
+    background-color: rgba($RED-4-rgb,0.75)
+    transition: background-color 100ms ease-in-out, box-shadow 100ms ease-in-out, color 100ms ease-in-out
+    .landing-version-banner
+      color: white
+      text-decoration: none
+      padding: 0.5*$basespacing 0*$basespacing
+      font-size: 85%
+      font-weight: 600
+      cursor: pointer
+
+  .landing-version-banner-container:hover
+    background-color: rgba($RED-4-rgb,0.85)
+
+  .landing-header-container
+    display: grid
+    grid-template-columns: fit-content(50%) auto auto
+
+    .landing-title, .landing-tags, .landing-download, .landing-subtitle
+      inline-size: max-content
+    .landing-title
+      font-size: 200%
+      font-weight: 300
+      grid-column: 1 / 2
+    .landing-tags
+      display: flex
+      flex-wrap: wrap
+      align-items: center
+      grid-column: 2 / 3
+      .tag
+        display: flex
+        justify-content: center
+        align-items: center
+        color: white
+        font-size: 75%
+        font-weight: 500
+        inline-size: max-content
+        block-size: min-content
+        padding: 0.2*$basespacing 0.5*$basespacing
+        border-radius: 2*$baseradius
+        cursor: default
+      .tag:first-child
+        margin-left: $basespacing
+      .tag:not(:first-child)
+        margin-left: 0.5*$basespacing
+      .tag:hover
+        box-shadow: $shadow
+
+      .tag.volatile
+        background-color: $BLUE-3-hex
+      .tag.volatile:hover
+        background-color: $BLUE-4-hex
+      .tag.legacy
+        background-color: $GRAY-4-hex
+      .tag.legacy:hover
+        background-color: $GRAY-5-hex
+
+    .landing-download
+      display: flex
+      align-items: center
+      grid-column: 3 / 4
+      justify-self: flex-end
+      a
+        display: flex
+        align-items: center
+        justify-content: center
+        font-size: 80%
+        font-weight: 500
+        padding: 0.5*$basespacing $basespacing
+        display: flex
+        color: white
+        fill: white
+        background-color: $green
+        border: none
+        border-radius: $baseradius
+        box-shadow: $shadow
+        .download-icon
+          margin-right: 0.5em
+      a:hover
+        box-shadow: $shadowdark
+        background-color: $greendark
+        text-decoration: none
+
+
+    .landing-subtitle
+      display: flex
+      align-items: flex-start
+      grid-column: 1 / 2
+      font-weight: 400
+      color: gray
+
+  .tab-container
+    display: flex
+    justify-content: center
+    flex-direction: row
+    margin-bottom: $basespacing
+    .tab
+      position: relative
+      min-inline-size: max-content
+      text-transform: uppercase
+      font-size: clamp(90%, calc(110% + 0.8vw) ,120%)
+      margin: 0 clamp(0.1em,1vw ,0.5em)
+      text-align: center
+      color: rgba(0,0,0,0.6)
+      cursor: pointer
+    .tab.active
+      color: black
+    .tab:hover:not(.active)
+      color: black
+      //border-bottom: solid gray
+    .tab::after
+      position: absolute
+      content: ""
+      width: 100%
+      height: 2px
+      left: 0
+      top: 95%
+      background-color: rgba(0,0,0,0.7)
+      transform: scaleX(0) scaleY(0.7) translateY(0.3*$basespacing)
+      //transition: transform 100ms ease-in-out
+    .tab.active::after
+      transform: scaleX(0.95) scaleY(0.7) translateY(0.3*$basespacing)
+      background-color: rgba(0,0,0,0.7)
+    .tab:hover::after
+      transform: scaleX(0.95) scaleY(0.7) translateY(0.3*$basespacing)
+
+
+  .landing-content-background
+    display: flex
+    flex-direction: column
+    align-self: center
+    min-inline-size: 100%
+    max-inline-size: 100%
+    background-color: $gray
+    min-block-size: 70vh
+
+
+  .landing-summary-container
+    display: flex
+    justify-content: center
+    flex-wrap: wrap
+    min-block-size: 30ex
+    padding: 2*$basespacing 0 2*$basespacing
+    column-gap: 2*$basespacing
+    row-gap: 1.5*$basespacing
+
+    .main-content
+      max-inline-size: 50% //600px
+
+    .summary-section:not(:first-child)
+      margin-top: 2*$basespacing
+
+
+    .summary-section
+      .summary-section-header
+        margin-bottom: 0.5*$basespacing
+        font-size: 140%
+        font-weight: 400
+      .summary-section-table
+        th, td
+          font-size: 90%
+          font-weight: 200
+          padding: 0.2em 0
+
+        th
+          vertical-align: top
+          inline-size: 14em
+          min-inline-size: 10em
+          font-weight: 400
+        td
+          font-weight: 300
+    .product-container
+      display: flex
+      align-items: center
+      .product-icon
+        height: 1.1rem
+        margin-right: 0.5*$basespacing
+    .quality-container
+      display: flex
+      align-items: center
+      .quality-icon
+        height: 1.1rem
+        margin-right: 0.5*$basespacing
+
+    .summary-section#file-information
+      .landing-hash
+        overflow-wrap: break-word
+        cursor: pointer
+        max-inline-size: 30ch
+        .landing-hash-small
+          inline-size: max-content
+          max-inline-size: 40ch
+        .landing-hash-large
+          max-inline-size: 30ch
+          inline-size: 30ch //min-content
+          overflow-wrap: break-word
+      .landing-hash:hover
+
+    .summary-section#data-origin
+      .data-source-list
+        .data-source-container
+          padding: 0.1*$basespacing 0
+          a
+            display: flex
+            align-items: center
+            .product-icon
+              height: 1.1rem
+              margin-right: 0.5*$basespacing
+
+    .summary-section#preview
+      .summary-section-header
+        margin-bottom: 0
+      .preview-caption
+        display: flex
+        justify-content: center
+        font-size: 100%
+        font-weight: 500
+      .preview-img
+        width: 100%
+
+    .summary-box
+      padding: 2*$basespacing
+      background-color: white
+      border-radius: $baseradius
+      box-shadow: $shadow
+      block-size: 100%
+
+    .main-content
+      flex: 1
+    .side-content
+      display: flex
+      flex-direction: column
+      row-gap: $basespacing
+      flex: 1
+
+    .citation-section
+      .citation-section-content
+        font-size: 80%
+        font-weight: 300
+        padding: 0.3*$basespacing
+        border-radius: 0.5*$baseradius
+      .citation-export
+        font-size: 80%
+        font-weight: 500
+        display: flex
+        flex-grow: 1
+        align-self: flex-end
+        justify-content: flex-end
+        margin-bottom: 0.4*$basespacing
+        a:not(:first-child)
+          margin-left: $basespacing
+        a:last-child
+          margin-right: $basespacing
+    .citation-section:not(:first-child)
+      margin-top: $basespacing
+
+    .citation-section#citation
+      .citation-header-container
+        display: flex
+        .summary-section-header
+      .citation-section-content
+        position: relative
+        border-radius: 0*$baseradius
+        cursor: pointer
+      .citation-section-content.small::before
+        content: ""
+        position: absolute
+        width: 100%
+        height: 50%
+        bottom: 0%
+        left: 0
+        background: linear-gradient(transparent, white)
+
+      .citation-section-content::after
+        content: ""
+        position: absolute
+        width: 7px
+        height: 7px
+        border-top: 1px solid
+        border-right: 1px solid
+        transform: rotate(-45deg)
+        transition: transform 200ms ease-in-out
+        top: calc(100% + 5px)
+        left: 50%
+      .citation-section-content.small::after
+        top: 100%
+        transform: rotate(135deg)
+
+
+  .landing-visualisations-container
+    margin: 2*$basespacing 0
+    .visualisations-box
+      display: grid
+      grid-template-columns: 1fr 1fr
+      //column-gap: 0.2*$basespacing
+      //row-gap: 0.2*$basespacing
+      background-color: white
+      border-radius: $baseradius
+      box-shadow: $shadowlight
+      block-size: min-content
+      padding: 0 $basespacing 0
+
+    .visualisation-container
+      padding: 2*$basespacing 0 0
+      .visualisation-caption
+        display: flex
+        justify-content: center
+        font-size: 100%
+        font-weight: 400
+
+      .visualisation-img
+        width: 100%
+        height: 100%
+        display: block
+
+  .landing-quality-report-container
+    margin: 2*$basespacing 0
+    .quality-report-box
+      display: flex
+      flex-direction: column
+      //align-items: center
+      padding: $basespacing 2*$basespacing 2*$basespacing
+      background-color: white
+      border-radius: $baseradius
+      box-shadow: $shadowlight
+
+      .quality-software
+        align-self: flex-end
+        max-inline-size: max-content
+        font-weight: 500
+        color: rgba(0,0,0,0.5)
+
+      .quality-report-header
+        display: flex
+        flex-direction: row
+        flex-wrap: wrap
+        align-items: center
+        //grid-template-columns: 250px repeat(3, 8em)
+        //justify-items: center
+        border-bottom: thin solid rgba(0,0,0,0.2)
+        padding: 0 0 $basespacing
+        column-gap: 2*$basespacing
+        .donut
+          margin-right: 4*$basespacing
+        .quality-report-stats
+          background-color: rgba(0,0,0,0.01)
+          padding: $basespacing
+          block-size: max-content
+          inline-size: max-content
+          display: grid
+          justify-items: center
+          grid-template-columns: repeat(3, 8em)
+          border: thin solid rgba(0,0,0,0.3)
+          border-radius: $baseradius
+          //box-shadow: $shadowlight
+          .header
+            grid-row: 1
+            font-size: 100%
+            font-weight: 400
+            align-self: end
+          .data
+            align-self: start
+            grid-row: 2
+            font-size: 300%
+            font-weight: 400
+          #tests, #ntests
+            grid-column: 1
+          #warnings, #nwarnings
+            grid-column: 2
+          #errors, #nerrors
+            grid-column: 3
+
+      .quality-test-list-header
+        padding: $basespacing 0 $basespacing
+        font-size: 140%
+        font-weight: 400
+      .quality-test-list
+        display: flex
+        flex-direction: column
+        .quality-test
+          display: grid
+          grid-template-columns: fit-content(40px) max-content
+          margin-bottom: $basespacing
+
+          .quality-test-icon
+            grid-column: 1
+            padding: 0 $basespacing 0
+            img
+              height: 20px
+          .quality-test-id
+            grid-column: 2
+            font-size: 120%
+            font-weight: 400
+          .quality-test-description
+            grid-column: 2
+            margin-bottom: 0.5*$basespacing
+          .quality-test-exception-list
+            grid-column: 2
+            .quality-test-exception
+              padding: 0.2*$basespacing
+              font-size: 105%
+              font-weight: 400
+              color: rgba($RED-4-rgb,0.85)
+            .quality-test-exception:nth-child(even)
+              background-color: rgba(0,0,0,0.03)
+
+
+
+
+.quality-icon
+  height: 1.5rem
+
+@media (max-width: 1000px)
+  main#landing
+    .landing-summary-container
+      .main-content, .side-content
+        min-inline-size: 100%
+
+
+@media (max-width: 1000px)
+  main#landing
+    .landing-header-container
+      grid-template-columns: auto auto
+      .landing-title
+        grid-column: 1
+      .landing-tags
+        grid-row: 3
+        grid-column: 1
+        margin-top: 0.5*$basespacing
+        .tag:first-child
+          margin-left: 0
+
+      .landing-download
+        grid-column: 2
+        button
+          padding: 0.2*$basespacing 0.5*$basespacing
+
+
+      .landing-subtitle
+        grid-row: 2
+        grid-column: 1
+    .tab-container
+      margin-top: 0.5*$basespacing
+
+@media (max-width: 1250px)
+  main#landing
+    .landing-visualisations-container
+      .visualisations-box
+        grid-template-columns: 1fr
+
+@media (min-width: 500px) and  (max-width: 1000px)
+  main#landing
+    .landing-header-container
+      .landing-download
+        grid-row: 1
+
+@media (max-width: 500px)
+  main#landing
+    .landing-header-container
+      .landing-title
+        grid-column: 1 / 3
+        inline-size: fit-content
+      .landing-download
+        grid-row: 3
