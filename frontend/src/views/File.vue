@@ -155,7 +155,7 @@ main#filelanding
       A <router-link id="newestVersion" :to="`/file/${newestVersion}`">newer version</router-link> of this file is
       available.
     </div>
-    <main class="info">
+    <main class="infoBox">
       <section id="file">
         <header>File information</header>
         <section class="details">
@@ -239,24 +239,23 @@ main#filelanding
                 <a v-else :href="response.instrumentPid">{{ instrument }}</a>
               </dd>
             </template>
-            <dt>Quality</dt>
-            <dd>{{ response.quality === "qc" ? "Quality Controlled (QC)" : "Near Real Time (NRT)" }}</dd>
+            <dt>Timeliness</dt>
+            <dd>{{ response.quality === "qc" ? "Regular" : "Near Real Time (NRT)" }}</dd>
             <dt>Quality check</dt>
+
             <dd>
-              <span v-if="response.qualityScore === 1" class="qualitycheck">
+              <span v-if="typeof response.errorLevel === 'string'" class="qualitycheck">
                 <router-link :to="`/quality/${response.uuid}`">
-                  <img :src="require('../assets/icons/pass.png')" />
+                  <img :src="getQcIcon(response.errorLevel)" alt="" />
                 </router-link>
-                Pass.
+                <span v-if="response.errorLevel !== 'pass'">
+                  Some issues, <router-link :to="`/quality/${response.uuid}`">see report.</router-link>
+                </span>
+                <span v-else>Pass</span>
               </span>
-              <span v-else-if="typeof response.qualityScore === 'number'" class="qualitycheck">
-                <router-link :to="`/quality/${response.uuid}`">
-                  <img :src="require('../assets/icons/pass-fail.png')" />
-                </router-link>
-                Some issues, <router-link :to="`/quality/${response.uuid}`">see report.</router-link>
-              </span>
-              <span v-else class="notAvailable"></span>
+              <span v-else class="notAvailable"> </span>
             </dd>
+
             <dt v-if="response.cloudnetpyVersion || response.processingVersion">Software</dt>
             <dd v-if="response.cloudnetpyVersion || response.processingVersion">
               <span v-if="response.processingVersion">
@@ -379,6 +378,7 @@ import {
   sortVisualizations,
   notEmpty,
   formatCoordinates,
+  getQcIcon,
   fetchInstrumentName,
 } from "../lib";
 import { DevMode } from "../lib/DevMode";
@@ -402,6 +402,7 @@ export default class FileView extends Vue {
   versions: string[] = [];
   error = false;
   apiUrl = process.env.VUE_APP_BACKENDURL;
+  getQcIcon = getQcIcon;
   humanReadableSize = humanReadableSize;
   humanReadableDate = humanReadableDate;
   humanReadableTimestamp = humanReadableTimestamp;

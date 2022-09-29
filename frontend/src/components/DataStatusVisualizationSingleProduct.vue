@@ -68,10 +68,14 @@
       </div>
       <div class="legendexpl">
         <div class="missing-data legendcolor"></div>
-        Fail
+        Warning
       </div>
       <div class="legendexpl">
-        <div class="only-legacy-data legendcolor"></div>
+        <div class="contains-errors legendcolor"></div>
+        Error
+      </div>
+      <div class="legendexpl">
+        <div class="only-model-data legendcolor"></div>
         Missing QC report
       </div>
       <div class="legendexpl">
@@ -131,10 +135,11 @@ export default class ProductAvailabilityVisualizationSingle extends ProductAvail
   createColorClassForSingleProduct(products: ProductLevels) {
     if (this.qualityScores) {
       if (this.noData(products)) return "no-data";
-      if (this.onlyLegacy(products)) return "only-legacy-data";
+      if (this.onlyLegacy(products)) return "only-model-data";
+      if (!this.allPass(products) && this.containsErrors(products)) return "contains-errors";
       if (!this.allPass(products) && this.hasSomeTests(products)) return "missing-data";
       if (this.allPass(products)) return "all-data";
-      return "only-legacy-data";
+      return "only-model-data";
     }
     if (this.noData(products)) return "no-data";
     if (this.onlyLegacy(products)) return "only-legacy-data";

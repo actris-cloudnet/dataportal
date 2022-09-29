@@ -366,11 +366,6 @@ export class FileRoutes {
     );
   }
 
-  public getRepoForFile(file: RegularFile | ModelFile) {
-    if (file.product.id == "model") return this.modelFileRepo;
-    return this.fileRepo;
-  }
-
   dateforsize: RequestHandler = async (req, res, next) => {
     const isModel = "model" in req.query;
     return dateforsize(

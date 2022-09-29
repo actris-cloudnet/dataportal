@@ -61,7 +61,7 @@ main.column
       <h2>{{ response.title || "Custom collection" }}</h2>
     </header>
     <div class="flex">
-      <main class="info column">
+      <main class="infoBox column">
         <section id="summary">
           <header>Summary</header>
           <section class="details">

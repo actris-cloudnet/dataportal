@@ -183,12 +183,12 @@ describe("File.vue", () => {
     expect(wrapper.findAll("#license").length).toEqual(0);
   });
 
-  it("displays a note on quality controlled file", async () => {
-    mocked(axios.get).mockImplementation(axiosMockWithFileUuid("acf"));
-    wrapper = mountVue(File);
-    await Vue.nextTick();
-    return expect(wrapper.text()).toContain("Quality Controlled (QC)");
-  });
+  // it("displays a note on quality controlled file", async () => {
+  //   mocked(axios.get).mockImplementation(axiosMockWithFileUuid("acf"));
+  //   wrapper = mountVue(File);
+  //   await Vue.nextTick();
+  //   return expect(wrapper.text()).toContain("Quality Controlled (QC)");
+  // });
 
   it("displays a note on nrt file", async () => {
     mocked(axios.get).mockImplementation(axiosMockWithFileUuid("22b"));

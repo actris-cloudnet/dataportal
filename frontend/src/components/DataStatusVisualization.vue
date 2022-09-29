@@ -19,9 +19,6 @@
 .all-raw
   background: #a0df7b
 
-.only-model-data
-  background: #D3D3D3
-
 .error-data
   background: #bd1919
 
@@ -240,7 +237,6 @@ export default class ProductAvailabilityVisualization extends Vue {
   allProducts: Product[] | null = null;
   currentYear: ProductYear | null = null;
   currentDate: ProductDate | null = null;
-  tooltipKey = 0;
   busy = false;
   hover = false;
   tooltipStyle = {
@@ -329,6 +325,14 @@ export default class ProductAvailabilityVisualization extends Vue {
     );
   }
 
+  containsErrors(products: ProductLevels) {
+    return (
+      products["2"].filter(this.isError).length > 0 ||
+      products["1c"].filter(this.isError).length > 0 ||
+      products["1b"].filter(this.isError).length > 0
+    );
+  }
+
   hasSomeTests(products: ProductLevels) {
     return (
       products["2"].filter(this.qualityExists).length > 0 ||
@@ -338,11 +342,15 @@ export default class ProductAvailabilityVisualization extends Vue {
   }
 
   topQuality(prod: ProductInfo) {
-    return "qualityScore" in prod && prod.qualityScore === 1;
+    return "errorLevel" in prod && prod.errorLevel === "pass";
+  }
+
+  isError(prod: ProductInfo) {
+    return "errorLevel" in prod && prod.errorLevel === "error";
   }
 
   qualityExists(prod: ProductInfo) {
-    return "qualityScore" in prod && typeof prod.qualityScore === "number";
+    return "errorLevel" in prod && prod.errorLevel !== null;
   }
 
   allLvl2(products: ProductLevels) {

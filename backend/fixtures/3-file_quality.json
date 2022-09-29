@@ -1,0 +1,18 @@
+[
+  {
+    "uuid": "acf78456-11b1-41a6-b2de-aa7590a75675",
+    "errorLevel": "error",
+    "qcVersion": "1.20",
+    "timestamp": "2022-02-20T10:56:19.382Z",
+    "tests": 8,
+    "errors": 2,
+    "warnings": 1
+  },
+  {
+    "uuid": "2bb32746-faf0-4057-9076-ed2e698dcf36",
+    "errorLevel": "pass",
+    "qcVersion": "1.20",
+    "timestamp": "2022-02-20T10:56:19.382Z",
+    "tests": 8
+  }
+]

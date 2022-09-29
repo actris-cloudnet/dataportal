@@ -6,16 +6,20 @@ import { augmentAxiosResponse, init } from "./lib";
 import { findByUuid, readResources } from "../../shared/lib";
 import { mocked } from "ts-jest/dist/util/testing";
 import QualityReportView from "../src/views/QualityReport.vue";
-import QualityTestResult from "../src/components/QualityTestResult.vue";
+import VueRouter from "vue-router";
 
 init();
 
 jest.mock("axios");
 
-let resources: any;
-let wrapper: Wrapper<Vue>;
+Vue.use(VueRouter);
+const router = new VueRouter();
 
 describe("QualityReport.vue", () => {
+  let resources: any;
+  let wrapper: Wrapper<Vue>;
+  let content: string;
+
   beforeAll(async () => {
     resources = await readResources();
     const func = (url: string, _req: AxiosRequestConfig | undefined): AxiosPromise => {
@@ -28,28 +32,31 @@ describe("QualityReport.vue", () => {
     mocked(axios.get).mockImplementation(func);
     wrapper = mount(QualityReportView, {
       propsData: { mode: "data" },
-      stubs: { "quality-test-result": QualityTestResult },
+      router,
     });
   });
 
-  it("shows file information", async () => {
+  beforeEach(async () => {
     await Vue.nextTick();
-    expect(wrapper.text()).toContain("Bucharest");
-    expect(wrapper.text()).toContain("20 February 2021");
-    return expect(wrapper.text()).toContain("Radar");
+    content = wrapper.text();
+  });
+
+  it("shows file information", async () => {
+    expect(content).toContain("20210126_bucharest_radar.nc");
+    expect(content).toContain("Processed: 2021-02-22 10:39:58 UTC");
+    expect(content).toContain("CloudnetPy version: 1.5.0");
   });
 
   it("shows failing tests", async () => {
-    await Vue.nextTick();
-    expect(wrapper.text()).toContain("references");
-    expect(wrapper.text()).toContain("cloudnetpy_version");
-    expect(wrapper.text()).toContain("altitude");
-    expect(wrapper.text()).toContain("651542365");
-    return expect(wrapper.text()).toContain("Conventions");
+    expect(content).toContain("Test failed without further details");
   });
 
   it("shows number of total tests", async () => {
-    await Vue.nextTick();
-    expect(wrapper.text()).toContain("16");
+    expect(content).toContain("63%");
+    expect(content).toContain("13%");
+    expect(content).toContain("25%");
+    expect(content).toContain("Number of tests: 8");
+    expect(content).toContain("Number of errors: 2");
+    expect(content).toContain("Number of warnings: 1");
   });
 });

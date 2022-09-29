@@ -10,6 +10,7 @@ module.exports = {
     ecmaVersion: 2020,
     project: "./tsconfig.eslint.json",
   },
+  ignorePatterns: [".eslintrc.js"],
   rules: {
     ...commonRules,
     ...{

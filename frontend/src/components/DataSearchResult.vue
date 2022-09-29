@@ -111,7 +111,7 @@ section#fileTable
   margin-left: 1em
   float: right
 
-  .info
+  .infoBox
     margin: 0
 
   #file
@@ -141,8 +141,9 @@ section#fileTable
 
 .qualitycheck
   img
-    height: 1.2em
+    height: 18px
     margin-top: -4px
+    padding-right: 5px
 
 #preview
   width: 100%
@@ -241,7 +242,7 @@ section#fileTable
           Show file &rarr;
         </router-link>
       </div>
-      <main class="info" v-if="previewResponse">
+      <main class="infoBox" v-if="previewResponse">
         <section id="file">
           <header>File information</header>
           <section class="details">
@@ -259,17 +260,14 @@ section#fileTable
               <dd>{{ humanReadableTimestamp(previewResponse.updatedAt) }}</dd>
               <dt>Quality check</dt>
               <dd>
-                <span v-if="previewResponse.qualityScore === 1" class="qualitycheck">
+                <span v-if="typeof previewResponse.errorLevel === 'string'" class="qualitycheck">
                   <router-link :to="`/quality/${previewResponse.uuid}`">
-                    <img :src="require('../assets/icons/pass.png')" />
+                    <img :src="getQcIcon(previewResponse.errorLevel)" alt="" />
                   </router-link>
-                  Pass.
-                </span>
-                <span v-else-if="typeof previewResponse.qualityScore === 'number'" class="qualitycheck">
-                  <router-link :to="`/quality/${previewResponse.uuid}`">
-                    <img :src="require('../assets/icons/pass-fail.png')" />
-                  </router-link>
-                  Some issues, <router-link :to="`/quality/${previewResponse.uuid}`">see report.</router-link>
+                  <span v-if="previewResponse.errorLevel !== 'pass'"
+                    >Some issues, <router-link :to="`/quality/${previewResponse.uuid}`">see report.</router-link></span
+                  >
+                  <span v-else>Pass</span>
                 </span>
                 <span v-else class="notAvailable"> </span>
               </dd>
@@ -313,6 +311,7 @@ import {
   humanReadableSize,
   humanReadableTimestamp,
   sortVisualizations,
+  getQcIcon,
 } from "../lib";
 import { SearchFileResponse } from "../../../backend/src/entity/SearchFileResponse";
 import { BTable } from "bootstrap-vue/esm/components/table";
@@ -344,6 +343,7 @@ export default class DataSearchResult extends Vue {
   humanReadableSize = humanReadableSize;
   humanReadableTimestamp = humanReadableTimestamp;
   combinedFileSize = combinedFileSize;
+  getQcIcon = getQcIcon;
 
   mounted() {
     window.addEventListener("resize", this.adjustPerPageAccordingToWindowHeight);

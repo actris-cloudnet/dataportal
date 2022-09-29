@@ -54,7 +54,7 @@
         >.
       </span>
     </header>
-    <main class="info">
+    <main class="infoBox">
       <section id="summary">
         <header>Summary</header>
         <section class="details">
@@ -307,7 +307,7 @@ export default class SiteView extends Vue {
   }
 
   async initDataStatusParser(product: string | null = null) {
-    const properties = ["measurementDate", "productId", "legacy", "uuid", "qualityScore"];
+    const properties = ["measurementDate", "productId", "legacy", "uuid", "errorLevel"];
     const payload = {
       site: this.siteid,
       showLegacy: true,
