@@ -39,15 +39,6 @@
 #testResults
   margin-top: 30px
 
-  .singleTest
-    border-bottom: 1px solid silver
-    border-top: 1px solid silver
-
-    .description
-      max-width: 400px
-      padding-left: 30px
-      padding-bottom: 15px
-
   .labels
     td
       font-weight: bold
@@ -57,26 +48,34 @@
     padding-left: 30px
     padding-bottom: 8px
 
-  .descriptionLabel
-    padding-left: 30px
-
-  .exceptionsLabel
-    padding-left: 20px
-
   img
     height: 20px
     margin-right: 10px
     margin-top: -4px
 
-  th
-   vertical-align: top
-   padding-top: 15px
-   padding-bottom: 15px
-   font-weight: normal
+  th, td
+    padding-top: 15px
+    padding-bottom: 15px
+
+  tr
+    border-bottom: 1px solid #ddd
+
+  thead tr
+    border-bottom-width: 2px
+
+  tbody th
+    font-weight: inherit
+    vertical-align: top
 
   td
-    vertical-align: top
-    padding-top: 15px
+    vertical-align: middle
+
+  ul
+    padding: 0
+    margin: 0
+
+  li + li
+    margin-top: 5px
 
   #exceptions
     margin-left: 20px
@@ -86,13 +85,16 @@
     color: gray
     padding-left: 8px
 
-  .variable
-    color: #555
-    background: white
-    font-family: monospace
+  .title
+    font-weight: 600
 
-  .rawData
-    padding-right: 10px
+  .description
+    color: gray
+    max-width: 400px
+    padding-left: 30px
+
+  code
+    font-size: 90%
 
 #qualityFooter
   padding-top: 30px
@@ -155,27 +157,32 @@
     </div>
 
     <table id="testResults">
-      <tr class="labels">
-        <td class="idLabel">Test</td>
-        <td class="descriptionLabel">Description</td>
-        <td v-if="qualityResponse.errorLevel !== 'pass'" class="exceptionsLabel">Issues</td>
-      </tr>
-      <tr v-for="test in qualityResponse.testReports" :key="test.testId" class="singleTest">
-        <th><img :src="getQcIcon(test.result)" alt="" />{{ test.testId }}</th>
-        <td class="description">{{ test.description }}</td>
-        <template>
-          <table id="exceptions">
-            <tr v-for="(exp, index) in test.exceptions" :key="exp.result + index">
-              <template v-if="Object.keys(exp).length <= 1 || !('message' in exp)">
-                <td class="detailsMissing">Test failed without further details.</td>
-              </template>
-              <template v-else>
-                <td>• {{ exp.message }}</td>
-              </template>
-            </tr>
-          </table>
-        </template>
-      </tr>
+      <thead>
+        <tr class="labels">
+          <th class="idLabel">Test</th>
+          <th v-if="qualityResponse.errorLevel !== 'pass'" class="exceptionsLabel">Issues</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="test in qualityResponse.testReports" :key="test.testId" class="singleTest">
+          <th>
+            <div class="title"><img :src="getQcIcon(test.result)" alt="" />{{ test.testId }}</div>
+            <div class="description" v-html="formatMessage(test.description)"></div>
+          </th>
+          <td>
+            <ul>
+              <li v-for="(exp, index) in test.exceptions" :key="exp.result + index">
+                <template v-if="Object.keys(exp).length <= 1 || !('message' in exp)">
+                  <span class="detailsMissing">Test failed without further details.</span>
+                </template>
+                <template v-else>
+                  <span v-html="formatMessage(exp.message)"></span>
+                </template>
+              </li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
     </table>
 
     <div id="qualityFooter">
@@ -190,6 +197,7 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 import axios from "axios";
 import { humanReadableTimestamp, getQcIcon } from "../lib";
 import Donut from "../components/Donut.vue";
+import escapeHtml from "escape-html";
 
 interface Test {
   testId: string;
@@ -229,6 +237,12 @@ export default class QualityReportView extends Vue {
 
   humanReadableTimestamp = humanReadableTimestamp;
   getQcIcon = getQcIcon;
+
+  formatMessage(message: string): string {
+    // Try to format anything that looks like an identifier (snake case, in
+    // single quotes).
+    return escapeHtml(message).replace(/&#39;(\w+)&#39;|(\w+_\w+)/gi, "<code>$1$2</code>");
+  }
 
   created() {
     axios
