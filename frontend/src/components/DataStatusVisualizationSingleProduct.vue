@@ -135,7 +135,6 @@ export default class ProductAvailabilityVisualizationSingle extends ProductAvail
   createColorClassForSingleProduct(products: ProductLevels) {
     if (this.qualityScores) {
       if (this.noData(products)) return "no-data";
-      if (this.onlyLegacy(products)) return "only-model-data";
       if (!this.allPass(products) && this.containsErrors(products)) return "contains-errors";
       if (!this.allPass(products) && this.hasSomeTests(products)) return "missing-data";
       if (this.allPass(products)) return "all-data";
