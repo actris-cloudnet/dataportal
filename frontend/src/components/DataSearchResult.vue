@@ -139,12 +139,6 @@ section#fileTable
 .center
   text-align: center
 
-.qualitycheck
-  img
-    height: 18px
-    margin-top: -4px
-    padding-right: 5px
-
 #preview
   width: 100%
 
@@ -264,10 +258,10 @@ section#fileTable
                   <router-link :to="`/quality/${previewResponse.uuid}`">
                     <img :src="getQcIcon(previewResponse.errorLevel)" alt="" />
                   </router-link>
-                  <span v-if="previewResponse.errorLevel !== 'pass'"
-                    >Some issues, <router-link :to="`/quality/${previewResponse.uuid}`">see report.</router-link></span
+                  <span v-if="previewResponse.errorLevel !== 'pass'">
+                    Some issues, <router-link :to="`/quality/${previewResponse.uuid}`">see report. </router-link></span
                   >
-                  <span v-else>Pass</span>
+                  <span v-else> Pass </span>
                 </span>
                 <span v-else class="notAvailable"> </span>
               </dd>

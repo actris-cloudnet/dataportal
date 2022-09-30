@@ -90,11 +90,6 @@ main#filelanding
 
 .secondaryButton
   margin-right: 1em
-
-.qualitycheck
-  img
-    height: 1.2em
-    margin-top: -4px
 </style>
 
 <template>
@@ -251,7 +246,7 @@ main#filelanding
                 <span v-if="response.errorLevel !== 'pass'">
                   Some issues, <router-link :to="`/quality/${response.uuid}`">see report.</router-link>
                 </span>
-                <span v-else>Pass</span>
+                <span v-else> Pass </span>
               </span>
               <span v-else class="notAvailable"> </span>
             </dd>

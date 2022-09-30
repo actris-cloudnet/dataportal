@@ -66,6 +66,7 @@
   img
     height: 20px
     margin-right: 10px
+    margin-top: -4px
 
   th
    vertical-align: top
