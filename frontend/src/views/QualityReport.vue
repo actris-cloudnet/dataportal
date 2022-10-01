@@ -8,7 +8,7 @@
 
 #infoBoxes
   display: flex
-  align-items: flex-start
+  flex-wrap: wrap
 
   caption
     font-size: 20px
@@ -16,6 +16,10 @@
     font-weight: bold
     font-variant-caps: all-small-caps
     color: #212529
+
+  .flexitem
+    margin-left: 10px
+    margin-right: 10px
 
 .infoBox
   tr
@@ -29,11 +33,8 @@
     color: gray
 
 .qcSummary
-  margin-right: 70px
-  margin-left: 30px
-
+  margin-right: 30px
   td
-    padding-right: 40px
     text-align: center
 
 #testResults
@@ -109,51 +110,57 @@
     </header>
 
     <div id="infoBoxes">
-      <table>
-        <Donut :qualityResponse="this.qualityResponse"></Donut>
-      </table>
-      <table class="qcSummary infoBox">
-        <caption>
-          QC summary
-        </caption>
-        <tr>
-          <th>Number of tests:</th>
-          <td>{{ qualityResponse.tests }}</td>
-        </tr>
-        <tr>
-          <th>Number of errors:</th>
-          <td>{{ qualityResponse.errors }}</td>
-        </tr>
-        <tr>
-          <th>Number of warnings:</th>
-          <td>{{ qualityResponse.warnings }}</td>
-        </tr>
-      </table>
-      <table class="infoBox">
-        <caption>
-          File information
-        </caption>
-        <tr>
-          <th>Filename:</th>
-          <router-link :to="`/file/${this.uuid}`">
-            <td>{{ fileResponse.filename }}</td>
-          </router-link>
-        </tr>
-        <tr>
-          <th>Processed:</th>
-          <td>{{ humanReadableTimestamp(fileResponse.updatedAt) }}</td>
-        </tr>
-        <tr>
-          <th>CloudnetPy version:</th>
-          <td v-if="fileResponse.cloudnetpyVersion">{{ fileResponse.cloudnetpyVersion }}</td>
-          <td v-else class="missingInfo">n/a</td>
-        </tr>
-        <tr v-if="fileResponse.processingVersion">
-          <th>Processing version:</th>
-          <td v-if="fileResponse.processingVersion">{{ fileResponse.processingVersion }}</td>
-          <td v-else class="missingInfo">n/a</td>
-        </tr>
-      </table>
+      <div class="flexitem">
+        <table>
+          <Donut :qualityResponse="this.qualityResponse"></Donut>
+        </table>
+      </div>
+      <div class="flexitem">
+        <table class="qcSummary infoBox">
+          <caption>
+            QC summary
+          </caption>
+          <tr>
+            <th>Number of tests:</th>
+            <td>{{ qualityResponse.tests }}</td>
+          </tr>
+          <tr>
+            <th>Number of errors:</th>
+            <td>{{ qualityResponse.errors }}</td>
+          </tr>
+          <tr>
+            <th>Number of warnings:</th>
+            <td>{{ qualityResponse.warnings }}</td>
+          </tr>
+        </table>
+      </div>
+      <div class="flexitem">
+        <table class="infoBox">
+          <caption>
+            File information
+          </caption>
+          <tr>
+            <th>Filename:</th>
+            <router-link :to="`/file/${this.uuid}`">
+              <td>{{ fileResponse.filename }}</td>
+            </router-link>
+          </tr>
+          <tr>
+            <th>Processed:</th>
+            <td>{{ humanReadableTimestamp(fileResponse.updatedAt) }}</td>
+          </tr>
+          <tr>
+            <th>CloudnetPy version:</th>
+            <td v-if="fileResponse.cloudnetpyVersion">{{ fileResponse.cloudnetpyVersion }}</td>
+            <td v-else class="missingInfo">n/a</td>
+          </tr>
+          <tr v-if="fileResponse.processingVersion">
+            <th>Processing version:</th>
+            <td v-if="fileResponse.processingVersion">{{ fileResponse.processingVersion }}</td>
+            <td v-else class="missingInfo">n/a</td>
+          </tr>
+        </table>
+      </div>
     </div>
 
     <table id="testResults">
