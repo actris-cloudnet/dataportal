@@ -67,12 +67,16 @@
         Pass
       </div>
       <div class="legendexpl">
-        <div class="missing-data legendcolor"></div>
+        <div class="contains-warnings legendcolor"></div>
         Warning
       </div>
       <div class="legendexpl">
         <div class="contains-errors legendcolor"></div>
         Error
+      </div>
+      <div class="legendexpl">
+        <div class="only-legacy-data legendcolor"></div>
+        Legacy
       </div>
       <div class="legendexpl">
         <div class="only-model-data legendcolor"></div>
@@ -133,14 +137,14 @@ export default class ProductAvailabilityVisualizationSingle extends ProductAvail
   }
 
   createColorClassForSingleProduct(products: ProductLevels) {
+    if (this.noData(products)) return "no-data";
     if (this.qualityScores) {
-      if (this.noData(products)) return "no-data";
-      if (!this.allPass(products) && this.containsErrors(products)) return "contains-errors";
-      if (!this.allPass(products) && this.hasSomeTests(products)) return "missing-data";
+      if (this.hasSomeTests(products) && this.onlyLegacy(products)) return "only-legacy-data";
       if (this.allPass(products)) return "all-data";
+      if (this.anyProductContainsErrors(products)) return "contains-errors";
+      if (this.anyProductContainsWarnings(products)) return "contains-warnings";
       return "only-model-data";
     }
-    if (this.noData(products)) return "no-data";
     if (this.onlyLegacy(products)) return "only-legacy-data";
     return "all-data";
   }
@@ -154,7 +158,8 @@ export default class ProductAvailabilityVisualizationSingle extends ProductAvail
   setCurrentYearDate(year: ProductYear, date: ProductDate, event: MouseEvent) {
     this.tooltipStyle = {
       top: `${event.clientY - 40}px`,
-      left: `${event.clientX - 40}px`,
+      left: `${event.clientX}px`,
+      transform: "translateX(-50%)",
     };
     this.currentDate = date;
     this.currentYear = year;

@@ -16,12 +16,6 @@
 .dataviz-date[href]
   cursor: pointer
 
-.all-raw
-  background: #a0df7b
-
-.error-data
-  background: #bd1919
-
 .legacy-label
   color: grey
 
@@ -29,24 +23,18 @@
   position: fixed
   z-index: 6
   background: white
-  padding: 0.5em
+  padding: .75em 1em
   box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.2)
-
-  header
-    font-weight: bold
+  border-radius: 8px
 
   section
     display: flex
-    flex-grow: 2
+    justify-content: space-between
     font-size: 0.9em
-    justify-content: center
-    align-items: flex-start
-    padding: 0.5em
-    width: 370px
+    margin-top: .5em
 
     ul
-      padding-left: 0.5em
-      padding-right: 0.5em
+      padding: 0
       list-style: none
       white-space: pre-wrap
       margin-bottom: 0
@@ -57,38 +45,40 @@
       li.modelitem
         margin-top: 0.8em
 
+      // Product availability:
+
+      li.productitem::before
+        content: '    '
+        background-repeat: no-repeat
+        background-position: center
+        background-size: contain
+
       li.productitem.found::before
-        content: '✓'
-        color: green
-        padding-right: 0.3em
+        background-image: url('../assets/icons/test-pass.svg')
 
       li.productitem:not(.found)::before
-        content: '✘'
-        color: #c60000
-        padding-right: 0.3em
+        background-image: url('../assets/icons/test-missing.svg')
 
-      li.productitem:not(.found).na::before
-        content: '?'
-        color: grey
-        padding-right: 0.3em
+      // Quality:
 
-.testspass
-  color: green
+      li.qualityitem::before
+        content: '    '
+        background-repeat: no-repeat
+        background-position: center
+        background-size: contain
 
-.testsfail
-  color: #c60000
+      li.qualityitem:not(.found).na::before
+        background-image: url('../assets/icons/test-missing.svg')
 
-.noquality
-  color: grey
+      li.qualityitem:not(.found)::before
+        background-image: url('../assets/icons/test-fail.svg')
 
-.incorrect-info
-  display: none
+      li.qualityitem.found::before
+        background-image: url('../assets/icons/test-pass.svg')
 
-.error-data .incorrect-info
-  display: inline-block
-  font-size: 0.7em
-  color: #bd1919
-  float: right
+      li.qualityitem.warning::before
+        background-image: url('../assets/icons/test-warning.svg')
+
 
 .dataviz-date:hover .dataviz-tooltip
   display: block
@@ -138,40 +128,44 @@
         <div class="no-data legendcolor"></div>
         No data
       </div>
-      <div class="legendexpl">
-        <div class="error-data legendcolor"></div>
-        Unknown
-      </div>
       <br />
-      <div class="legendexpl"><span class="legacy-label">L</span> Legacy</div>
+      <div class="legendexpl">
+        <span class="legacy-label"><sup>L</sup></span> Legacy
+      </div>
     </div>
     <div class="dav-legend" v-if="legend && qualityScores">
       <div class="legendexpl">
         <div class="all-data legendcolor"></div>
-        All tests pass
+        L2 pass
       </div>
       <div class="legendexpl">
-        <div class="missing-data legendcolor"></div>
-        Some tests fail or missing
+        <div class="all-raw legendcolor"></div>
+        L2 warnings
+      </div>
+      <div class="legendexpl">
+        <div class="contains-errors legendcolor"></div>
+        L2 errors
+      </div>
+      <div class="legendexpl">
+        <div class="only-legacy-data legendcolor"></div>
+        Legacy L2
       </div>
       <div class="legendexpl">
         <div class="only-model-data legendcolor"></div>
-        All tests missing
+        Products / tests missing
       </div>
       <div class="legendexpl">
         <div class="no-data legendcolor"></div>
         No data
       </div>
       <br />
-      <div class="legendexpl"><span class="legacy-label testsfail">✘</span> Fail</div>
-      <div class="legendexpl"><span class="legacy-label">?</span> Missing</div>
+      <div class="legendexpl">
+        <span class="legacy-label"><sup>L</sup></span> Legacy
+      </div>
     </div>
-    <div class="dataviz-tooltip" v-if="tooltips && hover" v-bind:style="tooltipStyle">
-      <header>
-        {{ year["year"] }}-{{ date["date"] }}
-        <span class="incorrect-info">This information may be incorrect.</span>
-      </header>
-      <section>
+    <div class="dataviz-tooltip" v-if="tooltips && hover" :style="tooltipStyle">
+      <header>{{ year["year"] }}-{{ date["date"] }}</header>
+      <section v-if="!qualityScores">
         <ul v-for="lvl in allLevels">
           <li class="header">Level {{ lvl }}</li>
           <li
@@ -179,23 +173,44 @@
             class="productitem"
             :class="{
               found: getProductStatus(date.products[lvl], product),
-              na: qualityScores && !getReportExists(date.products[lvl], product),
             }"
             :key="product.id"
           >
             {{ idToHumanReadable(product.id) }}
-            <sup
-              class="legacy-label"
-              v-if="
-                getProductStatus(date.products[lvl], product) && getProductStatus(date.products[lvl], product).legacy
-              "
-            >
-              L
-            </sup>
+            <sup class="legacy-label" v-if="isLegacyFile(date.products[lvl], product)">L</sup>
           </li>
           <li
             v-if="lvl === '1b'"
             class="productitem modelitem"
+            :class="{
+              found: getProductStatus(date.products[lvl], { id: 'model' }),
+              na: qualityScores && !getReportExists(date.products[lvl], { id: 'model' }),
+            }"
+          >
+            Model
+          </li>
+        </ul>
+      </section>
+
+      <section v-else>
+        <ul v-for="lvl in allLevels">
+          <li class="header">Level {{ lvl }}</li>
+          <li
+            v-for="product in filterProductsByLvl(lvl)"
+            class="qualityitem"
+            :class="{
+              found: getProductStatus(date.products[lvl], product),
+              na: qualityScores && !getReportExists(date.products[lvl], product),
+              warning: isFileWithWarning(date.products[lvl], product),
+            }"
+            :key="product.id"
+          >
+            {{ idToHumanReadable(product.id) }}
+            <sup class="legacy-label" v-if="isLegacyFile(date.products[lvl], product)">L</sup>
+          </li>
+          <li
+            v-if="lvl === '1b'"
+            class="qualityitem modelitem"
             :class="{
               found: getProductStatus(date.products[lvl], { id: 'model' }),
               na: qualityScores && !getReportExists(date.products[lvl], { id: 'model' }),
@@ -239,10 +254,7 @@ export default class ProductAvailabilityVisualization extends Vue {
   currentDate: ProductDate | null = null;
   busy = false;
   hover = false;
-  tooltipStyle = {
-    top: "0px",
-    left: "0px",
-  };
+  tooltipStyle: Record<string, string> = {};
 
   idToHumanReadable = idToHumanReadable;
   debounce = debounce;
@@ -255,9 +267,16 @@ export default class ProductAvailabilityVisualization extends Vue {
   }
 
   setCurrentYearDate(year: ProductYear, date: ProductDate, event: MouseEvent) {
+    const tooltipWidth = 420;
+    const tooltipMargin = 10;
     this.tooltipStyle = {
-      top: `${event.clientY + 10}px`,
-      left: `${event.clientX - 175}px`,
+      width: tooltipWidth + "px",
+      top: event.clientY + 10 + "px",
+      left:
+        Math.min(
+          Math.max(tooltipMargin, event.clientX - tooltipWidth / 2),
+          document.body.scrollWidth - tooltipWidth - tooltipMargin
+        ) + "px",
     };
     this.currentDate = date;
     this.currentYear = year;
@@ -292,6 +311,20 @@ export default class ProductAvailabilityVisualization extends Vue {
     return existingProduct;
   }
 
+  isLegacyFile(existingProducts: ProductInfo[], product: Product) {
+    const existingProduct = existingProducts.find((prod) => prod.id == product.id);
+    if (existingProduct) {
+      return existingProduct.legacy;
+    }
+  }
+
+  isFileWithWarning(existingProducts: ProductInfo[], product: Product) {
+    const existingProduct = existingProducts.find((prod) => prod.id == product.id);
+    if (existingProduct) {
+      return this.isWarning(existingProduct);
+    }
+  }
+
   getReportExists(existingProducts: ProductInfo[], product: Product) {
     const existingProduct = existingProducts.find((prod) => prod.id == product.id);
     return existingProduct && this.qualityExists(existingProduct);
@@ -302,19 +335,19 @@ export default class ProductAvailabilityVisualization extends Vue {
   }
 
   createColorClass(products: ProductLevels) {
+    if (this.noData(products)) return "no-data";
     if (this.qualityScores) {
-      if (this.noData(products)) return "no-data";
-      if (this.allPass(products)) return "all-data";
-      if (this.hasSomeTests(products)) return "missing-data";
+      if (this.hasSomeLevel2Tests(products) && this.onlyLegacyLevel2(products)) return "only-legacy-data";
+      if (this.allLevel2Pass(products)) return "all-data";
+      if (this.level2ContainsErrors(products)) return "contains-errors";
+      if (this.level2containsWarnings(products)) return "all-raw";
       return "only-model-data";
     }
-    if (this.noData(products)) return "no-data";
-    else if (this.onlyModel(products)) return "only-model-data";
-    else if (this.weirdModel(products)) return "error-data";
-    else if (this.allLvl2(products)) return "all-data";
-    else if (this.onlyLegacy(products)) return "only-legacy-data";
-    else if (this.missingData(products)) return "all-raw";
-    else return "error-data";
+    if (this.onlyModel(products)) return "only-model-data";
+    if (this.onlyLegacy(products)) return "only-legacy-data";
+    if (this.allLvl2(products)) return "all-data";
+    if (this.missingData(products)) return "all-raw";
+    return "contains-errors";
   }
 
   allPass(products: ProductLevels) {
@@ -322,14 +355,6 @@ export default class ProductAvailabilityVisualization extends Vue {
       products["2"].filter(this.topQuality).length == products["2"].length &&
       products["1c"].filter(this.topQuality).length == products["1c"].length &&
       products["1b"].filter(this.topQuality).length == products["1b"].length
-    );
-  }
-
-  containsErrors(products: ProductLevels) {
-    return (
-      products["2"].filter(this.isError).length > 0 ||
-      products["1c"].filter(this.isError).length > 0 ||
-      products["1b"].filter(this.isError).length > 0
     );
   }
 
@@ -341,19 +366,55 @@ export default class ProductAvailabilityVisualization extends Vue {
     );
   }
 
-  topQuality(prod: ProductInfo) {
+  hasSomeLevel2Tests(products: ProductLevels) {
+    return products["2"].filter(this.qualityExists).length > 0;
+  }
+
+  level2ContainsErrors(products: ProductLevels) {
+    return products["2"].filter(this.isError).length > 0;
+  }
+
+  level2containsWarnings(products: ProductLevels) {
+    return products["2"].filter(this.isWarning).length > 0;
+  }
+
+  anyProductContainsErrors(products: ProductLevels) {
+    return (
+      products["2"].filter(this.isError).length > 0 ||
+      products["1c"].filter(this.isError).length > 0 ||
+      products["1b"].filter(this.isError).length > 0
+    );
+  }
+
+  anyProductContainsWarnings(products: ProductLevels) {
+    return (
+      products["2"].filter(this.isWarning).length > 0 ||
+      products["1c"].filter(this.isWarning).length > 0 ||
+      products["1b"].filter(this.isWarning).length > 0
+    );
+  }
+
+  allLevel2Pass(products: ProductLevels): boolean {
+    return products["2"].filter(this.topQuality).length == 4;
+  }
+
+  topQuality(prod: ProductInfo): boolean {
     return "errorLevel" in prod && prod.errorLevel === "pass";
   }
 
-  isError(prod: ProductInfo) {
+  isError(prod: ProductInfo): boolean {
     return "errorLevel" in prod && prod.errorLevel === "error";
   }
 
-  qualityExists(prod: ProductInfo) {
+  isWarning(prod: ProductInfo): boolean {
+    return "errorLevel" in prod && prod.errorLevel === "warning";
+  }
+
+  qualityExists(prod: ProductInfo): boolean {
     return "errorLevel" in prod && prod.errorLevel !== null;
   }
 
-  allLvl2(products: ProductLevels) {
+  allLvl2(products: ProductLevels): boolean {
     return products["2"].filter(this.isNotLegacy).length == 4;
   }
 
@@ -373,6 +434,10 @@ export default class ProductAvailabilityVisualization extends Vue {
     );
   }
 
+  onlyLegacyLevel2(products: ProductLevels) {
+    return products["2"].length > 0 && products["2"].every(this.isLegacy);
+  }
+
   onlyModel(products: ProductLevels) {
     return (
       products["2"].length == 0 &&
@@ -382,27 +447,19 @@ export default class ProductAvailabilityVisualization extends Vue {
     );
   }
 
-  weirdModel(products: ProductLevels) {
-    return products["1b"].filter(this.isModel).length > 1;
-  }
-
-  noData(products: ProductLevels) {
+  noData(products: ProductLevels): boolean {
     return products["2"].length == 0 && products["1c"].length == 0 && products["1b"].length == 0;
   }
 
-  isLegacy(prod: ProductInfo) {
+  isLegacy(prod: ProductInfo): boolean {
     return prod.legacy;
   }
 
-  isLegacyOrModel(prod: ProductInfo) {
+  isLegacyOrModel(prod: ProductInfo): boolean {
     return prod.legacy || prod.id == "model";
   }
 
-  isModel(prod: ProductInfo) {
-    return prod.id == "model";
-  }
-
-  isNotLegacy(prod: ProductInfo) {
+  isNotLegacy(prod: ProductInfo): boolean {
     return !this.isLegacy(prod);
   }
 

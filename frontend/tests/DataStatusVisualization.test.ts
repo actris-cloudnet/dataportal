@@ -119,12 +119,6 @@ describe("Data availability mode", () => {
     expect(classes).toContain("no-data");
   });
 
-  it("displays red color for dates with weird data", async () => {
-    const { classes } = getColorElementByDate(wrapper, "2021-04-01");
-    expect(classes.length).toEqual(2);
-    expect(classes).toContain("error-data");
-  });
-
   it("hides tooltips on tooltips=false", async () => {
     const customWrapper = mountVue(ProductAvailabilityVisualization, { propsData: { ...props, tooltips: false } });
     await nextTick(1);
@@ -196,7 +190,7 @@ describe("Data quality mode", () => {
       })
     ).toBeTruthy();
     expect(classes.length).toEqual(2);
-    expect(classes).toContain("missing-data");
+    expect(classes).toContain("all-data");
   });
 
   it("displays light gray color for days that have no qc tests", async () => {
@@ -222,6 +216,6 @@ describe("Data quality mode", () => {
   });
 
   it("shows correct legend on legend=true", async () => {
-    expect(wrapper.find(".dav-legend").text()).toContain("All tests pass");
+    expect(wrapper.find(".dav-legend").text()).toContain("L2 pass");
   });
 });
