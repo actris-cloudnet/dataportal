@@ -64,7 +64,7 @@ describe("Site.vue", () => {
     wrapper = mountVue(Site);
     await nextTick(1);
     const instrumentText = await wrapper.find("#instruments").text();
-    return expect(instrumentText).toContain("not available");
+    return expect(instrumentText).toContain("No data received in the last");
   });
 
   it("fetches instruments from last n days", async () => {

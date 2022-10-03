@@ -83,14 +83,14 @@
           <div v-if="instrumentsStatus === 'loading'" class="loadingoverlay">
             <div class="lds-dual-ring"></div>
           </div>
-          <div class="detailslistNotAvailable" v-else-if="instrumentsStatus === 'error'">
+          <div v-else-if="instrumentsStatus === 'error'" class="detailslistError">
             Failed to load instrument information.
           </div>
           <div v-else-if="instruments && instruments.length" class="detailslist">
-            <span class="notice">
+            <div class="notice">
               The site has submitted data from the following instruments in the last
-              {{ instrumentsFromLastDays }} days:<br />
-            </span>
+              {{ instrumentsFromLastDays }} days:
+            </div>
             <div v-for="(instrument, index) in instruments" :key="index" class="detailslistItem">
               <img alt="instrument icon" :src="instrument.icon" class="product" />
               <span v-if="instrument.pid">
@@ -99,15 +99,18 @@
               <span v-else>{{ instrument.name }}</span>
             </div>
             <div v-if="instrumentPidStatus === 'someMissing'" class="notice note warningnote">
-              Some files were submitted without an instrument PID in the last 30 days.
+              Some files were submitted without an instrument PID in the last
+              {{ instrumentsFromLastDays }} days.
             </div>
             <div v-if="instrumentPidStatus === 'allMissing'" class="notice note errornote">
-              All files were submitted without an instrument PID in the last 30 days. Please consult
-              <a href="https://docs.cloudnet.fmi.fi/api/data-upload.html">our documentation</a> to identify your
+              All files in the last {{ instrumentsFromLastDays }} days were submitted without an instrument PID. Please
+              consult <a href="https://docs.cloudnet.fmi.fi/api/data-upload.html">our documentation</a> to identify your
               instruments.
             </div>
           </div>
-          <div class="detailslistNotAvailable" v-else>Instrument information not available.</div>
+          <div v-else class="detailslistNotAvailable">
+            No data received in the last {{ instrumentsFromLastDays }} days.
+          </div>
         </section>
       </section>
       <section id="sitemap" v-if="response.latitude != null && response.longitude != null">
