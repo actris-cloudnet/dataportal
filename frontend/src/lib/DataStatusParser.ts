@@ -1,4 +1,4 @@
-import { dateToString } from "../lib/index";
+import { dateToString, notEmpty } from "../lib/index";
 import { Product } from "../../../backend/src/entity/Product";
 import axios from "axios";
 
@@ -45,6 +45,7 @@ export class DataStatusParser {
   allProducts: Product[] | null = null;
   years: ProductYear[] = [];
   lvlTranslate: { [key: string]: keyof ProductLevels } = {};
+  availableProducts: Product[] = [];
 
   async engage() {
     const [searchRes, prodRes] = await Promise.all([
@@ -55,6 +56,14 @@ export class DataStatusParser {
     this.allProducts = prodRes.data.filter((prod: Product) => !prod.experimental);
     if (!this.searchResponse || !this.allProducts || this.searchResponse.length == 0) return this;
 
+    const productMap = this.allProducts.reduce((map: Record<string, Product>, product) => {
+      map[product.id] = product;
+      return map;
+    }, {});
+    const productIds = new Set(this.searchResponse.map((file) => file.productId));
+    this.availableProducts = Array.from(productIds)
+      .map((productId) => productMap[productId])
+      .filter(notEmpty);
     this.lvlTranslate = this.allProducts.reduce(
       (acc, cur) => ({ ...acc, [cur.id]: cur.level as keyof ProductLevels }),
       {}

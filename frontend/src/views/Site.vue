@@ -134,7 +134,7 @@
       <section id="product_availability" class="graph">
         <header>
           Product availability
-          <template v-if="selectedProduct">({{ selectedProduct }})</template>
+          <template v-if="selectedProductName">({{ selectedProductName }})</template>
         </header>
 
         <section class="details" v-if="singleProductView">
@@ -163,7 +163,7 @@
       <section id="product_quality" class="graph">
         <header>
           Product quality
-          <template v-if="selectedProduct">({{ selectedProduct }})</template>
+          <template v-if="selectedProductName">({{ selectedProductName }})</template>
         </header>
 
         <section class="details" v-if="singleProductView">
@@ -200,7 +200,7 @@
           v-model="selectedProductId"
           :multiple="false"
           label="Product filter"
-          :options="allProducts"
+          :options="dataStatusParser.availableProducts"
           id="singleProductSelect"
           :icons="true"
           :getIcon="getIconUrl"
@@ -224,7 +224,6 @@ import ProductAvailabilityVisualization from "../components/DataStatusVisualizat
 import ProductAvailabilityVisualizationSingle from "../components/DataStatusVisualizationSingleProduct.vue";
 import { getProductIcon, formatCoordinates, fetchInstrumentName } from "../lib";
 import { DevMode } from "../lib/DevMode";
-import { Product } from "../../../backend/src/entity/Product";
 import { DataStatusParser } from "../lib/DataStatusParser";
 import CustomMultiselect from "../components/Multiselect.vue";
 import { ReducedMetadataResponse } from "../../../backend/src/entity/ReducedMetadataResponse";
@@ -248,7 +247,6 @@ export default class SiteView extends Vue {
   instruments: Instrument[] = [];
   instrumentsFromLastDays = 30;
   instrumentsStatus: "loading" | "error" | "ready" = "loading";
-  allProducts: Product[] | null = null;
   selectedProductId: string | null = null;
   mapKey = 0;
   busy = false;
@@ -259,14 +257,6 @@ export default class SiteView extends Vue {
   payload = { developer: this.devMode.activated };
 
   created() {
-    axios
-      .get(`${this.apiUrl}products/`)
-      .then(({ data }) => {
-        this.allProducts = data.filter((product: Product) => product.level != "3");
-      })
-      .catch(() => {
-        /* */
-      });
     axios
       .get(`${this.apiUrl}sites/${this.siteid}`, { params: this.payload })
       .then(({ data }) => (this.response = data))
@@ -294,9 +284,11 @@ export default class SiteView extends Vue {
     });
   }
 
-  get selectedProduct() {
-    if (!this.selectedProductId || !this.allProducts) return null;
-    const product = this.allProducts.find((product) => product.id === this.selectedProductId);
+  get selectedProductName() {
+    if (!this.selectedProductId || !this.dataStatusParser || !this.dataStatusParser.availableProducts) {
+      return null;
+    }
+    const product = this.dataStatusParser.availableProducts.find((product) => product.id === this.selectedProductId);
     if (!product) return null;
     return product.humanReadableName;
   }
