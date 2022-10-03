@@ -15,26 +15,20 @@ text
 
 <template id="donutTemplate">
   <svg viewBox="0 0 170 170">
-    <g v-for="(value, index) in sortedValues" :key="index">
+    <g v-for="(segment, index) in segments" :key="index">
       <circle
         :cx="cx"
         :cy="cy"
         :r="radius"
-        :stroke="colors[index]"
+        :stroke="segment.color"
         :stroke-width="strokeWidth"
-        :stroke-dasharray="adjustedCircumference()"
-        :stroke-dashoffset="calculateStrokeDashOffset(value)"
+        :stroke-dasharray="adjustedCircumference"
+        :stroke-dashoffset="calculateStrokeDashOffset(segment)"
         fill="transparent"
-        :transform="returnCircleTransformValue(index)"
+        :transform="returnCircleTransformValue(segment)"
       />
-      <text
-        v-if="segmentBigEnough(value)"
-        text-anchor="middle"
-        dy="3px"
-        :x="chartData[index].textX"
-        :y="chartData[index].textY"
-      >
-        {{ percentageString(value) }}
+      <text v-if="segmentBigEnough(segment)" text-anchor="middle" dy="3px" :x="segment.textX" :y="segment.textY">
+        {{ percentageString(segment.value) }}
       </text>
     </g>
   </svg>
@@ -43,92 +37,80 @@ text
 <script lang="ts">
 import { Component, Prop } from "vue-property-decorator";
 import Vue from "vue";
-import { QualityResponse } from "../views/QualityReport.vue";
 
-interface Data {
+export interface DonutData {
+  value: number;
+  color: string;
+}
+
+interface Segment {
+  value: number;
+  color: string;
   degrees: number;
   textX: number;
   textY: number;
 }
 
+function angleToRadians(angle: number): number {
+  return (angle * Math.PI) / 180;
+}
+
 @Component
 export default class Donut extends Vue {
-  @Prop() qualityResponse!: QualityResponse;
-  angleOffset = -90;
-  chartData: Data[] = [];
-  colors = ["#4C9A2A", "goldenrod", "#cd5c5c"];
+  @Prop() data!: DonutData[];
   cx = 80;
   cy = 80;
   radius = 55;
   strokeWidth = 35;
-  sortedValues = this.getValues();
 
-  created() {
-    this.calculateChartData();
-  }
+  get segments(): Segment[] {
+    const sumOfValues = this.data.reduce((sum, item) => sum + item.value, 0);
+    if (sumOfValues === 0) return [];
 
-  calculateChartData() {
-    this.sortedValues.forEach((value) => {
-      const [x, y] = this.calculateTextCoords(value, this.angleOffset);
-      // start at -90deg so that the largest segment is perpendicular to top
-      const data: Data = {
-        degrees: this.angleOffset,
-        textX: x,
-        textY: y,
+    const output: Segment[] = [];
+    let angleOffset = -90;
+    this.data.forEach((item) => {
+      if (item.value == 0) return;
+      const value = item.value / sumOfValues;
+      const textAngle = angleToRadians(angleOffset + (value * 360) / 2);
+      const segment = {
+        value,
+        color: item.color,
+        degrees: angleOffset,
+        textX: this.radius * Math.cos(textAngle) + this.cx,
+        textY: this.radius * Math.sin(textAngle) + this.cx,
       };
-      this.chartData.push(data);
-      this.angleOffset = this.dataPercentage(value) * 360 + this.angleOffset;
+      output.push(segment);
+      angleOffset += segment.value * 360;
     });
+
+    return output;
   }
 
-  calculateTextCoords(value: number, angleOffset: number): number[] {
-    const angle = (this.dataPercentage(value) * 360) / 2 + angleOffset;
-    const radians = angle * (Math.PI / 180);
-    return [this.radius * Math.cos(radians) + this.cx, this.radius * Math.sin(radians) + this.cy];
+  calculateStrokeDashOffset(segment: Segment): number {
+    const strokeDiff = segment.value * this.circumference;
+    return this.circumference - strokeDiff;
   }
 
-  getValues(): number[] {
-    const data = [];
-    data.push(this.qualityResponse.tests - this.qualityResponse.warnings - this.qualityResponse.errors);
-    if (this.qualityResponse.warnings > 0) {
-      data.push(this.qualityResponse.warnings);
-    }
-    if (this.qualityResponse.errors > 0) {
-      data.push(this.qualityResponse.errors);
-    }
-    return data;
-  }
-
-  calculateStrokeDashOffset(value: number): number {
-    const circumference = this.circumference();
-    const strokeDiff = this.dataPercentage(value) * circumference;
-    return circumference - strokeDiff;
-  }
-
-  adjustedCircumference(): number {
+  get adjustedCircumference(): number {
     const gap = 1;
-    return this.circumference() - gap;
+    return this.circumference - gap;
   }
 
-  circumference(): number {
+  get circumference(): number {
     return 2 * Math.PI * this.radius;
   }
 
   percentageString(value: number): string {
-    return `${Math.round(this.dataPercentage(value) * 100)}%`;
+    return `${Math.round(100 * value)}%`;
   }
 
-  dataPercentage(value: number): number {
-    const sumOfValues = this.sortedValues.reduce((acc, val) => acc + val);
-    return value / sumOfValues;
+  returnCircleTransformValue(segment: Segment): string {
+    return `rotate(${segment.degrees}, ${this.cx}, ${this.cy})`;
   }
 
-  returnCircleTransformValue(index: number): string {
-    return `rotate(${this.chartData[index].degrees}, ${this.cx}, ${this.cy})`;
-  }
-
-  segmentBigEnough(value: number): boolean {
-    return Math.round(this.dataPercentage(value) * 100) > 5;
+  segmentBigEnough(segment: Segment): boolean {
+    return segment.value > 0.05;
   }
 }
 </script>

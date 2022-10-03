@@ -108,7 +108,7 @@
     <div id="infoBoxes">
       <div class="flexitem">
         <table>
-          <Donut :qualityResponse="this.qualityResponse"></Donut>
+          <Donut :data="donutData" />
         </table>
       </div>
       <div class="flexitem">
@@ -199,7 +199,7 @@
 import { Component, Prop, Vue } from "vue-property-decorator";
 import axios from "axios";
 import { humanReadableTimestamp, getQcIcon } from "../lib";
-import Donut from "../components/Donut.vue";
+import Donut, { DonutData } from "../components/Donut.vue";
 import escapeHtml from "escape-html";
 
 interface Test {
@@ -260,6 +260,18 @@ export default class QualityReportView extends Vue {
       .catch(() => {
         this.error = true;
       });
+  }
+
+  get donutData(): DonutData[] {
+    if (!this.qualityResponse) return [];
+    return [
+      {
+        value: this.qualityResponse.tests - this.qualityResponse.warnings - this.qualityResponse.errors,
+        color: "#4C9A2A",
+      },
+      { value: this.qualityResponse.warnings, color: "goldenrod" },
+      { value: this.qualityResponse.errors, color: "#cd5c5c" },
+    ];
   }
 }
 </script>
