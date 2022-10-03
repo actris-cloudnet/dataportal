@@ -55,8 +55,7 @@
     margin-top: -4px
 
   th, td
-    padding-top: 15px
-    padding-bottom: 15px
+    padding: 15px
 
   tr
     border-bottom: 1px solid #ddd
@@ -67,6 +66,7 @@
   tbody th
     font-weight: inherit
     vertical-align: top
+    padding-left: 0
 
   td
     vertical-align: middle
@@ -77,10 +77,6 @@
 
   li + li
     margin-top: 5px
-
-  #exceptions
-    margin-left: 20px
-    margin-bottom: 15px
 
   .detailsMissing
     color: gray
