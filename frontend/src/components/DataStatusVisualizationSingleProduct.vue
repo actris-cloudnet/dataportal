@@ -30,7 +30,12 @@
         v-if="index && parseInt(year['year']) + 1 !== parseInt(yearsReduced[index - 1]['year'])"
         class="dataviz-skippedyears"
       >
-        No data for years {{ parseInt(year["year"]) + 1 }} - {{ parseInt(yearsReduced[index - 1]["year"]) - 1 }}.
+        <template v-if="parseInt(year['year']) - parseInt(years[index - 1]['year']) == -2">
+          No data for year {{ parseInt(year["year"]) + 1 }}.
+        </template>
+        <template v-else>
+          No data for years {{ parseInt(year["year"]) + 1 }} - {{ parseInt(years[index - 1]["year"]) - 1 }}.
+        </template>
       </div>
       <div class="dataviz-year">{{ year["year"] }}</div>
       <div class="dataviz-yearblock" @mouseleave="debouncedHideTooltip()">
