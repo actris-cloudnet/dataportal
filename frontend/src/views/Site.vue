@@ -83,14 +83,14 @@
           <div v-if="instrumentsStatus === 'loading'" class="loadingoverlay">
             <div class="lds-dual-ring"></div>
           </div>
-          <div class="detailslistNotAvailable" v-else-if="instrumentsStatus === 'error'">
+          <div v-else-if="instrumentsStatus === 'error'" class="detailslistError">
             Failed to load instrument information.
           </div>
           <div v-else-if="instruments && instruments.length" class="detailslist">
-            <span class="notice">
+            <div class="notice">
               The site has submitted data from the following instruments in the last
-              {{ instrumentsFromLastDays }} days:<br />
-            </span>
+              {{ instrumentsFromLastDays }} days:
+            </div>
             <div v-for="(instrument, index) in instruments" :key="index" class="detailslistItem">
               <img alt="instrument icon" :src="instrument.icon" class="product" />
               <span v-if="instrument.pid">
@@ -99,15 +99,18 @@
               <span v-else>{{ instrument.name }}</span>
             </div>
             <div v-if="instrumentPidStatus === 'someMissing'" class="notice note warningnote">
-              Some files were submitted without an instrument PID in the last 30 days.
+              Some files were submitted without an instrument PID in the last
+              {{ instrumentsFromLastDays }} days.
             </div>
             <div v-if="instrumentPidStatus === 'allMissing'" class="notice note errornote">
-              All files were submitted without an instrument PID in the last 30 days. Please consult
-              <a href="https://docs.cloudnet.fmi.fi/api/data-upload.html">our documentation</a> to identify your
+              All files in the last {{ instrumentsFromLastDays }} days were submitted without an instrument PID. Please
+              consult <a href="https://docs.cloudnet.fmi.fi/api/data-upload.html">our documentation</a> to identify your
               instruments.
             </div>
           </div>
-          <div class="detailslistNotAvailable" v-else>Instrument information not available.</div>
+          <div v-else class="detailslistNotAvailable">
+            No data received in the last {{ instrumentsFromLastDays }} days.
+          </div>
         </section>
       </section>
       <section id="sitemap" v-if="response.latitude != null && response.longitude != null">
@@ -131,7 +134,7 @@
       <section id="product_availability" class="graph">
         <header>
           Product availability
-          <template v-if="selectedProduct">({{ selectedProduct }})</template>
+          <template v-if="selectedProductName">({{ selectedProductName }})</template>
         </header>
 
         <section class="details" v-if="singleProductView">
@@ -160,7 +163,7 @@
       <section id="product_quality" class="graph">
         <header>
           Product quality
-          <template v-if="selectedProduct">({{ selectedProduct }})</template>
+          <template v-if="selectedProductName">({{ selectedProductName }})</template>
         </header>
 
         <section class="details" v-if="singleProductView">
@@ -197,7 +200,7 @@
           v-model="selectedProductId"
           :multiple="false"
           label="Product filter"
-          :options="allProducts"
+          :options="dataStatusParser.availableProducts"
           id="singleProductSelect"
           :icons="true"
           :getIcon="getIconUrl"
@@ -221,7 +224,6 @@ import ProductAvailabilityVisualization from "../components/DataStatusVisualizat
 import ProductAvailabilityVisualizationSingle from "../components/DataStatusVisualizationSingleProduct.vue";
 import { getProductIcon, formatCoordinates, fetchInstrumentName } from "../lib";
 import { DevMode } from "../lib/DevMode";
-import { Product } from "../../../backend/src/entity/Product";
 import { DataStatusParser } from "../lib/DataStatusParser";
 import CustomMultiselect from "../components/Multiselect.vue";
 import { ReducedMetadataResponse } from "../../../backend/src/entity/ReducedMetadataResponse";
@@ -245,7 +247,6 @@ export default class SiteView extends Vue {
   instruments: Instrument[] = [];
   instrumentsFromLastDays = 30;
   instrumentsStatus: "loading" | "error" | "ready" = "loading";
-  allProducts: Product[] | null = null;
   selectedProductId: string | null = null;
   mapKey = 0;
   busy = false;
@@ -256,14 +257,6 @@ export default class SiteView extends Vue {
   payload = { developer: this.devMode.activated };
 
   created() {
-    axios
-      .get(`${this.apiUrl}products/`)
-      .then(({ data }) => {
-        this.allProducts = data.filter((product: Product) => product.level != "3");
-      })
-      .catch(() => {
-        /* */
-      });
     axios
       .get(`${this.apiUrl}sites/${this.siteid}`, { params: this.payload })
       .then(({ data }) => (this.response = data))
@@ -291,9 +284,11 @@ export default class SiteView extends Vue {
     });
   }
 
-  get selectedProduct() {
-    if (!this.selectedProductId || !this.allProducts) return null;
-    const product = this.allProducts.find((product) => product.id === this.selectedProductId);
+  get selectedProductName() {
+    if (!this.selectedProductId || !this.dataStatusParser || !this.dataStatusParser.availableProducts) {
+      return null;
+    }
+    const product = this.dataStatusParser.availableProducts.find((product) => product.id === this.selectedProductId);
     if (!product) return null;
     return product.humanReadableName;
   }

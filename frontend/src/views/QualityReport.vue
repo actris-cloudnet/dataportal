@@ -55,8 +55,7 @@
     margin-top: -4px
 
   th, td
-    padding-top: 15px
-    padding-bottom: 15px
+    padding: 15px
 
   tr
     border-bottom: 1px solid #ddd
@@ -67,6 +66,7 @@
   tbody th
     font-weight: inherit
     vertical-align: top
+    padding-left: 0
 
   td
     vertical-align: middle
@@ -77,10 +77,6 @@
 
   li + li
     margin-top: 5px
-
-  #exceptions
-    margin-left: 20px
-    margin-bottom: 15px
 
   .detailsMissing
     color: gray
@@ -97,6 +93,23 @@
   code
     font-size: 90%
 
+@media screen and (max-width: $narrow-screen)
+  thead
+    display: none
+
+  #testResults
+    tbody, tr, td, th
+      display: block
+      border: none
+      padding: 0
+
+    tr
+      margin-bottom: 30px
+
+    ul
+      padding-left: 30px
+      margin-top: 10px
+
 #qualityFooter
   padding-top: 30px
   color: gray
@@ -112,7 +125,7 @@
     <div id="infoBoxes">
       <div class="flexitem">
         <table>
-          <Donut :qualityResponse="this.qualityResponse"></Donut>
+          <Donut :data="donutData" />
         </table>
       </div>
       <div class="flexitem">
@@ -203,7 +216,7 @@
 import { Component, Prop, Vue } from "vue-property-decorator";
 import axios from "axios";
 import { humanReadableTimestamp, getQcIcon } from "../lib";
-import Donut from "../components/Donut.vue";
+import Donut, { DonutData } from "../components/Donut.vue";
 import escapeHtml from "escape-html";
 
 interface Test {
@@ -264,6 +277,18 @@ export default class QualityReportView extends Vue {
       .catch(() => {
         this.error = true;
       });
+  }
+
+  get donutData(): DonutData[] {
+    if (!this.qualityResponse) return [];
+    return [
+      {
+        value: this.qualityResponse.tests - this.qualityResponse.warnings - this.qualityResponse.errors,
+        color: "#4C9A2A",
+      },
+      { value: this.qualityResponse.warnings, color: "goldenrod" },
+      { value: this.qualityResponse.errors, color: "#cd5c5c" },
+    ];
   }
 }
 </script>
