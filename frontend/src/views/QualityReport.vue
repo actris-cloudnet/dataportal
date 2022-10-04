@@ -93,6 +93,23 @@
   code
     font-size: 90%
 
+@media screen and (max-width: $narrow-screen)
+  thead
+    display: none
+
+  #testResults
+    tbody, tr, td, th
+      display: block
+      border: none
+      padding: 0
+
+    tr
+      margin-bottom: 30px
+
+    ul
+      padding-left: 30px
+      margin-top: 10px
+
 #qualityFooter
   padding-top: 30px
   color: gray
