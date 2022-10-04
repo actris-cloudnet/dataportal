@@ -111,7 +111,7 @@
 
 <script lang="ts">
 import { Component, Prop } from "vue-property-decorator";
-import ProductAvailabilityVisualization from "./DataStatusVisualization.vue";
+import ProductAvailabilityVisualization, { ColorClass } from "./DataStatusVisualization.vue";
 import { ProductLevels, ProductYear, ProductDate } from "../lib/DataStatusParser";
 import Header from "../components/Header.vue";
 
@@ -149,7 +149,7 @@ export default class ProductAvailabilityVisualizationSingle extends ProductAvail
     }
   }
 
-  createColorClassForSingleProduct(products: ProductLevels) {
+  createColorClassForSingleProduct(products: ProductLevels): ColorClass {
     if (this.noData(products)) return "no-data";
     if (this.qualityScores) {
       if (this.hasSomeTests(products) && this.onlyLegacy(products)) return "only-legacy-data";
@@ -162,7 +162,7 @@ export default class ProductAvailabilityVisualizationSingle extends ProductAvail
     return "all-data";
   }
 
-  createIconForSingleProduct(products: ProductLevels) {
+  createIconForSingleProduct(products: ProductLevels): string {
     switch (this.createColorClassForSingleProduct(products)) {
       case "all-data":
         return require("../assets/icons/test-pass.svg");
@@ -175,7 +175,7 @@ export default class ProductAvailabilityVisualizationSingle extends ProductAvail
     }
   }
 
-  onlyLegacy(products: ProductLevels) {
+  onlyLegacy(products: ProductLevels): boolean {
     return (
       products["2"].every(this.isLegacy) && products["1c"].every(this.isLegacy) && products["1b"].every(this.isLegacy)
     );

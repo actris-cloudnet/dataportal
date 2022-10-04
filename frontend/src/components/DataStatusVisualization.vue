@@ -240,6 +240,16 @@ import { Product } from "../../../backend/src/entity/Product";
 import { DataStatusParser, ProductDate, ProductInfo, ProductLevels, ProductYear } from "../lib/DataStatusParser";
 import debounce from "debounce";
 
+export type ColorClass =
+  | "no-data"
+  | "only-legacy-data"
+  | "contains-errors"
+  | "contains-warnings"
+  | "only-model-data"
+  | "only-legacy-data"
+  | "all-data"
+  | "all-raw";
+
 @Component
 export default class ProductAvailabilityVisualization extends Vue {
   @Prop() site!: string;
@@ -339,7 +349,7 @@ export default class ProductAvailabilityVisualization extends Vue {
     return Array.from(new Set(Object.values(this.lvlTranslate))).sort();
   }
 
-  createColorClass(products: ProductLevels) {
+  createColorClass(products: ProductLevels): ColorClass {
     if (this.noData(products)) return "no-data";
     if (this.qualityScores) {
       if (this.hasSomeLevel2Tests(products) && this.onlyLegacyLevel2(products)) return "only-legacy-data";
