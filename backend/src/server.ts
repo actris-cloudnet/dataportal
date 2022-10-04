@@ -151,7 +151,7 @@ async function createServer() {
   app.get("/api/download/raw/:uuid/*", middleware.validateUuidParam, dlRoutes.raw);
   app.get("/api/download/collection/:uuid", middleware.validateUuidParam, dlRoutes.collection);
   app.get("/api/download/image/*", dlRoutes.image);
-  app.get("/api/quality/:uuid", qualityRoutes.qualityReport);
+  app.get("/api/quality/:uuid", middleware.validateUuidParam, qualityRoutes.qualityReport);
 
   app.get("/upload/metadata/:checksum", middleware.validateMD5Param, uploadRoutes.metadata, errorAsPlaintext);
 
@@ -212,7 +212,7 @@ async function createServer() {
   app.put("/visualizations/*", express.json(), vizRoutes.putVisualization);
   app.get("/upload-dateforsize", uploadRoutes.dateforsize);
   app.get("/file-dateforsize", fileRoutes.dateforsize);
-  app.put("/quality/:uuid", express.json(), qualityRoutes.putQualityReport);
+  app.put("/quality/:uuid", middleware.validateUuidParam, express.json(), qualityRoutes.putQualityReport);
   app.get(
     "/api/download/stats",
     authenticator.verifyCredentials("View download statistics"),
@@ -221,6 +221,7 @@ async function createServer() {
   );
   app.delete(
     "/api/files/:uuid",
+    middleware.validateUuidParam,
     authenticator.verifyCredentials(),
     middleware.checkDeleteParams,
     authorizator.verifyPermission(PermissionType.canDelete),
