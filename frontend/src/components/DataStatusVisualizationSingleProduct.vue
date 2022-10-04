@@ -20,6 +20,10 @@
   padding-left: 0.2em
   padding-right: 0.2em
   box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.2)
+
+  img
+    height: 1em
+    margin-top: -4px
 </style>
 
 <template>
@@ -94,7 +98,10 @@
       <br />
     </div>
     <div class="dataviz-tooltip" v-if="tooltips && hover" v-bind:style="tooltipStyle">
-      <header>{{ year.year }}-{{ date.date }}</header>
+      <header>
+        <img :src="createIconForSingleProduct(date.products)" alt="" />
+        {{ year.year }}-{{ date.date }}
+      </header>
     </div>
   </div>
   <div v-else class="loadingoverlay">
@@ -107,6 +114,7 @@ import { Component, Prop } from "vue-property-decorator";
 import ProductAvailabilityVisualization from "./DataStatusVisualization.vue";
 import { ProductLevels, ProductYear, ProductDate } from "../lib/DataStatusParser";
 import Header from "../components/Header.vue";
+
 @Component({
   components: { Header },
 })
@@ -152,6 +160,19 @@ export default class ProductAvailabilityVisualizationSingle extends ProductAvail
     }
     if (this.onlyLegacy(products)) return "only-legacy-data";
     return "all-data";
+  }
+
+  createIconForSingleProduct(products: ProductLevels) {
+    switch (this.createColorClassForSingleProduct(products)) {
+      case "all-data":
+        return require("../assets/icons/test-pass.svg");
+      case "contains-warnings":
+        return require("../assets/icons/test-warning.svg");
+      case "contains-errors":
+        return require("../assets/icons/test-fail.svg");
+      default:
+        return require("../assets/icons/test-missing.svg");
+    }
   }
 
   onlyLegacy(products: ProductLevels) {
