@@ -170,6 +170,8 @@ export default class ProductAvailabilityVisualizationSingle extends ProductAvail
         return require("../assets/icons/test-warning.svg");
       case "contains-errors":
         return require("../assets/icons/test-fail.svg");
+      case "only-legacy-data":
+        return require("../assets/icons/legacy-pass.svg");
       default:
         return require("../assets/icons/test-missing.svg");
     }
