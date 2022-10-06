@@ -42,6 +42,9 @@ export class Site {
   @Column({ type: "char", length: 3, nullable: true })
   dvasId!: string | null;
 
+  @Column({ type: "smallint", nullable: true })
+  actrisId!: number | null;
+
   @Column({ type: "text", nullable: true })
   country!: string | null;
 
