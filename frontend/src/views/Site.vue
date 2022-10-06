@@ -40,8 +40,8 @@
   background: #fffdee
 
 .errornote
-  border-color: #ffcaca;
-  background: #fee;
+  border-color: #ffcaca
+  background: #fee
 </style>
 
 <template>
@@ -63,6 +63,11 @@
             <dd>
               {{ response.humanReadableName }}<template v-if="response.country">, {{ response.country }}</template>
             </dd>
+            <dt>ACTRIS name</dt>
+            <dd v-if="nfName" style="max-width: 300px">
+              <a :href="nfLink">{{ nfName }}</a>
+            </dd>
+            <dd class="notAvailable" v-else></dd>
             <template v-if="response.latitude != null && response.longitude != null">
               <dt>Coordinates</dt>
               <dd>{{ formatCoordinates(response.latitude, response.longitude) }}</dd>
@@ -215,14 +220,14 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import axios from "axios";
 import { Site } from "../../../backend/src/entity/Site";
 import { SearchFileResponse } from "../../../backend/src/entity/SearchFileResponse";
 import Map from "../components/Map.vue";
 import ProductAvailabilityVisualization from "../components/DataStatusVisualization.vue";
 import ProductAvailabilityVisualizationSingle from "../components/DataStatusVisualizationSingleProduct.vue";
-import { getProductIcon, formatCoordinates, fetchInstrumentName } from "../lib";
+import { getProductIcon, formatCoordinates, fetchInstrumentName, actrisNfUrl } from "../lib";
 import { DevMode } from "../lib/DevMode";
 import { DataStatusParser } from "../lib/DataStatusParser";
 import CustomMultiselect from "../components/Multiselect.vue";
@@ -255,6 +260,8 @@ export default class SiteView extends Vue {
   devMode = new DevMode();
   dataStatusParser: DataStatusParser | null = null;
   payload = { developer: this.devMode.activated };
+  nfName: string | null = null;
+  nfLink: string | null = null;
 
   created() {
     axios
@@ -282,6 +289,23 @@ export default class SiteView extends Vue {
       console.error(error);
       this.instrumentsStatus = "error";
     });
+  }
+
+  @Watch("response")
+  getSiteName() {
+    if (!this.response?.actrisId) {
+      return;
+    }
+    const apiUrl = `${actrisNfUrl}/api/facilities/${this.response.actrisId}`;
+    axios
+      .get(apiUrl)
+      .then(({ data }) => {
+        this.nfName = data.name;
+        this.nfLink = data.landingPage;
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   }
 
   get selectedProductName() {
