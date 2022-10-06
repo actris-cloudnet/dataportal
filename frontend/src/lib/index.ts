@@ -5,6 +5,8 @@ import { SearchFileResponse } from "../../../backend/src/entity/SearchFileRespon
 import { Product } from "../../../backend/src/entity/Product";
 import { CollectionFileResponse } from "../../../backend/src/entity/CollectionFileResponse";
 
+export const actrisNfUrl = "https://actris-nf-labelling.out.ocp.fmi.fi";
+
 export const getProductIcon = (product: Product | string) => {
   try {
     return require(`../assets/icons/${typeof product == "string" ? product : product.id}.png`);
