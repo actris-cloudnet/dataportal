@@ -64,8 +64,8 @@
               {{ response.humanReadableName }}<template v-if="response.country">, {{ response.country }}</template>
             </dd>
             <dt>ACTRIS name</dt>
-            <dd v-if="nfName">
-              <a :href="nfLink" class="">{{ nfName }}</a>
+            <dd v-if="nfName" style="max-width: 300px">
+              <a :href="nfLink">{{ nfName }}</a>
             </dd>
             <dd class="notAvailable" v-else></dd>
             <template v-if="response.latitude != null && response.longitude != null">
