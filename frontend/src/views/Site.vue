@@ -297,11 +297,11 @@ export default class SiteView extends Vue {
       return;
     }
     const apiUrl = `${actrisNfUrl}/api/facilities/${this.response.actrisId}`;
-    this.nfLink = `${actrisNfUrl}/facility/${this.response.actrisId}`;
     axios
       .get(apiUrl)
       .then(({ data }) => {
         this.nfName = data.name;
+        this.nfLink = data.landingPage;
       })
       .catch((error) => {
         console.error(error);
