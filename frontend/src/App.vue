@@ -22,12 +22,20 @@ html
 body
   margin: 0
 
-#app > main
-  max-width: 100em
-  margin: 3em auto calc(#{$footer-height} + 4em)
-  padding-left: 5em
-  padding-right: 5em
-  font-family: $content-font
+#app
+  display: flex
+  flex-direction: column
+  min-height: 100vh
+
+#content
+  flex: 1
+
+  > main
+    max-width: 100em
+    margin: 3em auto
+    padding-left: 5em
+    padding-right: 5em
+    font-family: $content-font
 
 #consent
   position: fixed
@@ -60,9 +68,11 @@ h1, h2, h3, h4, h5, h6
 <template>
   <div id="app">
     <app-header />
-    <keep-alive include="app-search">
-      <router-view />
-    </keep-alive>
+    <div id="content">
+      <keep-alive include="app-search">
+        <router-view />
+      </keep-alive>
+    </div>
     <app-footer />
     <div id="consent" v-if="askConsent">
       We monitor site traffic. Read our <router-link to="/privacy">privacy policy</router-link>.

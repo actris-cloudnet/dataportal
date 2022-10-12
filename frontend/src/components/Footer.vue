@@ -6,7 +6,6 @@ footer.global
   background: #fdfdfd
   box-shadow: 0 1px 3px rgba(0,0,0,0.3)
   z-index: 5
-  position: absolute
   bottom: 0
   height: $footer-height
   display: grid
