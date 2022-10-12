@@ -29,6 +29,7 @@ body
 
 #content
   flex: 1
+  display: flex
 
   > main
     max-width: 100em

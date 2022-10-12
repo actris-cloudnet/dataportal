@@ -48,6 +48,7 @@ $shadow: 0 0.1em 0.6em 0 rgba(0,0,0,0.15)
 $shadowdark: 0 0.1em 0.6em 0 rgba(0,0,0,0.25)
 $shadowlight: 0 0.1em 0.6em 0 rgba(0,0,0,0.10)
 
+
 main#landing
   font-family: 'Montserrat', sans-serif
   font-size: 0.9em //clamp(0.7em, calc(1vw) ,1.1em)
@@ -57,7 +58,7 @@ main#landing
   margin: 0
   padding: 0
   min-inline-size: 100%
-  min-block-size: max-content
+
 
 
   .landing-header-container, .tab-container, .landing-summary-container, .landing-version-banner, .landing-visualisations-container, .landing-beta-banner
@@ -71,15 +72,10 @@ main#landing
 
   .landing-beta-banner-container
     position: absolute
-    top: 12px
+    top: 0px
     left: 200px
     inline-size: max-content
-    //display: flex
-    //flex-direction: column
     align-self: center
-    //min-inline-size: 100%
-    //max-inline-size: 100%
-    //background-color: rgba(0,0,0,1)
     .landing-beta-banner
       color: white
       inline-size: max-content
@@ -230,19 +226,19 @@ main#landing
 
   .landing-content-background
     display: flex
+    flex-grow: 1
     flex-direction: column
     align-self: center
     min-inline-size: 100%
     max-inline-size: 100%
     background-color: $gray
-    min-block-size: 70vh
+
 
 
   .landing-summary-container
     display: flex
     justify-content: center
     flex-wrap: wrap
-    min-block-size: 30ex
     padding: 2*$basespacing 0 2*$basespacing
     column-gap: 2*$basespacing
     row-gap: 1.5*$basespacing
@@ -395,8 +391,6 @@ main#landing
     .visualisations-box
       display: grid
       grid-template-columns: 1fr 1fr
-      //column-gap: 0.2*$basespacing
-      //row-gap: 0.2*$basespacing
       background-color: white
       border-radius: $baseradius
       box-shadow: $shadowlight
@@ -438,8 +432,6 @@ main#landing
         flex-direction: row
         flex-wrap: wrap
         align-items: center
-        //grid-template-columns: 250px repeat(3, 8em)
-        //justify-items: center
         border-bottom: thin solid rgba(0,0,0,0.2)
         padding: 0 0 $basespacing
         column-gap: 2*$basespacing
@@ -455,7 +447,6 @@ main#landing
           grid-template-columns: repeat(3, 8em)
           border: thin solid rgba(0,0,0,0.3)
           border-radius: $baseradius
-          //box-shadow: $shadowlight
           .header
             grid-row: 1
             font-size: 100%
