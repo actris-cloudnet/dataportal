@@ -15,6 +15,18 @@ import env from "../lib/env";
 import { CollectionRoutes } from "./collection";
 import { UploadRoutes } from "./upload";
 
+enum ProductType {
+  Observation = "observation",
+  Model = "model",
+  FundamentalParameter = "fundamentalParameter",
+}
+
+const allProductTypes = Object.values(ProductType) as ProductType[];
+
+function productTypeFromString(value: string): ProductType | undefined {
+  return (Object.values(ProductType) as string[]).includes(value) ? (value as ProductType) : undefined;
+}
+
 export class DownloadRoutes {
   constructor(
     conn: Connection,
@@ -153,6 +165,30 @@ export class DownloadRoutes {
         return next({ status: 400, errors: "invalid dimensions" });
     }
 
+    let productTypes: Set<ProductType>;
+    if (typeof req.query.productTypes === "undefined") {
+      productTypes = new Set(allProductTypes);
+    } else {
+      if (typeof req.query.productTypes !== "string") {
+        return next({ status: 400, errors: "invalid products parameter" });
+      }
+      productTypes = new Set();
+      for (const productString of req.query.productTypes.split(",")) {
+        const product = productTypeFromString(productString);
+        if (!product) {
+          return next({ status: 400, errors: `invalid product: ${productString}` });
+        }
+        productTypes.add(product);
+      }
+    }
+    if (productTypes.size === 0) {
+      return next({ status: 400, errors: "invalid products parameter" });
+    }
+    if (productTypes.size === 1 && productTypes.has(ProductType.FundamentalParameter)) {
+      res.send([]);
+      return;
+    }
+
     const productFileJoin = 'JOIN product_variable USING ("productId")';
     const productFileWhere = 'WHERE product_variable."actrisVocabUri" IS NOT NULL';
     let fileJoin = "";
@@ -170,37 +206,44 @@ export class DownloadRoutes {
       fileWhere = 'AND "countryCode" = $1';
       params.push(req.query.country);
     }
+    const fileSelects = [];
+    const collectionFileSelects = [];
 
-    const fileSelects = [
-      `SELECT uuid, count(*) AS "variableDays"
-       FROM (SELECT uuid
-             FROM regular_file
-             ${productFileJoin} ${fileJoin}
-             ${productFileWhere} ${fileWhere}
-             UNION ALL
-             SELECT uuid
-             FROM model_file
-             ${productFileJoin} ${fileJoin}
-             ${productFileWhere} ${fileWhere}) AS file
-       GROUP BY uuid`,
-      `SELECT "collectionUuid" AS uuid, COUNT(*) AS "variableDays"
-       FROM (SELECT "collectionUuid", "regularFileUuid" AS "fileUuid"
-             FROM collection_regular_files_regular_file
-             JOIN regular_file ON "regularFileUuid" = regular_file.uuid
-             ${productFileJoin} ${fileJoin}
-             ${productFileWhere} ${fileWhere}
-             UNION ALL
-             SELECT "collectionUuid", "modelFileUuid" AS "fileUuid"
-             FROM collection_model_files_model_file
-             JOIN model_file ON "modelFileUuid" = model_file.uuid
-             ${productFileJoin} ${fileJoin}
-             ${productFileWhere} ${fileWhere}) AS collection_file
-       GROUP BY "collectionUuid"`,
-    ];
+    if (productTypes.has(ProductType.Observation)) {
+      fileSelects.push(`SELECT uuid
+        FROM regular_file
+        ${productFileJoin} ${fileJoin}
+        ${productFileWhere} ${fileWhere}`);
+      collectionFileSelects.push(`SELECT "collectionUuid", "regularFileUuid" AS "fileUuid"
+        FROM collection_regular_files_regular_file
+        JOIN regular_file ON "regularFileUuid" = regular_file.uuid
+        ${productFileJoin} ${fileJoin}
+        ${productFileWhere} ${fileWhere}`);
+    }
+
+    if (productTypes.has(ProductType.Model)) {
+      fileSelects.push(`SELECT uuid
+        FROM model_file
+        ${productFileJoin} ${fileJoin}
+        ${productFileWhere} ${fileWhere}`);
+      collectionFileSelects.push(`SELECT "collectionUuid", "modelFileUuid" AS "fileUuid"
+        FROM collection_model_files_model_file
+        JOIN model_file ON "modelFileUuid" = model_file.uuid
+        ${productFileJoin} ${fileJoin}
+        ${productFileWhere} ${fileWhere}`);
+    }
+
+    const fileSelect = `SELECT uuid, count(*) AS "variableDays"
+       FROM (${fileSelects.join(" UNION ALL ")}) AS file
+       GROUP BY uuid
+       UNION ALL
+       SELECT "collectionUuid" AS uuid, COUNT(*) AS "variableDays"
+       FROM (${collectionFileSelects.join(" UNION ALL ")}) AS collection_file
+       GROUP BY "collectionUuid"`;
 
     const query = `${select}
       FROM download
-      JOIN (${fileSelects.join(" UNION ")}) object ON "objectUuid" = object.uuid
+      JOIN (${fileSelect}) object ON "objectUuid" = object.uuid
       WHERE ip NOT IN ('', '::ffff:127.0.0.1') AND ip NOT LIKE '192.168.%'
       ${group}
       ${order}`;

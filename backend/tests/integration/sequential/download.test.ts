@@ -20,6 +20,7 @@ interface Params {
   dimensions: string;
   country?: string;
   site?: string;
+  productTypes?: string;
 }
 
 function doRequest(params: Params, headers: any = { authorization: `Basic ${str2base64("bob:bobs_pass")}` }) {
@@ -69,7 +70,7 @@ describe("GET /api/download/stats", () => {
           )
       )
     );
-    // Download half year of collection data with two variables ≈ 1 variable year.
+    // Download half year of collection with one observation and model files with three variables ≈ 1.5 variable year.
     await downloadRepo.save(
       Array.from(
         { length: 184 },
@@ -107,12 +108,12 @@ describe("GET /api/download/stats", () => {
       { yearMonth: "2022-04", downloads: expect.toBeAround((2 * 2 * 30) / 365.25, 10) },
       { yearMonth: "2022-05", downloads: expect.toBeAround((2 * 2 * 31) / 365.25, 10) },
       { yearMonth: "2022-06", downloads: expect.toBeAround((2 * 2 * 30) / 365.25, 10) },
-      { yearMonth: "2022-07", downloads: expect.toBeAround((2 * 31) / 365.25, 10) },
-      { yearMonth: "2022-08", downloads: expect.toBeAround((2 * 31) / 365.25, 10) },
-      { yearMonth: "2022-09", downloads: expect.toBeAround((2 * 30) / 365.25, 10) },
-      { yearMonth: "2022-10", downloads: expect.toBeAround((2 * 31) / 365.25, 10) },
-      { yearMonth: "2022-11", downloads: expect.toBeAround((2 * 30) / 365.25, 10) },
-      { yearMonth: "2022-12", downloads: expect.toBeAround((2 * 31) / 365.25, 10) },
+      { yearMonth: "2022-07", downloads: expect.toBeAround(((2 + 1) * 31) / 365.25, 10) },
+      { yearMonth: "2022-08", downloads: expect.toBeAround(((2 + 1) * 31) / 365.25, 10) },
+      { yearMonth: "2022-09", downloads: expect.toBeAround(((2 + 1) * 30) / 365.25, 10) },
+      { yearMonth: "2022-10", downloads: expect.toBeAround(((2 + 1) * 31) / 365.25, 10) },
+      { yearMonth: "2022-11", downloads: expect.toBeAround(((2 + 1) * 30) / 365.25, 10) },
+      { yearMonth: "2022-12", downloads: expect.toBeAround(((2 + 1) * 31) / 365.25, 10) },
     ]));
 
   it("calculates unique IPs by date", () =>
@@ -135,7 +136,7 @@ describe("GET /api/download/stats", () => {
     expect(getStats({ dimensions: "country,downloads" })).resolves.toMatchObject([
       { country: "FI", downloads: expect.toBeAround((2 * 181) / 365.25, 10) },
       { country: "NO", downloads: expect.toBeAround((2 * 181) / 365.25, 10) },
-      { country: "SE", downloads: expect.toBeAround((2 * 184) / 365.25, 10) },
+      { country: "SE", downloads: expect.toBeAround(((1 + 2) * 184) / 365.25, 10) },
     ]));
 
   it("fails to filter by both site and country", () =>
@@ -167,5 +168,44 @@ describe("GET /api/download/stats", () => {
       { yearMonth: "2022-04", downloads: expect.toBeAround((2 * 30) / 365.25, 10) },
       { yearMonth: "2022-05", downloads: expect.toBeAround((2 * 31) / 365.25, 10) },
       { yearMonth: "2022-06", downloads: expect.toBeAround((2 * 30) / 365.25, 10) },
+      { yearMonth: "2022-07", downloads: expect.toBeAround((1 * 31) / 365.25, 10) },
+      { yearMonth: "2022-08", downloads: expect.toBeAround((1 * 31) / 365.25, 10) },
+      { yearMonth: "2022-09", downloads: expect.toBeAround((1 * 30) / 365.25, 10) },
+      { yearMonth: "2022-10", downloads: expect.toBeAround((1 * 31) / 365.25, 10) },
+      { yearMonth: "2022-11", downloads: expect.toBeAround((1 * 30) / 365.25, 10) },
+      { yearMonth: "2022-12", downloads: expect.toBeAround((1 * 31) / 365.25, 10) },
+    ]));
+
+  it("fails to filter by invalid products", () =>
+    expect(
+      getStats({ dimensions: "yearMonth,downloads", country: "FI", site: "mace-head", productTypes: "invalid" })
+    ).rejects.toMatchObject({
+      response: { status: 400 },
+    }));
+
+  it("calculates file downloads of observation products", () =>
+    expect(getStats({ dimensions: "yearMonth,downloads", productTypes: "observation" })).resolves.toMatchObject([
+      { yearMonth: "2022-01", downloads: expect.toBeAround((2 * 2 * 31) / 365.25, 10) },
+      { yearMonth: "2022-02", downloads: expect.toBeAround((2 * 2 * 28) / 365.25, 10) },
+      { yearMonth: "2022-03", downloads: expect.toBeAround((2 * 2 * 31) / 365.25, 10) },
+      { yearMonth: "2022-04", downloads: expect.toBeAround((2 * 2 * 30) / 365.25, 10) },
+      { yearMonth: "2022-05", downloads: expect.toBeAround((2 * 2 * 31) / 365.25, 10) },
+      { yearMonth: "2022-06", downloads: expect.toBeAround((2 * 2 * 30) / 365.25, 10) },
+      { yearMonth: "2022-07", downloads: expect.toBeAround((2 * 31) / 365.25, 10) },
+      { yearMonth: "2022-08", downloads: expect.toBeAround((2 * 31) / 365.25, 10) },
+      { yearMonth: "2022-09", downloads: expect.toBeAround((2 * 30) / 365.25, 10) },
+      { yearMonth: "2022-10", downloads: expect.toBeAround((2 * 31) / 365.25, 10) },
+      { yearMonth: "2022-11", downloads: expect.toBeAround((2 * 30) / 365.25, 10) },
+      { yearMonth: "2022-12", downloads: expect.toBeAround((2 * 31) / 365.25, 10) },
+    ]));
+
+  it("calculates file downloads of model products", () =>
+    expect(getStats({ dimensions: "yearMonth,downloads", productTypes: "model" })).resolves.toMatchObject([
+      { yearMonth: "2022-07", downloads: expect.toBeAround((1 * 31) / 365.25, 10) },
+      { yearMonth: "2022-08", downloads: expect.toBeAround((1 * 31) / 365.25, 10) },
+      { yearMonth: "2022-09", downloads: expect.toBeAround((1 * 30) / 365.25, 10) },
+      { yearMonth: "2022-10", downloads: expect.toBeAround((1 * 31) / 365.25, 10) },
+      { yearMonth: "2022-11", downloads: expect.toBeAround((1 * 30) / 365.25, 10) },
+      { yearMonth: "2022-12", downloads: expect.toBeAround((1 * 31) / 365.25, 10) },
     ]));
 });

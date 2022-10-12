@@ -80,6 +80,17 @@ legend
           </select>
         </label>
       </div>
+      <fieldset>
+        <legend class="label">Product type:</legend>
+        <label>
+          <input type="checkbox" value="observation" v-model="productTypes" />
+          Observation
+        </label>
+        <label style="margin-left: 0.5rem">
+          <input type="checkbox" value="model" v-model="productTypes" />
+          Model
+        </label>
+      </fieldset>
       <button @click="onSearch" :disabled="loading">
         {{ loading ? "Loading..." : "Search" }}
       </button>
@@ -162,6 +173,7 @@ export default class StatsView extends Vue {
   loadingSites = true;
   countries: Option[] = [];
   sites: Option[] = [];
+  productTypes = ["observation", "model"];
 
   currentCountry: string | null = null;
   currentSite: string | null = null;
@@ -217,6 +229,7 @@ export default class StatsView extends Vue {
       dimensions: this.selectedDimensions,
       country: this.currentCountry || undefined,
       site: this.currentSite || undefined,
+      productTypes: this.productTypes.join(","),
     };
     try {
       const response = await axios.get(`${this.apiUrl}download/stats`, { params, withCredentials: true });
