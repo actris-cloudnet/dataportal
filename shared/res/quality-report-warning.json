@@ -1,0 +1,36 @@
+{
+  "timestamp": "2022-10-13T07:00:26.906815Z",
+  "qcVersion": "1.1.2",
+  "tests": [
+    {
+      "testId": "TestUnits",
+      "description": "Test that unit attribute of variable matches expected value",
+      "exceptions": []
+    },
+    {
+      "testId": "TestInstrumentPid",
+      "description": "Test that valid instrument PID exists",
+      "exceptions": [
+        {
+          "message": "Instrument PID is missing.",
+          "result": "warning"
+        }
+      ]
+    },
+    {
+      "testId": "TestTimeVector",
+      "description": "Test that time vector is continuous",
+      "exceptions": []
+    },
+    {
+      "testId": "TestVariableNames",
+      "description": "Find missing variables",
+      "exceptions": []
+    },
+    {
+      "testId": "TestCFConvention",
+      "description": "Test that file passes CF convention",
+      "exceptions": []
+    }
+  ]
+}
