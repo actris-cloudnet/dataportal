@@ -4,6 +4,7 @@ import axios from "axios";
 import { backendPrivateUrl, backendPublicUrl } from "../../lib";
 import { promises as fsp } from "fs";
 import { FileQuality } from "../../../src/entity/FileQuality";
+import { readResources } from "../../../../shared/lib";
 
 let conn: Connection;
 let qualityReportRepo: Repository<QualityReport>;
@@ -12,65 +13,11 @@ const privateUrl = `${backendPrivateUrl}quality/`;
 const publicUrl = `${backendPublicUrl}quality/`;
 const fileUrl = `${backendPublicUrl}files/`;
 const searchUrl = `${backendPublicUrl}search/`;
-
-const report = {
-  qcVersion: "1.20",
-  timestamp: "2022-08-26T10:37:31.374494Z",
-  tests: [
-    {
-      testId: "TestUnits",
-      description: "A longer description of the test",
-      exceptions: [],
-    },
-    {
-      testId: "TestDataTypes",
-      description: "A longer description of the test",
-      exceptions: [
-        {
-          result: "warning",
-          variable: "count",
-          expected: "int32",
-          received: "float32",
-        },
-      ],
-    },
-    {
-      testId: "TestDimensions",
-      description: "A longer description of the test",
-      exceptions: [
-        {
-          result: "error",
-        },
-      ],
-    },
-    {
-      testId: "TestStandardNames",
-      description: "A longer description of the test",
-      exceptions: [
-        {
-          result: "warning",
-          variable: "foo2",
-          expected: "beta",
-          received: "ateb",
-        },
-        {
-          result: "error",
-          variable: "foo3",
-          expected: "beta",
-          received: "ateb",
-        },
-        {
-          result: "warning",
-          variable: "foo4",
-          expected: "dfff",
-          received: "fadeff",
-        },
-      ],
-    },
-  ],
-};
+let resources: any;
+let report: any;
 
 beforeAll(async () => {
+  resources = await readResources();
   conn = await createConnection();
   qualityReportRepo = await conn.getRepository("quality_report");
   fileQualityRepo = await conn.getRepository("file_quality");
@@ -105,7 +52,7 @@ describe("PUT /quality/:uuid", () => {
     const res1 = await axios.get(searchUrl, { params: { dateFrom: "2020-12-05" } });
     expect(res1.data[1].errorLevel).toEqual(null);
     const uuid = "b5d1d5af-3667-41bc-b952-e684f627d91c";
-    await putReport(uuid);
+    await putReportWithErrors(uuid);
     const res = await axios.get(searchUrl, { params: { dateFrom: "2020-12-05" } });
     expect(res.data[1].errorLevel).toEqual("error");
     // test that search_file table is updated
@@ -115,13 +62,23 @@ describe("PUT /quality/:uuid", () => {
 
   it("creates report for regular file (old report exist)", async () => {
     const uuid = "acf78456-11b1-41a6-b2de-aa7590a75675";
-    await putReport(uuid);
+    await putReportWithErrors(uuid);
     // test that individual test reports are sorted (error, warning, pass):
     const response = await axios.get(`${publicUrl}${uuid}`);
     await expect(response.data.testReports[0].result === "error");
     await expect(response.data.testReports[1].result === "error");
     await expect(response.data.testReports[2].result === "warning");
     await expect(response.data.testReports[3].result === "pass");
+  });
+
+  it("works with warnings only report", async () => {
+    const uuid = "acf78456-11b1-41a6-b2de-aa7590a75675";
+    await putReportWithWarnings(uuid);
+  });
+
+  it("works with passing report", async () => {
+    const uuid = "acf78456-11b1-41a6-b2de-aa7590a75675";
+    await putReportWithPasses(uuid);
   });
 
   it("doesn't update file's updatedAt when creating or updating report", async () => {
@@ -139,7 +96,8 @@ describe("PUT /quality/:uuid", () => {
   });
 });
 
-async function putReport(uuid: string) {
+async function putReportWithErrors(uuid: string) {
+  report = resources["quality-report-error"];
   await expect(axios.put(`${privateUrl}${uuid}`, report)).resolves.toMatchObject({
     status: 201,
   });
@@ -148,11 +106,51 @@ async function putReport(uuid: string) {
     data: {
       uuid: uuid,
       errorLevel: "error",
-      qcVersion: "1.20",
-      timestamp: "2022-08-26T10:37:31.374Z",
-      tests: 4,
-      errors: 2,
+      qcVersion: "1.1.2",
+      timestamp: "2022-10-13T07:00:26.906Z",
+      tests: 6,
+      errors: 1,
       warnings: 1,
+    },
+  });
+  return;
+}
+
+async function putReportWithWarnings(uuid: string) {
+  report = resources["quality-report-warning"];
+  await expect(axios.put(`${privateUrl}${uuid}`, report)).resolves.toMatchObject({
+    status: 201,
+  });
+  await expect(axios.get(`${publicUrl}${uuid}`)).resolves.toMatchObject({
+    status: 200,
+    data: {
+      uuid: uuid,
+      errorLevel: "warning",
+      qcVersion: "1.1.2",
+      timestamp: "2022-10-13T07:00:26.906Z",
+      tests: 5,
+      errors: 0,
+      warnings: 1,
+    },
+  });
+  return;
+}
+
+async function putReportWithPasses(uuid: string) {
+  report = resources["quality-report-pass"];
+  await expect(axios.put(`${privateUrl}${uuid}`, report)).resolves.toMatchObject({
+    status: 201,
+  });
+  await expect(axios.get(`${publicUrl}${uuid}`)).resolves.toMatchObject({
+    status: 200,
+    data: {
+      uuid: uuid,
+      errorLevel: "pass",
+      qcVersion: "1.1.2",
+      timestamp: "2022-10-13T07:00:26.906Z",
+      tests: 5,
+      errors: 0,
+      warnings: 0,
     },
   });
   return;

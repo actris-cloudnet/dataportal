@@ -6,9 +6,12 @@ import axios from "axios";
 import { Visualization } from "../../../src/entity/Visualization";
 import { SearchFile } from "../../../src/entity/SearchFile";
 import { ModelVisualization } from "../../../src/entity/ModelVisualization";
+import { FileQuality } from "../../../src/entity/FileQuality";
+import { QualityReport } from "../../../src/entity/QualityReport";
 import { initUsersAndPermissions } from "../../lib/userAccountAndPermissions";
 const uuidGen = require("uuid");
 const crypto = require("crypto");
+import { readResources } from "../../../../shared/lib";
 
 let conn: Connection;
 let fileRepo: Repository<RegularFile>;
@@ -16,6 +19,8 @@ let modelFileRepo: Repository<ModelFile>;
 let searchFileRepo: Repository<SearchFile>;
 let vizRepo: Repository<Visualization>;
 let modelVizRepo: Repository<ModelVisualization>;
+let fileQualityRepo: Repository<FileQuality>;
+let QualityReportRepo: Repository<QualityReport>;
 
 const volatileFile = JSON.parse(readFileSync("tests/data/file.json", "utf8"));
 const stableFile = { ...volatileFile, ...{ volatile: false, pid: "1234" } };
@@ -28,6 +33,8 @@ beforeAll(async () => {
   searchFileRepo = conn.getRepository("search_file");
   vizRepo = conn.getRepository("visualization");
   modelVizRepo = conn.getRepository("model_visualization");
+  fileQualityRepo = conn.getRepository("file_quality");
+  QualityReportRepo = conn.getRepository("quality_report");
   await initUsersAndPermissions();
   const prefix = `${storageServiceUrl}cloudnet-product`;
   await axios.put(`${prefix}-volatile/${volatileFile.s3key}`, "content");
@@ -36,19 +43,11 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  await vizRepo.delete({});
-  await modelVizRepo.delete({});
-  await searchFileRepo.delete({});
-  await modelFileRepo.delete({});
-  await fileRepo.delete({});
+  await cleanRepos();
 });
 
 afterAll(async () => {
-  await vizRepo.delete({});
-  await modelVizRepo.delete({});
-  await modelFileRepo.delete({});
-  await fileRepo.delete({});
-  await searchFileRepo.delete({});
+  await cleanRepos();
   await conn.close();
 });
 
@@ -529,6 +528,24 @@ describe("DELETE /api/files/", () => {
     await expect(deleteFile(file.uuid, true, false)).rejects.toMatchObject({ response: { status: 422 } });
   });
 
+  test("deletes quality reports too", async () => {
+    const resources = await readResources();
+    const report = resources["quality-report-pass"];
+    const file = await putDummyFile("model");
+    const url = `${backendPrivateUrl}quality/`;
+    await expect(axios.put(`${url}${file.uuid}`, report)).resolves.toMatchObject({
+      status: 201,
+    });
+    await expect(fileQualityRepo.findOne(file.uuid)).resolves.toBeTruthy();
+    let reports = await QualityReportRepo.find({ where: { quality: file.uuid } });
+    expect(reports.length).toEqual(5);
+    await expect(deleteFile(file.uuid, false, false)).resolves.toMatchObject({ status: 200 });
+    await expect(fileRepo.findOne(file.uuid)).resolves.toBeFalsy();
+    await expect(fileQualityRepo.findOne(file.uuid)).resolves.toBeFalsy();
+    reports = await QualityReportRepo.find({ where: { quality: file.uuid } });
+    await expect(reports).toMatchObject([]);
+  });
+
   async function putDummyFile(fileType: string = "radar", volatile: boolean = true) {
     const file = {
       ...volatileFile,
@@ -574,4 +591,15 @@ async function deleteFile(uuid: string, deleteHigherProducts: any = null, dryRun
 
 function generateHash() {
   return crypto.randomBytes(20).toString("hex");
+}
+
+async function cleanRepos() {
+  await vizRepo.delete({});
+  await modelVizRepo.delete({});
+  await modelFileRepo.delete({});
+  await fileRepo.delete({});
+  await searchFileRepo.delete({});
+  await fileQualityRepo.delete({});
+  await QualityReportRepo.delete({});
+  return;
 }
