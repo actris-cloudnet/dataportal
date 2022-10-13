@@ -2,6 +2,7 @@ import { Request, RequestHandler, Response } from "express";
 import { Collection } from "../entity/Collection";
 import { Connection, EntityManager, Repository, SelectQueryBuilder, In } from "typeorm";
 import { isFile, RegularFile } from "../entity/File";
+import { FileQuality } from "../entity/FileQuality";
 import {
   checkFileExists,
   convertToReducedResponse,
@@ -33,6 +34,7 @@ export class FileRoutes {
     this.visualizationRepo = conn.getRepository<Visualization>("visualization");
     this.modelVisualizationRepo = conn.getRepository<ModelVisualization>("model_visualization");
     this.productRepo = conn.getRepository<Product>("product");
+    this.fileQualityRepo = conn.getRepository<FileQuality>("file_quality");
   }
 
   readonly conn: Connection;
@@ -43,6 +45,7 @@ export class FileRoutes {
   readonly visualizationRepo: Repository<Visualization>;
   readonly modelVisualizationRepo: Repository<ModelVisualization>;
   readonly productRepo: Repository<Product>;
+  readonly fileQualityRepo: Repository<FileQuality>;
 
   file: RequestHandler = async (req: Request, res: Response, next) => {
     const getFileByUuid = (repo: Repository<RegularFile | ModelFile>, isModel: boolean | undefined) => {
@@ -392,6 +395,7 @@ export class FileRoutes {
       await visualizationRepo.createQueryBuilder().delete().where({ sourceFile: uuid }).execute();
       await fileRepo.createQueryBuilder().delete().where({ uuid: uuid }).execute();
       await this.searchFileRepo.createQueryBuilder().delete().where({ uuid: uuid }).execute();
+      await this.fileQualityRepo.createQueryBuilder().delete().where({ uuid: uuid }).execute();
     }
     return filenames;
   }
