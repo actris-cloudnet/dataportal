@@ -289,7 +289,7 @@ main#filelanding
             </dd>
             <dt v-if="response.model">Model</dt>
             <dd v-if="response.model">
-              {{ response.model.id }}
+              {{ response.model.humanReadableName }}
             </dd>
             <dt>Data from</dt>
             <dd>{{ response.measurementDate }}</dd>
