@@ -79,11 +79,6 @@ export default class DataOrigin extends Vue {
   @Prop() sourceFiles!: RegularFile[];
   getProductIcon = getProductIcon;
 
-  get testtest() {
-    console.log(this.sourceFiles);
-    return "from test";
-  }
-
   get currentVersionIndex() {
     if (this.response == null) return null;
     const response = this.response;

@@ -1,8 +1,6 @@
 <style scoped lang="sass">
 @import "../../sass/landing-beta.sass"
 .metadata-container
-  margin-top: auto
-  font-size: 90%
 </style>
 
 <template>
@@ -12,15 +10,14 @@
         <ProductInformation :response="response" :instrument="instrument" :instrumentStatus="instrumentStatus" />
         <FileInformation :response="response" />
         <DataOrigin :response="response" :isBusy="isBusy" :versions="versions" :sourceFiles="sourceFiles" />
-        <div class="metadata-container">Metadata: <a :href="jsonUrl">JSON</a></div>
       </div>
     </div>
     <div class="side-content">
       <div class="summary-box">
         <Preview :visualization="visualization" :loading="loadingVisualizations" />
       </div>
-      <div class="summary-box">
-        <Citation />
+      <div class="summary-box" id="citation" :class="{ volatile: isVolatile }">
+        <Citation :uuid="uuid" :file="response" />
       </div>
     </div>
   </div>
@@ -39,6 +36,7 @@ import Citation from "./Citation.vue";
 @Component({ components: { FileInformation, ProductInformation, DataOrigin, Preview, Citation } })
 export default class LandingSummary extends Vue {
   @Prop() response!: ModelFile | RegularFile | null;
+  @Prop() uuid!: string;
   @Prop() instrument!: string | null;
   @Prop() instrumentStatus!: "loading" | "error" | "ready";
   @Prop() isBusy!: boolean;
@@ -47,17 +45,16 @@ export default class LandingSummary extends Vue {
   @Prop() visualizations!: VisualizationItem[];
   @Prop() loadingVisualizations!: boolean;
 
+  get isVolatile() {
+    return this.response ? this.response.volatile : false;
+  }
+
   get visualization() {
     if (this.visualizations && this.visualizations.length > 0) {
       return this.visualizations[0];
     } else {
       return null;
     }
-  }
-
-  get jsonUrl(): string {
-    if (!this.response) return "";
-    return `${process.env.VUE_APP_BACKENDURL}files/${this.response.uuid}`;
   }
 }
 </script>

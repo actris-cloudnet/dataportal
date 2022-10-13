@@ -22,6 +22,7 @@ import { PublicationRoutes } from "./routes/publication";
 import { Authenticator, Authorizator } from "./lib/auth";
 import { PermissionType } from "./entity/Permission";
 import { UserActivationRoutes } from "./routes/userActivation";
+import { ReferenceRoutes } from "./routes/reference";
 
 async function createServer() {
   const port = 3000;
@@ -50,6 +51,8 @@ async function createServer() {
 
   const siteContactRoutes = new SiteContactRoutes(conn);
   const userAccountRoutes = new UserAccountRoutes(conn);
+
+  const referenceRoutes = new ReferenceRoutes(conn);
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     if (err.status < 500)
@@ -152,6 +155,8 @@ async function createServer() {
   app.get("/api/download/collection/:uuid", middleware.validateUuidParam, dlRoutes.collection);
   app.get("/api/download/image/*", dlRoutes.image);
   app.get("/api/quality/:uuid", middleware.validateUuidParam, qualityRoutes.qualityReport);
+  // citation
+  app.get("/api/reference/:uuid", middleware.validateUuidParam, referenceRoutes.getReference);
 
   app.get("/upload/metadata/:checksum", middleware.validateMD5Param, uploadRoutes.metadata, errorAsPlaintext);
 
