@@ -31,7 +31,7 @@
       <tr v-if="model">
         <th>Model</th>
         <td>
-          {{ model.id }}
+          {{ model.humanReadableName }}
         </td>
       </tr>
       <tr>

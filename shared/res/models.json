@@ -2,6 +2,7 @@
   {
     "id": "ecmwf",
     "optimumOrder": 0,
+    "humanReadableName": "ECMWF forecast",
     "citations": [
       {
         "id": "ecmwf",
@@ -11,18 +12,22 @@
   },
   {
     "id": "icon-iglo-12-23",
+    "humanReadableName": "ICON-IGLO (12h-23h forecast)",
     "optimumOrder": 1
   },
   {
     "id": "icon-iglo-24-35",
+    "humanReadableName": "ICON-IGLO (24h-35h forecast)",
     "optimumOrder": 2
   },
   {
     "id": "icon-iglo-36-47",
+    "humanReadableName": "ICON-IGLO (36h-47h forecast)",
     "optimumOrder": 2
   },
   {
     "id": "gdas1",
+    "humanReadableName": "Global Data Assimilation System (GDAS1)",
     "optimumOrder": 3
   }
 ]

@@ -9,6 +9,9 @@ export class Model {
   id!: string;
 
   @Column()
+  humanReadableName!: string;
+
+  @Column()
   optimumOrder!: number;
 
   @OneToMany((_) => ModelUpload, (uploads) => uploads.site)
