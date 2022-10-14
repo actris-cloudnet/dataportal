@@ -6,14 +6,12 @@
   <div v-if="active" class="landing-visualisations-container">
     <div class="visualisations-box">
       <div v-for="visualization in visualizations" :key="visualization.productVariable.id">
-        <div class="visualisation-container">
-          <div class="visualisation-caption">
-            {{ visualization.productVariable.humanReadableName }}
-          </div>
-          <div>
-            <VisualisationPlot :data="visualization" :maxMarginLeft="maxMarginLeft" :maxMarginRight="maxMarginRight" />
-          </div>
-        </div>
+        <Visualization
+          :data="visualization"
+          :maxMarginLeft="maxMarginLeft"
+          :maxMarginRight="maxMarginRight"
+          :caption="true"
+        />
       </div>
     </div>
   </div>
@@ -23,9 +21,8 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 import { ModelFile, RegularFile } from "../../../../backend/src/entity/File";
 import { VisualizationItem } from "../../../../backend/src/entity/VisualizationResponse";
 import Visualization from "../Visualization.vue";
-import VisualisationPlot from "./VisualisationPlot.vue";
 
-@Component({ components: { VisualisationPlot, Visualization } })
+@Component({ components: { Visualization } })
 export default class LandingVisualisations extends Vue {
   @Prop() active!: boolean;
   @Prop() response!: ModelFile | RegularFile | null;
