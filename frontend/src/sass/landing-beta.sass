@@ -308,13 +308,6 @@ main#landing
     .summary-section#preview
       .summary-section-header
         margin-bottom: 0
-      .preview-caption
-        display: flex
-        justify-content: center
-        font-size: 100%
-        font-weight: 500
-      .preview-img
-        width: 100%
 
     .summary-box
       padding: 2*$basespacing
@@ -389,25 +382,13 @@ main#landing
     margin: 2*$basespacing 0
     .visualisations-box
       display: grid
+      gap: $basespacing
       grid-template-columns: 1fr 1fr
       background-color: white
       border-radius: $baseradius
       box-shadow: $shadowlight
       block-size: min-content
-      padding: 0 $basespacing 0
-
-    .visualisation-container
-      padding: 2*$basespacing 0 0
-      .visualisation-caption
-        display: flex
-        justify-content: center
-        font-size: 100%
-        font-weight: 400
-
-      .visualisation-img
-        width: 100%
-        height: 100%
-        display: block
+      padding: 2*$basespacing 1.5*$basespacing
 
   .landing-quality-report-container
     margin: 2*$basespacing 0
