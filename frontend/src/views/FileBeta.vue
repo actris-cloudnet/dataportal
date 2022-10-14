@@ -34,6 +34,8 @@
       :visualisationsActive="this.visualisationsActive"
       :qualityReportActive="this.qualityReportActive"
       @tabclicked="tabClicked"
+      :response="response"
+      :visualizations="visualizations"
     />
     <div class="landing-content-background">
       <LandingSummary
