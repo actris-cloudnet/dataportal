@@ -3,8 +3,8 @@
 </style>
 
 <template>
-  <div v-if="active" class="landing-visualisations-container">
-    <div class="visualisations-box">
+  <div class="landing-visualisations-container">
+    <div v-if="visualizations.length > 0" class="visualisations-box">
       <div v-for="visualization in visualizations" :key="visualization.productVariable.id">
         <Visualization
           :data="visualization"
@@ -14,6 +14,7 @@
         />
       </div>
     </div>
+    <div v-else class="visualisations-box">No visualisations.</div>
   </div>
 </template>
 <script lang="ts">
@@ -24,7 +25,6 @@ import Visualization from "../Visualization.vue";
 
 @Component({ components: { Visualization } })
 export default class LandingVisualisations extends Vue {
-  @Prop() active!: boolean;
   @Prop() response!: ModelFile | RegularFile | null;
   @Prop() visualizations!: VisualizationItem[];
 

@@ -201,12 +201,9 @@ main#landing
       margin: 0 clamp(0.1em,1vw ,0.5em)
       text-align: center
       color: rgba(0,0,0,0.6)
-      cursor: pointer
-    .tab.active
+      text-decoration: none
+    .tab.router-link-exact-active
       color: black
-    .tab:hover:not(.active)
-      color: black
-      //border-bottom: solid gray
     .tab::after
       position: absolute
       content: ""
@@ -217,11 +214,13 @@ main#landing
       background-color: rgba(0,0,0,0.7)
       transform: scaleX(0) scaleY(0.7) translateY(0.3*$basespacing)
       //transition: transform 100ms ease-in-out
-    .tab.active::after
+    .tab.router-link-exact-active::after
       transform: scaleX(0.95) scaleY(0.7) translateY(0.3*$basespacing)
       background-color: rgba(0,0,0,0.7)
-    .tab:hover::after
+    .tab.router-link-exact-active:hover::after
       transform: scaleX(0.95) scaleY(0.7) translateY(0.3*$basespacing)
+    .tab:hover:not(.router-link-active)
+      color: black
 
 
   .landing-content-background
@@ -480,6 +479,9 @@ main#landing
               color: $RED-4-hex
             .quality-test-exception-warning
               color: $YELLOW-3-hex
+    .quality-report-box-loading
+      padding: 2*$basespacing
+      color: $GRAY-4-hex
 
 
 

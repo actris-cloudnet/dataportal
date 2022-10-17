@@ -83,7 +83,7 @@ import { getProductIcon, getQcIcon } from "../../lib";
 export default class ProductInformation extends Vue {
   @Prop() response!: ModelFile | RegularFile | null;
   @Prop() instrument!: string | null;
-  @Prop() instrumentStatus: "loading" | "error" | "ready";
+  @Prop() instrumentStatus!: "loading" | "error" | "ready";
   getQcIcon = getQcIcon;
   get timelinessString() {
     if (this.response == null) {

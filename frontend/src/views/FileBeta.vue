@@ -29,26 +29,23 @@
         {{ humanReadableDate(response.measurementDate) }}
       </div>
     </div>
-    <Tabs
-      :summaryActive="this.summaryActive"
-      :visualisationsActive="this.visualisationsActive"
-      :qualityReportActive="this.qualityReportActive"
-      @tabclicked="tabClicked"
-    />
+    <div class="tab-container">
+      <router-link class="tab" :to="{ name: 'FileBeta' }">Summary</router-link>
+      <router-link class="tab" :to="{ name: 'FileBetaVisualizations' }"> Visualisations </router-link>
+      <router-link class="tab" :to="{ name: 'FileBetaQualityReport' }"> Quality report </router-link>
+    </div>
     <div class="landing-content-background">
-      <LandingSummary
-        :active="summaryActive"
+      <router-view
+        :uuid="uuid"
         :response="response"
         :instrument="instrument"
         :instrumentStatus="instrumentStatus"
         :isBusy="isBusy"
         :versions="versions"
         :sourceFiles="sourceFiles"
-        :visualization="visualization"
-        :loadingVisualization="loadingVisualizations"
+        :visualizations="visualizations"
+        :loadingVisualizations="loadingVisualizations"
       />
-      <LandingVisualisations :active="visualisationsActive" :response="response" :visualizations="visualizations" />
-      <LandingQualityReport :active="qualityReportActive" :response="response" :uuid="uuid" />
     </div>
   </main>
 </template>
@@ -80,11 +77,7 @@ import ProductInformation from "../components/landing/ProductInformation.vue";
 import DataOrigin from "../components/landing/DataOrigin.vue";
 import Preview from "../components/landing/Preview.vue";
 import Citation from "../components/landing/Citation.vue";
-import Tabs from "../components/landing/Tabs.vue";
 import DownloadButton from "../components/landing/DownloadButton.vue";
-import LandingSummary from "../components/landing/LandingSummary.vue";
-import LandingVisualisations from "../components/landing/LandingVisualisations.vue";
-import LandingQualityReport from "../components/landing/LandingQualityReport.vue";
 
 Vue.component("how-to-cite", HowToCite);
 Vue.component("license", License);
@@ -92,16 +85,12 @@ Vue.component("visualization", Visualization);
 
 @Component({
   components: {
-    Tabs,
     FileInformation,
     ProductInformation,
     DataOrigin,
     Preview,
     Citation,
     DownloadButton,
-    LandingSummary,
-    LandingVisualisations,
-    LandingQualityReport,
   },
 })
 export default class FileViewBeta1 extends Vue {
@@ -134,30 +123,6 @@ export default class FileViewBeta1 extends Vue {
   visualisationsActive = false;
   qualityReportActive = false;
 
-  tabClicked(tabName: string) {
-    console.log("tabClicked");
-    switch (tabName) {
-      case "summary":
-        this.summaryActive = true;
-        this.visualisationsActive = false;
-        this.qualityReportActive = false;
-        console.log("summary");
-        break;
-      case "visualisations":
-        this.summaryActive = false;
-        this.visualisationsActive = true;
-        this.qualityReportActive = false;
-        console.log("visualisations");
-        break;
-      case "qualityReport":
-        this.summaryActive = false;
-        this.visualisationsActive = false;
-        this.qualityReportActive = true;
-        console.log("qualityReport");
-        break;
-    }
-  }
-
   get maxMarginRight() {
     return Math.max(...this.visualizations.map((viz) => viz.dimensions && viz.dimensions.marginRight).filter(notEmpty));
   }
@@ -168,14 +133,6 @@ export default class FileViewBeta1 extends Vue {
   getVisualizations() {
     if (!this.allVisualizations) return this.visualizations.slice(0, 1);
     return this.visualizations;
-  }
-
-  get visualization() {
-    if (this.visualizations && this.visualizations.length > 0) {
-      return this.visualizations[0];
-    } else {
-      return null;
-    }
   }
 
   get currentVersionIndex() {
