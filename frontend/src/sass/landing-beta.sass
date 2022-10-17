@@ -443,7 +443,8 @@ main#landing
             grid-column: 2
           #errors, #nerrors
             grid-column: 3
-
+      .quality-test-description
+        color: $GRAY-4-hex
       .quality-test-list-header
         padding: $basespacing 0 $basespacing
         font-size: 140%
@@ -453,7 +454,7 @@ main#landing
         flex-direction: column
         .quality-test
           display: grid
-          grid-template-columns: fit-content(40px) max-content
+          grid-template-columns: fit-content(40px) 1fr
           margin-bottom: $basespacing
 
           .quality-test-icon
@@ -470,13 +471,15 @@ main#landing
             margin-bottom: 0.5*$basespacing
           .quality-test-exception-list
             grid-column: 2
+            padding: 0
             .quality-test-exception
               padding: 0.2*$basespacing
               font-size: 105%
               font-weight: 400
-              color: rgba($RED-4-rgb,0.85)
-            .quality-test-exception:nth-child(even)
-              background-color: rgba(0,0,0,0.03)
+            .quality-test-exception-error
+              color: $RED-4-hex
+            .quality-test-exception-warning
+              color: $YELLOW-3-hex
 
 
 
