@@ -34,12 +34,16 @@
           </div>
           <div class="quality-test-id">{{ test.testId }}</div>
           <div v-if="qualityResponse" class="quality-test-description" v-html="formatMessage(test.description)"></div>
-          <div class="quality-test-exception-list">
-            <div class="quality-test-exception" v-for="(exception, i) in test.exceptions" :key="exception.result + i">
+          <ul class="quality-test-exception-list">
+            <li
+              v-for="(exception, i) in test.exceptions"
+              :key="exception.result + i"
+              :class="['quality-test-exception', 'quality-test-exception-' + exception.result]"
+            >
               <div v-if="Object.keys(exception).length <= 1 || !('message' in exception)">test failed</div>
               <div v-else v-html="formatMessage(exception.message)"></div>
-            </div>
-          </div>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
