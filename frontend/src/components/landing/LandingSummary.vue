@@ -1,5 +1,8 @@
 <style scoped lang="sass">
 @import "../../sass/landing-beta.sass"
+.metadata-container
+  margin-top: auto
+  font-size: 90%
 </style>
 
 <template>
@@ -9,6 +12,7 @@
         <FileInformation :response="response" />
         <ProductInformation :response="response" :instrument="instrument" :instrumentStatus="instrumentStatus" />
         <DataOrigin :response="response" :isBusy="isBusy" :versions="versions" :sourceFiles="sourceFiles" />
+        <div class="metadata-container">Metadata: <a :href="jsonUrl">JSON</a></div>
       </div>
     </div>
     <div class="side-content">
@@ -49,6 +53,11 @@ export default class LandingSummary extends Vue {
     } else {
       return null;
     }
+  }
+
+  get jsonUrl(): string {
+    if (!this.response) return "";
+    return `${process.env.VUE_APP_BACKENDURL}files/${this.response.uuid}`;
   }
 }
 </script>
