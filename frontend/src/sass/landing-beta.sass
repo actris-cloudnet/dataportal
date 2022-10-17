@@ -282,7 +282,6 @@ main#landing
     .summary-section#file-information
       .landing-hash
         overflow-wrap: break-word
-        cursor: pointer
         max-inline-size: 30ch
         .landing-hash-small
           inline-size: max-content
@@ -292,6 +291,21 @@ main#landing
           inline-size: 30ch //min-content
           overflow-wrap: break-word
       .landing-hash:hover
+
+    .copy-button
+      border: none
+      background: none
+      padding: 0
+      opacity: .75
+      &:hover
+        opacity: 1
+      &:focus
+        outline: none
+
+    .copy-message
+      color: $greendark
+      font-size: 80%
+      margin-left: .5*$basespacing
 
     .summary-section#data-origin
       .data-source-list
