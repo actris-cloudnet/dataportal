@@ -7,7 +7,7 @@
     <div class="main-content">
       <div class="summary-box">
         <FileInformation :response="response" />
-        <ProductInformation :response="response" :instrument="instrument" :model="model" />
+        <ProductInformation :response="response" :instrument="instrument" />
         <DataOrigin :response="response" :isBusy="isBusy" :versions="versions" :sourceFiles="sourceFiles" />
       </div>
     </div>
@@ -25,7 +25,6 @@
 import { Component, Prop, Vue } from "vue-property-decorator";
 import { ModelFile, RegularFile } from "../../../../backend/src/entity/File";
 import { VisualizationItem } from "../../../../backend/src/entity/VisualizationResponse";
-import { Model } from "../../../../backend/src/entity/Model";
 
 import FileInformation from "./FileInformation.vue";
 import ProductInformation from "./ProductInformation.vue";
@@ -38,7 +37,6 @@ export default class LandingSummary extends Vue {
   @Prop() active!: boolean;
   @Prop() response!: ModelFile | RegularFile | null;
   @Prop() instrument!: string | null;
-  @Prop() model!: Model | null;
   @Prop() isBusy!: boolean;
   @Prop() versions!: string[];
   @Prop() sourceFiles!: RegularFile[];
