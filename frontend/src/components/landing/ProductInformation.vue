@@ -28,11 +28,9 @@
           <a :href="response.instrumentPid">{{ instrument }}</a>
         </td>
       </tr>
-      <tr v-if="model">
+      <tr v-if="response.model">
         <th>Model</th>
-        <td>
-          {{ model.humanReadableName }}
-        </td>
+        <td>{{ response.model.humanReadableName }}</td>
       </tr>
       <tr>
         <th>Timeliness</th>
@@ -67,7 +65,6 @@
 
 <script lang="ts">
 import { ModelFile, RegularFile } from "../../../../backend/src/entity/File";
-import { Model } from "../../../../backend/src/entity/Model";
 import { Component, Prop } from "vue-property-decorator";
 import Vue from "vue";
 import { getProductIcon, getQcIcon } from "../../lib";
@@ -76,7 +73,6 @@ import { getProductIcon, getQcIcon } from "../../lib";
 export default class ProductInformation extends Vue {
   @Prop() response!: ModelFile | RegularFile | null;
   @Prop() instrument!: string | null;
-  @Prop() model!: Model | null;
   getQcIcon = getQcIcon;
   get timelinessString() {
     if (this.response == null) {
