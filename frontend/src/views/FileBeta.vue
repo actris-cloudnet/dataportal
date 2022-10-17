@@ -45,6 +45,7 @@
         :versions="versions"
         :sourceFiles="sourceFiles"
         :visualization="visualization"
+        :loadingVisualization="loadingVisualizations"
       />
       <LandingVisualisations :active="visualisationsActive" :response="response" :visualizations="visualizations" />
       <LandingQualityReport :active="qualityReportActive" :response="response" :uuid="uuid" />
@@ -127,6 +128,7 @@ export default class FileViewBeta1 extends Vue {
   instrument = "";
   instrumentStatus: "loading" | "error" | "ready" = "loading";
   truncateHash = true;
+  loadingVisualizations = true;
 
   summaryActive = true;
   visualisationsActive = false;
@@ -224,13 +226,14 @@ export default class FileViewBeta1 extends Vue {
     document.removeEventListener("click", this.hideBoxes);
   }
 
-  fetchVisualizations(payload: {}) {
-    return axios
-      .get(`${this.apiUrl}visualizations/${this.uuid}`, payload)
-      .then((response) => {
-        this.visualizations = sortVisualizations(response.data.visualizations);
-      })
-      .catch();
+  async fetchVisualizations(payload: {}) {
+    try {
+      const response = await axios.get(`${this.apiUrl}visualizations/${this.uuid}`, payload);
+      this.visualizations = sortVisualizations(response.data.visualizations);
+    } catch (error) {
+      console.error(error);
+    }
+    this.loadingVisualizations = false;
   }
 
   fetchFileMetadata(payload: {}) {
