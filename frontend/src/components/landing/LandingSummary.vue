@@ -3,7 +3,7 @@
 </style>
 
 <template>
-  <div v-if="active" class="landing-summary-container">
+  <div class="landing-summary-container">
     <div class="main-content">
       <div class="summary-box">
         <FileInformation :response="response" />
@@ -13,7 +13,7 @@
     </div>
     <div class="side-content">
       <div class="summary-box">
-        <Preview :visualization="visualization" :loading="loadingVisualization" />
+        <Preview :visualization="visualization" :loading="loadingVisualizations" />
       </div>
       <div class="summary-box">
         <Citation />
@@ -34,14 +34,21 @@ import Citation from "./Citation.vue";
 
 @Component({ components: { FileInformation, ProductInformation, DataOrigin, Preview, Citation } })
 export default class LandingSummary extends Vue {
-  @Prop() active!: boolean;
   @Prop() response!: ModelFile | RegularFile | null;
   @Prop() instrument!: string | null;
-  @Prop() instrumentStatus: "loading" | "error" | "ready";
+  @Prop() instrumentStatus!: "loading" | "error" | "ready";
   @Prop() isBusy!: boolean;
   @Prop() versions!: string[];
   @Prop() sourceFiles!: RegularFile[];
-  @Prop() visualization!: VisualizationItem | null;
-  @Prop() loadingVisualization!: boolean;
+  @Prop() visualizations!: VisualizationItem[];
+  @Prop() loadingVisualizations!: boolean;
+
+  get visualization() {
+    if (this.visualizations && this.visualizations.length > 0) {
+      return this.visualizations[0];
+    } else {
+      return null;
+    }
+  }
 }
 </script>

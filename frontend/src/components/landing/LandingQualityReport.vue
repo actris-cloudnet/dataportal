@@ -3,7 +3,7 @@
 </style>
 
 <template>
-  <div v-if="active" class="landing-quality-report-container">
+  <div class="landing-quality-report-container">
     <div v-if="qualityResponse" class="quality-report-box">
       <div class="quality-software">
         Tested with
@@ -47,6 +47,7 @@
         </div>
       </div>
     </div>
+    <div v-else class="quality-report-box quality-report-box-loading">Loading...</div>
   </div>
 </template>
 <script lang="ts">
@@ -61,7 +62,6 @@ import escapeHtml from "escape-html";
 
 @Component({ components: { Donut } })
 export default class LandingQualityReport extends Vue {
-  @Prop() active!: boolean;
   @Prop() uuid!: string;
   apiUrl = process.env.VUE_APP_BACKENDURL;
   fileResponse: FileResponse | null = null;
