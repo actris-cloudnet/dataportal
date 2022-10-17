@@ -13,7 +13,7 @@
     <div class="summary-section-header">Product</div>
     <table class="summary-section-table">
       <tr>
-        <th>Product</th>
+        <th>Type</th>
         <td>
           <div class="product-container">
             <img :alt="response.product.id" :src="productIconUrl" class="product-icon" />
@@ -58,16 +58,16 @@
         </td>
       </tr>
       <tr>
+        <th>Measurement date</th>
+        <td>{{ response.measurementDate }}</td>
+      </tr>
+      <tr>
         <th>Site</th>
         <td>
           <router-link :to="`/site/${response.site.id}`">
             {{ response.site.humanReadableName }}
           </router-link>
         </td>
-      </tr>
-      <tr>
-        <th>Measured</th>
-        <td>{{ response.measurementDate }}</td>
       </tr>
     </table>
   </div>
