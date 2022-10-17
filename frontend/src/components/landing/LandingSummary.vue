@@ -7,7 +7,7 @@
     <div class="main-content">
       <div class="summary-box">
         <FileInformation :response="response" />
-        <ProductInformation :response="response" :instrument="instrument" />
+        <ProductInformation :response="response" :instrument="instrument" :instrumentStatus="instrumentStatus" />
         <DataOrigin :response="response" :isBusy="isBusy" :versions="versions" :sourceFiles="sourceFiles" />
       </div>
     </div>
@@ -37,6 +37,7 @@ export default class LandingSummary extends Vue {
   @Prop() active!: boolean;
   @Prop() response!: ModelFile | RegularFile | null;
   @Prop() instrument!: string | null;
+  @Prop() instrumentStatus: "loading" | "error" | "ready";
   @Prop() isBusy!: boolean;
   @Prop() versions!: string[];
   @Prop() sourceFiles!: RegularFile[];
