@@ -5,14 +5,6 @@
 <template>
   <div class="landing-quality-report-container">
     <div v-if="qualityResponse" class="quality-report-box">
-      <div class="quality-software">
-        Tested with
-        <a :href="`https://github.com/actris-cloudnet/cloudnetpy-qc/tree/v${qualityResponse.qcVersion}`"
-          >Cloudnetpy-qc v{{ qualityResponse.qcVersion }}
-        </a>
-        at
-        {{ humanReadableTimestamp(qualityResponse.timestamp) }}
-      </div>
       <div class="quality-report-header">
         <div class="donut">
           <Donut :data="donutData" />
@@ -25,6 +17,14 @@
           <div class="header" id="errors">Errors</div>
           <div class="data" id="nerrors">{{ qualityResponse.errors }}</div>
         </div>
+      </div>
+      <div class="quality-software">
+        Tested with
+        <a :href="`https://github.com/actris-cloudnet/cloudnetpy-qc/tree/v${qualityResponse.qcVersion}`">
+          CloudnetPy-QC v{{ qualityResponse.qcVersion }}
+        </a>
+        at
+        {{ humanReadableTimestamp(qualityResponse.timestamp) }}
       </div>
       <div class="quality-test-list-header">Tests</div>
       <div class="quality-test-list">
