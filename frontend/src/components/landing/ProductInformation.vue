@@ -1,5 +1,11 @@
 <style scoped lang="sass">
 @import "../../sass/landing-beta.sass"
+
+.error
+  color: $RED-4-hex
+
+.loading
+  color: $GRAY-4-hex
 </style>
 
 <template>
@@ -25,7 +31,11 @@
       <tr v-if="response.instrumentPid">
         <th>Instrument</th>
         <td>
-          <a :href="response.instrumentPid">{{ instrument }}</a>
+          <span v-if="instrumentStatus === 'loading'" class="loading">Loading...</span>
+          <a v-else-if="instrumentStatus === 'error'" :href="response.instrumentPid" class="error">
+            Failed to load information
+          </a>
+          <a v-else :href="response.instrumentPid">{{ instrument }}</a>
         </td>
       </tr>
       <tr v-if="response.model">
@@ -73,6 +83,7 @@ import { getProductIcon, getQcIcon } from "../../lib";
 export default class ProductInformation extends Vue {
   @Prop() response!: ModelFile | RegularFile | null;
   @Prop() instrument!: string | null;
+  @Prop() instrumentStatus: "loading" | "error" | "ready";
   getQcIcon = getQcIcon;
   get timelinessString() {
     if (this.response == null) {

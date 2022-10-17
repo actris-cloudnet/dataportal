@@ -40,6 +40,7 @@
         :active="summaryActive"
         :response="response"
         :instrument="instrument"
+        :instrumentStatus="instrumentStatus"
         :isBusy="isBusy"
         :versions="versions"
         :sourceFiles="sourceFiles"
