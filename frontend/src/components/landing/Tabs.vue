@@ -1,21 +1,12 @@
 <style scoped lang="sass">
 @import "../../sass/landing-beta.sass"
 
+.tab
+  position: relative
+
 img
   width: 1rem
   height: 1rem !important
-
-.label
-  display: inline-block
-  width: 1rem
-  height: 1rem
-  background: gray
-  color: white
-  border-radius: 4px
-  font-size: .6rem
-  font-weight: 500
-  line-height: 1rem
-  vertical-align: middle
 </style>
 
 <template>
@@ -25,7 +16,12 @@ img
       Summary
     </div>
     <div class="tab" :class="{ active: visualisationsActive }" @click="$emit('tabclicked', 'visualisations')">
-      <span class="label">{{ visualizations.length }}</span>
+      <img
+        class="quality-icon"
+        :src="require('../../assets/icons/icons8-eye-50.png')"
+        alt=""
+        style="transform: scale(1.3)"
+      />
       Visualisations
     </div>
     <div class="tab" :class="{ active: qualityReportActive }" @click="$emit('tabclicked', 'qualityReport')">
