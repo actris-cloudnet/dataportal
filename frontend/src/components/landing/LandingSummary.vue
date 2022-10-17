@@ -9,8 +9,8 @@
   <div class="landing-summary-container">
     <div class="main-content">
       <div class="summary-box">
-        <FileInformation :response="response" />
         <ProductInformation :response="response" :instrument="instrument" :instrumentStatus="instrumentStatus" />
+        <FileInformation :response="response" />
         <DataOrigin :response="response" :isBusy="isBusy" :versions="versions" :sourceFiles="sourceFiles" />
         <div class="metadata-container">Metadata: <a :href="jsonUrl">JSON</a></div>
       </div>

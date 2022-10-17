@@ -44,7 +44,7 @@
         </td>
       </tr>
       <tr>
-        <th>Updated</th>
+        <th>Last modified</th>
         <td>{{ humanReadableTimestamp(response.updatedAt) }}</td>
       </tr>
       <tr>
