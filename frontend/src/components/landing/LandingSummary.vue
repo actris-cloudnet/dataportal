@@ -13,7 +13,7 @@
     </div>
     <div class="side-content">
       <div class="summary-box">
-        <Preview :visualization="visualization" />
+        <Preview :visualization="visualization" :loading="loadingVisualization" />
       </div>
       <div class="summary-box">
         <Citation />
@@ -43,5 +43,6 @@ export default class LandingSummary extends Vue {
   @Prop() versions!: string[];
   @Prop() sourceFiles!: RegularFile[];
   @Prop() visualization!: VisualizationItem | null;
+  @Prop() loadingVisualization!: boolean;
 }
 </script>

@@ -1,12 +1,17 @@
 <style scoped lang="sass">
 @import "../../sass/landing-beta.sass"
+
+.placeholder
+  color: $GRAY-3-hex
+  margin-top: .5*$basespacing
 </style>
 
 <template>
   <div class="summary-section" id="preview">
     <div class="summary-section-header">Preview</div>
-    <Visualization v-if="visualization" :data="visualization" :caption="true" />
-    <span v-else class="preview-loading">Loading...</span>
+    <div v-if="loading" class="placeholder">Loading...</div>
+    <Visualization v-else-if="visualization" :data="visualization" :caption="true" />
+    <div v-else class="placeholder">Not available.</div>
   </div>
 </template>
 
@@ -19,5 +24,6 @@ import Vue from "vue";
 @Component({ components: { Visualization } })
 export default class Preview extends Vue {
   @Prop() visualization!: VisualizationItem | null;
+  @Prop() loading!: boolean;
 }
 </script>
