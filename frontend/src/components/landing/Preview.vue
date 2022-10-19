@@ -10,7 +10,12 @@
   <div class="summary-section" id="preview">
     <div class="summary-section-header">Preview</div>
     <div v-if="loading" class="placeholder">Loading...</div>
-    <Visualization v-else-if="visualization" :data="visualization" :caption="true" />
+    <Visualization
+      v-else-if="visualization"
+      :data="visualization"
+      :caption="true"
+      :linkTo="{ name: 'FileBetaVisualizations' }"
+    />
     <div v-else class="placeholder">Not available.</div>
   </div>
 </template>

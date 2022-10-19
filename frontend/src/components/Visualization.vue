@@ -13,8 +13,29 @@
     <div class="caption">
       {{ data.productVariable.humanReadableName }}
     </div>
+    <a v-if="expandable" :href="imageUrl" target="_blank">
+      <img
+        :src="imageUrl"
+        :width="data.dimensions && data.dimensions.width"
+        :height="data.dimensions && data.dimensions.height"
+        alt=""
+        class="visualization"
+        :style="imageStyle"
+      />
+    </a>
+    <router-link :to="linkTo" v-else-if="linkTo">
+      <img
+        :src="imageUrl"
+        :width="data.dimensions && data.dimensions.width"
+        :height="data.dimensions && data.dimensions.height"
+        alt=""
+        class="visualization"
+        :style="imageStyle"
+      />
+    </router-link>
     <img
-      :src="quicklookUrl + data.s3key"
+      v-else
+      :src="imageUrl"
       :width="data.dimensions && data.dimensions.width"
       :height="data.dimensions && data.dimensions.height"
       alt=""
@@ -25,7 +46,7 @@
   <!-- TODO: remove legacy layout in the future. -->
   <img
     v-else
-    :src="quicklookUrl + data.s3key"
+    :src="imageUrl"
     :width="data.dimensions && data.dimensions.width"
     :height="data.dimensions && data.dimensions.height"
     alt=""
@@ -37,6 +58,8 @@
 <script lang="ts">
 import { Component, Prop } from "vue-property-decorator";
 import Vue from "vue";
+import { RawLocation } from "vue-router";
+
 import { VisualizationItem } from "../../../backend/src/entity/VisualizationResponse";
 
 @Component
@@ -45,6 +68,8 @@ export default class Visualization extends Vue {
   @Prop() maxMarginLeft?: number;
   @Prop() maxMarginRight?: number;
   @Prop({ default: false }) caption!: boolean;
+  @Prop() linkTo?: RawLocation;
+  @Prop() expandable?: boolean;
 
   get imageStyle() {
     if (
@@ -63,6 +88,8 @@ export default class Visualization extends Vue {
     };
   }
 
-  quicklookUrl = `${process.env.VUE_APP_BACKENDURL}download/image/`;
+  get imageUrl(): string {
+    return `${process.env.VUE_APP_BACKENDURL}download/image/${this.data.s3key}`;
+  }
 }
 </script>

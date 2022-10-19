@@ -54,7 +54,7 @@ import Vue from "vue";
 export default class Copyable extends Vue {
   @Prop({ default: "Copy to clipboard" }) title!: string;
   @Prop() value!: string;
-  @Prop() status: "success" | "failure" = "success";
+  status: "success" | "failure" = "success";
   message = "";
   messageDuration = 2000;
 
