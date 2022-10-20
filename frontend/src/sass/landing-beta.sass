@@ -13,6 +13,7 @@ $RED-4-rgb: rgb(255,67,71)
 $BLUE-1-hex: #385465
 $BLUE-2-hex: #4FADE9
 $BLUE-3-hex: #7DBCE5
+$BLUE-3-rgb: rgb(125, 188, 229)
 $BLUE-4-hex: #0B588A
 $BLUE-5-hex: #699EC0
 
@@ -22,12 +23,26 @@ $GRAY-3-hex: #A6A6A6;
 $GRAY-4-hex: #737373;
 $GRAY-5-hex: #404040;
 
-/* Color Theme Swatches in Hex */
 $YELLOW-1-hex: #F2CB07;
 $YELLOW-2-hex: #F2B705;
 $YELLOW-3-hex: #F29F05;
 $YELLOW-4-hex: #BF6B04;
 $YELLOW-5-hex: #8C4303;
+
+
+$actris-turquoise: #1798A8
+$actris-turquoiselight: #6DCBD6
+$actris-turquoiselighter: #7FCBD5
+$actris-turquoiselighterr: #CFEBEE
+$actris-turquoiselighterrr: #DFF2F2
+$actris-violet: #5D4AC7
+$actris-violetlight: #968CD0
+$actris-violetdark: #453794
+$actris-purple: #BD2EBD
+$actris-yellow: #FFDA01
+$actris-darkblue: #162A82
+$actris-green: #2C8F47
+
 
 
 
@@ -40,6 +55,7 @@ $greendark: #71B369
 
 $gray: #EDF0F2
 $lightgray: #F6F8FA
+
 
 $basespacing: 1rem
 $baseradius: 0.3rem
@@ -63,8 +79,8 @@ main#landing
 
 
   .landing-header-container, .tab-container, .landing-summary-container, .landing-version-banner, .landing-visualisations-container, .landing-beta-banner
-    inline-size: calc(min(95%, 140rem))
-    max-inline-size: 1350px
+    inline-size: calc(min(95%, 1500px))
+    max-inline-size: 1500px
     align-self: center
   .landing-quality-report-container
     inline-size: calc(min(95%, 900px))
@@ -133,12 +149,15 @@ main#landing
         align-items: center
         color: white
         font-size: 75%
-        font-weight: 500
+        font-weight: 400
         inline-size: max-content
         block-size: min-content
         padding: 0.2*$basespacing 0.5*$basespacing
         border-radius: 2*$baseradius
         cursor: default
+      a.tag
+        text-decoration: none
+        cursor: pointer
       .tag:first-child
         margin-left: $basespacing
       .tag:not(:first-child)
@@ -146,6 +165,11 @@ main#landing
       .tag:hover
         box-shadow: $shadow
 
+      .tag.actris
+        background-color: $actris-turquoise
+        letter-spacing: 0.03em
+      .tag.actris:hover
+        background-color: $actris-turquoiselight
       .tag.volatile
         background-color: $BLUE-3-hex
       .tag.volatile:hover
@@ -154,6 +178,29 @@ main#landing
         background-color: $GRAY-4-hex
       .tag.legacy:hover
         background-color: $GRAY-5-hex
+
+      /// Tooltip
+      .tag.tooltip
+        position: relative
+      .tag.tooltip:after
+        position: absolute
+        width: 30em
+        height: 2em
+        top: 100%
+        left: 0%
+        opacity: 0
+        visibility: hidden
+      .tag.tooltip:hover:after
+        opacity: 1
+        visibility: visible
+
+      .tag.tooltip.volatile:after
+        content: "Volatile data may be updated in the future"
+        color: $BLUE-4-hex
+      .tag.tooltip.actris:after
+        content: ""
+        color: $actris-violetdark
+
 
     .landing-download
       display: flex
@@ -338,37 +385,33 @@ main#landing
       flex-direction: column
       row-gap: $basespacing
       flex: 1
+      .summary-box:first-child
+        block-size: min-content
 
     .citation-section
       .citation-section-content
         font-size: 90%
         font-weight: 300
-        padding: 0.3*$basespacing
+        padding: 0.1*$basespacing
         border-radius: 0.5*$baseradius
-      .citation-export
-        font-size: 80%
-        font-weight: 500
-        display: flex
-        flex-grow: 1
-        align-self: flex-end
-        justify-content: flex-end
-        margin-bottom: 0.4*$basespacing
-        a:not(:first-child)
-          margin-left: $basespacing
-        a:last-child
-          margin-right: $basespacing
+      .citation-section-note
+        font-size: 90%
+        font-weight: 400
+        color: rgba(0,0,0,0.6)
+      .citation-section-note:not(:last-child)
+        margin-bottom: 0.25*$basespacing
+
+
     .citation-section:not(:first-child)
       margin-top: $basespacing
 
     .citation-section#citation
-      .citation-header-container
-        display: flex
-        .summary-section-header
       .citation-section-content
         position: relative
-        border-radius: 0*$baseradius
+
+      .citation-section-content.long
         cursor: pointer
-      .citation-section-content.small::before
+      .citation-section-content.long.reduced::before
         content: ""
         position: absolute
         width: 100%
@@ -377,20 +420,21 @@ main#landing
         left: 0
         background: linear-gradient(transparent, white)
 
-      .citation-section-content::after
+      .citation-section-content.long::after
         content: ""
         position: absolute
         width: 7px
         height: 7px
         border-top: 1px solid
         border-right: 1px solid
-        transform: rotate(-45deg)
         transition: transform 200ms ease-in-out
-        top: calc(100% + 5px)
         left: 50%
-      .citation-section-content.small::after
+      .citation-section-content.long.reduced::after
         top: 100%
         transform: rotate(135deg)
+      .citation-section-content.long.full::after
+        top: calc(100% + 5px)
+        transform: rotate(-45deg)
 
 
   .landing-visualisations-container

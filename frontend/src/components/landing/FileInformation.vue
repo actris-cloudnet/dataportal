@@ -1,5 +1,10 @@
 <style scoped lang="sass">
 @import "../../sass/landing-beta.sass"
+
+.v-enter-active, .v-leave-active
+  transition: opacity 0.2s ease-in-out
+.v-enter-from, .v-leave-to
+  opacity: 0
 </style>
 
 <template>
@@ -38,7 +43,9 @@
                   />
                 </svg>
               </button>
-              <span class="copy-message" v-if="copyMessage">({{ copyMessage }})</span>
+              <Transition>
+                <span class="copy-message" v-if="copyMessage">{{ copyMessage }}</span>
+              </Transition>
             </span>
           </div>
         </td>
@@ -74,7 +81,7 @@ export default class FileInformation extends Vue {
     if (!this.response) return;
     navigator.clipboard.writeText(this.response.checksum).then(
       () => {
-        this.copyMessage = "copied";
+        this.copyMessage = "Copied!";
         setTimeout(() => {
           this.copyMessage = "";
         }, 2000);

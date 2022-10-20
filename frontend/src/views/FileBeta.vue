@@ -4,9 +4,6 @@
 
 <template>
   <main v-if="response" id="landing">
-    <div class="landing-beta-banner-container">
-      <div class="landing-beta-banner">Beta version. Page is still under development.</div>
-    </div>
     <div v-if="!isBusy && newestVersion" class="landing-version-banner-container">
       <router-link class="landing-version-banner" :to="`/beta/file/${newestVersion}`"
         >New version of the file available</router-link
@@ -14,12 +11,11 @@
     </div>
     <div class="landing-header-container">
       <div class="landing-title">
-        {{ response.product.humanReadableName }}
-        data from
-        {{ response.site.humanReadableName }}
+        {{ title }}
       </div>
       <div class="landing-tags">
-        <div v-if="response.volatile" class="tag volatile">volatile file</div>
+        <a v-if="isActrisObject" class="tag actris" href="https://www.actris.eu/">ACTRIS</a>
+        <div v-if="response.volatile" class="tag tooltip volatile">volatile file</div>
         <div v-if="response.legacy" class="tag legacy">legacy file</div>
       </div>
       <div class="landing-download">
@@ -78,6 +74,7 @@ import DataOrigin from "../components/landing/DataOrigin.vue";
 import Preview from "../components/landing/Preview.vue";
 import Citation from "../components/landing/Citation.vue";
 import DownloadButton from "../components/landing/DownloadButton.vue";
+import { SiteType } from "../../../backend/src/entity/Site";
 
 Vue.component("how-to-cite", HowToCite);
 Vue.component("license", License);
@@ -122,6 +119,25 @@ export default class FileViewBeta1 extends Vue {
   summaryActive = true;
   visualisationsActive = false;
   qualityReportActive = false;
+
+  metaInfo() {
+    return { title: this.title };
+  }
+
+  get title() {
+    if (!this.response) {
+      return "Cloudnet Data Object";
+    } else {
+      return `${this.response.product.humanReadableName} data from ${this.response.site.humanReadableName}`;
+    }
+  }
+
+  get isActrisObject() {
+    if (!this.response) {
+      return false;
+    }
+    return this.response.site.type.includes("cloudnet" as SiteType);
+  }
 
   get maxMarginRight() {
     return Math.max(...this.visualizations.map((viz) => viz.dimensions && viz.dimensions.marginRight).filter(notEmpty));

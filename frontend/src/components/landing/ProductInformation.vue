@@ -1,5 +1,15 @@
 <style scoped lang="sass">
 @import "../../sass/landing-beta.sass"
+.summary-section-header-container
+  display: flex
+  flex-direction: row
+  justify-content: space-between
+.metadata-container
+  align-self: center
+  font-size: 85%
+  font-weight: 500
+
+
 
 .error
   color: $RED-4-hex
@@ -10,7 +20,10 @@
 
 <template>
   <div class="summary-section" id="product-information">
-    <div class="summary-section-header">Product</div>
+    <div class="summary-section-header-container">
+      <div class="summary-section-header">Product</div>
+      <div class="metadata-container"><a :href="jsonUrl">JSON</a></div>
+    </div>
     <table class="summary-section-table">
       <tr>
         <th>Type</th>
@@ -95,6 +108,10 @@ export default class ProductInformation extends Vue {
   }
   get productIconUrl() {
     return this.response !== null ? getProductIcon(this.response.product.id) : null;
+  }
+  get jsonUrl(): string {
+    if (!this.response) return "";
+    return `${process.env.VUE_APP_BACKENDURL}files/${this.response.uuid}`;
   }
 }
 </script>
