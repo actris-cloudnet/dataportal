@@ -12,9 +12,6 @@ export class QualityReport {
   @PrimaryColumn({ type: "text" })
   testId!: string;
 
-  @Column({ type: "text" })
-  description!: string;
-
   @Column({
     type: "enum",
     enum: ErrorLevel,

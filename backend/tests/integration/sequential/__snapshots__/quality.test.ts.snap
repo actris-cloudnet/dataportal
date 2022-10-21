@@ -1,0 +1,158 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PUT /quality/:uuid creates report for regular file (old report exist) 1`] = `
+Object {
+  "errorLevel": "error",
+  "errors": 1,
+  "qcVersion": "1.1.2",
+  "testReports": Array [
+    Object {
+      "description": null,
+      "exceptions": Array [
+        Object {
+          "message": "Instrument PID is missing.",
+          "result": "error",
+        },
+      ],
+      "name": "TestInstrumentPid",
+      "result": "warning",
+      "testId": "TestInstrumentPid",
+    },
+    Object {
+      "description": "Description for TestUnits",
+      "exceptions": Array [],
+      "name": "Name for TestUnits",
+      "result": "pass",
+      "testId": "TestUnits",
+    },
+    Object {
+      "description": null,
+      "exceptions": Array [],
+      "name": "TestCFConvention",
+      "result": "pass",
+      "testId": "TestCFConvention",
+    },
+    Object {
+      "description": null,
+      "exceptions": Array [],
+      "name": "TestTimeVector",
+      "result": "pass",
+      "testId": "TestTimeVector",
+    },
+    Object {
+      "description": null,
+      "exceptions": Array [],
+      "name": "TestVariableNames",
+      "result": "pass",
+      "testId": "TestVariableNames",
+    },
+  ],
+  "tests": 6,
+  "timestamp": "2022-10-13T07:00:26.906Z",
+  "uuid": "acf78456-11b1-41a6-b2de-aa7590a75675",
+  "warnings": 1,
+}
+`;
+
+exports[`PUT /quality/:uuid works with passing report 1`] = `
+Object {
+  "errorLevel": "pass",
+  "errors": 0,
+  "qcVersion": "1.1.2",
+  "testReports": Array [
+    Object {
+      "description": "Description for TestUnits",
+      "exceptions": Array [],
+      "name": "Name for TestUnits",
+      "result": "pass",
+      "testId": "TestUnits",
+    },
+    Object {
+      "description": null,
+      "exceptions": Array [],
+      "name": "TestCFConvention",
+      "result": "pass",
+      "testId": "TestCFConvention",
+    },
+    Object {
+      "description": null,
+      "exceptions": Array [],
+      "name": "TestInstrumentPid",
+      "result": "pass",
+      "testId": "TestInstrumentPid",
+    },
+    Object {
+      "description": null,
+      "exceptions": Array [],
+      "name": "TestTimeVector",
+      "result": "pass",
+      "testId": "TestTimeVector",
+    },
+    Object {
+      "description": null,
+      "exceptions": Array [],
+      "name": "TestVariableNames",
+      "result": "pass",
+      "testId": "TestVariableNames",
+    },
+  ],
+  "tests": 5,
+  "timestamp": "2022-10-13T07:00:26.906Z",
+  "uuid": "acf78456-11b1-41a6-b2de-aa7590a75675",
+  "warnings": 0,
+}
+`;
+
+exports[`PUT /quality/:uuid works with warnings only report 1`] = `
+Object {
+  "errorLevel": "warning",
+  "errors": 0,
+  "qcVersion": "1.1.2",
+  "testReports": Array [
+    Object {
+      "description": null,
+      "exceptions": Array [
+        Object {
+          "message": "Instrument PID is missing.",
+          "result": "warning",
+        },
+      ],
+      "name": "TestInstrumentPid",
+      "result": "warning",
+      "testId": "TestInstrumentPid",
+    },
+    Object {
+      "description": "Description for TestUnits",
+      "exceptions": Array [],
+      "name": "Name for TestUnits",
+      "result": "pass",
+      "testId": "TestUnits",
+    },
+    Object {
+      "description": null,
+      "exceptions": Array [],
+      "name": "TestCFConvention",
+      "result": "pass",
+      "testId": "TestCFConvention",
+    },
+    Object {
+      "description": null,
+      "exceptions": Array [],
+      "name": "TestTimeVector",
+      "result": "pass",
+      "testId": "TestTimeVector",
+    },
+    Object {
+      "description": null,
+      "exceptions": Array [],
+      "name": "TestVariableNames",
+      "result": "pass",
+      "testId": "TestVariableNames",
+    },
+  ],
+  "tests": 5,
+  "timestamp": "2022-10-13T07:00:26.906Z",
+  "uuid": "acf78456-11b1-41a6-b2de-aa7590a75675",
+  "warnings": 1,
+}
+`;

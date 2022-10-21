@@ -5,8 +5,10 @@ import { backendPrivateUrl, backendPublicUrl } from "../../lib";
 import { promises as fsp } from "fs";
 import { FileQuality } from "../../../src/entity/FileQuality";
 import { readResources } from "../../../../shared/lib";
+import { TestInfo } from "../../../src/entity/TestInfo";
 
 let conn: Connection;
+let testInfoRepo: Repository<TestInfo>;
 let qualityReportRepo: Repository<QualityReport>;
 let fileQualityRepo: Repository<FileQuality>;
 const privateUrl = `${backendPrivateUrl}quality/`;
@@ -19,6 +21,7 @@ let report: any;
 beforeAll(async () => {
   resources = await readResources();
   conn = await createConnection();
+  testInfoRepo = await conn.getRepository("test_info");
   qualityReportRepo = await conn.getRepository("quality_report");
   fileQualityRepo = await conn.getRepository("file_quality");
 });
@@ -34,6 +37,7 @@ beforeEach(async () => {
   await conn
     .getRepository("search_file")
     .save(JSON.parse((await fsp.readFile("fixtures/2-search_file.json")).toString()));
+  await testInfoRepo.save(JSON.parse((await fsp.readFile("fixtures/0-test_info.json")).toString()));
 });
 
 afterAll(async () => {
@@ -63,22 +67,25 @@ describe("PUT /quality/:uuid", () => {
   it("creates report for regular file (old report exist)", async () => {
     const uuid = "acf78456-11b1-41a6-b2de-aa7590a75675";
     await putReportWithErrors(uuid);
-    // test that individual test reports are sorted (error, warning, pass):
     const response = await axios.get(`${publicUrl}${uuid}`);
-    await expect(response.data.testReports[0].result === "error");
-    await expect(response.data.testReports[1].result === "error");
-    await expect(response.data.testReports[2].result === "warning");
-    await expect(response.data.testReports[3].result === "pass");
+    expect(response.status).toEqual(200);
+    expect(response.data).toMatchSnapshot();
   });
 
   it("works with warnings only report", async () => {
     const uuid = "acf78456-11b1-41a6-b2de-aa7590a75675";
     await putReportWithWarnings(uuid);
+    const response = await axios.get(`${publicUrl}${uuid}`);
+    expect(response.status).toEqual(200);
+    expect(response.data).toMatchSnapshot();
   });
 
   it("works with passing report", async () => {
     const uuid = "acf78456-11b1-41a6-b2de-aa7590a75675";
     await putReportWithPasses(uuid);
+    const response = await axios.get(`${publicUrl}${uuid}`);
+    expect(response.status).toEqual(200);
+    expect(response.data).toMatchSnapshot();
   });
 
   it("doesn't update file's updatedAt when creating or updating report", async () => {
@@ -101,19 +108,6 @@ async function putReportWithErrors(uuid: string) {
   await expect(axios.put(`${privateUrl}${uuid}`, report)).resolves.toMatchObject({
     status: 201,
   });
-  await expect(axios.get(`${publicUrl}${uuid}`)).resolves.toMatchObject({
-    status: 200,
-    data: {
-      uuid: uuid,
-      errorLevel: "error",
-      qcVersion: "1.1.2",
-      timestamp: "2022-10-13T07:00:26.906Z",
-      tests: 6,
-      errors: 1,
-      warnings: 1,
-    },
-  });
-  return;
 }
 
 async function putReportWithWarnings(uuid: string) {
@@ -121,19 +115,6 @@ async function putReportWithWarnings(uuid: string) {
   await expect(axios.put(`${privateUrl}${uuid}`, report)).resolves.toMatchObject({
     status: 201,
   });
-  await expect(axios.get(`${publicUrl}${uuid}`)).resolves.toMatchObject({
-    status: 200,
-    data: {
-      uuid: uuid,
-      errorLevel: "warning",
-      qcVersion: "1.1.2",
-      timestamp: "2022-10-13T07:00:26.906Z",
-      tests: 5,
-      errors: 0,
-      warnings: 1,
-    },
-  });
-  return;
 }
 
 async function putReportWithPasses(uuid: string) {
@@ -141,19 +122,6 @@ async function putReportWithPasses(uuid: string) {
   await expect(axios.put(`${privateUrl}${uuid}`, report)).resolves.toMatchObject({
     status: 201,
   });
-  await expect(axios.get(`${publicUrl}${uuid}`)).resolves.toMatchObject({
-    status: 200,
-    data: {
-      uuid: uuid,
-      errorLevel: "pass",
-      qcVersion: "1.1.2",
-      timestamp: "2022-10-13T07:00:26.906Z",
-      tests: 5,
-      errors: 0,
-      warnings: 0,
-    },
-  });
-  return;
 }
 
 async function cleanRepos() {
