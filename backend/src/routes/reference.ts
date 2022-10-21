@@ -1,8 +1,8 @@
 import { Connection, Repository } from "typeorm";
-import { Request, RequestHandler, Response, NextFunction } from "express";
+import { Request, RequestHandler, Response } from "express";
 
 import { RegularFile, ModelFile } from "../entity/File";
-import { Collection } from "../entity/Collection";
+// import { Collection } from "../entity/Collection";
 import axios from "axios";
 
 const LABELLING_URL = "https://actris-nf-labelling.out.ocp.fmi.fi/api/facilities";
@@ -25,24 +25,18 @@ interface Citation {
   note: string;
 }
 
-interface Reference {
-  citation: Citation;
-  acknowledgements: string;
-  dataAvailability: string;
-}
-
 export class ReferenceRoutes {
   private fileRepository: Repository<RegularFile>;
   private modelRepository: Repository<ModelFile>;
-  private collectionRepository: Repository<Collection>;
+  // private collectionRepository: Repository<Collection>;
 
   constructor(conn: Connection) {
     this.fileRepository = conn.getRepository<RegularFile>("regular_file");
     this.modelRepository = conn.getRepository<ModelFile>("model_file");
-    this.collectionRepository = conn.getRepository<Collection>("collection");
+    // this.collectionRepository = conn.getRepository<Collection>("collection");
   }
 
-  getReference: RequestHandler = async (req: Request, res: Response, next) => {
+  getReference: RequestHandler = async (req, res, next) => {
     let data: RegularFile | ModelFile | undefined = await this.fileRepository.findOne(
       { uuid: req.params.uuid },
       { relations: ["site", "site.citations", "product"] }
@@ -64,13 +58,10 @@ export class ReferenceRoutes {
     }
     if (req.query.acknowledgements === "true") {
       await getAcknowledgements(req, res, data);
-      return;
     } else if (req.query.dataAvailability === "true") {
       await getDataAvailability(req, res, data);
-      return;
     } else {
       await getCitation(req, res, data, pi);
-      return;
     }
   };
 }
@@ -109,21 +100,18 @@ async function getCitation(req: Request, res: Response, data: RegularFile | Mode
     res.setHeader("Content-Disposition", `inline; filename="${citekey}.bib"`);
     const bibtexstr = citation2bibtex(citation);
     res.send(bibtexstr);
-    return;
   } else if (req.query.format && req.query.format === "ris") {
     res.setHeader("Content-type", "text/plain");
     //res.setHeader("Content-type", "application/x-research-info-systems");
     res.setHeader("Content-Disposition", `inline; filename="${citekey}.ris"`);
     const risstr = citation2ris(citation);
     res.send(risstr);
-    return;
   } else if (req.query.format && req.query.format === "html") {
     res.setHeader("Content-type", "text/plain");
     const htmlstr = citation2html(citation);
     res.send(htmlstr);
   } else {
     res.json(citation);
-    return;
   }
 }
 
@@ -150,14 +138,11 @@ async function getAcknowledgements(req: Request, res: Response, data: RegularFil
   let ackstr = ack.join(" ");
   if (req.query.format && req.query.format === "html") {
     res.send(urls2HtmlLinks(ackstr));
-    return;
   } else if (req.query.format && req.query.format === "plain") {
     res.setHeader("Content-type", "text/plain");
     res.send(ack.join(" "));
-    return;
   } else {
     res.json(ack);
-    return;
   }
 }
 
@@ -257,7 +242,7 @@ function commonDataAvailabilityVolatileHtml(data: RegularFile | ModelFile) {
   const url = getCloudnetUrl(data.uuid);
   const datastr = `\
       The data is available at
-      the Aerosol, Clouds and Trace Gases Research Infrastructure (ACTRIS) Data Centre :
+      the Aerosol, Clouds and Trace Gases Research Infrastructure (ACTRIS) Data Centre:
       <a href="${url}">${url}</a>. The data is volatile and may be updated in the future.`;
   return datastr.replace(/\s\s+/g, " ").trim();
 }

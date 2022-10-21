@@ -9,7 +9,6 @@ let uuids: string[];
 beforeAll(async () => {
   resources = await readResources();
   uuids = resources["allfiles"].map((f: any) => f.uuid);
-  console.log(url);
 });
 
 describe("GET /api/reference", () => {
