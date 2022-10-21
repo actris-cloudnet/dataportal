@@ -1,28 +1,9 @@
 <style scoped lang="sass">
 @import "../../sass/landing-beta.sass"
-ul.ack-list
-  list-style: circle
-  padding: 0 $basespacing
-li.ack-entry:not(:first-child)
-  margin-top: 0.3*$basespacing
 
-li.ack-entry
-  padding-inline-start: 0.5*$basespacing
-li.ack-entry::marker
-li.ack-entry::before
-.ack-list
-  border-radius: $baseradius
-  //border: 1px solid rgba(0,0,0,0.1)
-.ack-entry:not(:first-child)
-  //border-top: 1px solid rgba(0,0,0,0.1)
-.ack-entry
-  font-weight: 400
-  font-size: 100%
-  //padding: 0.4*$basespacing 0.4*$basespacing
-  //transition: background-color 200ms ease-in-out
-.ack-entry:hover
-  //background-color: rgba(0,0,0,0.03)
-.data-availibility-statement-note
+.citation-note
+  padding-left: $basespacing/2
+  padding-right: $basespacing/2
 
 .volatile-disclaimer-banner
   background-color: rgba($BLUE-3-rgb,0.4)
@@ -57,6 +38,17 @@ li.ack-entry::before
   margin-bottom: 0.4*$basespacing
   a:not(:first-child)
     margin-left: $basespacing
+
+.example
+  background: rgba(64, 64, 128, .05)
+  padding: .75*$basespacing $basespacing
+  border-radius: $baseradius
+  font-size: 90%
+
+.example-header
+  font-weight: 400
+  font-size: 110%
+  margin-bottom: .5*$basespacing
 </style>
 
 <template>
@@ -72,10 +64,10 @@ li.ack-entry::before
           <a :href="risUrl">RIS</a>
         </div>
       </div>
-      <div v-if="!longCitation" class="citation-section-content small" v-html="visibleCitationString"></div>
+      <div v-if="!longCitation" class="example citation-section-content small" v-html="visibleCitationString"></div>
       <div
         v-else
-        class="citation-section-content long"
+        class="example citation-section-content long"
         :class="{ full: !longCitationReduced, reduced: longCitationReduced }"
         @dblclick="toggleCitation"
         v-html="visibleCitationString"
@@ -83,30 +75,17 @@ li.ack-entry::before
         <span v-if="longCitationReduced"> &#183; &#183; &#183;</span>
       </div>
     </section>
-    <div></div>
     <section class="citation-section">
-      <div class="summary-section-header-container">
-        <div class="summary-section-header">Acknowledgements</div>
-        <div class="acknowledgements-export">
-          <a :href="plainAckUrl">Example</a>
-        </div>
+      <p class="citation-note">
+        Please include the following information in your publication. You may edit the text to suit publication
+        standards.
+      </p>
+      <div class="example">
+        <div class="example-header">Data availability</div>
+        <p v-html="dataAvailabilityString"></p>
+        <div class="example-header">Acknowledgements</div>
+        <div v-html="acknowledgementsString"></div>
       </div>
-      <div class="citation-section-note">Acknowledge the following stakeholders in your publication:</div>
-      <div v-if="ackList.length > 0" class="citation-section-content">
-        <ul class="ack-list">
-          <li class="ack-entry" v-for="(ack, i) in ackList" :key="'ack' + i">
-            {{ ack }}
-          </li>
-        </ul>
-      </div>
-      <div v-else class="citation-section-content">
-        <span class="notAvailable"></span>
-      </div>
-    </section>
-    <section class="citation-section">
-      <div class="summary-section-header">Data availability</div>
-      <div class="citation-section-note">Example statement:</div>
-      <div class="citation-section-content" v-html="dataAvailabilityString"></div>
     </section>
   </div>
 </template>
@@ -124,7 +103,6 @@ export default class Citation extends Vue {
   @Prop() file!: ModelFile | RegularFile | null;
   citationString = "";
   acknowledgementsString = "";
-  ackList = [];
   dataAvailabilityString = "";
 
   longCitationReduced = true;
@@ -163,12 +141,6 @@ export default class Citation extends Vue {
   get risUrl() {
     return `${this.referenceUrl}?citation=true&format=ris`;
   }
-  get jsonUrl() {
-    return `${this.referenceUrl}?citation=true&format=json`;
-  }
-  get plainAckUrl() {
-    return `${this.referenceUrl}?acknowledgements=true&format=plain`;
-  }
 
   async fetchReferenceStrings() {
     await axios
@@ -181,12 +153,6 @@ export default class Citation extends Vue {
       .get(`${this.referenceUrl}?acknowledgements=true&format=html`)
       .then((response) => {
         this.acknowledgementsString = response.data;
-      })
-      .catch((error) => console.error(error));
-    await axios
-      .get(`${this.referenceUrl}?acknowledgements=true&format=json`)
-      .then((response) => {
-        this.ackList = response.data;
       })
       .catch((error) => console.error(error));
     await axios
