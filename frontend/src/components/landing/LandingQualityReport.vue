@@ -32,8 +32,8 @@
           <div class="quality-test-icon">
             <img :src="getQcIcon(test.result)" alt="" />
           </div>
-          <div class="quality-test-id">{{ test.testId }}</div>
-          <div v-if="qualityResponse" class="quality-test-description" v-html="formatMessage(test.description)"></div>
+          <div class="quality-test-id">{{ test.name }}</div>
+          <div v-if="test.description" class="quality-test-description" v-html="formatMessage(test.description)"></div>
           <ul class="quality-test-exception-list">
             <li
               v-for="(exception, i) in test.exceptions"

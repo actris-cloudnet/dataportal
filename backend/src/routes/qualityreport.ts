@@ -5,6 +5,7 @@ import { FileRoutes } from "./file";
 import { FileQuality } from "../entity/FileQuality";
 import { ModelFile, RegularFile } from "../entity/File";
 import { SearchFile } from "../entity/SearchFile";
+import { TestInfo } from "../entity/TestInfo";
 
 interface Report {
   qcVersion: string;
@@ -14,7 +15,6 @@ interface Report {
 
 interface Test {
   testId: string;
-  description: string;
   exceptions: Exception[];
 }
 
@@ -24,10 +24,17 @@ interface Exception {
 
 interface TestSummary {
   testId: string;
-  description: string;
   maxErrorLevel: ErrorLevel;
   numberOfErrors: number;
   numberOfWarnings: number;
+}
+
+interface QualityReportWithTestInfo extends QualityReport {
+  testInfo?: TestInfo;
+}
+
+interface FileQualityWithTestInfo extends FileQuality {
+  testReports: QualityReportWithTestInfo[];
 }
 
 export class QualityReportRoutes {
@@ -50,21 +57,34 @@ export class QualityReportRoutes {
   readonly searchFileRepo: Repository<SearchFile>;
 
   qualityReport: RequestHandler = async (req: Request, res: Response, next) => {
-    const qualityReport = await this.fileQualityRepo.findOne({ uuid: req.params.uuid }, { relations: ["testReports"] });
-    if (qualityReport === undefined) {
+    const qualityReport = await this.conn
+      .getRepository<FileQualityWithTestInfo>("file_quality")
+      .createQueryBuilder("fileQuality")
+      .leftJoinAndSelect("fileQuality.testReports", "testReport")
+      .leftJoinAndMapOne("testReport.testInfo", TestInfo, "testInfo", "testReport.testId = testInfo.testId")
+      .where("uuid = :uuid", { uuid: req.params.uuid })
+      .addOrderBy(
+        `CASE WHEN testReport.result = '${ErrorLevel.ERROR}'   THEN 1
+              WHEN testReport.result = '${ErrorLevel.WARNING}' THEN 2
+              WHEN testReport.result = '${ErrorLevel.PASS}'    THEN 3
+              ELSE 4
+         END`
+      )
+      .addOrderBy("COALESCE(testInfo.name, testReport.testId)")
+      .getOne();
+    if (!qualityReport) {
       return next({ status: 404, errors: ["No files match this UUID"] });
     }
-    let tests = qualityReport.testReports;
-    const sortByObject = [ErrorLevel.ERROR, ErrorLevel.WARNING, ErrorLevel.PASS].reduce((obj, item, index) => {
-      return {
-        ...obj,
-        [item]: index,
-      };
-    }, {});
-    // @ts-ignore
-    tests = tests.sort((a, b) => sortByObject[a.result] - sortByObject[b.result]);
-    qualityReport.testReports = tests;
-    res.send(qualityReport);
+    res.send({
+      ...qualityReport,
+      testReports: qualityReport.testReports.map((test) => ({
+        testId: test.testId,
+        name: test.testInfo ? test.testInfo.name : test.testId,
+        description: test.testInfo && test.testInfo.description,
+        result: test.result,
+        exceptions: test.exceptions,
+      })),
+    });
   };
 
   putQualityReport: RequestHandler = async (req: Request, res: Response, next) => {
@@ -95,7 +115,6 @@ export class QualityReportRoutes {
         await this.qualityReportRepo.save({
           result: testOutlines.find((ele) => ele.testId === test.testId)!.maxErrorLevel,
           testId: test.testId,
-          description: test.description,
           exceptions: test.exceptions,
           quality: fileQuality,
         });
@@ -126,7 +145,6 @@ export class QualityReportRoutes {
       }
       results.push({
         testId: test.testId,
-        description: test.description,
         maxErrorLevel: this.getMaxErrorLevel(nErrors, nWarnings),
         numberOfErrors: nErrors,
         numberOfWarnings: nWarnings,

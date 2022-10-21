@@ -186,8 +186,8 @@
       <tbody>
         <tr v-for="test in qualityResponse.testReports" :key="test.testId" class="singleTest">
           <th>
-            <div class="title"><img :src="getQcIcon(test.result)" alt="" />{{ test.testId }}</div>
-            <div class="description" v-html="formatMessage(test.description)"></div>
+            <div class="title"><img :src="getQcIcon(test.result)" alt="" />{{ test.name }}</div>
+            <div v-if="test.description" class="description" v-html="formatMessage(test.description)"></div>
           </th>
           <td>
             <ul>
@@ -221,7 +221,8 @@ import escapeHtml from "escape-html";
 
 interface Test {
   testId: string;
-  description: string;
+  name: string;
+  description: string | null;
   result: string;
   exceptions: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
