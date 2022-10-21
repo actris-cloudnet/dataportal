@@ -2,6 +2,8 @@
 .caption
   text-align: center
   font-weight: 400
+  position: relative
+  z-index: 1
 
   svg
     position: relative
@@ -12,6 +14,9 @@
 .visualization
   width: 100%
   height: auto
+
+.caption + .visualization
+  margin-top: -.35rem
 </style>
 
 <template>
