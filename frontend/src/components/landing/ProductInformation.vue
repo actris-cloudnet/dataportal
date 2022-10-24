@@ -5,7 +5,6 @@
   flex-direction: row
   justify-content: space-between
 .metadata-container
-  align-self: center
   font-size: 85%
   font-weight: 500
 
