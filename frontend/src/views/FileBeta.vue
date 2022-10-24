@@ -5,9 +5,14 @@
 <template>
   <main v-if="response" id="landing">
     <div v-if="!isBusy && newestVersion" class="landing-version-banner-container">
-      <router-link class="landing-version-banner" :to="`/beta/file/${newestVersion}`"
-        >New version of the file available</router-link
-      >
+      <div class="landing-version-banner">
+        There is a
+        <router-link class="landing-version-banner-link" :to="`/beta/file/${newestVersion}`">newer version</router-link>
+        of this data available.
+      </div>
+      <!--      <router-link class="landing-version-banner" :to="`/beta/file/${newestVersion}`">-->
+      <!--        A Newer version of this file is available-->
+      <!--      </router-link>-->
     </div>
     <div class="landing-header-container">
       <div class="landing-title">
