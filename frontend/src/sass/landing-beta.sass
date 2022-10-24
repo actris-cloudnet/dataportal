@@ -136,57 +136,23 @@ main#landing
         justify-content: center
         align-items: center
         color: white
-        font-size: 75%
-        font-weight: 400
+        font-size: 90%
+        font-weight: 550
         inline-size: max-content
         block-size: min-content
-        padding: 0.2*$basespacing 0.5*$basespacing
-        border-radius: 2*$baseradius
+        padding: 0.23*$basespacing 0.52*$basespacing
+        border-radius: 2.5*$baseradius
         cursor: default
-      a.tag
-        text-decoration: none
-        cursor: pointer
       .tag:first-child
         margin-left: $basespacing
       .tag:not(:first-child)
-        margin-left: 0.5*$basespacing
-      .tag:hover
-        box-shadow: $shadow
-
+        margin-left: 0.7*$basespacing
       .tag.actris
         background-color: $actris-turquoise
-        letter-spacing: 0.03em
-      .tag.actris:hover
-        background-color: $actris-turquoiselight
       .tag.volatile
         background-color: $BLUE-3-hex
-      .tag.volatile:hover
-        background-color: $BLUE-4-hex
       .tag.legacy
         background-color: $GRAY-4-hex
-      .tag.legacy:hover
-        background-color: $GRAY-5-hex
-
-      /// Tooltip
-      .tag.tooltip
-        position: relative
-      .tag.tooltip:after
-        position: absolute
-        width: 30em
-        height: 2em
-        top: 100%
-        left: 0
-        opacity: 0
-        visibility: hidden
-      .tag.tooltip:hover:after
-        opacity: 1
-        visibility: visible
-      .tag.tooltip.volatile:after
-        content: "Volatile data may be updated in the future"
-        color: $BLUE-4-hex
-      .tag.tooltip.actris:after
-        content: ""
-        color: $actris-violetdark
 
     .landing-download
       display: flex

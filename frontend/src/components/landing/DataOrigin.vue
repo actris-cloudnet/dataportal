@@ -95,10 +95,6 @@ export default class DataOrigin extends Vue {
     return this.versions.findIndex((uuid) => uuid == response.uuid);
   }
 
-  get newestVersion() {
-    if (!this.currentVersionIndex) return null;
-    return this.versions[0];
-  }
   get previousVersion() {
     if (this.currentVersionIndex == null) return null;
     return this.versions[this.currentVersionIndex + 1];

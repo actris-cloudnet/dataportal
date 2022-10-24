@@ -4,11 +4,10 @@
   display: flex
   flex-direction: row
   justify-content: space-between
+
 .metadata-container
   font-size: 85%
   font-weight: 500
-
-
 
 .error
   color: $RED-4-hex
