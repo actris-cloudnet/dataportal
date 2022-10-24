@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800&display=swap')
 
-
 $RED-1-hex: #BF3235
 $RED-2-hex: #7F2123
 $RED-3-hex: #401112
@@ -29,7 +28,6 @@ $YELLOW-3-hex: #F29F05
 $YELLOW-4-hex: #BF6B04
 $YELLOW-5-hex: #8C4303
 
-
 $actris-turquoise: #1798A8
 $actris-turquoiselight: #6DCBD6
 $actris-turquoiselighter: #7FCBD5
@@ -43,11 +41,6 @@ $actris-yellow: #FFDA01
 $actris-darkblue: #162A82
 $actris-green: #2C8F47
 
-
-
-
-
-
 $red: #F57E76
 $blue: #57A5F2
 $green: #7EC76D
@@ -56,14 +49,12 @@ $greendark: #71B369
 $gray: #EDF0F2
 $lightgray: #F6F8FA
 
-
 $basespacing: 1rem
 $baseradius: 0.3rem
 
 $shadow: 0 0.1em 0.6em 0 rgba(0,0,0,0.15)
 $shadowdark: 0 0.1em 0.6em 0 rgba(0,0,0,0.25)
 $shadowlight: 0 0.1em 0.6em 0 rgba(0,0,0,0.10)
-
 
 main#landing
   font-family: 'Montserrat', sans-serif
@@ -76,8 +67,6 @@ main#landing
   min-inline-size: 100%
   min-block-size: 90vh
 
-
-
   .landing-header-container, .tab-container, .landing-summary-container, .landing-version-banner, .landing-visualisations-container, .landing-beta-banner
     inline-size: calc(min(95%, 1500px))
     max-inline-size: 1500px
@@ -89,7 +78,7 @@ main#landing
 
   .landing-beta-banner-container
     position: absolute
-    top: 0px
+    top: 0
     left: 200px
     inline-size: max-content
     align-self: center
@@ -106,7 +95,6 @@ main#landing
 
   .landing-version-banner-container:first-child
     margin-bottom: 2*$basespacing
-
 
   .landing-version-banner-container
     display: flex
@@ -187,20 +175,18 @@ main#landing
         width: 30em
         height: 2em
         top: 100%
-        left: 0%
+        left: 0
         opacity: 0
         visibility: hidden
       .tag.tooltip:hover:after
         opacity: 1
         visibility: visible
-
       .tag.tooltip.volatile:after
         content: "Volatile data may be updated in the future"
         color: $BLUE-4-hex
       .tag.tooltip.actris:after
         content: ""
         color: $actris-violetdark
-
 
     .landing-download
       display: flex
@@ -213,7 +199,6 @@ main#landing
         justify-content: center
         font-weight: 500
         padding: 0.5*$basespacing $basespacing
-        display: flex
         color: white
         fill: white
         background-color: $green
@@ -226,7 +211,6 @@ main#landing
         box-shadow: $shadowdark
         background-color: $greendark
         text-decoration: none
-
 
     .landing-subtitle
       display: flex
@@ -260,7 +244,6 @@ main#landing
       top: 95%
       background-color: rgba(0,0,0,0.7)
       transform: scaleX(0) scaleY(0.7) translateY(0.3*$basespacing)
-      //transition: transform 100ms ease-in-out
     .tab.router-link-exact-active::after
       transform: scaleX(0.95) scaleY(0.7) translateY(0.3*$basespacing)
       background-color: rgba(0,0,0,0.7)
@@ -268,7 +251,6 @@ main#landing
       transform: scaleX(0.95) scaleY(0.7) translateY(0.3*$basespacing)
     .tab:hover:not(.router-link-active)
       color: black
-
 
   .landing-content-background
     display: flex
@@ -279,8 +261,6 @@ main#landing
     max-inline-size: 100%
     background-color: $gray
 
-
-
   .landing-summary-container
     display: flex
     justify-content: center
@@ -290,11 +270,10 @@ main#landing
     row-gap: 1.5*$basespacing
 
     .main-content
-      max-inline-size: 50% //600px
+      max-inline-size: 50%
 
     .summary-section:not(:first-child)
       margin-top: 2*$basespacing
-
 
     .summary-section
       .summary-section-header
@@ -305,7 +284,6 @@ main#landing
         th, td
           font-weight: 200
           padding: 0.2em 0
-
         th
           vertical-align: top
           inline-size: 14em
@@ -313,6 +291,7 @@ main#landing
           font-weight: 400
         td
           font-weight: 300
+
     .product-container
       display: flex
       align-items: center
@@ -335,9 +314,8 @@ main#landing
           max-inline-size: 40ch
         .landing-hash-large
           max-inline-size: 30ch
-          inline-size: 30ch //min-content
+          inline-size: 30ch
           overflow-wrap: break-word
-      .landing-hash:hover
 
     .summary-section#data-origin
       .data-source-list
@@ -382,15 +360,12 @@ main#landing
       .citation-section-content
         font-size: 90%
         font-weight: 300
-        //padding: 0.1*$basespacing
-        //border-radius: 0.5*$baseradius
       .citation-section-note
         font-size: 90%
         font-weight: 400
         color: rgba(0,0,0,0.6)
       .citation-section-note:not(:last-child)
         margin-bottom: 0.25*$basespacing
-
 
     .citation-section:not(:first-child)
       margin-top: $basespacing
@@ -406,7 +381,7 @@ main#landing
         position: absolute
         width: 100%
         height: 50%
-        bottom: 0%
+        bottom: 0
         left: 0
         background: linear-gradient(transparent, white)
 
@@ -426,7 +401,6 @@ main#landing
         top: calc(100% + 5px)
         transform: rotate(-45deg)
 
-
   .landing-visualisations-container
     margin: 2*$basespacing 0
     .visualisations-box
@@ -444,7 +418,6 @@ main#landing
     .quality-report-box
       display: flex
       flex-direction: column
-      //align-items: center
       padding: $basespacing 2*$basespacing 2*$basespacing
       background-color: white
       border-radius: $baseradius
@@ -534,9 +507,6 @@ main#landing
       padding: 2*$basespacing
       color: $GRAY-4-hex
 
-
-
-
 .quality-icon
   height: 1.5rem
 
@@ -545,7 +515,6 @@ main#landing
     .landing-summary-container
       .main-content, .side-content
         min-inline-size: 100%
-
 
 @media (max-width: 1000px)
   main#landing
@@ -564,7 +533,6 @@ main#landing
         grid-column: 2
         button
           padding: 0.2*$basespacing 0.5*$basespacing
-
 
       .landing-subtitle
         grid-row: 2
