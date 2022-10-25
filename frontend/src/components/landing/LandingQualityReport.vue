@@ -4,31 +4,38 @@
 
 <template>
   <div class="landing-quality-report-container">
-    <div v-if="qualityResponse" class="quality-report-box">
+    <div v-if="report.status === 'loading'" class="quality-report-box quality-report-box-loading">Loading...</div>
+    <div v-else-if="report.status === 'notFound'" class="quality-report-box quality-report-box-loading">
+      No report available.
+    </div>
+    <div v-else-if="report.status === 'error'" class="quality-report-box" style="color: red">
+      Failed to load report: {{ report.error.message }}
+    </div>
+    <div v-else class="quality-report-box">
       <div class="quality-report-header">
         <div class="donut">
           <Donut :data="donutData" />
         </div>
         <div class="quality-report-stats">
           <div class="header" id="tests">Tests</div>
-          <div class="data" id="ntests">{{ qualityResponse.tests }}</div>
+          <div class="data" id="ntests">{{ report.value.tests }}</div>
           <div class="header" id="warnings">Warnings</div>
-          <div class="data" id="nwarnings">{{ qualityResponse.warnings }}</div>
+          <div class="data" id="nwarnings">{{ report.value.warnings }}</div>
           <div class="header" id="errors">Errors</div>
-          <div class="data" id="nerrors">{{ qualityResponse.errors }}</div>
+          <div class="data" id="nerrors">{{ report.value.errors }}</div>
         </div>
       </div>
       <div class="quality-software">
         Tested with
-        <a :href="`https://github.com/actris-cloudnet/cloudnetpy-qc/tree/v${qualityResponse.qcVersion}`">
-          CloudnetPy-QC v{{ qualityResponse.qcVersion }}
+        <a :href="`https://github.com/actris-cloudnet/cloudnetpy-qc/tree/v${report.value.qcVersion}`">
+          CloudnetPy-QC v{{ report.value.qcVersion }}
         </a>
         at
-        {{ humanReadableTimestamp(qualityResponse.timestamp) }}
+        {{ humanReadableTimestamp(report.value.timestamp) }}
       </div>
       <div class="quality-test-list-header">Tests</div>
       <div class="quality-test-list">
-        <div class="quality-test" v-for="test in qualityResponse.testReports" :key="test.testId">
+        <div class="quality-test" v-for="test in report.value.testReports" :key="test.testId">
           <div class="quality-test-icon">
             <img :src="getQcIcon(test.result)" alt="" />
           </div>
@@ -47,55 +54,75 @@
         </div>
       </div>
     </div>
-    <div v-else class="quality-report-box quality-report-box-loading">Loading...</div>
   </div>
 </template>
 <script lang="ts">
 import axios from "axios";
-
 import { Component, Prop, Vue } from "vue-property-decorator";
+import escapeHtml from "escape-html";
 
-import { QualityResponse, FileResponse } from "../../views/QualityReport.vue";
 import Donut, { DonutData } from "../Donut.vue";
 import { humanReadableTimestamp, getQcIcon } from "../../lib";
-import escapeHtml from "escape-html";
+
+interface Exception {
+  result: string;
+  message: string;
+}
+
+interface Test {
+  testId: string;
+  name: string;
+  description: string | null;
+  result: string;
+  exceptions: Exception[];
+}
+
+interface QualityResponse {
+  errorLevel: string;
+  qcVersion: string;
+  timestamp: Date;
+  tests: number;
+  errors: number;
+  warnings: number;
+  testReports: Test[];
+}
+
+type QualityResult =
+  | { status: "loading" }
+  | { status: "ready"; value: QualityResponse }
+  | { status: "notFound" }
+  | { status: "error"; error: Error };
 
 @Component({ components: { Donut } })
 export default class LandingQualityReport extends Vue {
   @Prop() uuid!: string;
-  apiUrl = process.env.VUE_APP_BACKENDURL;
-  fileResponse: FileResponse | null = null;
-  qualityResponse: QualityResponse | null = null;
-  error = false;
-  tests = this.qualityResponse?.tests;
+  report: QualityResult = { status: "loading" };
 
   humanReadableTimestamp = humanReadableTimestamp;
   getQcIcon = getQcIcon;
 
-  created() {
-    axios
-      .get(`${this.apiUrl}files/${this.uuid}`)
-      .then(({ data }) => (this.fileResponse = data))
-      .catch(() => {
-        this.error = true;
-      });
-    axios
-      .get(`${this.apiUrl}quality/${this.uuid}`)
-      .then(({ data }) => (this.qualityResponse = data))
-      .catch(() => {
-        this.error = true;
-      });
+  async created() {
+    try {
+      const response = await axios.get(`${process.env.VUE_APP_BACKENDURL}quality/${this.uuid}`);
+      this.report = { status: "ready", value: response.data };
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        this.report = { status: "notFound" };
+      } else {
+        this.report = { status: "error", error };
+      }
+    }
   }
 
   get donutData(): DonutData[] {
-    if (!this.qualityResponse) return [];
+    if (this.report.status !== "ready") return [];
     return [
       {
-        value: this.qualityResponse.tests - this.qualityResponse.warnings - this.qualityResponse.errors,
+        value: this.report.value.tests - this.report.value.warnings - this.report.value.errors,
         color: "#4C9A2A",
       },
-      { value: this.qualityResponse.warnings, color: "goldenrod" },
-      { value: this.qualityResponse.errors, color: "#cd5c5c" },
+      { value: this.report.value.warnings, color: "goldenrod" },
+      { value: this.report.value.errors, color: "#cd5c5c" },
     ];
   }
 
