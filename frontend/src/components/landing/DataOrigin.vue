@@ -10,11 +10,20 @@
         <th>Data sources</th>
         <td v-if="sourceFiles.length > 0">
           <div class="data-source-list">
-            <div class="data-source-container" v-for="sourceFile in sourceFiles" :key="sourceFile.uuid">
-              <router-link :to="`/beta/file/${sourceFile.uuid}`">
-                <img :alt="sourceFile.product.id" :src="getProductIcon(sourceFile.product.id)" class="product-icon" />
-                {{ sourceFile.product.humanReadableName }}
+            <!-- eslint-disable-next-line vue/require-v-for-key -->
+            <div class="data-source-container" v-for="sourceFile in sourceFiles">
+              <router-link :to="`/beta/file/${sourceFile.value.uuid}`" v-if="sourceFile.ok">
+                <img
+                  :alt="sourceFile.value.product.id"
+                  :src="getProductIcon(sourceFile.value.product.id)"
+                  class="product-icon"
+                />
+                {{ sourceFile.value.product.humanReadableName }}
               </router-link>
+              <a v-else>
+                <span class="product-icon">?</span>
+                Unknown file
+              </a>
             </div>
           </div>
         </td>
@@ -70,13 +79,14 @@ import { ModelFile, RegularFile } from "../../../../backend/src/entity/File";
 import { Component, Prop } from "vue-property-decorator";
 import Vue from "vue";
 import { getProductIcon } from "../../lib";
+import { SourceFile } from "../../views/FileBeta.vue";
 
 @Component
 export default class DataOrigin extends Vue {
   @Prop() response!: ModelFile | RegularFile | null;
   @Prop() isBusy!: boolean;
   @Prop() versions!: string[];
-  @Prop() sourceFiles!: RegularFile[];
+  @Prop() sourceFiles!: SourceFile[];
   getProductIcon = getProductIcon;
 
   get currentVersionIndex() {

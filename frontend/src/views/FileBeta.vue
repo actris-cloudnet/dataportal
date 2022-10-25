@@ -58,6 +58,7 @@ import {
   notEmpty,
   formatCoordinates,
   fetchInstrumentName,
+  compareValues,
 } from "../lib";
 import { DevMode } from "../lib/DevMode";
 import { File, ModelFile, RegularFile } from "../../../backend/src/entity/File";
@@ -79,6 +80,8 @@ import { SiteType } from "../../../backend/src/entity/Site";
 Vue.component("how-to-cite", HowToCite);
 Vue.component("license", License);
 Vue.component("visualization", Visualization);
+
+export type SourceFile = { ok: true; value: File } | { ok: false; value: Error };
 
 @Component({
   components: {
@@ -105,7 +108,7 @@ export default class FileViewBeta1 extends Vue {
   formatCoordinates = formatCoordinates;
   devMode = new DevMode();
   allVisualizations = false;
-  sourceFiles: RegularFile[] = [];
+  sourceFiles: SourceFile[] = [];
   showHowToCite = false;
   showLicense = false;
   isBusy = false;
@@ -238,11 +241,24 @@ export default class FileViewBeta1 extends Vue {
     });
   }
 
-  fetchSourceFiles(response: RegularFile | ModelFile) {
-    if (!("sourceFileIds" in response) || !response.sourceFileIds) return;
-    return Promise.all(response.sourceFileIds.map((uuid) => axios.get(`${this.apiUrl}files/${uuid}`))).then(
-      (response) => (this.sourceFiles = response.map((res) => res.data))
+  async fetchSourceFiles(response: RegularFile | ModelFile) {
+    if (!("sourceFileIds" in response) || !response.sourceFileIds) {
+      this.sourceFiles = [];
+      return;
+    }
+    const results = await Promise.all(
+      response.sourceFileIds.map((uuid) =>
+        axios
+          .get(`${this.apiUrl}files/${uuid}`)
+          .then((response) => ({ ok: true, value: response.data }))
+          .catch((error) => ({ ok: false, value: error }))
+      )
     );
+    results.sort((a, b) => {
+      if (!a.ok || !b.ok) return -1;
+      return compareValues(a.value.product.humanReadableName, b.value.product.humanReadableName);
+    });
+    this.sourceFiles = results;
   }
 
   async fetchCitations() {
