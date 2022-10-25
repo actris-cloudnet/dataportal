@@ -45,7 +45,7 @@
         <td v-if="response.processingVersion && response.cloudnetpyVersion">
           <span v-if="response.processingVersion">
             <a :href="`https://github.com/actris-cloudnet/cloudnet-processing/tree/v${response.processingVersion}`">
-              Cloudnet-processing {{ response.processingVersion }}
+              Cloudnet processing {{ response.processingVersion }}
             </a>
           </span>
           <span v-if="response.processingVersion && response.cloudnetpyVersion">
@@ -53,7 +53,7 @@
           </span>
           <span v-if="response.cloudnetpyVersion">
             <a :href="`https://github.com/actris-cloudnet/cloudnetpy/tree/v${response.cloudnetpyVersion}`">
-              Cloudnetpy {{ response.cloudnetpyVersion }}
+              CloudnetPy {{ response.cloudnetpyVersion }}
             </a>
           </span>
         </td>
