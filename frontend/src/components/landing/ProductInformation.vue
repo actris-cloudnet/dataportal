@@ -76,10 +76,11 @@
         <td>{{ response.measurementDate }}</td>
       </tr>
       <tr>
-        <th>Site</th>
+        <th>Location</th>
         <td>
           <router-link :to="`/site/${response.site.id}`">
-            {{ response.site.humanReadableName }}
+            {{ response.site.humanReadableName }},
+            {{ response.site.country }}
           </router-link>
         </td>
       </tr>

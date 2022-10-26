@@ -11,6 +11,7 @@
           :maxMarginLeft="maxMarginLeft"
           :maxMarginRight="maxMarginRight"
           :caption="true"
+          :expandable="true"
         />
       </div>
     </div>
