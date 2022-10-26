@@ -54,7 +54,7 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import axios from "axios";
-import { humanReadableDate, sortVisualizations, fetchInstrumentName } from "../lib";
+import { humanReadableDate, sortVisualizations, fetchInstrumentName, compareValues } from "../lib";
 import { DevMode } from "../lib/DevMode";
 import { File, ModelFile, RegularFile } from "../../../backend/src/entity/File";
 import { VisualizationItem } from "../../../backend/src/entity/VisualizationResponse";
@@ -97,7 +97,7 @@ export default class FileViewBeta1 extends Vue {
   apiUrl = process.env.VUE_APP_BACKENDURL;
   humanReadableDate = humanReadableDate;
   devMode = new DevMode();
-  sourceFiles: RegularFile[] = [];
+  sourceFiles: SourceFile[] = [];
   showHowToCite = false;
   showLicense = false;
   isBusy = false;
