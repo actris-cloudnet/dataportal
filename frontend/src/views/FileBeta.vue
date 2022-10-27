@@ -10,18 +10,15 @@
         <router-link class="landing-version-banner-link" :to="`/beta/file/${newestVersion}`">newer version</router-link>
         of this data available.
       </div>
-      <!--      <router-link class="landing-version-banner" :to="`/beta/file/${newestVersion}`">-->
-      <!--        A Newer version of this file is available-->
-      <!--      </router-link>-->
     </div>
     <div class="landing-header-container">
       <div class="landing-title">
         {{ title }}
       </div>
       <div class="landing-tags">
-        <div v-if="isActrisObject" class="tag actris">Actris</div>
-        <div v-if="response.volatile" class="tag tooltip volatile">Volatile</div>
-        <div v-if="response.legacy" class="tag legacy">Legacy</div>
+        <div v-if="isActrisObject" class="tag actris" title="Data from an operational ACTRIS site">Actris</div>
+        <div v-if="response.volatile" class="tag tooltip volatile" title="Data may change in future">Volatile</div>
+        <div v-if="response.legacy" class="tag legacy" title="Produced using non-standardized processing">Legacy</div>
       </div>
       <div class="landing-download">
         <DownloadButton :downloadUrl="response.downloadUrl" />
