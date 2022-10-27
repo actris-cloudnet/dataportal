@@ -22,12 +22,6 @@
   flex-direction: row
   justify-content: space-between
 
-.acknowledgements-export
-  font-size: 80%
-  font-weight: 500
-  align-self: center
-  color: red
-
 .citation-export
   align-self: center
   font-size: 80%
