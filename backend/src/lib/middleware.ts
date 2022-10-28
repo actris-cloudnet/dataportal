@@ -136,30 +136,6 @@ export class Middleware {
     next();
   };
 
-  getSiteNameFromAuth: RequestHandler = async (req, _res, next) => {
-    const [authMethod, base64AuthString] = (req.header("authorization") || "").split(" ");
-    if (!authMethod || !base64AuthString || authMethod.toLowerCase() != "basic")
-      return next({ status: 400, errors: ["Invalid authentication method"] });
-    const authString = Buffer.from(base64AuthString, "base64").toString("utf8");
-    const [site] = authString.split(":");
-    req.params.site = site;
-    return next();
-  };
-
-  getSiteNameFromBody: RequestHandler = async (req, _res, next) => {
-    if (!req.body.site) next({ status: 422, error: "Missing site" });
-    req.params.site = req.body.site;
-    next();
-  };
-
-  getSiteNameFromMeta: RequestHandler = async (req, _res, next) => {
-    const md = await this.conn
-      .getRepository(ModelUpload)
-      .findOne({ checksum: req.params.checksum }, { relations: ["site"] });
-    if (md != undefined) req.params.site = md.site.id;
-    next();
-  };
-
   checkParamsExistInDb: RequestHandler = async (req: any, _res, next) => {
     Promise.all([this.checkSite(req), this.checkParam("product", req), this.checkParam("model", req)])
       .then(() => next())
