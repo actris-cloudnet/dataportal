@@ -373,7 +373,7 @@ export class UploadRoutes {
     const isValid = validFilenamePattern.test(filename);
     if (!isValid) return next({ status: 422, errors: `Filename contains forbidden characters: ${filename}` });
     if (filename.includes("/"))
-      console.log(`Warning: filename contains slashes (site: ${req.body.site}, filename: ${req.body.filename})`);
+      console.log(`Warning: filename contains slashes (site: ${req.params.site}, filename: ${filename})`);
     return next();
   };
 
