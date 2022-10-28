@@ -112,6 +112,7 @@ export class UploadRoutes {
       await uploadRepo.insert(uploadedMetadata);
       return res.sendStatus(200);
     } catch (err) {
+      console.error("Unknown error", err);
       return next({ status: 500, errors: `Internal server error: ${err.code}` });
     }
   };
@@ -127,6 +128,7 @@ export class UploadRoutes {
       await this.findRepoForUpload(upload).update({ uuid: partialUpload.uuid }, partialUpload);
       res.sendStatus(200);
     } catch (err) {
+      console.error("Unknown error", err);
       return next({ status: 500, errors: `Internal server error: ${err.code}` });
     }
   };
@@ -140,7 +142,10 @@ export class UploadRoutes {
         if (upload == undefined) return next({ status: 404, errors: "No metadata was found with provided id" });
         res.send(this.augmentUploadResponse(true)(upload));
       })
-      .catch((err) => next({ status: 500, errors: `Internal server error: ${err.code}` }));
+      .catch((err) => {
+        console.error("Unknown error", err);
+        next({ status: 500, errors: `Internal server error: ${err.code}` });
+      });
   };
 
   listMetadata = (includeS3path: boolean) => {
@@ -152,7 +157,8 @@ export class UploadRoutes {
           streamHandler(uploadedMetadata, res, "um", this.augmentUploadResponse(includeS3path));
         })
         .catch((err) => {
-          next({ status: 500, errors: `Internal server error: ${err}` });
+          console.error("Unknown error", err);
+          next({ status: 500, errors: `Internal server error: ${err.code}` });
         });
     };
   };
@@ -190,6 +196,7 @@ export class UploadRoutes {
       if (err.errors)
         // Our error
         return next({ status: 500, errors: `Internal server error: ${err.errors}` });
+      console.error("Unknown error", err);
       return next({ status: 500, errors: `Internal server error: ${err.code}` }); // Unknown error
     }
   };
