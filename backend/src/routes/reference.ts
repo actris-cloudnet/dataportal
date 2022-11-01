@@ -2,7 +2,6 @@ import { Connection, Repository } from "typeorm";
 import { Request, RequestHandler, Response } from "express";
 
 import { RegularFile, ModelFile } from "../entity/File";
-// import { Collection } from "../entity/Collection";
 import axios from "axios";
 
 const LABELLING_URL = "https://actris-nf-labelling.out.ocp.fmi.fi/api/facilities";
@@ -28,12 +27,10 @@ interface Citation {
 export class ReferenceRoutes {
   private fileRepository: Repository<RegularFile>;
   private modelRepository: Repository<ModelFile>;
-  // private collectionRepository: Repository<Collection>;
 
   constructor(conn: Connection) {
     this.fileRepository = conn.getRepository<RegularFile>("regular_file");
     this.modelRepository = conn.getRepository<ModelFile>("model_file");
-    // this.collectionRepository = conn.getRepository<Collection>("collection");
   }
 
   getReference: RequestHandler = async (req, res, next) => {
@@ -50,7 +47,7 @@ export class ReferenceRoutes {
     if (data === undefined) {
       return next({ status: 404, errors: "UUID not found" });
     }
-    const pi = await getPrincipalInvestigators(data).catch((err) => {
+    const pi = await getSitePI(data).catch((err) => {
       return next({ status: 500, errors: err });
     });
     if (pi === undefined) {
@@ -143,7 +140,7 @@ async function getAcknowledgements(req: Request, res: Response, data: RegularFil
   }
 }
 
-async function getPrincipalInvestigators(data: RegularFile | ModelFile): Promise<Name[]> {
+async function getSitePI(data: RegularFile | ModelFile): Promise<Name[]> {
   const actrisId = data.site.actrisId;
   let names: Name[] = [];
   if (actrisId) {
