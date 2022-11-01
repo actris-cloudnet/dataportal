@@ -47,20 +47,73 @@ export class ReferenceRoutes {
     if (data === undefined) {
       return next({ status: 404, errors: "UUID not found" });
     }
+    let sourceUuids: any = [];
+    let instruPis: Name[] = [];
+    await this.fetchSourceUuids(data, sourceUuids);
+    try {
+      instruPis = await this.getInstrumentPis(sourceUuids, data.measurementDate);
+    } catch (err) {
+      console.error(err);
+    }
     const pi = await getSitePI(data).catch((err) => {
       return next({ status: 500, errors: err });
     });
     if (pi === undefined) {
       return next({ status: 500, errors: "Cannot get authors" });
     }
+    let pis = instruPis.concat(pi);
+    // @ts-ignore
+    pis = pis.filter((v, i, a) => a.findIndex((v2) => ["first_name", "last_name"].every((k) => v2[k] === v[k])) === i);
     if (req.query.acknowledgements === "true") {
       await getAcknowledgements(req, res, data);
     } else if (req.query.dataAvailability === "true") {
       await getDataAvailability(req, res, data);
     } else {
-      await getCitation(req, res, data, pi);
+      await getCitation(req, res, data, pis);
     }
   };
+
+  async getInstrumentPis(pids: string[], measurementDate: Date) {
+    let output: Name[] = [];
+    for (const pid of pids) {
+      const match = pid.match("^https?://hdl\\.handle\\.net/(.+)");
+      if (!match) {
+        throw new Error("Invalid PID format");
+      }
+      const url = "https://hdl.handle.net/api/handles/" + match[1];
+      const response = await axios.get(url);
+      const values = response.data.values;
+      if (!Array.isArray(values)) {
+        throw new Error("Invalid PID response");
+      }
+      const nameItem = values.find((ele) => ele.type === "URL");
+      if (!nameItem || !nameItem.data || nameItem.data.format !== "string" || !nameItem.data.value) {
+        throw new Error("Invalid PID structure");
+      }
+      const apiUrl = nameItem.data.value;
+      if (typeof apiUrl !== "string") {
+        throw new Error("Invalid PID content");
+      }
+      const apiResponse = await axios.get(`${apiUrl}/pi?date=${measurementDate}`);
+      for (const data of apiResponse.data) {
+        output.push({ first_name: data.first_name, last_name: data.last_name });
+      }
+    }
+    return output;
+  }
+
+  async fetchSourceUuids(data: any, acc: any) {
+    if (data.sourceFileIds) {
+      for (const uuid of data.sourceFileIds) {
+        const new_data = (await this.fileRepository.findOne(uuid)) || {};
+        await this.fetchSourceUuids(new_data, acc);
+      }
+    } else {
+      if (data.instrumentPid) {
+        acc.push(data.instrumentPid);
+      }
+    }
+  }
 }
 
 async function getCitation(req: Request, res: Response, data: RegularFile | ModelFile, pi: Name[]) {
