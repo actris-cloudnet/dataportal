@@ -126,23 +126,20 @@ async function getDataAvailability(req: Request, res: Response, data: RegularFil
 }
 
 async function getAcknowledgements(req: Request, res: Response, data: RegularFile | ModelFile) {
-  let commonAck = commonAcknowledgement();
-  let ack = [];
-  if (data instanceof ModelFile) {
-    let modelAck = data.model.citations.map((r) => r.acknowledgements);
-    ack = [commonAck].concat(modelAck);
-  } else {
-    let siteAck = data.site.citations.map((r) => r.acknowledgements);
-    ack = [commonAck].concat(siteAck);
-  }
-  let ackstr = ack.join(" ");
+  const commonAck = commonAcknowledgement();
+  const specificAck =
+    data instanceof ModelFile
+      ? data.model.citations.map((r) => r.acknowledgements)
+      : data.site.citations.map((r) => r.acknowledgements);
+  const combinedAck = [commonAck].concat(specificAck);
+  const combinedAckStr = combinedAck.join(" ");
   if (req.query.format && req.query.format === "html") {
-    res.send(ackstr);
+    res.send(combinedAckStr);
   } else if (req.query.format && req.query.format === "plain") {
     res.setHeader("Content-type", "text/plain");
-    res.send(ack.join(" "));
+    res.send(combinedAckStr);
   } else {
-    res.json(ack);
+    res.json(combinedAck);
   }
 }
 
