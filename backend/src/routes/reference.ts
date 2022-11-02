@@ -47,60 +47,22 @@ export class ReferenceRoutes {
     if (data === undefined) {
       return next({ status: 404, errors: "UUID not found" });
     }
-    let sourceUuids: any = [];
-    let instruPis: Name[] = [];
-    await this.fetchSourceUuids(data, sourceUuids);
-    try {
-      instruPis = await this.getInstrumentPis(sourceUuids, data.measurementDate);
-    } catch (err) {
-      console.error(err);
-    }
-    const pi = await getSitePI(data).catch((err) => {
-      return next({ status: 500, errors: err });
-    });
-    if (pi === undefined) {
-      return next({ status: 500, errors: "Cannot get authors" });
-    }
-    let pis = instruPis.concat(pi);
-    // @ts-ignore
-    pis = pis.filter((v, i, a) => a.findIndex((v2) => ["first_name", "last_name"].every((k) => v2[k] === v[k])) === i);
     if (req.query.acknowledgements === "true") {
       await getAcknowledgements(req, res, data);
     } else if (req.query.dataAvailability === "true") {
       await getDataAvailability(req, res, data);
     } else {
+      let sourceUuids: string[] = [];
+      await this.fetchSourceUuids(data, sourceUuids);
+      const p1 = await getSitePI(data);
+      const p2 = await getInstrumentPis(sourceUuids, data.measurementDate);
+      let pis: any = await Promise.all([p1, p2]);
+      pis = [].concat.apply([], pis);
+      pis = [].concat.apply([], pis);
+      pis = removeDuplicateNames(pis);
       await getCitation(req, res, data, pis);
     }
   };
-
-  async getInstrumentPis(pids: string[], measurementDate: Date) {
-    let output: Name[] = [];
-    for (const pid of pids) {
-      const match = pid.match("^https?://hdl\\.handle\\.net/(.+)");
-      if (!match) {
-        throw new Error("Invalid PID format");
-      }
-      const url = "https://hdl.handle.net/api/handles/" + match[1];
-      const response = await axios.get(url);
-      const values = response.data.values;
-      if (!Array.isArray(values)) {
-        throw new Error("Invalid PID response");
-      }
-      const nameItem = values.find((ele) => ele.type === "URL");
-      if (!nameItem || !nameItem.data || nameItem.data.format !== "string" || !nameItem.data.value) {
-        throw new Error("Invalid PID structure");
-      }
-      const apiUrl = nameItem.data.value;
-      if (typeof apiUrl !== "string") {
-        throw new Error("Invalid PID content");
-      }
-      const apiResponse = await axios.get(`${apiUrl}/pi?date=${measurementDate}`);
-      for (const data of apiResponse.data) {
-        output.push({ first_name: data.first_name, last_name: data.last_name });
-      }
-    }
-    return output;
-  }
 
   async fetchSourceUuids(data: any, acc: any) {
     if (data.sourceFileIds) {
@@ -210,6 +172,31 @@ async function getSitePI(data: RegularFile | ModelFile): Promise<Name[]> {
   return names;
 }
 
+async function getInstrumentPis(pids: string[], measurementDate: Date) {
+  return await Promise.all(
+    pids.map(async (pid: string) => {
+      return await getInstrumentPi(pid, measurementDate);
+    })
+  );
+}
+
+async function getInstrumentPi(pid: string, measurementDate: Date): Promise<Name[]> {
+  const match = pid.match("^https?://hdl\\.handle\\.net/(.+)");
+  if (!match) {
+    throw new Error("Invalid PID format");
+  }
+  const url = "https://hdl.handle.net/api/handles/" + match[1];
+  const response = await axios.get(url);
+  const values = response.data.values;
+  if (!Array.isArray(values)) {
+    throw new Error("Invalid PID response");
+  }
+  const nameItem = values.find((ele) => ele.type === "URL");
+  const apiUrl = nameItem.data.value;
+  const apiRes = await axios.get(`${apiUrl}/pi?date=${measurementDate}`);
+  return apiRes.data;
+}
+
 function capitalize(str: string): string {
   return str.slice(0, 1).toUpperCase() + str.slice(1);
 }
@@ -312,4 +299,9 @@ function getCloudnetUrl(uuid: string) {
 function todayIsoString() {
   const today = new Date();
   return today.toISOString().split("T")[0];
+}
+
+function removeDuplicateNames(pis: Name[]): Name[] {
+  // @ts-ignore
+  return pis.filter((v, i, a) => a.findIndex((v2) => ["first_name", "last_name"].every((k) => v2[k] === v[k])) === i);
 }
