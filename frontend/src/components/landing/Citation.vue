@@ -105,6 +105,10 @@ export default class Citation extends Vue {
     await this.fetchReferenceStrings();
   }
 
+  async updated() {
+    await this.fetchReferenceStrings();
+  }
+
   get longCitation() {
     return this.citationString.length > 500;
   }
@@ -137,19 +141,19 @@ export default class Citation extends Vue {
   }
 
   async fetchReferenceStrings() {
-    await axios
+    axios
       .get(`${this.referenceUrl}?citation=true&format=html`)
       .then((response) => {
         this.citationString = response.data;
       })
       .catch((error) => console.error(error));
-    await axios
+    axios
       .get(`${this.referenceUrl}?acknowledgements=true&format=html`)
       .then((response) => {
         this.acknowledgementsString = response.data;
       })
       .catch((error) => console.error(error));
-    await axios
+    axios
       .get(`${this.referenceUrl}?dataAvailability=true&format=html`)
       .then((response) => {
         this.dataAvailabilityString = response.data;
