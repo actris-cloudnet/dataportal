@@ -5,7 +5,7 @@ import { RegularFile, ModelFile } from "../entity/File";
 import axios from "axios";
 
 const LABELLING_URL = "https://actris-nf-labelling.out.ocp.fmi.fi/api/facilities";
-const MODEL_AUTHOR = { first_name: "Ewan", last_name: "O'Connor" };
+const MODEL_AUTHOR = { first_name: "Ewan", last_name: "O'Connor", role: "modelPi" };
 
 interface Name {
   first_name: string;
@@ -198,7 +198,7 @@ async function getInstrumentPi(pid: string, measurementDate: Date): Promise<Name
   const nameItem = values.find((ele) => ele.type === "URL");
   const apiUrl = nameItem.data.value;
   const apiRes = await axios.get(`${apiUrl}/pi?date=${measurementDate}`);
-  return apiRes.data;
+  return apiRes.data.map((e: any) => ({ first_name: e.first_name, last_name: e.last_name, role: "instrumentPi" }));
 }
 
 function capitalize(str: string): string {
@@ -283,6 +283,19 @@ function todayIsoString() {
 }
 
 function removeDuplicateNames(pis: Name[]): Name[] {
-  // @ts-ignore
-  return pis.filter((v, i, a) => a.findIndex((v2) => ["first_name", "last_name"].every((k) => v2[k] === v[k])) === i);
+  // Order
+  const allPis = pis
+    .filter((ele) => ele.role == "instrumentPi")
+    .concat(pis.filter((ele) => ele.role == "modelPi"))
+    .concat(pis.filter((ele) => ele.role == "pi"));
+  // Remove duplicates
+  let out = [];
+  for (const pi of allPis) {
+    const firstNames = out.map((ele) => ele.first_name);
+    const lastNames = out.map((ele) => ele.last_name);
+    if (!firstNames.find((ele) => ele == pi.first_name) && !lastNames.find((ele) => ele == pi.last_name)) {
+      out.push(pi);
+    }
+  }
+  return out;
 }
