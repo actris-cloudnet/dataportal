@@ -155,7 +155,6 @@ export default class FileViewBeta1 extends Vue {
   async created() {
     document.addEventListener("click", this.hideBoxes);
     await this.onUuidChange();
-    await this.fetchCitations();
   }
 
   destroyed() {
@@ -219,19 +218,6 @@ export default class FileViewBeta1 extends Vue {
       return compareValues(a.value.product.humanReadableName, b.value.product.humanReadableName);
     });
     this.sourceFiles = results;
-  }
-
-  async fetchCitations() {
-    const citationQueryOptions = { params: { showCitations: true } };
-    const [sites, models] = await Promise.all([
-      axios.get(`${this.apiUrl}sites/`, citationQueryOptions),
-      axios.get(`${this.apiUrl}models/`, citationQueryOptions),
-    ]);
-    if (!this.response) return;
-    this.site = sites.data.filter((site: Site) => site.id == (this.response as File).site.id)[0];
-    if ((this.response as ModelFile).model) {
-      this.model = models.data.filter((model: Model) => model.id == (this.response as ModelFile).model.id)[0];
-    }
   }
 
   @Watch("uuid")
