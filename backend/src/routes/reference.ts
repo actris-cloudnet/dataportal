@@ -5,6 +5,7 @@ import { RegularFile, ModelFile } from "../entity/File";
 import axios from "axios";
 
 const LABELLING_URL = "https://actris-nf-labelling.out.ocp.fmi.fi/api/facilities";
+const MODEL_AUTHOR = { first_name: "Ewan", last_name: "O'Connor" };
 
 interface Name {
   first_name: string;
@@ -66,12 +67,14 @@ export class ReferenceRoutes {
   async fetchSourceUuids(data: any, acc: any) {
     if (data.sourceFileIds) {
       for (const uuid of data.sourceFileIds) {
-        const new_data = (await this.fileRepository.findOne(uuid)) || {};
+        const new_data = (await this.fileRepository.findOne(uuid)) || (await this.modelRepository.findOne(uuid));
         await this.fetchSourceUuids(new_data, acc);
       }
     } else {
       if (data.instrumentPid) {
         acc.push(data.instrumentPid);
+      } else if (data instanceof ModelFile) {
+        acc.push("model"); // modelPid does not exist yet
       }
     }
   }
@@ -111,7 +114,7 @@ async function getCitation(req: Request, res: Response, data: RegularFile | Mode
 
 function formatAuthor(data: RegularFile | ModelFile, pis: Name[]): Name[] {
   if (data instanceof ModelFile) {
-    return [{ first_name: "Ewan", last_name: "O'Connor" }];
+    return [MODEL_AUTHOR];
   } else {
     const sitePis: Name[] = pis.filter((a: Name) => a.role == "pi");
     const InstrumentPis: Name[] = pis.filter((a: Name) => a.role != "pi");
@@ -179,6 +182,9 @@ async function getInstrumentPis(pids: string[], measurementDate: Date) {
 }
 
 async function getInstrumentPi(pid: string, measurementDate: Date): Promise<Name[]> {
+  if (pid == "model") {
+    return [MODEL_AUTHOR];
+  }
   const match = pid.match("^https?://hdl\\.handle\\.net/(.+)");
   if (!match) {
     throw new Error("Invalid PID format");
