@@ -9,6 +9,7 @@ const LABELLING_URL = "https://actris-nf-labelling.out.ocp.fmi.fi/api/facilities
 interface Name {
   first_name: string;
   last_name: string;
+  role?: string;
 }
 
 interface Citation {
@@ -54,9 +55,7 @@ export class ReferenceRoutes {
     } else {
       let sourceUuids: string[] = [];
       await this.fetchSourceUuids(data, sourceUuids);
-      const p1 = await getSitePI(data);
-      const p2 = await getInstrumentPis(sourceUuids, data.measurementDate);
-      let pis: any = await Promise.all([p1, p2]);
+      let pis: any = await Promise.all([getSitePI(data), getInstrumentPis(sourceUuids, data.measurementDate)]);
       pis = [].concat.apply([], pis);
       pis = [].concat.apply([], pis);
       pis = removeDuplicateNames(pis);
@@ -85,7 +84,13 @@ async function getCitation(req: Request, res: Response, data: RegularFile | Mode
   if (data instanceof ModelFile) {
     author = [{ first_name: "Ewan", last_name: "O'Connor" }];
   } else {
-    author = pi.map((a: Name) => ({ first_name: a.first_name, last_name: a.last_name }));
+    const sitePis = pi
+      .filter((a: Name) => a.role == "pi")
+      .map((a: Name) => ({ first_name: a.first_name, last_name: a.last_name }));
+    const InstrumentPis = pi
+      .filter((a: Name) => a.role != "pi")
+      .map((a: Name) => ({ first_name: a.first_name, last_name: a.last_name }));
+    author = InstrumentPis.concat(sitePis);
   }
   const prod = data.product.humanReadableName;
   const site = data.site.humanReadableName;
@@ -166,7 +171,7 @@ async function getSitePI(data: RegularFile | ModelFile): Promise<Name[]> {
       },
     });
     if (response !== undefined) {
-      names = response.data.map((e: any) => ({ first_name: e.first_name, last_name: e.last_name }));
+      names = response.data.map((e: any) => ({ first_name: e.first_name, last_name: e.last_name, role: e.role }));
     }
   }
   return names;
