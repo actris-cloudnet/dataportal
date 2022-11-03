@@ -155,8 +155,14 @@ async function createServer() {
   app.get("/api/download/collection/:uuid", middleware.validateUuidParam, dlRoutes.collection);
   app.get("/api/download/image/*", dlRoutes.image);
   app.get("/api/quality/:uuid", middleware.validateUuidParam, qualityRoutes.qualityReport);
-  // citation
   app.get("/api/reference/:uuid", middleware.validateUuidParam, referenceRoutes.getReference);
+
+  // TODO: Depreciated. Needed for now, but in the future these should public
+  // and properly documented.
+  app.get("/api/upload-dateforsize", uploadRoutes.dateforsize);
+  app.get("/api/file-dateforsize", fileRoutes.dateforsize);
+  app.get("/api/upload-metadata", express.json(), uploadRoutes.listMetadata(true));
+  app.get("/api/upload-model-metadata", express.json(), uploadRoutes.listMetadata(true));
 
   app.get("/upload/metadata/:checksum", middleware.validateMD5Param, uploadRoutes.metadata, errorAsPlaintext);
 
@@ -215,8 +221,6 @@ async function createServer() {
   app.get("/upload-model-metadata", express.json(), uploadRoutes.listMetadata(true));
   app.post("/calibration", express.json(), calibRoutes.postCalibration);
   app.put("/visualizations/*", express.json(), vizRoutes.putVisualization);
-  app.get("/upload-dateforsize", uploadRoutes.dateforsize);
-  app.get("/file-dateforsize", fileRoutes.dateforsize);
   app.put("/quality/:uuid", middleware.validateUuidParam, express.json(), qualityRoutes.putQualityReport);
   app.get(
     "/api/download/stats",

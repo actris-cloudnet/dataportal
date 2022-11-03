@@ -68,7 +68,11 @@ export class CollectionRoutes {
       const collection = await this.collectionRepo.findOne(body.uuid);
       if (collection === undefined) return next({ status: 422, errors: ["Collection not found"] });
       if (collection.pid) return next({ status: 403, errors: ["Collection already has a PID"] });
-      const pidRes = await axios.post(env.DP_PID_SERVICE_URL, req.body, { timeout: env.DP_PID_SERVICE_TIMEOUT_MS });
+      const pidRes = await axios.post(
+        env.DP_PID_SERVICE_URL,
+        { uuid: body.uuid, type: body.type, url: `https://cloudnet.fmi.fi/collection/${body.uuid}` },
+        { timeout: env.DP_PID_SERVICE_TIMEOUT_MS }
+      );
       await this.collectionRepo.update({ uuid: body.uuid }, { pid: pidRes.data.pid });
       res.send(pidRes.data);
     } catch (e) {
