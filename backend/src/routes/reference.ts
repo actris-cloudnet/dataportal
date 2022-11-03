@@ -245,15 +245,29 @@ function citation2bibtex(c: Citation) {
 }`.replace(/^\s*\n/gm, "");
 }
 
+function getInitials(name: string): string {
+  return name
+    .split(/\s+|-/)
+    .map((part) => part.slice(0, 1) + ".")
+    .join(" ");
+}
+
+function formatList(parts: string[]): string {
+  if (parts.length <= 2) {
+    return parts.join(", and ");
+  }
+  return parts.slice(0, -1).join(", ") + ", and " + parts[parts.length - 1];
+}
+
 function citation2html(c: Citation) {
-  let author = c.author.map((a) => `${a.lastName}, ${a.firstName}`).join(" and ");
+  let author = formatList(c.author.map((a) => `${a.lastName}, ${getInitials(a.firstName)}`));
   if (author.length > 0) {
-    author = author.concat(": ");
+    author = author.concat(" ");
   }
   const url = c.url.length > 0 ? `<a href="${c.url}">${c.url}</a>, ` : "";
   let publisher = c.publisher.join(", ");
   publisher = publisher.length > 0 ? publisher.concat(", ") : "";
-  return `${author}${c.title}, ${publisher}${url}${c.year}`;
+  return `${author}"${c.title}", ${publisher}${url}${c.year}`;
 }
 
 function citation2ris(c: Citation) {
