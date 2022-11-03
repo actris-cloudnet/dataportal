@@ -4,12 +4,10 @@ import { Request, RequestHandler, Response } from "express";
 import { RegularFile, ModelFile } from "../entity/File";
 import axios from "axios";
 
-const LABELLING_URL = "https://actris-nf-labelling.out.ocp.fmi.fi/api/facilities";
-const MODEL_AUTHOR = { first_name: "Ewan", last_name: "O'Connor", role: "modelPi" };
-
 interface Name {
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
+  orcid?: string;
   role?: string;
 }
 
@@ -25,6 +23,9 @@ interface Citation {
   urldate: string;
   note: string;
 }
+
+const LABELLING_URL = "https://actris-nf-labelling.out.ocp.fmi.fi/api/facilities";
+const MODEL_AUTHOR: Name = { firstName: "Ewan", lastName: "O'Connor", orcid: "0000-0001-9834-5100", role: "modelPi" };
 
 export class ReferenceRoutes {
   private fileRepository: Repository<RegularFile>;
@@ -118,7 +119,7 @@ function formatAuthor(data: RegularFile | ModelFile, pis: Name[]): Name[] {
   } else {
     const sitePis: Name[] = pis.filter((a: Name) => a.role == "pi");
     const InstrumentPis: Name[] = pis.filter((a: Name) => a.role != "pi");
-    return InstrumentPis.concat(sitePis).map((a: Name) => ({ first_name: a.first_name, last_name: a.last_name }));
+    return InstrumentPis.concat(sitePis);
   }
 }
 
@@ -167,7 +168,9 @@ async function getSitePI(data: RegularFile | ModelFile): Promise<Name[]> {
       },
     });
     if (response !== undefined) {
-      names = response.data.map((e: any) => ({ first_name: e.first_name, last_name: e.last_name, role: e.role }));
+      names = response.data.map(
+        (e: any): Name => ({ firstName: e.first_name, lastName: e.last_name, orcid: e.orcid_id, role: e.role })
+      );
     }
   }
   return names;
@@ -198,7 +201,9 @@ async function getInstrumentPi(pid: string, measurementDate: Date): Promise<Name
   const nameItem = values.find((ele) => ele.type === "URL");
   const apiUrl = nameItem.data.value;
   const apiRes = await axios.get(`${apiUrl}/pi?date=${measurementDate}`);
-  return apiRes.data.map((e: any) => ({ first_name: e.first_name, last_name: e.last_name, role: "instrumentPi" }));
+  return apiRes.data.map(
+    (e: any): Name => ({ firstName: e.first_name, lastName: e.last_name, orcid: e.orcid_id, role: "instrumentPi" })
+  );
 }
 
 function capitalize(str: string): string {
@@ -222,7 +227,7 @@ function yearMonthDay(isodate: string) {
 }
 
 function citation2bibtex(c: Citation) {
-  const author = c.author.map((a) => `${a.last_name}, ${a.first_name}`).join(" and ");
+  const author = c.author.map((a) => `${a.lastName}, ${a.firstName}`).join(" and ");
   const publisher = c.publisher.join(", ");
   const note = c.note.length > 0 ? `note = {${c.note}},` : "";
   return `\
@@ -241,7 +246,7 @@ function citation2bibtex(c: Citation) {
 }
 
 function citation2html(c: Citation) {
-  let author = c.author.map((a) => `${a.last_name}, ${a.first_name}`).join(" and ");
+  let author = c.author.map((a) => `${a.lastName}, ${a.firstName}`).join(" and ");
   if (author.length > 0) {
     author = author.concat(": ");
   }
@@ -253,7 +258,7 @@ function citation2html(c: Citation) {
 
 function citation2ris(c: Citation) {
   const endl = "\r\n";
-  let author = c.author.map((a) => `AU  - ${a.last_name}, ${a.first_name}`).join("\r\n");
+  let author = c.author.map((a) => `AU  - ${a.lastName}, ${a.firstName}`).join("\r\n");
   let publisher = c.publisher.join(", ");
   if (author == "") {
     author = "AU  - ";
@@ -289,11 +294,12 @@ function removeDuplicateNames(pis: Name[]): Name[] {
     .concat(pis.filter((ele) => ele.role == "modelPi"))
     .concat(pis.filter((ele) => ele.role == "pi"));
   // Remove duplicates
-  let out = [];
+  const out: Name[] = [];
   for (const pi of allPis) {
-    const firstNames = out.map((ele) => ele.first_name);
-    const lastNames = out.map((ele) => ele.last_name);
-    if (!firstNames.find((ele) => ele == pi.first_name) && !lastNames.find((ele) => ele == pi.last_name)) {
+    const nameExists = out.some(
+      (name) => name.orcid === pi.orcid || (name.firstName === pi.firstName && name.lastName == pi.lastName)
+    );
+    if (!nameExists) {
       out.push(pi);
     }
   }
