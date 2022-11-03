@@ -125,8 +125,8 @@ describe("GET /api/uploaded-metadata", () => {
   });
 });
 
-describe("GET /upload-dateforsize", () => {
-  const publicUrl = `${backendPrivateUrl}upload-dateforsize/`;
+describe("GET /api/upload-dateforsize", () => {
+  const publicUrl = `${backendPublicUrl}upload-dateforsize/`;
   it("responds with date corresponding with the target size", async () => {
     return expect(
       axios.get(`${publicUrl}`, { params: { startDate: "2020-09-27T12:45:21.916Z", targetSize: "30" } })

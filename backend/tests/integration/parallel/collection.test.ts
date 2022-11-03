@@ -7,7 +7,10 @@ const validCollectionUuid = "48092c00-161d-4ca2-a29d-628cf8e960f6";
 let allCollections: any;
 
 describe("GET /api/collection/:uuid", () => {
-  beforeAll(async () => (allCollections = (await readResources())["allcollections"]));
+  beforeAll(async () => {
+    allCollections = (await readResources())["allcollections"];
+    delete allCollections[0].pid;
+  });
 
   it("returns a valid collection", async () => {
     const res = await axios.get(`${url}${validCollectionUuid}`);
