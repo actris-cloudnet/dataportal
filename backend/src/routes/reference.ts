@@ -310,9 +310,9 @@ function removeDuplicateNames(pis: Name[]): Name[] {
   // Remove duplicates
   const out: Name[] = [];
   for (const pi of allPis) {
-    const nameExists = out.some(
-      (name) => name.orcid === pi.orcid || (name.firstName === pi.firstName && name.lastName == pi.lastName)
-    );
+    const nameExists = pi.orcid
+      ? out.some((name) => name.orcid === pi.orcid)
+      : out.some((name) => name.firstName === pi.firstName && name.lastName === pi.lastName);
     if (!nameExists) {
       out.push(pi);
     }
