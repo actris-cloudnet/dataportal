@@ -15,7 +15,7 @@
         />
       </div>
     </div>
-    <div v-else class="visualisations-box">No visualisations.</div>
+    <div v-else class="visualisations-box">No visualisations available.</div>
   </div>
 </template>
 <script lang="ts">

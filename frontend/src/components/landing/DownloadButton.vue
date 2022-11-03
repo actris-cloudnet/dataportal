@@ -1,6 +1,7 @@
 <style scoped lang="sass">
 @import "../../sass/landing-beta.sass"
 </style>
+
 <template>
   <a :href="downloadUrl">
     <svg class="download-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -9,6 +10,7 @@
     Download
   </a>
 </template>
+
 <script lang="ts">
 import { Component, Vue, Prop } from "vue-property-decorator";
 @Component

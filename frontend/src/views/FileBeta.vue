@@ -5,18 +5,20 @@
 <template>
   <main v-if="response" id="landing">
     <div v-if="!isBusy && newestVersion" class="landing-version-banner-container">
-      <router-link class="landing-version-banner" :to="`/beta/file/${newestVersion}`"
-        >New version of the file available</router-link
-      >
+      <div class="landing-version-banner">
+        There is a
+        <router-link class="landing-version-banner-link" :to="`/beta/file/${newestVersion}`">newer version</router-link>
+        of this data available.
+      </div>
     </div>
     <div class="landing-header-container">
       <div class="landing-title">
         {{ title }}
       </div>
       <div class="landing-tags">
-        <a v-if="isActrisObject" class="tag actris" href="https://www.actris.eu/">ACTRIS</a>
-        <div v-if="response.volatile" class="tag tooltip volatile">volatile file</div>
-        <div v-if="response.legacy" class="tag legacy">legacy file</div>
+        <div v-if="isActrisObject" class="tag actris" title="Data from an operational ACTRIS site">Actris</div>
+        <div v-if="response.volatile" class="tag tooltip volatile" title="Data may change in future">Volatile</div>
+        <div v-if="response.legacy" class="tag legacy" title="Produced using non-standardized processing">Legacy</div>
       </div>
       <div class="landing-download">
         <DownloadButton :downloadUrl="response.downloadUrl" />
@@ -49,17 +51,7 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import axios from "axios";
-import {
-  getProductIcon,
-  humanReadableDate,
-  humanReadableSize,
-  humanReadableTimestamp,
-  sortVisualizations,
-  notEmpty,
-  formatCoordinates,
-  fetchInstrumentName,
-  compareValues,
-} from "../lib";
+import { humanReadableDate, sortVisualizations, fetchInstrumentName, compareValues } from "../lib";
 import { DevMode } from "../lib/DevMode";
 import { File, ModelFile, RegularFile } from "../../../backend/src/entity/File";
 import { VisualizationItem } from "../../../backend/src/entity/VisualizationResponse";
@@ -100,14 +92,8 @@ export default class FileViewBeta1 extends Vue {
   versions: string[] = [];
   error = false;
   apiUrl = process.env.VUE_APP_BACKENDURL;
-  humanReadableSize = humanReadableSize;
   humanReadableDate = humanReadableDate;
-  humanReadableTimestamp = humanReadableTimestamp;
-  getIconUrl = getProductIcon;
-  sortVisualizations = sortVisualizations;
-  formatCoordinates = formatCoordinates;
   devMode = new DevMode();
-  allVisualizations = false;
   sourceFiles: SourceFile[] = [];
   showHowToCite = false;
   showLicense = false;
@@ -116,12 +102,7 @@ export default class FileViewBeta1 extends Vue {
   model: Model | null = null;
   instrument = "";
   instrumentStatus: "loading" | "error" | "ready" = "loading";
-  truncateHash = true;
   loadingVisualizations = true;
-
-  summaryActive = true;
-  visualisationsActive = false;
-  qualityReportActive = false;
 
   metaInfo() {
     return { title: this.title };
@@ -142,18 +123,6 @@ export default class FileViewBeta1 extends Vue {
     return this.response.site.type.includes("cloudnet" as SiteType);
   }
 
-  get maxMarginRight() {
-    return Math.max(...this.visualizations.map((viz) => viz.dimensions && viz.dimensions.marginRight).filter(notEmpty));
-  }
-  get maxMarginLeft() {
-    return Math.max(...this.visualizations.map((viz) => viz.dimensions && viz.dimensions.marginLeft).filter(notEmpty));
-  }
-
-  getVisualizations() {
-    if (!this.allVisualizations) return this.visualizations.slice(0, 1);
-    return this.visualizations;
-  }
-
   get currentVersionIndex() {
     if (this.response == null) return null;
     const response = this.response;
@@ -163,15 +132,6 @@ export default class FileViewBeta1 extends Vue {
   get newestVersion() {
     if (!this.currentVersionIndex) return null;
     return this.versions[0];
-  }
-  get previousVersion() {
-    if (this.currentVersionIndex == null) return null;
-    return this.versions[this.currentVersionIndex + 1];
-  }
-
-  get nextVersion() {
-    if (!this.currentVersionIndex) return null;
-    return this.versions[this.currentVersionIndex - 1];
   }
 
   hideBoxes(e: MouseEvent) {
@@ -195,7 +155,6 @@ export default class FileViewBeta1 extends Vue {
   async created() {
     document.addEventListener("click", this.hideBoxes);
     await this.onUuidChange();
-    await this.fetchCitations();
   }
 
   destroyed() {
@@ -259,19 +218,6 @@ export default class FileViewBeta1 extends Vue {
       return compareValues(a.value.product.humanReadableName, b.value.product.humanReadableName);
     });
     this.sourceFiles = results;
-  }
-
-  async fetchCitations() {
-    const citationQueryOptions = { params: { showCitations: true } };
-    const [sites, models] = await Promise.all([
-      axios.get(`${this.apiUrl}sites/`, citationQueryOptions),
-      axios.get(`${this.apiUrl}models/`, citationQueryOptions),
-    ]);
-    if (!this.response) return;
-    this.site = sites.data.filter((site: Site) => site.id == (this.response as File).site.id)[0];
-    if ((this.response as ModelFile).model) {
-      this.model = models.data.filter((model: Model) => model.id == (this.response as ModelFile).model.id)[0];
-    }
   }
 
   @Watch("uuid")

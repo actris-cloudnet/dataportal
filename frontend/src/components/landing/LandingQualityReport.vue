@@ -6,7 +6,7 @@
   <div class="landing-quality-report-container">
     <div v-if="report.status === 'loading'" class="quality-report-box quality-report-box-loading">Loading...</div>
     <div v-else-if="report.status === 'notFound'" class="quality-report-box quality-report-box-loading">
-      No report available.
+      No quality report available.
     </div>
     <div v-else-if="report.status === 'error'" class="quality-report-box" style="color: red">
       Failed to load report: {{ report.error.message }}

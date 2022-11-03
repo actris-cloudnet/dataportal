@@ -2,14 +2,13 @@ import { Connection, Repository } from "typeorm";
 import { Request, RequestHandler, Response } from "express";
 
 import { RegularFile, ModelFile } from "../entity/File";
-// import { Collection } from "../entity/Collection";
 import axios from "axios";
 
-const LABELLING_URL = "https://actris-nf-labelling.out.ocp.fmi.fi/api/facilities";
-
 interface Name {
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
+  orcid?: string;
+  role?: string;
 }
 
 interface Citation {
@@ -25,15 +24,16 @@ interface Citation {
   note: string;
 }
 
+const LABELLING_URL = "https://actris-nf-labelling.out.ocp.fmi.fi/api/facilities";
+const MODEL_AUTHOR: Name = { firstName: "Ewan", lastName: "O'Connor", orcid: "0000-0001-9834-5100", role: "modelPi" };
+
 export class ReferenceRoutes {
   private fileRepository: Repository<RegularFile>;
   private modelRepository: Repository<ModelFile>;
-  // private collectionRepository: Repository<Collection>;
 
   constructor(conn: Connection) {
     this.fileRepository = conn.getRepository<RegularFile>("regular_file");
     this.modelRepository = conn.getRepository<ModelFile>("model_file");
-    // this.collectionRepository = conn.getRepository<Collection>("collection");
   }
 
   getReference: RequestHandler = async (req, res, next) => {
@@ -50,103 +50,114 @@ export class ReferenceRoutes {
     if (data === undefined) {
       return next({ status: 404, errors: "UUID not found" });
     }
-    const pi = await getPrincipalInvestigators(data).catch((err) => {
-      return next({ status: 500, errors: err });
-    });
-    if (pi === undefined) {
-      return next({ status: 500, errors: "Cannot get authors" });
-    }
     if (req.query.acknowledgements === "true") {
       await getAcknowledgements(req, res, data);
     } else if (req.query.dataAvailability === "true") {
       await getDataAvailability(req, res, data);
     } else {
-      await getCitation(req, res, data, pi);
+      let sourceUuids: string[] = [];
+      await this.fetchSourceUuids(data, sourceUuids);
+      let pis: any = await Promise.all([getSitePI(data), getInstrumentPis(sourceUuids, data.measurementDate)]);
+      pis = [].concat.apply([], pis);
+      pis = [].concat.apply([], pis);
+      pis = removeDuplicateNames(pis);
+      await getCitation(req, res, data, pis);
     }
   };
+
+  async fetchSourceUuids(data: any, acc: any) {
+    if (data.sourceFileIds) {
+      for (const uuid of data.sourceFileIds) {
+        const new_data = (await this.fileRepository.findOne(uuid)) || (await this.modelRepository.findOne(uuid));
+        await this.fetchSourceUuids(new_data, acc);
+      }
+    } else {
+      if (data.instrumentPid) {
+        acc.push(data.instrumentPid);
+      } else if (data instanceof ModelFile) {
+        acc.push("model"); // modelPid does not exist yet
+      }
+    }
+  }
 }
 
-async function getCitation(req: Request, res: Response, data: RegularFile | ModelFile, pi: Name[]) {
+async function getCitation(req: Request, res: Response, data: RegularFile | ModelFile, pis: Name[]) {
   const datestr = humanReadableDate(data.measurementDate as unknown as string);
-  let author = [];
-  let publisher = ["ACTRIS Cloud remote sensing data centre unit (CLU)"];
-  if (data instanceof ModelFile) {
-    author = [{ first_name: "Ewan", last_name: "O'Connor" }];
-  } else {
-    author = pi.map((a: Name) => ({ first_name: a.first_name, last_name: a.last_name }));
-  }
-  const prod = data.product.humanReadableName;
-  const site = data.site.humanReadableName;
-  const title = `${prod} data from ${site} on ${datestr}`;
   const [year, month, day] = yearMonthDay(data.updatedAt as unknown as string);
   const citekey = `${capitalize(data.site.id)}${capitalize(data.product.id)}${year}${month}${day}`;
-  const url = data.pid ? data.pid : getCloudnetUrl(data.uuid);
-  const note = data.volatile ? "Data is volatile and may be updated in the future" : "";
   const citation = {
     citekey: citekey,
-    author: author,
-    publisher: publisher,
-    title: title,
+    author: formatAuthor(data, pis),
+    publisher: ["ACTRIS Cloud remote sensing data centre unit (CLU)"],
+    title: `${data.product.humanReadableName} data from ${data.site.humanReadableName} on ${datestr}`,
     year: year,
     month: month,
     day: day,
-    url: url,
+    url: data.pid ? data.pid : getCloudnetUrl(data.uuid),
     urldate: todayIsoString(),
-    note: note,
+    note: data.volatile ? "Data is volatile and may be updated in the future" : "",
   };
   if (req.query.format && req.query.format === "bibtex") {
     res.setHeader("Content-type", "text/plain");
-    //res.setHeader("Content-type", "application/x-bibtex");
     res.setHeader("Content-Disposition", `inline; filename="${citekey}.bib"`);
-    const bibtexstr = citation2bibtex(citation);
-    res.send(bibtexstr);
+    res.send(citation2bibtex(citation));
   } else if (req.query.format && req.query.format === "ris") {
     res.setHeader("Content-type", "text/plain");
-    //res.setHeader("Content-type", "application/x-research-info-systems");
     res.setHeader("Content-Disposition", `inline; filename="${citekey}.ris"`);
-    const risstr = citation2ris(citation);
-    res.send(risstr);
+    res.send(citation2ris(citation));
   } else if (req.query.format && req.query.format === "html") {
     res.setHeader("Content-type", "text/plain");
-    const htmlstr = citation2html(citation);
-    res.send(htmlstr);
+    res.send(citation2html(citation));
   } else {
     res.json(citation);
   }
 }
 
-async function getDataAvailability(req: Request, res: Response, data: RegularFile | ModelFile) {
-  let avail = "";
-  if (data.volatile) {
-    avail = commonDataAvailabilityVolatileHtml(data);
+function formatAuthor(data: RegularFile | ModelFile, pis: Name[]): Name[] {
+  if (data instanceof ModelFile) {
+    return [MODEL_AUTHOR];
   } else {
-    avail = commonDataAvailabilityStableHtml(data);
+    const sitePis: Name[] = pis.filter((a: Name) => a.role == "pi");
+    const InstrumentPis: Name[] = pis.filter((a: Name) => a.role != "pi");
+    return InstrumentPis.concat(sitePis);
   }
-  res.send(avail);
 }
 
 async function getAcknowledgements(req: Request, res: Response, data: RegularFile | ModelFile) {
-  let commonAck = commonAcknowledgement();
-  let ack = [];
-  if (data instanceof ModelFile) {
-    let modelAck = data.model.citations.map((r) => r.acknowledgements);
-    ack = [commonAck].concat(modelAck);
-  } else {
-    let siteAck = data.site.citations.map((r) => r.acknowledgements);
-    ack = [commonAck].concat(siteAck);
-  }
-  let ackstr = ack.join(" ");
+  const commonAck = commonAcknowledgement();
+  const specificAck =
+    data instanceof ModelFile
+      ? data.model.citations.map((r) => r.acknowledgements)
+      : data.site.citations.map((r) => r.acknowledgements);
+  const combinedAck = [commonAck].concat(specificAck);
+  const combinedAckStr = combinedAck.join(" ");
   if (req.query.format && req.query.format === "html") {
-    res.send(ackstr);
+    res.send(combinedAckStr);
   } else if (req.query.format && req.query.format === "plain") {
     res.setHeader("Content-type", "text/plain");
-    res.send(ack.join(" "));
+    res.send(combinedAckStr);
   } else {
-    res.json(ack);
+    res.json(combinedAck);
   }
 }
 
-async function getPrincipalInvestigators(data: RegularFile | ModelFile): Promise<Name[]> {
+function commonAcknowledgement() {
+  const url = "https://cloudnet.fmi.fi/";
+  let ackstr = `
+    We acknowledge ACTRIS and Finnish Meteorological Institute for providing the data set which is available for download from <a href="${url}">${url}</a>.
+  `;
+  return ackstr.replace(/\s\s+/g, " ").trim();
+}
+
+async function getDataAvailability(req: Request, res: Response, data: RegularFile | ModelFile) {
+  const url = data.pid ? data.pid : getCloudnetUrl(data.uuid);
+  const datastr = `
+    The data used in this study are generated by the Aerosol, Clouds and Trace Gases Research Infrastructure (ACTRIS) and are available from the ACTRIS Data Centre using the following link: <a href="${url}">${url}</a>.
+  `;
+  res.send(datastr.replace(/\s\s+/g, " ").trim());
+}
+
+async function getSitePI(data: RegularFile | ModelFile): Promise<Name[]> {
   const actrisId = data.site.actrisId;
   let names: Name[] = [];
   if (actrisId) {
@@ -157,10 +168,42 @@ async function getPrincipalInvestigators(data: RegularFile | ModelFile): Promise
       },
     });
     if (response !== undefined) {
-      names = response.data.map((e: any) => ({ first_name: e.first_name, last_name: e.last_name }));
+      names = response.data.map(
+        (e: any): Name => ({ firstName: e.first_name, lastName: e.last_name, orcid: e.orcid_id, role: e.role })
+      );
     }
   }
   return names;
+}
+
+async function getInstrumentPis(pids: string[], measurementDate: Date) {
+  return await Promise.all(
+    pids.map(async (pid: string) => {
+      return await getInstrumentPi(pid, measurementDate);
+    })
+  );
+}
+
+async function getInstrumentPi(pid: string, measurementDate: Date): Promise<Name[]> {
+  if (pid == "model") {
+    return [MODEL_AUTHOR];
+  }
+  const match = pid.match("^https?://hdl\\.handle\\.net/(.+)");
+  if (!match) {
+    throw new Error("Invalid PID format");
+  }
+  const url = "https://hdl.handle.net/api/handles/" + match[1];
+  const response = await axios.get(url);
+  const values = response.data.values;
+  if (!Array.isArray(values)) {
+    throw new Error("Invalid PID response");
+  }
+  const nameItem = values.find((ele) => ele.type === "URL");
+  const apiUrl = nameItem.data.value;
+  const apiRes = await axios.get(`${apiUrl}/pi?date=${measurementDate}`);
+  return apiRes.data.map(
+    (e: any): Name => ({ firstName: e.first_name, lastName: e.last_name, orcid: e.orcid_id, role: "instrumentPi" })
+  );
 }
 
 function capitalize(str: string): string {
@@ -184,7 +227,7 @@ function yearMonthDay(isodate: string) {
 }
 
 function citation2bibtex(c: Citation) {
-  const author = c.author.map((a) => `${a.last_name}, ${a.first_name}`).join(" and ");
+  const author = c.author.map((a) => `${a.lastName}, ${a.firstName}`).join(" and ");
   const publisher = c.publisher.join(", ");
   const note = c.note.length > 0 ? `note = {${c.note}},` : "";
   return `\
@@ -202,20 +245,34 @@ function citation2bibtex(c: Citation) {
 }`.replace(/^\s*\n/gm, "");
 }
 
+function getInitials(name: string): string {
+  return name
+    .split(/\s+|-/)
+    .map((part) => part.slice(0, 1) + ".")
+    .join(" ");
+}
+
+function formatList(parts: string[]): string {
+  if (parts.length <= 2) {
+    return parts.join(", and ");
+  }
+  return parts.slice(0, -1).join(", ") + ", and " + parts[parts.length - 1];
+}
+
 function citation2html(c: Citation) {
-  let author = c.author.map((a) => `${a.last_name}, ${a.first_name}`).join(" and ");
+  let author = formatList(c.author.map((a) => `${a.lastName}, ${getInitials(a.firstName)}`));
   if (author.length > 0) {
-    author = author.concat(": ");
+    author = author.concat(" ");
   }
   const url = c.url.length > 0 ? `<a href="${c.url}">${c.url}</a>, ` : "";
   let publisher = c.publisher.join(", ");
   publisher = publisher.length > 0 ? publisher.concat(", ") : "";
-  return `${author}${c.title}, ${publisher}${url}${c.year}`;
+  return `${author}"${c.title}", ${publisher}${url}${c.year}`;
 }
 
 function citation2ris(c: Citation) {
   const endl = "\r\n";
-  let author = c.author.map((a) => `AU  - ${a.last_name}, ${a.first_name}`).join("\r\n");
+  let author = c.author.map((a) => `AU  - ${a.lastName}, ${a.firstName}`).join("\r\n");
   let publisher = c.publisher.join(", ");
   if (author == "") {
     author = "AU  - ";
@@ -231,29 +288,6 @@ Y2  - ${c.urldate}${endl}\
 N1  - ${c.note}${endl}`;
 }
 
-function commonAcknowledgement() {
-  const url = "https://cloudnet.fmi.fi/";
-  let ackstr = `
-    We acknowledge ACTRIS for providing the dataset used in this study, which was produced by the Finnish Meteorological Institute, and is available for download from <a href="${url}">${url}</a>.
-  `;
-  return ackstr.replace(/\s\s+/g, " ").trim();
-}
-
-function commonDataAvailabilityVolatileHtml(data: RegularFile | ModelFile) {
-  const url = getCloudnetUrl(data.uuid);
-  const datastr = `\
-      The ground-based remote-sensing data used in this article are generated by the Aerosol, Clouds and Trace Gases Research Infrastructure (ACTRIS) and are available from the ACTRIS Data Centre using the following link:
-      <a href="${url}">${url}</a>. The data is volatile and may be updated in the future.`;
-  return datastr.replace(/\s\s+/g, " ").trim();
-}
-function commonDataAvailabilityStableHtml(data: RegularFile | ModelFile) {
-  const pid = data.pid;
-  const datastr = `\
-      The ground-based remote-sensing data used in this article are generated by the Aerosol, Clouds and Trace Gases Research Infrastructure (ACTRIS) and are available from the ACTRIS Data Centre using the following link:
-      <a href="${pid}">${pid}</a>.`;
-  return datastr.replace(/\s\s+/g, " ").trim();
-}
-
 function getCopyrightUrl() {
   return `https://creativecommons.org/licenses/by/4.0/`;
 }
@@ -265,4 +299,23 @@ function getCloudnetUrl(uuid: string) {
 function todayIsoString() {
   const today = new Date();
   return today.toISOString().split("T")[0];
+}
+
+function removeDuplicateNames(pis: Name[]): Name[] {
+  // Order
+  const allPis = pis
+    .filter((ele) => ele.role == "instrumentPi")
+    .concat(pis.filter((ele) => ele.role == "modelPi"))
+    .concat(pis.filter((ele) => ele.role == "pi"));
+  // Remove duplicates
+  const out: Name[] = [];
+  for (const pi of allPis) {
+    const nameExists = out.some(
+      (name) => name.orcid === pi.orcid || (name.firstName === pi.firstName && name.lastName == pi.lastName)
+    );
+    if (!nameExists) {
+      out.push(pi);
+    }
+  }
+  return out;
 }
