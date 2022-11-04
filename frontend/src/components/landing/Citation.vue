@@ -10,9 +10,16 @@
   font-weight: 400
   font-size: 90%
   padding: 0.5*$basespacing $basespacing
-.volatile-disclaimer-banner
+  .banner-icon
+    height: 1.2em
+    padding-bottom: 2px
+    padding-right: 10px
+    opacity: 0.6
+
+.volatile-banner
   background-color: rgba($BLUE-3-rgb, 0.4)
-.legacy-disclaimer-banner
+
+.legacy-banner
   background-color: rgba($GRAY-3-hex, 0.4)
 
 .summary-section-header-container
@@ -50,11 +57,14 @@
 
 <template>
   <div class="summary-section" id="citation">
-    <div v-if="isVolatile" class="disclaimer-banner volatile-disclaimer-banner">
-      This data set is volatile and may be updated in the future.
-    </div>
-    <div v-if="isLegacy" class="disclaimer-banner legacy-disclaimer-banner">
-      This data set is legacy and produced using nonstandard processing.
+    <div
+      v-if="isVolatile || isLegacy"
+      class="disclaimer-banner"
+      :class="isVolatile ? 'volatile-banner' : 'legacy-banner'"
+    >
+      <img class="banner-icon" alt="warning icon" :src="require('../../assets/icons/test-warning.svg')" />
+      <span v-if="isVolatile">This data set is volatile and may be updated in the future.</span>
+      <span v-if="isLegacy">This data set is produced using nonstandard processing.</span>
     </div>
     <section class="citation-section" id="citation">
       <div class="summary-section-header-container">
