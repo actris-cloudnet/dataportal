@@ -246,10 +246,7 @@ function citation2bibtex(c: Citation) {
 }
 
 function getInitials(name: string): string {
-  return name
-    .split(/\s+|-/)
-    .map((part) => part.slice(0, 1) + ".")
-    .join(" ");
+  return name.replace(/\p{L}+/gu, (part) => part.slice(0, 1) + ".");
 }
 
 function formatList(parts: string[]): string {
