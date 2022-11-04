@@ -5,12 +5,15 @@
   padding-left: $basespacing/2
   padding-right: $basespacing/2
 
-.volatile-disclaimer-banner
-  background-color: rgba($BLUE-3-rgb,0.4)
+.disclaimer-banner
   border-radius: $baseradius
   font-weight: 400
   font-size: 90%
   padding: 0.5*$basespacing $basespacing
+.volatile-disclaimer-banner
+  background-color: rgba($BLUE-3-rgb, 0.4)
+.legacy-disclaimer-banner
+  background-color: rgba($GRAY-3-hex, 0.4)
 
 .summary-section-header-container
   display: flex
@@ -47,8 +50,11 @@
 
 <template>
   <div class="summary-section" id="citation">
-    <div v-if="isVolatile" class="volatile-disclaimer-banner">
-      Be aware that this data is volatile and may be updated in the future.
+    <div v-if="isVolatile" class="disclaimer-banner volatile-disclaimer-banner">
+      This data set is volatile and may be updated in the future.
+    </div>
+    <div v-if="isLegacy" class="disclaimer-banner legacy-disclaimer-banner">
+      This data set is legacy and produced using nonstandard processing.
     </div>
     <section class="citation-section" id="citation">
       <div class="summary-section-header-container">
@@ -127,6 +133,10 @@ export default class Citation extends Vue {
 
   get isVolatile() {
     return this.file ? this.file.volatile : false;
+  }
+
+  get isLegacy() {
+    return this.file ? this.file.legacy : false;
   }
 
   get referenceUrl() {
