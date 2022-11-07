@@ -64,8 +64,8 @@
       :class="isVolatile ? 'volatile-banner' : 'legacy-banner'"
     >
       <img class="banner-icon" alt="warning icon" :src="require('../../assets/icons/test-warning-mono.svg')" />
-      <span v-if="isVolatile">This data set is volatile and may be updated in the future.</span>
-      <span v-if="isLegacy">This data set is produced using nonstandard processing.</span>
+      <span v-if="isVolatile">This data object is volatile and may be updated in the future.</span>
+      <span v-if="isLegacy">This data object was produced using nonstandard processing.</span>
     </div>
     <section class="citation-section" id="citation">
       <div class="summary-section-header-container">
