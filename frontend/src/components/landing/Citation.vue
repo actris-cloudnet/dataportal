@@ -5,12 +5,23 @@
   padding-left: $basespacing/2
   padding-right: $basespacing/2
 
-.volatile-disclaimer-banner
-  background-color: rgba($BLUE-3-rgb,0.4)
+.disclaimer-banner
+  display: flex
+  align-items: center
   border-radius: $baseradius
   font-weight: 400
   font-size: 90%
   padding: 0.5*$basespacing $basespacing
+  .banner-icon
+    height: 1rem
+    padding-right: 0.5*$basespacing
+    opacity: 0.4
+
+.volatile-banner
+  background-color: rgba($BLUE-3-rgb, 0.4)
+
+.legacy-banner
+  background-color: rgba($GRAY-3-hex, 0.4)
 
 .summary-section-header-container
   display: flex
@@ -47,8 +58,14 @@
 
 <template>
   <div class="summary-section" id="citation">
-    <div v-if="isVolatile" class="volatile-disclaimer-banner">
-      Be aware that this data is volatile and may be updated in the future.
+    <div
+      v-if="isVolatile || isLegacy"
+      class="disclaimer-banner"
+      :class="isVolatile ? 'volatile-banner' : 'legacy-banner'"
+    >
+      <img class="banner-icon" alt="warning icon" :src="require('../../assets/icons/test-warning-mono.svg')" />
+      <span v-if="isVolatile">This data object is volatile and may be updated in the future.</span>
+      <span v-if="isLegacy">This data object was produced using nonstandard processing.</span>
     </div>
     <section class="citation-section" id="citation">
       <div class="summary-section-header-container">
@@ -127,6 +144,10 @@ export default class Citation extends Vue {
 
   get isVolatile() {
     return this.file ? this.file.volatile : false;
+  }
+
+  get isLegacy() {
+    return this.file ? this.file.legacy : false;
   }
 
   get referenceUrl() {
