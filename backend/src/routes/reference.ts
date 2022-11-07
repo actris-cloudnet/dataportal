@@ -246,10 +246,7 @@ function citation2bibtex(c: Citation) {
 }
 
 function getInitials(name: string): string {
-  return name
-    .split(/\s+|-/)
-    .map((part) => part.slice(0, 1) + ".")
-    .join(" ");
+  return name.replace(/\p{L}+/gu, (part) => part.slice(0, 1) + ".");
 }
 
 function formatList(parts: string[]): string {
@@ -310,9 +307,9 @@ function removeDuplicateNames(pis: Name[]): Name[] {
   // Remove duplicates
   const out: Name[] = [];
   for (const pi of allPis) {
-    const nameExists = out.some(
-      (name) => name.orcid === pi.orcid || (name.firstName === pi.firstName && name.lastName == pi.lastName)
-    );
+    const nameExists = pi.orcid
+      ? out.some((name) => name.orcid === pi.orcid)
+      : out.some((name) => name.firstName === pi.firstName && name.lastName === pi.lastName);
     if (!nameExists) {
       out.push(pi);
     }
