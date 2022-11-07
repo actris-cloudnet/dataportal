@@ -6,15 +6,16 @@
   padding-right: $basespacing/2
 
 .disclaimer-banner
+  display: flex
+  align-items: center
   border-radius: $baseradius
   font-weight: 400
   font-size: 90%
   padding: 0.5*$basespacing $basespacing
   .banner-icon
-    height: 1.2em
-    padding-bottom: 2px
-    padding-right: 10px
-    opacity: 0.6
+    height: 1rem
+    padding-right: 0.5*$basespacing
+    opacity: 0.4
 
 .volatile-banner
   background-color: rgba($BLUE-3-rgb, 0.4)
@@ -62,7 +63,7 @@
       class="disclaimer-banner"
       :class="isVolatile ? 'volatile-banner' : 'legacy-banner'"
     >
-      <img class="banner-icon" alt="warning icon" :src="require('../../assets/icons/test-warning.svg')" />
+      <img class="banner-icon" alt="warning icon" :src="require('../../assets/icons/test-warning-mono.svg')" />
       <span v-if="isVolatile">This data set is volatile and may be updated in the future.</span>
       <span v-if="isLegacy">This data set is produced using nonstandard processing.</span>
     </div>
