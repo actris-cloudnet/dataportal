@@ -30,6 +30,7 @@
     "size": 501452,
     "format": "NetCDF3",
     "product": "model",
+    "model": "ecmwf",
     "site": "granada",
     "version": "123",
     "errorLevel": null
