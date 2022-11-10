@@ -265,9 +265,8 @@ export class DownloadRoutes {
   }
 
   private async trackDownload(req: Request, type: ObjectType, uuid: string) {
-    const ip = req.header("x-forwarded-for") || "";
-    const result = this.ipLookup.get(ip);
-    const dl = new Download(type, uuid, ip, result?.country?.iso_code);
+    const result = this.ipLookup.get(req.ip);
+    const dl = new Download(type, uuid, req.ip, result?.country?.iso_code);
     await this.downloadRepo.save(dl);
   }
 }

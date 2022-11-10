@@ -10,7 +10,7 @@ import { initUsersAndPermissions } from "../lib/userAccountAndPermissions";
 
 let conn: Connection;
 let repo: Repository<Download>;
-axios.defaults.headers.common["X-Forwarded-For"] = "2.125.160.216";
+axios.defaults.headers.common["X-Forwarded-For"] = "2.125.160.216, 2.125.160.216, 10.134.8.1";
 
 beforeAll(async () => {
   conn = await createConnection();
