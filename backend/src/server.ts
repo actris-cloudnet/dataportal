@@ -78,6 +78,8 @@ async function createServer() {
     next(err);
   };
 
+  app.set("trust proxy", true);
+
   if (process.env.NODE_ENV != "production") {
     app.use(function (_req, res, next) {
       res.header("Access-Control-Allow-Origin", "http://localhost:8080");
