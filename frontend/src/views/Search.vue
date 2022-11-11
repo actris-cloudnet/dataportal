@@ -21,10 +21,6 @@ main#search.wideView
   padding-left: $heavypadding
   padding-right: $heavypadding
 
-.betanote
-  border-color: #ffeecf
-  background: #fdfce5
-
 a:focus
   outline: thin dotted
 
@@ -672,14 +668,6 @@ export default class Search extends Vue {
 
   dateErrorsExist(dateError: { [key: string]: boolean }) {
     return !(dateError.isValidDateString && dateError.isAfterStart && dateError.isBeforeEnd && dateError.isNotInFuture);
-  }
-
-  setSelectedProductIds(productIds: []) {
-    this.selectedProductIds = productIds;
-  }
-
-  setSelectedVariableIds(variableIds: []) {
-    this.selectedVariableIds = variableIds;
   }
 
   getInitialDateFrom() {
