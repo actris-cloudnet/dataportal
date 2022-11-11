@@ -35,31 +35,23 @@ const routes = [
     redirect: "/search/data",
   },
   {
+    // Allow two slashes in URL. Investigate if this is really needed.
     path: "/(/)?file/:uuid",
-    name: "File",
-    meta: {
-      title: "Cloudnet Data Object",
-    },
-    component: () => import("../views/File.vue"),
-    props: true,
-  },
-  {
-    path: "/beta/file/:uuid",
     meta: {
       title: "Cloudnet Data Object",
     },
     component: () => import("../views/FileBeta.vue"),
     props: true,
     children: [
-      { path: "", name: "FileBeta", component: () => import("../components/landing/LandingSummary.vue") },
+      { path: "", name: "File", component: () => import("../components/landing/LandingSummary.vue") },
       {
         path: "visualizations",
-        name: "FileBetaVisualizations",
+        name: "FileVisualizations",
         component: () => import("../components/landing/LandingVisualisations.vue"),
       },
       {
         path: "quality",
-        name: "FileBetaQualityReport",
+        name: "FileQualityReport",
         component: () => import("../components/landing/LandingQualityReport.vue"),
       },
     ],
