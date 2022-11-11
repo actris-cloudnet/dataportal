@@ -1,7 +1,6 @@
 # ACTRIS Cloudnet data portal
 
 [![Lint and test](https://github.com/actris-cloudnet/dataportal/actions/workflows/test.yml/badge.svg)](https://github.com/actris-cloudnet/dataportal/actions/workflows/test.yml)
-[![Selenium test](https://github.com/actris-cloudnet/dataportal/actions/workflows/selenium.yml/badge.svg)](https://github.com/actris-cloudnet/dataportal/actions/workflows/selenium.yml)
 
 This repository contains the source code for ACTRIS Cloudnet data portal hosted at https://cloudnet.fmi.fi.
 
@@ -13,7 +12,7 @@ on how to set up the CLU development environment.
 
 ### Development dependencies
 
-Install [pre-commit](https://pre-commit.com/#install) to your machine and run `pre-commit install` to setup the hooks.
+Install [pre-commit](https://pre-commit.com/#install) to your machine and run `pre-commit install` to set up the hooks.
 
 ## Running commands in the container
 
@@ -64,15 +63,6 @@ The frontend unit and integration tests are run with:
 
     cd frontend
     ./run npm test
-
-### Running selenium tests
-
-To run selenium tests for both backend and frontend, issue
-
-    cd .github
-    docker compose down
-    docker compose build
-    SELENIUM_TEST_TARGET=tests/selenium docker compose run test-selenium
 
 ### Running code formatters
 
