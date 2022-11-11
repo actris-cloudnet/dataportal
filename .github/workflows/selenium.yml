@@ -18,8 +18,8 @@ jobs:
       - name: Build docker images
         run: docker-compose build backend backend-prod frontend-prod
 
-      - name: Run selenium tests for file view
-        run: SELENIUM_TEST_TARGET=tests/selenium/file.test.ts docker-compose run test-selenium
+      #      - name: Run selenium tests for file view
+      #        run: SELENIUM_TEST_TARGET=tests/selenium/file.test.ts docker-compose run test-selenium
 
       - name: Run selenium tests for search view
         run: |
