@@ -259,7 +259,10 @@ section#fileTable
                     <img :src="getQcIcon(previewResponse.errorLevel)" alt="" />
                   </router-link>
                   <span v-if="previewResponse.errorLevel !== 'pass'">
-                    Some issues, <router-link :to="`/quality/${previewResponse.uuid}`">see report. </router-link></span
+                    Some issues,
+                    <router-link :to="{ name: 'FileQualityReport', params: { uuid: `${previewResponse.uuid}` } }"
+                      >see report.</router-link
+                    ></span
                   >
                   <span v-else> Pass </span>
                 </span>

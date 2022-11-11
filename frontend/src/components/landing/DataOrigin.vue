@@ -12,7 +12,7 @@
           <div class="data-source-list">
             <!-- eslint-disable-next-line vue/require-v-for-key -->
             <div class="data-source-container" v-for="sourceFile in sourceFiles">
-              <router-link :to="`/beta/file/${sourceFile.value.uuid}`" v-if="sourceFile.ok">
+              <router-link :to="`/file/${sourceFile.value.uuid}`" v-if="sourceFile.ok">
                 <img
                   :alt="sourceFile.value.product.id"
                   :src="getProductIcon(sourceFile.value.product.id)"
@@ -34,16 +34,11 @@
       <tr>
         <th>Versions</th>
         <td>
-          <router-link
-            v-if="!isBusy && previousVersion"
-            id="previousVersion"
-            :to="`/beta/file/${previousVersion}`"
-            replace
-          >
+          <router-link v-if="!isBusy && previousVersion" id="previousVersion" :to="`/file/${previousVersion}`" replace>
             previous
           </router-link>
           <span v-if="!isBusy && previousVersion && nextVersion">-</span>
-          <router-link v-if="!isBusy && nextVersion" id="nextVersion" :to="`/beta/file/${nextVersion}`" replace>
+          <router-link v-if="!isBusy && nextVersion" id="nextVersion" :to="`/file/${nextVersion}`" replace>
             next</router-link
           >
           <span v-if="isBusy || (!previousVersion && !nextVersion)" class="notAvailable"></span>
@@ -79,7 +74,7 @@ import { ModelFile, RegularFile } from "../../../../backend/src/entity/File";
 import { Component, Prop } from "vue-property-decorator";
 import Vue from "vue";
 import { getProductIcon } from "../../lib";
-import { SourceFile } from "../../views/FileBeta.vue";
+import { SourceFile } from "../../views/File.vue";
 
 @Component
 export default class DataOrigin extends Vue {

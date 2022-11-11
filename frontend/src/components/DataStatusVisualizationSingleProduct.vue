@@ -141,7 +141,7 @@ export default class ProductAvailabilityVisualizationSingle extends ProductAvail
       const uuid = prodsAll[0].uuid;
       if (this.qualityScores) {
         if (this.hasSomeTests(products)) {
-          return `/quality/${uuid}`;
+          return `/file/${uuid}/quality`;
         }
       } else {
         return `/file/${uuid}`;
