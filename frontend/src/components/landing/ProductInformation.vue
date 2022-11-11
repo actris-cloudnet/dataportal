@@ -63,7 +63,7 @@
           <div v-if="typeof response.errorLevel === 'string'" class="quality-container">
             <img class="quality-icon" :src="getQcIcon(response.errorLevel)" alt="" />
             <span v-if="response.errorLevel !== 'pass'">
-              Some issues, <router-link :to="{ name: 'FileBetaQualityReport' }">see report</router-link>
+              Some issues, <router-link :to="{ name: 'FileQualityReport' }">see report</router-link>
             </span>
             <span v-else>Pass</span>
           </div>

@@ -40,7 +40,7 @@ const routes = [
     meta: {
       title: "Cloudnet Data Object",
     },
-    component: () => import("../views/FileBeta.vue"),
+    component: () => import("../views/File.vue"),
     props: true,
     children: [
       { path: "", name: "File", component: () => import("../components/landing/LandingSummary.vue") },

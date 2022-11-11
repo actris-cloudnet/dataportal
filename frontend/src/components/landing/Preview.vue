@@ -14,7 +14,7 @@
       v-else-if="visualization"
       :data="visualization"
       :caption="true"
-      :linkTo="{ name: 'FileBetaVisualizations' }"
+      :linkTo="{ name: 'FileVisualizations' }"
     />
     <div v-else class="placeholder">Not available.</div>
   </div>
