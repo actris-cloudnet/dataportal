@@ -255,9 +255,7 @@ section#fileTable
               <dt>Quality check</dt>
               <dd>
                 <span v-if="typeof previewResponse.errorLevel === 'string'" class="qualitycheck">
-                  <router-link :to="`/quality/${previewResponse.uuid}`">
-                    <img :src="getQcIcon(previewResponse.errorLevel)" alt="" />
-                  </router-link>
+                  <img :src="getQcIcon(previewResponse.errorLevel)" alt="" />
                   <span v-if="previewResponse.errorLevel !== 'pass'">
                     Some issues,
                     <router-link :to="{ name: 'FileQualityReport', params: { uuid: `${previewResponse.uuid}` } }"
