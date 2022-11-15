@@ -27,6 +27,17 @@ function productTypeFromString(value: string): ProductType | undefined {
   return (Object.values(ProductType) as string[]).includes(value) ? (value as ProductType) : undefined;
 }
 
+// Validate ISO 8601 date.
+function validateDate(input: string): boolean {
+  const [year, month, day] = input.split("-");
+  const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  const expected = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date
+    .getDate()
+    .toString()
+    .padStart(2, "0")}`;
+  return input === expected;
+}
+
 export class DownloadRoutes {
   constructor(
     conn: Connection,
@@ -142,7 +153,11 @@ export class DownloadRoutes {
   };
 
   stats: RequestHandler = async (req, res, next) => {
-    let select, group, order;
+    const params = [];
+    let select,
+      group,
+      order,
+      where = "";
     switch (req.query.dimensions) {
       case "yearMonth,downloads":
         select = `SELECT to_char(download."createdAt", 'YYYY-MM') AS "yearMonth"
@@ -189,22 +204,36 @@ export class DownloadRoutes {
       return;
     }
 
+    if (req.query.downloadDateFrom) {
+      if (typeof req.query.downloadDateFrom !== "string" || !validateDate(req.query.downloadDateFrom)) {
+        return next({ status: 400, errors: "invalid downloadDateFrom" });
+      }
+      params.push(req.query.downloadDateFrom);
+      where += ` AND "createdAt" >= $${params.length}::date`;
+    }
+    if (req.query.downloadDateTo) {
+      if (typeof req.query.downloadDateTo !== "string" || !validateDate(req.query.downloadDateTo)) {
+        return next({ status: 400, errors: "invalid downloadDateTo" });
+      }
+      params.push(req.query.downloadDateTo);
+      where += ` AND "createdAt" < ($${params.length}::date + '1 day'::interval)`;
+    }
+
     const productFileJoin = 'JOIN product_variable USING ("productId")';
     const productFileWhere = 'WHERE product_variable."actrisVocabUri" IS NOT NULL';
     let fileJoin = "";
     let fileWhere = "";
-    const params = [];
     if (req.query.site && req.query.country) {
       return next({ status: 400, errors: "site and country parameters cannot be used at the same time" });
     }
     if (req.query.site) {
-      fileWhere = 'AND "siteId" = $1';
       params.push(req.query.site);
+      fileWhere = `AND "siteId" = $${params.length}`;
     }
     if (req.query.country) {
-      fileJoin = 'JOIN site ON "siteId" = site.id';
-      fileWhere = 'AND "countryCode" = $1';
       params.push(req.query.country);
+      fileJoin = 'JOIN site ON "siteId" = site.id';
+      fileWhere = `AND "countryCode" = $${params.length}`;
     }
     const fileSelects = [];
     const collectionFileSelects = [];
@@ -245,6 +274,7 @@ export class DownloadRoutes {
       FROM download
       JOIN (${fileSelect}) object ON "objectUuid" = object.uuid
       WHERE ip NOT IN ('', '::ffff:127.0.0.1') AND ip NOT LIKE '192.168.%'
+      ${where}
       ${group}
       ${order}`;
 

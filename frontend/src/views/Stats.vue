@@ -91,6 +91,10 @@ legend
           Model
         </label>
       </fieldset>
+      <div>
+        <div class="label">Download date:</div>
+        <input type="date" v-model="dateFrom" /> – <input type="date" v-model="dateTo" />
+      </div>
       <button @click="onSearch" :disabled="loading">
         {{ loading ? "Loading..." : "Search" }}
       </button>
@@ -174,6 +178,8 @@ export default class StatsView extends Vue {
   countries: Option[] = [];
   sites: Option[] = [];
   productTypes = ["observation", "model"];
+  dateFrom = "";
+  dateTo = "";
 
   currentCountry: string | null = null;
   currentSite: string | null = null;
@@ -230,6 +236,8 @@ export default class StatsView extends Vue {
       country: this.currentCountry || undefined,
       site: this.currentSite || undefined,
       productTypes: this.productTypes.join(","),
+      downloadDateFrom: this.dateFrom || undefined,
+      downloadDateTo: this.dateTo || undefined,
     };
     try {
       const response = await axios.get(`${this.apiUrl}download/stats`, { params, withCredentials: true });

@@ -21,6 +21,8 @@ interface Params {
   country?: string;
   site?: string;
   productTypes?: string;
+  downloadDateFrom?: string;
+  downloadDateTo?: string;
 }
 
 function doRequest(params: Params, headers: any = { authorization: `Basic ${str2base64("bob:bobs_pass")}` }) {
@@ -207,5 +209,31 @@ describe("GET /api/download/stats", () => {
       { yearMonth: "2022-10", downloads: expect.toBeAround((1 * 31) / 365.25, 10) },
       { yearMonth: "2022-11", downloads: expect.toBeAround((1 * 30) / 365.25, 10) },
       { yearMonth: "2022-12", downloads: expect.toBeAround((1 * 31) / 365.25, 10) },
+    ]));
+
+  it("filters until download date", () =>
+    expect(getStats({ dimensions: "yearMonth,downloads", downloadDateTo: "2022-02-20" })).resolves.toMatchObject([
+      { yearMonth: "2022-01", downloads: expect.toBeAround((2 * 2 * 31) / 365.25, 10) },
+      { yearMonth: "2022-02", downloads: expect.toBeAround((2 * 2 * 20) / 365.25, 10) },
+    ]));
+
+  it("filters from download date", () =>
+    expect(getStats({ dimensions: "yearMonth,downloads", downloadDateFrom: "2022-11-21" })).resolves.toMatchObject([
+      { yearMonth: "2022-11", downloads: expect.toBeAround(((2 + 1) * 10) / 365.25, 10) },
+      { yearMonth: "2022-12", downloads: expect.toBeAround(((2 + 1) * 31) / 365.25, 10) },
+    ]));
+
+  it("filters between download dates", () =>
+    expect(
+      getStats({ dimensions: "yearMonth,downloads", downloadDateFrom: "2022-03-02", downloadDateTo: "2022-10-15" })
+    ).resolves.toMatchObject([
+      { yearMonth: "2022-03", downloads: expect.toBeAround((2 * 2 * 30) / 365.25, 10) },
+      { yearMonth: "2022-04", downloads: expect.toBeAround((2 * 2 * 30) / 365.25, 10) },
+      { yearMonth: "2022-05", downloads: expect.toBeAround((2 * 2 * 31) / 365.25, 10) },
+      { yearMonth: "2022-06", downloads: expect.toBeAround((2 * 2 * 30) / 365.25, 10) },
+      { yearMonth: "2022-07", downloads: expect.toBeAround(((2 + 1) * 31) / 365.25, 10) },
+      { yearMonth: "2022-08", downloads: expect.toBeAround(((2 + 1) * 31) / 365.25, 10) },
+      { yearMonth: "2022-09", downloads: expect.toBeAround(((2 + 1) * 30) / 365.25, 10) },
+      { yearMonth: "2022-10", downloads: expect.toBeAround(((2 + 1) * 15) / 365.25, 10) },
     ]));
 });
