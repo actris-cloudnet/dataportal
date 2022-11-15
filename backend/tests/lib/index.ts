@@ -2,6 +2,7 @@ import * as fs from "fs";
 import { resolve } from "path";
 import { createConnection } from "typeorm";
 import axios from "axios";
+import { expect } from "@jest/globals";
 
 if (!process.env.DP_BACKEND_URL) throw new Error("DP_BACKEND_URL must be set");
 if (!process.env.DP_FRONTEND_URL) throw new Error("DP_FRONTEND_URL must be set");
@@ -44,3 +45,32 @@ export const visualizationPayloads = [
 ];
 
 export const str2base64 = (hex: string) => Buffer.from(hex, "utf8").toString("base64");
+
+expect.extend({
+  toBeAround(received: number, expected: number, precision: number = 2) {
+    const pass = Math.abs(expected - received) < Math.pow(10, -precision) / 2;
+    if (pass) {
+      return {
+        message: () => `expected ${received} not to be around ${expected}`,
+        pass: true,
+      };
+    } else {
+      return {
+        message: () => `expected ${received} to be around ${expected}`,
+        pass: false,
+      };
+    }
+  },
+});
+
+interface CustomMatchers<R = unknown> {
+  toBeAround(expected: number, precision?: number): R;
+}
+
+declare global {
+  namespace jest {
+    interface Expect extends CustomMatchers {}
+    interface Matchers<R> extends CustomMatchers<R> {}
+    interface InverseAsymmetricMatchers extends CustomMatchers {}
+  }
+}

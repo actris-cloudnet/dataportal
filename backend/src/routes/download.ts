@@ -15,6 +15,29 @@ import env from "../lib/env";
 import { CollectionRoutes } from "./collection";
 import { UploadRoutes } from "./upload";
 
+enum ProductType {
+  Observation = "observation",
+  Model = "model",
+  FundamentalParameter = "fundamentalParameter",
+}
+
+const allProductTypes = Object.values(ProductType) as ProductType[];
+
+function productTypeFromString(value: string): ProductType | undefined {
+  return (Object.values(ProductType) as string[]).includes(value) ? (value as ProductType) : undefined;
+}
+
+// Validate ISO 8601 date.
+function validateDate(input: string): boolean {
+  const [year, month, day] = input.split("-");
+  const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  const expected = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date
+    .getDate()
+    .toString()
+    .padStart(2, "0")}`;
+  return input === expected;
+}
+
 export class DownloadRoutes {
   constructor(
     conn: Connection,
@@ -130,100 +153,135 @@ export class DownloadRoutes {
   };
 
   stats: RequestHandler = async (req, res, next) => {
-    let select, group, order;
+    const params = [];
+    let select,
+      group,
+      order,
+      where = "";
     switch (req.query.dimensions) {
       case "yearMonth,downloads":
         select = `SELECT to_char(download."createdAt", 'YYYY-MM') AS "yearMonth"
-              , SUM(files) AS downloads`;
+                       , SUM("variableDays") / 365.25 AS downloads`;
         group = 'GROUP BY "yearMonth"';
         order = 'ORDER BY "yearMonth"';
         break;
       case "yearMonth,uniqueIps":
         select = `SELECT to_char(download."createdAt", 'YYYY-MM') AS "yearMonth"
-              , COUNT(DISTINCT ip) AS "uniqueIps"`;
+                       , COUNT(DISTINCT ip) AS "uniqueIps"`;
         group = 'GROUP BY "yearMonth"';
         order = 'ORDER BY "yearMonth"';
         break;
       case "country,downloads":
-        select = "SELECT country, SUM(files) AS downloads";
+        select = 'SELECT country, SUM("variableDays") / 365.25 AS downloads';
         group = "GROUP BY country";
-        order = "ORDER BY downloads DESC";
+        order = "ORDER BY country";
         break;
       default:
         return next({ status: 400, errors: "invalid dimensions" });
     }
 
-    let fileFilter = "";
-    const params = [];
+    let productTypes: Set<ProductType>;
+    if (typeof req.query.productTypes === "undefined") {
+      productTypes = new Set(allProductTypes);
+    } else {
+      if (typeof req.query.productTypes !== "string") {
+        return next({ status: 400, errors: "invalid products parameter" });
+      }
+      productTypes = new Set();
+      for (const productString of req.query.productTypes.split(",")) {
+        const product = productTypeFromString(productString);
+        if (!product) {
+          return next({ status: 400, errors: `invalid product: ${productString}` });
+        }
+        productTypes.add(product);
+      }
+    }
+    if (productTypes.size === 0) {
+      return next({ status: 400, errors: "invalid products parameter" });
+    }
+    if (productTypes.size === 1 && productTypes.has(ProductType.FundamentalParameter)) {
+      res.send([]);
+      return;
+    }
+
+    if (req.query.downloadDateFrom) {
+      if (typeof req.query.downloadDateFrom !== "string" || !validateDate(req.query.downloadDateFrom)) {
+        return next({ status: 400, errors: "invalid downloadDateFrom" });
+      }
+      params.push(req.query.downloadDateFrom);
+      where += ` AND "createdAt" >= $${params.length}::date`;
+    }
+    if (req.query.downloadDateTo) {
+      if (typeof req.query.downloadDateTo !== "string" || !validateDate(req.query.downloadDateTo)) {
+        return next({ status: 400, errors: "invalid downloadDateTo" });
+      }
+      params.push(req.query.downloadDateTo);
+      where += ` AND "createdAt" < ($${params.length}::date + '1 day'::interval)`;
+    }
+
+    const productFileJoin = 'JOIN product_variable USING ("productId")';
+    const productFileWhere = 'WHERE product_variable."actrisVocabUri" IS NOT NULL';
+    let fileJoin = "";
+    let fileWhere = "";
     if (req.query.site && req.query.country) {
       return next({ status: 400, errors: "site and country parameters cannot be used at the same time" });
     }
     if (req.query.site) {
-      fileFilter = 'WHERE "siteId" = $1';
       params.push(req.query.site);
+      fileWhere = `AND "siteId" = $${params.length}`;
     }
     if (req.query.country) {
-      fileFilter = 'JOIN site ON "siteId" = site.id WHERE "countryCode" = $1';
       params.push(req.query.country);
+      fileJoin = 'JOIN site ON "siteId" = site.id';
+      fileWhere = `AND "countryCode" = $${params.length}`;
+    }
+    const fileSelects = [];
+    const collectionFileSelects = [];
+
+    if (productTypes.has(ProductType.Observation)) {
+      fileSelects.push(`SELECT uuid
+        FROM regular_file
+        ${productFileJoin} ${fileJoin}
+        ${productFileWhere} ${fileWhere}`);
+      collectionFileSelects.push(`SELECT "collectionUuid", "regularFileUuid" AS "fileUuid"
+        FROM collection_regular_files_regular_file
+        JOIN regular_file ON "regularFileUuid" = regular_file.uuid
+        ${productFileJoin} ${fileJoin}
+        ${productFileWhere} ${fileWhere}`);
     }
 
-    const fileSelects = [];
-    if (typeof req.query.types == "string") {
-      for (const type of req.query.types.split(",")) {
-        switch (type) {
-          case "file":
-            fileSelects.push(
-              `SELECT uuid, 1 AS files FROM regular_file
-             ${fileFilter}
-             UNION
-             SELECT uuid, 1 AS files FROM model_file
-             ${fileFilter}`
-            );
-            break;
-          case "rawFile":
-            fileSelects.push(
-              `SELECT uuid, 1 AS files FROM instrument_upload
-             ${fileFilter}
-             UNION
-             SELECT uuid, 1 AS files FROM model_upload
-             ${fileFilter}`
-            );
-            break;
-          case "fileInCollection":
-            fileSelects.push(
-              `SELECT "collectionUuid" as uuid, count(*) as files
-             FROM (SELECT "collectionUuid", "regularFileUuid" AS "fileUuid"
-                   FROM collection_regular_files_regular_file
-                   JOIN regular_file ON "regularFileUuid" = regular_file.uuid
-                   ${fileFilter}
-                   UNION
-                   SELECT "collectionUuid", "modelFileUuid" AS "fileUuid"
-                   FROM collection_model_files_model_file
-                   JOIN model_file ON "modelFileUuid" = model_file.uuid
-                   ${fileFilter}) collection_file
-             GROUP BY "collectionUuid"`
-            );
-            break;
-          default:
-            return next({ status: 400, errors: "invalid types" });
-        }
-      }
+    if (productTypes.has(ProductType.Model)) {
+      fileSelects.push(`SELECT uuid
+        FROM model_file
+        ${productFileJoin} ${fileJoin}
+        ${productFileWhere} ${fileWhere}`);
+      collectionFileSelects.push(`SELECT "collectionUuid", "modelFileUuid" AS "fileUuid"
+        FROM collection_model_files_model_file
+        JOIN model_file ON "modelFileUuid" = model_file.uuid
+        ${productFileJoin} ${fileJoin}
+        ${productFileWhere} ${fileWhere}`);
     }
-    if (fileSelects.length === 0) {
-      return next({ status: 400, errors: "invalid types" });
-    }
+
+    const fileSelect = `SELECT uuid, count(*) AS "variableDays"
+       FROM (${fileSelects.join(" UNION ALL ")}) AS file
+       GROUP BY uuid
+       UNION ALL
+       SELECT "collectionUuid" AS uuid, COUNT(*) AS "variableDays"
+       FROM (${collectionFileSelects.join(" UNION ALL ")}) AS collection_file
+       GROUP BY "collectionUuid"`;
 
     const query = `${select}
-       FROM download
-       JOIN (${fileSelects.join(" UNION ")}) object ON "objectUuid" = object.uuid
-       WHERE ip NOT IN ('', '::ffff:127.0.0.1') AND ip NOT LIKE '192.168.%'
-       ${group}
-       ${order}`;
+      FROM download
+      JOIN (${fileSelect}) object ON "objectUuid" = object.uuid
+      WHERE ip NOT IN ('', '::ffff:127.0.0.1') AND ip NOT LIKE '192.168.%' AND ip NOT LIKE '193.166.223.%'
+      ${where}
+      ${group}
+      ${order}`;
 
     try {
       const rows = await this.conn.query(query, params);
       rows.forEach((row: any) => {
-        if (row.downloads) row.downloads = parseInt(row.downloads);
+        if (row.downloads) row.downloads = parseFloat(row.downloads);
         if (row.uniqueIps) row.uniqueIps = parseInt(row.uniqueIps);
       });
       res.send(rows);

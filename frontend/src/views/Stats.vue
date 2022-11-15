@@ -34,6 +34,9 @@ table,
 .placeholder
   margin-top: 1rem
 
+button
+  margin-top: .5rem
+
 legend
   font-size: inherit
   font-weight: bold
@@ -78,21 +81,21 @@ legend
         </label>
       </div>
       <fieldset>
-        <legend class="label">File type:</legend>
+        <legend class="label">Product type:</legend>
         <label>
-          <input type="checkbox" value="file" v-model="type" />
-          File
+          <input type="checkbox" value="observation" v-model="productTypes" />
+          Observation
         </label>
         <label style="margin-left: 0.5rem">
-          <input type="checkbox" value="rawFile" v-model="type" />
-          Raw file
-        </label>
-        <label style="margin-left: 0.5rem">
-          <input type="checkbox" value="fileInCollection" v-model="type" />
-          File in collection
+          <input type="checkbox" value="model" v-model="productTypes" />
+          Model
         </label>
       </fieldset>
-      <button @click="onSearch" :disabled="type.length == 0 || loading">
+      <div>
+        <div class="label">Download date:</div>
+        <input type="date" v-model="dateFrom" /> – <input type="date" v-model="dateTo" />
+      </div>
+      <button @click="onSearch" :disabled="loading">
         {{ loading ? "Loading..." : "Search" }}
       </button>
       <template v-if="!initial">
@@ -158,13 +161,12 @@ export default class StatsView extends Vue {
   dimensions: string[] = [];
   loading = false;
   initial = true;
-  type = ["file"];
   maxValue = 0;
   selectedDimensions = "yearMonth,downloads";
   DIMENSION_LABEL = {
     yearMonth: "Month",
     country: "Country",
-    downloads: "Downloads",
+    downloads: "Downloads (in variable years)",
     uniqueIps: "Unique IPs",
   };
   numberFormat = (Intl && Intl.NumberFormat && new Intl.NumberFormat("en-GB")) || {
@@ -175,6 +177,9 @@ export default class StatsView extends Vue {
   loadingSites = true;
   countries: Option[] = [];
   sites: Option[] = [];
+  productTypes = ["observation", "model"];
+  dateFrom = "";
+  dateTo = "";
 
   currentCountry: string | null = null;
   currentSite: string | null = null;
@@ -228,9 +233,11 @@ export default class StatsView extends Vue {
     this.loading = true;
     const params = {
       dimensions: this.selectedDimensions,
-      types: this.type.join(","),
       country: this.currentCountry || undefined,
       site: this.currentSite || undefined,
+      productTypes: this.productTypes.join(","),
+      downloadDateFrom: this.dateFrom || undefined,
+      downloadDateTo: this.dateTo || undefined,
     };
     try {
       const response = await axios.get(`${this.apiUrl}download/stats`, { params, withCredentials: true });
@@ -239,6 +246,9 @@ export default class StatsView extends Vue {
       this.statistics = response.data;
       this.dimensions = this.selectedDimensions.split(",");
       this.maxValue = Math.max(...this.statistics.map((d) => d[this.dimensions[1]]));
+      if (this.selectedDimensions === "country,downloads") {
+        this.statistics.sort((a, b) => compareValues(b.downloads, a.downloads));
+      }
     } catch (e) {
       this.loading = false;
       alert("Failed to download statistics");

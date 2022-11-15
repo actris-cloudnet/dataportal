@@ -272,11 +272,31 @@ section#fileTable
         <section id="preview">
           <header>Visualization</header>
           <section class="details">
-            <div v-if="previewImgUrl">
+            <div v-if="pendingVisualization">
               <div class="variable">
-                <h4>{{ previewTitle }}</h4>
+                <h4 v-if="currentVisualization">
+                  {{ currentVisualization.productVariable.humanReadableName }}
+                  <a
+                    :href="currentVisualization.productVariable.actrisVocabUri"
+                    v-if="currentVisualization.productVariable.actrisVocabUri"
+                    title="ACTRIS variable"
+                  >
+                    <svg
+                      class="link"
+                      fill="#000000"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 30 30"
+                      width="60px"
+                      height="60px"
+                    >
+                      <path
+                        d="M 25.980469 2.9902344 A 1.0001 1.0001 0 0 0 25.869141 3 L 20 3 A 1.0001 1.0001 0 1 0 20 5 L 23.585938 5 L 13.292969 15.292969 A 1.0001 1.0001 0 1 0 14.707031 16.707031 L 25 6.4140625 L 25 10 A 1.0001 1.0001 0 1 0 27 10 L 27 4.1269531 A 1.0001 1.0001 0 0 0 25.980469 2.9902344 z M 6 7 C 4.9069372 7 4 7.9069372 4 9 L 4 24 C 4 25.093063 4.9069372 26 6 26 L 21 26 C 22.093063 26 23 25.093063 23 24 L 23 14 L 23 11.421875 L 21 13.421875 L 21 16 L 21 24 L 6 24 L 6 9 L 14 9 L 16 9 L 16.578125 9 L 18.578125 7 L 16 7 L 14 7 L 6 7 z"
+                      />
+                    </svg>
+                  </a>
+                </h4>
                 <router-link :to="`/file/${previewResponse.uuid}`">
-                  <img :src="previewImgUrl" class="visualization" @load="changePreview" />
+                  <visualization :data="pendingVisualization" @load="changePreview" />
                 </router-link>
               </div>
             </div>
@@ -311,7 +331,10 @@ import {
 import { SearchFileResponse } from "../../../backend/src/entity/SearchFileResponse";
 import { BTable } from "bootstrap-vue/esm/components/table";
 import { BPagination } from "bootstrap-vue/esm/components/pagination";
+import { VisualizationItem } from "../../../backend/src/entity/VisualizationResponse";
+import Visualization from "./Visualization.vue";
 
+Vue.component("visualization", Visualization);
 Vue.component("b-table", BTable);
 Vue.component("b-pagination", BPagination);
 
@@ -327,13 +350,11 @@ export default class DataSearchResult extends Vue {
   apiUrl = process.env.VUE_APP_BACKENDURL;
   previewResponse: File | null = null;
   pendingPreviewResponse: File | null = null;
+  currentVisualization: VisualizationItem | null = null;
+  pendingVisualization: VisualizationItem | null = null;
 
   currentPage = 1;
   perPage = 15;
-
-  previewImgUrl = "";
-  previewTitle = "";
-  pendingPreviewTitle = "";
 
   humanReadableSize = humanReadableSize;
   humanReadableTimestamp = humanReadableTimestamp;
@@ -356,7 +377,6 @@ export default class DataSearchResult extends Vue {
   rowSelected(records: File[]) {
     if (records.length === 0) {
       this.clearPreview();
-      this.previewTitle = "";
       this.previewResponse = null;
       return;
     }
@@ -389,19 +409,18 @@ export default class DataSearchResult extends Vue {
           this.changePreview();
           return;
         }
-        const viz = sortVisualizations(data.visualizations)[0];
-        this.previewImgUrl = `${this.apiUrl}download/image/${viz.s3key}`;
-        this.pendingPreviewTitle = viz.productVariable.humanReadableName;
+        this.pendingVisualization = sortVisualizations(data.visualizations)[0];
       })
       .catch((error) => console.error(`Failed to load preview: ${error}`));
   }
 
   clearPreview() {
-    this.previewImgUrl = "";
+    this.currentVisualization = null;
+    this.pendingVisualization = null;
   }
 
   changePreview() {
-    this.previewTitle = this.pendingPreviewTitle;
+    this.currentVisualization = this.pendingVisualization;
     this.previewResponse = this.pendingPreviewResponse;
   }
 

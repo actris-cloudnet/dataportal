@@ -13,17 +13,28 @@ export class ProductVariable {
   @Column()
   order!: string;
 
+  @Column({ type: "varchar", nullable: true })
+  actrisVocabUri!: string | null;
+
   @OneToMany((_) => Visualization, (viz) => viz.productVariable)
   visualizations!: Visualization[];
 
   @ManyToOne((_) => Product, (prod) => prod.variables)
   product!: Product;
 
-  constructor(id: string, humanReadableName: string, order: string, visualizations: Visualization[], product: Product) {
+  constructor(
+    id: string,
+    humanReadableName: string,
+    order: string,
+    visualizations: Visualization[],
+    product: Product,
+    actrisVocabUri: string | null = null
+  ) {
     this.id = id;
     this.humanReadableName = humanReadableName;
     this.order = order;
     this.visualizations = visualizations;
     this.product = product;
+    this.actrisVocabUri = actrisVocabUri;
   }
 }

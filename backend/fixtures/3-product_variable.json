@@ -27,13 +27,15 @@
     "id": "radar-v",
     "humanReadableName": "Radar velocity",
     "product": "radar",
-    "order": "2"
+    "order": "2",
+    "actrisVocabUri": "http://example.org/vocab/radar-velocity"
   },
   {
     "id": "radar-ldr",
     "humanReadableName": "Radar LDR",
     "product": "radar",
-    "order": "3"
+    "order": "3",
+    "actrisVocabUri": "http://example.org/vocab/radar-linear-depolarisation-ratio"
   },
   {
     "id": "categorize-v",
@@ -58,5 +60,12 @@
     "humanReadableName": "Classification LDR",
     "product": "classification",
     "order": "3"
+  },
+  {
+    "id": "model-temperature",
+    "humanReadableName": "Model temperature",
+    "product": "model",
+    "order": "0",
+    "actrisVocabUri": "http://example.org/vocab/model-temperature"
   }
 ]

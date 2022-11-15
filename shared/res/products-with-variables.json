@@ -116,7 +116,14 @@
     "humanReadableName": "Model",
     "level": "1b",
     "experimental": false,
-    "variables": []
+    "variables": [
+      {
+        "id": "model-temperature",
+        "humanReadableName": "Model temperature",
+        "order": "0",
+        "actrisVocabUri": "http://example.org/vocab/model-temperature"
+      }
+    ]
   },
   {
     "id": "mwr",
@@ -134,12 +141,14 @@
       {
         "id": "radar-v",
         "humanReadableName": "Radar velocity",
-        "order": "2"
+        "order": "2",
+        "actrisVocabUri": "http://example.org/vocab/radar-velocity"
       },
       {
         "id": "radar-ldr",
         "humanReadableName": "Radar LDR",
-        "order": "3"
+        "order": "3",
+        "actrisVocabUri": "http://example.org/vocab/radar-linear-depolarisation-ratio"
       }
     ]
   }
