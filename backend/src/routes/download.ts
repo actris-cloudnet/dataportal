@@ -273,7 +273,7 @@ export class DownloadRoutes {
     const query = `${select}
       FROM download
       JOIN (${fileSelect}) object ON "objectUuid" = object.uuid
-      WHERE ip NOT IN ('', '::ffff:127.0.0.1') AND ip NOT LIKE '192.168.%'
+      WHERE ip NOT IN ('', '::ffff:127.0.0.1') AND ip NOT LIKE '192.168.%' AND ip NOT LIKE '193.166.223.%'
       ${where}
       ${group}
       ${order}`;
