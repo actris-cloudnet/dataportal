@@ -1,0 +1,16 @@
+#!/bin/sh
+set -e
+cd backend
+if [ "$1" != "major" ] && [ "$1" != "minor" ] && [ "$1" != "patch" ]; then
+  echo "Usage: $0 [major|minor|patch]"
+  exit 1
+fi
+version=$(npm version --no-git-tag-version "$1")
+git add package*
+cd ../frontend
+npm version --no-git-tag-version "$version" > /dev/null
+git add package*
+git commit -m "Release $version"
+git tag -am "$version" "$version"
+git push
+git push --tags
