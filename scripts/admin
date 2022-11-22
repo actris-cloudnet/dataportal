@@ -1,0 +1,147 @@
+#!/usr/bin/env python3
+
+import argparse
+import urllib.request
+import json
+
+BASE_URL = "http://localhost:3000"
+PERMISSIONS = ["canUpload", "canUploadModel", "canCalibrate", "canProcess", "canAddPublication", "canDelete", "canGetStats"]
+
+
+def get_all_users():
+    req = urllib.request.Request(url=f"{BASE_URL}/user-accounts")
+    with urllib.request.urlopen(req) as f:
+        return json.load(f)
+
+
+def get_user(username):
+    for user in get_all_users():
+        if user["username"] == username:
+            return user
+
+
+def put_user(user):
+    req = urllib.request.Request(
+        method="PUT",
+        url=f"{BASE_URL}/user-accounts/{user['id']}",
+        headers={"Content-Type": "application/json"},
+        data=json.dumps(user).encode("utf-8"),
+    )
+    with urllib.request.urlopen(req) as f:
+        return json.load(f)
+
+
+def post_user(user):
+    req = urllib.request.Request(
+        method="POST",
+        url=f"{BASE_URL}/user-accounts",
+        headers={"Content-Type": "application/json"},
+        data=json.dumps(user).encode("utf-8"),
+    )
+    with urllib.request.urlopen(req) as f:
+        return json.load(f)
+
+
+def print_user(user):
+    print('Username: ' + user['username'])
+    if user['permissions']:
+        print('Permissions:')
+        for perm in user['permissions']:
+            if perm['siteId'] is None:
+                print(f"- {perm['permission']} to all sites")
+            else:
+                print(f"- {perm['permission']} to site {perm['siteId']}")
+    else:
+        print('No permissions')
+
+
+def list_users(username):
+    for user in get_all_users():
+        print_user(user)
+        print()
+
+
+def user_info(args):
+    print_user(get_user(args.username))
+
+
+def create_user(args):
+    user = {"username": args.username, "permissions": []}
+    if args.password:
+        user['password'] = args.password
+    user = post_user(user)
+    token = user.get('activationToken')
+    if token:
+        link = f"https://cloudnet.fmi.fi/credentials/{token}"
+        print(f"Activation link: {link}")
+    else:
+        print_user(user)
+
+
+def add_permission(args):
+    user = get_user(args.username)
+    if args.all_sites:
+        user["permissions"].append({"siteId": None, "permission": args.permission})
+    else:
+        for site in args.site:
+            user["permissions"].append({"siteId": site, "permission": args.permission})
+    put_user(user)
+    print_user(user)
+
+
+def remove_permission(args):
+    user = get_user(args.username)
+    if args.all_sites:
+        user["permissions"] = [
+            perm
+            for perm in user["permissions"]
+            if perm["permission"] != args.permission
+        ]
+    else:
+        for site in args.site:
+            user["permissions"] = [
+                perm
+                for perm in user["permissions"]
+                if perm["siteId"] != site or perm["permission"] != args.permission
+            ]
+    put_user(user)
+    print_user(user)
+
+
+def main():
+    parser = argparse.ArgumentParser(prog="cloudnet-admin")
+    subparsers = parser.add_subparsers(required=True, dest='command')
+
+    subparser = subparsers.add_parser("list-users")
+    subparser.set_defaults(func=list_users)
+
+    subparser = subparsers.add_parser("user-info")
+    subparser.add_argument("username")
+    subparser.set_defaults(func=user_info)
+
+    subparser = subparsers.add_parser("create-user")
+    subparser.add_argument("username")
+    subparser.add_argument("--password")
+    subparser.set_defaults(func=create_user)
+
+    subparser = subparsers.add_parser("add-permission")
+    subparser.add_argument("username")
+    subparser.add_argument("permission", choices=PERMISSIONS)
+    group = subparser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--site", nargs="+")
+    group.add_argument("--all-sites", action="store_true")
+    subparser.set_defaults(func=add_permission)
+
+    subparser = subparsers.add_parser("remove-permission")
+    subparser.add_argument("username")
+    subparser.add_argument("permission", choices=PERMISSIONS)
+    group = subparser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--site", nargs="+")
+    group.add_argument("--all-sites", action="store_true")
+    subparser.set_defaults(func=remove_permission)
+
+    args = parser.parse_args()
+    args.func(args)
+
+if __name__ == '__main__':
+    main()
