@@ -56,24 +56,15 @@
       </div>
     </div>
     <div></div>
-    <div class="dav-legend" v-if="legend && !qualityScores">
-      <div class="legendexpl">
-        <div class="all-data legendcolor"></div>
-        OK
-      </div>
-      <div class="legendexpl">
-        <div class="only-legacy-data legendcolor"></div>
-        Legacy
-      </div>
-      <div class="legendexpl">
-        <div class="no-data legendcolor"></div>
-        No data
-      </div>
-    </div>
+
     <div class="dav-legend" v-if="legend && qualityScores">
       <div class="legendexpl">
         <div class="all-data legendcolor"></div>
         Pass
+      </div>
+      <div class="legendexpl">
+        <div class="contains-info legendcolor"></div>
+        Info
       </div>
       <div class="legendexpl">
         <div class="contains-warnings legendcolor"></div>
@@ -156,6 +147,7 @@ export default class ProductAvailabilityVisualizationSingle extends ProductAvail
       if (this.allPass(products)) return "all-data";
       if (this.anyProductContainsErrors(products)) return "contains-errors";
       if (this.anyProductContainsWarnings(products)) return "contains-warnings";
+      if (this.anyProductContainsInfo(products)) return "contains-info";
       return "only-model-data";
     }
     if (this.onlyLegacy(products)) return "only-legacy-data";
@@ -170,6 +162,8 @@ export default class ProductAvailabilityVisualizationSingle extends ProductAvail
         return require("../assets/icons/test-warning.svg");
       case "contains-errors":
         return require("../assets/icons/test-fail.svg");
+      case "contains-info":
+        return require("../assets/icons/test-info.svg");
       case "only-legacy-data":
         return require("../assets/icons/legacy-pass.svg");
       default:

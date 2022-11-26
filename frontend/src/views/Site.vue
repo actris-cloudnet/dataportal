@@ -136,22 +136,11 @@
       </section>
       <div class="forcewrap"></div>
 
-      <section id="product_availability" class="graph">
+      <section id="product_availability" class="graph" v-if="!selectedProductName">
         <header>
           Product availability
-          <template v-if="selectedProductName">({{ selectedProductName }})</template>
         </header>
-
-        <section class="details" v-if="singleProductView">
-          <ProductAvailabilityVisualizationSingle
-            :site="siteid"
-            :legend="true"
-            :tooltips="true"
-            :product="selectedProductId"
-            :dataStatusParser="dataStatusParser"
-          ></ProductAvailabilityVisualizationSingle>
-        </section>
-        <section class="details" v-else>
+        <section class="details">
           <ProductAvailabilityVisualization
             v-if="dataStatusParser"
             :site="siteid"
@@ -168,11 +157,12 @@
       <section id="product_quality" class="graph">
         <header>
           Product quality
-          <template v-if="selectedProductName">({{ selectedProductName }})</template>
+          <template v-if="selectedProductName">/ availability ({{ selectedProductName }})</template>
         </header>
 
         <section class="details" v-if="singleProductView">
           <ProductAvailabilityVisualizationSingle
+            v-if="dataStatusParser"
             :site="siteid"
             :legend="true"
             :tooltips="true"
@@ -180,6 +170,9 @@
             :qualityScores="true"
             :dataStatusParser="dataStatusParser"
           ></ProductAvailabilityVisualizationSingle>
+          <div v-else class="loadingoverlay">
+            <div class="lds-dual-ring"></div>
+          </div>
         </section>
 
         <section class="details" v-else>

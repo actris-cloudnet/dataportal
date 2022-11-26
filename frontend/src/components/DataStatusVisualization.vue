@@ -76,8 +76,14 @@
       li.qualityitem.found::before
         background-image: url('../assets/icons/test-pass.svg')
 
+      li.qualityitem.info::before
+        background-image: url('../assets/icons/test-info.svg')
+
       li.qualityitem.warning::before
         background-image: url('../assets/icons/test-warning.svg')
+
+      li.qualityitem.error::before
+        background-image: url('../assets/icons/test-fail.svg')
 
 
 .dataviz-date:hover .dataviz-tooltip
@@ -199,14 +205,16 @@
 
       <section v-else>
         <ul v-for="lvl in allLevels">
-          <li class="header">Level {{ lvl }}</li>
+          <li class="header">Leveli {{ lvl }}</li>
           <li
             v-for="product in filterProductsByLvl(lvl)"
             class="qualityitem"
             :class="{
               found: getProductStatus(date.products[lvl], product),
               na: qualityScores && !getReportExists(date.products[lvl], product),
+              info: isFileWithInfo(date.products[lvl], product),
               warning: isFileWithWarning(date.products[lvl], product),
+              error: isFileWithError(date.products[lvl], product),
             }"
             :key="product.id"
           >
@@ -246,9 +254,9 @@ export type ColorClass =
   | "contains-errors"
   | "contains-warnings"
   | "only-model-data"
-  | "only-legacy-data"
   | "all-data"
-  | "all-raw";
+  | "all-raw"
+  | "contains-info";
 
 @Component
 export default class ProductAvailabilityVisualization extends Vue {
@@ -340,6 +348,20 @@ export default class ProductAvailabilityVisualization extends Vue {
     }
   }
 
+  isFileWithInfo(existingProducts: ProductInfo[], product: Product) {
+    const existingProduct = existingProducts.find((prod) => prod.id == product.id);
+    if (existingProduct) {
+      return this.isInfo(existingProduct);
+    }
+  }
+
+  isFileWithError(existingProducts: ProductInfo[], product: Product) {
+    const existingProduct = existingProducts.find((prod) => prod.id == product.id);
+    if (existingProduct) {
+      return this.isError(existingProduct);
+    }
+  }
+
   getReportExists(existingProducts: ProductInfo[], product: Product) {
     const existingProduct = existingProducts.find((prod) => prod.id == product.id);
     return existingProduct && this.qualityExists(existingProduct);
@@ -409,6 +431,14 @@ export default class ProductAvailabilityVisualization extends Vue {
     );
   }
 
+  anyProductContainsInfo(products: ProductLevels) {
+    return (
+      products["2"].filter(this.isInfo).length > 0 ||
+      products["1c"].filter(this.isInfo).length > 0 ||
+      products["1b"].filter(this.isInfo).length > 0
+    );
+  }
+
   allLevel2Pass(products: ProductLevels): boolean {
     return products["2"].filter(this.topQuality).length == 4;
   }
@@ -423,6 +453,10 @@ export default class ProductAvailabilityVisualization extends Vue {
 
   isWarning(prod: ProductInfo): boolean {
     return "errorLevel" in prod && prod.errorLevel === "warning";
+  }
+
+  isInfo(prod: ProductInfo): boolean {
+    return "errorLevel" in prod && prod.errorLevel === "info";
   }
 
   qualityExists(prod: ProductInfo): boolean {
