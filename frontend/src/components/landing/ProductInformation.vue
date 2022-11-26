@@ -62,10 +62,20 @@
         <td>
           <div v-if="typeof response.errorLevel === 'string'" class="quality-container">
             <img class="quality-icon" :src="getQcIcon(response.errorLevel)" alt="" />
+<!--            <span v-if="response.errorLevel !== 'pass'">-->
+<!--              Some issues, <router-link :to="{ name: 'FileQualityReport' }">see report</router-link>-->
+<!--            </span>-->
+<!--            <span v-else>Pass</span>-->
+            <span v-if="response.errorLevel === 'info'">
+              Some info,</span>
+            <span v-else-if="response.errorLevel === 'warning'">
+              Some warnings,</span>
+            <span v-else-if="response.errorLevel === 'error'">
+              Some errors,</span>
+            <span v-else>
+              Pass</span>
             <span v-if="response.errorLevel !== 'pass'">
-              Some issues, <router-link :to="{ name: 'FileQualityReport' }">see report</router-link>
-            </span>
-            <span v-else>Pass</span>
+              <router-link :to="{ name: 'FileQualityReport' }"><span style="white-space: pre"> see report.</span></router-link></span>
           </div>
           <span v-else class="notAvailable"> </span>
         </td>

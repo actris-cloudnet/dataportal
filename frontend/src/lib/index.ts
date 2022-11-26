@@ -101,6 +101,8 @@ export function getQcIcon(errorLevel: string) {
     return require("../assets/icons/test-fail.svg");
   } else if (errorLevel === "warning") {
     return require("../assets/icons/test-warning.svg");
+  } else if (errorLevel == "info") {
+    return require("../assets/icons/test-info.svg");
   }
   return require("../assets/icons/test-pass.svg");
 }

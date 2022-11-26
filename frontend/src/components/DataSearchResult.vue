@@ -256,13 +256,17 @@ section#fileTable
               <dd>
                 <span v-if="typeof previewResponse.errorLevel === 'string'" class="qualitycheck">
                   <img :src="getQcIcon(previewResponse.errorLevel)" alt="" />
+                  <span v-if="previewResponse.errorLevel === 'info'">
+                    Some info,</span>
+                  <span v-else-if="previewResponse.errorLevel === 'warning'">
+                    Some warnings,</span>
+                  <span v-else-if="previewResponse.errorLevel === 'error'">
+                    Some errors,</span>
+                  <span v-else>
+                    Pass</span>
                   <span v-if="previewResponse.errorLevel !== 'pass'">
-                    Some issues,
                     <router-link :to="{ name: 'FileQualityReport', params: { uuid: `${previewResponse.uuid}` } }"
-                      >see report.</router-link
-                    ></span
-                  >
-                  <span v-else> Pass </span>
+                      ><span style="white-space: pre"> see report.</span></router-link></span>
                 </span>
                 <span v-else class="notAvailable"> </span>
               </dd>
