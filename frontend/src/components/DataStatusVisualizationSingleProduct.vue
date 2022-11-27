@@ -130,13 +130,7 @@ export default class ProductAvailabilityVisualizationSingle extends ProductAvail
     const prodsAll = products["2"].concat(products["1b"], products["1c"]);
     if (prodsAll.length > 0) {
       const uuid = prodsAll[0].uuid;
-      if (this.qualityScores) {
-        if (this.hasSomeTests(products)) {
-          return `/file/${uuid}/quality`;
-        }
-      } else {
-        return `/file/${uuid}`;
-      }
+      return `/file/${uuid}`;
     }
   }
 

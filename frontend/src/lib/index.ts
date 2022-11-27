@@ -7,6 +7,15 @@ import { CollectionFileResponse } from "../../../backend/src/entity/CollectionFi
 
 export const actrisNfUrl = "https://actris-nf-labelling.out.ocp.fmi.fi";
 
+export const getQcText = (errorLevel: string) => {
+  errorLevel = errorLevel != 'info' ? errorLevel + "s" : errorLevel
+  return "Some " + errorLevel + ", "
+}
+
+export const getQcLink = (uuid: string) => {
+  return {name: 'FileQualityReport', params: {uuid: `${uuid}`}}
+}
+
 export const getProductIcon = (product: Product | string) => {
   try {
     return require(`../assets/icons/${typeof product == "string" ? product : product.id}.png`);

@@ -256,17 +256,10 @@ section#fileTable
               <dd>
                 <span v-if="typeof previewResponse.errorLevel === 'string'" class="qualitycheck">
                   <img :src="getQcIcon(previewResponse.errorLevel)" alt="" />
-                  <span v-if="previewResponse.errorLevel === 'info'">
-                    Some info,</span>
-                  <span v-else-if="previewResponse.errorLevel === 'warning'">
-                    Some warnings,</span>
-                  <span v-else-if="previewResponse.errorLevel === 'error'">
-                    Some errors,</span>
+                  <span v-if="previewResponse.errorLevel !== 'pass'">
+                    {{getQcText(previewResponse.errorLevel)}} <router-link :to=getQcLink(previewResponse.uuid)>see report.</router-link></span>
                   <span v-else>
                     Pass</span>
-                  <span v-if="previewResponse.errorLevel !== 'pass'">
-                    <router-link :to="{ name: 'FileQualityReport', params: { uuid: `${previewResponse.uuid}` } }"
-                      ><span style="white-space: pre"> see report.</span></router-link></span>
                 </span>
                 <span v-else class="notAvailable"> </span>
               </dd>
@@ -331,6 +324,8 @@ import {
   humanReadableTimestamp,
   sortVisualizations,
   getQcIcon,
+  getQcText,
+  getQcLink
 } from "../lib";
 import { SearchFileResponse } from "../../../backend/src/entity/SearchFileResponse";
 import { BTable } from "bootstrap-vue/esm/components/table";
@@ -364,6 +359,8 @@ export default class DataSearchResult extends Vue {
   humanReadableTimestamp = humanReadableTimestamp;
   combinedFileSize = combinedFileSize;
   getQcIcon = getQcIcon;
+  getQcText = getQcText;
+  getQcLink = getQcLink;
 
   mounted() {
     window.addEventListener("resize", this.adjustPerPageAccordingToWindowHeight);
