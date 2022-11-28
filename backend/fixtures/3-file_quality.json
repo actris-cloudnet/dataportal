@@ -6,13 +6,17 @@
     "timestamp": "2022-02-20T10:56:19.382Z",
     "tests": 8,
     "errors": 2,
-    "warnings": 1
+    "warnings": 1,
+    "info": 0
   },
   {
     "uuid": "2bb32746-faf0-4057-9076-ed2e698dcf36",
     "errorLevel": "pass",
     "qcVersion": "1.20",
     "timestamp": "2022-02-20T10:56:19.382Z",
-    "tests": 8
+    "tests": 8,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0
   }
 ]

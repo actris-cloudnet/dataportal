@@ -3,6 +3,7 @@ import { FileQuality } from "./FileQuality";
 
 export enum ErrorLevel {
   PASS = "pass",
+  INFO = "info",
   WARNING = "warning",
   ERROR = "error",
 }

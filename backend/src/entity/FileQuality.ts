@@ -3,6 +3,7 @@ import { QualityReport } from "./QualityReport";
 
 export enum ErrorLevel {
   PASS = "pass",
+  INFO = "info",
   WARNING = "warning",
   ERROR = "error",
 }
@@ -32,6 +33,9 @@ export class FileQuality {
 
   @Column({ type: "smallint", default: 0 })
   warnings!: number;
+
+  @Column({ type: "smallint", default: 0 })
+  info!: number;
 
   @OneToMany(() => QualityReport, (report) => report.quality)
   testReports!: QualityReport[];

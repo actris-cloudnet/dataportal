@@ -19,6 +19,8 @@
         <div class="quality-report-stats">
           <div class="header" id="tests">Tests</div>
           <div class="data" id="ntests">{{ report.value.tests }}</div>
+          <div class="header" id="info">Info</div>
+          <div class="data" id="ninfo">{{ report.value.info }}</div>
           <div class="header" id="warnings">Warnings</div>
           <div class="data" id="nwarnings">{{ report.value.warnings }}</div>
           <div class="header" id="errors">Errors</div>
@@ -84,6 +86,7 @@ interface QualityResponse {
   tests: number;
   errors: number;
   warnings: number;
+  info: number;
   testReports: Test[];
 }
 
@@ -118,11 +121,12 @@ export default class LandingQualityReport extends Vue {
     if (this.report.status !== "ready") return [];
     return [
       {
-        value: this.report.value.tests - this.report.value.warnings - this.report.value.errors,
+        value: this.report.value.tests - this.report.value.warnings - this.report.value.errors - this.report.value.info,
         color: "#4C9A2A",
       },
       { value: this.report.value.warnings, color: "goldenrod" },
       { value: this.report.value.errors, color: "#cd5c5c" },
+      { value: this.report.value.info, color: "#98BADB" },
     ];
   }
 

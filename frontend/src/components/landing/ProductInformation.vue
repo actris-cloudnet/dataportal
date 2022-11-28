@@ -63,9 +63,9 @@
           <div v-if="typeof response.errorLevel === 'string'" class="quality-container">
             <img class="quality-icon" :src="getQcIcon(response.errorLevel)" alt="" />
             <span v-if="response.errorLevel !== 'pass'">
-              Some issues, <router-link :to="{ name: 'FileQualityReport' }">see report</router-link>
-            </span>
-            <span v-else>Pass</span>
+              {{getQcText(response.errorLevel)}}<router-link :to=getQcLink(response.uuid)>see report.</router-link></span>
+            <span v-else>
+              Pass</span>
           </div>
           <span v-else class="notAvailable"> </span>
         </td>
@@ -91,7 +91,7 @@
 import { ModelFile, RegularFile } from "../../../../backend/src/entity/File";
 import { Component, Prop } from "vue-property-decorator";
 import Vue from "vue";
-import { getProductIcon, getQcIcon } from "../../lib";
+import {getProductIcon, getQcIcon, getQcLink, getQcText} from "../../lib";
 
 @Component
 export default class ProductInformation extends Vue {
@@ -99,6 +99,8 @@ export default class ProductInformation extends Vue {
   @Prop() instrument!: string | null;
   @Prop() instrumentStatus!: "loading" | "error" | "ready";
   getQcIcon = getQcIcon;
+  getQcText = getQcText;
+  getQcLink = getQcLink;
   get timelinessString() {
     if (this.response == null) {
       return "";

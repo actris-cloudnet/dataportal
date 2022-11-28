@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800&display=swap')
 
 $RED-1-hex: #BF3235
 $RED-2-hex: #7F2123
@@ -259,7 +259,7 @@ main#landing
       align-items: center
       .quality-icon
         height: 1.1rem
-        margin-right: 0.5*$basespacing
+        margin-right: 0.3*$basespacing
 
     .summary-section#file-information
       .landing-hash
@@ -403,7 +403,7 @@ main#landing
           inline-size: max-content
           display: grid
           justify-items: center
-          grid-template-columns: repeat(3, 8em)
+          grid-template-columns: repeat(4, 6em)
           border: thin solid rgba(0,0,0,0.3)
           border-radius: $baseradius
           .header
@@ -414,14 +414,16 @@ main#landing
           .data
             align-self: start
             grid-row: 2
-            font-size: 300%
+            font-size: 250%
             font-weight: 400
           #tests, #ntests
             grid-column: 1
-          #warnings, #nwarnings
-            grid-column: 2
           #errors, #nerrors
+            grid-column: 2
+          #warnings, #nwarnings
             grid-column: 3
+          #info, #ninfo
+            grid-column: 4
       .quality-test-description
         color: $GRAY-4-hex
       .quality-test-list-header
@@ -460,11 +462,10 @@ main#landing
               color: $RED-4-hex
             .quality-test-exception-warning
               color: $YELLOW-3-hex
+            .quality-test-exception-info
+              color: #606060
     .quality-report-box-loading
       padding: 2*$basespacing
-
-.quality-icon
-  height: 1.5rem
 
 @media (max-width: 1000px)
   main#landing

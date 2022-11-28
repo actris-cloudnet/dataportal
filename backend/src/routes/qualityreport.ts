@@ -1,11 +1,11 @@
-import { Connection, Repository } from "typeorm";
-import { ErrorLevel, QualityReport } from "../entity/QualityReport";
-import { Request, RequestHandler, Response } from "express";
-import { FileRoutes } from "./file";
-import { FileQuality } from "../entity/FileQuality";
-import { ModelFile, RegularFile } from "../entity/File";
-import { SearchFile } from "../entity/SearchFile";
-import { TestInfo } from "../entity/TestInfo";
+import {Connection, Repository} from "typeorm";
+import {ErrorLevel, QualityReport} from "../entity/QualityReport";
+import {Request, RequestHandler, Response} from "express";
+import {FileRoutes} from "./file";
+import {FileQuality} from "../entity/FileQuality";
+import {ModelFile, RegularFile} from "../entity/File";
+import {SearchFile} from "../entity/SearchFile";
+import {TestInfo} from "../entity/TestInfo";
 
 interface Report {
   qcVersion: string;
@@ -27,6 +27,7 @@ interface TestSummary {
   maxErrorLevel: ErrorLevel;
   numberOfErrors: number;
   numberOfWarnings: number;
+  numberOfInfo: number;
 }
 
 interface QualityReportWithTestInfo extends QualityReport {
@@ -66,8 +67,9 @@ export class QualityReportRoutes {
       .addOrderBy(
         `CASE WHEN testReport.result = '${ErrorLevel.ERROR}'   THEN 1
               WHEN testReport.result = '${ErrorLevel.WARNING}' THEN 2
-              WHEN testReport.result = '${ErrorLevel.PASS}'    THEN 3
-              ELSE 4
+              WHEN testReport.result = '${ErrorLevel.INFO}'    THEN 3
+              WHEN testReport.result = '${ErrorLevel.PASS}'    THEN 4
+              ELSE 5
          END`
       )
       .addOrderBy("COALESCE(testInfo.name, testReport.testId)")
@@ -101,7 +103,8 @@ export class QualityReportRoutes {
       const testOutlines = this.parseTests(fullReport);
       const nErrors = this.countTestResults(testOutlines, ErrorLevel.ERROR);
       const nWarnings = this.countTestResults(testOutlines, ErrorLevel.WARNING);
-      const maxErrorLevel = this.getMaxErrorLevel(nErrors, nWarnings);
+      const nInfo = this.countTestResults(testOutlines, ErrorLevel.INFO);
+      const maxErrorLevel = this.getMaxErrorLevel(nErrors, nWarnings, nInfo);
       const fileQuality = await this.fileQualityRepo.save({
         uuid: uuid,
         errorLevel: maxErrorLevel,
@@ -109,6 +112,7 @@ export class QualityReportRoutes {
         tests: testOutlines.length,
         warnings: nWarnings,
         errors: nErrors,
+        info: nInfo,
         timestamp: fullReport.timestamp,
       });
       for (const test of fullReport.tests) {
@@ -136,29 +140,37 @@ export class QualityReportRoutes {
     for (const test of fileReport.tests) {
       let nErrors = 0;
       let nWarnings = 0;
+      let nInfo = 0;
       for (const report of test.exceptions) {
         if (report.result == ErrorLevel.ERROR) {
           nErrors += 1;
         } else if (report.result == ErrorLevel.WARNING) {
           nWarnings += 1;
+        } else if (report.result == ErrorLevel.INFO) {
+          nInfo += 1;
         }
+
       }
       results.push({
         testId: test.testId,
-        maxErrorLevel: this.getMaxErrorLevel(nErrors, nWarnings),
+        maxErrorLevel: this.getMaxErrorLevel(nErrors, nWarnings, nInfo),
         numberOfErrors: nErrors,
         numberOfWarnings: nWarnings,
+        numberOfInfo: nInfo,
       });
     }
     return results;
   }
 
-  private getMaxErrorLevel(nErrors: number, nWarnings: number): ErrorLevel {
+  private getMaxErrorLevel(nErrors: number, nWarnings: number, nInfo: number): ErrorLevel {
     if (nErrors > 0) {
       return ErrorLevel.ERROR;
     }
     if (nWarnings > 0) {
       return ErrorLevel.WARNING;
+    }
+    if (nInfo > 0) {
+      return ErrorLevel.INFO
     }
     return ErrorLevel.PASS;
   }

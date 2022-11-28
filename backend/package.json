@@ -54,6 +54,7 @@
     "typescript": "^4.2.3"
   },
   "scripts": {
+    "update-snapshot": "npm run reset-db && npx jest --update-snapshot tests/integration/parallel && npx jest --runInBand --update-snapshot tests/integration/sequential",
     "reset-db": "ts-node -T src/fixtures.ts fixtures TRUNCATE",
     "test": "npm run reset-db && jest tests/integration/parallel && jest --runInBand tests/integration/sequential",
     "reset-db-prod": "npm run reset-db && npx ts-node -T src/fixtures.ts /dataportal-resources",
