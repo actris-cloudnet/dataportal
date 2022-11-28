@@ -126,7 +126,7 @@ export default class LandingQualityReport extends Vue {
       },
       { value: this.report.value.warnings, color: "goldenrod" },
       { value: this.report.value.errors, color: "#cd5c5c" },
-      { value: this.report.value.info, color: "#909090" },
+      { value: this.report.value.info, color: "#98BADB" },
     ];
   }
 
