@@ -205,7 +205,7 @@
 
       <section v-else>
         <ul v-for="lvl in allLevels">
-          <li class="header">Leveli {{ lvl }}</li>
+          <li class="header">Level {{ lvl }}</li>
           <li
             v-for="product in filterProductsByLvl(lvl)"
             class="qualityitem"
