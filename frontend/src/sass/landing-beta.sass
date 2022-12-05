@@ -120,28 +120,6 @@ main#landing
       flex-wrap: wrap
       align-items: center
       grid-column: 2 / 3
-      .tag
-        display: flex
-        justify-content: center
-        align-items: center
-        color: white
-        font-size: 90%
-        font-weight: 550
-        inline-size: max-content
-        block-size: min-content
-        padding: 0.23*$basespacing 0.52*$basespacing
-        border-radius: 2.5*$baseradius
-        cursor: default
-      .tag:first-child
-        margin-left: $basespacing
-      .tag:not(:first-child)
-        margin-left: 0.7*$basespacing
-      .tag.actris
-        background-color: $actris-turquoise
-      .tag.volatile
-        background-color: $BLUE-3-hex
-      .tag.legacy
-        background-color: $GRAY-4-hex
 
     .landing-download
       display: flex
@@ -482,7 +460,6 @@ main#landing
         margin-top: 0.5*$basespacing
         .tag:first-child
           margin-left: 0
-
       .landing-download
         grid-column: 2
         button
