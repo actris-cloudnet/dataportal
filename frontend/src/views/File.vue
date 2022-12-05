@@ -1,5 +1,30 @@
 <style scoped lang="sass">
 @import "../sass/landing-beta.sass"
+.landing-tags
+  .tag
+    display: flex
+    justify-content: center
+    align-items: center
+    color: white
+    font-size: 90%
+    font-weight: 550
+    inline-size: max-content
+    block-size: min-content
+    padding: 0.23*$basespacing 0.52*$basespacing
+    border-radius: 2.5*$baseradius
+    cursor: default
+    &:first-child
+      margin-left: $basespacing
+    &:not(:first-child)
+      margin-left: 0.7*$basespacing
+  .experimental
+    background-color: #EC9706
+  .actris
+    background-color: $actris-turquoise
+  .volatile
+    background-color: $BLUE-3-hex
+  .legacy
+    background-color: $GRAY-4-hex
 </style>
 
 <template>
@@ -17,8 +42,9 @@
       </div>
       <div class="landing-tags">
         <div v-if="isActrisObject" class="tag actris" title="Data from an operational ACTRIS site">Actris</div>
-        <div v-if="response.volatile" class="tag tooltip volatile" title="Data may change in future">Volatile</div>
+        <div v-if="response.volatile" class="tag volatile" title="Data may change in future">Volatile</div>
         <div v-if="response.legacy" class="tag legacy" title="Produced using non-standardized processing">Legacy</div>
+        <div v-if="response.product.experimental" class="tag experimental" title="Experimental product">Experimental</div>
       </div>
       <div class="landing-download">
         <DownloadButton :downloadUrl="response.downloadUrl" />
