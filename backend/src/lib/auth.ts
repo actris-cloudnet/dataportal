@@ -92,7 +92,7 @@ export class Authorizator {
         return next({ status: 500, errors: "Authorizator received unauthenticated request" });
       }
       const isSite = "site" in res.locals;
-      let params: any = {
+      const params: any = {
         username: res.locals.username,
         permission: permission,
       };

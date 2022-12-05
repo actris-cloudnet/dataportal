@@ -1,11 +1,11 @@
-import {Connection, Repository} from "typeorm";
-import {ErrorLevel, QualityReport} from "../entity/QualityReport";
-import {Request, RequestHandler, Response} from "express";
-import {FileRoutes} from "./file";
-import {FileQuality} from "../entity/FileQuality";
-import {ModelFile, RegularFile} from "../entity/File";
-import {SearchFile} from "../entity/SearchFile";
-import {TestInfo} from "../entity/TestInfo";
+import { Connection, Repository } from "typeorm";
+import { ErrorLevel, QualityReport } from "../entity/QualityReport";
+import { Request, RequestHandler, Response } from "express";
+import { FileRoutes } from "./file";
+import { FileQuality } from "../entity/FileQuality";
+import { ModelFile, RegularFile } from "../entity/File";
+import { SearchFile } from "../entity/SearchFile";
+import { TestInfo } from "../entity/TestInfo";
 
 interface Report {
   qcVersion: string;
@@ -136,7 +136,7 @@ export class QualityReportRoutes {
   };
 
   private parseTests(fileReport: Report): TestSummary[] {
-    let results = [];
+    const results = [];
     for (const test of fileReport.tests) {
       let nErrors = 0;
       let nWarnings = 0;
@@ -149,7 +149,6 @@ export class QualityReportRoutes {
         } else if (report.result == ErrorLevel.INFO) {
           nInfo += 1;
         }
-
       }
       results.push({
         testId: test.testId,
@@ -170,7 +169,7 @@ export class QualityReportRoutes {
       return ErrorLevel.WARNING;
     }
     if (nInfo > 0) {
-      return ErrorLevel.INFO
+      return ErrorLevel.INFO;
     }
     return ErrorLevel.PASS;
   }

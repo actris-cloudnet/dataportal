@@ -27,8 +27,8 @@ async function generateDateNowString() {
 }
 
 async function pressLeftKey() {
-  var key = Key;
-  let actions = driver.actions({ async: true });
+  const key = Key;
+  const actions = driver.actions({ async: true });
   await actions.keyDown(key.CONTROL).sendKeys(key.LEFT).perform();
   await wait(200);
   await actions.keyUp(key.CONTROL).sendKeys(key.LEFT);
@@ -36,8 +36,8 @@ async function pressLeftKey() {
 }
 
 async function pressRightKey() {
-  var key = Key;
-  let actions = driver.actions({ async: true });
+  const key = Key;
+  const actions = driver.actions({ async: true });
   await actions.keyDown(key.CONTROL).sendKeys(key.RIGHT).perform();
   await wait(200);
   await actions.keyUp(key.CONTROL).sendKeys(key.RIGHT);
