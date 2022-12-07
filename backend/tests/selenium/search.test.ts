@@ -335,7 +335,7 @@ async function selectAllSites() {
 
 async function clearMapSelection(by: By) {
   const mapElement = await driver.wait(until.elementLocated(by));
-  let actions = driver.actions({ bridge: true });
+  const actions = driver.actions({ bridge: true });
   actions.move({ origin: mapElement, x: 68, y: 78 });
   await actions.click().perform();
   await actions.clear();
@@ -356,14 +356,14 @@ async function clickAllMarkers(by: By) {
 
 async function clickMapMarker(by: By, x: number, y: number) {
   const mapElement = await driver.wait(until.elementLocated(by));
-  let actions = driver.actions({ bridge: true });
+  const actions = driver.actions({ bridge: true });
   actions.move({ origin: mapElement, x: x, y: y });
   await actions.click().perform();
   await actions.clear();
 }
 
 async function putProductFiles() {
-  let filenames = [];
+  const filenames = [];
   for (let i = 23; i <= 27; i++) {
     filenames.push(`201907${i}_bucharest_classification.nc`);
   }

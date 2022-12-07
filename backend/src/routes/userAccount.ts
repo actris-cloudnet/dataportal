@@ -107,7 +107,7 @@ export class UserAccountRoutes {
   };
 
   createPermissions: RequestHandler = async (req: Request, res: Response, next) => {
-    let permissions: Permission[] = [];
+    const permissions: Permission[] = [];
     for (const perm of req.body.permissions) {
       let permission: Permission;
       const permissionType = permissionTypeFromString(perm.permission);
@@ -155,7 +155,7 @@ export class UserAccountRoutes {
   };
 
   putUserAccount: RequestHandler = async (req: Request, res: Response, next) => {
-    let user = await this.userAccountRepository.findOne(
+    const user = await this.userAccountRepository.findOne(
       { id: Number(req.params.id) },
       { relations: ["permissions", "permissions.site"] }
     );
@@ -292,7 +292,7 @@ export class UserAccountRoutes {
       return next({ status: 401, errors: "Missing the permission type from permission" });
     }
     if (permission.siteId !== null) {
-      let site = await this.siteRepository.findOne({ id: permission.siteId });
+      const site = await this.siteRepository.findOne({ id: permission.siteId });
       if (site === undefined) {
         return next({ status: 422, errors: "SiteId does not exist" });
       }

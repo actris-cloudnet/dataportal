@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { backendPublicUrl, genResponse } from "../../lib";
 import axios from "axios";
 import { RequestError } from "../../../src/entity/RequestError";
@@ -103,7 +104,7 @@ describe("/api/files", () => {
   });
 
   it("responds with 400 on malformed dateFrom", () => {
-    let expectedBody: RequestError = {
+    const expectedBody: RequestError = {
       status: 400,
       errors: ['Malformed date in property "dateFrom"'],
     };
@@ -117,7 +118,7 @@ describe("/api/files", () => {
   });
 
   it("responds with 400 on malformed dateTo", () => {
-    let expectedBody: RequestError = {
+    const expectedBody: RequestError = {
       status: 400,
       errors: ['Malformed date in property "dateTo"'],
     };
@@ -174,7 +175,7 @@ describe("/api/files", () => {
 
   it("responds with 400 on malformed limit", async () => {
     const payload = { params: { site: "bucharest", limit: "j" } };
-    let expectedBody: RequestError = {
+    const expectedBody: RequestError = {
       status: 400,
       errors: ['Malformed value in property "limit"'],
     };
@@ -226,7 +227,7 @@ describe("/api/files", () => {
 
   it("responds with 400 on malformed date", async () => {
     const payload = { params: { date: "j" } };
-    let expectedBody: RequestError = {
+    const expectedBody: RequestError = {
       status: 400,
       errors: ['Malformed date in property "date"'],
     };
@@ -235,7 +236,7 @@ describe("/api/files", () => {
 
   it("responds with 400 on conflicting date, dateFrom and dateTo", async () => {
     const validParams = { date: "2020-12-05" };
-    let expectedBody: RequestError = {
+    const expectedBody: RequestError = {
       status: 400,
       errors: ['Property "date" may not be defined if either "dateFrom" or "dateTo" is defined'],
     };
@@ -306,7 +307,7 @@ describe("/api/model-files", () => {
 
   it("responds with 400 if model and allModels are both defined", async () => {
     const payload = { params: { model: "ecmwf", allModels: true } };
-    let expectedBody: RequestError = {
+    const expectedBody: RequestError = {
       status: 400,
       errors: ['Properties "allModels" and "model" can not be both defined'],
     };
@@ -327,7 +328,7 @@ describe("/api/model-files", () => {
 
   it("responds with 404 if a specified model is not found", async () => {
     const payload = { params: { model: "sammakko" } };
-    let expectedBody: RequestError = {
+    const expectedBody: RequestError = {
       status: 404,
       errors: ["One or more of the specified models were not found"],
     };

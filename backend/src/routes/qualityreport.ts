@@ -136,7 +136,7 @@ export class QualityReportRoutes {
   };
 
   private parseTests(fileReport: Report): TestSummary[] {
-    let results = [];
+    const results = [];
     for (const test of fileReport.tests) {
       let nErrors = 0;
       let nWarnings = 0;

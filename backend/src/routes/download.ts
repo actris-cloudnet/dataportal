@@ -299,7 +299,7 @@ export class DownloadRoutes {
   }
 
   private async makeRequest(s3path: string, version?: string): Promise<IncomingMessage> {
-    let headers = {
+    const headers = {
       Authorization: ssAuthString(),
     };
 
