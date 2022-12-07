@@ -160,7 +160,7 @@ export class Middleware {
     const query: any = req.query;
     const keys = ["deleteHigherProducts", "dryRun"];
     for (const key of keys) {
-      if (!query[key]) next({ status: 404, errors: [`Missing mandatory parameter: ${key}`] });
+      if (!query[key]) return next({ status: 404, errors: [`Missing mandatory parameter: ${key}`] });
       const value = query[key].toLowerCase();
       if (value === "true") query[key] = true;
       else if (value === "false") query[key] = false;
