@@ -89,7 +89,7 @@ export class CalibrationRoutes {
   }
 
   private createCalibrationsForInterval(lastCalib: Calibration | undefined, newCalib: NewCalibration) {
-    const result = [];
+    let result = [];
     if (lastCalib) {
       for (
         let date = new Date(lastCalib.measurementDate);

@@ -17,8 +17,8 @@ const missingVars = envVars.filter((env) => !process.env[env]);
 if (missingVars.length > 0)
   throw new Error(`FATAL: Following environment variables must be set: ${missingVars.join(", ")}`);
 
-const envs = process.env as any;
-const ssUrl = new URL(envs.DP_SS_URL);
+let envs = process.env as any;
+let ssUrl = new URL(envs.DP_SS_URL);
 envs["DP_SS_HOST"] = ssUrl.hostname;
 envs["DP_SS_PORT"] = parseInt(ssUrl.port);
 envs["DP_PID_SERVICE_TIMEOUT_MS"] = parseInt(envs.DP_PID_SERVICE_TIMEOUT_MS);

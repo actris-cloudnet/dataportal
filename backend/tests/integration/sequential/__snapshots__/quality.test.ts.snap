@@ -1,16 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`PUT /quality/:uuid creates report for regular file (old report exist) 1`] = `
-{
+Object {
   "errorLevel": "error",
   "errors": 1,
   "info": 0,
   "qcVersion": "1.1.2",
-  "testReports": [
-    {
+  "testReports": Array [
+    Object {
       "description": null,
-      "exceptions": [
-        {
+      "exceptions": Array [
+        Object {
           "message": "Instrument PID is missing.",
           "result": "error",
         },
@@ -19,30 +19,30 @@ exports[`PUT /quality/:uuid creates report for regular file (old report exist) 1
       "result": "warning",
       "testId": "TestInstrumentPid",
     },
-    {
+    Object {
       "description": "Description for TestUnits",
-      "exceptions": [],
+      "exceptions": Array [],
       "name": "Name for TestUnits",
       "result": "pass",
       "testId": "TestUnits",
     },
-    {
+    Object {
       "description": null,
-      "exceptions": [],
+      "exceptions": Array [],
       "name": "TestCFConvention",
       "result": "pass",
       "testId": "TestCFConvention",
     },
-    {
+    Object {
       "description": null,
-      "exceptions": [],
+      "exceptions": Array [],
       "name": "TestTimeVector",
       "result": "pass",
       "testId": "TestTimeVector",
     },
-    {
+    Object {
       "description": null,
-      "exceptions": [],
+      "exceptions": Array [],
       "name": "TestVariableNames",
       "result": "pass",
       "testId": "TestVariableNames",
@@ -56,43 +56,43 @@ exports[`PUT /quality/:uuid creates report for regular file (old report exist) 1
 `;
 
 exports[`PUT /quality/:uuid works with passing report 1`] = `
-{
+Object {
   "errorLevel": "pass",
   "errors": 0,
   "info": 0,
   "qcVersion": "1.1.2",
-  "testReports": [
-    {
+  "testReports": Array [
+    Object {
       "description": "Description for TestUnits",
-      "exceptions": [],
+      "exceptions": Array [],
       "name": "Name for TestUnits",
       "result": "pass",
       "testId": "TestUnits",
     },
-    {
+    Object {
       "description": null,
-      "exceptions": [],
+      "exceptions": Array [],
       "name": "TestCFConvention",
       "result": "pass",
       "testId": "TestCFConvention",
     },
-    {
+    Object {
       "description": null,
-      "exceptions": [],
+      "exceptions": Array [],
       "name": "TestInstrumentPid",
       "result": "pass",
       "testId": "TestInstrumentPid",
     },
-    {
+    Object {
       "description": null,
-      "exceptions": [],
+      "exceptions": Array [],
       "name": "TestTimeVector",
       "result": "pass",
       "testId": "TestTimeVector",
     },
-    {
+    Object {
       "description": null,
-      "exceptions": [],
+      "exceptions": Array [],
       "name": "TestVariableNames",
       "result": "pass",
       "testId": "TestVariableNames",
@@ -106,16 +106,16 @@ exports[`PUT /quality/:uuid works with passing report 1`] = `
 `;
 
 exports[`PUT /quality/:uuid works with warnings only report 1`] = `
-{
+Object {
   "errorLevel": "warning",
   "errors": 0,
   "info": 0,
   "qcVersion": "1.1.2",
-  "testReports": [
-    {
+  "testReports": Array [
+    Object {
       "description": null,
-      "exceptions": [
-        {
+      "exceptions": Array [
+        Object {
           "message": "Instrument PID is missing.",
           "result": "warning",
         },
@@ -124,30 +124,30 @@ exports[`PUT /quality/:uuid works with warnings only report 1`] = `
       "result": "warning",
       "testId": "TestInstrumentPid",
     },
-    {
+    Object {
       "description": "Description for TestUnits",
-      "exceptions": [],
+      "exceptions": Array [],
       "name": "Name for TestUnits",
       "result": "pass",
       "testId": "TestUnits",
     },
-    {
+    Object {
       "description": null,
-      "exceptions": [],
+      "exceptions": Array [],
       "name": "TestCFConvention",
       "result": "pass",
       "testId": "TestCFConvention",
     },
-    {
+    Object {
       "description": null,
-      "exceptions": [],
+      "exceptions": Array [],
       "name": "TestTimeVector",
       "result": "pass",
       "testId": "TestTimeVector",
     },
-    {
+    Object {
       "description": null,
-      "exceptions": [],
+      "exceptions": Array [],
       "name": "TestVariableNames",
       "result": "pass",
       "testId": "TestVariableNames",

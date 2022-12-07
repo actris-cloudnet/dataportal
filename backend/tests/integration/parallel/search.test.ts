@@ -104,7 +104,7 @@ describe("/api/files", () => {
   });
 
   it("responds with 400 on malformed dateFrom", () => {
-    const expectedBody: RequestError = {
+    let expectedBody: RequestError = {
       status: 400,
       errors: ['Malformed date in property "dateFrom"'],
     };
@@ -118,7 +118,7 @@ describe("/api/files", () => {
   });
 
   it("responds with 400 on malformed dateTo", () => {
-    const expectedBody: RequestError = {
+    let expectedBody: RequestError = {
       status: 400,
       errors: ['Malformed date in property "dateTo"'],
     };
@@ -175,7 +175,7 @@ describe("/api/files", () => {
 
   it("responds with 400 on malformed limit", async () => {
     const payload = { params: { site: "bucharest", limit: "j" } };
-    const expectedBody: RequestError = {
+    let expectedBody: RequestError = {
       status: 400,
       errors: ['Malformed value in property "limit"'],
     };
@@ -227,7 +227,7 @@ describe("/api/files", () => {
 
   it("responds with 400 on malformed date", async () => {
     const payload = { params: { date: "j" } };
-    const expectedBody: RequestError = {
+    let expectedBody: RequestError = {
       status: 400,
       errors: ['Malformed date in property "date"'],
     };
@@ -236,7 +236,7 @@ describe("/api/files", () => {
 
   it("responds with 400 on conflicting date, dateFrom and dateTo", async () => {
     const validParams = { date: "2020-12-05" };
-    const expectedBody: RequestError = {
+    let expectedBody: RequestError = {
       status: 400,
       errors: ['Property "date" may not be defined if either "dateFrom" or "dateTo" is defined'],
     };
@@ -307,7 +307,7 @@ describe("/api/model-files", () => {
 
   it("responds with 400 if model and allModels are both defined", async () => {
     const payload = { params: { model: "ecmwf", allModels: true } };
-    const expectedBody: RequestError = {
+    let expectedBody: RequestError = {
       status: 400,
       errors: ['Properties "allModels" and "model" can not be both defined'],
     };
@@ -328,7 +328,7 @@ describe("/api/model-files", () => {
 
   it("responds with 404 if a specified model is not found", async () => {
     const payload = { params: { model: "sammakko" } };
-    const expectedBody: RequestError = {
+    let expectedBody: RequestError = {
       status: 404,
       errors: ["One or more of the specified models were not found"],
     };

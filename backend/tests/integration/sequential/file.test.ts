@@ -583,7 +583,7 @@ async function putFile(json: any) {
 async function deleteFile(uuid: string, deleteHigherProducts: any = null, dryRun: any = null) {
   const headers = { authorization: `Basic ${str2base64("bob:bobs_pass")}` };
   const url = `${backendPrivateUrl}api/files/${uuid}`;
-  const params: any = {};
+  let params: any = {};
   if (!(deleteHigherProducts === null)) params["deleteHigherProducts"] = deleteHigherProducts;
   if (!(dryRun === null)) params["dryRun"] = dryRun;
   return await axios.delete(url, { params: params, headers: headers });

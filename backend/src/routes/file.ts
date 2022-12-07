@@ -226,7 +226,7 @@ export class FileRoutes {
         visuRepo = this.modelVisualizationRepo;
       }
       const higherLevelProductNames = await this.getHigherLevelProducts(existingFile.product);
-      const products = await this.fileRepo.find({
+      let products = await this.fileRepo.find({
         where: {
           site: existingFile.site,
           measurementDate: existingFile.measurementDate,
@@ -410,7 +410,7 @@ export class FileRoutes {
     uniqueLevels = uniqueLevels.map((level) => level.level);
     const index = uniqueLevels.indexOf(product.level);
     const levels = uniqueLevels.slice(index + 1);
-    const products = await this.productRepo
+    let products = await this.productRepo
       .createQueryBuilder()
       .where({ level: In(levels) })
       .select("id")

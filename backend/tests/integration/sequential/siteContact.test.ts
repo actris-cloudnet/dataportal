@@ -11,7 +11,7 @@ interface ContactData {
 }
 
 beforeAll(async () => {
-  const req = await axios.get(SITE_CONTACTS_URL);
+  let req = await axios.get(SITE_CONTACTS_URL);
   const data: ContactData[] = req.data;
   for (const contact of data) {
     await axios.delete(`${SITE_CONTACTS_URL}/${contact.siteContactId}`);

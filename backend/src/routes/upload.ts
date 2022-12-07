@@ -206,7 +206,7 @@ export class UploadRoutes {
     checksum: string,
     inputStream: ReadableStream
   ): Promise<{ status: number; body: any }> {
-    const headers = {
+    let headers = {
       Authorization: ssAuthString(),
       "Content-MD5": Buffer.from(checksum, "hex").toString("base64"),
     };

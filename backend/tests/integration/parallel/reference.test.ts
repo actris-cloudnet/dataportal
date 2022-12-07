@@ -14,7 +14,7 @@ beforeAll(async () => {
 describe("GET /api/reference", () => {
   it("tests that reference api responds with some contect and correct type", async () => {
     for (const uuid of uuids) {
-      const _url = url.concat("reference/", uuid);
+      let _url = url.concat("reference/", uuid);
       const bib = (await axios.get(_url, { params: { citation: "true", format: "bibtex" } })).data;
       const ris = (await axios.get(_url, { params: { citation: "true", format: "ris" } })).data;
       const ack = (await axios.get(_url, { params: { acknowledgements: "true", format: "json" } })).data;
