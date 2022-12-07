@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import { createConnection } from "typeorm";
 import * as express from "express";
 import { ErrorRequestHandler } from "express";

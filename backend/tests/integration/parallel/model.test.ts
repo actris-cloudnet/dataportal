@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import { backendPublicUrl } from "../../lib";
 import axios from "axios";
 

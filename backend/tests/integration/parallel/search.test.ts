@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import { backendPublicUrl, genResponse } from "../../lib";
 import axios from "axios";
 import { RequestError } from "../../../src/entity/RequestError";
