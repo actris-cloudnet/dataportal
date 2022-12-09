@@ -6,8 +6,8 @@ import Vue from "vue";
 import { augmentAxiosResponse, init, mountVue, nextTick } from "./lib";
 import { mocked } from "ts-jest/dist/util/testing";
 import { findByUuid, readResources } from "../../shared/lib";
-import HowToCite from "../src/components/HowToCite.vue";
-import License from "../src/components/License.vue";
+// import HowToCite from "../src/components/HowToCite.vue";
+// import License from "../src/components/License.vue";
 
 init();
 

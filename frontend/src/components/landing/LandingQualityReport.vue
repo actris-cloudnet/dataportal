@@ -58,12 +58,13 @@
     </div>
   </div>
 </template>
+
 <script lang="ts">
 import axios from "axios";
 import { Component, Prop, Vue } from "vue-property-decorator";
 import escapeHtml from "escape-html";
 
-import Donut, { DonutData } from "../Donut.vue";
+import Donut from "../Donut.vue";
 import { humanReadableTimestamp, getQcIcon } from "../../lib";
 
 interface Exception {
@@ -117,7 +118,7 @@ export default class LandingQualityReport extends Vue {
     }
   }
 
-  get donutData(): DonutData[] {
+  get donutData() {
     if (this.report.status !== "ready") return [];
     return [
       {
