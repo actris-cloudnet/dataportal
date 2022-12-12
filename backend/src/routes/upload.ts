@@ -111,7 +111,7 @@ export class UploadRoutes {
 
       await uploadRepo.insert(uploadedMetadata);
       return res.sendStatus(200);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Unknown error", err);
       return next({ status: 500, errors: `Internal server error: ${err.code}` });
     }
@@ -127,7 +127,7 @@ export class UploadRoutes {
       if (!upload) return next({ status: 422, errors: "No file matches the provided uuid" });
       await this.findRepoForUpload(upload).update({ uuid: partialUpload.uuid }, partialUpload);
       res.sendStatus(200);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Unknown error", err);
       return next({ status: 500, errors: `Internal server error: ${err.code}` });
     }
@@ -142,7 +142,7 @@ export class UploadRoutes {
         if (upload == undefined) return next({ status: 404, errors: "No metadata was found with provided id" });
         res.send(this.augmentUploadResponse(true)(upload));
       })
-      .catch((err) => {
+      .catch((err: any) => {
         console.error("Unknown error", err);
         next({ status: 500, errors: `Internal server error: ${err.code}` });
       });
@@ -156,7 +156,7 @@ export class UploadRoutes {
         .then((uploadedMetadata) => {
           streamHandler(uploadedMetadata, res, "um", this.augmentUploadResponse(includeS3path));
         })
-        .catch((err) => {
+        .catch((err: any) => {
           console.error("Unknown error", err);
           next({ status: 500, errors: `Internal server error: ${err.code}` });
         });
@@ -191,7 +191,7 @@ export class UploadRoutes {
         { status: Status.UPLOADED, updatedAt: new Date(), size: body.size }
       );
       res.sendStatus(status);
-    } catch (err) {
+    } catch (err: any) {
       if (err.status == 400 && err.errors == "Checksum does not match file contents") return next(err); // Client error
       if (err.errors)
         // Our error
@@ -340,7 +340,7 @@ export class UploadRoutes {
     if ("instrumentPid" in body) {
       try {
         body.instrumentPid = this.sanitizeInstrumentPid(body.instrumentPid);
-      } catch (err) {
+      } catch (err: any) {
         return next({
           status: 422,
           errors: err.message,
