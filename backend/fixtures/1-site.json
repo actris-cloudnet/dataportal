@@ -98,5 +98,19 @@
     "country": "China",
     "countryCode": "CN",
     "countrySubdivisionCode": null
+  },
+  {
+    "id": "warsaw",
+    "humanReadableName": "Warsaw",
+    "type": ["cloudnet"],
+    "latitude": 52.21,
+    "longitude": 20.98,
+    "altitude": 112,
+    "gaw": null,
+    "dvasId": null,
+    "actrisId": null,
+    "country": "Poland",
+    "countryCode": null,
+    "countrySubdivisionCode": null
   }
 ]

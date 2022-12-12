@@ -102,5 +102,38 @@
       "auxiliary": false,
       "humanReadableName": "METEK MIRA-35 cloud radar"
     }
+  },
+  {
+    "uuid": "6f109227-d497-4423-9953-e54854c9ea4b",
+    "checksum": "a32f626ec8d26a128ac27605b9eb6e05",
+    "filename": "Stare_213_20221205_04.hpl",
+    "measurementDate": "2022-12-05",
+    "size": "50329725",
+    "status": "uploaded",
+    "createdAt": "2022-12-06T00:31:17.507Z",
+    "updatedAt": "2022-12-06T00:31:22.497Z",
+    "instrumentPid": null,
+    "siteId": "warsaw",
+    "instrumentId": "halo-doppler-lidar",
+    "site": {
+      "id": "warsaw",
+      "humanReadableName": "Warsaw",
+      "type": ["cloudnet"],
+      "latitude": 52.21,
+      "longitude": 20.98,
+      "altitude": 112,
+      "gaw": null,
+      "dvasId": null,
+      "actrisId": null,
+      "country": "Poland",
+      "countryCode": null,
+      "countrySubdivisionCode": null
+    },
+    "instrument": {
+      "id": "halo-doppler-lidar",
+      "type": "lidar",
+      "auxiliary": true,
+      "humanReadableName": "Halo Photonics Doppler lidar"
+    }
   }
 ]
