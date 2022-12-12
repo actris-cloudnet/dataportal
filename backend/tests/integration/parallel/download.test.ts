@@ -6,7 +6,7 @@ describe("GET /api/download/collection/:uuid", () => {
   const url = `${backendPublicUrl}download/collection/`;
 
   it("responds with 404 if collection is not found", async () => {
-    let expectedBody: RequestError = {
+    const expectedBody: RequestError = {
       status: 404,
       errors: ["No collection matches this UUID."],
     };
@@ -26,7 +26,7 @@ describe("GET /api/download/product/:uuid/:filename", () => {
   const url = `${backendPublicUrl}download/product/`;
 
   it("responds with 404 if file is not found", async () => {
-    let expectedBody: RequestError = {
+    const expectedBody: RequestError = {
       status: 404,
       errors: ["File not found"],
     };
@@ -46,7 +46,7 @@ describe("GET /api/download/raw/:uuid/:filename", () => {
   const url = `${backendPublicUrl}download/raw/`;
 
   it("responds with 404 if file is not found", async () => {
-    let expectedBody: RequestError = {
+    const expectedBody: RequestError = {
       status: 404,
       errors: ["File not found"],
     };

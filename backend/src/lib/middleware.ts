@@ -1,6 +1,5 @@
 import { RequestHandler } from "express";
 import { RequestErrorArray } from "../entity/RequestError";
-import { ModelUpload } from "../entity/Upload";
 import validator from "validator";
 import { Site } from "../entity/Site";
 import { Connection } from "typeorm";
@@ -40,14 +39,14 @@ export class Middleware {
     const checkFieldNames = (validKeys: string[], query: any) =>
       Object.keys(query).filter((key) => !validKeys.includes(key));
 
-    let requestError: RequestErrorArray = { status: 400, errors: [] };
+    const requestError: RequestErrorArray = { status: 400, errors: [] };
 
     if (Object.keys(req.query).length == 0) {
       requestError.errors.push("No search parameters given");
       return next(requestError);
     }
 
-    let validKeys = [
+    const validKeys = [
       "site",
       "volatile",
       "product",
@@ -90,7 +89,7 @@ export class Middleware {
   };
 
   modelFilesValidator: RequestHandler = (req, _res, next) => {
-    let requestError: RequestErrorArray = { status: 400, errors: [] };
+    const requestError: RequestErrorArray = { status: 400, errors: [] };
 
     const invalidKeys = ["product", "showLegacy", "allVersions"];
 
@@ -160,7 +159,7 @@ export class Middleware {
     const query: any = req.query;
     const keys = ["deleteHigherProducts", "dryRun"];
     for (const key of keys) {
-      if (!query[key]) next({ status: 404, errors: [`Missing mandatory parameter: ${key}`] });
+      if (!query[key]) return next({ status: 404, errors: [`Missing mandatory parameter: ${key}`] });
       const value = query[key].toLowerCase();
       if (value === "true") query[key] = true;
       else if (value === "false") query[key] = false;

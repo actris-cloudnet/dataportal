@@ -55,11 +55,11 @@ export class ReferenceRoutes {
     } else if (req.query.dataAvailability === "true") {
       await getDataAvailability(req, res, data);
     } else {
-      let sourceUuids: string[] = [];
+      const sourceUuids: string[] = [];
       await this.fetchSourceUuids(data, sourceUuids);
       let pis: any = await Promise.all([getSitePI(data), getInstrumentPis(sourceUuids, data.measurementDate)]);
-      pis = [].concat.apply([], pis);
-      pis = [].concat.apply([], pis);
+      // This flattens nested arrays
+      pis = [].concat(...[].concat(...pis)); // TODO: Rewrite this !!!!
       pis = removeDuplicateNames(pis);
       await getCitation(req, res, data, pis);
     }
@@ -143,7 +143,7 @@ async function getAcknowledgements(req: Request, res: Response, data: RegularFil
 
 function commonAcknowledgement() {
   const url = "https://cloudnet.fmi.fi/";
-  let ackstr = `
+  const ackstr = `
     We acknowledge ACTRIS and Finnish Meteorological Institute for providing the data set which is available for download from <a href="${url}">${url}</a>.
   `;
   return ackstr.replace(/\s\s+/g, " ").trim();
@@ -270,7 +270,7 @@ function citation2html(c: Citation) {
 function citation2ris(c: Citation) {
   const endl = "\r\n";
   let author = c.author.map((a) => `AU  - ${a.lastName}, ${a.firstName}`).join("\r\n");
-  let publisher = c.publisher.join(", ");
+  const publisher = c.publisher.join(", ");
   if (author == "") {
     author = "AU  - ";
   }
