@@ -48,7 +48,7 @@
 <template>
   <div>
     <label :for="id">{{ label }}</label>
-    <multiselect
+    <Multiselect
       :name="id"
       :id="id"
       :value="selectedOption"
@@ -76,18 +76,11 @@
         </span>
       </template>
       <span id="noRes" slot="noResult">Not found</span>
-    </multiselect>
+    </Multiselect>
   </div>
 </template>
 
 <script lang="ts">
-import Component from "vue-class-component";
-import Vue from "vue";
-import { Prop, Watch } from "vue-property-decorator";
-import Multiselect from "vue-multiselect";
-import { DevMode } from "../lib/DevMode";
-import { notEmpty } from "../lib";
-
 export interface Option {
   id: string;
   humanReadableName: string;
@@ -95,35 +88,47 @@ export interface Option {
 
 type OptionId = Option["id"];
 
-@Component({ components: { Multiselect } })
-export default class CustomMultiselect extends Vue {
-  @Prop() id!: string;
-  @Prop() label!: string;
-  @Prop() options!: Option[];
-  @Prop() icons!: boolean;
-  @Prop() getIcon!: Function;
-  @Prop() devMode!: DevMode;
-  @Prop() multiple!: boolean;
-  @Prop() value!: OptionId | OptionId[] | null;
+export default {};
+</script>
 
-  selectedOption: Option | Option[] | null = null;
+<script lang="ts" setup>
+import Multiselect from "vue-multiselect";
+import { DevMode } from "../lib/DevMode";
+import { notEmpty } from "../lib";
+import { ref, watch } from "vue";
 
-  @Watch("value")
-  onValueChanged(value: OptionId | OptionId[] | null) {
+const props = defineProps<{
+  id: string;
+  label: string;
+  options: Option[];
+  icons: boolean;
+  getIcon: Function;
+  devMode: DevMode;
+  multiple: boolean;
+  value: OptionId | OptionId[] | null;
+}>();
+
+const emit = defineEmits(["input"]);
+
+const selectedOption = ref<Option | Option[] | null>(null);
+
+watch(
+  () => props.value,
+  (value) => {
     if (Array.isArray(value)) {
-      this.selectedOption = value.map((v) => this.options.find((option) => option.id === v)).filter(notEmpty);
+      selectedOption.value = value.map((v) => props.options.find((option) => option.id === v)).filter(notEmpty);
     } else {
-      const result = this.options.find((option) => option.id === value);
-      this.selectedOption = result !== undefined ? result : null;
+      const result = props.options.find((option) => option.id === value);
+      selectedOption.value = result !== undefined ? result : null;
     }
   }
+);
 
-  onInput(input: Option | Option[]) {
-    this.$emit("input", Array.isArray(input) ? input.map((v) => v.id) : input.id);
-  }
+function onInput(input: Option | Option[]) {
+  emit("input", Array.isArray(input) ? input.map((v) => v.id) : input.id);
+}
 
-  isIddqd(target: string, _: string) {
-    if (target == "iddqd") this.devMode.enable();
-  }
+function isIddqd(target: string, _: string) {
+  if (target == "iddqd") props.devMode.enable();
 }
 </script>
