@@ -75,8 +75,9 @@ export class CollectionRoutes {
       );
       await this.collectionRepo.update({ uuid: body.uuid }, { pid: pidRes.data.pid });
       res.send(pidRes.data);
-    } catch (e) {
-      if (e.code == "ECONNABORTED") return next({ status: 504, errors: ["PID service took too long to respond"] });
+    } catch (e: any) {
+      if (e.code && e.code == "ECONNABORTED")
+        return next({ status: 504, errors: ["PID service took too long to respond"] });
       return next({ status: 500, errors: e });
     }
   };

@@ -1,0 +1,19 @@
+name: Production build
+on: [push]
+env:
+  COMPOSE_FILE: .github/docker-compose.yml
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build Docker images
+        run: docker-compose build backend backend-prod frontend-prod
+
+      - name: Print logs
+        if: always()
+        run: docker-compose logs
