@@ -151,7 +151,17 @@ export class UploadRoutes {
   listMetadata = (includeS3path: boolean) => {
     return async (req: Request, res: Response, next: NextFunction) => {
       const isModel = req.path.includes("model");
-      const repo = isModel ? this.modelUploadRepo : this.instrumentUploadRepo;
+      let repo;
+      if (isModel) {
+        repo = this.modelUploadRepo;
+      } else if (
+        Object.prototype.hasOwnProperty.call(req.query, "instrument") &&
+        req.query.instrument === "halo-doppler-lidar"
+      ) {
+        repo = this.miscUploadRepo;
+      } else {
+        repo = this.instrumentUploadRepo;
+      }
       this.metadataStream(repo, req.query, false, isModel)
         .then((uploadedMetadata) => {
           streamHandler(uploadedMetadata, res, "um", this.augmentUploadResponse(includeS3path));

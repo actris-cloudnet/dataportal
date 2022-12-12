@@ -71,6 +71,12 @@ describe("GET /api/raw-files", () => {
     ).resolves.toMatchObject({ status: 200, data: [instResp[0], instResp[3]] });
   });
 
+  it("responds with correct object when filtering with halo-doppler-lidar", async () => {
+    return expect(
+      axios.get(`${rawFilesUrl}`, { params: { instrument: "halo-doppler-lidar", developer: true } })
+    ).resolves.toMatchObject({ status: 200, data: [instResp[4]] });
+  });
+
   it("responds with correct object when filtering with updatedAt", async () => {
     return expect(
       axios.get(`${rawFilesUrl}`, {
