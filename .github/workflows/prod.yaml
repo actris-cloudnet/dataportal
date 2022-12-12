@@ -1,4 +1,5 @@
 name: Production build
+on: [push]
 env:
   COMPOSE_FILE: .github/docker-compose.yml
 
