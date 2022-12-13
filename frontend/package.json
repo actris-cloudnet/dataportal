@@ -1,6 +1,6 @@
 {
   "name": "dataportal-frontend",
-  "version": "2.63.2",
+  "version": "2.64.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
