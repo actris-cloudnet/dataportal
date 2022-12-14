@@ -19,5 +19,8 @@
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"],
-  "exclude": ["node_modules", "/backend/node_modules"]
+  "exclude": ["node_modules", "/backend/node_modules"],
+  "vueCompilerOptions": {
+    "target": 2.7
+  }
 }

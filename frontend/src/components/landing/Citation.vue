@@ -82,9 +82,7 @@
         :class="{ full: !longCitationReduced, reduced: longCitationReduced }"
         @dblclick="toggleCitation"
         v-html="visibleCitationString"
-      >
-        <span v-if="longCitationReduced"> &#183; &#183; &#183;</span>
-      </div>
+      ></div>
     </section>
     <section class="citation-section">
       <p class="citation-note">
