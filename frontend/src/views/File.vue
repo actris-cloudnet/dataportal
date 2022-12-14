@@ -44,7 +44,9 @@
         <div v-if="isActrisObject" class="tag actris" title="Data from an operational ACTRIS site">Actris</div>
         <div v-if="response.volatile" class="tag volatile" title="Data may change in future">Volatile</div>
         <div v-if="response.legacy" class="tag legacy" title="Produced using non-standardized processing">Legacy</div>
-        <div v-if="response.product.experimental" class="tag experimental" title="Experimental product">Experimental</div>
+        <div v-if="response.product.experimental" class="tag experimental" title="Experimental product">
+          Experimental
+        </div>
       </div>
       <div class="landing-download">
         <DownloadButton :downloadUrl="response.downloadUrl" />
