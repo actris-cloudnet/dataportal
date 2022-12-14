@@ -78,8 +78,8 @@
         <th>Location</th>
         <td>
           <router-link :to="`/site/${response.site.id}`">
-            {{ response.site.humanReadableName }},
-            {{ response.site.country }}
+            {{ response.site.humanReadableName
+            }}<template v-if="response.site.country">, {{ response.site.country }}</template>
           </router-link>
         </td>
       </tr>
