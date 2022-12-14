@@ -161,7 +161,7 @@ export class DownloadRoutes {
     switch (req.query.dimensions) {
       case "yearMonth,downloads":
         select = `SELECT to_char(download."createdAt", 'YYYY-MM') AS "yearMonth"
-                       , SUM("variableDays") / 365.25 AS downloads`;
+                       , SUM("variableDays") / 300 AS downloads`;
         group = 'GROUP BY "yearMonth"';
         order = 'ORDER BY "yearMonth"';
         break;
@@ -172,7 +172,7 @@ export class DownloadRoutes {
         order = 'ORDER BY "yearMonth"';
         break;
       case "country,downloads":
-        select = 'SELECT country, SUM("variableDays") / 365.25 AS downloads';
+        select = 'SELECT country, SUM("variableDays") / 300 AS downloads';
         group = "GROUP BY country";
         order = "ORDER BY country";
         break;
