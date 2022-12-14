@@ -137,9 +137,7 @@
       <div class="forcewrap"></div>
 
       <section id="product_availability" class="graph" v-if="!selectedProductName">
-        <header>
-          Product availability
-        </header>
+        <header>Product availability</header>
         <section class="details">
           <ProductAvailabilityVisualization
             v-if="dataStatusParser"
@@ -272,11 +270,11 @@ export default class SiteView extends Vue {
         },
       })
       .then(({ data }) => (this.latestFile = data[0]))
-      .catch(() => {
-        /* */
+      .catch((error) => {
+        console.error(error);
       });
-    this.initDataStatusParser().catch(() => {
-      /* */
+    this.initDataStatusParser().catch((error) => {
+      console.error(error);
     });
     this.loadInstruments().catch((error) => {
       console.error(error);
