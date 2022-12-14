@@ -122,7 +122,9 @@ export class DataStatusParser {
     }
     if (productInfo) {
       const { id, legacy, errorLevel, uuid } = productInfo;
-      existingObj[this.lvlTranslate[id]].push({
+      const lvl = this.lvlTranslate[id];
+      if (!lvl) return existingObj;
+      existingObj[lvl].push({
         id,
         legacy,
         errorLevel,
