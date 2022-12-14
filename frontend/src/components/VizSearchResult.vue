@@ -89,6 +89,9 @@ h3 > .rowtag
 .sourceFileLink
   color: inherit
   text-decoration: none
+
+.experimental
+  background-color: #EC9706
 </style>
 
 <template>
@@ -143,6 +146,7 @@ h3 > .rowtag
           >
             legacy
           </span>
+          <span v-if="file.experimental" class="rowtag experimental" title="Experimental product"> experimental </span>
         </h3>
         <div v-for="viz in sortVisualizations(file.visualizations)" :key="viz.s3key" class="variable">
           <h4>

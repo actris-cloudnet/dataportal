@@ -15,6 +15,7 @@ export class VisualizationResponse {
   productHumanReadable: string;
   volatile: boolean;
   legacy: boolean;
+  experimental: boolean;
   visualizations: VisualizationItem[];
 
   constructor(file: RegularFile | ModelFile) {
@@ -45,5 +46,6 @@ export class VisualizationResponse {
     this.locationHumanReadable = file.site.humanReadableName;
     this.volatile = file.volatile;
     this.legacy = file.legacy;
+    this.experimental = file.product.experimental;
   }
 }
