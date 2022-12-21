@@ -33,7 +33,7 @@ describe("Site.vue", () => {
   });
 
   it("displays basic information", async () => {
-    const expected = ["Bucharest, Romania", "44.348°\u00a0N, 26.029°\u00a0E", "93 m", "2019-07-16"];
+    const expected = ["Bucharest, Romania", "44.348°N, 26.029°E", "93 m", "2019-07-16"];
     mocked(axios.get).mockImplementation(axiosMockWithIdx(0, 7));
     wrapper = mountVue(Site);
     await nextTick(1);
@@ -42,7 +42,7 @@ describe("Site.vue", () => {
   });
 
   it("displays negative coordinate information", async () => {
-    const expected = ["Mace Head", "53.326°\u00a0N, 9.9°\u00a0W", "16 m", "2019-07-16"];
+    const expected = ["Mace Head", "53.326°N, 9.9°W", "16 m", "2019-07-16"];
     mocked(axios.get).mockImplementation(axiosMockWithIdx(1, 7));
     wrapper = mountVue(Site);
     await nextTick(1);
