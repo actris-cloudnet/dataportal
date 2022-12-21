@@ -44,13 +44,13 @@ describe("GET /api/sites", () => {
   it("responds with citations with showCitations flag", async () => {
     const params = { params: { showCitations: true } };
     const res = await axios.get(url, params);
-    expect(res.data[0].citations).toMatchObject([
+    expect(res.data[1].citations).toMatchObject([
       {
         id: "bucharest_test",
         acknowledgements: "Bucharest test citation.",
       },
     ]);
-    expect(res.data[1].citations).toMatchObject([
+    expect(res.data[2].citations).toMatchObject([
       {
         id: "hyytiala_test",
         acknowledgements: "Hyytiälä test citation.",
@@ -68,6 +68,63 @@ describe("GET /api/sites/:siteid", () => {
 
   it("responds with 404 if site is not found", async () => {
     const invalidUrl = `${url}espoo`;
+    return expect(axios.get(invalidUrl)).rejects.toMatchObject(
+      genResponse(404, { status: 404, errors: ["No sites match this id"] })
+    );
+  });
+});
+
+describe("GET /api/sites/:siteid/locations", () => {
+  it("responds with the correct json on valid id", async () => {
+    const validUrl = `${url}boaty/locations`;
+    const res = await axios.get(validUrl);
+    expect(res.data).toMatchObject([
+      {
+        date: "2022-01-01",
+        latitude: 60.163,
+        longitude: 24.969,
+      },
+      {
+        date: "2022-01-02",
+        latitude: 59.801,
+        longitude: 24.839,
+      },
+      {
+        date: "2022-01-03",
+        latitude: 59.446,
+        longitude: 24.772,
+      },
+    ]);
+  });
+
+  it("responds with 404 if site is not found", async () => {
+    const invalidUrl = `${url}espoo/locations`;
+    return expect(axios.get(invalidUrl)).rejects.toMatchObject(
+      genResponse(404, { status: 404, errors: ["No sites match this id"] })
+    );
+  });
+});
+
+describe("GET /api/sites/:siteid/locations/:date", () => {
+  it("responds with the correct json on valid date", async () => {
+    const validUrl = `${url}boaty/locations/2022-01-03`;
+    const res = await axios.get(validUrl);
+    expect(res.data).toMatchObject({
+      date: "2022-01-03",
+      latitude: 59.446,
+      longitude: 24.772,
+    });
+  });
+
+  it("responds with 404 on missing date", async () => {
+    const missingUrl = `${url}boaty/locations/2022-01-04`;
+    return expect(axios.get(missingUrl)).rejects.toMatchObject(
+      genResponse(404, { status: 404, errors: ["No location match this date"] })
+    );
+  });
+
+  it("responds with 404 if site is not found", async () => {
+    const invalidUrl = `${url}espoo/locations/2022-01-03`;
     return expect(axios.get(invalidUrl)).rejects.toMatchObject(
       genResponse(404, { status: 404, errors: ["No sites match this id"] })
     );

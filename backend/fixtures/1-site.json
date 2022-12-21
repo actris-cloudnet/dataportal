@@ -112,5 +112,19 @@
     "country": "Poland",
     "countryCode": null,
     "countrySubdivisionCode": null
+  },
+  {
+    "id": "boaty",
+    "humanReadableName": "Boaty McBoatface",
+    "type": ["mobile"],
+    "latitude": null,
+    "longitude": null,
+    "altitude": null,
+    "gaw": null,
+    "dvasId": null,
+    "actrisId": null,
+    "country": null,
+    "countryCode": null,
+    "countrySubdivisionCode": null
   }
 ]
