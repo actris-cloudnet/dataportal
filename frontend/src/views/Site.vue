@@ -118,7 +118,20 @@
           </div>
         </section>
       </section>
-      <section id="sitemap" v-if="response.latitude != null && response.longitude != null">
+      <section id="sitemap" v-if="response.type.includes('mobile')">
+        <header>Map</header>
+        <section class="details">
+          <div v-if="locations.status === 'loading'" class="loadingoverlay">
+            <div class="lds-dual-ring"></div>
+          </div>
+          <TrackMap v-else-if="locations.status === 'ready'" :site="response.id" :track="locations.value" />
+          <div v-else-if="locations.status === 'notFound'" style="padding: 10px; color: gray">No location history.</div>
+          <div v-else-if="locations.status === 'error'" style="padding: 10px; color: red">
+            Failed to load location history.
+          </div>
+        </section>
+      </section>
+      <section id="sitemap" v-else-if="response.latitude != null && response.longitude != null">
         <header>Map</header>
         <section class="details">
           <Map
@@ -213,7 +226,8 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import axios from "axios";
-import { Site } from "../../../backend/src/entity/Site";
+import { Site, SiteType } from "../../../backend/src/entity/Site";
+import { SiteLocation } from "../../../backend/src/entity/SiteLocation";
 import { SearchFileResponse } from "../../../backend/src/entity/SearchFileResponse";
 import Map from "../components/Map.vue";
 import ProductAvailabilityVisualization from "../components/DataStatusVisualization.vue";
@@ -223,6 +237,7 @@ import { DevMode } from "../lib/DevMode";
 import { DataStatusParser } from "../lib/DataStatusParser";
 import CustomMultiselect from "../components/Multiselect.vue";
 import { ReducedMetadataResponse } from "../../../backend/src/entity/ReducedMetadataResponse";
+import TrackMap from "../components/TrackMap.vue";
 
 interface Instrument {
   pid: string | null;
@@ -230,9 +245,21 @@ interface Instrument {
   icon: string;
 }
 
+type LocationsResult =
+  | { status: "loading" }
+  | { status: "ready"; value: SiteLocation[] }
+  | { status: "notFound" }
+  | { status: "error"; error: Error };
+
 @Component({
   name: "app-site",
-  components: { Map, ProductAvailabilityVisualization, CustomMultiselect, ProductAvailabilityVisualizationSingle },
+  components: {
+    Map,
+    ProductAvailabilityVisualization,
+    CustomMultiselect,
+    ProductAvailabilityVisualizationSingle,
+    TrackMap,
+  },
 })
 export default class SiteView extends Vue {
   @Prop() siteid!: string;
@@ -253,11 +280,35 @@ export default class SiteView extends Vue {
   payload = { developer: this.devMode.activated };
   nfName: string | null = null;
   nfLink: string | null = null;
+  locations: LocationsResult = { status: "loading" };
 
   created() {
     axios
       .get(`${this.apiUrl}sites/${this.siteid}`, { params: this.payload })
-      .then(({ data }) => (this.response = data))
+      .then((response) => {
+        this.response = response.data;
+        if (this.response?.type.includes("mobile" as SiteType)) {
+          axios
+            .get(`${this.apiUrl}sites/${this.siteid}/locations`)
+            .then((response) => {
+              if (response.data.length > 0) {
+                this.locations = { status: "ready", value: response.data };
+              } else {
+                this.locations = { status: "notFound" };
+              }
+            })
+            .catch((error) => {
+              if (error.response && error.response.status === 404) {
+                this.locations = { status: "notFound" };
+              } else {
+                this.locations = { status: "error", error };
+                console.error("Failed to load locations", error);
+              }
+            });
+        } else {
+          this.locations = { status: "notFound" };
+        }
+      })
       .catch(({ response }) => {
         this.error = true;
         this.response = response;
