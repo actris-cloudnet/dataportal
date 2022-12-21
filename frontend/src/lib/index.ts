@@ -81,11 +81,11 @@ export function notEmpty<TValue>(value: TValue | null | undefined): value is TVa
 }
 
 export function formatLatitude(latitude: number): string {
-  return `${Math.abs(latitude)}°\u00a0${latitude > 0 ? "N" : "S"}`;
+  return `${Math.abs(latitude)}°${latitude > 0 ? "N" : "S"}`;
 }
 
 export function formatLongitude(longitude: number): string {
-  return `${Math.abs(longitude)}°\u00a0${longitude > 0 ? "E" : "W"}`;
+  return `${Math.abs(longitude)}°${longitude > 0 ? "E" : "W"}`;
 }
 
 export function formatCoordinates(latitude: number, longitude: number): string {
