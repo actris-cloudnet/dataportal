@@ -6,7 +6,12 @@
   <div class="landing-summary-container">
     <div class="main-content">
       <div class="summary-box">
-        <ProductInformation :response="response" :instrument="instrument" :instrumentStatus="instrumentStatus" />
+        <ProductInformation
+          :response="response"
+          :location="location"
+          :instrument="instrument"
+          :instrumentStatus="instrumentStatus"
+        />
         <FileInformation :response="response" />
         <DataOrigin :response="response" :isBusy="isBusy" :versions="versions" :sourceFiles="sourceFiles" />
       </div>
@@ -24,6 +29,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
 import { ModelFile, RegularFile } from "../../../../backend/src/entity/File";
+import { SiteLocation } from "../../../../backend/src/entity/SiteLocation";
 import { VisualizationItem } from "../../../../backend/src/entity/VisualizationResponse";
 
 import FileInformation from "./FileInformation.vue";
@@ -35,6 +41,7 @@ import Citation from "./Citation.vue";
 @Component({ components: { FileInformation, ProductInformation, DataOrigin, Preview, Citation } })
 export default class LandingSummary extends Vue {
   @Prop() response!: ModelFile | RegularFile | null;
+  @Prop() location!: SiteLocation | null;
   @Prop() uuid!: string;
   @Prop() instrument!: string | null;
   @Prop() instrumentStatus!: "loading" | "error" | "ready";

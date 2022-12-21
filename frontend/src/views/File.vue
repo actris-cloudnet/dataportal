@@ -64,6 +64,7 @@
       <router-view
         :uuid="uuid"
         :response="response"
+        :location="location"
         :instrument="instrument"
         :instrumentStatus="instrumentStatus"
         :isBusy="isBusy"
@@ -86,7 +87,8 @@ import { VisualizationItem } from "../../../backend/src/entity/VisualizationResp
 import HowToCite from "../components/HowToCite.vue";
 import License from "../components/License.vue";
 import Visualization from "../components/Visualization.vue";
-import { Site } from "../../../backend/src/entity/Site";
+import { Site, SiteType } from "../../../backend/src/entity/Site";
+import { SiteLocation } from "../../../backend/src/entity/SiteLocation";
 import { Model } from "../../../backend/src/entity/Model";
 
 import FileInformation from "../components/landing/FileInformation.vue";
@@ -95,7 +97,6 @@ import DataOrigin from "../components/landing/DataOrigin.vue";
 import Preview from "../components/landing/Preview.vue";
 import Citation from "../components/landing/Citation.vue";
 import DownloadButton from "../components/landing/DownloadButton.vue";
-import { SiteType } from "../../../backend/src/entity/Site";
 
 Vue.component("how-to-cite", HowToCite);
 Vue.component("license", License);
@@ -131,6 +132,7 @@ export default class FileView extends Vue {
   instrument = "";
   instrumentStatus: "loading" | "error" | "ready" = "loading";
   loadingVisualizations = true;
+  location: SiteLocation | null = null;
 
   metaInfo() {
     return { title: this.title };
@@ -199,16 +201,30 @@ export default class FileView extends Vue {
     this.loadingVisualizations = false;
   }
 
-  fetchFileMetadata(payload: {}) {
-    return axios
-      .get(`${this.apiUrl}files/${this.uuid}`, payload)
-      .then((response) => {
-        this.response = response.data;
-      })
-      .catch(({ response }) => {
-        this.error = true;
-        this.response = response;
-      });
+  async fetchFileMetadata(payload: {}) {
+    try {
+      const response = await axios.get(`${this.apiUrl}files/${this.uuid}`, payload);
+      this.response = response.data;
+      if (this.response) {
+        this.fetchLocation(this.response);
+      }
+    } catch (err) {
+      this.error = true;
+      this.response = err.response;
+    }
+  }
+
+  async fetchLocation(file: ModelFile | RegularFile) {
+    if (!file.site.type.includes("mobile" as SiteType)) {
+      this.location = null;
+      return;
+    }
+    try {
+      const response = await axios.get(`${this.apiUrl}sites/${file.site.id}/locations/${file.measurementDate}`);
+      this.location = response.data;
+    } catch (err) {
+      this.location = null;
+    }
   }
 
   fetchVersions(file: File) {
