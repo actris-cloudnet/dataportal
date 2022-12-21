@@ -14,6 +14,9 @@
 
 .loading
   color: $GRAY-4-hex
+
+.coordinates
+  font-size: 90%
 </style>
 
 <template>
@@ -82,6 +85,9 @@
             {{ response.site.humanReadableName
             }}<template v-if="response.site.country">, {{ response.site.country }}</template>
           </router-link>
+          <template v-if="location">
+            <span class="coordinates"> ({{ formatCoordinates(location.latitude, location.longitude) }}) </span>
+          </template>
         </td>
       </tr>
     </table>
@@ -90,18 +96,21 @@
 
 <script lang="ts">
 import { ModelFile, RegularFile } from "../../../../backend/src/entity/File";
+import { SiteLocation } from "../../../../backend/src/entity/SiteLocation";
 import { Component, Prop } from "vue-property-decorator";
 import Vue from "vue";
-import { getProductIcon, getQcIcon, getQcLink, getQcText } from "../../lib";
+import { getProductIcon, getQcIcon, getQcLink, getQcText, formatCoordinates } from "../../lib";
 
 @Component
 export default class ProductInformation extends Vue {
   @Prop() response!: ModelFile | RegularFile | null;
+  @Prop() location!: SiteLocation | null;
   @Prop() instrument!: string | null;
   @Prop() instrumentStatus!: "loading" | "error" | "ready";
   getQcIcon = getQcIcon;
   getQcText = getQcText;
   getQcLink = getQcLink;
+  formatCoordinates = formatCoordinates;
   get timelinessString() {
     if (this.response == null) {
       return "";
