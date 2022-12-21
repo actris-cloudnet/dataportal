@@ -6,6 +6,7 @@ import { RegularCitation } from "./Citation";
 import { SiteContact } from "./SiteContact";
 import { Permission } from "./Permission";
 import { Person } from "./Person";
+import { SiteLocation } from "./SiteLocation";
 
 export enum SiteType {
   CLOUDNET = "cloudnet",
@@ -76,6 +77,9 @@ export class Site {
 
   @OneToMany((_) => Permission, (permission) => permission.site)
   permissions!: Permission[];
+
+  @OneToMany((_) => SiteLocation, (location) => location.site)
+  locations!: SiteLocation[];
 
   get isTestSite() {
     return this.type.includes(SiteType.TEST);
