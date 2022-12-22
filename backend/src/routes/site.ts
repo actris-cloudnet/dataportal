@@ -65,7 +65,7 @@ export class SiteRoutes {
       const qb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteid", req.params);
       const site = await hideTestDataFromNormalUsers<Site>(qb, req).getOne();
       if (!site) return next({ status: 404, errors: ["No sites match this id"] });
-      const locations = await this.siteLocationRepo.find({ where: { site }, order: { site: "ASC" } });
+      const locations = await this.siteLocationRepo.find({ where: { site }, order: { date: "ASC" } });
       res.send(locations);
     } catch (err: any) {
       return next({ status: 500, errors: err });
