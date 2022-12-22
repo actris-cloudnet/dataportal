@@ -56,7 +56,10 @@
             <br />
           </span>
           <span v-if="response.cloudnetpyVersion">
-            <a :href="`https://github.com/actris-cloudnet/cloudnetpy/tree/v${response.cloudnetpyVersion}`">
+            <template v-if="response.cloudnetpyVersion.indexOf('ustom')">
+              {{ response.cloudnetpyVersion }}
+            </template>
+            <a v-else :href="`https://github.com/actris-cloudnet/cloudnetpy/tree/v${response.cloudnetpyVersion}`">
               CloudnetPy {{ response.cloudnetpyVersion }}
             </a>
           </span>
