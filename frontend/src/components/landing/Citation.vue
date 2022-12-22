@@ -12,6 +12,7 @@
   font-weight: 400
   font-size: 90%
   padding: 0.5*$basespacing $basespacing
+  margin-bottom: 0.7em
   .banner-icon
     height: 1rem
     padding-right: 0.5*$basespacing
@@ -58,15 +59,15 @@
 
 <template>
   <div class="summary-section" id="citation">
-    <div
-      v-if="isVolatile || isLegacy"
-      class="disclaimer-banner"
-      :class="isVolatile ? 'volatile-banner' : 'legacy-banner'"
-    >
+    <div v-if="isVolatile" class="disclaimer-banner" :class="'volatile-banner'">
       <img class="banner-icon" alt="warning icon" :src="require('../../assets/icons/test-warning-mono.svg')" />
       <span v-if="isVolatile">This data object is volatile and may be updated in the future.</span>
+    </div>
+    <div v-if="isLegacy" class="disclaimer-banner" :class="'legacy-banner'">
+      <img class="banner-icon" alt="warning icon" :src="require('../../assets/icons/test-warning-mono.svg')" />
       <span v-if="isLegacy">This data object was produced using nonstandard processing.</span>
     </div>
+
     <section class="citation-section" id="citation">
       <div class="summary-section-header-container">
         <div class="summary-section-header">Citation</div>
