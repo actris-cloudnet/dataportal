@@ -85,6 +85,9 @@ describe("Site.vue", () => {
     date30daysago.setDate(date30daysago.getDate() - nDays!);
     const secondArg = getMockedAxiosLastCallSecondArgument();
     // Expect to be within 5 seconds
-    return expect(new Date(secondArg.params.dateFrom).getTime() / 1000).toBeCloseTo(date30daysago.getTime() / 1000, -1);
+    return expect(new Date(secondArg.params.updatedAtFrom).getTime() / 1000).toBeCloseTo(
+      date30daysago.getTime() / 1000,
+      -1
+    );
   });
 });
