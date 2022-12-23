@@ -10,10 +10,12 @@
     "test": "jest"
   },
   "dependencies": {
+    "@types/d3": "^7.4.0",
     "@types/escape-html": "^1.0.2",
     "@types/leaflet": "^1.9.0",
     "axios": "^0.21.4",
     "bootstrap-vue": "^2.23.1",
+    "d3": "^7.8.0",
     "debounce": "^1.2.1",
     "escape-html": "^1.0.3",
     "leaflet": "^1.9.3",

@@ -54,7 +54,7 @@
     "e2e-test": "set -e; for f in tests/e2e/*; do npm run reset-db && jest $f; done",
     "selenium-test": "npm run reset-db && jest --runInBand",
     "start": "node build/server.js",
-    "start-dev": "if test \"$SS_MODE\" = 'local' ; then npm run reset-db-prod ; fi ; nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'npx ts-node -T' src/server.ts",
+    "start-dev": "if test \"$SS_MODE\" = 'local' ; then npm run reset-db ; fi ; nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'npx ts-node -T' src/server.ts",
     "start-test": "node tests/lib/service-mocks.js & npm run start-dev",
     "start-e2e": "node tests/lib/service-mocks.js & npm start",
     "stop": "echo 'Use ./control script at project root'",
