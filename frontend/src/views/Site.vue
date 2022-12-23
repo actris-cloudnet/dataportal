@@ -402,7 +402,7 @@ export default class SiteView extends Vue {
     const dateFrom = new Date();
     dateFrom.setDate(dateFrom.getDate() - this.instrumentsFromLastDays);
     const instruments = await axios.get(`${this.apiUrl}uploaded-metadata/`, {
-      params: { ...this.payload, ...{ site: this.siteid, dateFrom } },
+      params: { ...this.payload, ...{ site: this.siteid, updatedAtFrom: dateFrom } },
     });
     this.instruments = await Promise.all(instruments.data.map(this.handleInstrument));
     this.instrumentsStatus = "ready";
