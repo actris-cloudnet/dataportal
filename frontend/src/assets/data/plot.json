@@ -1,0 +1,51 @@
+{
+  "uwind": {
+    "name": "Model zonal wind",
+    "cbar": "RdBu_r",
+    "clabel": "m s<sup>-1</sup>",
+    "range": [-50, 50],
+    "scale": "linear"
+  },
+  "vwind": {
+    "name": "Model meridional wind",
+    "cbar": "RdBu_r",
+    "clabel": "m s<sup>-1</sup>",
+    "range": [-50, 50],
+    "scale": "linear"
+  },
+  "temperature": {
+    "name": "Model temperature",
+    "cbar": "RdBu_r",
+    "clabel": "K",
+    "range": [223.15, 323.15],
+    "scale": "linear"
+  },
+  "cloud_fraction": {
+    "name": "Cloud fraction",
+    "cbar": "Blues",
+    "clabel": "",
+    "range": [0, 1],
+    "scale": "linear"
+  },
+  "specific_humidity": {
+    "name": "Model specific humidity",
+    "cbar": "viridis",
+    "clabel": "",
+    "range": [1e-5, 1e-2],
+    "scale": "log"
+  },
+  "q": {
+    "name": "Model specific humidity",
+    "cbar": "viridis",
+    "clabel": "",
+    "range": [1e-5, 1e-2],
+    "scale": "log"
+  },
+  "pressure": {
+    "name": "Model pressure",
+    "cbar": "viridis",
+    "clabel": "Pa",
+    "range": [1e4, 1.5e5],
+    "scale": "log"
+  }
+}

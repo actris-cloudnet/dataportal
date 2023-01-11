@@ -5,6 +5,7 @@
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
 import * as d3 from "d3";
+import plotSettings from "@/assets/data/plot.json";
 
 interface Variable {
   units: string;
@@ -40,7 +41,8 @@ function draw(ctx: CanvasRenderingContext2D, data: any, x: any, y: any, color: a
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   for (const d of data) {
     ctx.fillStyle = color(d.value);
-    ctx.fillRect(x(d.x), y(d.y), x(d.x) - x(d.prevX) + 1, y(d.prevY) - y(d.y) + 1);
+    // ctx.fillRect(x(d.x), y(d.y), x(d.x) - x(d.prevX), y(d.prevY) - y(d.y) + 1);
+    ctx.fillRect(x(d.x), y(d.y), 40, 4);
   }
 }
 
@@ -83,17 +85,32 @@ onMounted(() => {
   const y = d3
     .scaleLinear()
     // @ts-ignore
+    // .domain([0, d3.max(data, d => d.y)])
     .domain([0, 12])
     .rangeRound([height - margin.top - margin.bottom, 0]);
 
+  type Interpolator = (x: number) => string;
+  const interpolators: Record<string, Interpolator> = {
+    RdBu_r: (x) => d3.interpolateRdBu(x),
+    Blues: d3.interpolateBlues,
+    viridis: d3.interpolateViridis,
+  };
+  // @ts-ignore
+  const settings = plotSettings[props.variable];
+  const range = settings.cbar.endsWith("_r") ? [settings.range[1], settings.range[0]] : settings.range;
+  const interpolator = interpolators[settings.cbar];
+  let color;
+  if (settings.scale === "linear") {
+    color = d3.scaleSequential(interpolator).domain(range);
+  } else if (settings.scale === "log") {
+    const logScale = d3.scaleLog().domain(range);
+    color = d3.scaleSequential((d) => interpolator(logScale(d)));
+  }
   const yColor = d3
     .scaleLinear()
     // @ts-ignore
-    .domain(d3.extent(data, (d) => d.value))
+    .domain(settings.range)
     .rangeRound([height - margin.top - margin.bottom, 0]);
-
-  // @ts-ignore
-  const color = d3.scaleSequentialSqrt([0, d3.max(data, (d) => d.value)], d3.interpolateViridis);
 
   // g.selectAll("rect")
   //   .data(data)
