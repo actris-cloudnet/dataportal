@@ -22,6 +22,7 @@ import { Authenticator, Authorizator } from "./lib/auth";
 import { PermissionType } from "./entity/Permission";
 import { UserActivationRoutes } from "./routes/userActivation";
 import { ReferenceRoutes } from "./routes/reference";
+import * as http from "http";
 
 async function createServer() {
   const port = 3000;
@@ -275,7 +276,12 @@ async function createServer() {
 
   app.use(errorHandler);
 
-  app.listen(port, () => console.log(`App listening on port ${port}!`));
+  const server = http.createServer(app);
+  // Explicitly set timeout to default value of Node 15 because newer Node
+  // versions use a different value. Using 0 (i.e. no timeout) shouldn't be a
+  // problem because we're running behind a reverse proxy.
+  server.requestTimeout = 0;
+  server.listen(port, () => console.log(`App listening on port ${port}!`));
 }
 
 createServer().catch((err) => {
