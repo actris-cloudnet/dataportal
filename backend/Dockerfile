@@ -8,8 +8,6 @@ RUN npm ci
 
 FROM base AS dev
 
-ENV TZ="Europe/Helsinki"
-
 COPY backend /app
 COPY .eslintrc-common.js /
 COPY shared /shared

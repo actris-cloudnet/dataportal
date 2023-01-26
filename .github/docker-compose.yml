@@ -26,7 +26,6 @@ services:
   db:
     image: "postgres:13"
     environment:
-      TZ: "Europe/Helsinki"
       POSTGRES_DB: dataportal-test
       POSTGRES_USER: dataportal
       POSTGRES_PASSWORD: dev
