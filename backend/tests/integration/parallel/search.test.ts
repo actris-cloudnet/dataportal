@@ -70,7 +70,7 @@ describe("/api/files", () => {
   });
 
   it("responds with an array of objects with dates between [ dateFrom, dateTo ], in descending order", async () => {
-    const payload = { params: { dateFrom: new Date("2018-06-09"), dateTo: new Date("2019-09-01") } };
+    const payload = { params: { dateFrom: "2018-06-09", dateTo: "2019-09-01" } };
     const res = await axios.get(url, payload);
     return expect(res.data.map((d: any) => d.measurementDate)).toEqual([
       "2019-09-01",
@@ -91,8 +91,8 @@ describe("/api/files", () => {
   it("responds with correct objects if dateFrom, dateTo, site, and product are specified", async () => {
     const payload = {
       params: {
-        dateFrom: new Date("2018-06-09"),
-        dateTo: new Date("2019-09-02"),
+        dateFrom: "2018-06-09",
+        dateTo: "2019-09-02",
         site: "mace-head",
         product: "classification",
       },
@@ -122,7 +122,7 @@ describe("/api/files", () => {
       status: 400,
       errors: ['Malformed date in property "dateTo"'],
     };
-    const payload = { params: { dateFrom: new Date("2020-02-20"), dateTo: "turku" } };
+    const payload = { params: { dateFrom: "2020-02-20", dateTo: "turku" } };
     return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody));
   });
 
@@ -343,8 +343,8 @@ describe("/api/search", () => {
     const expectedData = [responses["allsearch"][2]];
     const payload = {
       params: {
-        dateFrom: new Date("2018-06-09"),
-        dateTo: new Date("2019-09-02"),
+        dateFrom: "2018-06-09",
+        dateTo: "2019-09-02",
         site: "mace-head",
         product: "classification",
       },

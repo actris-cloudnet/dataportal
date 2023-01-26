@@ -17,7 +17,7 @@ jobs:
       - name: Lint
         run: docker-compose run lint-backend
 
-      - name: Run integration tests
+      - name: Run unit and integration tests
         run: docker-compose run test-backend
 
       - name: Run e2e tests

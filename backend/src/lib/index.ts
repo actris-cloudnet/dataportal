@@ -21,10 +21,57 @@ export const fetchAll = <T>(conn: Connection, schema: Function, options = {}): P
   return repo.find(options) as Promise<T[]>;
 };
 
-export const isValidDate = (obj: any) => {
-  const date = new Date(obj);
-  return !isNaN(date.getDate()) && date.getTime() > new Date("1970-01-01").getTime();
-};
+const DATE_FORMAT = /^(?<year>\d\d\d\d)-(?<month>\d\d)-(?<day>\d\d)$/;
+const DATETIME_FORMAT =
+  /^(?<year>\d\d\d\d)-(?<month>\d\d)-(?<day>\d\d)(T(?<hours>\d\d):(?<minutes>\d\d):(?<seconds>\d\d)(\.(?<fraction>\d+))?(Z|\+00:00)?)?$/;
+
+export function isValidDate(obj: any): boolean {
+  if (obj instanceof Date) {
+    return !isNaN(obj.getTime());
+  }
+  if (typeof obj !== "string") {
+    return false;
+  }
+  const match = DATE_FORMAT.exec(obj);
+  if (!match || !match.groups) {
+    return false;
+  }
+  const year = parseInt(match.groups.year);
+  const month = parseInt(match.groups.month) - 1;
+  const day = parseInt(match.groups.day);
+  const date = new Date(year, month, day);
+  return date.getFullYear() == year && date.getMonth() == month && date.getDate() == day;
+}
+
+export function isValidDateTime(obj: any): boolean {
+  if (obj instanceof Date) {
+    return !isNaN(obj.getTime());
+  }
+  if (typeof obj !== "string") {
+    return false;
+  }
+  const match = DATETIME_FORMAT.exec(obj);
+  if (!match || !match.groups) {
+    return false;
+  }
+  const year = parseInt(match.groups.year);
+  const month = parseInt(match.groups.month) - 1;
+  const day = parseInt(match.groups.day);
+  const hours = match.groups.hours ? parseInt(match.groups.hours) : 0;
+  const minutes = match.groups.minutes ? parseInt(match.groups.minutes) : 0;
+  const seconds = match.groups.seconds ? parseInt(match.groups.seconds) : 0;
+  const milliseconds = match.groups.fraction ? parseInt(match.groups.fraction.slice(0, 3).padEnd(3, "0")) : 0;
+  const date = new Date(year, month, day, hours, minutes, seconds, milliseconds);
+  return (
+    date.getFullYear() == year &&
+    date.getMonth() == month &&
+    date.getDate() == day &&
+    date.getHours() == hours &&
+    date.getMinutes() == minutes &&
+    date.getSeconds() == seconds &&
+    date.getMilliseconds() == milliseconds
+  );
+}
 
 export const tomorrow = () => {
   const tomorrow = new Date();

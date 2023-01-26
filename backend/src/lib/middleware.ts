@@ -3,7 +3,7 @@ import { RequestErrorArray } from "../entity/RequestError";
 import validator from "validator";
 import { Site } from "../entity/Site";
 import { Connection } from "typeorm";
-import { fetchAll, hideTestDataFromNormalUsers, isValidDate, toArray } from ".";
+import { fetchAll, hideTestDataFromNormalUsers, isValidDate, isValidDateTime, toArray } from ".";
 import { validate as validateUuid } from "uuid";
 import { Product } from "../entity/Product";
 
@@ -198,11 +198,15 @@ export class Middleware {
           return `Malformed ${key}`;
         }
         break;
-      case "dateTo":
-      case "dateFrom":
       case "updatedAtFrom":
       case "updatedAtTo":
+        if (key in query && !isValidDateTime(query[key])) {
+          return `Malformed date and time in property "${key}"`;
+        }
+        break;
       case "date":
+      case "dateTo":
+      case "dateFrom":
         if (key in query && !isValidDate(query[key])) {
           return `Malformed date in property "${key}"`;
         }

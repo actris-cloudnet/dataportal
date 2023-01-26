@@ -6,7 +6,7 @@ import { Connection, Repository } from "typeorm";
 import { File, RegularFile } from "../entity/File";
 import { Upload } from "../entity/Upload";
 import { Download, ObjectType } from "../entity/Download";
-import { getS3pathForFile, getS3pathForImage, getS3pathForUpload, ssAuthString } from "../lib";
+import { getS3pathForFile, getS3pathForImage, getS3pathForUpload, ssAuthString, isValidDate } from "../lib";
 import * as http from "http";
 import { IncomingMessage } from "http";
 import archiver = require("archiver");
@@ -25,17 +25,6 @@ const allProductTypes = Object.values(ProductType) as ProductType[];
 
 function productTypeFromString(value: string): ProductType | undefined {
   return (Object.values(ProductType) as string[]).includes(value) ? (value as ProductType) : undefined;
-}
-
-// Validate ISO 8601 date.
-function validateDate(input: string): boolean {
-  const [year, month, day] = input.split("-");
-  const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-  const expected = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date
-    .getDate()
-    .toString()
-    .padStart(2, "0")}`;
-  return input === expected;
 }
 
 export class DownloadRoutes {
@@ -205,14 +194,14 @@ export class DownloadRoutes {
     }
 
     if (req.query.downloadDateFrom) {
-      if (typeof req.query.downloadDateFrom !== "string" || !validateDate(req.query.downloadDateFrom)) {
+      if (typeof req.query.downloadDateFrom !== "string" || !isValidDate(req.query.downloadDateFrom)) {
         return next({ status: 400, errors: "invalid downloadDateFrom" });
       }
       params.push(req.query.downloadDateFrom);
       where += ` AND "createdAt" >= $${params.length}::date`;
     }
     if (req.query.downloadDateTo) {
-      if (typeof req.query.downloadDateTo !== "string" || !validateDate(req.query.downloadDateTo)) {
+      if (typeof req.query.downloadDateTo !== "string" || !isValidDate(req.query.downloadDateTo)) {
         return next({ status: 400, errors: "invalid downloadDateTo" });
       }
       params.push(req.query.downloadDateTo);
