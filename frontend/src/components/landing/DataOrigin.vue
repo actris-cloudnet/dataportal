@@ -56,7 +56,7 @@
             <br />
           </span>
           <span v-if="response.cloudnetpyVersion">
-            <template v-if="response.cloudnetpyVersion.indexOf('ustom')">
+            <template v-if="response.cloudnetpyVersion.indexOf('ustom') !== -1">
               {{ response.cloudnetpyVersion }}
             </template>
             <a v-else :href="`https://github.com/actris-cloudnet/cloudnetpy/tree/v${response.cloudnetpyVersion}`">
