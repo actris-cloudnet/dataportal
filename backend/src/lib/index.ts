@@ -21,29 +21,10 @@ export const fetchAll = <T>(conn: Connection, schema: Function, options = {}): P
   return repo.find(options) as Promise<T[]>;
 };
 
-const DATE_FORMAT = /^(?<year>\d\d\d\d)-(?<month>\d\d)-(?<day>\d\d)$/;
 const DATETIME_FORMAT =
   /^(?<year>\d\d\d\d)-(?<month>\d\d)-(?<day>\d\d)(T(?<hours>\d\d):(?<minutes>\d\d):(?<seconds>\d\d)(\.(?<fraction>\d+))?(Z|\+00:00)?)?$/;
 
 export function isValidDate(obj: any): boolean {
-  if (obj instanceof Date) {
-    return !isNaN(obj.getTime());
-  }
-  if (typeof obj !== "string") {
-    return false;
-  }
-  const match = DATE_FORMAT.exec(obj);
-  if (!match || !match.groups) {
-    return false;
-  }
-  const year = parseInt(match.groups.year);
-  const month = parseInt(match.groups.month) - 1;
-  const day = parseInt(match.groups.day);
-  const date = new Date(year, month, day);
-  return date.getFullYear() == year && date.getMonth() == month && date.getDate() == day;
-}
-
-export function isValidDateTime(obj: any): boolean {
   if (obj instanceof Date) {
     return !isNaN(obj.getTime());
   }
