@@ -46,7 +46,7 @@
       </tr>
       <tr>
         <th>Software</th>
-        <td v-if="response.processingVersion && response.cloudnetpyVersion">
+        <td v-if="response.processingVersion || response.cloudnetpyVersion">
           <span v-if="response.processingVersion">
             <a :href="`https://github.com/actris-cloudnet/cloudnet-processing/tree/v${response.processingVersion}`">
               Cloudnet processing {{ response.processingVersion }}
