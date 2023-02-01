@@ -177,7 +177,7 @@
     <div class="dataviz-tooltip" v-if="tooltips && hover" :style="tooltipStyle">
       <header>{{ year["year"] }}-{{ date["date"] }}</header>
       <section v-if="!qualityScores">
-        <ul v-for="lvl in allLevels">
+        <ul v-for="lvl in allLevels()">
           <li class="header">Level {{ lvl }}</li>
           <li
             v-for="product in filterProductsByLvl(lvl)"
@@ -204,7 +204,7 @@
       </section>
 
       <section v-else>
-        <ul v-for="lvl in allLevels">
+        <ul v-for="lvl in allLevels()">
           <li class="header">Level {{ lvl }}</li>
           <li
             v-for="product in filterProductsByLvl(lvl)"
@@ -245,7 +245,7 @@ import { idToHumanReadable, ColorClass } from "../lib";
 import { Product } from "../../../backend/src/entity/Product";
 import { DataStatusParser, ProductDate, ProductInfo, ProductLevels, ProductYear } from "../lib/DataStatusParser";
 import debounce from "debounce";
-import { onMounted } from "vue";
+import { onMounted, ref, reactive } from "vue";
 
 interface Props {
   site: string;
@@ -263,25 +263,33 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const busy = false;
-let years: ProductYear[] = [];
-let lvlTranslate: { [key: string]: keyof ProductLevels } = {};
-let allProducts: Product[] | null = null;
-let currentYear: ProductYear | null = null;
-let currentDate: ProductDate | null = null;
-let hover = false;
-let tooltipStyle: Record<string, string> = {};
+let years = ref<ProductYear[]>([]);
+let lvlTranslate = ref<{ [key: string]: keyof ProductLevels }>({});
+const allProducts = ref<Product[] | null>(null);
+const currentYear = ref<ProductYear | null>(null);
+const currentDate = ref<ProductDate | null>(null);
+const hover = ref(false);
+let tooltipStyle = ref<Record<string, string>>({});
 
 onMounted(() => {
-  years = props.dataStatusParser.years;
-  lvlTranslate = props.dataStatusParser.lvlTranslate;
-  allProducts = props.dataStatusParser.allProducts;
+  years.value = props.dataStatusParser.years;
+  lvlTranslate.value = props.dataStatusParser.lvlTranslate;
+  allProducts.value = props.dataStatusParser.allProducts;
   if (props.loadingComplete) props.loadingComplete();
 });
+
+function year() {
+  return currentYear.value;
+}
+
+function date() {
+  return currentDate.value;
+}
 
 function setCurrentYearDate(year: ProductYear, date: ProductDate, event: MouseEvent) {
   const tooltipWidth = 420;
   const tooltipMargin = 10;
-  tooltipStyle = {
+  tooltipStyle.value = {
     width: tooltipWidth + "px",
     top: event.clientY + 10 + "px",
     left:
@@ -290,25 +298,17 @@ function setCurrentYearDate(year: ProductYear, date: ProductDate, event: MouseEv
         document.body.scrollWidth - tooltipWidth - tooltipMargin
       ) + "px",
   };
-  currentDate = date;
-  currentYear = year;
-  hover = true;
+  currentDate.value = date;
+  currentYear.value = year;
+  hover.value = true;
 }
 
 function hideTooltip() {
-  hover = false;
+  hover.value = false;
 }
 
 const debouncedSetCurrentYearDate = debounce(setCurrentYearDate, props.debounceMs);
 const debouncedHideTooltip = debounce(hideTooltip, props.debounceMs);
-
-function year() {
-  return currentYear;
-}
-
-function date() {
-  return currentDate;
-}
 
 function noData(products: ProductLevels): boolean {
   return products["2"].length == 0 && products["1c"].length == 0 && products["1b"].length == 0;
@@ -347,8 +347,8 @@ function qualityExists(prod: ProductInfo): boolean {
 }
 
 function filterProductsByLvl(lvl: string) {
-  if (!allProducts) return null;
-  return allProducts.filter(({ id }) => lvlTranslate[id] == lvl && id != "model");
+  if (!allProducts.value) return null;
+  return allProducts.value.filter(({ id }) => lvlTranslate.value[id] == lvl && id != "model");
 }
 
 function onlyLegacy(products: ProductLevels) {

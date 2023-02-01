@@ -84,8 +84,6 @@ import { humanReadableDate, sortVisualizations, fetchInstrumentName, compareValu
 import { DevMode } from "../lib/DevMode";
 import { File, ModelFile, RegularFile } from "../../../backend/src/entity/File";
 import { VisualizationItem } from "../../../backend/src/entity/VisualizationResponse";
-import HowToCite from "../components/HowToCite.vue";
-import License from "../components/License.vue";
 import Visualization from "../components/Visualization.vue";
 import { Site, SiteType } from "../../../backend/src/entity/Site";
 import { SiteLocation } from "../../../backend/src/entity/SiteLocation";
@@ -98,8 +96,6 @@ import Preview from "../components/landing/Preview.vue";
 import Citation from "../components/landing/Citation.vue";
 import DownloadButton from "../components/landing/DownloadButton.vue";
 
-Vue.component("how-to-cite", HowToCite);
-Vue.component("license", License);
 Vue.component("visualization", Visualization);
 
 export type SourceFile = { ok: true; value: File } | { ok: false; value: Error };
@@ -124,8 +120,6 @@ export default class FileView extends Vue {
   humanReadableDate = humanReadableDate;
   devMode = new DevMode();
   sourceFiles: SourceFile[] = [];
-  showHowToCite = false;
-  showLicense = false;
   isBusy = false;
   site!: Site;
   model: Model | null = null;
@@ -164,31 +158,8 @@ export default class FileView extends Vue {
     return this.versions[0];
   }
 
-  hideBoxes(e: MouseEvent) {
-    let target = e.target as HTMLElement;
-    const clickTargetId = target.id;
-
-    if (["showLicense", "showCiting"].includes(clickTargetId)) return;
-
-    // Check if clicked inside hoverbox
-    let hoverboxClicked = false;
-    while (!hoverboxClicked && target.parentElement) {
-      if (target.parentElement.className == "hoverbox") hoverboxClicked = true;
-      target = target.parentElement;
-    }
-    if (hoverboxClicked) return;
-
-    this.showLicense = false;
-    this.showHowToCite = false;
-  }
-
   async created() {
-    document.addEventListener("click", this.hideBoxes);
     await this.onUuidChange();
-  }
-
-  destroyed() {
-    document.removeEventListener("click", this.hideBoxes);
   }
 
   async fetchVisualizations(payload: {}) {

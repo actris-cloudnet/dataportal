@@ -38,9 +38,9 @@
         </svg>
       </a>
     </div>
-    <a v-if="expandable" :href="imageUrl" target="_blank">
+    <a v-if="expandable" :href="imageUrl()" target="_blank">
       <img
-        :src="imageUrl"
+        :src="imageUrl()"
         :width="data.dimensions && data.dimensions.width"
         :height="data.dimensions && data.dimensions.height"
         alt=""
@@ -50,7 +50,7 @@
     </a>
     <router-link :to="linkTo" v-else-if="linkTo">
       <img
-        :src="imageUrl"
+        :src="imageUrl()"
         :width="data.dimensions && data.dimensions.width"
         :height="data.dimensions && data.dimensions.height"
         alt=""
@@ -60,7 +60,7 @@
     </router-link>
     <img
       v-else
-      :src="imageUrl"
+      :src="imageUrl()"
       :width="data.dimensions && data.dimensions.width"
       :height="data.dimensions && data.dimensions.height"
       alt=""
@@ -72,7 +72,7 @@
   <!-- TODO: remove legacy layout in the future. -->
   <img
     v-else
-    :src="imageUrl"
+    :src="imageUrl()"
     :width="data.dimensions && data.dimensions.width"
     :height="data.dimensions && data.dimensions.height"
     alt=""
@@ -82,41 +82,44 @@
   />
 </template>
 
-<script lang="ts">
-import { Component, Prop } from "vue-property-decorator";
-import Vue from "vue";
+<script lang="ts" setup>
 import { RawLocation } from "vue-router";
-
 import { VisualizationItem } from "../../../backend/src/entity/VisualizationResponse";
 
-@Component
-export default class Visualization extends Vue {
-  @Prop() data!: VisualizationItem;
-  @Prop() maxMarginLeft?: number;
-  @Prop() maxMarginRight?: number;
-  @Prop({ default: false }) caption!: boolean;
-  @Prop() linkTo?: RawLocation;
-  @Prop() expandable?: boolean;
+interface Props {
+  data: VisualizationItem;
+  maxMarginLeft?: number;
+  maxMarginRight?: number;
+  caption?: boolean;
+  linkTo?: RawLocation;
+  expandable?: boolean;
+}
 
-  get imageStyle() {
-    if (
-      !this.data.dimensions ||
-      typeof this.maxMarginLeft === "undefined" ||
-      typeof this.maxMarginRight === "undefined"
-    ) {
-      return {};
-    }
-    const left = this.maxMarginLeft - this.data.dimensions.marginLeft;
-    const right = this.maxMarginRight - this.data.dimensions.marginRight;
-    const width = this.data.dimensions.width + left + right;
-    return {
-      paddingLeft: `${(100 * left) / width}%`,
-      paddingRight: `${(100 * right) / width}%`,
-    };
-  }
+const props = withDefaults(defineProps<Props>(), {
+  expandable: false,
+  caption: false,
+  maxMarginLeft: 0,
+  maxMarginRight: 0,
+});
 
-  get imageUrl(): string {
-    return `${process.env.VUE_APP_BACKENDURL}download/image/${this.data.s3key}`;
+function imageStyle() {
+  if (
+    !props.data.dimensions ||
+    typeof props.maxMarginLeft === "undefined" ||
+    typeof props.maxMarginRight === "undefined"
+  ) {
+    return {};
   }
+  const left = props.maxMarginLeft - props.data.dimensions.marginLeft;
+  const right = props.maxMarginRight - props.data.dimensions.marginRight;
+  const width = props.data.dimensions.width + left + right;
+  return {
+    paddingLeft: `${(100 * left) / width}%`,
+    paddingRight: `${(100 * right) / width}%`,
+  };
+}
+
+function imageUrl(): string {
+  return `${process.env.VUE_APP_BACKENDURL}download/image/${props.data.s3key}`;
 }
 </script>
