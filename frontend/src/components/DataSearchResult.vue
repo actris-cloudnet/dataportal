@@ -410,7 +410,7 @@ function createCollection() {
   if (listLength() > 10000) {
     downloadFailed.value = true;
     dlFailedMessage.value = "You may only download a maximum of 10 000 files!";
-    return
+    return;
   }
   downloadIsBusy.value = true;
   axios
@@ -432,14 +432,17 @@ function adjustPerPageAccordingToWindowHeight() {
   perPage.value = Math.max(Math.floor(document.documentElement.clientHeight / 70), 10);
 }
 
-watch(() => props.isBusy, () => {
-  // Reset page on filter change
-  if (!props.isBusy) {
-    currentPage.value = 1;
+watch(
+  () => props.isBusy,
+  () => {
+    // Reset page on filter change
+    if (!props.isBusy) {
+      currentPage.value = 1;
+    }
+    downloadFailed.value = false;
+    previewResponse.value = null;
   }
-  downloadFailed.value = false;
-  previewResponse.value = null;
-});
+);
 
 onMounted(() => {
   window.addEventListener("resize", adjustPerPageAccordingToWindowHeight);
@@ -449,5 +452,4 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener("resize", adjustPerPageAccordingToWindowHeight);
 });
-
 </script>
