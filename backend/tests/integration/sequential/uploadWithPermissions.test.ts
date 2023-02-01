@@ -7,7 +7,7 @@ import { initUsersAndPermissions } from "../../lib/userAccountAndPermissions";
 
 const crypto = require("crypto");
 
-jest.setTimeout(20000)
+jest.setTimeout(20000);
 
 let conn: Connection;
 let instrumentRepo: any;
