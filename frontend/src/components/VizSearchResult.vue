@@ -97,9 +97,9 @@ h3 > .rowtag
 <template>
   <main id="vizSearchResults" v-bind:class="{ singleColumn: !comparisonView, opaque: isBusy }">
     <header>
-      <h3>Visualizations for {{ humanReadableDate }}</h3>
+      <h3>Visualizations for {{ formatDate() }}</h3>
       <span v-if="isBusy" class="listTitle">Loading...</span>
-      <div v-if="searchYieldedResults">
+      <div v-if="searchYieldedResults()">
         <div class="modeSelector">
           <label for="checkbox_id" id="switchlabel">comparison view</label>
           <label class="switch">
@@ -112,9 +112,9 @@ h3 > .rowtag
     <section v-if="noSelectionsMade" class="notfound">
       Please make a selection in the search filters to display visualizations.
     </section>
-    <section v-else-if="searchYieldedResults" class="vizContainer" v-bind:class="{ sideBySide: comparisonView }">
+    <section v-else-if="searchYieldedResults()" class="vizContainer" v-bind:class="{ sideBySide: comparisonView }">
       <div
-        v-for="(file, index) in sortedApiResponse"
+        v-for="(file, index) in sortedApiResponse()"
         :key="index"
         class="sourceFile"
         v-bind:class="{ paddedSourceFile: !comparisonView }"
@@ -170,7 +170,7 @@ h3 > .rowtag
               </svg>
             </a>
           </h4>
-          <visualization :data="viz" :maxMarginLeft="maxMarginLeft" :maxMarginRight="maxMarginRight" />
+          <visualization :data="viz" :maxMarginLeft="maxMarginLeft()" :maxMarginRight="maxMarginRight()" />
           <br />
         </div>
       </div>
@@ -179,63 +179,66 @@ h3 > .rowtag
   </main>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Watch } from "vue-property-decorator";
-import Vue from "vue";
+<script lang="ts" setup>
 import { VisualizationResponse } from "../../../backend/src/entity/VisualizationResponse";
 import { humanReadableDate, sortVisualizations, notEmpty } from "../lib";
+import { ref, watch } from "vue";
 import Visualization from "./Visualization.vue";
 
-Vue.component("visualization", Visualization);
+interface Props {
+  apiResponse: VisualizationResponse[];
+  isBusy: boolean;
+  date: Date;
+  setWideMode: Function;
+  noSelectionsMade: boolean;
+}
 
-@Component
-export default class DataSearchResult extends Vue {
-  @Prop() apiResponse!: VisualizationResponse[];
-  @Prop() isBusy!: boolean;
-  @Prop() date!: Date;
-  @Prop() setWideMode!: Function;
-  @Prop() noSelectionsMade!: boolean;
+const props = defineProps<Props>();
 
-  comparisonView = false;
-  sortVisualizations = sortVisualizations;
+const comparisonView = ref(false);
 
-  get humanReadableDate() {
-    return humanReadableDate(this.date.toString());
-  }
-  get maxMarginRight() {
-    return Math.max(
-      ...this.apiResponse.flatMap((file) =>
-        file.visualizations.map((viz) => viz.dimensions && viz.dimensions.marginRight).filter(notEmpty)
-      )
-    );
-  }
-  get maxMarginLeft() {
-    return Math.max(
-      ...this.apiResponse.flatMap((file) =>
-        file.visualizations.map((viz) => viz.dimensions && viz.dimensions.marginLeft).filter(notEmpty)
-      )
-    );
-  }
-  get sortedApiResponse() {
-    return this.apiResponse.concat().sort(this.alphabeticalSort);
-  }
-  get searchYieldedResults() {
-    return this.apiResponse.length > 0;
-  }
+function formatDate() {
+  return humanReadableDate(props.date.toString());
+}
 
-  alphabeticalSort(a: VisualizationResponse, b: VisualizationResponse) {
-    if (a.productHumanReadable == b.productHumanReadable) {
-      if (a.locationHumanReadable == b.locationHumanReadable) return 0;
-      if (a.locationHumanReadable < b.locationHumanReadable) return -1;
-      return 1;
-    }
-    if (a.productHumanReadable < b.productHumanReadable) return -1;
+function maxMarginRight() {
+  return Math.max(
+    ...props.apiResponse.flatMap((file) =>
+      file.visualizations.map((viz) => viz.dimensions && viz.dimensions.marginRight).filter(notEmpty)
+    )
+  );
+}
+
+function maxMarginLeft() {
+  return Math.max(
+    ...props.apiResponse.flatMap((file) =>
+      file.visualizations.map((viz) => viz.dimensions && viz.dimensions.marginLeft).filter(notEmpty)
+    )
+  );
+}
+
+function alphabeticalSort(a: VisualizationResponse, b: VisualizationResponse) {
+  if (a.productHumanReadable == b.productHumanReadable) {
+    if (a.locationHumanReadable == b.locationHumanReadable) return 0;
+    if (a.locationHumanReadable < b.locationHumanReadable) return -1;
     return 1;
   }
-
-  @Watch("comparisonView")
-  onViewModeChange() {
-    this.setWideMode(this.comparisonView);
-  }
+  if (a.productHumanReadable < b.productHumanReadable) return -1;
+  return 1;
 }
+
+function sortedApiResponse() {
+  return props.apiResponse.concat().sort(alphabeticalSort);
+}
+
+function searchYieldedResults() {
+  return props.apiResponse.length > 0;
+}
+
+watch(
+  () => comparisonView,
+  () => {
+    props.setWideMode(comparisonView);
+  }
+);
 </script>
