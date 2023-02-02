@@ -29,7 +29,7 @@
 <template>
   <!-- eslint-disable vue/require-v-for-key -->
   <div id="data_availability_visualization" v-if="!busy">
-    <div v-for="(year, index) in yearsReduced" v-bind:key="year['year']" class="dataviz-row">
+    <div v-for="(year, index) in yearsReduced()" v-bind:key="year['year']" class="dataviz-row">
       <div
         v-if="index && parseInt(year['year']) + 1 !== parseInt(yearsReduced[index - 1]['year'])"
         class="dataviz-skippedyears"
@@ -104,6 +104,7 @@
 import { ProductLevels, ProductYear, ProductDate, ProductInfo } from "../lib/DataStatusParser";
 import { ColorClass } from "../lib";
 import debounce from "debounce";
+import { ref } from "vue";
 
 interface Props {
   site: string;
@@ -120,15 +121,15 @@ const props = withDefaults(defineProps<Props>(), {
   debounceMs: 1000 / 60,
 });
 
-let currentYear: ProductYear | null = null;
-let currentDate: ProductDate | null = null;
 const busy = false;
-const years: ProductYear[] = [];
-let hover = false;
-let tooltipStyle: Record<string, string> = {};
+let years = ref<ProductYear[]>([]);
+const currentYear = ref<ProductYear | null>(null);
+const currentDate = ref<ProductDate | null>(null);
+const hover = ref(false);
+let tooltipStyle = ref<Record<string, string>>({});
 
 function yearsReduced() {
-  return years.map((year) => ({
+  return years.value.map((year) => ({
     year: year.year,
     dates: year.dates.map((date) => ({
       date: date.date,
@@ -257,18 +258,18 @@ function createIconForSingleProduct(products: ProductLevels): string {
 }
 
 function hideTooltip() {
-  hover = false;
+  hover.value = false;
 }
 
 function setCurrentYearDate(year: ProductYear, date: ProductDate, event: MouseEvent) {
-  tooltipStyle = {
+  tooltipStyle.value = {
     top: `${event.clientY - 40}px`,
     left: `${event.clientX}px`,
     transform: "translateX(-50%)",
   };
-  currentDate = date;
-  currentYear = year;
-  hover = true;
+  currentDate.value = date;
+  currentYear.value = year;
+  hover.value = true;
 }
 
 const debouncedSetCurrentYearDate = debounce(setCurrentYearDate, props.debounceMs);

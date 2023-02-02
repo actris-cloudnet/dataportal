@@ -169,3 +169,13 @@ export function getMarkerIcon(site: Site, selected = false) {
   else validType = site.type.filter((type) => markerColors[type])[0] || "other";
   return markerIconFromColor(markerColors[validType]);
 }
+
+export type ColorClass =
+  | "no-data"
+  | "only-legacy-data"
+  | "contains-errors"
+  | "contains-warnings"
+  | "only-model-data"
+  | "all-data"
+  | "all-raw"
+  | "contains-info";
