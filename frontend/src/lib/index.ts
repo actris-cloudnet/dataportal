@@ -4,6 +4,7 @@ import { VisualizationItem } from "../../../backend/src/entity/VisualizationResp
 import { SearchFileResponse } from "../../../backend/src/entity/SearchFileResponse";
 import { Product } from "../../../backend/src/entity/Product";
 import { CollectionFileResponse } from "../../../backend/src/entity/CollectionFileResponse";
+import { Site } from "../../../backend/src/entity/Site";
 
 export const actrisNfUrl = "https://actris-nf-labelling.out.ocp.fmi.fi";
 
@@ -150,4 +151,21 @@ export async function fetchInstrumentName(pid: string): Promise<string> {
   }
 
   return nameValue;
+}
+
+const markerIconFromColor = (color: string) => require(`../assets/markers/marker-icon-${color}.png`);
+
+export const markerColors: { [key: string]: string } = {
+  selected: "red",
+  cloudnet: "blue",
+  arm: "violet",
+  campaign: "orange",
+  other: "grey",
+};
+
+export function getMarkerIcon(site: Site, selected = false) {
+  let validType: string;
+  if (selected) validType = "selected";
+  else validType = site.type.filter((type) => markerColors[type])[0] || "other";
+  return markerIconFromColor(markerColors[validType]);
 }
