@@ -24,7 +24,7 @@ import { UserActivationRoutes } from "./routes/userActivation";
 import { ReferenceRoutes } from "./routes/reference";
 import * as http from "http";
 
-async function createServer() {
+async function createServer(): Promise<void> {
   const port = 3000;
   const app = express();
 
@@ -282,8 +282,32 @@ async function createServer() {
   // problem because we're running behind a reverse proxy.
   server.requestTimeout = 0;
   server.listen(port, () => console.log(`App listening on port ${port}!`));
+
+  return new Promise((resolve, reject) => {
+    process.on("SIGTERM", () => {
+      console.log("SIGTERM signal received: closing HTTP server...");
+      server.close(() => {
+        console.log("HTTP server closed. Now closing database connection...");
+        conn.close().then(
+          () => {
+            console.log("Database connection closed.");
+            resolve();
+          },
+          (err) => {
+            console.error("Failed to close database connection:", err);
+            reject(err);
+          }
+        );
+      });
+    });
+  });
 }
 
-createServer().catch((err) => {
-  console.error(`Fatal error: ${err}`);
-});
+createServer()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error(`Fatal error: ${err}`);
+    process.exit(1);
+  });
