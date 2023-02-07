@@ -72,35 +72,24 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { ModelFile, RegularFile } from "../../../../backend/src/entity/File";
-import { Component, Prop } from "vue-property-decorator";
-import Vue from "vue";
+import { computed } from "vue";
 import { getProductIcon } from "../../lib";
 import { SourceFile } from "../../views/File.vue";
 
-@Component
-export default class DataOrigin extends Vue {
-  @Prop() response!: ModelFile | RegularFile | null;
-  @Prop() isBusy!: boolean;
-  @Prop() versions!: string[];
-  @Prop() sourceFiles!: SourceFile[];
-  getProductIcon = getProductIcon;
-
-  get currentVersionIndex() {
-    if (this.response == null) return null;
-    const response = this.response;
-    return this.versions.findIndex((uuid) => uuid == response.uuid);
-  }
-
-  get previousVersion() {
-    if (this.currentVersionIndex == null) return null;
-    return this.versions[this.currentVersionIndex + 1];
-  }
-
-  get nextVersion() {
-    if (!this.currentVersionIndex) return null;
-    return this.versions[this.currentVersionIndex - 1];
-  }
+interface Props {
+  response: ModelFile | RegularFile;
+  isBusy: boolean;
+  versions: string[];
+  sourceFiles: SourceFile[];
 }
+
+const props = defineProps<Props>();
+
+const currentVersionIndex = computed(() => props.versions.findIndex((uuid) => uuid == props.response.uuid));
+
+const previousVersion = computed(() => props.versions[currentVersionIndex.value + 1]);
+
+const nextVersion = computed(() => props.versions[currentVersionIndex.value - 1]);
 </script>

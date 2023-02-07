@@ -18,34 +18,37 @@
     <div v-else class="visualisations-box">No visualisations available.</div>
   </div>
 </template>
-<script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+
+<script lang="ts" setup>
+import { computed } from "vue";
 import { ModelFile, RegularFile } from "../../../../backend/src/entity/File";
 import { VisualizationItem } from "../../../../backend/src/entity/VisualizationResponse";
 import Visualization from "../Visualization.vue";
 
-@Component({ components: { Visualization } })
-export default class LandingVisualisations extends Vue {
-  @Prop() response!: ModelFile | RegularFile | null;
-  @Prop() visualizations!: VisualizationItem[];
-
-  get maxMarginLeft() {
-    let max = 0;
-    for (const v of this.visualizations) {
-      if (v.dimensions) {
-        max = Math.max(max, v.dimensions.marginLeft);
-      }
-    }
-    return max;
-  }
-  get maxMarginRight() {
-    let max = 0;
-    for (const v of this.visualizations) {
-      if (v.dimensions) {
-        max = Math.max(max, v.dimensions.marginRight);
-      }
-    }
-    return max;
-  }
+interface Props {
+  response: ModelFile | RegularFile;
+  visualizations: VisualizationItem[];
 }
+
+const props = defineProps<Props>();
+
+const maxMarginLeft = computed(() => {
+  let max = 0;
+  for (const v of props.visualizations) {
+    if (v.dimensions) {
+      max = Math.max(max, v.dimensions.marginLeft);
+    }
+  }
+  return max;
+});
+
+const maxMarginRight = computed(() => {
+  let max = 0;
+  for (const v of props.visualizations) {
+    if (v.dimensions) {
+      max = Math.max(max, v.dimensions.marginRight);
+    }
+  }
+  return max;
+});
 </script>

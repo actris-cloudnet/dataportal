@@ -94,35 +94,26 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { ModelFile, RegularFile } from "../../../../backend/src/entity/File";
 import { SiteLocation } from "../../../../backend/src/entity/SiteLocation";
-import { Component, Prop } from "vue-property-decorator";
-import Vue from "vue";
+import { computed } from "vue";
 import { getProductIcon, getQcIcon, getQcLink, getQcText, formatCoordinates } from "../../lib";
 
-@Component
-export default class ProductInformation extends Vue {
-  @Prop() response!: ModelFile | RegularFile | null;
-  @Prop() location!: SiteLocation | null;
-  @Prop() instrument!: string | null;
-  @Prop() instrumentStatus!: "loading" | "error" | "ready";
-  getQcIcon = getQcIcon;
-  getQcText = getQcText;
-  getQcLink = getQcLink;
-  formatCoordinates = formatCoordinates;
-  get timelinessString() {
-    if (this.response == null) {
-      return "";
-    }
-    return this.response.quality === "qc" ? "Quality Controlled (QC)" : "Near Real Time (NRT)";
-  }
-  get productIconUrl() {
-    return this.response !== null ? getProductIcon(this.response.product.id) : null;
-  }
-  get jsonUrl(): string {
-    if (!this.response) return "";
-    return `${process.env.VUE_APP_BACKENDURL}files/${this.response.uuid}`;
-  }
+interface Props {
+  response: ModelFile | RegularFile;
+  location: SiteLocation | null;
+  instrument: string | null;
+  instrumentStatus: "loading" | "error" | "ready";
 }
+
+const props = defineProps<Props>();
+
+const timelinessString = computed(() =>
+  props.response.quality === "qc" ? "Quality Controlled (QC)" : "Near Real Time (NRT)"
+);
+
+const productIconUrl = computed(() => getProductIcon(props.response.product.id));
+
+const jsonUrl = computed(() => `${process.env.VUE_APP_BACKENDURL}files/${props.response.uuid}`);
 </script>
