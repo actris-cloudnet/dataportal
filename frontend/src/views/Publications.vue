@@ -30,23 +30,27 @@ ul
 <template>
   <main>
     <h1>Cloudnet publications</h1>
-    <div v-for="[year, pubs] in publicationsByYear" :key="year" class="year">
-      <h2>{{ year }}</h2>
-      <ul>
-        <li v-for="pub in pubs" :key="pub.pid">
-          <p v-html="pub.citation"></p>
-        </li>
-      </ul>
-    </div>
+    <template v-if="publications.status == 'ready'">
+      <div v-for="[year, pubs] in publications.data" :key="year" class="year">
+        <h2>{{ year }}</h2>
+        <ul>
+          <li v-for="pub in pubs" :key="pub.pid">
+            <p v-html="pub.citation"></p>
+          </li>
+        </ul>
+      </div>
+    </template>
+    <div v-else-if="publications.status == 'loading'">Loading publications...</div>
+    <div v-else-if="publications.status == 'error'">Failed to load publications.</div>
   </main>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+<script lang="ts" setup>
+import { ref, onMounted } from "vue";
 import axios, { AxiosResponse } from "axios";
 import { Publication } from "../../../backend/src/entity/Publication";
 
-function groupBySorted<T, K extends keyof T>(items: T[], key: K, order: "asc" | "desc"): [T[K], T][] {
+function groupBySorted<T, K extends keyof T>(items: T[], key: K, order: "asc" | "desc"): [T[K], T[]][] {
   const grouped = items.reduce((result, item) => {
     const value = item[key];
     if (result.has(value)) result.get(value).push(item);
@@ -63,22 +67,19 @@ function groupBySorted<T, K extends keyof T>(items: T[], key: K, order: "asc" | 
   return result;
 }
 
-@Component({
-  components: {},
-})
-export default class PubView extends Vue {
-  apiUrl = process.env.VUE_APP_BACKENDURL;
-  publicationsByYear: [Publication["year"], Publication][] = [];
+type PublicationState =
+  | { status: "loading" }
+  | { status: "ready"; data: [Publication["year"], Publication[]][] }
+  | { status: "error" };
 
-  data() {
-    return {
-      publications: null,
-    };
-  }
+const publications = ref<PublicationState>({ status: "loading" });
 
-  async created() {
-    const response: AxiosResponse<Publication[]> = await axios.get(`${this.apiUrl}publications`);
-    this.publicationsByYear = groupBySorted(response.data, "year", "desc");
+onMounted(async () => {
+  try {
+    const response: AxiosResponse<Publication[]> = await axios.get(`${process.env.VUE_APP_BACKENDURL}publications`);
+    publications.value = { status: "ready", data: groupBySorted(response.data, "year", "desc") };
+  } catch (error) {
+    publications.value = { status: "error" };
   }
-}
+});
 </script>
