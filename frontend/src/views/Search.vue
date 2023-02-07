@@ -334,7 +334,7 @@ div.checkbox
           :dateInput="dateInputStart"
           :start="beginningOfHistory"
           :end="dateTo"
-          v-on:error="dateFromError = $event"
+          @error="dateFromError = $event"
           :key="dateFromUpdate"
         ></datepicker>
         <span class="centerlabel">&#8212;</span>
@@ -344,7 +344,7 @@ div.checkbox
           :dateInput="dateInputEnd"
           :start="dateFrom"
           :end="today"
-          v-on:error="dateToError = $event"
+          @error="dateToError = $event"
           :key="dateToUpdate"
         ></datepicker>
         <div v-if="!isTrueOnBothDateFields('isValidDateString')" class="errormsg">
@@ -374,7 +374,7 @@ div.checkbox
           :dateInput="visualizationDate"
           :start="beginningOfHistory"
           :end="today"
-          v-on:error="dateToError = $event"
+          @error="dateToError = $event"
           :key="vizDateUpdate"
         ></datepicker>
         <div class="dateButtons">
