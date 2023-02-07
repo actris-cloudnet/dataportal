@@ -21,7 +21,7 @@
         <Preview :visualization="visualization" :loading="loadingVisualizations" />
       </div>
       <div class="summary-box" id="citation" :class="{ volatile: isVolatile }">
-        <Citation :uuid="uuid" :file="response" />
+        <Citation :uuid="uuid" :file="response" v-if="response" />
       </div>
     </div>
   </div>
