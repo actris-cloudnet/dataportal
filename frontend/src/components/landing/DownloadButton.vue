@@ -11,10 +11,10 @@
   </a>
 </template>
 
-<script lang="ts">
-import { Component, Vue, Prop } from "vue-property-decorator";
-@Component
-export default class DownloadButton extends Vue {
-  @Prop() downloadUrl!: string;
+<script lang="ts" setup>
+interface Props {
+  downloadUrl: string;
 }
+
+const props = defineProps<Props>();
 </script>
