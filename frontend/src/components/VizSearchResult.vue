@@ -95,7 +95,7 @@ h3 > .rowtag
 </style>
 
 <template>
-  <main id="vizSearchResults" v-bind:class="{ singleColumn: !comparisonView, opaque: isBusy }">
+  <main id="vizSearchResults" :class="{ singleColumn: !comparisonView, opaque: isBusy }">
     <header>
       <h3>Visualizations for {{ formatDate() }}</h3>
       <span v-if="isBusy" class="listTitle">Loading...</span>
@@ -112,12 +112,12 @@ h3 > .rowtag
     <section v-if="noSelectionsMade" class="notfound">
       Please make a selection in the search filters to display visualizations.
     </section>
-    <section v-else-if="searchYieldedResults()" class="vizContainer" v-bind:class="{ sideBySide: comparisonView }">
+    <section v-else-if="searchYieldedResults()" class="vizContainer" :class="{ sideBySide: comparisonView }">
       <div
         v-for="(file, index) in sortedApiResponse()"
         :key="index"
         class="sourceFile"
-        v-bind:class="{ paddedSourceFile: !comparisonView }"
+        :class="{ paddedSourceFile: !comparisonView }"
       >
         <h3>
           <router-link

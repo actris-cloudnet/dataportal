@@ -208,15 +208,10 @@ section#fileTable
         aria-controls="fileTable"
       ></b-pagination>
       <div class="downloadinfo" v-if="listLength() > 0 && !simplifiedView">
-        <a
-          class="download"
-          v-bind:class="{ disabled: isBusy || downloadIsBusy }"
-          href=""
-          @click.prevent="createCollection()"
-        >
+        <a class="download" :class="{ disabled: isBusy || downloadIsBusy }" href="" @click.prevent="createCollection()">
           Download all </a
         ><br />
-        <span v-if="!downloadFailed" class="dlcount" v-bind:class="{ disabled: isBusy || downloadIsBusy }">
+        <span v-if="!downloadFailed" class="dlcount" :class="{ disabled: isBusy || downloadIsBusy }">
           {{ listLength() }} files ({{ humanReadableSize(combinedFileSize(apiResponse)) }})
         </span>
         <div v-else class="dlcount errormsg">

@@ -29,7 +29,7 @@
 <template>
   <!-- eslint-disable vue/require-v-for-key -->
   <div id="data_availability_visualization" v-if="!busy">
-    <div v-for="(year, index) in yearsReduced" v-bind:key="year['year']" class="dataviz-row">
+    <div v-for="(year, index) in yearsReduced" :key="year['year']" class="dataviz-row">
       <div
         v-if="index && parseInt(year['year']) + 1 !== parseInt(yearsReduced[index - 1]['year'])"
         class="dataviz-skippedyears"
@@ -45,7 +45,7 @@
       <div class="dataviz-yearblock" @mouseleave="debouncedHideTooltip()">
         <a
           v-for="date in year.dates"
-          v-bind:key="date.date"
+          :key="date.date"
           class="dataviz-date"
           :id="`dataviz-color-${year.year}-${date.date}`"
           :href="createLinkToLandingPage(date.products)"
@@ -88,7 +88,7 @@
       </div>
       <br />
     </div>
-    <div class="dataviz-tooltip" v-if="tooltips && hover" v-bind:style="tooltipStyle">
+    <div class="dataviz-tooltip" v-if="tooltips && hover" :style="tooltipStyle">
       <header>
         <img :src="createIconForSingleProduct(date.products)" alt="" />
         {{ year.year }}-{{ date.date }}

@@ -93,7 +93,7 @@
 <template>
   <!-- eslint-disable vue/require-v-for-key -->
   <div id="data_availability_visualization" v-if="!busy">
-    <div v-for="(year, index) in years" v-bind:key="year['year']" class="dataviz-row">
+    <div v-for="(year, index) in years" :key="year['year']" class="dataviz-row">
       <div
         v-if="index && parseInt(year['year']) + 1 !== parseInt(years[index - 1]['year'])"
         class="dataviz-skippedyears"

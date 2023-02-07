@@ -95,19 +95,11 @@ main.column
       </main>
       <div class="rightView">
         <nav class="internalNavi">
-          <router-link
-            :to="{ path: `general` }"
-            :replace="true"
-            v-bind:class="{ 'router-link-active': mode === 'general' }"
-          >
+          <router-link :to="{ path: `general` }" :replace="true" :class="{ 'router-link-active': mode === 'general' }">
             General
           </router-link>
           |
-          <router-link
-            :to="{ path: `files` }"
-            :replace="true"
-            v-bind:class="{ 'router-link-active': mode === 'files' }"
-          >
+          <router-link :to="{ path: `files` }" :replace="true" :class="{ 'router-link-active': mode === 'files' }">
             All files
           </router-link>
         </nav>

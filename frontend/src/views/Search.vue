@@ -260,7 +260,7 @@ div.checkbox
 </style>
 
 <template>
-  <main v-if="mode === 'visualizations' || mode === 'data'" id="search" v-bind:class="mainWidth">
+  <main v-if="mode === 'visualizations' || mode === 'data'" id="search" :class="mainWidth">
     <div v-if="devMode.activated" class="note rednote">
       You are using the dataportal in developer mode. Files from sites in testing mode are now visible.
       <span class="close_x" id="disableDevMode" @click="devMode.disable()">Deactivate</span>
@@ -437,7 +437,7 @@ div.checkbox
       <a @click="reset" id="reset">Reset filter</a>
     </section>
 
-    <div class="results" v-bind:class="{ widemapmarginright: showAllSites }">
+    <div class="results" :class="{ widemapmarginright: showAllSites }">
       <viz-search-result
         v-if="isVizMode()"
         :apiResponse="apiResponse"
