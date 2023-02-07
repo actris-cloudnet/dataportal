@@ -103,8 +103,8 @@ legend
         <table v-else :class="{ loading }">
           <thead>
             <tr>
-              <th>{{ DIMENSION_LABEL[dimensions[0]] }}</th>
-              <th>{{ DIMENSION_LABEL[dimensions[1]] }}</th>
+              <th>{{ dimensionLabel[dimensions[0]] }}</th>
+              <th>{{ dimensionLabel[dimensions[1]] }}</th>
             </tr>
           </thead>
           <tbody>
@@ -139,8 +139,8 @@ legend
   </main>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+<script lang="ts" setup>
+import { ref, onMounted, computed } from "vue";
 import axios from "axios";
 
 import { Site, SiteType } from "../../../backend/src/entity/Site";
@@ -152,107 +152,101 @@ interface Option {
   label: string;
 }
 
-@Component({
-  components: {},
-})
-export default class StatsView extends Vue {
-  apiUrl = process.env.VUE_APP_BACKENDURL;
-  statistics: any[] = []; // eslint-disable-line  @typescript-eslint/no-explicit-any
-  dimensions: string[] = [];
-  loading = false;
-  initial = true;
-  maxValue = 0;
-  selectedDimensions = "yearMonth,downloads";
-  DIMENSION_LABEL = {
-    yearMonth: "Month",
-    country: "Country",
-    downloads: "Downloads (in variable years)",
-    uniqueIps: "Unique IPs",
+const apiUrl = process.env.VUE_APP_BACKENDURL;
+const statistics = ref([]);
+const dimensions = ref<string[]>([]);
+const loading = ref(false);
+const initial = ref(true);
+const maxValue = ref(0);
+const selectedDimensions = ref("yearMonth,downloads");
+const dimensionLabel = {
+  yearMonth: "Month",
+  country: "Country",
+  downloads: "Downloads (in variable years)",
+  uniqueIps: "Unique IPs",
+};
+const numberFormat = (Intl && Intl.NumberFormat && new Intl.NumberFormat("en-GB")) || {
+  format(number: number): string {
+    return number.toString();
+  },
+};
+const loadingSites = ref(true);
+const countries = ref<Option[]>([]);
+const sites = ref<Option[]>([]);
+const productTypes = ref(["observation", "model"]);
+const dateFrom = ref("");
+const dateTo = ref("");
+
+const currentCountry = ref<string | null>(null);
+const currentSite = ref<string | null>(null);
+
+const countryModel = computed({
+  get: () => currentCountry.value,
+  set(country) {
+    currentCountry.value = country;
+    currentSite.value = null;
+  },
+});
+
+const siteModel = computed({
+  get: () => currentSite.value,
+  set(site) {
+    currentCountry.value = null;
+    currentSite.value = site;
+  },
+});
+
+function getCountryName(countryCode: string): string {
+  return (COUNTRY_NAMES as any)[countryCode] || `Unknown (${countryCode})`; // eslint-disable-line  @typescript-eslint/no-explicit-any
+}
+
+onMounted(async () => {
+  try {
+    const response = await axios.get(`${apiUrl}sites`);
+    const data: Site[] = response.data;
+    countries.value = Array.from(new Set(data.map((site) => site.countryCode).filter(notEmpty)))
+      .map((countryCode) => ({
+        id: countryCode,
+        label: getCountryName(countryCode),
+      }))
+      .sort((a, b) => compareValues(a.label, b.label));
+    sites.value = data
+      .filter((site) => !site.type.includes("hidden" as SiteType))
+      .map((site) => ({
+        id: site.id,
+        label: site.humanReadableName,
+      }))
+      .sort((a, b) => compareValues(a.label, b.label));
+    loadingSites.value = false;
+  } catch (e) {
+    alert("Failed to download counties");
+  }
+});
+
+async function onSearch() {
+  loading.value = true;
+  const params = {
+    dimensions: selectedDimensions.value,
+    country: currentCountry.value || undefined,
+    site: currentSite.value || undefined,
+    productTypes: productTypes.value.join(","),
+    downloadDateFrom: dateFrom.value || undefined,
+    downloadDateTo: dateTo.value || undefined,
   };
-  numberFormat = (Intl && Intl.NumberFormat && new Intl.NumberFormat("en-GB")) || {
-    format(number: number): string {
-      return number.toString();
-    },
-  };
-  loadingSites = true;
-  countries: Option[] = [];
-  sites: Option[] = [];
-  productTypes = ["observation", "model"];
-  dateFrom = "";
-  dateTo = "";
-
-  currentCountry: string | null = null;
-  currentSite: string | null = null;
-
-  get countryModel(): string | null {
-    return this.currentCountry;
-  }
-
-  set countryModel(country: string | null) {
-    this.currentCountry = country;
-    this.currentSite = null;
-  }
-
-  get siteModel(): string | null {
-    return this.currentSite;
-  }
-
-  set siteModel(site: string | null) {
-    this.currentCountry = null;
-    this.currentSite = site;
-  }
-
-  getCountryName(countryCode: string): string {
-    return (COUNTRY_NAMES as any)[countryCode] || `Unknown (${countryCode})`; // eslint-disable-line  @typescript-eslint/no-explicit-any
-  }
-
-  async created() {
-    try {
-      const response = await axios.get(`${this.apiUrl}sites`);
-      const sites: Site[] = response.data;
-      this.countries = Array.from(new Set(sites.map((site) => site.countryCode).filter(notEmpty)))
-        .map((countryCode) => ({
-          id: countryCode,
-          label: this.getCountryName(countryCode),
-        }))
-        .sort((a, b) => compareValues(a.label, b.label));
-      this.sites = sites
-        .filter((site) => !site.type.includes("hidden" as SiteType))
-        .map((site) => ({
-          id: site.id,
-          label: site.humanReadableName,
-        }))
-        .sort((a, b) => compareValues(a.label, b.label));
-      this.loadingSites = false;
-    } catch (e) {
-      alert("Failed to download counties");
+  try {
+    const response = await axios.get(`${apiUrl}download/stats`, { params, withCredentials: true });
+    loading.value = false;
+    initial.value = false;
+    dimensions.value = selectedDimensions.value.split(",");
+    const data = response.data;
+    maxValue.value = Math.max(...data.map((d) => d[dimensions.value[1]]));
+    if (selectedDimensions.value === "country,downloads") {
+      data.sort((a, b) => compareValues(b.downloads, a.downloads));
     }
-  }
-
-  async onSearch() {
-    this.loading = true;
-    const params = {
-      dimensions: this.selectedDimensions,
-      country: this.currentCountry || undefined,
-      site: this.currentSite || undefined,
-      productTypes: this.productTypes.join(","),
-      downloadDateFrom: this.dateFrom || undefined,
-      downloadDateTo: this.dateTo || undefined,
-    };
-    try {
-      const response = await axios.get(`${this.apiUrl}download/stats`, { params, withCredentials: true });
-      this.loading = false;
-      this.initial = false;
-      this.statistics = response.data;
-      this.dimensions = this.selectedDimensions.split(",");
-      this.maxValue = Math.max(...this.statistics.map((d) => d[this.dimensions[1]]));
-      if (this.selectedDimensions === "country,downloads") {
-        this.statistics.sort((a, b) => compareValues(b.downloads, a.downloads));
-      }
-    } catch (e) {
-      this.loading = false;
-      alert("Failed to download statistics");
-    }
+    statistics.value = data;
+  } catch (e) {
+    loading.value = false;
+    alert("Failed to download statistics");
   }
 }
 </script>

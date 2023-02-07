@@ -62,18 +62,22 @@
       @input="onInput"
       @search-change="isIddqd"
     >
-      <template slot="tag" slot-scope="props" v-if="icons">
+      <template slot="tag" slot-scope="props" v-if="getIcon">
         <span class="multiselect__tag">
-          <img alt="option" class="option__image" :src="getIcon(props.option)" />
+          <img class="option__image" :src="getIcon(props.option)" alt="" />
           {{ props.option.humanReadableName }}
           <i class="multiselect__tag-icon" @click="props.remove(props.option)"></i>
         </span>
       </template>
-      <template slot="option" slot-scope="props" v-if="icons">
+      <template slot="option" slot-scope="props" v-if="getIcon">
         <span>
-          <img alt="option" v-if="icons" class="option__image" :src="getIcon(props.option)" />
+          <img class="option__image" :src="getIcon(props.option)" alt="" />
           {{ props.option.humanReadableName }}
         </span>
+      </template>
+      <template slot="singleLabel" slot-scope="props" v-if="getIcon">
+        <img class="option__image" :src="getIcon(props.option)" alt="" />
+        {{ props.option.humanReadableName }}
       </template>
       <span id="noRes" slot="noResult">Not found</span>
     </Multiselect>
@@ -95,18 +99,23 @@ export default {};
 import Multiselect from "vue-multiselect";
 import { DevMode } from "../lib/DevMode";
 import { notEmpty } from "../lib";
-import { ref, watch } from "vue";
+import { ref, watch, PropType } from "vue";
 
-const props = defineProps<{
-  id: string;
-  label: string;
-  options: Option[];
-  icons: boolean;
-  getIcon: Function;
-  devMode: DevMode;
-  multiple: boolean;
-  value: OptionId | OptionId[] | null;
-}>();
+const props = defineProps({
+  id: { required: true, type: String },
+  label: { required: true, type: String },
+  options: { required: true, type: Array as PropType<Option[]> },
+  getIcon: { required: false, type: Function },
+  devMode: { required: false, type: DevMode },
+  multiple: Boolean,
+  // Nullable workaround: https://github.com/vuejs/core/issues/3948
+  value: {
+    required: true,
+    type: null as unknown as PropType<OptionId | OptionId[] | null>,
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+    validator: (v: any) => typeof v === "string" || Array.isArray(v) || v === null,
+  },
+});
 
 const emit = defineEmits(["input"]);
 
@@ -129,6 +138,8 @@ function onInput(input: Option | Option[]) {
 }
 
 function isIddqd(target: string, _: string) {
-  if (target == "iddqd") props.devMode.enable();
+  if (props.devMode && target == "iddqd") {
+    props.devMode.enable();
+  }
 }
 </script>

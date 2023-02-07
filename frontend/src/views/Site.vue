@@ -134,14 +134,14 @@
       <section id="sitemap" v-else-if="response.latitude != null && response.longitude != null">
         <header>Map</header>
         <section class="details">
-          <Map
+          <MyMap
             v-if="!busy"
             :sites="[response]"
             :center="[response.latitude, response.longitude]"
             :zoom="5"
             :fullHeight="true"
             :key="mapKey"
-          ></Map>
+          />
           <div v-else class="loadingoverlay">
             <div class="lds-dual-ring"></div>
           </div>
@@ -211,8 +211,7 @@
           label="Product filter"
           :options="dataStatusParser.availableProducts"
           id="singleProductSelect"
-          :icons="true"
-          :getIcon="getIconUrl"
+          :getIcon="getProductIcon"
         >
         </custom-multiselect>
       </div>
@@ -220,16 +219,16 @@
     </div>
   </main>
 
-  <app-error v-else-if="error" :response="response"></app-error>
+  <ApiError v-else-if="error" :response="response" />
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+<script lang="ts" setup>
+import { onMounted, ref, watch, computed } from "vue";
 import axios from "axios";
 import { Site, SiteType } from "../../../backend/src/entity/Site";
 import { SiteLocation } from "../../../backend/src/entity/SiteLocation";
 import { SearchFileResponse } from "../../../backend/src/entity/SearchFileResponse";
-import Map from "../components/Map.vue";
+import MyMap from "../components/Map.vue";
 import ProductAvailabilityVisualization from "../components/ProductAvailabilityVisualization.vue";
 import ProductAvailabilityVisualizationSingle from "../components/ProductAvailabilityVisualizationSingle.vue";
 import { getProductIcon, formatCoordinates, fetchInstrumentName, actrisNfUrl } from "../lib";
@@ -238,6 +237,7 @@ import { DataStatusParser } from "../lib/DataStatusParser";
 import CustomMultiselect from "../components/Multiselect.vue";
 import { ReducedMetadataResponse } from "../../../backend/src/entity/ReducedMetadataResponse";
 import TrackMap from "../components/TrackMap.vue";
+import ApiError from "./ApiError.vue";
 
 interface Instrument {
   pid: string | null;
@@ -251,172 +251,163 @@ type LocationsResult =
   | { status: "notFound" }
   | { status: "error"; error: Error };
 
-@Component({
-  name: "app-site",
-  components: {
-    Map,
-    ProductAvailabilityVisualization,
-    CustomMultiselect,
-    ProductAvailabilityVisualizationSingle,
-    TrackMap,
-  },
-})
-export default class SiteView extends Vue {
-  @Prop() siteid!: string;
-  apiUrl = process.env.VUE_APP_BACKENDURL;
-  response: Site | null = null;
-  latestFile: SearchFileResponse | null = null;
-  error = false;
-  instruments: Instrument[] = [];
-  instrumentsFromLastDays = 30;
-  instrumentsStatus: "loading" | "error" | "ready" = "loading";
-  selectedProductId: string | null = null;
-  mapKey = 0;
-  busy = false;
-  getIconUrl = getProductIcon;
-  formatCoordinates = formatCoordinates;
-  devMode = new DevMode();
-  dataStatusParser: DataStatusParser | null = null;
-  payload = { developer: this.devMode.activated };
-  nfName: string | null = null;
-  nfLink: string | null = null;
-  locations: LocationsResult = { status: "loading" };
+interface Props {
+  siteid: string;
+}
 
-  created() {
-    axios
-      .get(`${this.apiUrl}sites/${this.siteid}`, { params: this.payload })
-      .then((response) => {
-        this.response = response.data;
-        if (this.response?.type.includes("mobile" as SiteType)) {
-          axios
-            .get(`${this.apiUrl}sites/${this.siteid}/locations`)
-            .then((response) => {
-              if (response.data.length > 0) {
-                this.locations = { status: "ready", value: response.data };
-              } else {
-                this.locations = { status: "notFound" };
-              }
-            })
-            .catch((error) => {
-              if (error.response && error.response.status === 404) {
-                this.locations = { status: "notFound" };
-              } else {
-                this.locations = { status: "error", error };
-                console.error("Failed to load locations", error);
-              }
-            });
-        } else {
-          this.locations = { status: "notFound" };
-        }
-      })
-      .catch(({ response }) => {
-        this.error = true;
-        this.response = response;
-      });
-    axios
-      .get(`${this.apiUrl}search/`, {
-        params: {
-          ...this.payload,
-          ...{ site: this.siteid, product: ["radar", "lidar", "mwr"], limit: 1 },
-        },
-      })
-      .then(({ data }) => (this.latestFile = data[0]))
-      .catch((error) => {
-        console.error(error);
-      });
-    this.initDataStatusParser().catch((error) => {
+const props = defineProps<Props>();
+
+const apiUrl = process.env.VUE_APP_BACKENDURL;
+const response = ref<Site | null>(null);
+const latestFile = ref<SearchFileResponse | null>(null);
+const error = ref(false);
+const instruments = ref<Instrument[]>([]);
+const instrumentsFromLastDays = 30;
+const instrumentsStatus = ref<"loading" | "error" | "ready">("loading");
+const selectedProductId = ref<string | null>(null);
+const mapKey = ref(0);
+const busy = ref(false);
+const devMode = new DevMode();
+const dataStatusParser = ref<DataStatusParser | null>(null);
+const payload = { developer: devMode.activated };
+const nfName = ref<string | null>(null);
+const nfLink = ref<string | null>(null);
+const locations = ref<LocationsResult>({ status: "loading" });
+
+onMounted(() => {
+  axios
+    .get(`${apiUrl}sites/${props.siteid}`, { params: payload })
+    .then((res) => {
+      response.value = res.data;
+      if (response.value?.type.includes("mobile" as SiteType)) {
+        axios
+          .get(`${apiUrl}sites/${props.siteid}/locations`)
+          .then((res) => {
+            if (res.data.length > 0) {
+              locations.value = { status: "ready", value: res.data };
+            } else {
+              locations.value = { status: "notFound" };
+            }
+          })
+          .catch((error) => {
+            if (error.response && error.response.status === 404) {
+              locations.value = { status: "notFound" };
+            } else {
+              locations.value = { status: "error", error };
+              console.error("Failed to load locations", error);
+            }
+          });
+      } else {
+        locations.value = { status: "notFound" };
+      }
+    })
+    .catch((error) => {
+      error.value = true;
+      response.value = error.response;
+    });
+  axios
+    .get(`${apiUrl}search/`, {
+      params: {
+        ...payload,
+        ...{ site: props.siteid, product: ["radar", "lidar", "mwr"], limit: 1 },
+      },
+    })
+    .then(({ data }) => (latestFile.value = data[0]))
+    .catch((error) => {
       console.error(error);
     });
-    this.loadInstruments().catch((error) => {
-      console.error(error);
-      this.instrumentsStatus = "error";
-    });
-  }
+  initDataStatusParser().catch((error) => {
+    console.error(error);
+  });
+  loadInstruments().catch((error) => {
+    console.error(error);
+    instrumentsStatus.value = "error";
+  });
+});
 
-  @Watch("response")
-  getSiteName() {
-    if (!this.response?.actrisId) {
+watch(
+  () => response.value,
+  () => {
+    if (!response.value?.actrisId) {
       return;
     }
-    const apiUrl = `${actrisNfUrl}/api/facilities/${this.response.actrisId}`;
+    const apiUrl = `${actrisNfUrl}/api/facilities/${response.value.actrisId}`;
     axios
       .get(apiUrl)
       .then(({ data }) => {
-        this.nfName = data.name;
-        this.nfLink = data.landingPage;
+        nfName.value = data.name;
+        nfLink.value = data.landingPage;
       })
       .catch((error) => {
         console.error(error);
       });
   }
+);
 
-  get selectedProductName() {
-    if (!this.selectedProductId || !this.dataStatusParser || !this.dataStatusParser.availableProducts) {
-      return null;
-    }
-    const product = this.dataStatusParser.availableProducts.find((product) => product.id === this.selectedProductId);
-    if (!product) return null;
-    return product.humanReadableName;
+const selectedProductName = computed(() => {
+  if (!selectedProductId.value || !dataStatusParser.value || !dataStatusParser.value.availableProducts) {
+    return null;
   }
+  const product = dataStatusParser.value.availableProducts.find((product) => product.id === selectedProductId.value);
+  if (!product) return null;
+  return product.humanReadableName;
+});
 
-  get singleProductView(): boolean {
-    return this.selectedProductId != null;
-  }
+const singleProductView = computed(() => selectedProductId.value != null);
 
-  reset() {
-    this.selectedProductId = null;
-  }
+function reset() {
+  selectedProductId.value = null;
+}
 
-  async initDataStatusParser(product: string | null = null) {
-    const properties = ["measurementDate", "productId", "legacy", "uuid", "errorLevel"];
-    const payload = {
-      site: this.siteid,
-      showLegacy: true,
-      developer: this.devMode.activated,
-      product: product,
-      properties,
+async function initDataStatusParser(product: string | null = null) {
+  const properties = ["measurementDate", "productId", "legacy", "uuid", "errorLevel"];
+  const payload = {
+    site: props.siteid,
+    showLegacy: true,
+    developer: devMode.activated,
+    product: product,
+    properties,
+  };
+  dataStatusParser.value = await new DataStatusParser(payload).engage();
+}
+
+async function handleInstrument(response: ReducedMetadataResponse): Promise<Instrument> {
+  if (response.instrumentPid) {
+    return {
+      pid: response.instrumentPid,
+      name: await fetchInstrumentName(response.instrumentPid).catch((error) => {
+        console.error("Failed to load instrument information", error);
+        return response.instrument.humanReadableName;
+      }),
+      icon: getProductIcon(response.instrument.type),
     };
-    this.dataStatusParser = await new DataStatusParser(payload).engage();
-  }
-
-  async handleInstrument(response: ReducedMetadataResponse): Promise<Instrument> {
-    if (response.instrumentPid) {
-      return {
-        pid: response.instrumentPid,
-        name: await fetchInstrumentName(response.instrumentPid).catch((error) => {
-          console.error("Failed to load instrument information", error);
-          return response.instrument.humanReadableName;
-        }),
-        icon: this.getIconUrl(response.instrument.type),
-      };
-    } else {
-      return {
-        pid: null,
-        name: `Unidentified ${response.instrument.humanReadableName}`,
-        icon: this.getIconUrl(response.instrument.type),
-      };
-    }
-  }
-
-  async loadInstruments() {
-    const dateFrom = new Date();
-    dateFrom.setDate(dateFrom.getDate() - this.instrumentsFromLastDays);
-    const instruments = await axios.get(`${this.apiUrl}uploaded-metadata/`, {
-      params: { ...this.payload, ...{ site: this.siteid, updatedAtFrom: dateFrom } },
-    });
-    this.instruments = await Promise.all(instruments.data.map(this.handleInstrument));
-    this.instrumentsStatus = "ready";
-  }
-
-  get instrumentPidStatus(): "ok" | "someMissing" | "allMissing" {
-    const okCount = this.instruments.reduce((count, instrument) => (instrument.pid ? count + 1 : count), 0);
-    if (okCount == this.instruments.length) {
-      return "ok";
-    }
-    if (okCount == 0) {
-      return "allMissing";
-    }
-    return "someMissing";
+  } else {
+    return {
+      pid: null,
+      name: `Unidentified ${response.instrument.humanReadableName}`,
+      icon: getProductIcon(response.instrument.type),
+    };
   }
 }
+
+async function loadInstruments() {
+  const dateFrom = new Date();
+  dateFrom.setDate(dateFrom.getDate() - instrumentsFromLastDays);
+  const res = await axios.get(`${apiUrl}uploaded-metadata/`, {
+    params: { ...payload, ...{ site: props.siteid, updatedAtFrom: dateFrom } },
+  });
+  instruments.value = await Promise.all(res.data.map(handleInstrument));
+  instrumentsStatus.value = "ready";
+}
+
+const instrumentPidStatus = computed(() => {
+  const okCount = instruments.value.reduce((count, instrument) => (instrument.pid ? count + 1 : count), 0);
+  if (okCount == instruments.value.length) {
+    return "ok";
+  }
+  if (okCount == 0) {
+    return "allMissing";
+  }
+  return "someMissing";
+});
 </script>

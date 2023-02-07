@@ -78,190 +78,173 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+import { File } from "../../../backend/src/entity/File";
+export type SourceFile = { ok: true; value: File } | { ok: false; value: Error };
+</script>
+
+<script lang="ts" setup>
+import { ref, computed, watch, watchEffect } from "vue";
 import axios from "axios";
 import { humanReadableDate, sortVisualizations, fetchInstrumentName, compareValues } from "../lib";
 import { DevMode } from "../lib/DevMode";
-import { File, ModelFile, RegularFile } from "../../../backend/src/entity/File";
+import { ModelFile, RegularFile } from "../../../backend/src/entity/File";
 import { VisualizationItem } from "../../../backend/src/entity/VisualizationResponse";
-import Visualization from "../components/Visualization.vue";
-import { Site, SiteType } from "../../../backend/src/entity/Site";
+import { SiteType } from "../../../backend/src/entity/Site";
 import { SiteLocation } from "../../../backend/src/entity/SiteLocation";
-import { Model } from "../../../backend/src/entity/Model";
 
-import FileInformation from "../components/landing/FileInformation.vue";
-import ProductInformation from "../components/landing/ProductInformation.vue";
-import DataOrigin from "../components/landing/DataOrigin.vue";
-import Preview from "../components/landing/Preview.vue";
-import Citation from "../components/landing/Citation.vue";
 import DownloadButton from "../components/landing/DownloadButton.vue";
 
-Vue.component("visualization", Visualization);
+interface Props {
+  uuid: string;
+}
 
-export type SourceFile = { ok: true; value: File } | { ok: false; value: Error };
+const props = defineProps<Props>();
 
-@Component({
-  components: {
-    FileInformation,
-    ProductInformation,
-    DataOrigin,
-    Preview,
-    Citation,
-    DownloadButton,
-  },
-})
-export default class FileView extends Vue {
-  @Prop() uuid!: string;
-  response: ModelFile | RegularFile | null = null;
-  visualizations: VisualizationItem[] = [];
-  versions: string[] = [];
-  error = false;
-  apiUrl = process.env.VUE_APP_BACKENDURL;
-  humanReadableDate = humanReadableDate;
-  devMode = new DevMode();
-  sourceFiles: SourceFile[] = [];
-  isBusy = false;
-  site!: Site;
-  model: Model | null = null;
-  instrument = "";
-  instrumentStatus: "loading" | "error" | "ready" = "loading";
-  loadingVisualizations = true;
-  location: SiteLocation | null = null;
+const apiUrl = process.env.VUE_APP_BACKENDURL;
+const devMode = new DevMode();
 
-  metaInfo() {
-    return { title: this.title };
+const response = ref<ModelFile | RegularFile | null>(null);
+const visualizations = ref<VisualizationItem[]>([]);
+const versions = ref<string[]>([]);
+const error = ref(false);
+const sourceFiles = ref<SourceFile[]>([]);
+const isBusy = ref(false);
+const instrument = ref("");
+const instrumentStatus = ref<"loading" | "error" | "ready">("loading");
+const loadingVisualizations = ref(true);
+const location = ref<SiteLocation | null>(null);
+
+const title = computed(() => {
+  if (!response.value) {
+    return "Cloudnet Data Object";
+  } else {
+    return `${response.value.product.humanReadableName} data from ${response.value.site.humanReadableName}`;
   }
+});
 
-  get title() {
-    if (!this.response) {
-      return "Cloudnet Data Object";
-    } else {
-      return `${this.response.product.humanReadableName} data from ${this.response.site.humanReadableName}`;
+watchEffect(() => {
+  document.title = title.value;
+});
+
+const isActrisObject = computed(() => {
+  if (!response.value) {
+    return false;
+  }
+  return response.value.site.type.includes("cloudnet" as SiteType);
+});
+
+const currentVersionIndex = computed(() => {
+  if (response.value == null) return null;
+  return versions.value.findIndex((uuid) => uuid == props.uuid);
+});
+
+const newestVersion = computed(() => {
+  if (!currentVersionIndex.value) return null;
+  return versions.value[0];
+});
+
+async function fetchVisualizations(payload: {}) {
+  try {
+    const response = await axios.get(`${apiUrl}visualizations/${props.uuid}`, payload);
+    visualizations.value = sortVisualizations(response.data.visualizations);
+  } catch (error) {
+    console.error(error);
+  }
+  loadingVisualizations.value = false;
+}
+
+async function fetchFileMetadata(payload: {}) {
+  try {
+    const res = await axios.get(`${apiUrl}files/${props.uuid}`, payload);
+    response.value = res.data;
+    if (response.value) {
+      await fetchLocation(response.value);
     }
-  }
-
-  get isActrisObject() {
-    if (!this.response) {
-      return false;
-    }
-    return this.response.site.type.includes("cloudnet" as SiteType);
-  }
-
-  get currentVersionIndex() {
-    if (this.response == null) return null;
-    const response = this.response;
-    return this.versions.findIndex((uuid) => uuid == response.uuid);
-  }
-
-  get newestVersion() {
-    if (!this.currentVersionIndex) return null;
-    return this.versions[0];
-  }
-
-  async created() {
-    await this.onUuidChange();
-  }
-
-  async fetchVisualizations(payload: {}) {
-    try {
-      const response = await axios.get(`${this.apiUrl}visualizations/${this.uuid}`, payload);
-      this.visualizations = sortVisualizations(response.data.visualizations);
-    } catch (error) {
-      console.error(error);
-    }
-    this.loadingVisualizations = false;
-  }
-
-  async fetchFileMetadata(payload: {}) {
-    try {
-      const response = await axios.get(`${this.apiUrl}files/${this.uuid}`, payload);
-      this.response = response.data;
-      if (this.response) {
-        this.fetchLocation(this.response);
-      }
-    } catch (err) {
-      this.error = true;
-      this.response = err.response;
-    }
-  }
-
-  async fetchLocation(file: ModelFile | RegularFile) {
-    if (!file.site.type.includes("mobile" as SiteType)) {
-      this.location = null;
-      return;
-    }
-    try {
-      const response = await axios.get(`${this.apiUrl}sites/${file.site.id}/locations/${file.measurementDate}`);
-      this.location = response.data;
-    } catch (err) {
-      this.location = null;
-    }
-  }
-
-  fetchVersions(file: File) {
-    // No need to reload versions
-    if (this.versions.includes(file.uuid)) return;
-    const payload = {
-      params: {
-        developer: this.devMode.activated || undefined,
-        filename: file.filename,
-        allVersions: true,
-        showLegacy: true,
-      },
-    };
-    return axios.get(`${this.apiUrl}files`, payload).then((response) => {
-      const searchFiles = response.data as File[];
-      this.versions = searchFiles.map((sf) => sf.uuid);
-    });
-  }
-
-  async fetchSourceFiles(response: RegularFile | ModelFile) {
-    if (!("sourceFileIds" in response) || !response.sourceFileIds) {
-      this.sourceFiles = [];
-      return;
-    }
-    const results = await Promise.all(
-      response.sourceFileIds.map((uuid) =>
-        axios
-          .get(`${this.apiUrl}files/${uuid}`)
-          .then((response) => ({ ok: true, value: response.data }))
-          .catch((error) => ({ ok: false, value: error }))
-      )
-    );
-    results.sort((a, b) => {
-      if (!a.ok || !b.ok) return -1;
-      return compareValues(a.value.product.humanReadableName, b.value.product.humanReadableName);
-    });
-    this.sourceFiles = results;
-  }
-
-  @Watch("uuid")
-  async onUuidChange() {
-    this.isBusy = true;
-    const payload = { params: { developer: this.devMode.activated || undefined } };
-    await this.fetchFileMetadata(payload);
-    if (this.response == null || this.error) return;
-    await Promise.all([
-      this.fetchInstrument(this.response),
-      this.fetchVisualizations(payload),
-      this.fetchVersions(this.response),
-      this.fetchSourceFiles(this.response),
-    ]);
-    this.isBusy = false;
-  }
-
-  async fetchInstrument(file: RegularFile | ModelFile) {
-    if (!("instrumentPid" in file) || file.instrumentPid == null) {
-      return;
-    }
-    const pid = (file as RegularFile).instrumentPid;
-    try {
-      this.instrument = await fetchInstrumentName(pid);
-      this.instrumentStatus = "ready";
-    } catch (err) {
-      console.error("Failed to load instrument:", err);
-      this.instrumentStatus = "error";
-    }
+  } catch (err) {
+    error.value = true;
+    response.value = err.response;
   }
 }
+
+async function fetchLocation(file: ModelFile | RegularFile) {
+  if (!file.site.type.includes("mobile" as SiteType)) {
+    location.value = null;
+    return;
+  }
+  try {
+    const response = await axios.get(`${apiUrl}sites/${file.site.id}/locations/${file.measurementDate}`);
+    location.value = response.data;
+  } catch (err) {
+    location.value = null;
+  }
+}
+
+function fetchVersions(file: File) {
+  // No need to reload versions
+  if (versions.value.includes(file.uuid)) return;
+  const payload = {
+    params: {
+      developer: devMode.activated || undefined,
+      filename: file.filename,
+      allVersions: true,
+      showLegacy: true,
+    },
+  };
+  return axios.get(`${apiUrl}files`, payload).then((response) => {
+    const searchFiles = response.data as File[];
+    versions.value = searchFiles.map((sf) => sf.uuid);
+  });
+}
+
+async function fetchSourceFiles(response: RegularFile | ModelFile) {
+  if (!("sourceFileIds" in response) || !response.sourceFileIds) {
+    sourceFiles.value = [];
+    return;
+  }
+  const results = await Promise.all(
+    response.sourceFileIds.map((uuid) =>
+      axios
+        .get(`${apiUrl}files/${uuid}`)
+        .then((response) => ({ ok: true, value: response.data }))
+        .catch((error) => ({ ok: false, value: error }))
+    )
+  );
+  results.sort((a, b) => {
+    if (!a.ok || !b.ok) return -1;
+    return compareValues(a.value.product.humanReadableName, b.value.product.humanReadableName);
+  });
+  sourceFiles.value = results;
+}
+
+async function fetchInstrument(file: RegularFile | ModelFile) {
+  if (!("instrumentPid" in file) || file.instrumentPid == null) {
+    return;
+  }
+  const pid = (file as RegularFile).instrumentPid;
+  try {
+    instrument.value = await fetchInstrumentName(pid);
+    instrumentStatus.value = "ready";
+  } catch (err) {
+    console.error("Failed to load instrument:", err);
+    instrumentStatus.value = "error";
+  }
+}
+
+watch(
+  () => props.uuid,
+  async () => {
+    isBusy.value = true;
+    const payload = { params: { developer: devMode.activated || undefined } };
+    await fetchFileMetadata(payload);
+    if (response.value == null || error.value) return;
+    await Promise.all([
+      fetchInstrument(response.value),
+      fetchVisualizations(payload),
+      fetchVersions(response.value),
+      fetchSourceFiles(response.value),
+    ]);
+    isBusy.value = false;
+  },
+  { immediate: true }
+);
 </script>

@@ -47,17 +47,14 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { ModelFile, RegularFile } from "../../../../backend/src/entity/File";
-import { Component, Prop } from "vue-property-decorator";
-import Vue from "vue";
 import { humanReadableSize, humanReadableTimestamp } from "../../lib";
 import Copyable from "./Copyable.vue";
 
-@Component({ components: { Copyable } })
-export default class FileInformation extends Vue {
-  @Prop() response!: ModelFile | RegularFile | null;
-  humanReadableSize = humanReadableSize;
-  humanReadableTimestamp = humanReadableTimestamp;
+interface Props {
+  response: ModelFile | RegularFile | null;
 }
+
+defineProps<Props>();
 </script>

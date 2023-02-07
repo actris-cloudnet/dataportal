@@ -55,130 +55,107 @@
   font-weight: 400
   font-size: 110%
   margin-bottom: .5*$basespacing
+
+.loading
+  color: gray
+
+.error
+  color: red
 </style>
 
 <template>
   <div class="summary-section" id="citation">
-    <div v-if="isVolatile" class="disclaimer-banner" :class="'volatile-banner'">
+    <div v-if="file.volatile" class="disclaimer-banner" :class="'volatile-banner'">
       <img class="banner-icon" alt="warning icon" :src="require('../../assets/icons/test-warning-mono.svg')" />
-      <span v-if="isVolatile">This data object is volatile and may be updated in the future.</span>
+      <span v-if="file.volatile">This data object is volatile and may be updated in the future.</span>
     </div>
-    <div v-if="isLegacy" class="disclaimer-banner" :class="'legacy-banner'">
+    <div v-if="file.legacy" class="disclaimer-banner" :class="'legacy-banner'">
       <img class="banner-icon" alt="warning icon" :src="require('../../assets/icons/test-warning-mono.svg')" />
-      <span v-if="isLegacy">This data object was produced using nonstandard processing.</span>
+      <span v-if="file.legacy">This data object was produced using nonstandard processing.</span>
     </div>
 
     <section class="citation-section" id="citation">
       <div class="summary-section-header-container">
         <div class="summary-section-header">Citation</div>
-        <div class="citation-export">
-          <a :href="bibtexUrl">BibTeX</a>
-          <a :href="risUrl">RIS</a>
+        <div class="citation-export" v-if="citation.status == 'ready'">
+          <a :href="citation.bibtexUrl">BibTeX</a>
+          <a :href="citation.risUrl">RIS</a>
         </div>
       </div>
-      <div v-if="!longCitation" class="example citation-section-content small" v-html="visibleCitationString"></div>
-      <div
-        v-else
-        class="example citation-section-content long"
-        :class="{ full: !longCitationReduced, reduced: longCitationReduced }"
-        @dblclick="toggleCitation"
-        v-html="visibleCitationString"
-      ></div>
+      <div v-if="citation.status == 'ready'" class="example citation-section-content" v-html="citation.citation"></div>
+      <div v-else-if="citation.status == 'loading'" class="loading">Loading...</div>
+      <div v-else-if="citation.status == 'error'" class="error">Failed to load citation.</div>
     </section>
-    <section class="citation-section">
+    <section class="citation-section" v-if="citation.status == 'ready'">
       <p class="citation-note">
         Please include the following information in your publication. You may edit the text to suit publication
         standards.
       </p>
       <div class="example">
         <div class="example-header">Data availability</div>
-        <p v-html="dataAvailabilityString"></p>
+        <p v-html="citation.dataAvailability"></p>
         <div class="example-header">Acknowledgements</div>
-        <div v-html="acknowledgementsString"></div>
+        <div v-html="citation.acknowledgements" v-if="citation.status == 'ready'"></div>
       </div>
     </section>
   </div>
 </template>
 
-<script lang="ts">
-import { Component, Prop } from "vue-property-decorator";
-import Vue from "vue";
+<script lang="ts" setup>
+import { ref, watch } from "vue";
 import axios from "axios";
 
 import { ModelFile, RegularFile } from "../../../../backend/src/entity/File";
 
-@Component
-export default class Citation extends Vue {
-  @Prop() uuid!: string;
-  @Prop() file!: ModelFile | RegularFile | null;
-  citationString = "";
-  acknowledgementsString = "";
-  dataAvailabilityString = "";
+interface Props {
+  uuid: string;
+  file: ModelFile | RegularFile;
+}
 
-  longCitationReduced = true;
+const props = defineProps<Props>();
 
-  async created() {
-    await this.fetchReferenceStrings();
-  }
-
-  async updated() {
-    await this.fetchReferenceStrings();
-  }
-
-  get longCitation() {
-    return this.citationString.length > 500;
-  }
-
-  get visibleCitationString() {
-    if (this.longCitation && this.longCitationReduced) {
-      return this.citationString.replace(/(<([^>]+)>)/gi, "").slice(0, 500);
-    } else {
-      return this.citationString;
+type CitationState =
+  | { status: "loading" }
+  | {
+      status: "ready";
+      citation: string;
+      acknowledgements: string;
+      dataAvailability: string;
+      bibtexUrl: string;
+      risUrl: string;
     }
-  }
+  | { status: "error" };
 
-  toggleCitation() {
-    this.longCitationReduced = !this.longCitationReduced;
-  }
+const citation = ref<CitationState>({ status: "loading" });
 
-  get isVolatile() {
-    return this.file ? this.file.volatile : false;
-  }
-
-  get isLegacy() {
-    return this.file ? this.file.legacy : false;
-  }
-
-  get referenceUrl() {
-    return `${process.env.VUE_APP_BACKENDURL}reference/${this.uuid}/`;
-  }
-
-  get bibtexUrl() {
-    return `${this.referenceUrl}?citation=true&format=bibtex`;
-  }
-  get risUrl() {
-    return `${this.referenceUrl}?citation=true&format=ris`;
-  }
-
-  async fetchReferenceStrings() {
-    axios
-      .get(`${this.referenceUrl}?citation=true&format=html`)
-      .then((response) => {
-        this.citationString = response.data;
-      })
-      .catch((error) => console.error(error));
-    axios
-      .get(`${this.referenceUrl}?acknowledgements=true&format=html`)
-      .then((response) => {
-        this.acknowledgementsString = response.data;
-      })
-      .catch((error) => console.error(error));
-    axios
-      .get(`${this.referenceUrl}?dataAvailability=true&format=html`)
-      .then((response) => {
-        this.dataAvailabilityString = response.data;
-      })
-      .catch((error) => console.error(error));
+async function fetchReferenceStrings() {
+  const baseUrl = `${process.env.VUE_APP_BACKENDURL}reference/${props.uuid}/`;
+  try {
+    const responses = await Promise.all([
+      axios.get(`${baseUrl}?citation=true&format=html`),
+      axios.get(`${baseUrl}?acknowledgements=true&format=html`),
+      axios.get(`${baseUrl}?dataAvailability=true&format=html`),
+    ]);
+    citation.value = {
+      status: "ready",
+      citation: responses[0].data,
+      acknowledgements: responses[1].data,
+      dataAvailability: responses[2].data,
+      bibtexUrl: `${baseUrl}?citation=true&format=bibtex`,
+      risUrl: `${baseUrl}?citation=true&format=ris`,
+    };
+  } catch (error) {
+    console.error("Failed to load citation:", error);
+    citation.value = { status: "error" };
   }
 }
+
+watch(
+  () => props.uuid,
+  async () => {
+    citation.value = { status: "loading" };
+    await fetchReferenceStrings();
+  },
+  { immediate: true }
+);
 </script>

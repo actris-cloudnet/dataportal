@@ -29,23 +29,23 @@
 <template>
   <!-- eslint-disable vue/require-v-for-key -->
   <div id="data_availability_visualization" v-if="!busy">
-    <div v-for="(year, index) in yearsReduced()" v-bind:key="year['year']" class="dataviz-row">
+    <div v-for="(year, index) in yearsReduced" :key="year.year" class="dataviz-row">
       <div
-        v-if="index && parseInt(year['year']) + 1 !== parseInt(yearsReduced[index - 1]['year'])"
+        v-if="index && parseInt(year.year) + 1 !== parseInt(yearsReduced[index - 1]['year'])"
         class="dataviz-skippedyears"
       >
-        <template v-if="parseInt(year['year']) - parseInt(years[index - 1]['year']) == -2">
-          No data for year {{ parseInt(year["year"]) + 1 }}.
+        <template v-if="parseInt(year.year) - parseInt(years[index - 1].year) == -2">
+          No data for year {{ parseInt(year.year) + 1 }}.
         </template>
         <template v-else>
-          No data for years {{ parseInt(year["year"]) + 1 }} - {{ parseInt(years[index - 1]["year"]) - 1 }}.
+          No data for years {{ parseInt(year.year) + 1 }} - {{ parseInt(years[index - 1].year) - 1 }}.
         </template>
       </div>
-      <div class="dataviz-year">{{ year["year"] }}</div>
+      <div class="dataviz-year">{{ year.year }}</div>
       <div class="dataviz-yearblock" @mouseleave="debouncedHideTooltip()">
         <a
           v-for="date in year.dates"
-          v-bind:key="date.date"
+          :key="date.date"
           class="dataviz-date"
           :id="`dataviz-color-${year.year}-${date.date}`"
           :href="createLinkToLandingPage(date.products)"
@@ -88,10 +88,10 @@
       </div>
       <br />
     </div>
-    <div class="dataviz-tooltip" v-if="tooltips && hover" v-bind:style="tooltipStyle">
+    <div class="dataviz-tooltip" v-if="tooltips && hover" :style="tooltipStyle">
       <header>
-        <img :src="createIconForSingleProduct(date.products)" alt="" />
-        {{ year.year }}-{{ date.date }}
+        <img :src="createIconForSingleProduct(currentDate.products)" alt="" />
+        {{ currentYear.year }}-{{ currentDate.date }}
       </header>
     </div>
   </div>
@@ -101,35 +101,36 @@
 </template>
 
 <script lang="ts" setup>
-import { ProductLevels, ProductYear, ProductDate, ProductInfo } from "../lib/DataStatusParser";
+import { ProductLevels, ProductYear, ProductDate, ProductInfo, DataStatusParser } from "../lib/DataStatusParser";
 import { ColorClass } from "../lib";
 import debounce from "debounce";
-import { ref } from "vue";
+import { computed, ref, onMounted } from "vue";
 
 interface Props {
   site: string;
-  loadingComplete?: () => void;
   legend: boolean;
   dateFrom?: string;
   tooltips?: boolean;
   qualityScores?: boolean;
-  debounceMs: number;
   product: string;
+  dataStatusParser: DataStatusParser;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  debounceMs: 1000 / 60,
-});
+const props = defineProps<Props>();
 
 const busy = false;
-let years = ref<ProductYear[]>([]);
+const years = ref<ProductYear[]>([]);
 const currentYear = ref<ProductYear | null>(null);
 const currentDate = ref<ProductDate | null>(null);
 const hover = ref(false);
-let tooltipStyle = ref<Record<string, string>>({});
+const tooltipStyle = ref<Record<string, string>>({});
 
-function yearsReduced() {
-  return years.value.map((year) => ({
+onMounted(() => {
+  years.value = props.dataStatusParser.years;
+});
+
+const yearsReduced = computed(() =>
+  years.value.map((year) => ({
     year: year.year,
     dates: year.dates.map((date) => ({
       date: date.date,
@@ -139,8 +140,8 @@ function yearsReduced() {
         "1c": date.products["1c"].filter((x) => x.id == props.product),
       },
     })),
-  }));
-}
+  }))
+);
 
 function createLinkToLandingPage(products: ProductLevels): string | undefined {
   const prodsAll = products["2"].concat(products["1b"], products["1c"]);
@@ -262,9 +263,11 @@ function hideTooltip() {
 }
 
 function setCurrentYearDate(year: ProductYear, date: ProductDate, event: MouseEvent) {
+  const tooltipTop = (event.target as HTMLElement).getBoundingClientRect().top - 30;
+  const tooltipLeft = event.clientX;
   tooltipStyle.value = {
-    top: `${event.clientY - 40}px`,
-    left: `${event.clientX}px`,
+    top: `${tooltipTop}px`,
+    left: `${tooltipLeft}px`,
     transform: "translateX(-50%)",
   };
   currentDate.value = date;
@@ -272,6 +275,7 @@ function setCurrentYearDate(year: ProductYear, date: ProductDate, event: MouseEv
   hover.value = true;
 }
 
-const debouncedSetCurrentYearDate = debounce(setCurrentYearDate, props.debounceMs);
-const debouncedHideTooltip = debounce(hideTooltip, props.debounceMs);
+const debounceMs = 1000 / 60;
+const debouncedSetCurrentYearDate = debounce(setCurrentYearDate, debounceMs);
+const debouncedHideTooltip = debounce(hideTooltip, debounceMs);
 </script>

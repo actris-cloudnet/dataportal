@@ -108,11 +108,8 @@ h4
   </main>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { ActiveConsent } from "../lib/ActiveConsent";
-import { Vue } from "vue-property-decorator";
 
-export default class PrivacyPolicyView extends Vue {
-  lastEdited = new ActiveConsent().privacyPolicyEdited;
-}
+const lastEdited = new ActiveConsent().privacyPolicyEdited;
 </script>

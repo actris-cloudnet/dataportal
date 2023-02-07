@@ -1,9 +1,7 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import VueMeta from "vue-meta";
 
 Vue.use(VueRouter);
-Vue.use(VueMeta);
 
 const routes = [
   {
@@ -35,7 +33,8 @@ const routes = [
     redirect: "/search/data",
   },
   {
-    // Allow two slashes in URL. Investigate if this is really needed.
+    // Allow two slashes in URL. It's possible that some early PIDs resolve to a
+    // landing pages with two slashes.
     path: "/(/)?file/:uuid",
     meta: {
       title: "Cloudnet Data Object",

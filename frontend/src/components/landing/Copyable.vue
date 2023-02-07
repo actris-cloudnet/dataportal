@@ -44,35 +44,36 @@ button
   </span>
 </template>
 
-<script lang="ts">
-import { Component, Prop } from "vue-property-decorator";
-import Vue from "vue";
+<script lang="ts" setup>
+import { ref } from "vue";
 
-@Component
-export default class Copyable extends Vue {
-  @Prop({ default: "Copy to clipboard" }) title!: string;
-  @Prop() value!: string;
-  status: "success" | "failure" = "success";
-  message = "";
-  messageDuration = 2000;
+interface Props {
+  title?: string;
+  value: string;
+}
 
-  copy() {
-    navigator.clipboard.writeText(this.value).then(
-      () => {
-        this.status = "success";
-        this.message = "Copied!";
-        setTimeout(() => {
-          this.message = "";
-        }, this.messageDuration);
-      },
-      () => {
-        this.status = "failure";
-        this.message = "Failed to copy...";
-        setTimeout(() => {
-          this.message = "";
-        }, 2 * this.messageDuration);
-      }
-    );
-  }
+const props = withDefaults(defineProps<Props>(), { title: "Copy to clipboard" });
+
+const status = ref<"success" | "failure">("success");
+const message = ref("");
+const messageDuration = 2000;
+
+function copy() {
+  navigator.clipboard.writeText(props.value).then(
+    () => {
+      status.value = "success";
+      message.value = "Copied!";
+      setTimeout(() => {
+        message.value = "";
+      }, messageDuration);
+    },
+    () => {
+      status.value = "failure";
+      message.value = "Failed to copy...";
+      setTimeout(() => {
+        message.value = "";
+      }, 2 * messageDuration);
+    }
+  );
 }
 </script>

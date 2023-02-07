@@ -9,7 +9,7 @@
       No quality report available.
     </div>
     <div v-else-if="report.status === 'error'" class="quality-report-box" style="color: red">
-      Failed to load report: {{ report.error.message }}
+      Failed to load report.
     </div>
     <div v-else class="quality-report-box">
       <div class="quality-report-header">
@@ -59,13 +59,19 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import axios from "axios";
-import { Component, Prop, Vue } from "vue-property-decorator";
 import escapeHtml from "escape-html";
+import { computed, ref, watch } from "vue";
 
 import Donut from "../Donut.vue";
 import { humanReadableTimestamp, getQcIcon } from "../../lib";
+
+interface Props {
+  uuid: string;
+}
+
+const props = defineProps<Props>();
 
 interface Exception {
   result: string;
@@ -95,46 +101,44 @@ type QualityResult =
   | { status: "loading" }
   | { status: "ready"; value: QualityResponse }
   | { status: "notFound" }
-  | { status: "error"; error: Error };
+  | { status: "error" };
 
-@Component({ components: { Donut } })
-export default class LandingQualityReport extends Vue {
-  @Prop() uuid!: string;
-  report: QualityResult = { status: "loading" };
+const report = ref<QualityResult>({ status: "loading" });
 
-  humanReadableTimestamp = humanReadableTimestamp;
-  getQcIcon = getQcIcon;
-
-  async created() {
+watch(
+  () => props.uuid,
+  async () => {
     try {
-      const response = await axios.get(`${process.env.VUE_APP_BACKENDURL}quality/${this.uuid}`);
-      this.report = { status: "ready", value: response.data };
+      const response = await axios.get(`${process.env.VUE_APP_BACKENDURL}quality/${props.uuid}`);
+      report.value = { status: "ready", value: response.data };
     } catch (error) {
       if (error.response && error.response.status === 404) {
-        this.report = { status: "notFound" };
+        report.value = { status: "notFound" };
       } else {
-        this.report = { status: "error", error };
+        report.value = { status: "error" };
       }
     }
-  }
+  },
+  { immediate: true }
+);
 
-  get donutData() {
-    if (this.report.status !== "ready") return [];
-    return [
-      {
-        value: this.report.value.tests - this.report.value.warnings - this.report.value.errors - this.report.value.info,
-        color: "#4C9A2A",
-      },
-      { value: this.report.value.warnings, color: "goldenrod" },
-      { value: this.report.value.errors, color: "#cd5c5c" },
-      { value: this.report.value.info, color: "#98BADB" },
-    ];
-  }
+const donutData = computed(() => {
+  if (report.value.status !== "ready") return [];
+  return [
+    {
+      value:
+        report.value.value.tests - report.value.value.warnings - report.value.value.errors - report.value.value.info,
+      color: "#4C9A2A",
+    },
+    { value: report.value.value.warnings, color: "goldenrod" },
+    { value: report.value.value.errors, color: "#cd5c5c" },
+    { value: report.value.value.info, color: "#98BADB" },
+  ];
+});
 
-  formatMessage(message: string): string {
-    // Try to format anything that looks like an identifier (snake case, in
-    // single quotes).
-    return escapeHtml(message).replace(/&#39;(\w+)&#39;|(\w+_\w+)/gi, "<code>$1$2</code>");
-  }
+function formatMessage(message: string): string {
+  // Try to format anything that looks like an identifier (snake case, in single
+  // quotes).
+  return escapeHtml(message).replace(/&#39;(\w+)&#39;|(\w+_\w+)/gi, "<code>$1$2</code>");
 }
 </script>

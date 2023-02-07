@@ -20,15 +20,14 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { VisualizationItem } from "../../../../backend/src/entity/VisualizationResponse";
-import { Component, Prop } from "vue-property-decorator";
 import Visualization from "../Visualization.vue";
-import Vue from "vue";
 
-@Component({ components: { Visualization } })
-export default class Preview extends Vue {
-  @Prop() visualization!: VisualizationItem | null;
-  @Prop() loading!: boolean;
+interface Props {
+  visualization: VisualizationItem | null;
+  loading: boolean;
 }
+
+defineProps<Props>();
 </script>
