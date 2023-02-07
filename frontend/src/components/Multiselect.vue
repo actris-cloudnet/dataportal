@@ -97,16 +97,18 @@ import { DevMode } from "../lib/DevMode";
 import { notEmpty } from "../lib";
 import { ref, watch } from "vue";
 
-const props = defineProps<{
+interface Props {
   id: string;
   label: string;
   options: Option[];
   icons: boolean;
   getIcon: Function;
-  devMode: DevMode;
+  devMode?: DevMode;
   multiple: boolean;
   value: OptionId | OptionId[] | null;
-}>();
+}
+
+const props = defineProps<Props>();
 
 const emit = defineEmits(["input"]);
 
@@ -129,6 +131,8 @@ function onInput(input: Option | Option[]) {
 }
 
 function isIddqd(target: string, _: string) {
-  if (target == "iddqd") props.devMode.enable();
+  if (props.devMode && target == "iddqd") {
+    props.devMode.enable();
+  }
 }
 </script>

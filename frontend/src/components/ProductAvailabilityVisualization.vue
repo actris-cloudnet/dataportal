@@ -93,7 +93,7 @@
 <template>
   <!-- eslint-disable vue/require-v-for-key -->
   <div id="data_availability_visualization" v-if="!busy">
-    <div v-for="(year, index) in years" v-bind:key="year['year']" class="dataviz-row">
+    <div v-for="(year, index) in years" :key="year['year']" class="dataviz-row">
       <div
         v-if="index && parseInt(year['year']) + 1 !== parseInt(years[index - 1]['year'])"
         class="dataviz-skippedyears"
@@ -175,27 +175,27 @@
       </div>
     </div>
     <div class="dataviz-tooltip" v-if="tooltips && hover" :style="tooltipStyle">
-      <header>{{ year["year"] }}-{{ date["date"] }}</header>
+      <header>{{ currentYear.year }}-{{ currentDate.date }}</header>
       <section v-if="!qualityScores">
-        <ul v-for="lvl in allLevels()">
+        <ul v-for="lvl in allLevels">
           <li class="header">Level {{ lvl }}</li>
           <li
             v-for="product in filterProductsByLvl(lvl)"
             class="productitem"
             :class="{
-              found: getProductStatus(date.products[lvl], product),
+              found: getProductStatus(currentDate.products[lvl], product),
             }"
             :key="product.id"
           >
             {{ idToHumanReadable(product.id) }}
-            <sup class="legacy-label" v-if="isLegacyFile(date.products[lvl], product)">L</sup>
+            <sup class="legacy-label" v-if="isLegacyFile(currentDate.products[lvl], product)">L</sup>
           </li>
           <li
             v-if="lvl === '1b'"
             class="productitem modelitem"
             :class="{
-              found: getProductStatus(date.products[lvl], { id: 'model' }),
-              na: qualityScores && !getReportExists(date.products[lvl], { id: 'model' }),
+              found: getProductStatus(currentDate.products[lvl], { id: 'model' }),
+              na: qualityScores && !getReportExists(currentDate.products[lvl], { id: 'model' }),
             }"
           >
             Model
@@ -204,29 +204,29 @@
       </section>
 
       <section v-else>
-        <ul v-for="lvl in allLevels()">
+        <ul v-for="lvl in allLevels">
           <li class="header">Level {{ lvl }}</li>
           <li
             v-for="product in filterProductsByLvl(lvl)"
             class="qualityitem"
             :class="{
-              found: getProductStatus(date.products[lvl], product),
-              na: qualityScores && !getReportExists(date.products[lvl], product),
-              info: isFileWithInfo(date.products[lvl], product),
-              warning: isFileWithWarning(date.products[lvl], product),
-              error: isFileWithError(date.products[lvl], product),
+              found: getProductStatus(currentDate.products[lvl], product),
+              na: qualityScores && !getReportExists(currentDate.products[lvl], product),
+              info: isFileWithInfo(currentDate.products[lvl], product),
+              warning: isFileWithWarning(currentDate.products[lvl], product),
+              error: isFileWithError(currentDate.products[lvl], product),
             }"
             :key="product.id"
           >
             {{ idToHumanReadable(product.id) }}
-            <sup class="legacy-label" v-if="isLegacyFile(date.products[lvl], product)">L</sup>
+            <sup class="legacy-label" v-if="isLegacyFile(currentDate.products[lvl], product)">L</sup>
           </li>
           <li
             v-if="lvl === '1b'"
             class="qualityitem modelitem"
             :class="{
-              found: getProductStatus(date.products[lvl], { id: 'model' }),
-              na: qualityScores && !getReportExists(date.products[lvl], { id: 'model' }),
+              found: getProductStatus(currentDate.products[lvl], { id: 'model' }),
+              na: qualityScores && !getReportExists(currentDate.products[lvl], { id: 'model' }),
             }"
           >
             Model
@@ -245,7 +245,7 @@ import { idToHumanReadable, ColorClass } from "../lib";
 import { Product } from "../../../backend/src/entity/Product";
 import { DataStatusParser, ProductDate, ProductInfo, ProductLevels, ProductYear } from "../lib/DataStatusParser";
 import debounce from "debounce";
-import { onMounted, ref, reactive } from "vue";
+import { onMounted, ref, computed } from "vue";
 
 interface Props {
   site: string;
@@ -255,21 +255,18 @@ interface Props {
   tooltips?: boolean;
   qualityScores?: boolean;
   dataStatusParser: DataStatusParser;
-  debounceMs: number;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  debounceMs: 1000 / 60,
-});
+const props = defineProps<Props>();
 
 const busy = false;
-let years = ref<ProductYear[]>([]);
-let lvlTranslate = ref<{ [key: string]: keyof ProductLevels }>({});
+const years = ref<ProductYear[]>([]);
+const lvlTranslate = ref<{ [key: string]: keyof ProductLevels }>({});
 const allProducts = ref<Product[] | null>(null);
 const currentYear = ref<ProductYear | null>(null);
 const currentDate = ref<ProductDate | null>(null);
 const hover = ref(false);
-let tooltipStyle = ref<Record<string, string>>({});
+const tooltipStyle = ref<Record<string, string>>({});
 
 onMounted(() => {
   years.value = props.dataStatusParser.years;
@@ -278,25 +275,18 @@ onMounted(() => {
   if (props.loadingComplete) props.loadingComplete();
 });
 
-function year() {
-  return currentYear.value;
-}
-
-function date() {
-  return currentDate.value;
-}
-
 function setCurrentYearDate(year: ProductYear, date: ProductDate, event: MouseEvent) {
   const tooltipWidth = 420;
   const tooltipMargin = 10;
+  const tooltipTop = (event.target as HTMLElement).getBoundingClientRect().top + 20;
+  const tooltipLeft = Math.min(
+    Math.max(tooltipMargin, event.clientX - tooltipWidth / 2),
+    document.body.scrollWidth - tooltipWidth - tooltipMargin
+  );
   tooltipStyle.value = {
-    width: tooltipWidth + "px",
-    top: event.clientY + 10 + "px",
-    left:
-      Math.min(
-        Math.max(tooltipMargin, event.clientX - tooltipWidth / 2),
-        document.body.scrollWidth - tooltipWidth - tooltipMargin
-      ) + "px",
+    width: `${tooltipWidth}px`,
+    top: `${tooltipTop}px`,
+    left: `${tooltipLeft}px`,
   };
   currentDate.value = date;
   currentYear.value = year;
@@ -307,8 +297,9 @@ function hideTooltip() {
   hover.value = false;
 }
 
-const debouncedSetCurrentYearDate = debounce(setCurrentYearDate, props.debounceMs);
-const debouncedHideTooltip = debounce(hideTooltip, props.debounceMs);
+const debounceMs = 1000 / 60;
+const debouncedSetCurrentYearDate = debounce(setCurrentYearDate, debounceMs);
+const debouncedHideTooltip = debounce(hideTooltip, debounceMs);
 
 function noData(products: ProductLevels): boolean {
   return products["2"].length == 0 && products["1c"].length == 0 && products["1b"].length == 0;
@@ -409,9 +400,7 @@ function getReportExists(existingProducts: ProductInfo[], product: Product) {
   return existingProduct && qualityExists(existingProduct);
 }
 
-function allLevels() {
-  return Array.from(new Set(Object.values(lvlTranslate))).sort();
-}
+const allLevels = computed(() => Array.from(new Set(Object.values(lvlTranslate.value))).sort());
 
 function hasSomeLevel2Tests(products: ProductLevels) {
   return products["2"].filter(qualityExists).length > 0;
