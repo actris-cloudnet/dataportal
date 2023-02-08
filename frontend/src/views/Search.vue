@@ -367,15 +367,10 @@ div.checkbox
           :key="vizDateUpdate"
         />
         <div class="dateButtons">
-          <button
-            id="previousBtn"
-            class="dateBtn"
-            @click="setPreviousDate()"
-            :disabled="setDateButtonActiveStatus('previous')"
-          >
+          <button id="previousBtn" class="dateBtn" @click="setPreviousDate()" :disabled="!hasPreviousDate()">
             <img alt="calendar" class="dateIcon" :src="getProductIcon('date-previous')" />
           </button>
-          <button id="nextBtn" class="dateBtn" @click="setNextDate()" :disabled="setDateButtonActiveStatus('next')">
+          <button id="nextBtn" class="dateBtn" @click="setNextDate()" :disabled="!hasNextDate()">
             <img alt="calendar" class="dateIcon" :src="getProductIcon('date-next')" />
           </button>
         </div>
@@ -719,31 +714,32 @@ export default class Search extends Vue {
 
   addKeyPressListener() {
     window.addEventListener("keydown", (e) => {
-      if (document.activeElement === null) {
+      if (!document.activeElement || document.activeElement.tagName != "INPUT") {
         if (e.code == "ArrowLeft") this.setPreviousDate();
-        if (e.code == "ArrowRight") this.setNextDate();
-      } else {
-        const element = document.activeElement;
-        const input = "INPUT";
-        if (input != element.tagName) {
-          if (e.code == "ArrowLeft") this.setPreviousDate();
-          if (e.code == "ArrowRight") this.setNextDate();
-        }
+        else if (e.code == "ArrowRight") this.setNextDate();
       }
     });
   }
 
+  hasNextDate() {
+    return !isSameDay(this.dateTo, new Date());
+  }
+
+  hasPreviousDate() {
+    return !isSameDay(this.dateTo, this.beginningOfHistory);
+  }
+
   setPreviousDate() {
-    if (this.dateTo > this.beginningOfHistory) {
-      const date = this.dateTo;
+    if (this.hasPreviousDate()) {
+      const date = new Date(this.dateTo);
       date.setDate(date.getDate() - 1);
       this.dateTo = date;
     }
   }
 
   setNextDate() {
-    if (!isSameDay(this.dateTo, new Date())) {
-      const date = this.dateTo;
+    if (this.hasNextDate()) {
+      const date = new Date(this.dateTo);
       date.setDate(date.getDate() + 1);
       this.dateTo = date;
     }
@@ -758,17 +754,6 @@ export default class Search extends Vue {
     else if (isDateToToday && diffDays === fixedRanges.month) this.activeBtn = "btn2";
     else if (isDateToToday && diffDays === fixedRanges.day) this.activeBtn = "btn3";
     else this.activeBtn = "";
-  }
-
-  setDateButtonActiveStatus(name: string) {
-    // const isDateToday = isSameDay(this.visualizationDate, new Date());
-    // const isDateLatest = isSameDay(this.visualizationDate, this.beginningOfHistory);
-    // if (name == "next") {
-    //   if (isDateToday) return true;
-    // } else {
-    //   if (isDateLatest) return true;
-    // }
-    return false;
   }
 
   replaceUrlQueryString(param: string, value: Date | string[]) {
