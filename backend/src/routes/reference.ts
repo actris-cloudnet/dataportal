@@ -37,31 +37,35 @@ export class ReferenceRoutes {
   }
 
   getReference: RequestHandler = async (req, res, next) => {
-    let data: RegularFile | ModelFile | undefined = await this.fileRepository.findOne(
-      { uuid: req.params.uuid },
-      { relations: ["site", "site.citations", "product"] }
-    );
-    if (!data) {
-      data = await this.modelRepository.findOne(
+    try {
+      let data: RegularFile | ModelFile | undefined = await this.fileRepository.findOne(
         { uuid: req.params.uuid },
-        { relations: ["site", "site.citations", "product", "model", "model.citations"] }
+        { relations: ["site", "site.citations", "product"] }
       );
-    }
-    if (data === undefined) {
-      return next({ status: 404, errors: "UUID not found" });
-    }
-    if (req.query.acknowledgements === "true") {
-      await getAcknowledgements(req, res, data);
-    } else if (req.query.dataAvailability === "true") {
-      await getDataAvailability(req, res, data);
-    } else {
-      const sourceUuids: string[] = [];
-      await this.fetchSourceUuids(data, sourceUuids);
-      let pis: any = await Promise.all([getSitePI(data), getInstrumentPis(sourceUuids, data.measurementDate)]);
-      // This flattens nested arrays
-      pis = [].concat(...[].concat(...pis)); // TODO: Rewrite this !!!!
-      pis = removeDuplicateNames(pis);
-      await getCitation(req, res, data, pis);
+      if (!data) {
+        data = await this.modelRepository.findOne(
+          { uuid: req.params.uuid },
+          { relations: ["site", "site.citations", "product", "model", "model.citations"] }
+        );
+      }
+      if (data === undefined) {
+        return next({ status: 404, errors: "UUID not found" });
+      }
+      if (req.query.acknowledgements === "true") {
+        await getAcknowledgements(req, res, data);
+      } else if (req.query.dataAvailability === "true") {
+        await getDataAvailability(req, res, data);
+      } else {
+        const sourceUuids: string[] = [];
+        await this.fetchSourceUuids(data, sourceUuids);
+        let pis: any = await Promise.all([getSitePI(data), getInstrumentPis(sourceUuids, data.measurementDate)]);
+        // This flattens nested arrays
+        pis = [].concat(...[].concat(...pis)); // TODO: Rewrite this !!!!
+        pis = removeDuplicateNames(pis);
+        await getCitation(req, res, data, pis);
+      }
+    } catch (err) {
+      next(err);
     }
   };
 
