@@ -148,14 +148,14 @@ section#fileTable
   <section id="fileTable">
     <div class="column1">
       <h3>Results</h3>
-      <span class="listTitle" v-if="!simplifiedView && listLength() > 0">
+      <span class="listTitle" v-if="!simplifiedView && listLength > 0">
         <span v-if="isBusy">Searching...</span>
-        <span v-else>Found {{ listLength() }} results</span>
+        <span v-else>Found {{ listLength }} results</span>
         <span class="listLegend">
           <span class="rowtag volatile rounded"></span> volatile <span class="rowtag legacy rounded"></span> legacy
         </span>
       </span>
-      <div v-if="listLength() === 0 && !isBusy" class="noresults">
+      <div v-if="listLength === 0 && !isBusy" class="noresults">
         <h2>No results</h2>
         Are we missing some data? Send an email to
         <a href="mailto:actris-cloudnet@fmi.fi">actris-cloudnet@fmi.fi</a>.
@@ -200,19 +200,19 @@ section#fileTable
       </b-table>
       <b-pagination
         id="pagi"
-        v-if="listLength() > perPage"
+        v-if="listLength > perPage"
         v-model="currentPage"
-        :total-rows="listLength()"
+        :total-rows="listLength"
         :per-page="perPage"
         :disabled="isBusy"
         aria-controls="fileTable"
       ></b-pagination>
-      <div class="downloadinfo" v-if="listLength() > 0 && !simplifiedView">
+      <div class="downloadinfo" v-if="listLength > 0 && !simplifiedView">
         <a class="download" :class="{ disabled: isBusy || downloadIsBusy }" href="" @click.prevent="createCollection()">
           Download all </a
         ><br />
         <span v-if="!downloadFailed" class="dlcount" :class="{ disabled: isBusy || downloadIsBusy }">
-          {{ listLength() }} files ({{ humanReadableSize(combinedFileSize(apiResponse)) }})
+          {{ listLength }} files ({{ humanReadableSize(combinedFileSize(apiResponse)) }})
         </span>
         <div v-else class="dlcount errormsg">
           {{ dlFailedMessage || "Download failed!" }}
@@ -308,7 +308,7 @@ section#fileTable
 import axios from "axios";
 import { useRouter } from "vue-router/composables";
 import { File } from "../../../backend/src/entity/File";
-import { watch, onMounted, onBeforeUnmount, ref } from "vue";
+import { watch, onMounted, onBeforeUnmount, ref, computed } from "vue";
 import {
   combinedFileSize,
   getProductIcon,
@@ -347,9 +347,7 @@ const perPage = ref(15);
 
 const apiUrl = process.env.VUE_APP_BACKENDURL;
 
-function listLength() {
-  return props.apiResponse.length;
-}
+const listLength = computed(() => props.apiResponse.length);
 
 function clearPreview() {
   currentVisualization.value = null;
