@@ -331,39 +331,29 @@ div.checkbox
         <datepicker
           name="dateFrom"
           v-model="dateFrom"
-          :dateInput="dateInputStart"
           :start="beginningOfHistory"
           :end="dateTo"
           @error="dateFromError = $event"
           :key="dateFromUpdate"
-        ></datepicker>
+        />
         <span class="centerlabel">&#8212;</span>
         <datepicker
           name="dateTo"
           v-model="dateTo"
-          :dateInput="dateInputEnd"
           :start="dateFrom"
           :end="today"
           @error="dateToError = $event"
           :key="dateToUpdate"
-        ></datepicker>
+        />
         <div v-if="!isTrueOnBothDateFields('isValidDateString')" class="errormsg">
           Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.
         </div>
-        <div
-          v-if="isTrueOnBothDateFields('isValidDateString') && !isTrueOnBothDateFields('isNotInFuture')"
-          class="errormsg"
-        >
-          Provided date is in the future.
-        </div>
-        <div
-          v-if="
-            isTrueOnBothDateFields('isValidDateString') && (!dateFromError.isBeforeEnd || !dateToError.isAfterStart)
-          "
-          class="errormsg"
-        >
-          Date from must be before date to.
-        </div>
+        <template v-else>
+          <div v-if="!isTrueOnBothDateFields('isNotInFuture')" class="errormsg">Provided date is in the future.</div>
+          <div v-if="!dateFromError.isBeforeEnd || !dateToError.isAfterStart" class="errormsg">
+            Start date must be before end date.
+          </div>
+        </template>
       </div>
 
       <div class="date" v-if="isVizMode()">
@@ -371,12 +361,11 @@ div.checkbox
           label="Date"
           name="dateTo"
           v-model="dateTo"
-          :dateInput="visualizationDate"
           :start="beginningOfHistory"
           :end="today"
           @error="dateToError = $event"
           :key="vizDateUpdate"
-        ></datepicker>
+        />
         <div class="dateButtons">
           <button
             id="previousBtn"
@@ -464,7 +453,6 @@ div.checkbox
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
-import VCalendar from "v-calendar";
 import axios from "axios";
 import { Site } from "../../../backend/src/entity/Site";
 import Datepicker from "../components/Datepicker.vue";
@@ -487,8 +475,6 @@ import { Product } from "../../../backend/src/entity/Product";
 import { ProductVariable } from "../../../backend/src/entity/ProductVariable";
 import { SearchFileResponse } from "../../../backend/src/entity/SearchFileResponse";
 import Map from "../components/Map.vue";
-
-Vue.use(VCalendar);
 
 @Component({
   name: "app-search",
@@ -519,11 +505,8 @@ export default class Search extends Vue {
   today = new Date();
   dateTo = this.today;
   dateFrom = this.isVizMode() ? this.today : this.getInitialDateFrom();
-  dateFromError: { [key: string]: boolean } = {};
-  dateToError: { [key: string]: boolean } = {};
-  visualizationDate = this.dateTo;
-  dateInputStart = this.dateFrom;
-  dateInputEnd = this.dateFrom;
+  dateFromError: Record<string, boolean> = {};
+  dateToError: Record<string, boolean> = {};
   activeBtn = "";
 
   // products
@@ -579,7 +562,7 @@ export default class Search extends Vue {
         if (isValidDate(value)) {
           const date = new Date(value);
           this[param] = date;
-          param === "dateFrom" ? (this.dateInputStart = date) : (this.dateInputEnd = date);
+          param === "dateFrom" ? (this.dateFrom = date) : (this.dateTo = date);
         }
       }
     }
@@ -723,15 +706,15 @@ export default class Search extends Vue {
   }
 
   setDateRange(n: number) {
-    this.dateInputEnd = new Date();
+    this.dateTo = new Date();
     const date = new Date();
     date.setDate(date.getDate() - n);
-    this.dateInputStart = date;
+    this.dateFrom = date;
   }
 
   setDateRangeForCurrentYear() {
-    this.dateInputEnd = new Date();
-    this.dateInputStart = getDateFromBeginningOfYear();
+    this.dateTo = new Date();
+    this.dateFrom = getDateFromBeginningOfYear();
   }
 
   addKeyPressListener() {
@@ -754,7 +737,6 @@ export default class Search extends Vue {
     if (this.dateTo > this.beginningOfHistory) {
       const date = this.dateTo;
       date.setDate(date.getDate() - 1);
-      this.visualizationDate = date;
       this.dateTo = date;
     }
   }
@@ -763,7 +745,6 @@ export default class Search extends Vue {
     if (!isSameDay(this.dateTo, new Date())) {
       const date = this.dateTo;
       date.setDate(date.getDate() + 1);
-      this.visualizationDate = date;
       this.dateTo = date;
     }
   }
@@ -780,13 +761,13 @@ export default class Search extends Vue {
   }
 
   setDateButtonActiveStatus(name: string) {
-    const isDateToday = isSameDay(this.visualizationDate, new Date());
-    const isDateLatest = isSameDay(this.visualizationDate, this.beginningOfHistory);
-    if (name == "next") {
-      if (isDateToday) return true;
-    } else {
-      if (isDateLatest) return true;
-    }
+    // const isDateToday = isSameDay(this.visualizationDate, new Date());
+    // const isDateLatest = isSameDay(this.visualizationDate, this.beginningOfHistory);
+    // if (name == "next") {
+    //   if (isDateToday) return true;
+    // } else {
+    //   if (isDateLatest) return true;
+    // }
     return false;
   }
 
@@ -863,7 +844,6 @@ export default class Search extends Vue {
     if (!this.renderComplete || this.dateErrorsExist(this.dateToError)) return;
     if (this.isVizMode()) {
       this.dateFrom = this.dateTo;
-      this.visualizationDate = new Date(this.dateTo);
     }
     this.replaceUrlQueryString("dateTo", this.dateTo);
     this.replaceUrlQueryString("dateFrom", this.dateFrom);

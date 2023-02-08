@@ -17,23 +17,18 @@ input.date
 </style>
 
 <template>
-  <div class="dateform" :id="name" :class="{ error: $v.dateString.$error }">
+  <div class="dateform" :id="name">
     <label v-if="label" :for="name">{{ label }}</label
     ><br v-if="label" />
     <div class="container">
-      <input
-        class="date"
-        :name="name"
-        type="text"
-        v-model.lazy="$v.dateString.$model"
-        @focus="$event.target.select()"
-      />
+      <input class="date" :name="name" type="text" v-model.lazy="dateString" @focus="$event.target.select()" />
       <v-date-picker
-        locale="en"
-        v-model="value"
+        locale="en-gb"
+        :value="value"
+        @input="(newValue) => emit('input', newValue)"
         :popover="{ placement: 'bottom', visibility: 'click' }"
         :input-debounce="100"
-        :available-dates="{ end, start }"
+        :available-dates="{ start, end }"
       >
         <button class="calendar">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="w-4 h-4 fill-current">
@@ -48,59 +43,45 @@ input.date
   </div>
 </template>
 
-<script lang="ts">
-import Component, { mixins } from "vue-class-component";
-import Vue from "vue";
-import { validationMixin } from "vuelidate";
-import { Validate } from "vuelidate-property-decorators";
-import { helpers } from "vuelidate/lib/validators";
-import { Prop, Watch } from "vue-property-decorator";
+<script lang="ts" setup>
+import { computed, watchEffect } from "vue";
 import { dateToString, dateToUTC } from "../lib";
+import VDatePicker from "v-calendar/lib/components/date-picker.umd";
 
-// date validation
-const isValidDate = (obj: Date) => obj && !isNaN(obj.getDate());
-const isValidDateString = (obj: string) => isValidDate(new Date(obj));
-const isNotInFuture = (obj: string) => new Date(obj) < dateToUTC(new Date());
-const isBeforeEnd = (obj: string, parentVm: Vue) => new Date(obj) <= helpers.ref("end", validationMixin, parentVm);
-const isAfterStart = (obj: string, parentVm: Vue) => new Date(obj) >= helpers.ref("start", validationMixin, parentVm);
-
-@Component
-export default class Datepicker extends mixins(validationMixin, Vue) {
-  @Prop() name!: string;
-  @Prop() label!: string;
-  @Prop() start!: Date;
-  @Prop() end!: Date;
-  @Prop() dateInput!: Date;
-
-  @Validate({ isValidDateString, isNotInFuture, isBeforeEnd, isAfterStart })
-  dateString = this.$attrs.value;
-
-  dateToString = dateToString;
-
-  created() {
-    // Fix displaying date string on component create
-    // eslint-disable-next-line no-self-assign
-    this.value = this.value;
-  }
-
-  set value(date: Date) {
-    if (!isValidDate(date)) return;
-    this.dateString = this.dateToString(date);
-  }
-
-  get value(): Date {
-    return new Date(this.dateString);
-  }
-
-  @Watch("dateInput")
-  onDateInputChange() {
-    this.value = this.dateInput;
-  }
-
-  @Watch("dateString")
-  onDateChange() {
-    this.$emit("input", this.value);
-    this.$emit("error", this.$v.dateString);
-  }
+interface Props {
+  value: Date;
+  name: string;
+  label: string;
+  start: Date;
+  end: Date;
 }
+
+const props = defineProps<Props>();
+
+const emit = defineEmits(["input", "error"]);
+
+function validateDate(value: Date) {
+  const result = {
+    isValidDateString: !isNaN(value.getDate()),
+    isNotInFuture: value < dateToUTC(new Date()),
+    isBeforeEnd: value <= props.end,
+    isAfterStart: value >= props.start,
+  };
+  emit("error", result);
+  return result;
+}
+
+watchEffect(() => {
+  validateDate(props.value);
+});
+
+const dateString = computed({
+  get: () => dateToString(props.value),
+  set(newValue) {
+    const date = new Date(newValue);
+    if (validateDate(date).isValidDateString) {
+      emit("input", date);
+    }
+  },
+});
 </script>
