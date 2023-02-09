@@ -211,7 +211,6 @@
           label="Product filter"
           :options="dataStatusParser.availableProducts"
           id="singleProductSelect"
-          :icons="true"
           :getIcon="getIconUrl"
         >
         </custom-multiselect>

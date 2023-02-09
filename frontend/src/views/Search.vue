@@ -289,7 +289,6 @@ div.checkbox
         id="siteSelect"
         class="nobottommargin"
         :class="{ widemapmarginleft: showAllSites }"
-        :icons="true"
         :multiple="true"
         :getIcon="getMarkerIcon"
         :devMode="devMode"
@@ -393,7 +392,6 @@ div.checkbox
         :options="allProducts"
         id="productSelect"
         :multiple="true"
-        :icons="true"
         :getIcon="getProductIcon"
         :devMode="devMode"
       />
