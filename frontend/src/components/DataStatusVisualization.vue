@@ -245,7 +245,7 @@ import { idToHumanReadable, ColorClass } from "../lib";
 import { Product } from "../../../backend/src/entity/Product";
 import { DataStatusParser, ProductDate, ProductInfo, ProductLevels, ProductYear } from "../lib/DataStatusParser";
 import debounce from "debounce";
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 
 interface Props {
   site: string;
@@ -255,33 +255,30 @@ interface Props {
   tooltips?: boolean;
   qualityScores?: boolean;
   dataStatusParser: DataStatusParser;
-  debounceMs: number;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  debounceMs: 1000 / 60,
-});
+const props = defineProps<Props>();
 
-const busy = false;
-let years: ProductYear[] = [];
-let lvlTranslate: { [key: string]: keyof ProductLevels } = {};
-let allProducts: Product[] | null = null;
-let currentYear: ProductYear | null = null;
-let currentDate: ProductDate | null = null;
-let hover = false;
-let tooltipStyle: Record<string, string> = {};
+const busy = ref(false);
+const years = ref<ProductYear[]>([]);
+const lvlTranslate = ref<{ [key: string]: keyof ProductLevels }>({});
+const allProducts = ref<Product[] | null>(null);
+const currentYear = ref<ProductYear | null>(null);
+const currentDate = ref<ProductDate | null>(null);
+const hover = ref(false);
+const tooltipStyle = ref<Record<string, string>>({});
 
 onMounted(() => {
-  years = props.dataStatusParser.years;
-  lvlTranslate = props.dataStatusParser.lvlTranslate;
-  allProducts = props.dataStatusParser.allProducts;
+  years.value = props.dataStatusParser.years;
+  lvlTranslate.value = props.dataStatusParser.lvlTranslate;
+  allProducts.value = props.dataStatusParser.allProducts;
   if (props.loadingComplete) props.loadingComplete();
 });
 
 function setCurrentYearDate(year: ProductYear, date: ProductDate, event: MouseEvent) {
   const tooltipWidth = 420;
   const tooltipMargin = 10;
-  tooltipStyle = {
+  tooltipStyle.value = {
     width: tooltipWidth + "px",
     top: event.clientY + 10 + "px",
     left:
@@ -290,17 +287,18 @@ function setCurrentYearDate(year: ProductYear, date: ProductDate, event: MouseEv
         document.body.scrollWidth - tooltipWidth - tooltipMargin
       ) + "px",
   };
-  currentDate = date;
-  currentYear = year;
-  hover = true;
+  currentDate.value = date;
+  currentYear.value = year;
+  hover.value = true;
 }
 
 function hideTooltip() {
-  hover = false;
+  hover.value = false;
 }
 
-const debouncedSetCurrentYearDate = debounce(setCurrentYearDate, props.debounceMs);
-const debouncedHideTooltip = debounce(hideTooltip, props.debounceMs);
+const debounceMs = 1000 / 60;
+const debouncedSetCurrentYearDate = debounce(setCurrentYearDate, debounceMs);
+const debouncedHideTooltip = debounce(hideTooltip, debounceMs);
 
 function year() {
   return currentYear;
@@ -347,8 +345,8 @@ function qualityExists(prod: ProductInfo): boolean {
 }
 
 function filterProductsByLvl(lvl: string) {
-  if (!allProducts) return null;
-  return allProducts.filter(({ id }) => lvlTranslate[id] == lvl && id != "model");
+  if (!allProducts.value) return null;
+  return allProducts.value.filter(({ id }) => lvlTranslate.value[id] == lvl && id != "model");
 }
 
 function onlyLegacy(products: ProductLevels) {
