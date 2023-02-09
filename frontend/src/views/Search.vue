@@ -441,7 +441,7 @@ div.checkbox
       </data-search-result>
     </div>
   </main>
-  <app-error v-else :response="{ status: 404 }"></app-error>
+  <ApiError v-else :response="{ status: 404 }" />
 </template>
 
 <script lang="ts">
@@ -474,6 +474,7 @@ import { Product } from "../../../backend/src/entity/Product";
 import { SearchFileResponse } from "../../../backend/src/entity/SearchFileResponse";
 import MyMap from "../components/Map.vue";
 import { useRoute, useRouter } from "vue-router/composables";
+import ApiError from "./ApiError.vue";
 
 interface Props {
   mode: string;

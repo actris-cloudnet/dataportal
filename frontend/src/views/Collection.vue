@@ -147,7 +147,7 @@ main.column
       </div>
     </div>
   </main>
-  <app-error v-else-if="error" :response="response"></app-error>
+  <ApiError v-else-if="error" :response="response" />
 </template>
 
 <script lang="ts" setup>
@@ -163,6 +163,7 @@ import HowToCite from "../components/HowToCite.vue";
 import License from "../components/License.vue";
 import { CollectionFileResponse } from "../../../backend/src/entity/CollectionFileResponse";
 import { Model } from "../../../backend/src/entity/Model";
+import ApiError from "./ApiError.vue";
 
 interface Props {
   uuid: string;

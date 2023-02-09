@@ -219,14 +219,8 @@
     </div>
   </main>
 
-  <app-error v-else-if="error" :response="response"></app-error>
+  <ApiError v-else-if="error" :response="response" />
 </template>
-
-<script lang="ts">
-export default {
-  name: "app-site",
-};
-</script>
 
 <script lang="ts" setup>
 import { onMounted, ref, watch, computed } from "vue";
@@ -243,6 +237,7 @@ import { DataStatusParser } from "../lib/DataStatusParser";
 import CustomMultiselect from "../components/Multiselect.vue";
 import { ReducedMetadataResponse } from "../../../backend/src/entity/ReducedMetadataResponse";
 import TrackMap from "../components/TrackMap.vue";
+import ApiError from "./ApiError.vue";
 
 interface Instrument {
   pid: string | null;
