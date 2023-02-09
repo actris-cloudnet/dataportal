@@ -71,7 +71,7 @@ main.column
               <dt>File count</dt>
               <dd>{{ sortedFiles.length }}</dd>
               <dt>Total size</dt>
-              <dd>{{ humanReadableSize(combinedFileSize(this.sortedFiles)) }}</dd>
+              <dd>{{ humanReadableSize(totalSize) }}</dd>
               <dt v-if="response.downloadCount">Download count</dt>
               <dd v-if="response.downloadCount">{{ response.downloadCount }}</dd>
             </dl>
@@ -80,14 +80,14 @@ main.column
         <section id="sitemap" v-if="sites.length > 0">
           <header>Sites</header>
           <section class="details">
-            <Map :sites="sites" :center="[34.0, -14.0]" :zoom="1"></Map>
+            <my-map :sites="sites" :center="[34.0, -14.0]" :zoom="1" />
           </section>
         </section>
         <section id="products">
           <header>Products</header>
           <section class="details">
             <div v-for="product in products" :key="product.id">
-              <img :src="getIconUrl(product.id)" class="product" />
+              <img :src="getProductIcon(product.id)" class="product" />
               {{ product.humanReadableName }}
             </div>
           </section>
@@ -150,13 +150,13 @@ main.column
   <app-error v-else-if="error" :response="response"></app-error>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+<script lang="ts" setup>
+import { ref, computed, onMounted } from "vue";
 import axios from "axios";
 import { CollectionResponse } from "../../../backend/src/entity/CollectionResponse";
 import { combinedFileSize, constructTitle, getProductIcon, humanReadableSize } from "../lib";
 import { Site } from "../../../backend/src/entity/Site";
-import Map from "../components/Map.vue";
+import MyMap from "../components/Map.vue";
 import { Product } from "../../../backend/src/entity/Product";
 import DataSearchResult from "../components/DataSearchResult.vue";
 import HowToCite from "../components/HowToCite.vue";
@@ -164,120 +164,110 @@ import License from "../components/License.vue";
 import { CollectionFileResponse } from "../../../backend/src/entity/CollectionFileResponse";
 import { Model } from "../../../backend/src/entity/Model";
 
-Vue.component("data-search-result", DataSearchResult);
-Vue.component("how-to-cite", HowToCite);
-Vue.component("license", License);
-
-@Component({
-  components: { Map },
-})
-export default class CollectionView extends Vue {
-  @Prop() uuid!: string;
-  @Prop() mode!: string;
-  error = false;
-  response: CollectionResponse | null = null;
-  sortedFiles: CollectionFileResponse[] = [];
-  sites: Site[] = [];
-  products: Product[] = [];
-  models: Model[] = [];
-  apiUrl = process.env.VUE_APP_BACKENDURL;
-  busy = false;
-  pidServiceError = false;
-  nonModelSiteIds: string[] = [];
-
-  combinedFileSize = combinedFileSize;
-  humanReadableSize = humanReadableSize;
-  getIconUrl = getProductIcon;
-
-  get startDate() {
-    return this.sortedFiles[this.sortedFiles.length - 1].measurementDate;
-  }
-
-  get endDate() {
-    return this.sortedFiles[0].measurementDate;
-  }
-
-  get collectionYear() {
-    if (!this.response) return null;
-    return new Date(this.response.createdAt).getFullYear();
-  }
-
-  get downloadUrl() {
-    if (!this.response) return null;
-    return `${this.apiUrl}download/collection/${this.response.uuid}`;
-  }
-
-  getUnique(arr: CollectionFileResponse[], field: keyof CollectionFileResponse) {
-    return arr
-      .map((file) => file[field])
-      .reduce((acc: string[], cur) => (typeof cur == "string" && !acc.includes(cur) ? acc.concat([cur]) : acc), []);
-  }
-
-  get size() {
-    return combinedFileSize(this.sortedFiles);
-  }
-
-  generatePidInBackground() {
-    if (!this.response || this.response.pid) return;
-    const payload = {
-      type: "collection",
-      uuid: this.uuid,
-    };
-    axios
-      .post(`${this.apiUrl}generate-pid`, payload)
-      .then(({ data }) => {
-        if (!this.response) return;
-        this.response.pid = data.pid;
-      })
-      .catch((e) => {
-        this.pidServiceError = true;
-        // eslint-disable-next-line no-console
-        console.error(e);
-      });
-  }
-
-  created() {
-    this.busy = true;
-    return (
-      axios
-        .get(`${this.apiUrl}collection/${this.uuid}`)
-        .then((res) => {
-          this.response = res.data;
-          if (this.response == null) return;
-          this.sortedFiles = constructTitle(
-            this.response.files.sort(
-              (a, b) => new Date(b.measurementDate).getTime() - new Date(a.measurementDate).getTime()
-            )
-          );
-          this.nonModelSiteIds = this.getUnique(
-            this.sortedFiles.filter((file) => file.productId != "model"),
-            "siteId"
-          );
-        })
-        .catch(({ response }) => {
-          this.error = true;
-          this.response = response;
-        })
-        .then(() => {
-          this.generatePidInBackground();
-          const siteIds = this.getUnique(this.sortedFiles, "siteId");
-          const productIds = this.getUnique(this.sortedFiles, "productId");
-          const modelIds = this.getUnique(this.sortedFiles, "modelId");
-          const citationQueryOptions = { params: { showCitations: true } };
-          return Promise.all([
-            axios.get(`${this.apiUrl}sites/`, citationQueryOptions),
-            axios.get(`${this.apiUrl}models/`, citationQueryOptions),
-            axios.get(`${this.apiUrl}products/`),
-          ]).then(([sites, models, products]) => {
-            this.sites = sites.data.filter((site: Site) => siteIds.includes(site.id));
-            this.products = products.data.filter((product: Product) => productIds.includes(product.id));
-            this.models = models.data.filter((model: Product) => modelIds.includes(model.id));
-          });
-        })
-        // eslint-disable-next-line no-console
-        .catch(console.error)
-        .finally(() => (this.busy = false))
-    );
-  }
+interface Props {
+  uuid: string;
+  mode: string;
 }
+
+const props = defineProps<Props>();
+
+const error = ref(false);
+const response = ref<CollectionResponse | null>(null);
+const sortedFiles = ref<CollectionFileResponse[]>([]);
+const sites = ref<Site[]>([]);
+const products = ref<Product[]>([]);
+const models = ref<Model[]>([]);
+const apiUrl = process.env.VUE_APP_BACKENDURL;
+const busy = ref(false);
+const pidServiceError = ref(false);
+const nonModelSiteIds = ref<string[]>([]);
+
+const startDate = computed(() => sortedFiles.value[sortedFiles.value.length - 1].measurementDate);
+
+const endDate = computed(() => sortedFiles.value[0].measurementDate);
+
+const collectionYear = computed(() => {
+  if (!response.value) return null;
+  return new Date(response.value.createdAt).getFullYear();
+});
+
+const downloadUrl = computed(() => {
+  if (!response.value) return null;
+  return `${apiUrl}download/collection/${response.value.uuid}`;
+});
+
+function getUnique(arr: CollectionFileResponse[], field: keyof CollectionFileResponse) {
+  return arr
+    .map((file) => file[field])
+    .reduce((acc: string[], cur) => (typeof cur == "string" && !acc.includes(cur) ? acc.concat([cur]) : acc), []);
+}
+
+const totalSize = computed(() => {
+  return combinedFileSize(sortedFiles.value);
+});
+
+function generatePidInBackground() {
+  if (!response.value || response.value.pid) return;
+  const payload = {
+    type: "collection",
+    uuid: props.uuid,
+  };
+  axios
+    .post(`${apiUrl}generate-pid`, payload)
+    .then(({ data }) => {
+      if (!response.value) return;
+      response.value.pid = data.pid;
+    })
+    .catch((e) => {
+      pidServiceError.value = true;
+      // eslint-disable-next-line no-console
+      console.error(e);
+    });
+}
+
+onMounted(() => {
+  busy.value = true;
+  return (
+    axios
+      .get(`${apiUrl}collection/${props.uuid}`)
+      .then((res) => {
+        response.value = res.data;
+        if (response.value == null) return;
+        sortedFiles.value = constructTitle(
+          response.value.files.sort(
+            (a, b) => new Date(b.measurementDate).getTime() - new Date(a.measurementDate).getTime()
+          )
+        );
+        nonModelSiteIds.value = getUnique(
+          sortedFiles.value.filter((file) => file.productId != "model"),
+          "siteId"
+        );
+      })
+      .catch((error) => {
+        error.value = true;
+        response.value = error.response;
+      })
+      .then(() => {
+        generatePidInBackground();
+        const siteIds = getUnique(sortedFiles.value, "siteId");
+        const productIds = getUnique(sortedFiles.value, "productId");
+        const modelIds = getUnique(sortedFiles.value, "modelId");
+        const citationQueryOptions = { params: { showCitations: true } };
+        return Promise.all([
+          axios.get(`${apiUrl}sites/`, citationQueryOptions),
+          axios.get(`${apiUrl}models/`, citationQueryOptions),
+          axios.get(`${apiUrl}products/`),
+        ]).then(([sitesRes, modelsRes, productsRes]) => {
+          sites.value = sitesRes.data.filter((site: Site) => siteIds.includes(site.id));
+          products.value = productsRes.data.filter((product: Product) => productIds.includes(product.id));
+          models.value = modelsRes.data.filter((model: Product) => modelIds.includes(model.id));
+        });
+      })
+      // eslint-disable-next-line no-console
+      .catch(console.error)
+      .finally(() => {
+        busy.value = false;
+      })
+  );
+});
 </script>

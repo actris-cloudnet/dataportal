@@ -400,7 +400,7 @@ function rowSelected(records: File[]) {
 }
 
 function createCollection() {
-  if (listLength() > 10000) {
+  if (listLength.value > 10000) {
     downloadFailed.value = true;
     dlFailedMessage.value = "You may only download a maximum of 10 000 files!";
     return;
