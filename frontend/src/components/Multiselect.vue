@@ -64,16 +64,20 @@
     >
       <template slot="tag" slot-scope="props" v-if="getIcon">
         <span class="multiselect__tag">
-          <img alt="option" class="option__image" :src="getIcon(props.option)" />
+          <img class="option__image" :src="getIcon(props.option)" alt="" />
           {{ props.option.humanReadableName }}
           <i class="multiselect__tag-icon" @click="props.remove(props.option)"></i>
         </span>
       </template>
       <template slot="option" slot-scope="props" v-if="getIcon">
         <span>
-          <img alt="option" class="option__image" :src="getIcon(props.option)" />
+          <img class="option__image" :src="getIcon(props.option)" alt="" />
           {{ props.option.humanReadableName }}
         </span>
+      </template>
+      <template slot="singleLabel" slot-scope="props" v-if="getIcon">
+        <img class="option__image" :src="getIcon(props.option)" alt="" />
+        {{ props.option.humanReadableName }}
       </template>
       <span id="noRes" slot="noResult">Not found</span>
     </Multiselect>
