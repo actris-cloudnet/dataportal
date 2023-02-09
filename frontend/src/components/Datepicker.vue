@@ -18,8 +18,8 @@ input.date
 
 <template>
   <div class="dateform" :id="name">
-    <label v-if="label" :for="name">{{ label }}</label
-    ><br v-if="label" />
+    <label v-if="label" :for="name">{{ label }}</label>
+    <br v-if="label" />
     <div class="container">
       <input class="date" :name="name" type="text" v-model.lazy="dateString" @focus="$event.target.select()" />
       <v-date-picker
@@ -51,7 +51,7 @@ import VDatePicker from "v-calendar/lib/components/date-picker.umd";
 interface Props {
   value: Date;
   name: string;
-  label: string;
+  label?: string;
   start: Date;
   end: Date;
 }
