@@ -56,5 +56,5 @@ interface Props {
   response: ModelFile | RegularFile | null;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 </script>

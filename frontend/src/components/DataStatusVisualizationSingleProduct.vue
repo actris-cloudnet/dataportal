@@ -120,8 +120,6 @@ const props = withDefaults(defineProps<Props>(), {
   debounceMs: 1000 / 60,
 });
 
-let currentYear: ProductYear | null = null;
-let currentDate: ProductDate | null = null;
 const busy = false;
 const years: ProductYear[] = [];
 let hover = false;
@@ -266,8 +264,6 @@ function setCurrentYearDate(year: ProductYear, date: ProductDate, event: MouseEv
     left: `${event.clientX}px`,
     transform: "translateX(-50%)",
   };
-  currentDate = date;
-  currentYear = year;
   hover = true;
 }
 

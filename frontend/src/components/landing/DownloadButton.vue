@@ -16,5 +16,5 @@ interface Props {
   downloadUrl: string;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 </script>

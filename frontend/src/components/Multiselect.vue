@@ -112,6 +112,7 @@ const props = defineProps({
   value: {
     required: true,
     type: null as unknown as PropType<OptionId | OptionId[] | null>,
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     validator: (v: any) => typeof v === "string" || Array.isArray(v) || v === null,
   },
 });

@@ -78,6 +78,7 @@
 </template>
 
 <script lang="ts">
+import { File } from "../../../backend/src/entity/File";
 export type SourceFile = { ok: true; value: File } | { ok: false; value: Error };
 </script>
 
@@ -86,7 +87,7 @@ import { ref, computed, watch, watchEffect } from "vue";
 import axios from "axios";
 import { humanReadableDate, sortVisualizations, fetchInstrumentName, compareValues } from "../lib";
 import { DevMode } from "../lib/DevMode";
-import { File, ModelFile, RegularFile } from "../../../backend/src/entity/File";
+import { ModelFile, RegularFile } from "../../../backend/src/entity/File";
 import { VisualizationItem } from "../../../backend/src/entity/VisualizationResponse";
 import { SiteType } from "../../../backend/src/entity/Site";
 import { SiteLocation } from "../../../backend/src/entity/SiteLocation";

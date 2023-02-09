@@ -128,15 +128,6 @@ type CitationState =
 
 const citation = ref<CitationState>({ status: "loading" });
 
-watch(
-  () => props.uuid,
-  async () => {
-    citation.value = { status: "loading" };
-    await fetchReferenceStrings();
-  },
-  { immediate: true }
-);
-
 async function fetchReferenceStrings() {
   const baseUrl = `${process.env.VUE_APP_BACKENDURL}reference/${props.uuid}/`;
   try {
@@ -158,4 +149,13 @@ async function fetchReferenceStrings() {
     citation.value = { status: "error" };
   }
 }
+
+watch(
+  () => props.uuid,
+  async () => {
+    citation.value = { status: "loading" };
+    await fetchReferenceStrings();
+  },
+  { immediate: true }
+);
 </script>

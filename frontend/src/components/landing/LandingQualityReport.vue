@@ -111,7 +111,7 @@ watch(
     try {
       const response = await axios.get(`${process.env.VUE_APP_BACKENDURL}quality/${props.uuid}`);
       report.value = { status: "ready", value: response.data };
-    } catch (error: any) {
+    } catch (error) {
       if (error.response && error.response.status === 404) {
         report.value = { status: "notFound" };
       } else {

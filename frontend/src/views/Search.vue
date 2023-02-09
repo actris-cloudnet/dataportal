@@ -451,7 +451,7 @@ export default {
 </script>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, onActivated, nextTick, watch, watchEffect } from "vue";
+import { ref, computed, onMounted, nextTick, watch } from "vue";
 import axios from "axios";
 import { Site } from "../../../backend/src/entity/Site";
 import Datepicker from "../components/Datepicker.vue";
@@ -481,6 +481,26 @@ interface Props {
 
 const props = defineProps<Props>();
 
+function resetResponse() {
+  return [];
+}
+
+const isVizMode = computed(() => props.mode == "visualizations");
+
+function getInitialDateFrom() {
+  const date = new Date();
+  return new Date(date.setDate(date.getDate() - fixedRanges.day));
+}
+
+function showKeyInfo() {
+  return localStorage.getItem("hideInfoBox") !== "1";
+}
+
+function hideKeyInfo() {
+  localStorage.setItem("hideInfoBox", "1");
+  displayKeyInfo.value = false;
+}
+
 // api call
 const apiUrl = process.env.VUE_APP_BACKENDURL;
 const apiResponse = ref<SearchFileResponse[] | Visualization[]>(resetResponse());
@@ -502,7 +522,7 @@ const showAllSites = ref(false);
 const beginningOfHistory = ref(new Date("1970-01-01"));
 const today = ref(new Date());
 const dateTo = ref(today);
-const dateFrom = ref(isVizMode ? today : getInitialDateFrom());
+const dateFrom = ref(isVizMode.value ? today : getInitialDateFrom());
 const dateFromError = ref<Record<string, boolean>>({});
 const dateToError = ref<Record<string, boolean>>({});
 const activeBtn = ref("");
@@ -651,13 +671,6 @@ function dateErrorsExist(dateError: { [key: string]: boolean }) {
   return !(dateError.isValidDateString && dateError.isAfterStart && dateError.isBeforeEnd && dateError.isNotInFuture);
 }
 
-function getInitialDateFrom() {
-  const date = new Date();
-  return new Date(date.setDate(date.getDate() - fixedRanges.day));
-}
-
-const isVizMode = computed(() => props.mode == "visualizations");
-
 function setVizWideMode(wide: boolean) {
   vizWideMode.value = wide;
   mapKey.value = mapKey.value + 1;
@@ -681,10 +694,6 @@ const selectExtraSites = (site: Site) => !(site.type as string[]).includes("clou
 
 function discardExperimentalProducts(prod: Product) {
   return showExpProducts.value || !prod.experimental;
-}
-
-function resetResponse() {
-  return [];
 }
 
 function navigateToSearch(mode: string) {
@@ -765,18 +774,7 @@ function replaceUrlQueryString(param: string, value: Date | string[]) {
   });
 }
 
-function showKeyInfo() {
-  return localStorage.getItem("hideInfoBox") !== "1";
-}
-
-function hideKeyInfo() {
-  localStorage.setItem("hideInfoBox", "1");
-  displayKeyInfo.value = false;
-}
-
-const downloadUri = computed(() => {
-  axios.getUri({ ...{ method: "post", url: `${apiUrl}download/` }, ...payload });
-});
+const downloadUri = computed(() => axios.getUri({ ...{ method: "post", url: `${apiUrl}download/` }, ...payload }));
 
 const payload = computed(() => {
   return {

@@ -29,5 +29,5 @@ interface Props {
   loading: boolean;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 </script>
