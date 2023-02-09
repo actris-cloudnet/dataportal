@@ -25,14 +25,17 @@ section
   </main>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+<script lang="ts" setup>
 import { AxiosResponse } from "axios";
+import { computed } from "vue";
 
-@Component
-export default class ApiError extends Vue {
-  @Prop() response!: AxiosResponse;
-
-  message = typeof this.response.data == "string" ? this.response.data : this.response.data.errors.join("<br>");
+interface Props {
+  response: AxiosResponse;
 }
+
+const props = defineProps<Props>();
+
+const message = computed(() =>
+  typeof props.response.data == "string" ? props.response.data : props.response.data.errors.join("<br>")
+);
 </script>

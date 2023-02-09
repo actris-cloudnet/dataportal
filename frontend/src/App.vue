@@ -81,19 +81,15 @@ h1, h2, h3, h4, h5, h6
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
+import { ref } from "vue";
 import { ActiveConsent } from "./lib/ActiveConsent";
-import { Vue } from "vue-property-decorator";
-import Component from "vue-class-component";
 
-@Component
-export default class AppView extends Vue {
-  activeConsent = new ActiveConsent();
-  askConsent = this.activeConsent.askConsent;
+const activeConsent = new ActiveConsent();
+const askConsent = ref(activeConsent.askConsent);
 
-  consent() {
-    this.activeConsent.consent();
-    this.askConsent = false;
-  }
+function consent() {
+  activeConsent.consent();
+  askConsent.value = false;
 }
 </script>
