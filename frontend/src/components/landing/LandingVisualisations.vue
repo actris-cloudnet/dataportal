@@ -5,7 +5,10 @@
 <template>
   <div class="landing-visualisations-container">
     <div v-if="visualizations.length > 0" class="visualisations-box">
-      <div v-for="visualization in visualizations" :key="visualization.productVariable.id">
+      <div
+        v-for="visualization in visualizations"
+        :key="visualization.productVariable.id"
+      >
         <Visualization
           :data="visualization"
           :maxMarginLeft="maxMarginLeft"
@@ -21,12 +24,12 @@
 
 <script lang="ts" setup>
 import { computed } from "vue";
-import { ModelFile, RegularFile } from "../../../../backend/src/entity/File";
-import { VisualizationItem } from "../../../../backend/src/entity/VisualizationResponse";
-import Visualization from "../Visualization.vue";
+import type { FileResponse } from "@/views/FileView.vue";
+import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
+import Visualization from "../ImageVisualization.vue";
 
-interface Props {
-  response: ModelFile | RegularFile;
+export interface Props {
+  response: FileResponse;
   visualizations: VisualizationItem[];
 }
 

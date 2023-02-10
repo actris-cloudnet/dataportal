@@ -7,7 +7,8 @@ export class ActiveConsent {
 
   constructor() {
     const lastConsent = parseInt(localStorage.getItem("consented") || "0");
-    this.askConsent = lastConsent < new Date(this.privacyPolicyEdited).getTime() / 1000;
+    this.askConsent =
+      lastConsent < new Date(this.privacyPolicyEdited).getTime() / 1000;
   }
 
   consent() {

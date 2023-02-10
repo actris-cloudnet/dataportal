@@ -93,16 +93,31 @@
 <template>
   <!-- eslint-disable vue/require-v-for-key -->
   <div id="data_availability_visualization" v-if="!busy">
-    <div v-for="(year, index) in years" :key="year['year']" class="dataviz-row">
+    <div
+      v-for="(year, index) in dataStatus.years"
+      :key="year['year']"
+      class="dataviz-row"
+    >
       <div
-        v-if="index && parseInt(year['year']) + 1 !== parseInt(years[index - 1]['year'])"
+        v-if="
+          index &&
+          parseInt(year['year']) + 1 !==
+            parseInt(dataStatus.years[index - 1]['year'])
+        "
         class="dataviz-skippedyears"
       >
-        <template v-if="parseInt(year['year']) - parseInt(years[index - 1]['year']) == -2">
+        <template
+          v-if="
+            parseInt(year['year']) -
+              parseInt(dataStatus.years[index - 1]['year']) ==
+            -2
+          "
+        >
           No data for year {{ parseInt(year["year"]) + 1 }}.
         </template>
         <template v-else>
-          No data for years {{ parseInt(year["year"]) + 1 }} - {{ parseInt(years[index - 1]["year"]) - 1 }}.
+          No data for years {{ parseInt(year["year"]) + 1 }} -
+          {{ parseInt(dataStatus.years[index - 1]["year"]) - 1 }}.
         </template>
       </div>
       <div class="dataviz-year">{{ year["year"] }}</div>
@@ -112,7 +127,9 @@
           class="dataviz-date"
           :id="`dataviz-color-${year.year}-${date.date}`"
           :class="createColorClass(date.products)"
-          :href="createLinkToSearchPage(`${year.year}-${date.date}`, date.products)"
+          :href="
+            createLinkToSearchPage(`${year.year}-${date.date}`, date.products)
+          "
           @mouseenter="debouncedSetCurrentYearDate(year, date, $event)"
         ></a>
       </div>
@@ -174,8 +191,12 @@
         <span class="legacy-label"><sup>L</sup></span> Legacy
       </div>
     </div>
-    <div class="dataviz-tooltip" v-if="tooltips && hover" :style="tooltipStyle">
-      <header>{{ year["year"] }}-{{ date["date"] }}</header>
+    <div
+      class="dataviz-tooltip"
+      v-if="tooltips && hover && currentYear && currentDate"
+      :style="tooltipStyle"
+    >
+      <header>{{ currentYear.year }}-{{ currentDate.date }}</header>
       <section v-if="!qualityScores">
         <ul v-for="lvl in allLevels">
           <li class="header">Level {{ lvl }}</li>
@@ -183,19 +204,25 @@
             v-for="product in filterProductsByLvl(lvl)"
             class="productitem"
             :class="{
-              found: getProductStatus(date.products[lvl], product),
+              found: getProductStatus(currentDate.products[lvl], product.id),
             }"
             :key="product.id"
           >
             {{ idToHumanReadable(product.id) }}
-            <sup class="legacy-label" v-if="isLegacyFile(date.products[lvl], product)">L</sup>
+            <sup
+              class="legacy-label"
+              v-if="isLegacyFile(currentDate.products[lvl], product.id)"
+              >L</sup
+            >
           </li>
           <li
             v-if="lvl === '1b'"
             class="productitem modelitem"
             :class="{
-              found: getProductStatus(date.products[lvl], { id: 'model' }),
-              na: qualityScores && !getReportExists(date.products[lvl], { id: 'model' }),
+              found: getProductStatus(currentDate.products[lvl], 'model'),
+              na:
+                qualityScores &&
+                !getReportExists(currentDate.products[lvl], 'model'),
             }"
           >
             Model
@@ -210,23 +237,31 @@
             v-for="product in filterProductsByLvl(lvl)"
             class="qualityitem"
             :class="{
-              found: getProductStatus(date.products[lvl], product),
-              na: qualityScores && !getReportExists(date.products[lvl], product),
-              info: isFileWithInfo(date.products[lvl], product),
-              warning: isFileWithWarning(date.products[lvl], product),
-              error: isFileWithError(date.products[lvl], product),
+              found: getProductStatus(currentDate.products[lvl], product.id),
+              na:
+                qualityScores &&
+                !getReportExists(currentDate.products[lvl], product.id),
+              info: isFileWithInfo(currentDate.products[lvl], product.id),
+              warning: isFileWithWarning(currentDate.products[lvl], product.id),
+              error: isFileWithError(currentDate.products[lvl], product.id),
             }"
             :key="product.id"
           >
             {{ idToHumanReadable(product.id) }}
-            <sup class="legacy-label" v-if="isLegacyFile(date.products[lvl], product)">L</sup>
+            <sup
+              class="legacy-label"
+              v-if="isLegacyFile(currentDate.products[lvl], product.id)"
+              >L</sup
+            >
           </li>
           <li
             v-if="lvl === '1b'"
             class="qualityitem modelitem"
             :class="{
-              found: getProductStatus(date.products[lvl], { id: 'model' }),
-              na: qualityScores && !getReportExists(date.products[lvl], { id: 'model' }),
+              found: getProductStatus(currentDate.products[lvl], 'model'),
+              na:
+                qualityScores &&
+                !getReportExists(currentDate.products[lvl], 'model'),
             }"
           >
             Model
@@ -241,41 +276,45 @@
 </template>
 
 <script lang="ts" setup>
-import { idToHumanReadable, ColorClass } from "../lib";
-import { Product } from "../../../backend/src/entity/Product";
-import { DataStatusParser, ProductDate, ProductInfo, ProductLevels, ProductYear } from "../lib/DataStatusParser";
+import { idToHumanReadable, type ColorClass } from "../lib";
+import type { Product } from "@shared/entity/Product";
+import type {
+  DataStatus,
+  ProductDate,
+  ProductInfo,
+  ProductLevels,
+  ProductYear,
+} from "../lib/DataStatusParser";
 import debounce from "debounce";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 
-interface Props {
+export interface Props {
   site: string;
   loadingComplete?: () => void;
   legend: boolean;
   dateFrom?: string;
   tooltips?: boolean;
   qualityScores?: boolean;
-  dataStatusParser: DataStatusParser;
+  dataStatus: DataStatus;
 }
 
 const props = defineProps<Props>();
 
 const busy = ref(false);
-const years = ref<ProductYear[]>([]);
-const lvlTranslate = ref<{ [key: string]: keyof ProductLevels }>({});
-const allProducts = ref<Product[] | null>(null);
 const currentYear = ref<ProductYear | null>(null);
 const currentDate = ref<ProductDate | null>(null);
 const hover = ref(false);
 const tooltipStyle = ref<Record<string, string>>({});
 
 onMounted(() => {
-  years.value = props.dataStatusParser.years;
-  lvlTranslate.value = props.dataStatusParser.lvlTranslate;
-  allProducts.value = props.dataStatusParser.allProducts;
   if (props.loadingComplete) props.loadingComplete();
 });
 
-function setCurrentYearDate(year: ProductYear, date: ProductDate, event: MouseEvent) {
+function setCurrentYearDate(
+  year: ProductYear,
+  date: ProductDate,
+  event: MouseEvent
+) {
   const tooltipWidth = 420;
   const tooltipMargin = 10;
   tooltipStyle.value = {
@@ -300,16 +339,12 @@ const debounceMs = 1000 / 60;
 const debouncedSetCurrentYearDate = debounce(setCurrentYearDate, debounceMs);
 const debouncedHideTooltip = debounce(hideTooltip, debounceMs);
 
-function year() {
-  return currentYear;
-}
-
-function date() {
-  return currentDate;
-}
-
 function noData(products: ProductLevels): boolean {
-  return products["2"].length == 0 && products["1c"].length == 0 && products["1b"].length == 0;
+  return (
+    products["2"].length == 0 &&
+    products["1c"].length == 0 &&
+    products["1b"].length == 0
+  );
 }
 
 function isLegacy(prod: ProductInfo): boolean {
@@ -345,12 +380,18 @@ function qualityExists(prod: ProductInfo): boolean {
 }
 
 function filterProductsByLvl(lvl: string) {
-  if (!allProducts.value) return null;
-  return allProducts.value.filter(({ id }) => lvlTranslate.value[id] == lvl && id != "model");
+  if (!props.dataStatus.allProducts) return null;
+  return props.dataStatus.allProducts.filter(
+    ({ id }) => props.dataStatus.lvlTranslate[id] == lvl && id != "model"
+  );
 }
 
 function onlyLegacy(products: ProductLevels) {
-  return products["2"].every(isLegacy) && products["1c"].every(isLegacy) && products["1b"].every(isLegacyOrModel);
+  return (
+    products["2"].every(isLegacy) &&
+    products["1c"].every(isLegacy) &&
+    products["1b"].every(isLegacyOrModel)
+  );
 }
 
 function onlyLegacyLevel2(products: ProductLevels) {
@@ -366,50 +407,70 @@ function onlyModel(products: ProductLevels) {
   );
 }
 
-function getProductStatus(existingProducts: ProductInfo[], product: Product) {
-  const existingProduct = existingProducts.find((prod) => prod.id == product.id);
+function getProductStatus(
+  existingProducts: ProductInfo[],
+  productId: Product["id"]
+) {
+  const existingProduct = existingProducts.find((prod) => prod.id == productId);
   if (props.qualityScores && existingProduct) {
     return topQuality(existingProduct);
   }
   return existingProduct;
 }
 
-function isLegacyFile(existingProducts: ProductInfo[], product: Product) {
-  const existingProduct = existingProducts.find((prod) => prod.id == product.id);
+function isLegacyFile(
+  existingProducts: ProductInfo[],
+  productId: Product["id"]
+) {
+  const existingProduct = existingProducts.find((prod) => prod.id == productId);
   if (existingProduct) {
     return existingProduct.legacy;
   }
 }
 
-function isFileWithWarning(existingProducts: ProductInfo[], product: Product) {
-  const existingProduct = existingProducts.find((prod) => prod.id == product.id);
+function isFileWithWarning(
+  existingProducts: ProductInfo[],
+  productId: Product["id"]
+) {
+  const existingProduct = existingProducts.find((prod) => prod.id == productId);
   if (existingProduct) {
     return isWarning(existingProduct);
   }
 }
 
-function isFileWithInfo(existingProducts: ProductInfo[], product: Product) {
-  const existingProduct = existingProducts.find((prod) => prod.id == product.id);
+function isFileWithInfo(
+  existingProducts: ProductInfo[],
+  productId: Product["id"]
+) {
+  const existingProduct = existingProducts.find((prod) => prod.id == productId);
   if (existingProduct) {
     return isInfo(existingProduct);
   }
 }
 
-function isFileWithError(existingProducts: ProductInfo[], product: Product) {
-  const existingProduct = existingProducts.find((prod) => prod.id == product.id);
+function isFileWithError(
+  existingProducts: ProductInfo[],
+  productId: Product["id"]
+) {
+  const existingProduct = existingProducts.find((prod) => prod.id == productId);
   if (existingProduct) {
     return isError(existingProduct);
   }
 }
 
-function getReportExists(existingProducts: ProductInfo[], product: Product) {
-  const existingProduct = existingProducts.find((prod) => prod.id == product.id);
+function getReportExists(
+  existingProducts: ProductInfo[],
+  productId: Product["id"]
+) {
+  const existingProduct = existingProducts.find((prod) => prod.id == productId);
   return existingProduct && qualityExists(existingProduct);
 }
 
-function allLevels() {
-  return Array.from(new Set(Object.values(lvlTranslate))).sort();
-}
+const allLevels = computed(() => {
+  return Array.from(
+    new Set(Object.values(props.dataStatus.lvlTranslate))
+  ).sort();
+});
 
 function hasSomeLevel2Tests(products: ProductLevels) {
   return products["2"].filter(qualityExists).length > 0;
@@ -442,7 +503,8 @@ function missingData(products: ProductLevels) {
 function createColorClass(products: ProductLevels): ColorClass {
   if (noData(products)) return "no-data";
   if (props.qualityScores) {
-    if (hasSomeLevel2Tests(products) && onlyLegacyLevel2(products)) return "only-legacy-data";
+    if (hasSomeLevel2Tests(products) && onlyLegacyLevel2(products))
+      return "only-legacy-data";
     if (allLevel2Pass(products)) return "all-data";
     if (level2ContainsErrors(products)) return "contains-errors";
     if (level2containsWarnings(products)) return "all-raw";
@@ -455,7 +517,10 @@ function createColorClass(products: ProductLevels): ColorClass {
   return "contains-errors";
 }
 
-function createLinkToSearchPage(date: string, products: ProductLevels): string | undefined {
+function createLinkToSearchPage(
+  date: string,
+  products: ProductLevels
+): string | undefined {
   if (!props.qualityScores && !noData(products)) {
     return `/search/data?site=${props.site}&dateFrom=${date}&dateTo=${date}`;
   }

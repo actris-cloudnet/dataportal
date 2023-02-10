@@ -30,7 +30,11 @@
         <th>Type</th>
         <td>
           <div class="product-container">
-            <img :alt="response.product.id" :src="productIconUrl" class="product-icon" />
+            <img
+              :alt="response.product.id"
+              :src="productIconUrl"
+              class="product-icon"
+            />
             {{ response.product.humanReadableName }}
           </div>
         </td>
@@ -39,20 +43,32 @@
         <th>Level</th>
         <td>
           {{ response.product.level }}
-          (<a :href="'https://docs.cloudnet.fmi.fi/levels.html#level-' + response.product.level">definition</a>)
+          (<a
+            :href="
+              'https://docs.cloudnet.fmi.fi/levels.html#level-' +
+              response.product.level
+            "
+            >definition</a
+          >)
         </td>
       </tr>
-      <tr v-if="response.instrumentPid">
+      <tr v-if="'instrumentPid' in response && instrument">
         <th>Instrument</th>
         <td>
-          <span v-if="instrumentStatus === 'loading'" class="loading">Loading...</span>
-          <a v-else-if="instrumentStatus === 'error'" :href="response.instrumentPid" class="error">
+          <span v-if="instrumentStatus === 'loading'" class="loading"
+            >Loading...</span
+          >
+          <a
+            v-else-if="instrumentStatus === 'error'"
+            :href="response.instrumentPid"
+            class="error"
+          >
             Failed to load information
           </a>
           <a v-else :href="response.instrumentPid">{{ instrument }}</a>
         </td>
       </tr>
-      <tr v-if="response.model">
+      <tr v-if="'model' in response">
         <th>Model</th>
         <td>{{ response.model.humanReadableName }}</td>
       </tr>
@@ -63,11 +79,20 @@
       <tr>
         <th>Quality control</th>
         <td>
-          <div v-if="typeof response.errorLevel === 'string'" class="quality-container">
-            <img class="quality-icon" :src="getQcIcon(response.errorLevel)" alt="" />
+          <div
+            v-if="typeof response.errorLevel === 'string'"
+            class="quality-container"
+          >
+            <img
+              class="quality-icon"
+              :src="getQcIcon(response.errorLevel)"
+              alt=""
+            />
             <span v-if="response.errorLevel !== 'pass'">
               {{ getQcText(response.errorLevel) }}
-              <router-link :to="getQcLink(response.uuid)">see report.</router-link>
+              <router-link :to="getQcLink(response.uuid)"
+                >see report.</router-link
+              >
             </span>
             <span v-else> Pass</span>
           </div>
@@ -83,10 +108,14 @@
         <td>
           <router-link :to="`/site/${response.site.id}`">
             {{ response.site.humanReadableName
-            }}<template v-if="response.site.country">, {{ response.site.country }}</template>
+            }}<template v-if="response.site.country"
+              >, {{ response.site.country }}</template
+            >
           </router-link>
           <template v-if="location">
-            <span class="coordinates"> ({{ formatCoordinates(location.latitude, location.longitude) }}) </span>
+            <span class="coordinates">
+              ({{ formatCoordinates(location.latitude, location.longitude) }})
+            </span>
           </template>
         </td>
       </tr>
@@ -95,13 +124,19 @@
 </template>
 
 <script lang="ts" setup>
-import { ModelFile, RegularFile } from "../../../../backend/src/entity/File";
-import { SiteLocation } from "../../../../backend/src/entity/SiteLocation";
+import type { FileResponse } from "@/views/FileView.vue";
+import type { SiteLocation } from "@shared/entity/SiteLocation";
 import { computed } from "vue";
-import { getProductIcon, getQcIcon, getQcLink, getQcText, formatCoordinates } from "../../lib";
+import {
+  getProductIcon,
+  getQcIcon,
+  getQcLink,
+  getQcText,
+  formatCoordinates,
+} from "../../lib";
 
-interface Props {
-  response: ModelFile | RegularFile;
+export interface Props {
+  response: FileResponse;
   location: SiteLocation | null;
   instrument: string | null;
   instrumentStatus: "loading" | "error" | "ready";
@@ -110,10 +145,16 @@ interface Props {
 const props = defineProps<Props>();
 
 const timelinessString = computed(() =>
-  props.response.quality === "qc" ? "Quality Controlled (QC)" : "Near Real Time (NRT)"
+  props.response.quality === "qc"
+    ? "Quality Controlled (QC)"
+    : "Near Real Time (NRT)"
 );
 
-const productIconUrl = computed(() => getProductIcon(props.response.product.id));
+const productIconUrl = computed(() =>
+  getProductIcon(props.response.product.id)
+);
 
-const jsonUrl = computed(() => `${process.env.VUE_APP_BACKENDURL}files/${props.response.uuid}`);
+const jsonUrl = computed(
+  () => `${import.meta.env.VITE_BACKEND_URL}files/${props.response.uuid}`
+);
 </script>

@@ -2,16 +2,12 @@
 
 // Import external css first to prevent overriding styles later
 
-@import "~bootstrap/scss/functions"
-@import "~bootstrap/scss/variables"
-@import "~bootstrap/scss/mixins"
-@import "~bootstrap/scss/tables"
-@import "~bootstrap/scss/pagination"
-@import "~bootstrap/scss/reboot"
-@import "~bootstrap/scss/utilities"
-@import "~bootstrap-vue/dist/bootstrap-vue.min.css"
+@import "bootstrap/scss/functions"
+@import "bootstrap/scss/variables"
+@import "bootstrap/scss/mixins"
+@import "bootstrap/scss/reboot"
 
-@import "~vue-multiselect/dist/vue-multiselect.min.css"
+@import "./assets/fonts/inter.css"
 @import "./sass/variables.sass"
 @import "./sass/global.sass"
 
@@ -75,7 +71,8 @@ h1, h2, h3, h4, h5, h6
     </div>
     <Footer />
     <div id="consent" v-if="askConsent">
-      We monitor site traffic. Read our <router-link to="/privacy">privacy policy</router-link>.
+      We monitor site traffic. Read our
+      <router-link to="/privacy">privacy policy</router-link>.
       <button class="secondaryButton" @click="consent()">OK</button>
     </div>
   </div>
@@ -84,8 +81,8 @@ h1, h2, h3, h4, h5, h6
 <script lang="ts" setup>
 import { ref } from "vue";
 import { ActiveConsent } from "./lib/ActiveConsent";
-import Header from "./components/Header.vue";
-import Footer from "./components/Footer.vue";
+import Header from "./components/TheHeader.vue";
+import Footer from "./components/TheFooter.vue";
 
 const activeConsent = new ActiveConsent();
 const askConsent = ref(activeConsent.askConsent);

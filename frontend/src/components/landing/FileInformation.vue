@@ -48,12 +48,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ModelFile, RegularFile } from "../../../../backend/src/entity/File";
+import type { FileResponse } from "@/views/FileView.vue";
 import { humanReadableSize, humanReadableTimestamp } from "../../lib";
-import Copyable from "./Copyable.vue";
+import Copyable from "./CopyableText.vue";
 
-interface Props {
-  response: ModelFile | RegularFile | null;
+export interface Props {
+  response: FileResponse;
 }
 
 defineProps<Props>();

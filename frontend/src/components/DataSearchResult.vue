@@ -152,7 +152,8 @@ section#fileTable
         <span v-if="isBusy">Searching...</span>
         <span v-else>Found {{ listLength }} results</span>
         <span class="listLegend">
-          <span class="rowtag volatile rounded"></span> volatile <span class="rowtag legacy rounded"></span> legacy
+          <span class="rowtag volatile rounded"></span> volatile
+          <span class="rowtag legacy rounded"></span> legacy
         </span>
       </span>
       <div v-if="listLength === 0 && !isBusy" class="noresults">
@@ -160,20 +161,21 @@ section#fileTable
         Are we missing some data? Send an email to
         <a href="mailto:actris-cloudnet@fmi.fi">actris-cloudnet@fmi.fi</a>.
       </div>
-      <b-table
+      <BaseTable
         v-else
         id="tableContent"
-        borderless
-        small
-        striped
-        hover
-        sort-icon-left
         :items="apiResponse"
+        keyField="uuid"
         :fields="[
-          { key: 'productId', label: '', tdClass: 'icon', tdAttr: setIcon },
-          { key: 'title', label: 'Data object', sortable: true },
+          {
+            key: 'productId',
+            label: '',
+            tdClass: 'icon',
+            tdStyle: iconCellStyle,
+          },
+          { key: 'title', label: 'Data object' },
           { key: 'volatile', label: '' },
-          { key: 'measurementDate', label: 'Date', sortable: true },
+          { key: 'measurementDate', label: 'Date' },
         ]"
         :current-page="currentPage"
         :per-page="perPage"
@@ -183,7 +185,7 @@ section#fileTable
         select-mode="single"
         @row-selected="rowSelected"
       >
-        <template v-slot:cell(volatile)="data">
+        <template #cell(volatile)="data">
           <span
             v-if="data.item.volatile"
             class="rowtag volatile rounded"
@@ -196,9 +198,12 @@ section#fileTable
             title="This is legacy data. Quality of the data is not assured."
           >
           </span>
+          <span
+            ><!-- Dummy element needed when there are no other elements. --></span
+          >
         </template>
-      </b-table>
-      <b-pagination
+      </BaseTable>
+      <BasePagination
         id="pagi"
         v-if="listLength > perPage"
         v-model="currentPage"
@@ -206,13 +211,24 @@ section#fileTable
         :per-page="perPage"
         :disabled="isBusy"
         aria-controls="fileTable"
-      ></b-pagination>
+      />
       <div class="downloadinfo" v-if="listLength > 0 && !simplifiedView">
-        <a class="download" :class="{ disabled: isBusy || downloadIsBusy }" href="" @click.prevent="createCollection()">
+        <a
+          class="download"
+          :class="{ disabled: isBusy || downloadIsBusy }"
+          href=""
+          @click.prevent="createCollection()"
+        >
           Download all </a
         ><br />
-        <span v-if="!downloadFailed" class="dlcount" :class="{ disabled: isBusy || downloadIsBusy }">
-          {{ listLength }} files ({{ humanReadableSize(combinedFileSize(apiResponse)) }})
+        <span
+          v-if="!downloadFailed"
+          class="dlcount"
+          :class="{ disabled: isBusy || downloadIsBusy }"
+        >
+          {{ listLength }} files ({{
+            humanReadableSize(combinedFileSize(apiResponse))
+          }})
         </span>
         <div v-else class="dlcount errormsg">
           {{ dlFailedMessage || "Download failed!" }}
@@ -223,7 +239,11 @@ section#fileTable
     <div class="column2">
       <div>
         <h3 class="inlineblock previewTitle">Preview</h3>
-        <router-link v-if="previewResponse" :to="`/file/${previewResponse.uuid}`" class="listLegend linkToDoPage">
+        <router-link
+          v-if="previewResponse"
+          :to="`/file/${previewResponse.uuid}`"
+          class="listLegend linkToDoPage"
+        >
           Show file &rarr;
         </router-link>
       </div>
@@ -245,11 +265,16 @@ section#fileTable
               <dd>{{ humanReadableTimestamp(previewResponse.updatedAt) }}</dd>
               <dt>Quality check</dt>
               <dd>
-                <span v-if="typeof previewResponse.errorLevel === 'string'" class="qualitycheck">
+                <span
+                  v-if="typeof previewResponse.errorLevel === 'string'"
+                  class="qualitycheck"
+                >
                   <img :src="getQcIcon(previewResponse.errorLevel)" alt="" />
                   <span v-if="previewResponse.errorLevel !== 'pass'">
                     {{ getQcText(previewResponse.errorLevel) }}
-                    <router-link :to="getQcLink(previewResponse.uuid)">see report.</router-link>
+                    <router-link :to="getQcLink(previewResponse.uuid)"
+                      >see report.</router-link
+                    >
                   </span>
                   <span v-else> Pass</span>
                 </span>
@@ -285,7 +310,10 @@ section#fileTable
                   </a>
                 </h4>
                 <router-link :to="`/file/${previewResponse.uuid}`">
-                  <visualization :data="pendingVisualization" @load="changePreview" />
+                  <visualization
+                    :data="pendingVisualization"
+                    @load="changePreview"
+                  />
                 </router-link>
               </div>
             </div>
@@ -294,20 +322,26 @@ section#fileTable
         </section>
         <a class="download" :href="previewResponse.downloadUrl">
           Download file
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+          >
             <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
           </svg>
         </a>
       </main>
-      <div v-else class="listTitle previewSubTitle">Click a search result to show a preview.</div>
+      <div v-else class="listTitle previewSubTitle">
+        Click a search result to show a preview.
+      </div>
     </div>
   </section>
 </template>
 
 <script lang="ts" setup>
 import axios from "axios";
-import { useRouter } from "vue-router/composables";
-import { File } from "../../../backend/src/entity/File";
+import { useRouter } from "vue-router";
 import { watch, onMounted, onBeforeUnmount, ref, computed } from "vue";
 import {
   combinedFileSize,
@@ -319,15 +353,14 @@ import {
   getQcText,
   getQcLink,
 } from "../lib";
-import { SearchFileResponse } from "../../../backend/src/entity/SearchFileResponse";
-import { BTable } from "bootstrap-vue/esm/components/table";
-import { BPagination } from "bootstrap-vue/esm/components/pagination";
-import { VisualizationItem } from "../../../backend/src/entity/VisualizationResponse";
-import Visualization from "./Visualization.vue";
+import type { SearchFileResponse } from "@shared/entity/SearchFileResponse";
+import BaseTable from "./BaseTable.vue";
+import BasePagination from "./BasePagination.vue";
+import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
+import Visualization from "./ImageVisualization.vue";
+import type { FileResponse } from "@/views/FileView.vue";
 
-const router = useRouter();
-
-interface Props {
+export interface Props {
   apiResponse: SearchFileResponse[];
   isBusy: boolean;
   simplifiedView?: boolean;
@@ -335,17 +368,19 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const router = useRouter();
+
 const downloadIsBusy = ref(false);
 const downloadFailed = ref(false);
 const dlFailedMessage = ref("");
-const previewResponse = ref<File | null>(null);
-const pendingPreviewResponse = ref<File | null>(null);
+const previewResponse = ref<FileResponse | null>(null);
+const pendingPreviewResponse = ref<FileResponse | null>(null);
 const currentVisualization = ref<VisualizationItem | null>(null);
 const pendingVisualization = ref<VisualizationItem | null>(null);
 const currentPage = ref(1);
 const perPage = ref(15);
 
-const apiUrl = process.env.VUE_APP_BACKENDURL;
+const apiUrl = import.meta.env.VITE_BACKEND_URL;
 
 const listLength = computed(() => props.apiResponse.length);
 
@@ -359,7 +394,7 @@ function changePreview() {
   previewResponse.value = pendingPreviewResponse.value;
 }
 
-function loadPreview(record: File) {
+function loadPreview(record: FileResponse) {
   axios
     .get(`${apiUrl}visualizations/${record.uuid}`)
     .then(({ data }) => {
@@ -373,21 +408,15 @@ function loadPreview(record: File) {
     .catch((error) => console.error(`Failed to load preview: ${error}`));
 }
 
-function rowSelected(records: File[]) {
-  if (records.length === 0) {
-    clearPreview();
-    previewResponse.value = null;
-    return;
-  }
-  const record = records[0];
+function rowSelected(item: FileResponse) {
   // NOTE: Keep the breakpoint in sync with SASS above.
   if (window.innerWidth <= 1200) {
-    router.push(`/file/${record.uuid}`).catch(() => {
+    router.push(`/file/${item.uuid}`).catch(() => {
       /* */
     });
   } else {
     axios
-      .get(`${apiUrl}files/${record.uuid}`)
+      .get(`${apiUrl}files/${item.uuid}`)
       .then(({ data }) => {
         pendingPreviewResponse.value = data;
         if (!previewResponse.value) {
@@ -395,7 +424,7 @@ function rowSelected(records: File[]) {
         }
       })
       .catch((error) => console.error(`Failed to load preview: ${error}`));
-    loadPreview(record);
+    loadPreview(item);
   }
 }
 
@@ -407,8 +436,12 @@ function createCollection() {
   }
   downloadIsBusy.value = true;
   axios
-    .post(`${apiUrl}collection`, { files: props.apiResponse.map((file) => file.uuid) })
-    .then(({ data }) => router.push({ path: `/collection/${data}` }))
+    .post(`${apiUrl}collection`, {
+      files: props.apiResponse.map((file) => file.uuid),
+    })
+    .then(({ data: uuid }) =>
+      router.push({ name: "Collection", params: { uuid } })
+    )
     .catch((err) => {
       downloadFailed.value = true;
       // eslint-disable-next-line no-console
@@ -417,12 +450,18 @@ function createCollection() {
     .finally(() => (downloadIsBusy.value = false));
 }
 
-function setIcon(product: string) {
-  if (product) return { style: `background-image: url(${getProductIcon(product)})` };
+function iconCellStyle(item: any) {
+  return {
+    backgroundImage: `url(${getProductIcon(item.productId)})`,
+    width: "40px",
+  };
 }
 
 function adjustPerPageAccordingToWindowHeight() {
-  perPage.value = Math.max(Math.floor(document.documentElement.clientHeight / 70), 10);
+  perPage.value = Math.max(
+    Math.floor(document.documentElement.clientHeight / 70),
+    10
+  );
 }
 
 watch(

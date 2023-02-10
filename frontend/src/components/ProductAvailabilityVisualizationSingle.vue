@@ -29,16 +29,29 @@
 <template>
   <!-- eslint-disable vue/require-v-for-key -->
   <div id="data_availability_visualization" v-if="!busy">
-    <div v-for="(year, index) in yearsReduced" :key="year.year" class="dataviz-row">
+    <div
+      v-for="(year, index) in yearsReduced"
+      :key="year.year"
+      class="dataviz-row"
+    >
       <div
-        v-if="index && parseInt(year.year) + 1 !== parseInt(yearsReduced[index - 1]['year'])"
+        v-if="
+          index &&
+          parseInt(year.year) + 1 !== parseInt(yearsReduced[index - 1]['year'])
+        "
         class="dataviz-skippedyears"
       >
-        <template v-if="parseInt(year.year) - parseInt(years[index - 1].year) == -2">
+        <template
+          v-if="
+            parseInt(year.year) - parseInt(dataStatus.years[index - 1].year) ==
+            -2
+          "
+        >
           No data for year {{ parseInt(year.year) + 1 }}.
         </template>
         <template v-else>
-          No data for years {{ parseInt(year.year) + 1 }} - {{ parseInt(years[index - 1].year) - 1 }}.
+          No data for years {{ parseInt(year.year) + 1 }} -
+          {{ parseInt(dataStatus.years[index - 1].year) - 1 }}.
         </template>
       </div>
       <div class="dataviz-year">{{ year.year }}</div>
@@ -88,7 +101,11 @@
       </div>
       <br />
     </div>
-    <div class="dataviz-tooltip" v-if="tooltips && hover" :style="tooltipStyle">
+    <div
+      class="dataviz-tooltip"
+      v-if="tooltips && hover && currentDate && currentYear"
+      :style="tooltipStyle"
+    >
       <header>
         <img :src="createIconForSingleProduct(currentDate.products)" alt="" />
         {{ currentYear.year }}-{{ currentDate.date }}
@@ -101,36 +118,44 @@
 </template>
 
 <script lang="ts" setup>
-import { ProductLevels, ProductYear, ProductDate, ProductInfo, DataStatusParser } from "../lib/DataStatusParser";
-import { ColorClass } from "../lib";
+import type {
+  ProductLevels,
+  ProductYear,
+  ProductDate,
+  ProductInfo,
+  DataStatus,
+} from "../lib/DataStatusParser";
+import type { ColorClass } from "../lib";
 import debounce from "debounce";
-import { computed, ref, onMounted } from "vue";
+import { computed, ref } from "vue";
 
-interface Props {
+import testPassIcon from "../assets/icons/test-pass.svg";
+import testWarningIcon from "../assets/icons/test-warning.svg";
+import testFailIcon from "../assets/icons/test-fail.svg";
+import testInfoIcon from "../assets/icons/test-info.svg";
+import legacyPassIcon from "../assets/icons/legacy-pass.svg";
+import testMissingIcon from "../assets/icons/test-missing.svg";
+
+export interface Props {
   site: string;
   legend: boolean;
   dateFrom?: string;
   tooltips?: boolean;
   qualityScores?: boolean;
   product: string;
-  dataStatusParser: DataStatusParser;
+  dataStatus: DataStatus;
 }
 
 const props = defineProps<Props>();
 
 const busy = false;
-const years = ref<ProductYear[]>([]);
 const currentYear = ref<ProductYear | null>(null);
 const currentDate = ref<ProductDate | null>(null);
 const hover = ref(false);
 const tooltipStyle = ref<Record<string, string>>({});
 
-onMounted(() => {
-  years.value = props.dataStatusParser.years;
-});
-
 const yearsReduced = computed(() =>
-  years.value.map((year) => ({
+  props.dataStatus.years.map((year) => ({
     year: year.year,
     dates: year.dates.map((date) => ({
       date: date.date,
@@ -216,7 +241,11 @@ function isLegacy(prod: ProductInfo): boolean {
 }
 
 function noData(products: ProductLevels): boolean {
-  return products["2"].length == 0 && products["1c"].length == 0 && products["1b"].length == 0;
+  return (
+    products["2"].length == 0 &&
+    products["1c"].length == 0 &&
+    products["1b"].length == 0
+  );
 }
 
 function isLegacyOrModel(prod: ProductInfo): boolean {
@@ -224,13 +253,18 @@ function isLegacyOrModel(prod: ProductInfo): boolean {
 }
 
 function onlyLegacy(products: ProductLevels) {
-  return products["2"].every(isLegacy) && products["1c"].every(isLegacy) && products["1b"].every(isLegacyOrModel);
+  return (
+    products["2"].every(isLegacy) &&
+    products["1c"].every(isLegacy) &&
+    products["1b"].every(isLegacyOrModel)
+  );
 }
 
 function createColorClassForSingleProduct(products: ProductLevels): ColorClass {
   if (noData(products)) return "no-data";
   if (props.qualityScores) {
-    if (hasSomeTests(products) && onlyLegacy(products)) return "only-legacy-data";
+    if (hasSomeTests(products) && onlyLegacy(products))
+      return "only-legacy-data";
     if (allPass(products)) return "all-data";
     if (anyProductContainsErrors(products)) return "contains-errors";
     if (anyProductContainsWarnings(products)) return "contains-warnings";
@@ -244,17 +278,17 @@ function createColorClassForSingleProduct(products: ProductLevels): ColorClass {
 function createIconForSingleProduct(products: ProductLevels): string {
   switch (createColorClassForSingleProduct(products)) {
     case "all-data":
-      return require("../assets/icons/test-pass.svg");
+      return testPassIcon;
     case "contains-warnings":
-      return require("../assets/icons/test-warning.svg");
+      return testWarningIcon;
     case "contains-errors":
-      return require("../assets/icons/test-fail.svg");
+      return testFailIcon;
     case "contains-info":
-      return require("../assets/icons/test-info.svg");
+      return testInfoIcon;
     case "only-legacy-data":
-      return require("../assets/icons/legacy-pass.svg");
+      return legacyPassIcon;
     default:
-      return require("../assets/icons/test-missing.svg");
+      return testMissingIcon;
   }
 }
 
@@ -262,8 +296,13 @@ function hideTooltip() {
   hover.value = false;
 }
 
-function setCurrentYearDate(year: ProductYear, date: ProductDate, event: MouseEvent) {
-  const tooltipTop = (event.target as HTMLElement).getBoundingClientRect().top - 30;
+function setCurrentYearDate(
+  year: ProductYear,
+  date: ProductDate,
+  event: MouseEvent
+) {
+  const tooltipTop =
+    (event.target as HTMLElement).getBoundingClientRect().top - 30;
   const tooltipLeft = event.clientX;
   tooltipStyle.value = {
     top: `${tooltipTop}px`,

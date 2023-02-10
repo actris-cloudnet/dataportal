@@ -17,25 +17,32 @@ section
 
 <template>
   <main id="error">
-    <h1>{{ response.status }}</h1>
-    <h2 v-if="response.status !== 500">{{ message }}</h2>
+    <h1>{{ response?.status || "Unknown error" }}</h1>
+    <h2 v-if="response && response.status !== 500">{{ message }}</h2>
     <h2 v-else>Internal server error</h2>
-    <section v-if="response.status === 404">The page you are looking for does not exist.</section>
-    <section v-if="response.status > 500">Service temporarily offline</section>
+    <section v-if="response && response.status === 404">
+      The page you are looking for does not exist.
+    </section>
+    <section v-if="response && response.status > 500">
+      Service temporarily offline
+    </section>
   </main>
 </template>
 
 <script lang="ts" setup>
-import { AxiosResponse } from "axios";
 import { computed } from "vue";
 
-interface Props {
-  response: AxiosResponse;
+export interface Props {
+  response?: { status: number; data: any };
 }
 
 const props = defineProps<Props>();
 
 const message = computed(() =>
-  typeof props.response.data == "string" ? props.response.data : props.response.data.errors.join("<br>")
+  props.response
+    ? typeof props.response.data == "string"
+      ? props.response.data
+      : props.response.data.errors.join("<br>")
+    : undefined
 );
 </script>

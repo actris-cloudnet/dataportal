@@ -13,14 +13,26 @@
           :instrumentStatus="instrumentStatus"
         />
         <FileInformation :response="response" />
-        <DataOrigin :response="response" :isBusy="isBusy" :versions="versions" :sourceFiles="sourceFiles" />
+        <DataOrigin
+          :response="response"
+          :isBusy="isBusy"
+          :versions="versions"
+          :sourceFiles="sourceFiles"
+        />
       </div>
     </div>
     <div class="side-content">
       <div class="summary-box">
-        <Preview :visualization="visualization" :loading="loadingVisualizations" />
+        <Preview
+          :visualization="visualization"
+          :loading="loadingVisualizations"
+        />
       </div>
-      <div class="summary-box" id="citation" :class="{ volatile: response.volatile }">
+      <div
+        class="summary-box"
+        id="citation"
+        :class="{ volatile: response.volatile }"
+      >
         <Citation :uuid="uuid" :file="response" v-if="response" />
       </div>
     </div>
@@ -28,25 +40,25 @@
 </template>
 <script lang="ts" setup>
 import { computed } from "vue";
-import { ModelFile, RegularFile } from "../../../../backend/src/entity/File";
-import { SiteLocation } from "../../../../backend/src/entity/SiteLocation";
-import { VisualizationItem } from "../../../../backend/src/entity/VisualizationResponse";
+import type { SiteLocation } from "@shared/entity/SiteLocation";
+import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
 
 import FileInformation from "./FileInformation.vue";
 import ProductInformation from "./ProductInformation.vue";
 import DataOrigin from "./DataOrigin.vue";
-import Preview from "./Preview.vue";
-import Citation from "./Citation.vue";
+import Preview from "./FilePreview.vue";
+import Citation from "./FileCitation.vue";
+import type { SourceFile, FileResponse } from "@/views/FileView.vue";
 
-interface Props {
-  response: ModelFile | RegularFile;
+export interface Props {
+  response: FileResponse;
   location: SiteLocation | null;
   uuid: string;
   instrument: string | null;
   instrumentStatus: "loading" | "error" | "ready";
   isBusy: boolean;
   versions: string[];
-  sourceFiles: RegularFile[];
+  sourceFiles: SourceFile[];
   visualizations: VisualizationItem[];
   loadingVisualizations: boolean;
 }

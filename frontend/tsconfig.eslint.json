@@ -1,4 +1,0 @@
-{
-  "extends": "./tsconfig.json",
-  "include": [".eslintrc.js", "babel.config.js", "vue.config.js", "src", "tests"]
-}
