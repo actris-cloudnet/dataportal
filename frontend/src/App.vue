@@ -65,9 +65,11 @@ h1, h2, h3, h4, h5, h6
   <div id="app">
     <Header />
     <div id="content">
-      <keep-alive include="app-search">
-        <router-view />
-      </keep-alive>
+      <router-view v-slot="{ Component }">
+        <keep-alive include="app-search">
+          <component :is="Component" />
+        </keep-alive>
+      </router-view>
     </div>
     <Footer />
     <div id="consent" v-if="askConsent">
