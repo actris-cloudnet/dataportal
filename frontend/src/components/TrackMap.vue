@@ -64,7 +64,8 @@ onMounted(() => {
           .addTo(leafletInstance);
         objects.push(point, hoverArea);
       }
-    }
+    },
+    { immediate: true }
   );
 });
 
