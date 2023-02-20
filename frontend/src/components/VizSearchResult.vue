@@ -95,9 +95,12 @@ h3 > .rowtag
 </style>
 
 <template>
-  <main id="vizSearchResults" v-bind:class="{ singleColumn: !comparisonView, opaque: isBusy }">
+  <main
+    id="vizSearchResults"
+    :class="{ singleColumn: !comparisonView, opaque: isBusy }"
+  >
     <header>
-      <h3>Visualizations for {{ humanReadableDate }}</h3>
+      <h3>Visualizations for {{ humanReadableDate(date) }}</h3>
       <span v-if="isBusy" class="listTitle">Loading...</span>
       <div v-if="searchYieldedResults">
         <div class="modeSelector">
@@ -112,12 +115,16 @@ h3 > .rowtag
     <section v-if="noSelectionsMade" class="notfound">
       Please make a selection in the search filters to display visualizations.
     </section>
-    <section v-else-if="searchYieldedResults" class="vizContainer" v-bind:class="{ sideBySide: comparisonView }">
+    <section
+      v-else-if="searchYieldedResults"
+      class="vizContainer"
+      :class="{ sideBySide: comparisonView }"
+    >
       <div
         v-for="(file, index) in sortedApiResponse"
         :key="index"
         class="sourceFile"
-        v-bind:class="{ paddedSourceFile: !comparisonView }"
+        :class="{ paddedSourceFile: !comparisonView }"
       >
         <h3>
           <router-link
@@ -126,7 +133,13 @@ h3 > .rowtag
             class="sourceFileLink"
           >
             {{ file.locationHumanReadable }} / {{ file.productHumanReadable }}
-            <svg fill="#000000" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="60px" height="60px">
+            <svg
+              fill="#000000"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 30 30"
+              width="60px"
+              height="60px"
+            >
               <path
                 d="M 25.980469 2.9902344 A 1.0001 1.0001 0 0 0 25.869141 3 L 20 3 A 1.0001 1.0001 0 1 0 20 5 L 23.585938 5 L 13.292969 15.292969 A 1.0001 1.0001 0 1 0 14.707031 16.707031 L 25 6.4140625 L 25 10 A 1.0001 1.0001 0 1 0 27 10 L 27 4.1269531 A 1.0001 1.0001 0 0 0 25.980469 2.9902344 z M 6 7 C 4.9069372 7 4 7.9069372 4 9 L 4 24 C 4 25.093063 4.9069372 26 6 26 L 21 26 C 22.093063 26 23 25.093063 23 24 L 23 14 L 23 11.421875 L 21 13.421875 L 21 16 L 21 24 L 6 24 L 6 9 L 14 9 L 16 9 L 16.578125 9 L 18.578125 7 L 16 7 L 14 7 L 6 7 z"
               />
@@ -146,9 +159,19 @@ h3 > .rowtag
           >
             legacy
           </span>
-          <span v-if="file.experimental" class="rowtag experimental" title="Experimental product"> experimental </span>
+          <span
+            v-if="file.experimental"
+            class="rowtag experimental"
+            title="Experimental product"
+          >
+            experimental
+          </span>
         </h3>
-        <div v-for="viz in sortVisualizations(file.visualizations)" :key="viz.s3key" class="variable">
+        <div
+          v-for="viz in sortVisualizations(file.visualizations)"
+          :key="viz.s3key"
+          class="variable"
+        >
           <h4>
             {{ viz.productVariable.humanReadableName }}
             <a
@@ -170,72 +193,76 @@ h3 > .rowtag
               </svg>
             </a>
           </h4>
-          <visualization :data="viz" :maxMarginLeft="maxMarginLeft" :maxMarginRight="maxMarginRight" />
+          <visualization
+            :data="viz"
+            :maxMarginLeft="maxMarginLeft"
+            :maxMarginRight="maxMarginRight"
+          />
           <br />
         </div>
       </div>
     </section>
-    <section class="notfound" v-else>No visualizations were found with the selected parameters.</section>
+    <section class="notfound" v-else>
+      No visualizations were found with the selected parameters.
+    </section>
   </main>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Watch } from "vue-property-decorator";
-import Vue from "vue";
-import { VisualizationResponse } from "../../../backend/src/entity/VisualizationResponse";
+<script lang="ts" setup>
+import type { VisualizationResponse } from "@shared/entity/VisualizationResponse";
 import { humanReadableDate, sortVisualizations, notEmpty } from "../lib";
-import Visualization from "./Visualization.vue";
+import { ref, watchEffect, computed } from "vue";
+import Visualization from "./ImageVisualization.vue";
 
-Vue.component("visualization", Visualization);
+export interface Props {
+  apiResponse: VisualizationResponse[];
+  isBusy: boolean;
+  date: Date;
+  setWideMode: Function;
+  noSelectionsMade: boolean;
+}
 
-@Component
-export default class DataSearchResult extends Vue {
-  @Prop() apiResponse!: VisualizationResponse[];
-  @Prop() isBusy!: boolean;
-  @Prop() date!: Date;
-  @Prop() setWideMode!: Function;
-  @Prop() noSelectionsMade!: boolean;
+const props = defineProps<Props>();
 
-  comparisonView = false;
-  sortVisualizations = sortVisualizations;
+const comparisonView = ref(false);
 
-  get humanReadableDate() {
-    return humanReadableDate(this.date.toString());
-  }
-  get maxMarginRight() {
-    return Math.max(
-      ...this.apiResponse.flatMap((file) =>
-        file.visualizations.map((viz) => viz.dimensions && viz.dimensions.marginRight).filter(notEmpty)
-      )
-    );
-  }
-  get maxMarginLeft() {
-    return Math.max(
-      ...this.apiResponse.flatMap((file) =>
-        file.visualizations.map((viz) => viz.dimensions && viz.dimensions.marginLeft).filter(notEmpty)
-      )
-    );
-  }
-  get sortedApiResponse() {
-    return this.apiResponse.concat().sort(this.alphabeticalSort);
-  }
-  get searchYieldedResults() {
-    return this.apiResponse.length > 0;
-  }
+const maxMarginRight = computed(() =>
+  Math.max(
+    ...props.apiResponse.flatMap((file) =>
+      file.visualizations
+        .map((viz) => viz.dimensions && viz.dimensions.marginRight)
+        .filter(notEmpty)
+    )
+  )
+);
 
-  alphabeticalSort(a: VisualizationResponse, b: VisualizationResponse) {
-    if (a.productHumanReadable == b.productHumanReadable) {
-      if (a.locationHumanReadable == b.locationHumanReadable) return 0;
-      if (a.locationHumanReadable < b.locationHumanReadable) return -1;
-      return 1;
-    }
-    if (a.productHumanReadable < b.productHumanReadable) return -1;
+const maxMarginLeft = computed(() =>
+  Math.max(
+    ...props.apiResponse.flatMap((file) =>
+      file.visualizations
+        .map((viz) => viz.dimensions && viz.dimensions.marginLeft)
+        .filter(notEmpty)
+    )
+  )
+);
+
+function alphabeticalSort(a: VisualizationResponse, b: VisualizationResponse) {
+  if (a.productHumanReadable == b.productHumanReadable) {
+    if (a.locationHumanReadable == b.locationHumanReadable) return 0;
+    if (a.locationHumanReadable < b.locationHumanReadable) return -1;
     return 1;
   }
-
-  @Watch("comparisonView")
-  onViewModeChange() {
-    this.setWideMode(this.comparisonView);
-  }
+  if (a.productHumanReadable < b.productHumanReadable) return -1;
+  return 1;
 }
+
+const sortedApiResponse = computed(() =>
+  props.apiResponse.concat().sort(alphabeticalSort)
+);
+
+const searchYieldedResults = computed(() => props.apiResponse.length > 0);
+
+watchEffect(() => {
+  props.setWideMode(comparisonView);
+});
 </script>

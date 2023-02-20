@@ -40,7 +40,6 @@ services:
       context: ..
       dockerfile: frontend/Dockerfile
       target: dev
-    command: ["npm", "run", "serve"]
     healthcheck:
       test:
         [
@@ -51,6 +50,13 @@ services:
         ]
       interval: 1s
       retries: 20
+    env_file:
+      - ci.env
+    environment:
+      - VITE_BACKEND_URL=/api/
+    volumes:
+      - ../frontend:/app
+      - ../shared:/shared
   test-backend:
     image: backend
     depends_on:
@@ -67,24 +73,10 @@ services:
     env_file:
       - ci.env
     command: ["npm", "run", "e2e-test"]
-  test-frontend:
-    image: frontend
-    depends_on:
-      - frontend
-    env_file:
-      - ci.env
-    command: ["npm", "test"]
   lint-backend:
     image: backend
     depends_on:
       - backend
-    env_file:
-      - ci.env
-    command: ["npm", "run", "lint"]
-  lint-frontend:
-    image: frontend
-    depends_on:
-      - frontend
     env_file:
       - ci.env
     command: ["npm", "run", "lint"]
@@ -147,7 +139,7 @@ services:
       cache_from:
         - frontend
       args:
-        - VUE_APP_BACKENDURL=/api/
+        - BACKEND_URL=/api/
     env_file:
       - ci.env
     environment:

@@ -17,22 +17,32 @@ section
 
 <template>
   <main id="error">
-    <h1>{{ response.status }}</h1>
-    <h2 v-if="response.status !== 500">{{ message }}</h2>
+    <h1>{{ response?.status || "Unknown error" }}</h1>
+    <h2 v-if="response && response.status !== 500">{{ message }}</h2>
     <h2 v-else>Internal server error</h2>
-    <section v-if="response.status === 404">The page you are looking for does not exist.</section>
-    <section v-if="response.status > 500">Service temporarily offline</section>
+    <section v-if="response && response.status === 404">
+      The page you are looking for does not exist.
+    </section>
+    <section v-if="response && response.status > 500">
+      Service temporarily offline
+    </section>
   </main>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
-import { AxiosResponse } from "axios";
+<script lang="ts" setup>
+import { computed } from "vue";
 
-@Component
-export default class ApiError extends Vue {
-  @Prop() response!: AxiosResponse;
-
-  message = typeof this.response.data == "string" ? this.response.data : this.response.data.errors.join("<br>");
+export interface Props {
+  response?: { status: number; data: any };
 }
+
+const props = defineProps<Props>();
+
+const message = computed(() =>
+  props.response
+    ? typeof props.response.data == "string"
+      ? props.response.data
+      : props.response.data.errors.join("<br>")
+    : undefined
+);
 </script>

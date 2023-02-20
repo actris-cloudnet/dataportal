@@ -1,24 +1,21 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Wrapper } from "@vue/test-utils";
-import axios, { AxiosPromise, AxiosRequestConfig } from "axios";
-import Vue from "vue";
-import { augmentAxiosResponse, init, mountVue, nextTick, wait } from "./lib";
-import { mocked } from "ts-jest/dist/util/testing";
+import { VueWrapper, mount } from "@vue/test-utils";
+import axios, { AxiosPromise } from "axios";
+import { augmentAxiosResponse, nextTick, wait } from "./lib";
 import { readResources } from "../../shared/lib";
-import ProductAvailabilityVisualization from "../src/components/DataStatusVisualization.vue";
-import { DataStatusParser } from "../src/lib/DataStatusParser";
+import DataStatusVisualization from "../src/components/DataStatusVisualization.vue";
+import { parseDataStatus } from "../src/lib/DataStatusParser";
+import { vi, describe, beforeAll, expect, it } from "vitest";
 
-init();
-
-jest.mock("axios");
+vi.mock("axios");
 
 let resources: any;
-let wrapper: Wrapper<Vue>;
+let wrapper: VueWrapper;
 let props: any;
 
-const getLiWrappers = (element: Wrapper<Vue>) => element.findAll(".dataviz-tooltip li.productitem").wrappers;
+const getLiWrappers = (element: VueWrapper) =>
+  element.findAll(".dataviz-tooltip li.productitem");
 
-const getColorElementByDate = (wrapper: Wrapper<Vue>, date: string) => {
+const getColorElementByDate = (wrapper: VueWrapper, date: string) => {
   const element = wrapper.find(`#dataviz-color-${date}`);
   return { element, classes: element.classes() };
 };
@@ -26,14 +23,17 @@ const getColorElementByDate = (wrapper: Wrapper<Vue>, date: string) => {
 describe("Data availability mode", () => {
   beforeAll(async () => {
     resources = await readResources();
-    const axiosMock = (url: string, _: AxiosRequestConfig | undefined): AxiosPromise => {
-      if (url.includes("search")) {
-        return Promise.resolve(augmentAxiosResponse(resources["productavailabilitysearch"]));
-      } else {
+    const axiosMock = (url: string): AxiosPromise => {
+      if (url.includes("/search")) {
+        return Promise.resolve(
+          augmentAxiosResponse(resources["productavailabilitysearch"])
+        );
+      } else if (url.includes("/product")) {
         return Promise.resolve(augmentAxiosResponse(resources["products"]));
       }
+      return Promise.reject(new Error(`Unmocked URL: ${url}`));
     };
-    mocked(axios.get).mockImplementation(axiosMock);
+    vi.mocked(axios.get).mockImplementation(axiosMock);
     const properties = ["measurementDate", "productId", "legacy", "errorLevel"];
     const searchPayload = {
       site: "palaiseau",
@@ -41,15 +41,16 @@ describe("Data availability mode", () => {
       developer: false,
       properties,
     };
-    const dataStatusParser = await new DataStatusParser(searchPayload).engage();
+    const dataStatus = await parseDataStatus(searchPayload);
     props = {
+      site: "palaiseau",
       legend: true,
       tooltips: true,
       qualityScores: false,
       debounceMs: 0,
-      dataStatusParser,
+      dataStatus,
     };
-    wrapper = mountVue(ProductAvailabilityVisualization, { propsData: props });
+    wrapper = mount(DataStatusVisualization, { propsData: props });
     await nextTick(1);
   });
 
@@ -58,7 +59,11 @@ describe("Data availability mode", () => {
     await element.trigger("mouseenter");
     await wait(50);
     expect(
-      getLiWrappers(wrapper).every((wrap) => wrap.text().includes("Disdrometer") || wrap.classes().includes("found"))
+      getLiWrappers(wrapper).every(
+        (wrap) =>
+          wrap.text().includes("Disdrometer") ||
+          wrap.classes().includes("found")
+      )
     ).toBeTruthy();
     expect(classes.length).toEqual(2);
     expect(classes).toContain("all-data");
@@ -71,7 +76,8 @@ describe("Data availability mode", () => {
     expect(
       getLiWrappers(wrapper).every((wrap) => {
         const wrapClasses = wrap.classes();
-        return wrap.text().includes("Classification") || wrap.text().includes("Disdrometer")
+        return wrap.text().includes("Classification") ||
+          wrap.text().includes("Disdrometer")
           ? !wrapClasses.includes("found")
           : wrapClasses.includes("found");
       })
@@ -83,12 +89,14 @@ describe("Data availability mode", () => {
   it("displays dark gray color for days that have only legacy data", async () => {
     const { element, classes } = getColorElementByDate(wrapper, "2021-05-03");
     await element.trigger("mouseenter");
-    await wait(50);
-    const supWrappers = wrapper.findAll(".dataviz-tooltip sup").wrappers;
+    await wait(500);
+    const supWrappers = wrapper.findAll(".dataviz-tooltip sup");
     expect(
       getLiWrappers(wrapper).every((wrap) => {
         const wrapClasses = wrap.classes();
-        return wrap.text().includes("Classification") ? wrapClasses.includes("found") : !wrapClasses.includes("found");
+        return wrap.text().includes("Classification")
+          ? wrapClasses.includes("found")
+          : !wrapClasses.includes("found");
       })
     ).toBeTruthy();
     expect(supWrappers.length).toEqual(1);
@@ -103,7 +111,9 @@ describe("Data availability mode", () => {
     expect(
       getLiWrappers(wrapper).every((wrap) => {
         const wrapClasses = wrap.classes();
-        return wrap.text().includes("Model") ? wrapClasses.includes("found") : !wrapClasses.includes("found");
+        return wrap.text().includes("Model")
+          ? wrapClasses.includes("found")
+          : !wrapClasses.includes("found");
       })
     );
     expect(classes.length).toEqual(2);
@@ -114,55 +124,64 @@ describe("Data availability mode", () => {
     const { element, classes } = getColorElementByDate(wrapper, "2021-05-01");
     await element.trigger("mouseenter");
     await wait(50);
-    expect(getLiWrappers(wrapper).every((wrap) => !wrap.classes().includes("found"))).toBeTruthy();
+    expect(
+      getLiWrappers(wrapper).every((wrap) => !wrap.classes().includes("found"))
+    ).toBeTruthy();
     expect(classes.length).toEqual(2);
     expect(classes).toContain("no-data");
   });
 
   it("hides tooltips on tooltips=false", async () => {
-    const customWrapper = mountVue(ProductAvailabilityVisualization, { propsData: { ...props, tooltips: false } });
+    const customWrapper = mount(DataStatusVisualization, {
+      propsData: { ...props, tooltips: false },
+    });
     await nextTick(1);
     const { element } = getColorElementByDate(customWrapper, "2021-05-05");
     expect(getLiWrappers(element).length).toEqual(0);
   });
 
   it("shows legend on legend=true", async () => {
-    expect(wrapper.findAll(".dav-legend").wrappers).toHaveLength(1);
+    expect(wrapper.findAll(".dav-legend")).toHaveLength(1);
   });
 
   it("hides legend on legend=false", async () => {
-    const customWrapper = mountVue(ProductAvailabilityVisualization, { propsData: { ...props, legend: false } });
+    const customWrapper = mount(DataStatusVisualization, {
+      propsData: { ...props, legend: false },
+    });
     await nextTick(1);
-    expect(customWrapper.findAll(".dav-legend").wrappers).toHaveLength(0);
+    expect(customWrapper.findAll(".dav-legend")).toHaveLength(0);
   });
 });
 
 describe("Data quality mode", () => {
   beforeAll(async () => {
     resources = await readResources();
-    const axiosMock = (url: string, _: AxiosRequestConfig | undefined): AxiosPromise => {
+    const axiosMock = (url: string): AxiosPromise => {
       if (url.includes("search")) {
-        return Promise.resolve(augmentAxiosResponse(resources["productavailabilitysearch"]));
+        return Promise.resolve(
+          augmentAxiosResponse(resources["productavailabilitysearch"])
+        );
       } else {
         return Promise.resolve(augmentAxiosResponse(resources["products"]));
       }
     };
-    mocked(axios.get).mockImplementation(axiosMock);
+    vi.mocked(axios.get).mockImplementation(axiosMock);
     const properties = ["measurementDate", "productId", "legacy", "errorLevel"];
     const searchPayload = {
       site: "palaiseau",
       legacy: true,
       properties,
     };
-    const dataStatusParser = await new DataStatusParser(searchPayload).engage();
+    const dataStatus = await parseDataStatus(searchPayload);
     props = {
+      site: "whatever",
       legend: true,
       tooltips: true,
       qualityScores: true,
       debounceMs: 0,
-      dataStatusParser,
+      dataStatus,
     };
-    wrapper = mountVue(ProductAvailabilityVisualization, { propsData: props });
+    wrapper = mount(DataStatusVisualization, { propsData: props });
     await nextTick(1);
   });
 
@@ -171,7 +190,11 @@ describe("Data quality mode", () => {
     await element.trigger("mouseenter");
     await wait(50);
     expect(
-      getLiWrappers(wrapper).every((wrap) => wrap.text().includes("Disdrometer") || wrap.classes().includes("found"))
+      getLiWrappers(wrapper).every(
+        (wrap) =>
+          wrap.text().includes("Disdrometer") ||
+          wrap.classes().includes("found")
+      )
     ).toBeTruthy();
     expect(classes.length).toEqual(2);
     expect(classes).toContain("all-data");
@@ -184,7 +207,8 @@ describe("Data quality mode", () => {
     expect(
       getLiWrappers(wrapper).every((wrap) => {
         const wrapClasses = wrap.classes();
-        return wrap.text().includes("Model") || wrap.text().includes("Disdrometer")
+        return wrap.text().includes("Model") ||
+          wrap.text().includes("Disdrometer")
           ? !wrapClasses.includes("found")
           : wrapClasses.includes("found");
       })
@@ -210,7 +234,9 @@ describe("Data quality mode", () => {
     const { element, classes } = getColorElementByDate(wrapper, "2021-05-01");
     await element.trigger("mouseenter");
     await wait(50);
-    expect(getLiWrappers(wrapper).every((wrap) => !wrap.classes().includes("found"))).toBeTruthy();
+    expect(
+      getLiWrappers(wrapper).every((wrap) => !wrap.classes().includes("found"))
+    ).toBeTruthy();
     expect(classes.length).toEqual(2);
     expect(classes).toContain("no-data");
   });

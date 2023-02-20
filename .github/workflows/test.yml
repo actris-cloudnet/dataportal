@@ -37,11 +37,16 @@ jobs:
       - name: Build docker images
         run: docker-compose build frontend
 
-      - name: Lint frontend
-        run: docker-compose run lint-frontend
+      - name: Install dependencies
+        run: |
+          docker-compose run frontend npm install
+          docker compose run frontend sh -c 'cd /shared && npm install'
 
-      - name: Run frontend unit tests
-        run: docker-compose run test-frontend
+      - name: Lint frontend
+        run: docker-compose run frontend npm run lint
+
+      - name: Run unit tests
+        run: docker-compose run frontend npm run test:unit
 
       - name: Print logs
         if: always()

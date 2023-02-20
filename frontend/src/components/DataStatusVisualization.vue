@@ -93,16 +93,31 @@
 <template>
   <!-- eslint-disable vue/require-v-for-key -->
   <div id="data_availability_visualization" v-if="!busy">
-    <div v-for="(year, index) in years" v-bind:key="year['year']" class="dataviz-row">
+    <div
+      v-for="(year, index) in dataStatus.years"
+      :key="year['year']"
+      class="dataviz-row"
+    >
       <div
-        v-if="index && parseInt(year['year']) + 1 !== parseInt(years[index - 1]['year'])"
+        v-if="
+          index &&
+          parseInt(year['year']) + 1 !==
+            parseInt(dataStatus.years[index - 1]['year'])
+        "
         class="dataviz-skippedyears"
       >
-        <template v-if="parseInt(year['year']) - parseInt(years[index - 1]['year']) == -2">
+        <template
+          v-if="
+            parseInt(year['year']) -
+              parseInt(dataStatus.years[index - 1]['year']) ==
+            -2
+          "
+        >
           No data for year {{ parseInt(year["year"]) + 1 }}.
         </template>
         <template v-else>
-          No data for years {{ parseInt(year["year"]) + 1 }} - {{ parseInt(years[index - 1]["year"]) - 1 }}.
+          No data for years {{ parseInt(year["year"]) + 1 }} -
+          {{ parseInt(dataStatus.years[index - 1]["year"]) - 1 }}.
         </template>
       </div>
       <div class="dataviz-year">{{ year["year"] }}</div>
@@ -112,7 +127,9 @@
           class="dataviz-date"
           :id="`dataviz-color-${year.year}-${date.date}`"
           :class="createColorClass(date.products)"
-          :href="createLinkToSearchPage(`${year.year}-${date.date}`, date.products)"
+          :href="
+            createLinkToSearchPage(`${year.year}-${date.date}`, date.products)
+          "
           @mouseenter="debouncedSetCurrentYearDate(year, date, $event)"
         ></a>
       </div>
@@ -174,8 +191,12 @@
         <span class="legacy-label"><sup>L</sup></span> Legacy
       </div>
     </div>
-    <div class="dataviz-tooltip" v-if="tooltips && hover" :style="tooltipStyle">
-      <header>{{ year["year"] }}-{{ date["date"] }}</header>
+    <div
+      class="dataviz-tooltip"
+      v-if="tooltips && hover && currentYear && currentDate"
+      :style="tooltipStyle"
+    >
+      <header>{{ currentYear.year }}-{{ currentDate.date }}</header>
       <section v-if="!qualityScores">
         <ul v-for="lvl in allLevels">
           <li class="header">Level {{ lvl }}</li>
@@ -183,19 +204,25 @@
             v-for="product in filterProductsByLvl(lvl)"
             class="productitem"
             :class="{
-              found: getProductStatus(date.products[lvl], product),
+              found: getProductStatus(currentDate.products[lvl], product.id),
             }"
             :key="product.id"
           >
             {{ idToHumanReadable(product.id) }}
-            <sup class="legacy-label" v-if="isLegacyFile(date.products[lvl], product)">L</sup>
+            <sup
+              class="legacy-label"
+              v-if="isLegacyFile(currentDate.products[lvl], product.id)"
+              >L</sup
+            >
           </li>
           <li
             v-if="lvl === '1b'"
             class="productitem modelitem"
             :class="{
-              found: getProductStatus(date.products[lvl], { id: 'model' }),
-              na: qualityScores && !getReportExists(date.products[lvl], { id: 'model' }),
+              found: getProductStatus(currentDate.products[lvl], 'model'),
+              na:
+                qualityScores &&
+                !getReportExists(currentDate.products[lvl], 'model'),
             }"
           >
             Model
@@ -210,23 +237,31 @@
             v-for="product in filterProductsByLvl(lvl)"
             class="qualityitem"
             :class="{
-              found: getProductStatus(date.products[lvl], product),
-              na: qualityScores && !getReportExists(date.products[lvl], product),
-              info: isFileWithInfo(date.products[lvl], product),
-              warning: isFileWithWarning(date.products[lvl], product),
-              error: isFileWithError(date.products[lvl], product),
+              found: getProductStatus(currentDate.products[lvl], product.id),
+              na:
+                qualityScores &&
+                !getReportExists(currentDate.products[lvl], product.id),
+              info: isFileWithInfo(currentDate.products[lvl], product.id),
+              warning: isFileWithWarning(currentDate.products[lvl], product.id),
+              error: isFileWithError(currentDate.products[lvl], product.id),
             }"
             :key="product.id"
           >
             {{ idToHumanReadable(product.id) }}
-            <sup class="legacy-label" v-if="isLegacyFile(date.products[lvl], product)">L</sup>
+            <sup
+              class="legacy-label"
+              v-if="isLegacyFile(currentDate.products[lvl], product.id)"
+              >L</sup
+            >
           </li>
           <li
             v-if="lvl === '1b'"
             class="qualityitem modelitem"
             :class="{
-              found: getProductStatus(date.products[lvl], { id: 'model' }),
-              na: qualityScores && !getReportExists(date.products[lvl], { id: 'model' }),
+              found: getProductStatus(currentDate.products[lvl], 'model'),
+              na:
+                qualityScores &&
+                !getReportExists(currentDate.products[lvl], 'model'),
             }"
           >
             Model
@@ -240,282 +275,254 @@
   </div>
 </template>
 
-<script lang="ts">
-import { Component, Prop } from "vue-property-decorator";
-import Vue from "vue";
-import { idToHumanReadable } from "../lib";
-import { Product } from "../../../backend/src/entity/Product";
-import { DataStatusParser, ProductDate, ProductInfo, ProductLevels, ProductYear } from "../lib/DataStatusParser";
+<script lang="ts" setup>
+import { idToHumanReadable, type ColorClass } from "../lib";
+import type { Product } from "@shared/entity/Product";
+import type {
+  DataStatus,
+  ProductDate,
+  ProductInfo,
+  ProductLevels,
+  ProductYear,
+} from "../lib/DataStatusParser";
 import debounce from "debounce";
+import { onMounted, ref, computed } from "vue";
 
-export type ColorClass =
-  | "no-data"
-  | "only-legacy-data"
-  | "contains-errors"
-  | "contains-warnings"
-  | "only-model-data"
-  | "all-data"
-  | "all-raw"
-  | "contains-info";
+export interface Props {
+  site: string;
+  loadingComplete?: () => void;
+  legend: boolean;
+  dateFrom?: string;
+  tooltips?: boolean;
+  qualityScores?: boolean;
+  dataStatus: DataStatus;
+}
 
-@Component
-export default class ProductAvailabilityVisualization extends Vue {
-  @Prop() site!: string;
-  @Prop() loadingComplete?: () => void;
-  @Prop() legend!: boolean;
-  @Prop() dateFrom?: string;
-  @Prop() tooltips?: boolean;
-  @Prop() qualityScores?: boolean;
-  @Prop() dataStatusParser!: DataStatusParser;
-  @Prop({ default: 1000 / 60 }) debounceMs!: number;
+const props = defineProps<Props>();
 
-  apiUrl = process.env.VUE_APP_BACKENDURL;
-  years: ProductYear[] = [];
-  lvlTranslate: { [key: string]: keyof ProductLevels } = {};
-  allProducts: Product[] | null = null;
-  currentYear: ProductYear | null = null;
-  currentDate: ProductDate | null = null;
-  busy = false;
-  hover = false;
-  tooltipStyle: Record<string, string> = {};
+const busy = ref(false);
+const currentYear = ref<ProductYear | null>(null);
+const currentDate = ref<ProductDate | null>(null);
+const hover = ref(false);
+const tooltipStyle = ref<Record<string, string>>({});
 
-  idToHumanReadable = idToHumanReadable;
-  debounce = debounce;
+onMounted(() => {
+  if (props.loadingComplete) props.loadingComplete();
+});
 
-  mounted() {
-    this.years = this.dataStatusParser.years;
-    this.lvlTranslate = this.dataStatusParser.lvlTranslate;
-    this.allProducts = this.dataStatusParser.allProducts;
-    if (this.loadingComplete) this.loadingComplete();
+function setCurrentYearDate(
+  year: ProductYear,
+  date: ProductDate,
+  event: MouseEvent
+) {
+  const tooltipWidth = 420;
+  const tooltipMargin = 10;
+  tooltipStyle.value = {
+    width: tooltipWidth + "px",
+    top: event.clientY + 10 + "px",
+    left:
+      Math.min(
+        Math.max(tooltipMargin, event.clientX - tooltipWidth / 2),
+        document.body.scrollWidth - tooltipWidth - tooltipMargin
+      ) + "px",
+  };
+  currentDate.value = date;
+  currentYear.value = year;
+  hover.value = true;
+}
+
+function hideTooltip() {
+  hover.value = false;
+}
+
+const debounceMs = 1000 / 60;
+const debouncedSetCurrentYearDate = debounce(setCurrentYearDate, debounceMs);
+const debouncedHideTooltip = debounce(hideTooltip, debounceMs);
+
+function noData(products: ProductLevels): boolean {
+  return (
+    products["2"].length == 0 &&
+    products["1c"].length == 0 &&
+    products["1b"].length == 0
+  );
+}
+
+function isLegacy(prod: ProductInfo): boolean {
+  return prod.legacy;
+}
+
+function isLegacyOrModel(prod: ProductInfo): boolean {
+  return prod.legacy || prod.id == "model";
+}
+
+function isNotLegacy(prod: ProductInfo): boolean {
+  return !isLegacy(prod);
+}
+
+function topQuality(prod: ProductInfo): boolean {
+  return "errorLevel" in prod && prod.errorLevel === "pass";
+}
+
+function isError(prod: ProductInfo): boolean {
+  return "errorLevel" in prod && prod.errorLevel === "error";
+}
+
+function isWarning(prod: ProductInfo): boolean {
+  return "errorLevel" in prod && prod.errorLevel === "warning";
+}
+
+function isInfo(prod: ProductInfo): boolean {
+  return "errorLevel" in prod && prod.errorLevel === "info";
+}
+
+function qualityExists(prod: ProductInfo): boolean {
+  return "errorLevel" in prod && prod.errorLevel !== null;
+}
+
+function filterProductsByLvl(lvl: string) {
+  if (!props.dataStatus.allProducts) return null;
+  return props.dataStatus.allProducts.filter(
+    ({ id }) => props.dataStatus.lvlTranslate[id] == lvl && id != "model"
+  );
+}
+
+function onlyLegacy(products: ProductLevels) {
+  return (
+    products["2"].every(isLegacy) &&
+    products["1c"].every(isLegacy) &&
+    products["1b"].every(isLegacyOrModel)
+  );
+}
+
+function onlyLegacyLevel2(products: ProductLevels) {
+  return products["2"].length > 0 && products["2"].every(isLegacy);
+}
+
+function onlyModel(products: ProductLevels) {
+  return (
+    products["2"].length == 0 &&
+    products["1c"].length == 0 &&
+    products["1b"].length == 1 &&
+    products["1b"][0].id == "model"
+  );
+}
+
+function getProductStatus(
+  existingProducts: ProductInfo[],
+  productId: Product["id"]
+) {
+  const existingProduct = existingProducts.find((prod) => prod.id == productId);
+  if (props.qualityScores && existingProduct) {
+    return topQuality(existingProduct);
   }
+  return existingProduct;
+}
 
-  setCurrentYearDate(year: ProductYear, date: ProductDate, event: MouseEvent) {
-    const tooltipWidth = 420;
-    const tooltipMargin = 10;
-    this.tooltipStyle = {
-      width: tooltipWidth + "px",
-      top: event.clientY + 10 + "px",
-      left:
-        Math.min(
-          Math.max(tooltipMargin, event.clientX - tooltipWidth / 2),
-          document.body.scrollWidth - tooltipWidth - tooltipMargin
-        ) + "px",
-    };
-    this.currentDate = date;
-    this.currentYear = year;
-    this.hover = true;
+function isLegacyFile(
+  existingProducts: ProductInfo[],
+  productId: Product["id"]
+) {
+  const existingProduct = existingProducts.find((prod) => prod.id == productId);
+  if (existingProduct) {
+    return existingProduct.legacy;
   }
+}
 
-  debouncedSetCurrentYearDate = debounce(this.setCurrentYearDate, this.debounceMs);
-  debouncedHideTooltip = debounce(this.hideTooltip, this.debounceMs);
-
-  hideTooltip() {
-    this.hover = false;
+function isFileWithWarning(
+  existingProducts: ProductInfo[],
+  productId: Product["id"]
+) {
+  const existingProduct = existingProducts.find((prod) => prod.id == productId);
+  if (existingProduct) {
+    return isWarning(existingProduct);
   }
+}
 
-  get year() {
-    return this.currentYear;
+function isFileWithInfo(
+  existingProducts: ProductInfo[],
+  productId: Product["id"]
+) {
+  const existingProduct = existingProducts.find((prod) => prod.id == productId);
+  if (existingProduct) {
+    return isInfo(existingProduct);
   }
+}
 
-  get date() {
-    return this.currentDate;
+function isFileWithError(
+  existingProducts: ProductInfo[],
+  productId: Product["id"]
+) {
+  const existingProduct = existingProducts.find((prod) => prod.id == productId);
+  if (existingProduct) {
+    return isError(existingProduct);
   }
+}
 
-  filterProductsByLvl(lvl: string) {
-    if (!this.allProducts) return null;
-    return this.allProducts.filter(({ id }) => this.lvlTranslate[id] == lvl && id != "model");
+function getReportExists(
+  existingProducts: ProductInfo[],
+  productId: Product["id"]
+) {
+  const existingProduct = existingProducts.find((prod) => prod.id == productId);
+  return existingProduct && qualityExists(existingProduct);
+}
+
+const allLevels = computed(() => {
+  return Array.from(
+    new Set(Object.values(props.dataStatus.lvlTranslate))
+  ).sort();
+});
+
+function hasSomeLevel2Tests(products: ProductLevels) {
+  return products["2"].filter(qualityExists).length > 0;
+}
+
+function level2ContainsErrors(products: ProductLevels) {
+  return products["2"].filter(isError).length > 0;
+}
+
+function level2containsWarnings(products: ProductLevels) {
+  return products["2"].filter(isWarning).length > 0;
+}
+
+function allLevel2Pass(products: ProductLevels): boolean {
+  return products["2"].filter(topQuality).length == 4;
+}
+
+function allLvl2(products: ProductLevels): boolean {
+  return products["2"].filter(isNotLegacy).length == 4;
+}
+
+function missingData(products: ProductLevels) {
+  return (
+    products["2"].filter(isNotLegacy).length ||
+    products["1c"].filter(isNotLegacy).length ||
+    products["1b"].filter(isNotLegacy).length
+  );
+}
+
+function createColorClass(products: ProductLevels): ColorClass {
+  if (noData(products)) return "no-data";
+  if (props.qualityScores) {
+    if (hasSomeLevel2Tests(products) && onlyLegacyLevel2(products))
+      return "only-legacy-data";
+    if (allLevel2Pass(products)) return "all-data";
+    if (level2ContainsErrors(products)) return "contains-errors";
+    if (level2containsWarnings(products)) return "all-raw";
+    return "only-model-data";
   }
+  if (onlyModel(products)) return "only-model-data";
+  if (onlyLegacy(products)) return "only-legacy-data";
+  if (allLvl2(products)) return "all-data";
+  if (missingData(products)) return "all-raw";
+  return "contains-errors";
+}
 
-  getProductStatus(existingProducts: ProductInfo[], product: Product) {
-    const existingProduct = existingProducts.find((prod) => prod.id == product.id);
-    if (this.qualityScores && existingProduct) {
-      return this.topQuality(existingProduct);
-    }
-    return existingProduct;
-  }
-
-  isLegacyFile(existingProducts: ProductInfo[], product: Product) {
-    const existingProduct = existingProducts.find((prod) => prod.id == product.id);
-    if (existingProduct) {
-      return existingProduct.legacy;
-    }
-  }
-
-  isFileWithWarning(existingProducts: ProductInfo[], product: Product) {
-    const existingProduct = existingProducts.find((prod) => prod.id == product.id);
-    if (existingProduct) {
-      return this.isWarning(existingProduct);
-    }
-  }
-
-  isFileWithInfo(existingProducts: ProductInfo[], product: Product) {
-    const existingProduct = existingProducts.find((prod) => prod.id == product.id);
-    if (existingProduct) {
-      return this.isInfo(existingProduct);
-    }
-  }
-
-  isFileWithError(existingProducts: ProductInfo[], product: Product) {
-    const existingProduct = existingProducts.find((prod) => prod.id == product.id);
-    if (existingProduct) {
-      return this.isError(existingProduct);
-    }
-  }
-
-  getReportExists(existingProducts: ProductInfo[], product: Product) {
-    const existingProduct = existingProducts.find((prod) => prod.id == product.id);
-    return existingProduct && this.qualityExists(existingProduct);
-  }
-
-  get allLevels() {
-    return Array.from(new Set(Object.values(this.lvlTranslate))).sort();
-  }
-
-  createColorClass(products: ProductLevels): ColorClass {
-    if (this.noData(products)) return "no-data";
-    if (this.qualityScores) {
-      if (this.hasSomeLevel2Tests(products) && this.onlyLegacyLevel2(products)) return "only-legacy-data";
-      if (this.allLevel2Pass(products)) return "all-data";
-      if (this.level2ContainsErrors(products)) return "contains-errors";
-      if (this.level2containsWarnings(products)) return "all-raw";
-      return "only-model-data";
-    }
-    if (this.onlyModel(products)) return "only-model-data";
-    if (this.onlyLegacy(products)) return "only-legacy-data";
-    if (this.allLvl2(products)) return "all-data";
-    if (this.missingData(products)) return "all-raw";
-    return "contains-errors";
-  }
-
-  allPass(products: ProductLevels) {
-    return (
-      products["2"].filter(this.topQuality).length == products["2"].length &&
-      products["1c"].filter(this.topQuality).length == products["1c"].length &&
-      products["1b"].filter(this.topQuality).length == products["1b"].length
-    );
-  }
-
-  hasSomeTests(products: ProductLevels) {
-    return (
-      products["2"].filter(this.qualityExists).length > 0 ||
-      products["1c"].filter(this.qualityExists).length > 0 ||
-      products["1b"].filter(this.qualityExists).length > 0
-    );
-  }
-
-  hasSomeLevel2Tests(products: ProductLevels) {
-    return products["2"].filter(this.qualityExists).length > 0;
-  }
-
-  level2ContainsErrors(products: ProductLevels) {
-    return products["2"].filter(this.isError).length > 0;
-  }
-
-  level2containsWarnings(products: ProductLevels) {
-    return products["2"].filter(this.isWarning).length > 0;
-  }
-
-  anyProductContainsErrors(products: ProductLevels) {
-    return (
-      products["2"].filter(this.isError).length > 0 ||
-      products["1c"].filter(this.isError).length > 0 ||
-      products["1b"].filter(this.isError).length > 0
-    );
-  }
-
-  anyProductContainsWarnings(products: ProductLevels) {
-    return (
-      products["2"].filter(this.isWarning).length > 0 ||
-      products["1c"].filter(this.isWarning).length > 0 ||
-      products["1b"].filter(this.isWarning).length > 0
-    );
-  }
-
-  anyProductContainsInfo(products: ProductLevels) {
-    return (
-      products["2"].filter(this.isInfo).length > 0 ||
-      products["1c"].filter(this.isInfo).length > 0 ||
-      products["1b"].filter(this.isInfo).length > 0
-    );
-  }
-
-  allLevel2Pass(products: ProductLevels): boolean {
-    return products["2"].filter(this.topQuality).length == 4;
-  }
-
-  topQuality(prod: ProductInfo): boolean {
-    return "errorLevel" in prod && prod.errorLevel === "pass";
-  }
-
-  isError(prod: ProductInfo): boolean {
-    return "errorLevel" in prod && prod.errorLevel === "error";
-  }
-
-  isWarning(prod: ProductInfo): boolean {
-    return "errorLevel" in prod && prod.errorLevel === "warning";
-  }
-
-  isInfo(prod: ProductInfo): boolean {
-    return "errorLevel" in prod && prod.errorLevel === "info";
-  }
-
-  qualityExists(prod: ProductInfo): boolean {
-    return "errorLevel" in prod && prod.errorLevel !== null;
-  }
-
-  allLvl2(products: ProductLevels): boolean {
-    return products["2"].filter(this.isNotLegacy).length == 4;
-  }
-
-  missingData(products: ProductLevels) {
-    return (
-      products["2"].filter(this.isNotLegacy).length ||
-      products["1c"].filter(this.isNotLegacy).length ||
-      products["1b"].filter(this.isNotLegacy).length
-    );
-  }
-
-  onlyLegacy(products: ProductLevels) {
-    return (
-      products["2"].every(this.isLegacy) &&
-      products["1c"].every(this.isLegacy) &&
-      products["1b"].every(this.isLegacyOrModel)
-    );
-  }
-
-  onlyLegacyLevel2(products: ProductLevels) {
-    return products["2"].length > 0 && products["2"].every(this.isLegacy);
-  }
-
-  onlyModel(products: ProductLevels) {
-    return (
-      products["2"].length == 0 &&
-      products["1c"].length == 0 &&
-      products["1b"].length == 1 &&
-      products["1b"][0].id == "model"
-    );
-  }
-
-  noData(products: ProductLevels): boolean {
-    return products["2"].length == 0 && products["1c"].length == 0 && products["1b"].length == 0;
-  }
-
-  isLegacy(prod: ProductInfo): boolean {
-    return prod.legacy;
-  }
-
-  isLegacyOrModel(prod: ProductInfo): boolean {
-    return prod.legacy || prod.id == "model";
-  }
-
-  isNotLegacy(prod: ProductInfo): boolean {
-    return !this.isLegacy(prod);
-  }
-
-  createLinkToSearchPage(date: string, products: ProductLevels): string | undefined {
-    if (!this.qualityScores && !this.noData(products)) {
-      return `/search/data?site=${this.site}&dateFrom=${date}&dateTo=${date}`;
-    }
+function createLinkToSearchPage(
+  date: string,
+  products: ProductLevels
+): string | undefined {
+  if (!props.qualityScores && !noData(products)) {
+    return `/search/data?site=${props.site}&dateFrom=${date}&dateTo=${date}`;
   }
 }
 </script>

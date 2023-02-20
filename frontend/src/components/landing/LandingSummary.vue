@@ -13,54 +13,63 @@
           :instrumentStatus="instrumentStatus"
         />
         <FileInformation :response="response" />
-        <DataOrigin :response="response" :isBusy="isBusy" :versions="versions" :sourceFiles="sourceFiles" />
+        <DataOrigin
+          :response="response"
+          :isBusy="isBusy"
+          :versions="versions"
+          :sourceFiles="sourceFiles"
+        />
       </div>
     </div>
     <div class="side-content">
       <div class="summary-box">
-        <Preview :visualization="visualization" :loading="loadingVisualizations" />
+        <Preview
+          :visualization="visualization"
+          :loading="loadingVisualizations"
+        />
       </div>
-      <div class="summary-box" id="citation" :class="{ volatile: isVolatile }">
-        <Citation :uuid="uuid" :file="response" />
+      <div
+        class="summary-box"
+        id="citation"
+        :class="{ volatile: response.volatile }"
+      >
+        <Citation :uuid="uuid" :file="response" v-if="response" />
       </div>
     </div>
   </div>
 </template>
-<script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
-import { ModelFile, RegularFile } from "../../../../backend/src/entity/File";
-import { SiteLocation } from "../../../../backend/src/entity/SiteLocation";
-import { VisualizationItem } from "../../../../backend/src/entity/VisualizationResponse";
+<script lang="ts" setup>
+import { computed } from "vue";
+import type { SiteLocation } from "@shared/entity/SiteLocation";
+import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
 
 import FileInformation from "./FileInformation.vue";
 import ProductInformation from "./ProductInformation.vue";
 import DataOrigin from "./DataOrigin.vue";
-import Preview from "./Preview.vue";
-import Citation from "./Citation.vue";
+import Preview from "./FilePreview.vue";
+import Citation from "./FileCitation.vue";
+import type { SourceFile, FileResponse } from "@/views/FileView.vue";
 
-@Component({ components: { FileInformation, ProductInformation, DataOrigin, Preview, Citation } })
-export default class LandingSummary extends Vue {
-  @Prop() response!: ModelFile | RegularFile | null;
-  @Prop() location!: SiteLocation | null;
-  @Prop() uuid!: string;
-  @Prop() instrument!: string | null;
-  @Prop() instrumentStatus!: "loading" | "error" | "ready";
-  @Prop() isBusy!: boolean;
-  @Prop() versions!: string[];
-  @Prop() sourceFiles!: RegularFile[];
-  @Prop() visualizations!: VisualizationItem[];
-  @Prop() loadingVisualizations!: boolean;
-
-  get isVolatile() {
-    return this.response ? this.response.volatile : false;
-  }
-
-  get visualization() {
-    if (this.visualizations && this.visualizations.length > 0) {
-      return this.visualizations[0];
-    } else {
-      return null;
-    }
-  }
+export interface Props {
+  response: FileResponse;
+  location: SiteLocation | null;
+  uuid: string;
+  instrument: string | null;
+  instrumentStatus: "loading" | "error" | "ready";
+  isBusy: boolean;
+  versions: string[];
+  sourceFiles: SourceFile[];
+  visualizations: VisualizationItem[];
+  loadingVisualizations: boolean;
 }
+
+const props = defineProps<Props>();
+
+const visualization = computed(() => {
+  if (props.visualizations && props.visualizations.length > 0) {
+    return props.visualizations[0];
+  } else {
+    return null;
+  }
+});
 </script>
