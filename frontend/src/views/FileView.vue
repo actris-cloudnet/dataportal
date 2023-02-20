@@ -85,11 +85,20 @@
       </div>
     </div>
     <div class="tab-container">
-      <router-link class="tab" :to="{ name: 'File' }">Summary</router-link>
+      <router-link class="tab" :to="{ name: 'File' }">
+        <img :src="getProductIcon(response.product.id)" alt="" />
+        Summary
+      </router-link>
       <router-link class="tab" :to="{ name: 'FileVisualizations' }">
+        <img :src="PhotoGalleryIcon" alt="" />
         Visualisations
       </router-link>
-      <router-link class="tab" :to="{ name: 'FileQualityReport' }">
+      <router-link
+        class="tab"
+        :to="{ name: 'FileQualityReport' }"
+        v-if="response.errorLevel"
+      >
+        <img :src="getQcIcon(response.errorLevel)" alt="" />
         Quality report
       </router-link>
     </div>
@@ -112,7 +121,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, watchEffect } from "vue";
+import { ref, computed, watch } from "vue";
 import axios from "axios";
 import {
   humanReadableDate,
@@ -126,6 +135,9 @@ import type { SiteType } from "@shared/entity/Site";
 import type { SiteLocation } from "@shared/entity/SiteLocation";
 import type { File } from "@shared/entity/File";
 import DownloadButton from "../components/landing/DownloadButton.vue";
+import { getProductIcon, getQcIcon } from "../lib";
+
+import PhotoGalleryIcon from "@/assets/icons/photo-gallery.png";
 
 export type SourceFile =
   | { ok: true; value: File }
@@ -152,13 +164,11 @@ const instrumentStatus = ref<"loading" | "error" | "ready">("loading");
 const loadingVisualizations = ref(true);
 const location = ref<SiteLocation | null>(null);
 
-const title = computed(() => {
-  if (!response.value) {
-    return "Cloudnet Data Object";
-  } else {
-    return `${response.value.product.humanReadableName} data from ${response.value.site.humanReadableName}`;
-  }
-});
+const title = computed(() =>
+  response.value
+    ? `${response.value.product.humanReadableName} data from ${response.value.site.humanReadableName}`
+    : undefined
+);
 
 const isActrisObject = computed(() => {
   if (!response.value) {
