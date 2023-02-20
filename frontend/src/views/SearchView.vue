@@ -251,6 +251,7 @@ div.checkbox
   text-align: center
   padding: 0.2em
   margin-left: 0.5em
+  border-radius: .25rem
 
 .volatile
   background: #cad7ff

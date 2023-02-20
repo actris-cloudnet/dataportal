@@ -14,6 +14,7 @@ export interface Props {
   fields: Field[];
   currentPage: number;
   perPage: number;
+  busy: boolean;
 }
 
 const props = defineProps<Props>();
@@ -47,6 +48,10 @@ table
   border-collapse: collapse
   width: 100%
 
+  &[aria-busy=true]
+    opacity: .5
+    pointer-events: none
+
 th
   padding: $header-padding $cell-padding
 
@@ -64,7 +69,7 @@ tbody tr
 </style>
 
 <template>
-  <table>
+  <table :aria-busy="busy">
     <thead>
       <tr>
         <th v-for="field in fields" :key="field.key">
