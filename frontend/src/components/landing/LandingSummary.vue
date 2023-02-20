@@ -49,6 +49,7 @@ import DataOrigin from "./DataOrigin.vue";
 import Preview from "./FilePreview.vue";
 import Citation from "./FileCitation.vue";
 import type { SourceFile, FileResponse } from "@/views/FileView.vue";
+import { useTitle } from "@/router";
 
 export interface Props {
   response: FileResponse;
@@ -61,9 +62,12 @@ export interface Props {
   sourceFiles: SourceFile[];
   visualizations: VisualizationItem[];
   loadingVisualizations: boolean;
+  title: string;
 }
 
 const props = defineProps<Props>();
+
+useTitle(["Summary", props.title]);
 
 const visualization = computed(() => {
   if (props.visualizations && props.visualizations.length > 0) {

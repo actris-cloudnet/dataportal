@@ -105,6 +105,7 @@
         :sourceFiles="sourceFiles"
         :visualizations="visualizations"
         :loadingVisualizations="loadingVisualizations"
+        :title="title"
       />
     </div>
   </main>
@@ -157,10 +158,6 @@ const title = computed(() => {
   } else {
     return `${response.value.product.humanReadableName} data from ${response.value.site.humanReadableName}`;
   }
-});
-
-watchEffect(() => {
-  document.title = title.value;
 });
 
 const isActrisObject = computed(() => {

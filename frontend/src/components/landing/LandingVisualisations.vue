@@ -27,13 +27,17 @@ import { computed } from "vue";
 import type { FileResponse } from "@/views/FileView.vue";
 import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
 import Visualization from "../ImageVisualization.vue";
+import { useTitle } from "@/router";
 
 export interface Props {
   response: FileResponse;
   visualizations: VisualizationItem[];
+  title: string;
 }
 
 const props = defineProps<Props>();
+
+useTitle(["Visualisations", props.title]);
 
 const maxMarginLeft = computed(() => {
   let max = 0;

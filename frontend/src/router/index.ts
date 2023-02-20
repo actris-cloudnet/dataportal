@@ -1,3 +1,4 @@
+import { watch, computed, ref, type Ref } from "vue";
 import { createRouter, createWebHistory } from "vue-router";
 
 const router = createRouter({
@@ -6,16 +7,13 @@ const router = createRouter({
     {
       path: "/",
       name: "Frontpage",
-      meta: {
-        title: "Cloudnet Data Portal",
-      },
       component: () => import("../views/FrontpageView.vue"),
     },
     {
       path: "/privacy",
       name: "Privacy Policy",
       meta: {
-        title: "Cloudnet privacy policy",
+        title: "Privacy policy",
       },
       component: () => import("../views/PrivacyPolicyView.vue"),
     },
@@ -23,7 +21,7 @@ const router = createRouter({
       path: "/data-availability",
       name: "Data Availability",
       meta: {
-        title: "Cloudnet Data Availability",
+        title: "Data availability",
       },
       component: () => import("../views/DataAvailabilityView.vue"),
     },
@@ -33,26 +31,27 @@ const router = createRouter({
     },
     {
       path: "/file/:uuid",
-      meta: {
-        title: "Cloudnet Data Object",
-      },
       component: () => import("../views/FileView.vue"),
       props: true,
+      meta: { title: false },
       children: [
         {
           path: "",
           name: "File",
+          meta: { title: false },
           component: () => import("../components/landing/LandingSummary.vue"),
         },
         {
           path: "visualizations",
           name: "FileVisualizations",
+          meta: { title: false },
           component: () =>
             import("../components/landing/LandingVisualisations.vue"),
         },
         {
           path: "quality",
           name: "FileQualityReport",
+          meta: { title: false },
           component: () =>
             import("../components/landing/LandingQualityReport.vue"),
         },
@@ -68,7 +67,7 @@ const router = createRouter({
       path: "/search/:mode",
       name: "Search",
       meta: {
-        title: "Cloudnet Search",
+        title: "Search",
       },
       component: () => import("../views/SearchView.vue"),
       props: true,
@@ -77,7 +76,7 @@ const router = createRouter({
       path: "/sites",
       name: "Sites",
       meta: {
-        title: "Cloudnet Sites",
+        title: "Measurement sites",
       },
       component: () => import("../views/SitesView.vue"),
       props: true,
@@ -85,9 +84,7 @@ const router = createRouter({
     {
       path: "/site/:siteid",
       name: "Site",
-      meta: {
-        title: "Cloudnet Site",
-      },
+      meta: { title: false },
       component: () => import("../views/SiteView.vue"),
       props: true,
     },
@@ -95,7 +92,7 @@ const router = createRouter({
       path: "/collection/:uuid/:mode?",
       name: "Collection",
       meta: {
-        title: "Cloudnet Collection",
+        title: "Collection",
       },
       component: () => import("../views/CollectionView.vue"),
       props: (to) => ({
@@ -107,7 +104,7 @@ const router = createRouter({
       path: "/stats",
       name: "Download statistics",
       meta: {
-        title: "Cloudnet Download statistics",
+        title: "Download statistics",
       },
       component: () => import("../views/StatsView.vue"),
       props: true,
@@ -116,7 +113,7 @@ const router = createRouter({
       path: "/publications",
       name: "Cloudnet Publications",
       meta: {
-        title: "Cloudnet Publications",
+        title: "Publications",
       },
       component: () => import("../views/PublicationsView.vue"),
       props: true,
@@ -138,9 +135,28 @@ const router = createRouter({
   ],
 });
 
+const baseTitle = "Cloudnet data portal";
+
+function setTitle(parts: string[]) {
+  document.title = [...parts, baseTitle].join(" – ");
+}
+
 router.beforeEach((to) => {
-  document.title =
-    typeof to.meta.title == "string" ? to.meta.title : "Cloudnet Data Portal";
+  if (typeof to.meta.title === "string") {
+    setTitle([to.meta.title]);
+  } else if (typeof to.meta.title === "undefined") {
+    setTitle([]);
+  }
 });
+
+type TitleParts = (string | undefined)[];
+
+export function useTitle(parts: TitleParts | Ref<TitleParts>) {
+  watch(
+    typeof parts === "function" ? computed<TitleParts>(parts) : ref(parts),
+    (parts) => setTitle(parts.filter((x): x is string => !!x)),
+    { immediate: true }
+  );
+}
 
 export default router;
