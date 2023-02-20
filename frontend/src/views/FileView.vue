@@ -119,7 +119,6 @@ import {
   fetchInstrumentName,
   compareValues,
 } from "../lib";
-import { DevMode } from "../lib/DevMode";
 import type { RegularFile, ModelFile } from "@shared/entity/File";
 import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
 import type { SiteType } from "@shared/entity/Site";
@@ -140,7 +139,6 @@ export type FileResponse = ModelFile | RegularFile;
 const props = defineProps<Props>();
 
 const apiUrl = import.meta.env.VITE_BACKEND_URL;
-const devMode = new DevMode();
 
 const response = ref<FileResponse | null>(null);
 const visualizations = ref<VisualizationItem[]>([]);
@@ -182,12 +180,9 @@ const newestVersion = computed(() => {
   return versions.value[0];
 });
 
-async function fetchVisualizations(payload: {}) {
+async function fetchVisualizations() {
   try {
-    const response = await axios.get(
-      `${apiUrl}visualizations/${props.uuid}`,
-      payload
-    );
+    const response = await axios.get(`${apiUrl}visualizations/${props.uuid}`);
     visualizations.value = sortVisualizations(response.data.visualizations);
   } catch (error) {
     console.error(error);
@@ -195,9 +190,9 @@ async function fetchVisualizations(payload: {}) {
   loadingVisualizations.value = false;
 }
 
-async function fetchFileMetadata(payload: {}) {
+async function fetchFileMetadata() {
   try {
-    const res = await axios.get(`${apiUrl}files/${props.uuid}`, payload);
+    const res = await axios.get(`${apiUrl}files/${props.uuid}`);
     response.value = res.data;
     if (response.value) {
       await fetchLocation(response.value);
@@ -228,7 +223,6 @@ function fetchVersions(file: File) {
   if (versions.value.includes(file.uuid)) return;
   const payload = {
     params: {
-      developer: devMode.activated || undefined,
       filename: file.filename,
       allVersions: true,
       showLegacy: true,
@@ -281,12 +275,11 @@ watch(
   () => props.uuid,
   async () => {
     isBusy.value = true;
-    const payload = { params: { developer: devMode.activated || undefined } };
-    await fetchFileMetadata(payload);
+    await fetchFileMetadata();
     if (response.value == null || error.value) return;
     await Promise.all([
       fetchInstrument(response.value),
-      fetchVisualizations(payload),
+      fetchVisualizations(),
       fetchVersions(response.value),
       fetchSourceFiles(response.value),
     ]);

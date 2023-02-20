@@ -61,7 +61,6 @@
       :show-labels="false"
       :multiple="multiple"
       :hideSelected="false"
-      @search-change="isIddqd"
     >
       <template #tag="slotProps">
         <span class="multiselect__tag">
@@ -107,7 +106,6 @@
 
 <script lang="ts" setup>
 import VueMultiselect from "vue-multiselect";
-import { DevMode } from "../lib/DevMode";
 import { notEmpty } from "../lib";
 import { computed } from "vue";
 import type { PropType } from "vue";
@@ -126,7 +124,6 @@ const props = defineProps({
   label: { required: true, type: String },
   options: { required: true, type: Array as PropType<Option[]> },
   getIcon: { required: false, type: Function },
-  devMode: { required: false, type: DevMode },
   multiple: Boolean,
   // Nullable workaround: https://github.com/vuejs/core/issues/3948
   modelValue: {
@@ -166,10 +163,4 @@ const value = computed({
     );
   },
 });
-
-function isIddqd(target: string) {
-  if (props.devMode && target == "iddqd") {
-    props.devMode.enable();
-  }
-}
 </script>

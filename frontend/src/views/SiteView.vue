@@ -287,7 +287,6 @@ import {
   fetchInstrumentName,
   actrisNfUrl,
 } from "../lib";
-import { DevMode } from "../lib/DevMode";
 import { parseDataStatus, type DataStatus } from "../lib/DataStatusParser";
 import CustomMultiselect from "../components/MultiSelect.vue";
 import type { ReducedMetadataResponse } from "@shared/entity/ReducedMetadataResponse";
@@ -323,16 +322,14 @@ const instrumentsStatus = ref<"loading" | "error" | "ready">("loading");
 const selectedProductId = ref<string | null>(null);
 const mapKey = ref(0);
 const busy = ref(false);
-const devMode = new DevMode();
 const dataStatus = ref<DataStatus | null>(null);
-const payload = { developer: devMode.activated };
 const nfName = ref<string>();
 const nfLink = ref<string>();
 const locations = ref<LocationsResult>({ status: "loading" });
 
 onMounted(() => {
   axios
-    .get(`${apiUrl}sites/${props.siteid}`, { params: payload })
+    .get(`${apiUrl}sites/${props.siteid}`)
     .then((res) => {
       response.value = res.data;
       if (response.value?.type.includes("mobile" as SiteType)) {
@@ -364,8 +361,9 @@ onMounted(() => {
   axios
     .get(`${apiUrl}search/`, {
       params: {
-        ...payload,
-        ...{ site: props.siteid, product: ["radar", "lidar", "mwr"], limit: 1 },
+        site: props.siteid,
+        product: ["radar", "lidar", "mwr"],
+        limit: 1,
       },
     })
     .then(({ data }) => (latestFile.value = data[0]))
@@ -430,7 +428,6 @@ async function initDataStatusParser(product: string | null = null) {
   const payload = {
     site: props.siteid,
     showLegacy: true,
-    developer: devMode.activated,
     product: product,
     properties,
   };
@@ -462,7 +459,7 @@ async function loadInstruments() {
   const dateFrom = new Date();
   dateFrom.setDate(dateFrom.getDate() - instrumentsFromLastDays);
   const res = await axios.get(`${apiUrl}uploaded-metadata/`, {
-    params: { ...payload, ...{ site: props.siteid, updatedAtFrom: dateFrom } },
+    params: { site: props.siteid, updatedAtFrom: dateFrom },
   });
   instruments.value = await Promise.all(res.data.map(handleInstrument));
   instrumentsStatus.value = "ready";

@@ -266,13 +266,6 @@ div.checkbox
     id="search"
     :class="mainWidth"
   >
-    <div v-if="devMode.activated" class="note rednote">
-      You are using the dataportal in developer mode. Files from sites in
-      testing mode are now visible.
-      <span class="close_x" id="disableDevMode" @click="devMode.disable()"
-        >Deactivate</span
-      >
-    </div>
     <div v-if="error" class="note rednote">
       Error: Search backend is offline, {{ error }}
     </div>
@@ -301,7 +294,6 @@ div.checkbox
         :class="{ widemapmarginleft: showAllSites }"
         :multiple="true"
         :getIcon="getMarkerIcon"
-        :devMode="devMode"
       />
       <div class="checkbox">
         <input
@@ -439,7 +431,6 @@ div.checkbox
         id="productSelect"
         :multiple="true"
         :getIcon="getProductIcon"
-        :devMode="devMode"
       />
       <div class="checkbox">
         <input
@@ -524,7 +515,6 @@ import {
   isValidDate,
   getMarkerIcon,
 } from "../lib";
-import { DevMode } from "../lib/DevMode";
 import VizSearchResult from "../components/VizSearchResult.vue";
 import type { Product } from "@shared/entity/Product";
 import type { SearchFileResponse } from "@shared/entity/SearchFileResponse";
@@ -609,7 +599,6 @@ const renderComplete = ref(false);
 const displayKeyInfo = ref(showKeyInfo());
 const vizWideMode = ref(false);
 const error = ref(null);
-const devMode = new DevMode();
 
 // keys
 const dateFromUpdate = ref(10000);
@@ -657,13 +646,12 @@ onMounted(async () => {
 });
 
 async function initView() {
-  const payload = { developer: devMode.activated || undefined };
   const sitesPayload = {
-    params: { ...payload, ...{ type: ["cloudnet", "campaign", "arm"] } },
+    params: { type: ["cloudnet", "campaign", "arm"] },
   };
   await Promise.all([
     axios.get(`${apiUrl}sites/`, sitesPayload),
-    axios.get(`${apiUrl}products/variables`, { params: payload }),
+    axios.get(`${apiUrl}products/variables`),
   ]).then(([sites, products]) => {
     allSites.value = sites.data
       .sort(alphabeticalSort)
@@ -914,7 +902,6 @@ const payload = computed(() => {
         : allProducts.value.map((prod) => prod.id),
       variable: isVizMode.value ? selectedVariableIds.value : undefined,
       showLegacy: true,
-      developer: devMode.activated || undefined,
     },
   };
 });
@@ -986,14 +973,6 @@ watch(
   async () => {
     replaceUrlQueryString({ variable: selectedVariableIds.value });
     await fetchData();
-  }
-);
-
-watch(
-  () => devMode.activated,
-  async () => {
-    await initView();
-    mapKey.value = mapKey.value + 1;
   }
 );
 
