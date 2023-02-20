@@ -98,12 +98,16 @@ import { computed, ref, watch } from "vue";
 
 import Donut from "../DonutVisualization.vue";
 import { humanReadableTimestamp, getQcIcon } from "../../lib";
+import { useTitle } from "@/router";
 
 export interface Props {
   uuid: string;
+  title: string;
 }
 
 const props = defineProps<Props>();
+
+useTitle(["Quality report", props.title]);
 
 interface Exception {
   result: string;

@@ -293,6 +293,7 @@ import type { ReducedMetadataResponse } from "@shared/entity/ReducedMetadataResp
 import TrackMap, { type Point } from "../components/TrackMap.vue";
 import ApiError from "./ApiError.vue";
 import backIcon from "../assets/icons/back.png";
+import { useTitle } from "@/router";
 
 export interface Props {
   siteid: string;
@@ -326,6 +327,13 @@ const dataStatus = ref<DataStatus | null>(null);
 const nfName = ref<string>();
 const nfLink = ref<string>();
 const locations = ref<LocationsResult>({ status: "loading" });
+
+const title = computed(() => [
+  response.value?.humanReadableName,
+  "Measurement sites",
+]);
+
+useTitle(title);
 
 onMounted(() => {
   axios
