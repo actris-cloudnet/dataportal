@@ -23,6 +23,7 @@ COPY frontend /app
 COPY shared /shared
 
 ARG BACKEND_URL
+RUN test -n "$BACKEND_URL" || (echo "BACKEND_URL not set" && false)
 ENV VITE_BACKEND_URL=$BACKEND_URL
 ENV NODE_ENV=production
 RUN npm run build
