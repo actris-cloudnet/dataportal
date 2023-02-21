@@ -1,5 +1,5 @@
 <style scoped lang="sass">
-@import "../../sass/landing-beta.sass"
+@import "@/sass/landing-beta.sass"
 
 .placeholder
   color: $GRAY-3-hex
@@ -22,7 +22,7 @@
 
 <script lang="ts" setup>
 import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
-import Visualization from "../ImageVisualization.vue";
+import Visualization from "@/components/ImageVisualization.vue";
 
 export interface Props {
   visualization: VisualizationItem | null;

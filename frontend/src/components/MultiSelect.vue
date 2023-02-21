@@ -1,7 +1,7 @@
 <style src="vue-multiselect/dist/vue-multiselect.css"></style>
 
 <style lang="sass">
-@import "../sass/variables.sass"
+@import "@/sass/variables.sass"
 
 .nobottommargin
   margin-top: 15px
@@ -106,7 +106,7 @@
 
 <script lang="ts" setup>
 import VueMultiselect from "vue-multiselect";
-import { notEmpty } from "../lib";
+import { notEmpty } from "@/lib";
 import { computed } from "vue";
 import type { PropType } from "vue";
 

@@ -1,5 +1,5 @@
 <style scoped lang="sass">
-@import "../../sass/landing-beta.sass"
+@import "@/sass/landing-beta.sass"
 </style>
 
 <template>
@@ -26,7 +26,7 @@
 import { computed } from "vue";
 import type { FileResponse } from "@/views/FileView.vue";
 import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
-import Visualization from "../ImageVisualization.vue";
+import Visualization from "@/components/ImageVisualization.vue";
 import { useTitle } from "@/router";
 
 export interface Props {

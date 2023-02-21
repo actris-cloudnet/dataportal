@@ -1,8 +1,8 @@
 <style scoped lang="sass">
-@import "../sass/variables.sass"
-@import "../sass/global.sass"
-@import "../sass/landing.sass"
-@import "../sass/spinner.sass"
+@import "@/sass/variables.sass"
+@import "@/sass/global.sass"
+@import "@/sass/landing.sass"
+@import "@/sass/spinner.sass"
 
 .forcewrap
   flex-basis: 100%
@@ -278,21 +278,21 @@ import { onMounted, ref, watch, computed } from "vue";
 import axios from "axios";
 import type { Site, SiteType } from "@shared/entity/Site";
 import type { SearchFileResponse } from "@shared/entity/SearchFileResponse";
-import MyMap from "../components/SuperMap.vue";
-import ProductAvailabilityVisualization from "../components/ProductAvailabilityVisualization.vue";
-import ProductAvailabilityVisualizationSingle from "../components/ProductAvailabilityVisualizationSingle.vue";
+import MyMap from "@/components/SuperMap.vue";
+import ProductAvailabilityVisualization from "@/components/ProductAvailabilityVisualization.vue";
+import ProductAvailabilityVisualizationSingle from "@/components/ProductAvailabilityVisualizationSingle.vue";
 import {
   getProductIcon,
   formatCoordinates,
   fetchInstrumentName,
   actrisNfUrl,
-} from "../lib";
-import { parseDataStatus, type DataStatus } from "../lib/DataStatusParser";
-import CustomMultiselect from "../components/MultiSelect.vue";
+} from "@/lib";
+import { parseDataStatus, type DataStatus } from "@/lib/DataStatusParser";
+import CustomMultiselect from "@/components/MultiSelect.vue";
 import type { ReducedMetadataResponse } from "@shared/entity/ReducedMetadataResponse";
-import TrackMap, { type Point } from "../components/TrackMap.vue";
+import TrackMap, { type Point } from "@/components/TrackMap.vue";
 import ApiError from "./ApiError.vue";
-import backIcon from "../assets/icons/back.png";
+import backIcon from "@/assets/icons/back.png";
 import { useTitle } from "@/router";
 
 export interface Props {

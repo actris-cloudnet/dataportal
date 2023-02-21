@@ -1,5 +1,5 @@
 <style scoped lang="sass">
-@import "../../sass/landing-beta.sass"
+@import "@/sass/landing-beta.sass"
 
 .citation-note
   padding-left: calc($basespacing/2)
@@ -126,7 +126,7 @@ import axios from "axios";
 
 import type { FileResponse } from "@/views/FileView.vue";
 
-import warningIcon from "../../assets/icons/test-warning-mono.svg";
+import warningIcon from "@/assets/icons/test-warning-mono.svg";
 
 export interface Props {
   uuid: string;

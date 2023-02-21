@@ -39,7 +39,7 @@ function selectRow(row: any) {
 </script>
 
 <style lang="sass" scoped>
-@import "../sass/variables.sass"
+@import "@/sass/variables.sass"
 
 $cell-padding: 9px
 $header-padding: 5px

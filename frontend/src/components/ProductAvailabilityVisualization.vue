@@ -1,8 +1,8 @@
 <style scoped lang="sass">
-@import "../sass/variables.sass"
-@import "../sass/global.sass"
-@import "../sass/spinner.sass"
-@import "../sass/availability.sass"
+@import "@/sass/variables.sass"
+@import "@/sass/global.sass"
+@import "@/sass/spinner.sass"
+@import "@/sass/availability.sass"
 
 .dataviz-date
   width: calc(1%/3.66)
@@ -57,10 +57,10 @@
         background-size: contain
 
       li.productitem.found::before
-        background-image: url('../assets/icons/test-pass.svg')
+        background-image: url('@/assets/icons/test-pass.svg')
 
       li.productitem:not(.found)::before
-        background-image: url('../assets/icons/test-missing.svg')
+        background-image: url('@/assets/icons/test-missing.svg')
 
       // Quality:
 
@@ -71,22 +71,22 @@
         background-size: contain
 
       li.qualityitem:not(.found).na::before
-        background-image: url('../assets/icons/test-missing.svg')
+        background-image: url('@/assets/icons/test-missing.svg')
 
       li.qualityitem:not(.found)::before
-        background-image: url('../assets/icons/test-fail.svg')
+        background-image: url('@/assets/icons/test-fail.svg')
 
       li.qualityitem.found::before
-        background-image: url('../assets/icons/test-pass.svg')
+        background-image: url('@/assets/icons/test-pass.svg')
 
       li.qualityitem.info::before
-        background-image: url('../assets/icons/test-info.svg')
+        background-image: url('@/assets/icons/test-info.svg')
 
       li.qualityitem.warning::before
-        background-image: url('../assets/icons/test-warning.svg')
+        background-image: url('@/assets/icons/test-warning.svg')
 
       li.qualityitem.error::before
-        background-image: url('../assets/icons/test-fail.svg')
+        background-image: url('@/assets/icons/test-fail.svg')
 
 
 .dataviz-date:hover .dataviz-tooltip
@@ -279,7 +279,7 @@
 </template>
 
 <script lang="ts" setup>
-import { idToHumanReadable, type ColorClass } from "../lib";
+import { idToHumanReadable, type ColorClass } from "@/lib";
 import type { Product } from "@shared/entity/Product";
 import type {
   DataStatus,

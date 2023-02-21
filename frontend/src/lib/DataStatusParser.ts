@@ -1,4 +1,4 @@
-import { dateToString, notEmpty } from "../lib/index";
+import { dateToString, notEmpty } from "@/lib/index";
 import type { Product } from "@shared/entity/Product";
 import axios from "axios";
 import type { SearchFileResponse } from "@shared/entity/SearchFileResponse";

@@ -69,7 +69,7 @@ const visiblePages = computed(() => {
 </template>
 
 <style lang="sass" scoped>
-@import "../sass/variables.sass"
+@import "@/sass/variables.sass"
 
 button
   border: none

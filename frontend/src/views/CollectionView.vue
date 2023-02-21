@@ -1,7 +1,7 @@
 <style scoped lang="sass">
-@import "../sass/variables.sass"
-@import "../sass/global.sass"
-@import "../sass/landing.sass"
+@import "@/sass/variables.sass"
+@import "@/sass/global.sass"
+@import "@/sass/landing.sass"
 
 div.flex
   display: flex
@@ -178,17 +178,17 @@ import {
   constructTitle,
   getProductIcon,
   humanReadableSize,
-} from "../lib";
+} from "@/lib";
 import type { Site } from "@shared/entity/Site";
-import MyMap from "../components/SuperMap.vue";
+import MyMap from "@/components/SuperMap.vue";
 import type { Product } from "@shared/entity/Product";
-import DataSearchResult from "../components/DataSearchResult.vue";
-import HowToCite from "../components/HowToCite.vue";
-import License from "../components/LicenseInfo.vue";
+import DataSearchResult from "@/components/DataSearchResult.vue";
+import HowToCite from "@/components/HowToCite.vue";
+import License from "@/components/LicenseInfo.vue";
 import type { CollectionFileResponse } from "@shared/entity/CollectionFileResponse";
 import type { Model } from "@shared/entity/Model";
 import ApiError from "./ApiError.vue";
-import backIcon from "../assets/icons/back.png";
+import backIcon from "@/assets/icons/back.png";
 
 export interface Props {
   uuid: string;

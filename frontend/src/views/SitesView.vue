@@ -1,5 +1,5 @@
 <style lang="sass">
-@import "../sass/variables.sass"
+@import "@/sass/variables.sass"
 
 h1
   margin-bottom: 3rem
@@ -84,7 +84,7 @@ h2
 <script lang="ts" setup>
 import type { Site, SiteType } from "@shared/entity/Site";
 import axios from "axios";
-import { formatLatitude, formatLongitude } from "../lib";
+import { formatLatitude, formatLongitude } from "@/lib";
 import { ref, onMounted } from "vue";
 
 type SitesState =

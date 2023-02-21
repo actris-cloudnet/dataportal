@@ -1,5 +1,5 @@
 <style scoped lang="sass">
-@import "../sass/variables.sass"
+@import "@/sass/variables.sass"
 
 h1
   margin-bottom: 4rem

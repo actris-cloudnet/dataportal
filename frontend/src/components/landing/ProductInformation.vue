@@ -1,5 +1,5 @@
 <style scoped lang="sass">
-@import "../../sass/landing-beta.sass"
+@import "@/sass/landing-beta.sass"
 .summary-section-header-container
   display: flex
   flex-direction: row
@@ -133,7 +133,7 @@ import {
   getQcLink,
   getQcText,
   formatCoordinates,
-} from "../../lib";
+} from "@/lib";
 
 export interface Props {
   response: FileResponse;

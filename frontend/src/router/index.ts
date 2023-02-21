@@ -7,7 +7,7 @@ const router = createRouter({
     {
       path: "/",
       name: "Frontpage",
-      component: () => import("../views/FrontpageView.vue"),
+      component: () => import("@/views/FrontpageView.vue"),
     },
     {
       path: "/privacy",
@@ -15,7 +15,7 @@ const router = createRouter({
       meta: {
         title: "Privacy policy",
       },
-      component: () => import("../views/PrivacyPolicyView.vue"),
+      component: () => import("@/views/PrivacyPolicyView.vue"),
     },
     {
       path: "/data-availability",
@@ -23,7 +23,7 @@ const router = createRouter({
       meta: {
         title: "Data availability",
       },
-      component: () => import("../views/DataAvailabilityView.vue"),
+      component: () => import("@/views/DataAvailabilityView.vue"),
     },
     {
       path: "/search",
@@ -31,7 +31,7 @@ const router = createRouter({
     },
     {
       path: "/file/:uuid",
-      component: () => import("../views/FileView.vue"),
+      component: () => import("@/views/FileView.vue"),
       props: true,
       meta: { title: false },
       children: [
@@ -39,21 +39,21 @@ const router = createRouter({
           path: "",
           name: "File",
           meta: { title: false },
-          component: () => import("../components/landing/LandingSummary.vue"),
+          component: () => import("@/components/landing/LandingSummary.vue"),
         },
         {
           path: "visualizations",
           name: "FileVisualizations",
           meta: { title: false },
           component: () =>
-            import("../components/landing/LandingVisualisations.vue"),
+            import("@/components/landing/LandingVisualisations.vue"),
         },
         {
           path: "quality",
           name: "FileQualityReport",
           meta: { title: false },
           component: () =>
-            import("../components/landing/LandingQualityReport.vue"),
+            import("@/components/landing/LandingQualityReport.vue"),
         },
       ],
     },
@@ -69,7 +69,7 @@ const router = createRouter({
       meta: {
         title: "Search",
       },
-      component: () => import("../views/SearchView.vue"),
+      component: () => import("@/views/SearchView.vue"),
       props: true,
     },
     {
@@ -78,14 +78,14 @@ const router = createRouter({
       meta: {
         title: "Measurement sites",
       },
-      component: () => import("../views/SitesView.vue"),
+      component: () => import("@/views/SitesView.vue"),
       props: true,
     },
     {
       path: "/site/:siteid",
       name: "Site",
       meta: { title: false },
-      component: () => import("../views/SiteView.vue"),
+      component: () => import("@/views/SiteView.vue"),
       props: true,
     },
     {
@@ -94,7 +94,7 @@ const router = createRouter({
       meta: {
         title: "Collection",
       },
-      component: () => import("../views/CollectionView.vue"),
+      component: () => import("@/views/CollectionView.vue"),
       props: (to) => ({
         ...to.params,
         mode: to.params.mode || "general",
@@ -106,7 +106,7 @@ const router = createRouter({
       meta: {
         title: "Download statistics",
       },
-      component: () => import("../views/StatsView.vue"),
+      component: () => import("@/views/StatsView.vue"),
       props: true,
     },
     {
@@ -115,7 +115,7 @@ const router = createRouter({
       meta: {
         title: "Publications",
       },
-      component: () => import("../views/PublicationsView.vue"),
+      component: () => import("@/views/PublicationsView.vue"),
       props: true,
     },
     {
@@ -124,7 +124,7 @@ const router = createRouter({
       meta: {
         title: "Not Found",
       },
-      component: () => import("../views/ApiError.vue"),
+      component: () => import("@/views/ApiError.vue"),
       props: {
         response: {
           status: 404,

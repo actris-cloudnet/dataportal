@@ -1,5 +1,5 @@
 <style scoped lang="sass">
-@import "../../sass/landing-beta.sass"
+@import "@/sass/landing-beta.sass"
 </style>
 
 <template>
@@ -96,8 +96,8 @@ import axios from "axios";
 import escapeHtml from "escape-html";
 import { computed, ref, watch } from "vue";
 
-import Donut from "../DonutVisualization.vue";
-import { humanReadableTimestamp, getQcIcon } from "../../lib";
+import Donut from "@/components/DonutVisualization.vue";
+import { humanReadableTimestamp, getQcIcon } from "@/lib";
 import { useTitle } from "@/router";
 
 export interface Props {

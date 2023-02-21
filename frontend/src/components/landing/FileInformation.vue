@@ -1,5 +1,5 @@
 <style scoped lang="sass">
-@import "../../sass/landing-beta.sass"
+@import "@/sass/landing-beta.sass"
 </style>
 
 <template>
@@ -49,7 +49,7 @@
 
 <script lang="ts" setup>
 import type { FileResponse } from "@/views/FileView.vue";
-import { humanReadableSize, humanReadableTimestamp } from "../../lib";
+import { humanReadableSize, humanReadableTimestamp } from "@/lib";
 import Copyable from "./CopyableText.vue";
 
 export interface Props {

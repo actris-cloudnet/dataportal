@@ -1,6 +1,6 @@
 <style lang="sass">
-@import "../sass/variables.sass"
-@import "../sass/global.sass"
+@import "@/sass/variables.sass"
+@import "@/sass/global.sass"
 @import "leaflet/dist/leaflet.css"
 @import "leaflet-draw/dist/leaflet.draw.css"
 
@@ -103,8 +103,8 @@ import {
 import L from "leaflet";
 import "leaflet-draw";
 import type { Site, SiteType } from "@shared/entity/Site";
-import { getMarkerIcon } from "../lib";
-import shadowIcon from "../assets/markers/marker-shadow.png";
+import { getMarkerIcon } from "@/lib";
+import shadowIcon from "@/assets/markers/marker-shadow.png";
 
 export interface Props {
   sites: Site[];

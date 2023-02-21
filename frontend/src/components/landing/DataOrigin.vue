@@ -1,5 +1,5 @@
 <style scoped lang="sass">
-@import "../../sass/landing-beta.sass"
+@import "@/sass/landing-beta.sass"
 </style>
 
 <template>
@@ -104,7 +104,7 @@
 
 <script lang="ts" setup>
 import { computed } from "vue";
-import { getProductIcon } from "../../lib";
+import { getProductIcon } from "@/lib";
 import type { FileResponse, SourceFile } from "@/views/FileView.vue";
 
 export interface Props {

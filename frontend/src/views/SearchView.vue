@@ -1,6 +1,6 @@
 <style lang="sass">
-@import "../sass/variables.sass"
-@import "../sass/global.sass"
+@import "@/sass/variables.sass"
+@import "@/sass/global.sass"
 
 $lightpadding: 1em
 $heavypadding: 5em
@@ -501,10 +501,10 @@ export default {
 import { ref, computed, onMounted, nextTick, watch } from "vue";
 import axios from "axios";
 import type { Site } from "@shared/entity/Site";
-import Datepicker, { type DateErrors } from "../components/DatePicker.vue";
-import CustomMultiselect from "../components/MultiSelect.vue";
-import type { Option } from "../components/MultiSelect.vue";
-import DataSearchResult from "../components/DataSearchResult.vue";
+import Datepicker, { type DateErrors } from "@/components/DatePicker.vue";
+import CustomMultiselect from "@/components/MultiSelect.vue";
+import type { Option } from "@/components/MultiSelect.vue";
+import DataSearchResult from "@/components/DataSearchResult.vue";
 import {
   constructTitle,
   dateToString,
@@ -514,17 +514,17 @@ import {
   isSameDay,
   isValidDate,
   getMarkerIcon,
-} from "../lib";
-import VizSearchResult from "../components/VizSearchResult.vue";
+} from "@/lib";
+import VizSearchResult from "@/components/VizSearchResult.vue";
 import type { Product } from "@shared/entity/Product";
 import type { SearchFileResponse } from "@shared/entity/SearchFileResponse";
-import MyMap from "../components/SuperMap.vue";
+import MyMap from "@/components/SuperMap.vue";
 import { useRoute, useRouter } from "vue-router";
 import ApiError from "./ApiError.vue";
 
-import datePreviousIcon from "../assets/icons/date-previous.png";
-import dateNextIcon from "../assets/icons/date-next.png";
-import infoIcon from "../assets/icons/info.png";
+import datePreviousIcon from "@/assets/icons/date-previous.png";
+import dateNextIcon from "@/assets/icons/date-next.png";
+import infoIcon from "@/assets/icons/info.png";
 import type { VisualizationResponse } from "@shared/entity/VisualizationResponse";
 
 export interface Props {

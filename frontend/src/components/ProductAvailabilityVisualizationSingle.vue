@@ -1,8 +1,8 @@
 <style scoped lang="sass">
-@import "../sass/variables.sass"
-@import "../sass/global.sass"
-@import "../sass/spinner.sass"
-@import "../sass/availability.sass"
+@import "@/sass/variables.sass"
+@import "@/sass/global.sass"
+@import "@/sass/spinner.sass"
+@import "@/sass/availability.sass"
 
 .dataviz-date
   width: calc(1%/3.66)
@@ -138,12 +138,12 @@ import {
   noData,
 } from "@/lib/ProductAvailabilityTools";
 
-import testPassIcon from "../assets/icons/test-pass.svg";
-import testWarningIcon from "../assets/icons/test-warning.svg";
-import testFailIcon from "../assets/icons/test-fail.svg";
-import testInfoIcon from "../assets/icons/test-info.svg";
-import legacyPassIcon from "../assets/icons/legacy-pass.svg";
-import testMissingIcon from "../assets/icons/test-missing.svg";
+import testPassIcon from "@/assets/icons/test-pass.svg";
+import testWarningIcon from "@/assets/icons/test-warning.svg";
+import testFailIcon from "@/assets/icons/test-fail.svg";
+import testInfoIcon from "@/assets/icons/test-info.svg";
+import legacyPassIcon from "@/assets/icons/legacy-pass.svg";
+import testMissingIcon from "@/assets/icons/test-missing.svg";
 
 export interface Props {
   site: string;

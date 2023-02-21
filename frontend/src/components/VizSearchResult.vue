@@ -1,7 +1,7 @@
 <style lang="sass">
-@import "../sass/variables.sass"
-@import "../sass/global.sass"
-@import "../sass/visualizations.sass"
+@import "@/sass/variables.sass"
+@import "@/sass/global.sass"
+@import "@/sass/visualizations.sass"
 
 main#vizSearchResults
   width: 100%
@@ -210,7 +210,7 @@ h3 > .rowtag
 
 <script lang="ts" setup>
 import type { VisualizationResponse } from "@shared/entity/VisualizationResponse";
-import { humanReadableDate, sortVisualizations, notEmpty } from "../lib";
+import { humanReadableDate, sortVisualizations, notEmpty } from "@/lib";
 import { ref, watchEffect, computed } from "vue";
 import Visualization from "./ImageVisualization.vue";
 

@@ -160,8 +160,8 @@ import { ref, onMounted, computed } from "vue";
 import axios from "axios";
 
 import type { Site, SiteType } from "@shared/entity/Site";
-import COUNTRY_NAMES from "../assets/country-io-names.json";
-import { compareValues, notEmpty } from "../lib";
+import COUNTRY_NAMES from "@/assets/country-io-names.json";
+import { compareValues, notEmpty } from "@/lib";
 
 interface Option {
   id: string;

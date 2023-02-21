@@ -1,9 +1,9 @@
 <style scoped lang="sass">
-@import "../sass/variables.sass"
-@import "../sass/global.sass"
+@import "@/sass/variables.sass"
+@import "@/sass/global.sass"
 
 header
-  background-image: linear-gradient(to left, rgba(0,0,0,0.0), $header-background-color 70%), url('../assets/clouds3.jpg')
+  background-image: linear-gradient(to left, rgba(0,0,0,0.0), $header-background-color 70%), url('@/assets/clouds3.jpg')
   opacity: 0.7
   background-position: right 0px top 20%
   background-repeat: no-repeat

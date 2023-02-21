@@ -1,7 +1,7 @@
 <style scoped lang="sass">
-@import "../sass/variables.sass"
-@import "../sass/global.sass"
-@import "../sass/spinner.sass"
+@import "@/sass/variables.sass"
+@import "@/sass/global.sass"
+@import "@/sass/spinner.sass"
 
 .availabilityviz
   margin-bottom: 2em
@@ -89,8 +89,8 @@
 import { computed, onMounted, ref } from "vue";
 import axios from "axios";
 import type { Site, SiteType } from "@shared/entity/Site";
-import ProductAvailabilityVisualization from "../components/DataStatusVisualization.vue";
-import { parseDataStatus, type DataStatus } from "../lib/DataStatusParser";
+import ProductAvailabilityVisualization from "@/components/DataStatusVisualization.vue";
+import { parseDataStatus, type DataStatus } from "@/lib/DataStatusParser";
 
 const apiUrl = import.meta.env.VITE_BACKEND_URL;
 const sites = ref<Site[]>([]);

@@ -1,7 +1,7 @@
 <style lang="sass">
-@import "../sass/variables.sass"
-@import "../sass/global.sass"
-@import "../sass/landing.sass"
+@import "@/sass/variables.sass"
+@import "@/sass/global.sass"
+@import "@/sass/landing.sass"
 
 section#fileTable
   width: 100%
@@ -352,7 +352,7 @@ import {
   getQcIcon,
   getQcText,
   getQcLink,
-} from "../lib";
+} from "@/lib";
 import type { SearchFileResponse } from "@shared/entity/SearchFileResponse";
 import BaseTable from "./BaseTable.vue";
 import BasePagination from "./BasePagination.vue";

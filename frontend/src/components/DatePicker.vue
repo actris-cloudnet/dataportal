@@ -56,7 +56,7 @@ input.date
 
 <script lang="ts" setup>
 import { computed, watchEffect, ref } from "vue";
-import { dateToString, dateToUTC } from "../lib";
+import { dateToString, dateToUTC } from "@/lib";
 import { DatePicker as VDatePicker } from "v-calendar";
 import "v-calendar/dist/style.css";
 

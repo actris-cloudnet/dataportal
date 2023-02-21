@@ -6,31 +6,31 @@ import type { Product } from "@shared/entity/Product";
 import type { CollectionFileResponse } from "@shared/entity/CollectionFileResponse";
 import type { Site, SiteType } from "@shared/entity/Site";
 
-import categorizeIcon from "../assets/icons/categorize.png";
-import categorizeVoodooIcon from "../assets/icons/categorize-voodoo.png";
-import classificationIcon from "../assets/icons/classification.png";
-import classificationVoodooIcon from "../assets/icons/classification-voodoo.png";
-import derIcon from "../assets/icons/der.png";
-import disdrometerIcon from "../assets/icons/disdrometer.png";
-import drizzleIcon from "../assets/icons/drizzle.png";
-import ierIcon from "../assets/icons/ier.png";
-import iwcIcon from "../assets/icons/iwc.png";
-import l3CfIcon from "../assets/icons/l3-cf.png";
-import l3IwcIcon from "../assets/icons/l3-iwc.png";
-import l3LwcIcon from "../assets/icons/l3-lwc.png";
-import lidarIcon from "../assets/icons/lidar.png";
-import lwcIcon from "../assets/icons/lwc.png";
-import modelIcon from "../assets/icons/model.png";
-import mwrIcon from "../assets/icons/mwr.png";
-import radarIcon from "../assets/icons/radar.png";
-import unknownIcon from "../assets/icons/unknown.png";
-import weatherStationIcon from "../assets/icons/weather-station.png";
+import categorizeIcon from "@/assets/icons/categorize.png";
+import categorizeVoodooIcon from "@/assets/icons/categorize-voodoo.png";
+import classificationIcon from "@/assets/icons/classification.png";
+import classificationVoodooIcon from "@/assets/icons/classification-voodoo.png";
+import derIcon from "@/assets/icons/der.png";
+import disdrometerIcon from "@/assets/icons/disdrometer.png";
+import drizzleIcon from "@/assets/icons/drizzle.png";
+import ierIcon from "@/assets/icons/ier.png";
+import iwcIcon from "@/assets/icons/iwc.png";
+import l3CfIcon from "@/assets/icons/l3-cf.png";
+import l3IwcIcon from "@/assets/icons/l3-iwc.png";
+import l3LwcIcon from "@/assets/icons/l3-lwc.png";
+import lidarIcon from "@/assets/icons/lidar.png";
+import lwcIcon from "@/assets/icons/lwc.png";
+import modelIcon from "@/assets/icons/model.png";
+import mwrIcon from "@/assets/icons/mwr.png";
+import radarIcon from "@/assets/icons/radar.png";
+import unknownIcon from "@/assets/icons/unknown.png";
+import weatherStationIcon from "@/assets/icons/weather-station.png";
 
-import markerIconRed from "../assets/markers/marker-icon-red.png";
-import markerIconBlue from "../assets/markers/marker-icon-blue.png";
-import markerIconViolet from "../assets/markers/marker-icon-violet.png";
-import markerIconOrange from "../assets/markers/marker-icon-orange.png";
-import markerIconGrey from "../assets/markers/marker-icon-grey.png";
+import markerIconRed from "@/assets/markers/marker-icon-red.png";
+import markerIconBlue from "@/assets/markers/marker-icon-blue.png";
+import markerIconViolet from "@/assets/markers/marker-icon-violet.png";
+import markerIconOrange from "@/assets/markers/marker-icon-orange.png";
+import markerIconGrey from "@/assets/markers/marker-icon-grey.png";
 
 export const actrisNfUrl = "https://actris-nf-labelling.out.ocp.fmi.fi";
 
@@ -170,10 +170,10 @@ export function compareValues(a: any, b: any): number {
   return 0;
 }
 
-import testFailIcon from "../assets/icons/test-fail.svg";
-import testWarningIcon from "../assets/icons/test-warning.svg";
-import testInfoIcon from "../assets/icons/test-info.svg";
-import testPassIcon from "../assets/icons/test-pass.svg";
+import testFailIcon from "@/assets/icons/test-fail.svg";
+import testWarningIcon from "@/assets/icons/test-warning.svg";
+import testInfoIcon from "@/assets/icons/test-info.svg";
+import testPassIcon from "@/assets/icons/test-pass.svg";
 
 export function getQcIcon(errorLevel: string) {
   if (errorLevel === "error") {

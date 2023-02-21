@@ -1,5 +1,5 @@
 <style scoped lang="sass">
-@import "../sass/landing-beta.sass"
+@import "@/sass/landing-beta.sass"
 .landing-tags
   .tag
     display: flex
@@ -128,14 +128,14 @@ import {
   sortVisualizations,
   fetchInstrumentName,
   compareValues,
-} from "../lib";
+} from "@/lib";
 import type { RegularFile, ModelFile } from "@shared/entity/File";
 import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
 import type { SiteType } from "@shared/entity/Site";
 import type { SiteLocation } from "@shared/entity/SiteLocation";
 import type { File } from "@shared/entity/File";
-import DownloadButton from "../components/landing/DownloadButton.vue";
-import { getProductIcon, getQcIcon } from "../lib";
+import DownloadButton from "@/components/landing/DownloadButton.vue";
+import { getProductIcon, getQcIcon } from "@/lib";
 
 import PhotoGalleryIcon from "@/assets/icons/photo-gallery.png";
 

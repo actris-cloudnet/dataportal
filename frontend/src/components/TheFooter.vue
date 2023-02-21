@@ -1,6 +1,6 @@
 <style scoped lang="sass">
-@import "../sass/variables.sass"
-@import "../sass/global.sass"
+@import "@/sass/variables.sass"
+@import "@/sass/global.sass"
 
 footer.global
   background: #fdfdfd

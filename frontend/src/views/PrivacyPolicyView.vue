@@ -1,6 +1,6 @@
 <style scoped lang="sass">
-@import "../sass/variables.sass"
-@import "../sass/global.sass"
+@import "@/sass/variables.sass"
+@import "@/sass/global.sass"
 
 main#privacypolicy
   background-color: $landing-header
@@ -120,7 +120,7 @@ h4
       We will inform you of any material changes to this policy with a notice on
       our website.
     </p>
-    <!-- REMEMBER TO CHANGE LAST UPDATED DATE WHEN MAKING MODIFICATIONS TO THIS PAGE. SEE ../lib/ActiveConsent.ts -->
+    <!-- REMEMBER TO CHANGE LAST UPDATED DATE WHEN MAKING MODIFICATIONS TO THIS PAGE. SEE @/lib/ActiveConsent.ts -->
     <p>
       This policy has been last updated in <b>{{ lastEdited }}</b
       >.
@@ -129,7 +129,7 @@ h4
 </template>
 
 <script lang="ts" setup>
-import { ActiveConsent } from "../lib/ActiveConsent";
+import { ActiveConsent } from "@/lib/ActiveConsent";
 
 const lastEdited = new ActiveConsent().privacyPolicyEdited;
 </script>
