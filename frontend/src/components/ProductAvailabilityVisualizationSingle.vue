@@ -122,12 +122,21 @@ import type {
   ProductLevels,
   ProductYear,
   ProductDate,
-  ProductInfo,
   DataStatus,
-} from "../lib/DataStatusParser";
-import type { ColorClass } from "../lib";
+} from "@/lib/DataStatusParser";
+import type { ColorClass } from "@/lib";
 import debounce from "debounce";
 import { computed, ref } from "vue";
+
+import {
+  isLegacy,
+  isError,
+  isWarning,
+  isInfo,
+  qualityExists,
+  topQuality,
+  noData,
+} from "@/lib/ProductAvailabilityTools";
 
 import testPassIcon from "../assets/icons/test-pass.svg";
 import testWarningIcon from "../assets/icons/test-warning.svg";
@@ -176,20 +185,12 @@ function createLinkToLandingPage(products: ProductLevels): string | undefined {
   }
 }
 
-function qualityExists(prod: ProductInfo): boolean {
-  return "errorLevel" in prod && prod.errorLevel !== null;
-}
-
 function hasSomeTests(products: ProductLevels) {
   return (
     products["2"].filter(qualityExists).length > 0 ||
     products["1c"].filter(qualityExists).length > 0 ||
     products["1b"].filter(qualityExists).length > 0
   );
-}
-
-function isError(prod: ProductInfo): boolean {
-  return "errorLevel" in prod && prod.errorLevel === "error";
 }
 
 function anyProductContainsErrors(products: ProductLevels) {
@@ -200,20 +201,12 @@ function anyProductContainsErrors(products: ProductLevels) {
   );
 }
 
-function isWarning(prod: ProductInfo): boolean {
-  return "errorLevel" in prod && prod.errorLevel === "warning";
-}
-
 function anyProductContainsWarnings(products: ProductLevels) {
   return (
     products["2"].filter(isWarning).length > 0 ||
     products["1c"].filter(isWarning).length > 0 ||
     products["1b"].filter(isWarning).length > 0
   );
-}
-
-function isInfo(prod: ProductInfo): boolean {
-  return "errorLevel" in prod && prod.errorLevel === "info";
 }
 
 function anyProductContainsInfo(products: ProductLevels) {
@@ -224,27 +217,11 @@ function anyProductContainsInfo(products: ProductLevels) {
   );
 }
 
-function topQuality(prod: ProductInfo): boolean {
-  return "errorLevel" in prod && prod.errorLevel === "pass";
-}
-
 function allPass(products: ProductLevels) {
   return (
     products["2"].filter(topQuality).length == products["2"].length &&
     products["1c"].filter(topQuality).length == products["1c"].length &&
     products["1b"].filter(topQuality).length == products["1b"].length
-  );
-}
-
-function isLegacy(prod: ProductInfo): boolean {
-  return prod.legacy;
-}
-
-function noData(products: ProductLevels): boolean {
-  return (
-    products["2"].length == 0 &&
-    products["1c"].length == 0 &&
-    products["1b"].length == 0
   );
 }
 
