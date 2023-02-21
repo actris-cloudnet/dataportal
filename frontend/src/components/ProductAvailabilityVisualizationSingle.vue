@@ -248,15 +248,11 @@ function noData(products: ProductLevels): boolean {
   );
 }
 
-function isLegacyOrModel(prod: ProductInfo): boolean {
-  return prod.legacy || prod.id == "model";
-}
-
 function onlyLegacy(products: ProductLevels) {
   return (
     products["2"].every(isLegacy) &&
     products["1c"].every(isLegacy) &&
-    products["1b"].every(isLegacyOrModel)
+    products["1b"].every(isLegacy)
   );
 }
 
