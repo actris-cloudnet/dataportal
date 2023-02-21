@@ -284,9 +284,19 @@ import type {
   ProductInfo,
   ProductLevels,
   ProductYear,
-} from "../lib/DataStatusParser";
+} from "@/lib/DataStatusParser";
 import debounce from "debounce";
 import { onMounted, ref, computed } from "vue";
+
+import {
+  isLegacy,
+  isError,
+  isWarning,
+  isInfo,
+  qualityExists,
+  topQuality,
+  noData,
+} from "@/lib/ProductAvailabilityTools";
 
 export interface Props {
   site: string;
@@ -341,44 +351,12 @@ const debounceMs = 1000 / 60;
 const debouncedSetCurrentYearDate = debounce(setCurrentYearDate, debounceMs);
 const debouncedHideTooltip = debounce(hideTooltip, debounceMs);
 
-function noData(products: ProductLevels): boolean {
-  return (
-    products["2"].length == 0 &&
-    products["1c"].length == 0 &&
-    products["1b"].length == 0
-  );
-}
-
-function isLegacy(prod: ProductInfo): boolean {
-  return prod.legacy;
-}
-
 function isLegacyOrModel(prod: ProductInfo): boolean {
   return prod.legacy || prod.id == "model";
 }
 
 function isNotLegacy(prod: ProductInfo): boolean {
   return !isLegacy(prod);
-}
-
-function topQuality(prod: ProductInfo): boolean {
-  return "errorLevel" in prod && prod.errorLevel === "pass";
-}
-
-function isError(prod: ProductInfo): boolean {
-  return "errorLevel" in prod && prod.errorLevel === "error";
-}
-
-function isWarning(prod: ProductInfo): boolean {
-  return "errorLevel" in prod && prod.errorLevel === "warning";
-}
-
-function isInfo(prod: ProductInfo): boolean {
-  return "errorLevel" in prod && prod.errorLevel === "info";
-}
-
-function qualityExists(prod: ProductInfo): boolean {
-  return "errorLevel" in prod && prod.errorLevel !== null;
 }
 
 function filterProductsByLvl(lvl: string) {
