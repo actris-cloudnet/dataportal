@@ -55,11 +55,13 @@ onMounted(() => {
         })
           .bindTooltip(p.date)
           .on("click", () => {
-            router.push({
-              name: "Search",
-              params: { mode: "data" },
-              query: { site: props.site, dateFrom: p.date, dateTo: p.date },
-            });
+            document.location =
+              "/search/data?" +
+              new URLSearchParams({
+                site: props.site,
+                dateFrom: p.date,
+                dateTo: p.date,
+              });
           })
           .addTo(leafletInstance);
         objects.push(point, hoverArea);
