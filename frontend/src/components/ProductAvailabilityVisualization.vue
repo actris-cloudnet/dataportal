@@ -45,6 +45,9 @@
       li.modelitem
         margin-top: 0.8em
 
+      li.productitem::before, li.qualityitem::before
+        margin-right: 5px
+
       // Product availability:
 
       li.productitem::before
