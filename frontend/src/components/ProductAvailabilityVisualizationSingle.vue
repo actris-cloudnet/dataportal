@@ -134,7 +134,7 @@ import {
   isWarning,
   isInfo,
   qualityExists,
-  topQuality,
+  isPass,
   noData,
 } from "@/lib/ProductAvailabilityTools";
 
@@ -219,9 +219,9 @@ function anyProductContainsInfo(products: ProductLevels) {
 
 function allPass(products: ProductLevels) {
   return (
-    products["2"].filter(topQuality).length == products["2"].length &&
-    products["1c"].filter(topQuality).length == products["1c"].length &&
-    products["1b"].filter(topQuality).length == products["1b"].length
+    products["2"].filter(isPass).length == products["2"].length &&
+    products["1c"].filter(isPass).length == products["1c"].length &&
+    products["1b"].filter(isPass).length == products["1b"].length
   );
 }
 

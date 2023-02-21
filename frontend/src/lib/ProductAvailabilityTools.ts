@@ -1,33 +1,23 @@
 import type { ProductLevels, ProductInfo } from "@/lib/DataStatusParser";
 
-export function isLegacy(prod: ProductInfo): boolean {
-  return prod.legacy;
-}
+export const isLegacy = (prod: ProductInfo): boolean => prod.legacy;
 
-export function isError(prod: ProductInfo): boolean {
-  return "errorLevel" in prod && prod.errorLevel === "error";
-}
+export const isError = (prod: ProductInfo): boolean =>
+  prod?.errorLevel === "error";
 
-export function isWarning(prod: ProductInfo): boolean {
-  return "errorLevel" in prod && prod.errorLevel === "warning";
-}
+export const isWarning = (prod: ProductInfo): boolean =>
+  prod?.errorLevel === "warning";
 
-export function isInfo(prod: ProductInfo): boolean {
-  return "errorLevel" in prod && prod.errorLevel === "info";
-}
+export const isInfo = (prod: ProductInfo): boolean =>
+  prod?.errorLevel === "info";
 
-export function qualityExists(prod: ProductInfo): boolean {
-  return "errorLevel" in prod && prod.errorLevel !== null;
-}
+export const isPass = (prod: ProductInfo): boolean =>
+  prod?.errorLevel === "pass";
 
-export function topQuality(prod: ProductInfo): boolean {
-  return "errorLevel" in prod && prod.errorLevel === "pass";
-}
+export const qualityExists = (prod: ProductInfo): boolean =>
+  "errorLevel" in prod && prod.errorLevel !== null;
 
-export function noData(products: ProductLevels): boolean {
-  return (
-    products["2"].length == 0 &&
-    products["1c"].length == 0 &&
-    products["1b"].length == 0
-  );
-}
+export const noData = (products: ProductLevels): boolean =>
+  products["2"].length == 0 &&
+  products["1c"].length == 0 &&
+  products["1b"].length == 0;

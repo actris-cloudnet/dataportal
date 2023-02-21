@@ -297,7 +297,7 @@ import {
   isWarning,
   isInfo,
   qualityExists,
-  topQuality,
+  isPass,
   noData,
 } from "@/lib/ProductAvailabilityTools";
 
@@ -396,7 +396,7 @@ function getProductStatus(
 ) {
   const existingProduct = existingProducts.find((prod) => prod.id == productId);
   if (props.qualityScores && existingProduct) {
-    return topQuality(existingProduct);
+    return isPass(existingProduct);
   }
   return existingProduct;
 }
@@ -466,7 +466,7 @@ function level2containsWarnings(products: ProductLevels) {
 }
 
 function allLevel2Pass(products: ProductLevels): boolean {
-  return products["2"].filter(topQuality).length == 4;
+  return products["2"].filter(isPass).length == 4;
 }
 
 function allLvl2(products: ProductLevels): boolean {
