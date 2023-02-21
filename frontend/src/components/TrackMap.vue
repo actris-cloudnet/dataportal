@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { ref, onMounted, onBeforeUnmount, watch } from "vue";
-import { useRouter } from "vue-router";
 import L from "leaflet";
 
 export interface Point {
@@ -15,8 +14,6 @@ export interface Props {
 }
 
 const props = defineProps<Props>();
-
-const router = useRouter();
 
 const mapContainer = ref<HTMLElement | null>(null);
 let leafletInstance: L.Map | null = null;
