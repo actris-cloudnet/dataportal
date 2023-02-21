@@ -20,7 +20,6 @@ footer.global
     height: $footer-height-narrow
 
 .footeritem
-  font-family: $header-font
   color: darkgrey
   line-height: 1.1
   font-size: 95%

@@ -76,7 +76,6 @@ button.calendar
   border-radius: 0 2px 2px 0
   font-size: 1em
   cursor: pointer
-  font-family: $content-font
   &:focus
     background-color: $steel-warrior
     outline: none

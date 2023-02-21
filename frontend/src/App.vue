@@ -11,6 +11,13 @@
 @import "./sass/variables.sass"
 @import "./sass/global.sass"
 
+body
+  font-family: 'Inter', sans-serif
+
+@supports (font-variation-settings: normal)
+  body
+    font-family: 'Inter var', sans-serif
+
 html
   position: relative
   min-height: 100%
@@ -31,7 +38,6 @@ body
     margin: 3em auto
     padding-left: 5em
     padding-right: 5em
-    font-family: $content-font
 
 #consent
   position: fixed

@@ -11,7 +11,6 @@ header
   height: 4.5em
 
 .portal-name
-  font-family: $header-font
   color: white
   margin: 0
   line-height: 1
