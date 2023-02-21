@@ -52,12 +52,12 @@
           >)
         </td>
       </tr>
-      <tr v-if="'instrumentPid' in response && instrument">
+      <tr v-if="'instrumentPid' in response && response.instrumentPid">
         <th>Instrument</th>
         <td>
-          <span v-if="instrumentStatus === 'loading'" class="loading"
-            >Loading...</span
-          >
+          <span v-if="instrumentStatus === 'loading'" class="loading">
+            Loading...
+          </span>
           <a
             v-else-if="instrumentStatus === 'error'"
             :href="response.instrumentPid"
