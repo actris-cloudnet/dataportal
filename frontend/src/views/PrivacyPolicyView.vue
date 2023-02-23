@@ -105,9 +105,8 @@ h4
       If you have a question regarding our privacy policy, wish to exercise any
       of your rights, or feel dissatisfaction with our use of your data, please
       contact the Cloudnet team by sending an email to
-      <a href="mailto:actris-cloudnet-feedback@fmi.fi"
-        >actris-cloudnet-feedback@fmi.fi</a
-      >. We will perform our duties without undue delay within one month of your
+      <a href="mailto:actris-cloudnet@fmi.fi">actris-cloudnet@fmi.fi</a>. We
+      will perform our duties without undue delay within one month of your
       request. That period may be extended by two further months where
       necessary, considering the complexity and number of the requests. For
       further information about your rights and exercising them, please see here
