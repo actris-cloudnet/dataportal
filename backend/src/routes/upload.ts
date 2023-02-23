@@ -174,11 +174,15 @@ export class UploadRoutes {
   };
 
   listInstrumentsFromMetadata: RequestHandler = async (req: Request, res: Response, next) => {
-    (this.metadataMany(this.instrumentUploadRepo, req.query, true) as Promise<InstrumentUpload[]>)
-      .then((uploadedMetadata) => res.send(uploadedMetadata.map((md) => new ReducedMetadataResponse(md))))
-      .catch((err) => {
-        next({ status: 500, errors: err });
-      });
+    try {
+      const results = await Promise.all([
+        this.metadataMany(this.instrumentUploadRepo, req.query, true) as Promise<InstrumentUpload[]>,
+        this.metadataMany(this.miscUploadRepo, req.query, true) as Promise<InstrumentUpload[]>,
+      ]);
+      res.send(results.flat().map((md) => new ReducedMetadataResponse(md)));
+    } catch (err) {
+      next({ status: 500, errors: err });
+    }
   };
 
   putData: RequestHandler = async (req: Request, res: Response, next) => {
