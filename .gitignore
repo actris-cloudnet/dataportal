@@ -103,11 +103,6 @@ dist
 # TernJS port file
 .tern-port
 
-# Data
-/backend/public
-/backend/tests/data/public
-inbox
-
 # Build data
 build
 public/css
@@ -124,13 +119,3 @@ public/css
 
 # Pycharm settings
 .idea
-
-# Config
-config.prod.ts
-
-# S3 mock
-backend/buckets/*
-!backend/buckets/placeholder
-
-# remote db
-remote-db.tmp.sql
