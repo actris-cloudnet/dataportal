@@ -66,7 +66,10 @@
       <tr>
         <th>Software</th>
         <td
-          v-if="response.processingVersion || 'cloudnetpyVersion' in response"
+          v-if="
+            response.processingVersion ||
+            ('cloudnetpyVersion' in response && response.cloudnetpyVersion)
+          "
         >
           <span v-if="response.processingVersion">
             <a
@@ -76,11 +79,17 @@
             </a>
           </span>
           <span
-            v-if="response.processingVersion && 'cloudnetpyVersion' in response"
+            v-if="
+              response.processingVersion &&
+              'cloudnetpyVersion' in response &&
+              response.cloudnetpyVersion
+            "
           >
             <br />
           </span>
-          <span v-if="'cloudnetpyVersion' in response">
+          <span
+            v-if="'cloudnetpyVersion' in response && response.cloudnetpyVersion"
+          >
             <template
               v-if="response.cloudnetpyVersion.toLowerCase().includes('custom')"
             >
