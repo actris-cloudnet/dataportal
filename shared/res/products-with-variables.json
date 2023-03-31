@@ -29,22 +29,22 @@
       {
         "id": "classification-target_classification",
         "humanReadableName": "Target classification",
-        "order": "0"
+        "order": 0
       },
       {
         "id": "classification-detection_status",
         "humanReadableName": "Classification detection status",
-        "order": "1"
+        "order": 1
       },
       {
         "id": "classification-v",
         "humanReadableName": "Classification velocity",
-        "order": "2"
+        "order": 2
       },
       {
         "id": "classification-ldr",
         "humanReadableName": "Classification LDR",
-        "order": "3"
+        "order": 3
       }
     ]
   },
@@ -78,22 +78,22 @@
       {
         "id": "test2",
         "humanReadableName": "Kaljanhimo",
-        "order": "0"
+        "order": 0
       },
       {
         "id": "test1",
         "humanReadableName": "Auringonpaisteen määrä",
-        "order": "1"
+        "order": 1
       },
       {
         "id": "categorize-v",
         "humanReadableName": "Categorize velocity",
-        "order": "2"
+        "order": 2
       },
       {
         "id": "categorize-ldr",
         "humanReadableName": "Categorize LDR",
-        "order": "3"
+        "order": 3
       }
     ]
   },
@@ -120,7 +120,7 @@
       {
         "id": "model-temperature",
         "humanReadableName": "Model temperature",
-        "order": "0",
+        "order": 0,
         "actrisVocabUri": "http://example.org/vocab/model-temperature"
       }
     ]
@@ -141,13 +141,13 @@
       {
         "id": "radar-v",
         "humanReadableName": "Radar velocity",
-        "order": "2",
+        "order": 2,
         "actrisVocabUri": "http://example.org/vocab/radar-velocity"
       },
       {
         "id": "radar-ldr",
         "humanReadableName": "Radar LDR",
-        "order": "3",
+        "order": 3,
         "actrisVocabUri": "http://example.org/vocab/radar-linear-depolarisation-ratio"
       }
     ]

@@ -348,7 +348,6 @@ import {
   getProductIcon,
   humanReadableSize,
   humanReadableTimestamp,
-  sortVisualizations,
   getQcIcon,
   getQcText,
   getQcLink,
@@ -403,7 +402,7 @@ function loadPreview(record: FileResponse) {
         changePreview();
         return;
       }
-      pendingVisualization.value = sortVisualizations(data.visualizations)[0];
+      pendingVisualization.value = data.visualizations[0];
     })
     .catch((error) => console.error(`Failed to load preview: ${error}`));
 }

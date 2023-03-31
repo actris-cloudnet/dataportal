@@ -10,8 +10,8 @@ export class ProductVariable {
   @Column()
   humanReadableName!: string;
 
-  @Column()
-  order!: string;
+  @Column({ type: "smallint" })
+  order!: number;
 
   @Column({ type: "varchar", nullable: true })
   actrisVocabUri!: string | null;
@@ -25,7 +25,7 @@ export class ProductVariable {
   constructor(
     id: string,
     humanReadableName: string,
-    order: string,
+    order: number,
     visualizations: Visualization[],
     product: Product,
     actrisVocabUri: string | null = null

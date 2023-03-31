@@ -123,12 +123,7 @@
 <script lang="ts" setup>
 import { ref, computed, watch } from "vue";
 import axios from "axios";
-import {
-  humanReadableDate,
-  sortVisualizations,
-  fetchInstrumentName,
-  compareValues,
-} from "@/lib";
+import { humanReadableDate, fetchInstrumentName, compareValues } from "@/lib";
 import type { RegularFile, ModelFile } from "@shared/entity/File";
 import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
 import type { SiteType } from "@shared/entity/Site";
@@ -190,7 +185,7 @@ const newestVersion = computed(() => {
 async function fetchVisualizations() {
   try {
     const response = await axios.get(`${apiUrl}visualizations/${props.uuid}`);
-    visualizations.value = sortVisualizations(response.data.visualizations);
+    visualizations.value = response.data.visualizations;
   } catch (error) {
     console.error(error);
   }

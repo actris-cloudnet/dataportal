@@ -68,7 +68,8 @@ export class VisualizationRoutes {
         .leftJoinAndSelect("visualizations.productVariable", "product_variable")
         .leftJoinAndSelect("file.site", "site")
         .leftJoinAndSelect("file.product", "product")
-        .where("file.uuid = :uuid", params);
+        .where("file.uuid = :uuid", params)
+        .addOrderBy("product_variable.order", "ASC");
       return hideTestDataFromNormalUsers(qb, req).getOne();
     };
 
@@ -89,7 +90,8 @@ export class VisualizationRoutes {
       let qb = this.fileController
         .filesQueryBuilder(query, mode ? "model" : "file")
         .innerJoinAndSelect("file.visualizations", "visualizations")
-        .leftJoinAndSelect("visualizations.productVariable", "product_variable");
+        .leftJoinAndSelect("visualizations.productVariable", "product_variable")
+        .addOrderBy("product_variable.order", "ASC");
       if ("variable" in query && query.variable.length)
         qb = qb.andWhere("product_variable.id IN (:...variable)", query);
       return qb.getMany();
