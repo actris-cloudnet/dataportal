@@ -168,7 +168,7 @@ h3 > .rowtag
           </span>
         </h3>
         <div
-          v-for="viz in sortVisualizations(file.visualizations)"
+          v-for="viz in file.visualizations"
           :key="viz.s3key"
           class="variable"
         >
@@ -210,7 +210,7 @@ h3 > .rowtag
 
 <script lang="ts" setup>
 import type { VisualizationResponse } from "@shared/entity/VisualizationResponse";
-import { humanReadableDate, sortVisualizations, notEmpty } from "@/lib";
+import { humanReadableDate, notEmpty } from "@/lib";
 import { ref, watchEffect, computed } from "vue";
 import Visualization from "./ImageVisualization.vue";
 

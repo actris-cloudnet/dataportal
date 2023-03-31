@@ -13,11 +13,11 @@ const expectedResult = {
   visualizations: [
     {
       s3key: "test1.png",
-      productVariable: { id: "test2", humanReadableName: "Kaljanhimo", order: "0" },
+      productVariable: { id: "test2", humanReadableName: "Kaljanhimo", order: 0 },
     },
     {
       s3key: "test0.png",
-      productVariable: { id: "test1", humanReadableName: "Auringonpaisteen määrä", order: "1" },
+      productVariable: { id: "test1", humanReadableName: "Auringonpaisteen määrä", order: 1 },
     },
   ],
 };
@@ -31,7 +31,7 @@ const expectedModelResult = {
   visualizations: [
     {
       s3key: "test3.png",
-      productVariable: { id: "test1", humanReadableName: "Auringonpaisteen määrä", order: "1" },
+      productVariable: { id: "test1", humanReadableName: "Auringonpaisteen määrä", order: 1 },
     },
   ],
 };

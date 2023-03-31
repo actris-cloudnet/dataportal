@@ -100,16 +100,6 @@ export const dateToString = (date: Date) => {
   return utcTime.toISOString().slice(0, 10);
 };
 
-export const sortVisualizations = (visualizations: VisualizationItem[]) => {
-  return visualizations
-    .concat()
-    .sort((a: VisualizationItem, b: VisualizationItem) => {
-      if (a.productVariable.order == b.productVariable.order) return 0;
-      if (a.productVariable.order < b.productVariable.order) return -1;
-      return 1;
-    });
-};
-
 export const fixedRanges = Object.freeze({ week: 6, month: 29, day: 0 });
 
 export function getDateFromBeginningOfYear(): Date {

@@ -17,13 +17,14 @@ export class ProductRoutes {
   };
 
   productVariables: RequestHandler = async (req: Request, res: Response, next) => {
-    fetchAll<Product>(this.conn, Product, { relations: ["variables"], order: { level: "DESC", id: "ASC" } })
-      .then((result) =>
-        result.map((prod) => ({
-          ...prod,
-          variables: prod.variables.sort((a, b) => parseInt(a.order) - parseInt(b.order)),
-        }))
-      )
+    // TODO: Need to use query builder with typeorm < 0.3.0
+    this.conn
+      .createQueryBuilder(Product, "product")
+      .leftJoinAndSelect("product.variables", "product_variable")
+      .addOrderBy("product.level", "DESC")
+      .addOrderBy("product.id", "ASC")
+      .addOrderBy("product_variable.order", "ASC")
+      .getMany()
       .then((result) => res.send(result))
       .catch((err) => next({ status: 500, errors: err }));
   };
