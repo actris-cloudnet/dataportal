@@ -25,7 +25,4 @@ export class Instrument {
 
   @OneToMany((_) => InstrumentUpload, (upload) => upload.instrument)
   uploads!: InstrumentUpload[];
-
-  @OneToMany((_) => Calibration, (calib) => calib.instrument)
-  calibrations!: Calibration[];
 }

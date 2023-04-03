@@ -61,9 +61,6 @@ export class Site {
   @OneToMany((_) => Upload, (upload) => upload.site)
   uploads!: Upload[];
 
-  @OneToMany((_) => Calibration, (calib) => calib.site)
-  calibrations!: Calibration[];
-
   @ManyToMany((_) => Person, (person) => person.sites)
   @JoinTable()
   persons!: Person[];

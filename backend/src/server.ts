@@ -132,6 +132,13 @@ async function createServer(): Promise<void> {
   );
   app.get("/api/visualizations/:uuid", middleware.validateUuidParam, vizRoutes.visualizationForSourceFile);
   app.get("/api/calibration", calibRoutes.calibration);
+  app.put(
+    "/api/calibration",
+    authenticator.verifyCredentials(),
+    authorizator.verifyPermission(PermissionType.canCalibrate),
+    express.json(),
+    calibRoutes.putCalibration
+  );
   app.get(
     "/api/raw-files",
     middleware.filesValidator,
@@ -223,7 +230,6 @@ async function createServer(): Promise<void> {
   app.post("/upload-metadata", express.json(), uploadRoutes.updateMetadata);
   app.get("/upload-metadata", express.json(), uploadRoutes.listMetadata(true));
   app.get("/upload-model-metadata", express.json(), uploadRoutes.listMetadata(true));
-  app.post("/calibration", express.json(), calibRoutes.postCalibration);
   app.put("/visualizations/*", express.json(), vizRoutes.putVisualization);
   app.put("/quality/:uuid", middleware.validateUuidParam, express.json(), qualityRoutes.putQualityReport);
   app.get(
