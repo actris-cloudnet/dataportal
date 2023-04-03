@@ -1,39 +1,23 @@
 [
   {
-    "instrument": "mira",
-    "site": "hyytiala",
+    "instrumentPid": "hyytiala-mira",
     "measurementDate": "2021-01-02",
-    "calibration": [
-      {
-        "createdAt": "2021-02-23T18:25:43.511Z",
-        "calibrationFactor": 0.9
-      }
-    ]
+    "data": { "calibrationFactor": 0.9 },
+    "createdAt": "2021-02-23T18:25:43.511Z",
+    "updatedAt": "2021-02-23T18:25:43.511Z"
   },
   {
-    "instrument": "mira",
-    "site": "hyytiala",
+    "instrumentPid": "hyytiala-mira",
     "measurementDate": "2021-01-01",
-    "calibration": [
-      {
-        "createdAt": "2021-02-23T18:25:43.511Z",
-        "calibrationFactor": 0.5
-      },
-      {
-        "createdAt": "2021-02-23T17:25:43.511Z",
-        "calibrationFactor": 0.2
-      }
-    ]
+    "data": { "calibrationFactor": 0.5 },
+    "updatedAt": "2021-02-23T18:25:43.511Z",
+    "createdAt": "2021-02-23T17:25:43.511Z"
   },
   {
-    "instrument": "mira",
-    "site": "bucharest",
+    "instrumentPid": "bucharest-mira",
     "measurementDate": "2021-01-01",
-    "calibration": [
-      {
-        "createdAt": "2021-02-23T17:25:43.511Z",
-        "calibrationFactor": 0.2
-      }
-    ]
+    "data": { "calibrationFactor": 0.2 },
+    "createdAt": "2021-02-23T17:25:43.511Z",
+    "updatedAt": "2021-02-23T17:25:43.511Z"
   }
 ]

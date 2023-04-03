@@ -1,50 +1,68 @@
 import axios from "axios";
-import { backendPrivateUrl } from "../../lib";
-import { Connection, createConnection, Repository } from "typeorm";
-import { Calibration } from "../../../src/entity/Calibration";
+import { Connection, createConnection } from "typeorm";
+import { backendPublicUrl, wait } from "../../lib";
+import { UserAccount } from "../../../src/entity/UserAccount";
+import { Permission, PermissionType } from "../../../src/entity/Permission";
 
 let conn: Connection;
-let repo: Repository<Calibration>;
-const url = `${backendPrivateUrl}calibration/`;
+const url = `${backendPublicUrl}calibration/`;
+const credentials = { username: "calibrator", password: "hunter2" };
 
-describe("POST /calibration", () => {
+describe("PUT /api/calibration", () => {
   beforeAll(async () => {
     conn = await createConnection();
-    repo = conn.getRepository("calibration");
-  });
+    const userRepo = conn.getRepository<UserAccount>("user_account");
+    const permRepo = conn.getRepository<Permission>("permission");
+    await userRepo.delete({});
+    await permRepo.delete({});
 
-  beforeEach(async () => {
-    await repo.delete({});
+    const user = new UserAccount();
+    user.username = credentials.username;
+    user.setPassword(credentials.password);
+    await userRepo.save(user);
+
+    const perm = new Permission();
+    perm.permission = PermissionType.canCalibrate;
+    perm.userAccounts = [user];
+    await permRepo.save(perm);
   });
 
   afterAll(() => conn.close());
 
-  it("on valid new calibration inserts it to the table", async () => {
-    await axios.post(url, { site: "hyytiala", instrument: "mira", date: "2021-01-01", calibrationFactor: 0.5 });
-    await expect(repo.findOneOrFail()).resolves.toBeTruthy();
+  it("requires correct credentials", async () => {
+    const body = { calibrationFactor: 0.5 };
+    const config = {
+      params: { instrumentPid: "hyytiala-chm15k", date: "2021-01-01" },
+      auth: { username: "asdasd", password: "asdksad" },
+    };
+    return expect(axios.put(url, body, config)).rejects.toMatchObject({ response: { status: 401 } });
   });
 
-  it("inserts two calibrations for same date", async () => {
-    await axios.post(url, { site: "hyytiala", instrument: "mira", date: "2021-01-01", calibrationFactor: 0.5 });
-    await axios.post(url, { site: "hyytiala", instrument: "mira", date: "2021-01-01", calibrationFactor: 0.8 });
-    const res = await repo.findOneOrFail();
-    expect(res.calibration.length).toEqual(2);
+  it("inserts new calibration", async () => {
+    await axios.put(
+      url,
+      { calibrationFactor: 0.5 },
+      { params: { instrumentPid: "hyytiala-chm15k", date: "2021-01-01" }, auth: credentials }
+    );
+    const res = await axios.get(url, { params: { instrumentPid: "hyytiala-chm15k", date: "2021-01-01" } });
+    expect(res.data.data).toEqual({ calibrationFactor: 0.5 });
+    expect(res.data.updatedAt).toEqual(res.data.createdAt);
   });
 
-  it("sets calibration for all dates between existing and new calibration", async () => {
-    await axios.post(url, { site: "hyytiala", instrument: "mira", date: "2021-01-01", calibrationFactor: 0.5 });
-    await axios.post(url, { site: "hyytiala", instrument: "mira", date: "2021-01-03", calibrationFactor: 0.8 });
-    const res = await repo.find({ where: { site: "hyytiala" }, order: { measurementDate: "ASC" } });
-    expect(res.length).toEqual(3);
-    expect(res[0].calibration[0].calibrationFactor).toEqual(0.5);
-    expect(res[1].calibration[0].calibrationFactor).toEqual(0.5);
-    expect(res[2].calibration[0].calibrationFactor).toEqual(0.8);
-    await repo.delete({});
-    await axios.post(url, { site: "hyytiala", instrument: "mira", date: "2021-01-01", calibrationFactor: 0.5 });
-    await axios.post(url, { site: "hyytiala", instrument: "mira", date: "2021-01-02", calibrationFactor: 0.8 });
-    const res2 = await repo.find({ where: { site: "hyytiala" }, order: { measurementDate: "ASC" } });
-    expect(res2.length).toEqual(2);
-    expect(res2[0].calibration[0].calibrationFactor).toEqual(0.5);
-    expect(res2[1].calibration[0].calibrationFactor).toEqual(0.8);
+  it("replaces previous calibration for same date", async () => {
+    await axios.put(
+      url,
+      { calibrationFactor: 0.5 },
+      { params: { instrumentPid: "hyytiala-chm15k", date: "2021-01-01" }, auth: credentials }
+    );
+    await wait(1000);
+    await axios.put(
+      url,
+      { calibrationFactor: 0.8 },
+      { params: { instrumentPid: "hyytiala-chm15k", date: "2021-01-01" }, auth: credentials }
+    );
+    const res = await axios.get(url, { params: { instrumentPid: "hyytiala-chm15k", date: "2021-01-01" } });
+    expect(res.data.data).toEqual({ calibrationFactor: 0.8 });
+    expect(res.data.updatedAt).not.toEqual(res.data.createdAt);
   });
 });
