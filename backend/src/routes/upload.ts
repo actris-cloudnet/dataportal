@@ -290,7 +290,7 @@ export class UploadRoutes {
   }
 
   private async metadataStream(
-    repo: Repository<InstrumentUpload | ModelUpload>,
+    repo: Repository<InstrumentUpload | ModelUpload | MiscUpload>,
     query: any,
     onlyDistinctInstruments = false,
     model = false
