@@ -3,6 +3,8 @@ import { Request, RequestHandler, Response } from "express";
 
 import { RegularFile, ModelFile } from "../entity/File";
 import axios from "axios";
+import { RegularCitation } from "../entity/Citation";
+import { Person } from "../entity/Person";
 
 interface Name {
   firstName: string;
@@ -40,7 +42,7 @@ export class ReferenceRoutes {
     try {
       let data: RegularFile | ModelFile | undefined = await this.fileRepository.findOne(
         { uuid: req.params.uuid },
-        { relations: ["site", "site.citations", "product"] }
+        { relations: ["site", "site.citations", "product", "site.citations.persons"] }
       );
       if (!data) {
         data = await this.modelRepository.findOne(
@@ -121,9 +123,12 @@ function formatAuthor(data: RegularFile | ModelFile, pis: Name[]): Name[] {
   if (data instanceof ModelFile) {
     return [MODEL_AUTHOR];
   } else {
+    const siteAuthors: Name[] = data.site.citations
+      .flatMap((citation) => citation.persons)
+      .map(({ firstname, surname, orcid }) => ({ firstName: firstname, lastName: surname, orcid }));
     const sitePis: Name[] = pis.filter((a: Name) => a.role == "pi");
     const InstrumentPis: Name[] = pis.filter((a: Name) => a.role != "pi");
-    return InstrumentPis.concat(sitePis);
+    return InstrumentPis.concat(sitePis).concat(siteAuthors);
   }
 }
 
