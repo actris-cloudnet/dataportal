@@ -2,6 +2,7 @@ import { Column, Entity, OneToMany, ManyToMany, PrimaryGeneratedColumn } from "t
 
 import { SiteContact } from "./SiteContact";
 import { Site } from "./Site";
+import { RegularCitation } from "./Citation";
 
 @Entity()
 export class Person {
@@ -9,10 +10,10 @@ export class Person {
   id?: number;
 
   @Column()
-  firstname?: string;
+  firstname!: string;
 
   @Column()
-  surname?: string;
+  surname!: string;
 
   @Column({ unique: true, nullable: true })
   orcid?: string;
@@ -25,4 +26,7 @@ export class Person {
 
   @ManyToMany((_) => Site, (site) => site.persons)
   sites?: Site[];
+
+  @ManyToMany((_) => RegularCitation, (regularCitation) => regularCitation.persons)
+  citations?: RegularCitation[];
 }
