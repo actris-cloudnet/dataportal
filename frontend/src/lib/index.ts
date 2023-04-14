@@ -25,7 +25,7 @@ import mwrIcon from "@/assets/icons/mwr.png";
 import radarIcon from "@/assets/icons/radar.png";
 import unknownIcon from "@/assets/icons/unknown.png";
 import weatherStationIcon from "@/assets/icons/weather-station.png";
-import haloDopplerLidarIcon from "@/assets/icons/halo-doppler-lidar.svg";
+import dopplerLidarIcon from "@/assets/icons/doppler-lidar.svg";
 
 import markerIconRed from "@/assets/markers/marker-icon-red.png";
 import markerIconBlue from "@/assets/markers/marker-icon-blue.png";
@@ -63,7 +63,7 @@ const productIcons: Record<string, string> = {
   mwr: mwrIcon,
   radar: radarIcon,
   "weather-station": weatherStationIcon,
-  "halo-doppler-lidar": haloDopplerLidarIcon,
+  "doppler-lidar": dopplerLidarIcon,
 };
 
 export const getProductIcon = (product: Product | string) => {
