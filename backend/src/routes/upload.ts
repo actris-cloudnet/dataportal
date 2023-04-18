@@ -22,8 +22,6 @@ import * as http from "http";
 import ReadableStream = NodeJS.ReadableStream;
 import env from "../lib/env";
 
-const INSTRUMENT_PID_FORMAT = /^https:\/\/hdl.handle.net\/21\.12132\/3\.[a-f0-9]+$/;
-
 export class UploadRoutes {
   constructor(conn: Connection) {
     this.conn = conn;
@@ -357,14 +355,12 @@ export class UploadRoutes {
         errors: 'Metadata must have either "instrument" or "model" field',
       });
     }
-    if ("instrumentPid" in body) {
-      try {
-        body.instrumentPid = this.sanitizeInstrumentPid(body.instrumentPid);
-      } catch (err: any) {
-        return next({
-          status: 422,
-          errors: err.message,
-        });
+    if ("instrument" in body) {
+      if (!("instrumentPid" in body) || !body.instrumentPid) {
+        return next({ status: 422, errors: "Request is missing instrumentPid" });
+      }
+      if (typeof body.instrumentPid !== "string" || !body.instrumentPid.startsWith("https://")) {
+        return next({ status: 422, errors: "Invalid instrumentPid format" });
       }
     }
     if ("tags" in body) {
@@ -384,23 +380,6 @@ export class UploadRoutes {
     }
     return next();
   };
-
-  sanitizeInstrumentPid(value: any): string | null {
-    if (value === null) {
-      return null;
-    }
-    if (typeof value === "string") {
-      const string = value.trim();
-      if (!string) {
-        return null;
-      }
-      if (!INSTRUMENT_PID_FORMAT.test(string)) {
-        throw new Error(`Expected "instrumentPid" to match regular expression ${INSTRUMENT_PID_FORMAT}`);
-      }
-      return string;
-    }
-    throw new Error(`Invalid value "${value}" for "instrumentPid"`);
-  }
 
   isFutureDate(measurementDate: string): boolean {
     const referenceDate = new Date();

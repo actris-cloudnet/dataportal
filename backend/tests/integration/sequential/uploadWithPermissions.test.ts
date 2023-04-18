@@ -36,6 +36,7 @@ const validMetadata = {
   measurementDate: "2020-08-11",
   checksum: "9a0364b9e99bb480dd25e1f0284c8555",
   instrument: "mira",
+  instrumentPid: "https://pid.test/mira1",
   site: "granada",
 };
 
@@ -44,6 +45,7 @@ const validMetadataAndStableProduct = {
   measurementDate: "2021-02-20",
   checksum: "3a0364b9e99bb480dd25e1f0284c8555",
   instrument: "mira",
+  instrumentPid: "https://pid.test/mira2",
   site: "bucharest",
 };
 
@@ -52,6 +54,7 @@ const validMetadataAndVolatileProduct = {
   measurementDate: "2018-11-15",
   checksum: "3a0364b9e99bb480dd25e1f0284c8555",
   instrument: "mira",
+  instrumentPid: "https://pid.test/mira3",
   site: "mace-head",
 };
 
@@ -142,15 +145,14 @@ describe("POST /upload/metadata", () => {
     expect(md.status).toEqual(Status.CREATED);
   });
 
-  test("rejects invalid instrumentPid", async () => {
-    const payload = { ...validMetadata, instrumentPid: "https://hdl.handle.net/21.04578/093475435" };
+  test("rejects metadata without instrumentPid", async () => {
+    const payload = { ...validMetadata, instrumentPid: undefined };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject({ response: { status: 422 } });
   });
 
-  test("allows empty instrumentPid", async () => {
-    const payload = { ...validMetadata, instrumentPid: "" };
-    await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
-    await instrumentRepo.findOneOrFail({ filename: validMetadata.filename, instrumentPid: null });
+  test("rejects metadata with invalid instrumentPid", async () => {
+    const payload = { ...validMetadata, instrumentPid: "kissa" };
+    await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject({ response: { status: 422 } });
   });
 
   test("inserts new metadata containing instrumentPid", async () => {
@@ -611,6 +613,7 @@ describe("test content upload", () => {
     measurementDate: "2020-08-11",
     checksum: "9a0364b9e99bb480dd25e1f0284c8555",
     instrument: "mira",
+    instrumentPid: "https://pid.test/mira",
     site: "granada",
   };
   const content = "content";
@@ -955,6 +958,7 @@ async function expectSuccessfulUploadInstrument(username: string, password: stri
     filename: "file1.LV1",
     measurementDate: "2020-08-11",
     instrument: "mira",
+    instrumentPid: "https://pid.test/mira",
     checksum: checksum,
     site: siteId,
   };
@@ -991,6 +995,7 @@ async function expectFailedUploadInstrument(
     filename: "file1.LV1",
     measurementDate: "2020-08-11",
     instrument: "mira",
+    instrumentPid: "https://pid.test/mira",
     checksum: checksum,
     site: siteId,
   };
