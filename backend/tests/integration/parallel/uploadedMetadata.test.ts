@@ -72,6 +72,7 @@ describe("GET /api/raw-files", () => {
   });
 
   it("responds with correct object when filtering with halo-doppler-lidar", async () => {
+    console.log(rawFilesUrl);
     return expect(
       axios.get(`${rawFilesUrl}`, { params: { instrument: "halo-doppler-lidar", developer: true } })
     ).resolves.toMatchObject({ status: 200, data: [instResp[4]] });

@@ -175,14 +175,14 @@ describe("POST /upload/metadata", () => {
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject({ response: { status: 422 } });
   });
 
-  test("inserts new misc upload metadata containing instrumentPid", async () => {
+  test("inserts new halo upload metadata containing instrumentPid", async () => {
     const payload = {
       ...validMetadata,
       instrument: "halo-doppler-lidar",
       instrumentPid: "https://hdl.handle.net/21.12132/3.191564170f8a4686",
     };
     await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
-    await miscUploadRepo.findOneOrFail({ instrumentPid: payload.instrumentPid });
+    await instrumentRepo.findOneOrFail({ instrumentPid: payload.instrumentPid });
   });
 
   test("inserts new metadata if different date", async () => {
@@ -212,11 +212,11 @@ describe("POST /upload/metadata", () => {
     await instrumentRepo.findOneOrFail({ checksum: payloadResub.checksum });
   });
 
-  test("inserts new metadata for misc upload", async () => {
+  test("inserts new metadata for halo upload", async () => {
     const now = new Date();
     const payload = { ...validMetadata, instrument: "halo-doppler-lidar" };
     await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
-    const md = await miscUploadRepo.findOne({ checksum: validMetadata.checksum });
+    const md = await instrumentRepo.findOne({ checksum: validMetadata.checksum });
     expect(md).toBeTruthy();
     expect(new Date(md.createdAt).getTime()).toBeGreaterThan(now.getTime());
     expect(new Date(md.updatedAt).getTime()).toEqual(new Date(md.createdAt).getTime());
@@ -414,12 +414,12 @@ describe("PUT /upload/data/:checksum", () => {
 
   test("responds with 201 on submitting new doppler-lidar file", async () => {
     await instrumentRepo.delete({}); // important
-    const miscMetadata = { ...validMetadata, instrument: "halo-doppler-lidar" };
-    await expect(axios.post(metadataUrl, miscMetadata, { headers })).resolves.toMatchObject({ status: 200 });
-    let md = await miscUploadRepo.findOne({ checksum: validMetadata.checksum });
+    const haloMetadata = { ...validMetadata, instrument: "halo-doppler-lidar" };
+    await expect(axios.post(metadataUrl, haloMetadata, { headers })).resolves.toMatchObject({ status: 200 });
+    let md = await instrumentRepo.findOne({ checksum: validMetadata.checksum });
     expect(md.status).toEqual(Status.CREATED);
     await expect(axios.put(validUrl, validFile, { headers })).resolves.toMatchObject({ status: 201 });
-    md = await miscUploadRepo.findOne({ checksum: validMetadata.checksum });
+    md = await instrumentRepo.findOne({ checksum: validMetadata.checksum });
     expect(md.status).toEqual(Status.UPLOADED);
   });
 

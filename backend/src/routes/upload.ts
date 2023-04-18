@@ -154,11 +154,6 @@ export class UploadRoutes {
       let repo;
       if (isModel) {
         repo = this.modelUploadRepo;
-      } else if (
-        Object.prototype.hasOwnProperty.call(req.query, "instrument") &&
-        req.query.instrument === "halo-doppler-lidar"
-      ) {
-        repo = this.miscUploadRepo;
       } else {
         repo = this.instrumentUploadRepo;
       }

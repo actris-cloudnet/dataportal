@@ -22,8 +22,7 @@
   {
     "id": "halo-doppler-lidar",
     "type": "lidar",
-    "humanReadableName": "Halo Photonics Doppler lidar",
-    "auxiliary": true
+    "humanReadableName": "Halo Photonics Doppler lidar"
   },
   {
     "id": "hatpro",
