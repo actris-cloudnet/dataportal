@@ -1,5 +1,5 @@
 import { Site } from "../entity/Site";
-import { InstrumentUpload, MiscUpload, ModelUpload, Status, Upload } from "../entity/Upload";
+import { InstrumentUpload, ModelUpload, Status, Upload } from "../entity/Upload";
 import { Connection, Repository } from "typeorm";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import {
@@ -28,7 +28,6 @@ export class UploadRoutes {
   constructor(conn: Connection) {
     this.conn = conn;
     this.instrumentUploadRepo = this.conn.getRepository(InstrumentUpload);
-    this.miscUploadRepo = this.conn.getRepository(MiscUpload);
     this.modelUploadRepo = this.conn.getRepository(ModelUpload);
     this.instrumentRepo = this.conn.getRepository(Instrument);
     this.modelRepo = this.conn.getRepository(Model);
@@ -39,7 +38,6 @@ export class UploadRoutes {
 
   readonly conn: Connection;
   readonly instrumentUploadRepo: Repository<InstrumentUpload>;
-  readonly miscUploadRepo: Repository<MiscUpload>;
   readonly modelUploadRepo: Repository<ModelUpload>;
   readonly instrumentRepo: Repository<Instrument>;
   readonly siteRepo: Repository<Site>;
@@ -64,7 +62,7 @@ export class UploadRoutes {
         if (dataSource == undefined) {
           return next({ status: 422, errors: "Unknown instrument" });
         }
-        uploadRepo = this.isMiscUpload(dataSource) ? this.miscUploadRepo : this.instrumentUploadRepo;
+        uploadRepo = this.instrumentUploadRepo;
       } else {
         dataSource = await this.modelRepo.findOne(body.model);
         if (dataSource == undefined) {
@@ -102,9 +100,7 @@ export class UploadRoutes {
       const args = { ...params, checksum: body.checksum, status: Status.CREATED };
 
       if (instrumentUpload) {
-        uploadedMetadata = this.isMiscUpload(dataSource as Instrument)
-          ? new MiscUpload(args, dataSource as Instrument, body.instrumentPid)
-          : new InstrumentUpload(args, dataSource as Instrument, body.instrumentPid);
+        uploadedMetadata = new InstrumentUpload(args, dataSource as Instrument, body.instrumentPid);
       } else {
         uploadedMetadata = new ModelUpload(args, dataSource as Model);
       }
@@ -154,11 +150,6 @@ export class UploadRoutes {
       let repo;
       if (isModel) {
         repo = this.modelUploadRepo;
-      } else if (
-        Object.prototype.hasOwnProperty.call(req.query, "instrument") &&
-        req.query.instrument === "halo-doppler-lidar"
-      ) {
-        repo = this.miscUploadRepo;
       } else {
         repo = this.instrumentUploadRepo;
       }
@@ -177,7 +168,6 @@ export class UploadRoutes {
     try {
       const results = await Promise.all([
         this.metadataMany(this.instrumentUploadRepo, req.query, true) as Promise<InstrumentUpload[]>,
-        this.metadataMany(this.miscUploadRepo, req.query, true) as Promise<InstrumentUpload[]>,
       ]);
       res.send(results.flat().map((md) => new ReducedMetadataResponse(md)));
     } catch (err) {
@@ -290,7 +280,7 @@ export class UploadRoutes {
   }
 
   private async metadataStream(
-    repo: Repository<InstrumentUpload | ModelUpload | MiscUpload>,
+    repo: Repository<InstrumentUpload | ModelUpload>,
     query: any,
     onlyDistinctInstruments = false,
     model = false
@@ -400,15 +390,13 @@ export class UploadRoutes {
 
   findAnyUpload(
     searchFunc: (
-      arg0: Repository<ModelUpload | InstrumentUpload | MiscUpload>,
+      arg0: Repository<ModelUpload | InstrumentUpload>,
       arg1?: boolean
-    ) => Promise<ModelUpload | InstrumentUpload | MiscUpload | undefined>
-  ): Promise<ModelUpload | InstrumentUpload | MiscUpload | undefined> {
-    return Promise.all([
-      searchFunc(this.instrumentUploadRepo, false),
-      searchFunc(this.modelUploadRepo, true),
-      searchFunc(this.miscUploadRepo, false),
-    ]).then(([upload, modelUpload, miscUpload]) => upload || modelUpload || miscUpload);
+    ) => Promise<ModelUpload | InstrumentUpload | undefined>
+  ): Promise<ModelUpload | InstrumentUpload | undefined> {
+    return Promise.all([searchFunc(this.instrumentUploadRepo, false), searchFunc(this.modelUploadRepo, true)]).then(
+      ([upload, modelUpload]) => upload || modelUpload
+    );
   }
 
   dateforsize: RequestHandler = async (req, res, next) => {
@@ -422,15 +410,10 @@ export class UploadRoutes {
     );
   };
 
-  findRepoForUpload(upload: InstrumentUpload | ModelUpload | MiscUpload) {
+  findRepoForUpload(upload: InstrumentUpload | ModelUpload) {
     if ("instrument" in upload) {
-      if (this.isMiscUpload(upload.instrument)) return this.miscUploadRepo;
       return this.instrumentUploadRepo;
     }
     return this.modelUploadRepo;
-  }
-
-  isMiscUpload(instrument: Instrument) {
-    return instrument.auxiliary;
   }
 }

@@ -132,7 +132,7 @@
     "instrument": {
       "id": "halo-doppler-lidar",
       "type": "lidar",
-      "auxiliary": true,
+      "auxiliary": false,
       "humanReadableName": "Halo Photonics Doppler lidar"
     }
   }

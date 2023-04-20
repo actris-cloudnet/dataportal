@@ -43,14 +43,12 @@ export class Authorizator {
   private userAccountRepository: Repository<UserAccount>;
   private siteRepository: Repository<Site>;
   readonly instrumentUploadRepository: Repository<Upload>;
-  readonly miscUploadRepository: Repository<Upload>;
   readonly modelUploadRepository: Repository<Upload>;
 
   constructor(conn: Connection) {
     this.userAccountRepository = conn.getRepository<UserAccount>("user_account");
     this.siteRepository = conn.getRepository<Site>("site");
     this.instrumentUploadRepository = conn.getRepository<Upload>("instrument_upload");
-    this.miscUploadRepository = conn.getRepository<Upload>("misc_upload");
     this.modelUploadRepository = conn.getRepository<Upload>("model_upload");
   }
 
@@ -70,7 +68,7 @@ export class Authorizator {
 
   findSiteFromChecksum: RequestHandler = async (req, res, next) => {
     let uploadMetadata: Upload | undefined;
-    const repos = [this.instrumentUploadRepository, this.miscUploadRepository, this.modelUploadRepository];
+    const repos = [this.instrumentUploadRepository, this.modelUploadRepository];
     try {
       for (const repo of repos) {
         uploadMetadata = await repo.findOne({ checksum: req.params.checksum }, { relations: ["site"] });
