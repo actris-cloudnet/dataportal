@@ -147,12 +147,7 @@ export class UploadRoutes {
   listMetadata = (includeS3path: boolean) => {
     return async (req: Request, res: Response, next: NextFunction) => {
       const isModel = req.path.includes("model");
-      let repo;
-      if (isModel) {
-        repo = this.modelUploadRepo;
-      } else {
-        repo = this.instrumentUploadRepo;
-      }
+      const repo = isModel ? this.modelUploadRepo : this.instrumentUploadRepo;
       this.metadataStream(repo, req.query, false, isModel)
         .then((uploadedMetadata) => {
           streamHandler(uploadedMetadata, res, "um", this.augmentUploadResponse(includeS3path));
@@ -166,12 +161,15 @@ export class UploadRoutes {
 
   listInstrumentsFromMetadata: RequestHandler = async (req: Request, res: Response, next) => {
     try {
-      const results = await Promise.all([
-        this.metadataMany(this.instrumentUploadRepo, req.query, true) as Promise<InstrumentUpload[]>,
-      ]);
-      res.send(results.flat().map((md) => new ReducedMetadataResponse(md)));
-    } catch (err) {
-      next({ status: 500, errors: err });
+      const instrumentUploads = (await this.metadataMany(
+        this.instrumentUploadRepo,
+        req.query,
+        true
+      )) as InstrumentUpload[];
+      const reducedMetadataResponses = instrumentUploads.map((md) => new ReducedMetadataResponse(md));
+      res.send(reducedMetadataResponses);
+    } catch (error) {
+      next({ status: 500, errors: error });
     }
   };
 
@@ -411,9 +409,6 @@ export class UploadRoutes {
   };
 
   findRepoForUpload(upload: InstrumentUpload | ModelUpload) {
-    if ("instrument" in upload) {
-      return this.instrumentUploadRepo;
-    }
-    return this.modelUploadRepo;
+    return "instrument" in upload ? this.instrumentUploadRepo : this.modelUploadRepo;
   }
 }
