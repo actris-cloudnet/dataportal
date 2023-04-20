@@ -21,7 +21,6 @@
     "instrument": {
       "id": "mira",
       "type": "radar",
-      "auxiliary": false,
       "humanReadableName": "METEK MIRA-35 cloud radar"
     }
   },
@@ -47,7 +46,6 @@
     "instrument": {
       "id": "chm15k",
       "type": "lidar",
-      "auxiliary": false,
       "humanReadableName": "Lufft CHM15k ceilometer"
     }
   },
@@ -73,7 +71,6 @@
     "instrument": {
       "id": "chm15k",
       "type": "lidar",
-      "auxiliary": false,
       "humanReadableName": "Lufft CHM15k ceilometer"
     }
   },
@@ -99,7 +96,6 @@
     "instrument": {
       "id": "mira",
       "type": "radar",
-      "auxiliary": false,
       "humanReadableName": "METEK MIRA-35 cloud radar"
     }
   },
@@ -132,7 +128,6 @@
     "instrument": {
       "id": "halo-doppler-lidar",
       "type": "lidar",
-      "auxiliary": false,
       "humanReadableName": "Halo Photonics Doppler lidar"
     }
   }

@@ -12,7 +12,6 @@ jest.setTimeout(20000);
 let conn: Connection;
 let instrumentRepo: any;
 let modelRepo: any;
-let miscUploadRepo: any;
 
 const metadataUrl = `${backendPrivateUrl}upload/metadata/`;
 const modelMetadataUrl = `${backendPrivateUrl}model-upload/metadata/`;
@@ -70,7 +69,6 @@ beforeAll(async () => {
   conn = await createConnection();
   instrumentRepo = conn.getRepository("instrument_upload");
   modelRepo = conn.getRepository("model_upload");
-  miscUploadRepo = conn.getRepository("misc_upload");
   // Make sure these tables are initialized correctly
   await conn
     .getRepository("regular_file")
@@ -81,21 +79,18 @@ beforeAll(async () => {
 
   await instrumentRepo.delete({});
   await modelRepo.delete({});
-  await miscUploadRepo.delete({});
   await initUsersAndPermissions();
 });
 
 afterAll(async () => {
   await instrumentRepo.delete({});
   await modelRepo.delete({});
-  await miscUploadRepo.delete({});
   await conn.close();
 });
 
 describe("POST /upload/metadata", () => {
   beforeEach(async () => {
     await instrumentRepo.delete({});
-    await miscUploadRepo.delete({});
   });
 
   test("accepts valid filenames", async () => {
@@ -401,7 +396,6 @@ describe("PUT /upload/data/:checksum", () => {
 
   beforeEach(async () => {
     await instrumentRepo.delete({});
-    await miscUploadRepo.delete({});
     await axios.post(metadataUrl, validMetadata, { headers });
   });
 
