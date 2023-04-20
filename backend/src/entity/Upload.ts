@@ -90,21 +90,6 @@ export class InstrumentUpload extends Upload {
 }
 
 @Entity()
-export class MiscUpload extends Upload {
-  @ManyToOne((_) => Instrument, (instrument) => instrument.uploads)
-  instrument!: Instrument;
-
-  @Column({ type: "text", nullable: true })
-  instrumentPid!: string | null;
-
-  constructor(args: UploadOptions, instrument: Instrument, instrumentPid: string) {
-    super(args);
-    this.instrument = instrument;
-    this.instrumentPid = instrumentPid;
-  }
-}
-
-@Entity()
 export class ModelUpload extends Upload {
   @ManyToOne((_) => Model, (model) => model.uploads)
   model!: Model;

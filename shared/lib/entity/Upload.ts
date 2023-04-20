@@ -34,11 +34,6 @@ export interface InstrumentUpload extends Upload {
   instrumentPid: string | null;
 }
 
-export interface MiscUpload extends Upload {
-  instrument: Instrument;
-  instrumentPid: string | null;
-}
-
 export interface ModelUpload extends Upload {
   model: Model;
   filename: string;

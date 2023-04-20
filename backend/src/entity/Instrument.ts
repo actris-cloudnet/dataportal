@@ -17,9 +17,6 @@ export class Instrument {
   @Column()
   type!: InstrumentType;
 
-  @Column({ default: false })
-  auxiliary!: boolean;
-
   @Column()
   humanReadableName!: string;
 

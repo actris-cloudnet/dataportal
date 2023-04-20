@@ -11,7 +11,6 @@ export enum InstrumentType {
 export interface Instrument {
   id: string;
   type: InstrumentType;
-  auxiliary: boolean;
   humanReadableName: string;
   uploads: InstrumentUpload[];
   calibrations: Calibration[];
