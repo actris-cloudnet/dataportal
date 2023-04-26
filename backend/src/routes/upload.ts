@@ -86,7 +86,18 @@ export class UploadRoutes {
       }
 
       const params = { site: site, measurementDate: body.measurementDate, filename: filename };
-      const payload = instrumentUpload ? { ...params, instrument: body.instrument } : { ...params, model: body.model };
+      let instrumentParams;
+      let sortedTags;
+      if (instrumentUpload) {
+        const allowedTags = new Set(dataSource.allowedTags);
+        const metadataTags = new Set(body.tags);
+        sortedTags = Array.from(new Set(Array.from(metadataTags).filter((x) => allowedTags.has(x)))).sort();
+        if (metadataTags.size != sortedTags.length) {
+          return next({ status: 422, errors: "Unknown tag" });
+        }
+        instrumentParams = { ...params, instrument: body.instrument, tags: sortedTags };
+      }
+      const payload = instrumentUpload ? { ...instrumentParams } : { ...params, model: body.model };
       const existingMetadata = await uploadRepo.findOne(payload);
       if (existingMetadata != undefined) {
         await uploadRepo.update(existingMetadata.uuid, {
@@ -100,7 +111,7 @@ export class UploadRoutes {
       const args = { ...params, checksum: body.checksum, status: Status.CREATED };
 
       if (instrumentUpload) {
-        uploadedMetadata = new InstrumentUpload(args, dataSource as Instrument, body.instrumentPid);
+        uploadedMetadata = new InstrumentUpload(args, dataSource as Instrument, body.instrumentPid, sortedTags);
       } else {
         uploadedMetadata = new ModelUpload(args, dataSource as Model);
       }

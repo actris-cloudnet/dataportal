@@ -37,6 +37,7 @@
   {
     "id": "halo-doppler-lidar",
     "type": "lidar",
-    "humanReadableName": "Halo Photonics Doppler lidar"
+    "humanReadableName": "Halo Photonics Doppler lidar",
+    "allowedTags": ["co", "cross"]
   }
 ]
