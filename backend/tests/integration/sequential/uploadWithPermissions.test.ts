@@ -754,7 +754,7 @@ describe("Test instrument upload with various tags", () => {
     tags: ["co"],
   };
 
-  it("tests that using prohibited tags gails", async () => {
+  it("tests that using prohibited tags fails", async () => {
     await expect(axios.post(metadataUrl, { ...payload_co, tags: "XYZ" }, { headers })).rejects.toMatchObject({
       response: { status: 422 },
     });

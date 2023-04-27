@@ -21,7 +21,7 @@ export class Instrument {
   humanReadableName!: string;
 
   @Column({ type: "text", array: true, default: [], nullable: false })
-  allowedTags!: string;
+  allowedTags!: Array<string>;
 
   @OneToMany((_) => InstrumentUpload, (upload) => upload.instrument)
   uploads!: InstrumentUpload[];

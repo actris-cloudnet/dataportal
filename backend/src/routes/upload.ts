@@ -89,8 +89,8 @@ export class UploadRoutes {
       let instrumentParams;
       let sortedTags;
       if (instrumentUpload) {
-        const allowedTags = new Set(dataSource.allowedTags);
-        const metadataTags = new Set(body.tags);
+        const allowedTags = new Set((dataSource as Instrument).allowedTags);
+        const metadataTags = new Set(body.tags as Array<string>);
         sortedTags = Array.from(new Set(Array.from(metadataTags).filter((x) => allowedTags.has(x)))).sort();
         if (metadataTags.size != sortedTags.length) {
           return next({ status: 422, errors: "Unknown tag" });
@@ -111,7 +111,12 @@ export class UploadRoutes {
       const args = { ...params, checksum: body.checksum, status: Status.CREATED };
 
       if (instrumentUpload) {
-        uploadedMetadata = new InstrumentUpload(args, dataSource as Instrument, body.instrumentPid, sortedTags);
+        uploadedMetadata = new InstrumentUpload(
+          args,
+          dataSource as Instrument,
+          body.instrumentPid,
+          sortedTags as Array<string>
+        );
       } else {
         uploadedMetadata = new ModelUpload(args, dataSource as Model);
       }
