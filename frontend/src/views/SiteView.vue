@@ -126,24 +126,6 @@
               </span>
               <span v-else>{{ instrument.name }}</span>
             </div>
-            <div
-              v-if="instrumentPidStatus === 'someMissing'"
-              class="notice note warningnote"
-            >
-              Some files were submitted without an instrument PID in the last
-              {{ instrumentsFromLastDays }} days.
-            </div>
-            <div
-              v-if="instrumentPidStatus === 'allMissing'"
-              class="notice note errornote"
-            >
-              All files in the last {{ instrumentsFromLastDays }} days were
-              submitted without an instrument PID. Please consult
-              <a href="https://docs.cloudnet.fmi.fi/api/data-upload.html"
-                >our documentation</a
-              >
-              to identify your instruments.
-            </div>
           </div>
           <div v-else class="detailslistNotAvailable">
             No data received in the last {{ instrumentsFromLastDays }} days.
@@ -472,18 +454,4 @@ async function loadInstruments() {
   instruments.value = await Promise.all(res.data.map(handleInstrument));
   instrumentsStatus.value = "ready";
 }
-
-const instrumentPidStatus = computed(() => {
-  const okCount = instruments.value.reduce(
-    (count, instrument) => (instrument.pid ? count + 1 : count),
-    0
-  );
-  if (okCount == instruments.value.length) {
-    return "ok";
-  }
-  if (okCount == 0) {
-    return "allMissing";
-  }
-  return "someMissing";
-});
 </script>
