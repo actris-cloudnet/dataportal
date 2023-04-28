@@ -50,7 +50,9 @@ export class UploadRoutes {
     const filename = basename(body.filename);
     let uploadRepo: Repository<InstrumentUpload | ModelUpload>;
     const instrumentUpload = "instrument" in body;
-    let dataSource, uploadedMetadata;
+    let dataSource;
+    let uploadedMetadata;
+    let sortedTags;
 
     try {
       const site = await this.siteRepo.findOne(req.params.site);
@@ -63,6 +65,15 @@ export class UploadRoutes {
           return next({ status: 422, errors: "Unknown instrument" });
         }
         uploadRepo = this.instrumentUploadRepo;
+
+        const allowedTags = new Set((dataSource as Instrument).allowedTags);
+        const metadataTags = new Set(body.tags as Array<string>);
+        sortedTags = Array.from(metadataTags)
+          .filter((x) => allowedTags.has(x))
+          .sort();
+        if (metadataTags.size != sortedTags.length) {
+          return next({ status: 422, errors: "Unknown tag" });
+        }
       } else {
         dataSource = await this.modelRepo.findOne(body.model);
         if (dataSource == undefined) {
@@ -86,7 +97,9 @@ export class UploadRoutes {
       }
 
       const params = { site: site, measurementDate: body.measurementDate, filename: filename };
-      const payload = instrumentUpload ? { ...params, instrument: body.instrument } : { ...params, model: body.model };
+      const payload = instrumentUpload
+        ? { ...params, instrument: body.instrument, tags: sortedTags }
+        : { ...params, model: body.model };
       const existingMetadata = await uploadRepo.findOne(payload);
       if (existingMetadata != undefined) {
         await uploadRepo.update(existingMetadata.uuid, {
@@ -100,7 +113,12 @@ export class UploadRoutes {
       const args = { ...params, checksum: body.checksum, status: Status.CREATED };
 
       if (instrumentUpload) {
-        uploadedMetadata = new InstrumentUpload(args, dataSource as Instrument, body.instrumentPid);
+        uploadedMetadata = new InstrumentUpload(
+          args,
+          dataSource as Instrument,
+          body.instrumentPid,
+          sortedTags as Array<string>
+        );
       } else {
         uploadedMetadata = new ModelUpload(args, dataSource as Model);
       }
@@ -346,6 +364,21 @@ export class UploadRoutes {
         return next({
           status: 422,
           errors: err.message,
+        });
+      }
+    }
+    if ("tags" in body) {
+      if (Array.isArray(body.tags)) {
+        if (!body.tags.every((tag: any) => typeof tag === "string")) {
+          return next({
+            status: 422,
+            errors: "Metadata tags must be strings",
+          });
+        }
+      } else {
+        return next({
+          status: 422,
+          errors: "Metadata tags must be given as an array",
         });
       }
     }

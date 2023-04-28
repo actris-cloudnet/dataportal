@@ -637,6 +637,154 @@ describe("test content upload", () => {
   });
 });
 
+describe("Test instrument upload with tags", () => {
+  beforeAll(async () => {
+    await instrumentRepo.delete({});
+  });
+  const headers = { authorization: `Basic ${str2base64("alice:alices_password")}` };
+  const payload_co = {
+    site: "hyytiala",
+    filename: "Stare_34_20220101_19.hpl",
+    instrument: "halo-doppler-lidar",
+    measurementDate: "2022-01-01",
+    checksum: "947eb3a21cdbafc0d2c9027adf8ac42e",
+    tags: ["co"],
+  };
+  const payload_cross = {
+    site: "hyytiala",
+    filename: "Stare_34_20220101_19.hpl",
+    instrument: "halo-doppler-lidar",
+    measurementDate: "2022-01-01",
+    checksum: "b5a221450f2029ed4d20196851a01a0a",
+    tags: ["cross"],
+  };
+  const url_co = `${dataUrl}${payload_co.checksum}`;
+  const url_cross = `${dataUrl}${payload_cross.checksum}`;
+
+  it("tests co metadata upload with co tags", async () => {
+    await expect(axios.post(metadataUrl, payload_co, { headers })).resolves.toMatchObject({ status: 200 });
+  });
+
+  it("tests cross metadata upload of with same filename and cross tags", async () => {
+    await expect(axios.post(metadataUrl, payload_cross, { headers })).resolves.toMatchObject({ status: 200 });
+  });
+
+  it("tests data upload for the co file", async () => {
+    const content = "co-content";
+    await expect(axios.put(url_co, content, { headers })).resolves.toMatchObject({ status: 201 });
+  });
+
+  it("tests data upload for the cross file", async () => {
+    const content = "cross-content";
+    await expect(axios.put(url_cross, content, { headers })).resolves.toMatchObject({ status: 201 });
+  });
+
+  it("tests that co file exists", async () => {
+    const record = await instrumentRepo.findOne({
+      where: { filename: payload_co.filename, tags: payload_co.tags, checksum: payload_co.checksum },
+    });
+    expect(record).toMatchObject({ status: "uploaded" });
+  });
+
+  it("tests that cross file exists", async () => {
+    const record = await instrumentRepo.findOne({
+      where: { filename: payload_cross.filename, tags: payload_cross.tags, checksum: payload_cross.checksum },
+    });
+    expect(record).toMatchObject({ status: "uploaded" });
+  });
+});
+
+describe("tags: Test instrument upload metadata tag update", () => {
+  beforeAll(async () => {
+    await instrumentRepo.delete({});
+  });
+  const headers = { authorization: `Basic ${str2base64("alice:alices_password")}` };
+  const payload_co = {
+    site: "hyytiala",
+    filename: "Stare_34_20220101_19.hpl",
+    instrument: "halo-doppler-lidar",
+    measurementDate: "2022-01-01",
+    checksum: "947eb3a21cdbafc0d2c9027adf8ac42e",
+    tags: ["co"],
+  };
+  const payload_cross = {
+    site: "hyytiala",
+    filename: "Stare_34_20220101_19.hpl",
+    instrument: "halo-doppler-lidar",
+    measurementDate: "2022-01-01",
+    checksum: "b5a221450f2029ed4d20196851a01a0a",
+    tags: ["cross"],
+  };
+
+  it("tests co metadata upload with co tags", async () => {
+    await expect(axios.post(metadataUrl, payload_co, { headers })).resolves.toMatchObject({ status: 200 });
+  });
+
+  it("tests cross metadata upload with cross tags", async () => {
+    await expect(axios.post(metadataUrl, payload_cross, { headers })).resolves.toMatchObject({ status: 200 });
+  });
+
+  it("tests cross metadata tags changes to co", async () => {
+    await expect(axios.post(metadataUrl, { ...payload_cross, tags: ["co"] }, { headers })).resolves.toMatchObject({
+      status: 200,
+    });
+  });
+
+  it("tests that original cross metadata has now co tags", async () => {
+    const record = await instrumentRepo.findOne({
+      where: { filename: payload_cross.filename, checksum: payload_cross.checksum },
+    });
+    expect(record).toMatchObject({ status: "created", tags: ["co"] });
+  });
+
+  it("tests that original co metadata has been removed", async () => {
+    const record = await instrumentRepo.findOne({
+      where: { filename: payload_co.filename, checksum: payload_co.checksum },
+      relations: ["instrument"],
+    });
+    expect(record).toBeUndefined();
+  });
+});
+
+describe("Test instrument upload with various tags", () => {
+  beforeAll(async () => {
+    await instrumentRepo.delete({});
+  });
+  const headers = { authorization: `Basic ${str2base64("alice:alices_password")}` };
+  const payload_co = {
+    site: "hyytiala",
+    filename: "Stare_34_20220101_19.hpl",
+    instrument: "halo-doppler-lidar",
+    measurementDate: "2022-01-01",
+    checksum: "947eb3a21cdbafc0d2c9027adf8ac42e",
+    tags: ["co"],
+  };
+
+  it("tests that using prohibited tags fails", async () => {
+    await expect(axios.post(metadataUrl, { ...payload_co, tags: ["XYZ", "co"] }, { headers })).rejects.toMatchObject({
+      response: { status: 422 },
+    });
+  });
+
+  it("tests that tag not given as a list fails", async () => {
+    await expect(axios.post(metadataUrl, { ...payload_co, tags: "co" }, { headers })).rejects.toMatchObject({
+      response: { status: 422 },
+    });
+  });
+
+  it("tests that tags work as sorted(list(set(submitted_tags)))", async () => {
+    await expect(
+      axios.post(metadataUrl, { ...payload_co, tags: ["cross", "co", "co"] }, { headers })
+    ).resolves.toMatchObject({
+      status: 200,
+    });
+    const record = await instrumentRepo.findOne({
+      where: { filename: payload_co.filename, checksum: payload_co.checksum },
+    });
+    expect(record).toMatchObject({ tags: ["co", "cross"] });
+  });
+});
+
 describe("test user permissions", () => {
   beforeAll(async () => {
     await initUsersAndPermissions();
