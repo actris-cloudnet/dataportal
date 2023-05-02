@@ -449,7 +449,11 @@ async function loadInstruments() {
   const dateFrom = new Date();
   dateFrom.setDate(dateFrom.getDate() - instrumentsFromLastDays);
   const res = await axios.get(`${apiUrl}uploaded-metadata/`, {
-    params: { site: props.siteid, updatedAtFrom: dateFrom },
+    params: {
+      site: props.siteid,
+      updatedAtFrom: dateFrom,
+      status: ["uploaded", "processed"],
+    },
   });
   instruments.value = await Promise.all(res.data.map(handleInstrument));
   instrumentsStatus.value = "ready";
