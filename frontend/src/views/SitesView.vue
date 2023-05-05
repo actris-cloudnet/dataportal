@@ -15,10 +15,10 @@ h2
     outline: thin dotted
   td, th
     padding: 9px
+    &:nth-child(1)
+      padding-right: 0
   tr:nth-child(2n+1) > td
     background-color: $blue-dust
-  td:nth-child(3)
-    text-align: center
 .table-striped[aria-busy="false"]
   tr:hover td
     cursor: pointer
@@ -30,6 +30,30 @@ h2
 
 .item + .item
   margin-top: 4rem
+
+.status
+  display: inline-block
+  width: .6rem
+  height: .6rem
+  border-radius: 50%
+  vertical-align: middle
+
+  &.cloudnet
+    background: #25910f
+
+  &.active
+    background: #eed679
+
+  &.inactive
+    background: #ddd
+
+.a-legend-class-not-overridden-by-some-global-style
+  font-size: 75%
+  margin-top: 1rem
+  color: #666
+
+  .status
+    margin-left: 8px
 </style>
 
 <template>
@@ -38,9 +62,10 @@ h2
     <template v-if="sites.status == 'ready'">
       <div v-for="item in sites.items" :key="item.title" class="item">
         <h2>{{ item.title }}</h2>
-        <table>
+        <table class="table table-striped">
           <thead>
             <tr>
+              <th></th>
               <th>Site</th>
               <th>Country</th>
               <th>Latitude</th>
@@ -51,6 +76,9 @@ h2
           </thead>
           <tbody>
             <tr v-for="site in item.sites" :key="site.id">
+              <td>
+                <span :class="{ status: true, [site.status]: true }"></span>
+              </td>
               <td>
                 <router-link
                   :to="{ name: 'Site', params: { siteid: site.id } }"
@@ -74,6 +102,14 @@ h2
             </tr>
           </tbody>
         </table>
+        <p class="a-legend-class-not-overridden-by-some-global-style">
+          <span class="status cloudnet"></span>
+          Operational site
+          <span class="status active"></span>
+          Some data
+          <span class="status inactive"></span>
+          Inactive
+        </p>
       </div>
     </template>
     <div v-else-if="sites.status == 'loading'">Loading...</div>

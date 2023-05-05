@@ -35,4 +35,5 @@ export interface Site {
   citations: RegularCitation[];
   contacts: SiteContact[];
   locations: SiteLocation[];
+  status: "cloudnet" | "active" | "inactive";
 }

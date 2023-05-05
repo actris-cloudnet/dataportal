@@ -1,15 +1,60 @@
-import { backendPublicUrl, genResponse } from "../../lib";
+import { backendPrivateUrl, backendPublicUrl, genResponse, storageServiceUrl } from "../../lib";
 import axios from "axios";
 import { readResources } from "../../../../shared/lib";
+import { Connection, Repository, createConnection } from "typeorm";
+import { RegularFile } from "../../../src/entity/File";
+import { Visualization } from "../../../src/entity/Visualization";
+import { SearchFile } from "../../../src/entity/SearchFile";
+const crypto = require("crypto");
 
 const url = `${backendPublicUrl}sites/`;
 let resources: any;
 let sites: string[];
+let conn: Connection;
+let regularFileRepo: Repository<RegularFile>;
+let searchFileRepo: Repository<SearchFile>;
+let vizRepo: Repository<Visualization>;
 
 beforeAll(async () => {
   resources = await readResources();
   sites = resources["sites"].map((site: any) => site.id);
+  conn = await createConnection();
+  regularFileRepo = conn.getRepository("regular_file");
+  searchFileRepo = conn.getRepository("search_file");
+  vizRepo = conn.getRepository("visualization");
 });
+
+beforeEach(async () => {
+  await vizRepo.delete({});
+  await regularFileRepo.delete({});
+  await searchFileRepo.delete({});
+});
+
+afterAll(async () => {
+  await conn.close();
+});
+
+async function putFile(data: { site: string; product: string; measurementDate: string }) {
+  const s3key = data.measurementDate.replace(/-/g, "") + "_" + data.site + "_" + data.product + ".nc";
+  await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${s3key}`, "content");
+  const url = `${backendPrivateUrl}files/${s3key}`;
+  await axios.put(url, {
+    uuid: crypto.randomUUID(),
+    pid: "",
+    volatile: true,
+    measurementDate: data.measurementDate,
+    product: data.product,
+    cloudnetpyVersion: "1.0.4",
+    createdAt: "2020-02-20T10:56:19.382Z",
+    updatedAt: "2020-02-20T10:56:19.382Z",
+    s3key: s3key,
+    checksum: crypto.randomBytes(20).toString("hex"),
+    size: 12200657,
+    format: "HDF5 (NetCDF4)",
+    site: data.site,
+    version: "123",
+  });
+}
 
 describe("GET /api/sites", () => {
   it("responds with a list of all sites in dev mode", async () => {
@@ -56,6 +101,34 @@ describe("GET /api/sites", () => {
         acknowledgements: "Hyytiälä test citation.",
       },
     ]);
+  });
+
+  it("shows inactive status", async () => {
+    const res = await axios.get(url);
+    const site = res.data.find((site: any) => site.id === "hyytiala");
+    expect(site.status).toEqual("inactive");
+  });
+
+  it("shows active status", async () => {
+    await putFile({ measurementDate: new Date().toISOString().slice(0, 10), product: "lidar", site: "hyytiala" });
+    const res = await axios.get(url);
+    const site = res.data.find((site: any) => site.id === "hyytiala");
+    expect(site.status).toEqual("active");
+  });
+
+  it("shows cloudnet status", async () => {
+    await putFile({ measurementDate: new Date().toISOString().slice(0, 10), product: "lidar", site: "hyytiala" });
+    await putFile({ measurementDate: new Date().toISOString().slice(0, 10), product: "radar", site: "hyytiala" });
+    await putFile({ measurementDate: new Date().toISOString().slice(0, 10), product: "mwr", site: "hyytiala" });
+    await putFile({ measurementDate: new Date().toISOString().slice(0, 10), product: "categorize", site: "hyytiala" });
+    await putFile({
+      measurementDate: new Date().toISOString().slice(0, 10),
+      product: "classification",
+      site: "hyytiala",
+    });
+    const res = await axios.get(url);
+    const site = res.data.find((site: any) => site.id === "hyytiala");
+    expect(site.status).toEqual("cloudnet");
   });
 });
 
