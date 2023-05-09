@@ -187,3 +187,16 @@ export function randomString(length: number): string {
     .toString("hex")
     .slice(0, length);
 }
+
+export function validateInstrumentPid(input: any): string {
+  if (typeof input !== "string") {
+    return "must be string";
+  }
+  if (!input.startsWith("https://")) {
+    return "must be HTTPS";
+  }
+  if (!input.startsWith("https://hdl.handle.net/")) {
+    return "must be Handle";
+  }
+  return "";
+}

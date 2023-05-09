@@ -1,20 +1,20 @@
 [
   {
-    "instrumentPid": "hyytiala-mira",
+    "instrumentPid": "https://hdl.handle.net/123/hyytiala-mira",
     "measurementDate": "2021-01-02",
     "data": { "calibrationFactor": 0.9 },
     "createdAt": "2021-02-23T18:25:43.511Z",
     "updatedAt": "2021-02-23T18:25:43.511Z"
   },
   {
-    "instrumentPid": "hyytiala-mira",
+    "instrumentPid": "https://hdl.handle.net/123/hyytiala-mira",
     "measurementDate": "2021-01-01",
     "data": { "calibrationFactor": 0.5 },
     "updatedAt": "2021-02-23T18:25:43.511Z",
     "createdAt": "2021-02-23T17:25:43.511Z"
   },
   {
-    "instrumentPid": "bucharest-mira",
+    "instrumentPid": "https://hdl.handle.net/123/bucharest-mira",
     "measurementDate": "2021-01-01",
     "data": { "calibrationFactor": 0.2 },
     "createdAt": "2021-02-23T17:25:43.511Z",

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Connection, createConnection } from "typeorm";
-import { backendPublicUrl, wait } from "../../lib";
+import { backendPublicUrl, genResponse, wait } from "../../lib";
 import { UserAccount } from "../../../src/entity/UserAccount";
 import { Permission, PermissionType } from "../../../src/entity/Permission";
 
@@ -32,19 +32,31 @@ describe("PUT /api/calibration", () => {
   it("requires correct credentials", async () => {
     const body = { calibrationFactor: 0.5 };
     const config = {
-      params: { instrumentPid: "hyytiala-chm15k", date: "2021-01-01" },
+      params: { instrumentPid: "https://hdl.handle.net/123/hyytiala-chm15k", date: "2021-01-01" },
       auth: { username: "asdasd", password: "asdksad" },
     };
     return expect(axios.put(url, body, config)).rejects.toMatchObject({ response: { status: 401 } });
+  });
+
+  it("requires valid instrument PID", async () => {
+    return expect(
+      axios.put(
+        url,
+        { calibrationFactor: 0.5 },
+        { params: { instrumentPid: "kissa", date: "2021-01-01" }, auth: credentials }
+      )
+    ).rejects.toMatchObject(genResponse(400, { status: 400, errors: "instrumentPid must be HTTPS" }));
   });
 
   it("inserts new calibration", async () => {
     await axios.put(
       url,
       { calibrationFactor: 0.5 },
-      { params: { instrumentPid: "hyytiala-chm15k", date: "2021-01-01" }, auth: credentials }
+      { params: { instrumentPid: "https://hdl.handle.net/123/hyytiala-chm15k", date: "2021-01-01" }, auth: credentials }
     );
-    const res = await axios.get(url, { params: { instrumentPid: "hyytiala-chm15k", date: "2021-01-01" } });
+    const res = await axios.get(url, {
+      params: { instrumentPid: "https://hdl.handle.net/123/hyytiala-chm15k", date: "2021-01-01" },
+    });
     expect(res.data.data).toEqual({ calibrationFactor: 0.5 });
     expect(res.data.updatedAt).toEqual(res.data.createdAt);
   });
@@ -53,15 +65,17 @@ describe("PUT /api/calibration", () => {
     await axios.put(
       url,
       { calibrationFactor: 0.5 },
-      { params: { instrumentPid: "hyytiala-chm15k", date: "2021-01-01" }, auth: credentials }
+      { params: { instrumentPid: "https://hdl.handle.net/123/hyytiala-chm15k", date: "2021-01-01" }, auth: credentials }
     );
     await wait(1000);
     await axios.put(
       url,
       { calibrationFactor: 0.8 },
-      { params: { instrumentPid: "hyytiala-chm15k", date: "2021-01-01" }, auth: credentials }
+      { params: { instrumentPid: "https://hdl.handle.net/123/hyytiala-chm15k", date: "2021-01-01" }, auth: credentials }
     );
-    const res = await axios.get(url, { params: { instrumentPid: "hyytiala-chm15k", date: "2021-01-01" } });
+    const res = await axios.get(url, {
+      params: { instrumentPid: "https://hdl.handle.net/123/hyytiala-chm15k", date: "2021-01-01" },
+    });
     expect(res.data.data).toEqual({ calibrationFactor: 0.8 });
     expect(res.data.updatedAt).not.toEqual(res.data.createdAt);
   });

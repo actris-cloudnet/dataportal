@@ -170,7 +170,7 @@ describe("after PUTting a raw instrument file", () => {
     measurementDate: "2020-08-11",
     checksum: "9a0364b9e99bb480dd25e1f0284c8555",
     instrument: "mira",
-    instrumentPid: "https://pid.test/mira",
+    instrumentPid: "https://hdl.handle.net/123/mira",
     site: "granada",
   };
   const rawFile = "content";

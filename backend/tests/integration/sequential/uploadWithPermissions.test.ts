@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Connection, createConnection } from "typeorm/";
-import { backendPrivateUrl, backendPublicUrl, str2base64 } from "../../lib";
+import { backendPrivateUrl, backendPublicUrl, genResponse, str2base64 } from "../../lib";
 import { Status } from "../../../src/entity/Upload";
 import { promises as fsp } from "fs";
 import { initUsersAndPermissions } from "../../lib/userAccountAndPermissions";
@@ -36,7 +36,7 @@ const validMetadata = {
   measurementDate: "2020-08-11",
   checksum: "9a0364b9e99bb480dd25e1f0284c8555",
   instrument: "mira",
-  instrumentPid: "https://pid.test/mira1",
+  instrumentPid: "https://hdl.handle.net/123/mira1",
   site: "granada",
 };
 
@@ -45,7 +45,7 @@ const validMetadataAndStableProduct = {
   measurementDate: "2021-02-20",
   checksum: "3a0364b9e99bb480dd25e1f0284c8555",
   instrument: "mira",
-  instrumentPid: "https://pid.test/mira2",
+  instrumentPid: "https://hdl.handle.net/123/mira2",
   site: "bucharest",
 };
 
@@ -54,7 +54,7 @@ const validMetadataAndVolatileProduct = {
   measurementDate: "2018-11-15",
   checksum: "3a0364b9e99bb480dd25e1f0284c8555",
   instrument: "mira",
-  instrumentPid: "https://pid.test/mira3",
+  instrumentPid: "https://hdl.handle.net/123/mira3",
   site: "mace-head",
 };
 
@@ -147,12 +147,40 @@ describe("POST /upload/metadata", () => {
 
   test("rejects metadata without instrumentPid", async () => {
     const payload = { ...validMetadata, instrumentPid: undefined };
-    await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject({ response: { status: 422 } });
+    await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject(
+      genResponse(422, "Request is missing instrumentPid")
+    );
+  });
+
+  test("rejects metadata with invalid instrumentPid type", async () => {
+    const payload = { ...validMetadata, instrumentPid: 123 };
+    await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject(
+      genResponse(422, "instrumentPid must be string")
+    );
   });
 
   test("rejects metadata with invalid instrumentPid", async () => {
     const payload = { ...validMetadata, instrumentPid: "kissa" };
-    await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject({ response: { status: 422 } });
+    await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject(
+      genResponse(422, "instrumentPid must be HTTPS")
+    );
+  });
+
+  test("rejects metadata with instrument landing page", async () => {
+    const payload = {
+      ...validMetadata,
+      instrumentPid: "https://instrumentdb.out.ocp.fmi.fi/instrument/141063a2-67b7-47ee-b97c-7d814d33e68a",
+    };
+    await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject(
+      genResponse(422, "instrumentPid must be Handle")
+    );
+  });
+
+  test("rejects metadata with HTTP instrumentPid", async () => {
+    const payload = { ...validMetadata, instrumentPid: "http://hdl.handle.net/21.12132/3.191564170f8a4686" };
+    await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject(
+      genResponse(422, "instrumentPid must be HTTPS")
+    );
   });
 
   test("inserts new metadata containing instrumentPid", async () => {
@@ -613,7 +641,7 @@ describe("test content upload", () => {
     measurementDate: "2020-08-11",
     checksum: "9a0364b9e99bb480dd25e1f0284c8555",
     instrument: "mira",
-    instrumentPid: "https://pid.test/mira",
+    instrumentPid: "https://hdl.handle.net/123/mira",
     site: "granada",
   };
   const content = "content";
@@ -649,7 +677,7 @@ describe("Test instrument upload with tags", () => {
     site: "hyytiala",
     filename: "Stare_34_20220101_19.hpl",
     instrument: "halo-doppler-lidar",
-    instrumentPid: "https://pid.test/halo",
+    instrumentPid: "https://hdl.handle.net/123/halo",
     measurementDate: "2022-01-01",
     checksum: "947eb3a21cdbafc0d2c9027adf8ac42e",
     tags: ["co"],
@@ -658,7 +686,7 @@ describe("Test instrument upload with tags", () => {
     site: "hyytiala",
     filename: "Stare_34_20220101_19.hpl",
     instrument: "halo-doppler-lidar",
-    instrumentPid: "https://pid.test/halo",
+    instrumentPid: "https://hdl.handle.net/123/halo",
     measurementDate: "2022-01-01",
     checksum: "b5a221450f2029ed4d20196851a01a0a",
     tags: ["cross"],
@@ -708,7 +736,7 @@ describe("tags: Test instrument upload metadata tag update", () => {
     site: "hyytiala",
     filename: "Stare_34_20220101_19.hpl",
     instrument: "halo-doppler-lidar",
-    instrumentPid: "https://pid.test/halo",
+    instrumentPid: "https://hdl.handle.net/123/halo",
     measurementDate: "2022-01-01",
     checksum: "947eb3a21cdbafc0d2c9027adf8ac42e",
     tags: ["co"],
@@ -717,7 +745,7 @@ describe("tags: Test instrument upload metadata tag update", () => {
     site: "hyytiala",
     filename: "Stare_34_20220101_19.hpl",
     instrument: "halo-doppler-lidar",
-    instrumentPid: "https://pid.test/halo",
+    instrumentPid: "https://hdl.handle.net/123/halo",
     measurementDate: "2022-01-01",
     checksum: "b5a221450f2029ed4d20196851a01a0a",
     tags: ["cross"],
@@ -762,7 +790,7 @@ describe("Test instrument upload with various tags", () => {
     site: "hyytiala",
     filename: "Stare_34_20220101_19.hpl",
     instrument: "halo-doppler-lidar",
-    instrumentPid: "https://pid.test/halo",
+    instrumentPid: "https://hdl.handle.net/123/halo",
     measurementDate: "2022-01-01",
     checksum: "947eb3a21cdbafc0d2c9027adf8ac42e",
     tags: ["co"],
@@ -963,7 +991,7 @@ async function expectSuccessfulUploadInstrument(username: string, password: stri
     filename: "file1.LV1",
     measurementDate: "2020-08-11",
     instrument: "mira",
-    instrumentPid: "https://pid.test/mira",
+    instrumentPid: "https://hdl.handle.net/123/mira",
     checksum: checksum,
     site: siteId,
   };
@@ -1000,7 +1028,7 @@ async function expectFailedUploadInstrument(
     filename: "file1.LV1",
     measurementDate: "2020-08-11",
     instrument: "mira",
-    instrumentPid: "https://pid.test/mira",
+    instrumentPid: "https://hdl.handle.net/123/mira",
     checksum: checksum,
     site: siteId,
   };
