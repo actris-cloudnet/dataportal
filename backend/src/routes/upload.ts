@@ -11,6 +11,7 @@ import {
   streamHandler,
   toArray,
   tomorrow,
+  validateInstrumentPid,
 } from "../lib";
 import { basename } from "path";
 import { ReducedMetadataResponse } from "../entity/ReducedMetadataResponse";
@@ -359,8 +360,9 @@ export class UploadRoutes {
       if (!("instrumentPid" in body) || !body.instrumentPid) {
         return next({ status: 422, errors: "Request is missing instrumentPid" });
       }
-      if (typeof body.instrumentPid !== "string" || !body.instrumentPid.startsWith("https://")) {
-        return next({ status: 422, errors: "Invalid instrumentPid format" });
+      const error = validateInstrumentPid(body.instrumentPid);
+      if (error) {
+        return next({ status: 422, errors: `instrumentPid ${error}` });
       }
     }
     if ("tags" in body) {

@@ -131,11 +131,12 @@ async function createServer(): Promise<void> {
     vizRoutes.visualization
   );
   app.get("/api/visualizations/:uuid", middleware.validateUuidParam, vizRoutes.visualizationForSourceFile);
-  app.get("/api/calibration", calibRoutes.calibration);
+  app.get("/api/calibration", calibRoutes.validateParams, calibRoutes.calibration);
   app.put(
     "/api/calibration",
     authenticator.verifyCredentials(),
     authorizator.verifyPermission(PermissionType.canCalibrate),
+    calibRoutes.validateParams,
     express.json(),
     calibRoutes.putCalibration
   );

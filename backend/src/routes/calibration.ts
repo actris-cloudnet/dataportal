@@ -1,6 +1,7 @@
 import { Connection, LessThanOrEqual, Repository } from "typeorm";
 import { Request, RequestHandler, Response } from "express";
 import { Calibration } from "../entity/Calibration";
+import { isValidDate, validateInstrumentPid } from "../lib";
 
 export class CalibrationRoutes {
   constructor(conn: Connection) {
@@ -9,10 +10,21 @@ export class CalibrationRoutes {
 
   private calibRepo: Repository<Calibration>;
 
-  calibration: RequestHandler = async (req: Request, res: Response, next) => {
-    if (typeof req.query.date !== "string" || typeof req.query.instrumentPid !== "string") {
+  validateParams: RequestHandler = async (req: Request, res: Response, next) => {
+    if (!("date" in req.query) || !("instrumentPid" in req.query)) {
       return next({ status: 400, errors: "Following parameters must all be specified: date, instrumentPid" });
     }
+    if (!isValidDate(req.query.date)) {
+      return next({ status: 400, errors: "date is invalid" });
+    }
+    const instrumentPidError = validateInstrumentPid(req.query.instrumentPid);
+    if (instrumentPidError) {
+      return next({ status: 400, errors: `instrumentPid ${instrumentPidError}` });
+    }
+    next();
+  };
+
+  calibration: RequestHandler = async (req: Request, res: Response, next) => {
     try {
       const calib = await this.calibRepo.findOne({
         where: {
@@ -35,13 +47,10 @@ export class CalibrationRoutes {
   };
 
   putCalibration: RequestHandler = async (req: Request, res: Response, next) => {
-    if (typeof req.query.date !== "string" || typeof req.query.instrumentPid !== "string") {
-      return next({ status: 400, errors: "Following parameters must all be specified: date, instrumentPid" });
-    }
     try {
       const calib = new Calibration();
-      calib.instrumentPid = req.query.instrumentPid;
-      calib.measurementDate = req.query.date;
+      calib.instrumentPid = req.query.instrumentPid as string;
+      calib.measurementDate = req.query.date as string;
       calib.data = req.body;
       await this.calibRepo.save(calib);
       return res.sendStatus(200);
