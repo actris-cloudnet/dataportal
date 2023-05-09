@@ -1,7 +1,7 @@
 import axios from "axios";
-import { Connection, createConnection } from "typeorm/";
+import { Connection, Repository, createConnection } from "typeorm/";
 import { backendPrivateUrl, backendPublicUrl, genResponse, str2base64 } from "../../lib";
-import { Status } from "../../../src/entity/Upload";
+import { InstrumentUpload, ModelUpload, Status } from "../../../src/entity/Upload";
 import { promises as fsp } from "fs";
 import { initUsersAndPermissions } from "../../lib/userAccountAndPermissions";
 
@@ -10,8 +10,8 @@ const crypto = require("crypto");
 jest.setTimeout(20000);
 
 let conn: Connection;
-let instrumentRepo: any;
-let modelRepo: any;
+let instrumentRepo: Repository<InstrumentUpload>;
+let modelRepo: Repository<ModelUpload>;
 
 const metadataUrl = `${backendPrivateUrl}upload/metadata/`;
 const modelMetadataUrl = `${backendPrivateUrl}model-upload/metadata/`;
@@ -96,7 +96,7 @@ describe("POST /upload/metadata", () => {
     await instrumentRepo.delete({});
   });
 
-  test("accepts valid filenames", async () => {
+  it("accepts valid filenames", async () => {
     const validNames = [
       "filename.LV1",
       "/file/name/with/slashes.txt",
@@ -114,7 +114,7 @@ describe("POST /upload/metadata", () => {
     }
   });
 
-  test("rejects invalid filenames", async () => {
+  it("rejects invalid filenames", async () => {
     const badNames = [
       "windows\\\\on\\tyhma.LV1",
       "file with.whitespace",
@@ -135,17 +135,18 @@ describe("POST /upload/metadata", () => {
       await expect(axios.post(metadataUrl, badMeta, { headers })).rejects.toMatchObject({ response: { status: 422 } });
     }
   });
-  test("inserts new metadata", async () => {
+
+  it("inserts new metadata", async () => {
     const now = new Date();
     await expect(axios.post(metadataUrl, validMetadata, { headers })).resolves.toMatchObject({ status: 200 });
-    const md = await instrumentRepo.findOne({ checksum: validMetadata.checksum });
+    const md = await instrumentRepo.findOneOrFail({ checksum: validMetadata.checksum });
     expect(md).toBeTruthy();
     expect(new Date(md.createdAt).getTime()).toBeGreaterThan(now.getTime());
     expect(new Date(md.updatedAt).getTime()).toEqual(new Date(md.createdAt).getTime());
     expect(md.status).toEqual(Status.CREATED);
   });
 
-  test("rejects metadata without instrumentPid", async () => {
+  it("rejects metadata without instrumentPid", async () => {
     const payload = { ...validMetadata, instrumentPid: undefined };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject(
       genResponse(422, "Request is missing instrumentPid")
@@ -159,7 +160,7 @@ describe("POST /upload/metadata", () => {
     );
   });
 
-  test("rejects metadata with invalid instrumentPid", async () => {
+  it("rejects metadata with invalid instrumentPid", async () => {
     const payload = { ...validMetadata, instrumentPid: "kissa" };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject(
       genResponse(422, "instrumentPid must be HTTPS")
@@ -183,24 +184,24 @@ describe("POST /upload/metadata", () => {
     );
   });
 
-  test("inserts new metadata containing instrumentPid", async () => {
+  it("inserts new metadata containing instrumentPid", async () => {
     const payload = { ...validMetadata, instrumentPid: "https://hdl.handle.net/21.12132/3.191564170f8a4686" };
     await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
     await instrumentRepo.findOneOrFail({ instrumentPid: payload.instrumentPid });
   });
 
-  test("inserts new metadata with the current date as measurementDate", async () => {
+  it("inserts new metadata with the current date as measurementDate", async () => {
     const today = new Date().toISOString().slice(0, 10);
     const payload = { ...validMetadata, measurementDate: today };
     await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
   });
 
-  test("responds with 422 on measurementDate in the future", async () => {
+  it("responds with 422 on measurementDate in the future", async () => {
     const payload = { ...validMetadata, measurementDate: "2032-01-01" };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject({ response: { status: 422 } });
   });
 
-  test("inserts new halo upload metadata containing instrumentPid", async () => {
+  it("inserts new halo upload metadata containing instrumentPid", async () => {
     const payload = {
       ...validMetadata,
       instrument: "halo-doppler-lidar",
@@ -210,7 +211,7 @@ describe("POST /upload/metadata", () => {
     await instrumentRepo.findOneOrFail({ instrumentPid: payload.instrumentPid });
   });
 
-  test("inserts new metadata if different date", async () => {
+  it("inserts new metadata if different date", async () => {
     const payload = { ...validMetadata };
     await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
     const payloadResub = { ...payload, measurementDate: "2020-08-12", checksum: "ac5c1f6c923cc8b259c2e22c7b258ee4" };
@@ -219,7 +220,7 @@ describe("POST /upload/metadata", () => {
     await instrumentRepo.findOneOrFail({ checksum: payloadResub.checksum });
   });
 
-  test("inserts new metadata if different filename", async () => {
+  it("inserts new metadata if different filename", async () => {
     const payload = { ...validMetadata };
     await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
     const payloadResub = { ...payload, filename: "random_results.nc", checksum: "ac5c1f6c923cc8b259c2e22c7b258ee4" };
@@ -228,7 +229,7 @@ describe("POST /upload/metadata", () => {
     await instrumentRepo.findOneOrFail({ checksum: payloadResub.checksum });
   });
 
-  test("inserts new metadata if different instrument", async () => {
+  it("inserts new metadata if different instrument", async () => {
     const payload = { ...validMetadata };
     await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
     const payloadResub = { ...payload, instrument: "hatpro", checksum: "ac5c1f6c923cc8b259c2e22c7b258ee4" };
@@ -237,34 +238,34 @@ describe("POST /upload/metadata", () => {
     await instrumentRepo.findOneOrFail({ checksum: payloadResub.checksum });
   });
 
-  test("inserts new metadata for halo upload", async () => {
+  it("inserts new metadata for halo upload", async () => {
     const now = new Date();
     const payload = { ...validMetadata, instrument: "halo-doppler-lidar" };
     await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
-    const md = await instrumentRepo.findOne({ checksum: validMetadata.checksum });
+    const md = await instrumentRepo.findOneOrFail({ checksum: validMetadata.checksum });
     expect(md).toBeTruthy();
     expect(new Date(md.createdAt).getTime()).toBeGreaterThan(now.getTime());
     expect(new Date(md.updatedAt).getTime()).toEqual(new Date(md.createdAt).getTime());
     expect(md.status).toEqual(Status.CREATED);
   });
 
-  test("updates existing metadata", async () => {
+  it("updates existing metadata", async () => {
     const payload = { ...validMetadata };
     const expectedResponse = { status: 200, data: "OK" };
     await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject(expectedResponse);
-    const md = await instrumentRepo.findOne({ checksum: payload.checksum });
+    const md = await instrumentRepo.findOneOrFail({ checksum: payload.checksum });
     expect(md.checksum).toBe(validMetadata.checksum);
     const initialTime = new Date(md.updatedAt).getTime();
     const payloadResub = { ...payload, checksum: "ac5c1f6c923cc8b259c2e22c7b258ee4" };
     await expect(axios.post(metadataUrl, payloadResub, { headers })).resolves.toMatchObject(expectedResponse);
     expect(await instrumentRepo.findOne({ checksum: payload.checksum })).toBe(undefined);
-    const mdResub = await instrumentRepo.findOne(md.uuid);
+    const mdResub = await instrumentRepo.findOneOrFail(md.uuid);
     expect(mdResub.checksum).toBe(payloadResub.checksum);
     const ResubTime = new Date(mdResub.updatedAt).getTime();
     expect(ResubTime).toBeGreaterThan(initialTime);
   });
 
-  test("updates existing metadata if stable product", async () => {
+  it("updates existing metadata if stable product", async () => {
     const headers = { authorization: `Basic ${str2base64("bucharest:passWordForBucharest")}` };
     const payload = { ...validMetadataAndStableProduct };
     await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
@@ -275,7 +276,7 @@ describe("POST /upload/metadata", () => {
     expect(md).toBe(undefined);
   });
 
-  test("updates existing metadata if volatile product", async () => {
+  it("updates existing metadata if volatile product", async () => {
     const headers = { authorization: `Basic ${str2base64("mace-head:SfSCHhnU5cjrMiLdgcW3ixkTQRo")}` };
     const payload = { ...validMetadataAndVolatileProduct };
     await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
@@ -286,45 +287,45 @@ describe("POST /upload/metadata", () => {
     expect(md).toBe(undefined);
   });
 
-  test("updates existing metadata with allowUpdate = true", async () => {
+  it("updates existing metadata with allowUpdate = true", async () => {
     const payload = { ...validMetadata, allowUpdate: true };
     const expectedResponse = { status: 200 };
     await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject(expectedResponse);
-    const md = await instrumentRepo.findOne({ checksum: payload.checksum });
+    const md = await instrumentRepo.findOneOrFail({ checksum: payload.checksum });
     expect(md.checksum).toBe(validMetadata.checksum);
     const payloadResub = { ...payload, checksum: "ac5c1f6c923cc8b259c2e22c7b258ee4" };
     await expect(axios.post(metadataUrl, payloadResub, { headers })).resolves.toMatchObject(expectedResponse);
     expect(await instrumentRepo.findOne({ checksum: payload.checksum })).toBe(undefined);
-    const mdResub = await instrumentRepo.findOne(md.uuid);
+    const mdResub = await instrumentRepo.findOneOrFail(md.uuid);
     expect(mdResub.checksum).toBe(payloadResub.checksum);
   });
 
-  test("updates existing metadata with allowUpdate = false", async () => {
+  it("updates existing metadata with allowUpdate = false", async () => {
     const payload = { ...validMetadata, allowUpdate: false };
     const expectedResponse = { status: 200 };
     await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject(expectedResponse);
-    const md = await instrumentRepo.findOne({ checksum: payload.checksum });
+    const md = await instrumentRepo.findOneOrFail({ checksum: payload.checksum });
     expect(md.checksum).toBe(validMetadata.checksum);
     const payloadResub = { ...payload, checksum: "ac5c1f6c923cc8b259c2e22c7b258ee4" };
     await expect(axios.post(metadataUrl, payloadResub, { headers })).resolves.toMatchObject(expectedResponse);
     expect(await instrumentRepo.findOne({ checksum: payload.checksum })).toBe(undefined);
-    const mdResub = await instrumentRepo.findOne(md.uuid);
+    const mdResub = await instrumentRepo.findOneOrFail(md.uuid);
     expect(mdResub.checksum).toBe(payloadResub.checksum);
   });
 
-  test("responds with 200 on existing hashsum with created status", async () => {
+  it("responds with 200 on existing hashsum with created status", async () => {
     await axios.post(metadataUrl, validMetadata, { headers });
     await expect(axios.post(metadataUrl, validMetadata, { headers })).resolves.toMatchObject({ status: 200 });
   });
 
-  test("responds with 422 if both model and instrument fields are specified", async () => {
+  it("responds with 422 if both model and instrument fields are specified", async () => {
     const newMetadata = { ...validMetadata, model: "ecmwf" };
     await expect(axios.post(metadataUrl, newMetadata, { headers })).rejects.toMatchObject({
       response: { status: 422 },
     });
   });
 
-  test("responds with 409 on existing hashsum with uploaded status", async () => {
+  it("responds with 409 on existing hashsum with uploaded status", async () => {
     const now = new Date();
     const uploadedMetadata = {
       ...validMetadata,
@@ -333,15 +334,15 @@ describe("POST /upload/metadata", () => {
       createdAt: now,
       updatedAt: now,
     };
-    await instrumentRepo.save(uploadedMetadata);
+    await instrumentRepo.save(uploadedMetadata as any);
     await expect(axios.post(metadataUrl, validMetadata, { headers })).rejects.toMatchObject({
       response: { status: 409 },
     });
-    const md = await instrumentRepo.findOne({ checksum: validMetadata.checksum });
+    const md = await instrumentRepo.findOneOrFail({ checksum: validMetadata.checksum });
     expect(new Date(md.updatedAt).getTime()).toEqual(now.getTime());
   });
 
-  test("responds with 409 on existing hashsum with allowUpdate=True and instrument data", async () => {
+  it("responds with 409 on existing hashsum with allowUpdate=True and instrument data", async () => {
     const now = new Date();
     const uploadedMetadata = {
       ...validMetadata,
@@ -352,67 +353,67 @@ describe("POST /upload/metadata", () => {
       updatedAt: now,
     };
     const newUpload = { ...validMetadata, allowUpdate: true };
-    await instrumentRepo.save(uploadedMetadata);
+    await instrumentRepo.save(uploadedMetadata as any);
     await expect(axios.post(metadataUrl, newUpload, { headers })).rejects.toMatchObject({ response: { status: 409 } });
-    const md = await instrumentRepo.findOne({ checksum: uploadedMetadata.checksum });
+    const md = await instrumentRepo.findOneOrFail({ checksum: uploadedMetadata.checksum });
     expect(new Date(md.updatedAt).getTime()).toEqual(now.getTime());
   });
 
-  test("responds with 422 on missing filename", async () => {
+  it("responds with 422 on missing filename", async () => {
     const payload = { ...validMetadata, filename: undefined };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject({
       response: { status: 422 },
     });
   });
 
-  test("responds with 422 on missing measurementDate", async () => {
+  it("responds with 422 on missing measurementDate", async () => {
     const payload = { ...validMetadata, measurementDate: undefined };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject({
       response: { status: 422 },
     });
   });
 
-  test("responds with 422 on invalid measurementDate", async () => {
+  it("responds with 422 on invalid measurementDate", async () => {
     const payload = { ...validMetadata, measurementDate: "July" };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject({
       response: { status: 422 },
     });
   });
 
-  test("responds with 422 on missing checksum", async () => {
+  it("responds with 422 on missing checksum", async () => {
     const payload = { ...validMetadata, checksum: undefined };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject({
       response: { status: 422 },
     });
   });
 
-  test("responds with 422 on invalid checksum", async () => {
+  it("responds with 422 on invalid checksum", async () => {
     const payload = { ...validMetadata, checksum: "293948" };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject({
       response: { status: 422 },
     });
   });
 
-  test("responds with 422 on missing instrument", async () => {
+  it("responds with 422 on missing instrument", async () => {
     const payload = { ...validMetadata, instrument: undefined };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject({
       response: { status: 422 },
     });
   });
 
-  test("responds with 422 on invalid instrument", async () => {
+  it("responds with 422 on invalid instrument", async () => {
     const payload = { ...validMetadata, instrument: "kukko" };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject({
       response: { status: 422 },
     });
   });
 
-  test("responds with 401 on missing authentication", async () => {
+  it("responds with 401 on missing authentication", async () => {
     const payload = { ...validMetadata, site: undefined };
     await expect(axios.post(metadataUrl, payload)).rejects.toMatchObject({ response: { status: 401 } });
   });
 
-  test("responds with 401 on non-existent username", async () => {
+  it("responds with 401 on non-existent username", async () => {
     const badHeaders = { authorization: `Basic ${str2base64("espoo:lol")}` };
     await expect(axios.post(metadataUrl, validMetadata, { headers: badHeaders })).rejects.toMatchObject({
       response: { status: 401 },
@@ -429,67 +430,67 @@ describe("PUT /upload/data/:checksum", () => {
     await axios.post(metadataUrl, validMetadata, { headers });
   });
 
-  test("responds with 201 on submitting new file", async () => {
+  it("responds with 201 on submitting new file", async () => {
     await expect(axios.put(validUrl, validFile, { headers })).resolves.toMatchObject({ status: 201 });
-    const md = await instrumentRepo.findOne({ checksum: validMetadata.checksum });
+    const md = await instrumentRepo.findOneOrFail({ checksum: validMetadata.checksum });
     expect(new Date(md.updatedAt).getTime()).toBeGreaterThan(new Date(md.createdAt).getTime());
     expect(md.status).toEqual(Status.UPLOADED);
   });
 
-  test("responds with 201 on submitting new doppler-lidar file", async () => {
+  it("responds with 201 on submitting new doppler-lidar file", async () => {
     await instrumentRepo.delete({}); // important
     const haloMetadata = { ...validMetadata, instrument: "halo-doppler-lidar" };
     await expect(axios.post(metadataUrl, haloMetadata, { headers })).resolves.toMatchObject({ status: 200 });
-    let md = await instrumentRepo.findOne({ checksum: validMetadata.checksum });
+    let md = await instrumentRepo.findOneOrFail({ checksum: validMetadata.checksum });
     expect(md.status).toEqual(Status.CREATED);
     await expect(axios.put(validUrl, validFile, { headers })).resolves.toMatchObject({ status: 201 });
-    md = await instrumentRepo.findOne({ checksum: validMetadata.checksum });
+    md = await instrumentRepo.findOneOrFail({ checksum: validMetadata.checksum });
     expect(md.status).toEqual(Status.UPLOADED);
   });
 
-  test("responds with 200 on submitting existing file", async () => {
+  it("responds with 200 on submitting existing file", async () => {
     await axios.put(validUrl, validFile, { headers });
-    const md1 = await instrumentRepo.findOne({ checksum: validMetadata.checksum });
+    const md1 = await instrumentRepo.findOneOrFail({ checksum: validMetadata.checksum });
     await expect(axios.put(validUrl, validFile, { headers })).resolves.toMatchObject({ status: 200 });
-    const md2 = await instrumentRepo.findOne({ checksum: validMetadata.checksum });
+    const md2 = await instrumentRepo.findOneOrFail({ checksum: validMetadata.checksum });
     expect(new Date(md1.updatedAt).getTime()).toEqual(new Date(md2.updatedAt).getTime());
   });
 
-  test("saves correct file size", async () => {
+  it("saves correct file size", async () => {
     await axios.put(validUrl, validFile, { headers });
-    const md = await instrumentRepo.findOne({ checksum: validMetadata.checksum });
+    const md = await instrumentRepo.findOneOrFail({ checksum: validMetadata.checksum });
     expect(md.size).toBe(validFile.length + ""); // eslint-disable-line prefer-template
   });
 
-  test("responds with 400 on invalid hash", async () => {
+  it("responds with 400 on invalid hash", async () => {
     const url = `${dataUrl}file1.lv1`;
     await expect(axios.put(url, validFile, { headers })).rejects.toMatchObject({ response: { status: 400 } });
   });
 
-  test("responds with 400 on incorrect hash", async () => {
+  it("responds with 400 on incorrect hash", async () => {
     const invalidFile = "invalidhash";
     await expect(axios.put(validUrl, invalidFile, { headers })).rejects.toMatchObject({
       response: { status: 400 },
     });
   });
 
-  test("responds with 500 on internal errors", async () => {
+  it("responds with 500 on internal errors", async () => {
     const invalidFile = "servererr";
     await expect(axios.put(validUrl, invalidFile, { headers })).rejects.toMatchObject({
       response: { status: 500 },
     });
   });
 
-  test("responds with 422 on nonexistent hash", async () => {
+  it("responds with 422 on nonexistent hash", async () => {
     const url = `${dataUrl}9a0364b9e99bb480dd25e1f0284c8554`;
     await expect(axios.put(url, validFile, { headers })).rejects.toMatchObject({ response: { status: 422 } });
   });
 
-  test("responds with 401 when submitting data with wrong credentials", async () => {
+  it("responds with 401 when submitting data with wrong credentials", async () => {
     const now = new Date();
     const headers = { authorization: `Basic ${str2base64("martinlaakso:lol")}` };
     await expect(axios.put(validUrl, validFile, { headers })).rejects.toMatchObject({ response: { status: 401 } });
-    const md = await instrumentRepo.findOne({ checksum: validMetadata.checksum });
+    const md = await instrumentRepo.findOneOrFail({ checksum: validMetadata.checksum });
     expect(new Date(md.updatedAt).getTime()).toBeLessThan(now.getTime());
   });
 });
@@ -502,11 +503,11 @@ describe("PUT /model-upload/data/:checksum", () => {
     await axios.post(modelMetadataUrl, validModelMetadata, { headers });
   });
 
-  test("responds with 201 on submitting new model file", async () => {
+  it("responds with 201 on submitting new model file", async () => {
     const validModelUrl = `${modelDataUrl}${validModelMetadata.checksum}`;
     const validFile = "content";
     await expect(axios.put(validModelUrl, validFile, { headers })).resolves.toMatchObject({ status: 201 });
-    const md = await modelRepo.findOne({ checksum: validModelMetadata.checksum });
+    const md = await modelRepo.findOneOrFail({ checksum: validModelMetadata.checksum });
     expect(md.status).toEqual(Status.UPLOADED);
   });
 });
@@ -525,30 +526,33 @@ describe("POST /model-upload/metadata", () => {
     await modelRepo.delete({});
   });
 
-  test("inserts metadata if volatile model file exists", async () => {
+  it("inserts metadata if volatile model file exists", async () => {
     const payload = { ...metaData, measurementDate: "2020-05-12" };
     await expect(axios.post(modelMetadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
     await modelRepo.findOneOrFail({ checksum: metaData.checksum });
   });
 
-  test("inserts new metadata and takes site from metadata", async () => {
+  it("inserts new metadata and takes site from metadata", async () => {
     await expect(axios.post(modelMetadataUrl, validModelMetadata, { headers })).resolves.toMatchObject({ status: 200 });
-    const md = await modelRepo.findOne({ checksum: validModelMetadata.checksum }, { relations: ["site", "model"] });
+    const md = await modelRepo.findOneOrFail(
+      { checksum: validModelMetadata.checksum },
+      { relations: ["site", "model"] }
+    );
     expect(md.site.id).toBe(validModelMetadata.site);
   });
 
-  test("updates metadata submitted with allowUpdate flag", async () => {
+  it("updates metadata submitted with allowUpdate flag", async () => {
     const payload = { ...validMetadata, instrument: undefined, allowUpdate: true, model: "ecmwf" };
     await expect(axios.post(modelMetadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
-    const md = await modelRepo.findOne({ checksum: payload.checksum });
+    const md = await modelRepo.findOneOrFail({ checksum: payload.checksum });
     await modelRepo.update(md.uuid, { updatedAt: "2020-11-07" });
     const payloadResub = { ...payload, checksum: "ac5c1f6c923cc8b259c2e22c7b258ee4" };
     await expect(axios.post(modelMetadataUrl, payloadResub, { headers })).resolves.toMatchObject({ status: 200 });
-    const mdResub = await modelRepo.findOne(md.uuid);
+    const mdResub = await modelRepo.findOneOrFail(md.uuid);
     expect(mdResub.checksum).toBe(payloadResub.checksum);
   });
 
-  test("responds with 409 on existing hashsum with allowUpdate=True", async () => {
+  it("responds with 409 on existing hashsum with allowUpdate=True", async () => {
     const now = new Date();
     const uploadedMetadata = {
       ...validMetadata,
@@ -561,50 +565,50 @@ describe("POST /model-upload/metadata", () => {
       instrument: undefined,
     };
     const newUpload = { ...validMetadata, allowUpdate: true, model: "ecmwf", instrument: undefined };
-    await modelRepo.save(uploadedMetadata);
+    await modelRepo.save(uploadedMetadata as any);
     await expect(axios.post(modelMetadataUrl, newUpload, { headers })).rejects.toMatchObject({
       response: { status: 409 },
     });
-    const md = await modelRepo.findOne({ checksum: uploadedMetadata.checksum });
+    const md = await modelRepo.findOneOrFail({ checksum: uploadedMetadata.checksum });
     expect(new Date(md.updatedAt).getTime()).toEqual(now.getTime());
   });
 
-  test("responds with 422 on missing model", async () => {
+  it("responds with 422 on missing model", async () => {
     const payload = { ...validModelMetadata, model: undefined };
     await expect(axios.post(modelMetadataUrl, payload, { headers })).rejects.toMatchObject({
       response: { status: 422 },
     });
   });
 
-  test("responds with 422 on invalid model", async () => {
+  it("responds with 422 on invalid model", async () => {
     const payload = { ...validModelMetadata, model: "kukko" };
     await expect(axios.post(modelMetadataUrl, payload, { headers })).rejects.toMatchObject({
       response: { status: 422 },
     });
   });
 
-  test("responds with 422 on empty model", async () => {
+  it("responds with 422 on empty model", async () => {
     const payload = { ...validModelMetadata, model: "" };
     await expect(axios.post(modelMetadataUrl, payload, { headers })).rejects.toMatchObject({
       response: { status: 422 },
     });
   });
 
-  test("responds with 422 on missing site", async () => {
+  it("responds with 422 on missing site", async () => {
     const payload = { ...validModelMetadata, site: undefined };
     await expect(axios.post(modelMetadataUrl, payload, { headers })).rejects.toMatchObject({
       response: { status: 422 },
     });
   });
 
-  test("responds with 422 on empty site", async () => {
+  it("responds with 422 on empty site", async () => {
     const payload = { ...validModelMetadata, site: "" };
     await expect(axios.post(modelMetadataUrl, payload, { headers })).rejects.toMatchObject({
       response: { status: 422 },
     });
   });
 
-  test("responds with 422 on invalid site", async () => {
+  it("responds with 422 on invalid site", async () => {
     const payload = { ...validModelMetadata, site: "aksjdfksdf" };
     await expect(axios.post(modelMetadataUrl, payload, { headers })).rejects.toMatchObject({
       response: { status: 422 },
@@ -621,16 +625,16 @@ describe("POST /upload-metadata/", () => {
     uuid = data[0].uuid;
   });
 
-  test("updates status", async () => {
+  it("updates status", async () => {
     await expect(axios.post(privateMetadataUrl, { uuid, status: Status.PROCESSED })).resolves.toMatchObject({
       status: 200,
     });
-    await expect(instrumentRepo.findOne(uuid)).resolves.toMatchObject({ status: Status.PROCESSED });
+    await expect(instrumentRepo.findOneOrFail(uuid)).resolves.toMatchObject({ status: Status.PROCESSED });
   });
 
-  test("updates status to invalid", async () => {
+  it("updates status to invalid", async () => {
     await expect(axios.post(privateMetadataUrl, { uuid, status: "invalid" })).resolves.toMatchObject({ status: 200 });
-    await expect(instrumentRepo.findOne(uuid)).resolves.toMatchObject({ status: "invalid" });
+    await expect(instrumentRepo.findOneOrFail(uuid)).resolves.toMatchObject({ status: "invalid" });
   });
 });
 
@@ -663,7 +667,7 @@ describe("test content upload", () => {
     const checksum = validMetadata.checksum;
     const postDataUrl = dataUrl.concat(checksum);
     await expect(axios.put(postDataUrl, content, { headers })).resolves.toMatchObject({ status: 201 });
-    const metadata = await instrumentRepo.findOne({ checksum: checksum });
+    const metadata = await instrumentRepo.findOneOrFail({ checksum: checksum });
     expect(new Date(metadata.updatedAt).getTime()).toBeGreaterThan(new Date(metadata.createdAt).getTime());
   });
 });
@@ -713,14 +717,14 @@ describe("Test instrument upload with tags", () => {
   });
 
   it("tests that co file exists", async () => {
-    const record = await instrumentRepo.findOne({
+    const record = await instrumentRepo.findOneOrFail({
       where: { filename: payload_co.filename, tags: payload_co.tags, checksum: payload_co.checksum },
     });
     expect(record).toMatchObject({ status: "uploaded" });
   });
 
   it("tests that cross file exists", async () => {
-    const record = await instrumentRepo.findOne({
+    const record = await instrumentRepo.findOneOrFail({
       where: { filename: payload_cross.filename, tags: payload_cross.tags, checksum: payload_cross.checksum },
     });
     expect(record).toMatchObject({ status: "uploaded" });
@@ -766,7 +770,7 @@ describe("tags: Test instrument upload metadata tag update", () => {
   });
 
   it("tests that original cross metadata has now co tags", async () => {
-    const record = await instrumentRepo.findOne({
+    const record = await instrumentRepo.findOneOrFail({
       where: { filename: payload_cross.filename, checksum: payload_cross.checksum },
     });
     expect(record).toMatchObject({ status: "created", tags: ["co"] });
@@ -814,7 +818,7 @@ describe("Test instrument upload with various tags", () => {
     ).resolves.toMatchObject({
       status: 200,
     });
-    const record = await instrumentRepo.findOne({
+    const record = await instrumentRepo.findOneOrFail({
       where: { filename: payload_co.filename, checksum: payload_co.checksum },
     });
     expect(record).toMatchObject({ tags: ["co", "cross"] });
@@ -1000,7 +1004,7 @@ async function expectSuccessfulUploadInstrument(username: string, password: stri
   const timeBeforePost = new Date();
   // POST metadata
   await expect(axios.post(metadataUrl, postMetadata, { headers })).resolves.toMatchObject({ status: 200 });
-  const metadataFromDb = await instrumentRepo.findOne({ checksum: checksum });
+  const metadataFromDb = await instrumentRepo.findOneOrFail({ checksum: checksum });
   expect(metadataFromDb).toBeTruthy();
   expect(new Date(metadataFromDb.createdAt).getTime()).toBeGreaterThan(timeBeforePost.getTime());
   expect(new Date(metadataFromDb.updatedAt).getTime()).toEqual(new Date(metadataFromDb.createdAt).getTime());
@@ -1008,7 +1012,7 @@ async function expectSuccessfulUploadInstrument(username: string, password: stri
   // PUT data
   const putDataUrl = dataUrl.concat(checksum);
   await expect(axios.put(putDataUrl, content, { headers })).resolves.toMatchObject({ status: 201 });
-  const metadataFromDbAfterPut = await instrumentRepo.findOne({ checksum: checksum });
+  const metadataFromDbAfterPut = await instrumentRepo.findOneOrFail({ checksum: checksum });
   expect(new Date(metadataFromDbAfterPut.updatedAt).getTime()).toBeGreaterThan(
     new Date(metadataFromDbAfterPut.createdAt).getTime()
   );
@@ -1059,7 +1063,7 @@ async function expectSuccessfulUploadModel(username: string, password: string, s
   // POST metadata
   const timeBeforePost = new Date().getTime();
   await expect(axios.post(modelMetadataUrl, postMetadata, { headers })).resolves.toMatchObject({ status: 200 });
-  const metadata = await modelRepo.findOne({ checksum: postMetadata.checksum }, { relations: ["site", "model"] });
+  const metadata = await modelRepo.findOneOrFail({ checksum: postMetadata.checksum }, { relations: ["site", "model"] });
   const timeCreated = new Date(metadata.createdAt).getTime();
   expect(metadata.site.id).toEqual(siteId);
   expect(timeCreated).toBeGreaterThan(timeBeforePost);
@@ -1067,7 +1071,7 @@ async function expectSuccessfulUploadModel(username: string, password: string, s
   const timeBeforePut = new Date().getTime();
   const putDataUrl = modelDataUrl.concat(checksum);
   await expect(axios.put(putDataUrl, content, { headers })).resolves.toMatchObject({ status: 201 });
-  const metadataAfterPut = await modelRepo.findOne(
+  const metadataAfterPut = await modelRepo.findOneOrFail(
     { checksum: postMetadata.checksum },
     { relations: ["site", "model"] }
   );
@@ -1104,6 +1108,7 @@ async function expectFailedUploadModel(
   await expect(axios.put(putDataUrl, content, { headers })).rejects.toMatchObject({ response: { status: putStatus } });
   await expect(modelRepo.findOne({ checksum: checksum })).resolves.toBeUndefined();
 }
+
 function randomInt(min: number, max: number): number {
   min = Math.ceil(min);
   max = Math.floor(max);
