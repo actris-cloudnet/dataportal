@@ -81,27 +81,28 @@ export class UploadRoutes {
         uploadRepo = this.modelUploadRepo;
       }
 
-      // Remove existing metadata if its status is created
-      const existingCreatedMetadata = await uploadRepo.findOne({
-        checksum: body.checksum,
-        status: Status.CREATED,
-      });
-      if (existingCreatedMetadata != undefined) {
-        await uploadRepo.remove(existingCreatedMetadata);
+      // First search row by checksum.
+      const uploadByChecksum = await uploadRepo.findOne({ checksum: body.checksum });
+      if (uploadByChecksum) {
+        if (uploadByChecksum.status === Status.CREATED) {
+          // Remove the existing row so that we can insert or update a row with
+          // the same checksum.
+          await uploadRepo.remove(uploadByChecksum);
+        } else {
+          return next({ status: 409, errors: "File already uploaded" });
+        }
       }
 
-      const existingUploadedMetadata = await uploadRepo.findOne({ checksum: body.checksum });
-      if (existingUploadedMetadata != undefined) {
-        return next({ status: 409, errors: "File already uploaded" });
-      }
-
+      // Secondly search row by other unique columns.
       const params = { site: site, measurementDate: body.measurementDate, filename: filename };
       const payload = instrumentUpload
         ? { ...params, instrument: body.instrument, tags: sortedTags }
         : { ...params, model: body.model };
-      const existingMetadata = await uploadRepo.findOne(payload);
-      if (existingMetadata != undefined) {
-        await uploadRepo.update(existingMetadata.uuid, {
+
+      // If a matching row exists, update it.
+      const uploadByParams = await uploadRepo.findOne(payload);
+      if (uploadByParams) {
+        await uploadRepo.update(uploadByParams.uuid, {
           checksum: body.checksum,
           updatedAt: new Date(),
           status: Status.CREATED,
@@ -109,8 +110,8 @@ export class UploadRoutes {
         return res.sendStatus(200);
       }
 
+      // If no matching row was found, insert a new one.
       const args = { ...params, checksum: body.checksum, status: Status.CREATED };
-
       if (instrumentUpload) {
         uploadedMetadata = new InstrumentUpload(
           args,
@@ -121,7 +122,6 @@ export class UploadRoutes {
       } else {
         uploadedMetadata = new ModelUpload(args, dataSource as Model);
       }
-
       await uploadRepo.insert(uploadedMetadata);
       return res.sendStatus(200);
     } catch (err: any) {
