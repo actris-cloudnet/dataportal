@@ -52,13 +52,13 @@ afterAll(async () => {
 });
 
 describe("PUT /files/:s3key", () => {
-  test("inserting new volatile file", async () => {
+  it("inserting new volatile file", async () => {
     await expect(putFile(volatileFile)).resolves.toMatchObject({ status: 201 });
     await expect(searchFileRepo.findOneOrFail({ where: { uuid: volatileFile.uuid } })).resolves.toBeTruthy();
     await expect(fileRepo.findOneOrFail(volatileFile.uuid)).resolves.toBeTruthy();
   });
 
-  test("updating existing volatile file", async () => {
+  it("updating existing volatile file", async () => {
     await expect(putFile(volatileFile)).resolves.toMatchObject({ status: 201 });
     const dbRow1 = await fileRepo.findOneOrFail(volatileFile.uuid);
     await expect(putFile(volatileFile)).resolves.toMatchObject({ status: 200 });
@@ -68,7 +68,7 @@ describe("PUT /files/:s3key", () => {
     expect(dbRow1.updatedAt < dbRow2.updatedAt);
   });
 
-  test("inserting new version of an existing freezed file", async () => {
+  it("inserting new version of an existing freezed file", async () => {
     await expect(putFile(stableFile)).resolves.toMatchObject({ status: 201 });
     const newVersion = {
       ...stableFile,
@@ -83,7 +83,7 @@ describe("PUT /files/:s3key", () => {
     await expect(searchFileRepo.findOneOrFail({ where: { uuid: newVersion.uuid } })).resolves.toBeTruthy();
   });
 
-  test("inserting legacy file", async () => {
+  it("inserting legacy file", async () => {
     const tmpfile = { ...volatileFile };
     tmpfile.legacy = true;
     await expect(putFile(tmpfile)).resolves.toMatchObject({ status: 201 });
@@ -91,14 +91,14 @@ describe("PUT /files/:s3key", () => {
     await expect(searchFileRepo.findOneOrFail(volatileFile.uuid)).resolves.toMatchObject({ legacy: true });
   });
 
-  test("inserting quality controlled file", async () => {
+  it("inserting quality controlled file", async () => {
     const tmpfile = { ...stableFile };
     tmpfile.quality = "qc";
     await expect(putFile(tmpfile)).resolves.toMatchObject({ status: 201 });
     await expect(fileRepo.findOneOrFail(volatileFile.uuid)).resolves.toMatchObject({ quality: "qc" });
   });
 
-  test("inserting a normal file and a legacy file", async () => {
+  it("inserting a normal file and a legacy file", async () => {
     await expect(putFile(stableFile)).resolves.toMatchObject({ status: 201 });
     const tmpfile = { ...stableFile };
     tmpfile.legacy = true;
@@ -110,7 +110,7 @@ describe("PUT /files/:s3key", () => {
     await expect(searchFileRepo.findOneOrFail(tmpfile.uuid)).rejects.toBeTruthy();
   });
 
-  test("inserting a legacy file and a normal file", async () => {
+  it("inserting a legacy file and a normal file", async () => {
     const tmpfile = { ...stableFile };
     tmpfile.legacy = true;
     tmpfile.uuid = "87EB042E-B247-4AC1-BC03-074DD0D74BDB";
@@ -122,7 +122,7 @@ describe("PUT /files/:s3key", () => {
     await expect(searchFileRepo.findOneOrFail(tmpfile.uuid)).rejects.toBeTruthy();
   });
 
-  test("inserting a legacy file and two normal files", async () => {
+  it("inserting a legacy file and two normal files", async () => {
     const tmpfile = { ...stableFile };
     tmpfile.legacy = true;
     tmpfile.uuid = "87EB042E-B247-4AC1-BC03-074DD0D74BDB";
@@ -139,7 +139,7 @@ describe("PUT /files/:s3key", () => {
     await expect(searchFileRepo.findOneOrFail(tmpfile2.uuid)).resolves.toMatchObject({ legacy: false });
   });
 
-  test("inserting two model files (first worse, then better)", async () => {
+  it("inserting two model files (first worse, then better)", async () => {
     const tmpfile1 = { ...volatileFile, product: "model", model: "icon-iglo-12-23" };
     const tmpfile2 = {
       ...tmpfile1,
@@ -162,7 +162,7 @@ describe("PUT /files/:s3key", () => {
     await expect(searchFileRepo.findOne(tmpfile2.uuid)).resolves.toBeTruthy();
   });
 
-  test("inserting two model files (first better, then worse)", async () => {
+  it("inserting two model files (first better, then worse)", async () => {
     const tmpfile1 = { ...volatileFile, product: "model", model: "ecmwf" };
     const tmpfile2 = {
       ...tmpfile1,
@@ -179,7 +179,7 @@ describe("PUT /files/:s3key", () => {
     await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeTruthy();
   });
 
-  test("inserting several model files with different optimumOrder", async () => {
+  it("inserting several model files with different optimumOrder", async () => {
     const tmpfile1 = { ...volatileFile, product: "model", model: "icon-iglo-24-35" };
     const tmpfile2 = {
       ...tmpfile1,
@@ -217,7 +217,7 @@ describe("PUT /files/:s3key", () => {
     await expect(searchFileRepo.findOne(tmpfile3.uuid)).resolves.toBeTruthy();
   });
 
-  test("inserting several model files with different optimumOrder II", async () => {
+  it("inserting several model files with different optimumOrder II", async () => {
     const tmpfile1 = { ...volatileFile, product: "model", model: "ecmwf" };
     const tmpfile2 = {
       ...volatileFile,
@@ -256,7 +256,7 @@ describe("PUT /files/:s3key", () => {
     await expect(searchFileRepo.findOne(tmpfile3.uuid)).resolves.toBeFalsy();
   });
 
-  test("inserting several model files with different optimumOrder III", async () => {
+  it("inserting several model files with different optimumOrder III", async () => {
     const tmpfile1 = { ...volatileFile, product: "model", model: "icon-iglo-24-35" };
     delete tmpfile1.cloudnetpyVersion;
     const tmpfile2 = {
@@ -291,13 +291,13 @@ describe("PUT /files/:s3key", () => {
     await expect(searchFileRepo.findOne(tmpfile3.uuid)).resolves.toBeTruthy();
   });
 
-  test("errors on invalid site", async () => {
+  it("errors on invalid site", async () => {
     const tmpfile = { ...stableFile };
     tmpfile.site = "bökärest";
     await expect(putFile(tmpfile)).rejects.toMatchObject({ response: { status: 400 } });
   });
 
-  test("overwrites existing freezed files on test site", async () => {
+  it("overwrites existing freezed files on test site", async () => {
     const tmpfile = { ...stableFile };
     tmpfile.site = "granada";
     tmpfile.s3key = "20181115_granada_mira.nc";
@@ -309,7 +309,7 @@ describe("PUT /files/:s3key", () => {
     expect(dbRow1.updatedAt < dbRow2.updatedAt);
   });
 
-  test("inserting new file with source files", async () => {
+  it("inserting new file with source files", async () => {
     await putFile(stableFile);
     const tmpfile = { ...stableFile };
     tmpfile.sourceFileIds = [stableFile.uuid];
@@ -323,7 +323,7 @@ describe("PUT /files/:s3key", () => {
     expect(dbRow1.sourceFileIds).toMatchObject([stableFile.uuid]);
   });
 
-  test("errors on nonexisting source files", async () => {
+  it("errors on nonexisting source files", async () => {
     await putFile(stableFile);
     const tmpfile = { ...stableFile };
     tmpfile.sourceFileIds = ["42b32746-faf0-4057-9076-ed2e698dcc34"];
@@ -332,7 +332,7 @@ describe("PUT /files/:s3key", () => {
     await expect(putFile(tmpfile)).rejects.toMatchObject({ response: { status: 422 } });
   });
 
-  test("errors on model versions", async () => {
+  it("errors on model versions", async () => {
     const tmpfile1 = { ...stableFile };
     tmpfile1.product = "model";
     tmpfile1.model = "ecmwf";
@@ -343,7 +343,7 @@ describe("PUT /files/:s3key", () => {
     await expect(putFile(tmpfile2)).rejects.toMatchObject({ response: { status: 501 } });
   });
 
-  test("errors on invalid filename", async () => {
+  it("errors on invalid filename", async () => {
     // filename: 20181115_mace-head_mira.nc
     let tmpfile = { ...volatileFile };
     tmpfile.measurementDate = "2018-11-16";
@@ -355,13 +355,13 @@ describe("PUT /files/:s3key", () => {
 });
 
 describe("POST /files/", () => {
-  test("refuse freezing a file without pid", async () => {
+  it("refuse freezing a file without pid", async () => {
     const tmpfile = { ...stableFile };
     delete tmpfile.pid;
     await expect(putFile(tmpfile)).rejects.toMatchObject({ response: { status: 422 } });
   });
 
-  test("freezing existing file", async () => {
+  it("freezing existing file", async () => {
     await putFile(volatileFile);
     const payload = {
       uuid: volatileFile.uuid,
@@ -378,7 +378,7 @@ describe("POST /files/", () => {
     expect(dbRow2.volatile).toEqual(false);
   });
 
-  test("freezing existing model file", async () => {
+  it("freezing existing model file", async () => {
     await putFile(volatileModelFile);
     const payload = {
       uuid: volatileModelFile.uuid,
@@ -395,7 +395,7 @@ describe("POST /files/", () => {
     expect(dbRow2.volatile).toEqual(false);
   });
 
-  test("refuse updating freezed file", async () => {
+  it("refuse updating freezed file", async () => {
     await putFile(stableFile);
     await expect(putFile(stableFile)).rejects.toMatchObject({
       response: {
@@ -405,7 +405,7 @@ describe("POST /files/", () => {
     });
   });
 
-  test("updating version id does not update updatedAt", async () => {
+  it("updating version id does not update updatedAt", async () => {
     await putFile(stableFile);
     const dbRow1 = await fileRepo.findOneOrFail(stableFile.uuid);
     const payload = { uuid: stableFile.uuid, version: "999" };
@@ -419,13 +419,13 @@ describe("POST /files/", () => {
 describe("DELETE /api/files/", () => {
   const privUrl = `${backendPrivateUrl}visualizations/`;
 
-  test("missing mandatory parameter", async () => {
+  it("missing mandatory parameter", async () => {
     const file = await putDummyFile("radar", false);
     await expect(deleteFile(file.uuid)).rejects.toMatchObject({ response: { status: 404 } });
     await expect(deleteFile(file.uuid, true)).rejects.toMatchObject({ response: { status: 404 } });
   });
 
-  test("incorrect parameter value", async () => {
+  it("incorrect parameter value", async () => {
     const file = await putDummyFile("radar", false);
     await expect(deleteFile(file.uuid, "kissa", false)).rejects.toMatchObject({ response: { status: 400 } });
     await expect(deleteFile(file.uuid, "treu", false)).rejects.toMatchObject({ response: { status: 400 } });
@@ -435,18 +435,18 @@ describe("DELETE /api/files/", () => {
     await expect(deleteFile(file.uuid, false, "fales")).rejects.toMatchObject({ response: { status: 400 } });
   });
 
-  test("refuses deleting a stable file", async () => {
+  it("refuses deleting a stable file", async () => {
     const radarFile = await putDummyFile("radar", false);
     await expect(deleteFile(radarFile.uuid, false, false)).rejects.toMatchObject({ response: { status: 422 } });
     await fileRepo.findOneOrFail(radarFile.uuid);
   });
 
-  test("refuses deleting non-existent file", async () => {
+  it("refuses deleting non-existent file", async () => {
     const uuid = "db9156e5-8b97-4e9f-8974-55757d873e5e";
     await expect(deleteFile(uuid, false, false)).rejects.toMatchObject({ response: { status: 422 } });
   });
 
-  test("deletes regular volatile file and images", async () => {
+  it("deletes regular volatile file and images", async () => {
     const radarFile = await putDummyFile();
     await putDummyImage("radar-v.png", radarFile);
     await putDummyImage("radar-ldr.png", radarFile);
@@ -456,7 +456,7 @@ describe("DELETE /api/files/", () => {
     await expect(vizRepo.findOne("radar-ldr.png")).resolves.toBeFalsy();
   });
 
-  test("deletes higher-level volatile products too", async () => {
+  it("deletes higher-level volatile products too", async () => {
     const radarFile = await putDummyFile();
     await putDummyImage("radar-v.png", radarFile);
     const categorizeFile = await putDummyFile("categorize");
@@ -468,7 +468,7 @@ describe("DELETE /api/files/", () => {
     await expect(vizRepo.findOne("categorize-ldr.png")).resolves.toBeFalsy();
   });
 
-  test("does not delete with dryRun parameter", async () => {
+  it("does not delete with dryRun parameter", async () => {
     const radarFile = await putDummyFile();
     await putDummyImage("radar-v.png", radarFile);
     const categorizeFile = await putDummyFile("categorize");
@@ -480,7 +480,7 @@ describe("DELETE /api/files/", () => {
     await expect(vizRepo.findOne("categorize-ldr.png")).resolves.toBeTruthy();
   });
 
-  test("returns filenames of deleted products and images", async () => {
+  it("returns filenames of deleted products and images", async () => {
     const radarFile = await putDummyFile();
     await putDummyImage("radar-v.png", radarFile);
     const categorizeFile = await putDummyFile("categorize");
@@ -494,13 +494,13 @@ describe("DELETE /api/files/", () => {
     ]);
   });
 
-  test("refuses deleting if higher-level products contain stable product", async () => {
+  it("refuses deleting if higher-level products contain stable product", async () => {
     const file = await putDummyFile();
     await putDummyFile("categorize", false);
     await expect(deleteFile(file.uuid, true, false)).rejects.toMatchObject({ response: { status: 422 } });
   });
 
-  test("deleting using deleteHigherProducts parameter I", async () => {
+  it("deleting using deleteHigherProducts parameter I", async () => {
     const radarFile = await putDummyFile();
     const categorizeFile = await putDummyFile("categorize", false);
     await expect(deleteFile(radarFile.uuid, false, false)).resolves.toMatchObject({ status: 200 });
@@ -508,7 +508,7 @@ describe("DELETE /api/files/", () => {
     await expect(fileRepo.findOne(categorizeFile.uuid)).resolves.toBeTruthy();
   });
 
-  test("deleting using deleteHigherProducts parameter II", async () => {
+  it("deleting using deleteHigherProducts parameter II", async () => {
     const radarFile = await putDummyFile();
     const categorizeFile = await putDummyFile("categorize");
     await expect(deleteFile(radarFile.uuid, false, false)).resolves.toMatchObject({ status: 200 });
@@ -516,19 +516,19 @@ describe("DELETE /api/files/", () => {
     await expect(fileRepo.findOne(categorizeFile.uuid)).resolves.toBeTruthy();
   });
 
-  test("deletes model file", async () => {
+  it("deletes model file", async () => {
     const file = await putDummyFile("model");
     await expect(deleteFile(file.uuid, false, false)).resolves.toMatchObject({ status: 200 });
     await expect(fileRepo.findOne(file.uuid)).resolves.toBeFalsy();
   });
 
-  test("refuses deleting model file if higher-level products contain stable product", async () => {
+  it("refuses deleting model file if higher-level products contain stable product", async () => {
     const file = await putDummyFile("model");
     await putDummyFile("categorize", false);
     await expect(deleteFile(file.uuid, true, false)).rejects.toMatchObject({ response: { status: 422 } });
   });
 
-  test("deletes quality reports too", async () => {
+  it("deletes quality reports too", async () => {
     const resources = await readResources();
     const report = resources["quality-report-pass"];
     const file = await putDummyFile("model");
