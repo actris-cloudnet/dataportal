@@ -51,9 +51,9 @@
         <div
           v-if="isActrisObject"
           class="tag actris"
-          title="Data from an operational ACTRIS site"
+          title="Data from ACTRIS site"
         >
-          Actris
+          ACTRIS
         </div>
         <div
           v-if="response.volatile"
@@ -169,7 +169,7 @@ const isActrisObject = computed(() => {
   if (!response.value) {
     return false;
   }
-  return response.value.site.type.includes("cloudnet" as SiteType);
+  return response.value.site.actrisId != null;
 });
 
 const currentVersionIndex = computed(() => {
