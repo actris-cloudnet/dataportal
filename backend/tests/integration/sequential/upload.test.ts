@@ -146,6 +146,49 @@ describe("POST /upload/metadata", () => {
     expect(md.status).toEqual(Status.CREATED);
   });
 
+  it("inserts same metadata simultaneously", async () => {
+    const now = new Date();
+    await Promise.all(
+      Array.from({ length: 100 }, () =>
+        axios.post(metadataUrl, validMetadata, { headers }).catch(() => {
+          /* Let some requests fail. */
+        })
+      )
+    );
+    const mds = await instrumentRepo.find({ checksum: validMetadata.checksum });
+    expect(mds).toHaveLength(1);
+    expect(new Date(mds[0].createdAt).getTime()).toBeGreaterThan(now.getTime());
+    expect(new Date(mds[0].updatedAt).getTime()).toBeGreaterThan(now.getTime());
+    expect(mds[0].status).toEqual(Status.CREATED);
+  });
+
+  it("replaces metadata on same day simultaneously", async () => {
+    const now = new Date();
+    const altChecksum = randomMd5();
+    await Promise.all(
+      Array.from({ length: 100 }, (v, i) =>
+        axios
+          .post(metadataUrl, i % 2 == 0 ? validMetadata : { ...validMetadata, checksum: altChecksum }, { headers })
+          .catch(() => {
+            /* Let some requests fail. */
+          })
+      )
+    );
+    const mds = await instrumentRepo.find({
+      where: {
+        filename: validMetadata.filename,
+        measurementDate: validMetadata.measurementDate,
+        instrument: validMetadata.instrument,
+        instrumentPid: validMetadata.instrumentPid,
+        site: validMetadata.site,
+      },
+    });
+    expect(mds).toHaveLength(1);
+    expect(new Date(mds[0].createdAt).getTime()).toBeGreaterThan(now.getTime());
+    expect(new Date(mds[0].updatedAt).getTime()).toBeGreaterThan(now.getTime());
+    expect(mds[0].status).toEqual(Status.CREATED);
+  });
+
   it("rejects metadata without instrumentPid", async () => {
     const payload = { ...validMetadata, instrumentPid: undefined };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject(
@@ -1117,4 +1160,8 @@ function randomInt(min: number, max: number): number {
 
 function md5(str: string) {
   return crypto.createHash("md5").update(str).digest("hex");
+}
+
+function randomMd5(): string {
+  return crypto.randomBytes(16).toString("hex");
 }
