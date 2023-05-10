@@ -7,16 +7,16 @@
     align-items: center
     color: white
     font-size: 90%
-    font-weight: 550
+    font-weight: 600
     inline-size: max-content
     block-size: min-content
-    padding: 0.23*$basespacing 0.52*$basespacing
-    border-radius: 2.5*$baseradius
+    padding: 0.25*$basespacing 0.65*$basespacing
+    border-radius: 999px
     cursor: default
     &:first-child
       margin-left: $basespacing
     &:not(:first-child)
-      margin-left: 0.7*$basespacing
+      margin-left: 0.5*$basespacing
   .experimental
     background-color: #EC9706
   .actris
