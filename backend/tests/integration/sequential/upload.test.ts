@@ -233,6 +233,19 @@ describe("POST /upload/metadata", () => {
     await instrumentRepo.findOneOrFail({ instrumentPid: payload.instrumentPid });
   });
 
+  it("inserts similar metadata with different instrumentPids", async () => {
+    const metadata1 = { ...validMetadata, instrumentPid: "https://hdl.handle.net/123/pid1", checksum: randomMd5() };
+    const metadata2 = { ...validMetadata, instrumentPid: "https://hdl.handle.net/123/pid2", checksum: randomMd5() };
+    await expect(axios.post(metadataUrl, metadata1, { headers })).resolves.toMatchObject({ status: 200 });
+    await expect(axios.post(metadataUrl, metadata2, { headers })).resolves.toMatchObject({ status: 200 });
+    const md1 = await instrumentRepo.findOneOrFail({ checksum: metadata1.checksum });
+    expect(md1.status).toEqual(Status.CREATED);
+    expect(md1.instrumentPid).toEqual(metadata1.instrumentPid);
+    const md2 = await instrumentRepo.findOneOrFail({ checksum: metadata2.checksum });
+    expect(md2.status).toEqual(Status.CREATED);
+    expect(md2.instrumentPid).toEqual(metadata2.instrumentPid);
+  });
+
   it("inserts new metadata with the current date as measurementDate", async () => {
     const today = new Date().toISOString().slice(0, 10);
     const payload = { ...validMetadata, measurementDate: today };
