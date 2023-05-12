@@ -49,7 +49,7 @@ export abstract class Upload {
   @Column()
   updatedAt!: Date;
 
-  @ManyToOne((_) => Site, (site) => site.uploads)
+  @ManyToOne((_) => Site, (site) => site.uploads, { nullable: false })
   site!: Site;
 
   @BeforeInsert()
@@ -77,7 +77,7 @@ export abstract class Upload {
 @Entity()
 @Unique(["site", "measurementDate", "filename", "instrument", "instrumentPid", "tags"])
 export class InstrumentUpload extends Upload {
-  @ManyToOne((_) => Instrument, (instrument) => instrument.uploads)
+  @ManyToOne((_) => Instrument, (instrument) => instrument.uploads, { nullable: false })
   instrument!: Instrument;
 
   @Column({ type: "text", nullable: true })
@@ -97,7 +97,7 @@ export class InstrumentUpload extends Upload {
 @Entity()
 @Unique(["site", "measurementDate", "filename", "model"])
 export class ModelUpload extends Upload {
-  @ManyToOne((_) => Model, (model) => model.uploads)
+  @ManyToOne((_) => Model, (model) => model.uploads, { nullable: false })
   model!: Model;
 
   constructor(args: UploadOptions, model: Model) {
