@@ -97,7 +97,7 @@ export class UploadRoutes {
         // Secondly search row by other unique columns.
         const params = { site: site, measurementDate: body.measurementDate, filename: filename };
         const payload = instrumentUpload
-          ? { ...params, instrument: body.instrument, tags: sortedTags }
+          ? { ...params, instrument: body.instrument, instrumentPid: body.instrumentPid, tags: sortedTags }
           : { ...params, model: body.model };
 
         // If a matching row exists, update it.
