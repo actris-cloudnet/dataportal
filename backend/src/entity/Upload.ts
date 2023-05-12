@@ -1,4 +1,4 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, ManyToOne, PrimaryColumn, Unique } from "typeorm";
 import { Site } from "./Site";
 import { Instrument } from "./Instrument";
 import { Model } from "./Model";
@@ -75,6 +75,7 @@ export abstract class Upload {
 }
 
 @Entity()
+@Unique(["site", "measurementDate", "filename", "instrument", "instrumentPid", "tags"])
 export class InstrumentUpload extends Upload {
   @ManyToOne((_) => Instrument, (instrument) => instrument.uploads)
   instrument!: Instrument;
@@ -94,12 +95,10 @@ export class InstrumentUpload extends Upload {
 }
 
 @Entity()
+@Unique(["site", "measurementDate", "filename", "model"])
 export class ModelUpload extends Upload {
   @ManyToOne((_) => Model, (model) => model.uploads)
   model!: Model;
-
-  @Column({ unique: true })
-  filename!: string;
 
   constructor(args: UploadOptions, model: Model) {
     super(args);
