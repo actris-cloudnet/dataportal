@@ -1,6 +1,6 @@
 import { Site } from "../entity/Site";
 import { InstrumentUpload, ModelUpload, Status, Upload } from "../entity/Upload";
-import { Connection, EntitySchema, EntityTarget, Repository } from "typeorm";
+import { Connection, EntityTarget, Repository } from "typeorm";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import {
   dateforsize,
@@ -131,9 +131,9 @@ export class UploadRoutes {
       });
 
       if (result.status >= 200 && result.status < 300) {
-        res.sendStatus(result.status);
+        return res.sendStatus(result.status);
       } else {
-        next(result);
+        return next(result);
       }
     } catch (err: any) {
       console.error("Unknown error", err);
