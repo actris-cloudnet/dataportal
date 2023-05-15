@@ -16,10 +16,10 @@ export class Visualization {
   @PrimaryColumn()
   s3key!: string;
 
-  @ManyToOne((_) => RegularFile, (file) => file.visualizations)
+  @ManyToOne((_) => RegularFile, (file) => file.visualizations, { nullable: false })
   sourceFile!: File;
 
-  @ManyToOne((_) => ProductVariable, (prodVar) => prodVar.visualizations)
+  @ManyToOne((_) => ProductVariable, (prodVar) => prodVar.visualizations, { nullable: false })
   productVariable!: ProductVariable;
 
   @Column({ type: "smallint", nullable: true })

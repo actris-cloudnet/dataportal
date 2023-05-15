@@ -19,7 +19,7 @@ export class ProductVariable {
   @OneToMany((_) => Visualization, (viz) => viz.productVariable)
   visualizations!: Visualization[];
 
-  @ManyToOne((_) => Product, (prod) => prod.variables)
+  @ManyToOne((_) => Product, (prod) => prod.variables, { nullable: false })
   product!: Product;
 
   constructor(

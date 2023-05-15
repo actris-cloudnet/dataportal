@@ -51,7 +51,7 @@ export abstract class File {
   @Column({ type: "date" })
   measurementDate!: Date;
 
-  @ManyToOne((_) => Site, (site) => site.files)
+  @ManyToOne((_) => Site, (site) => site.files, { nullable: false })
   site!: Site;
 
   @Column()
@@ -63,7 +63,7 @@ export abstract class File {
   @Column()
   format!: string;
 
-  @ManyToOne((_) => Product, (product) => product.files)
+  @ManyToOne((_) => Product, (product) => product.files, { nullable: false })
   product!: Product;
 
   @Column({
@@ -115,7 +115,7 @@ export class RegularFile extends File {
 
 @Entity()
 export class ModelFile extends File {
-  @ManyToOne((_) => Model, (model) => model.files)
+  @ManyToOne((_) => Model, (model) => model.files, { nullable: false })
   model!: Model;
 
   @OneToMany((_) => ModelVisualization, (viz) => viz.sourceFile)

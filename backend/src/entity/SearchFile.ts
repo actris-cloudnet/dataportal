@@ -13,10 +13,10 @@ export class SearchFile {
   @Column({ type: "date" })
   measurementDate!: Date;
 
-  @ManyToOne((_) => Site, (site) => site.files)
+  @ManyToOne((_) => Site, (site) => site.files, { nullable: false })
   site!: Site;
 
-  @ManyToOne((_) => Product, (product) => product.files)
+  @ManyToOne((_) => Product, (product) => product.files, { nullable: false })
   product!: Product;
 
   @Column()

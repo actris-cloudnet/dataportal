@@ -18,9 +18,9 @@ export class SiteContact {
   @Column()
   role!: RoleType;
 
-  @ManyToOne(() => Site, (site) => site.contacts)
+  @ManyToOne(() => Site, (site) => site.contacts, { nullable: false })
   site!: Site;
 
-  @ManyToOne(() => Person, (person) => person.siteContactRoles)
+  @ManyToOne(() => Person, (person) => person.siteContactRoles, { nullable: false })
   person!: Person;
 }
