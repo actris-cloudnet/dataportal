@@ -380,7 +380,7 @@ watch(
       .get(apiUrl)
       .then(({ data }) => {
         nfName.value = data.name;
-        nfLink.value = data.landingPage;
+        nfLink.value = data.landing_page;
       })
       .catch((error) => {
         console.error(error);
