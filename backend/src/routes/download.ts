@@ -160,6 +160,12 @@ export class DownloadRoutes {
         group = 'GROUP BY "yearMonth"';
         order = 'ORDER BY "yearMonth"';
         break;
+      case "year,uniqueIps":
+        select = `SELECT to_char(download."createdAt", 'YYYY') AS year
+                       , COUNT(DISTINCT ip) AS "uniqueIps"`;
+        group = "GROUP BY year";
+        order = "ORDER BY year";
+        break;
       case "country,downloads":
         select = 'SELECT country, SUM("variableDays") / 300 AS downloads';
         group = "GROUP BY country";

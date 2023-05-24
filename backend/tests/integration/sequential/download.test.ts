@@ -118,7 +118,7 @@ describe("GET /api/download/stats", () => {
       { yearMonth: "2022-12", downloads: expect.toBeAround(((2 + 1) * 31) / 300, 10) },
     ]));
 
-  it("calculates unique IPs by date", () =>
+  it("calculates unique IPs by month year", () =>
     expect(getStats({ dimensions: "yearMonth,uniqueIps" })).resolves.toMatchObject([
       { yearMonth: "2022-01", uniqueIps: 2 },
       { yearMonth: "2022-02", uniqueIps: 2 },
@@ -133,6 +133,9 @@ describe("GET /api/download/stats", () => {
       { yearMonth: "2022-11", uniqueIps: 1 },
       { yearMonth: "2022-12", uniqueIps: 1 },
     ]));
+
+  it("calculates unique IPs by year", () =>
+    expect(getStats({ dimensions: "year,uniqueIps" })).resolves.toMatchObject([{ year: "2022", uniqueIps: 3 }]));
 
   it("calculates file downloads by country", () =>
     expect(getStats({ dimensions: "country,downloads" })).resolves.toMatchObject([

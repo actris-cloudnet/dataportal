@@ -56,6 +56,7 @@ legend
         <select v-model="selectedDimensions">
           <option value="yearMonth,downloads">Monthly downloads</option>
           <option value="yearMonth,uniqueIps">Monthly unique IPs</option>
+          <option value="year,uniqueIps">Yearly unique IPs</option>
           <option value="country,downloads">Downloads by country</option>
         </select> </label
       ><br />
@@ -168,7 +169,7 @@ interface Option {
   label: string;
 }
 
-type Dimension = "yearMonth" | "country" | "downloads" | "uniqueIps";
+type Dimension = "year" | "yearMonth" | "country" | "downloads" | "uniqueIps";
 
 const apiUrl = import.meta.env.VITE_BACKEND_URL;
 const statistics = ref([]);
@@ -178,6 +179,7 @@ const initial = ref(true);
 const maxValue = ref(0);
 const selectedDimensions = ref("yearMonth,downloads");
 const dimensionLabel: Record<Dimension, string> = {
+  year: "Year",
   yearMonth: "Month",
   country: "Country",
   downloads: "Downloads (in variable years)",
