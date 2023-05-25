@@ -11,8 +11,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
       - name: Build Docker images
-        run: docker-compose build backend backend-prod frontend-prod
+        uses: docker/bake-action@v3
+        with:
+          workdir: .github
+          targets: backend-prod,frontend-prod
+          set: |
+            *.cache-to=type=gha,mode=max
+            *.cache-from=type=gha
 
       - name: Print logs
         if: always()
