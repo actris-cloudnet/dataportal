@@ -55,9 +55,9 @@ async function createServer(): Promise<void> {
   const referenceRoutes = new ReferenceRoutes(conn);
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
-    if (err.status < 500)
-      console.log(`Error ${err.status} in ${req.method} ${req.path}:`, stringify(err)); // Client error
-    else console.error(`Error ${err.status} in ${req.method} ${req.path}:`, err.errors); // Might be anything
+    console.error(
+      JSON.stringify({ req: { method: req.method, url: req.url, body: req.is("json") ? req.body : "[Redacted]" }, err })
+    );
     if (!res.headersSent) {
       delete err.params;
       const status = err.status || 500;
