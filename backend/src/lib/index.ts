@@ -13,6 +13,7 @@ import { CollectionFileResponse } from "../entity/CollectionFileResponse";
 import ReadableStream = NodeJS.ReadableStream;
 import maxmind, { CountryResponse, OpenOpts, Reader } from "maxmind";
 import { randomBytes } from "crypto";
+import { Collection } from "../entity/Collection";
 
 export const stringify = (obj: any): string => JSON.stringify(obj, null, 2);
 
@@ -199,4 +200,16 @@ export function validateInstrumentPid(input: any): string {
     return "must be Handle";
   }
   return "";
+}
+
+export function getFileLandingPage(file: RegularFile | ModelFile): string {
+  return `${env.DP_FRONTEND_URL}/file/${file.uuid}`;
+}
+
+export function getCollectionLandingPage(collection: Collection): string {
+  return `${env.DP_FRONTEND_URL}/collection/${collection.uuid}`;
+}
+
+export function getObjectLandingPage(object: RegularFile | ModelFile | Collection): string {
+  return object instanceof Collection ? getCollectionLandingPage(object) : getFileLandingPage(object);
 }

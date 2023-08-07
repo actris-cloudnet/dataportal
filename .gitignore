@@ -119,3 +119,6 @@ public/css
 
 # Pycharm settings
 .idea
+
+# Environment variables
+backend/dev.env
