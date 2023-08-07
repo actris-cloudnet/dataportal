@@ -1,0 +1,486 @@
+import { Connection, Repository } from "typeorm";
+
+import { RegularFile, ModelFile, File } from "../entity/File";
+import { Collection } from "../entity/Collection";
+import axios from "axios";
+import { getCollectionLandingPage, getFileLandingPage } from ".";
+import env from "../lib/env";
+import { Model } from "../entity/Model";
+
+const LABELLING_URL = "https://actris-nf-labelling.out.ocp.fmi.fi/api/facilities";
+const MODEL_AUTHOR: Person = { firstName: "Ewan", lastName: "O'Connor", orcid: "0000-0001-9834-5100", role: "modelPi" };
+const PUBLISHER = "ACTRIS Cloud remote sensing data centre unit (CLU)";
+const MONTHS_FULL = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+const MONTHS_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const COMMON_ACK = `We acknowledge ACTRIS and Finnish Meteorological Institute for providing the data set which is available for download from <a href="${env.DP_FRONTEND_URL}">${env.DP_FRONTEND_URL}</a>.`;
+
+export interface Person {
+  firstName: string;
+  lastName: string;
+  orcid: string | null;
+  role: "instrumentPi" | "modelPi" | "nfPi";
+}
+
+export interface Citation {
+  authors: Person[];
+  publisher: string;
+  title: string;
+  year: number;
+  url: string;
+  note?: string;
+}
+
+interface InstrumentPi {
+  first_name: string;
+  last_name: string;
+  orcid_id: string | null;
+  start_date: string | null;
+  end_date: string | null;
+}
+
+interface NfContact {
+  first_name: string;
+  last_name: string;
+  orcid_id: string | null;
+  role: string;
+  start_date: string | null;
+  end_date: string | null;
+}
+
+export class CitationService {
+  private conn: Connection;
+
+  constructor(conn: Connection) {
+    this.conn = conn;
+  }
+
+  async getCollectionCitation(collection: Collection): Promise<Citation> {
+    const [instrumentPis, usesModelData, nfPis, productNames, siteNames, dateRange] = await Promise.all([
+      this.queryInstrumentPids(collection).then((pids) => fetchInstrumentPis(pids)),
+      this.usesModelData(collection),
+      this.queryCollectionActrisIds(collection).then((ids) => fetchNfPis(ids)),
+      this.queryCollectionProductNames(collection),
+      this.queryCollectionSiteNames(collection),
+      this.queryCollectionDateRange(collection),
+    ]);
+    if (usesModelData) {
+      instrumentPis.push(MODEL_AUTHOR);
+    }
+    const siteAuthors = await this.queryCollectionSitePersons(collection);
+    const authors = removeDuplicateNames([...instrumentPis, ...nfPis, ...siteAuthors]);
+    const products = formatList(
+      truncateList(
+        productNames.map((x) => x.toLowerCase()),
+        5,
+        "products"
+      )
+    );
+    const sites = formatList(truncateList(siteNames, 5, "sites"));
+    const date = formatDateRange(dateRange.startDate, dateRange.endDate);
+    const title = `Custom collection of ${products} data from ${sites} ${date}`;
+    return {
+      authors,
+      publisher: PUBLISHER,
+      title,
+      year: collection.createdAt.getFullYear(),
+      url: collection.pid || getCollectionLandingPage(collection),
+    };
+  }
+
+  async getFileCitation(file: RegularFile | ModelFile): Promise<Citation> {
+    let people: Person[];
+    if (file instanceof RegularFile) {
+      const instrumentPids = await this.queryInstrumentPids(file);
+      people = await fetchInstrumentPis(instrumentPids);
+      if (await this.usesModelData(file)) {
+        people.push(MODEL_AUTHOR);
+      }
+      people = people.concat(
+        file.site.citations
+          .flatMap((citation) => citation.persons)
+          .map((person) => ({
+            firstName: person.firstname,
+            lastName: person.surname,
+            orcid: person.orcid ? normalizeOrcid(person.orcid) : null,
+            role: "nfPi",
+          }))
+      );
+    } else {
+      people = [MODEL_AUTHOR];
+    }
+    return {
+      authors: removeDuplicateNames(people),
+      publisher: PUBLISHER,
+      title: `${file.product.humanReadableName} data from ${file.site.humanReadableName} on ${humanReadableDate(
+        file.measurementDate
+      )}`,
+      year: file.updatedAt.getFullYear(),
+      url: file.pid || getFileLandingPage(file),
+      note: file.volatile ? "Data is volatile and may be updated in the future" : undefined,
+    };
+  }
+
+  async getAcknowledgements(object: RegularFile | ModelFile | Collection): Promise<string> {
+    const [siteAcks, modelAcks] = await Promise.all([this.querySiteAcks(object), this.queryModelAcks(object)]);
+    let output = COMMON_ACK;
+    if (siteAcks.length > 0) {
+      output += " ";
+      output += siteAcks.join(" ");
+    }
+    if (modelAcks.length > 0) {
+      output += " We acknowledge ";
+      output += formatList(modelAcks.map((a) => a.replace(/\.$/, "")));
+      output += ".";
+    }
+    return output;
+  }
+
+  private queryInstrumentPids(object: RegularFile | Collection): Promise<{ instrumentPid: string; dates: string[] }[]> {
+    return this.querySourceFiles(
+      object,
+      `SELECT "instrumentPid", array_agg(regular_file."measurementDate"::text) AS dates
+       FROM traverse
+       JOIN regular_file ON traverse.uuid = regular_file.uuid
+       WHERE "instrumentPid" IS NOT NULL
+       GROUP BY "instrumentPid"`
+    );
+  }
+
+  private async usesModelData(object: RegularFile | Collection): Promise<boolean> {
+    const result = await this.querySourceFiles(
+      object,
+      `SELECT 1
+       FROM traverse
+       JOIN model_file ON traverse.uuid = model_file.uuid
+       LIMIT 1`
+    );
+    return result.length > 0;
+  }
+
+  private async queryCollectionActrisIds(collection: Collection): Promise<{ actrisId: number; dates: string[] }[]> {
+    return await this.conn.query(
+      `SELECT "actrisId", array_agg(regular_file."measurementDate"::text) AS dates
+       FROM regular_file
+       JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
+       JOIN site ON regular_file."siteId" = site.id
+       WHERE "collectionUuid" = $1
+       AND "actrisId" IS NOT NULL
+       GROUP BY "actrisId"`,
+      [collection.uuid]
+    );
+  }
+
+  private async queryCollectionProductNames(collection: Collection): Promise<string[]> {
+    return (
+      await this.conn.query(
+        `SELECT product."humanReadableName"
+         FROM regular_file
+         JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
+         JOIN product ON regular_file."productId" = product.id
+         WHERE "collectionUuid" = $1
+         UNION
+         SELECT 'Model' AS "humanReadableName"
+         FROM model_file
+         JOIN collection_model_files_model_file ON model_file.uuid = "modelFileUuid"
+         WHERE "collectionUuid" = $1`,
+        [collection.uuid]
+      )
+    )
+      .map((x: any) => x.humanReadableName)
+      .sort();
+  }
+
+  private async queryCollectionSiteNames(collection: Collection): Promise<string[]> {
+    return (
+      await this.conn.query(
+        `SELECT site."humanReadableName"
+         FROM regular_file
+         JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
+         JOIN site ON regular_file."siteId" = site.id
+         WHERE "collectionUuid" = $1
+         UNION
+         SELECT site."humanReadableName"
+         FROM model_file
+         JOIN collection_model_files_model_file ON model_file.uuid = "modelFileUuid"
+         JOIN site ON model_file."siteId" = site.id
+         WHERE "collectionUuid" = $1`,
+        [collection.uuid]
+      )
+    )
+      .map((x: any) => x.humanReadableName)
+      .sort();
+  }
+
+  private async queryCollectionSitePersons(collection: Collection): Promise<Person[]> {
+    const rows = await this.conn.query(
+      `SELECT DISTINCT firstname, surname, orcid
+       FROM regular_file
+       JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
+       JOIN site_citations_regular_citation USING ("siteId")
+       JOIN regular_citation_persons_person USING ("regularCitationId")
+       JOIN person ON "personId" = person.id
+       WHERE "collectionUuid" = $1`,
+      [collection.uuid]
+    );
+    return rows.map(
+      (row: any): Person => ({
+        firstName: row.firstname,
+        lastName: row.surname,
+        orcid: row.orcid ? normalizeOrcid(row.orcid) : null,
+        role: "nfPi",
+      })
+    );
+  }
+
+  private async queryCollectionDateRange(collection: Collection): Promise<{ startDate: Date; endDate: Date }> {
+    return (
+      await this.conn.query(
+        `SELECT MIN("measurementDate") AS "startDate", MAX("measurementDate") AS "endDate"
+         FROM (SELECT "measurementDate"
+               FROM regular_file
+               JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
+               WHERE "collectionUuid" = $1
+               UNION
+               SELECT "measurementDate"
+               FROM model_file
+               JOIN collection_model_files_model_file ON model_file.uuid = "modelFileUuid"
+               WHERE "collectionUuid" = $1) AS dates`,
+        [collection.uuid]
+      )
+    )[0];
+  }
+
+  private async queryModelAcks(object: RegularFile | ModelFile | Collection): Promise<string[]> {
+    if (object instanceof ModelFile) {
+      return object.model.citations.map((r) => r.acknowledgements);
+    }
+    return (
+      await this.querySourceFiles(
+        object,
+        `SELECT DISTINCT acknowledgements
+         FROM traverse
+         JOIN model_file ON traverse.uuid = model_file.uuid
+         JOIN model_citations_model_citation ON model_file."modelId" = model_citations_model_citation."modelId"
+         JOIN model_citation ON model_citations_model_citation."modelCitationId" = model_citation.id`
+      )
+    ).map((x: any) => x.acknowledgements);
+  }
+
+  private async querySiteAcks(object: RegularFile | ModelFile | Collection): Promise<string[]> {
+    if (object instanceof RegularFile) {
+      return object.site.citations.map((r) => r.acknowledgements);
+    }
+    if (object instanceof ModelFile) {
+      return [];
+    }
+    const result = await this.conn.query(
+      `SELECT DISTINCT acknowledgements
+       FROM regular_file
+       JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
+       JOIN site_citations_regular_citation ON regular_file."siteId" = site_citations_regular_citation."siteId"
+       JOIN regular_citation ON site_citations_regular_citation."regularCitationId" = regular_citation.id
+       WHERE "collectionUuid" = $1`,
+      [object.uuid]
+    );
+    return result.map((x: any) => x.acknowledgements);
+  }
+
+  private async querySourceFiles(object: RegularFile | Collection, query: string): Promise<any> {
+    const filter =
+      object instanceof Collection
+        ? `JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
+           WHERE "collectionUuid" = $1`
+        : `WHERE uuid = $1`;
+    return await this.conn.query(
+      `WITH RECURSIVE traverse AS (
+       SELECT uuid
+       FROM regular_file
+       ${filter}
+       UNION ALL
+       SELECT "sourceFileUuid"
+       FROM regular_file, UNNEST("sourceFileIds"::uuid[]) AS "sourceFileUuid", traverse
+       WHERE regular_file.uuid = traverse.uuid
+     )
+     ${query}`,
+      [object.uuid]
+    );
+  }
+}
+
+async function fetchInstrumentPi(pid: string, measurementDate?: Date): Promise<InstrumentPi[]> {
+  const match = pid.match("^https?://hdl\\.handle\\.net/(.+)");
+  if (!match) {
+    throw new Error("Invalid PID format");
+  }
+  const url = "https://hdl.handle.net/api/handles/" + match[1];
+  const response = await axios.get(url);
+  const values = response.data.values;
+  if (!Array.isArray(values)) {
+    throw new Error("Invalid PID response");
+  }
+  const nameItem = values.find((ele) => ele.type === "URL");
+  let apiUrl = nameItem.data.value + "/pi";
+  if (measurementDate) {
+    const dateStr = new Date(measurementDate).toISOString().slice(0, 10);
+    apiUrl += "?date=" + dateStr;
+  }
+  const apiRes = await axios.get(apiUrl);
+  return apiRes.data;
+}
+
+async function fetchInstrumentPis(data: { instrumentPid: string; dates: string[] }[]): Promise<Person[]> {
+  return (
+    await Promise.all(
+      data.map((item) =>
+        fetchInstrumentPi(item.instrumentPid).then((pis) => {
+          const output = new Set<InstrumentPi>();
+          for (const date of item.dates) {
+            pis
+              .filter(
+                (pi) =>
+                  (pi.start_date != null ? date >= pi.start_date : true) &&
+                  (pi.end_date != null ? date <= pi.end_date : true)
+              )
+              .forEach((pi) => {
+                output.add(pi);
+              });
+          }
+          return Array.from(
+            output,
+            (pi): Person => ({
+              firstName: pi.first_name,
+              lastName: pi.last_name,
+              orcid: pi.orcid_id ? normalizeOrcid(pi.orcid_id) : null,
+              role: "instrumentPi",
+            })
+          );
+        })
+      )
+    )
+  ).flat();
+}
+
+async function fetchNfPi(actrisId: number, measurementDate?: string): Promise<NfContact[]> {
+  const response = await axios.get(`${LABELLING_URL}/${actrisId}/contacts`, {
+    params: {
+      date: measurementDate,
+      role: "pi",
+    },
+  });
+  if (!Array.isArray(response.data)) {
+    return [];
+  }
+  return response.data;
+}
+
+async function fetchNfPis(data: { actrisId: number; dates: string[] }[]): Promise<Person[]> {
+  return (
+    await Promise.all(
+      data.map((item) =>
+        fetchNfPi(item.actrisId).then((contacts) => {
+          const output = new Set<InstrumentPi>();
+          for (const date of item.dates) {
+            contacts
+              .filter(
+                (contact) =>
+                  contact.role === "pi" &&
+                  (contact.start_date != null ? date >= contact.start_date : true) &&
+                  (contact.end_date != null ? date <= contact.end_date : true)
+              )
+              .forEach((pi) => {
+                output.add(pi);
+              });
+          }
+          return Array.from(
+            output,
+            (pi): Person => ({
+              firstName: pi.first_name,
+              lastName: pi.last_name,
+              orcid: pi.orcid_id ? normalizeOrcid(pi.orcid_id) : null,
+              role: "nfPi",
+            })
+          );
+        })
+      )
+    )
+  ).flat();
+}
+
+function normalizeOrcid(orcid: string): string {
+  return orcid.replace(/^(https?:\/\/)?(www\.)?orcid\.org\//, "");
+}
+
+function removeDuplicateNames(pis: Person[]): Person[] {
+  // Order
+  const allPis = pis
+    .sort((a, b) =>
+      a.lastName !== b.lastName
+        ? a.lastName.localeCompare(b.lastName, "en-gb")
+        : a.firstName.localeCompare(b.firstName, "en-gb")
+    )
+    .filter((ele) => ele.role == "instrumentPi")
+    .concat(pis.filter((ele) => ele.role == "modelPi"))
+    .concat(pis.filter((ele) => ele.role == "nfPi"));
+  // Remove duplicates
+  const out: Person[] = [];
+  for (const pi of allPis) {
+    const nameExists = pi.orcid
+      ? out.some((name) => name.orcid === pi.orcid)
+      : out.some((name) => name.firstName === pi.firstName && name.lastName === pi.lastName);
+    if (!nameExists) {
+      out.push(pi);
+    }
+  }
+  return out;
+}
+
+function truncateList(list: string[], limit: number, placeholder: string) {
+  if (list.length <= limit) {
+    return list;
+  }
+  return [...list.slice(0, limit), `${list.length - limit} other ${placeholder}`];
+}
+
+function formatList(parts: string[]): string {
+  if (parts.length <= 2) {
+    return parts.join(", and ");
+  }
+  return parts.slice(0, -1).join(", ") + ", and " + parts[parts.length - 1];
+}
+
+function formatDateRange(startDate: Date, endDate: Date): string {
+  const sameDate = startDate.getDate() == endDate.getDate();
+  const sameMonth = startDate.getMonth() == endDate.getMonth();
+  const sameYear = startDate.getFullYear() == endDate.getFullYear();
+  if (sameYear && sameMonth && sameDate) {
+    return "on " + startDate.getDate() + " " + MONTHS_ABBR[startDate.getMonth()] + " " + startDate.getFullYear();
+  }
+  let output = "between " + startDate.getDate();
+  if (!sameMonth || !sameYear) {
+    output += " " + MONTHS_ABBR[startDate.getMonth()];
+  }
+  if (!sameYear) {
+    output += " " + startDate.getFullYear();
+  }
+  return output + " and " + endDate.getDate() + " " + MONTHS_ABBR[endDate.getMonth()] + " " + endDate.getFullYear();
+}
+
+function humanReadableDate(date: Date): string {
+  if (!(date instanceof Date)) {
+    date = new Date(date);
+  }
+  return `${date.getDate()} ${MONTHS_FULL[date.getMonth()]} ${date.getFullYear()}`;
+}
