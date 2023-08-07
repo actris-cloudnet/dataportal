@@ -5,8 +5,9 @@ import { validate as validateUuid } from "uuid";
 import axios from "axios";
 import { Connection, Repository } from "typeorm";
 import { File, ModelFile, RegularFile } from "../entity/File";
-import { convertToSearchResponse } from "../lib";
+import { getCollectionLandingPage, convertToSearchResponse } from "../lib";
 import env from "../lib/env";
+import { CitationService } from "../lib/cite";
 
 export class CollectionRoutes {
   constructor(conn: Connection) {
@@ -14,12 +15,14 @@ export class CollectionRoutes {
     this.collectionRepo = conn.getRepository<Collection>("collection");
     this.fileRepo = conn.getRepository<RegularFile>("regular_file");
     this.modelFileRepo = conn.getRepository<ModelFile>("model_file");
+    this.citationService = new CitationService(conn);
   }
 
   readonly conn: Connection;
   readonly collectionRepo: Repository<Collection>;
   readonly fileRepo: Repository<RegularFile>;
   readonly modelFileRepo: Repository<ModelFile>;
+  readonly citationService: CitationService;
 
   postCollection: RequestHandler = async (req: Request, res: Response, next) => {
     if (!("files" in req.body) || !req.body.files || !Array.isArray(req.body.files)) {
@@ -66,21 +69,67 @@ export class CollectionRoutes {
     }
     try {
       const collection = await this.collectionRepo.findOne(body.uuid);
-      if (collection === undefined) return next({ status: 422, errors: ["Collection not found"] });
-      if (collection.pid) return next({ status: 403, errors: ["Collection already has a PID"] });
-      const pidRes = await axios.post(
-        env.DP_PID_SERVICE_URL,
-        { uuid: body.uuid, type: body.type, url: `https://cloudnet.fmi.fi/collection/${body.uuid}` },
-        { timeout: env.DP_PID_SERVICE_TIMEOUT_MS }
-      );
-      await this.collectionRepo.update({ uuid: body.uuid }, { pid: pidRes.data.pid });
-      res.send(pidRes.data);
+      if (collection === undefined) {
+        return next({ status: 422, errors: ["Collection not found"] });
+      }
+      if (collection.pid) {
+        return next({ status: 403, errors: ["Collection already has a PID"] });
+      }
+      collection.pid = await this.mintDoi(collection);
+      await this.collectionRepo.save(collection);
+      res.send({ pid: collection.pid });
     } catch (e: any) {
-      if (e.code && e.code == "ECONNABORTED")
+      if (e.code && e.code == "ECONNABORTED") {
         return next({ status: 504, errors: ["PID service took too long to respond"] });
+      }
       return next({ status: 500, errors: e });
     }
   };
+
+  private async mintDoi(collection: Collection): Promise<string> {
+    const pidRes = await axios.post(`${env.DATACITE_API_URL}/dois`, await this.collectionDataCite(collection), {
+      headers: { "Content-Type": "application/vnd.api+json" },
+      auth: { username: env.DATACITE_API_USERNAME, password: env.DATACITE_API_PASSWORD },
+      timeout: env.DATACITE_API_TIMEOUT_MS,
+    });
+    return `${env.DATACITE_DOI_SERVER}/${pidRes.data.data.attributes.doi}`;
+  }
+
+  private async collectionDataCite(collection: Collection): Promise<object> {
+    const doiSuffix = collection.uuid.toLowerCase().replace(/-/g, "").slice(0, 16);
+    const citation = await this.citationService.getCollectionCitation(collection);
+    const creators = citation.authors.map((person) => ({
+      name: `${person.lastName}, ${person.firstName}`,
+      nameType: "Personal",
+      givenName: person.firstName,
+      familyName: person.lastName,
+      nameIdentifiers: person.orcid
+        ? [
+            {
+              schemeUri: "https://orcid.org",
+              nameIdentifier: `https://orcid.org/${person.orcid}`,
+              nameIdentifierScheme: "ORCID",
+            },
+          ]
+        : undefined,
+    }));
+    return {
+      data: {
+        type: "dois",
+        attributes: {
+          event: "publish",
+          doi: `${env.DATACITE_DOI_PREFIX}/${doiSuffix}`,
+          creators,
+          titles: [{ lang: "en", title: citation.title }],
+          publisher: citation.publisher,
+          publicationYear: citation.year,
+          types: { resourceTypeGeneral: "Dataset" },
+          url: getCollectionLandingPage(collection),
+          schemaVersion: "http://datacite.org/schema/kernel-4",
+        },
+      },
+    };
+  }
 
   allcollections: RequestHandler = async (req: Request, res: Response, next) =>
     this.collectionRepo
