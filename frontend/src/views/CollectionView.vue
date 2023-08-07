@@ -119,23 +119,19 @@ main.column
           v-if="mode === 'general'"
         >
           <h3>How to cite</h3>
-          <span v-if="busy">Generating citation text...</span>
+          <span v-if="citationBusy" style="color: gray"
+            >Generating citation...</span
+          >
           <div v-else-if="pidServiceError" class="errormsg">
             PID service is unavailable. Please try again later. You may still
             download the collection.
           </div>
           <how-to-cite
-            v-else
-            :pid="response.pid"
-            :products="products"
-            :sites="sites"
-            :models="models"
-            :nonModelSiteIds="nonModelSiteIds"
-            :collectionYear="collectionYear"
-            :startDate="startDate"
-            :endDate="endDate"
-          >
-          </how-to-cite>
+            v-if="!citationBusy"
+            :citation="citation"
+            :acknowledgements="acknowledgements"
+            :dataAvailability="dataAvailability"
+          />
 
           <h3>License</h3>
           <license></license>
@@ -205,8 +201,12 @@ const products = ref<Product[]>([]);
 const models = ref<Model[]>([]);
 const apiUrl = import.meta.env.VITE_BACKEND_URL;
 const busy = ref(false);
+const citationBusy = ref(false);
 const pidServiceError = ref(false);
 const nonModelSiteIds = ref<string[]>([]);
+const citation = ref<string>("");
+const acknowledgements = ref<string>("");
+const dataAvailability = ref<string>("");
 
 const startDate = computed(
   () =>
@@ -243,27 +243,25 @@ const totalSize = computed(() => {
   return combinedFileSize(sortedFiles.value);
 });
 
-function generatePidInBackground() {
+async function generatePid(): Promise<void> {
   if (!response.value || response.value.pid) return;
-  const payload = {
-    type: "collection",
-    uuid: props.uuid,
-  };
-  axios
-    .post(`${apiUrl}generate-pid`, payload)
-    .then(({ data }) => {
-      if (!response.value) return;
-      response.value.pid = data.pid;
-    })
-    .catch((e) => {
-      pidServiceError.value = true;
-      // eslint-disable-next-line no-console
-      console.error(e);
-    });
+  try {
+    const payload = {
+      type: "collection",
+      uuid: props.uuid,
+    };
+    const pidRes = await axios.post(`${apiUrl}generate-pid`, payload);
+    if (!response.value) return;
+    response.value.pid = pidRes.data.pid;
+  } catch (error) {
+    pidServiceError.value = true;
+    console.error(error);
+  }
 }
 
 onMounted(() => {
   busy.value = true;
+  citationBusy.value = true;
   return axios
     .get(`${apiUrl}collection/${props.uuid}`)
     .then((res) => {
@@ -286,14 +284,30 @@ onMounted(() => {
       response.value = error.response;
     })
     .then(() => {
-      generatePidInBackground();
+      generatePid().finally(() => {
+        Promise.all([
+          axios.get(
+            `${apiUrl}reference/${props.uuid}?citation=true&format=html`
+          ),
+          axios.get(
+            `${apiUrl}reference/${props.uuid}?acknowledgements=true&format=html`
+          ),
+          axios.get(
+            `${apiUrl}reference/${props.uuid}?dataAvailability=true&format=html`
+          ),
+        ]).then(([citationRes, ackRes, availRes]) => {
+          citationBusy.value = false;
+          citation.value = citationRes.data;
+          acknowledgements.value = ackRes.data;
+          dataAvailability.value = availRes.data;
+        });
+      });
       const siteIds = getUnique(sortedFiles.value, "siteId");
       const productIds = getUnique(sortedFiles.value, "productId");
       const modelIds = getUnique(sortedFiles.value, "modelId");
-      const citationQueryOptions = { params: { showCitations: true } };
       return Promise.all([
-        axios.get(`${apiUrl}sites/`, citationQueryOptions),
-        axios.get(`${apiUrl}models/`, citationQueryOptions),
+        axios.get(`${apiUrl}sites/`),
+        axios.get(`${apiUrl}models/`),
         axios.get(`${apiUrl}products/`),
       ]).then(([sitesRes, modelsRes, productsRes]) => {
         sites.value = sitesRes.data.filter((site: Site) =>

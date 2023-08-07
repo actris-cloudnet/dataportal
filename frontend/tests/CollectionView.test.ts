@@ -42,6 +42,30 @@ describe("CollectionView.vue", () => {
           return Promise.resolve(augmentAxiosResponse(resources["models"]));
         } else if (url.includes("/generate-pid")) {
           return Promise.resolve(augmentAxiosResponse({ pid: "testpid" }));
+        } else if (
+          url.includes("/reference/testuuid?citation=true&format=html")
+        ) {
+          return Promise.resolve(
+            augmentAxiosResponse(
+              'Meikäläinen, M. (2023). Custom collection. <a href="">testpid</a>'
+            )
+          );
+        } else if (
+          url.includes("/reference/testuuid?acknowledgements=true&format=html")
+        ) {
+          return Promise.resolve(
+            augmentAxiosResponse(
+              "We acknowledge many people and organizations."
+            )
+          );
+        } else if (
+          url.includes("/reference/testuuid?dataAvailability=true&format=html")
+        ) {
+          return Promise.resolve(
+            augmentAxiosResponse(
+              "Only available in the amazing Cloudnet data portal."
+            )
+          );
         }
         return Promise.reject(new Error(`Unmocked URL: ${url}`));
       };
@@ -99,9 +123,15 @@ describe("CollectionView.vue", () => {
 
     it("displays custom citation info", async () => {
       await nextTick(2);
-      expect(
-        wrapper.text().match(/Hyytiälä test citation/g) || []
-      ).toHaveLength(1);
+      expect(wrapper.text()).toContain(
+        "Only available in the amazing Cloudnet data portal."
+      );
+      expect(wrapper.text()).toContain(
+        "We acknowledge many people and organizations."
+      );
+      expect(wrapper.text()).toContain(
+        "Meikäläinen, M. (2023). Custom collection. testpid"
+      );
     });
   });
 
