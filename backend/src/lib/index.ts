@@ -213,3 +213,17 @@ export function getCollectionLandingPage(collection: Collection): string {
 export function getObjectLandingPage(object: RegularFile | ModelFile | Collection): string {
   return object instanceof Collection ? getCollectionLandingPage(object) : getFileLandingPage(object);
 }
+
+export function truncateList(list: string[], limit: number, placeholder: string) {
+  if (list.length < limit + 2) {
+    return list;
+  }
+  return [...list.slice(0, limit), `${list.length - limit} other ${placeholder}`];
+}
+
+export function formatList(parts: string[], conjunction: string): string {
+  if (parts.length <= 2) {
+    return parts.join(conjunction);
+  }
+  return parts.slice(0, -1).join(", ") + conjunction + parts[parts.length - 1];
+}

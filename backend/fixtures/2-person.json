@@ -1,1 +1,7 @@
-[]
+[
+  {
+    "firstname": "Benjamin",
+    "surname": "Bucharinen",
+    "citations": [{ "id": "bucharest_test" }]
+  }
+]

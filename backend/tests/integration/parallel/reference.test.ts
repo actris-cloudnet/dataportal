@@ -1,32 +1,43 @@
 import { backendPublicUrl } from "../../lib";
 import axios from "axios";
-import { readResources } from "../../../../shared/lib";
 
 const url = `${backendPublicUrl}`;
-let resources: any;
-let uuids: string[];
-
-beforeAll(async () => {
-  resources = await readResources();
-  uuids = resources["allfiles"].map((f: any) => f.uuid);
-});
+const uuids = [
+  // Regular files
+  "2bb32746-faf0-4057-9076-ed2e698dcf36",
+  "1bb32746-faf0-4057-9076-ed2e698dcf36",
+  "b6de8cf4-8825-47b0-aaa9-4fd413bbb0d7",
+  "f036da43-c19c-4832-99f9-6cc88f3255c5",
+  // Model files
+  "a45a2e9a-e39d-4af2-9798-5ea0fadf041e",
+  // Collections
+  "48092c00-161d-4ca2-a29d-628cf8e960f6",
+  "7a6c6675-af65-4650-a20c-e061344393d1",
+];
 
 describe("GET /api/reference", () => {
-  it("tests that reference api responds with some contect and correct type", async () => {
-    for (const uuid of uuids) {
-      const _url = url.concat("reference/", uuid);
-      const bib = (await axios.get(_url, { params: { citation: "true", format: "bibtex" } })).data;
-      const ris = (await axios.get(_url, { params: { citation: "true", format: "ris" } })).data;
-      const ack = (await axios.get(_url, { params: { acknowledgements: "true", format: "json" } })).data;
-      const dat = (await axios.get(_url, { params: { dataAvailibility: "true", format: "html" } })).data;
-      expect(typeof bib).toBe("string");
-      expect(typeof ris).toBe("string");
-      expect(Array.isArray(ack)).toBe(true);
-      expect(typeof dat).toBe("string");
-      expect(bib.length).toBeGreaterThan(0);
-      expect(ris.length).toBeGreaterThan(0);
-      expect(ack.length).toBeGreaterThan(0);
-      expect(dat.length).toBeGreaterThan(0);
-    }
-  });
+  for (const uuid of uuids) {
+    describe(`/${uuid}`, () => {
+      for (const format of ["html", "bibtex", "ris"]) {
+        it(`outputs citation as ${format}`, async () => {
+          const res = await axios.get(`${url}reference/${uuid}`, { params: { citation: "true", format } });
+          expect(res.data).toMatchSnapshot();
+        });
+      }
+
+      it(`outputs acknowledgements`, async () => {
+        const res = await axios.get(`${url}reference/${uuid}`, {
+          params: { acknowledgements: "true", format: "html" },
+        });
+        expect(res.data).toMatchSnapshot();
+      });
+
+      it(`outputs data availability`, async () => {
+        const res = await axios.get(`${url}reference/${uuid}`, {
+          params: { dataAvailability: "true", format: "html" },
+        });
+        expect(res.data).toMatchSnapshot();
+      });
+    });
+  }
 });

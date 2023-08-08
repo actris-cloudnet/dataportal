@@ -3,7 +3,7 @@ import { Request, RequestHandler, Response } from "express";
 
 import { RegularFile, ModelFile } from "../entity/File";
 import { Collection } from "../entity/Collection";
-import { getObjectLandingPage } from "../lib";
+import { formatList, getObjectLandingPage } from "../lib";
 import { Citation, CitationService } from "../lib/cite";
 
 export class ReferenceRoutes {
@@ -42,7 +42,6 @@ export class ReferenceRoutes {
         await this.getCitation(req, res, object);
       }
     } catch (err) {
-      console.error(err);
       next(err);
     }
   };
@@ -102,16 +101,19 @@ function getInitials(name: string): string {
   return name.replace(/\p{L}+/gu, (part) => part.slice(0, 1) + ".");
 }
 
-function formatList(parts: string[]): string {
-  if (parts.length <= 2) {
-    return parts.join(" & ");
-  }
-  return parts.slice(0, -1).join(", ") + ", & " + parts[parts.length - 1];
-}
-
 function citation2html(c: Citation) {
-  const authors = formatList(c.authors.map((a) => `${a.lastName}, ${getInitials(a.firstName)}`));
-  return `${authors} (${c.year}). ${c.title}. ${c.publisher}. <a href="${c.url}">${c.url}</a>`;
+  const authors = formatList(
+    c.authors.map((a) => `${a.lastName}, ${getInitials(a.firstName)}`),
+    ", & "
+  );
+  const year = `(${c.year})`;
+  const title = c.title;
+  const publisher = c.publisher;
+  const link = `<a href="${c.url}">${c.url}</a>`;
+  if (!authors) {
+    return `${title}. ${year}. ${publisher}. ${link}`;
+  }
+  return `${authors} ${year}. ${title}. ${publisher}. ${link}`;
 }
 
 function citation2ris(c: Citation) {

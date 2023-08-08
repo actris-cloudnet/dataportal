@@ -88,5 +88,23 @@
     "site": "bucharest",
     "version": "123",
     "errorLevel": "pass"
+  },
+  {
+    "uuid": "a45a2e9a-e39d-4af2-9798-5ea0fadf041e",
+    "pid": "www.pid.com",
+    "volatile": false,
+    "measurementDate": "2019-07-16",
+    "product": "model",
+    "model": "ecmwf",
+    "cloudnetpyVersion": "1.0.4",
+    "createdAt": "2020-02-20T10:56:19.382Z",
+    "updatedAt": "2020-02-20T10:56:19.382Z",
+    "s3key": "20190716_bucharest_ecmwf.nc",
+    "checksum": "e7712f5a1a01fac7e0fa23d47f1879d5107de0c7e9c4b530d5ec98cf4091ddfd",
+    "size": 12200657,
+    "format": "HDF5 (NetCDF4)",
+    "site": "bucharest",
+    "version": "123",
+    "errorLevel": "pass"
   }
 ]

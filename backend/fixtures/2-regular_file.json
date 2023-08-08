@@ -115,6 +115,11 @@
     "size": 7127282,
     "format": "HDF5 (NetCDF4)",
     "site": "bucharest",
+    "sourceFileIds": [
+      "b6de8cf4-8825-47b0-aaa9-4fd413bbb0d7",
+      "f036da43-c19c-4832-99f9-6cc88f3255c5",
+      "a45a2e9a-e39d-4af2-9798-5ea0fadf041e"
+    ],
     "version": "123",
     "errorLevel": null
   },
@@ -244,5 +249,41 @@
     "version": "123",
     "quality": "qc",
     "errorLevel": "error"
+  },
+  {
+    "uuid": "b6de8cf4-8825-47b0-aaa9-4fd413bbb0d7",
+    "pid": "",
+    "volatile": false,
+    "measurementDate": "2019-07-16",
+    "product": "lidar",
+    "cloudnetpyVersion": "1.0.4",
+    "createdAt": "2020-02-19T10:59:58.449Z",
+    "updatedAt": "2020-02-19T10:59:58.449Z",
+    "s3key": "20190715_bucharest_lidar.nc",
+    "checksum": "f5e059df0c0dccecc5a5d07d4306e17b9b2b4272ea176688e0ee5c1f651010df",
+    "size": 7127282,
+    "format": "HDF5 (NetCDF4)",
+    "site": "bucharest",
+    "version": "123",
+    "errorLevel": null,
+    "instrumentPid": "https://hdl.handle.net/123/bucharest_lidar"
+  },
+  {
+    "uuid": "f036da43-c19c-4832-99f9-6cc88f3255c5",
+    "pid": "",
+    "volatile": false,
+    "measurementDate": "2019-07-16",
+    "product": "radar",
+    "cloudnetpyVersion": "1.0.4",
+    "createdAt": "2020-02-19T10:59:58.449Z",
+    "updatedAt": "2020-02-19T10:59:58.449Z",
+    "s3key": "20190715_bucharest_lidar.nc",
+    "checksum": "e09b61366e9c1a4b2676d07dc9bfccff1436a73e46f1a3a8ea51429218d5cb50",
+    "size": 7127282,
+    "format": "HDF5 (NetCDF4)",
+    "site": "bucharest",
+    "version": "123",
+    "errorLevel": null,
+    "instrumentPid": "https://hdl.handle.net/123/bucharest_radar"
   }
 ]
