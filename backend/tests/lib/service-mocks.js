@@ -46,4 +46,46 @@ pidApp.post("/pid", express.json(), (req, res, _next) => {
 });
 pidApp.listen(5801, () => console.log("PID service mock running"));
 
-// TODO citation-service
+const dataciteApp = express();
+dataciteApp.post("/dois", express.json({ type: "application/vnd.api+json" }), (req, res, _next) => {
+  res.send(req.body);
+});
+dataciteApp.listen(5802, () => console.log("DataCite mock running"));
+
+const labellingApp = express();
+labellingApp.get("/api/facilities/:id/contacts", (req, res, _next) => {
+  res.send([
+    {
+      first_name: "Björn",
+      last_name: "Buchareström",
+      orcid_id: null,
+      start_date: "2019-01-01",
+      end_date: null,
+      role: "pi",
+    },
+  ]);
+});
+labellingApp.listen(5803, () => console.log("Labelling mock running"));
+
+const handleApp = express();
+handleApp.get("/handles/123/:suffix", (req, res, _next) => {
+  res.send({ values: [{ type: "URL", data: { value: `http://localhost:5805/instrument/${req.params.suffix}` } }] });
+});
+handleApp.listen(5804, () => console.log("Handle API mock running"));
+
+const instrumentdbApp = express();
+instrumentdbApp.get("/instrument/:uuid/pi", (req, res, _next) => {
+  let pis = [];
+  if (req.params.uuid === "bucharest_lidar") {
+    pis = [{ first_name: "Jean-Luc", last_name: "Picard", orcid_id: null, start_date: "2019-01-01", end_date: null }];
+  } else if (req.params.uuid === "bucharest_radar") {
+    pis = [
+      { first_name: "Christopher", last_name: "Pike", orcid_id: null, start_date: null, end_date: "2018-12-31" },
+      { first_name: "James Tiberius", last_name: "Kirk", orcid_id: null, start_date: "2019-01-01", end_date: null },
+    ];
+  }
+  res.send(pis);
+});
+instrumentdbApp.listen(5805, () => console.log("InstrumentDB mock running"));
+
+// TODO: citation-service?

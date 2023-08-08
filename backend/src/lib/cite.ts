@@ -1,13 +1,11 @@
-import { Connection, Repository } from "typeorm";
+import { Connection } from "typeorm";
 
 import { RegularFile, ModelFile, File } from "../entity/File";
 import { Collection } from "../entity/Collection";
 import axios from "axios";
-import { getCollectionLandingPage, getFileLandingPage } from ".";
+import { formatList, getCollectionLandingPage, getFileLandingPage, truncateList } from ".";
 import env from "../lib/env";
-import { Model } from "../entity/Model";
 
-const LABELLING_URL = "https://actris-nf-labelling.out.ocp.fmi.fi/api/facilities";
 const MODEL_AUTHOR: Person = { firstName: "Ewan", lastName: "O'Connor", orcid: "0000-0001-9834-5100", role: "modelPi" };
 const PUBLISHER = "ACTRIS Cloud remote sensing data centre unit (CLU)";
 const MONTHS_FULL = [
@@ -86,9 +84,10 @@ export class CitationService {
         productNames.map((x) => x.toLowerCase()),
         5,
         "products"
-      )
+      ),
+      ", and "
     );
-    const sites = formatList(truncateList(siteNames, 5, "sites"));
+    const sites = formatList(truncateList(siteNames, 5, "sites"), ", and ");
     const date = formatDateRange(dateRange.startDate, dateRange.endDate);
     const title = `Custom collection of ${products} data from ${sites} ${date}`;
     return {
@@ -103,9 +102,25 @@ export class CitationService {
   async getFileCitation(file: RegularFile | ModelFile): Promise<Citation> {
     let people: Person[];
     if (file instanceof RegularFile) {
-      const instrumentPids = await this.queryInstrumentPids(file);
-      people = await fetchInstrumentPis(instrumentPids);
-      if (await this.usesModelData(file)) {
+      const [instrumentPis, nfPi, usesModelData] = await Promise.all([
+        this.queryInstrumentPids(file).then((pids) => fetchInstrumentPis(pids)),
+        file.site.actrisId
+          ? fetchNfPi(file.site.actrisId, file.measurementDate as unknown as string)
+          : Promise.resolve([]),
+        this.usesModelData(file),
+      ]);
+      people = [
+        ...instrumentPis,
+        ...nfPi.map(
+          (pi): Person => ({
+            firstName: pi.first_name,
+            lastName: pi.last_name,
+            orcid: pi.orcid_id ? normalizeOrcid(pi.orcid_id) : null,
+            role: "nfPi",
+          })
+        ),
+      ];
+      if (usesModelData) {
         people.push(MODEL_AUTHOR);
       }
       people = people.concat(
@@ -142,7 +157,10 @@ export class CitationService {
     }
     if (modelAcks.length > 0) {
       output += " We acknowledge ";
-      output += formatList(modelAcks.map((a) => a.replace(/\.$/, "")));
+      output += formatList(
+        modelAcks.map((a) => a.replace(/\.$/, "")),
+        ", and "
+      );
       output += ".";
     }
     return output;
@@ -325,7 +343,7 @@ async function fetchInstrumentPi(pid: string, measurementDate?: Date): Promise<I
   if (!match) {
     throw new Error("Invalid PID format");
   }
-  const url = "https://hdl.handle.net/api/handles/" + match[1];
+  const url = `${env.HANDLE_API_URL}/handles/${match[1]}`;
   const response = await axios.get(url);
   const values = response.data.values;
   if (!Array.isArray(values)) {
@@ -374,7 +392,7 @@ async function fetchInstrumentPis(data: { instrumentPid: string; dates: string[]
 }
 
 async function fetchNfPi(actrisId: number, measurementDate?: string): Promise<NfContact[]> {
-  const response = await axios.get(`${LABELLING_URL}/${actrisId}/contacts`, {
+  const response = await axios.get(`${env.LABELLING_URL}/api/facilities/${actrisId}/contacts`, {
     params: {
       date: measurementDate,
       role: "pi",
@@ -445,20 +463,6 @@ function removeDuplicateNames(pis: Person[]): Person[] {
     }
   }
   return out;
-}
-
-function truncateList(list: string[], limit: number, placeholder: string) {
-  if (list.length <= limit) {
-    return list;
-  }
-  return [...list.slice(0, limit), `${list.length - limit} other ${placeholder}`];
-}
-
-function formatList(parts: string[]): string {
-  if (parts.length <= 2) {
-    return parts.join(", and ");
-  }
-  return parts.slice(0, -1).join(", ") + ", and " + parts[parts.length - 1];
 }
 
 function formatDateRange(startDate: Date, endDate: Date): string {

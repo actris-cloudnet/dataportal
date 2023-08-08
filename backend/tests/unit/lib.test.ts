@@ -1,4 +1,4 @@
-import { isValidDate } from "../../src/lib";
+import { isValidDate, truncateList } from "../../src/lib";
 
 describe("isValidDate", () => {
   it("accepts valid date", () => {
@@ -70,5 +70,20 @@ describe("isValidDate", () => {
     expect(isValidDate(100)).toBe(false);
     expect(isValidDate(false)).toBe(false);
     expect(isValidDate({ asdf: "asdf" })).toBe(false);
+  });
+});
+
+describe("truncateList", () => {
+  it("truncates list", () => {
+    const elements = ["Hydrogen", "Helium", "Lithium", "Beryllium", "Boron"];
+    expect(truncateList(elements, 1, "elements")).toEqual(["Hydrogen", "4 other elements"]);
+    expect(truncateList(elements, 2, "elements")).toEqual(["Hydrogen", "Helium", "3 other elements"]);
+    expect(truncateList(elements, 3, "elements")).toEqual(["Hydrogen", "Helium", "Lithium", "2 other elements"]);
+    expect(truncateList(elements, 4, "elements")).toEqual(["Hydrogen", "Helium", "Lithium", "Beryllium", "Boron"]);
+    expect(truncateList(elements, 5, "elements")).toEqual(["Hydrogen", "Helium", "Lithium", "Beryllium", "Boron"]);
+    expect(truncateList(elements, 6, "elements")).toEqual(["Hydrogen", "Helium", "Lithium", "Beryllium", "Boron"]);
+    expect(truncateList(elements, 7, "elements")).toEqual(["Hydrogen", "Helium", "Lithium", "Beryllium", "Boron"]);
+    expect(truncateList(elements, 8, "elements")).toEqual(["Hydrogen", "Helium", "Lithium", "Beryllium", "Boron"]);
+    expect(truncateList(elements, 9, "elements")).toEqual(["Hydrogen", "Helium", "Lithium", "Beryllium", "Boron"]);
   });
 });

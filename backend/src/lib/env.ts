@@ -15,6 +15,8 @@ const requiredVars = [
   "DATACITE_API_TIMEOUT_MS",
   "DATACITE_DOI_SERVER",
   "DATACITE_DOI_PREFIX",
+  "LABELLING_URL",
+  "HANDLE_API_URL",
 ] as const;
 
 type RequiredVar = typeof requiredVars[number];
@@ -44,6 +46,8 @@ interface Env {
   DATACITE_API_TIMEOUT_MS: number;
   DATACITE_DOI_SERVER: string;
   DATACITE_DOI_PREFIX: string;
+  LABELLING_URL: string;
+  HANDLE_API_URL: string;
 }
 
 const env: Env = {
@@ -53,6 +57,8 @@ const env: Env = {
   DATACITE_API_URL: rawEnv.DATACITE_API_URL.replace(/\/$/, ""),
   DATACITE_API_TIMEOUT_MS: parseInt(rawEnv.DATACITE_API_TIMEOUT_MS),
   DATACITE_DOI_SERVER: rawEnv.DATACITE_DOI_SERVER.replace(/\/$/, ""),
+  LABELLING_URL: rawEnv.LABELLING_URL.replace(/\/$/, ""),
+  HANDLE_API_URL: rawEnv.HANDLE_API_URL.replace(/\/$/, ""),
 };
 
 export default env;
