@@ -79,17 +79,15 @@ export class CitationService {
     }
     const siteAuthors = await this.queryCollectionSitePersons(collection);
     const authors = removeDuplicateNames([...instrumentPis, ...nfPis, ...siteAuthors]);
-    const products = formatList(
-      truncateList(
-        productNames.map((x) => x.toLowerCase()),
-        5,
-        "products"
-      ),
-      ", and "
-    );
+    const allProducts = productNames.map((x) => x.toLowerCase());
+    const truncatedProducts = truncateList(allProducts, 5, "products");
+    let products = formatList(truncatedProducts, ", and ");
+    if (allProducts.length === truncatedProducts.length) {
+      products += " data";
+    }
     const sites = formatList(truncateList(siteNames, 5, "sites"), ", and ");
     const date = formatDateRange(dateRange.startDate, dateRange.endDate);
-    const title = `Custom collection of ${products} data from ${sites} ${date}`;
+    const title = `Custom collection of ${products} from ${sites} ${date}`;
     return {
       authors,
       publisher: PUBLISHER,
