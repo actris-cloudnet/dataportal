@@ -100,7 +100,7 @@ export abstract class File {
 
 @Entity()
 export class RegularFile extends File {
-  @Column("text", { array: true, nullable: true })
+  @Column("uuid", { array: true, nullable: true })
   sourceFileIds!: string[] | null;
 
   @Column({ default: "" })

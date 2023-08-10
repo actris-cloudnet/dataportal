@@ -327,7 +327,7 @@ export class CitationService {
        ${filter}
        UNION ALL
        SELECT "sourceFileUuid"
-       FROM regular_file, UNNEST("sourceFileIds"::uuid[]) AS "sourceFileUuid", traverse
+       FROM regular_file, UNNEST("sourceFileIds") AS "sourceFileUuid", traverse
        WHERE regular_file.uuid = traverse.uuid
      )
      ${query}`,
