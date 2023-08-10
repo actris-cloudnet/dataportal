@@ -6,7 +6,6 @@ export interface Collection {
   modelFiles: ModelFile[];
   title: string;
   pid: string;
-  downloadCount: number;
   createdAt: Date;
   updatedAt: Date;
 }

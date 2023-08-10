@@ -72,10 +72,6 @@ main.column
               <dd>{{ sortedFiles.length }}</dd>
               <dt>Total size</dt>
               <dd>{{ humanReadableSize(totalSize) }}</dd>
-              <dt v-if="response.downloadCount">Download count</dt>
-              <dd v-if="response.downloadCount">
-                {{ response.downloadCount }}
-              </dd>
             </dl>
           </section>
         </section>

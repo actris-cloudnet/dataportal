@@ -21,9 +21,6 @@ export class Collection {
   @Column({ default: "" })
   pid!: string;
 
-  @Column({ default: 0 })
-  downloadCount!: number;
-
   @Column()
   createdAt!: Date;
 

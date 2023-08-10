@@ -8,7 +8,6 @@ export class CollectionResponse {
   files: CollectionFileResponse[];
   title: string;
   pid: string;
-  downloadCount: number;
   createdAt: Date;
   updatedAt: Date;
 
@@ -20,7 +19,6 @@ export class CollectionResponse {
     this.files = sortedFiles.map(convertToCollectionFileResponse);
     this.title = coll.title;
     this.pid = coll.pid;
-    this.downloadCount = coll.downloadCount;
     this.createdAt = coll.createdAt;
     this.updatedAt = coll.updatedAt;
   }

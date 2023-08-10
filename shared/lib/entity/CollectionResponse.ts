@@ -5,7 +5,6 @@ export interface CollectionResponse {
   files: CollectionFileResponse[];
   title: string;
   pid: string;
-  downloadCount: number;
   createdAt: Date;
   updatedAt: Date;
 }
