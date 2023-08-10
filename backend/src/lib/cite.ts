@@ -176,14 +176,14 @@ export class CitationService {
   }
 
   private async usesModelData(object: RegularFile | Collection): Promise<boolean> {
-    const result = await this.querySourceFiles(
+    const rows = await this.querySourceFiles(
       object,
       `SELECT 1
        FROM traverse
        JOIN model_file ON traverse.uuid = model_file.uuid
        LIMIT 1`
     );
-    return result.length > 0;
+    return rows.length > 0;
   }
 
   private async queryCollectionActrisIds(collection: Collection): Promise<{ actrisId: number; dates: string[] }[]> {
@@ -200,48 +200,42 @@ export class CitationService {
   }
 
   private async queryCollectionProductNames(collection: Collection): Promise<string[]> {
-    return (
-      await this.conn.query(
-        `SELECT product."humanReadableName"
-         FROM regular_file
-         JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
-         JOIN product ON regular_file."productId" = product.id
-         WHERE "collectionUuid" = $1
-         UNION
-         SELECT 'Model' AS "humanReadableName"
-         FROM model_file
-         JOIN collection_model_files_model_file ON model_file.uuid = "modelFileUuid"
-         WHERE "collectionUuid" = $1`,
-        [collection.uuid]
-      )
-    )
-      .map((x: any) => x.humanReadableName)
-      .sort();
+    const rows: any[] = await this.conn.query(
+      `SELECT product."humanReadableName"
+       FROM regular_file
+       JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
+       JOIN product ON regular_file."productId" = product.id
+       WHERE "collectionUuid" = $1
+       UNION
+       SELECT 'Model' AS "humanReadableName"
+       FROM model_file
+       JOIN collection_model_files_model_file ON model_file.uuid = "modelFileUuid"
+       WHERE "collectionUuid" = $1`,
+      [collection.uuid]
+    );
+    return rows.map((row) => row.humanReadableName).sort();
   }
 
   private async queryCollectionSiteNames(collection: Collection): Promise<string[]> {
-    return (
-      await this.conn.query(
-        `SELECT site."humanReadableName"
-         FROM regular_file
-         JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
-         JOIN site ON regular_file."siteId" = site.id
-         WHERE "collectionUuid" = $1
-         UNION
-         SELECT site."humanReadableName"
-         FROM model_file
-         JOIN collection_model_files_model_file ON model_file.uuid = "modelFileUuid"
-         JOIN site ON model_file."siteId" = site.id
-         WHERE "collectionUuid" = $1`,
-        [collection.uuid]
-      )
-    )
-      .map((x: any) => x.humanReadableName)
-      .sort();
+    const rows: any[] = await this.conn.query(
+      `SELECT site."humanReadableName"
+       FROM regular_file
+       JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
+       JOIN site ON regular_file."siteId" = site.id
+       WHERE "collectionUuid" = $1
+       UNION
+       SELECT site."humanReadableName"
+       FROM model_file
+       JOIN collection_model_files_model_file ON model_file.uuid = "modelFileUuid"
+       JOIN site ON model_file."siteId" = site.id
+       WHERE "collectionUuid" = $1`,
+      [collection.uuid]
+    );
+    return rows.map((row) => row.humanReadableName).sort();
   }
 
   private async queryCollectionSitePersons(collection: Collection): Promise<Person[]> {
-    const rows = await this.conn.query(
+    const rows: any[] = await this.conn.query(
       `SELECT DISTINCT firstname, surname, orcid
        FROM regular_file
        JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
@@ -252,7 +246,7 @@ export class CitationService {
       [collection.uuid]
     );
     return rows.map(
-      (row: any): Person => ({
+      (row): Person => ({
         firstName: row.firstname,
         lastName: row.surname,
         orcid: row.orcid ? normalizeOrcid(row.orcid) : null,
@@ -262,37 +256,35 @@ export class CitationService {
   }
 
   private async queryCollectionDateRange(collection: Collection): Promise<{ startDate: Date; endDate: Date }> {
-    return (
-      await this.conn.query(
-        `SELECT MIN("measurementDate") AS "startDate", MAX("measurementDate") AS "endDate"
-         FROM (SELECT "measurementDate"
-               FROM regular_file
-               JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
-               WHERE "collectionUuid" = $1
-               UNION
-               SELECT "measurementDate"
-               FROM model_file
-               JOIN collection_model_files_model_file ON model_file.uuid = "modelFileUuid"
-               WHERE "collectionUuid" = $1) AS dates`,
-        [collection.uuid]
-      )
-    )[0];
+    const rows = await this.conn.query(
+      `SELECT MIN("measurementDate") AS "startDate", MAX("measurementDate") AS "endDate"
+       FROM (SELECT "measurementDate"
+             FROM regular_file
+             JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
+             WHERE "collectionUuid" = $1
+             UNION
+             SELECT "measurementDate"
+             FROM model_file
+             JOIN collection_model_files_model_file ON model_file.uuid = "modelFileUuid"
+             WHERE "collectionUuid" = $1) AS dates`,
+      [collection.uuid]
+    );
+    return rows[0];
   }
 
   private async queryModelAcks(object: RegularFile | ModelFile | Collection): Promise<string[]> {
     if (object instanceof ModelFile) {
       return object.model.citations.map((r) => r.acknowledgements);
     }
-    return (
-      await this.querySourceFiles(
-        object,
-        `SELECT DISTINCT acknowledgements
-         FROM traverse
-         JOIN model_file ON traverse.uuid = model_file.uuid
-         JOIN model_citations_model_citation ON model_file."modelId" = model_citations_model_citation."modelId"
-         JOIN model_citation ON model_citations_model_citation."modelCitationId" = model_citation.id`
-      )
-    ).map((x: any) => x.acknowledgements);
+    const rows: any[] = await this.querySourceFiles(
+      object,
+      `SELECT DISTINCT acknowledgements
+       FROM traverse
+       JOIN model_file ON traverse.uuid = model_file.uuid
+       JOIN model_citations_model_citation ON model_file."modelId" = model_citations_model_citation."modelId"
+       JOIN model_citation ON model_citations_model_citation."modelCitationId" = model_citation.id`
+    );
+    return rows.map((row) => row.acknowledgements);
   }
 
   private async querySiteAcks(object: RegularFile | ModelFile | Collection): Promise<string[]> {
@@ -302,7 +294,7 @@ export class CitationService {
     if (object instanceof ModelFile) {
       return [];
     }
-    const result = await this.conn.query(
+    const rows: any[] = await this.conn.query(
       `SELECT DISTINCT acknowledgements
        FROM regular_file
        JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
@@ -311,7 +303,7 @@ export class CitationService {
        WHERE "collectionUuid" = $1`,
       [object.uuid]
     );
-    return result.map((x: any) => x.acknowledgements);
+    return rows.map((row) => row.acknowledgements);
   }
 
   private async querySourceFiles(object: RegularFile | Collection, query: string): Promise<any> {
@@ -322,15 +314,15 @@ export class CitationService {
         : `WHERE uuid = $1`;
     return await this.conn.query(
       `WITH RECURSIVE traverse AS (
-       SELECT uuid
-       FROM regular_file
-       ${filter}
-       UNION ALL
-       SELECT "sourceFileUuid"
-       FROM regular_file, UNNEST("sourceFileIds") AS "sourceFileUuid", traverse
-       WHERE regular_file.uuid = traverse.uuid
-     )
-     ${query}`,
+         SELECT uuid
+         FROM regular_file
+         ${filter}
+         UNION ALL
+         SELECT "sourceFileUuid"
+         FROM regular_file, UNNEST("sourceFileIds") AS "sourceFileUuid", traverse
+         WHERE regular_file.uuid = traverse.uuid
+       )
+       ${query}`,
       [object.uuid]
     );
   }
