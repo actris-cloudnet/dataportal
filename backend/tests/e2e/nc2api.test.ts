@@ -135,21 +135,34 @@ describe("after PUTting metadata to API", () => {
     });
 
     it("hashes of /download zipped files match originals and collection download count increases", async () => {
-      const tmpZip = "tests/data/tmp.zip";
       const expectedShas = await (
         await axios.get(`${backendPublicUrl}files/`, { params: { site: "bucharest" } })
       ).data.map((file: any) => file.checksum);
       const receivedFile = await axios.get(`${backendPublicUrl}download/collection/${collectionUuid}`, {
         responseType: "arraybuffer",
       });
-      fs.writeFileSync(tmpZip, receivedFile.data);
-      const shas = new AdmZip(tmpZip).getEntries().map((entry) => {
-        const hash = createHash("sha256");
-        hash.update(entry.getData());
-        return hash.digest("hex");
-      });
+      const entries = new AdmZip(receivedFile.data).getEntries();
+
+      const readmeEntry = entries.find((entry) => entry.entryName === "README.md");
+      expect(readmeEntry).toBeDefined();
+      const readmeContent = readmeEntry!.getData().toString("utf-8");
+      expect(readmeContent).toContain(collectionUuid);
+      expect(readmeContent).toContain(
+        "Custom collection of classification data from Bucharest between 23 and 24 Jul 2019"
+      );
+
+      const licenseEntry = entries.find((entry) => entry.entryName === "LICENSE.txt");
+      expect(licenseEntry).toBeDefined();
+
+      const shas = entries
+        .filter((entry) => entry.entryName.endsWith(".nc"))
+        .map((entry) => {
+          const hash = createHash("sha256");
+          hash.update(entry.getData());
+          return hash.digest("hex");
+        });
       expect(shas.sort()).toMatchObject(expectedShas.sort());
-      fs.unlinkSync(tmpZip);
+
       return expect(
         repo.findOne({
           where: {
