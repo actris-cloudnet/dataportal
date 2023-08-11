@@ -1,12 +1,20 @@
 import { Request, RequestHandler } from "express";
 import { CountryResponse, Reader } from "maxmind";
+import { readFileSync } from "fs";
 
 import { Collection } from "../entity/Collection";
 import { Connection, Repository } from "typeorm";
 import { File, RegularFile } from "../entity/File";
 import { Upload } from "../entity/Upload";
 import { Download, ObjectType } from "../entity/Download";
-import { getS3pathForFile, getS3pathForImage, getS3pathForUpload, ssAuthString, isValidDate } from "../lib";
+import {
+  getS3pathForFile,
+  getS3pathForImage,
+  getS3pathForUpload,
+  ssAuthString,
+  isValidDate,
+  getCollectionLandingPage,
+} from "../lib";
 import * as http from "http";
 import { IncomingMessage } from "http";
 import archiver = require("archiver");
@@ -14,6 +22,8 @@ import { FileRoutes } from "./file";
 import env from "../lib/env";
 import { CollectionRoutes } from "./collection";
 import { UploadRoutes } from "./upload";
+import { CitationService } from "../lib/cite";
+import { citation2txt } from "./reference";
 
 enum ProductType {
   Observation = "observation",
@@ -26,6 +36,8 @@ const allProductTypes = Object.values(ProductType) as ProductType[];
 function productTypeFromString(value: string): ProductType | undefined {
   return (Object.values(ProductType) as string[]).includes(value) ? (value as ProductType) : undefined;
 }
+
+const LICENSE_TEXT = readFileSync("data/CC-BY-4.0.txt");
 
 export class DownloadRoutes {
   constructor(
@@ -44,6 +56,7 @@ export class DownloadRoutes {
     this.collController = collController;
     this.uploadController = uploadController;
     this.ipLookup = ipLookup;
+    this.citationService = new CitationService(this.conn);
   }
 
   readonly conn: Connection;
@@ -55,6 +68,7 @@ export class DownloadRoutes {
   readonly uploadController: UploadRoutes;
   readonly collController: CollectionRoutes;
   readonly ipLookup: Reader<CountryResponse>;
+  readonly citationService: CitationService;
 
   product: RequestHandler = async (req, res, next) => {
     const s3key = req.params[0];
@@ -103,12 +117,15 @@ export class DownloadRoutes {
       archive.on("error", console.error);
       req.on("close", () => archive.abort());
 
-      const receiverFilename = `cloudnet-collection-${new Date().getTime()}.zip`;
+      const shortUuid = collection.uuid.toLowerCase().replace(/-/g, "").slice(0, 16);
+      const receiverFilename = `cloudnet-collection-${shortUuid}.zip`;
       res.set("Content-Type", "application/octet-stream");
       res.set("Content-Disposition", `attachment; filename="${receiverFilename}"`);
       archive.pipe(res);
 
-      let i = 1;
+      archive.append(await this.generateReadme(collection), { name: "README.md" });
+      archive.append(LICENSE_TEXT, { name: "LICENSE.txt" });
+
       const appendFile = async (idx: number) => {
         const file = allFiles[idx];
         const fileStream = await this.makeFileRequest(file);
@@ -117,7 +134,13 @@ export class DownloadRoutes {
           await archive.finalize();
         }
       };
-      archive.on("entry", () => (i < allFiles.length ? appendFile(i++) : null));
+      let i = -2;
+      archive.on("entry", (entry) => {
+        i++;
+        if (i > 0 && i < allFiles.length) {
+          appendFile(i);
+        }
+      });
       await appendFile(0);
     } catch (err) {
       res.sendStatus(500);
@@ -321,5 +344,27 @@ export class DownloadRoutes {
     const result = this.ipLookup.get(req.ip);
     const dl = new Download(type, uuid, req.ip, result?.country?.iso_code);
     await this.downloadRepo.save(dl);
+  }
+
+  private async generateReadme(collection: Collection): Promise<string> {
+    let citationText = "";
+    try {
+      const citation = await this.citationService.getCollectionCitation(collection);
+      citationText = citation2txt(citation);
+    } catch (e) {
+      citationText = "Failed to generate citation.";
+    }
+    const lines = [
+      "# README",
+      `These files were downloaded from Cloudnet data portal: <${
+        collection.pid ? collection.pid : getCollectionLandingPage(collection)
+      }>`,
+      "## Citation",
+      citationText,
+      "## License",
+      "Cloudnet data is licensed under a Creative Commons Attribution 4.0 international licence.",
+      "You should have received a copy of the license along with this work. If not, see <http://creativecommons.org/licenses/by/4.0/>.",
+    ];
+    return lines.join("\n\n");
   }
 }

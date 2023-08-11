@@ -116,6 +116,21 @@ function citation2html(c: Citation) {
   return `${authors} ${year}. ${title}. ${publisher}. ${link}`;
 }
 
+export function citation2txt(c: Citation) {
+  const authors = formatList(
+    c.authors.map((a) => `${a.lastName}, ${getInitials(a.firstName)}`),
+    ", & "
+  );
+  const year = `(${c.year})`;
+  const title = c.title;
+  const publisher = c.publisher;
+  const link = c.url;
+  if (!authors) {
+    return `${title}. ${year}. ${publisher}. ${link}`;
+  }
+  return `${authors} ${year}. ${title}. ${publisher}. ${link}`;
+}
+
 function citation2ris(c: Citation) {
   const newline = "\r\n";
   let authors = c.authors.map((a) => `AU  - ${a.lastName}, ${a.firstName}`).join(newline);
