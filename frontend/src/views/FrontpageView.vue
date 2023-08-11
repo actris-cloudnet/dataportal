@@ -44,8 +44,8 @@ main#frontpage
 </style>
 
 <script lang="ts" setup>
-import actrisLogo from "@/assets/actris_logo.gif";
-import cloudnetLogo from "@/assets/cloudnet_logo_large_2020.png";
+import actrisLogo from "@/assets/logos/actris.svg";
+import cloudnetLogo from "@/assets/logos/cloudnet.svg";
 import searchIcon from "@/assets/icons/search-white.png";
 import graphIcon from "@/assets/icons/graph-white.png";
 import docsIcon from "@/assets/icons/docs-white.png";
@@ -55,7 +55,7 @@ import docsIcon from "@/assets/icons/docs-white.png";
   <main id="frontpage">
     <header class="logos">
       <img alt="Actris logo" :src="actrisLogo" />
-      <img alt="Cloudnet logo" :src="cloudnetLogo" />
+      <img alt="Cloudnet logo" :src="cloudnetLogo" style="padding-top: 2em" />
     </header>
     <main>
       <h3>Welcome to ACTRIS Cloudnet data portal</h3>
