@@ -7,16 +7,21 @@ const storageApp = express();
 storageApp.put("/*", (req, res, _next) => {
   const path = req.params[0];
   console.log("PUT", path);
-  serverMemory[path] = new Buffer(0);
+
+  const chunks = [];
   req.on("data", (chunk) => {
     const chunkStr = chunk.toString();
     if (chunkStr === "invalidhash") return res.status(400).send("Checksum does not match file contents");
     if (chunkStr === "servererr") return res.sendStatus(400);
-    serverMemory[path] = Buffer.concat([serverMemory[path], chunk]);
-    if (chunkStr === "content") return res.status(201).send({ size: chunk.length });
+    chunks.push(chunk);
   });
   req.on("error", console.error);
-  req.on("end", () => res.headersSent || res.status(201).send({ size: serverMemory[path].length }));
+  req.on("end", () => {
+    if (!res.headersSent) {
+      serverMemory[path] = Buffer.concat(chunks);
+      res.status(201).send({ size: serverMemory[path].length });
+    }
+  });
 });
 
 storageApp.get("/*", (req, res, _next) => {
