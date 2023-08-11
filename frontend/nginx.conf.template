@@ -11,6 +11,11 @@ server {
         try_files $uri $uri/ /index.html;
     }
 
+    location /index.html {
+        root /app;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
+
     location /api/ {
         proxy_pass $DP_BACKEND_URL/api/;
         proxy_http_version 1.1;
