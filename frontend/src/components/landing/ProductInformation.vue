@@ -77,29 +77,6 @@
         <td>{{ timelinessString }}</td>
       </tr>
       <tr>
-        <th>Quality control</th>
-        <td>
-          <div
-            v-if="typeof response.errorLevel === 'string'"
-            class="quality-container"
-          >
-            <img
-              class="quality-icon"
-              :src="getQcIcon(response.errorLevel)"
-              alt=""
-            />
-            <span v-if="response.errorLevel !== 'pass'">
-              {{ getQcText(response.errorLevel) }}
-              <router-link :to="getQcLink(response.uuid)"
-                >see report.</router-link
-              >
-            </span>
-            <span v-else> Pass</span>
-          </div>
-          <span v-else class="notAvailable"> </span>
-        </td>
-      </tr>
-      <tr>
         <th>Measurement date</th>
         <td>{{ response.measurementDate }}</td>
       </tr>
@@ -127,13 +104,7 @@
 import type { FileResponse } from "@/views/FileView.vue";
 import type { SiteLocation } from "@shared/entity/SiteLocation";
 import { computed } from "vue";
-import {
-  getProductIcon,
-  getQcIcon,
-  getQcLink,
-  getQcText,
-  formatCoordinates,
-} from "@/lib";
+import { getProductIcon, formatCoordinates } from "@/lib";
 
 export interface Props {
   response: FileResponse;
