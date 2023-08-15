@@ -91,23 +91,31 @@ describe("SearchView.vue", () => {
   });
 
   describe("date selectors", () => {
-    it("has the correct default dateFrom", () => {
-      expect(getInputValueByName("dateFrom")).toBe(dateFromDefault);
-    });
-
     it("has today as the default dateTo", () => {
       expect(getInputValueByName("dateTo")).toBe(dateToDefault);
     });
 
     it("sets correct date ranges from quickselector buttons", async () => {
       await findElementById("weekBtn").trigger("click");
-      expect(getInputValueByName("dateFrom")).toBe(dateFromPast(0));
+      expect(
+        (wrapper.find("#showDateRangeCheckbox").element as HTMLInputElement)
+          .checked
+      ).toBe(false);
+      expect(wrapper.find("#dateFrom").exists()).toBe(false);
       expect(getInputValueByName("dateTo")).toBe(dateToDefault);
       await findElementById("yearBtn").trigger("click");
       const year = new Date().getFullYear();
+      expect(
+        (wrapper.find("#showDateRangeCheckbox").element as HTMLInputElement)
+          .checked
+      ).toBe(true);
       expect(getInputValueByName("dateFrom")).toBe(`${year}-01-01`);
       expect(getInputValueByName("dateTo")).toBe(dateToDefault);
       await findElementById("monthBtn").trigger("click");
+      expect(
+        (wrapper.find("#showDateRangeCheckbox").element as HTMLInputElement)
+          .checked
+      ).toBe(true);
       expect(getInputValueByName("dateFrom")).toBe(dateFromPast(29));
       expect(getInputValueByName("dateTo")).toBe(dateToDefault);
     });

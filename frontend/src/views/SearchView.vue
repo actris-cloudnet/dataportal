@@ -161,9 +161,8 @@ label, span.filterlabel
   width: 100%
   height: 27px
   display: flex
-  justify-content: space-between
   margin-bottom: 0.6em
-  margin-top: 0.6em
+  gap: .6rem
   .quickBtn
     color: black
     height: 25px
@@ -174,6 +173,7 @@ label, span.filterlabel
     border: 1px solid $steel-warrior
     border-radius: 3px
     background-color: $blue-dust
+    flex-grow: 1
     &:hover
       background-color: $steel-warrior
     &:focus
@@ -304,7 +304,7 @@ div.checkbox
         <label for="showAllSitesCheckbox">Show all sites</label>
       </div>
 
-      <span class="filterlabel" v-if="!isVizMode">Date range</span>
+      <span class="filterlabel" v-if="!isVizMode">Date</span>
       <div class="quickselectors" v-if="!isVizMode">
         <button
           id="yearBtn"
@@ -333,19 +333,21 @@ div.checkbox
       </div>
 
       <div class="date" v-if="!isVizMode">
-        <datepicker
-          name="dateFrom"
-          v-model="dateFrom"
-          :start="beginningOfHistory"
-          :end="dateTo"
-          @error="dateFromError = $event"
-          :key="dateFromUpdate"
-        />
-        <span class="centerlabel">&#8212;</span>
+        <template v-if="showDateRange">
+          <datepicker
+            name="dateFrom"
+            v-model="dateFrom"
+            :start="beginningOfHistory"
+            :end="dateTo"
+            @error="dateFromError = $event"
+            :key="dateFromUpdate"
+          />
+          <span class="centerlabel">&#8212;</span>
+        </template>
         <datepicker
           name="dateTo"
           v-model="dateTo"
-          :start="dateFrom"
+          :start="showDateRange ? dateFrom : beginningOfHistory"
           :end="today"
           @error="dateToError = $event"
           :key="dateToUpdate"
@@ -370,6 +372,16 @@ div.checkbox
             Start date must be before end date.
           </div>
         </template>
+      </div>
+
+      <div class="checkbox" v-if="!isVizMode">
+        <input
+          type="checkbox"
+          id="showDateRangeCheckbox"
+          name="showDateRangeCheckbox"
+          v-model="showDateRange"
+        />
+        <label for="showDateRangeCheckbox">Show date range</label>
       </div>
 
       <div class="date" v-if="isVizMode">
@@ -579,6 +591,7 @@ const dateFrom = ref(isVizMode.value ? new Date() : getInitialDateFrom());
 const dateFromError = ref<DateErrors>();
 const dateToError = ref<DateErrors>();
 const activeBtn = ref("");
+const showDateRange = ref(false);
 
 // products
 const normalProducts = ref<Product[]>([]);
@@ -639,6 +652,7 @@ onMounted(async () => {
       }
     }
   }
+  showDateRange.value = !isSameDay(dateFrom.value, dateTo.value);
   if (paramsSet.length === 0) {
     await fetchData();
   }
@@ -767,10 +781,13 @@ function setVizWideMode(wide: boolean) {
 }
 
 function isTrueOnBothDateFields(errorId: keyof DateErrors) {
+  if (!showDateRange.value) {
+    return dateToError.value && dateToError.value[errorId];
+  }
   return (
     dateFromError.value &&
     dateToError.value &&
-    (isVizMode.value || dateFromError.value[errorId]) &&
+    dateFromError.value[errorId] &&
     dateToError.value[errorId]
   );
 }
@@ -814,11 +831,13 @@ function setDateRange(n: number) {
   const date = new Date();
   date.setDate(date.getDate() - n);
   dateFrom.value = date;
+  showDateRange.value = n != 0;
 }
 
 function setDateRangeForCurrentYear() {
   dateTo.value = new Date();
   dateFrom.value = getDateFromBeginningOfYear();
+  showDateRange.value = true;
 }
 
 function addKeyPressListener() {
@@ -942,7 +961,7 @@ watch(
   () => dateFrom.value,
   async () => {
     if (!renderComplete.value || dateErrorsExist(dateFromError.value)) return;
-    replaceUrlQueryString({ dateFrom: dateFrom.value });
+    replaceUrlQueryString({ dateFrom: dateFrom.value, dateTo: dateTo.value });
     await fetchData();
   }
 );
@@ -951,7 +970,7 @@ watch(
   () => dateTo.value,
   async () => {
     if (!renderComplete.value || dateErrorsExist(dateToError.value)) return;
-    if (isVizMode.value) {
+    if (isVizMode.value || !showDateRange.value) {
       dateFrom.value = dateTo.value;
     }
     replaceUrlQueryString({ dateFrom: dateFrom.value, dateTo: dateTo.value });
@@ -1034,6 +1053,15 @@ watch(
     mapKey.value = mapKey.value + 1;
     await fetchData();
     renderComplete.value = true;
+  }
+);
+
+watch(
+  () => showDateRange.value,
+  (enabled) => {
+    if (!enabled) {
+      dateFrom.value = dateTo.value;
+    }
   }
 );
 </script>
