@@ -449,7 +449,7 @@ div.checkbox
         @click="navigateToSearch('visualizations')"
         class="secondaryButton widebutton"
       >
-        View latest date in visualization search &rarr;
+        View in visualization search &rarr;
       </button>
 
       <a @click="reset" id="reset">Reset filter</a>
