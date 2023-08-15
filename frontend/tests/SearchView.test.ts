@@ -21,6 +21,13 @@ const dateFromDefault = date.toISOString().substring(0, 10);
 const dateToDefault = new Date().toISOString().substring(0, 10);
 let filesSortedByDate: any;
 
+// https://github.com/jsdom/jsdom/issues/3368
+global.ResizeObserver = class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+
 describe("SearchView.vue", () => {
   let wrapper: VueWrapper;
   let resources: any;

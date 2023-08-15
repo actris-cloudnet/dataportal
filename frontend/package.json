@@ -21,9 +21,9 @@
     "escape-html": "^1.0.3",
     "leaflet": "^1.9.3",
     "leaflet-draw": "^1.0.4",
-    "v-calendar": "^3.0.0-alpha.8",
+    "v-calendar": "^3.0.3",
     "vue": "^3.2.45",
-    "vue-multiselect": "^3.0.0-beta.1",
+    "vue-multiselect": "^3.0.0-beta.2",
     "vue-router": "^4.1.6"
   },
   "devDependencies": {

@@ -33,7 +33,9 @@ input.date
         v-model="dateValue"
         :popover="{ placement: 'bottom' }"
         :input-debounce="100"
-        :available-dates="{ start, end }"
+        :min-date="start"
+        :max-date="end"
+        :is-required="true"
       >
         <template v-slot="{ togglePopover }">
           <button class="calendar" @click="togglePopover">
