@@ -89,26 +89,6 @@ button.calendar
     width: 1em
     height: 1em
 
-div.keyInfo
-  border-style: solid
-  border-width: 0.5px
-  border-radius: 2px
-  grid-column: 1 / 8
-  padding: 0.1em
-  width: 100%
-  border-color: $steel-warrior
-  background: $blue-dust
-  font-size: 85%
-  color: grey
-  .infoIcon
-    opacity: 0.5
-    height: 1.3em
-    width: auto
-    top: -1.5px
-    position: relative
-    margin-right: 0.5em
-    margin-left: 0.7em
-
 label, span.filterlabel
   font-size: 0.9em
   margin-bottom: 0
@@ -412,11 +392,6 @@ div.checkbox
             <img alt="calendar" class="dateIcon" :src="dateNextIcon" />
           </button>
         </div>
-        <div v-if="displayKeyInfo" class="keyInfo">
-          <img alt="info" class="infoIcon" :src="infoIcon" />
-          Use arrow keys to change dates
-          <span class="closeX" @click="hideKeyInfo"> &#10005; </span>
-        </div>
         <div
           v-if="dateToError && !dateToError.isValidDateString"
           class="errormsg"
@@ -535,7 +510,6 @@ import ApiError from "./ApiError.vue";
 
 import datePreviousIcon from "@/assets/icons/date-previous.png";
 import dateNextIcon from "@/assets/icons/date-next.png";
-import infoIcon from "@/assets/icons/info.png";
 import type { VisualizationResponse } from "@shared/entity/VisualizationResponse";
 
 export interface Props {
@@ -553,15 +527,6 @@ const isVizMode = computed(() => props.mode == "visualizations");
 function getInitialDateFrom() {
   const date = new Date();
   return new Date(date.setDate(date.getDate() - fixedRanges.day));
-}
-
-function showKeyInfo() {
-  return localStorage.getItem("hideInfoBox") !== "1";
-}
-
-function hideKeyInfo() {
-  localStorage.setItem("hideInfoBox", "1");
-  displayKeyInfo.value = false;
 }
 
 // api call
@@ -608,7 +573,6 @@ const selectedVariableIds = ref<string[]>([]);
 
 // other
 const renderComplete = ref(false);
-const displayKeyInfo = ref(showKeyInfo());
 const vizWideMode = ref(false);
 const error = ref(null);
 
