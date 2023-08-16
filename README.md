@@ -62,7 +62,7 @@ To run backend e2e-tests, issue
 The frontend unit and integration tests are run with:
 
     cd frontend
-    ./run npm test
+    ./run npm test run test:unit
 
 ### Running code formatters
 
