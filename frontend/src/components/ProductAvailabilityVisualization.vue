@@ -171,7 +171,7 @@
       </div>
       <div class="legendexpl">
         <div class="all-raw legendcolor"></div>
-        L2 warnings
+        L2 warnings / info
       </div>
       <div class="legendexpl">
         <div class="contains-errors legendcolor"></div>
@@ -461,8 +461,8 @@ function level2ContainsErrors(products: ProductLevels) {
   return products["2"].filter(isError).length > 0;
 }
 
-function level2containsWarnings(products: ProductLevels) {
-  return products["2"].filter(isWarning).length > 0;
+function level2containsWarningsOrInfo(products: ProductLevels) {
+  return products["2"].filter((x) => isWarning(x) || isInfo(x)).length > 0;
 }
 
 function allLevel2Pass(products: ProductLevels): boolean {
@@ -488,7 +488,7 @@ function createColorClass(products: ProductLevels): ColorClass {
       return "only-legacy-data";
     if (allLevel2Pass(products)) return "all-data";
     if (level2ContainsErrors(products)) return "contains-errors";
-    if (level2containsWarnings(products)) return "all-raw";
+    if (level2containsWarningsOrInfo(products)) return "all-raw";
     return "only-model-data";
   }
   if (onlyModel(products)) return "only-model-data";
