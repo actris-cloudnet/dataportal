@@ -276,7 +276,7 @@ section#fileTable
                       >see report.</router-link
                     >
                   </span>
-                  <span v-else> Pass</span>
+                  <span v-else>Pass</span>
                 </span>
                 <span v-else class="notAvailable"> </span>
               </dd>
