@@ -2,7 +2,7 @@ import { VueWrapper, mount } from "@vue/test-utils";
 import axios, { AxiosPromise } from "axios";
 import { augmentAxiosResponse, nextTick, wait } from "./lib";
 import { readResources } from "../../shared/lib";
-import DataStatusVisualization from "../src/components/DataStatusVisualization.vue";
+import ProductAvailabilityVisualization from "../src/components/ProductAvailabilityVisualization.vue";
 import { parseDataStatus } from "../src/lib/DataStatusParser";
 import { vi, describe, beforeAll, expect, it } from "vitest";
 
@@ -50,7 +50,7 @@ describe("Data availability mode", () => {
       debounceMs: 0,
       dataStatus,
     };
-    wrapper = mount(DataStatusVisualization, { propsData: props });
+    wrapper = mount(ProductAvailabilityVisualization, { propsData: props });
     await nextTick(1);
   });
 
@@ -132,7 +132,7 @@ describe("Data availability mode", () => {
   });
 
   it("hides tooltips on tooltips=false", async () => {
-    const customWrapper = mount(DataStatusVisualization, {
+    const customWrapper = mount(ProductAvailabilityVisualization, {
       propsData: { ...props, tooltips: false },
     });
     await nextTick(1);
@@ -145,7 +145,7 @@ describe("Data availability mode", () => {
   });
 
   it("hides legend on legend=false", async () => {
-    const customWrapper = mount(DataStatusVisualization, {
+    const customWrapper = mount(ProductAvailabilityVisualization, {
       propsData: { ...props, legend: false },
     });
     await nextTick(1);
@@ -181,7 +181,7 @@ describe("Data quality mode", () => {
       debounceMs: 0,
       dataStatus,
     };
-    wrapper = mount(DataStatusVisualization, { propsData: props });
+    wrapper = mount(ProductAvailabilityVisualization, { propsData: props });
     await nextTick(1);
   });
 

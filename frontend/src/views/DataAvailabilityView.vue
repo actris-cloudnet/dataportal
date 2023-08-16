@@ -89,7 +89,7 @@
 import { computed, onMounted, ref } from "vue";
 import axios from "axios";
 import type { Site, SiteType } from "@shared/entity/Site";
-import ProductAvailabilityVisualization from "@/components/DataStatusVisualization.vue";
+import ProductAvailabilityVisualization from "@/components/ProductAvailabilityVisualization.vue";
 import { parseDataStatus, type DataStatus } from "@/lib/DataStatusParser";
 
 const apiUrl = import.meta.env.VITE_BACKEND_URL;
