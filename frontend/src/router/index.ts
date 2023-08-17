@@ -18,14 +18,6 @@ const router = createRouter({
       component: () => import("@/views/PrivacyPolicyView.vue"),
     },
     {
-      path: "/data-availability",
-      name: "Data Availability",
-      meta: {
-        title: "Data availability",
-      },
-      component: () => import("@/views/DataAvailabilityView.vue"),
-    },
-    {
       path: "/search",
       redirect: "/search/data",
     },
