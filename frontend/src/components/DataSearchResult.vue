@@ -126,7 +126,9 @@ section#fileTable
     width: 100%
 
 .listLegend
-  display: inline-block
+  list-style: none
+  display: flex
+  gap: .5em
   float: right
   text-align: right
 
@@ -151,10 +153,17 @@ section#fileTable
       <span class="listTitle" v-if="!simplifiedView && listLength > 0">
         <span v-if="isBusy">Searching...</span>
         <span v-else>Found {{ listLength }} results</span>
-        <span class="listLegend">
-          <span class="rowtag volatile rounded"></span> volatile
-          <span class="rowtag legacy rounded"></span> legacy
-        </span>
+        <ul class="listLegend">
+          <li v-if="hasVolatile">
+            <span class="rowtag volatile rounded"></span> volatile
+          </li>
+          <li v-if="hasLegacy">
+            <span class="rowtag legacy rounded"></span> legacy
+          </li>
+          <li v-if="hasExperimental">
+            <span class="rowtag experimental rounded"></span> experimental
+          </li>
+        </ul>
       </span>
       <div v-if="listLength === 0 && !isBusy" class="noresults">
         <h2>No results</h2>
@@ -186,21 +195,26 @@ section#fileTable
         @row-selected="rowSelected"
       >
         <template #cell(volatile)="data">
-          <span
-            v-if="data.item.volatile"
-            class="rowtag volatile rounded"
-            title="The data for this day may be incomplete. This file is updating in real time."
-          >
+          <span class="rowtags">
+            <span
+              v-if="data.item.volatile"
+              class="rowtag volatile rounded"
+              title="The data for this day may be incomplete. This file is updating in real time."
+            >
+            </span>
+            <span
+              v-if="data.item.legacy"
+              class="rowtag legacy rounded"
+              title="This is legacy data. Quality of the data is not assured."
+            >
+            </span>
+            <span
+              v-if="data.item.experimental"
+              class="rowtag experimental rounded"
+              title="This is experimental product."
+            >
+            </span>
           </span>
-          <span
-            v-if="data.item.legacy"
-            class="rowtag legacy rounded"
-            title="This is legacy data. Quality of the data is not assured."
-          >
-          </span>
-          <span
-            ><!-- Dummy element needed when there are no other elements. --></span
-          >
         </template>
       </BaseTable>
       <BasePagination
@@ -382,6 +396,14 @@ const perPage = ref(15);
 const apiUrl = import.meta.env.VITE_BACKEND_URL;
 
 const listLength = computed(() => props.apiResponse.length);
+
+const hasVolatile = computed(() =>
+  props.apiResponse.some((item) => item.volatile)
+);
+const hasLegacy = computed(() => props.apiResponse.some((item) => item.legacy));
+const hasExperimental = computed(() =>
+  props.apiResponse.some((item) => item.experimental)
+);
 
 function clearPreview() {
   currentVisualization.value = null;

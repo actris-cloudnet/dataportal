@@ -222,6 +222,11 @@ div.checkbox
     &::after
       content: ''
 
+.rowtags
+  display: flex
+  gap: .25em
+  justify-content: center
+
 .rowtag
   display: inline-block
   min-width: 1em
@@ -229,7 +234,6 @@ div.checkbox
   font-size: 0.9em
   text-align: center
   padding: 0.2em
-  margin-left: 0.5em
   border-radius: .25rem
 
 .volatile
@@ -237,6 +241,9 @@ div.checkbox
 
 .legacy
   background: #cecece
+
+.experimental
+  background-color: #EC9706
 </style>
 
 <template>

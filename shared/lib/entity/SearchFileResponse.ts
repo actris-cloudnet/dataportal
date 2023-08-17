@@ -10,5 +10,6 @@ export interface SearchFileResponse {
   size: number;
   volatile: boolean;
   legacy: boolean;
+  experimental: boolean;
   errorLevel: ErrorLevel | null;
 }
