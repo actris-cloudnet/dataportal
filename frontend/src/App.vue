@@ -9,6 +9,7 @@
 
 @import "./assets/fonts/inter.css"
 @import "./sass/variables.sass"
+@import "./sass/new-variables.scss"
 @import "./sass/global.sass"
 
 body
@@ -34,10 +35,11 @@ body
   flex: 1
 
   > main
-    max-width: 100em
+    max-width: $page-width
     margin: 3em auto
     padding-left: 5em
     padding-right: 5em
+    box-sizing: content-box
 
 #consent
   position: fixed
