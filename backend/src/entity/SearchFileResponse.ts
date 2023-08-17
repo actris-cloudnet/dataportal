@@ -11,6 +11,7 @@ export class SearchFileResponse {
   size: number;
   volatile: boolean;
   legacy: boolean;
+  experimental: boolean;
   errorLevel: ErrorLevel | null;
 
   constructor(file: SearchFile) {
@@ -23,6 +24,7 @@ export class SearchFileResponse {
     this.size = file.size;
     this.volatile = file.volatile;
     this.legacy = file.legacy;
+    this.experimental = file.product.experimental;
     this.errorLevel = file.errorLevel;
   }
 }

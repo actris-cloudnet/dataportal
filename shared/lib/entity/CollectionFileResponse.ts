@@ -11,5 +11,6 @@ export interface CollectionFileResponse {
   size: number;
   volatile: boolean;
   legacy: boolean;
+  experimental: boolean;
   errorLevel: ErrorLevel | null;
 }

@@ -12,6 +12,7 @@ export class CollectionFileResponse {
   size: number;
   volatile: boolean;
   legacy: boolean;
+  experimental: boolean;
   errorLevel: ErrorLevel | null;
 
   constructor(file: RegularFile | ModelFile) {
@@ -25,6 +26,7 @@ export class CollectionFileResponse {
     this.size = parseInt(file.size as unknown as string, 10);
     this.volatile = file.volatile;
     this.legacy = file.legacy;
+    this.experimental = file.product.experimental;
     this.errorLevel = file.errorLevel;
   }
 }
