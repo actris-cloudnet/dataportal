@@ -12,11 +12,13 @@ describe("/api/files/:uuid", () => {
   };
 
   it("request succeeds on instrument file", async () => {
-    return expect(axios.get(`${url}a5d1d5af-3667-41bc-b952-e684f627d91c`)).resolves.toBeTruthy();
+    const res = await axios.get(`${url}38092c00-161d-4ca2-a29d-628cf8e960f6`);
+    expect(res.data).toMatchSnapshot();
   });
 
   it("request succeeds on model file", async () => {
-    return expect(axios.get(`${url}b5d1d5af-3667-41bc-b952-e684f627d91c`)).resolves.toBeTruthy();
+    const res = await axios.get(`${url}b5d1d5af-3667-41bc-b952-e684f627d91c`);
+    expect(res.data).toMatchSnapshot();
   });
 
   it("responds with a 404 on test file if in normal mode", async () => {

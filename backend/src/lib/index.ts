@@ -87,6 +87,12 @@ export const augmentFile = (includeS3path: boolean) => (file: RegularFile | Mode
   s3key: undefined,
   s3path: includeS3path ? getS3pathForFile(file) : undefined,
   model: "model" in file ? file.model : undefined,
+  software: file.software
+    ? file.software.map((software) => ({
+        title: `${software.humanReadableName || software.code} ${software.version}`,
+        url: software.url,
+      }))
+    : undefined,
 });
 
 export const ssAuthString = () =>

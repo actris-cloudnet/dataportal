@@ -23,6 +23,7 @@ import { SearchFileResponse } from "../entity/SearchFileResponse";
 import { Visualization } from "../entity/Visualization";
 import { ModelVisualization } from "../entity/ModelVisualization";
 import { Product } from "../entity/Product";
+import { SoftwareService } from "../lib/software";
 
 export class FileRoutes {
   constructor(conn: Connection) {
@@ -35,6 +36,7 @@ export class FileRoutes {
     this.modelVisualizationRepo = conn.getRepository<ModelVisualization>("model_visualization");
     this.productRepo = conn.getRepository<Product>("product");
     this.fileQualityRepo = conn.getRepository<FileQuality>("file_quality");
+    this.softwareService = new SoftwareService(conn);
   }
 
   readonly conn: Connection;
@@ -46,13 +48,15 @@ export class FileRoutes {
   readonly modelVisualizationRepo: Repository<ModelVisualization>;
   readonly productRepo: Repository<Product>;
   readonly fileQualityRepo: Repository<FileQuality>;
+  readonly softwareService: SoftwareService;
 
   file: RequestHandler = async (req: Request, res: Response, next) => {
     const getFileByUuid = (repo: Repository<RegularFile | ModelFile>, isModel: boolean | undefined) => {
       const qb = repo
         .createQueryBuilder("file")
         .leftJoinAndSelect("file.site", "site")
-        .leftJoinAndSelect("file.product", "product");
+        .leftJoinAndSelect("file.product", "product")
+        .leftJoinAndSelect("file.software", "software");
       if (isModel) qb.leftJoinAndSelect("file.model", "model");
       qb.where("file.uuid = :uuid", req.params);
       return hideTestDataFromNormalUsers<RegularFile | ModelFile>(qb, req).getOne();
@@ -127,6 +131,14 @@ export class FileRoutes {
       return next({ status: 400, errors: ["The specified file was not found in storage service"] });
     }
 
+    if (file.software) {
+      file.software = await Promise.all(
+        Object.entries(file.software).map(async ([code, version]) =>
+          this.softwareService.getSoftware(code, version as string)
+        )
+      );
+    }
+
     try {
       const findFileByName = (model: boolean) => {
         const repo = model ? this.modelFileRepo : this.fileRepo;
@@ -155,14 +167,14 @@ export class FileRoutes {
           } else {
             await transactionalEntityManager.insert(SearchFile, searchFile);
           }
-          await transactionalEntityManager.insert(FileClass, file);
+          await transactionalEntityManager.save(FileClass, file);
         });
         res.sendStatus(201);
       } else if (existingFile.site.isTestSite || existingFile.volatile) {
         // Replace existing
         file.createdAt = existingFile.createdAt;
         await this.conn.transaction(async (transactionalEntityManager) => {
-          await transactionalEntityManager.update(FileClass, { uuid: file.uuid }, file);
+          await transactionalEntityManager.save(FileClass, file);
           await transactionalEntityManager.update(SearchFile, { uuid: file.uuid }, searchFile);
         });
         res.sendStatus(200);
@@ -171,7 +183,7 @@ export class FileRoutes {
         if (isModel) return next({ status: 501, errors: ["Versioning is not supported for model files."] });
         await this.conn.transaction(async (transactionalEntityManager) => {
           file.createdAt = file.updatedAt;
-          await transactionalEntityManager.insert(FileClass, file);
+          await transactionalEntityManager.save(FileClass, file);
           if (!file.legacy) {
             // Don't display legacy files in search if cloudnet version is available
             await transactionalEntityManager.delete(SearchFile, { uuid: existingFile.uuid });
