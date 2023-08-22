@@ -4,6 +4,8 @@ import {
   Column,
   Entity,
   Index,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryColumn,
@@ -17,6 +19,7 @@ import { basename } from "path";
 import { Model } from "./Model";
 import { ModelVisualization } from "./ModelVisualization";
 import { ErrorLevel } from "./QualityReport";
+import { Software } from "./Software";
 
 export enum Quality {
   NRT = "nrt",
@@ -81,6 +84,10 @@ export abstract class File {
 
   @Column({ default: "" })
   processingVersion!: string;
+
+  @ManyToMany(() => Software)
+  @JoinTable()
+  software!: Software[];
 
   get filename() {
     return basename(this.s3key);

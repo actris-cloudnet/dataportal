@@ -1,5 +1,10 @@
-<style scoped lang="sass">
-@import "@/sass/landing-beta.sass"
+<style scoped lang="scss">
+@import "@/sass/landing-beta.sass";
+
+.software {
+  list-style: none;
+  padding: 0;
+}
 </style>
 
 <template>
@@ -65,43 +70,17 @@
       </tr>
       <tr>
         <th>Software</th>
-        <td
-          v-if="
-            response.processingVersion ||
-            ('cloudnetpyVersion' in response && response.cloudnetpyVersion)
-          "
-        >
-          <span v-if="response.processingVersion">
-            <a
-              :href="`https://github.com/actris-cloudnet/cloudnet-processing/tree/v${response.processingVersion}`"
-            >
-              Cloudnet processing {{ response.processingVersion }}
-            </a>
-          </span>
-          <span
-            v-if="
-              response.processingVersion &&
-              'cloudnetpyVersion' in response &&
-              response.cloudnetpyVersion
-            "
-          >
-            <br />
-          </span>
-          <span
-            v-if="'cloudnetpyVersion' in response && response.cloudnetpyVersion"
-          >
-            <template
-              v-if="response.cloudnetpyVersion.toLowerCase().includes('custom')"
-            >
-              {{ response.cloudnetpyVersion }}
-            </template>
-            <a
-              v-else
-              :href="`https://github.com/actris-cloudnet/cloudnetpy/tree/v${response.cloudnetpyVersion}`"
-            >
-              CloudnetPy {{ response.cloudnetpyVersion }}
-            </a>
-          </span>
+        <td v-if="response.software.length > 0">
+          <ul class="software">
+            <li v-for="software in response.software" :key="software.title">
+              <a :href="software.url" v-if="software.url">
+                {{ software.title }}
+              </a>
+              <span v-else>
+                {{ software.title }}
+              </span>
+            </li>
+          </ul>
         </td>
         <td v-else>
           <span class="notAvailable" />

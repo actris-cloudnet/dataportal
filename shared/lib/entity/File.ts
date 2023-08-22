@@ -4,6 +4,7 @@ import type { Visualization } from "./Visualization";
 import type { Model } from "./Model";
 import type { ModelVisualization } from "./ModelVisualization";
 import type { ErrorLevel } from "./QualityReport";
+import type { Software } from "./Software";
 
 export enum Quality {
   NRT = "nrt",
@@ -30,6 +31,7 @@ export interface File {
   processingVersion: string;
   filename: string;
   downloadUrl: string;
+  software: Software[];
 }
 
 export interface RegularFile extends File {

@@ -352,6 +352,22 @@ describe("PUT /files/:s3key", () => {
     tmpfile.site = "hyytiala";
     await expect(putFile(tmpfile)).rejects.toMatchObject({ response: { status: 400 } });
   });
+
+  it("inserts and updates software", async () => {
+    await expect(putFile(volatileFile)).resolves.toMatchObject({ status: 201 });
+    const file1 = await fileRepo.findOneOrFail(volatileFile.uuid, { relations: ["software"] });
+    expect(file1.software.length).toBe(1);
+    expect(file1.software[0].code).toBe("cloudnetpy");
+    expect(file1.software[0].version).toBe("1.0.4");
+
+    await expect(putFile({ ...volatileFile, software: { cloudnetpy: "1.0.5" } })).resolves.toMatchObject({
+      status: 200,
+    });
+    const file2 = await fileRepo.findOneOrFail(volatileFile.uuid, { relations: ["software"] });
+    expect(file2.software.length).toBe(1);
+    expect(file2.software[0].code).toBe("cloudnetpy");
+    expect(file2.software[0].version).toBe("1.0.5");
+  });
 });
 
 describe("POST /files/", () => {

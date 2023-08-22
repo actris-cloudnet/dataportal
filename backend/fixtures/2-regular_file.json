@@ -14,7 +14,8 @@
     "format": "HDF5 (NetCDF4)",
     "site": "mace-head",
     "version": "123",
-    "errorLevel": null
+    "errorLevel": null,
+    "software": [{ "id": 1 }]
   },
   {
     "uuid": "bde7a35f-03aa-4bff-acfb-b4974ea9f217",
@@ -31,7 +32,8 @@
     "format": "HDF5 (NetCDF4)",
     "site": "mace-head",
     "version": "123",
-    "errorLevel": null
+    "errorLevel": null,
+    "software": [{ "id": 1 }]
   },
   {
     "uuid": "d21d6a9b-6804-4465-a026-74ec429fe17d",
@@ -48,7 +50,8 @@
     "format": "HDF5 (NetCDF4)",
     "site": "hyytiala",
     "version": "123",
-    "errorLevel": null
+    "errorLevel": null,
+    "software": [{ "id": 1 }]
   },
   {
     "uuid": "22b32746-faf0-4057-9076-ed2e698dcc34",
@@ -65,7 +68,8 @@
     "format": "HDF5 (NetCDF4)",
     "site": "bucharest",
     "version": "123",
-    "errorLevel": null
+    "errorLevel": null,
+    "software": [{ "id": 1 }]
   },
   {
     "uuid": "6cb32746-faf0-4057-9076-ed2e698dcf36",
@@ -82,7 +86,8 @@
     "format": "HDF5 (NetCDF4)",
     "site": "bucharest",
     "version": "123",
-    "errorLevel": null
+    "errorLevel": null,
+    "software": [{ "id": 1 }]
   },
   {
     "uuid": "8bb32746-faf0-4057-9076-ed2e698dcf36",
@@ -99,7 +104,8 @@
     "format": "HDF5 (NetCDF4)",
     "site": "bucharest",
     "version": "123",
-    "errorLevel": null
+    "errorLevel": null,
+    "software": [{ "id": 1 }]
   },
   {
     "uuid": "1bb32746-faf0-4057-9076-ed2e698dcf36",
@@ -121,7 +127,8 @@
       "a45a2e9a-e39d-4af2-9798-5ea0fadf041e"
     ],
     "version": "123",
-    "errorLevel": null
+    "errorLevel": null,
+    "software": [{ "id": 1 }]
   },
   {
     "uuid": "2bb32746-faf0-4057-9076-ed2e698dcf36",
@@ -139,7 +146,8 @@
     "site": "bucharest",
     "sourceFileIds": ["1bb32746-faf0-4057-9076-ed2e698dcf36"],
     "version": "123",
-    "errorLevel": "pass"
+    "errorLevel": "pass",
+    "software": [{ "id": 1 }]
   },
   {
     "uuid": "3bb32746-faf0-4057-9076-ed2e698dcf36",
@@ -157,7 +165,8 @@
     "format": "HDF5 (NetCDF4)",
     "site": "bucharest",
     "version": "123",
-    "errorLevel": null
+    "errorLevel": null,
+    "software": [{ "id": 1 }]
   },
   {
     "uuid": "52b32746-faf0-4057-9076-ed2e698dcc34",
@@ -175,7 +184,8 @@
     "format": "HDF5 (NetCDF4)",
     "site": "bucharest",
     "version": "123",
-    "errorLevel": null
+    "errorLevel": null,
+    "software": [{ "id": 1 }]
   },
   {
     "uuid": "62b32746-faf0-4057-9076-ed2e698dcc34",
@@ -193,7 +203,8 @@
     "format": "HDF5 (NetCDF4)",
     "site": "bucharest",
     "version": "123",
-    "errorLevel": "pass"
+    "errorLevel": "pass",
+    "software": [{ "id": 1 }]
   },
   {
     "uuid": "72b32746-faf0-4057-9076-ed2e698dcc34",
@@ -211,7 +222,8 @@
     "format": "HDF5 (NetCDF4)",
     "site": "bucharest",
     "version": "123",
-    "errorLevel": null
+    "errorLevel": null,
+    "software": [{ "id": 1 }]
   },
   {
     "uuid": "82b32746-faf0-4057-9076-ed2e698dcc34",
@@ -229,7 +241,8 @@
     "format": "HDF5 (NetCDF4)",
     "site": "bucharest",
     "version": "123",
-    "errorLevel": null
+    "errorLevel": null,
+    "software": [{ "id": 1 }]
   },
   {
     "uuid": "acf78456-11b1-41a6-b2de-aa7590a75675",
@@ -248,7 +261,8 @@
     "site": "bucharest",
     "version": "123",
     "quality": "qc",
-    "errorLevel": "error"
+    "errorLevel": "error",
+    "software": [{ "id": 1 }]
   },
   {
     "uuid": "b6de8cf4-8825-47b0-aaa9-4fd413bbb0d7",
@@ -266,7 +280,8 @@
     "site": "bucharest",
     "version": "123",
     "errorLevel": null,
-    "instrumentPid": "https://hdl.handle.net/123/bucharest_lidar"
+    "instrumentPid": "https://hdl.handle.net/123/bucharest_lidar",
+    "software": [{ "id": 1 }]
   },
   {
     "uuid": "f036da43-c19c-4832-99f9-6cc88f3255c5",
@@ -284,6 +299,7 @@
     "site": "bucharest",
     "version": "123",
     "errorLevel": null,
-    "instrumentPid": "https://hdl.handle.net/123/bucharest_radar"
+    "instrumentPid": "https://hdl.handle.net/123/bucharest_radar",
+    "software": [{ "id": 1 }]
   }
 ]

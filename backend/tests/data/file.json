@@ -4,7 +4,6 @@
   "volatile": true,
   "measurementDate": "2018-11-15",
   "product": "radar",
-  "cloudnetpyVersion": "1.0.4",
   "createdAt": "2020-02-20T10:56:19.382Z",
   "updatedAt": "2020-02-20T10:56:19.382Z",
   "s3key": "20181115_mace-head_mira.nc",
@@ -12,5 +11,8 @@
   "size": 12200657,
   "format": "HDF5 (NetCDF4)",
   "site": "mace-head",
-  "version": "123"
+  "version": "123",
+  "software": {
+    "cloudnetpy": "1.0.4"
+  }
 }
