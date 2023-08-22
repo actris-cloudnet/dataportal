@@ -57,29 +57,6 @@ services:
     volumes:
       - ../frontend:/app
       - ../shared:/shared
-  test-backend:
-    image: backend
-    depends_on:
-      backend:
-        condition: service_healthy
-    env_file:
-      - ci.env
-    command: ["npm", "test"]
-  e2e-test-backend:
-    image: backend
-    depends_on:
-      backend:
-        condition: service_healthy
-    env_file:
-      - ci.env
-    command: ["npm", "run", "e2e-test"]
-  lint-backend:
-    image: backend
-    depends_on:
-      - backend
-    env_file:
-      - ci.env
-    command: ["npm", "run", "lint"]
   selenium:
     image: selenium/standalone-firefox:4.0.0-beta-1-20210215
     shm_size: 2g
