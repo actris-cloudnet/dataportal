@@ -4,7 +4,7 @@
 
 <template>
   <div class="summary-section" id="data-origin">
-    <div class="summary-section-header">Origin</div>
+    <div class="summary-section-header">Provenance</div>
     <table class="summary-section-table">
       <tr>
         <th>Data sources</th>
