@@ -24,18 +24,25 @@ jobs:
             *.cache-from=type=gha
           load: true
 
+      - name: Run backend
+        run: docker compose up --wait backend
+
       - name: Lint
-        run: docker-compose run lint-backend
+        run: docker compose exec backend npm run lint
 
       - name: Run unit and integration tests
-        run: docker-compose run test-backend
+        run: docker compose exec backend npm test
 
       - name: Run e2e tests
-        run: docker-compose run e2e-test-backend
+        run: docker compose exec backend npm run e2e-test
+
+      - name: Shutdown backend
+        if: always()
+        run: docker compose down
 
       - name: Print logs
         if: always()
-        run: docker-compose logs
+        run: docker compose logs
 
   frontend:
     name: Frontend
@@ -59,15 +66,15 @@ jobs:
 
       - name: Install dependencies
         run: |
-          docker-compose run frontend npm install
+          docker compose run frontend npm install
           docker compose run frontend sh -c 'cd /shared && npm install'
 
       - name: Lint frontend
-        run: docker-compose run frontend npm run lint
+        run: docker compose run frontend npm run lint
 
       - name: Run unit tests
-        run: docker-compose run frontend npm run test:unit
+        run: docker compose run frontend npm run test:unit
 
       - name: Print logs
         if: always()
-        run: docker-compose logs
+        run: docker compose logs
