@@ -20,7 +20,7 @@ let searchFileRepo: Repository<SearchFile>;
 let vizRepo: Repository<Visualization>;
 let modelVizRepo: Repository<ModelVisualization>;
 let fileQualityRepo: Repository<FileQuality>;
-let QualityReportRepo: Repository<QualityReport>;
+let qualityReportRepo: Repository<QualityReport>;
 
 const volatileFile = JSON.parse(readFileSync("tests/data/file.json", "utf8"));
 const stableFile = { ...volatileFile, ...{ volatile: false, pid: "1234" } };
@@ -34,7 +34,7 @@ beforeAll(async () => {
   vizRepo = conn.getRepository("visualization");
   modelVizRepo = conn.getRepository("model_visualization");
   fileQualityRepo = conn.getRepository("file_quality");
-  QualityReportRepo = conn.getRepository("quality_report");
+  qualityReportRepo = conn.getRepository("quality_report");
   await initUsersAndPermissions();
   const prefix = `${storageServiceUrl}cloudnet-product`;
   await axios.put(`${prefix}-volatile/${volatileFile.s3key}`, "content");
@@ -537,12 +537,12 @@ describe("DELETE /api/files/", () => {
       status: 201,
     });
     await expect(fileQualityRepo.findOne(file.uuid)).resolves.toBeTruthy();
-    let reports = await QualityReportRepo.find({ where: { quality: file.uuid } });
+    let reports = await qualityReportRepo.find({ where: { quality: file.uuid } });
     expect(reports.length).toEqual(5);
     await expect(deleteFile(file.uuid, false, false)).resolves.toMatchObject({ status: 200 });
     await expect(fileRepo.findOne(file.uuid)).resolves.toBeFalsy();
     await expect(fileQualityRepo.findOne(file.uuid)).resolves.toBeFalsy();
-    reports = await QualityReportRepo.find({ where: { quality: file.uuid } });
+    reports = await qualityReportRepo.find({ where: { quality: file.uuid } });
     await expect(reports).toMatchObject([]);
   });
 
@@ -600,6 +600,5 @@ async function cleanRepos() {
   await fileRepo.delete({});
   await searchFileRepo.delete({});
   await fileQualityRepo.delete({});
-  await QualityReportRepo.delete({});
-  return;
+  await qualityReportRepo.delete({});
 }
