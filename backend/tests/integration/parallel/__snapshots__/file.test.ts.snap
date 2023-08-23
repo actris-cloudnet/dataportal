@@ -3,7 +3,6 @@
 exports[`/api/files/:uuid request succeeds on instrument file 1`] = `
 Object {
   "checksum": "298688b011a511f8f0e9353371cf73ee86f60c89b0e02c6931d8c05542c64cdb",
-  "cloudnetpyVersion": "1.0.4",
   "createdAt": "2020-02-20T10:56:19.382Z",
   "downloadUrl": "http://localhost:3000/api/download/product/38092c00-161d-4ca2-a29d-628cf8e960f6/20181115_mace-head_mira.nc",
   "errorLevel": null,
@@ -13,7 +12,6 @@ Object {
   "legacy": false,
   "measurementDate": "2018-11-15",
   "pid": "",
-  "processingVersion": "",
   "product": Object {
     "experimental": false,
     "humanReadableName": "Radar",
@@ -68,7 +66,6 @@ Object {
     "optimumOrder": 0,
   },
   "pid": "",
-  "processingVersion": "",
   "product": Object {
     "experimental": false,
     "humanReadableName": "Model",

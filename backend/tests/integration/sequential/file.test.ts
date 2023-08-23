@@ -258,7 +258,6 @@ describe("PUT /files/:s3key", () => {
 
   it("inserting several model files with different optimumOrder III", async () => {
     const tmpfile1 = { ...volatileFile, product: "model", model: "icon-iglo-24-35" };
-    delete tmpfile1.cloudnetpyVersion;
     const tmpfile2 = {
       ...tmpfile1,
       model: "icon-iglo-36-47",
