@@ -82,9 +82,6 @@ export abstract class File {
   @Column()
   updatedAt!: Date;
 
-  @Column({ default: "" })
-  processingVersion!: string;
-
   @ManyToMany(() => Software)
   @JoinTable()
   software!: Software[];
@@ -109,9 +106,6 @@ export abstract class File {
 export class RegularFile extends File {
   @Column("uuid", { array: true, nullable: true })
   sourceFileIds!: string[] | null;
-
-  @Column({ default: "" })
-  cloudnetpyVersion!: string;
 
   @OneToMany((_) => Visualization, (viz) => viz.sourceFile)
   visualizations!: Visualization[];

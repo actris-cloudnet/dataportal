@@ -4,7 +4,6 @@
   "volatile": true,
   "measurementDate": "2019-07-27",
   "product": "classification",
-  "cloudnetpyVersion": "1.0.4",
   "checksum": "4a06acf6a43feafb8b2f59890ee6ee2e4898da656cb496af06aea3778b46024a",
   "format": "HDF5 (NetCDF4)",
   "site": "bucharest",

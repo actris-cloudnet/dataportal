@@ -4,7 +4,6 @@
   "volatile": true,
   "measurementDate": "2020-2-26",
   "product": "lidar",
-  "cloudnetpyVersion": "1.0.7",
   "checksum": "d9d4ce94f5dcb52d79b9d38c3ddf8496125daccd4aaf16273f89076fdfe8aaf5",
   "format": "HDF5 (NetCDF4)",
   "site": "bucharest",

@@ -44,7 +44,6 @@ async function putFile(data: { site: string; product: string; measurementDate: s
     volatile: true,
     measurementDate: data.measurementDate,
     product: data.product,
-    cloudnetpyVersion: "1.0.4",
     createdAt: "2020-02-20T10:56:19.382Z",
     updatedAt: "2020-02-20T10:56:19.382Z",
     s3key: s3key,

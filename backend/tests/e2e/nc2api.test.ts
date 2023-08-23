@@ -30,7 +30,6 @@ afterAll(async () => {
 const inputJson = {
   uuid: "15506ea8-d357-4c7b-af8c-95dfcc34fc7d",
   measurementDate: "2019-07-23",
-  cloudnetpyVersion: "1.0.4",
   filename: "20190723_bucharest_classification.nc",
   checksum: "b77b731aaae54f403aae6765ad1d20e1603b4454e2bc0d461aab4985a4a82ca4",
   size: 139021,
@@ -44,7 +43,6 @@ const inputJson = {
 const inputJson2 = {
   uuid: "25506ea8-d357-4c7b-af8c-95dfcc34fc7d",
   measurementDate: "2019-07-24",
-  cloudnetpyVersion: "1.0.4",
   filename: "20190724_bucharest_classification.nc",
   checksum: "6904509c9e03154d9c831aaa8595e01eb5339110e842a34e16f24ffb4456e061",
   size: 139021,
@@ -58,7 +56,6 @@ const inputJson2 = {
 const expectedJson = {
   uuid: "15506ea8-d357-4c7b-af8c-95dfcc34fc7d",
   measurementDate: "2019-07-23",
-  cloudnetpyVersion: "1.0.4",
   filename: "20190723_bucharest_classification.nc",
   checksum: "b77b731aaae54f403aae6765ad1d20e1603b4454e2bc0d461aab4985a4a82ca4",
   size: "139021",

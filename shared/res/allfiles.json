@@ -14,7 +14,6 @@
     "createdAt": "2020-02-19T10:59:58.449Z",
     "updatedAt": "2020-02-19T10:59:58.449Z",
     "sourceFileIds": null,
-    "cloudnetpyVersion": "1.0.4",
     "site": {
       "id": "bucharest",
       "humanReadableName": "Bucharest",
@@ -48,7 +47,6 @@
     "createdAt": "2020-02-20T10:56:19.382Z",
     "updatedAt": "2020-02-20T10:56:19.382Z",
     "sourceFileIds": null,
-    "cloudnetpyVersion": "1.0.4",
     "site": {
       "id": "mace-head",
       "humanReadableName": "Mace Head",
@@ -82,7 +80,6 @@
     "createdAt": "2020-02-20T10:56:19.382Z",
     "updatedAt": "2020-02-20T10:56:19.382Z",
     "sourceFileIds": null,
-    "cloudnetpyVersion": "1.0.4",
     "site": {
       "id": "mace-head",
       "humanReadableName": "Mace Head",
@@ -116,7 +113,6 @@
     "createdAt": "2020-02-20T10:39:58.449Z",
     "updatedAt": "2020-02-20T10:39:58.449Z",
     "sourceFileIds": null,
-    "cloudnetpyVersion": "1.0.4",
     "site": {
       "id": "bucharest",
       "humanReadableName": "Bucharest",
@@ -150,7 +146,6 @@
     "createdAt": "2020-02-20T10:49:58.449Z",
     "updatedAt": "2020-02-20T10:49:58.449Z",
     "sourceFileIds": null,
-    "cloudnetpyVersion": "1.0.4",
     "site": {
       "id": "bucharest",
       "humanReadableName": "Bucharest",
@@ -184,7 +179,6 @@
     "createdAt": "2020-02-20T10:59:58.449Z",
     "updatedAt": "2020-02-20T10:59:58.449Z",
     "sourceFileIds": null,
-    "cloudnetpyVersion": "1.0.4",
     "site": {
       "id": "bucharest",
       "humanReadableName": "Bucharest",
@@ -218,7 +212,6 @@
     "createdAt": "2020-02-19T10:59:58.449Z",
     "updatedAt": "2020-02-19T10:59:58.449Z",
     "sourceFileIds": null,
-    "cloudnetpyVersion": "1.0.4",
     "site": {
       "id": "bucharest",
       "humanReadableName": "Bucharest",
@@ -252,7 +245,6 @@
     "createdAt": "2020-02-19T10:59:58.449Z",
     "updatedAt": "2020-02-19T10:59:58.449Z",
     "sourceFileIds": ["1bb32746-faf0-4057-9076-ed2e698dcf36"],
-    "cloudnetpyVersion": "1.0.4",
     "site": {
       "id": "bucharest",
       "humanReadableName": "Bucharest",
@@ -286,7 +278,6 @@
     "createdAt": "2020-02-20T10:47:33.775Z",
     "updatedAt": "2020-02-20T10:47:33.775Z",
     "sourceFileIds": null,
-    "cloudnetpyVersion": "1.0.4",
     "site": {
       "id": "hyytiala",
       "humanReadableName": "Hyytiälä",
@@ -320,7 +311,6 @@
     "createdAt": "2020-02-20T10:39:58.449Z",
     "updatedAt": "2020-02-21T10:49:58.449Z",
     "sourceFileIds": null,
-    "cloudnetpyVersion": "1.0.4",
     "site": {
       "id": "bucharest",
       "humanReadableName": "Bucharest",
@@ -354,7 +344,6 @@
     "createdAt": "2020-02-20T10:39:58.449Z",
     "updatedAt": "2020-02-22T10:39:58.449Z",
     "sourceFileIds": null,
-    "cloudnetpyVersion": "1.0.4",
     "site": {
       "id": "bucharest",
       "humanReadableName": "Bucharest",
@@ -388,7 +377,6 @@
     "createdAt": "2020-02-20T10:39:58.449Z",
     "updatedAt": "2020-02-20T10:39:58.449Z",
     "sourceFileIds": null,
-    "cloudnetpyVersion": "1.0.4",
     "site": {
       "id": "bucharest",
       "humanReadableName": "Bucharest",
@@ -422,7 +410,6 @@
     "createdAt": "2020-02-20T10:39:58.449Z",
     "updatedAt": "2020-02-21T10:39:58.449Z",
     "sourceFileIds": null,
-    "cloudnetpyVersion": "1.0.4",
     "site": {
       "id": "bucharest",
       "humanReadableName": "Bucharest",
@@ -456,7 +443,6 @@
     "createdAt": "2021-02-20T10:39:58.449Z",
     "updatedAt": "2021-02-22T10:39:58.449Z",
     "sourceFileIds": null,
-    "cloudnetpyVersion": "1.5.0",
     "site": {
       "id": "bucharest",
       "humanReadableName": "Bucharest",

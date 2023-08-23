@@ -28,7 +28,6 @@ export interface File {
   errorLevel: ErrorLevel | null;
   createdAt: Date;
   updatedAt: Date;
-  processingVersion: string;
   filename: string;
   downloadUrl: string;
   software: Software[];
@@ -36,7 +35,6 @@ export interface File {
 
 export interface RegularFile extends File {
   sourceFileIds: string[] | null;
-  cloudnetpyVersion: string;
   visualizations: Visualization[];
   instrumentPid: string;
 }
