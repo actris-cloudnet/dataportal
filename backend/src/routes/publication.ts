@@ -1,12 +1,12 @@
 import { Request, RequestHandler, Response } from "express";
-import { Connection, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { Publication } from "../entity/Publication";
 import axios, { AxiosResponse } from "axios";
 import env from "../lib/env";
 
 export class PublicationRoutes {
-  constructor(conn: Connection) {
-    this.publicationRepo = conn.getRepository<Publication>("publication");
+  constructor(dataSource: DataSource) {
+    this.publicationRepo = dataSource.getRepository(Publication);
   }
 
   readonly publicationRepo: Repository<Publication>;

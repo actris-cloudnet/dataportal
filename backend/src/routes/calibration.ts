@@ -1,11 +1,16 @@
-import { Connection, LessThanOrEqual, Repository } from "typeorm";
+import { DataSource, LessThanOrEqual, Repository } from "typeorm";
 import { Request, RequestHandler, Response } from "express";
 import { Calibration } from "../entity/Calibration";
 import { isValidDate, validateInstrumentPid } from "../lib";
 
+interface QueryParams {
+  date: string;
+  instrumentPid: string;
+}
+
 export class CalibrationRoutes {
-  constructor(conn: Connection) {
-    this.calibRepo = conn.getRepository<Calibration>("calibration");
+  constructor(dataSource: DataSource) {
+    this.calibRepo = dataSource.getRepository(Calibration);
   }
 
   private calibRepo: Repository<Calibration>;
@@ -24,12 +29,13 @@ export class CalibrationRoutes {
     next();
   };
 
-  calibration: RequestHandler = async (req: Request, res: Response, next) => {
+  calibration: RequestHandler = async (req, res, next) => {
+    const query = req.query as unknown as QueryParams;
     try {
       const calib = await this.calibRepo.findOne({
         where: {
-          instrumentPid: req.query.instrumentPid,
-          measurementDate: LessThanOrEqual(req.query.date),
+          instrumentPid: query.instrumentPid,
+          measurementDate: LessThanOrEqual(query.date),
         },
         order: { measurementDate: "DESC" },
       });
@@ -46,11 +52,12 @@ export class CalibrationRoutes {
     }
   };
 
-  putCalibration: RequestHandler = async (req: Request, res: Response, next) => {
+  putCalibration: RequestHandler = async (req, res, next) => {
+    const query = req.query as unknown as QueryParams;
     try {
       const calib = new Calibration();
-      calib.instrumentPid = req.query.instrumentPid as string;
-      calib.measurementDate = req.query.date as string;
+      calib.instrumentPid = query.instrumentPid;
+      calib.measurementDate = query.date;
       calib.data = req.body;
       await this.calibRepo.save(calib);
       return res.sendStatus(200);

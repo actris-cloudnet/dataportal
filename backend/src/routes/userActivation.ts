@@ -1,4 +1,4 @@
-import { Connection, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { Request, RequestHandler, Response } from "express";
 
 import { UserAccount } from "../entity/UserAccount";
@@ -38,13 +38,13 @@ const postTemplate = (username: string, password: string) => `<!doctype html>
 export class UserActivationRoutes {
   private userAccountRepository: Repository<UserAccount>;
 
-  constructor(conn: Connection) {
-    this.userAccountRepository = conn.getRepository<UserAccount>("user_account");
+  constructor(dataSource: DataSource) {
+    this.userAccountRepository = dataSource.getRepository(UserAccount);
   }
 
   get: RequestHandler = async (req: Request, res: Response, next) => {
     try {
-      const user = await this.userAccountRepository.findOne({ activationToken: req.params.token });
+      const user = await this.userAccountRepository.findOneBy({ activationToken: req.params.token });
       if (!user) {
         return res.status(404).contentType("text/html; charset=utf-8").send(errorTemplate);
       }
@@ -56,7 +56,7 @@ export class UserActivationRoutes {
 
   post: RequestHandler = async (req: Request, res: Response, next) => {
     try {
-      const user = await this.userAccountRepository.findOne({ activationToken: req.params.token });
+      const user = await this.userAccountRepository.findOneBy({ activationToken: req.params.token });
       if (!user) {
         return res.status(404).contentType("text/html; charset=utf-8").send(errorTemplate);
       }

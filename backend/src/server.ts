@@ -1,8 +1,8 @@
-import { createConnection } from "typeorm";
+import { DataSource } from "typeorm";
 import * as express from "express";
 import { ErrorRequestHandler } from "express";
 import { RequestError } from "./entity/RequestError";
-import { stringify, getIpLookup } from "./lib";
+import { getIpLookup } from "./lib";
 import { Middleware } from "./lib/middleware";
 import { FileRoutes } from "./routes/file";
 import { SiteRoutes } from "./routes/site";
@@ -23,36 +23,37 @@ import { PermissionType } from "./entity/Permission";
 import { UserActivationRoutes } from "./routes/userActivation";
 import { ReferenceRoutes } from "./routes/reference";
 import * as http from "http";
+import { AppDataSource } from "./data-source";
 
 async function createServer(): Promise<void> {
   const port = 3000;
   const app = express();
 
-  const conn = await createConnection();
+  await AppDataSource.initialize();
   const ipLookup = await getIpLookup({ watchForUpdates: true });
-  const middleware = new Middleware(conn);
+  const middleware = new Middleware(AppDataSource);
 
-  const authenticator = new Authenticator(conn);
-  const authorizator = new Authorizator(conn);
+  const authenticator = new Authenticator(AppDataSource);
+  const authorizator = new Authorizator(AppDataSource);
 
-  const fileRoutes = new FileRoutes(conn);
-  const siteRoutes = new SiteRoutes(conn);
-  const prodRoutes = new ProductRoutes(conn);
-  const instrRoutes = new InstrumentRoutes(conn);
-  const vizRoutes = new VisualizationRoutes(conn, fileRoutes);
-  const uploadRoutes = new UploadRoutes(conn);
-  const collRoutes = new CollectionRoutes(conn);
-  const modelRoutes = new ModelRoutes(conn);
-  const dlRoutes = new DownloadRoutes(conn, fileRoutes, collRoutes, uploadRoutes, ipLookup);
-  const calibRoutes = new CalibrationRoutes(conn);
-  const qualityRoutes = new QualityReportRoutes(conn, fileRoutes);
-  const publicationRoutes = new PublicationRoutes(conn);
-  const userActivationRoutes = new UserActivationRoutes(conn);
+  const fileRoutes = new FileRoutes(AppDataSource);
+  const siteRoutes = new SiteRoutes(AppDataSource);
+  const prodRoutes = new ProductRoutes(AppDataSource);
+  const instrRoutes = new InstrumentRoutes(AppDataSource);
+  const vizRoutes = new VisualizationRoutes(AppDataSource, fileRoutes);
+  const uploadRoutes = new UploadRoutes(AppDataSource);
+  const collRoutes = new CollectionRoutes(AppDataSource);
+  const modelRoutes = new ModelRoutes(AppDataSource);
+  const dlRoutes = new DownloadRoutes(AppDataSource, fileRoutes, collRoutes, uploadRoutes, ipLookup);
+  const calibRoutes = new CalibrationRoutes(AppDataSource);
+  const qualityRoutes = new QualityReportRoutes(AppDataSource, fileRoutes);
+  const publicationRoutes = new PublicationRoutes(AppDataSource);
+  const userActivationRoutes = new UserActivationRoutes(AppDataSource);
 
-  const siteContactRoutes = new SiteContactRoutes(conn);
-  const userAccountRoutes = new UserAccountRoutes(conn);
+  const siteContactRoutes = new SiteContactRoutes(AppDataSource);
+  const userAccountRoutes = new UserAccountRoutes(AppDataSource);
 
-  const referenceRoutes = new ReferenceRoutes(conn);
+  const referenceRoutes = new ReferenceRoutes(AppDataSource);
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     console.error(
@@ -274,12 +275,6 @@ async function createServer(): Promise<void> {
   app.delete("/user-accounts/:id", userAccountRoutes.deleteUserAccount);
   app.put("/user-accounts/:id", express.json(), userAccountRoutes.validatePut, userAccountRoutes.putUserAccount);
   app.get("/user-accounts/", userAccountRoutes.getAllUserAccounts);
-  app.post(
-    "/user-accounts/migrate-legacy",
-    express.json(),
-    userAccountRoutes.validateMigrateLegacyPost,
-    userAccountRoutes.migrateLegacyPostUserAccount
-  );
 
   app.use(errorHandler);
 
@@ -295,7 +290,7 @@ async function createServer(): Promise<void> {
       console.log("SIGTERM signal received: closing HTTP server...");
       server.close(() => {
         console.log("HTTP server closed. Now closing database connection...");
-        conn.close().then(
+        AppDataSource.destroy().then(
           () => {
             console.log("Database connection closed.");
             resolve();

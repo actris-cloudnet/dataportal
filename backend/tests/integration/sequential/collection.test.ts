@@ -1,11 +1,12 @@
 import axios from "axios";
 import { backendPublicUrl, genResponse } from "../../lib";
-import { Connection, createConnection, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { Collection } from "../../../src/entity/Collection";
 import { promises as fsp } from "fs";
-import { File } from "../../../src/entity/File";
+import { File, RegularFile } from "../../../src/entity/File";
+import { AppDataSource } from "../../../src/data-source";
 
-let conn: Connection;
+let dataSource: DataSource;
 let repo: Repository<Collection>;
 let fileRepo: Repository<File>;
 const url = `${backendPublicUrl}collection/`;
@@ -14,9 +15,9 @@ const validFileUuids = ["38092c00-161d-4ca2-a29d-628cf8e960f6", "bde7a35f-03aa-4
 
 describe("POST /api/collection", () => {
   beforeAll(async () => {
-    conn = await createConnection();
-    repo = conn.getRepository("collection");
-    fileRepo = conn.getRepository("regular_file");
+    dataSource = await AppDataSource.initialize();
+    repo = dataSource.getRepository(Collection);
+    fileRepo = dataSource.getRepository(RegularFile);
     await fileRepo.save(JSON.parse((await fsp.readFile("fixtures/2-regular_file.json")).toString()));
   });
 
@@ -24,11 +25,11 @@ describe("POST /api/collection", () => {
     await repo.delete({});
   });
 
-  afterAll(() => conn.close());
+  afterAll(async () => await dataSource.destroy());
 
   it("on valid new collection inserts a row to db and responds with uuid", async () => {
     const res = await axios.post(url, { files: validFileUuids });
-    await expect(repo.findOneOrFail(res.data)).resolves.toBeTruthy();
+    await expect(repo.findOneByOrFail({ uuid: res.data })).resolves.toBeTruthy();
   });
 
   it("on invalid request responds with 422", async () => {

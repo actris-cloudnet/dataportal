@@ -1,48 +1,52 @@
-import { Connection, createConnection, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { QualityReport } from "../../../src/entity/QualityReport";
 import axios from "axios";
 import { backendPrivateUrl, backendPublicUrl } from "../../lib";
 import { promises as fsp } from "fs";
-import { FileQuality } from "../../../src/entity/FileQuality";
+import { ErrorLevel, FileQuality } from "../../../src/entity/FileQuality";
 import { readResources } from "../../../../shared/lib";
 import { TestInfo } from "../../../src/entity/TestInfo";
+import { AppDataSource } from "../../../src/data-source";
+import { ModelFile, RegularFile } from "../../../src/entity/File";
+import { SearchFile } from "../../../src/entity/SearchFile";
+import { ModelVisualization } from "../../../src/entity/ModelVisualization";
+import { Visualization } from "../../../src/entity/Visualization";
 
-let conn: Connection;
+let dataSource: DataSource;
 let testInfoRepo: Repository<TestInfo>;
 let qualityReportRepo: Repository<QualityReport>;
 let fileQualityRepo: Repository<FileQuality>;
+let regularFileRepo: Repository<RegularFile>;
+let modelFileRepo: Repository<SearchFile>;
+let searchFileRepo: Repository<SearchFile>;
 const privateUrl = `${backendPrivateUrl}quality/`;
 const publicUrl = `${backendPublicUrl}quality/`;
 const fileUrl = `${backendPublicUrl}files/`;
-const searchUrl = `${backendPublicUrl}search/`;
 let resources: any;
 let report: any;
 
 beforeAll(async () => {
   resources = await readResources();
-  conn = await createConnection();
-  testInfoRepo = await conn.getRepository("test_info");
-  qualityReportRepo = await conn.getRepository("quality_report");
-  fileQualityRepo = await conn.getRepository("file_quality");
+  dataSource = await AppDataSource.initialize();
+  testInfoRepo = dataSource.getRepository(TestInfo);
+  qualityReportRepo = dataSource.getRepository(QualityReport);
+  fileQualityRepo = dataSource.getRepository(FileQuality);
+  regularFileRepo = dataSource.getRepository(RegularFile);
+  modelFileRepo = dataSource.getRepository(ModelFile);
+  searchFileRepo = dataSource.getRepository(SearchFile);
 });
 
 beforeEach(async () => {
   await cleanRepos();
-  await conn
-    .getRepository("regular_file")
-    .save(JSON.parse((await fsp.readFile("fixtures/2-regular_file.json")).toString()));
-  await conn
-    .getRepository("model_file")
-    .save(JSON.parse((await fsp.readFile("fixtures/2-model_file.json")).toString()));
-  await conn
-    .getRepository("search_file")
-    .save(JSON.parse((await fsp.readFile("fixtures/2-search_file.json")).toString()));
+  await regularFileRepo.save(JSON.parse((await fsp.readFile("fixtures/2-regular_file.json")).toString()));
+  await modelFileRepo.save(JSON.parse((await fsp.readFile("fixtures/2-model_file.json")).toString()));
+  await searchFileRepo.save(JSON.parse((await fsp.readFile("fixtures/2-search_file.json")).toString()));
   await testInfoRepo.save(JSON.parse((await fsp.readFile("fixtures/0-test_info.json")).toString()));
 });
 
 afterAll(async () => {
   await cleanRepos();
-  await conn.close();
+  await dataSource.destroy();
 });
 
 describe("PUT /quality/:uuid", () => {
@@ -53,15 +57,12 @@ describe("PUT /quality/:uuid", () => {
   });
 
   it("creates new report for model file (no prior report)", async () => {
-    const res1 = await axios.get(searchUrl, { params: { dateFrom: "2020-12-05" } });
-    expect(res1.data[1].errorLevel).toEqual(null);
     const uuid = "b5d1d5af-3667-41bc-b952-e684f627d91c";
+    expect((await modelFileRepo.findOneByOrFail({ uuid })).errorLevel).toBe(null);
+    expect((await searchFileRepo.findOneByOrFail({ uuid })).errorLevel).toBe(null);
     await putReportWithErrors(uuid);
-    const res = await axios.get(searchUrl, { params: { dateFrom: "2020-12-05" } });
-    expect(res.data[1].errorLevel).toEqual("error");
-    // test that search_file table is updated
-    const res2 = await axios.get(searchUrl, { params: { dateFrom: "2020-12-05" } });
-    expect(res2.data[0].errorLevel).toEqual("error");
+    expect((await modelFileRepo.findOneByOrFail({ uuid })).errorLevel).toBe(ErrorLevel.ERROR);
+    expect((await searchFileRepo.findOneByOrFail({ uuid })).errorLevel).toBe(ErrorLevel.ERROR);
   });
 
   it("creates report for regular file (old report exist)", async () => {
@@ -127,10 +128,9 @@ async function putReportWithPasses(uuid: string) {
 async function cleanRepos() {
   await qualityReportRepo.delete({});
   await fileQualityRepo.delete({});
-  await conn.getRepository("visualization").delete({});
-  await conn.getRepository("model_visualization").delete({});
-  await conn.getRepository("regular_file").delete({});
-  await conn.getRepository("model_file").delete({});
-  await conn.getRepository("search_file").delete({});
-  return;
+  await dataSource.getRepository(Visualization).delete({});
+  await dataSource.getRepository(ModelVisualization).delete({});
+  await dataSource.getRepository(RegularFile).delete({});
+  await dataSource.getRepository(ModelFile).delete({});
+  await dataSource.getRepository(SearchFile).delete({});
 }

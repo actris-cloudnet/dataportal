@@ -1,15 +1,17 @@
-import { Connection } from "typeorm";
+import { DataSource } from "typeorm";
 import { Request, RequestHandler, Response } from "express";
+import { Model } from "../entity/Model";
 
 export class ModelRoutes {
-  constructor(conn: Connection) {
-    this.conn = conn;
+  constructor(dataSource: DataSource) {
+    this.dataSource = dataSource;
   }
 
-  private conn: Connection;
+  private dataSource: DataSource;
 
   models: RequestHandler = async (req: Request, res: Response, next) => {
-    const qb = this.conn.getRepository("model").createQueryBuilder("model");
+    // TODO: why query builder is used?
+    const qb = this.dataSource.getRepository(Model).createQueryBuilder("model");
     if (req.query.showCitations) qb.leftJoinAndSelect("model.citations", "citations");
     else qb.select();
 

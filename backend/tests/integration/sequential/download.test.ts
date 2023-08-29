@@ -2,14 +2,15 @@ import axios from "axios";
 import { promises as fsp } from "fs";
 
 import { backendPublicUrl, str2base64 } from "../../lib";
-import { Connection, createConnection, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { Download, ObjectType } from "../../../src/entity/Download";
 import { ModelFile, RegularFile } from "../../../src/entity/File";
 import { Collection } from "../../../src/entity/Collection";
 import { InstrumentUpload } from "../../../src/entity/Upload";
 import { initUsersAndPermissions } from "../../lib/userAccountAndPermissions";
+import { AppDataSource } from "../../../src/data-source";
 
-let conn: Connection;
+let dataSource: DataSource;
 let regularFileRepo: Repository<RegularFile>;
 let modelFileRepo: Repository<ModelFile>;
 let collectionRepo: Repository<Collection>;
@@ -33,12 +34,12 @@ const getStats = async (params: Params) => (await doRequest(params)).data;
 
 describe("GET /api/download/stats", () => {
   beforeAll(async () => {
-    conn = await createConnection();
-    downloadRepo = conn.getRepository("download");
-    regularFileRepo = conn.getRepository("regular_file");
-    modelFileRepo = conn.getRepository("model_file");
-    collectionRepo = conn.getRepository("collection");
-    instrumentUploadRepo = conn.getRepository("instrument_upload");
+    dataSource = await AppDataSource.initialize();
+    downloadRepo = dataSource.getRepository(Download);
+    regularFileRepo = dataSource.getRepository(RegularFile);
+    modelFileRepo = dataSource.getRepository(ModelFile);
+    collectionRepo = dataSource.getRepository(Collection);
+    instrumentUploadRepo = dataSource.getRepository(InstrumentUpload);
     await downloadRepo.delete({});
     await initUsersAndPermissions();
     await regularFileRepo.save(JSON.parse((await fsp.readFile("fixtures/2-regular_file.json")).toString()));
@@ -94,7 +95,7 @@ describe("GET /api/download/stats", () => {
     await collectionRepo.delete({});
     await instrumentUploadRepo.delete({});
     await downloadRepo.delete({});
-    await conn.close();
+    await dataSource.destroy();
   });
 
   it("fails without authentication", () =>

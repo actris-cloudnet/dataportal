@@ -1,19 +1,19 @@
 import { Request, RequestHandler, Response } from "express";
-import { Connection, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { hideTestDataFromNormalUsers, toArray } from "../lib";
 import { Site } from "../entity/Site";
 import { SiteLocation } from "../entity/SiteLocation";
 import { RegularFile } from "../entity/File";
 
 export class SiteRoutes {
-  constructor(conn: Connection) {
-    this.conn = conn;
-    this.siteRepo = conn.getRepository<Site>("site");
-    this.regularFileRepo = conn.getRepository<RegularFile>("regular_file");
-    this.siteLocationRepo = conn.getRepository<SiteLocation>("site_location");
+  constructor(dataSource: DataSource) {
+    this.dataSource = dataSource;
+    this.siteRepo = dataSource.getRepository(Site);
+    this.regularFileRepo = dataSource.getRepository(RegularFile);
+    this.siteLocationRepo = dataSource.getRepository(SiteLocation);
   }
 
-  readonly conn: Connection;
+  readonly dataSource: DataSource;
   readonly siteRepo: Repository<Site>;
   readonly regularFileRepo: Repository<RegularFile>;
   readonly siteLocationRepo: Repository<SiteLocation>;
@@ -23,7 +23,7 @@ export class SiteRoutes {
     hideTestDataFromNormalUsers<Site>(qb, req)
       .getOne()
       .then((result) => {
-        if (result == undefined) return next({ status: 404, errors: ["No sites match this id"] });
+        if (!result) return next({ status: 404, errors: ["No sites match this id"] });
         res.send(result);
       })
       .catch((err) => next({ status: 500, errors: err }));
@@ -86,7 +86,7 @@ export class SiteRoutes {
       const qb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteid", req.params);
       const site = await hideTestDataFromNormalUsers<Site>(qb, req).getOne();
       if (!site) return next({ status: 404, errors: ["No sites match this id"] });
-      const location = await this.siteLocationRepo.findOne({ where: { site, date: req.params.date } });
+      const location = await this.siteLocationRepo.findOneBy({ siteId: site.id, date: new Date(req.params.date) });
       if (!location) return next({ status: 404, errors: ["No location match this date"] });
       res.send(location);
     } catch (err: any) {
@@ -99,7 +99,7 @@ export class SiteRoutes {
       const qb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteid", req.params);
       const site = await hideTestDataFromNormalUsers<Site>(qb, req).getOne();
       if (!site) return next({ status: 404, errors: ["No sites match this id"] });
-      const locations = await this.siteLocationRepo.find({ where: { site }, order: { date: "ASC" } });
+      const locations = await this.siteLocationRepo.find({ where: { siteId: site.id }, order: { date: "ASC" } });
       res.send(locations);
     } catch (err: any) {
       return next({ status: 500, errors: err });

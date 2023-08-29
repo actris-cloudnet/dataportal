@@ -22,6 +22,9 @@ export class QualityReport {
   @Column({ type: "jsonb", nullable: true })
   exceptions!: any;
 
-  @ManyToOne(() => FileQuality, (quality) => quality.testReports, { primary: true, onDelete: "CASCADE" })
+  @PrimaryColumn()
+  qualityUuid!: string;
+
+  @ManyToOne(() => FileQuality, (quality) => quality.testReports, { onDelete: "CASCADE" })
   quality!: FileQuality;
 }

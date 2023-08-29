@@ -1,5 +1,5 @@
 import { Request, RequestHandler, Response } from "express";
-import { Connection, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { checkFileExists, getS3pathForImage, hideTestDataFromNormalUsers } from "../lib";
 import { Visualization } from "../entity/Visualization";
 import { VisualizationResponse } from "../entity/VisualizationResponse";
@@ -9,17 +9,15 @@ import { ProductVariable } from "../entity/ProductVariable";
 import { ModelVisualization } from "../entity/ModelVisualization";
 
 export class VisualizationRoutes {
-  constructor(conn: Connection, fileController: FileRoutes) {
-    this.conn = conn;
-    this.fileRepo = conn.getRepository<RegularFile>("regular_file");
-    this.modelFileRepo = conn.getRepository<ModelFile>("model_file");
-    this.visualizationRepo = conn.getRepository<Visualization>("visualization");
-    this.modelVisualizationRepo = conn.getRepository<ModelVisualization>("model_visualization");
-    this.productVariableRepo = conn.getRepository<ProductVariable>("product_variable");
+  constructor(dataSource: DataSource, fileController: FileRoutes) {
+    this.fileRepo = dataSource.getRepository(RegularFile);
+    this.modelFileRepo = dataSource.getRepository(ModelFile);
+    this.visualizationRepo = dataSource.getRepository(Visualization);
+    this.modelVisualizationRepo = dataSource.getRepository(ModelVisualization);
+    this.productVariableRepo = dataSource.getRepository(ProductVariable);
     this.fileController = fileController;
   }
 
-  readonly conn: Connection;
   readonly fileRepo: Repository<RegularFile>;
   readonly modelFileRepo: Repository<ModelFile>;
   readonly visualizationRepo: Repository<Visualization>;
@@ -31,8 +29,10 @@ export class VisualizationRoutes {
     const body = req.body;
     const s3key = req.params[0];
     Promise.all([
-      this.fileController.findAnyFile((repo) => repo.findOne(body.sourceFileId, { relations: ["product"] })),
-      this.productVariableRepo.findOneOrFail(body.variableId),
+      this.fileController.findAnyFile((repo) =>
+        repo.findOne({ where: { uuid: body.sourceFileId }, relations: { product: true } })
+      ),
+      this.productVariableRepo.findOneByOrFail({ id: body.variableId }),
       checkFileExists(getS3pathForImage(s3key)),
     ])
       .then(([file, productVariable, _]) => {
@@ -76,7 +76,7 @@ export class VisualizationRoutes {
     this.fileController
       .findAnyFile(fetchVisualizationsForSourceFile)
       .then((file) => {
-        if (file == undefined) {
+        if (!file) {
           next({ status: 404, errors: ["No files match the query"], params });
           return;
         }

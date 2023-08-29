@@ -25,8 +25,8 @@ export class Site {
   @Column()
   humanReadableName!: string;
 
-  @Column("text", { array: true, nullable: true })
-  type!: SiteType[];
+  @Column("text", { array: true })
+  type!: string[];
 
   @Column({ type: "float", nullable: true })
   latitude!: number | null;

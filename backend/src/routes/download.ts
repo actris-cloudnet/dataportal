@@ -3,7 +3,7 @@ import { CountryResponse, Reader } from "maxmind";
 import { readFileSync } from "fs";
 
 import { Collection } from "../entity/Collection";
-import { Connection, Repository } from "typeorm";
+import { Connection, DataSource, Repository } from "typeorm";
 import { File, RegularFile } from "../entity/File";
 import { Upload } from "../entity/Upload";
 import { Download, ObjectType } from "../entity/Download";
@@ -41,25 +41,25 @@ const LICENSE_TEXT = readFileSync("data/CC-BY-4.0.txt");
 
 export class DownloadRoutes {
   constructor(
-    conn: Connection,
+    dataSource: DataSource,
     fileController: FileRoutes,
     collController: CollectionRoutes,
     uploadController: UploadRoutes,
     ipLookup: Reader<CountryResponse>
   ) {
-    this.conn = conn;
-    this.collectionRepo = conn.getRepository<Collection>("collection");
-    this.uploadRepo = conn.getRepository<Upload>("upload");
-    this.downloadRepo = conn.getRepository<Download>("download");
-    this.fileRepo = conn.getRepository<RegularFile>("regular_file");
+    this.dataSource = dataSource;
+    this.collectionRepo = dataSource.getRepository(Collection);
+    this.uploadRepo = dataSource.getRepository(Upload);
+    this.downloadRepo = dataSource.getRepository(Download);
+    this.fileRepo = dataSource.getRepository(RegularFile);
     this.fileController = fileController;
     this.collController = collController;
     this.uploadController = uploadController;
     this.ipLookup = ipLookup;
-    this.citationService = new CitationService(this.conn);
+    this.citationService = new CitationService(dataSource);
   }
 
-  readonly conn: Connection;
+  readonly dataSource: DataSource;
   readonly collectionRepo: Repository<Collection>;
   readonly fileRepo: Repository<RegularFile>;
   readonly uploadRepo: Repository<Upload>;
@@ -73,8 +73,8 @@ export class DownloadRoutes {
   product: RequestHandler = async (req, res, next) => {
     const s3key = req.params[0];
     try {
-      const file = await this.fileController.findAnyFile((repo) => repo.findOne({ uuid: req.params.uuid, s3key }));
-      if (file === undefined) return next({ status: 404, errors: ["File not found"] });
+      const file = await this.fileController.findAnyFile((repo) => repo.findOneBy({ uuid: req.params.uuid, s3key }));
+      if (!file) return next({ status: 404, errors: ["File not found"] });
       const upstreamRes = await this.makeFileRequest(file);
       res.setHeader("Content-Type", "application/octet-stream");
       res.setHeader("Content-Length", file.size);
@@ -89,9 +89,9 @@ export class DownloadRoutes {
     const filename = req.params[0];
     try {
       const file = await this.uploadController.findAnyUpload((repo) =>
-        repo.findOne({ uuid: req.params.uuid, filename }, { relations: ["site"] })
+        repo.findOne({ where: { uuid: req.params.uuid, filename }, relations: { site: true } })
       );
-      if (file === undefined) return next({ status: 404, errors: ["File not found"] });
+      if (!file) return next({ status: 404, errors: ["File not found"] });
       const upstreamRes = await this.makeRawFileRequest(file);
       res.setHeader("Content-Type", "application/octet-stream");
       res.setHeader("Content-Length", file.size);
@@ -105,7 +105,7 @@ export class DownloadRoutes {
   collection: RequestHandler = async (req, res, next) => {
     const collectionUuid: string = req.params.uuid;
     const collection = await this.collController.findCollection(collectionUuid);
-    if (collection === undefined) {
+    if (!collection) {
       return next({ status: 404, errors: ["No collection matches this UUID."] });
     }
 
@@ -297,7 +297,7 @@ export class DownloadRoutes {
       ${order}`;
 
     try {
-      const rows = await this.conn.query(query, params);
+      const rows = await this.dataSource.query(query, params);
       rows.forEach((row: any) => {
         if (row.downloads) row.downloads = parseFloat(row.downloads);
         if (row.uniqueIps) row.uniqueIps = parseInt(row.uniqueIps);

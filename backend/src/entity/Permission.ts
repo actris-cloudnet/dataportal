@@ -23,7 +23,7 @@ export class Permission {
   permission!: PermissionType;
 
   @ManyToOne(() => Site, (site) => site.permissions, { nullable: true })
-  site?: Site;
+  site!: Site | null;
 
   @ManyToMany(() => UserAccount, (userAccount) => userAccount.permissions)
   userAccounts!: UserAccount[];

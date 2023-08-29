@@ -1,6 +1,6 @@
 import { Request, RequestHandler, Response } from "express";
 import { Collection } from "../entity/Collection";
-import { Connection, EntityManager, Repository, SelectQueryBuilder, In } from "typeorm";
+import { EntityManager, Repository, SelectQueryBuilder, In, DataSource } from "typeorm";
 import { isFile, RegularFile } from "../entity/File";
 import { FileQuality } from "../entity/FileQuality";
 import {
@@ -26,20 +26,20 @@ import { Product } from "../entity/Product";
 import { SoftwareService } from "../lib/software";
 
 export class FileRoutes {
-  constructor(conn: Connection) {
-    this.conn = conn;
-    this.collectionRepo = conn.getRepository<Collection>("collection");
-    this.fileRepo = conn.getRepository<RegularFile>("regular_file");
-    this.modelFileRepo = conn.getRepository<ModelFile>("model_file");
-    this.searchFileRepo = conn.getRepository<SearchFile>("search_file");
-    this.visualizationRepo = conn.getRepository<Visualization>("visualization");
-    this.modelVisualizationRepo = conn.getRepository<ModelVisualization>("model_visualization");
-    this.productRepo = conn.getRepository<Product>("product");
-    this.fileQualityRepo = conn.getRepository<FileQuality>("file_quality");
-    this.softwareService = new SoftwareService(conn);
+  constructor(dataSource: DataSource) {
+    this.dataSource = dataSource;
+    this.collectionRepo = dataSource.getRepository(Collection);
+    this.fileRepo = dataSource.getRepository(RegularFile);
+    this.modelFileRepo = dataSource.getRepository(ModelFile);
+    this.searchFileRepo = dataSource.getRepository(SearchFile);
+    this.visualizationRepo = dataSource.getRepository(Visualization);
+    this.modelVisualizationRepo = dataSource.getRepository(ModelVisualization);
+    this.productRepo = dataSource.getRepository(Product);
+    this.fileQualityRepo = dataSource.getRepository(FileQuality);
+    this.softwareService = new SoftwareService(dataSource);
   }
 
-  readonly conn: Connection;
+  readonly dataSource: DataSource;
   readonly collectionRepo: Repository<Collection>;
   readonly fileRepo: Repository<RegularFile>;
   readonly modelFileRepo: Repository<ModelFile>;
@@ -117,7 +117,7 @@ export class FileRoutes {
       const sourceFileIds = req.body.sourceFileIds || [];
       await Promise.all(
         sourceFileIds.map(
-          async (uuid: string) => (await this.findAnyFile((repo) => repo.findOne(uuid))) || Promise.reject()
+          async (uuid: string) => (await this.findAnyFile((repo) => repo.findOneBy({ uuid }))) || Promise.reject()
         )
       );
     } catch (e) {
@@ -158,10 +158,10 @@ export class FileRoutes {
       const searchFile = new SearchFile(file);
 
       const FileClass = isModel ? ModelFile : RegularFile;
-      if (existingFile == undefined) {
+      if (!existingFile) {
         // New file
         file.createdAt = file.updatedAt;
-        await this.conn.transaction(async (transactionalEntityManager) => {
+        await this.dataSource.transaction(async (transactionalEntityManager) => {
           if (isModel) {
             await FileRoutes.updateModelSearchFile(transactionalEntityManager, file, searchFile);
           } else {
@@ -173,7 +173,7 @@ export class FileRoutes {
       } else if (existingFile.site.isTestSite || existingFile.volatile) {
         // Replace existing
         file.createdAt = existingFile.createdAt;
-        await this.conn.transaction(async (transactionalEntityManager) => {
+        await this.dataSource.transaction(async (transactionalEntityManager) => {
           await transactionalEntityManager.save(FileClass, file);
           await transactionalEntityManager.update(SearchFile, { uuid: file.uuid }, searchFile);
         });
@@ -181,7 +181,7 @@ export class FileRoutes {
       } else if (existingFile.uuid != file.uuid) {
         // New version
         if (isModel) return next({ status: 501, errors: ["Versioning is not supported for model files."] });
-        await this.conn.transaction(async (transactionalEntityManager) => {
+        await this.dataSource.transaction(async (transactionalEntityManager) => {
           file.createdAt = file.updatedAt;
           await transactionalEntityManager.save(FileClass, file);
           if (!file.legacy) {
@@ -206,7 +206,9 @@ export class FileRoutes {
     const partialFile = req.body;
     if (!partialFile.uuid) return next({ status: 422, errors: ["Request body is missing uuid"] });
     try {
-      const existingFile = await this.findAnyFile((repo) => repo.findOne(partialFile.uuid, { relations: ["product"] }));
+      const existingFile = await this.findAnyFile((repo) =>
+        repo.findOne({ where: { uuid: partialFile.uuid }, relations: { product: true } })
+      );
       if (!existingFile) return next({ status: 422, errors: ["No file matches the provided uuid"] });
       let repo: Repository<RegularFile | ModelFile> = this.fileRepo;
       if (existingFile.product.id == "model") repo = this.modelFileRepo;
@@ -214,7 +216,7 @@ export class FileRoutes {
       delete partialFile.pid; // No PID in SearchFile
       delete partialFile.checksum; // No checksum in SearchFile
       delete partialFile.version; // No version in SearchFile
-      if (await this.searchFileRepo.findOne(partialFile.uuid))
+      if (await this.searchFileRepo.findOneBy({ uuid: partialFile.uuid }))
         await this.searchFileRepo.update({ uuid: partialFile.uuid }, partialFile);
       res.sendStatus(200);
     } catch (e) {
@@ -223,12 +225,15 @@ export class FileRoutes {
   };
 
   deleteFile: RequestHandler = async (req: Request, res: Response, next) => {
+    // TODO: use transaction
     const query: any = req.query;
     const dryRun = query.dryRun;
     const uuid = req.params.uuid;
     const filenames: string[] = [];
     try {
-      const existingFile = await this.findAnyFile((repo) => repo.findOne(uuid, { relations: ["product", "site"] }));
+      const existingFile = await this.findAnyFile((repo) =>
+        repo.findOne({ where: { uuid }, relations: { product: true, site: true } })
+      );
       if (!existingFile) return next({ status: 422, errors: ["No file matches the provided uuid"] });
       if (!existingFile.volatile) return next({ status: 422, errors: ["Forbidden to delete a stable file"] });
       let fileRepo: Repository<RegularFile | ModelFile> = this.fileRepo;
@@ -238,12 +243,10 @@ export class FileRoutes {
         visuRepo = this.modelVisualizationRepo;
       }
       const higherLevelProductNames = await this.getHigherLevelProducts(existingFile.product);
-      const products = await this.fileRepo.find({
-        where: {
-          site: existingFile.site,
-          measurementDate: existingFile.measurementDate,
-          product: In(higherLevelProductNames),
-        },
+      const products = await this.fileRepo.findBy({
+        site: { id: existingFile.site.id },
+        measurementDate: existingFile.measurementDate,
+        product: In(higherLevelProductNames),
       });
       if (query.deleteHigherProducts && products.length > 0) {
         const onlyVolatileProducts = products.every((product) => product.volatile);
@@ -264,13 +267,13 @@ export class FileRoutes {
 
   allfiles: RequestHandler = async (req: Request, res: Response, next) =>
     this.fileRepo
-      .find({ relations: ["site", "product"] })
+      .find({ relations: { site: true, product: true } })
       .then((result) => res.send(sortByMeasurementDateAsc(result).map(augmentFile(false))))
       .catch((err) => next({ status: 500, errors: err }));
 
   allsearch: RequestHandler = async (req: Request, res: Response, next) =>
     this.searchFileRepo
-      .find({ relations: ["site", "product"] })
+      .find({ relations: { site: true, product: true } })
       .then((result) => {
         res.send(sortByMeasurementDateAsc(result).map(convertToSearchResponse));
       })
@@ -340,7 +343,7 @@ export class FileRoutes {
     file: any,
     searchFile: SearchFile
   ) {
-    const { optimumOrder } = await transactionalEntityManager.findOneOrFail(Model, { id: file.model });
+    const { optimumOrder } = await transactionalEntityManager.findOneByOrFail(Model, { id: file.model });
     const [bestModelFile] = await transactionalEntityManager
       .createQueryBuilder(ModelFile, "file")
       .leftJoinAndSelect("file.site", "site")
@@ -363,11 +366,8 @@ export class FileRoutes {
   }
 
   public findAnyFile(
-    searchFunc: (
-      arg0: Repository<RegularFile | ModelFile>,
-      arg1?: boolean
-    ) => Promise<RegularFile | ModelFile | undefined>
-  ): Promise<RegularFile | ModelFile | undefined> {
+    searchFunc: (arg0: Repository<RegularFile | ModelFile>, arg1?: boolean) => Promise<RegularFile | ModelFile | null>
+  ): Promise<RegularFile | ModelFile | null> {
     return Promise.all([searchFunc(this.fileRepo, false), searchFunc(this.modelFileRepo, true)]).then(
       ([file, modelFile]) => (file ? file : modelFile)
     );
@@ -399,15 +399,15 @@ export class FileRoutes {
     dryRun: boolean
   ) {
     const filenames: string[] = [];
-    const file = await fileRepo.createQueryBuilder().where({ uuid: uuid }).getOneOrFail();
+    const file = await fileRepo.findOneByOrFail({ uuid });
     filenames.push(file.s3key);
-    const images = await visualizationRepo.createQueryBuilder().where({ sourceFile: uuid }).getMany();
+    const images = await visualizationRepo.findBy({ sourceFile: { uuid } });
     for (const image of images) filenames.push(image.s3key);
     if (!dryRun) {
-      await visualizationRepo.createQueryBuilder().delete().where({ sourceFile: uuid }).execute();
-      await fileRepo.createQueryBuilder().delete().where({ uuid: uuid }).execute();
-      await this.searchFileRepo.createQueryBuilder().delete().where({ uuid: uuid }).execute();
-      await this.fileQualityRepo.createQueryBuilder().delete().where({ uuid: uuid }).execute();
+      await visualizationRepo.delete({ sourceFile: { uuid } });
+      await fileRepo.delete({ uuid });
+      await this.searchFileRepo.delete({ uuid });
+      await this.fileQualityRepo.delete({ uuid });
     }
     return filenames;
   }

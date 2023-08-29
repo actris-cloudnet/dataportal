@@ -1,37 +1,38 @@
 import axios from "axios";
 import { backendPublicUrl, genResponse } from "../../lib";
-import { Connection, createConnection, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { Collection } from "../../../src/entity/Collection";
 import { RegularFile } from "../../../src/entity/File";
+import { AppDataSource } from "../../../src/data-source";
 
 const url = `${backendPublicUrl}generate-pid/`;
 
-let conn: Connection;
+let dataSource: DataSource;
 let collRepo: Repository<Collection>;
 let fileRepo: Repository<RegularFile>;
 
 beforeAll(async () => {
-  conn = await createConnection();
-  collRepo = conn.getRepository(Collection);
-  fileRepo = conn.getRepository(RegularFile);
+  dataSource = await AppDataSource.initialize();
+  collRepo = dataSource.getRepository(Collection);
+  fileRepo = dataSource.getRepository(RegularFile);
 });
 
 describe("POST /api/generate-pid", () => {
-  afterAll(async () => conn.close());
+  afterAll(async () => await dataSource.destroy());
 
   it("responds with a pid and adds it to the collection", async () => {
-    const file = await fileRepo.findOneOrFail("38092c00-161d-4ca2-a29d-628cf8e960f6");
+    const file = await fileRepo.findOneByOrFail({ uuid: "38092c00-161d-4ca2-a29d-628cf8e960f6" });
     let collection = new Collection([file], []);
     await collRepo.save(collection);
     const res = await axios.post(url, { type: "collection", uuid: collection.uuid });
     expect(res.data).toHaveProperty("pid");
-    collection = await collRepo.findOneOrFail(collection.uuid);
+    collection = await collRepo.findOneByOrFail({ uuid: collection.uuid });
     expect(collection.pid).toBe(res.data.pid);
     await collRepo.remove(collection);
   });
 
   it("responds with 403 if collection already has a PID", async () => {
-    const file = await fileRepo.findOneOrFail("38092c00-161d-4ca2-a29d-628cf8e960f6");
+    const file = await fileRepo.findOneByOrFail({ uuid: "38092c00-161d-4ca2-a29d-628cf8e960f6" });
     const collection = new Collection([file], []);
     collection.pid = "asd";
     await collRepo.save(collection);

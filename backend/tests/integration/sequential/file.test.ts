@@ -1,4 +1,4 @@
-import { Connection, createConnection, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { ModelFile, RegularFile } from "../../../src/entity/File";
 import { readFileSync } from "fs";
 import { backendPrivateUrl, storageServiceUrl, str2base64 } from "../../lib";
@@ -12,8 +12,9 @@ import { initUsersAndPermissions } from "../../lib/userAccountAndPermissions";
 const uuidGen = require("uuid");
 const crypto = require("crypto");
 import { readResources } from "../../../../shared/lib";
+import { AppDataSource } from "../../../src/data-source";
 
-let conn: Connection;
+let dataSource: DataSource;
 let fileRepo: Repository<RegularFile>;
 let modelFileRepo: Repository<ModelFile>;
 let searchFileRepo: Repository<SearchFile>;
@@ -27,14 +28,14 @@ const stableFile = { ...volatileFile, ...{ volatile: false, pid: "1234" } };
 const volatileModelFile = { ...volatileFile, ...{ model: "ecmwf", product: "model" } };
 
 beforeAll(async () => {
-  conn = await createConnection();
-  fileRepo = conn.getRepository("regular_file");
-  modelFileRepo = conn.getRepository("model_file");
-  searchFileRepo = conn.getRepository("search_file");
-  vizRepo = conn.getRepository("visualization");
-  modelVizRepo = conn.getRepository("model_visualization");
-  fileQualityRepo = conn.getRepository("file_quality");
-  qualityReportRepo = conn.getRepository("quality_report");
+  dataSource = await AppDataSource.initialize();
+  fileRepo = dataSource.getRepository(RegularFile);
+  modelFileRepo = dataSource.getRepository(ModelFile);
+  searchFileRepo = dataSource.getRepository(SearchFile);
+  vizRepo = dataSource.getRepository(Visualization);
+  modelVizRepo = dataSource.getRepository(ModelVisualization);
+  fileQualityRepo = dataSource.getRepository(FileQuality);
+  qualityReportRepo = dataSource.getRepository(QualityReport);
   await initUsersAndPermissions();
   const prefix = `${storageServiceUrl}cloudnet-product`;
   await axios.put(`${prefix}-volatile/${volatileFile.s3key}`, "content");
@@ -48,22 +49,22 @@ beforeEach(async () => {
 
 afterAll(async () => {
   await cleanRepos();
-  await conn.close();
+  await dataSource.destroy();
 });
 
 describe("PUT /files/:s3key", () => {
   it("inserting new volatile file", async () => {
     await expect(putFile(volatileFile)).resolves.toMatchObject({ status: 201 });
-    await expect(searchFileRepo.findOneOrFail({ where: { uuid: volatileFile.uuid } })).resolves.toBeTruthy();
-    await expect(fileRepo.findOneOrFail(volatileFile.uuid)).resolves.toBeTruthy();
+    await expect(searchFileRepo.findOneByOrFail({ uuid: volatileFile.uuid })).resolves.toBeTruthy();
+    await expect(fileRepo.findOneByOrFail({ uuid: volatileFile.uuid })).resolves.toBeTruthy();
   });
 
   it("updating existing volatile file", async () => {
     await expect(putFile(volatileFile)).resolves.toMatchObject({ status: 201 });
-    const dbRow1 = await fileRepo.findOneOrFail(volatileFile.uuid);
+    const dbRow1 = await fileRepo.findOneByOrFail({ uuid: volatileFile.uuid });
     await expect(putFile(volatileFile)).resolves.toMatchObject({ status: 200 });
-    const dbRow2 = await fileRepo.findOneOrFail(volatileFile.uuid);
-    await expect(searchFileRepo.findOneOrFail({ where: { uuid: volatileFile.uuid } })).resolves.toBeTruthy();
+    const dbRow2 = await fileRepo.findOneByOrFail({ uuid: volatileFile.uuid });
+    await expect(searchFileRepo.findOneByOrFail({ uuid: volatileFile.uuid })).resolves.toBeTruthy();
     expect(dbRow1.createdAt).toEqual(dbRow2.createdAt);
     expect(dbRow1.updatedAt < dbRow2.updatedAt);
   });
@@ -78,24 +79,24 @@ describe("PUT /files/:s3key", () => {
       },
     };
     await expect(putFile(newVersion)).resolves.toMatchObject({ status: 200 });
-    await expect(fileRepo.findOneOrFail({ where: { uuid: newVersion.uuid } })).resolves.toBeTruthy();
-    await expect(searchFileRepo.findOneOrFail({ where: { uuid: stableFile.uuid } })).rejects.toBeTruthy();
-    await expect(searchFileRepo.findOneOrFail({ where: { uuid: newVersion.uuid } })).resolves.toBeTruthy();
+    await expect(fileRepo.findOneByOrFail({ uuid: newVersion.uuid })).resolves.toBeTruthy();
+    await expect(searchFileRepo.findOneByOrFail({ uuid: stableFile.uuid })).rejects.toBeTruthy();
+    await expect(searchFileRepo.findOneByOrFail({ uuid: newVersion.uuid })).resolves.toBeTruthy();
   });
 
   it("inserting legacy file", async () => {
     const tmpfile = { ...volatileFile };
     tmpfile.legacy = true;
     await expect(putFile(tmpfile)).resolves.toMatchObject({ status: 201 });
-    await expect(fileRepo.findOneOrFail(volatileFile.uuid)).resolves.toMatchObject({ legacy: true });
-    await expect(searchFileRepo.findOneOrFail(volatileFile.uuid)).resolves.toMatchObject({ legacy: true });
+    await expect(fileRepo.findOneByOrFail({ uuid: volatileFile.uuid })).resolves.toMatchObject({ legacy: true });
+    await expect(searchFileRepo.findOneByOrFail({ uuid: volatileFile.uuid })).resolves.toMatchObject({ legacy: true });
   });
 
   it("inserting quality controlled file", async () => {
     const tmpfile = { ...stableFile };
     tmpfile.quality = "qc";
     await expect(putFile(tmpfile)).resolves.toMatchObject({ status: 201 });
-    await expect(fileRepo.findOneOrFail(volatileFile.uuid)).resolves.toMatchObject({ quality: "qc" });
+    await expect(fileRepo.findOneByOrFail({ uuid: volatileFile.uuid })).resolves.toMatchObject({ quality: "qc" });
   });
 
   it("inserting a normal file and a legacy file", async () => {
@@ -106,8 +107,8 @@ describe("PUT /files/:s3key", () => {
     tmpfile.s3key = `legacy/${stableFile.s3key}`;
     tmpfile.checksum = "610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678";
     await expect(putFile(tmpfile)).resolves.toMatchObject({ status: 200 });
-    await expect(searchFileRepo.findOneOrFail(stableFile.uuid)).resolves.toMatchObject({ legacy: false });
-    await expect(searchFileRepo.findOneOrFail(tmpfile.uuid)).rejects.toBeTruthy();
+    await expect(searchFileRepo.findOneByOrFail({ uuid: stableFile.uuid })).resolves.toMatchObject({ legacy: false });
+    await expect(searchFileRepo.findOneByOrFail({ uuid: tmpfile.uuid })).rejects.toBeTruthy();
   });
 
   it("inserting a legacy file and a normal file", async () => {
@@ -118,8 +119,8 @@ describe("PUT /files/:s3key", () => {
     tmpfile.checksum = "610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678";
     await expect(putFile(tmpfile)).resolves.toMatchObject({ status: 201 });
     await expect(putFile(stableFile)).resolves.toMatchObject({ status: 200 });
-    await expect(searchFileRepo.findOneOrFail(stableFile.uuid)).resolves.toMatchObject({ legacy: false });
-    await expect(searchFileRepo.findOneOrFail(tmpfile.uuid)).rejects.toBeTruthy();
+    await expect(searchFileRepo.findOneByOrFail({ uuid: stableFile.uuid })).resolves.toMatchObject({ legacy: false });
+    await expect(searchFileRepo.findOneByOrFail({ uuid: tmpfile.uuid })).rejects.toBeTruthy();
   });
 
   it("inserting a legacy file and two normal files", async () => {
@@ -134,9 +135,9 @@ describe("PUT /files/:s3key", () => {
     await expect(putFile(tmpfile)).resolves.toMatchObject({ status: 201 });
     await expect(putFile(stableFile)).resolves.toMatchObject({ status: 200 });
     await expect(putFile(tmpfile2)).resolves.toMatchObject({ status: 200 });
-    await expect(searchFileRepo.findOneOrFail(stableFile.uuid)).rejects.toBeTruthy();
-    await expect(searchFileRepo.findOneOrFail(tmpfile.uuid)).rejects.toBeTruthy();
-    await expect(searchFileRepo.findOneOrFail(tmpfile2.uuid)).resolves.toMatchObject({ legacy: false });
+    await expect(searchFileRepo.findOneByOrFail({ uuid: stableFile.uuid })).rejects.toBeTruthy();
+    await expect(searchFileRepo.findOneByOrFail({ uuid: tmpfile.uuid })).rejects.toBeTruthy();
+    await expect(searchFileRepo.findOneByOrFail({ uuid: tmpfile2.uuid })).resolves.toMatchObject({ legacy: false });
   });
 
   it("inserting two model files (first worse, then better)", async () => {
@@ -149,17 +150,21 @@ describe("PUT /files/:s3key", () => {
       checksum: "610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678",
     };
     await expect(putFile(tmpfile1)).resolves.toMatchObject({ status: 201 });
-    await expect(modelFileRepo.findOneOrFail(tmpfile1.uuid, { relations: ["model"] })).resolves.toMatchObject({
+    await expect(
+      modelFileRepo.findOneOrFail({ where: { uuid: tmpfile1.uuid }, relations: { model: true } })
+    ).resolves.toMatchObject({
       model: { id: tmpfile1.model },
     });
-    await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeTruthy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile1.uuid })).resolves.toBeTruthy();
     await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile2.s3key}`, "content");
     await expect(putFile(tmpfile2)).resolves.toMatchObject({ status: 201 });
-    await expect(modelFileRepo.findOneOrFail(tmpfile2.uuid, { relations: ["model"] })).resolves.toMatchObject({
+    await expect(
+      modelFileRepo.findOneOrFail({ where: { uuid: tmpfile2.uuid }, relations: { model: true } })
+    ).resolves.toMatchObject({
       model: { id: tmpfile2.model },
     });
-    await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeFalsy();
-    await expect(searchFileRepo.findOne(tmpfile2.uuid)).resolves.toBeTruthy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile1.uuid })).resolves.toBeFalsy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile2.uuid })).resolves.toBeTruthy();
   });
 
   it("inserting two model files (first better, then worse)", async () => {
@@ -172,11 +177,11 @@ describe("PUT /files/:s3key", () => {
       checksum: "610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678",
     };
     await expect(putFile(tmpfile1)).resolves.toMatchObject({ status: 201 });
-    await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeTruthy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile1.uuid })).resolves.toBeTruthy();
     await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile2.s3key}`, "content");
     await expect(putFile(tmpfile2)).resolves.toMatchObject({ status: 201 });
-    await expect(searchFileRepo.findOne(tmpfile2.uuid)).resolves.toBeFalsy();
-    await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeTruthy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile2.uuid })).resolves.toBeFalsy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile1.uuid })).resolves.toBeTruthy();
   });
 
   it("inserting several model files with different optimumOrder", async () => {
@@ -196,25 +201,31 @@ describe("PUT /files/:s3key", () => {
       checksum: "deb5a92691553bcac4cfb57f5917d7cbf9ccfae9592c40626d9615bd64ebeffe",
     };
     await expect(putFile(tmpfile1)).resolves.toMatchObject({ status: 201 });
-    await expect(modelFileRepo.findOneOrFail(tmpfile1.uuid, { relations: ["model"] })).resolves.toMatchObject({
+    await expect(
+      modelFileRepo.findOneOrFail({ where: { uuid: tmpfile1.uuid }, relations: { model: true } })
+    ).resolves.toMatchObject({
       model: { id: tmpfile1.model },
     });
-    await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeTruthy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile1.uuid })).resolves.toBeTruthy();
     await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile2.s3key}`, "content");
     await expect(putFile(tmpfile2)).resolves.toMatchObject({ status: 201 });
-    await expect(modelFileRepo.findOneOrFail(tmpfile2.uuid, { relations: ["model"] })).resolves.toMatchObject({
+    await expect(
+      modelFileRepo.findOneOrFail({ where: { uuid: tmpfile2.uuid }, relations: { model: true } })
+    ).resolves.toMatchObject({
       model: { id: tmpfile2.model },
     });
-    await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeFalsy();
-    await expect(searchFileRepo.findOne(tmpfile2.uuid)).resolves.toBeTruthy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile1.uuid })).resolves.toBeFalsy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile2.uuid })).resolves.toBeTruthy();
     await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile3.s3key}`, "content");
     await expect(putFile(tmpfile3)).resolves.toMatchObject({ status: 201 });
-    await expect(modelFileRepo.findOneOrFail(tmpfile3.uuid, { relations: ["model"] })).resolves.toMatchObject({
+    await expect(
+      modelFileRepo.findOneOrFail({ where: { uuid: tmpfile3.uuid }, relations: { model: true } })
+    ).resolves.toMatchObject({
       model: { id: tmpfile3.model },
     });
-    await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeFalsy();
-    await expect(searchFileRepo.findOne(tmpfile2.uuid)).resolves.toBeFalsy();
-    await expect(searchFileRepo.findOne(tmpfile3.uuid)).resolves.toBeTruthy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile1.uuid })).resolves.toBeFalsy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile2.uuid })).resolves.toBeFalsy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile3.uuid })).resolves.toBeTruthy();
   });
 
   it("inserting several model files with different optimumOrder II", async () => {
@@ -235,25 +246,31 @@ describe("PUT /files/:s3key", () => {
       checksum: "610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678",
     };
     await expect(putFile(tmpfile1)).resolves.toMatchObject({ status: 201 });
-    await expect(modelFileRepo.findOneOrFail(tmpfile1.uuid, { relations: ["model"] })).resolves.toMatchObject({
+    await expect(
+      modelFileRepo.findOneOrFail({ where: { uuid: tmpfile1.uuid }, relations: { model: true } })
+    ).resolves.toMatchObject({
       model: { id: tmpfile1.model },
     });
-    await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeTruthy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile1.uuid })).resolves.toBeTruthy();
     await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile2.s3key}`, "content");
     await expect(putFile(tmpfile2)).resolves.toMatchObject({ status: 201 });
-    await expect(modelFileRepo.findOneOrFail(tmpfile2.uuid, { relations: ["model"] })).resolves.toMatchObject({
+    await expect(
+      modelFileRepo.findOneOrFail({ where: { uuid: tmpfile2.uuid }, relations: { model: true } })
+    ).resolves.toMatchObject({
       model: { id: tmpfile2.model },
     });
-    await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeTruthy();
-    await expect(searchFileRepo.findOne(tmpfile2.uuid)).resolves.toBeFalsy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile1.uuid })).resolves.toBeTruthy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile2.uuid })).resolves.toBeFalsy();
     await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile3.s3key}`, "content");
     await expect(putFile(tmpfile3)).resolves.toMatchObject({ status: 201 });
-    await expect(modelFileRepo.findOneOrFail(tmpfile3.uuid, { relations: ["model"] })).resolves.toMatchObject({
+    await expect(
+      modelFileRepo.findOneOrFail({ where: { uuid: tmpfile3.uuid }, relations: { model: true } })
+    ).resolves.toMatchObject({
       model: { id: tmpfile3.model },
     });
-    await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeTruthy();
-    await expect(searchFileRepo.findOne(tmpfile2.uuid)).resolves.toBeFalsy();
-    await expect(searchFileRepo.findOne(tmpfile3.uuid)).resolves.toBeFalsy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile1.uuid })).resolves.toBeTruthy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile2.uuid })).resolves.toBeFalsy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile3.uuid })).resolves.toBeFalsy();
   });
 
   it("inserting several model files with different optimumOrder III", async () => {
@@ -274,20 +291,20 @@ describe("PUT /files/:s3key", () => {
     };
     await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile1.s3key}`, "content");
     await expect(putFile(tmpfile1)).resolves.toMatchObject({ status: 201 });
-    await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeTruthy();
-    await expect(searchFileRepo.findOne(tmpfile2.uuid)).resolves.toBeFalsy();
-    await expect(searchFileRepo.findOne(tmpfile3.uuid)).resolves.toBeFalsy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile1.uuid })).resolves.toBeTruthy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile2.uuid })).resolves.toBeFalsy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile3.uuid })).resolves.toBeFalsy();
     await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile2.s3key}`, "content");
     await expect(putFile(tmpfile2)).resolves.toMatchObject({ status: 201 });
     await expect(putFile(tmpfile1)).resolves.toMatchObject({ status: 200 });
-    await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeFalsy();
-    await expect(searchFileRepo.findOne(tmpfile2.uuid)).resolves.toBeTruthy();
-    await expect(searchFileRepo.findOne(tmpfile3.uuid)).resolves.toBeFalsy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile1.uuid })).resolves.toBeFalsy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile2.uuid })).resolves.toBeTruthy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile3.uuid })).resolves.toBeFalsy();
     await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile3.s3key}`, "content");
     await expect(putFile(tmpfile3)).resolves.toMatchObject({ status: 201 });
-    await expect(searchFileRepo.findOne(tmpfile1.uuid)).resolves.toBeFalsy();
-    await expect(searchFileRepo.findOne(tmpfile2.uuid)).resolves.toBeFalsy();
-    await expect(searchFileRepo.findOne(tmpfile3.uuid)).resolves.toBeTruthy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile1.uuid })).resolves.toBeFalsy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile2.uuid })).resolves.toBeFalsy();
+    await expect(searchFileRepo.findOneBy({ uuid: tmpfile3.uuid })).resolves.toBeTruthy();
   });
 
   it("errors on invalid site", async () => {
@@ -302,9 +319,9 @@ describe("PUT /files/:s3key", () => {
     tmpfile.s3key = "20181115_granada_mira.nc";
     await axios.put(`${storageServiceUrl}cloudnet-product/${tmpfile.s3key}`, "content");
     await putFile(tmpfile);
-    const dbRow1 = await fileRepo.findOneOrFail(stableFile.uuid);
+    const dbRow1 = await fileRepo.findOneByOrFail({ uuid: stableFile.uuid });
     await expect(putFile(tmpfile)).resolves.toMatchObject({ status: 200 });
-    const dbRow2 = await fileRepo.findOneOrFail(stableFile.uuid);
+    const dbRow2 = await fileRepo.findOneByOrFail({ uuid: stableFile.uuid });
     expect(dbRow1.updatedAt < dbRow2.updatedAt);
   });
 
@@ -318,7 +335,7 @@ describe("PUT /files/:s3key", () => {
     tmpfile.product = "categorize";
     await axios.put(`${storageServiceUrl}cloudnet-product/${tmpfile.s3key}`, "content");
     await expect(putFile(tmpfile)).resolves.toMatchObject({ status: 201 });
-    const dbRow1 = await fileRepo.findOneOrFail(tmpfile.uuid);
+    const dbRow1 = await fileRepo.findOneByOrFail({ uuid: tmpfile.uuid });
     expect(dbRow1.sourceFileIds).toMatchObject([stableFile.uuid]);
   });
 
@@ -354,7 +371,7 @@ describe("PUT /files/:s3key", () => {
 
   it("inserts and updates software", async () => {
     await expect(putFile(volatileFile)).resolves.toMatchObject({ status: 201 });
-    const file1 = await fileRepo.findOneOrFail(volatileFile.uuid, { relations: ["software"] });
+    const file1 = await fileRepo.findOneOrFail({ where: { uuid: volatileFile.uuid }, relations: { software: true } });
     expect(file1.software.length).toBe(1);
     expect(file1.software[0].code).toBe("cloudnetpy");
     expect(file1.software[0].version).toBe("1.0.4");
@@ -362,7 +379,7 @@ describe("PUT /files/:s3key", () => {
     await expect(putFile({ ...volatileFile, software: { cloudnetpy: "1.0.5" } })).resolves.toMatchObject({
       status: 200,
     });
-    const file2 = await fileRepo.findOneOrFail(volatileFile.uuid, { relations: ["software"] });
+    const file2 = await fileRepo.findOneOrFail({ where: { uuid: volatileFile.uuid }, relations: { software: true } });
     expect(file2.software.length).toBe(1);
     expect(file2.software[0].code).toBe("cloudnetpy");
     expect(file2.software[0].version).toBe("1.0.5");
@@ -385,8 +402,8 @@ describe("POST /files/", () => {
       checksum: "dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b5",
     };
     await expect(axios.post(`${backendPrivateUrl}files/`, payload)).resolves.toMatchObject({ status: 200 });
-    const dbRow = await fileRepo.findOneOrFail(volatileFile.uuid);
-    const dbRow2 = await searchFileRepo.findOneOrFail(volatileFile.uuid);
+    const dbRow = await fileRepo.findOneByOrFail({ uuid: volatileFile.uuid });
+    const dbRow2 = await searchFileRepo.findOneByOrFail({ uuid: volatileFile.uuid });
     expect(dbRow.volatile).toEqual(false);
     expect(dbRow.pid).toEqual(payload.pid);
     expect(dbRow.checksum).toEqual(payload.checksum);
@@ -402,8 +419,8 @@ describe("POST /files/", () => {
       checksum: "dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b5",
     };
     await expect(axios.post(`${backendPrivateUrl}files/`, payload)).resolves.toMatchObject({ status: 200 });
-    const dbRow = await modelFileRepo.findOneOrFail(volatileModelFile.uuid);
-    const dbRow2 = await searchFileRepo.findOneOrFail(volatileModelFile.uuid);
+    const dbRow = await modelFileRepo.findOneByOrFail({ uuid: volatileModelFile.uuid });
+    const dbRow2 = await searchFileRepo.findOneByOrFail({ uuid: volatileModelFile.uuid });
     expect(dbRow.volatile).toEqual(false);
     expect(dbRow.pid).toEqual(payload.pid);
     expect(dbRow.checksum).toEqual(payload.checksum);
@@ -422,10 +439,10 @@ describe("POST /files/", () => {
 
   it("updating version id does not update updatedAt", async () => {
     await putFile(stableFile);
-    const dbRow1 = await fileRepo.findOneOrFail(stableFile.uuid);
+    const dbRow1 = await fileRepo.findOneByOrFail({ uuid: stableFile.uuid });
     const payload = { uuid: stableFile.uuid, version: "999" };
     await expect(axios.post(`${backendPrivateUrl}files/`, payload)).resolves.toMatchObject({ status: 200 });
-    const dbRow2 = await fileRepo.findOneOrFail(stableFile.uuid);
+    const dbRow2 = await fileRepo.findOneByOrFail({ uuid: stableFile.uuid });
     expect(dbRow2.version).toEqual("999");
     expect(dbRow2.updatedAt).toEqual(dbRow1.updatedAt);
   });
@@ -453,7 +470,7 @@ describe("DELETE /api/files/", () => {
   it("refuses deleting a stable file", async () => {
     const radarFile = await putDummyFile("radar", false);
     await expect(deleteFile(radarFile.uuid, false, false)).rejects.toMatchObject({ response: { status: 422 } });
-    await fileRepo.findOneOrFail(radarFile.uuid);
+    await fileRepo.findOneByOrFail({ uuid: radarFile.uuid });
   });
 
   it("refuses deleting non-existent file", async () => {
@@ -466,9 +483,9 @@ describe("DELETE /api/files/", () => {
     await putDummyImage("radar-v.png", radarFile);
     await putDummyImage("radar-ldr.png", radarFile);
     await expect(deleteFile(radarFile.uuid, false, false)).resolves.toMatchObject({ status: 200 });
-    await expect(fileRepo.findOne(radarFile.uuid)).resolves.toBeFalsy();
-    await expect(vizRepo.findOne("radar-v.png")).resolves.toBeFalsy();
-    await expect(vizRepo.findOne("radar-ldr.png")).resolves.toBeFalsy();
+    await expect(fileRepo.findOneBy({ uuid: radarFile.uuid })).resolves.toBeFalsy();
+    await expect(vizRepo.findOneBy({ s3key: "radar-v.png" })).resolves.toBeFalsy();
+    await expect(vizRepo.findOneBy({ s3key: "radar-ldr.png" })).resolves.toBeFalsy();
   });
 
   it("deletes higher-level volatile products too", async () => {
@@ -477,10 +494,10 @@ describe("DELETE /api/files/", () => {
     const categorizeFile = await putDummyFile("categorize");
     await putDummyImage("categorize-ldr.png", categorizeFile);
     await expect(deleteFile(radarFile.uuid, true, false)).resolves.toMatchObject({ status: 200 });
-    await expect(fileRepo.findOne(radarFile.uuid)).resolves.toBeFalsy();
-    await expect(fileRepo.findOne(categorizeFile.uuid)).resolves.toBeFalsy();
-    await expect(vizRepo.findOne("radar-v.png")).resolves.toBeFalsy();
-    await expect(vizRepo.findOne("categorize-ldr.png")).resolves.toBeFalsy();
+    await expect(fileRepo.findOneBy({ uuid: radarFile.uuid })).resolves.toBeFalsy();
+    await expect(fileRepo.findOneBy({ uuid: categorizeFile.uuid })).resolves.toBeFalsy();
+    await expect(vizRepo.findOneBy({ s3key: "radar-v.png" })).resolves.toBeFalsy();
+    await expect(vizRepo.findOneBy({ s3key: "categorize-ldr.png" })).resolves.toBeFalsy();
   });
 
   it("does not delete with dryRun parameter", async () => {
@@ -489,10 +506,10 @@ describe("DELETE /api/files/", () => {
     const categorizeFile = await putDummyFile("categorize");
     await putDummyImage("categorize-ldr.png", categorizeFile);
     await expect(deleteFile(radarFile.uuid, true, true)).resolves.toMatchObject({ status: 200 });
-    await expect(fileRepo.findOne(radarFile.uuid)).resolves.toBeTruthy();
-    await expect(fileRepo.findOne(categorizeFile.uuid)).resolves.toBeTruthy();
-    await expect(vizRepo.findOne("radar-v.png")).resolves.toBeTruthy();
-    await expect(vizRepo.findOne("categorize-ldr.png")).resolves.toBeTruthy();
+    await expect(fileRepo.findOneBy({ uuid: radarFile.uuid })).resolves.toBeTruthy();
+    await expect(fileRepo.findOneBy({ uuid: categorizeFile.uuid })).resolves.toBeTruthy();
+    await expect(vizRepo.findOneBy({ s3key: "radar-v.png" })).resolves.toBeTruthy();
+    await expect(vizRepo.findOneBy({ s3key: "categorize-ldr.png" })).resolves.toBeTruthy();
   });
 
   it("returns filenames of deleted products and images", async () => {
@@ -519,22 +536,22 @@ describe("DELETE /api/files/", () => {
     const radarFile = await putDummyFile();
     const categorizeFile = await putDummyFile("categorize", false);
     await expect(deleteFile(radarFile.uuid, false, false)).resolves.toMatchObject({ status: 200 });
-    await expect(fileRepo.findOne(radarFile.uuid)).resolves.toBeFalsy();
-    await expect(fileRepo.findOne(categorizeFile.uuid)).resolves.toBeTruthy();
+    await expect(fileRepo.findOneBy({ uuid: radarFile.uuid })).resolves.toBeFalsy();
+    await expect(fileRepo.findOneBy({ uuid: categorizeFile.uuid })).resolves.toBeTruthy();
   });
 
   it("deleting using deleteHigherProducts parameter II", async () => {
     const radarFile = await putDummyFile();
     const categorizeFile = await putDummyFile("categorize");
     await expect(deleteFile(radarFile.uuid, false, false)).resolves.toMatchObject({ status: 200 });
-    await expect(fileRepo.findOne(radarFile.uuid)).resolves.toBeFalsy();
-    await expect(fileRepo.findOne(categorizeFile.uuid)).resolves.toBeTruthy();
+    await expect(fileRepo.findOneBy({ uuid: radarFile.uuid })).resolves.toBeFalsy();
+    await expect(fileRepo.findOneBy({ uuid: categorizeFile.uuid })).resolves.toBeTruthy();
   });
 
   it("deletes model file", async () => {
     const file = await putDummyFile("model");
     await expect(deleteFile(file.uuid, false, false)).resolves.toMatchObject({ status: 200 });
-    await expect(fileRepo.findOne(file.uuid)).resolves.toBeFalsy();
+    await expect(fileRepo.findOneBy({ uuid: file.uuid })).resolves.toBeFalsy();
   });
 
   it("refuses deleting model file if higher-level products contain stable product", async () => {
@@ -551,13 +568,13 @@ describe("DELETE /api/files/", () => {
     await expect(axios.put(`${url}${file.uuid}`, report)).resolves.toMatchObject({
       status: 201,
     });
-    await expect(fileQualityRepo.findOne(file.uuid)).resolves.toBeTruthy();
-    let reports = await qualityReportRepo.find({ where: { quality: file.uuid } });
+    await expect(fileQualityRepo.findOneBy({ uuid: file.uuid })).resolves.toBeTruthy();
+    let reports = await qualityReportRepo.findBy({ qualityUuid: file.uuid });
     expect(reports.length).toEqual(5);
     await expect(deleteFile(file.uuid, false, false)).resolves.toMatchObject({ status: 200 });
-    await expect(fileRepo.findOne(file.uuid)).resolves.toBeFalsy();
-    await expect(fileQualityRepo.findOne(file.uuid)).resolves.toBeFalsy();
-    reports = await qualityReportRepo.find({ where: { quality: file.uuid } });
+    await expect(fileRepo.findOneBy({ uuid: file.uuid })).resolves.toBeFalsy();
+    await expect(fileQualityRepo.findOneBy({ uuid: file.uuid })).resolves.toBeFalsy();
+    reports = await qualityReportRepo.findBy({ qualityUuid: file.uuid });
     await expect(reports).toMatchObject([]);
   });
 
@@ -586,7 +603,7 @@ describe("DELETE /api/files/", () => {
     };
     await axios.put(`${storageServiceUrl}cloudnet-img/${id}`, "content");
     await axios.put(`${privUrl}${id}`, payload);
-    await expect(vizRepo.findOneOrFail(id)).resolves.toBeTruthy();
+    await expect(vizRepo.findOneByOrFail({ s3key: id })).resolves.toBeTruthy();
   }
 });
 

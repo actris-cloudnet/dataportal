@@ -1,16 +1,18 @@
 import { Request, RequestHandler, Response } from "express";
-import { Connection } from "typeorm";
+import { DataSource } from "typeorm";
+import { Instrument } from "../entity/Instrument";
 
 export class InstrumentRoutes {
-  constructor(conn: Connection) {
-    this.conn = conn;
+  constructor(dataSource: DataSource) {
+    this.dataSource = dataSource;
   }
 
-  readonly conn: Connection;
+  readonly dataSource: DataSource;
 
   instruments: RequestHandler = async (_req: Request, res: Response, next) => {
-    this.conn
-      .getRepository("instrument")
+    // TODO: why query builder is used?
+    this.dataSource
+      .getRepository(Instrument)
       .createQueryBuilder("instrument")
       .select()
       .addOrderBy("instrument.type", "ASC")

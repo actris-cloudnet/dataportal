@@ -1,7 +1,7 @@
-import { Connection, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { RequestHandler } from "express";
 import { UserAccount } from "../entity/UserAccount";
-import { Upload } from "../entity/Upload";
+import { InstrumentUpload, ModelUpload } from "../entity/Upload";
 import { PermissionType } from "../entity/Permission";
 import { Site } from "../entity/Site";
 const auth = require("basic-auth");
@@ -9,8 +9,8 @@ const auth = require("basic-auth");
 export class Authenticator {
   private userAccountRepository: Repository<UserAccount>;
 
-  constructor(conn: Connection) {
-    this.userAccountRepository = conn.getRepository<UserAccount>("user_account");
+  constructor(dataSource: DataSource) {
+    this.userAccountRepository = dataSource.getRepository(UserAccount);
   }
 
   verifyCredentials(realm: string | null = null): RequestHandler {
@@ -21,7 +21,7 @@ export class Authenticator {
         return next({ status: 401, errors: "Unauthorized" });
       }
       try {
-        const userAccount = await this.userAccountRepository.findOne({ username: credentials.name });
+        const userAccount = await this.userAccountRepository.findOneBy({ username: credentials.name });
         if (!userAccount) {
           return next({ status: 401, errors: "Unauthorized" });
         }
@@ -42,21 +42,21 @@ export class Authenticator {
 export class Authorizator {
   private userAccountRepository: Repository<UserAccount>;
   private siteRepository: Repository<Site>;
-  readonly instrumentUploadRepository: Repository<Upload>;
-  readonly modelUploadRepository: Repository<Upload>;
+  readonly instrumentUploadRepository: Repository<InstrumentUpload>;
+  readonly modelUploadRepository: Repository<ModelUpload>;
 
-  constructor(conn: Connection) {
-    this.userAccountRepository = conn.getRepository<UserAccount>("user_account");
-    this.siteRepository = conn.getRepository<Site>("site");
-    this.instrumentUploadRepository = conn.getRepository<Upload>("instrument_upload");
-    this.modelUploadRepository = conn.getRepository<Upload>("model_upload");
+  constructor(dataSource: DataSource) {
+    this.userAccountRepository = dataSource.getRepository(UserAccount);
+    this.siteRepository = dataSource.getRepository(Site);
+    this.instrumentUploadRepository = dataSource.getRepository(InstrumentUpload);
+    this.modelUploadRepository = dataSource.getRepository(ModelUpload);
   }
 
   verifySite: RequestHandler = async (req, res, next) => {
     try {
       const siteName = "body" in req && "site" in req.body ? req.body.site : res.locals.username;
-      const site = await this.siteRepository.findOne(siteName);
-      if (site === undefined) {
+      const site = await this.siteRepository.findOneBy({ id: siteName });
+      if (!site) {
         return next({ status: 422, errors: "Site does not exist" });
       }
       res.locals.site = site;
@@ -67,18 +67,19 @@ export class Authorizator {
   };
 
   findSiteFromChecksum: RequestHandler = async (req, res, next) => {
-    let uploadMetadata: Upload | undefined;
     const repos = [this.instrumentUploadRepository, this.modelUploadRepository];
     try {
       for (const repo of repos) {
-        uploadMetadata = await repo.findOne({ checksum: req.params.checksum }, { relations: ["site"] });
-        if (uploadMetadata) break;
+        const uploadMetadata = await repo.findOne({
+          where: { checksum: req.params.checksum },
+          relations: { site: true },
+        });
+        if (uploadMetadata) {
+          res.locals.site = uploadMetadata.site;
+          return next();
+        }
       }
-      if (uploadMetadata === undefined) {
-        return next({ status: 422, errors: "Checksum does not exist in the database" });
-      }
-      res.locals.site = uploadMetadata.site;
-      return next();
+      return next({ status: 422, errors: "Checksum does not exist in the database" });
     } catch (err) {
       return next({ status: 500, errors: `Internal server error: ${err}` });
     }
@@ -108,7 +109,7 @@ export class Authorizator {
       userQuery = userQuery.andWhere("permission.permission = :permission").setParameters(params);
       try {
         const userWithProperPermission = await userQuery.getOne();
-        if (userWithProperPermission === undefined) {
+        if (!userWithProperPermission) {
           return next({ status: 401, errors: "Missing permission" });
         }
         if (isSite) {

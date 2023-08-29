@@ -2,7 +2,7 @@ import { RequestHandler } from "express";
 import { RequestErrorArray } from "../entity/RequestError";
 import validator from "validator";
 import { Site } from "../entity/Site";
-import { Connection } from "typeorm";
+import { Connection, In } from "typeorm";
 import { fetchAll, hideTestDataFromNormalUsers, isValidDate, toArray } from ".";
 import { validate as validateUuid } from "uuid";
 import { Product } from "../entity/Product";
@@ -149,7 +149,7 @@ export class Middleware {
     if (!req.query[param]) return Promise.resolve();
     await this.conn
       .getRepository(param)
-      .findByIds(req.query[param])
+      .findBy({ id: In(req.query[param]) })
       .then((res) => {
         if (res.length != req.query[param].length) this.throw404Error(param, req);
       });

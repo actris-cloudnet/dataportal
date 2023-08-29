@@ -1,18 +1,19 @@
 import axios from "axios";
-import { Connection, createConnection } from "typeorm";
+import { DataSource } from "typeorm";
 import { backendPublicUrl, genResponse, wait } from "../../lib";
 import { UserAccount } from "../../../src/entity/UserAccount";
 import { Permission, PermissionType } from "../../../src/entity/Permission";
+import { AppDataSource } from "../../../src/data-source";
 
-let conn: Connection;
+let dataSource: DataSource;
 const url = `${backendPublicUrl}calibration/`;
 const credentials = { username: "calibrator", password: "hunter2" };
 
 describe("PUT /api/calibration", () => {
   beforeAll(async () => {
-    conn = await createConnection();
-    const userRepo = conn.getRepository<UserAccount>("user_account");
-    const permRepo = conn.getRepository<Permission>("permission");
+    dataSource = await AppDataSource.initialize();
+    const userRepo = dataSource.getRepository(UserAccount);
+    const permRepo = dataSource.getRepository(Permission);
     await userRepo.delete({});
     await permRepo.delete({});
 
@@ -27,7 +28,7 @@ describe("PUT /api/calibration", () => {
     await permRepo.save(perm);
   });
 
-  afterAll(() => conn.close());
+  afterAll(async () => await dataSource.destroy());
 
   it("requires correct credentials", async () => {
     const body = { calibrationFactor: 0.5 };

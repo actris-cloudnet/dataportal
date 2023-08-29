@@ -3,28 +3,32 @@ import axios from "axios";
 import { backendPrivateUrl, backendPublicUrl, storageServiceUrl, str2base64 } from "../lib";
 import * as AdmZip from "adm-zip";
 import { createHash } from "crypto";
-import { Connection, createConnection, Repository } from "typeorm";
-import { Download } from "../../src/entity/Download";
+import { DataSource, Repository } from "typeorm";
+import { Download, ObjectType } from "../../src/entity/Download";
 import { basename } from "path";
 import { initUsersAndPermissions } from "../lib/userAccountAndPermissions";
+import { AppDataSource } from "../../src/data-source";
+import { RegularFile } from "../../src/entity/File";
+import { Visualization } from "../../src/entity/Visualization";
+import { InstrumentUpload } from "../../src/entity/Upload";
 
-let conn: Connection;
-let repo: Repository<Download>;
+let dataSource: DataSource;
+let downloadRepo: Repository<Download>;
 axios.defaults.headers.common["X-Forwarded-For"] = "2.125.160.216, 2.125.160.216, 10.134.8.1";
 
 beforeAll(async () => {
-  conn = await createConnection();
-  await conn.getRepository("download").delete({});
-  await conn.getRepository("visualization").delete({});
-  await conn.getRepository("regular_file").delete({});
-  repo = conn.getRepository("download");
+  dataSource = await AppDataSource.initialize();
+  downloadRepo = dataSource.getRepository(Download);
+  await downloadRepo.delete({});
+  await dataSource.getRepository(Visualization).delete({});
+  await dataSource.getRepository(RegularFile).delete({});
 });
 
 afterAll(async () => {
-  await conn.getRepository("download").delete({});
-  await conn.getRepository("visualization").delete({});
-  await conn.getRepository("regular_file").delete({});
-  await conn.close();
+  await downloadRepo.delete({});
+  await dataSource.getRepository(Visualization).delete({});
+  await dataSource.getRepository(RegularFile).delete({});
+  await dataSource.destroy();
 });
 
 const inputJson = {
@@ -102,15 +106,15 @@ describe("after PUTting metadata to API", () => {
         hash.update(response.data);
         expect(hash.digest("hex")).toEqual(expectedJson.checksum);
         return expect(
-          repo.findOne({
+          downloadRepo.exist({
             where: {
               objectUuid: expectedJson.uuid,
-              objectType: "product",
+              objectType: ObjectType.Product,
               ip: "2.125.160.216",
               country: "GB",
             },
           })
-        ).resolves.toBeTruthy();
+        ).resolves.toBe(true);
       });
   });
 
@@ -161,15 +165,15 @@ describe("after PUTting metadata to API", () => {
       expect(shas.sort()).toMatchObject(expectedShas.sort());
 
       return expect(
-        repo.findOne({
+        downloadRepo.exist({
           where: {
             objectUuid: collectionUuid,
-            objectType: "collection",
+            objectType: ObjectType.Collection,
             ip: "2.125.160.216",
             country: "GB",
           },
         })
-      ).resolves.toBeTruthy();
+      ).resolves.toBe(true);
     });
   });
 });
@@ -191,9 +195,8 @@ describe("after PUTting a raw instrument file", () => {
 
   beforeAll(async () => {
     await initUsersAndPermissions();
-
-    await conn.getRepository("instrument_upload").delete({});
-    await conn.getRepository("download").delete({});
+    await dataSource.getRepository(InstrumentUpload).delete({});
+    await downloadRepo.delete({});
     await axios.post(metadataUrl, validMetadata, { headers });
     return axios.put(uploadUrl, rawFile, { headers });
   });
@@ -206,15 +209,15 @@ describe("after PUTting a raw instrument file", () => {
       hash.update(response.data);
       expect(hash.digest("hex")).toEqual(validMetadata.checksum);
       return expect(
-        repo.findOne({
+        downloadRepo.exist({
           where: {
             objectUuid: data.uuid,
-            objectType: "raw",
+            objectType: ObjectType.Raw,
             ip: "2.125.160.216",
             country: "GB",
           },
         })
-      ).resolves.toBeTruthy();
+      ).resolves.toBe(true);
     });
   });
 });

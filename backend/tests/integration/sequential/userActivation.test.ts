@@ -1,19 +1,21 @@
 import axios from "axios";
 import { backendPrivateUrl } from "../../lib";
-import { Connection, createConnection } from "typeorm/";
+import { DataSource } from "typeorm/";
+import { AppDataSource } from "../../../src/data-source";
+import { UserAccount } from "../../../src/entity/UserAccount";
 
-let conn: Connection;
+let dataSource: DataSource;
 let userAccountRepository: any;
 
 beforeAll(async () => {
-  conn = await createConnection();
-  userAccountRepository = conn.getRepository("user_account");
+  dataSource = await AppDataSource.initialize();
+  userAccountRepository = dataSource.getRepository(UserAccount);
   await userAccountRepository.delete({});
 });
 
 afterAll(async () => {
   await userAccountRepository.delete({});
-  await conn.close();
+  await dataSource.destroy();
 });
 
 describe("test user account activation", () => {
@@ -52,7 +54,7 @@ describe("test user account activation", () => {
     const match = res.data.match(/<strong>Password:<\/strong> (\w+)/);
     expect(match).not.toBeNull();
     const password = match![1];
-    const user = await userAccountRepository.findOneOrFail({ username: "liisa" });
+    const user = await userAccountRepository.findOneByOrFail({ username: "liisa" });
     expect(user.activationToken).toBeNull();
     expect(user.passwordHash).not.toBeNull();
     expect(user.comparePassword(password)).toBeTruthy();

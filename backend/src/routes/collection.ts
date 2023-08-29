@@ -3,22 +3,22 @@ import { Collection } from "../entity/Collection";
 import { CollectionResponse } from "../entity/CollectionResponse";
 import { validate as validateUuid } from "uuid";
 import axios from "axios";
-import { Connection, Repository } from "typeorm";
+import { DataSource, In, Repository } from "typeorm";
 import { File, ModelFile, RegularFile } from "../entity/File";
 import { getCollectionLandingPage, convertToSearchResponse } from "../lib";
 import env from "../lib/env";
 import { CitationService } from "../lib/cite";
 
 export class CollectionRoutes {
-  constructor(conn: Connection) {
-    this.conn = conn;
-    this.collectionRepo = conn.getRepository<Collection>("collection");
-    this.fileRepo = conn.getRepository<RegularFile>("regular_file");
-    this.modelFileRepo = conn.getRepository<ModelFile>("model_file");
-    this.citationService = new CitationService(conn);
+  constructor(dataSource: DataSource) {
+    this.dataSource = dataSource;
+    this.collectionRepo = dataSource.getRepository(Collection);
+    this.fileRepo = dataSource.getRepository(RegularFile);
+    this.modelFileRepo = dataSource.getRepository(ModelFile);
+    this.citationService = new CitationService(dataSource);
   }
 
-  readonly conn: Connection;
+  readonly dataSource: DataSource;
   readonly collectionRepo: Repository<Collection>;
   readonly fileRepo: Repository<RegularFile>;
   readonly modelFileRepo: Repository<ModelFile>;
@@ -32,8 +32,8 @@ export class CollectionRoutes {
     const fileUuids: string[] = req.body.files;
     try {
       const [files, modelFiles] = await Promise.all([
-        this.fileRepo.findByIds(fileUuids),
-        this.modelFileRepo.findByIds(fileUuids),
+        this.fileRepo.findBy({ uuid: In(fileUuids) }),
+        this.modelFileRepo.findBy({ uuid: In(fileUuids) }),
       ]);
       if ((files as unknown as File[]).concat(modelFiles).length != fileUuids.length) {
         const existingUuids = files.map((file) => file.uuid);
@@ -68,8 +68,8 @@ export class CollectionRoutes {
       return next({ status: 422, errors: ["Type must be collection"] });
     }
     try {
-      const collection = await this.collectionRepo.findOne(body.uuid);
-      if (collection === undefined) {
+      const collection = await this.collectionRepo.findOneBy({ uuid: body.uuid });
+      if (!collection) {
         return next({ status: 422, errors: ["Collection not found"] });
       }
       if (collection.pid) {
@@ -134,14 +134,10 @@ export class CollectionRoutes {
   allcollections: RequestHandler = async (req: Request, res: Response, next) =>
     this.collectionRepo
       .find({
-        relations: [
-          "regularFiles",
-          "regularFiles.site",
-          "regularFiles.product",
-          "modelFiles",
-          "modelFiles.site",
-          "modelFiles.product",
-        ],
+        relations: {
+          regularFiles: { site: true, product: true },
+          modelFiles: { site: true, product: true },
+        },
       })
       .then((collections) => {
         const response = collections.map((coll) => ({
@@ -152,26 +148,26 @@ export class CollectionRoutes {
       })
       .catch((err) => next({ status: 500, errors: err }));
 
-  public async findCollection(uuid: string) {
-    const collection = await this.collectionRepo.findOne(uuid);
-    if (!collection) return undefined;
+  public async findCollection(uuid: string): Promise<Collection | null> {
+    const collection = await this.collectionRepo.findOneBy({ uuid });
+    if (!collection) return null;
     const regularFileIds = await this.collectionRepo.query(
       'SELECT "regularFileUuid" from collection_regular_files_regular_file WHERE "collectionUuid" = $1',
       [uuid]
     );
-    const regularFiles = await this.fileRepo.findByIds(
-      regularFileIds.map((obj: any) => obj.regularFileUuid),
-      { relations: ["site", "product"] }
-    );
+    const regularFiles = await this.fileRepo.find({
+      where: { uuid: In(regularFileIds.map((obj: any) => obj.regularFileUuid)) },
+      relations: { site: true, product: true },
+    });
 
     const modelFileIds = await this.collectionRepo.query(
       'SELECT "modelFileUuid" from collection_model_files_model_file WHERE "collectionUuid" = $1',
       [uuid]
     );
-    const modelFiles = await this.modelFileRepo.findByIds(
-      modelFileIds.map((obj: any) => obj.modelFileUuid),
-      { relations: ["site", "product", "model"] }
-    );
+    const modelFiles = await this.modelFileRepo.find({
+      where: { uuid: In(modelFileIds.map((obj: any) => obj.modelFileUuid)) },
+      relations: { site: true, product: true, model: true },
+    });
     return { ...collection, regularFiles, modelFiles } as Collection;
   }
 }

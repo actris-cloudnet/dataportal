@@ -1,4 +1,4 @@
-import { Connection, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { ErrorLevel, QualityReport } from "../entity/QualityReport";
 import { Request, RequestHandler, Response } from "express";
 import { FileRoutes } from "./file";
@@ -39,17 +39,17 @@ interface FileQualityWithTestInfo extends FileQuality {
 }
 
 export class QualityReportRoutes {
-  constructor(conn: Connection, fileRoutes: FileRoutes) {
-    this.conn = conn;
-    this.qualityReportRepo = conn.getRepository<QualityReport>("quality_report");
-    this.fileQualityRepo = conn.getRepository<FileQuality>("file_quality");
+  constructor(dataSource: DataSource, fileRoutes: FileRoutes) {
+    this.dataSource = dataSource;
+    this.qualityReportRepo = dataSource.getRepository(QualityReport);
+    this.fileQualityRepo = dataSource.getRepository(FileQuality);
     this.fileRoutes = fileRoutes;
-    this.fileRepo = conn.getRepository<RegularFile>("regular_file");
-    this.modelFileRepo = conn.getRepository<ModelFile>("model_file");
-    this.searchFileRepo = conn.getRepository<SearchFile>("search_file");
+    this.fileRepo = dataSource.getRepository(RegularFile);
+    this.modelFileRepo = dataSource.getRepository(ModelFile);
+    this.searchFileRepo = dataSource.getRepository(SearchFile);
   }
 
-  readonly conn: Connection;
+  readonly dataSource: DataSource;
   readonly qualityReportRepo: Repository<QualityReport>;
   readonly fileQualityRepo: Repository<FileQuality>;
   readonly fileRoutes: FileRoutes;
@@ -58,8 +58,8 @@ export class QualityReportRoutes {
   readonly searchFileRepo: Repository<SearchFile>;
 
   qualityReport: RequestHandler = async (req: Request, res: Response, next) => {
-    const qualityReport = await this.conn
-      .getRepository<FileQualityWithTestInfo>("file_quality")
+    const qualityReport = await this.dataSource
+      .getRepository<FileQualityWithTestInfo>(FileQuality)
       .createQueryBuilder("fileQuality")
       .leftJoinAndSelect("fileQuality.testReports", "testReport")
       .leftJoinAndMapOne("testReport.testInfo", TestInfo, "testInfo", "testReport.testId = testInfo.testId")
@@ -93,10 +93,11 @@ export class QualityReportRoutes {
     const uuid = req.params.uuid;
     const fullReport: Report = req.body;
     try {
+      // TODO: use transaction
       const existingFile = await this.fileRoutes.findAnyFile((repo, _) =>
-        repo.findOne(uuid, { relations: ["product"] })
+        repo.findOne({ where: { uuid }, relations: { product: true } })
       );
-      if (existingFile === undefined) {
+      if (!existingFile) {
         return next({ status: 400, errors: ["No files match this UUID"] });
       }
       await this.fileQualityRepo.delete(uuid);
@@ -105,7 +106,7 @@ export class QualityReportRoutes {
       const nWarnings = this.countTestResults(testOutlines, ErrorLevel.WARNING);
       const nInfo = this.countTestResults(testOutlines, ErrorLevel.INFO);
       const maxErrorLevel = this.getMaxErrorLevel(nErrors, nWarnings, nInfo);
-      const fileQuality = await this.fileQualityRepo.save({
+      await this.fileQualityRepo.save({
         uuid: uuid,
         errorLevel: maxErrorLevel,
         qcVersion: fullReport.qcVersion,
@@ -115,20 +116,18 @@ export class QualityReportRoutes {
         info: nInfo,
         timestamp: fullReport.timestamp,
       });
+      // TODO: Remove all QualityReports first? Needed if tests are removed.
       for (const test of fullReport.tests) {
         await this.qualityReportRepo.save({
           result: testOutlines.find((ele) => ele.testId === test.testId)!.maxErrorLevel,
           testId: test.testId,
           exceptions: test.exceptions,
-          quality: fileQuality,
+          qualityUuid: uuid,
         });
       }
       const repo = this.getRepoForFile(existingFile);
       await repo.update(uuid, { errorLevel: maxErrorLevel });
-      const existingSearchFile = this.searchFileRepo.findOne(uuid);
-      if (existingSearchFile !== undefined) {
-        await this.searchFileRepo.update(uuid, { errorLevel: maxErrorLevel });
-      }
+      await this.searchFileRepo.update(uuid, { errorLevel: maxErrorLevel });
       res.sendStatus(201);
     } catch (e) {
       return next({ status: 500, errors: e });

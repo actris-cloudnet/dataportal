@@ -19,7 +19,7 @@
     "pg": "^8.8.0",
     "pg-query-stream": "^4.2.4",
     "sass": "^1.56.1",
-    "typeorm": "^0.2.45",
+    "typeorm": "^0.3.17",
     "uuid": "^9.0.0",
     "validator": "^13.7.0"
   },
@@ -43,7 +43,7 @@
     "prettier": "^2.8.0",
     "selenium-webdriver": "^4.7.0",
     "ts-jest": "^27.0.0",
-    "ts-node": "^9.1.1",
+    "ts-node": "^10.9.1",
     "typescript": "~4.7.3"
   },
   "scripts": {
@@ -62,7 +62,13 @@
     "stop": "echo 'Use ./control script at project root'",
     "build": "tsc",
     "lint": "eslint . --ext .js,.ts",
-    "lint-fix": "eslint . --ext .js,.ts --fix"
+    "lint-fix": "eslint . --ext .js,.ts --fix",
+    "typeorm": "typeorm-ts-node-esm",
+    "migration:run": "npm run typeorm migration:run -- --dataSource src/data-source.ts",
+    "migration:revert": "npm run typeorm migration:revert -- --dataSource src/data-source.ts",
+    "migration:show": "npm run typeorm migration:show -- --dataSource src/data-source.ts",
+    "migration:create": "npm run typeorm migration:create",
+    "migration:generate": "npm run typeorm migration:generate -- --dataSource src/data-source.ts"
   },
   "repository": {
     "type": "git",

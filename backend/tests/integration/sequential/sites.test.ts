@@ -1,16 +1,17 @@
 import { backendPrivateUrl, backendPublicUrl, genResponse, storageServiceUrl } from "../../lib";
 import axios from "axios";
 import { readResources } from "../../../../shared/lib";
-import { Connection, Repository, createConnection } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { RegularFile } from "../../../src/entity/File";
 import { Visualization } from "../../../src/entity/Visualization";
 import { SearchFile } from "../../../src/entity/SearchFile";
+import { AppDataSource } from "../../../src/data-source";
 const crypto = require("crypto");
 
 const url = `${backendPublicUrl}sites/`;
 let resources: any;
 let sites: string[];
-let conn: Connection;
+let dataSource: DataSource;
 let regularFileRepo: Repository<RegularFile>;
 let searchFileRepo: Repository<SearchFile>;
 let vizRepo: Repository<Visualization>;
@@ -18,10 +19,10 @@ let vizRepo: Repository<Visualization>;
 beforeAll(async () => {
   resources = await readResources();
   sites = resources["sites"].map((site: any) => site.id);
-  conn = await createConnection();
-  regularFileRepo = conn.getRepository("regular_file");
-  searchFileRepo = conn.getRepository("search_file");
-  vizRepo = conn.getRepository("visualization");
+  dataSource = await AppDataSource.initialize();
+  regularFileRepo = dataSource.getRepository(RegularFile);
+  searchFileRepo = dataSource.getRepository(SearchFile);
+  vizRepo = dataSource.getRepository(Visualization);
 });
 
 beforeEach(async () => {
@@ -31,7 +32,7 @@ beforeEach(async () => {
 });
 
 afterAll(async () => {
-  await conn.close();
+  await dataSource.destroy();
 });
 
 async function putFile(data: { site: string; product: string; measurementDate: string }) {

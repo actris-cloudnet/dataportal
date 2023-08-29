@@ -1,4 +1,4 @@
-import { Connection, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { Request, RequestHandler, Response } from "express";
 
 import { RegularFile, ModelFile } from "../entity/File";
@@ -7,32 +7,30 @@ import { formatList, getObjectLandingPage } from "../lib";
 import { Citation, CitationService } from "../lib/cite";
 
 export class ReferenceRoutes {
-  private conn: Connection;
   private fileRepo: Repository<RegularFile>;
   private modelRepo: Repository<ModelFile>;
   private collectionRepo: Repository<Collection>;
   private citationService: CitationService;
 
-  constructor(conn: Connection) {
-    this.conn = conn;
-    this.fileRepo = conn.getRepository("regular_file");
-    this.modelRepo = conn.getRepository("model_file");
-    this.collectionRepo = conn.getRepository("collection");
-    this.citationService = new CitationService(conn);
+  constructor(dataSource: DataSource) {
+    this.fileRepo = dataSource.getRepository(RegularFile);
+    this.modelRepo = dataSource.getRepository(ModelFile);
+    this.collectionRepo = dataSource.getRepository(Collection);
+    this.citationService = new CitationService(dataSource);
   }
 
   getReference: RequestHandler = async (req, res, next) => {
     try {
       const object = await Promise.any([
-        this.collectionRepo.findOneOrFail({ uuid: req.params.uuid }),
-        this.fileRepo.findOneOrFail(
-          { uuid: req.params.uuid },
-          { relations: ["site", "site.citations", "site.citations.persons", "product"] }
-        ),
-        this.modelRepo.findOneOrFail(
-          { uuid: req.params.uuid },
-          { relations: ["site", "site.citations", "product", "model", "model.citations"] }
-        ),
+        this.collectionRepo.findOneByOrFail({ uuid: req.params.uuid }),
+        this.fileRepo.findOneOrFail({
+          where: { uuid: req.params.uuid },
+          relations: { site: { citations: { persons: true } }, product: true },
+        }),
+        this.modelRepo.findOneOrFail({
+          where: { uuid: req.params.uuid },
+          relations: { site: { citations: true }, product: true, model: { citations: true } },
+        }),
       ]);
       if (req.query.acknowledgements === "true") {
         await this.getAcknowledgements(req, res, object);

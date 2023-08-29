@@ -1,18 +1,18 @@
 [
   {
-    "site": "boaty",
+    "siteId": "boaty",
     "date": "2022-01-03",
     "latitude": 59.446,
     "longitude": 24.772
   },
   {
-    "site": "boaty",
+    "siteId": "boaty",
     "date": "2022-01-02",
     "latitude": 59.801,
     "longitude": 24.839
   },
   {
-    "site": "boaty",
+    "siteId": "boaty",
     "date": "2022-01-01",
     "latitude": 60.163,
     "longitude": 24.969

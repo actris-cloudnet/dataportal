@@ -1,22 +1,24 @@
 import axios from "axios";
 import { readFileSync } from "fs";
 import { backendPrivateUrl } from "../../lib";
-import { Connection, createConnection } from "typeorm/";
+import { DataSource } from "typeorm/";
+import { AppDataSource } from "../../../src/data-source";
+import { UserAccount } from "../../../src/entity/UserAccount";
 
 const USER_ACCOUNTS_URL = backendPrivateUrl.concat("user-accounts");
 
-let conn: Connection;
+let dataSource: DataSource;
 let userAccountRepository: any;
 
 beforeAll(async () => {
-  conn = await createConnection();
-  userAccountRepository = conn.getRepository("user_account");
+  dataSource = await AppDataSource.initialize();
+  userAccountRepository = dataSource.getRepository(UserAccount);
   await userAccountRepository.delete({});
 });
 
 afterAll(async () => {
   await userAccountRepository.delete({});
-  await conn.close();
+  await await dataSource.destroy();
 });
 
 describe("test user accounts and permissions", () => {
@@ -74,7 +76,7 @@ describe("test user accounts and permissions", () => {
       data: { id: alice.id },
     });
     const respGetWithNewPassword = await axios.get(USER_ACCOUNTS_URL.concat("/", alice.id));
-    const aliceFromDb = await userAccountRepository.findOne({ id: alice.id });
+    const aliceFromDb = await userAccountRepository.findOneBy({ id: alice.id });
     expect(aliceFromDb.passwordHash).toMatch("$apr1$");
     expect(aliceFromDb.passwordHash).not.toEqual(alice.passwordHash);
     expect(respGetWithNewPassword.data.permissions).toEqual(alice.permissions);
@@ -202,31 +204,6 @@ describe("test user accounts and permissions", () => {
     const expectedUsers = new Set(["bob", "carol", "david", "eve", "bucharest", "granada", "mace-head"]);
     const intersection = users.filter((u: string) => expectedUsers.has(u));
     expect(intersection).toHaveLength(7);
-  });
-
-  it("migrates legacy user accounts", async () => {
-    // Delete existing legacy users from the database
-    const getRespAllUsers = await axios.get(USER_ACCOUNTS_URL);
-    for (const legacyUserStr of ["bucharest", "granada", "mace-head"]) {
-      const user = getRespAllUsers.data.find((u: any) => u.username === legacyUserStr);
-      await axios.delete(USER_ACCOUNTS_URL.concat("/", user.id));
-    }
-    const legacyUsers = JSON.parse(readFileSync("tests/data/legacyUserAccountCredentials.json", "utf8"));
-    for (const legacyLine of legacyUsers) {
-      const [username, passwordHash] = legacyLine.split(":", 2);
-      expect([username, passwordHash].join(":")).toEqual(legacyLine);
-      const resp = await axios.post(USER_ACCOUNTS_URL.concat("/migrate-legacy"), {
-        username: username,
-        passwordHash: passwordHash,
-      });
-      expect(resp).toMatchObject({ status: 201 });
-      await expect(axios.get(USER_ACCOUNTS_URL.concat("/", resp.data.id))).resolves.toMatchObject({
-        status: 200,
-        data: { username: username },
-      });
-      const userFromDb = await userAccountRepository.findOne({ id: resp.data.id });
-      expect(userFromDb.passwordHash).toEqual(passwordHash);
-    }
   });
 
   async function handlePerson(userName: string) {

@@ -1,4 +1,4 @@
-import { Connection, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { Request, RequestHandler, Response } from "express";
 import { SiteContact, RoleType } from "../entity/SiteContact";
 import { Person } from "../entity/Person";
@@ -21,10 +21,10 @@ export class SiteContactRoutes {
   private personRepository: Repository<Person>;
   private siteRepository: Repository<Site>;
 
-  constructor(conn: Connection) {
-    this.personRepository = conn.getRepository<Person>("person");
-    this.siteContactRepository = conn.getRepository<SiteContact>("site_contact");
-    this.siteRepository = conn.getRepository<Site>("site");
+  constructor(dataSource: DataSource) {
+    this.personRepository = dataSource.getRepository(Person);
+    this.siteContactRepository = dataSource.getRepository(SiteContact);
+    this.siteRepository = dataSource.getRepository(Site);
   }
 
   getPersons: RequestHandler = async (req: Request, res: Response) => {
@@ -34,7 +34,7 @@ export class SiteContactRoutes {
 
   getContacts: RequestHandler = async (req: Request, res: Response, next) => {
     try {
-      const contacts = (await this.siteRepository.find({ relations: ["persons"] }))
+      const contacts = (await this.siteRepository.find({ relations: { persons: true } }))
         .filter((ele) => !(ele.type[0].includes("arm") || ele.type[0].includes("hidden")))
         .map((ele) => ({
           site: ele.id,
@@ -80,12 +80,11 @@ export class SiteContactRoutes {
       return next({ status: 400, error: "unexpected role" });
     }
     const site = await this.findExistingSite(body);
-    if (site === undefined) {
+    if (!site) {
       return next({ status: 400, error: "site does not exist" });
     }
-    let person: Person | undefined;
-    person = await this.findExistingPerson(body);
-    if (person !== undefined) {
+    let person = await this.findExistingPerson(body);
+    if (person) {
       const existingSiteContact = await this.findExistingSiteContact(site, person, role);
       if (existingSiteContact) {
         return next({ status: 400, error: "person already has this role for the site" });
@@ -123,7 +122,7 @@ export class SiteContactRoutes {
       .leftJoinAndSelect("site_contact.site", "site")
       .where("site_contact.id = :id", { id: req.params.id })
       .getOne();
-    if (siteContact === undefined) {
+    if (!siteContact) {
       return next({ status: 400, error: "requested site contact does not exist" });
     }
     const body = req.body;
@@ -134,7 +133,7 @@ export class SiteContactRoutes {
     }
     if (validKeys.has("siteId")) {
       const updatedSite = await this.findExistingSite(body);
-      if (updatedSite === undefined) {
+      if (!updatedSite) {
         return next({ status: 400, error: "site does not exist" });
       }
       siteContact.site = updatedSite;
@@ -160,7 +159,7 @@ export class SiteContactRoutes {
       .createQueryBuilder("person")
       .where("person.id = :id", { id: req.params.id })
       .getOne();
-    if (person === undefined) {
+    if (!person) {
       return next({ status: 400, error: "requested person does not exist" });
     }
     try {
@@ -197,7 +196,7 @@ export class SiteContactRoutes {
       .leftJoinAndSelect(SiteContact, "site_contact", "site_contact.personId = person.id")
       .where("person.id = :id", { id: personId })
       .getRawOne();
-    if (requestedPersonRaw === undefined) {
+    if (!requestedPersonRaw) {
       return next({ status: 400, error: "requested person does not exist" });
     }
     if (requestedPersonRaw.site_contact_id !== null) {
@@ -230,7 +229,7 @@ export class SiteContactRoutes {
     return res.sendStatus(200);
   };
 
-  private async findExistingPerson(postData: SiteContactApiData): Promise<Person | undefined> {
+  private async findExistingPerson(postData: SiteContactApiData): Promise<Person | null> {
     return this.personRepository
       .createQueryBuilder("person")
       .where("person.firstname = :firstname", { firstname: postData.firstname })
@@ -239,11 +238,11 @@ export class SiteContactRoutes {
       .getOne();
   }
 
-  private async findExistingSite(body: SiteContactApiData): Promise<Site | undefined> {
+  private async findExistingSite(body: SiteContactApiData): Promise<Site | null> {
     return this.siteRepository.createQueryBuilder("site").where("site.id = :siteId", { siteId: body.siteId }).getOne();
   }
 
-  private async findExistingSiteContact(site: Site, person: Person, role: RoleType): Promise<SiteContact | undefined> {
+  private async findExistingSiteContact(site: Site, person: Person, role: RoleType): Promise<SiteContact | null> {
     return this.siteContactRepository
       .createQueryBuilder("site_contact")
       .where("site_contact.siteId = :siteId", { siteId: site.id })

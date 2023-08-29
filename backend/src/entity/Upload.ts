@@ -84,7 +84,7 @@ export class InstrumentUpload extends Upload {
   instrumentPid!: string | null;
 
   @Column({ type: "text", array: true, default: [], nullable: false })
-  tags!: Array<string>;
+  tags!: string[];
 
   constructor(args: UploadOptions, instrument: Instrument, instrumentPid: string, tags: Array<string>) {
     super(args);

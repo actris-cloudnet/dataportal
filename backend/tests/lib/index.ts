@@ -1,17 +1,17 @@
 import * as fs from "fs";
 import { resolve } from "path";
-import { createConnection } from "typeorm";
 import axios from "axios";
 import { expect } from "@jest/globals";
+import { AppDataSource } from "../../src/data-source";
 
 if (!process.env.DP_BACKEND_URL) throw new Error("DP_BACKEND_URL must be set");
 if (!process.env.DP_FRONTEND_URL) throw new Error("DP_FRONTEND_URL must be set");
 if (!process.env.DP_SS_TEST_URL) throw new Error("DP_SS_TEST_URL must be set");
 
 export async function clearRepo(repo: string) {
-  const conn = await createConnection();
-  await conn.getRepository(repo).delete({});
-  return conn.close();
+  const dataSource = await AppDataSource.initialize();
+  await dataSource.getRepository(repo).delete({});
+  await dataSource.destroy();
 }
 
 export async function putFile(filename: string) {

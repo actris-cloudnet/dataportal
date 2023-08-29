@@ -35,12 +35,17 @@ To load other data to the db, for instance the sites used in production, use:
 
 ### Migrations
 
-The dataportal uses typeorm for automatic database schema manipulation. This repo provides a wrapper script for typeorm's own migration tool.
+The dataportal uses TypeORM for automatic database schema manipulation. This repository provides wrapper scripts for TypeORM's own migration tool:
 
      cd backend
-    ./run-dev scripts/typeorm
+    ./run-dev npm run migration:show
+    ./run-dev npm run migration:run
+    ./run-dev npm run migration:revert
+    ./run-dev npm run migration:generate -- src/migration/NewMigration
+    ./run-dev npm run migration:create -- src/migration/NewMigration
+    ./run-dev npm run typeorm -- --help
 
-The migrations are stored in `backend/src/migration`. For more information on how to use typeorm's migrations, see: https://github.com/typeorm/typeorm/blob/master/docs/migrations.md
+The migrations are stored in `backend/src/migration`. For more information on how to use TypeORM's migrations, see <https://typeorm.io/migrations>.
 
 ### Running unit and integration tests
 

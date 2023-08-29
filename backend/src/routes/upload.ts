@@ -1,8 +1,9 @@
 import { Site } from "../entity/Site";
 import { InstrumentUpload, ModelUpload, Status, Upload } from "../entity/Upload";
-import { Connection, EntityTarget, Repository } from "typeorm";
+import { DataSource, EntityTarget, FindOptionsWhere, Repository } from "typeorm";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import {
+  ArrayEqual,
   dateforsize,
   fetchAll,
   getS3pathForUpload,
@@ -24,18 +25,18 @@ import ReadableStream = NodeJS.ReadableStream;
 import env from "../lib/env";
 
 export class UploadRoutes {
-  constructor(conn: Connection) {
-    this.conn = conn;
-    this.instrumentUploadRepo = this.conn.getRepository(InstrumentUpload);
-    this.modelUploadRepo = this.conn.getRepository(ModelUpload);
-    this.instrumentRepo = this.conn.getRepository(Instrument);
-    this.modelRepo = this.conn.getRepository(Model);
-    this.siteRepo = this.conn.getRepository(Site);
-    this.modelFileRepo = this.conn.getRepository(ModelFile);
-    this.regularFileRepo = this.conn.getRepository(RegularFile);
+  constructor(dataSource: DataSource) {
+    this.dataSource = dataSource;
+    this.instrumentUploadRepo = this.dataSource.getRepository(InstrumentUpload);
+    this.modelUploadRepo = this.dataSource.getRepository(ModelUpload);
+    this.instrumentRepo = this.dataSource.getRepository(Instrument);
+    this.modelRepo = this.dataSource.getRepository(Model);
+    this.siteRepo = this.dataSource.getRepository(Site);
+    this.modelFileRepo = this.dataSource.getRepository(ModelFile);
+    this.regularFileRepo = this.dataSource.getRepository(RegularFile);
   }
 
-  readonly conn: Connection;
+  readonly dataSource: DataSource;
   readonly instrumentUploadRepo: Repository<InstrumentUpload>;
   readonly modelUploadRepo: Repository<ModelUpload>;
   readonly instrumentRepo: Repository<Instrument>;
@@ -54,13 +55,13 @@ export class UploadRoutes {
     let sortedTags = [] as string[];
 
     try {
-      const site = await this.siteRepo.findOne(req.params.site);
-      if (site == undefined) {
+      const site = await this.siteRepo.findOneBy({ id: req.params.site });
+      if (!site) {
         return next({ status: 422, errors: "Unknown site" });
       }
       if (instrumentUpload) {
-        dataSource = await this.instrumentRepo.findOne(body.instrument);
-        if (dataSource == undefined) {
+        dataSource = await this.instrumentRepo.findOneBy({ id: body.instrument });
+        if (!dataSource) {
           return next({ status: 422, errors: "Unknown instrument" });
         }
         UploadEntity = InstrumentUpload;
@@ -74,16 +75,16 @@ export class UploadRoutes {
           return next({ status: 422, errors: "Unknown tag" });
         }
       } else {
-        dataSource = await this.modelRepo.findOne(body.model);
-        if (dataSource == undefined) {
+        dataSource = await this.modelRepo.findOneBy({ id: body.model });
+        if (!dataSource) {
           return next({ status: 422, errors: "Unknown model" });
         }
         UploadEntity = ModelUpload;
       }
 
-      const result = await this.conn.transaction(async (transactionalEntityManager) => {
+      const result = await this.dataSource.transaction(async (transactionalEntityManager) => {
         // First search row by checksum.
-        const uploadByChecksum = await transactionalEntityManager.findOne(UploadEntity, { checksum: body.checksum });
+        const uploadByChecksum = await transactionalEntityManager.findOneBy(UploadEntity, { checksum: body.checksum });
         if (uploadByChecksum) {
           if (uploadByChecksum.status === Status.CREATED) {
             // Remove the existing row so that we can insert or update a row
@@ -95,16 +96,18 @@ export class UploadRoutes {
         }
 
         // Secondly search row by other unique columns.
-        const params = { site: site, measurementDate: body.measurementDate, filename: filename };
+        const params = { site: { id: site.id }, measurementDate: body.measurementDate, filename: filename };
         const payload = instrumentUpload
-          ? { ...params, instrument: body.instrument, instrumentPid: body.instrumentPid, tags: sortedTags }
-          : { ...params, model: body.model };
+          ? {
+              ...params,
+              instrument: { id: body.instrument },
+              instrumentPid: body.instrumentPid,
+              tags: ArrayEqual(sortedTags),
+            } // TODO(TypeScript 4.9): satisfies FindOptionsWhere<InstrumentUpload>
+          : { ...params, model: { id: body.model } }; // TODO(TypeScript 4.9): satisfies FindOptionsWhere<ModelUpload>;
 
         // If a matching row exists, update it.
-        const uploadByParams = await transactionalEntityManager.findOne<InstrumentUpload | ModelUpload>(
-          UploadEntity,
-          payload
-        );
+        const uploadByParams = await transactionalEntityManager.findOneBy(UploadEntity, payload);
         if (uploadByParams) {
           await transactionalEntityManager.update(UploadEntity, uploadByParams.uuid, {
             checksum: body.checksum,
@@ -115,14 +118,9 @@ export class UploadRoutes {
         }
 
         // If no matching row was found, insert a new one.
-        const args = { ...params, checksum: body.checksum, status: Status.CREATED };
+        const args = { ...params, site, checksum: body.checksum, status: Status.CREATED };
         if (instrumentUpload) {
-          uploadedMetadata = new InstrumentUpload(
-            args,
-            dataSource as Instrument,
-            body.instrumentPid,
-            sortedTags as Array<string>
-          );
+          uploadedMetadata = new InstrumentUpload(args, dataSource as Instrument, body.instrumentPid, sortedTags);
         } else {
           uploadedMetadata = new ModelUpload(args, dataSource as Model);
         }
@@ -146,7 +144,7 @@ export class UploadRoutes {
     if (!partialUpload.uuid) return next({ status: 422, errors: "Request body is missing uuid" });
     try {
       const upload = await this.findAnyUpload((repo, model) =>
-        repo.findOne({ uuid: partialUpload.uuid }, { relations: ["site", model ? "model" : "instrument"] })
+        repo.findOne({ where: { uuid: partialUpload.uuid }, relations: ["site", model ? "model" : "instrument"] })
       );
       if (!upload) return next({ status: 422, errors: "No file matches the provided uuid" });
       await this.findRepoForUpload(upload).update({ uuid: partialUpload.uuid }, partialUpload);
@@ -160,10 +158,10 @@ export class UploadRoutes {
   metadata: RequestHandler = async (req: Request, res: Response, next) => {
     const checksum = req.params.checksum;
     this.findAnyUpload((repo, model) =>
-      repo.findOne({ checksum: checksum }, { relations: ["site", model ? "model" : "instrument"] })
+      repo.findOne({ where: { checksum: checksum }, relations: ["site", model ? "model" : "instrument"] })
     )
       .then((upload) => {
-        if (upload == undefined) return next({ status: 404, errors: "No metadata was found with provided id" });
+        if (!upload) return next({ status: 404, errors: "No metadata was found with provided id" });
         res.send(this.augmentUploadResponse(true)(upload));
       })
       .catch((err: any) => {
@@ -272,7 +270,7 @@ export class UploadRoutes {
     model = false
   ) {
     const augmentedQuery: any = {
-      site: query.site || (await fetchAll<Site>(this.conn, Site)).map((site) => site.id),
+      site: query.site || (await fetchAll<Site>(this.dataSource, Site)).map((site) => site.id),
       status: query.status || [Status.UPLOADED, Status.CREATED, Status.PROCESSED, Status.INVALID],
       dateFrom: query.dateFrom || "1970-01-01",
       dateTo: query.dateTo || tomorrow(),
@@ -415,8 +413,8 @@ export class UploadRoutes {
     searchFunc: (
       arg0: Repository<ModelUpload | InstrumentUpload>,
       arg1?: boolean
-    ) => Promise<ModelUpload | InstrumentUpload | undefined>
-  ): Promise<ModelUpload | InstrumentUpload | undefined> {
+    ) => Promise<ModelUpload | InstrumentUpload | null>
+  ): Promise<ModelUpload | InstrumentUpload | null> {
     return Promise.all([searchFunc(this.instrumentUploadRepo, false), searchFunc(this.modelUploadRepo, true)]).then(
       ([upload, modelUpload]) => upload || modelUpload
     );

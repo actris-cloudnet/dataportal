@@ -1,9 +1,12 @@
-import { Column, Entity, ManyToOne } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
 import { Site } from "./Site";
 
 @Entity()
 export class SiteLocation {
-  @ManyToOne((_) => Site, (site) => site.locations, { primary: true })
+  @PrimaryColumn()
+  siteId!: string;
+
+  @ManyToOne((_) => Site, (site) => site.locations)
   site!: Site;
 
   @Column({ type: "date", primary: true })

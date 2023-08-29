@@ -1,4 +1,4 @@
-import { Connection, In, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { Software } from "../entity/Software";
 import axios from "axios";
 
@@ -31,8 +31,8 @@ export class SoftwareService {
     },
   };
 
-  constructor(conn: Connection) {
-    this.softwareRepo = conn.getRepository(Software);
+  constructor(dataSource: DataSource) {
+    this.softwareRepo = dataSource.getRepository(Software);
     this.pendingRequests = {};
   }
 
@@ -48,7 +48,7 @@ export class SoftwareService {
   }
 
   private async getOrCreateSoftware(code: string, version: string): Promise<Software> {
-    let software = await this.softwareRepo.findOne({ code, version });
+    let software = await this.softwareRepo.findOneBy({ code, version });
     if (!software) {
       software = await this.softwareRepo.save({ code, version });
       this.updateMetadataInBackground(software);

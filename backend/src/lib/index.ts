@@ -1,4 +1,4 @@
-import { Connection, Repository, SelectQueryBuilder } from "typeorm";
+import { Connection, FindOperator, Repository, SelectQueryBuilder } from "typeorm";
 import { basename } from "path";
 import { NextFunction, Request, Response } from "express";
 import { ModelFile, RegularFile } from "../entity/File";
@@ -232,4 +232,9 @@ export function formatList(parts: string[], conjunction: string): string {
     return parts.join(conjunction);
   }
   return parts.slice(0, -1).join(", ") + conjunction + parts[parts.length - 1];
+}
+
+// TODO: Workaround for TypeORM 0.3
+export function ArrayEqual<T>(value: T[] | FindOperator<T>): FindOperator<any> {
+  return new FindOperator("equal", value as any);
 }
