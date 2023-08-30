@@ -48,20 +48,22 @@ describe("SearchView.vue", () => {
     filesSortedByDate = resources["allfiles"].sort(
       (a: any, b: any) => new Date(a.measurementDate).getTime() - new Date(b.measurementDate).getTime(),
     );
-    const defaultAxiosMock = (url: string): AxiosPromise => {
-      if (url.includes("/files")) {
-        return Promise.resolve(augmentAxiosResponse(resources["allfiles"]));
-      } else if (url.includes("/sites")) {
-        // sites
-        return Promise.resolve(augmentAxiosResponse(resources["sites"]));
-      } else if (url.includes("/search")) {
-        // search
-        return Promise.resolve(augmentAxiosResponse(resources["allsearch"]));
-      } else if (url.includes("/products")) {
-        return Promise.resolve(augmentAxiosResponse(resources["products-with-variables"]));
+
+    const defaultAxiosMock = async (url: string): Promise<AxiosResponse> => {
+      const resourceMappings: Record<string, string> = {
+        "/files": "allfiles",
+        "/sites": "sites",
+        "/search": "allsearch",
+        "/products": "products-with-variables",
+        "/instruments": "instruments",
+      };
+      const resourceKey = Object.keys(resourceMappings).find((key) => url.includes(key));
+      if (resourceKey) {
+        return augmentAxiosResponse(resources[resourceMappings[resourceKey]]);
       }
-      return Promise.reject(new Error(`Unmocked URL: ${url}`));
+      throw new Error(`Unmocked URL: ${url}`);
     };
+
     vi.mocked(axios.get).mockImplementation(defaultAxiosMock);
 
     router.push("/search/data");

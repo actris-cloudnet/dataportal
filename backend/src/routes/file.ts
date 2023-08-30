@@ -58,7 +58,8 @@ export class FileRoutes {
         .leftJoinAndSelect("file.product", "product")
         .leftJoinAndSelect("file.software", "software")
         .orderBy('COALESCE(software."humanReadableName", software.code)', "ASC");
-      if (isModel) qb.leftJoinAndSelect("file.model", "model");
+      const prop = isModel ? "model" : "instrument";
+      qb.leftJoinAndSelect(`file.${prop}`, prop);
       qb.where("file.uuid = :uuid", req.params);
       return hideTestDataFromNormalUsers<RegularFile | ModelFile>(qb, req).getOne();
     };
@@ -159,8 +160,7 @@ export class FileRoutes {
           .getOne();
       };
       const existingFile = await findFileByName(isModel);
-      const searchFile = new SearchFile(file);
-
+      const searchFile = new SearchFile(file as RegularFile | ModelFile);
       const FileClass = isModel ? ModelFile : RegularFile;
       if (!existingFile) {
         // New file
@@ -294,14 +294,22 @@ export class FileRoutes {
       .leftJoinAndSelect("file.site", "site")
       .leftJoinAndSelect("file.product", "product");
     if (isModel) qb.leftJoinAndSelect("file.model", "model");
+    if (!isModel) qb.leftJoinAndSelect("file.instrument", "instrument");
 
     // Where clauses
     qb = addCommonFilters(qb, query);
+
     if (isModel && query.model) qb.andWhere("model.id IN (:...model)", query);
+    if (!isModel && query.instrument) qb.andWhere("file.instrument IN (:...instrument)", query);
+
+    // Hack to prevent loading of model files when instrument is selected without product
+    if (isModel && query.instrument) qb.andWhere("1 = 0");
+
     if (query.filename) qb.andWhere("regexp_replace(s3key, '.+/', '') IN (:...filename)", query); // eslint-disable-line quotes
     if (query.releasedBefore) qb.andWhere("file.updatedAt < :releasedBefore", query);
     if (query.updatedAtFrom) qb.andWhere("file.updatedAt >= :updatedAtFrom", query);
     if (query.updatedAtTo) qb.andWhere("file.updatedAt <= :updatedAtTo", query);
+    if (query.instrumentPid) qb.andWhere("file.instrumentPid IN (:...instrumentPid)", query);
 
     // No allVersions, allModels or model/filename params (default)
     if (
@@ -335,8 +343,10 @@ export class FileRoutes {
     let qb = this.searchFileRepo
       .createQueryBuilder("file")
       .leftJoinAndSelect("file.site", "site")
-      .leftJoinAndSelect("file.product", "product");
+      .leftJoinAndSelect("file.product", "product")
+      .leftJoinAndSelect("file.instrument", "instrument");
     qb = addCommonFilters(qb, query);
+    if (query.instrument) qb.andWhere("instrument.id IN (:...instrument)", query);
     qb.orderBy("file.measurementDate", "DESC");
     if ("limit" in query) qb.limit(parseInt(query.limit));
     return qb;

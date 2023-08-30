@@ -20,6 +20,7 @@ import { Model } from "./Model";
 import { ModelVisualization } from "./ModelVisualization";
 import { ErrorLevel } from "./QualityReport";
 import { Software } from "./Software";
+import { Instrument } from "./Instrument";
 
 export enum Quality {
   NRT = "nrt",
@@ -102,6 +103,7 @@ export abstract class File {
   }
 }
 
+@Index(["instrument"])
 @Entity()
 export class RegularFile extends File {
   @Column("uuid", { array: true, nullable: true })
@@ -112,6 +114,9 @@ export class RegularFile extends File {
 
   @Column({ nullable: true })
   instrumentPid!: string;
+
+  @ManyToOne((_) => Instrument, (instrument) => instrument.files, { nullable: true })
+  instrument!: Instrument | null;
 }
 
 @Entity()

@@ -14,7 +14,8 @@
     "site": "mace-head",
     "version": "123",
     "errorLevel": null,
-    "software": [{ "id": 1 }]
+    "software": [{ "id": 1 }],
+    "instrument": "mira"
   },
   {
     "uuid": "bde7a35f-03aa-4bff-acfb-b4974ea9f217",
@@ -48,7 +49,8 @@
     "site": "hyytiala",
     "version": "123",
     "errorLevel": null,
-    "software": [{ "id": 1 }]
+    "software": [{ "id": 1 }],
+    "instrument": "rpg-fmcw-94"
   },
   {
     "uuid": "22b32746-faf0-4057-9076-ed2e698dcc34",
@@ -248,7 +250,8 @@
     "version": "123",
     "quality": "qc",
     "errorLevel": "error",
-    "software": [{ "id": 1 }]
+    "software": [{ "id": 1 }],
+    "instrument": "mira"
   },
   {
     "uuid": "b6de8cf4-8825-47b0-aaa9-4fd413bbb0d7",
@@ -266,7 +269,8 @@
     "version": "123",
     "errorLevel": null,
     "instrumentPid": "https://hdl.handle.net/123/bucharest_lidar",
-    "software": [{ "id": 1 }]
+    "software": [{ "id": 1 }],
+    "instrument": "chm15k"
   },
   {
     "uuid": "f036da43-c19c-4832-99f9-6cc88f3255c5",
@@ -284,6 +288,7 @@
     "version": "123",
     "errorLevel": null,
     "instrumentPid": "https://hdl.handle.net/123/bucharest_radar",
-    "software": [{ "id": 1 }]
+    "software": [{ "id": 1 }],
+    "instrument": "rpg-fmcw-94"
   }
 ]
