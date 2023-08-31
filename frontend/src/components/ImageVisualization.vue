@@ -23,11 +23,7 @@
   <div v-if="caption">
     <div class="caption">
       {{ data.productVariable.humanReadableName }}
-      <a
-        :href="data.productVariable.actrisVocabUri"
-        v-if="data.productVariable.actrisVocabUri"
-        title="ACTRIS variable"
-      >
+      <a :href="data.productVariable.actrisVocabUri" v-if="data.productVariable.actrisVocabUri" title="ACTRIS variable">
         <svg
           class="link"
           fill="#000000"
@@ -128,7 +124,5 @@ const imageStyle = computed(() => {
   };
 });
 
-const imageUrl = computed(
-  () => `${import.meta.env.VITE_BACKEND_URL}download/image/${props.data.s3key}`
-);
+const imageUrl = computed(() => `${import.meta.env.VITE_BACKEND_URL}download/image/${props.data.s3key}`);
 </script>

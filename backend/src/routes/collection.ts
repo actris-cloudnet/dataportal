@@ -153,7 +153,7 @@ export class CollectionRoutes {
     if (!collection) return null;
     const regularFileIds = await this.collectionRepo.query(
       'SELECT "regularFileUuid" from collection_regular_files_regular_file WHERE "collectionUuid" = $1',
-      [uuid]
+      [uuid],
     );
     const regularFiles = await this.fileRepo.find({
       where: { uuid: In(regularFileIds.map((obj: any) => obj.regularFileUuid)) },
@@ -162,7 +162,7 @@ export class CollectionRoutes {
 
     const modelFileIds = await this.collectionRepo.query(
       'SELECT "modelFileUuid" from collection_model_files_model_file WHERE "collectionUuid" = $1',
-      [uuid]
+      [uuid],
     );
     const modelFiles = await this.modelFileRepo.find({
       where: { uuid: In(modelFileIds.map((obj: any) => obj.modelFileUuid)) },

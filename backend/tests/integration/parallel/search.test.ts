@@ -24,7 +24,7 @@ describe("/api/files", () => {
       errors: ["No search parameters given"],
     };
     return expect(axios.get(`${backendPublicUrl}files/`)).rejects.toMatchObject(
-      genResponse(expectedBody.status, expectedBody)
+      genResponse(expectedBody.status, expectedBody),
     );
   });
 
@@ -35,7 +35,7 @@ describe("/api/files", () => {
       errors: ["Unknown query parameters: x,y"],
     };
     return expect(axios.get(`${backendPublicUrl}files/`, payload)).rejects.toMatchObject(
-      genResponse(expectedBody.status, expectedBody)
+      genResponse(expectedBody.status, expectedBody),
     );
   });
 
@@ -53,7 +53,7 @@ describe("/api/files", () => {
     expect(res).toHaveProperty("data");
     expect(res.data).toHaveLength(3);
     return expect(new Set(res.data.map((d: any) => d.site.id))).toEqual(
-      new Set(["mace-head", "mace-head", "hyytiala"])
+      new Set(["mace-head", "mace-head", "hyytiala"]),
     );
   });
 

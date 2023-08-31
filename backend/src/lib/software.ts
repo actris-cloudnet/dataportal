@@ -17,14 +17,14 @@ export class SoftwareService {
       humanReadableName: "Cloudnet processing",
       githubRepository: "actris-cloudnet/cloudnet-processing",
     },
-    cloudnetpy: {
+    "cloudnetpy": {
       humanReadableName: "CloudnetPy",
       githubRepository: "actris-cloudnet/cloudnetpy",
       zenodoConceptId: "3666030",
     },
     "halo-reader": { humanReadableName: "HALO reader", githubRepository: "actris-cloudnet/halo-reader" },
-    mwrpy: { humanReadableName: "MWRPy", githubRepository: "actris-cloudnet/mwrpy" },
-    voodoonet: {
+    "mwrpy": { humanReadableName: "MWRPy", githubRepository: "actris-cloudnet/mwrpy" },
+    "voodoonet": {
       humanReadableName: "VoodooNet",
       githubRepository: "actris-cloudnet/voodoonet",
       zenodoConceptId: "8263093",

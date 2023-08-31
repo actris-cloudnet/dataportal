@@ -29,17 +29,10 @@
 
 <template>
   <main v-if="response" id="landing">
-    <div
-      v-if="!isBusy && newestVersion"
-      class="landing-version-banner-container"
-    >
+    <div v-if="!isBusy && newestVersion" class="landing-version-banner-container">
       <div class="landing-version-banner">
         There is a
-        <router-link
-          class="landing-version-banner-link"
-          :to="`/file/${newestVersion}`"
-          >newer version</router-link
-        >
+        <router-link class="landing-version-banner-link" :to="`/file/${newestVersion}`">newer version</router-link>
         of this data available.
       </div>
     </div>
@@ -48,32 +41,10 @@
         {{ title }}
       </div>
       <div class="landing-tags">
-        <div
-          v-if="isActrisObject"
-          class="tag actris"
-          title="Data from ACTRIS site"
-        >
-          ACTRIS
-        </div>
-        <div
-          v-if="response.volatile"
-          class="tag volatile"
-          title="Data may change in future"
-        >
-          Volatile
-        </div>
-        <div
-          v-if="response.legacy"
-          class="tag legacy"
-          title="Produced using non-standardized processing"
-        >
-          Legacy
-        </div>
-        <div
-          v-if="response.product.experimental"
-          class="tag experimental"
-          title="Experimental product"
-        >
+        <div v-if="isActrisObject" class="tag actris" title="Data from ACTRIS site">ACTRIS</div>
+        <div v-if="response.volatile" class="tag volatile" title="Data may change in future">Volatile</div>
+        <div v-if="response.legacy" class="tag legacy" title="Produced using non-standardized processing">Legacy</div>
+        <div v-if="response.product.experimental" class="tag experimental" title="Experimental product">
           Experimental
         </div>
       </div>
@@ -93,11 +64,7 @@
         <img :src="PhotoGalleryIcon" alt="" />
         Visualisations
       </router-link>
-      <router-link
-        class="tab"
-        :to="{ name: 'FileQualityReport' }"
-        v-if="response.errorLevel"
-      >
+      <router-link class="tab" :to="{ name: 'FileQualityReport' }" v-if="response.errorLevel">
         <img :src="getQcIcon(response.errorLevel)" alt="" />
         Quality report
       </router-link>
@@ -134,9 +101,7 @@ import { getProductIcon, getQcIcon } from "@/lib";
 
 import PhotoGalleryIcon from "@/assets/icons/photo-gallery.png";
 
-export type SourceFile =
-  | { ok: true; value: File }
-  | { ok: false; value: Error };
+export type SourceFile = { ok: true; value: File } | { ok: false; value: Error };
 
 export interface Props {
   uuid: string;
@@ -162,7 +127,7 @@ const location = ref<SiteLocation | null>(null);
 const title = computed(() =>
   response.value
     ? `${response.value.product.humanReadableName} data from ${response.value.site.humanReadableName}`
-    : undefined
+    : undefined,
 );
 
 const isActrisObject = computed(() => {
@@ -211,9 +176,7 @@ async function fetchLocation(file: ModelFile | RegularFile) {
     return;
   }
   try {
-    const response = await axios.get(
-      `${apiUrl}sites/${file.site.id}/locations/${file.measurementDate}`
-    );
+    const response = await axios.get(`${apiUrl}sites/${file.site.id}/locations/${file.measurementDate}`);
     location.value = response.data;
   } catch (err) {
     location.value = null;
@@ -246,15 +209,12 @@ async function fetchSourceFiles(response: RegularFile | ModelFile) {
       axios
         .get(`${apiUrl}files/${uuid}`)
         .then((response) => ({ ok: true, value: response.data }))
-        .catch((error) => ({ ok: false, value: error }))
-    )
+        .catch((error) => ({ ok: false, value: error })),
+    ),
   );
   results.sort((a, b) => {
     if (!a.ok || !b.ok) return -1;
-    return compareValues(
-      a.value.product.humanReadableName,
-      b.value.product.humanReadableName
-    );
+    return compareValues(a.value.product.humanReadableName, b.value.product.humanReadableName);
   });
   sourceFiles.value = results;
 }
@@ -287,6 +247,6 @@ watch(
     ]);
     isBusy.value = false;
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>

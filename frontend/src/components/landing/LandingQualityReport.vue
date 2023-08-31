@@ -4,23 +4,11 @@
 
 <template>
   <div class="landing-quality-report-container">
-    <div
-      v-if="report.status === 'loading'"
-      class="quality-report-box quality-report-box-loading"
-    >
-      Loading...
-    </div>
-    <div
-      v-else-if="report.status === 'notFound'"
-      class="quality-report-box quality-report-box-loading"
-    >
+    <div v-if="report.status === 'loading'" class="quality-report-box quality-report-box-loading">Loading...</div>
+    <div v-else-if="report.status === 'notFound'" class="quality-report-box quality-report-box-loading">
       No quality report available.
     </div>
-    <div
-      v-else-if="report.status === 'error'"
-      class="quality-report-box"
-      style="color: red"
-    >
+    <div v-else-if="report.status === 'error'" class="quality-report-box" style="color: red">
       Failed to load report.
     </div>
     <div v-else class="quality-report-box">
@@ -41,9 +29,7 @@
       </div>
       <div class="quality-software">
         Tested with
-        <a
-          :href="`https://github.com/actris-cloudnet/cloudnetpy-qc/tree/v${report.value.qcVersion}`"
-        >
+        <a :href="`https://github.com/actris-cloudnet/cloudnetpy-qc/tree/v${report.value.qcVersion}`">
           CloudnetPy-QC v{{ report.value.qcVersion }}
         </a>
         at
@@ -51,37 +37,19 @@
       </div>
       <div class="quality-test-list-header">Tests</div>
       <div class="quality-test-list">
-        <div
-          class="quality-test"
-          v-for="test in report.value.testReports"
-          :key="test.testId"
-        >
+        <div class="quality-test" v-for="test in report.value.testReports" :key="test.testId">
           <div class="quality-test-icon">
             <img :src="getQcIcon(test.result)" alt="" />
           </div>
           <div class="quality-test-id">{{ test.name }}</div>
-          <div
-            v-if="test.description"
-            class="quality-test-description"
-            v-html="formatMessage(test.description)"
-          ></div>
+          <div v-if="test.description" class="quality-test-description" v-html="formatMessage(test.description)"></div>
           <ul class="quality-test-exception-list">
             <li
               v-for="(exception, i) in test.exceptions"
               :key="exception.result + i"
-              :class="[
-                'quality-test-exception',
-                'quality-test-exception-' + exception.result,
-              ]"
+              :class="['quality-test-exception', 'quality-test-exception-' + exception.result]"
             >
-              <div
-                v-if="
-                  Object.keys(exception).length <= 1 ||
-                  !('message' in exception)
-                "
-              >
-                test failed
-              </div>
+              <div v-if="Object.keys(exception).length <= 1 || !('message' in exception)">test failed</div>
               <div v-else v-html="formatMessage(exception.message)"></div>
             </li>
           </ul>
@@ -145,9 +113,7 @@ watch(
   () => props.uuid,
   async () => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}quality/${props.uuid}`
-      );
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}quality/${props.uuid}`);
       report.value = { status: "ready", value: response.data };
     } catch (error: any) {
       if (error.response && error.response.status === 404) {
@@ -157,7 +123,7 @@ watch(
       }
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const donutData = computed(() => {
@@ -165,10 +131,7 @@ const donutData = computed(() => {
   return [
     {
       value:
-        report.value.value.tests -
-        report.value.value.warnings -
-        report.value.value.errors -
-        report.value.value.info,
+        report.value.value.tests - report.value.value.warnings - report.value.value.errors - report.value.value.info,
       color: "#4C9A2A",
     },
     { value: report.value.value.warnings, color: "goldenrod" },
@@ -180,9 +143,6 @@ const donutData = computed(() => {
 function formatMessage(message: string): string {
   // Try to format anything that looks like an identifier (snake case, in single
   // quotes).
-  return escapeHtml(message).replace(
-    /&#39;(\w+)&#39;|(\w+_\w+)/gi,
-    "<code>$1$2</code>"
-  );
+  return escapeHtml(message).replace(/&#39;(\w+)&#39;|(\w+_\w+)/gi, "<code>$1$2</code>");
 }
 </script>

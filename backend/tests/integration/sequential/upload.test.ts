@@ -24,13 +24,13 @@ const dataUrl = `${backendPrivateUrl}upload/data/`;
 const modelDataUrl = `${backendPrivateUrl}model-upload/data/`;
 
 const userCredentials = {
-  alice: "alices_password",
-  bob: "bobs_pass",
-  carol: "carols-passphrase",
-  david: "davids^passphrase",
-  eve: "eves_passphraase",
-  bucharest: "passWordForBucharest",
-  granada: "PASSWORDFORgranada",
+  "alice": "alices_password",
+  "bob": "bobs_pass",
+  "carol": "carols-passphrase",
+  "david": "davids^passphrase",
+  "eve": "eves_passphraase",
+  "bucharest": "passWordForBucharest",
+  "granada": "PASSWORDFORgranada",
   "mace-head": "SfSCHhnU5cjrMiLdgcW3ixkTQRo",
 };
 
@@ -155,8 +155,8 @@ describe("POST /upload/metadata", () => {
       Array.from({ length: 100 }, () =>
         axios.post(metadataUrl, validMetadata, { headers }).catch(() => {
           /* Let some requests fail. */
-        })
-      )
+        }),
+      ),
     );
     const mds = await instrumentRepo.findBy({ checksum: validMetadata.checksum });
     expect(mds).toHaveLength(1);
@@ -174,8 +174,8 @@ describe("POST /upload/metadata", () => {
           .post(metadataUrl, i % 2 == 0 ? validMetadata : { ...validMetadata, checksum: altChecksum }, { headers })
           .catch(() => {
             /* Let some requests fail. */
-          })
-      )
+          }),
+      ),
     );
     const mds = await instrumentRepo.findBy({
       filename: validMetadata.filename,
@@ -193,21 +193,21 @@ describe("POST /upload/metadata", () => {
   it("rejects metadata without instrumentPid", async () => {
     const payload = { ...validMetadata, instrumentPid: undefined };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject(
-      genResponse(422, "Request is missing instrumentPid")
+      genResponse(422, "Request is missing instrumentPid"),
     );
   });
 
   test("rejects metadata with invalid instrumentPid type", async () => {
     const payload = { ...validMetadata, instrumentPid: 123 };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject(
-      genResponse(422, "instrumentPid must be string")
+      genResponse(422, "instrumentPid must be string"),
     );
   });
 
   it("rejects metadata with invalid instrumentPid", async () => {
     const payload = { ...validMetadata, instrumentPid: "kissa" };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject(
-      genResponse(422, "instrumentPid must be HTTPS")
+      genResponse(422, "instrumentPid must be HTTPS"),
     );
   });
 
@@ -217,14 +217,14 @@ describe("POST /upload/metadata", () => {
       instrumentPid: "https://instrumentdb.out.ocp.fmi.fi/instrument/141063a2-67b7-47ee-b97c-7d814d33e68a",
     };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject(
-      genResponse(422, "instrumentPid must be Handle")
+      genResponse(422, "instrumentPid must be Handle"),
     );
   });
 
   test("rejects metadata with HTTP instrumentPid", async () => {
     const payload = { ...validMetadata, instrumentPid: "http://hdl.handle.net/21.12132/3.191564170f8a4686" };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject(
-      genResponse(422, "instrumentPid must be HTTPS")
+      genResponse(422, "instrumentPid must be HTTPS"),
     );
   });
 
@@ -836,7 +836,7 @@ describe("tags: Test instrument upload metadata tag update", () => {
 
   it("tests that original co metadata has been removed", async () => {
     await expect(
-      instrumentRepo.exist({ where: { filename: payload_co.filename, checksum: payload_co.checksum } })
+      instrumentRepo.exist({ where: { filename: payload_co.filename, checksum: payload_co.checksum } }),
     ).resolves.toBe(false);
   });
 });
@@ -870,7 +870,7 @@ describe("Test instrument upload with various tags", () => {
 
   it("tests that tags work as sorted(list(set(submitted_tags)))", async () => {
     await expect(
-      axios.post(metadataUrl, { ...payload_co, tags: ["cross", "co", "co"] }, { headers })
+      axios.post(metadataUrl, { ...payload_co, tags: ["cross", "co", "co"] }, { headers }),
     ).resolves.toMatchObject({
       status: 200,
     });
@@ -1070,7 +1070,7 @@ async function expectSuccessfulUploadInstrument(username: string, password: stri
   await expect(axios.put(putDataUrl, content, { headers })).resolves.toMatchObject({ status: 201 });
   const metadataFromDbAfterPut = await instrumentRepo.findOneByOrFail({ checksum });
   expect(new Date(metadataFromDbAfterPut.updatedAt).getTime()).toBeGreaterThan(
-    new Date(metadataFromDbAfterPut.createdAt).getTime()
+    new Date(metadataFromDbAfterPut.createdAt).getTime(),
   );
 }
 
@@ -1078,7 +1078,7 @@ async function expectFailedUploadInstrument(
   username: string,
   password: string,
   siteId: string,
-  correctPassword: boolean = true
+  correctPassword: boolean = true,
 ) {
   const putStatus: number = correctPassword ? 422 : 401;
   const contentLength = randomInt(4, 128);
@@ -1142,7 +1142,7 @@ async function expectFailedUploadModel(
   username: string,
   password: string,
   siteId: string,
-  correctPassword: boolean = true
+  correctPassword: boolean = true,
 ) {
   const putStatus: number = correctPassword ? 422 : 401;
   const contentLength = randomInt(4, 128);

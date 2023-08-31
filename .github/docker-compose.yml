@@ -15,12 +15,7 @@ services:
     command: ["npm", "run", "start-test"]
     healthcheck:
       test:
-        [
-          "CMD",
-          "node",
-          "-e",
-          "const c=new require('net').Socket();c.connect(3000);c.on('connect',()=>process.exit(0))",
-        ]
+        ["CMD", "node", "-e", "const c=new require('net').Socket();c.connect(3000);c.on('connect',()=>process.exit(0))"]
       interval: 1s
       retries: 20
   db:
@@ -42,12 +37,7 @@ services:
       target: dev
     healthcheck:
       test:
-        [
-          "CMD",
-          "node",
-          "-e",
-          "const c=new require('net').Socket();c.connect(8080);c.on('connect',()=>process.exit(0))",
-        ]
+        ["CMD", "node", "-e", "const c=new require('net').Socket();c.connect(8080);c.on('connect',()=>process.exit(0))"]
       interval: 1s
       retries: 20
     env_file:
@@ -99,12 +89,7 @@ services:
       - DP_BACKEND_URL=http://frontend-prod:8080/api
     healthcheck:
       test:
-        [
-          "CMD",
-          "node",
-          "-e",
-          "const c=new require('net').Socket();c.connect(3000);c.on('connect',()=>process.exit(0))",
-        ]
+        ["CMD", "node", "-e", "const c=new require('net').Socket();c.connect(3000);c.on('connect',()=>process.exit(0))"]
       interval: 1s
       retries: 20
     command: ["npm", "run", "start-e2e"]

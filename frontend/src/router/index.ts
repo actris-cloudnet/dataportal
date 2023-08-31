@@ -37,15 +37,13 @@ const router = createRouter({
           path: "visualizations",
           name: "FileVisualizations",
           meta: { title: false },
-          component: () =>
-            import("@/components/landing/LandingVisualisations.vue"),
+          component: () => import("@/components/landing/LandingVisualisations.vue"),
         },
         {
           path: "quality",
           name: "FileQualityReport",
           meta: { title: false },
-          component: () =>
-            import("@/components/landing/LandingQualityReport.vue"),
+          component: () => import("@/components/landing/LandingQualityReport.vue"),
         },
       ],
     },
@@ -147,7 +145,7 @@ export function useTitle(parts: TitleParts | Ref<TitleParts>) {
   watch(
     typeof parts === "function" ? computed<TitleParts>(parts) : ref(parts),
     (parts) => setTitle(parts.filter((x): x is string => !!x)),
-    { immediate: true }
+    { immediate: true },
   );
 }
 

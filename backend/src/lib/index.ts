@@ -136,7 +136,7 @@ export const transformRawFile = (obj: any, prefix: string): RegularFile | ModelF
       ...acc,
       ...translateKeyVal(key, obj[key], acc, prefix),
     }),
-    {}
+    {},
   ) as RegularFile | ModelFile | SearchFile;
 };
 
@@ -145,7 +145,7 @@ export const dateforsize = async (
   table: string,
   req: Request,
   res: Response,
-  _: NextFunction
+  _: NextFunction,
 ) => {
   const query = req.query as any;
   const startDate = new Date(query.startDate);
@@ -156,7 +156,7 @@ export const dateforsize = async (
     SELECT "updatedAt", sum(size) OVER (ORDER BY "updatedAt")
     FROM ${table} where "updatedAt" > $1) as asd
   WHERE sum > $2 LIMIT 1`,
-    [startDate, sizeBytes]
+    [startDate, sizeBytes],
   );
 
   if (result.length == 0) return res.sendStatus(400);

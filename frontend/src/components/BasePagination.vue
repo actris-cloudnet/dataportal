@@ -18,16 +18,9 @@ const totalPages = computed(() => Math.ceil(props.totalRows / props.perPage));
 
 const radius = 1;
 const visiblePages = computed(() => {
-  const middlePage = Math.min(
-    Math.max(props.modelValue, radius + 1),
-    totalPages.value - radius
-  );
+  const middlePage = Math.min(Math.max(props.modelValue, radius + 1), totalPages.value - radius);
   const output = [];
-  for (
-    let page = Math.max(1, middlePage - radius);
-    page <= Math.min(middlePage + radius, totalPages.value);
-    page++
-  ) {
+  for (let page = Math.max(1, middlePage - radius); page <= Math.min(middlePage + radius, totalPages.value); page++) {
     output.push(page);
   }
   return output;
@@ -36,15 +29,8 @@ const visiblePages = computed(() => {
 
 <template>
   <div class="page">
-    <button @click="emit('update:modelValue', 1)" :disabled="modelValue === 1">
-      «
-    </button>
-    <button
-      @click="emit('update:modelValue', modelValue - 1)"
-      :disabled="modelValue === 1"
-    >
-      ‹
-    </button>
+    <button @click="emit('update:modelValue', 1)" :disabled="modelValue === 1">«</button>
+    <button @click="emit('update:modelValue', modelValue - 1)" :disabled="modelValue === 1">‹</button>
     <button
       v-for="page in visiblePages"
       :key="page"
@@ -53,18 +39,8 @@ const visiblePages = computed(() => {
     >
       {{ page }}
     </button>
-    <button
-      @click="emit('update:modelValue', modelValue + 1)"
-      :disabled="modelValue === totalPages"
-    >
-      ›
-    </button>
-    <button
-      @click="emit('update:modelValue', totalPages)"
-      :disabled="modelValue === totalPages"
-    >
-      »
-    </button>
+    <button @click="emit('update:modelValue', modelValue + 1)" :disabled="modelValue === totalPages">›</button>
+    <button @click="emit('update:modelValue', totalPages)" :disabled="modelValue === totalPages">»</button>
   </div>
 </template>
 

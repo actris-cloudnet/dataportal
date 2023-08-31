@@ -28,7 +28,7 @@ export class ProductVariable {
     order: number,
     visualizations: Visualization[],
     product: Product,
-    actrisVocabUri: string | null = null
+    actrisVocabUri: string | null = null,
   ) {
     this.id = id;
     this.humanReadableName = humanReadableName;

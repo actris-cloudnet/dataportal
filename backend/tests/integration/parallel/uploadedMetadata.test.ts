@@ -43,37 +43,37 @@ describe("GET /api/raw-files", () => {
 
   it("responds with correct object when filtering with date", async () => {
     return expect(
-      axios.get(`${rawFilesUrl}`, { params: { dateFrom: "2020-08-11", dateTo: "2020-08-11", developer: true } })
+      axios.get(`${rawFilesUrl}`, { params: { dateFrom: "2020-08-11", dateTo: "2020-08-11", developer: true } }),
     ).resolves.toMatchObject({ status: 200, data: [instResp[0]] });
   });
 
   it("responds with correct object when filtering with date 2", async () => {
     return expect(
-      axios.get(`${rawFilesUrl}`, { params: { date: "2020-08-11", developer: true } })
+      axios.get(`${rawFilesUrl}`, { params: { date: "2020-08-11", developer: true } }),
     ).resolves.toMatchObject({ status: 200, data: [instResp[0]] });
   });
 
   it("responds with correct object when filtering with site", async () => {
     return expect(axios.get(`${rawFilesUrl}`, { params: { site: "granada", developer: true } })).resolves.toMatchObject(
-      { status: 200, data: [instResp[0]] }
+      { status: 200, data: [instResp[0]] },
     );
   });
 
   it("responds with correct object when filtering with status", async () => {
     return expect(
-      axios.get(`${rawFilesUrl}`, { params: { status: "processed", developer: true } })
+      axios.get(`${rawFilesUrl}`, { params: { status: "processed", developer: true } }),
     ).resolves.toMatchObject({ status: 200, data: [instResp[1], instResp[2]] });
   });
 
   it("responds with correct object when filtering with instrument", async () => {
     return expect(
-      axios.get(`${rawFilesUrl}`, { params: { instrument: "mira", developer: true } })
+      axios.get(`${rawFilesUrl}`, { params: { instrument: "mira", developer: true } }),
     ).resolves.toMatchObject({ status: 200, data: [instResp[0], instResp[3]] });
   });
 
   it("responds with correct object when filtering with halo-doppler-lidar", async () => {
     return expect(
-      axios.get(`${rawFilesUrl}`, { params: { instrument: "halo-doppler-lidar", developer: true } })
+      axios.get(`${rawFilesUrl}`, { params: { instrument: "halo-doppler-lidar", developer: true } }),
     ).resolves.toMatchObject({ status: 200, data: [instResp[4]] });
   });
 
@@ -81,7 +81,7 @@ describe("GET /api/raw-files", () => {
     return expect(
       axios.get(`${rawFilesUrl}`, {
         params: { updatedAtFrom: "2020-09-27T00:00:00.000Z", updatedAtTo: "2020-09-28T00:00:00.000Z", developer: true },
-      })
+      }),
     ).resolves.toMatchObject({ status: 200, data: [instResp[0]] });
   });
 
@@ -100,7 +100,7 @@ describe("GET /api/raw-model-files", () => {
 
   it("responds with correct object when filtering with model", async () => {
     return expect(
-      axios.get(`${rawModelFilesUrl}`, { params: { model: "icon-iglo-12-23", developer: true } })
+      axios.get(`${rawModelFilesUrl}`, { params: { model: "icon-iglo-12-23", developer: true } }),
     ).resolves.toMatchObject({ status: 200, data: [modelResp[2], modelResp[3]] });
   });
 });
@@ -135,13 +135,13 @@ describe("GET /api/upload-dateforsize", () => {
   const publicUrl = `${backendPublicUrl}upload-dateforsize/`;
   it("responds with date corresponding with the target size", async () => {
     return expect(
-      axios.get(`${publicUrl}`, { params: { startDate: "2020-09-27T12:45:21.916Z", targetSize: "30" } })
+      axios.get(`${publicUrl}`, { params: { startDate: "2020-09-27T12:45:21.916Z", targetSize: "30" } }),
     ).resolves.toMatchObject({ status: 200, data: "2020-09-28T12:47:21.916Z" });
   });
 
   it("responds with 400 if there is not enough data", async () => {
     return expect(
-      axios.get(`${publicUrl}`, { params: { startDate: "2020-09-28T12:47:21.916Z", targetSize: "30" } })
+      axios.get(`${publicUrl}`, { params: { startDate: "2020-09-28T12:47:21.916Z", targetSize: "30" } }),
     ).rejects.toMatchObject({ response: { status: 400 } });
   });
 });

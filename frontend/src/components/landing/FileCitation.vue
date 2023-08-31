@@ -65,21 +65,13 @@
 
 <template>
   <div class="summary-section" id="citation">
-    <div
-      v-if="file.volatile"
-      class="disclaimer-banner"
-      :class="'volatile-banner'"
-    >
+    <div v-if="file.volatile" class="disclaimer-banner" :class="'volatile-banner'">
       <img class="banner-icon" alt="warning icon" :src="warningIcon" />
-      <span v-if="file.volatile"
-        >This data object is volatile and may be updated in the future.</span
-      >
+      <span v-if="file.volatile">This data object is volatile and may be updated in the future.</span>
     </div>
     <div v-if="file.legacy" class="disclaimer-banner" :class="'legacy-banner'">
       <img class="banner-icon" alt="warning icon" :src="warningIcon" />
-      <span v-if="file.legacy"
-        >This data object was produced using nonstandard processing.</span
-      >
+      <span v-if="file.legacy">This data object was produced using nonstandard processing.</span>
     </div>
 
     <section class="citation-section" id="citation">
@@ -90,31 +82,20 @@
           <a :href="citation.risUrl">RIS</a>
         </div>
       </div>
-      <div
-        v-if="citation.status == 'ready'"
-        class="example citation-section-content"
-        v-html="citation.citation"
-      ></div>
-      <div v-else-if="citation.status == 'loading'" class="loading">
-        Loading...
-      </div>
-      <div v-else-if="citation.status == 'error'" class="error">
-        Failed to load citation.
-      </div>
+      <div v-if="citation.status == 'ready'" class="example citation-section-content" v-html="citation.citation"></div>
+      <div v-else-if="citation.status == 'loading'" class="loading">Loading...</div>
+      <div v-else-if="citation.status == 'error'" class="error">Failed to load citation.</div>
     </section>
     <section class="citation-section" v-if="citation.status == 'ready'">
       <p class="citation-note">
-        Please include the following information in your publication. You may
-        edit the text to suit publication standards.
+        Please include the following information in your publication. You may edit the text to suit publication
+        standards.
       </p>
       <div class="example">
         <div class="example-header">Data availability</div>
         <p v-html="citation.dataAvailability"></p>
         <div class="example-header">Acknowledgements</div>
-        <div
-          v-html="citation.acknowledgements"
-          v-if="citation.status == 'ready'"
-        ></div>
+        <div v-html="citation.acknowledgements" v-if="citation.status == 'ready'"></div>
       </div>
     </section>
   </div>
@@ -177,6 +158,6 @@ watch(
     citation.value = { status: "loading" };
     await fetchReferenceStrings();
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>

@@ -70,7 +70,7 @@ describe("test user accounts and permissions", () => {
     await expect(
       axios.put(USER_ACCOUNTS_URL.concat("/", alice.id), {
         password: "alices_new_password",
-      })
+      }),
     ).resolves.toMatchObject({
       status: 200,
       data: { id: alice.id },
@@ -88,7 +88,7 @@ describe("test user accounts and permissions", () => {
     for (const user of getRespAllUsers.data) {
       if (user.username === alice.username) continue;
       await expect(
-        axios.put(USER_ACCOUNTS_URL.concat("/", alice.id), { username: user.username })
+        axios.put(USER_ACCOUNTS_URL.concat("/", alice.id), { username: user.username }),
       ).rejects.toMatchObject({
         response: { status: 400 },
       });
@@ -100,7 +100,7 @@ describe("test user accounts and permissions", () => {
     await expect(
       axios.put(USER_ACCOUNTS_URL.concat("/", alice.id), {
         permissions: [],
-      })
+      }),
     ).resolves.toMatchObject({
       status: 200,
       data: {
@@ -114,7 +114,7 @@ describe("test user accounts and permissions", () => {
           { siteId: "granada", permission: "canUpload" },
           { siteId: null, permission: "canUploadModel" },
         ],
-      })
+      }),
     ).resolves.toMatchObject({
       status: 200,
       data: {
@@ -135,7 +135,7 @@ describe("test user accounts and permissions", () => {
           { siteId: "granada", permission: "canUpload" },
           { siteId: "mace-head", permission: "canUpload" },
         ],
-      })
+      }),
     ).resolves.toMatchObject({
       status: 200,
       data: {
@@ -156,7 +156,7 @@ describe("test user accounts and permissions", () => {
           { siteId: "granadaTypo", permission: "canUpload" },
           { siteId: null, permission: "canUploadModel" },
         ],
-      })
+      }),
     ).rejects.toMatchObject({ response: { status: 422 } });
   });
 
@@ -168,7 +168,7 @@ describe("test user accounts and permissions", () => {
           { siteId: "granada", permission: "canUpload" },
           { siteId: null, permission: "canUploadModelTYPO" },
         ],
-      })
+      }),
     ).rejects.toMatchObject({ response: { status: 422 } });
   });
 
@@ -177,7 +177,7 @@ describe("test user accounts and permissions", () => {
     await expect(
       axios.put(USER_ACCOUNTS_URL.concat("/", alice.id), {
         password: "",
-      })
+      }),
     ).rejects.toMatchObject({ response: { status: 401 } });
   });
 
@@ -186,7 +186,7 @@ describe("test user accounts and permissions", () => {
     await expect(
       axios.put(USER_ACCOUNTS_URL.concat("/", alice.id), {
         username: "",
-      })
+      }),
     ).rejects.toMatchObject({ response: { status: 401 } });
   });
 

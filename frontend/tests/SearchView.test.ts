@@ -32,17 +32,12 @@ describe("SearchView.vue", () => {
   let wrapper: VueWrapper;
   let resources: any;
 
-  const findInputByName = (inputName: string) =>
-    wrapper.find(`input[name="${inputName}"]`);
+  const findInputByName = (inputName: string) => wrapper.find(`input[name="${inputName}"]`);
   const findElementById = (id: string) => wrapper.find(`#${id}`);
   const getInputValueByName = (inputName: string) =>
-    (wrapper.find(`input[name="${inputName}"]`).element as HTMLInputElement)
-      .value;
+    (wrapper.find(`input[name="${inputName}"]`).element as HTMLInputElement).value;
 
-  const changeInputAndNextTick = async (
-    inputName: string,
-    newValue: string
-  ) => {
+  const changeInputAndNextTick = async (inputName: string, newValue: string) => {
     const input = findInputByName(inputName);
     const inputElement = input.element as HTMLInputElement;
     inputElement.value = newValue;
@@ -53,9 +48,7 @@ describe("SearchView.vue", () => {
   beforeAll(async () => {
     resources = await readResources();
     filesSortedByDate = resources["allfiles"].sort(
-      (a: any, b: any) =>
-        new Date(a.measurementDate).getTime() -
-        new Date(b.measurementDate).getTime()
+      (a: any, b: any) => new Date(a.measurementDate).getTime() - new Date(b.measurementDate).getTime(),
     );
     const defaultAxiosMock = (url: string): AxiosPromise => {
       if (url.includes("/files")) {
@@ -67,9 +60,7 @@ describe("SearchView.vue", () => {
         // search
         return Promise.resolve(augmentAxiosResponse(resources["allsearch"]));
       } else if (url.includes("/products")) {
-        return Promise.resolve(
-          augmentAxiosResponse(resources["products-with-variables"])
-        );
+        return Promise.resolve(augmentAxiosResponse(resources["products-with-variables"]));
       }
       return Promise.reject(new Error(`Unmocked URL: ${url}`));
     };
@@ -97,25 +88,16 @@ describe("SearchView.vue", () => {
 
     it("sets correct date ranges from quickselector buttons", async () => {
       await findElementById("weekBtn").trigger("click");
-      expect(
-        (wrapper.find("#showDateRangeCheckbox").element as HTMLInputElement)
-          .checked
-      ).toBe(false);
+      expect((wrapper.find("#showDateRangeCheckbox").element as HTMLInputElement).checked).toBe(false);
       expect(wrapper.find("#dateFrom").exists()).toBe(false);
       expect(getInputValueByName("dateTo")).toBe(dateToDefault);
       await findElementById("yearBtn").trigger("click");
       const year = new Date().getFullYear();
-      expect(
-        (wrapper.find("#showDateRangeCheckbox").element as HTMLInputElement)
-          .checked
-      ).toBe(true);
+      expect((wrapper.find("#showDateRangeCheckbox").element as HTMLInputElement).checked).toBe(true);
       expect(getInputValueByName("dateFrom")).toBe(`${year}-01-01`);
       expect(getInputValueByName("dateTo")).toBe(dateToDefault);
       await findElementById("monthBtn").trigger("click");
-      expect(
-        (wrapper.find("#showDateRangeCheckbox").element as HTMLInputElement)
-          .checked
-      ).toBe(true);
+      expect((wrapper.find("#showDateRangeCheckbox").element as HTMLInputElement).checked).toBe(true);
       expect(getInputValueByName("dateFrom")).toBe(dateFromPast(29));
       expect(getInputValueByName("dateTo")).toBe(dateToDefault);
     });
@@ -153,7 +135,7 @@ describe("SearchView.vue", () => {
 
     it("updates table based on api response", async () => {
       vi.mocked(axios.get).mockImplementationOnce(() =>
-        Promise.resolve(augmentAxiosResponse(resources["allsearch"].slice(3)))
+        Promise.resolve(augmentAxiosResponse(resources["allsearch"].slice(3))),
       );
       const newValue = filesSortedByDate[0].measurementDate;
       await changeInputAndNextTick("dateFrom", newValue);
@@ -163,15 +145,9 @@ describe("SearchView.vue", () => {
         .slice(3)
         .map((file: any) => file.measurementDate)
         .forEach((date: any) => expect(wrapper.text()).toContain(date));
-      expect(wrapper.text()).not.toContain(
-        resources["allsearch"][0].measurementDate
-      );
-      expect(wrapper.text()).not.toContain(
-        resources["allsearch"][1].measurementDate
-      );
-      expect(wrapper.text()).not.toContain(
-        resources["allsearch"][2].measurementDate
-      );
+      expect(wrapper.text()).not.toContain(resources["allsearch"][0].measurementDate);
+      expect(wrapper.text()).not.toContain(resources["allsearch"][1].measurementDate);
+      expect(wrapper.text()).not.toContain(resources["allsearch"][2].measurementDate);
     });
 
     it("does not touch API on invalid input", async () => {
@@ -222,9 +198,7 @@ describe("SearchView.vue", () => {
 
   describe("volatility", () => {
     it("displays volatile label only next to volatile items", async () => {
-      expect(findElementById("tableContent").findAll(".volatile")).toHaveLength(
-        4
-      );
+      expect(findElementById("tableContent").findAll(".volatile")).toHaveLength(4);
     });
   });
 
@@ -236,9 +210,7 @@ describe("SearchView.vue", () => {
     });
 
     it("displays legacy label next to volatile items", async () => {
-      expect(findElementById("tableContent").findAll(".legacy")).toHaveLength(
-        1
-      );
+      expect(findElementById("tableContent").findAll(".legacy")).toHaveLength(1);
     });
   });
 

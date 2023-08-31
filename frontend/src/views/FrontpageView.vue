@@ -60,19 +60,14 @@ import docsIcon from "@/assets/icons/docs-white.png";
     <main>
       <h3>Welcome to ACTRIS Cloudnet data portal</h3>
       <p>
-        The ACTRIS Cloudnet data portal provides data processing and curation
-        service of ground-based cloud remote sensing measurements. This includes
-        centralized processing, quality control, provenance, data harmonization
-        and archiving.
+        The ACTRIS Cloudnet data portal provides data processing and curation service of ground-based cloud remote
+        sensing measurements. This includes centralized processing, quality control, provenance, data harmonization and
+        archiving.
       </p>
       <p>
-        The data portal is developed by the Cloud remote sensing data centre
-        unit (CLU) as part of the
-        <a href="https://www.actris.eu/">ACTRIS</a> research infrastructure, and
-        operated at the
-        <a href="https://en.ilmatieteenlaitos.fi/"
-          >Finnish Meteorological Institute</a
-        >.
+        The data portal is developed by the Cloud remote sensing data centre unit (CLU) as part of the
+        <a href="https://www.actris.eu/">ACTRIS</a> research infrastructure, and operated at the
+        <a href="https://en.ilmatieteenlaitos.fi/">Finnish Meteorological Institute</a>.
       </p>
       <div class="buttons">
         <router-link to="search/data" class="download">
@@ -91,9 +86,7 @@ import docsIcon from "@/assets/icons/docs-white.png";
     </main>
     <div class="publications">
       <router-link to="/sites"> Measurement sites &#8594; </router-link><br />
-      <router-link to="/publications">
-        Cloudnet publications &#8594;
-      </router-link>
+      <router-link to="/publications"> Cloudnet publications &#8594; </router-link>
     </div>
   </main>
 </template>

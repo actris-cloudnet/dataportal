@@ -18,7 +18,7 @@ export class MigrateSoftware1692791385486 implements MigrationInterface {
        UNION
        SELECT DISTINCT 'custom-cloudnetpy', substring("cloudnetpyVersion", '\\((.+)\\)')
        FROM regular_file
-       WHERE "cloudnetpyVersion" != '' AND "cloudnetpyVersion" LIKE 'Custom%'`
+       WHERE "cloudnetpyVersion" != '' AND "cloudnetpyVersion" LIKE 'Custom%'`,
     );
     await queryRunner.query(
       `INSERT INTO regular_file_software_software ("regularFileUuid", "softwareId")
@@ -35,14 +35,14 @@ export class MigrateSoftware1692791385486 implements MigrationInterface {
        SELECT regular_file.uuid, software.id
        FROM regular_file
        JOIN software on software.code = 'cloudnet-processing' AND software.version = "processingVersion"
-       WHERE "processingVersion" != ''`
+       WHERE "processingVersion" != ''`,
     );
     await queryRunner.query(
       `INSERT INTO model_file_software_software ("modelFileUuid", "softwareId")
        SELECT model_file.uuid, software.id
        FROM model_file
        JOIN software on software.code = 'cloudnet-processing' AND software.version = "processingVersion"
-       WHERE "processingVersion" != ''`
+       WHERE "processingVersion" != ''`,
     );
   }
 

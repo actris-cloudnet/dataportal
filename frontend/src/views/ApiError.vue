@@ -20,12 +20,8 @@ section
     <h1>{{ response?.status || "Unknown error" }}</h1>
     <h2 v-if="response && response.status !== 500">{{ message }}</h2>
     <h2 v-else>Internal server error</h2>
-    <section v-if="response && response.status === 404">
-      The page you are looking for does not exist.
-    </section>
-    <section v-if="response && response.status > 500">
-      Service temporarily offline
-    </section>
+    <section v-if="response && response.status === 404">The page you are looking for does not exist.</section>
+    <section v-if="response && response.status > 500">Service temporarily offline</section>
   </main>
 </template>
 
@@ -43,6 +39,6 @@ const message = computed(() =>
     ? typeof props.response.data == "string"
       ? props.response.data
       : props.response.data.errors.join("<br>")
-    : undefined
+    : undefined,
 );
 </script>

@@ -75,11 +75,7 @@ legend
           <div class="label">All sites in country:</div>
           <select v-model="countryModel">
             <option :value="null">--- any ---</option>
-            <option
-              v-for="option in countries"
-              :key="option.id"
-              :value="option.id"
-            >
+            <option v-for="option in countries" :key="option.id" :value="option.id">
               {{ option.label }}
             </option>
           </select>
@@ -105,9 +101,7 @@ legend
         {{ loading ? "Loading..." : "Search" }}
       </button>
       <template v-if="!initial">
-        <div v-if="statistics.length == 0" class="placeholder">
-          No downloads.
-        </div>
+        <div v-if="statistics.length == 0" class="placeholder">No downloads.</div>
         <table v-else :class="{ loading }">
           <thead>
             <tr>
@@ -118,11 +112,7 @@ legend
           <tbody>
             <tr v-for="item in statistics" :key="item[item[dimensions[0]]]">
               <td v-if="dimensions[0] == 'country'">
-                {{
-                  item[dimensions[0]]
-                    ? getCountryName(item[dimensions[0]])
-                    : "Unknown"
-                }}
+                {{ item[dimensions[0]] ? getCountryName(item[dimensions[0]]) : "Unknown" }}
               </td>
               <td v-else>
                 {{ item[dimensions[0]] || "Unknown" }}
@@ -133,14 +123,9 @@ legend
                     class="bar-bar"
                     :style="{
                       // Calculate bar width of at least 1 pixel.
-                      width:
-                        Math.max(1, (100 * item[dimensions[1]]) / maxValue) +
-                        'px',
+                      width: Math.max(1, (100 * item[dimensions[1]]) / maxValue) + 'px',
                       // For 1 pixel bar, indicate quantity with opacity.
-                      opacity: Math.min(
-                        1,
-                        0.25 + 0.75 * ((100 * item[dimensions[1]]) / maxValue)
-                      ),
+                      opacity: Math.min(1, 0.25 + 0.75 * ((100 * item[dimensions[1]]) / maxValue)),
                     }"
                   ></div>
                   <div class="bar-number">
@@ -185,9 +170,7 @@ const dimensionLabel: Record<Dimension, string> = {
   downloads: "Downloads (in variable years)",
   uniqueIps: "Unique IPs",
 };
-const numberFormat = (Intl &&
-  Intl.NumberFormat &&
-  new Intl.NumberFormat("en-GB")) || {
+const numberFormat = (Intl && Intl.NumberFormat && new Intl.NumberFormat("en-GB")) || {
   format(number: number): string {
     return number.toString();
   },
@@ -226,9 +209,7 @@ onMounted(async () => {
   try {
     const response = await axios.get(`${apiUrl}sites`);
     const data: Site[] = response.data;
-    countries.value = Array.from(
-      new Set(data.map((site) => site.countryCode).filter(notEmpty))
-    )
+    countries.value = Array.from(new Set(data.map((site) => site.countryCode).filter(notEmpty)))
       .map((countryCode) => ({
         id: countryCode,
         label: getCountryName(countryCode),

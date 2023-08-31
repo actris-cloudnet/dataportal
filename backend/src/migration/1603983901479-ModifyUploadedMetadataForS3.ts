@@ -10,11 +10,11 @@ export class ModifyUploadedMetadataForS31603983901479 implements MigrationInterf
     await queryRunner.query(`ALTER TABLE "uploaded_metadata" DROP COLUMN "hash"`);
     await queryRunner.query(`ALTER TABLE "uploaded_metadata" ADD "uuid" uuid NOT NULL`);
     await queryRunner.query(
-      `ALTER TABLE "uploaded_metadata" ADD CONSTRAINT "PK_47439ec1e1986f4673ba6ecaccb" PRIMARY KEY ("uuid")`
+      `ALTER TABLE "uploaded_metadata" ADD CONSTRAINT "PK_47439ec1e1986f4673ba6ecaccb" PRIMARY KEY ("uuid")`,
     );
     await queryRunner.query(`ALTER TABLE "uploaded_metadata" ADD "hashSum" character varying(32) NOT NULL`);
     await queryRunner.query(
-      `ALTER TABLE "uploaded_metadata" ADD CONSTRAINT "UQ_c66b237bc100e5b32a3c9fd7932" UNIQUE ("hashSum")`
+      `ALTER TABLE "uploaded_metadata" ADD CONSTRAINT "UQ_c66b237bc100e5b32a3c9fd7932" UNIQUE ("hashSum")`,
     );
   }
 
@@ -25,11 +25,11 @@ export class ModifyUploadedMetadataForS31603983901479 implements MigrationInterf
     await queryRunner.query(`ALTER TABLE "uploaded_metadata" DROP COLUMN "uuid"`);
     await queryRunner.query(`ALTER TABLE "uploaded_metadata" ADD "hash" character varying(64) NOT NULL`);
     await queryRunner.query(
-      `ALTER TABLE "uploaded_metadata" ADD CONSTRAINT "UQ_11dd39e009aacff3f24931e7eae" UNIQUE ("hash")`
+      `ALTER TABLE "uploaded_metadata" ADD CONSTRAINT "UQ_11dd39e009aacff3f24931e7eae" UNIQUE ("hash")`,
     );
     await queryRunner.query(`ALTER TABLE "uploaded_metadata" ADD "id" character varying(18) NOT NULL`);
     await queryRunner.query(
-      `ALTER TABLE "uploaded_metadata" ADD CONSTRAINT "PK_2b9995a191e92cb786dba509a33" PRIMARY KEY ("id")`
+      `ALTER TABLE "uploaded_metadata" ADD CONSTRAINT "PK_2b9995a191e92cb786dba509a33" PRIMARY KEY ("id")`,
     );
   }
 }

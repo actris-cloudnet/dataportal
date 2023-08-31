@@ -47,7 +47,7 @@ export class SiteRoutes {
         sites.map((site) => ({
           ...site,
           status: statuses[site.id] || "inactive",
-        }))
+        })),
       );
     } catch (err) {
       return next({ status: 500, errors: err });

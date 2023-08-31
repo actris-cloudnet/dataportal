@@ -5,7 +5,7 @@ export class AddPublicationTable1647416469676 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE TABLE "publication" ("pid" character varying NOT NULL, "citation" text NOT NULL, "year" integer NOT NULL, "updatedAt" TIMESTAMP NOT NULL, CONSTRAINT "PK_46ad015e4b7a277aee00e13f735" PRIMARY KEY ("pid"))`
+      `CREATE TABLE "publication" ("pid" character varying NOT NULL, "citation" text NOT NULL, "year" integer NOT NULL, "updatedAt" TIMESTAMP NOT NULL, CONSTRAINT "PK_46ad015e4b7a277aee00e13f735" PRIMARY KEY ("pid"))`,
     );
   }
 

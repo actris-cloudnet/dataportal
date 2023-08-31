@@ -21,9 +21,9 @@ let leafletInstance: L.Map | null = null;
 onMounted(() => {
   if (!mapContainer.value) return;
   leafletInstance = L.map(mapContainer.value).setView([54.0, 14.0], 3);
-  L.tileLayer(
-    "https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png"
-  ).addTo(leafletInstance);
+  L.tileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png").addTo(
+    leafletInstance,
+  );
   let objects: L.Layer[] = [];
   watch(
     () => props.track,
@@ -34,7 +34,7 @@ onMounted(() => {
       if (!props.track) return;
       const polyline = L.polyline(
         props.track.map((p) => [p.latitude, p.longitude]),
-        { color: "steelblue", weight: 1, dashArray: "4" }
+        { color: "steelblue", weight: 1, dashArray: "4" },
       ).addTo(leafletInstance);
       leafletInstance.fitBounds(polyline.getBounds());
       objects.push(polyline);
@@ -64,7 +64,7 @@ onMounted(() => {
         objects.push(point, hoverArea);
       }
     },
-    { immediate: true }
+    { immediate: true },
   );
 });
 

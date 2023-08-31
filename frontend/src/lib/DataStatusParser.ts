@@ -45,11 +45,7 @@ export interface DataStatus {
 
 const apiUrl = import.meta.env.VITE_BACKEND_URL;
 
-function createProductLevels(
-  lvlTranslate: LvlTranslate,
-  productInfo?: ProductInfo,
-  existingObj?: ProductLevels
-) {
+function createProductLevels(lvlTranslate: LvlTranslate, productInfo?: ProductInfo, existingObj?: ProductLevels) {
   if (!existingObj) {
     existingObj = {
       "1b": [],
@@ -84,25 +80,17 @@ export async function parseDataStatus(searchPayload: any): Promise<DataStatus> {
     return { allProducts, years: [], lvlTranslate: {}, availableProducts: [] };
   }
 
-  const productMap = allProducts.reduce(
-    (map: Record<string, Product>, product) => {
-      map[product.id] = product;
-      return map;
-    },
-    {}
-  );
+  const productMap = allProducts.reduce((map: Record<string, Product>, product) => {
+    map[product.id] = product;
+    return map;
+  }, {});
   const productIds = new Set(searchResponse.map((file) => file.productId));
   const availableProducts = Array.from(productIds)
     .map((productId) => productMap[productId])
     .filter(notEmpty);
-  const lvlTranslate = allProducts.reduce(
-    (acc, cur) => ({ ...acc, [cur.id]: cur.level as keyof ProductLevels }),
-    {}
-  );
+  const lvlTranslate = allProducts.reduce((acc, cur) => ({ ...acc, [cur.id]: cur.level as keyof ProductLevels }), {});
   const initialDate = new Date(
-    `${searchResponse[searchResponse.length - 1].measurementDate
-      .toString()
-      .slice(0, 4)}-01-01`
+    `${searchResponse[searchResponse.length - 1].measurementDate.toString().slice(0, 4)}-01-01`,
   );
   const endDate = new Date(searchResponse[0].measurementDate);
   const allDates: string[] = [];
@@ -130,9 +118,7 @@ export async function parseDataStatus(searchPayload: any): Promise<DataStatus> {
             return {
               date: dateSubstr,
               products:
-                dateSubstr == date
-                  ? createProductLevels(lvlTranslate, productInfo)
-                  : createProductLevels(lvlTranslate),
+                dateSubstr == date ? createProductLevels(lvlTranslate, productInfo) : createProductLevels(lvlTranslate),
             };
           }),
       };
@@ -141,11 +127,7 @@ export async function parseDataStatus(searchPayload: any): Promise<DataStatus> {
       const foundObj = acc[yearIndex];
       const dateIndex = foundObj.dates.findIndex((obj) => obj.date == date);
       const existingProducts = acc[yearIndex].dates[dateIndex].products;
-      acc[yearIndex].dates[dateIndex].products = createProductLevels(
-        lvlTranslate,
-        productInfo,
-        existingProducts
-      );
+      acc[yearIndex].dates[dateIndex].products = createProductLevels(lvlTranslate, productInfo, existingProducts);
       return acc;
     }
   }, []);

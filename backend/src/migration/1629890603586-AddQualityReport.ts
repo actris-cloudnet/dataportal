@@ -5,7 +5,7 @@ export class AddQualityReport1629890603586 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE TABLE "quality_report" ("fileUuid" uuid NOT NULL, "report" jsonb NOT NULL, CONSTRAINT "PK_0c4fc5419d1c694c2750009a7b3" PRIMARY KEY ("fileUuid"))`
+      `CREATE TABLE "quality_report" ("fileUuid" uuid NOT NULL, "report" jsonb NOT NULL, CONSTRAINT "PK_0c4fc5419d1c694c2750009a7b3" PRIMARY KEY ("fileUuid"))`,
     );
     await queryRunner.query(`ALTER TABLE "file" ADD "qualityScore" double precision`);
     await queryRunner.query(`ALTER TABLE "regular_file" ADD "qualityScore" double precision`);

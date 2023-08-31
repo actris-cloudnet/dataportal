@@ -45,26 +45,26 @@ export const getQcLink = (uuid: string) => {
 };
 
 const productIcons: Record<string, string> = {
-  categorize: categorizeIcon,
+  "categorize": categorizeIcon,
   "categorize-voodoo": categorizeVoodooIcon,
-  classification: classificationIcon,
+  "classification": classificationIcon,
   "classification-voodoo": classificationVoodooIcon,
-  der: derIcon,
-  disdrometer: disdrometerIcon,
-  drizzle: drizzleIcon,
-  ier: ierIcon,
-  iwc: iwcIcon,
+  "der": derIcon,
+  "disdrometer": disdrometerIcon,
+  "drizzle": drizzleIcon,
+  "ier": ierIcon,
+  "iwc": iwcIcon,
   "l3-cf": l3CfIcon,
   "l3-iwc": l3IwcIcon,
   "l3-lwc": l3LwcIcon,
-  lidar: lidarIcon,
-  lwc: lwcIcon,
-  model: modelIcon,
-  mwr: mwrIcon,
+  "lidar": lidarIcon,
+  "lwc": lwcIcon,
+  "model": modelIcon,
+  "mwr": mwrIcon,
   "mwr-l1c": mwrIcon,
   "mwr-single": mwrIcon,
   "mwr-multi": mwrIcon,
-  radar: radarIcon,
+  "radar": radarIcon,
   "weather-station": weatherStationIcon,
   "doppler-lidar": dopplerLidarIcon,
 };
@@ -77,9 +77,7 @@ export const getProductIcon = (product: Product | string) => {
 export const humanReadableSize = (size: number) => {
   if (size == 0) return "0 B";
   const i = Math.floor(Math.log(size) / Math.log(1024));
-  return `${(size / Math.pow(1024, i)).toFixed(1)} ${
-    ["B", "kB", "MB", "GB", "TB"][i]
-  }`;
+  return `${(size / Math.pow(1024, i)).toFixed(1)} ${["B", "kB", "MB", "GB", "TB"][i]}`;
 };
 
 export const humanReadableDate = (date: string | Date) =>
@@ -97,8 +95,7 @@ export const humanReadableTimestamp = (date: string | Date) => {
 export const combinedFileSize = (files: SearchFileResponse[]) =>
   files.map((file) => file.size).reduce((prev, cur) => cur + prev, 0);
 
-export const dateToUTC = (date: Date) =>
-  new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+export const dateToUTC = (date: Date) => new Date(date.getTime() - date.getTimezoneOffset() * 60000);
 
 export const dateToString = (date: Date) => {
   const utcTime = dateToUTC(date);
@@ -113,11 +110,7 @@ export function getDateFromBeginningOfYear(): Date {
 }
 
 export function isSameDay(a: Date, b: Date) {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
 export function constructTitle(files: CollectionFileResponse[]) {
@@ -132,9 +125,7 @@ export const idToHumanReadable = (id: string) => {
   return id.charAt(0).toUpperCase() + id.slice(1);
 };
 
-export function notEmpty<TValue>(
-  value: TValue | null | undefined
-): value is TValue {
+export function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
   return value !== null && value !== undefined;
 }
 
@@ -153,9 +144,7 @@ export function formatCoordinates(latitude: number, longitude: number): string {
 // eslint-disable-next-line  @typescript-eslint/no-explicit-any
 export const isValidDate = (obj: any) => {
   const date = new Date(obj);
-  return (
-    !isNaN(date.getDate()) && date.getTime() > new Date("1970-01-01").getTime()
-  );
+  return !isNaN(date.getDate()) && date.getTime() > new Date("1970-01-01").getTime();
 };
 
 // eslint-disable-next-line  @typescript-eslint/no-explicit-any
@@ -194,15 +183,8 @@ export async function fetchInstrumentName(pid: string): Promise<string> {
     throw new Error("Invalid PID response");
   }
 
-  const nameItem = values.find(
-    (ele) => ele.type === "21.T11148/709a23220f2c3d64d1e1"
-  );
-  if (
-    !nameItem ||
-    !nameItem.data ||
-    nameItem.data.format !== "string" ||
-    !nameItem.data.value
-  ) {
+  const nameItem = values.find((ele) => ele.type === "21.T11148/709a23220f2c3d64d1e1");
+  if (!nameItem || !nameItem.data || nameItem.data.format !== "string" || !nameItem.data.value) {
     throw new Error("Invalid PID structure");
   }
   let nameValue = JSON.parse(nameItem.data.value);
@@ -210,23 +192,12 @@ export async function fetchInstrumentName(pid: string): Promise<string> {
     throw new Error("Invalid PID content");
   }
 
-  const typeItem = values.find(
-    (ele) => ele.type === "21.T11148/f76ad9d0324302fc47dd"
-  );
-  if (
-    typeItem &&
-    typeItem.data &&
-    typeItem.data.format === "string" &&
-    typeItem.data.value
-  ) {
+  const typeItem = values.find((ele) => ele.type === "21.T11148/f76ad9d0324302fc47dd");
+  if (typeItem && typeItem.data && typeItem.data.format === "string" && typeItem.data.value) {
     const typeValue = JSON.parse(typeItem.data.value);
     if (Array.isArray(typeValue) && typeValue.length > 0) {
       const firstValue = typeValue[0];
-      if (
-        firstValue &&
-        firstValue.instrumentType &&
-        firstValue.instrumentType.instrumentTypeName
-      ) {
+      if (firstValue && firstValue.instrumentType && firstValue.instrumentType.instrumentTypeName) {
         nameValue += " " + firstValue.instrumentType.instrumentTypeName;
       }
     }

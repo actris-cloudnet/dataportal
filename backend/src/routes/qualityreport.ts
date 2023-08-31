@@ -70,7 +70,7 @@ export class QualityReportRoutes {
               WHEN testReport.result = '${ErrorLevel.INFO}'    THEN 3
               WHEN testReport.result = '${ErrorLevel.PASS}'    THEN 4
               ELSE 5
-         END`
+         END`,
       )
       .addOrderBy("COALESCE(testInfo.name, testReport.testId)")
       .getOne();
@@ -95,7 +95,7 @@ export class QualityReportRoutes {
     try {
       // TODO: use transaction
       const existingFile = await this.fileRoutes.findAnyFile((repo, _) =>
-        repo.findOne({ where: { uuid }, relations: { product: true } })
+        repo.findOne({ where: { uuid }, relations: { product: true } }),
       );
       if (!existingFile) {
         return next({ status: 400, errors: ["No files match this UUID"] });

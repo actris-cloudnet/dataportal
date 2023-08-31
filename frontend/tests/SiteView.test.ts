@@ -1,10 +1,6 @@
 import { VueWrapper, mount } from "@vue/test-utils";
 import axios, { AxiosPromise } from "axios";
-import {
-  augmentAxiosResponse,
-  getMockedAxiosLastCallSecondArgument,
-  nextTick,
-} from "./lib";
+import { augmentAxiosResponse, getMockedAxiosLastCallSecondArgument, nextTick } from "./lib";
 import { readResources } from "../../shared/lib";
 import SiteView from "../src/views/SiteView.vue";
 import { vi, describe, beforeAll, expect, it } from "vitest";
@@ -18,20 +14,12 @@ let wrapper: VueWrapper;
 describe("SiteView.vue", () => {
   beforeAll(async () => {
     resources = await readResources();
-    axiosMockWithIdx = (
-      siteIdx: number,
-      searchIdx: number,
-      instruments = []
-    ) => {
+    axiosMockWithIdx = (siteIdx: number, searchIdx: number, instruments = []) => {
       return (url: string): AxiosPromise => {
         if (url.includes("/site")) {
-          return Promise.resolve(
-            augmentAxiosResponse(resources["sites"][siteIdx])
-          );
+          return Promise.resolve(augmentAxiosResponse(resources["sites"][siteIdx]));
         } else if (url.includes("/search")) {
-          return Promise.resolve(
-            augmentAxiosResponse([resources["allsearch"][searchIdx]])
-          );
+          return Promise.resolve(augmentAxiosResponse([resources["allsearch"][searchIdx]]));
         } else if (url.includes("/uploaded-metadata")) {
           return Promise.resolve(augmentAxiosResponse(instruments));
         } else if (url.includes("/product")) {
@@ -43,12 +31,7 @@ describe("SiteView.vue", () => {
   });
 
   it("displays basic information", async () => {
-    const expected = [
-      "Bucharest, Romania",
-      "44.348°N, 26.029°E",
-      "93 m",
-      "2019-07-16",
-    ];
+    const expected = ["Bucharest, Romania", "44.348°N, 26.029°E", "93 m", "2019-07-16"];
     vi.mocked(axios.get).mockImplementation(axiosMockWithIdx(0, 7));
     wrapper = mount(SiteView, { props: { siteid: "bucharest" } });
     await nextTick(1);
@@ -67,9 +50,7 @@ describe("SiteView.vue", () => {
 
   it("displays instruments when they are found", async () => {
     const expected = ["Lufft CHM15k ceilometer", "METEK MIRA-35 cloud radar"];
-    vi.mocked(axios.get).mockImplementation(
-      axiosMockWithIdx(0, 7, resources["uploaded-metadata-public"])
-    );
+    vi.mocked(axios.get).mockImplementation(axiosMockWithIdx(0, 7, resources["uploaded-metadata-public"]));
     wrapper = mount(SiteView, { props: { siteid: "whatever" } });
     await nextTick(1);
     const instrumentText = wrapper.find("#instruments").text();
@@ -85,11 +66,8 @@ describe("SiteView.vue", () => {
   });
 
   it("fetches instruments from last n days", async () => {
-    const expectedString =
-      "The site has submitted data from the following instruments in the last";
-    vi.mocked(axios.get).mockImplementation(
-      axiosMockWithIdx(0, 8, resources["uploaded-metadata-public"])
-    );
+    const expectedString = "The site has submitted data from the following instruments in the last";
+    vi.mocked(axios.get).mockImplementation(axiosMockWithIdx(0, 8, resources["uploaded-metadata-public"]));
     wrapper = mount(SiteView, { props: { siteid: "whatever" } });
     await nextTick(1);
     const instrumentText = wrapper.find("#instruments").text();
@@ -105,8 +83,6 @@ describe("SiteView.vue", () => {
     date30daysago.setDate(date30daysago.getDate() - nDays!);
     const secondArg = getMockedAxiosLastCallSecondArgument();
     // Expect to be within 5 seconds
-    expect(
-      new Date(secondArg.params.updatedAtFrom).getTime() / 1000
-    ).toBeCloseTo(date30daysago.getTime() / 1000, -1);
+    expect(new Date(secondArg.params.updatedAtFrom).getTime() / 1000).toBeCloseTo(date30daysago.getTime() / 1000, -1);
   });
 });

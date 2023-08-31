@@ -96,31 +96,16 @@
 <template>
   <!-- eslint-disable vue/require-v-for-key -->
   <div id="data_availability_visualization" v-if="!busy">
-    <div
-      v-for="(year, index) in dataStatus.years"
-      :key="year['year']"
-      class="dataviz-row"
-    >
+    <div v-for="(year, index) in dataStatus.years" :key="year['year']" class="dataviz-row">
       <div
-        v-if="
-          index &&
-          parseInt(year['year']) + 1 !==
-            parseInt(dataStatus.years[index - 1]['year'])
-        "
+        v-if="index && parseInt(year['year']) + 1 !== parseInt(dataStatus.years[index - 1]['year'])"
         class="dataviz-skippedyears"
       >
-        <template
-          v-if="
-            parseInt(year['year']) -
-              parseInt(dataStatus.years[index - 1]['year']) ==
-            -2
-          "
-        >
+        <template v-if="parseInt(year['year']) - parseInt(dataStatus.years[index - 1]['year']) == -2">
           No data for year {{ parseInt(year["year"]) + 1 }}.
         </template>
         <template v-else>
-          No data for years {{ parseInt(year["year"]) + 1 }} -
-          {{ parseInt(dataStatus.years[index - 1]["year"]) - 1 }}.
+          No data for years {{ parseInt(year["year"]) + 1 }} - {{ parseInt(dataStatus.years[index - 1]["year"]) - 1 }}.
         </template>
       </div>
       <div class="dataviz-year">{{ year["year"] }}</div>
@@ -130,9 +115,7 @@
           class="dataviz-date"
           :id="`dataviz-color-${year.year}-${date.date}`"
           :class="createColorClass(date.products)"
-          :href="
-            createLinkToSearchPage(`${year.year}-${date.date}`, date.products)
-          "
+          :href="createLinkToSearchPage(`${year.year}-${date.date}`, date.products)"
           @mouseenter="debouncedSetCurrentYearDate(year, date, $event)"
         ></a>
       </div>
@@ -194,11 +177,7 @@
         <span class="legacy-label"><sup>L</sup></span> Legacy
       </div>
     </div>
-    <div
-      class="dataviz-tooltip"
-      v-if="tooltips && hover && currentYear && currentDate"
-      :style="tooltipStyle"
-    >
+    <div class="dataviz-tooltip" v-if="tooltips && hover && currentYear && currentDate" :style="tooltipStyle">
       <header>{{ currentYear.year }}-{{ currentDate.date }}</header>
       <section v-if="!qualityScores">
         <ul v-for="lvl in allLevels">
@@ -212,20 +191,14 @@
             :key="product.id"
           >
             {{ idToHumanReadable(product.id) }}
-            <sup
-              class="legacy-label"
-              v-if="isLegacyFile(currentDate.products[lvl], product.id)"
-              >L</sup
-            >
+            <sup class="legacy-label" v-if="isLegacyFile(currentDate.products[lvl], product.id)">L</sup>
           </li>
           <li
             v-if="lvl === '1b'"
             class="productitem modelitem"
             :class="{
               found: getProductStatus(currentDate.products[lvl], 'model'),
-              na:
-                qualityScores &&
-                !getReportExists(currentDate.products[lvl], 'model'),
+              na: qualityScores && !getReportExists(currentDate.products[lvl], 'model'),
             }"
           >
             Model
@@ -241,9 +214,7 @@
             class="qualityitem"
             :class="{
               found: getProductStatus(currentDate.products[lvl], product.id),
-              na:
-                qualityScores &&
-                !getReportExists(currentDate.products[lvl], product.id),
+              na: qualityScores && !getReportExists(currentDate.products[lvl], product.id),
               info: isFileWithInfo(currentDate.products[lvl], product.id),
               warning: isFileWithWarning(currentDate.products[lvl], product.id),
               error: isFileWithError(currentDate.products[lvl], product.id),
@@ -251,20 +222,14 @@
             :key="product.id"
           >
             {{ idToHumanReadable(product.id) }}
-            <sup
-              class="legacy-label"
-              v-if="isLegacyFile(currentDate.products[lvl], product.id)"
-              >L</sup
-            >
+            <sup class="legacy-label" v-if="isLegacyFile(currentDate.products[lvl], product.id)">L</sup>
           </li>
           <li
             v-if="lvl === '1b'"
             class="qualityitem modelitem"
             :class="{
               found: getProductStatus(currentDate.products[lvl], 'model'),
-              na:
-                qualityScores &&
-                !getReportExists(currentDate.products[lvl], 'model'),
+              na: qualityScores && !getReportExists(currentDate.products[lvl], 'model'),
             }"
           >
             Model
@@ -281,25 +246,11 @@
 <script lang="ts" setup>
 import { idToHumanReadable, type ColorClass } from "@/lib";
 import type { Product } from "@shared/entity/Product";
-import type {
-  DataStatus,
-  ProductDate,
-  ProductInfo,
-  ProductLevels,
-  ProductYear,
-} from "@/lib/DataStatusParser";
+import type { DataStatus, ProductDate, ProductInfo, ProductLevels, ProductYear } from "@/lib/DataStatusParser";
 import debounce from "debounce";
 import { onMounted, ref, computed } from "vue";
 
-import {
-  isLegacy,
-  isError,
-  isWarning,
-  isInfo,
-  qualityExists,
-  isPass,
-  noData,
-} from "@/lib/ProductAvailabilityTools";
+import { isLegacy, isError, isWarning, isInfo, qualityExists, isPass, noData } from "@/lib/ProductAvailabilityTools";
 
 export interface Props {
   site: string;
@@ -323,18 +274,13 @@ onMounted(() => {
   if (props.loadingComplete) props.loadingComplete();
 });
 
-function setCurrentYearDate(
-  year: ProductYear,
-  date: ProductDate,
-  event: MouseEvent
-) {
+function setCurrentYearDate(year: ProductYear, date: ProductDate, event: MouseEvent) {
   const tooltipWidth = 420;
   const tooltipMargin = 10;
-  const tooltipTop =
-    (event.target as HTMLElement).getBoundingClientRect().top + 20;
+  const tooltipTop = (event.target as HTMLElement).getBoundingClientRect().top + 20;
   const tooltipLeft = Math.min(
     Math.max(tooltipMargin, event.clientX - tooltipWidth / 2),
-    document.body.scrollWidth - tooltipWidth - tooltipMargin
+    document.body.scrollWidth - tooltipWidth - tooltipMargin,
   );
   tooltipStyle.value = {
     width: `${tooltipWidth}px`,
@@ -364,17 +310,11 @@ function isNotLegacy(prod: ProductInfo): boolean {
 
 function filterProductsByLvl(lvl: string) {
   if (!props.dataStatus.allProducts) return null;
-  return props.dataStatus.allProducts.filter(
-    ({ id }) => props.dataStatus.lvlTranslate[id] == lvl && id != "model"
-  );
+  return props.dataStatus.allProducts.filter(({ id }) => props.dataStatus.lvlTranslate[id] == lvl && id != "model");
 }
 
 function onlyLegacy(products: ProductLevels) {
-  return (
-    products["2"].every(isLegacy) &&
-    products["1c"].every(isLegacy) &&
-    products["1b"].every(isLegacyOrModel)
-  );
+  return products["2"].every(isLegacy) && products["1c"].every(isLegacy) && products["1b"].every(isLegacyOrModel);
 }
 
 function onlyLegacyLevel2(products: ProductLevels) {
@@ -390,10 +330,7 @@ function onlyModel(products: ProductLevels) {
   );
 }
 
-function getProductStatus(
-  existingProducts: ProductInfo[],
-  productId: Product["id"]
-) {
+function getProductStatus(existingProducts: ProductInfo[], productId: Product["id"]) {
   const existingProduct = existingProducts.find((prod) => prod.id == productId);
   if (props.qualityScores && existingProduct) {
     return isPass(existingProduct);
@@ -401,57 +338,40 @@ function getProductStatus(
   return existingProduct;
 }
 
-function isLegacyFile(
-  existingProducts: ProductInfo[],
-  productId: Product["id"]
-) {
+function isLegacyFile(existingProducts: ProductInfo[], productId: Product["id"]) {
   const existingProduct = existingProducts.find((prod) => prod.id == productId);
   if (existingProduct) {
     return existingProduct.legacy;
   }
 }
 
-function isFileWithWarning(
-  existingProducts: ProductInfo[],
-  productId: Product["id"]
-) {
+function isFileWithWarning(existingProducts: ProductInfo[], productId: Product["id"]) {
   const existingProduct = existingProducts.find((prod) => prod.id == productId);
   if (existingProduct) {
     return isWarning(existingProduct);
   }
 }
 
-function isFileWithInfo(
-  existingProducts: ProductInfo[],
-  productId: Product["id"]
-) {
+function isFileWithInfo(existingProducts: ProductInfo[], productId: Product["id"]) {
   const existingProduct = existingProducts.find((prod) => prod.id == productId);
   if (existingProduct) {
     return isInfo(existingProduct);
   }
 }
 
-function isFileWithError(
-  existingProducts: ProductInfo[],
-  productId: Product["id"]
-) {
+function isFileWithError(existingProducts: ProductInfo[], productId: Product["id"]) {
   const existingProduct = existingProducts.find((prod) => prod.id == productId);
   if (existingProduct) {
     return isError(existingProduct);
   }
 }
 
-function getReportExists(
-  existingProducts: ProductInfo[],
-  productId: Product["id"]
-) {
+function getReportExists(existingProducts: ProductInfo[], productId: Product["id"]) {
   const existingProduct = existingProducts.find((prod) => prod.id == productId);
   return existingProduct && qualityExists(existingProduct);
 }
 
-const allLevels = computed(() =>
-  Array.from(new Set(Object.values(props.dataStatus.lvlTranslate))).sort()
-);
+const allLevels = computed(() => Array.from(new Set(Object.values(props.dataStatus.lvlTranslate))).sort());
 
 function hasSomeLevel2Tests(products: ProductLevels) {
   return products["2"].filter(qualityExists).length > 0;
@@ -484,8 +404,7 @@ function missingData(products: ProductLevels) {
 function createColorClass(products: ProductLevels): ColorClass {
   if (noData(products)) return "no-data";
   if (props.qualityScores) {
-    if (hasSomeLevel2Tests(products) && onlyLegacyLevel2(products))
-      return "only-legacy-data";
+    if (hasSomeLevel2Tests(products) && onlyLegacyLevel2(products)) return "only-legacy-data";
     if (allLevel2Pass(products)) return "all-data";
     if (level2ContainsErrors(products)) return "contains-errors";
     if (level2containsWarningsOrInfo(products)) return "all-raw";
@@ -498,10 +417,7 @@ function createColorClass(products: ProductLevels): ColorClass {
   return "contains-errors";
 }
 
-function createLinkToSearchPage(
-  date: string,
-  products: ProductLevels
-): string | undefined {
+function createLinkToSearchPage(date: string, products: ProductLevels): string | undefined {
   if (!props.qualityScores && !noData(products)) {
     return `/search/data?site=${props.site}&dateFrom=${date}&dateTo=${date}`;
   }

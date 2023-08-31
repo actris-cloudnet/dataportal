@@ -142,7 +142,7 @@ describe("GET /api/sites/:siteid", () => {
   it("responds with 404 if site is not found", async () => {
     const invalidUrl = `${url}espoo`;
     return expect(axios.get(invalidUrl)).rejects.toMatchObject(
-      genResponse(404, { status: 404, errors: ["No sites match this id"] })
+      genResponse(404, { status: 404, errors: ["No sites match this id"] }),
     );
   });
 });
@@ -173,7 +173,7 @@ describe("GET /api/sites/:siteid/locations", () => {
   it("responds with 404 if site is not found", async () => {
     const invalidUrl = `${url}espoo/locations`;
     return expect(axios.get(invalidUrl)).rejects.toMatchObject(
-      genResponse(404, { status: 404, errors: ["No sites match this id"] })
+      genResponse(404, { status: 404, errors: ["No sites match this id"] }),
     );
   });
 });
@@ -192,14 +192,14 @@ describe("GET /api/sites/:siteid/locations/:date", () => {
   it("responds with 404 on missing date", async () => {
     const missingUrl = `${url}boaty/locations/2022-01-04`;
     return expect(axios.get(missingUrl)).rejects.toMatchObject(
-      genResponse(404, { status: 404, errors: ["No location match this date"] })
+      genResponse(404, { status: 404, errors: ["No location match this date"] }),
     );
   });
 
   it("responds with 404 if site is not found", async () => {
     const invalidUrl = `${url}espoo/locations/2022-01-03`;
     return expect(axios.get(invalidUrl)).rejects.toMatchObject(
-      genResponse(404, { status: 404, errors: ["No sites match this id"] })
+      genResponse(404, { status: 404, errors: ["No sites match this id"] }),
     );
   });
 });

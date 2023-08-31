@@ -247,14 +247,8 @@ div.checkbox
 </style>
 
 <template>
-  <main
-    v-if="mode === 'visualizations' || mode === 'data'"
-    id="search"
-    :class="mainWidth"
-  >
-    <div v-if="error" class="note rednote">
-      Error: Search backend is offline, {{ error }}
-    </div>
+  <main v-if="mode === 'visualizations' || mode === 'data'" id="search" :class="mainWidth">
+    <div v-if="error" class="note rednote">Error: Search backend is offline, {{ error }}</div>
 
     <section id="sideBar">
       <div :class="{ widemap: showAllSites, wideviz: vizWideMode }">
@@ -282,12 +276,7 @@ div.checkbox
         :getIcon="getMarkerIcon"
       />
       <div class="checkbox">
-        <input
-          type="checkbox"
-          id="showAllSitesCheckbox"
-          name="showAllSitesCheckbox"
-          v-model="showAllSites"
-        />
+        <input type="checkbox" id="showAllSitesCheckbox" name="showAllSitesCheckbox" v-model="showAllSites" />
         <label for="showAllSitesCheckbox">Show all sites</label>
       </div>
 
@@ -339,21 +328,13 @@ div.checkbox
           @error="dateToError = $event"
           :key="dateToUpdate"
         />
-        <div
-          v-if="!isTrueOnBothDateFields('isValidDateString')"
-          class="errormsg"
-        >
+        <div v-if="!isTrueOnBothDateFields('isValidDateString')" class="errormsg">
           Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.
         </div>
         <template v-else>
-          <div v-if="!isTrueOnBothDateFields('isNotInFuture')" class="errormsg">
-            Provided date is in the future.
-          </div>
+          <div v-if="!isTrueOnBothDateFields('isNotInFuture')" class="errormsg">Provided date is in the future.</div>
           <div
-            v-if="
-              (dateFromError && !dateFromError.isBeforeEnd) ||
-              (dateToError && !dateToError.isAfterStart)
-            "
+            v-if="(dateFromError && !dateFromError.isBeforeEnd) || (dateToError && !dateToError.isAfterStart)"
             class="errormsg"
           >
             Start date must be before end date.
@@ -362,12 +343,7 @@ div.checkbox
       </div>
 
       <div class="checkbox" v-if="!isVizMode">
-        <input
-          type="checkbox"
-          id="showDateRangeCheckbox"
-          name="showDateRangeCheckbox"
-          v-model="showDateRange"
-        />
+        <input type="checkbox" id="showDateRangeCheckbox" name="showDateRangeCheckbox" v-model="showDateRange" />
         <label for="showDateRangeCheckbox">Show date range</label>
       </div>
 
@@ -382,37 +358,17 @@ div.checkbox
           :key="vizDateUpdate"
         />
         <div class="dateButtons">
-          <button
-            id="previousBtn"
-            class="dateBtn"
-            @click="setPreviousDate()"
-            :disabled="!hasPreviousDate()"
-          >
+          <button id="previousBtn" class="dateBtn" @click="setPreviousDate()" :disabled="!hasPreviousDate()">
             <img alt="calendar" class="dateIcon" :src="datePreviousIcon" />
           </button>
-          <button
-            id="nextBtn"
-            class="dateBtn"
-            @click="setNextDate()"
-            :disabled="!hasNextDate()"
-          >
+          <button id="nextBtn" class="dateBtn" @click="setNextDate()" :disabled="!hasNextDate()">
             <img alt="calendar" class="dateIcon" :src="dateNextIcon" />
           </button>
         </div>
-        <div
-          v-if="dateToError && !dateToError.isValidDateString"
-          class="errormsg"
-        >
+        <div v-if="dateToError && !dateToError.isValidDateString" class="errormsg">
           Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.
         </div>
-        <div
-          v-if="
-            dateToError &&
-            dateToError.isValidDateString &&
-            !dateToError.isNotInFuture
-          "
-          class="errormsg"
-        >
+        <div v-if="dateToError && dateToError.isValidDateString && !dateToError.isNotInFuture" class="errormsg">
           Provided date is in the future.
         </div>
       </div>
@@ -426,12 +382,7 @@ div.checkbox
         :getIcon="getProductIcon"
       />
       <div class="checkbox">
-        <input
-          type="checkbox"
-          id="showExpProductsCheckbox"
-          name="showExpProductsCheckbox"
-          v-model="showExpProducts"
-        />
+        <input type="checkbox" id="showExpProductsCheckbox" name="showExpProductsCheckbox" v-model="showExpProducts" />
         <label for="showExpProductsCheckbox">Show experimental products</label>
       </div>
 
@@ -444,18 +395,10 @@ div.checkbox
         id="variableSelect"
       />
 
-      <button
-        v-if="isVizMode"
-        @click="navigateToSearch('data')"
-        class="secondaryButton widebutton"
-      >
+      <button v-if="isVizMode" @click="navigateToSearch('data')" class="secondaryButton widebutton">
         View in data search &rarr;
       </button>
-      <button
-        v-else
-        @click="navigateToSearch('visualizations')"
-        class="secondaryButton widebutton"
-      >
+      <button v-else @click="navigateToSearch('visualizations')" class="secondaryButton widebutton">
         View in visualization search &rarr;
       </button>
 
@@ -538,9 +481,7 @@ function getInitialDateFrom() {
 
 // api call
 const apiUrl = import.meta.env.VITE_BACKEND_URL;
-const apiResponse = ref<SearchFileResponse[] | VisualizationResponse[]>(
-  resetResponse()
-);
+const apiResponse = ref<SearchFileResponse[] | VisualizationResponse[]>(resetResponse());
 const pendingUpdates = ref(false);
 
 // file list
@@ -602,16 +543,12 @@ onMounted(async () => {
   await initView();
   const query = route.query;
   const params = ["site", "product", "variable", "dateFrom", "dateTo"];
-  const paramsSet = params.filter(
-    (param) => param in query && query[param] != null
-  );
+  const paramsSet = params.filter((param) => param in query && query[param] != null);
   for (const param of paramsSet) {
     const value = route.query[param] as string;
     if (param === "site") selectedSiteIds.value = parseQuery(param, value);
-    if (param === "product")
-      selectedProductIds.value = parseQuery(param, value);
-    if (param === "variable")
-      selectedVariableIds.value = parseQuery(param, value);
+    if (param === "product") selectedProductIds.value = parseQuery(param, value);
+    if (param === "variable") selectedVariableIds.value = parseQuery(param, value);
     if (param === "dateFrom" || param === "dateTo") {
       if (isValidDate(value)) {
         const date = new Date(value);
@@ -633,38 +570,23 @@ async function initView() {
   const sitesPayload = {
     params: { type: ["cloudnet", "campaign", "arm"] },
   };
-  await Promise.all([
-    axios.get(`${apiUrl}sites/`, sitesPayload),
-    axios.get(`${apiUrl}products/variables`),
-  ]).then(([sites, products]) => {
-    allSites.value = sites.data
-      .sort(alphabeticalSort)
-      .filter(selectNormalSites);
-    normalSites.value = sites.data
-      .sort(alphabeticalSort)
-      .filter(selectNormalSites);
-    extraSites.value = sites.data
-      .sort(alphabeticalSort)
-      .filter(selectExtraSites);
-    normalSiteIds.value = normalSites.value.map((site) => site.id);
-    extraSiteIds.value = extraSites.value.map((site) => site.id);
-    allProducts.value = products.data
-      .filter(discardExperimentalProducts)
-      .sort(alphabeticalSort);
-    normalProducts.value = products.data
-      .filter((prod: Product) => !prod.experimental)
-      .sort(alphabeticalSort);
-    experimentalProducts.value = products.data
-      .filter((prod: Product) => prod.experimental)
-      .sort(alphabeticalSort);
-    normalProductIds.value = normalProducts.value.map((prod) => prod.id);
-    experimentalProductIds.value = experimentalProducts.value.map(
-      (prod) => prod.id
-    );
-    experimentalVariableIds.value = experimentalProducts.value
-      .flatMap((prod) => prod.variables)
-      .map((prod) => prod.id);
-  });
+  await Promise.all([axios.get(`${apiUrl}sites/`, sitesPayload), axios.get(`${apiUrl}products/variables`)]).then(
+    ([sites, products]) => {
+      allSites.value = sites.data.sort(alphabeticalSort).filter(selectNormalSites);
+      normalSites.value = sites.data.sort(alphabeticalSort).filter(selectNormalSites);
+      extraSites.value = sites.data.sort(alphabeticalSort).filter(selectExtraSites);
+      normalSiteIds.value = normalSites.value.map((site) => site.id);
+      extraSiteIds.value = extraSites.value.map((site) => site.id);
+      allProducts.value = products.data.filter(discardExperimentalProducts).sort(alphabeticalSort);
+      normalProducts.value = products.data.filter((prod: Product) => !prod.experimental).sort(alphabeticalSort);
+      experimentalProducts.value = products.data.filter((prod: Product) => prod.experimental).sort(alphabeticalSort);
+      normalProductIds.value = normalProducts.value.map((prod) => prod.id);
+      experimentalProductIds.value = experimentalProducts.value.map((prod) => prod.id);
+      experimentalVariableIds.value = experimentalProducts.value
+        .flatMap((prod) => prod.variables)
+        .map((prod) => prod.id);
+    },
+  );
 }
 
 function parseQuery(param: string, value: string): string[] {
@@ -672,14 +594,9 @@ function parseQuery(param: string, value: string): string[] {
   const valueArray = value.split(",");
   if (param === "product") {
     for (const productId of valueArray) {
-      if (
-        experimentalProductIds.value.includes(productId) &&
-        !showExpProducts.value
-      ) {
+      if (experimentalProductIds.value.includes(productId) && !showExpProducts.value) {
         showExpProducts.value = true;
-        allProducts.value = normalProducts.value.concat(
-          experimentalProducts.value
-        );
+        allProducts.value = normalProducts.value.concat(experimentalProducts.value);
       }
     }
     validChoices = normalProductIds.value.concat(experimentalProductIds.value);
@@ -694,13 +611,9 @@ function parseQuery(param: string, value: string): string[] {
     validChoices = allSites.value.map((site) => site.id);
   }
   if (param === "variable") {
-    validChoices = allProducts.value
-      .flatMap((prod) => prod.variables)
-      .map((variable) => variable.id);
+    validChoices = allProducts.value.flatMap((prod) => prod.variables).map((variable) => variable.id);
   }
-  const validValues = valueArray.filter((value) =>
-    validChoices.includes(value)
-  );
+  const validValues = valueArray.filter((value) => validChoices.includes(value));
   return Array.from(new Set(validValues));
 }
 
@@ -726,8 +639,7 @@ function fetchData() {
         })
         .catch((err) => {
           console.error(err);
-          error.value =
-            (err.response && err.response.statusText) || "unknown error";
+          error.value = (err.response && err.response.statusText) || "unknown error";
           apiResponse.value = resetResponse();
           isBusy.value = false;
           reject();
@@ -755,12 +667,7 @@ function isTrueOnBothDateFields(errorId: keyof DateErrors) {
   if (!showDateRange.value) {
     return dateToError.value && dateToError.value[errorId];
   }
-  return (
-    dateFromError.value &&
-    dateToError.value &&
-    dateFromError.value[errorId] &&
-    dateToError.value[errorId]
-  );
+  return dateFromError.value && dateToError.value && dateFromError.value[errorId] && dateToError.value[errorId];
 }
 
 function onMapMarkerClick(ids: string[]) {
@@ -769,25 +676,20 @@ function onMapMarkerClick(ids: string[]) {
   selectedSiteIds.value = union.filter((id) => !intersection.includes(id));
 }
 
-const alphabeticalSort = (a: Option, b: Option) =>
-  a.humanReadableName > b.humanReadableName;
+const alphabeticalSort = (a: Option, b: Option) => a.humanReadableName > b.humanReadableName;
 
-const selectNormalSites = (site: Site) =>
-  (site.type as string[]).includes("cloudnet");
+const selectNormalSites = (site: Site) => (site.type as string[]).includes("cloudnet");
 
-const selectExtraSites = (site: Site) =>
-  !(site.type as string[]).includes("cloudnet");
+const selectExtraSites = (site: Site) => !(site.type as string[]).includes("cloudnet");
 
 function discardExperimentalProducts(prod: Product) {
   return showExpProducts.value || !prod.experimental;
 }
 
 function navigateToSearch(mode: string) {
-  router
-    .push({ name: "Search", params: { mode }, query: route.query })
-    .catch(() => {
-      // Ignore useless error when URL doesn't change.
-    });
+  router.push({ name: "Search", params: { mode }, query: route.query }).catch(() => {
+    // Ignore useless error when URL doesn't change.
+  });
 }
 
 function reset() {
@@ -846,27 +748,19 @@ function setNextDate() {
 
 function checkIfButtonShouldBeActive() {
   const oneDay = 24 * 60 * 60 * 1000;
-  const diffDays = Math.round(
-    Math.abs((dateTo.value.valueOf() - dateFrom.value.valueOf()) / oneDay)
-  );
+  const diffDays = Math.round(Math.abs((dateTo.value.valueOf() - dateFrom.value.valueOf()) / oneDay));
   const isDateToToday = isSameDay(dateTo.value, new Date());
-  const isDateFromBeginningOfYear = isSameDay(
-    new Date(dateFrom.value),
-    getDateFromBeginningOfYear()
-  );
+  const isDateFromBeginningOfYear = isSameDay(new Date(dateFrom.value), getDateFromBeginningOfYear());
   if (isDateToToday && isDateFromBeginningOfYear) activeBtn.value = "btn1";
-  else if (isDateToToday && diffDays === fixedRanges.month)
-    activeBtn.value = "btn2";
-  else if (isDateToToday && diffDays === fixedRanges.day)
-    activeBtn.value = "btn3";
+  else if (isDateToToday && diffDays === fixedRanges.month) activeBtn.value = "btn2";
+  else if (isDateToToday && diffDays === fixedRanges.day) activeBtn.value = "btn3";
   else activeBtn.value = "";
 }
 
 function replaceUrlQueryString(params: Record<string, Date | string[]>) {
   const query = { ...route.query };
   for (const [param, value] of Object.entries(params)) {
-    const valueToUrl =
-      value instanceof Date ? dateToString(value) : value.join(",");
+    const valueToUrl = value instanceof Date ? dateToString(value) : value.join(",");
     query[param] = valueToUrl === "" ? [] : valueToUrl;
   }
   router.replace({ path: route.path, query }).catch(() => {
@@ -875,20 +769,19 @@ function replaceUrlQueryString(params: Record<string, Date | string[]>) {
 }
 
 const downloadUri = computed(() =>
-  axios.getUri({ ...{ method: "post", url: `${apiUrl}download/` }, ...payload })
+  axios.getUri({
+    ...{ method: "post", url: `${apiUrl}download/` },
+    ...payload,
+  }),
 );
 
 const payload = computed(() => {
   return {
     params: {
-      site: selectedSiteIds.value.length
-        ? selectedSiteIds.value
-        : allSites.value.map((site) => site.id),
+      site: selectedSiteIds.value.length ? selectedSiteIds.value : allSites.value.map((site) => site.id),
       dateFrom: isVizMode.value ? dateTo.value : dateFrom.value,
       dateTo: dateTo.value,
-      product: selectedProductIds.value.length
-        ? selectedProductIds.value
-        : allProducts.value.map((prod) => prod.id),
+      product: selectedProductIds.value.length ? selectedProductIds.value : allProducts.value.map((prod) => prod.id),
       variable: isVizMode.value ? selectedVariableIds.value : undefined,
       showLegacy: true,
     },
@@ -913,11 +806,7 @@ const selectableVariables = computed(() => {
 });
 
 const noSelectionsMade = computed(() => {
-  return !(
-    selectedProductIds.value.length ||
-    selectedSiteIds.value.length ||
-    selectedVariableIds.value.length
-  );
+  return !(selectedProductIds.value.length || selectedSiteIds.value.length || selectedVariableIds.value.length);
 });
 
 watch(
@@ -925,7 +814,7 @@ watch(
   async () => {
     replaceUrlQueryString({ site: selectedSiteIds.value });
     await fetchData();
-  }
+  },
 );
 
 watch(
@@ -934,7 +823,7 @@ watch(
     if (!renderComplete.value || dateErrorsExist(dateFromError.value)) return;
     replaceUrlQueryString({ dateFrom: dateFrom.value, dateTo: dateTo.value });
     await fetchData();
-  }
+  },
 );
 
 watch(
@@ -946,7 +835,7 @@ watch(
     }
     replaceUrlQueryString({ dateFrom: dateFrom.value, dateTo: dateTo.value });
     await fetchData();
-  }
+  },
 );
 
 watch(
@@ -954,7 +843,7 @@ watch(
   async () => {
     replaceUrlQueryString({ product: selectedProductIds.value });
     await fetchData();
-  }
+  },
 );
 
 watch(
@@ -962,7 +851,7 @@ watch(
   async () => {
     replaceUrlQueryString({ variable: selectedVariableIds.value });
     await fetchData();
-  }
+  },
 );
 
 watch(
@@ -971,15 +860,13 @@ watch(
     if (!showAllSites.value) {
       // remove selected campaign and arm sites
       allSites.value = normalSites.value;
-      selectedSiteIds.value = selectedSiteIds.value.filter(
-        (site) => !extraSiteIds.value.includes(site)
-      );
+      selectedSiteIds.value = selectedSiteIds.value.filter((site) => !extraSiteIds.value.includes(site));
     } else {
       allSites.value = normalSites.value.concat(extraSites.value);
     }
     mapKey.value = mapKey.value + 1;
     await fetchData();
-  }
+  },
 );
 
 watch(
@@ -989,26 +876,23 @@ watch(
       // remove selected experimental products and variables
       allProducts.value = normalProducts.value;
       selectedProductIds.value = selectedProductIds.value.filter(
-        (prod) => !experimentalProductIds.value.includes(prod)
+        (prod) => !experimentalProductIds.value.includes(prod),
       );
       selectedVariableIds.value = selectedVariableIds.value.filter(
-        (variable) => !experimentalVariableIds.value.includes(variable)
+        (variable) => !experimentalVariableIds.value.includes(variable),
       );
     } else {
-      allProducts.value = normalProducts.value.concat(
-        experimentalProducts.value
-      );
+      allProducts.value = normalProducts.value.concat(experimentalProducts.value);
     }
     await fetchData();
-  }
+  },
 );
 
 watch(
   () => allProducts.value,
   () => {
-    showExpProducts.value =
-      allProducts.value.length > normalProducts.value.length;
-  }
+    showExpProducts.value = allProducts.value.length > normalProducts.value.length;
+  },
 );
 
 watch(
@@ -1024,7 +908,7 @@ watch(
     mapKey.value = mapKey.value + 1;
     await fetchData();
     renderComplete.value = true;
-  }
+  },
 );
 
 watch(
@@ -1033,6 +917,6 @@ watch(
     if (!enabled) {
       dateFrom.value = dateTo.value;
     }
-  }
+  },
 );
 </script>

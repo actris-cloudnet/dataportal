@@ -27,13 +27,7 @@ text
         fill="transparent"
         :transform="returnCircleTransformValue(segment)"
       />
-      <text
-        v-if="segmentBigEnough(segment)"
-        text-anchor="middle"
-        dy="3px"
-        :x="segment.textX"
-        :y="segment.textY"
-      >
+      <text v-if="segmentBigEnough(segment)" text-anchor="middle" dy="3px" :x="segment.textX" :y="segment.textY">
         {{ percentageString(segment.value) }}
       </text>
     </g>

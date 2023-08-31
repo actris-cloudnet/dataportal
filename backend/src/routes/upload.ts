@@ -143,7 +143,7 @@ export class UploadRoutes {
     if (!partialUpload.uuid) return next({ status: 422, errors: "Request body is missing uuid" });
     try {
       const upload = await this.findAnyUpload((repo, model) =>
-        repo.findOne({ where: { uuid: partialUpload.uuid }, relations: ["site", model ? "model" : "instrument"] })
+        repo.findOne({ where: { uuid: partialUpload.uuid }, relations: ["site", model ? "model" : "instrument"] }),
       );
       if (!upload) return next({ status: 422, errors: "No file matches the provided uuid" });
       await this.findRepoForUpload(upload).update({ uuid: partialUpload.uuid }, partialUpload);
@@ -157,7 +157,7 @@ export class UploadRoutes {
   metadata: RequestHandler = async (req: Request, res: Response, next) => {
     const checksum = req.params.checksum;
     this.findAnyUpload((repo, model) =>
-      repo.findOne({ where: { checksum: checksum }, relations: ["site", model ? "model" : "instrument"] })
+      repo.findOne({ where: { checksum: checksum }, relations: ["site", model ? "model" : "instrument"] }),
     )
       .then((upload) => {
         if (!upload) return next({ status: 404, errors: "No metadata was found with provided id" });
@@ -189,7 +189,7 @@ export class UploadRoutes {
       const instrumentUploads = (await this.metadataMany(
         this.instrumentUploadRepo,
         req.query,
-        true
+        true,
       )) as InstrumentUpload[];
       const reducedMetadataResponses = instrumentUploads.map((md) => new ReducedMetadataResponse(md));
       res.send(reducedMetadataResponses);
@@ -206,7 +206,7 @@ export class UploadRoutes {
         repo.findOne({
           where: { checksum: checksum, site: { id: site } },
           relations: ["site", model ? "model" : "instrument"],
-        })
+        }),
       );
       if (!upload) return next({ status: 400, errors: "No metadata matches this hash" });
       if (upload.status != Status.CREATED) return res.sendStatus(200); // Already uploaded
@@ -215,7 +215,7 @@ export class UploadRoutes {
 
       await this.findRepoForUpload(upload).update(
         { checksum: checksum },
-        { status: Status.UPLOADED, updatedAt: new Date(), size: body.size }
+        { status: Status.UPLOADED, updatedAt: new Date(), size: body.size },
       );
       res.sendStatus(status);
     } catch (err: any) {
@@ -231,10 +231,10 @@ export class UploadRoutes {
   private async makeRequest(
     s3path: string,
     checksum: string,
-    inputStream: ReadableStream
+    inputStream: ReadableStream,
   ): Promise<{ status: number; body: any }> {
     const headers = {
-      Authorization: ssAuthString(),
+      "Authorization": ssAuthString(),
       "Content-MD5": Buffer.from(checksum, "hex").toString("base64"),
     };
 
@@ -266,7 +266,7 @@ export class UploadRoutes {
     repo: Repository<InstrumentUpload | ModelUpload>,
     query: any,
     onlyDistinctInstruments = false,
-    model = false
+    model = false,
   ) {
     const augmentedQuery: any = {
       site: query.site || (await this.siteRepo.find()).map((site) => site.id),
@@ -306,7 +306,7 @@ export class UploadRoutes {
     repo: Repository<InstrumentUpload | ModelUpload>,
     query: any,
     onlyDistinctInstruments = false,
-    model = false
+    model = false,
   ) {
     const qb = await this.metadataQueryBuilder(repo, query, onlyDistinctInstruments, model);
     return qb.stream();
@@ -316,7 +316,7 @@ export class UploadRoutes {
     repo: Repository<InstrumentUpload | ModelUpload>,
     query: any,
     onlyDistinctInstruments = false,
-    model = false
+    model = false,
   ) {
     const qb = await this.metadataQueryBuilder(repo, query, onlyDistinctInstruments, model);
     return qb.getMany();
@@ -411,8 +411,8 @@ export class UploadRoutes {
   async findAnyUpload(
     searchFunc: (
       arg0: Repository<ModelUpload | InstrumentUpload>,
-      arg1?: boolean
-    ) => Promise<ModelUpload | InstrumentUpload | null>
+      arg1?: boolean,
+    ) => Promise<ModelUpload | InstrumentUpload | null>,
   ): Promise<ModelUpload | InstrumentUpload | null> {
     const [upload, modelUpload] = await Promise.all([
       searchFunc(this.instrumentUploadRepo, false),
@@ -428,7 +428,7 @@ export class UploadRoutes {
       isModel ? "model_upload" : "instrument_upload",
       req,
       res,
-      next
+      next,
     );
   };
 

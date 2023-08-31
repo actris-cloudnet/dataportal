@@ -55,9 +55,9 @@ describe("GET /api/download/stats", () => {
             "38092c00-161d-4ca2-a29d-628cf8e960f6",
             "1.1.1.1",
             "FI",
-            new Date(2022, 0, day + 1)
-          )
-      )
+            new Date(2022, 0, day + 1),
+          ),
+      ),
     );
     // Download half year of Hyytiälä data with two variables ≈ 1 variable year.
     await downloadRepo.save(
@@ -69,9 +69,9 @@ describe("GET /api/download/stats", () => {
             "d21d6a9b-6804-4465-a026-74ec429fe17d",
             "1.1.1.2",
             "NO",
-            new Date(2022, 0, day + 1)
-          )
-      )
+            new Date(2022, 0, day + 1),
+          ),
+      ),
     );
     // Download half year of collection with one observation and model files with three variables ≈ 1.5 variable year.
     await downloadRepo.save(
@@ -83,9 +83,9 @@ describe("GET /api/download/stats", () => {
             "48092c00-161d-4ca2-a29d-628cf8e960f6",
             "1.1.1.3",
             "SE",
-            new Date(2022, 0, 182 + day)
-          )
-      )
+            new Date(2022, 0, 182 + day),
+          ),
+      ),
     );
   });
 
@@ -184,7 +184,7 @@ describe("GET /api/download/stats", () => {
 
   it("fails to filter by invalid products", () =>
     expect(
-      getStats({ dimensions: "yearMonth,downloads", country: "FI", site: "mace-head", productTypes: "invalid" })
+      getStats({ dimensions: "yearMonth,downloads", country: "FI", site: "mace-head", productTypes: "invalid" }),
     ).rejects.toMatchObject({
       response: { status: 400 },
     }));
@@ -229,7 +229,7 @@ describe("GET /api/download/stats", () => {
 
   it("filters between download dates", () =>
     expect(
-      getStats({ dimensions: "yearMonth,downloads", downloadDateFrom: "2022-03-02", downloadDateTo: "2022-10-15" })
+      getStats({ dimensions: "yearMonth,downloads", downloadDateFrom: "2022-03-02", downloadDateTo: "2022-10-15" }),
     ).resolves.toMatchObject([
       { yearMonth: "2022-03", downloads: expect.toBeAround((2 * 2 * 30) / 300, 10) },
       { yearMonth: "2022-04", downloads: expect.toBeAround((2 * 2 * 30) / 300, 10) },

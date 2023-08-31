@@ -34,14 +34,14 @@ describe("POST /api/collection", () => {
 
   it("on invalid request responds with 422", async () => {
     await expect(axios.post(url, { file: validFileUuids })).rejects.toMatchObject(
-      genResponse(422, { errors: ['Request is missing field "files"'] })
+      genResponse(422, { errors: ['Request is missing field "files"'] }),
     );
   });
 
   it("on missing files responds with 422", async () => {
     const missingUuid = validFileUuids.concat(["48092c00-161d-4ca2-a29d-628cf8e960f6"]);
     await expect(axios.post(url, { files: missingUuid })).rejects.toMatchObject(
-      genResponse(422, { errors: ["Following files do not exist: 48092c00-161d-4ca2-a29d-628cf8e960f6"] })
+      genResponse(422, { errors: ["Following files do not exist: 48092c00-161d-4ca2-a29d-628cf8e960f6"] }),
     );
   });
 });

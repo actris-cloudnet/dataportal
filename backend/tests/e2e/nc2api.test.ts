@@ -113,7 +113,7 @@ describe("after PUTting metadata to API", () => {
               ip: "2.125.160.216",
               country: "GB",
             },
-          })
+          }),
         ).resolves.toBe(true);
       });
   });
@@ -149,7 +149,7 @@ describe("after PUTting metadata to API", () => {
       const readmeContent = readmeEntry!.getData().toString("utf-8");
       expect(readmeContent).toContain(collectionUuid);
       expect(readmeContent).toContain(
-        "Custom collection of classification data from Bucharest between 23 and 24 Jul 2019"
+        "Custom collection of classification data from Bucharest between 23 and 24 Jul 2019",
       );
 
       const licenseEntry = entries.find((entry) => entry.entryName === "LICENSE.txt");
@@ -172,7 +172,7 @@ describe("after PUTting metadata to API", () => {
             ip: "2.125.160.216",
             country: "GB",
           },
-        })
+        }),
       ).resolves.toBe(true);
     });
   });
@@ -216,7 +216,7 @@ describe("after PUTting a raw instrument file", () => {
             ip: "2.125.160.216",
             country: "GB",
           },
-        })
+        }),
       ).resolves.toBe(true);
     });
   });

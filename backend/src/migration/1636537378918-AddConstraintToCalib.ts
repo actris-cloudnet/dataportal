@@ -5,7 +5,7 @@ export class AddConstraintToCalib1636537378918 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `ALTER TABLE "calibration" ADD CONSTRAINT "UQ_e8249fb47cad2bfbbdfe460c00b" UNIQUE ("measurementDate", "siteId", "instrumentId")`
+      `ALTER TABLE "calibration" ADD CONSTRAINT "UQ_e8249fb47cad2bfbbdfe460c00b" UNIQUE ("measurementDate", "siteId", "instrumentId")`,
     );
   }
 

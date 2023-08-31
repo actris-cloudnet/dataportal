@@ -29,29 +29,16 @@
 <template>
   <!-- eslint-disable vue/require-v-for-key -->
   <div id="data_availability_visualization" v-if="!busy">
-    <div
-      v-for="(year, index) in yearsReduced"
-      :key="year.year"
-      class="dataviz-row"
-    >
+    <div v-for="(year, index) in yearsReduced" :key="year.year" class="dataviz-row">
       <div
-        v-if="
-          index &&
-          parseInt(year.year) + 1 !== parseInt(yearsReduced[index - 1]['year'])
-        "
+        v-if="index && parseInt(year.year) + 1 !== parseInt(yearsReduced[index - 1]['year'])"
         class="dataviz-skippedyears"
       >
-        <template
-          v-if="
-            parseInt(year.year) - parseInt(dataStatus.years[index - 1].year) ==
-            -2
-          "
-        >
+        <template v-if="parseInt(year.year) - parseInt(dataStatus.years[index - 1].year) == -2">
           No data for year {{ parseInt(year.year) + 1 }}.
         </template>
         <template v-else>
-          No data for years {{ parseInt(year.year) + 1 }} -
-          {{ parseInt(dataStatus.years[index - 1].year) - 1 }}.
+          No data for years {{ parseInt(year.year) + 1 }} - {{ parseInt(dataStatus.years[index - 1].year) - 1 }}.
         </template>
       </div>
       <div class="dataviz-year">{{ year.year }}</div>
@@ -101,11 +88,7 @@
       </div>
       <br />
     </div>
-    <div
-      class="dataviz-tooltip"
-      v-if="tooltips && hover && currentDate && currentYear"
-      :style="tooltipStyle"
-    >
+    <div class="dataviz-tooltip" v-if="tooltips && hover && currentDate && currentYear" :style="tooltipStyle">
       <header>
         <img :src="createIconForSingleProduct(currentDate.products)" alt="" />
         {{ currentYear.year }}-{{ currentDate.date }}
@@ -118,25 +101,12 @@
 </template>
 
 <script lang="ts" setup>
-import type {
-  ProductLevels,
-  ProductYear,
-  ProductDate,
-  DataStatus,
-} from "@/lib/DataStatusParser";
+import type { ProductLevels, ProductYear, ProductDate, DataStatus } from "@/lib/DataStatusParser";
 import type { ColorClass } from "@/lib";
 import debounce from "debounce";
 import { computed, ref } from "vue";
 
-import {
-  isLegacy,
-  isError,
-  isWarning,
-  isInfo,
-  qualityExists,
-  isPass,
-  noData,
-} from "@/lib/ProductAvailabilityTools";
+import { isLegacy, isError, isWarning, isInfo, qualityExists, isPass, noData } from "@/lib/ProductAvailabilityTools";
 
 import testPassIcon from "@/assets/icons/test-pass.svg";
 import testWarningIcon from "@/assets/icons/test-warning.svg";
@@ -174,7 +144,7 @@ const yearsReduced = computed(() =>
         "1c": date.products["1c"].filter((x) => x.id == props.product),
       },
     })),
-  }))
+  })),
 );
 
 function createLinkToLandingPage(products: ProductLevels): string | undefined {
@@ -226,18 +196,13 @@ function allPass(products: ProductLevels) {
 }
 
 function onlyLegacy(products: ProductLevels) {
-  return (
-    products["2"].every(isLegacy) &&
-    products["1c"].every(isLegacy) &&
-    products["1b"].every(isLegacy)
-  );
+  return products["2"].every(isLegacy) && products["1c"].every(isLegacy) && products["1b"].every(isLegacy);
 }
 
 function createColorClassForSingleProduct(products: ProductLevels): ColorClass {
   if (noData(products)) return "no-data";
   if (props.qualityScores) {
-    if (hasSomeTests(products) && onlyLegacy(products))
-      return "only-legacy-data";
+    if (hasSomeTests(products) && onlyLegacy(products)) return "only-legacy-data";
     if (allPass(products)) return "all-data";
     if (anyProductContainsErrors(products)) return "contains-errors";
     if (anyProductContainsWarnings(products)) return "contains-warnings";
@@ -269,13 +234,8 @@ function hideTooltip() {
   hover.value = false;
 }
 
-function setCurrentYearDate(
-  year: ProductYear,
-  date: ProductDate,
-  event: MouseEvent
-) {
-  const tooltipTop =
-    (event.target as HTMLElement).getBoundingClientRect().top - 30;
+function setCurrentYearDate(year: ProductYear, date: ProductDate, event: MouseEvent) {
+  const tooltipTop = (event.target as HTMLElement).getBoundingClientRect().top - 30;
   const tooltipLeft = event.clientX;
   tooltipStyle.value = {
     top: `${tooltipTop}px`,

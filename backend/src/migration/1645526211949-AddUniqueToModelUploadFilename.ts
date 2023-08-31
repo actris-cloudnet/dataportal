@@ -6,7 +6,7 @@ export class AddUniqueToModelUploadFilename1645526211949 implements MigrationInt
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`COMMENT ON COLUMN "model_upload"."filename" IS NULL`);
     await queryRunner.query(
-      `ALTER TABLE "model_upload" ADD CONSTRAINT "UQ_7d1baf638db4876c37aa6025265" UNIQUE ("filename")`
+      `ALTER TABLE "model_upload" ADD CONSTRAINT "UQ_7d1baf638db4876c37aa6025265" UNIQUE ("filename")`,
     );
   }
 

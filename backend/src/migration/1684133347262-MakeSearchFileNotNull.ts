@@ -10,13 +10,13 @@ export class MakeSearchFileNotNull1684133347262 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "search_file" ALTER COLUMN "siteId" SET NOT NULL`);
     await queryRunner.query(`ALTER TABLE "search_file" ALTER COLUMN "productId" SET NOT NULL`);
     await queryRunner.query(
-      `ALTER TABLE "search_file" ADD CONSTRAINT "UQ_04b805110f90917f6f029ed506a" UNIQUE ("measurementDate", "siteId", "productId")`
+      `ALTER TABLE "search_file" ADD CONSTRAINT "UQ_04b805110f90917f6f029ed506a" UNIQUE ("measurementDate", "siteId", "productId")`,
     );
     await queryRunner.query(
-      `ALTER TABLE "search_file" ADD CONSTRAINT "FK_42a81a5ce2ba2ff97bf4b9fb9f4" FOREIGN KEY ("siteId") REFERENCES "site"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`
+      `ALTER TABLE "search_file" ADD CONSTRAINT "FK_42a81a5ce2ba2ff97bf4b9fb9f4" FOREIGN KEY ("siteId") REFERENCES "site"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "search_file" ADD CONSTRAINT "FK_fec04c86fcd20096d881d0e172f" FOREIGN KEY ("productId") REFERENCES "product"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`
+      `ALTER TABLE "search_file" ADD CONSTRAINT "FK_fec04c86fcd20096d881d0e172f" FOREIGN KEY ("productId") REFERENCES "product"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
   }
 
@@ -27,13 +27,13 @@ export class MakeSearchFileNotNull1684133347262 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "search_file" ALTER COLUMN "productId" DROP NOT NULL`);
     await queryRunner.query(`ALTER TABLE "search_file" ALTER COLUMN "siteId" DROP NOT NULL`);
     await queryRunner.query(
-      `ALTER TABLE "search_file" ADD CONSTRAINT "UQ_04b805110f90917f6f029ed506a" UNIQUE ("measurementDate", "siteId", "productId")`
+      `ALTER TABLE "search_file" ADD CONSTRAINT "UQ_04b805110f90917f6f029ed506a" UNIQUE ("measurementDate", "siteId", "productId")`,
     );
     await queryRunner.query(
-      `ALTER TABLE "search_file" ADD CONSTRAINT "FK_fec04c86fcd20096d881d0e172f" FOREIGN KEY ("productId") REFERENCES "product"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`
+      `ALTER TABLE "search_file" ADD CONSTRAINT "FK_fec04c86fcd20096d881d0e172f" FOREIGN KEY ("productId") REFERENCES "product"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "search_file" ADD CONSTRAINT "FK_42a81a5ce2ba2ff97bf4b9fb9f4" FOREIGN KEY ("siteId") REFERENCES "site"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`
+      `ALTER TABLE "search_file" ADD CONSTRAINT "FK_42a81a5ce2ba2ff97bf4b9fb9f4" FOREIGN KEY ("siteId") REFERENCES "site"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
   }
 }

@@ -69,7 +69,7 @@ describe("test /site-contacts and /persons private api", () => {
     const siteContactPutRawData = readFileSync("tests/data/siteContact-put.json", "utf8");
     const resPutSiteContact = await axios.put(
       `${SITE_CONTACTS_URL}/${siteContactId}`,
-      JSON.parse(siteContactPutRawData)
+      JSON.parse(siteContactPutRawData),
     );
     expect(resPutSiteContact.status).toBe(200);
     // Update person
@@ -102,7 +102,7 @@ describe("test /site-contacts and /persons private api", () => {
     expect(siteContactId).not.toBe(undefined);
     const putRes = await axios.put(
       `${SITE_CONTACTS_URL}/${siteContactId}`,
-      JSON.parse(readFileSync("tests/data/siteContact-put-site.json", "utf8"))
+      JSON.parse(readFileSync("tests/data/siteContact-put-site.json", "utf8")),
     );
     expect(putRes.status).toBe(200);
     const resMaceHead = await axios.get(`${SITE_CONTACTS_URL}?siteId=mace-head`);

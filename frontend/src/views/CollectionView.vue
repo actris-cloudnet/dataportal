@@ -109,18 +109,11 @@ main.column
             All files
           </router-link>
         </nav>
-        <section
-          id="editCollection"
-          class="rightView"
-          v-if="mode === 'general'"
-        >
+        <section id="editCollection" class="rightView" v-if="mode === 'general'">
           <h3>How to cite</h3>
-          <span v-if="citationBusy" style="color: gray"
-            >Generating citation...</span
-          >
+          <span v-if="citationBusy" style="color: gray">Generating citation...</span>
           <div v-else-if="pidServiceError" class="errormsg">
-            PID service is unavailable. Please try again later. You may still
-            download the collection.
+            PID service is unavailable. Please try again later. You may still download the collection.
           </div>
           <how-to-cite
             v-if="!citationBusy"
@@ -133,16 +126,11 @@ main.column
           <license></license>
 
           <h3>Download</h3>
-          By clicking the download button you confirm that you have taken notice
-          of the above data licensing information.<br />
+          By clicking the download button you confirm that you have taken notice of the above data licensing
+          information.<br />
           <a class="download" :href="downloadUrl" id="downloadCollection">
             Download collection
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
               <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
             </svg>
           </a>
@@ -165,12 +153,7 @@ main.column
 import { ref, computed, onMounted } from "vue";
 import axios from "axios";
 import type { CollectionResponse } from "@shared/entity/CollectionResponse";
-import {
-  combinedFileSize,
-  constructTitle,
-  getProductIcon,
-  humanReadableSize,
-} from "@/lib";
+import { combinedFileSize, constructTitle, getProductIcon, humanReadableSize } from "@/lib";
 import type { Site } from "@shared/entity/Site";
 import MyMap from "@/components/SuperMap.vue";
 import type { Product } from "@shared/entity/Product";
@@ -204,11 +187,7 @@ const citation = ref<string>("");
 const acknowledgements = ref<string>("");
 const dataAvailability = ref<string>("");
 
-const startDate = computed(
-  () =>
-    sortedFiles.value &&
-    sortedFiles.value[sortedFiles.value.length - 1].measurementDate
-);
+const startDate = computed(() => sortedFiles.value && sortedFiles.value[sortedFiles.value.length - 1].measurementDate);
 
 const endDate = computed(() => sortedFiles.value[0].measurementDate);
 
@@ -222,17 +201,10 @@ const downloadUrl = computed(() => {
   return `${apiUrl}download/collection/${response.value.uuid}`;
 });
 
-function getUnique(
-  arr: CollectionFileResponse[],
-  field: keyof CollectionFileResponse
-) {
+function getUnique(arr: CollectionFileResponse[], field: keyof CollectionFileResponse) {
   return arr
     .map((file) => file[field])
-    .reduce(
-      (acc: string[], cur) =>
-        typeof cur == "string" && !acc.includes(cur) ? acc.concat([cur]) : acc,
-      []
-    );
+    .reduce((acc: string[], cur) => (typeof cur == "string" && !acc.includes(cur) ? acc.concat([cur]) : acc), []);
 }
 
 const totalSize = computed(() => {
@@ -265,14 +237,12 @@ onMounted(() => {
       if (response.value == null) return;
       sortedFiles.value = constructTitle(
         response.value.files.sort(
-          (a, b) =>
-            new Date(b.measurementDate).getTime() -
-            new Date(a.measurementDate).getTime()
-        )
+          (a, b) => new Date(b.measurementDate).getTime() - new Date(a.measurementDate).getTime(),
+        ),
       );
       nonModelSiteIds.value = getUnique(
         sortedFiles.value.filter((file) => file.productId != "model"),
-        "siteId"
+        "siteId",
       );
     })
     .catch((error) => {
@@ -282,15 +252,9 @@ onMounted(() => {
     .then(() => {
       generatePid().finally(() => {
         Promise.all([
-          axios.get(
-            `${apiUrl}reference/${props.uuid}?citation=true&format=html`
-          ),
-          axios.get(
-            `${apiUrl}reference/${props.uuid}?acknowledgements=true&format=html`
-          ),
-          axios.get(
-            `${apiUrl}reference/${props.uuid}?dataAvailability=true&format=html`
-          ),
+          axios.get(`${apiUrl}reference/${props.uuid}?citation=true&format=html`),
+          axios.get(`${apiUrl}reference/${props.uuid}?acknowledgements=true&format=html`),
+          axios.get(`${apiUrl}reference/${props.uuid}?dataAvailability=true&format=html`),
         ]).then(([citationRes, ackRes, availRes]) => {
           citationBusy.value = false;
           citation.value = citationRes.data;
@@ -306,15 +270,9 @@ onMounted(() => {
         axios.get(`${apiUrl}models/`),
         axios.get(`${apiUrl}products/`),
       ]).then(([sitesRes, modelsRes, productsRes]) => {
-        sites.value = sitesRes.data.filter((site: Site) =>
-          siteIds.includes(site.id)
-        );
-        products.value = productsRes.data.filter((product: Product) =>
-          productIds.includes(product.id)
-        );
-        models.value = modelsRes.data.filter((model: Product) =>
-          modelIds.includes(model.id)
-        );
+        sites.value = sitesRes.data.filter((site: Site) => siteIds.includes(site.id));
+        products.value = productsRes.data.filter((product: Product) => productIds.includes(product.id));
+        models.value = modelsRes.data.filter((model: Product) => modelIds.includes(model.id));
       });
     })
     .catch(console.error)

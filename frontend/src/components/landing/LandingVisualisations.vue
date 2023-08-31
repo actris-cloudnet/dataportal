@@ -5,10 +5,7 @@
 <template>
   <div class="landing-visualisations-container">
     <div v-if="visualizations.length > 0" class="visualisations-box">
-      <div
-        v-for="visualization in visualizations"
-        :key="visualization.productVariable.id"
-      >
+      <div v-for="visualization in visualizations" :key="visualization.productVariable.id">
         <Visualization
           :data="visualization"
           :maxMarginLeft="maxMarginLeft"

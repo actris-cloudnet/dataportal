@@ -6,7 +6,7 @@ export class AddModelToFile1607944893142 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`ALTER TABLE "file" ADD "modelId" character varying`);
     await queryRunner.query(
-      `ALTER TABLE "file" ADD CONSTRAINT "FK_5af5a3b6962dfdb21c85c530e08" FOREIGN KEY ("modelId") REFERENCES "model"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`
+      `ALTER TABLE "file" ADD CONSTRAINT "FK_5af5a3b6962dfdb21c85c530e08" FOREIGN KEY ("modelId") REFERENCES "model"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
   }
 

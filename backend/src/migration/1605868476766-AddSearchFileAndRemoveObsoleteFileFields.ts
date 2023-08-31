@@ -5,7 +5,7 @@ export class AddSearchFileAndRemoveObsoleteFileFields1605868476766 implements Mi
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE TABLE "search_file" ("uuid" uuid NOT NULL, "measurementDate" date NOT NULL, "size" integer NOT NULL, "siteId" character varying, "productId" character varying, CONSTRAINT "PK_7a111a3df8790374cd476849a0f" PRIMARY KEY ("uuid"))`
+      `CREATE TABLE "search_file" ("uuid" uuid NOT NULL, "measurementDate" date NOT NULL, "size" integer NOT NULL, "siteId" character varying, "productId" character varying, CONSTRAINT "PK_7a111a3df8790374cd476849a0f" PRIMARY KEY ("uuid"))`,
     );
     await queryRunner.query(`ALTER TABLE "file" DROP COLUMN "title"`);
     await queryRunner.query(`ALTER TABLE "file" DROP COLUMN "publicity"`);
@@ -17,10 +17,10 @@ export class AddSearchFileAndRemoveObsoleteFileFields1605868476766 implements Mi
     await queryRunner.query(`ALTER TABLE "file" ADD "updatedAt" TIMESTAMP NOT NULL`);
     await queryRunner.query(`ALTER TABLE "file" ALTER COLUMN "history" SET DEFAULT ''`);
     await queryRunner.query(
-      `ALTER TABLE "search_file" ADD CONSTRAINT "FK_42a81a5ce2ba2ff97bf4b9fb9f4" FOREIGN KEY ("siteId") REFERENCES "site"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`
+      `ALTER TABLE "search_file" ADD CONSTRAINT "FK_42a81a5ce2ba2ff97bf4b9fb9f4" FOREIGN KEY ("siteId") REFERENCES "site"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "search_file" ADD CONSTRAINT "FK_fec04c86fcd20096d881d0e172f" FOREIGN KEY ("productId") REFERENCES "product"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`
+      `ALTER TABLE "search_file" ADD CONSTRAINT "FK_fec04c86fcd20096d881d0e172f" FOREIGN KEY ("productId") REFERENCES "product"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
   }
 

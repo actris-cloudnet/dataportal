@@ -25,7 +25,7 @@ const requiredVars = [
   "TYPEORM_SYNCHRONIZE",
 ] as const;
 
-type RequiredVar = typeof requiredVars[number];
+type RequiredVar = (typeof requiredVars)[number];
 
 const missingVars = requiredVars.filter((env) => !process.env[env]);
 if (missingVars.length > 0) {

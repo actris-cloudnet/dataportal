@@ -6,7 +6,7 @@ export class LinkProductToUploadedMetadata1597388016923 implements MigrationInte
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`ALTER TABLE "uploaded_metadata" ADD "productId" character varying`);
     await queryRunner.query(
-      `ALTER TABLE "uploaded_metadata" ADD CONSTRAINT "FK_9f6d6b144479cf5a8efba43e7e1" FOREIGN KEY ("productId") REFERENCES "product"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`
+      `ALTER TABLE "uploaded_metadata" ADD CONSTRAINT "FK_9f6d6b144479cf5a8efba43e7e1" FOREIGN KEY ("productId") REFERENCES "product"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
   }
 

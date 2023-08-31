@@ -26,10 +26,7 @@ const emit = defineEmits<{
 const selectedRow = ref<any>(null);
 
 const visibleItems = computed(() =>
-  props.items.slice(
-    (props.currentPage - 1) * props.perPage,
-    props.currentPage * props.perPage
-  )
+  props.items.slice((props.currentPage - 1) * props.perPage, props.currentPage * props.perPage),
 );
 
 function selectRow(row: any) {

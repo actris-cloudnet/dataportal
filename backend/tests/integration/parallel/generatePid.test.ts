@@ -38,7 +38,7 @@ describe("POST /api/generate-pid", () => {
     await collRepo.save(collection);
     const error = { errors: ["Collection already has a PID"] };
     await expect(axios.post(url, { type: "collection", uuid: collection.uuid })).rejects.toMatchObject(
-      genResponse(403, error)
+      genResponse(403, error),
     );
     await collRepo.remove(collection);
   });
@@ -47,21 +47,21 @@ describe("POST /api/generate-pid", () => {
     const error = { errors: ["Missing or invalid uuid or type"] };
     await expect(axios.post(url, { type: "collection" })).rejects.toMatchObject(genResponse(422, error));
     return await expect(axios.post(url, { uuid: "48092c00-161d-4ca2-a29d-628cf8e960f6" })).rejects.toMatchObject(
-      genResponse(422, error)
+      genResponse(422, error),
     );
   });
 
   it("responds with 422 on invalid type", async () => {
     const error = { errors: ["Type must be collection"] };
     return await expect(
-      axios.post(url, { type: "file", uuid: "48092c00-161d-4ca2-a29d-628cf8e960f6" })
+      axios.post(url, { type: "file", uuid: "48092c00-161d-4ca2-a29d-628cf8e960f6" }),
     ).rejects.toMatchObject(genResponse(422, error));
   });
 
   it("responds with 422 on missing uuid", async () => {
     const error = { errors: ["Collection not found"] };
     return await expect(
-      axios.post(url, { type: "collection", uuid: "11092c00-161d-4ca2-a29d-628cf8e960f6" })
+      axios.post(url, { type: "collection", uuid: "11092c00-161d-4ca2-a29d-628cf8e960f6" }),
     ).rejects.toMatchObject(genResponse(422, error));
   });
 

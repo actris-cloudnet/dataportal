@@ -45,7 +45,7 @@ export class DownloadRoutes {
     fileController: FileRoutes,
     collController: CollectionRoutes,
     uploadController: UploadRoutes,
-    ipLookup: Reader<CountryResponse>
+    ipLookup: Reader<CountryResponse>,
   ) {
     this.dataSource = dataSource;
     this.collectionRepo = dataSource.getRepository(Collection);
@@ -89,7 +89,7 @@ export class DownloadRoutes {
     const filename = req.params[0];
     try {
       const file = await this.uploadController.findAnyUpload((repo) =>
-        repo.findOne({ where: { uuid: req.params.uuid, filename }, relations: { site: true } })
+        repo.findOne({ where: { uuid: req.params.uuid, filename }, relations: { site: true } }),
       );
       if (!file) return next({ status: 404, errors: ["File not found"] });
       const upstreamRes = await this.makeRawFileRequest(file);

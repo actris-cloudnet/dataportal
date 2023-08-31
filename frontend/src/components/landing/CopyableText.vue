@@ -75,7 +75,7 @@ function copy() {
       setTimeout(() => {
         message.value = "";
       }, 2 * messageDuration);
-    }
+    },
   );
 }
 </script>

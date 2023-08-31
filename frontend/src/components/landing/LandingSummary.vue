@@ -13,26 +13,14 @@
           :instrumentStatus="instrumentStatus"
         />
         <FileInformation :response="response" />
-        <DataOrigin
-          :response="response"
-          :isBusy="isBusy"
-          :versions="versions"
-          :sourceFiles="sourceFiles"
-        />
+        <DataOrigin :response="response" :isBusy="isBusy" :versions="versions" :sourceFiles="sourceFiles" />
       </div>
     </div>
     <div class="side-content">
       <div class="summary-box">
-        <Preview
-          :visualization="visualization"
-          :loading="loadingVisualizations"
-        />
+        <Preview :visualization="visualization" :loading="loadingVisualizations" />
       </div>
-      <div
-        class="summary-box"
-        id="citation"
-        :class="{ volatile: response.volatile }"
-      >
+      <div class="summary-box" id="citation" :class="{ volatile: response.volatile }">
         <Citation :uuid="uuid" :file="response" v-if="response" />
       </div>
     </div>

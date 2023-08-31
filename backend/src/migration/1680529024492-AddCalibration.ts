@@ -5,7 +5,7 @@ export class AddCalibration1680529024492 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE TABLE "calibration" ("instrumentPid" character varying NOT NULL, "measurementDate" date NOT NULL, "data" jsonb NOT NULL, "createdAt" TIMESTAMP NOT NULL, "updatedAt" TIMESTAMP NOT NULL, CONSTRAINT "PK_9f87fbc48713f4fd19351d77c38" PRIMARY KEY ("instrumentPid", "measurementDate"))`
+      `CREATE TABLE "calibration" ("instrumentPid" character varying NOT NULL, "measurementDate" date NOT NULL, "data" jsonb NOT NULL, "createdAt" TIMESTAMP NOT NULL, "updatedAt" TIMESTAMP NOT NULL, CONSTRAINT "PK_9f87fbc48713f4fd19351d77c38" PRIMARY KEY ("instrumentPid", "measurementDate"))`,
     );
   }
 

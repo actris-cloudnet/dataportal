@@ -64,37 +64,19 @@
     >
       <template #tag="slotProps">
         <span class="multiselect__tag">
-          <img
-            v-if="getIcon"
-            class="option__image"
-            :src="getIcon(slotProps.option)"
-            alt=""
-          />
+          <img v-if="getIcon" class="option__image" :src="getIcon(slotProps.option)" alt="" />
           {{ slotProps.option.humanReadableName }}
-          <i
-            class="multiselect__tag-icon"
-            @click="slotProps.remove(slotProps.option)"
-          ></i>
+          <i class="multiselect__tag-icon" @click="slotProps.remove(slotProps.option)"></i>
         </span>
       </template>
       <template #option="slotProps">
         <span>
-          <img
-            v-if="getIcon"
-            class="option__image"
-            :src="getIcon(slotProps.option)"
-            alt=""
-          />
+          <img v-if="getIcon" class="option__image" :src="getIcon(slotProps.option)" alt="" />
           {{ slotProps.option.humanReadableName }}
         </span>
       </template>
       <template #singleLabel="slotProps">
-        <img
-          v-if="getIcon"
-          class="option__image"
-          :src="getIcon(slotProps.option)"
-          alt=""
-        />
+        <img v-if="getIcon" class="option__image" :src="getIcon(slotProps.option)" alt="" />
         {{ slotProps.option.humanReadableName }}
       </template>
       <template #noResult>
@@ -130,8 +112,7 @@ const props = defineProps({
     required: true,
     type: null as unknown as PropType<ModelValue>,
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-    validator: (v: any) =>
-      typeof v === "string" || Array.isArray(v) || v === null,
+    validator: (v: any) => typeof v === "string" || Array.isArray(v) || v === null,
   },
 });
 
@@ -142,25 +123,14 @@ const emit = defineEmits<{
 const value = computed({
   get() {
     if (Array.isArray(props.modelValue)) {
-      return props.modelValue
-        .map((v) => props.options.find((option) => option.id === v))
-        .filter(notEmpty);
+      return props.modelValue.map((v) => props.options.find((option) => option.id === v)).filter(notEmpty);
     } else {
-      const result = props.options.find(
-        (option) => option.id === props.modelValue
-      );
+      const result = props.options.find((option) => option.id === props.modelValue);
       return result !== undefined ? result : null;
     }
   },
   set(value) {
-    emit(
-      "update:modelValue",
-      Array.isArray(value)
-        ? value.map((v) => v.id)
-        : value != null
-        ? value.id
-        : null
-    );
+    emit("update:modelValue", Array.isArray(value) ? value.map((v) => v.id) : value != null ? value.id : null);
   },
 });
 </script>

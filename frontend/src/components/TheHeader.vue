@@ -40,13 +40,8 @@ import headerLogo from "@/assets/header-logo.svg";
 $header-color: darken(#78c0e0, 25%);
 
 header {
-  background-image: linear-gradient(
-      to bottom,
-      transparent 75%,
-      rgba(0, 0, 0, 0.05)
-    ),
-    linear-gradient(to left, rgba($header-color, 0.5), $header-color 70%),
-    url("@/assets/clouds3.jpg");
+  background-image: linear-gradient(to bottom, transparent 75%, rgba(0, 0, 0, 0.05)),
+    linear-gradient(to left, rgba($header-color, 0.5), $header-color 70%), url("@/assets/clouds3.jpg");
   opacity: 0.7;
   background-position: right 0px top 20%;
   background-repeat: no-repeat;

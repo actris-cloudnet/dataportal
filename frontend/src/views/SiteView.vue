@@ -50,8 +50,7 @@
     <header>
       <h2>{{ response.humanReadableName }}</h2>
       <span>
-        Measurement station<template v-if="response.country">
-          in {{ response.country }}</template
+        Measurement station<template v-if="response.country"> in {{ response.country }}</template
         >.
       </span>
     </header>
@@ -62,19 +61,14 @@
           <dl>
             <dt>Location</dt>
             <dd>
-              {{ response.humanReadableName
-              }}<template v-if="response.country"
-                >, {{ response.country }}</template
-              >
+              {{ response.humanReadableName }}<template v-if="response.country">, {{ response.country }}</template>
             </dd>
             <dt>ACTRIS name</dt>
             <dd v-if="nfName" style="max-width: 300px">
               <a :href="nfLink">{{ nfName }}</a>
             </dd>
             <dd class="notAvailable" v-else></dd>
-            <template
-              v-if="response.latitude != null && response.longitude != null"
-            >
+            <template v-if="response.latitude != null && response.longitude != null">
               <dt>Coordinates</dt>
               <dd>
                 {{ formatCoordinates(response.latitude, response.longitude) }}
@@ -96,31 +90,16 @@
           <div v-if="instrumentsStatus === 'loading'" class="loadingoverlay">
             <div class="lds-dual-ring"></div>
           </div>
-          <div
-            v-else-if="instrumentsStatus === 'error'"
-            class="detailslistError"
-          >
+          <div v-else-if="instrumentsStatus === 'error'" class="detailslistError">
             Failed to load instrument information.
           </div>
-          <div
-            v-else-if="instruments && instruments.length"
-            class="detailslist"
-          >
+          <div v-else-if="instruments && instruments.length" class="detailslist">
             <div class="notice">
-              The site has submitted data from the following instruments in the
-              last
+              The site has submitted data from the following instruments in the last
               {{ instrumentsFromLastDays }} days:
             </div>
-            <div
-              v-for="(instrument, index) in instruments"
-              :key="index"
-              class="detailslistItem"
-            >
-              <img
-                alt="instrument icon"
-                :src="instrument.icon"
-                class="product"
-              />
+            <div v-for="(instrument, index) in instruments" :key="index" class="detailslistItem">
+              <img alt="instrument icon" :src="instrument.icon" class="product" />
               <span v-if="instrument.pid">
                 <a :href="instrument.pid">{{ instrument.name }}</a>
               </span>
@@ -138,29 +117,14 @@
           <div v-if="locations.status === 'loading'" class="loadingoverlay">
             <div class="lds-dual-ring"></div>
           </div>
-          <TrackMap
-            v-else-if="locations.status === 'ready'"
-            :site="response.id"
-            :track="locations.value"
-          />
-          <div
-            v-else-if="locations.status === 'notFound'"
-            style="padding: 10px; color: gray"
-          >
-            No location history.
-          </div>
-          <div
-            v-else-if="locations.status === 'error'"
-            style="padding: 10px; color: red"
-          >
+          <TrackMap v-else-if="locations.status === 'ready'" :site="response.id" :track="locations.value" />
+          <div v-else-if="locations.status === 'notFound'" style="padding: 10px; color: gray">No location history.</div>
+          <div v-else-if="locations.status === 'error'" style="padding: 10px; color: red">
             Failed to load location history.
           </div>
         </section>
       </section>
-      <section
-        id="sitemap"
-        v-else-if="response.latitude != null && response.longitude != null"
-      >
+      <section id="sitemap" v-else-if="response.latitude != null && response.longitude != null">
         <header>Map</header>
         <section class="details">
           <MyMap
@@ -178,11 +142,7 @@
       </section>
       <div class="forcewrap"></div>
 
-      <section
-        id="product_availability"
-        class="graph"
-        v-if="!selectedProductName"
-      >
+      <section id="product_availability" class="graph" v-if="!selectedProductName">
         <header>Product availability</header>
         <section class="details">
           <ProductAvailabilityVisualization
@@ -201,9 +161,7 @@
       <section id="product_quality" class="graph">
         <header>
           Product quality
-          <template v-if="selectedProductName"
-            >/ availability ({{ selectedProductName }})</template
-          >
+          <template v-if="selectedProductName">/ availability ({{ selectedProductName }})</template>
         </header>
 
         <section class="details" v-if="selectedProductId">
@@ -263,12 +221,7 @@ import type { SearchFileResponse } from "@shared/entity/SearchFileResponse";
 import MyMap from "@/components/SuperMap.vue";
 import ProductAvailabilityVisualization from "@/components/ProductAvailabilityVisualization.vue";
 import ProductAvailabilityVisualizationSingle from "@/components/ProductAvailabilityVisualizationSingle.vue";
-import {
-  getProductIcon,
-  formatCoordinates,
-  fetchInstrumentName,
-  actrisNfUrl,
-} from "@/lib";
+import { getProductIcon, formatCoordinates, fetchInstrumentName, actrisNfUrl } from "@/lib";
 import { parseDataStatus, type DataStatus } from "@/lib/DataStatusParser";
 import CustomMultiselect from "@/components/MultiSelect.vue";
 import type { ReducedMetadataResponse } from "@shared/entity/ReducedMetadataResponse";
@@ -310,10 +263,7 @@ const nfName = ref<string>();
 const nfLink = ref<string>();
 const locations = ref<LocationsResult>({ status: "loading" });
 
-const title = computed(() => [
-  response.value?.humanReadableName,
-  "Measurement sites",
-]);
+const title = computed(() => [response.value?.humanReadableName, "Measurement sites"]);
 
 useTitle(title);
 
@@ -385,20 +335,14 @@ watch(
       .catch((error) => {
         console.error(error);
       });
-  }
+  },
 );
 
 const selectedProductName = computed(() => {
-  if (
-    !selectedProductId.value ||
-    !dataStatus.value ||
-    !dataStatus.value.availableProducts
-  ) {
+  if (!selectedProductId.value || !dataStatus.value || !dataStatus.value.availableProducts) {
     return null;
   }
-  const product = dataStatus.value.availableProducts.find(
-    (product) => product.id === selectedProductId.value
-  );
+  const product = dataStatus.value.availableProducts.find((product) => product.id === selectedProductId.value);
   if (!product) return null;
   return product.humanReadableName;
 });
@@ -408,13 +352,7 @@ function reset() {
 }
 
 async function initDataStatusParser(product: string | null = null) {
-  const properties = [
-    "measurementDate",
-    "productId",
-    "legacy",
-    "uuid",
-    "errorLevel",
-  ];
+  const properties = ["measurementDate", "productId", "legacy", "uuid", "errorLevel"];
   const payload = {
     site: props.siteid,
     showLegacy: true,
@@ -424,9 +362,7 @@ async function initDataStatusParser(product: string | null = null) {
   dataStatus.value = await parseDataStatus(payload);
 }
 
-async function handleInstrument(
-  response: ReducedMetadataResponse
-): Promise<Instrument> {
+async function handleInstrument(response: ReducedMetadataResponse): Promise<Instrument> {
   if (response.instrumentPid) {
     return {
       pid: response.instrumentPid,

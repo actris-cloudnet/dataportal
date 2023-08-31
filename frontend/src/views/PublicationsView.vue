@@ -40,12 +40,8 @@ ul
         </ul>
       </div>
     </template>
-    <div v-else-if="publications.status == 'loading'">
-      Loading publications...
-    </div>
-    <div v-else-if="publications.status == 'error'">
-      Failed to load publications.
-    </div>
+    <div v-else-if="publications.status == 'loading'">Loading publications...</div>
+    <div v-else-if="publications.status == 'error'">Failed to load publications.</div>
   </main>
 </template>
 
@@ -55,11 +51,7 @@ import axios from "axios";
 import type { AxiosResponse } from "axios";
 import type { Publication } from "@shared/entity/Publication";
 
-function groupBySorted<T, K extends keyof T>(
-  items: T[],
-  key: K,
-  order: "asc" | "desc"
-): [T[K], T[]][] {
+function groupBySorted<T, K extends keyof T>(items: T[], key: K, order: "asc" | "desc"): [T[K], T[]][] {
   const grouped = items.reduce((result, item) => {
     const value = item[key];
     if (result.has(value)) result.get(value).push(item);
@@ -85,9 +77,7 @@ const publications = ref<PublicationState>({ status: "loading" });
 
 onMounted(async () => {
   try {
-    const response: AxiosResponse<Publication[]> = await axios.get(
-      `${import.meta.env.VITE_BACKEND_URL}publications`
-    );
+    const response: AxiosResponse<Publication[]> = await axios.get(`${import.meta.env.VITE_BACKEND_URL}publications`);
     publications.value = {
       status: "ready",
       data: groupBySorted(response.data, "year", "desc"),

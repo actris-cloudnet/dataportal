@@ -57,7 +57,10 @@ async function createServer(): Promise<void> {
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     console.error(
-      JSON.stringify({ req: { method: req.method, url: req.url, body: req.is("json") ? req.body : "[Redacted]" }, err })
+      JSON.stringify({
+        req: { method: req.method, url: req.url, body: req.is("json") ? req.body : "[Redacted]" },
+        err,
+      }),
     );
     if (!res.headersSent) {
       delete err.params;
@@ -100,14 +103,14 @@ async function createServer(): Promise<void> {
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
-    fileRoutes.search
+    fileRoutes.search,
   );
   app.get(
     "/api/files",
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
-    fileRoutes.files
+    fileRoutes.files,
   );
   app.get(
     "/api/model-files",
@@ -115,7 +118,7 @@ async function createServer(): Promise<void> {
     middleware.modelFilesValidator,
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
-    fileRoutes.modelFiles
+    fileRoutes.modelFiles,
   );
   app.get("/api/files/:uuid", middleware.validateUuidParam, fileRoutes.file);
   app.get("/api/sites", siteRoutes.sites);
@@ -129,7 +132,7 @@ async function createServer(): Promise<void> {
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
-    vizRoutes.visualization
+    vizRoutes.visualization,
   );
   app.get("/api/visualizations/:uuid", middleware.validateUuidParam, vizRoutes.visualizationForSourceFile);
   app.get("/api/calibration", calibRoutes.validateParams, calibRoutes.calibration);
@@ -139,21 +142,21 @@ async function createServer(): Promise<void> {
     authorizator.verifyPermission(PermissionType.canCalibrate),
     calibRoutes.validateParams,
     express.json(),
-    calibRoutes.putCalibration
+    calibRoutes.putCalibration,
   );
   app.get(
     "/api/raw-files",
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
-    uploadRoutes.listMetadata(false)
+    uploadRoutes.listMetadata(false),
   );
   app.get(
     "/api/raw-model-files",
     middleware.filesValidator,
     middleware.filesQueryAugmenter,
     middleware.checkParamsExistInDb,
-    uploadRoutes.listMetadata(false)
+    uploadRoutes.listMetadata(false),
   );
 
   // public/internal
@@ -188,7 +191,7 @@ async function createServer(): Promise<void> {
     uploadRoutes.validateMetadata,
     uploadRoutes.validateFilename,
     uploadRoutes.postMetadata,
-    errorAsPlaintext
+    errorAsPlaintext,
   );
   app.put(
     "/upload/data/:checksum",
@@ -198,7 +201,7 @@ async function createServer(): Promise<void> {
     authorizator.verifyPermission(PermissionType.canUpload),
     express.raw({ limit: "100gb" }),
     uploadRoutes.putData,
-    errorAsPlaintext
+    errorAsPlaintext,
   );
 
   // model data upload (for Ewan only)
@@ -210,7 +213,7 @@ async function createServer(): Promise<void> {
     authorizator.verifyPermission(PermissionType.canUploadModel),
     uploadRoutes.validateMetadata,
     uploadRoutes.validateFilename,
-    uploadRoutes.postMetadata
+    uploadRoutes.postMetadata,
   );
 
   app.put(
@@ -220,7 +223,7 @@ async function createServer(): Promise<void> {
     authorizator.findSiteFromChecksum,
     authorizator.verifyPermission(PermissionType.canUploadModel),
     express.raw({ limit: "1gb" }),
-    uploadRoutes.putData
+    uploadRoutes.putData,
   );
 
   app.get("/credentials/:token", userActivationRoutes.get);
@@ -238,7 +241,7 @@ async function createServer(): Promise<void> {
     "/api/download/stats",
     authenticator.verifyCredentials("View download statistics"),
     authorizator.verifyPermission(PermissionType.canGetStats),
-    dlRoutes.stats
+    dlRoutes.stats,
   );
   app.delete(
     "/api/files/:uuid",
@@ -246,13 +249,13 @@ async function createServer(): Promise<void> {
     authenticator.verifyCredentials(),
     middleware.checkDeleteParams,
     authorizator.verifyPermission(PermissionType.canDelete),
-    fileRoutes.deleteFile
+    fileRoutes.deleteFile,
   );
   app.post(
     "/api/publications/",
     authenticator.verifyCredentials(),
     authorizator.verifyPermission(PermissionType.canAddPublication),
-    publicationRoutes.postPublication
+    publicationRoutes.postPublication,
   );
   app.get("/api/publications/", publicationRoutes.getPublications);
 
@@ -298,7 +301,7 @@ async function createServer(): Promise<void> {
           (err) => {
             console.error("Failed to close database connection:", err);
             reject(err);
-          }
+          },
         );
       });
     });

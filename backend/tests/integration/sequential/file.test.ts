@@ -151,7 +151,7 @@ describe("PUT /files/:s3key", () => {
     };
     await expect(putFile(tmpfile1)).resolves.toMatchObject({ status: 201 });
     await expect(
-      modelFileRepo.findOneOrFail({ where: { uuid: tmpfile1.uuid }, relations: { model: true } })
+      modelFileRepo.findOneOrFail({ where: { uuid: tmpfile1.uuid }, relations: { model: true } }),
     ).resolves.toMatchObject({
       model: { id: tmpfile1.model },
     });
@@ -159,7 +159,7 @@ describe("PUT /files/:s3key", () => {
     await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile2.s3key}`, "content");
     await expect(putFile(tmpfile2)).resolves.toMatchObject({ status: 201 });
     await expect(
-      modelFileRepo.findOneOrFail({ where: { uuid: tmpfile2.uuid }, relations: { model: true } })
+      modelFileRepo.findOneOrFail({ where: { uuid: tmpfile2.uuid }, relations: { model: true } }),
     ).resolves.toMatchObject({
       model: { id: tmpfile2.model },
     });
@@ -202,7 +202,7 @@ describe("PUT /files/:s3key", () => {
     };
     await expect(putFile(tmpfile1)).resolves.toMatchObject({ status: 201 });
     await expect(
-      modelFileRepo.findOneOrFail({ where: { uuid: tmpfile1.uuid }, relations: { model: true } })
+      modelFileRepo.findOneOrFail({ where: { uuid: tmpfile1.uuid }, relations: { model: true } }),
     ).resolves.toMatchObject({
       model: { id: tmpfile1.model },
     });
@@ -210,7 +210,7 @@ describe("PUT /files/:s3key", () => {
     await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile2.s3key}`, "content");
     await expect(putFile(tmpfile2)).resolves.toMatchObject({ status: 201 });
     await expect(
-      modelFileRepo.findOneOrFail({ where: { uuid: tmpfile2.uuid }, relations: { model: true } })
+      modelFileRepo.findOneOrFail({ where: { uuid: tmpfile2.uuid }, relations: { model: true } }),
     ).resolves.toMatchObject({
       model: { id: tmpfile2.model },
     });
@@ -219,7 +219,7 @@ describe("PUT /files/:s3key", () => {
     await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile3.s3key}`, "content");
     await expect(putFile(tmpfile3)).resolves.toMatchObject({ status: 201 });
     await expect(
-      modelFileRepo.findOneOrFail({ where: { uuid: tmpfile3.uuid }, relations: { model: true } })
+      modelFileRepo.findOneOrFail({ where: { uuid: tmpfile3.uuid }, relations: { model: true } }),
     ).resolves.toMatchObject({
       model: { id: tmpfile3.model },
     });
@@ -247,7 +247,7 @@ describe("PUT /files/:s3key", () => {
     };
     await expect(putFile(tmpfile1)).resolves.toMatchObject({ status: 201 });
     await expect(
-      modelFileRepo.findOneOrFail({ where: { uuid: tmpfile1.uuid }, relations: { model: true } })
+      modelFileRepo.findOneOrFail({ where: { uuid: tmpfile1.uuid }, relations: { model: true } }),
     ).resolves.toMatchObject({
       model: { id: tmpfile1.model },
     });
@@ -255,7 +255,7 @@ describe("PUT /files/:s3key", () => {
     await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile2.s3key}`, "content");
     await expect(putFile(tmpfile2)).resolves.toMatchObject({ status: 201 });
     await expect(
-      modelFileRepo.findOneOrFail({ where: { uuid: tmpfile2.uuid }, relations: { model: true } })
+      modelFileRepo.findOneOrFail({ where: { uuid: tmpfile2.uuid }, relations: { model: true } }),
     ).resolves.toMatchObject({
       model: { id: tmpfile2.model },
     });
@@ -264,7 +264,7 @@ describe("PUT /files/:s3key", () => {
     await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile3.s3key}`, "content");
     await expect(putFile(tmpfile3)).resolves.toMatchObject({ status: 201 });
     await expect(
-      modelFileRepo.findOneOrFail({ where: { uuid: tmpfile3.uuid }, relations: { model: true } })
+      modelFileRepo.findOneOrFail({ where: { uuid: tmpfile3.uuid }, relations: { model: true } }),
     ).resolves.toMatchObject({
       model: { id: tmpfile3.model },
     });

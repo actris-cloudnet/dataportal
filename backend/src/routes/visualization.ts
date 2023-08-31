@@ -36,7 +36,7 @@ export class VisualizationRoutes {
     try {
       const [file, productVariable] = await Promise.all([
         this.fileController.findAnyFile((repo) =>
-          repo.findOne({ where: { uuid: body.sourceFileId }, relations: { product: true } })
+          repo.findOne({ where: { uuid: body.sourceFileId }, relations: { product: true } }),
         ),
         this.productVariableRepo.findOneBy({ id: body.variableId }),
       ]);

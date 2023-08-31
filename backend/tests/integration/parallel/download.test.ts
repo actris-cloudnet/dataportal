@@ -11,13 +11,13 @@ describe("GET /api/download/collection/:uuid", () => {
       errors: ["No collection matches this UUID."],
     };
     return expect(axios.get(`${url}25506ea8-d357-4c7b-af8c-95dfcc34fc7d`)).rejects.toMatchObject(
-      genResponse(expectedBody.status, expectedBody)
+      genResponse(expectedBody.status, expectedBody),
     );
   });
 
   it("responds 404 if invalid uuid", async () => {
     return expect(axios.get(`${url}kisseliini`)).rejects.toMatchObject(
-      genResponse(404, { errors: ["Not found: invalid UUID"] })
+      genResponse(404, { errors: ["Not found: invalid UUID"] }),
     );
   });
 });
@@ -31,13 +31,13 @@ describe("GET /api/download/product/:uuid/:filename", () => {
       errors: ["File not found"],
     };
     return expect(axios.get(`${url}25506ea8-d357-4c7b-af8c-95dfcc34fc7d/test.nc`)).rejects.toMatchObject(
-      genResponse(expectedBody.status, expectedBody)
+      genResponse(expectedBody.status, expectedBody),
     );
   });
 
   it("responds 404 if invalid uuid", async () => {
     return expect(axios.get(`${url}kisseliini/asd`)).rejects.toMatchObject(
-      genResponse(404, { errors: ["Not found: invalid UUID"] })
+      genResponse(404, { errors: ["Not found: invalid UUID"] }),
     );
   });
 });
@@ -51,13 +51,13 @@ describe("GET /api/download/raw/:uuid/:filename", () => {
       errors: ["File not found"],
     };
     return expect(axios.get(`${url}25506ea8-d357-4c7b-af8c-95dfcc34fc7d/test.nc`)).rejects.toMatchObject(
-      genResponse(expectedBody.status, expectedBody)
+      genResponse(expectedBody.status, expectedBody),
     );
   });
 
   it("responds 404 if invalid uuid", async () => {
     return expect(axios.get(`${url}kisseliini/asd`)).rejects.toMatchObject(
-      genResponse(404, { errors: ["Not found: invalid UUID"] })
+      genResponse(404, { errors: ["Not found: invalid UUID"] }),
     );
   });
 });

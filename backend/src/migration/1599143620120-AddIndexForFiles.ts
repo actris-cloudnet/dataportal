@@ -5,7 +5,7 @@ export class AddIndexForFiles1599143620120 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE INDEX "IDX_47594c1ce8314490ec0ddc7c75" ON "file" ("measurementDate", "siteId", "productId") `
+      `CREATE INDEX "IDX_47594c1ce8314490ec0ddc7c75" ON "file" ("measurementDate", "siteId", "productId") `,
     );
   }
 

@@ -7,10 +7,7 @@ module.exports = {
     es6: true,
     node: true,
   },
-  extends: [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/eslint-recommended",
-  ],
+  extends: ["eslint:recommended", "plugin:@typescript-eslint/eslint-recommended"],
   globals: {
     Atomics: "readonly",
     SharedArrayBuffer: "readonly",
@@ -21,12 +18,6 @@ module.exports = {
     sourceType: "module",
   },
   plugins: ["@typescript-eslint"],
-  ignorePatterns: [
-    "dist/",
-    "node_modules/",
-    "build/",
-    "public/",
-    "src/migration/",
-  ],
+  ignorePatterns: ["dist/", "node_modules/", "build/", "public/", "src/migration/"],
   rules: { ...commonRules },
 };

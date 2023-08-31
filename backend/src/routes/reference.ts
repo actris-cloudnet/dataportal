@@ -102,7 +102,7 @@ function getInitials(name: string): string {
 function citation2html(c: Citation) {
   const authors = formatList(
     c.authors.map((a) => `${a.lastName}, ${getInitials(a.firstName)}`),
-    ", & "
+    ", & ",
   );
   const year = `(${c.year})`;
   const title = c.title;
@@ -117,7 +117,7 @@ function citation2html(c: Citation) {
 export function citation2txt(c: Citation) {
   const authors = formatList(
     c.authors.map((a) => `${a.lastName}, ${getInitials(a.firstName)}`),
-    ", & "
+    ", & ",
   );
   const year = `(${c.year})`;
   const title = c.title;

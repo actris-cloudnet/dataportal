@@ -40,10 +40,7 @@ describe("FileView.vue", () => {
     resources = await readResources();
     axiosMockWithFileUuid = (uuid: string | string[]) => {
       let nreq = 0;
-      return (
-        url: string,
-        req: AxiosRequestConfig | undefined
-      ): AxiosPromise => {
+      return (url: string, req: AxiosRequestConfig | undefined): AxiosPromise => {
         if (url.includes("visualization")) {
           return Promise.resolve(augmentAxiosResponse(visualizationResponse));
         } else if (url.includes("/sites")) {
@@ -57,13 +54,11 @@ describe("FileView.vue", () => {
                 findByUuid(resources["allfiles"], "8bb"),
                 findByUuid(resources["allfiles"], "6cb"),
                 findByUuid(resources["allfiles"], "22b"),
-              ])
+              ]),
             );
           const i = Array.isArray(uuid) ? uuid[nreq] : uuid;
           nreq += 1;
-          return Promise.resolve(
-            augmentAxiosResponse(findByUuid(resources["allfiles"], i))
-          );
+          return Promise.resolve(augmentAxiosResponse(findByUuid(resources["allfiles"], i)));
         }
         return Promise.reject(new Error(`Unmocked URL: ${url}`));
       };

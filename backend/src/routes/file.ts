@@ -120,8 +120,8 @@ export class FileRoutes {
       const sourceFileIds = req.body.sourceFileIds || [];
       await Promise.all(
         sourceFileIds.map(
-          async (uuid: string) => (await this.findAnyFile((repo) => repo.findOneBy({ uuid }))) || Promise.reject()
-        )
+          async (uuid: string) => (await this.findAnyFile((repo) => repo.findOneBy({ uuid }))) || Promise.reject(),
+        ),
       );
     } catch (e) {
       return next({ status: 422, errors: ["One or more of the specified source files were not found"] });
@@ -137,8 +137,8 @@ export class FileRoutes {
     if (file.software) {
       file.software = await Promise.all(
         Object.entries(file.software).map(async ([code, version]) =>
-          this.softwareService.getSoftware(code, version as string)
-        )
+          this.softwareService.getSoftware(code, version as string),
+        ),
       );
     }
 
@@ -150,7 +150,7 @@ export class FileRoutes {
           qb.innerJoin(
             (sub_qb) => sub_qb.from("search_file", "searchfile"),
             "best_version",
-            "file.uuid = best_version.uuid"
+            "file.uuid = best_version.uuid",
           );
         return qb
           .leftJoinAndSelect("file.site", "site")
@@ -210,7 +210,7 @@ export class FileRoutes {
     if (!partialFile.uuid) return next({ status: 422, errors: ["Request body is missing uuid"] });
     try {
       const existingFile = await this.findAnyFile((repo) =>
-        repo.findOne({ where: { uuid: partialFile.uuid }, relations: { product: true } })
+        repo.findOne({ where: { uuid: partialFile.uuid }, relations: { product: true } }),
       );
       if (!existingFile) return next({ status: 422, errors: ["No file matches the provided uuid"] });
       let repo: Repository<RegularFile | ModelFile> = this.fileRepo;
@@ -235,7 +235,7 @@ export class FileRoutes {
     const filenames: string[] = [];
     try {
       const existingFile = await this.findAnyFile((repo) =>
-        repo.findOne({ where: { uuid }, relations: { product: true, site: true } })
+        repo.findOne({ where: { uuid }, relations: { product: true, site: true } }),
       );
       if (!existingFile) return next({ status: 422, errors: ["No file matches the provided uuid"] });
       if (!existingFile.volatile) return next({ status: 422, errors: ["Forbidden to delete a stable file"] });
@@ -257,7 +257,7 @@ export class FileRoutes {
           return next({ status: 422, errors: ["Forbidden to delete due to higher level stable files"] });
         for (const product of products) {
           filenames.push(
-            ...(await this.deleteFileAndVisualizations(this.fileRepo, this.visualizationRepo, product.uuid, dryRun))
+            ...(await this.deleteFileAndVisualizations(this.fileRepo, this.visualizationRepo, product.uuid, dryRun)),
           );
         }
       }
@@ -312,10 +312,10 @@ export class FileRoutes {
       // On model route we want to return all models if filename is specified
       qb.innerJoin(
         (
-          sub_qb // Default functionality
+          sub_qb, // Default functionality
         ) => sub_qb.from("search_file", "searchfile"),
         "best_version",
-        "file.uuid = best_version.uuid"
+        "file.uuid = best_version.uuid",
       );
     }
 
@@ -344,7 +344,7 @@ export class FileRoutes {
   private static async updateModelSearchFile(
     transactionalEntityManager: EntityManager,
     file: any,
-    searchFile: SearchFile
+    searchFile: SearchFile,
   ) {
     const { optimumOrder } = await transactionalEntityManager.findOneByOrFail(Model, { id: file.model });
     const [bestModelFile] = await transactionalEntityManager
@@ -369,7 +369,7 @@ export class FileRoutes {
   }
 
   public async findAnyFile(
-    searchFunc: (arg0: Repository<RegularFile | ModelFile>, arg1?: boolean) => Promise<RegularFile | ModelFile | null>
+    searchFunc: (arg0: Repository<RegularFile | ModelFile>, arg1?: boolean) => Promise<RegularFile | ModelFile | null>,
   ): Promise<RegularFile | ModelFile | null> {
     const [file, modelFile] = await Promise.all([
       searchFunc(this.fileRepo, false),
@@ -379,7 +379,7 @@ export class FileRoutes {
   }
 
   async findAllFiles(
-    searchFunc: (arg0: Repository<RegularFile | ModelFile>, arg1?: boolean) => Promise<(RegularFile | ModelFile)[]>
+    searchFunc: (arg0: Repository<RegularFile | ModelFile>, arg1?: boolean) => Promise<(RegularFile | ModelFile)[]>,
   ): Promise<(RegularFile | ModelFile)[]> {
     const [files, modelFiles] = await Promise.all([
       searchFunc(this.fileRepo, false),
@@ -395,7 +395,7 @@ export class FileRoutes {
       isModel ? "model_file" : "regular_file",
       req,
       res,
-      next
+      next,
     );
   };
 
@@ -403,7 +403,7 @@ export class FileRoutes {
     fileRepo: Repository<RegularFile | ModelFile>,
     visualizationRepo: Repository<Visualization | ModelVisualization>,
     uuid: string,
-    dryRun: boolean
+    dryRun: boolean,
   ) {
     const filenames: string[] = [];
     const file = await fileRepo.findOneByOrFail({ uuid });

@@ -154,15 +154,9 @@ section#fileTable
         <span v-if="isBusy">Searching...</span>
         <span v-else>Found {{ listLength }} results</span>
         <ul class="listLegend">
-          <li v-if="hasVolatile">
-            <span class="rowtag volatile rounded"></span> volatile
-          </li>
-          <li v-if="hasLegacy">
-            <span class="rowtag legacy rounded"></span> legacy
-          </li>
-          <li v-if="hasExperimental">
-            <span class="rowtag experimental rounded"></span> experimental
-          </li>
+          <li v-if="hasVolatile"><span class="rowtag volatile rounded"></span> volatile</li>
+          <li v-if="hasLegacy"><span class="rowtag legacy rounded"></span> legacy</li>
+          <li v-if="hasExperimental"><span class="rowtag experimental rounded"></span> experimental</li>
         </ul>
       </span>
       <div v-if="listLength === 0 && !isBusy" class="noresults">
@@ -227,22 +221,11 @@ section#fileTable
         aria-controls="fileTable"
       />
       <div class="downloadinfo" v-if="listLength > 0 && !simplifiedView">
-        <a
-          class="download"
-          :class="{ disabled: isBusy || downloadIsBusy }"
-          href=""
-          @click.prevent="createCollection()"
-        >
+        <a class="download" :class="{ disabled: isBusy || downloadIsBusy }" href="" @click.prevent="createCollection()">
           Download all </a
         ><br />
-        <span
-          v-if="!downloadFailed"
-          class="dlcount"
-          :class="{ disabled: isBusy || downloadIsBusy }"
-        >
-          {{ listLength }} files ({{
-            humanReadableSize(combinedFileSize(apiResponse))
-          }})
+        <span v-if="!downloadFailed" class="dlcount" :class="{ disabled: isBusy || downloadIsBusy }">
+          {{ listLength }} files ({{ humanReadableSize(combinedFileSize(apiResponse)) }})
         </span>
         <div v-else class="dlcount errormsg">
           {{ dlFailedMessage || "Download failed!" }}
@@ -253,11 +236,7 @@ section#fileTable
     <div class="column2">
       <div>
         <h3 class="inlineblock previewTitle">Preview</h3>
-        <router-link
-          v-if="previewResponse"
-          :to="`/file/${previewResponse.uuid}`"
-          class="listLegend linkToDoPage"
-        >
+        <router-link v-if="previewResponse" :to="`/file/${previewResponse.uuid}`" class="listLegend linkToDoPage">
           Show file &rarr;
         </router-link>
       </div>
@@ -279,16 +258,11 @@ section#fileTable
               <dd>{{ humanReadableTimestamp(previewResponse.updatedAt) }}</dd>
               <dt>Quality check</dt>
               <dd>
-                <span
-                  v-if="typeof previewResponse.errorLevel === 'string'"
-                  class="qualitycheck"
-                >
+                <span v-if="typeof previewResponse.errorLevel === 'string'" class="qualitycheck">
                   <img :src="getQcIcon(previewResponse.errorLevel)" alt="" />
                   <span v-if="previewResponse.errorLevel !== 'pass'">
                     {{ getQcText(previewResponse.errorLevel) }}
-                    <router-link :to="getQcLink(previewResponse.uuid)"
-                      >see report.</router-link
-                    >
+                    <router-link :to="getQcLink(previewResponse.uuid)">see report.</router-link>
                   </span>
                   <span v-else>Pass</span>
                 </span>
@@ -324,10 +298,7 @@ section#fileTable
                   </a>
                 </h4>
                 <router-link :to="`/file/${previewResponse.uuid}`">
-                  <visualization
-                    :data="pendingVisualization"
-                    @load="changePreview"
-                  />
+                  <visualization :data="pendingVisualization" @load="changePreview" />
                 </router-link>
               </div>
             </div>
@@ -336,19 +307,12 @@ section#fileTable
         </section>
         <a class="download" :href="previewResponse.downloadUrl">
           Download file
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-          >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
             <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
           </svg>
         </a>
       </main>
-      <div v-else class="listTitle previewSubTitle">
-        Click a search result to show a preview.
-      </div>
+      <div v-else class="listTitle previewSubTitle">Click a search result to show a preview.</div>
     </div>
   </section>
 </template>
@@ -397,13 +361,9 @@ const apiUrl = import.meta.env.VITE_BACKEND_URL;
 
 const listLength = computed(() => props.apiResponse.length);
 
-const hasVolatile = computed(() =>
-  props.apiResponse.some((item) => item.volatile)
-);
+const hasVolatile = computed(() => props.apiResponse.some((item) => item.volatile));
 const hasLegacy = computed(() => props.apiResponse.some((item) => item.legacy));
-const hasExperimental = computed(() =>
-  props.apiResponse.some((item) => item.experimental)
-);
+const hasExperimental = computed(() => props.apiResponse.some((item) => item.experimental));
 
 function clearPreview() {
   currentVisualization.value = null;
@@ -460,9 +420,7 @@ function createCollection() {
     .post(`${apiUrl}collection`, {
       files: props.apiResponse.map((file) => file.uuid),
     })
-    .then(({ data: uuid }) =>
-      router.push({ name: "Collection", params: { uuid } })
-    )
+    .then(({ data: uuid }) => router.push({ name: "Collection", params: { uuid } }))
     .catch((err) => {
       downloadFailed.value = true;
       // eslint-disable-next-line no-console
@@ -479,10 +437,7 @@ function iconCellStyle(item: any) {
 }
 
 function adjustPerPageAccordingToWindowHeight() {
-  perPage.value = Math.max(
-    Math.floor(document.documentElement.clientHeight / 70),
-    10
-  );
+  perPage.value = Math.max(Math.floor(document.documentElement.clientHeight / 70), 10);
 }
 
 watch(
@@ -494,7 +449,7 @@ watch(
     }
     downloadFailed.value = false;
     previewResponse.value = null;
-  }
+  },
 );
 
 onMounted(() => {

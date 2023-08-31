@@ -115,7 +115,7 @@ export class CitationService {
             lastName: pi.last_name,
             orcid: pi.orcid_id ? normalizeOrcid(pi.orcid_id) : null,
             role: "nfPi",
-          })
+          }),
         ),
       ];
       if (usesModelData) {
@@ -129,7 +129,7 @@ export class CitationService {
             lastName: person.surname,
             orcid: person.orcid ? normalizeOrcid(person.orcid) : null,
             role: "nfPi",
-          }))
+          })),
       );
     } else {
       people = [MODEL_AUTHOR];
@@ -138,7 +138,7 @@ export class CitationService {
       authors: removeDuplicateNames(people),
       publisher: PUBLISHER,
       title: `${file.product.humanReadableName} data from ${file.site.humanReadableName} on ${humanReadableDate(
-        file.measurementDate
+        file.measurementDate,
       )}`,
       year: file.updatedAt.getFullYear(),
       url: file.pid || getFileLandingPage(file),
@@ -157,7 +157,7 @@ export class CitationService {
       output += " We acknowledge ";
       output += formatList(
         modelAcks.map((a) => a.replace(/\.$/, "")),
-        ", and "
+        ", and ",
       );
       output += ".";
     }
@@ -171,7 +171,7 @@ export class CitationService {
        FROM traverse
        JOIN regular_file ON traverse.uuid = regular_file.uuid
        WHERE "instrumentPid" IS NOT NULL
-       GROUP BY "instrumentPid"`
+       GROUP BY "instrumentPid"`,
     );
   }
 
@@ -181,7 +181,7 @@ export class CitationService {
       `SELECT 1
        FROM traverse
        JOIN model_file ON traverse.uuid = model_file.uuid
-       LIMIT 1`
+       LIMIT 1`,
     );
     return rows.length > 0;
   }
@@ -195,7 +195,7 @@ export class CitationService {
        WHERE "collectionUuid" = $1
        AND "actrisId" IS NOT NULL
        GROUP BY "actrisId"`,
-      [collection.uuid]
+      [collection.uuid],
     );
   }
 
@@ -211,7 +211,7 @@ export class CitationService {
        FROM model_file
        JOIN collection_model_files_model_file ON model_file.uuid = "modelFileUuid"
        WHERE "collectionUuid" = $1`,
-      [collection.uuid]
+      [collection.uuid],
     );
     return rows.map((row) => row.humanReadableName).sort();
   }
@@ -229,7 +229,7 @@ export class CitationService {
        JOIN collection_model_files_model_file ON model_file.uuid = "modelFileUuid"
        JOIN site ON model_file."siteId" = site.id
        WHERE "collectionUuid" = $1`,
-      [collection.uuid]
+      [collection.uuid],
     );
     return rows.map((row) => row.humanReadableName).sort();
   }
@@ -243,7 +243,7 @@ export class CitationService {
        JOIN regular_citation_persons_person USING ("regularCitationId")
        JOIN person ON "personId" = person.id
        WHERE "collectionUuid" = $1`,
-      [collection.uuid]
+      [collection.uuid],
     );
     return rows.map(
       (row): Person => ({
@@ -251,7 +251,7 @@ export class CitationService {
         lastName: row.surname,
         orcid: row.orcid ? normalizeOrcid(row.orcid) : null,
         role: "nfPi",
-      })
+      }),
     );
   }
 
@@ -267,7 +267,7 @@ export class CitationService {
              FROM model_file
              JOIN collection_model_files_model_file ON model_file.uuid = "modelFileUuid"
              WHERE "collectionUuid" = $1) AS dates`,
-      [collection.uuid]
+      [collection.uuid],
     );
     return rows[0];
   }
@@ -282,7 +282,7 @@ export class CitationService {
        FROM traverse
        JOIN model_file ON traverse.uuid = model_file.uuid
        JOIN model_citations_model_citation ON model_file."modelId" = model_citations_model_citation."modelId"
-       JOIN model_citation ON model_citations_model_citation."modelCitationId" = model_citation.id`
+       JOIN model_citation ON model_citations_model_citation."modelCitationId" = model_citation.id`,
     );
     return rows.map((row) => row.acknowledgements);
   }
@@ -301,7 +301,7 @@ export class CitationService {
        JOIN site_citations_regular_citation ON regular_file."siteId" = site_citations_regular_citation."siteId"
        JOIN regular_citation ON site_citations_regular_citation."regularCitationId" = regular_citation.id
        WHERE "collectionUuid" = $1`,
-      [object.uuid]
+      [object.uuid],
     );
     return rows.map((row) => row.acknowledgements);
   }
@@ -323,7 +323,7 @@ export class CitationService {
          WHERE regular_file.uuid = traverse.uuid
        )
        ${query}`,
-      [object.uuid]
+      [object.uuid],
     );
   }
 }
@@ -360,7 +360,7 @@ async function fetchInstrumentPis(data: { instrumentPid: string; dates: string[]
               .filter(
                 (pi) =>
                   (pi.start_date != null ? date >= pi.start_date : true) &&
-                  (pi.end_date != null ? date <= pi.end_date : true)
+                  (pi.end_date != null ? date <= pi.end_date : true),
               )
               .forEach((pi) => {
                 output.add(pi);
@@ -373,10 +373,10 @@ async function fetchInstrumentPis(data: { instrumentPid: string; dates: string[]
               lastName: pi.last_name,
               orcid: pi.orcid_id ? normalizeOrcid(pi.orcid_id) : null,
               role: "instrumentPi",
-            })
+            }),
           );
-        })
-      )
+        }),
+      ),
     )
   ).flat();
 }
@@ -406,7 +406,7 @@ async function fetchNfPis(data: { actrisId: number; dates: string[] }[]): Promis
                 (contact) =>
                   contact.role === "pi" &&
                   (contact.start_date != null ? date >= contact.start_date : true) &&
-                  (contact.end_date != null ? date <= contact.end_date : true)
+                  (contact.end_date != null ? date <= contact.end_date : true),
               )
               .forEach((pi) => {
                 output.add(pi);
@@ -419,10 +419,10 @@ async function fetchNfPis(data: { actrisId: number; dates: string[] }[]): Promis
               lastName: pi.last_name,
               orcid: pi.orcid_id ? normalizeOrcid(pi.orcid_id) : null,
               role: "nfPi",
-            })
+            }),
           );
-        })
-      )
+        }),
+      ),
     )
   ).flat();
 }
@@ -437,7 +437,7 @@ function removeDuplicateNames(pis: Person[]): Person[] {
     .sort((a, b) =>
       a.lastName !== b.lastName
         ? a.lastName.localeCompare(b.lastName, "en-gb")
-        : a.firstName.localeCompare(b.firstName, "en-gb")
+        : a.firstName.localeCompare(b.firstName, "en-gb"),
     )
     .filter((ele) => ele.role == "instrumentPi")
     .concat(pis.filter((ele) => ele.role == "modelPi"))

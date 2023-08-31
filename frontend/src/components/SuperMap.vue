@@ -77,13 +77,7 @@
 </style>
 
 <template>
-  <div
-    id="mapContainer"
-    ref="mapElement"
-    class="container wrapper"
-    :class="{ fullHeight }"
-    style="z-index: 4"
-  >
+  <div id="mapContainer" ref="mapElement" class="container wrapper" :class="{ fullHeight }" style="z-index: 4">
     <div class="row">
       <div v-if="showLegend" id="map" class="widemap"></div>
       <div v-else id="map" class="map"></div>
@@ -92,14 +86,7 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  onBeforeUnmount,
-  onMounted,
-  onActivated,
-  watch,
-  ref,
-  nextTick,
-} from "vue";
+import { onBeforeUnmount, onMounted, onActivated, watch, ref, nextTick } from "vue";
 import L from "leaflet";
 import "leaflet-draw";
 import type { Site, SiteType } from "@shared/entity/Site";
@@ -179,9 +166,7 @@ function initMap() {
   map = L.map(mapElement.value as unknown as HTMLElement, {
     maxBounds: setMapBounds(),
   }).setView(getMapCenter(), props.zoom);
-  tileLayer = L.tileLayer(
-    "https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png"
-  );
+  tileLayer = L.tileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png");
   tileLayer.addTo(map);
   if (props.showLegend) legend.addTo(map);
 }
@@ -256,10 +241,9 @@ function initBoundingBoxTool() {
   mappi.on(L.Draw.Event.CREATED, (e) => {
     const keys = Object.keys(allMarkers);
     const clickedSites = keys.filter((key) =>
-      L.latLngBounds(e.layer.getBounds()).contains(allMarkers[key].getLatLng())
+      L.latLngBounds(e.layer.getBounds()).contains(allMarkers[key].getLatLng()),
     );
-    if (props.onMapMarkerClick && clickedSites.length)
-      props.onMapMarkerClick(clickedSites);
+    if (props.onMapMarkerClick && clickedSites.length) props.onMapMarkerClick(clickedSites);
   });
 
   mappi.on(L.Draw.Event.DRAWSTART, () => {
@@ -303,6 +287,6 @@ watch(
   () => props.selectedSiteIds,
   () => {
     setMarkerIcons();
-  }
+  },
 );
 </script>

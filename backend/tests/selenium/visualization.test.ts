@@ -57,11 +57,11 @@ beforeAll(async () => {
   return Promise.all([
     axios.put(
       `${backendPrivateUrl}visualizations/${basename(visualizationPayloads[0].s3key)}`,
-      visualizationPayloads[0]
+      visualizationPayloads[0],
     ),
     axios.put(
       `${backendPrivateUrl}visualizations/${basename(visualizationPayloads[1].s3key)}`,
-      visualizationPayloads[1]
+      visualizationPayloads[1],
     ),
   ]);
 });
@@ -94,7 +94,7 @@ describe("visualizations page", () => {
         const response = await axios.head(downloadUrl);
         expect(response.status).toBe(200);
         return expect(response.headers["content-type"]).toBe("image/png");
-      })
+      }),
     );
   });
 

@@ -16,14 +16,8 @@
         <td v-if="sourceFiles.length > 0">
           <div class="data-source-list">
             <!-- eslint-disable-next-line vue/require-v-for-key -->
-            <div
-              class="data-source-container"
-              v-for="sourceFile in sourceFiles"
-            >
-              <router-link
-                :to="`/file/${sourceFile.value.uuid}`"
-                v-if="sourceFile.ok"
-              >
+            <div class="data-source-container" v-for="sourceFile in sourceFiles">
+              <router-link :to="`/file/${sourceFile.value.uuid}`" v-if="sourceFile.ok">
                 <img
                   :alt="sourceFile.value.product.id"
                   :src="getProductIcon(sourceFile.value.product.id)"
@@ -45,27 +39,14 @@
       <tr>
         <th>Versions</th>
         <td>
-          <router-link
-            v-if="!isBusy && previousVersion"
-            id="previousVersion"
-            :to="`/file/${previousVersion}`"
-            replace
-          >
+          <router-link v-if="!isBusy && previousVersion" id="previousVersion" :to="`/file/${previousVersion}`" replace>
             previous
           </router-link>
           <span v-if="!isBusy && previousVersion && nextVersion">-</span>
-          <router-link
-            v-if="!isBusy && nextVersion"
-            id="nextVersion"
-            :to="`/file/${nextVersion}`"
-            replace
-          >
+          <router-link v-if="!isBusy && nextVersion" id="nextVersion" :to="`/file/${nextVersion}`" replace>
             next</router-link
           >
-          <span
-            v-if="isBusy || (!previousVersion && !nextVersion)"
-            class="notAvailable"
-          ></span>
+          <span v-if="isBusy || (!previousVersion && !nextVersion)" class="notAvailable"></span>
         </td>
       </tr>
       <tr>
@@ -104,15 +85,9 @@ export interface Props {
 
 const props = defineProps<Props>();
 
-const currentVersionIndex = computed(() =>
-  props.versions.findIndex((uuid) => uuid == props.response.uuid)
-);
+const currentVersionIndex = computed(() => props.versions.findIndex((uuid) => uuid == props.response.uuid));
 
-const previousVersion = computed(
-  () => props.versions[currentVersionIndex.value + 1]
-);
+const previousVersion = computed(() => props.versions[currentVersionIndex.value + 1]);
 
-const nextVersion = computed(
-  () => props.versions[currentVersionIndex.value - 1]
-);
+const nextVersion = computed(() => props.versions[currentVersionIndex.value - 1]);
 </script>

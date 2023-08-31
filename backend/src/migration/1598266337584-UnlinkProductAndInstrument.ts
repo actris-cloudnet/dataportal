@@ -13,7 +13,7 @@ export class UnlinkProductAndInstrument1598266337584 implements MigrationInterfa
     await queryRunner.query(`ALTER TABLE "instrument" ALTER COLUMN "type" DROP NOT NULL`);
     await queryRunner.query(`ALTER TABLE "instrument" RENAME COLUMN "type" TO "productId"`);
     await queryRunner.query(
-      `ALTER TABLE "instrument" ADD CONSTRAINT "FK_2cfa7bb87165cc2a842f092890d" FOREIGN KEY ("productId") REFERENCES "product"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`
+      `ALTER TABLE "instrument" ADD CONSTRAINT "FK_2cfa7bb87165cc2a842f092890d" FOREIGN KEY ("productId") REFERENCES "product"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
   }
 }

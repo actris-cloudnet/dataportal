@@ -6,10 +6,10 @@ export class AddDataProcessingVersion1648199725352 implements MigrationInterface
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`ALTER TABLE "file" ADD "dataProcessingVersion" character varying NOT NULL DEFAULT ''`);
     await queryRunner.query(
-      `ALTER TABLE "regular_file" ADD "dataProcessingVersion" character varying NOT NULL DEFAULT ''`
+      `ALTER TABLE "regular_file" ADD "dataProcessingVersion" character varying NOT NULL DEFAULT ''`,
     );
     await queryRunner.query(
-      `ALTER TABLE "model_file" ADD "dataProcessingVersion" character varying NOT NULL DEFAULT ''`
+      `ALTER TABLE "model_file" ADD "dataProcessingVersion" character varying NOT NULL DEFAULT ''`,
     );
   }
 

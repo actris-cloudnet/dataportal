@@ -5,7 +5,7 @@ export class AddUploadedMetadata1597233469409 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE TABLE "uploaded_metadata" ("hash" character varying NOT NULL, "filename" character varying NOT NULL, "measurementDate" date NOT NULL, CONSTRAINT "PK_11dd39e009aacff3f24931e7eae" PRIMARY KEY ("hash"))`
+      `CREATE TABLE "uploaded_metadata" ("hash" character varying NOT NULL, "filename" character varying NOT NULL, "measurementDate" date NOT NULL, CONSTRAINT "PK_11dd39e009aacff3f24931e7eae" PRIMARY KEY ("hash"))`,
     );
   }
 

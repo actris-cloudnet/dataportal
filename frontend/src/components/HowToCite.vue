@@ -6,8 +6,7 @@
 <template>
   <!-- eslint-disable max-len -->
   <section id="howtocite">
-    This is an example of how to cite Cloudnet datasets. You may edit the text
-    to suit publication standards.
+    This is an example of how to cite Cloudnet datasets. You may edit the text to suit publication standards.
     <div class="infobox infocolor">
       <h4>Data availability</h4>
       <div class="citationtext" v-html="dataAvailability"></div>

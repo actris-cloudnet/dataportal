@@ -24,16 +24,9 @@ describe("CollectionView.vue", () => {
     mockAxios = () => {
       return (url: string): AxiosPromise => {
         if (url.includes("/collection/testuuid")) {
-          return Promise.resolve(
-            augmentAxiosResponse(resources["allcollections"][0])
-          );
+          return Promise.resolve(augmentAxiosResponse(resources["allcollections"][0]));
         } else if (url.includes("/search")) {
-          return Promise.resolve(
-            augmentAxiosResponse([
-              resources["allsearch"][0],
-              resources["allsearch"][8],
-            ])
-          );
+          return Promise.resolve(augmentAxiosResponse([resources["allsearch"][0], resources["allsearch"][8]]));
         } else if (url.includes("/sites")) {
           return Promise.resolve(augmentAxiosResponse(resources["sites"]));
         } else if (url.includes("/products")) {
@@ -42,30 +35,14 @@ describe("CollectionView.vue", () => {
           return Promise.resolve(augmentAxiosResponse(resources["models"]));
         } else if (url.includes("/generate-pid")) {
           return Promise.resolve(augmentAxiosResponse({ pid: "testpid" }));
-        } else if (
-          url.includes("/reference/testuuid?citation=true&format=html")
-        ) {
+        } else if (url.includes("/reference/testuuid?citation=true&format=html")) {
           return Promise.resolve(
-            augmentAxiosResponse(
-              'Meikäläinen, M. (2023). Custom collection. <a href="">testpid</a>'
-            )
+            augmentAxiosResponse('Meikäläinen, M. (2023). Custom collection. <a href="">testpid</a>'),
           );
-        } else if (
-          url.includes("/reference/testuuid?acknowledgements=true&format=html")
-        ) {
-          return Promise.resolve(
-            augmentAxiosResponse(
-              "We acknowledge many people and organizations."
-            )
-          );
-        } else if (
-          url.includes("/reference/testuuid?dataAvailability=true&format=html")
-        ) {
-          return Promise.resolve(
-            augmentAxiosResponse(
-              "Only available in the amazing Cloudnet data portal."
-            )
-          );
+        } else if (url.includes("/reference/testuuid?acknowledgements=true&format=html")) {
+          return Promise.resolve(augmentAxiosResponse("We acknowledge many people and organizations."));
+        } else if (url.includes("/reference/testuuid?dataAvailability=true&format=html")) {
+          return Promise.resolve(augmentAxiosResponse("Only available in the amazing Cloudnet data portal."));
         }
         return Promise.reject(new Error(`Unmocked URL: ${url}`));
       };
@@ -86,9 +63,7 @@ describe("CollectionView.vue", () => {
     });
 
     it("displays date span", () => {
-      expect(wrapper.find("#summary").text()).toContain(
-        "2014-12-05 - 2019-09-01"
-      );
+      expect(wrapper.find("#summary").text()).toContain("2014-12-05 - 2019-09-01");
     });
 
     it("displays size", () => {
@@ -117,21 +92,15 @@ describe("CollectionView.vue", () => {
     it("displays license", async () => {
       await nextTick(2);
       expect(wrapper.text()).toMatch(
-        /Cloudnet data is licensed under a[\s\n]*Creative Commons Attribution 4\.0 international licence\./
+        /Cloudnet data is licensed under a[\s\n]*Creative Commons Attribution 4\.0 international licence\./,
       );
     });
 
     it("displays custom citation info", async () => {
       await nextTick(2);
-      expect(wrapper.text()).toContain(
-        "Only available in the amazing Cloudnet data portal."
-      );
-      expect(wrapper.text()).toContain(
-        "We acknowledge many people and organizations."
-      );
-      expect(wrapper.text()).toContain(
-        "Meikäläinen, M. (2023). Custom collection. testpid"
-      );
+      expect(wrapper.text()).toContain("Only available in the amazing Cloudnet data portal.");
+      expect(wrapper.text()).toContain("We acknowledge many people and organizations.");
+      expect(wrapper.text()).toContain("Meikäläinen, M. (2023). Custom collection. testpid");
     });
   });
 

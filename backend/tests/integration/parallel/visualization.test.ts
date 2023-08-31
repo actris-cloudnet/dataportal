@@ -59,7 +59,7 @@ describe("GET /visualizations", () => {
 describe("GET /visualizations/:uuid", () => {
   it("responds 404 if invalid uuid", async () => {
     return expect(axios.get(`${url}kisseliini`)).rejects.toMatchObject(
-      genResponse(404, { errors: ["Not found: invalid UUID"] })
+      genResponse(404, { errors: ["Not found: invalid UUID"] }),
     );
   });
 
