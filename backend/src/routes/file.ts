@@ -1,6 +1,6 @@
 import { Request, RequestHandler, Response } from "express";
 import { Collection } from "../entity/Collection";
-import { EntityManager, Repository, SelectQueryBuilder, In, DataSource } from "typeorm";
+import { EntityManager, Repository, SelectQueryBuilder, In, DataSource, ObjectLiteral } from "typeorm";
 import { isFile, RegularFile } from "../entity/File";
 import { FileQuality } from "../entity/FileQuality";
 import {
@@ -438,14 +438,14 @@ export class FileRoutes {
   }
 }
 
-function addCommonFilters<T>(qb: SelectQueryBuilder<T>, query: any) {
+function addCommonFilters<Entity extends ObjectLiteral>(qb: SelectQueryBuilder<Entity>, query: any) {
   qb.andWhere("site.id IN (:...site)", query);
   if (query.product) qb.andWhere("product.id IN (:...product)", query);
   if (query.dateFrom) qb.andWhere("file.measurementDate >= :dateFrom", query);
   if (query.dateTo) qb.andWhere("file.measurementDate <= :dateTo", query);
   if (query.volatile) qb.andWhere("file.volatile IN (:...volatile)", query);
   if (query.legacy) qb.andWhere("file.legacy IN (:...legacy)", query);
-  return qb as SelectQueryBuilder<T>;
+  return qb;
 }
 
 function isValidFilename(file: any) {

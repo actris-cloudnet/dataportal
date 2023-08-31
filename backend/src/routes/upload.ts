@@ -97,13 +97,13 @@ export class UploadRoutes {
         // Secondly search row by other unique columns.
         const params = { site: { id: site.id }, measurementDate: body.measurementDate, filename: filename };
         const payload = instrumentUpload
-          ? {
+          ? ({
               ...params,
               instrument: { id: body.instrument },
               instrumentPid: body.instrumentPid,
               tags: ArrayEqual(sortedTags),
-            } // TODO(TypeScript 4.9): satisfies FindOptionsWhere<InstrumentUpload>
-          : { ...params, model: { id: body.model } }; // TODO(TypeScript 4.9): satisfies FindOptionsWhere<ModelUpload>;
+            } satisfies FindOptionsWhere<InstrumentUpload>)
+          : ({ ...params, model: { id: body.model } } satisfies FindOptionsWhere<ModelUpload>);
 
         // If a matching row exists, update it.
         const uploadByParams = await transactionalEntityManager.findOneBy(UploadEntity, payload);

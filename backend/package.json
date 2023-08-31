@@ -44,7 +44,7 @@
     "selenium-webdriver": "^4.7.0",
     "ts-jest": "^27.0.0",
     "ts-node": "^10.9.1",
-    "typescript": "~4.7.3"
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "update-snapshot": "npm run reset-db && npx jest --update-snapshot tests/integration/parallel && npx jest --runInBand --update-snapshot tests/integration/sequential",
