@@ -56,7 +56,8 @@ export class FileRoutes {
         .createQueryBuilder("file")
         .leftJoinAndSelect("file.site", "site")
         .leftJoinAndSelect("file.product", "product")
-        .leftJoinAndSelect("file.software", "software");
+        .leftJoinAndSelect("file.software", "software")
+        .orderBy('COALESCE(software."humanReadableName", software.code)', "ASC");
       if (isModel) qb.leftJoinAndSelect("file.model", "model");
       qb.where("file.uuid = :uuid", req.params);
       return hideTestDataFromNormalUsers<RegularFile | ModelFile>(qb, req).getOne();
