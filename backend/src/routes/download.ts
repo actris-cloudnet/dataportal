@@ -3,7 +3,7 @@ import { CountryResponse, Reader } from "maxmind";
 import { readFileSync } from "fs";
 
 import { Collection } from "../entity/Collection";
-import { Connection, DataSource, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { File, RegularFile } from "../entity/File";
 import { Upload } from "../entity/Upload";
 import { Download, ObjectType } from "../entity/Download";

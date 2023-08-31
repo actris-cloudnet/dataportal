@@ -1,4 +1,4 @@
-import { Connection, FindOperator, Repository, SelectQueryBuilder } from "typeorm";
+import { FindOperator, Repository, SelectQueryBuilder } from "typeorm";
 import { basename } from "path";
 import { NextFunction, Request, Response } from "express";
 import { ModelFile, RegularFile } from "../entity/File";
@@ -16,11 +16,6 @@ import { randomBytes } from "crypto";
 import { Collection } from "../entity/Collection";
 
 export const stringify = (obj: any): string => JSON.stringify(obj, null, 2);
-
-export const fetchAll = <T>(conn: Connection, schema: Function, options = {}): Promise<T[]> => {
-  const repo = conn.getRepository(schema);
-  return repo.find(options) as Promise<T[]>;
-};
 
 const DATETIME_FORMAT =
   /^(?<year>\d\d\d\d)-(?<month>\d\d)-(?<day>\d\d)(T(?<hours>\d\d):(?<minutes>\d\d):(?<seconds>\d\d)(\.(?<fraction>\d+))?(Z|\+00:00)?)?$/;
@@ -68,7 +63,7 @@ export const toArray = (obj: string | Array<string> | undefined): Array<string> 
 };
 
 export const hideTestDataFromNormalUsers = <T>(dbQuery: SelectQueryBuilder<T>, req: Request): SelectQueryBuilder<T> =>
-  req.query.developer !== undefined ? dbQuery : dbQuery.andWhere("NOT :type = ANY(site.type)", { type: SiteType.TEST });
+  req.query.developer !== undefined ? dbQuery : dbQuery.andWhere("not :type = ANY(site.type)", { type: SiteType.TEST });
 
 export const convertToSearchResponse = (file: SearchFile) => new SearchFileResponse(file);
 

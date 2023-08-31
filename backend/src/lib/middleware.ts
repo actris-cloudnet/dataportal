@@ -2,17 +2,21 @@ import { RequestHandler } from "express";
 import { RequestErrorArray } from "../entity/RequestError";
 import validator from "validator";
 import { Site } from "../entity/Site";
-import { Connection, In } from "typeorm";
-import { fetchAll, hideTestDataFromNormalUsers, isValidDate, toArray } from ".";
+import { DataSource, In, Repository } from "typeorm";
+import { hideTestDataFromNormalUsers, isValidDate, toArray } from ".";
 import { validate as validateUuid } from "uuid";
 import { Product } from "../entity/Product";
 
 export class Middleware {
-  constructor(conn: Connection) {
-    this.conn = conn;
+  constructor(dataSource: DataSource) {
+    this.dataSource = dataSource;
+    this.siteRepo = dataSource.getRepository(Site);
+    this.productRepo = dataSource.getRepository(Product);
   }
 
-  private conn: Connection;
+  private dataSource: DataSource;
+  private siteRepo: Repository<Site>;
+  private productRepo: Repository<Product>;
 
   validateUuidParam: RequestHandler = (req, _res, next) => {
     /* eslint-disable prefer-template */
@@ -108,12 +112,12 @@ export class Middleware {
   filesQueryAugmenter: RequestHandler = async (req, _res, next) => {
     const query = req.query as any;
     const defaultSite = async () =>
-      (await fetchAll<Site>(this.conn, Site))
+      (await this.siteRepo.find())
         .filter((site) => !(req.query.developer === undefined && site.isTestSite)) // Hide test sites
         .filter((site) => (req.path.includes("search") ? !site.isHiddenSite : true)) // Hide hidden sites from /search
         .map((site) => site.id);
     const defaultProduct = async () =>
-      (await fetchAll<Product>(this.conn, Product))
+      (await this.productRepo.find())
         .filter((prod) => req.query.developer == "true" || prod.level != "3") // Hide experimental products
         .map((prod) => prod.id);
     const setLegacy = () => ("showLegacy" in query ? null : [false]); // Don't filter by "legacy" if showLegacy is enabled
@@ -147,7 +151,7 @@ export class Middleware {
 
   private checkParam = async (param: string, req: any) => {
     if (!req.query[param]) return Promise.resolve();
-    await this.conn
+    await this.dataSource
       .getRepository(param)
       .findBy({ id: In(req.query[param]) })
       .then((res) => {
@@ -170,11 +174,7 @@ export class Middleware {
 
   private checkSite = async (req: any) => {
     if (!req.query["site"]) return Promise.resolve();
-    let qb = this.conn
-      .getRepository<Site>("site")
-      .createQueryBuilder("site")
-      .select()
-      .where("site.id IN (:...site)", req.query);
+    let qb = this.siteRepo.createQueryBuilder("site").select().where("site.id IN (:...site)", req.query);
     qb = hideTestDataFromNormalUsers(qb, req);
     await qb.getMany().then((res: any[]) => {
       if (res.length != req.query.site.length) this.throw404Error("site", req);

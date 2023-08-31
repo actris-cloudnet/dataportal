@@ -5,7 +5,6 @@ import { NextFunction, Request, RequestHandler, Response } from "express";
 import {
   ArrayEqual,
   dateforsize,
-  fetchAll,
   getS3pathForUpload,
   isValidDate,
   ssAuthString,
@@ -270,7 +269,7 @@ export class UploadRoutes {
     model = false
   ) {
     const augmentedQuery: any = {
-      site: query.site || (await fetchAll<Site>(this.dataSource, Site)).map((site) => site.id),
+      site: query.site || (await this.siteRepo.find()).map((site) => site.id),
       status: query.status || [Status.UPLOADED, Status.CREATED, Status.PROCESSED, Status.INVALID],
       dateFrom: query.dateFrom || "1970-01-01",
       dateTo: query.dateTo || tomorrow(),

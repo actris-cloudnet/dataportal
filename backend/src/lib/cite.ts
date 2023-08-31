@@ -1,4 +1,4 @@
-import { Connection } from "typeorm";
+import { DataSource } from "typeorm";
 
 import { RegularFile, ModelFile, File } from "../entity/File";
 import { Collection } from "../entity/Collection";
@@ -59,10 +59,10 @@ interface NfContact {
 }
 
 export class CitationService {
-  private conn: Connection;
+  private dataSource: DataSource;
 
-  constructor(conn: Connection) {
-    this.conn = conn;
+  constructor(dataSource: DataSource) {
+    this.dataSource = dataSource;
   }
 
   async getCollectionCitation(collection: Collection): Promise<Citation> {
@@ -187,7 +187,7 @@ export class CitationService {
   }
 
   private async queryCollectionActrisIds(collection: Collection): Promise<{ actrisId: number; dates: string[] }[]> {
-    return await this.conn.query(
+    return await this.dataSource.query(
       `SELECT "actrisId", array_agg(regular_file."measurementDate"::text) AS dates
        FROM regular_file
        JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
@@ -200,7 +200,7 @@ export class CitationService {
   }
 
   private async queryCollectionProductNames(collection: Collection): Promise<string[]> {
-    const rows: any[] = await this.conn.query(
+    const rows: any[] = await this.dataSource.query(
       `SELECT product."humanReadableName"
        FROM regular_file
        JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
@@ -217,7 +217,7 @@ export class CitationService {
   }
 
   private async queryCollectionSiteNames(collection: Collection): Promise<string[]> {
-    const rows: any[] = await this.conn.query(
+    const rows: any[] = await this.dataSource.query(
       `SELECT site."humanReadableName"
        FROM regular_file
        JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
@@ -235,7 +235,7 @@ export class CitationService {
   }
 
   private async queryCollectionSitePersons(collection: Collection): Promise<Person[]> {
-    const rows: any[] = await this.conn.query(
+    const rows: any[] = await this.dataSource.query(
       `SELECT DISTINCT firstname, surname, orcid
        FROM regular_file
        JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
@@ -256,7 +256,7 @@ export class CitationService {
   }
 
   private async queryCollectionDateRange(collection: Collection): Promise<{ startDate: Date; endDate: Date }> {
-    const rows = await this.conn.query(
+    const rows = await this.dataSource.query(
       `SELECT MIN("measurementDate") AS "startDate", MAX("measurementDate") AS "endDate"
        FROM (SELECT "measurementDate"
              FROM regular_file
@@ -294,7 +294,7 @@ export class CitationService {
     if (object instanceof ModelFile) {
       return [];
     }
-    const rows: any[] = await this.conn.query(
+    const rows: any[] = await this.dataSource.query(
       `SELECT DISTINCT acknowledgements
        FROM regular_file
        JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
@@ -312,7 +312,7 @@ export class CitationService {
         ? `JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
            WHERE "collectionUuid" = $1`
         : `WHERE uuid = $1`;
-    return await this.conn.query(
+    return await this.dataSource.query(
       `WITH RECURSIVE traverse AS (
          SELECT uuid
          FROM regular_file
