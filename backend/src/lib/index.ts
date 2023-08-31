@@ -68,7 +68,7 @@ export const toArray = (obj: string | Array<string> | undefined): Array<string> 
 };
 
 export const hideTestDataFromNormalUsers = <T>(dbQuery: SelectQueryBuilder<T>, req: Request): SelectQueryBuilder<T> =>
-  req.query.developer !== undefined ? dbQuery : dbQuery.andWhere("not :type = ANY(site.type)", { type: SiteType.TEST });
+  req.query.developer !== undefined ? dbQuery : dbQuery.andWhere("NOT :type = ANY(site.type)", { type: SiteType.TEST });
 
 export const convertToSearchResponse = (file: SearchFile) => new SearchFileResponse(file);
 

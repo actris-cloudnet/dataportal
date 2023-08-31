@@ -19,42 +19,40 @@ export class SiteRoutes {
   readonly siteLocationRepo: Repository<SiteLocation>;
 
   site: RequestHandler = async (req: Request, res: Response, next) => {
-    const qb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteid", req.params);
-    hideTestDataFromNormalUsers<Site>(qb, req)
-      .getOne()
-      .then((result) => {
-        if (!result) return next({ status: 404, errors: ["No sites match this id"] });
-        res.send(result);
-      })
-      .catch((err) => next({ status: 500, errors: err }));
+    try {
+      const qb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteid", req.params);
+      const site = await hideTestDataFromNormalUsers<Site>(qb, req).getOne();
+      if (!site) {
+        return next({ status: 404, errors: ["No sites match this id"] });
+      }
+      res.send(site);
+    } catch (err) {
+      return next({ status: 500, errors: err });
+    }
   };
 
   sites: RequestHandler = async (req: Request, res: Response, next) => {
-    const query: any = req.query;
-    const qb = this.siteRepo.createQueryBuilder("site");
-    if (query.showCitations) qb.leftJoinAndSelect("site.citations", "citations");
-    else qb.select();
-    const statuses = await this.fetchStatuses();
-
-    hideTestDataFromNormalUsers(qb, req)
-      .addOrderBy("site.id", "ASC")
-      .getMany()
-      .then((sites) => {
-        const typeQuery = toArray(query.type);
-        if (typeQuery) sites = this.sitesContainAtLeastOneType(sites, typeQuery);
-        res.send(
-          sites.map((site) => ({
-            ...site,
-            status: statuses[site.id] || "inactive",
-          }))
-        );
-      })
-      .catch((err) => next({ status: 500, errors: err }));
+    try {
+      const query: any = req.query;
+      const qb = this.siteRepo.createQueryBuilder("site");
+      if (query.showCitations) {
+        qb.leftJoinAndSelect("site.citations", "citations");
+      }
+      if (query.type) {
+        qb.where("site.type && :types", { types: toArray(query.type) });
+      }
+      const sites = await hideTestDataFromNormalUsers(qb, req).addOrderBy("site.id", "ASC").getMany();
+      const statuses = await this.fetchStatuses();
+      res.send(
+        sites.map((site) => ({
+          ...site,
+          status: statuses[site.id] || "inactive",
+        }))
+      );
+    } catch (err) {
+      return next({ status: 500, errors: err });
+    }
   };
-
-  private sitesContainAtLeastOneType(sites: Site[], typeQuery: Array<string>) {
-    return sites.filter((site) => site.type.filter((type) => typeQuery.includes(type)).length > 0);
-  }
 
   private async fetchStatuses(): Promise<Record<string, string>> {
     const rows = await this.regularFileRepo

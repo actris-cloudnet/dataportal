@@ -62,32 +62,35 @@ export class FileRoutes {
       return hideTestDataFromNormalUsers<RegularFile | ModelFile>(qb, req).getOne();
     };
 
-    this.findAnyFile(getFileByUuid)
-      .then((file) => {
-        if (file == null) return next({ status: 404, errors: ["No files match this UUID"] });
-        res.send(augmentFile(false)(file));
-      })
-      .catch((err) => next(err));
+    try {
+      const file = await this.findAnyFile(getFileByUuid);
+      if (!file) {
+        return next({ status: 404, errors: ["No files match this UUID"] });
+      }
+      res.send(augmentFile(false)(file));
+    } catch (err) {
+      next({ status: 500, errors: err });
+    }
   };
 
   files: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query as any;
-    this.filesQueryBuilder(query, "file")
-      .stream()
-      .then((stream) => streamHandler(stream, res, "file", augmentFile(query.s3path)))
-      .catch((err) => {
-        next({ status: 500, errors: err });
-      });
+    try {
+      const stream = await this.filesQueryBuilder(query, "file").stream();
+      streamHandler(stream, res, "file", augmentFile(query.s3path));
+    } catch (err) {
+      next({ status: 500, errors: err });
+    }
   };
 
   modelFiles: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query as any;
-    this.filesQueryBuilder(query, "model")
-      .stream()
-      .then((stream) => streamHandler(stream, res, "file", augmentFile(query.s3path)))
-      .catch((err) => {
-        next({ status: 500, errors: err });
-      });
+    try {
+      const stream = await this.filesQueryBuilder(query, "model").stream();
+      streamHandler(stream, res, "file", augmentFile(query.s3path));
+    } catch (err) {
+      next({ status: 500, errors: err });
+    }
   };
 
   search: RequestHandler = async (req: Request, res: Response, next) => {
@@ -96,12 +99,12 @@ export class FileRoutes {
       ? convertToReducedResponse(toArray(query.properties) as (keyof SearchFileResponse)[])
       : convertToSearchResponse;
 
-    this.searchFilesQueryBuilder(query)
-      .stream()
-      .then((stream) => streamHandler(stream, res, "file", converterFunction))
-      .catch((err) => {
-        next({ status: 500, errors: err });
-      });
+    try {
+      const stream = await this.searchFilesQueryBuilder(query).stream();
+      streamHandler(stream, res, "file", converterFunction);
+    } catch (err) {
+      next({ status: 500, errors: err });
+    }
   };
 
   putFile: RequestHandler = async (req: Request, res: Response, next) => {
@@ -365,20 +368,24 @@ export class FileRoutes {
     }
   }
 
-  public findAnyFile(
+  public async findAnyFile(
     searchFunc: (arg0: Repository<RegularFile | ModelFile>, arg1?: boolean) => Promise<RegularFile | ModelFile | null>
   ): Promise<RegularFile | ModelFile | null> {
-    return Promise.all([searchFunc(this.fileRepo, false), searchFunc(this.modelFileRepo, true)]).then(
-      ([file, modelFile]) => (file ? file : modelFile)
-    );
+    const [file, modelFile] = await Promise.all([
+      searchFunc(this.fileRepo, false),
+      searchFunc(this.modelFileRepo, true),
+    ]);
+    return file || modelFile;
   }
 
-  findAllFiles(
+  async findAllFiles(
     searchFunc: (arg0: Repository<RegularFile | ModelFile>, arg1?: boolean) => Promise<(RegularFile | ModelFile)[]>
   ): Promise<(RegularFile | ModelFile)[]> {
-    return Promise.all([searchFunc(this.fileRepo, false), searchFunc(this.modelFileRepo, true)]).then(
-      ([files, modelFiles]) => files.concat(modelFiles)
-    );
+    const [files, modelFiles] = await Promise.all([
+      searchFunc(this.fileRepo, false),
+      searchFunc(this.modelFileRepo, true),
+    ]);
+    return files.concat(modelFiles);
   }
 
   dateforsize: RequestHandler = async (req, res, next) => {

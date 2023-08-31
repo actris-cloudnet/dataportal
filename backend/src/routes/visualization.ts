@@ -28,35 +28,47 @@ export class VisualizationRoutes {
   putVisualization: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body;
     const s3key = req.params[0];
-    Promise.all([
-      this.fileController.findAnyFile((repo) =>
-        repo.findOne({ where: { uuid: body.sourceFileId }, relations: { product: true } })
-      ),
-      this.productVariableRepo.findOneByOrFail({ id: body.variableId }),
-      checkFileExists(getS3pathForImage(s3key)),
-    ])
-      .then(([file, productVariable, _]) => {
-        if (!file) throw Error("Source file not found");
+    try {
+      await checkFileExists(getS3pathForImage(s3key));
+    } catch (err) {
+      return next({ status: 400, errors: err });
+    }
+    try {
+      const [file, productVariable] = await Promise.all([
+        this.fileController.findAnyFile((repo) =>
+          repo.findOne({ where: { uuid: body.sourceFileId }, relations: { product: true } })
+        ),
+        this.productVariableRepo.findOneBy({ id: body.variableId }),
+      ]);
+      if (!file) {
+        return next({ status: 400, errors: "Source file not found" });
+      }
+      if (!productVariable) {
+        return next({ status: 400, errors: "Variable not found" });
+      }
 
-        let save;
-        if (file.product.id == "model") {
-          const viz = new ModelVisualization(req.params[0], file as ModelFile, productVariable, body.dimensions);
-          save = this.modelVisualizationRepo.save(viz);
-        } else {
-          const viz = new Visualization(req.params[0], file, productVariable, body.dimensions);
-          save = this.visualizationRepo.save(viz);
-        }
+      if (file.product.id == "model") {
+        const viz = new ModelVisualization(req.params[0], file as ModelFile, productVariable, body.dimensions);
+        await this.modelVisualizationRepo.save(viz);
+      } else {
+        const viz = new Visualization(req.params[0], file, productVariable, body.dimensions);
+        await this.visualizationRepo.save(viz);
+      }
 
-        save.then((_) => res.sendStatus(201)).catch((err) => next({ status: 500, errors: err }));
-      })
-      .catch((err: any) => next({ status: 400, errors: err }));
+      res.sendStatus(201);
+    } catch (err) {
+      next({ status: 500, errors: err });
+    }
   };
 
   visualization: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query;
-    this.getManyVisualizations(query)
-      .then((result) => res.send(result.map((file) => new VisualizationResponse(file))))
-      .catch((err) => next({ status: 500, errors: err }));
+    try {
+      const visualizations = await this.getManyVisualizations(query);
+      res.send(visualizations.map((file) => new VisualizationResponse(file)));
+    } catch (err) {
+      next({ status: 500, errors: err });
+    }
   };
 
   visualizationForSourceFile: RequestHandler = async (req: Request, res: Response, next) => {
@@ -73,16 +85,15 @@ export class VisualizationRoutes {
       return hideTestDataFromNormalUsers(qb, req).getOne();
     };
 
-    this.fileController
-      .findAnyFile(fetchVisualizationsForSourceFile)
-      .then((file) => {
-        if (!file) {
-          next({ status: 404, errors: ["No files match the query"], params });
-          return;
-        }
-        res.send(new VisualizationResponse(file));
-      })
-      .catch((err) => next({ status: 500, errors: err }));
+    try {
+      const file = await this.fileController.findAnyFile(fetchVisualizationsForSourceFile);
+      if (!file) {
+        return next({ status: 404, errors: ["No files match the query"], params });
+      }
+      res.send(new VisualizationResponse(file));
+    } catch (err) {
+      next({ status: 500, errors: err });
+    }
   };
 
   private getManyVisualizations(query: any) {

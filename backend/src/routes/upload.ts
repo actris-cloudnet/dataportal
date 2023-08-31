@@ -409,15 +409,17 @@ export class UploadRoutes {
     return next();
   };
 
-  findAnyUpload(
+  async findAnyUpload(
     searchFunc: (
       arg0: Repository<ModelUpload | InstrumentUpload>,
       arg1?: boolean
     ) => Promise<ModelUpload | InstrumentUpload | null>
   ): Promise<ModelUpload | InstrumentUpload | null> {
-    return Promise.all([searchFunc(this.instrumentUploadRepo, false), searchFunc(this.modelUploadRepo, true)]).then(
-      ([upload, modelUpload]) => upload || modelUpload
-    );
+    const [upload, modelUpload] = await Promise.all([
+      searchFunc(this.instrumentUploadRepo, false),
+      searchFunc(this.modelUploadRepo, true),
+    ]);
+    return upload || modelUpload;
   }
 
   dateforsize: RequestHandler = async (req, res, next) => {
