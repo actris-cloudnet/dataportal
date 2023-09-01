@@ -170,7 +170,6 @@ label, span.filterlabel
   width: 80%
   height: 32px
   display: flex
-  margin-top: 1.5em
   margin-left: 8.0em
   .dateBtn:disabled
     opacity: 0.5
@@ -280,7 +279,8 @@ div.checkbox
         <label for="showAllSitesCheckbox">Show all sites</label>
       </div>
 
-      <span class="filterlabel" v-if="!isVizMode">Date</span>
+      <span class="filterlabel">Date</span>
+
       <div class="quickselectors" v-if="!isVizMode">
         <button
           id="yearBtn"
@@ -308,18 +308,16 @@ div.checkbox
         </button>
       </div>
 
-      <div class="date" v-if="!isVizMode">
-        <template v-if="showDateRange">
-          <datepicker
-            name="dateFrom"
-            v-model="dateFrom"
-            :start="beginningOfHistory"
-            :end="dateTo"
-            @error="dateFromError = $event"
-            :key="dateFromUpdate"
-          />
-          <span class="centerlabel">&#8212;</span>
-        </template>
+      <div class="date" v-if="!isVizMode && showDateRange">
+        <datepicker
+          name="dateFrom"
+          v-model="dateFrom"
+          :start="beginningOfHistory"
+          :end="dateTo"
+          @error="dateFromError = $event"
+          :key="dateFromUpdate"
+        />
+        <span class="centerlabel">&#8212;</span>
         <datepicker
           name="dateTo"
           v-model="dateTo"
@@ -342,14 +340,8 @@ div.checkbox
         </template>
       </div>
 
-      <div class="checkbox" v-if="!isVizMode">
-        <input type="checkbox" id="showDateRangeCheckbox" name="showDateRangeCheckbox" v-model="showDateRange" />
-        <label for="showDateRangeCheckbox">Show date range</label>
-      </div>
-
-      <div class="date" v-if="isVizMode">
+      <div class="date" v-else>
         <datepicker
-          label="Date"
           name="dateTo"
           v-model="dateTo"
           :start="beginningOfHistory"
@@ -371,6 +363,11 @@ div.checkbox
         <div v-if="dateToError && dateToError.isValidDateString && !dateToError.isNotInFuture" class="errormsg">
           Provided date is in the future.
         </div>
+      </div>
+
+      <div class="checkbox" v-if="!isVizMode">
+        <input type="checkbox" id="showDateRangeCheckbox" name="showDateRangeCheckbox" v-model="showDateRange" />
+        <label for="showDateRangeCheckbox">Show date range</label>
       </div>
 
       <custom-multiselect
