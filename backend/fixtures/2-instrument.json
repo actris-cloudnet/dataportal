@@ -2,41 +2,49 @@
   {
     "id": "mira",
     "type": "radar",
+    "shortName": "MIRA",
     "humanReadableName": "METEK MIRA-35 cloud radar"
   },
   {
     "id": "rpg-fmcw-94",
     "type": "radar",
+    "shortName": "RPG FMCW-94",
     "humanReadableName": "RPG FMCW-94 cloud radar"
   },
   {
     "id": "ct25k",
     "type": "lidar",
+    "shortName": "CT25K",
     "humanReadableName": "Vaisala CT25K ceilometer"
   },
   {
     "id": "cl31",
     "type": "lidar",
+    "shortName": "CL31",
     "humanReadableName": "Vaisala CL31 ceilometer"
   },
   {
     "id": "cl51",
     "type": "lidar",
+    "shortName": "CL51",
     "humanReadableName": "Vaisala CL51 ceilometer"
   },
   {
     "id": "chm15k",
     "type": "lidar",
+    "shortName": "CHM15K",
     "humanReadableName": "Lufft CHM15k ceilometer"
   },
   {
     "id": "hatpro",
     "type": "mwr",
+    "shortName": "HATPRO",
     "humanReadableName": "RPG HATPRO microwave radiometer"
   },
   {
     "id": "halo-doppler-lidar",
     "type": "lidar",
+    "shortName": "Halo Doppler Lidar",
     "humanReadableName": "Halo Photonics Doppler lidar",
     "allowedTags": ["co", "cross"]
   }
