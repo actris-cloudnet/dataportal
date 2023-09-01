@@ -1,5 +1,5 @@
 import axios from "axios";
-import { DataSource, Raw, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { backendPrivateUrl, backendPublicUrl, genResponse, str2base64 } from "../../lib";
 import { InstrumentUpload, ModelUpload, Status } from "../../../src/entity/Upload";
 import { promises as fsp } from "fs";

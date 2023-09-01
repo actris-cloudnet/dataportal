@@ -135,7 +135,7 @@ export class DownloadRoutes {
         }
       };
       let i = -2;
-      archive.on("entry", (entry) => {
+      archive.on("entry", (_entry) => {
         i++;
         if (i > 0 && i < allFiles.length) {
           appendFile(i);

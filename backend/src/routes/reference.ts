@@ -89,7 +89,7 @@ function citation2bibtex(c: Citation, citekey: string) {
     note: c.note,
   };
   const bibtex = Object.entries(fields)
-    .filter(([key, value]) => value !== undefined)
+    .filter(([_key, value]) => value !== undefined)
     .map(([key, value]) => `${key} = {${value}}`)
     .join(",\n  ");
   return `@misc{${citekey},\n  ${bibtex}\n}`;

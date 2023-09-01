@@ -16,8 +16,6 @@ import router from "../src/router";
 
 vi.mock("axios");
 
-const date = new Date();
-const dateFromDefault = date.toISOString().substring(0, 10);
 const dateToDefault = new Date().toISOString().substring(0, 10);
 let filesSortedByDate: any;
 

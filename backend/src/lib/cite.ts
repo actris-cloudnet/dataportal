@@ -1,6 +1,6 @@
 import { DataSource } from "typeorm";
 
-import { RegularFile, ModelFile, File } from "../entity/File";
+import { RegularFile, ModelFile } from "../entity/File";
 import { Collection } from "../entity/Collection";
 import axios from "axios";
 import { formatList, getCollectionLandingPage, getFileLandingPage, truncateList } from ".";

@@ -191,11 +191,6 @@ const startDate = computed(() => sortedFiles.value && sortedFiles.value[sortedFi
 
 const endDate = computed(() => sortedFiles.value[0].measurementDate);
 
-const collectionYear = computed(() => {
-  if (!response.value) return undefined;
-  return new Date(response.value.createdAt).getFullYear();
-});
-
 const downloadUrl = computed(() => {
   if (!response.value) return undefined;
   return `${apiUrl}download/collection/${response.value.uuid}`;

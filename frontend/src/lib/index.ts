@@ -1,6 +1,5 @@
 import axios from "axios";
 
-import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
 import type { SearchFileResponse } from "@shared/entity/SearchFileResponse";
 import type { Product } from "@shared/entity/Product";
 import type { CollectionFileResponse } from "@shared/entity/CollectionFileResponse";

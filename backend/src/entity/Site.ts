@@ -1,7 +1,6 @@
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn } from "typeorm";
 import { File } from "./File";
 import { Upload } from "./Upload";
-import { Calibration } from "./Calibration";
 import { RegularCitation } from "./Citation";
 import { SiteContact } from "./SiteContact";
 import { Permission } from "./Permission";

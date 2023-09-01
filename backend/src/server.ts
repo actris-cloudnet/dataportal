@@ -1,4 +1,3 @@
-import { DataSource } from "typeorm";
 import * as express from "express";
 import { ErrorRequestHandler } from "express";
 import { RequestError } from "./entity/RequestError";
