@@ -23,6 +23,10 @@ const requiredVars = [
   "TYPEORM_DATABASE",
   "TYPEORM_PORT",
   "TYPEORM_SYNCHRONIZE",
+  "TYPEORM_MIGRATIONS",
+  "TYPEORM_MIGRATIONS_RUN",
+  "TYPEORM_LOGGING",
+  "TYPEORM_ENTITIES",
 ] as const;
 
 type RequiredVar = (typeof requiredVars)[number];
@@ -60,6 +64,10 @@ interface Env {
   TYPEORM_DATABASE: string;
   TYPEORM_PORT: number;
   TYPEORM_SYNCHRONIZE: boolean;
+  TYPEORM_MIGRATIONS: string;
+  TYPEORM_MIGRATIONS_RUN: boolean;
+  TYPEORM_LOGGING: boolean;
+  TYPEORM_ENTITIES: string;
 }
 
 const env: Env = {
@@ -72,7 +80,9 @@ const env: Env = {
   LABELLING_URL: readUrl(rawEnv.LABELLING_URL),
   HANDLE_API_URL: readUrl(rawEnv.HANDLE_API_URL),
   TYPEORM_PORT: readInteger(rawEnv.TYPEORM_PORT),
-  TYPEORM_SYNCHRONIZE: readString(rawEnv.TYPEORM_SYNCHRONIZE),
+  TYPEORM_SYNCHRONIZE: readBoolean(rawEnv.TYPEORM_SYNCHRONIZE),
+  TYPEORM_MIGRATIONS_RUN: readBoolean(rawEnv.TYPEORM_MIGRATIONS_RUN),
+  TYPEORM_LOGGING: readBoolean(rawEnv.TYPEORM_LOGGING),
 };
 
 export default env;
@@ -85,7 +95,7 @@ function readInteger(input: string): number {
   return x;
 }
 
-function readString(input: string): boolean {
+function readBoolean(input: string): boolean {
   if (input === "true") {
     return true;
   }

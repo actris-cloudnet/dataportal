@@ -10,8 +10,8 @@ export const AppDataSource = new DataSource({
   database: env.TYPEORM_DATABASE,
   port: env.TYPEORM_PORT,
   synchronize: env.TYPEORM_SYNCHRONIZE,
-  migrations: ["src/migration/*.ts"],
-  migrationsRun: true,
-  logging: false,
-  entities: ["src/entity/*.ts"],
+  migrations: [env.TYPEORM_MIGRATIONS],
+  migrationsRun: env.TYPEORM_MIGRATIONS_RUN,
+  logging: env.TYPEORM_LOGGING,
+  entities: [env.TYPEORM_ENTITIES],
 });
