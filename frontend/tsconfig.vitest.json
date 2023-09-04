@@ -4,6 +4,7 @@
   "compilerOptions": {
     "composite": true,
     "lib": [],
-    "types": ["node", "jsdom"]
+    "types": ["node", "jsdom"],
+    "resolvePackageJsonExports": false // Workaround for v-calendar@3.0.3, see https://github.com/vuejs/tsconfig#migrating-from-typescript--50
   }
 }
