@@ -1,6 +1,7 @@
 import { backendPublicUrl } from "../../lib";
 import axios from "axios";
 import { RequestError } from "../../../src/entity/RequestError";
+import { describe, expect, it } from "@jest/globals";
 
 const testUuid = "9e04d8ef-0f2b-4823-835d-33e458403c67";
 

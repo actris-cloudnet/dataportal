@@ -27,13 +27,18 @@ jobs:
       - name: Run backend
         run: docker compose up --wait backend
 
+      - name: Type check
+        run: docker compose exec backend npm run type-check
+
       - name: Lint
         run: docker compose exec backend npm run lint
 
       - name: Run unit and integration tests
+        if: always()
         run: docker compose exec backend npm test
 
       - name: Run e2e tests
+        if: always()
         run: docker compose exec backend npm run e2e-test
 
       - name: Shutdown backend

@@ -7,6 +7,7 @@ import { initUsersAndPermissions } from "../../lib/userAccountAndPermissions";
 import { AppDataSource } from "../../../src/data-source";
 import { ModelFile, RegularFile } from "../../../src/entity/File";
 import { ArrayEqual } from "../../../src/lib";
+import { beforeAll, beforeEach, afterAll, describe, it, expect, jest } from "@jest/globals";
 
 const crypto = require("crypto");
 
@@ -197,7 +198,7 @@ describe("POST /upload/metadata", () => {
     );
   });
 
-  test("rejects metadata with invalid instrumentPid type", async () => {
+  it("rejects metadata with invalid instrumentPid type", async () => {
     const payload = { ...validMetadata, instrumentPid: 123 };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject(
       genResponse(422, "instrumentPid must be string"),
@@ -211,7 +212,7 @@ describe("POST /upload/metadata", () => {
     );
   });
 
-  test("rejects metadata with instrument landing page", async () => {
+  it("rejects metadata with instrument landing page", async () => {
     const payload = {
       ...validMetadata,
       instrumentPid: "https://instrumentdb.out.ocp.fmi.fi/instrument/141063a2-67b7-47ee-b97c-7d814d33e68a",
@@ -221,7 +222,7 @@ describe("POST /upload/metadata", () => {
     );
   });
 
-  test("rejects metadata with HTTP instrumentPid", async () => {
+  it("rejects metadata with HTTP instrumentPid", async () => {
     const payload = { ...validMetadata, instrumentPid: "http://hdl.handle.net/21.12132/3.191564170f8a4686" };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject(
       genResponse(422, "instrumentPid must be HTTPS"),

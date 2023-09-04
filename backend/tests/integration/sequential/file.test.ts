@@ -13,6 +13,7 @@ const uuidGen = require("uuid");
 const crypto = require("crypto");
 import { readResources } from "../../../../shared/lib";
 import { AppDataSource } from "../../../src/data-source";
+import { describe, expect, it, beforeAll, afterAll, beforeEach } from "@jest/globals";
 
 let dataSource: DataSource;
 let fileRepo: Repository<RegularFile>;
@@ -518,7 +519,7 @@ describe("DELETE /api/files/", () => {
     const categorizeFile = await putDummyFile("categorize");
     await putDummyImage("categorize-ldr.png", categorizeFile);
     const res = await deleteFile(radarFile.uuid, true, true);
-    expect(res.data).toMatchObject([
+    expect(res.data).toEqual([
       "20181115_mace-head_categorize.nc",
       "categorize-ldr.png",
       "20181115_mace-head_radar.nc",

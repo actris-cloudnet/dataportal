@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`/api/files/:uuid request succeeds on instrument file 1`] = `
-Object {
+{
   "checksum": "298688b011a511f8f0e9353371cf73ee86f60c89b0e02c6931d8c05542c64cdb",
   "createdAt": "2020-02-20T10:56:19.382Z",
   "downloadUrl": "http://localhost:3000/api/download/product/38092c00-161d-4ca2-a29d-628cf8e960f6/20181115_mace-head_mira.nc",
@@ -12,14 +12,14 @@ Object {
   "legacy": false,
   "measurementDate": "2018-11-15",
   "pid": "",
-  "product": Object {
+  "product": {
     "experimental": false,
     "humanReadableName": "Radar",
     "id": "radar",
     "level": "1b",
   },
   "quality": "nrt",
-  "site": Object {
+  "site": {
     "actrisId": null,
     "altitude": 16,
     "country": "Ireland",
@@ -31,13 +31,13 @@ Object {
     "id": "mace-head",
     "latitude": 53.326,
     "longitude": -9.9,
-    "type": Array [
+    "type": [
       "cloudnet",
     ],
   },
   "size": "12200657",
-  "software": Array [
-    Object {
+  "software": [
+    {
       "title": "CloudnetPy 1.0.4",
       "url": null,
     },
@@ -51,7 +51,7 @@ Object {
 `;
 
 exports[`/api/files/:uuid request succeeds on model file 1`] = `
-Object {
+{
   "checksum": "055bcd9deae26851992c3da6352844fb9443203c48ae4f4ad8f1aa50ef2ab26f",
   "createdAt": "2020-02-20T10:52:59.073Z",
   "downloadUrl": "http://localhost:3000/api/download/product/b5d1d5af-3667-41bc-b952-e684f627d91c/20141205_mace-head_ecmwf.nc",
@@ -60,20 +60,20 @@ Object {
   "format": "NetCDF3",
   "legacy": false,
   "measurementDate": "2020-12-05",
-  "model": Object {
+  "model": {
     "humanReadableName": "ECMWF forecast",
     "id": "ecmwf",
     "optimumOrder": 0,
   },
   "pid": "",
-  "product": Object {
+  "product": {
     "experimental": false,
     "humanReadableName": "Model",
     "id": "model",
     "level": "1b",
   },
   "quality": "nrt",
-  "site": Object {
+  "site": {
     "actrisId": 1337,
     "altitude": 93,
     "country": "Romania",
@@ -85,12 +85,12 @@ Object {
     "id": "bucharest",
     "latitude": 44.348,
     "longitude": 26.029,
-    "type": Array [
+    "type": [
       "cloudnet",
     ],
   },
   "size": "500452",
-  "software": Array [],
+  "software": [],
   "updatedAt": "2020-02-20T10:52:59.073Z",
   "uuid": "b5d1d5af-3667-41bc-b952-e684f627d91c",
   "version": "123",

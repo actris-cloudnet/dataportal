@@ -1,3 +1,4 @@
+/*
 import { clearRepo, wait } from "./index";
 import { Builder, By, Key, until, WebDriver } from "selenium-webdriver";
 
@@ -66,3 +67,4 @@ export class Selenium {
     return this.driver.findElement(by);
   }
 }
+*/

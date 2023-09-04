@@ -1,6 +1,7 @@
 import axios from "axios";
 import { readFileSync } from "fs";
 import { backendPrivateUrl } from "../lib";
+import { expect } from "@jest/globals";
 
 export async function initUsersAndPermissions() {
   const USER_ACCOUNTS_URL = `${backendPrivateUrl}user-accounts`;

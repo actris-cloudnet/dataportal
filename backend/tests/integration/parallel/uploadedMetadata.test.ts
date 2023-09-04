@@ -1,6 +1,7 @@
 import { backendPrivateUrl, backendPublicUrl } from "../../lib";
 import axios from "axios";
 import { readResources } from "../../../../shared/lib";
+import { describe, expect, it, beforeAll } from "@jest/globals";
 
 const protectedUrl = `${backendPrivateUrl}upload/metadata/`;
 const privateUrl = `${backendPrivateUrl}upload-metadata/`;

@@ -9,6 +9,7 @@ import { Collection } from "../../../src/entity/Collection";
 import { InstrumentUpload } from "../../../src/entity/Upload";
 import { initUsersAndPermissions } from "../../lib/userAccountAndPermissions";
 import { AppDataSource } from "../../../src/data-source";
+import { describe, expect, it, beforeAll, afterAll } from "@jest/globals";
 
 let dataSource: DataSource;
 let regularFileRepo: Repository<RegularFile>;
@@ -105,18 +106,18 @@ describe("GET /api/download/stats", () => {
 
   it("calculates file downloads by date", () =>
     expect(getStats({ dimensions: "yearMonth,downloads" })).resolves.toMatchObject([
-      { yearMonth: "2022-01", downloads: expect.toBeAround((2 * 2 * 31) / 300, 10) },
-      { yearMonth: "2022-02", downloads: expect.toBeAround((2 * 2 * 28) / 300, 10) },
-      { yearMonth: "2022-03", downloads: expect.toBeAround((2 * 2 * 31) / 300, 10) },
-      { yearMonth: "2022-04", downloads: expect.toBeAround((2 * 2 * 30) / 300, 10) },
-      { yearMonth: "2022-05", downloads: expect.toBeAround((2 * 2 * 31) / 300, 10) },
-      { yearMonth: "2022-06", downloads: expect.toBeAround((2 * 2 * 30) / 300, 10) },
-      { yearMonth: "2022-07", downloads: expect.toBeAround(((2 + 1) * 31) / 300, 10) },
-      { yearMonth: "2022-08", downloads: expect.toBeAround(((2 + 1) * 31) / 300, 10) },
-      { yearMonth: "2022-09", downloads: expect.toBeAround(((2 + 1) * 30) / 300, 10) },
-      { yearMonth: "2022-10", downloads: expect.toBeAround(((2 + 1) * 31) / 300, 10) },
-      { yearMonth: "2022-11", downloads: expect.toBeAround(((2 + 1) * 30) / 300, 10) },
-      { yearMonth: "2022-12", downloads: expect.toBeAround(((2 + 1) * 31) / 300, 10) },
+      { yearMonth: "2022-01", downloads: expect.closeTo((2 * 2 * 31) / 300, 10) },
+      { yearMonth: "2022-02", downloads: expect.closeTo((2 * 2 * 28) / 300, 10) },
+      { yearMonth: "2022-03", downloads: expect.closeTo((2 * 2 * 31) / 300, 10) },
+      { yearMonth: "2022-04", downloads: expect.closeTo((2 * 2 * 30) / 300, 10) },
+      { yearMonth: "2022-05", downloads: expect.closeTo((2 * 2 * 31) / 300, 10) },
+      { yearMonth: "2022-06", downloads: expect.closeTo((2 * 2 * 30) / 300, 10) },
+      { yearMonth: "2022-07", downloads: expect.closeTo(((2 + 1) * 31) / 300, 10) },
+      { yearMonth: "2022-08", downloads: expect.closeTo(((2 + 1) * 31) / 300, 10) },
+      { yearMonth: "2022-09", downloads: expect.closeTo(((2 + 1) * 30) / 300, 10) },
+      { yearMonth: "2022-10", downloads: expect.closeTo(((2 + 1) * 31) / 300, 10) },
+      { yearMonth: "2022-11", downloads: expect.closeTo(((2 + 1) * 30) / 300, 10) },
+      { yearMonth: "2022-12", downloads: expect.closeTo(((2 + 1) * 31) / 300, 10) },
     ]));
 
   it("calculates unique IPs by month year", () =>
@@ -140,9 +141,9 @@ describe("GET /api/download/stats", () => {
 
   it("calculates file downloads by country", () =>
     expect(getStats({ dimensions: "country,downloads" })).resolves.toMatchObject([
-      { country: "FI", downloads: expect.toBeAround((2 * 181) / 300, 10) },
-      { country: "NO", downloads: expect.toBeAround((2 * 181) / 300, 10) },
-      { country: "SE", downloads: expect.toBeAround(((1 + 2) * 184) / 300, 10) },
+      { country: "FI", downloads: expect.closeTo((2 * 181) / 300, 10) },
+      { country: "NO", downloads: expect.closeTo((2 * 181) / 300, 10) },
+      { country: "SE", downloads: expect.closeTo(((1 + 2) * 184) / 300, 10) },
     ]));
 
   it("fails to filter by both site and country", () =>
@@ -152,34 +153,34 @@ describe("GET /api/download/stats", () => {
 
   it("can filter by country of files", () =>
     expect(getStats({ dimensions: "yearMonth,downloads", country: "FI" })).resolves.toMatchObject([
-      { yearMonth: "2022-01", downloads: expect.toBeAround((2 * 31) / 300, 10) },
-      { yearMonth: "2022-02", downloads: expect.toBeAround((2 * 28) / 300, 10) },
-      { yearMonth: "2022-03", downloads: expect.toBeAround((2 * 31) / 300, 10) },
-      { yearMonth: "2022-04", downloads: expect.toBeAround((2 * 30) / 300, 10) },
-      { yearMonth: "2022-05", downloads: expect.toBeAround((2 * 31) / 300, 10) },
-      { yearMonth: "2022-06", downloads: expect.toBeAround((2 * 30) / 300, 10) },
-      { yearMonth: "2022-07", downloads: expect.toBeAround((2 * 31) / 300, 10) },
-      { yearMonth: "2022-08", downloads: expect.toBeAround((2 * 31) / 300, 10) },
-      { yearMonth: "2022-09", downloads: expect.toBeAround((2 * 30) / 300, 10) },
-      { yearMonth: "2022-10", downloads: expect.toBeAround((2 * 31) / 300, 10) },
-      { yearMonth: "2022-11", downloads: expect.toBeAround((2 * 30) / 300, 10) },
-      { yearMonth: "2022-12", downloads: expect.toBeAround((2 * 31) / 300, 10) },
+      { yearMonth: "2022-01", downloads: expect.closeTo((2 * 31) / 300, 10) },
+      { yearMonth: "2022-02", downloads: expect.closeTo((2 * 28) / 300, 10) },
+      { yearMonth: "2022-03", downloads: expect.closeTo((2 * 31) / 300, 10) },
+      { yearMonth: "2022-04", downloads: expect.closeTo((2 * 30) / 300, 10) },
+      { yearMonth: "2022-05", downloads: expect.closeTo((2 * 31) / 300, 10) },
+      { yearMonth: "2022-06", downloads: expect.closeTo((2 * 30) / 300, 10) },
+      { yearMonth: "2022-07", downloads: expect.closeTo((2 * 31) / 300, 10) },
+      { yearMonth: "2022-08", downloads: expect.closeTo((2 * 31) / 300, 10) },
+      { yearMonth: "2022-09", downloads: expect.closeTo((2 * 30) / 300, 10) },
+      { yearMonth: "2022-10", downloads: expect.closeTo((2 * 31) / 300, 10) },
+      { yearMonth: "2022-11", downloads: expect.closeTo((2 * 30) / 300, 10) },
+      { yearMonth: "2022-12", downloads: expect.closeTo((2 * 31) / 300, 10) },
     ]));
 
   it("can filter by site", () =>
     expect(getStats({ dimensions: "yearMonth,downloads", site: "mace-head" })).resolves.toMatchObject([
-      { yearMonth: "2022-01", downloads: expect.toBeAround((2 * 31) / 300, 10) },
-      { yearMonth: "2022-02", downloads: expect.toBeAround((2 * 28) / 300, 10) },
-      { yearMonth: "2022-03", downloads: expect.toBeAround((2 * 31) / 300, 10) },
-      { yearMonth: "2022-04", downloads: expect.toBeAround((2 * 30) / 300, 10) },
-      { yearMonth: "2022-05", downloads: expect.toBeAround((2 * 31) / 300, 10) },
-      { yearMonth: "2022-06", downloads: expect.toBeAround((2 * 30) / 300, 10) },
-      { yearMonth: "2022-07", downloads: expect.toBeAround((1 * 31) / 300, 10) },
-      { yearMonth: "2022-08", downloads: expect.toBeAround((1 * 31) / 300, 10) },
-      { yearMonth: "2022-09", downloads: expect.toBeAround((1 * 30) / 300, 10) },
-      { yearMonth: "2022-10", downloads: expect.toBeAround((1 * 31) / 300, 10) },
-      { yearMonth: "2022-11", downloads: expect.toBeAround((1 * 30) / 300, 10) },
-      { yearMonth: "2022-12", downloads: expect.toBeAround((1 * 31) / 300, 10) },
+      { yearMonth: "2022-01", downloads: expect.closeTo((2 * 31) / 300, 10) },
+      { yearMonth: "2022-02", downloads: expect.closeTo((2 * 28) / 300, 10) },
+      { yearMonth: "2022-03", downloads: expect.closeTo((2 * 31) / 300, 10) },
+      { yearMonth: "2022-04", downloads: expect.closeTo((2 * 30) / 300, 10) },
+      { yearMonth: "2022-05", downloads: expect.closeTo((2 * 31) / 300, 10) },
+      { yearMonth: "2022-06", downloads: expect.closeTo((2 * 30) / 300, 10) },
+      { yearMonth: "2022-07", downloads: expect.closeTo((1 * 31) / 300, 10) },
+      { yearMonth: "2022-08", downloads: expect.closeTo((1 * 31) / 300, 10) },
+      { yearMonth: "2022-09", downloads: expect.closeTo((1 * 30) / 300, 10) },
+      { yearMonth: "2022-10", downloads: expect.closeTo((1 * 31) / 300, 10) },
+      { yearMonth: "2022-11", downloads: expect.closeTo((1 * 30) / 300, 10) },
+      { yearMonth: "2022-12", downloads: expect.closeTo((1 * 31) / 300, 10) },
     ]));
 
   it("fails to filter by invalid products", () =>
@@ -191,53 +192,53 @@ describe("GET /api/download/stats", () => {
 
   it("calculates file downloads of observation products", () =>
     expect(getStats({ dimensions: "yearMonth,downloads", productTypes: "observation" })).resolves.toMatchObject([
-      { yearMonth: "2022-01", downloads: expect.toBeAround((2 * 2 * 31) / 300, 10) },
-      { yearMonth: "2022-02", downloads: expect.toBeAround((2 * 2 * 28) / 300, 10) },
-      { yearMonth: "2022-03", downloads: expect.toBeAround((2 * 2 * 31) / 300, 10) },
-      { yearMonth: "2022-04", downloads: expect.toBeAround((2 * 2 * 30) / 300, 10) },
-      { yearMonth: "2022-05", downloads: expect.toBeAround((2 * 2 * 31) / 300, 10) },
-      { yearMonth: "2022-06", downloads: expect.toBeAround((2 * 2 * 30) / 300, 10) },
-      { yearMonth: "2022-07", downloads: expect.toBeAround((2 * 31) / 300, 10) },
-      { yearMonth: "2022-08", downloads: expect.toBeAround((2 * 31) / 300, 10) },
-      { yearMonth: "2022-09", downloads: expect.toBeAround((2 * 30) / 300, 10) },
-      { yearMonth: "2022-10", downloads: expect.toBeAround((2 * 31) / 300, 10) },
-      { yearMonth: "2022-11", downloads: expect.toBeAround((2 * 30) / 300, 10) },
-      { yearMonth: "2022-12", downloads: expect.toBeAround((2 * 31) / 300, 10) },
+      { yearMonth: "2022-01", downloads: expect.closeTo((2 * 2 * 31) / 300, 10) },
+      { yearMonth: "2022-02", downloads: expect.closeTo((2 * 2 * 28) / 300, 10) },
+      { yearMonth: "2022-03", downloads: expect.closeTo((2 * 2 * 31) / 300, 10) },
+      { yearMonth: "2022-04", downloads: expect.closeTo((2 * 2 * 30) / 300, 10) },
+      { yearMonth: "2022-05", downloads: expect.closeTo((2 * 2 * 31) / 300, 10) },
+      { yearMonth: "2022-06", downloads: expect.closeTo((2 * 2 * 30) / 300, 10) },
+      { yearMonth: "2022-07", downloads: expect.closeTo((2 * 31) / 300, 10) },
+      { yearMonth: "2022-08", downloads: expect.closeTo((2 * 31) / 300, 10) },
+      { yearMonth: "2022-09", downloads: expect.closeTo((2 * 30) / 300, 10) },
+      { yearMonth: "2022-10", downloads: expect.closeTo((2 * 31) / 300, 10) },
+      { yearMonth: "2022-11", downloads: expect.closeTo((2 * 30) / 300, 10) },
+      { yearMonth: "2022-12", downloads: expect.closeTo((2 * 31) / 300, 10) },
     ]));
 
   it("calculates file downloads of model products", () =>
     expect(getStats({ dimensions: "yearMonth,downloads", productTypes: "model" })).resolves.toMatchObject([
-      { yearMonth: "2022-07", downloads: expect.toBeAround((1 * 31) / 300, 10) },
-      { yearMonth: "2022-08", downloads: expect.toBeAround((1 * 31) / 300, 10) },
-      { yearMonth: "2022-09", downloads: expect.toBeAround((1 * 30) / 300, 10) },
-      { yearMonth: "2022-10", downloads: expect.toBeAround((1 * 31) / 300, 10) },
-      { yearMonth: "2022-11", downloads: expect.toBeAround((1 * 30) / 300, 10) },
-      { yearMonth: "2022-12", downloads: expect.toBeAround((1 * 31) / 300, 10) },
+      { yearMonth: "2022-07", downloads: expect.closeTo((1 * 31) / 300, 10) },
+      { yearMonth: "2022-08", downloads: expect.closeTo((1 * 31) / 300, 10) },
+      { yearMonth: "2022-09", downloads: expect.closeTo((1 * 30) / 300, 10) },
+      { yearMonth: "2022-10", downloads: expect.closeTo((1 * 31) / 300, 10) },
+      { yearMonth: "2022-11", downloads: expect.closeTo((1 * 30) / 300, 10) },
+      { yearMonth: "2022-12", downloads: expect.closeTo((1 * 31) / 300, 10) },
     ]));
 
   it("filters until download date", () =>
     expect(getStats({ dimensions: "yearMonth,downloads", downloadDateTo: "2022-02-20" })).resolves.toMatchObject([
-      { yearMonth: "2022-01", downloads: expect.toBeAround((2 * 2 * 31) / 300, 10) },
-      { yearMonth: "2022-02", downloads: expect.toBeAround((2 * 2 * 20) / 300, 10) },
+      { yearMonth: "2022-01", downloads: expect.closeTo((2 * 2 * 31) / 300, 10) },
+      { yearMonth: "2022-02", downloads: expect.closeTo((2 * 2 * 20) / 300, 10) },
     ]));
 
   it("filters from download date", () =>
     expect(getStats({ dimensions: "yearMonth,downloads", downloadDateFrom: "2022-11-21" })).resolves.toMatchObject([
-      { yearMonth: "2022-11", downloads: expect.toBeAround(((2 + 1) * 10) / 300, 10) },
-      { yearMonth: "2022-12", downloads: expect.toBeAround(((2 + 1) * 31) / 300, 10) },
+      { yearMonth: "2022-11", downloads: expect.closeTo(((2 + 1) * 10) / 300, 10) },
+      { yearMonth: "2022-12", downloads: expect.closeTo(((2 + 1) * 31) / 300, 10) },
     ]));
 
   it("filters between download dates", () =>
     expect(
       getStats({ dimensions: "yearMonth,downloads", downloadDateFrom: "2022-03-02", downloadDateTo: "2022-10-15" }),
     ).resolves.toMatchObject([
-      { yearMonth: "2022-03", downloads: expect.toBeAround((2 * 2 * 30) / 300, 10) },
-      { yearMonth: "2022-04", downloads: expect.toBeAround((2 * 2 * 30) / 300, 10) },
-      { yearMonth: "2022-05", downloads: expect.toBeAround((2 * 2 * 31) / 300, 10) },
-      { yearMonth: "2022-06", downloads: expect.toBeAround((2 * 2 * 30) / 300, 10) },
-      { yearMonth: "2022-07", downloads: expect.toBeAround(((2 + 1) * 31) / 300, 10) },
-      { yearMonth: "2022-08", downloads: expect.toBeAround(((2 + 1) * 31) / 300, 10) },
-      { yearMonth: "2022-09", downloads: expect.toBeAround(((2 + 1) * 30) / 300, 10) },
-      { yearMonth: "2022-10", downloads: expect.toBeAround(((2 + 1) * 15) / 300, 10) },
+      { yearMonth: "2022-03", downloads: expect.closeTo((2 * 2 * 30) / 300, 10) },
+      { yearMonth: "2022-04", downloads: expect.closeTo((2 * 2 * 30) / 300, 10) },
+      { yearMonth: "2022-05", downloads: expect.closeTo((2 * 2 * 31) / 300, 10) },
+      { yearMonth: "2022-06", downloads: expect.closeTo((2 * 2 * 30) / 300, 10) },
+      { yearMonth: "2022-07", downloads: expect.closeTo(((2 + 1) * 31) / 300, 10) },
+      { yearMonth: "2022-08", downloads: expect.closeTo(((2 + 1) * 31) / 300, 10) },
+      { yearMonth: "2022-09", downloads: expect.closeTo(((2 + 1) * 30) / 300, 10) },
+      { yearMonth: "2022-10", downloads: expect.closeTo(((2 + 1) * 15) / 300, 10) },
     ]));
 });

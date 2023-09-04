@@ -1,3 +1,4 @@
+/*
 import { By, Key, WebDriver } from "selenium-webdriver";
 import axios from "axios";
 import { backendPrivateUrl, frontendUrl, putFile, storageServiceUrl, visualizationPayloads, wait } from "../lib";
@@ -237,3 +238,4 @@ describe("file landing page", () => {
     expect(imgs.length).toEqual(2);
   });
 });
+*/

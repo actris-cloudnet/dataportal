@@ -1,6 +1,6 @@
 import axios from "axios";
 import { readFileSync } from "fs";
-
+import { describe, expect, it, beforeAll } from "@jest/globals";
 import { backendPrivateUrl } from "../../lib";
 
 const SITE_CONTACTS_URL = `${backendPrivateUrl}site-contacts`;

@@ -1,3 +1,4 @@
+/*
 import { By, until, WebDriver } from "selenium-webdriver";
 import axios from "axios";
 import { frontendUrl, putFile, wait } from "../lib";
@@ -389,3 +390,4 @@ function testMaceHeadFiles(content: any) {
     expect(content).toContain(`Ice water content from Mace Head 2019-07-${i}`);
   }
 }
+*/

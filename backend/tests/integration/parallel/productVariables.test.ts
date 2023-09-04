@@ -1,6 +1,7 @@
 import { backendPublicUrl } from "../../lib";
 import axios from "axios";
 import { readResources } from "../../../../shared/lib";
+import { describe, expect, it, beforeAll } from "@jest/globals";
 
 describe("/api/products", () => {
   const url = `${backendPublicUrl}products/variables`;
