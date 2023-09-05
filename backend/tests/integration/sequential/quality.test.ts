@@ -18,7 +18,7 @@ let testInfoRepo: Repository<TestInfo>;
 let qualityReportRepo: Repository<QualityReport>;
 let fileQualityRepo: Repository<FileQuality>;
 let regularFileRepo: Repository<RegularFile>;
-let modelFileRepo: Repository<SearchFile>;
+let modelFileRepo: Repository<ModelFile>;
 let searchFileRepo: Repository<SearchFile>;
 const privateUrl = `${backendPrivateUrl}quality/`;
 const publicUrl = `${backendPublicUrl}quality/`;

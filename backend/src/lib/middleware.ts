@@ -70,6 +70,7 @@ export class Middleware {
       "updatedAtTo",
       "s3path",
       "status",
+      "instrumentPid",
       "instrument",
     ];
 
@@ -128,6 +129,8 @@ export class Middleware {
     query.model = toArray(query.model);
     query.volatile = toArray(query.volatile);
     query.filename = toArray(query.filename);
+    query.instrument = toArray(query.instrument);
+    query.instrumentPid = toArray(query.instrumentPid);
     query.legacy = setLegacy();
     if (query.date) {
       query.dateFrom = query.date;

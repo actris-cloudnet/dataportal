@@ -4,6 +4,7 @@ import type { SearchFileResponse } from "@shared/entity/SearchFileResponse";
 import type { Product } from "@shared/entity/Product";
 import type { CollectionFileResponse } from "@shared/entity/CollectionFileResponse";
 import type { Site, SiteType } from "@shared/entity/Site";
+import type { Instrument } from "@shared/entity/Instrument";
 
 import categorizeIcon from "@/assets/icons/categorize.png";
 import categorizeVoodooIcon from "@/assets/icons/categorize-voodoo.png";
@@ -72,6 +73,8 @@ export const getProductIcon = (product: Product | string) => {
   const id = typeof product == "string" ? product : product.id;
   return productIcons[id] || unknownIcon;
 };
+
+export const getInstrumentIcon = (instrument: Instrument) => getProductIcon(instrument.type);
 
 export const humanReadableSize = (size: number) => {
   if (size == 0) return "0 B";

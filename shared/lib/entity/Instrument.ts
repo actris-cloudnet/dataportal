@@ -14,4 +14,5 @@ export interface Instrument {
   humanReadableName: string;
   uploads: InstrumentUpload[];
   calibrations: Calibration[];
+  shortName: string;
 }

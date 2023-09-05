@@ -221,7 +221,7 @@ import type { SearchFileResponse } from "@shared/entity/SearchFileResponse";
 import MyMap from "@/components/SuperMap.vue";
 import ProductAvailabilityVisualization from "@/components/ProductAvailabilityVisualization.vue";
 import ProductAvailabilityVisualizationSingle from "@/components/ProductAvailabilityVisualizationSingle.vue";
-import { getProductIcon, formatCoordinates, fetchInstrumentName, actrisNfUrl } from "@/lib";
+import { getProductIcon, formatCoordinates, fetchInstrumentName, actrisNfUrl, getInstrumentIcon } from "@/lib";
 import { parseDataStatus, type DataStatus } from "@/lib/DataStatusParser";
 import CustomMultiselect from "@/components/MultiSelect.vue";
 import type { ReducedMetadataResponse } from "@shared/entity/ReducedMetadataResponse";
@@ -370,13 +370,13 @@ async function handleInstrument(response: ReducedMetadataResponse): Promise<Inst
         console.error("Failed to load instrument information", error);
         return response.instrument.humanReadableName;
       }),
-      icon: getProductIcon(response.instrument.type),
+      icon: getInstrumentIcon(response.instrument),
     };
   } else {
     return {
       pid: null,
       name: `Unidentified ${response.instrument.humanReadableName}`,
-      icon: getProductIcon(response.instrument.type),
+      icon: getInstrumentIcon(response.instrument),
     };
   }
 }

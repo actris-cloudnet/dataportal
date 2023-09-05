@@ -274,12 +274,13 @@ export class UploadRoutes {
       dateFrom: query.dateFrom || "1970-01-01",
       dateTo: query.dateTo || tomorrow(),
       instrument: model ? undefined : query.instrument,
+      instrumentPid: model ? undefined : query.instrumentPid,
       model: model ? query.model : undefined,
       updatedAtFrom: query.updatedAtFrom ? new Date(query.updatedAtFrom) : "1970-01-01T00:00:00.000Z",
       updatedAtTo: query.updatedAtTo ? new Date(query.updatedAtTo) : tomorrow(),
     };
 
-    const fieldsToArray = ["site", "status", "instrument", "model"];
+    const fieldsToArray = ["site", "status", "instrument", "model", "instrumentPid"];
     fieldsToArray.forEach((element) => (augmentedQuery[element] = toArray(augmentedQuery[element])));
 
     const qb = repo.createQueryBuilder("um");
@@ -295,6 +296,7 @@ export class UploadRoutes {
       .andWhere("site.id IN (:...site)", augmentedQuery)
       .andWhere("um.status IN (:...status)", augmentedQuery);
     if (query.instrument) qb.andWhere("instrument.id IN (:...instrument)", augmentedQuery);
+    if (query.instrumentPid) qb.andWhere("um.instrumentPid IN (:...instrumentPid)", augmentedQuery);
     if (query.model) qb.andWhere("model.id IN (:...model)", augmentedQuery);
 
     if (!onlyDistinctInstruments) qb.addOrderBy("size", "DESC");

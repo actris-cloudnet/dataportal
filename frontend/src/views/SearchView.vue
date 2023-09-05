@@ -384,6 +384,15 @@ div.checkbox
       </div>
 
       <custom-multiselect
+        label="Instrument"
+        v-model="selectedInstrumentIds"
+        :options="allInstruments"
+        id="instrumentSelect"
+        :multiple="true"
+        :getIcon="getInstrumentIcon"
+      />
+
+      <custom-multiselect
         v-show="isVizMode"
         label="Variable"
         v-model="selectedVariableIds"
@@ -447,6 +456,7 @@ import {
   isSameDay,
   isValidDate,
   getMarkerIcon,
+  getInstrumentIcon,
 } from "@/lib";
 import VizSearchResult from "@/components/VizSearchResult.vue";
 import type { Product } from "@shared/entity/Product";
@@ -458,6 +468,7 @@ import ApiError from "./ApiError.vue";
 import datePreviousIcon from "@/assets/icons/date-previous.png";
 import dateNextIcon from "@/assets/icons/date-next.png";
 import type { VisualizationResponse } from "@shared/entity/VisualizationResponse";
+import type { Instrument } from "@shared/entity/Instrument";
 
 export interface Props {
   mode: string;
@@ -516,6 +527,10 @@ const showExpProducts = ref(false);
 const experimentalVariableIds = ref<string[]>([]);
 const selectedVariableIds = ref<string[]>([]);
 
+// instruments
+const allInstruments = ref<Instrument[]>([]);
+const selectedInstrumentIds = ref<string[]>([]);
+
 // other
 const renderComplete = ref(false);
 const vizWideMode = ref(false);
@@ -539,13 +554,14 @@ onMounted(async () => {
   addKeyPressListener();
   await initView();
   const query = route.query;
-  const params = ["site", "product", "variable", "dateFrom", "dateTo"];
+  const params = ["site", "product", "variable", "dateFrom", "dateTo", "instrument"];
   const paramsSet = params.filter((param) => param in query && query[param] != null);
   for (const param of paramsSet) {
     const value = route.query[param] as string;
     if (param === "site") selectedSiteIds.value = parseQuery(param, value);
     if (param === "product") selectedProductIds.value = parseQuery(param, value);
     if (param === "variable") selectedVariableIds.value = parseQuery(param, value);
+    if (param === "instrument") selectedInstrumentIds.value = parseQuery(param, value);
     if (param === "dateFrom" || param === "dateTo") {
       if (isValidDate(value)) {
         const date = new Date(value);
@@ -567,23 +583,27 @@ async function initView() {
   const sitesPayload = {
     params: { type: ["cloudnet", "campaign", "arm"] },
   };
-  await Promise.all([axios.get(`${apiUrl}sites/`, sitesPayload), axios.get(`${apiUrl}products/variables`)]).then(
-    ([sites, products]) => {
-      allSites.value = sites.data.sort(alphabeticalSort).filter(selectNormalSites);
-      normalSites.value = sites.data.sort(alphabeticalSort).filter(selectNormalSites);
-      extraSites.value = sites.data.sort(alphabeticalSort).filter(selectExtraSites);
-      normalSiteIds.value = normalSites.value.map((site) => site.id);
-      extraSiteIds.value = extraSites.value.map((site) => site.id);
-      allProducts.value = products.data.filter(discardExperimentalProducts).sort(alphabeticalSort);
-      normalProducts.value = products.data.filter((prod: Product) => !prod.experimental).sort(alphabeticalSort);
-      experimentalProducts.value = products.data.filter((prod: Product) => prod.experimental).sort(alphabeticalSort);
-      normalProductIds.value = normalProducts.value.map((prod) => prod.id);
-      experimentalProductIds.value = experimentalProducts.value.map((prod) => prod.id);
-      experimentalVariableIds.value = experimentalProducts.value
-        .flatMap((prod) => prod.variables)
-        .map((prod) => prod.id);
-    },
-  );
+  await Promise.all([
+    axios.get(`${apiUrl}sites/`, sitesPayload),
+    axios.get(`${apiUrl}products/variables`),
+    axios.get(`${apiUrl}instruments`),
+  ]).then(([sites, products, instruments]) => {
+    allSites.value = sites.data.sort(alphabeticalSort).filter(selectNormalSites);
+    normalSites.value = sites.data.sort(alphabeticalSort).filter(selectNormalSites);
+    extraSites.value = sites.data.sort(alphabeticalSort).filter(selectExtraSites);
+    normalSiteIds.value = normalSites.value.map((site) => site.id);
+    extraSiteIds.value = extraSites.value.map((site) => site.id);
+    allProducts.value = products.data.filter(discardExperimentalProducts).sort(alphabeticalSort);
+    allInstruments.value = instruments.data.sort(alphabeticalSort).map((i: Instrument) => ({
+      ...i,
+      humanReadableName: i.shortName || i.humanReadableName,
+    }));
+    normalProducts.value = products.data.filter((prod: Product) => !prod.experimental).sort(alphabeticalSort);
+    experimentalProducts.value = products.data.filter((prod: Product) => prod.experimental).sort(alphabeticalSort);
+    normalProductIds.value = normalProducts.value.map((prod) => prod.id);
+    experimentalProductIds.value = experimentalProducts.value.map((prod) => prod.id);
+    experimentalVariableIds.value = experimentalProducts.value.flatMap((prod) => prod.variables).map((prod) => prod.id);
+  });
 }
 
 function parseQuery(param: string, value: string): string[] {
@@ -609,6 +629,9 @@ function parseQuery(param: string, value: string): string[] {
   }
   if (param === "variable") {
     validChoices = allProducts.value.flatMap((prod) => prod.variables).map((variable) => variable.id);
+  }
+  if (param == "instrument") {
+    validChoices = allInstruments.value.map((instrument) => instrument.id);
   }
   const validValues = valueArray.filter((value) => validChoices.includes(value));
   return Array.from(new Set(validValues));
@@ -780,6 +803,7 @@ const payload = computed(() => {
       dateTo: dateTo.value,
       product: selectedProductIds.value.length ? selectedProductIds.value : allProducts.value.map((prod) => prod.id),
       variable: isVizMode.value ? selectedVariableIds.value : undefined,
+      instrument: selectedInstrumentIds.value.length ? selectedInstrumentIds.value : undefined,
       showLegacy: true,
     },
   };
@@ -803,7 +827,12 @@ const selectableVariables = computed(() => {
 });
 
 const noSelectionsMade = computed(() => {
-  return !(selectedProductIds.value.length || selectedSiteIds.value.length || selectedVariableIds.value.length);
+  return !(
+    selectedProductIds.value.length ||
+    selectedSiteIds.value.length ||
+    selectedVariableIds.value.length ||
+    selectedInstrumentIds.value.length
+  );
 });
 
 watch(
@@ -847,6 +876,14 @@ watch(
   () => selectedVariableIds.value,
   async () => {
     replaceUrlQueryString({ variable: selectedVariableIds.value });
+    await fetchData();
+  },
+);
+
+watch(
+  () => selectedInstrumentIds.value,
+  async () => {
+    replaceUrlQueryString({ instrument: selectedInstrumentIds.value });
     await fetchData();
   },
 );

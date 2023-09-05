@@ -13,6 +13,8 @@ export class SearchFileResponse {
   legacy: boolean;
   experimental: boolean;
   errorLevel: ErrorLevel | null;
+  instrument: string | null;
+  instrumentId: string | null;
 
   constructor(file: SearchFile) {
     this.uuid = file.uuid;
@@ -26,5 +28,7 @@ export class SearchFileResponse {
     this.legacy = file.legacy;
     this.experimental = file.product.experimental;
     this.errorLevel = file.errorLevel;
+    this.instrument = file.instrument ? file.instrument.shortName || file.instrument.humanReadableName : null;
+    this.instrumentId = file.instrument ? file.instrument.id : null;
   }
 }

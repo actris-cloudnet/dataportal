@@ -252,6 +252,14 @@ section#fileTable
               <dd v-else class="notAvailable"></dd>
               <dt>Filename</dt>
               <dd>{{ previewResponse.filename }}</dd>
+              <template v-if="'instrument' in previewResponse && previewResponse.instrument !== null">
+                <dt>Instrument</dt>
+                <dd>{{ previewResponse.instrument.shortName }}</dd>
+              </template>
+              <template v-if="'model' in previewResponse">
+                <dt>Model</dt>
+                <dd>{{ previewResponse.model.humanReadableName }}</dd>
+              </template>
               <dt>Size</dt>
               <dd>{{ humanReadableSize(previewResponse.size) }}</dd>
               <dt>Last modified</dt>
