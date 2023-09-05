@@ -258,7 +258,7 @@ section#fileTable
               </template>
               <template v-if="'model' in previewResponse">
                 <dt>Model</dt>
-                <dd>{{ previewResponse.model.id }}</dd>
+                <dd>{{ previewResponse.model.humanReadableName }}</dd>
               </template>
               <dt>Size</dt>
               <dd>{{ humanReadableSize(previewResponse.size) }}</dd>
