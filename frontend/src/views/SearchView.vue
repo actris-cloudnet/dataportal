@@ -825,7 +825,12 @@ const selectableVariables = computed(() => {
 });
 
 const noSelectionsMade = computed(() => {
-  return !(selectedProductIds.value.length || selectedSiteIds.value.length || selectedVariableIds.value.length);
+  return !(
+    selectedProductIds.value.length ||
+    selectedSiteIds.value.length ||
+    selectedVariableIds.value.length ||
+    selectedInstrumentIds.value.length
+  );
 });
 
 watch(
