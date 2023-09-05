@@ -8,8 +8,8 @@ exports[`/api/files/:uuid request succeeds on instrument file 1`] = `
   "errorLevel": null,
   "filename": "20181115_mace-head_mira.nc",
   "format": "HDF5 (NetCDF4)",
-  "instrument": Object {
-    "allowedTags": Array [],
+  "instrument": {
+    "allowedTags": [],
     "humanReadableName": "METEK MIRA-35 cloud radar",
     "id": "mira",
     "shortName": "MIRA",
