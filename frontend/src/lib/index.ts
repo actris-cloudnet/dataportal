@@ -4,6 +4,7 @@ import type { SearchFileResponse } from "@shared/entity/SearchFileResponse";
 import type { Product } from "@shared/entity/Product";
 import type { CollectionFileResponse } from "@shared/entity/CollectionFileResponse";
 import type { Site, SiteType } from "@shared/entity/Site";
+import type { Instrument } from "@shared/entity/Instrument";
 
 import categorizeIcon from "@/assets/icons/categorize.png";
 import categorizeVoodooIcon from "@/assets/icons/categorize-voodoo.png";
@@ -159,7 +160,6 @@ import testFailIcon from "@/assets/icons/test-fail.svg";
 import testWarningIcon from "@/assets/icons/test-warning.svg";
 import testInfoIcon from "@/assets/icons/test-info.svg";
 import testPassIcon from "@/assets/icons/test-pass.svg";
-import { Instrument } from "@shared/entity/Instrument";
 
 export function getQcIcon(errorLevel: string) {
   if (errorLevel === "error") {
