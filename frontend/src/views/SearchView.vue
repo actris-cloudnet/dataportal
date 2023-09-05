@@ -389,6 +389,7 @@ div.checkbox
         :options="allInstruments"
         id="instrumentSelect"
         :multiple="true"
+        :getIcon="getInstrumentIcon"
       />
 
       <custom-multiselect
@@ -455,6 +456,7 @@ import {
   isSameDay,
   isValidDate,
   getMarkerIcon,
+  getInstrumentIcon,
 } from "@/lib";
 import VizSearchResult from "@/components/VizSearchResult.vue";
 import type { Product } from "@shared/entity/Product";
@@ -593,7 +595,7 @@ async function initView() {
     extraSiteIds.value = extraSites.value.map((site) => site.id);
     allProducts.value = products.data.filter(discardExperimentalProducts).sort(alphabeticalSort);
     allInstruments.value = instruments.data.sort(alphabeticalSort).map((i: Instrument) => ({
-      id: i.id,
+      ...i,
       humanReadableName: i.shortName || i.humanReadableName,
     }));
     normalProducts.value = products.data.filter((prod: Product) => !prod.experimental).sort(alphabeticalSort);

@@ -73,6 +73,8 @@ export const getProductIcon = (product: Product | string) => {
   return productIcons[id] || unknownIcon;
 };
 
+export const getInstrumentIcon = (instrument: Instrument) => getProductIcon(instrument.type);
+
 export const humanReadableSize = (size: number) => {
   if (size == 0) return "0 B";
   const i = Math.floor(Math.log(size) / Math.log(1024));
@@ -157,6 +159,7 @@ import testFailIcon from "@/assets/icons/test-fail.svg";
 import testWarningIcon from "@/assets/icons/test-warning.svg";
 import testInfoIcon from "@/assets/icons/test-info.svg";
 import testPassIcon from "@/assets/icons/test-pass.svg";
+import { Instrument } from "@shared/entity/Instrument";
 
 export function getQcIcon(errorLevel: string) {
   if (errorLevel === "error") {
