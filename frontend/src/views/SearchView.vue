@@ -594,7 +594,7 @@ async function initView() {
     normalSiteIds.value = normalSites.value.map((site) => site.id);
     extraSiteIds.value = extraSites.value.map((site) => site.id);
     allProducts.value = products.data.filter(discardExperimentalProducts).sort(alphabeticalSort);
-    allInstruments.value = instruments.data.sort(alphabeticalSort).map((i: Instrument) => ({
+    allInstruments.value = instruments.data.sort(instrumentSort).map((i: Instrument) => ({
       ...i,
       humanReadableName: i.shortName || i.humanReadableName,
     }));
@@ -697,6 +697,9 @@ function onMapMarkerClick(ids: string[]) {
 }
 
 const alphabeticalSort = (a: Option, b: Option) => a.humanReadableName > b.humanReadableName;
+
+const instrumentSort = (a: Instrument, b: Instrument) =>
+  a.type == b.type ? a.shortName || a.humanReadableName > b.shortName || b.humanReadableName : a.type > b.type;
 
 const selectNormalSites = (site: Site) => (site.type as string[]).includes("cloudnet");
 
