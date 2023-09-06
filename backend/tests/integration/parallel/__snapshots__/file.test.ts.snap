@@ -45,8 +45,10 @@ exports[`/api/files/:uuid request succeeds on instrument file 1`] = `
   "size": "12200657",
   "software": [
     {
+      "id": "cloudnetpy",
       "title": "CloudnetPy 1.0.4",
       "url": null,
+      "version": "1.0.4",
     },
   ],
   "sourceFileIds": null,

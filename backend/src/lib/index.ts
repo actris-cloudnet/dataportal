@@ -87,6 +87,8 @@ export const augmentFile = (includeS3path: boolean) => (file: RegularFile | Mode
   model: "model" in file ? file.model : undefined,
   software: file.software
     ? file.software.map((software) => ({
+        id: software.code,
+        version: software.version,
         title: `${software.humanReadableName || software.code} ${software.version}`,
         url: software.url,
       }))
