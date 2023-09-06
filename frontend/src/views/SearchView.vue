@@ -399,6 +399,7 @@ div.checkbox
         :options="selectableVariables"
         :multiple="true"
         id="variableSelect"
+        :getIcon="getVariableIcon"
       />
 
       <button v-if="isVizMode" @click="navigateToSearch('data')" class="secondaryButton widebutton">
@@ -705,6 +706,8 @@ const selectNormalSites = (site: Site) => (site.type as string[]).includes("clou
 
 const selectExtraSites = (site: Site) => !(site.type as string[]).includes("cloudnet");
 
+const getVariableIcon = (variable: any) => getProductIcon(variable.product);
+
 function discardExperimentalProducts(prod: Product) {
   return showExpProducts.value || !prod.experimental;
 }
@@ -821,12 +824,11 @@ const mainWidth = computed(() => {
 });
 
 const selectableVariables = computed(() => {
+  const formatProduct = (prod: Product) => prod.variables.map((variable) => ({ ...variable, product: prod }));
   if (selectedProductIds.value.length == 0) {
-    return allProducts.value.flatMap((prod) => prod.variables);
+    return allProducts.value.flatMap(formatProduct);
   }
-  return allProducts.value
-    .filter((prod) => selectedProductIds.value.includes(prod.id))
-    .flatMap((prod) => prod.variables);
+  return allProducts.value.filter((prod) => selectedProductIds.value.includes(prod.id)).flatMap(formatProduct);
 });
 
 const noSelectionsMade = computed(() => {
