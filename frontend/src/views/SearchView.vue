@@ -409,7 +409,7 @@ div.checkbox
         View in visualization search &rarr;
       </button>
 
-      <a @click="reset" id="reset">Reset filter</a>
+      <a :href="isVizMode ? '/search/visualizations' : '/search/data'" id="reset">Reset filter</a>
     </section>
 
     <div class="results" :class="{ widemapmarginright: showAllSites }">
@@ -716,13 +716,6 @@ function navigateToSearch(mode: string) {
   router.push({ name: "Search", params: { mode }, query: route.query }).catch(() => {
     // Ignore useless error when URL doesn't change.
   });
-}
-
-function reset() {
-  router.replace({ path: route.path, query: {} }).catch(() => {
-    // Ignore useless error when URL doesn't change.
-  });
-  router.go(0);
 }
 
 function setDateRange(n: number) {
