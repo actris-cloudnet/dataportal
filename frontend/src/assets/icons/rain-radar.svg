@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg width="50" height="50" version="1.1" viewBox="0 0 13.229 13.229" xmlns="http://www.w3.org/2000/svg">
+ <g transform="translate(-30.204 -26.261)" fill="none" stroke="#000">
+  <path d="m35.459 26.807c2.3879 2.8993 2.2174 5.059-0.06071 5.004-2.2781-0.05497-2.0058-2.5306 0.06071-5.004z" stroke-width=".66146"/>
+  <path d="m40.372 29.786c3.7572 4.5619 3.4889 7.9599-0.09552 7.8734-3.5844-0.08654-3.1559-3.9817 0.09552-7.8734z" stroke-width=".66146"/>
+  <g stroke-width=".66146">
+   <circle cx="30.204" cy="39.489" r="2.86"/>
+   <circle cx="30.204" cy="39.489" r="4.7827"/>
+   <circle cx="30.204" cy="39.489" r="6.7626"/>
+  </g>
+ </g>
+</svg>
