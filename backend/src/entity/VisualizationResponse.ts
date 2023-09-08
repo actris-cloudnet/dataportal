@@ -2,6 +2,8 @@ import { Visualization, Dimensions } from "./Visualization";
 import { ModelVisualization } from "./ModelVisualization";
 import { ModelFile, RegularFile } from "./File";
 import { ProductVariable } from "./ProductVariable";
+import { Instrument } from "./Instrument";
+import { Model } from "./Model";
 
 export interface VisualizationItem {
   s3key: string;
@@ -17,6 +19,7 @@ export class VisualizationResponse {
   legacy: boolean;
   experimental: boolean;
   visualizations: VisualizationItem[];
+  source: Instrument | Model | null;
 
   constructor(file: RegularFile | ModelFile) {
     this.sourceFileId = file.uuid;
@@ -40,6 +43,13 @@ export class VisualizationResponse {
             }
           : null,
     }));
+    if (file instanceof RegularFile && file.instrument !== null) {
+      this.source = file.instrument;
+    } else if (file instanceof ModelFile && file.model !== null) {
+      this.source = file.model;
+    } else {
+      this.source = null;
+    }
     this.productHumanReadable = file.product.humanReadableName;
     this.locationHumanReadable = file.site.humanReadableName;
     this.volatile = file.volatile;
