@@ -126,22 +126,31 @@ const sites = ref<SitesState>({ status: "loading" });
 
 onMounted(async () => {
   try {
-    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}sites`);
-    const normalSites = (response.data as Site[]).filter((site) => !site.type.includes("hidden" as SiteType));
+    const response = await axios.get<Site[]>(`${import.meta.env.VITE_BACKEND_URL}sites`);
     sites.value = {
       status: "ready",
       items: [
         {
           title: "Cloudnet sites",
-          sites: normalSites.filter((site) => site.type.includes("cloudnet" as SiteType)),
+          sites: response.data.filter(
+            (site) => !site.type.includes("hidden" as SiteType) && site.type.includes("cloudnet" as SiteType),
+          ),
         },
         {
           title: "Campaign sites",
-          sites: normalSites.filter((site) => site.type.includes("campaign" as SiteType)),
+          sites: response.data.filter(
+            (site) => !site.type.includes("hidden" as SiteType) && site.type.includes("campaign" as SiteType),
+          ),
         },
         {
           title: "ARM sites",
-          sites: normalSites.filter((site) => site.type.includes("arm" as SiteType)),
+          sites: response.data.filter(
+            (site) => !site.type.includes("hidden" as SiteType) && site.type.includes("arm" as SiteType),
+          ),
+        },
+        {
+          title: "Model sites",
+          sites: response.data.filter((site) => site.type.includes("model" as SiteType)),
         },
       ],
     };

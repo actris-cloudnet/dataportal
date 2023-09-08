@@ -1,21 +1,23 @@
 import { Request, RequestHandler, Response } from "express";
 import { DataSource, Repository } from "typeorm";
 import { hideTestDataFromNormalUsers, toArray } from "../lib";
-import { Site } from "../entity/Site";
+import { Site, SiteType } from "../entity/Site";
 import { SiteLocation } from "../entity/SiteLocation";
-import { RegularFile } from "../entity/File";
+import { ModelFile, RegularFile } from "../entity/File";
 
 export class SiteRoutes {
   constructor(dataSource: DataSource) {
     this.dataSource = dataSource;
     this.siteRepo = dataSource.getRepository(Site);
     this.regularFileRepo = dataSource.getRepository(RegularFile);
+    this.modelFileRepo = dataSource.getRepository(ModelFile);
     this.siteLocationRepo = dataSource.getRepository(SiteLocation);
   }
 
   readonly dataSource: DataSource;
   readonly siteRepo: Repository<Site>;
   readonly regularFileRepo: Repository<RegularFile>;
+  readonly modelFileRepo: Repository<ModelFile>;
   readonly siteLocationRepo: Repository<SiteLocation>;
 
   site: RequestHandler = async (req: Request, res: Response, next) => {
@@ -42,11 +44,13 @@ export class SiteRoutes {
         qb.where("site.type && :types", { types: toArray(query.type) });
       }
       const sites = await hideTestDataFromNormalUsers(qb, req).addOrderBy("site.id", "ASC").getMany();
-      const statuses = await this.fetchStatuses();
+      const cloudnetStatuses = await this.queryCloudnetStatuses();
+      const modelStatuses = await this.queryModelStatuses();
       res.send(
         sites.map((site) => ({
           ...site,
-          status: statuses[site.id] || "inactive",
+          status:
+            (site.type.includes(SiteType.MODEL) ? modelStatuses[site.id] : cloudnetStatuses[site.id]) || "inactive",
         })),
       );
     } catch (err) {
@@ -54,7 +58,7 @@ export class SiteRoutes {
     }
   };
 
-  private async fetchStatuses(): Promise<Record<string, string>> {
+  private async queryCloudnetStatuses(): Promise<Record<string, string>> {
     const rows = await this.regularFileRepo
       .createQueryBuilder("file")
       .select("file.siteId")
@@ -64,17 +68,39 @@ export class SiteRoutes {
       .getRawMany();
 
     return rows.reduce((obj, item) => {
-      obj[item.siteId] = this.getStatus(item.latestProducts);
+      obj[item.siteId] = this.getCloudnetStatus(item.latestProducts);
       return obj;
     }, {});
   }
 
-  private getStatus(products: string[]) {
+  private getCloudnetStatus(products: string[]) {
     if (products.includes("classification")) {
       return "cloudnet";
     }
     if (products.length > 0) {
       return "active";
+    }
+    return "inactive";
+  }
+
+  private async queryModelStatuses(): Promise<Record<string, string>> {
+    const rows = await this.modelFileRepo
+      .createQueryBuilder("file")
+      .select("file.siteId")
+      .addSelect("array_agg(distinct file.productId)", "latestProducts")
+      .where("file.measurementDate > CURRENT_DATE - 7")
+      .groupBy("file.siteId")
+      .getRawMany();
+
+    return rows.reduce((obj, item) => {
+      obj[item.siteId] = this.getModelStatus(item.latestProducts);
+      return obj;
+    }, {});
+  }
+
+  private getModelStatus(products: string[]) {
+    if (products.includes("model")) {
+      return "cloudnet";
     }
     return "inactive";
   }
