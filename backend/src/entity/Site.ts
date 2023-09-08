@@ -12,6 +12,7 @@ export enum SiteType {
   ARM = "arm",
   CAMPAIGN = "campaign",
   MOBILE = "mobile",
+  MODEL = "model",
   TEST = "test",
   HIDDEN = "hidden",
 }
