@@ -245,21 +245,20 @@ section#fileTable
           <header>File information</header>
           <section class="details">
             <dl>
-              <dt>PID</dt>
-              <dd v-if="previewResponse.pid.length > 2">
-                <a :href="previewResponse.pid"> {{ previewResponse.pid }} </a>
-              </dd>
-              <dd v-else class="notAvailable"></dd>
-              <dt>Filename</dt>
-              <dd>{{ previewResponse.filename }}</dd>
               <template v-if="'instrument' in previewResponse && previewResponse.instrument !== null">
                 <dt>Instrument</dt>
                 <dd>{{ previewResponse.instrument.shortName }}</dd>
               </template>
-              <template v-if="'model' in previewResponse">
+              <template v-else-if="'model' in previewResponse">
                 <dt>Model</dt>
                 <dd>{{ previewResponse.model.humanReadableName }}</dd>
               </template>
+              <template v-else>
+                <dt>Product</dt>
+                <dd>{{ previewResponse.product.humanReadableName }}</dd>
+              </template>
+              <dt>Date</dt>
+              <dd>{{ previewResponse.measurementDate }}</dd>
               <dt>Size</dt>
               <dd>{{ humanReadableSize(previewResponse.size) }}</dd>
               <dt>Last modified</dt>
