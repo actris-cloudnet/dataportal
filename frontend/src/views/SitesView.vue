@@ -71,7 +71,6 @@ h2
               <th>Latitude</th>
               <th>Longitude</th>
               <th>Altitude</th>
-              <th>GAW ID</th>
             </tr>
           </thead>
           <tbody>
@@ -92,7 +91,6 @@ h2
                 {{ site.longitude != null ? formatLongitude(site.longitude) : "-" }}
               </td>
               <td>{{ site.altitude != null ? `${site.altitude}m` : "-" }}</td>
-              <td>{{ site.gaw || "-" }}</td>
             </tr>
           </tbody>
         </table>

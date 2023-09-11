@@ -63,11 +63,6 @@
             <dd>
               {{ response.humanReadableName }}<template v-if="response.country">, {{ response.country }}</template>
             </dd>
-            <dt>ACTRIS name</dt>
-            <dd v-if="nfName" style="max-width: 300px">
-              <a :href="nfLink">{{ nfName }}</a>
-            </dd>
-            <dd class="notAvailable" v-else></dd>
             <template v-if="response.latitude != null && response.longitude != null">
               <dt>Coordinates</dt>
               <dd>
@@ -78,6 +73,20 @@
               <dt>Site altitude</dt>
               <dd>{{ response.altitude }} m</dd>
             </template>
+            <dt>GAW ID</dt>
+            <dd v-if="response.gaw">
+              <a
+                :href="`https://gawsis.meteoswiss.ch/GAWSIS/#/search/station/stationReportDetails/0-20008-0-${response.gaw}`"
+              >
+                {{ response.gaw }}
+              </a>
+            </dd>
+            <dd class="notAvailable" v-else></dd>
+            <dt>ACTRIS NF</dt>
+            <dd v-if="nfName" style="max-width: 300px">
+              <a :href="nfLink">{{ nfName }}</a>
+            </dd>
+            <dd class="notAvailable" v-else></dd>
             <dt>Last measurement</dt>
             <dd v-if="latestFile">{{ latestFile.measurementDate }}</dd>
             <dd class="notAvailable" v-else></dd>
