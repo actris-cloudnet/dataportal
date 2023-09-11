@@ -72,6 +72,7 @@ export class Middleware {
       "status",
       "instrumentPid",
       "instrument",
+      "privateFrontendOrder",
     ];
 
     if (req.path.includes("visualization")) validKeys.push("variable");

@@ -804,6 +804,7 @@ const payload = computed(() => {
       variable: isVizMode.value ? selectedVariableIds.value : undefined,
       instrument: selectedInstrumentIds.value.length ? selectedInstrumentIds.value : undefined,
       showLegacy: true,
+      privateFrontendOrder: true,
     },
   };
 });

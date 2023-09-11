@@ -329,9 +329,22 @@ export class FileRoutes {
     }
 
     // Ordering
-    qb.orderBy("file.measurementDate", "DESC");
-    if (isModel) qb.addOrderBy("model.optimumOrder", "ASC");
-    qb.addOrderBy("file.legacy", "ASC").addOrderBy("file.updatedAt", "DESC");
+    if (query.privateFrontendOrder) {
+      qb.orderBy("file.measurementDate", "DESC")
+        .addOrderBy("file.siteId", "ASC")
+        .addOrderBy("product.level", "ASC")
+        .addOrderBy("product.id", "ASC");
+      if (isModel) {
+        qb.addOrderBy("model.optimumOrder", "ASC");
+      } else {
+        qb.addOrderBy("instrument.id", "ASC").addOrderBy("file.instrumentPid", "ASC");
+      }
+    } else {
+      // Legacy order to show version in chronological order.
+      qb.orderBy("file.measurementDate", "DESC");
+      if (isModel) qb.addOrderBy("model.optimumOrder", "ASC");
+      qb.addOrderBy("file.legacy", "ASC").addOrderBy("file.updatedAt", "DESC");
+    }
 
     // Limit
     if ("limit" in query) qb.limit(parseInt(query.limit));
@@ -347,7 +360,12 @@ export class FileRoutes {
       .leftJoinAndSelect("file.instrument", "instrument");
     qb = addCommonFilters(qb, query);
     if (query.instrument) qb.andWhere("instrument.id IN (:...instrument)", query);
-    qb.orderBy("file.measurementDate", "DESC");
+    qb.orderBy("file.measurementDate", "DESC")
+      .addOrderBy("file.siteId", "ASC")
+      .addOrderBy("product.level", "ASC")
+      .addOrderBy("product.id", "ASC")
+      .addOrderBy("instrument.id", "ASC")
+      .addOrderBy("file.instrumentPid", "ASC");
     if ("limit" in query) qb.limit(parseInt(query.limit));
     return qb;
   }
