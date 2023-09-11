@@ -260,6 +260,7 @@ export interface Props {
   tooltips?: boolean;
   qualityScores?: boolean;
   dataStatus: DataStatus;
+  linkToSearch: boolean;
 }
 
 const props = defineProps<Props>();
@@ -418,7 +419,7 @@ function createColorClass(products: ProductLevels): ColorClass {
 }
 
 function createLinkToSearchPage(date: string, products: ProductLevels): string | undefined {
-  if (!props.qualityScores && !noData(products)) {
+  if (props.linkToSearch && !props.qualityScores && !noData(products)) {
     return `/search/data?site=${props.site}&dateFrom=${date}&dateTo=${date}`;
   }
 }

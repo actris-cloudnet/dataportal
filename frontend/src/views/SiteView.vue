@@ -160,6 +160,7 @@
             :legend="true"
             :tooltips="true"
             :dataStatus="dataStatus"
+            :linkToSearch="!response.type.includes('hidden' as SiteType)"
           />
           <div v-else class="loadingoverlay">
             <div class="lds-dual-ring"></div>
@@ -196,6 +197,7 @@
             tooltips
             qualityScores
             :dataStatus="dataStatus"
+            :linkToSearch="!response.type.includes('hidden' as SiteType)"
           />
           <div v-else class="loadingoverlay">
             <div class="lds-dual-ring"></div>
