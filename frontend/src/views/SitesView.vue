@@ -1,4 +1,4 @@
-<style lang="sass">
+<style lang="sass" scoped>
 @import "@/sass/variables.sass"
 
 h1
@@ -6,6 +6,9 @@ h1
 
 h2
   margin-bottom: 1rem
+
+p
+  max-width: 800px
 
 .table
   width: unset
@@ -62,6 +65,7 @@ h2
     <template v-if="sites.status == 'ready'">
       <div v-for="item in sites.items" :key="item.title" class="item">
         <h2>{{ item.title }}</h2>
+        <p>{{ item.description }}</p>
         <table class="table table-striped">
           <thead>
             <tr>
@@ -95,12 +99,12 @@ h2
           </tbody>
         </table>
         <p class="a-legend-class-not-overridden-by-some-global-style">
-          <span class="status cloudnet"></span>
-          Operational site
-          <span class="status active"></span>
-          Some data
-          <span class="status inactive"></span>
-          Inactive
+          <span class="status cloudnet" v-if="item.legend[0]"></span>
+          {{ item.legend[0] }}
+          <span class="status active" v-if="item.legend[1]"></span>
+          {{ item.legend[1] }}
+          <span class="status inactive" v-if="item.legend[2]"></span>
+          {{ item.legend[2] }}
         </p>
       </div>
     </template>
@@ -117,7 +121,7 @@ import { ref, onMounted } from "vue";
 
 type SitesState =
   | { status: "loading" }
-  | { status: "ready"; items: { title: string; sites: Site[] }[] }
+  | { status: "ready"; items: { title: string; description: string; legend: string[]; sites: Site[] }[] }
   | { status: "error" };
 
 const sites = ref<SitesState>({ status: "loading" });
@@ -130,24 +134,34 @@ onMounted(async () => {
       items: [
         {
           title: "Cloudnet sites",
+          description:
+            "Sites with instrumentation required for the Cloudnet processing scheme. Most of the sites are part of the ACTRIS research infrastructure.",
+          legend: ["Operational site", "Some data", "Inactive"],
           sites: response.data.filter(
             (site) => !site.type.includes("hidden" as SiteType) && site.type.includes("cloudnet" as SiteType),
           ),
         },
         {
           title: "Campaign sites",
+          description:
+            "Short-term Cloudnet-compliant sites. Most sites contain historical data and are processed using non-standard methods.",
+          legend: ["Operational site", "Some data", "Inactive"],
           sites: response.data.filter(
             (site) => !site.type.includes("hidden" as SiteType) && site.type.includes("campaign" as SiteType),
           ),
         },
         {
           title: "ARM sites",
+          description: "Sites part of ARM network with historical data processed using non-standard methods.",
+          legend: ["Operational site", "Some data", "Inactive"],
           sites: response.data.filter(
             (site) => !site.type.includes("hidden" as SiteType) && site.type.includes("arm" as SiteType),
           ),
         },
         {
           title: "Model sites",
+          description: "Sites with only model data.",
+          legend: ["Active", "", "Inactive"],
           sites: response.data.filter((site) => site.type.includes("model" as SiteType)),
         },
       ],

@@ -88,7 +88,7 @@ export class SiteRoutes {
       .createQueryBuilder("file")
       .select("file.siteId")
       .addSelect("array_agg(distinct file.productId)", "latestProducts")
-      .where("file.measurementDate > CURRENT_DATE - 7")
+      .where("file.measurementDate > CURRENT_DATE - 3")
       .groupBy("file.siteId")
       .getRawMany();
 
