@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import headerLogo from "@/assets/header-logo.svg";
+const isDev = import.meta.env.NODE_ENV != "production";
 </script>
 
 <template>
-  <header>
+  <header :class="{ dev: isDev }">
     <div class="container">
       <a href="/" class="logo">
         <img :src="headerLogo" alt="Cloudnet data portal" />
@@ -46,6 +47,12 @@ header {
   background-position: right 0px top 20%;
   background-repeat: no-repeat;
   background-size: cover;
+
+  &.dev {
+    background-image: linear-gradient(to bottom, transparent 75%, rgba(0, 0, 0, 0.05)),
+      repeating-linear-gradient(-45deg, #ff6dbc55, #ff6dbc55 15px, #ff529855 15px, #ff529855 30px),
+      linear-gradient(to left, rgba($header-color, 0.5), $header-color 70%), url("@/assets/clouds3.jpg");
+  }
 }
 
 .container {
