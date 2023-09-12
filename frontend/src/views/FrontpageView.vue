@@ -66,7 +66,7 @@ import docsIcon from "@/assets/icons/docs-white.png";
       </p>
       <p>
         The data portal is developed by the Cloud remote sensing data centre unit (CLU) as part of the
-        <a href="https://www.actris.eu/">ACTRIS</a> research infrastructure, and operated at the
+        <a href="https://www.actris.eu/">ACTRIS research infrastructure</a>, and operated at the
         <a href="https://en.ilmatieteenlaitos.fi/">Finnish Meteorological Institute</a>.
       </p>
       <div class="buttons">
