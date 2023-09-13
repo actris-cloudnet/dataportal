@@ -121,7 +121,10 @@ import { ref, onMounted } from "vue";
 
 type SitesState =
   | { status: "loading" }
-  | { status: "ready"; items: { title: string; description: string; legend: string[]; sites: Site[] }[] }
+  | {
+      status: "ready";
+      items: { title: string; description: string; legend: [string, string, string]; sites: Site[] }[];
+    }
   | { status: "error" };
 
 const sites = ref<SitesState>({ status: "loading" });
@@ -135,7 +138,7 @@ onMounted(async () => {
         {
           title: "Cloudnet sites",
           description:
-            "Sites with instrumentation required for the Cloudnet processing scheme. Most of the sites are part of the ACTRIS research infrastructure.",
+            "Permanent sites with instrumentation required for the Cloudnet processing scheme. Most of the sites are part of the ACTRIS research infrastructure.",
           legend: ["Operational site", "Some data", "Inactive"],
           sites: response.data.filter(
             (site) => !site.type.includes("hidden" as SiteType) && site.type.includes("cloudnet" as SiteType),
@@ -144,7 +147,7 @@ onMounted(async () => {
         {
           title: "Campaign sites",
           description:
-            "Short-term Cloudnet-compliant sites. Most sites contain historical data and are processed using non-standard methods.",
+            "Short-term sites compliant with the Cloudnet processing scheme. Most sites contain historical data processed using non-standard methods.",
           legend: ["Operational site", "Some data", "Inactive"],
           sites: response.data.filter(
             (site) => !site.type.includes("hidden" as SiteType) && site.type.includes("campaign" as SiteType),
