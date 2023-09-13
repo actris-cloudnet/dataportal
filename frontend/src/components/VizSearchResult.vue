@@ -114,7 +114,7 @@ h3 > .rowtag
     </section>
     <section v-else-if="searchYieldedResults" class="vizContainer" :class="{ sideBySide: comparisonView }">
       <div
-        v-for="(file, index) in sortedApiResponse"
+        v-for="(file, index) in apiResponse"
         :key="index"
         class="sourceFile"
         :class="{ paddedSourceFile: !comparisonView }"
@@ -219,18 +219,6 @@ const maxMarginLeft = computed(() =>
     ),
   ),
 );
-
-function alphabeticalSort(a: VisualizationResponse, b: VisualizationResponse) {
-  if (a.productHumanReadable == b.productHumanReadable) {
-    if (a.locationHumanReadable == b.locationHumanReadable) return 0;
-    if (a.locationHumanReadable < b.locationHumanReadable) return -1;
-    return 1;
-  }
-  if (a.productHumanReadable < b.productHumanReadable) return -1;
-  return 1;
-}
-
-const sortedApiResponse = computed(() => props.apiResponse.concat().sort(alphabeticalSort));
 
 const searchYieldedResults = computed(() => props.apiResponse.length > 0);
 
