@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import headerLogo from "@/assets/header-logo.svg";
-const isDev = import.meta.env.NODE_ENV != "production";
+const isDev = import.meta.env.DEV;
 </script>
 
 <template>
