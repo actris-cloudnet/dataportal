@@ -161,6 +161,7 @@
             :tooltips="true"
             :dataStatus="dataStatus"
             :linkToSearch="!response.type.includes('hidden' as SiteType)"
+            :nLevel2FileTypes="nLevel2FileTypes"
           />
           <div v-else class="loadingoverlay">
             <div class="lds-dual-ring"></div>
@@ -198,6 +199,7 @@
             qualityScores
             :dataStatus="dataStatus"
             :linkToSearch="!response.type.includes('hidden' as SiteType)"
+            :nLevel2FileTypes="nLevel2FileTypes"
           />
           <div v-else class="loadingoverlay">
             <div class="lds-dual-ring"></div>
@@ -264,6 +266,7 @@ const apiUrl = import.meta.env.VITE_BACKEND_URL;
 const response = ref<Site | null>(null);
 const latestFile = ref<SearchFileResponse | null>(null);
 const error = ref(false);
+const nLevel2FileTypes = ref(0);
 const instruments = ref<Instrument[]>([]);
 const instrumentsFromLastDays = 30;
 const instrumentsStatus = ref<"loading" | "error" | "ready">("loading");
@@ -411,5 +414,9 @@ async function fetchLatestLevel1Product() {
     },
   });
   latestFile.value = searchResponse.data[0];
+  // Also fetch the number of level2 products while we have the correct API response
+  nLevel2FileTypes.value = productsResponse.data.filter(
+    (product: Product) => product.level === "2" && !product.experimental,
+  ).length;
 }
 </script>

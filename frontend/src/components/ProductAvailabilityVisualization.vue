@@ -261,6 +261,7 @@ export interface Props {
   qualityScores?: boolean;
   dataStatus: DataStatus;
   linkToSearch: boolean;
+  nLevel2FileTypes: number;
 }
 
 const props = defineProps<Props>();
@@ -387,11 +388,11 @@ function level2containsWarningsOrInfo(products: ProductLevels) {
 }
 
 function allLevel2Pass(products: ProductLevels): boolean {
-  return products["2"].filter(isPass).length == 4;
+  return products["2"].filter(isPass).length == props.nLevel2FileTypes;
 }
 
 function allLvl2(products: ProductLevels): boolean {
-  return products["2"].filter(isNotLegacy).length == 4;
+  return products["2"].filter(isNotLegacy).length == props.nLevel2FileTypes;
 }
 
 function missingData(products: ProductLevels) {
