@@ -24,8 +24,26 @@
     "experimental": false
   },
   {
+    "id": "classification-voodoo",
+    "humanReadableName": "Classification (Voodoo)",
+    "level": "2",
+    "experimental": true
+  },
+  {
+    "id": "der",
+    "humanReadableName": "Droplet effective radius",
+    "level": "2",
+    "experimental": false
+  },
+  {
     "id": "drizzle",
     "humanReadableName": "Drizzle",
+    "level": "2",
+    "experimental": false
+  },
+  {
+    "id": "ier",
+    "humanReadableName": "Ice effective radius",
     "level": "2",
     "experimental": false
   },
@@ -42,16 +60,46 @@
     "experimental": false
   },
   {
+    "id": "mwr-multi",
+    "humanReadableName": "MWR multiple pointing",
+    "level": "2",
+    "experimental": true
+  },
+  {
+    "id": "mwr-single",
+    "humanReadableName": "MWR single pointing",
+    "level": "2",
+    "experimental": true
+  },
+  {
     "id": "categorize",
     "humanReadableName": "Categorize",
     "level": "1c",
     "experimental": false
   },
   {
+    "id": "categorize-voodoo",
+    "humanReadableName": "Categorize (Voodoo)",
+    "level": "1c",
+    "experimental": true
+  },
+  {
+    "id": "mwr-l1c",
+    "humanReadableName": "MWR Level 1c",
+    "level": "1c",
+    "experimental": true
+  },
+  {
     "id": "disdrometer",
     "humanReadableName": "Disdrometer",
     "level": "1b",
     "experimental": false
+  },
+  {
+    "id": "doppler-lidar",
+    "humanReadableName": "Doppler lidar",
+    "level": "1b",
+    "experimental": true
   },
   {
     "id": "lidar",
@@ -76,5 +124,17 @@
     "humanReadableName": "Radar",
     "level": "1b",
     "experimental": false
+  },
+  {
+    "id": "rain-radar",
+    "humanReadableName": "Rain radar",
+    "level": "1b",
+    "experimental": true
+  },
+  {
+    "id": "weather-station",
+    "humanReadableName": "Weather station",
+    "level": "1b",
+    "experimental": true
   }
 ]
