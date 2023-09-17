@@ -240,6 +240,7 @@ import TrackMap, { type Point } from "@/components/TrackMap.vue";
 import ApiError from "./ApiError.vue";
 import backIcon from "@/assets/icons/back.png";
 import { useTitle } from "@/router";
+import type { Product } from "@shared/entity/Product";
 
 export interface Props {
   siteid: string;
@@ -309,19 +310,10 @@ onMounted(() => {
       error.value = true;
       response.value = error.response;
     });
-  axios
-    .get(`${apiUrl}search/`, {
-      params: {
-        site: props.siteid,
-        product: ["radar", "lidar", "mwr"],
-        limit: 1,
-      },
-    })
-    .then(({ data }) => (latestFile.value = data[0]))
-    .catch((error) => {
-      console.error(error);
-    });
   initDataStatusParser().catch((error) => {
+    console.error(error);
+  });
+  fetchLatestLevel1Product().catch((error) => {
     console.error(error);
   });
   loadInstruments().catch((error) => {
@@ -404,5 +396,20 @@ async function loadInstruments() {
   });
   instruments.value = await Promise.all(res.data.map(handleInstrument));
   instrumentsStatus.value = "ready";
+}
+
+async function fetchLatestLevel1Product() {
+  const productsResponse = await axios.get(`${apiUrl}products`);
+  const level1bProducts = productsResponse.data
+    .filter((product: Product) => product.level === "1b")
+    .map((product: Product) => product.id);
+  const searchResponse = await axios.get(`${apiUrl}search/`, {
+    params: {
+      site: props.siteid,
+      product: level1bProducts,
+      limit: 1,
+    },
+  });
+  latestFile.value = searchResponse.data[0];
 }
 </script>
