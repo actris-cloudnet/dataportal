@@ -3,14 +3,6 @@ import type { Product } from "@shared/entity/Product";
 import axios from "axios";
 import type { SearchFileResponse } from "@shared/entity/SearchFileResponse";
 
-export interface ReducedSearchResponse {
-  measurementDate: string;
-  productId: string;
-  legacy: boolean;
-  uuid: string;
-  errorLevel?: string;
-}
-
 export interface ProductInfo {
   id: string;
   legacy: boolean;
