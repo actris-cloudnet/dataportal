@@ -45,6 +45,8 @@ describe("Data availability mode", () => {
       tooltips: true,
       qualityScores: false,
       debounceMs: 0,
+      nLevel2FileTypes: 6,
+      linkToSearch: true,
       dataStatus,
     };
     wrapper = mount(ProductAvailabilityVisualization, { propsData: props });
@@ -69,7 +71,10 @@ describe("Data availability mode", () => {
     expect(
       getLiWrappers(wrapper).every((wrap) => {
         const wrapClasses = wrap.classes();
-        return wrap.text().includes("Classification") || wrap.text().includes("Disdrometer")
+        return wrap.text().includes("Classification") ||
+          wrap.text().includes("Disdrometer") ||
+          wrap.text().includes("IER") ||
+          wrap.text().includes("DER")
           ? !wrapClasses.includes("found")
           : wrapClasses.includes("found");
       }),
@@ -164,6 +169,8 @@ describe("Data quality mode", () => {
       qualityScores: true,
       debounceMs: 0,
       dataStatus,
+      linkToSearch: true,
+      nLevel2FileTypes: 6,
     };
     wrapper = mount(ProductAvailabilityVisualization, { propsData: props });
     await nextTick(1);

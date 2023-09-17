@@ -1,6 +1,6 @@
 import { VueWrapper, mount } from "@vue/test-utils";
 import axios, { AxiosPromise } from "axios";
-import { augmentAxiosResponse, getMockedAxiosLastCallSecondArgument, nextTick } from "./lib";
+import { augmentAxiosResponse, nextTick } from "./lib";
 import { readResources } from "../../shared/lib";
 import SiteView from "../src/views/SiteView.vue";
 import { vi, describe, beforeAll, expect, it } from "vitest";
@@ -34,7 +34,7 @@ describe("SiteView.vue", () => {
     const expected = ["Bucharest, Romania", "44.348°N, 26.029°E", "93 m", "2019-07-16"];
     vi.mocked(axios.get).mockImplementation(axiosMockWithIdx(0, 7));
     wrapper = mount(SiteView, { props: { siteid: "bucharest" } });
-    await nextTick(1);
+    await nextTick(50);
     const summaryText = wrapper.find("#summary").text();
     expected.forEach((str) => expect(summaryText).toContain(str));
   });
@@ -43,7 +43,7 @@ describe("SiteView.vue", () => {
     const expected = ["Mace Head", "53.326°N, 9.9°W", "16 m", "2019-07-16"];
     vi.mocked(axios.get).mockImplementation(axiosMockWithIdx(1, 7));
     wrapper = mount(SiteView, { props: { siteid: "mace-head" } });
-    await nextTick(1);
+    await nextTick(50);
     const summaryText = wrapper.find("#summary").text();
     expected.forEach((str) => expect(summaryText).toContain(str));
   });
@@ -52,7 +52,7 @@ describe("SiteView.vue", () => {
     const expected = ["Lufft CHM15k ceilometer", "METEK MIRA-35 cloud radar"];
     vi.mocked(axios.get).mockImplementation(axiosMockWithIdx(0, 7, resources["uploaded-metadata-public"]));
     wrapper = mount(SiteView, { props: { siteid: "whatever" } });
-    await nextTick(1);
+    await nextTick(50);
     const instrumentText = wrapper.find("#instruments").text();
     expected.forEach((str) => expect(instrumentText).toContain(str));
   });
@@ -60,7 +60,7 @@ describe("SiteView.vue", () => {
   it("displays notification when instruments are not found", async () => {
     vi.mocked(axios.get).mockImplementation(axiosMockWithIdx(1, 0));
     wrapper = mount(SiteView, { props: { siteid: "whatever" } });
-    await nextTick(1);
+    await nextTick(50);
     const instrumentText = wrapper.find("#instruments").text();
     expect(instrumentText).toContain("No data received in the last");
   });
@@ -69,7 +69,7 @@ describe("SiteView.vue", () => {
     const expectedString = "The site has submitted data from the following instruments in the last";
     vi.mocked(axios.get).mockImplementation(axiosMockWithIdx(0, 8, resources["uploaded-metadata-public"]));
     wrapper = mount(SiteView, { props: { siteid: "whatever" } });
-    await nextTick(1);
+    await nextTick(50);
     const instrumentText = wrapper.find("#instruments").text();
     expect(instrumentText).toContain(expectedString);
     const instrumentTextClean = instrumentText.replace(/\s+/g, " ");
@@ -81,8 +81,9 @@ describe("SiteView.vue", () => {
     expect(nDays).toBeDefined();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     date30daysago.setDate(date30daysago.getDate() - nDays!);
-    const secondArg = getMockedAxiosLastCallSecondArgument();
+    const call = vi.mocked(axios.get).mock.calls.find((call) => call[0].includes("/uploaded-metadata/"));
+    expect(call).toBeDefined();
     // Expect to be within 5 seconds
-    expect(new Date(secondArg.params.updatedAtFrom).getTime() / 1000).toBeCloseTo(date30daysago.getTime() / 1000, -1);
+    expect(new Date(call![1]?.params.updatedAtFrom).getTime() / 1000).toBeCloseTo(date30daysago.getTime() / 1000, -1);
   });
 });

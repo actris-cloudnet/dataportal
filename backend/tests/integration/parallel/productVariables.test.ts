@@ -4,7 +4,7 @@ import { readResources } from "../../../../shared/lib";
 import { describe, expect, it, beforeAll } from "@jest/globals";
 
 describe("/api/products", () => {
-  const url = `${backendPublicUrl}products/variables`;
+  const url = `${backendPublicUrl}products/`;
   let responses: any;
 
   beforeAll(async () => (responses = await readResources()));
