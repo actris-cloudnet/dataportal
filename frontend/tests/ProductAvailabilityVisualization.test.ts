@@ -71,7 +71,6 @@ describe("Data availability mode", () => {
     expect(
       getLiWrappers(wrapper).every((wrap) => {
         const wrapClasses = wrap.classes();
-        console.log(wrap.text(), wrapClasses);
         return wrap.text().includes("Classification") ||
           wrap.text().includes("Disdrometer") ||
           wrap.text().includes("IER") ||

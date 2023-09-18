@@ -81,6 +81,7 @@ describe("SiteView.vue", () => {
     expect(nDays).toBeDefined();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     date30daysago.setDate(date30daysago.getDate() - nDays!);
+    await nextTick(50);
     const call: any = vi
       .mocked(axios.get)
       .mock.calls.find((a) => a[0] === "http://localhost:3000/api/uploaded-metadata/");
