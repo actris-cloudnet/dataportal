@@ -81,8 +81,11 @@ describe("SiteView.vue", () => {
     expect(nDays).toBeDefined();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     date30daysago.setDate(date30daysago.getDate() - nDays!);
-    //const secondArg = getMockedAxiosLastCallSecondArgument();
+    const call: any = vi
+      .mocked(axios.get)
+      .mock.calls.find((a) => a[0] === "http://localhost:3000/api/uploaded-metadata/");
+    expect(call).toBeDefined();
     // Expect to be within 5 seconds
-    // expect(new Date(secondArg.params.updatedAtFrom).getTime() / 1000).toBeCloseTo(date30daysago.getTime() / 1000, -1);
+    expect(new Date(call[1].params.updatedAtFrom).getTime() / 1000).toBeCloseTo(date30daysago.getTime() / 1000, -1);
   });
 });
