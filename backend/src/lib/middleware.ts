@@ -70,12 +70,12 @@ export class Middleware {
       "updatedAtTo",
       "s3path",
       "status",
-      "instrumentPid",
-      "instrument",
       "privateFrontendOrder",
     ];
 
     if (req.path.includes("visualization")) validKeys.push("variable");
+
+    if (!req.path.includes("model")) validKeys.push("instrument", "instrumentPid");
 
     const unknownFields = checkFieldNames(validKeys, req.query);
     if (unknownFields.length > 0) {
@@ -144,7 +144,12 @@ export class Middleware {
   };
 
   checkParamsExistInDb: RequestHandler = async (req: any, _res, next) => {
-    Promise.all([this.checkSite(req), this.checkParam("product", req), this.checkParam("model", req)])
+    Promise.all([
+      this.checkSite(req),
+      this.checkParam("product", req),
+      this.checkParam("model", req),
+      this.checkParam("instrument", req),
+    ])
       .then(() => next())
       .catch(next);
   };
