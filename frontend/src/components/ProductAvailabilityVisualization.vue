@@ -1,6 +1,5 @@
 <style scoped lang="sass">
 @import "@/sass/variables.sass"
-@import "@/sass/global.sass"
 @import "@/sass/spinner.sass"
 @import "@/sass/availability.sass"
 

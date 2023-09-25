@@ -1,6 +1,5 @@
 <style lang="sass">
 @import "@/sass/variables.sass"
-@import "@/sass/global.sass"
 @import "leaflet/dist/leaflet.css"
 @import "leaflet-draw/dist/leaflet.draw.css"
 

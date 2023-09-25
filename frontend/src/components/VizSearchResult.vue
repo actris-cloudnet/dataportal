@@ -1,6 +1,5 @@
 <style lang="sass">
 @import "@/sass/variables.sass"
-@import "@/sass/global.sass"
 @import "@/sass/visualizations.sass"
 
 main#vizSearchResults

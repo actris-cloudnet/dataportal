@@ -30,7 +30,7 @@ defineEmits<{
 @import "@/sass/new-variables";
 
 .button {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   font-weight: 500;

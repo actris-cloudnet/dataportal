@@ -1,6 +1,5 @@
 <style scoped lang="sass">
 @import "@/sass/variables.sass"
-@import "@/sass/global.sass"
 
 main#frontpage
   text-align: center
@@ -26,10 +25,12 @@ main#frontpage
       line-height: 2em
 
   .buttons
+    display: flex
     text-align: center
     margin-top: 2em
     margin-bottom: 1em
     a
+      flex-direction: column
       margin: 1em
       padding: 1em
       width: 10em
@@ -49,6 +50,7 @@ import cloudnetLogo from "@/assets/logos/cloudnet.svg";
 import searchIcon from "@/assets/icons/search-white.png";
 import graphIcon from "@/assets/icons/graph-white.png";
 import docsIcon from "@/assets/icons/docs-white.png";
+import BaseButton from "@/components/BaseButton.vue";
 </script>
 
 <template>
@@ -70,18 +72,18 @@ import docsIcon from "@/assets/icons/docs-white.png";
         <a href="https://en.ilmatieteenlaitos.fi/">Finnish Meteorological Institute</a>.
       </p>
       <div class="buttons">
-        <router-link to="search/data" class="download">
-          <img alt="magnifying glass" :src="searchIcon" /><br />
+        <BaseButton to="search/data" type="primary">
+          <img alt="magnifying glass" :src="searchIcon" />
           Search and download data
-        </router-link>
-        <router-link to="search/visualizations" class="download">
-          <img alt="graph" :src="graphIcon" /><br />
+        </BaseButton>
+        <BaseButton to="search/visualizations" type="primary">
+          <img alt="graph" :src="graphIcon" />
           View data visualizations
-        </router-link>
-        <a href="https://docs.cloudnet.fmi.fi" class="download">
-          <img alt="documents" :src="docsIcon" /><br />
+        </BaseButton>
+        <BaseButton href="https://docs.cloudnet.fmi.fi" type="primary">
+          <img alt="documents" :src="docsIcon" />
           Read documentation
-        </a>
+        </BaseButton>
       </div>
     </main>
     <div class="publications">

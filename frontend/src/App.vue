@@ -1,24 +1,28 @@
-<style lang="sass">
+<script lang="ts" setup>
+import TheHeader from "@/components/TheHeader.vue";
+import TheFooter from "@/components/TheFooter.vue";
+import ConceptPopup from "@/components/ConceptPopup.vue";
+</script>
 
-@import "the-new-css-reset/css/reset.css"
-@import "./assets/fonts/inter.css"
+<template>
+  <div id="app">
+    <TheHeader />
+    <div id="content">
+      <router-view v-slot="{ Component }">
+        <keep-alive include="app-search">
+          <component :is="Component" />
+        </keep-alive>
+      </router-view>
+    </div>
+    <TheFooter />
+    <ConceptPopup />
+  </div>
+</template>
+
+<style lang="sass">
 @import "./sass/variables.sass"
 @import "./sass/new-variables.scss"
-@import "./sass/global.sass"
-
-body
-  font-family: 'Inter', sans-serif
-
-@supports (font-variation-settings: normal)
-  body
-    font-family: 'Inter var', sans-serif
-
-html
-  position: relative
-  min-height: 100%
-
-body
-  margin: 0
+@import "./sass/global.scss"
 
 #app
   display: flex
@@ -62,37 +66,3 @@ h1, h2, h3, h4, h5, h6
   line-height: 1
   font-weight: normal
 </style>
-
-<template>
-  <div id="app">
-    <Header />
-    <div id="content">
-      <router-view v-slot="{ Component }">
-        <keep-alive include="app-search">
-          <component :is="Component" />
-        </keep-alive>
-      </router-view>
-    </div>
-    <Footer />
-    <div id="consent" v-if="askConsent">
-      We monitor site traffic. Read our
-      <router-link to="/privacy">privacy policy</router-link>.
-      <button class="secondaryButton" @click="consent()">OK</button>
-    </div>
-  </div>
-</template>
-
-<script lang="ts" setup>
-import { ref } from "vue";
-import { ActiveConsent } from "./lib/ActiveConsent";
-import Header from "./components/TheHeader.vue";
-import Footer from "./components/TheFooter.vue";
-
-const activeConsent = new ActiveConsent();
-const askConsent = ref(activeConsent.askConsent);
-
-function consent() {
-  activeConsent.consent();
-  askConsent.value = false;
-}
-</script>
