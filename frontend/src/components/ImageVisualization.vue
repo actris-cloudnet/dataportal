@@ -36,12 +36,12 @@ img {
 <template>
   <figure>
     <figcaption :style="captionStyle">
-      {{ data.productVariable.humanReadableName }}
+      {{ currentData.productVariable.humanReadableName }}
       <a
-        :href="data.productVariable.actrisVocabUri"
+        :href="currentData.productVariable.actrisVocabUri"
         title="Definition for the variable in ACTRIS vocabulary"
         class="tag"
-        v-if="linkToVocabulary && data.productVariable.actrisVocabUri"
+        v-if="linkToVocabulary && currentData.productVariable.actrisVocabUri"
       >
         definition
       </a>
@@ -49,34 +49,34 @@ img {
     <a v-if="expandable" :href="imageUrl" target="_blank">
       <img
         :src="imageUrl"
-        :width="data.dimensions?.width"
-        :height="data.dimensions?.height"
+        :width="currentData.dimensions?.width"
+        :height="currentData.dimensions?.height"
         alt=""
         class="visualization"
         :style="imageStyle"
-        @load="$emit('load')"
+        @load="onLoad"
       />
     </a>
     <router-link :to="linkTo" v-else-if="linkTo">
       <img
         :src="imageUrl"
-        :width="data.dimensions?.width"
-        :height="data.dimensions?.height"
+        :width="currentData.dimensions?.width"
+        :height="currentData.dimensions?.height"
         alt=""
         class="visualization"
         :style="imageStyle"
-        @load="$emit('load')"
+        @load="onLoad"
       />
     </router-link>
     <img
       v-else
       :src="imageUrl"
-      :width="data.dimensions?.width"
-      :height="data.dimensions?.height"
+      :width="currentData.dimensions?.width"
+      :height="currentData.dimensions?.height"
       alt=""
       class="visualization"
       :style="imageStyle"
-      @load="$emit('load')"
+      @load="onLoad"
     />
   </figure>
 </template>
@@ -84,7 +84,7 @@ img {
 <script lang="ts" setup>
 import type { RouteLocationRaw } from "vue-router";
 import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
-import { computed } from "vue";
+import { computed, ref, watchEffect } from "vue";
 
 export interface Props {
   data: VisualizationItem;
@@ -106,17 +106,20 @@ const emit = defineEmits<{
   (e: "load"): void;
 }>();
 
+const currentData = ref(props.data);
+const nextData = ref(props.data);
+
 const imageStyle = computed(() => {
   if (
-    !props.data.dimensions ||
+    !currentData.value.dimensions ||
     typeof props.maxMarginLeft === "undefined" ||
     typeof props.maxMarginRight === "undefined"
   ) {
     return {};
   }
-  const left = props.maxMarginLeft - props.data.dimensions.marginLeft;
-  const right = props.maxMarginRight - props.data.dimensions.marginRight;
-  const width = props.data.dimensions.width + left + right;
+  const left = props.maxMarginLeft - currentData.value.dimensions.marginLeft;
+  const right = props.maxMarginRight - currentData.value.dimensions.marginRight;
+  const width = currentData.value.dimensions.width + left + right;
   return {
     paddingLeft: `${(100 * left) / width}%`,
     paddingRight: `${(100 * right) / width}%`,
@@ -125,7 +128,7 @@ const imageStyle = computed(() => {
 
 const captionStyle = computed(() => {
   if (
-    !props.data.dimensions ||
+    !currentData.value.dimensions ||
     typeof props.maxMarginLeft === "undefined" ||
     typeof props.maxMarginRight === "undefined"
   ) {
@@ -133,12 +136,21 @@ const captionStyle = computed(() => {
   }
   const left = props.maxMarginLeft;
   const right = props.maxMarginRight;
-  const width = props.data.dimensions.width + left + right;
+  const width = currentData.value.dimensions.width + left + right;
   return {
     paddingLeft: `${100 * (left / width)}%`,
     paddingRight: `${100 * (right / width)}%`,
   };
 });
 
-const imageUrl = computed(() => `${import.meta.env.VITE_BACKEND_URL}download/image/${props.data.s3key}`);
+const imageUrl = computed(() => `${import.meta.env.VITE_BACKEND_URL}download/image/${nextData.value.s3key}`);
+
+watchEffect(() => {
+  nextData.value = props.data;
+});
+
+function onLoad() {
+  currentData.value = nextData.value;
+  emit("load");
+}
 </script>

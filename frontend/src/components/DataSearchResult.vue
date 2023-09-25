@@ -125,6 +125,10 @@ section#fileTable
   #file
     width: 100%
 
+  &.busy
+    opacity: 0.5
+    pointer-events: none
+
 
 // NOTE: Keep the breakpoint in sync with JavaScript below.
 @media screen and (max-width: 1200px)
@@ -164,7 +168,10 @@ section#fileTable
 
 .filePreview
   margin-top: 1rem
-  min-height: 190px
+  aspect-ratio: 5 / 2
+  display: flex
+  align-items: center
+  justify-content: center
 
 .download
   margin-top: 0rem
@@ -261,7 +268,7 @@ section#fileTable
         <br />
       </div>
     </div>
-    <div class="column2">
+    <div :class="{ column2: true, busy: previewBusy }">
       <div v-if="previewResponse" class="file-preview-container">
         <h3 class="previewTitle">
           {{ previewResponse.product.humanReadableName }} from {{ previewResponse.site.humanReadableName }}
@@ -372,6 +379,7 @@ const currentVisualization = ref<VisualizationItem | null>(null);
 const pendingVisualization = ref<VisualizationItem | null>(null);
 const currentPage = ref(1);
 const perPage = ref(15);
+const previewBusy = ref(false);
 
 const apiUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -389,9 +397,11 @@ function clearPreview() {
 function changePreview() {
   currentVisualization.value = pendingVisualization.value;
   previewResponse.value = pendingPreviewResponse.value;
+  previewBusy.value = false;
 }
 
 function loadPreview(record: FileResponse) {
+  previewBusy.value = true;
   axios
     .get(`${apiUrl}visualizations/${record.uuid}`)
     .then(({ data }) => {
