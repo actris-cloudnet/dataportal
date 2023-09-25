@@ -6,12 +6,13 @@ $lightpadding: 1em
 $heavypadding: 5em
 
 main#search
-  position: relative
+  padding-left: $lightpadding
+  padding-right: $lightpadding
+
+#searchContainer
   display: flex
   justify-content: center
   flex-wrap: wrap
-  padding-left: $lightpadding
-  padding-right: $lightpadding
 
 main#search.mediumView
   max-width: 90em
@@ -42,6 +43,7 @@ a:focus
 section#sideBar
   margin-right: 80px
   width: 300px
+  padding: 2rem 0
 
 @media screen and (max-width: $narrow-screen)
   section#sideBar
@@ -51,15 +53,11 @@ section#sideBar
     margin-left: 80px
     margin-right: 80px
 
-.multiselect
-  margin-bottom: $filter-margin
-
 div.date
   display: grid
   grid-template-columns: 42.5% 15% 42.5%
   justify-items: center
   row-gap: 0.5em
-  margin-bottom: $filter-margin
   .date
     outline: none
 
@@ -89,11 +87,11 @@ button.calendar
     width: 1em
     height: 1em
 
-label, span.filterlabel
-  font-size: 0.9em
-  margin-bottom: 0
-  &::after
-    content: ':'
+// label, span.filterlabel
+//   font-size: 0.9em
+//   margin-bottom: 0
+//   &::after
+//     content: ':'
 
 #noRes
   font-size: 90%
@@ -117,7 +115,6 @@ label, span.filterlabel
     background: none
 
 .results
-  margin-top: 15px
   display: inline-flex
   flex-grow: 1
   min-width: 600px
@@ -243,192 +240,216 @@ div.checkbox
 
 .experimental
   background-color: #EC9706
+
+.smallmap
+  height: 300px
+
+.widemap
+  height: 450px
+  margin-top: 1rem
+
+.filterbox
+  margin-top: 1rem
 </style>
 
 <template>
   <main v-if="mode === 'visualizations' || mode === 'data'" id="search" :class="mainWidth">
     <div v-if="error" class="note rednote">Error: Search backend is offline, {{ error }}</div>
 
-    <section id="sideBar">
-      <div :class="{ widemap: showAllSites, wideviz: vizWideMode }">
-        <MyMap
-          v-if="allSites && allSites.length > 0"
-          :key="mapKey"
-          :sites="allSites"
-          :selectedSiteIds="selectedSiteIds"
-          :onMapMarkerClick="onMapMarkerClick"
-          :center="[54.0, 14.0]"
-          :zoom="showAllSites ? 2 : 3"
-          :showLegend="showAllSites"
-          :enableBoundingBox="true"
-        />
-      </div>
-
-      <custom-multiselect
-        label="Location"
-        v-model="selectedSiteIds"
-        :options="allSites"
-        id="siteSelect"
-        class="nobottommargin"
-        :class="{ widemapmarginleft: showAllSites }"
-        :multiple="true"
-        :getIcon="getMarkerIcon"
+    <div v-if="allSites && allSites.length > 0 && showAllSites" class="widemap">
+      <SuperMap
+        :key="mapKey"
+        :sites="allSites"
+        :selectedSiteIds="selectedSiteIds"
+        :onMapMarkerClick="onMapMarkerClick"
+        :center="[54.0, 14.0]"
+        :zoom="2"
+        showLegend
+        enableBoundingBox
       />
-      <div class="checkbox">
-        <input type="checkbox" id="showAllSitesCheckbox" name="showAllSitesCheckbox" v-model="showAllSites" />
-        <label for="showAllSitesCheckbox">Show all sites</label>
-      </div>
+    </div>
 
-      <span class="filterlabel">Date</span>
-
-      <div class="quickselectors" v-if="!isVizMode">
-        <button
-          id="yearBtn"
-          class="quickBtn"
-          @click="setDateRangeForCurrentYear()"
-          :class="{ activeBtn: activeBtn === 'btn1' }"
-        >
-          Current year
-        </button>
-        <button
-          id="monthBtn"
-          class="quickBtn"
-          @click="setDateRange(fixedRanges.month)"
-          :class="{ activeBtn: activeBtn === 'btn2' }"
-        >
-          Last 30 days
-        </button>
-        <button
-          id="weekBtn"
-          class="quickBtn"
-          @click="setDateRange(fixedRanges.day)"
-          :class="{ activeBtn: activeBtn === 'btn3' }"
-        >
-          Today
-        </button>
-      </div>
-
-      <div class="date" v-if="!isVizMode && showDateRange">
-        <datepicker
-          name="dateFrom"
-          v-model="dateFrom"
-          :start="beginningOfHistory"
-          :end="dateTo"
-          @error="dateFromError = $event"
-          :key="dateFromUpdate"
-        />
-        <span class="centerlabel">&#8212;</span>
-        <datepicker
-          name="dateTo"
-          v-model="dateTo"
-          :start="showDateRange ? dateFrom : beginningOfHistory"
-          :end="today"
-          @error="dateToError = $event"
-          :key="dateToUpdate"
-        />
-        <div v-if="!isTrueOnBothDateFields('isValidDateString')" class="errormsg">
-          Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.
+    <div id="searchContainer">
+      <section id="sideBar">
+        <div v-if="allSites && allSites.length > 0 && !showAllSites" class="smallmap">
+          <SuperMap
+            :key="mapKey"
+            :sites="allSites"
+            :selectedSiteIds="selectedSiteIds"
+            :onMapMarkerClick="onMapMarkerClick"
+            :center="[54.0, 14.0]"
+            :zoom="3"
+            enableBoundingBox
+          />
         </div>
-        <template v-else>
-          <div v-if="!isTrueOnBothDateFields('isNotInFuture')" class="errormsg">Provided date is in the future.</div>
-          <div
-            v-if="(dateFromError && !dateFromError.isBeforeEnd) || (dateToError && !dateToError.isAfterStart)"
-            class="errormsg"
-          >
-            Start date must be before end date.
+
+        <div class="filterbox">
+          <custom-multiselect
+            label="Location"
+            v-model="selectedSiteIds"
+            :options="allSites"
+            id="siteSelect"
+            class="nobottommargin"
+            :class="{ widemapmarginleft: showAllSites }"
+            :multiple="true"
+            :getIcon="getMarkerIcon"
+          />
+          <CheckBox v-model="showAllSites" label="Show all sites" />
+        </div>
+
+        <div class="filterbox">
+          <span class="filterlabel">Date</span>
+          <div class="quickselectors" v-if="!isVizMode">
+            <button
+              id="yearBtn"
+              class="quickBtn"
+              @click="setDateRangeForCurrentYear()"
+              :class="{ activeBtn: activeBtn === 'btn1' }"
+            >
+              Current year
+            </button>
+            <button
+              id="monthBtn"
+              class="quickBtn"
+              @click="setDateRange(fixedRanges.month)"
+              :class="{ activeBtn: activeBtn === 'btn2' }"
+            >
+              Last 30 days
+            </button>
+            <button
+              id="weekBtn"
+              class="quickBtn"
+              @click="setDateRange(fixedRanges.day)"
+              :class="{ activeBtn: activeBtn === 'btn3' }"
+            >
+              Today
+            </button>
           </div>
-        </template>
-      </div>
 
-      <div class="date" v-else>
-        <datepicker
-          name="dateTo"
-          v-model="dateTo"
-          :start="beginningOfHistory"
-          :end="today"
-          @error="dateToError = $event"
-          :key="vizDateUpdate"
+          <div class="date" v-if="!isVizMode && showDateRange">
+            <datepicker
+              name="dateFrom"
+              v-model="dateFrom"
+              :start="beginningOfHistory"
+              :end="dateTo"
+              @error="dateFromError = $event"
+              :key="dateFromUpdate"
+            />
+            <span class="centerlabel">&#8212;</span>
+            <datepicker
+              name="dateTo"
+              v-model="dateTo"
+              :start="showDateRange ? dateFrom : beginningOfHistory"
+              :end="today"
+              @error="dateToError = $event"
+              :key="dateToUpdate"
+            />
+            <div v-if="!isTrueOnBothDateFields('isValidDateString')" class="errormsg">
+              Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.
+            </div>
+            <template v-else>
+              <div v-if="!isTrueOnBothDateFields('isNotInFuture')" class="errormsg">
+                Provided date is in the future.
+              </div>
+              <div
+                v-if="(dateFromError && !dateFromError.isBeforeEnd) || (dateToError && !dateToError.isAfterStart)"
+                class="errormsg"
+              >
+                Start date must be before end date.
+              </div>
+            </template>
+          </div>
+
+          <div class="date" v-else>
+            <datepicker
+              name="dateTo"
+              v-model="dateTo"
+              :start="beginningOfHistory"
+              :end="today"
+              @error="dateToError = $event"
+              :key="vizDateUpdate"
+            />
+            <div class="dateButtons">
+              <button id="previousBtn" class="dateBtn" @click="setPreviousDate()" :disabled="!hasPreviousDate()">
+                <img alt="calendar" class="dateIcon" :src="datePreviousIcon" />
+              </button>
+              <button id="nextBtn" class="dateBtn" @click="setNextDate()" :disabled="!hasNextDate()">
+                <img alt="calendar" class="dateIcon" :src="dateNextIcon" />
+              </button>
+            </div>
+            <div v-if="dateToError && !dateToError.isValidDateString" class="errormsg">
+              Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.
+            </div>
+            <div v-if="dateToError && dateToError.isValidDateString && !dateToError.isNotInFuture" class="errormsg">
+              Provided date is in the future.
+            </div>
+          </div>
+          <CheckBox v-model="showDateRange" label="Show date range" />
+        </div>
+
+        <div class="filterbox">
+          <custom-multiselect
+            label="Product"
+            v-model="selectedProductIds"
+            :options="allProducts"
+            id="productSelect"
+            :multiple="true"
+            :getIcon="getProductIcon"
+          />
+          <CheckBox v-model="showExpProducts" label="Show experimental products" />
+        </div>
+
+        <div class="filterbox">
+          <custom-multiselect
+            label="Instrument"
+            v-model="selectedInstrumentIds"
+            :options="allInstruments"
+            id="instrumentSelect"
+            :multiple="true"
+            :getIcon="getInstrumentIcon"
+          />
+        </div>
+
+        <div class="filterbox">
+          <custom-multiselect
+            v-show="isVizMode"
+            label="Variable"
+            v-model="selectedVariableIds"
+            :options="selectableVariables"
+            :multiple="true"
+            id="variableSelect"
+            :getIcon="getVariableIcon"
+          />
+        </div>
+
+        <div class="filterbox">
+          <BaseButton v-if="isVizMode" @click="navigateToSearch('data')" type="secondary" style="width: 100%">
+            View in data search &rarr;
+          </BaseButton>
+          <BaseButton v-else @click="navigateToSearch('visualizations')" type="secondary" style="width: 100%">
+            View in visualization search &rarr;
+          </BaseButton>
+          <a :href="isVizMode ? '/search/visualizations' : '/search/data'" id="reset">Reset filter</a>
+        </div>
+      </section>
+
+      <div class="results">
+        <viz-search-result
+          v-if="isVizMode"
+          :apiResponse="apiResponse as VisualizationResponse[]"
+          :isBusy="isBusy"
+          :date="dateTo"
+          :key="vizSearchUpdate"
+          :noSelectionsMade="noSelectionsMade"
+          :setWideMode="setVizWideMode"
         />
-        <div class="dateButtons">
-          <button id="previousBtn" class="dateBtn" @click="setPreviousDate()" :disabled="!hasPreviousDate()">
-            <img alt="calendar" class="dateIcon" :src="datePreviousIcon" />
-          </button>
-          <button id="nextBtn" class="dateBtn" @click="setNextDate()" :disabled="!hasNextDate()">
-            <img alt="calendar" class="dateIcon" :src="dateNextIcon" />
-          </button>
-        </div>
-        <div v-if="dateToError && !dateToError.isValidDateString" class="errormsg">
-          Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.
-        </div>
-        <div v-if="dateToError && dateToError.isValidDateString && !dateToError.isNotInFuture" class="errormsg">
-          Provided date is in the future.
-        </div>
+        <data-search-result
+          v-else
+          :apiResponse="apiResponse as SearchFileResponse[]"
+          :isBusy="isBusy"
+          :key="dataSearchUpdate"
+        />
       </div>
-
-      <div class="checkbox" v-if="!isVizMode">
-        <input type="checkbox" id="showDateRangeCheckbox" name="showDateRangeCheckbox" v-model="showDateRange" />
-        <label for="showDateRangeCheckbox">Show date range</label>
-      </div>
-
-      <custom-multiselect
-        label="Product"
-        v-model="selectedProductIds"
-        :options="allProducts"
-        id="productSelect"
-        :multiple="true"
-        :getIcon="getProductIcon"
-      />
-      <div class="checkbox">
-        <input type="checkbox" id="showExpProductsCheckbox" name="showExpProductsCheckbox" v-model="showExpProducts" />
-        <label for="showExpProductsCheckbox">Show experimental products</label>
-      </div>
-
-      <custom-multiselect
-        label="Instrument"
-        v-model="selectedInstrumentIds"
-        :options="allInstruments"
-        id="instrumentSelect"
-        :multiple="true"
-        :getIcon="getInstrumentIcon"
-      />
-
-      <custom-multiselect
-        v-show="isVizMode"
-        label="Variable"
-        v-model="selectedVariableIds"
-        :options="selectableVariables"
-        :multiple="true"
-        id="variableSelect"
-        :getIcon="getVariableIcon"
-      />
-
-      <button v-if="isVizMode" @click="navigateToSearch('data')" class="secondaryButton widebutton">
-        View in data search &rarr;
-      </button>
-      <button v-else @click="navigateToSearch('visualizations')" class="secondaryButton widebutton">
-        View in visualization search &rarr;
-      </button>
-
-      <a :href="isVizMode ? '/search/visualizations' : '/search/data'" id="reset">Reset filter</a>
-    </section>
-
-    <div class="results" :class="{ widemapmarginright: showAllSites }">
-      <viz-search-result
-        v-if="isVizMode"
-        :apiResponse="apiResponse as VisualizationResponse[]"
-        :isBusy="isBusy"
-        :date="dateTo"
-        :key="vizSearchUpdate"
-        :noSelectionsMade="noSelectionsMade"
-        :setWideMode="setVizWideMode"
-      />
-      <data-search-result
-        v-else
-        :apiResponse="apiResponse as SearchFileResponse[]"
-        :isBusy="isBusy"
-        :downloadUri="downloadUri"
-        :key="dataSearchUpdate"
-      />
     </div>
   </main>
   <ApiError v-else :response="{ status: 404, data: 'Not found' }" />
@@ -462,9 +483,11 @@ import {
 import VizSearchResult from "@/components/VizSearchResult.vue";
 import type { Product } from "@shared/entity/Product";
 import type { SearchFileResponse } from "@shared/entity/SearchFileResponse";
-import MyMap from "@/components/SuperMap.vue";
+import SuperMap from "@/components/SuperMap.vue";
 import { useRoute, useRouter } from "vue-router";
 import ApiError from "./ApiError.vue";
+import CheckBox from "@/components/CheckBox.vue";
+import BaseButton from "@/components/BaseButton.vue";
 
 import datePreviousIcon from "@/assets/icons/date-previous.png";
 import dateNextIcon from "@/assets/icons/date-next.png";

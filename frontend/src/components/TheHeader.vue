@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import headerLogo from "@/assets/header-logo.svg";
+import { ref } from "vue";
+
 const isDev = import.meta.env.DEV;
+const showMenu = ref(false);
 </script>
 
 <template>
@@ -9,7 +12,8 @@ const isDev = import.meta.env.DEV;
       <a href="/" class="logo">
         <img :src="headerLogo" alt="Cloudnet data portal" />
       </a>
-      <ul>
+      <div class="menu-toggle" @click="showMenu = !showMenu">☰</div>
+      <ul :class="{ show: showMenu }">
         <li>
           <a href="/search">
             <span>Browse data</span>
@@ -38,6 +42,7 @@ const isDev = import.meta.env.DEV;
 <style scoped lang="scss">
 @import "@/sass/new-variables";
 
+$header-height: 4.5rem;
 $header-color: darken(#78c0e0, 25%);
 
 header {
@@ -47,6 +52,7 @@ header {
   background-position: right 0px top 20%;
   background-repeat: no-repeat;
   background-size: cover;
+  z-index: 999;
 
   &.dev {
     background-image: linear-gradient(to bottom, transparent 75%, rgba(0, 0, 0, 0.05)),
@@ -61,8 +67,9 @@ header {
   max-width: $page-width;
   box-sizing: content-box;
   margin: 0 auto;
-  height: 4.5rem;
+  height: $header-height;
   padding: 0 1rem;
+  position: relative;
 }
 
 img {
@@ -117,6 +124,41 @@ li a {
     width: auto;
     height: 1.4rem;
     margin-right: 0.5rem;
+  }
+}
+
+.menu-toggle {
+  display: none;
+  padding: 1rem;
+  color: white;
+}
+
+@media screen and (max-width: 800px) {
+  .menu-toggle {
+    display: block;
+    margin-left: auto;
+  }
+
+  ul {
+    display: none;
+    position: absolute;
+    top: $header-height;
+    left: 0;
+    right: 0;
+    background-color: white;
+    padding: 0;
+    margin: 0;
+    border-bottom: 1px solid silver;
+  }
+
+  li a {
+    color: black;
+    margin: 0;
+    padding: 0.5rem 1rem;
+  }
+
+  ul.show {
+    display: block;
   }
 }
 </style>

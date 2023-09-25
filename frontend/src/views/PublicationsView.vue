@@ -29,7 +29,10 @@ ul
 
 <template>
   <main>
-    <h1>Cloudnet publications</h1>
+    <LandingHeader title="Publications" />
+    <p>
+      List of publications that are related to the Cloudnet processing scheme or use data from the Cloudnet data portal.
+    </p>
     <template v-if="publications.status == 'ready'">
       <div v-for="[year, pubs] in publications.data" :key="year" class="year">
         <h2>{{ year }}</h2>
@@ -50,6 +53,7 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 import type { AxiosResponse } from "axios";
 import type { Publication } from "@shared/entity/Publication";
+import LandingHeader from "@/components/LandingHeader.vue";
 
 function groupBySorted<T, K extends keyof T>(items: T[], key: K, order: "asc" | "desc"): [T[K], T[]][] {
   const grouped = items.reduce((result, item) => {

@@ -2,15 +2,6 @@
 @import "@/sass/variables.sass"
 @import "@/sass/global.sass"
 
-main#privacypolicy
-  background-color: $landing-header
-  padding: 2em
-  max-width: 70em
-
-@media screen and (max-width: $narrow-screen)
-  main#privacypolicy
-    padding: 1em
-
 h2
   margin-bottom: 1em
 h3
@@ -24,7 +15,7 @@ h4
 
 <template>
   <main id="privacypolicy">
-    <h2>Cloudnet privacy policy</h2>
+    <LandingHeader title="Privacy policy" />
     <h3>Scope</h3>
     <p>
       This policy describes how we, ACTRIS Cloud remote sensing data centre unit (later Cloudnet) at the Finnish
@@ -109,6 +100,7 @@ h4
 
 <script lang="ts" setup>
 import { ActiveConsent } from "@/lib/ActiveConsent";
+import LandingHeader from "@/components/LandingHeader.vue";
 
 const lastEdited = new ActiveConsent().privacyPolicyEdited;
 </script>

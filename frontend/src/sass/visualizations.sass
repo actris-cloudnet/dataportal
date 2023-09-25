@@ -1,11 +1,10 @@
 $column-spacing: 10px
 
-div.sourceFile
-  padding-left: 1em
-  padding-right: 1em
-  padding-bottom: 1em
-  display: flex
-  flex-wrap: wrap
+
+div.sourceFile .variables
+  display: grid
+  grid-template-columns: repeat(auto-fill, minmax(min(700px, 100%), 1fr))
+  row-gap: 1rem
 div.paddedSourceFile + div.paddedSourceFile, .sideBySide div.sourceFile:nth-child(n+3)
   border-top: 1px solid $border-color
   padding-top: 1em
@@ -39,10 +38,3 @@ img
       top: -1px
       width: 0.9em
       height: auto
-.variable
-  flex-basis: 600px
-  flex-grow: 1
-  max-width: 1000px
-  h4
-    margin-left: 1.5em
-    margin-bottom: 0.15em

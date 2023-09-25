@@ -5,19 +5,8 @@
 @import "leaflet-draw/dist/leaflet.draw.css"
 
 .map
-  height: 300px
-  width: 300px
-
-.widemap
-  height: 450px
-  .wrapper
-    top: -36px
-    position: absolute
-    left: 1em
-    right: 1em
-
-.wrapper
-  position: relative
+  width: 100%
+  height: 100%
 
 .legend
   background: white
@@ -77,12 +66,7 @@
 </style>
 
 <template>
-  <div id="mapContainer" ref="mapElement" class="container wrapper" :class="{ fullHeight }" style="z-index: 4">
-    <div class="row">
-      <div v-if="showLegend" id="map" class="widemap"></div>
-      <div v-else id="map" class="map"></div>
-    </div>
-  </div>
+  <div id="mapContainer" ref="mapElement" class="map" style="z-index: 4"></div>
 </template>
 
 <script lang="ts" setup>

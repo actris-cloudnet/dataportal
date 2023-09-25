@@ -1,12 +1,6 @@
 <style lang="sass">
 
-// Import external css first to prevent overriding styles later
-
-@import "bootstrap/scss/functions"
-@import "bootstrap/scss/variables"
-@import "bootstrap/scss/mixins"
-@import "bootstrap/scss/reboot"
-
+@import "the-new-css-reset/css/reset.css"
 @import "./assets/fonts/inter.css"
 @import "./sass/variables.sass"
 @import "./sass/new-variables.scss"
@@ -36,7 +30,7 @@ body
 
   > main
     max-width: $page-width
-    margin: 3em auto
+    margin: 0 auto
     padding-left: 5em
     padding-right: 5em
     box-sizing: content-box
@@ -57,7 +51,7 @@ body
 
 @media screen and (max-width: $narrow-screen)
   #app > main
-    margin: 3em auto calc(#{$footer-height-narrow} + 4em)
+    //margin: 3em auto calc(#{$footer-height-narrow} + 4em)
     padding-left: 1em
     padding-right: 1em
 

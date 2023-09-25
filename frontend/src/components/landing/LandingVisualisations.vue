@@ -10,8 +10,8 @@
           :data="visualization"
           :maxMarginLeft="maxMarginLeft"
           :maxMarginRight="maxMarginRight"
-          :caption="true"
-          :expandable="true"
+          expandable
+          linkToVocabulary
         />
       </div>
     </div>

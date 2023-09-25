@@ -46,14 +46,17 @@
 
 <template>
   <main id="sitelanding" v-if="!error && response">
-    <img alt="back" id="backButton" :src="backIcon" @click="$router.back()" />
-    <header>
-      <h2>{{ response.humanReadableName }}</h2>
-      <span>
-        Measurement station<template v-if="response.country"> in {{ response.country }}</template
-        >.
-      </span>
-    </header>
+    <LandingHeader :title="response.humanReadableName" :subtitle="subtitle">
+      <template #tags>
+        <BaseTag v-if="response.actrisId" type="actris" title="This station is part of an ACTRIS National Facility"
+          >ACTRIS</BaseTag
+        >
+        <BaseTag v-if="response.type.includes('campaign' as SiteType)" type="experimental">Campaign</BaseTag>
+        <BaseTag v-if="response.type.includes('arm' as SiteType)" type="experimental">ARM</BaseTag>
+        <BaseTag v-if="response.type.includes('model' as SiteType)" type="experimental">Model</BaseTag>
+        <BaseTag v-else-if="response.type.includes('hidden' as SiteType)" type="experimental">Hidden</BaseTag>
+      </template>
+    </LandingHeader>
     <main class="infoBox">
       <section id="summary">
         <header>Summary</header>
@@ -240,9 +243,10 @@ import CustomMultiselect from "@/components/MultiSelect.vue";
 import type { ReducedMetadataResponse } from "@shared/entity/ReducedMetadataResponse";
 import TrackMap, { type Point } from "@/components/TrackMap.vue";
 import ApiError from "./ApiError.vue";
-import backIcon from "@/assets/icons/back.png";
 import { useTitle } from "@/router";
 import type { Product } from "@shared/entity/Product";
+import BaseTag from "@/components/BaseTag.vue";
+import LandingHeader from "@/components/LandingHeader.vue";
 
 export interface Props {
   siteid: string;
@@ -281,6 +285,14 @@ const locations = ref<LocationsResult>({ status: "loading" });
 const title = computed(() => [response.value?.humanReadableName, "Measurement sites"]);
 
 useTitle(title);
+
+const subtitle = computed(() => {
+  let result = "Measurement station";
+  if (response.value?.country) {
+    result += ` in ${response.value.country}`;
+  }
+  return result;
+});
 
 onMounted(() => {
   axios

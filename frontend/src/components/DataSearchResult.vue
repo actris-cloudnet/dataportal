@@ -4,9 +4,9 @@
 @import "@/sass/landing.sass"
 
 section#fileTable
+  display: flex
   width: 100%
   text-align: left
-  margin-top: -15px
 
   #tableContent
     margin-top: 10px
@@ -92,24 +92,33 @@ section#fileTable
   .download:focus
     outline: thin dotted black
 
-.previewTitle, .previewSubTitle
-  margin-left: 15px
+.previewTitle
+  font-size: 1.2rem
+  margin-bottom: .25rem
 
-.linkToDoPage
-  margin-right: 15px
+.previewSubtitle
+  color: gray
+
+// .previewTitle, .previewSubTitle
+  // margin-left: 15px
+
+// .linkToDoPage
+//   margin-right: 15px
 
 .noresults
   text-align: center
   margin-top: 3em
 
 .column1
-  float: left
-  width: 50%
+  flex-basis: 55%
+  padding-top: 2rem
 
 .column2
-  width: 45%
-  margin-left: 1em
-  float: right
+  flex-basis: 45%
+  border-left: 1px solid #ddd
+  padding: 2rem
+  padding-right: 0
+  margin-left: 2rem
 
   .infoBox
     margin: 0
@@ -123,7 +132,7 @@ section#fileTable
   .column2
     display: none
   .column1
-    width: 100%
+    flex-basis: 100%
 
 .listLegend
   list-style: none
@@ -144,6 +153,22 @@ section#fileTable
 .visualization
   width: 100%
   height: auto
+
+.inffff
+  display: grid
+  grid-template-columns: auto 4fr
+  column-gap: 2rem
+  row-gap: .5rem
+
+  dt
+    font-weight: bold
+
+.filePreview
+  margin-top: 1rem
+  min-height: 190px
+
+.download
+  margin-top: 0rem
 </style>
 
 <template>
@@ -183,9 +208,6 @@ section#fileTable
         :current-page="currentPage"
         :per-page="perPage"
         :busy="isBusy"
-        :show-empty="true"
-        selectable
-        select-mode="single"
         @row-selected="rowSelected"
       >
         <template #cell(volatile)="data">
@@ -221,9 +243,16 @@ section#fileTable
         aria-controls="fileTable"
       />
       <div class="downloadinfo" v-if="listLength > 0 && !simplifiedView">
-        <a class="download" :class="{ disabled: isBusy || downloadIsBusy }" href="" @click.prevent="createCollection()">
-          Download all </a
-        ><br />
+        <BaseButton
+          type="primary"
+          class="download"
+          :class="{ disabled: isBusy || downloadIsBusy }"
+          href=""
+          @click.prevent="createCollection()"
+        >
+          Download all
+        </BaseButton>
+        <br />
         <span v-if="!downloadFailed" class="dlcount" :class="{ disabled: isBusy || downloadIsBusy }">
           {{ listLength }} files ({{ humanReadableSize(combinedFileSize(apiResponse)) }})
         </span>
@@ -234,91 +263,70 @@ section#fileTable
       </div>
     </div>
     <div class="column2">
-      <div>
-        <h3 class="inlineblock previewTitle">Preview</h3>
-        <router-link v-if="previewResponse" :to="`/file/${previewResponse.uuid}`" class="listLegend linkToDoPage">
-          Show file &rarr;
-        </router-link>
+      <div v-if="previewResponse" class="file-preview-container">
+        <h3 class="previewTitle">
+          {{ previewResponse.product.humanReadableName }} from {{ previewResponse.site.humanReadableName }}
+        </h3>
+        <div class="previewSubtitle">
+          {{ humanReadableDate(previewResponse.measurementDate) }}
+        </div>
+        <div class="filePreview">
+          <visualization
+            :data="pendingVisualization"
+            @load="changePreview"
+            :link-to="{ name: 'File', params: { uuid: previewResponse.uuid } }"
+            v-if="pendingVisualization"
+          />
+          <span v-else>Preview not available.</span>
+        </div>
+        <div class="download" style="width: 100%; display: flex; gap: 1rem; margin-bottom: 2rem">
+          <BaseButton type="primary" :href="previewResponse.downloadUrl" style="flex-basis: 50%">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+              <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+            </svg>
+            Download
+          </BaseButton>
+          <BaseButton
+            type="secondary"
+            :to="{ name: 'File', params: { uuid: previewResponse.uuid } }"
+            style="flex-basis: 50%"
+          >
+            Details &rarr;
+          </BaseButton>
+        </div>
+        <dl class="inffff">
+          <template v-if="'instrument' in previewResponse && previewResponse.instrument !== null">
+            <dt>Instrument</dt>
+            <dd>{{ previewResponse.instrument.shortName }}</dd>
+          </template>
+          <template v-else-if="'model' in previewResponse">
+            <dt>Model</dt>
+            <dd>{{ previewResponse.model.humanReadableName }}</dd>
+          </template>
+          <template v-else>
+            <dt>Product</dt>
+            <dd>{{ previewResponse.product.humanReadableName }}</dd>
+          </template>
+          <dt>Date</dt>
+          <dd>{{ previewResponse.measurementDate }}</dd>
+          <dt>Size</dt>
+          <dd>{{ humanReadableSize(previewResponse.size) }}</dd>
+          <dt>Last modified</dt>
+          <dd>{{ humanReadableTimestamp(previewResponse.updatedAt) }}</dd>
+          <dt>Quality check</dt>
+          <dd>
+            <span v-if="typeof previewResponse.errorLevel === 'string'" class="qualitycheck">
+              <img :src="getQcIcon(previewResponse.errorLevel)" alt="" />
+              <span v-if="previewResponse.errorLevel !== 'pass'">
+                {{ getQcText(previewResponse.errorLevel) }}
+                <router-link :to="getQcLink(previewResponse.uuid)">see report.</router-link>
+              </span>
+              <span v-else>Pass</span>
+            </span>
+            <span v-else class="notAvailable"> </span>
+          </dd>
+        </dl>
       </div>
-      <main class="infoBox" v-if="previewResponse">
-        <section id="file">
-          <header>File information</header>
-          <section class="details">
-            <dl>
-              <template v-if="'instrument' in previewResponse && previewResponse.instrument !== null">
-                <dt>Instrument</dt>
-                <dd>{{ previewResponse.instrument.shortName }}</dd>
-              </template>
-              <template v-else-if="'model' in previewResponse">
-                <dt>Model</dt>
-                <dd>{{ previewResponse.model.humanReadableName }}</dd>
-              </template>
-              <template v-else>
-                <dt>Product</dt>
-                <dd>{{ previewResponse.product.humanReadableName }}</dd>
-              </template>
-              <dt>Date</dt>
-              <dd>{{ previewResponse.measurementDate }}</dd>
-              <dt>Size</dt>
-              <dd>{{ humanReadableSize(previewResponse.size) }}</dd>
-              <dt>Last modified</dt>
-              <dd>{{ humanReadableTimestamp(previewResponse.updatedAt) }}</dd>
-              <dt>Quality check</dt>
-              <dd>
-                <span v-if="typeof previewResponse.errorLevel === 'string'" class="qualitycheck">
-                  <img :src="getQcIcon(previewResponse.errorLevel)" alt="" />
-                  <span v-if="previewResponse.errorLevel !== 'pass'">
-                    {{ getQcText(previewResponse.errorLevel) }}
-                    <router-link :to="getQcLink(previewResponse.uuid)">see report.</router-link>
-                  </span>
-                  <span v-else>Pass</span>
-                </span>
-                <span v-else class="notAvailable"> </span>
-              </dd>
-            </dl>
-          </section>
-        </section>
-        <section id="preview">
-          <header>Visualization</header>
-          <section class="details">
-            <div v-if="pendingVisualization">
-              <div class="variable">
-                <h4 v-if="currentVisualization">
-                  {{ currentVisualization.productVariable.humanReadableName }}
-                  <a
-                    :href="currentVisualization.productVariable.actrisVocabUri"
-                    v-if="currentVisualization.productVariable.actrisVocabUri"
-                    title="ACTRIS variable"
-                  >
-                    <svg
-                      class="link"
-                      fill="#000000"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 30 30"
-                      width="60px"
-                      height="60px"
-                    >
-                      <path
-                        d="M 25.980469 2.9902344 A 1.0001 1.0001 0 0 0 25.869141 3 L 20 3 A 1.0001 1.0001 0 1 0 20 5 L 23.585938 5 L 13.292969 15.292969 A 1.0001 1.0001 0 1 0 14.707031 16.707031 L 25 6.4140625 L 25 10 A 1.0001 1.0001 0 1 0 27 10 L 27 4.1269531 A 1.0001 1.0001 0 0 0 25.980469 2.9902344 z M 6 7 C 4.9069372 7 4 7.9069372 4 9 L 4 24 C 4 25.093063 4.9069372 26 6 26 L 21 26 C 22.093063 26 23 25.093063 23 24 L 23 14 L 23 11.421875 L 21 13.421875 L 21 16 L 21 24 L 6 24 L 6 9 L 14 9 L 16 9 L 16.578125 9 L 18.578125 7 L 16 7 L 14 7 L 6 7 z"
-                      />
-                    </svg>
-                  </a>
-                </h4>
-                <router-link :to="`/file/${previewResponse.uuid}`">
-                  <visualization :data="pendingVisualization" @load="changePreview" />
-                </router-link>
-              </div>
-            </div>
-            <span v-else>Preview not available.</span>
-          </section>
-        </section>
-        <a class="download" :href="previewResponse.downloadUrl">
-          Download file
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
-          </svg>
-        </a>
-      </main>
       <div v-else class="listTitle previewSubTitle">Click a search result to show a preview.</div>
     </div>
   </section>
@@ -336,10 +344,12 @@ import {
   getQcIcon,
   getQcText,
   getQcLink,
+  humanReadableDate,
 } from "@/lib";
 import type { SearchFileResponse } from "@shared/entity/SearchFileResponse";
 import BaseTable from "./BaseTable.vue";
 import BasePagination from "./BasePagination.vue";
+import BaseButton from "./BaseButton.vue";
 import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
 import Visualization from "./ImageVisualization.vue";
 import type { FileResponse } from "@/views/FileView.vue";

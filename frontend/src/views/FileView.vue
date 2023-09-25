@@ -36,39 +36,33 @@
         of this data available.
       </div>
     </div>
-    <div class="landing-header-container">
-      <div class="landing-title">
-        {{ title }}
-      </div>
-      <div class="landing-tags">
-        <div v-if="isActrisObject" class="tag actris" title="Data from ACTRIS site">ACTRIS</div>
-        <div v-if="response.volatile" class="tag volatile" title="Data may change in future">Volatile</div>
-        <div v-if="response.legacy" class="tag legacy" title="Produced using non-standardized processing">Legacy</div>
-        <div v-if="response.product.experimental" class="tag experimental" title="Experimental product">
-          Experimental
-        </div>
-      </div>
-      <div class="landing-download">
-        <DownloadButton :downloadUrl="response.downloadUrl" />
-      </div>
-      <div class="landing-subtitle">
-        {{ humanReadableDate(response.measurementDate) }}
-      </div>
-    </div>
-    <div class="tab-container">
-      <router-link class="tab" :to="{ name: 'File' }">
-        <img :src="getProductIcon(response.product.id)" alt="" />
-        Summary
-      </router-link>
-      <router-link class="tab" :to="{ name: 'FileVisualizations' }">
-        <img :src="PhotoGalleryIcon" alt="" />
-        Visualisations
-      </router-link>
-      <router-link class="tab" :to="{ name: 'FileQualityReport' }" v-if="response.errorLevel">
-        <img :src="getQcIcon(response.errorLevel)" alt="" />
-        Quality report
-      </router-link>
-    </div>
+    <LandingHeader :title="title" :subtitle="humanReadableDate(response.measurementDate)">
+      <template #tags>
+        <FileTags :response="response" />
+      </template>
+      <template #actions>
+        <BaseButton type="primary" :href="response.downloadUrl">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+          </svg>
+          Download
+        </BaseButton>
+      </template>
+      <template #tabs>
+        <router-link class="tab" :to="{ name: 'File' }">
+          <img :src="getProductIcon(response.product.id)" alt="" />
+          Summary
+        </router-link>
+        <router-link class="tab" :to="{ name: 'FileVisualizations' }">
+          <img :src="PhotoGalleryIcon" alt="" />
+          Visualisations
+        </router-link>
+        <router-link class="tab" :to="{ name: 'FileQualityReport' }" v-if="response.errorLevel">
+          <img :src="getQcIcon(response.errorLevel)" alt="" />
+          Quality report
+        </router-link>
+      </template>
+    </LandingHeader>
     <div class="landing-content-background">
       <router-view
         :uuid="uuid"
@@ -96,10 +90,12 @@ import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
 import type { SiteType } from "@shared/entity/Site";
 import type { SiteLocation } from "@shared/entity/SiteLocation";
 import type { File } from "@shared/entity/File";
-import DownloadButton from "@/components/landing/DownloadButton.vue";
+import BaseButton from "@/components/BaseButton.vue";
+import FileTags from "@/components/FileTags.vue";
 import { getProductIcon, getQcIcon } from "@/lib";
 
 import PhotoGalleryIcon from "@/assets/icons/photo-gallery.png";
+import LandingHeader from "@/components/LandingHeader.vue";
 
 export type SourceFile = { ok: true; value: File } | { ok: false; value: Error };
 
@@ -127,7 +123,7 @@ const location = ref<SiteLocation | null>(null);
 const title = computed(() =>
   response.value
     ? `${response.value.product.humanReadableName} data from ${response.value.site.humanReadableName}`
-    : undefined,
+    : "",
 );
 
 const isActrisObject = computed(() => {

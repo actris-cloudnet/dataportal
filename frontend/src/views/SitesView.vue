@@ -61,7 +61,7 @@ p
 
 <template>
   <main>
-    <h1>Measurement sites</h1>
+    <LandingHeader title="Measurement sites" />
     <template v-if="sites.status == 'ready'">
       <div v-for="item in sites.items" :key="item.title" class="item">
         <h2>{{ item.title }}</h2>
@@ -118,6 +118,7 @@ import type { Site, SiteType } from "@shared/entity/Site";
 import axios from "axios";
 import { formatLatitude, formatLongitude } from "@/lib";
 import { ref, onMounted } from "vue";
+import LandingHeader from "@/components/LandingHeader.vue";
 
 type SitesState =
   | { status: "loading" }
