@@ -12,6 +12,8 @@ defineProps<Props>();
     <header>
       <div class="title-container">
         <h1 class="title">{{ title }}</h1>
+      </div>
+      <div class="tags">
         <slot name="tags"></slot>
       </div>
       <slot name="actions"></slot>
@@ -30,10 +32,13 @@ defineProps<Props>();
 
 header {
   display: grid;
-  grid-template-columns: auto min-content;
+  grid-template-columns: minmax(min-content, max-content) auto min-content;
+  align-items: center;
   max-width: $page-width;
-  margin: 2rem auto;
+  margin: 0 auto;
+  padding: 1rem;
   box-sizing: content-box;
+  column-gap: 1rem;
 }
 
 .title-container {
@@ -54,8 +59,8 @@ header {
 }
 
 .tags {
-  grid-row: 3;
-  grid-column: 1;
+  grid-row: 1;
+  grid-column: 2;
   margin-top: 0.5rem;
 }
 

@@ -30,14 +30,14 @@ import ConceptPopup from "@/components/ConceptPopup.vue";
   min-height: 100vh
 
 #content
-  flex: 1
+  flex-grow: 1
 
-  > main
-    max-width: $page-width
-    margin: 0 auto
-    padding-left: 5em
-    padding-right: 5em
-    box-sizing: content-box
+  // > main
+  //   max-width: $page-width
+  //   margin: 0 auto
+  //   padding-left: 5em
+  //   padding-right: 5em
+  //   box-sizing: content-box
 
 #consent
   position: fixed

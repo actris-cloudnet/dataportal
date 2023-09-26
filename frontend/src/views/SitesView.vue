@@ -1,116 +1,149 @@
-<style lang="sass" scoped>
-@import "@/sass/variables.sass"
+<style lang="scss" scoped>
+@import "@/sass/variables.sass";
+@import "@/sass/new-variables.scss";
 
-h1
-  margin-bottom: 3rem
+main {
+  box-sizing: content-box;
+  max-width: $page-width;
+  margin: 0 auto;
+  padding: 1rem;
+}
 
-h2
-  margin-bottom: 1rem
+h1 {
+  margin-bottom: 3rem;
+}
 
-p
-  max-width: 800px
+h2 {
+  margin-bottom: 1rem;
+}
 
-.table
-  width: unset
+p {
+  max-width: 800px;
+}
 
-.table-striped
-  th:focus
-    outline: thin dotted
-  td, th
-    padding: 9px
-    &:nth-child(1)
-      padding-right: 0
-  tr:nth-child(2n+1) > td
-    background-color: $blue-dust
-.table-striped[aria-busy="false"]
-  tr:hover td
-    cursor: pointer
-    background-color: #e4eff7
-  tr:focus td
-    background-color: #e4eff7
-  tr
-    outline: none
+.table {
+  width: unset;
+}
 
-.item + .item
-  margin-top: 4rem
+.table-striped {
+  th:focus {
+    outline: thin dotted;
+  }
+  td,
+  th {
+    padding: 9px;
 
-.status
-  display: inline-block
-  width: .6rem
-  height: .6rem
-  border-radius: 50%
-  vertical-align: middle
+    &:nth-child(1) {
+      padding-right: 0;
+    }
+  }
+  tr:nth-child(2n + 1) > td {
+    background-color: $blue-dust;
+  }
+}
 
-  &.cloudnet
-    background: #25910f
+.table-striped[aria-busy="false"] {
+  tr:hover td {
+    cursor: pointer;
+    background-color: #e4eff7;
+  }
+  tr:focus td {
+    background-color: #e4eff7;
+  }
+  tr {
+    outline: none;
+  }
+}
 
-  &.active
-    background: #eed679
+.item + .item {
+  margin-top: 4rem;
+}
 
-  &.inactive
-    background: #ddd
+.status {
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  vertical-align: middle;
 
-.a-legend-class-not-overridden-by-some-global-style
-  font-size: 75%
-  margin-top: 1rem
-  color: #666
+  &.cloudnet {
+    background: #25910f;
+  }
 
-  .status
-    margin-left: 8px
+  &.active {
+    background: #eed679;
+  }
+
+  &.inactive {
+    background: #ddd;
+  }
+}
+
+.a-legend-class-not-overridden-by-some-global-style {
+  font-size: 75%;
+  margin-top: 1rem;
+  color: #666;
+
+  .status {
+    margin-left: 8px;
+  }
+}
 </style>
 
 <template>
-  <main>
+  <div>
     <LandingHeader title="Measurement sites" />
-    <template v-if="sites.status == 'ready'">
-      <div v-for="item in sites.items" :key="item.title" class="item">
-        <h2>{{ item.title }}</h2>
-        <p>{{ item.description }}</p>
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th></th>
-              <th>Site</th>
-              <th>Country</th>
-              <th>Latitude</th>
-              <th>Longitude</th>
-              <th>Altitude</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="site in item.sites" :key="site.id">
-              <td>
-                <span :class="{ status: true, [site.status]: true }"></span>
-              </td>
-              <td>
-                <router-link :to="{ name: 'Site', params: { siteid: site.id } }">
-                  {{ site.humanReadableName }}
-                </router-link>
-              </td>
-              <td>{{ site.country || "-" }}</td>
-              <td>
-                {{ site.latitude != null ? formatLatitude(site.latitude) : "-" }}
-              </td>
-              <td>
-                {{ site.longitude != null ? formatLongitude(site.longitude) : "-" }}
-              </td>
-              <td>{{ site.altitude != null ? `${site.altitude}m` : "-" }}</td>
-            </tr>
-          </tbody>
-        </table>
-        <p class="a-legend-class-not-overridden-by-some-global-style">
-          <span class="status cloudnet" v-if="item.legend[0]"></span>
-          {{ item.legend[0] }}
-          <span class="status active" v-if="item.legend[1]"></span>
-          {{ item.legend[1] }}
-          <span class="status inactive" v-if="item.legend[2]"></span>
-          {{ item.legend[2] }}
-        </p>
-      </div>
-    </template>
-    <div v-else-if="sites.status == 'loading'">Loading...</div>
-    <div v-else-if="sites.status == 'error'">Failed to load sites.</div>
-  </main>
+    <main>
+      <template v-if="sites.status == 'ready'">
+        <div v-for="item in sites.items" :key="item.title" class="item">
+          <h2>{{ item.title }}</h2>
+          <p>{{ item.description }}</p>
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Site</th>
+                <th>Country</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Altitude</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="site in item.sites" :key="site.id">
+                <td>
+                  <span :class="{ status: true, [site.status]: true }"></span>
+                </td>
+                <td>
+                  <router-link :to="{ name: 'Site', params: { siteid: site.id } }">
+                    {{ site.humanReadableName }}
+                  </router-link>
+                </td>
+                <td>{{ site.country || "-" }}</td>
+                <td>
+                  {{ site.latitude != null ? formatLatitude(site.latitude) : "-" }}
+                </td>
+                <td>
+                  {{ site.longitude != null ? formatLongitude(site.longitude) : "-" }}
+                </td>
+                <td>{{ site.altitude != null ? `${site.altitude}m` : "-" }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="a-legend-class-not-overridden-by-some-global-style">
+            <span class="status cloudnet" v-if="item.legend[0]"></span>
+            {{ item.legend[0] }}
+            <span class="status active" v-if="item.legend[1]"></span>
+            {{ item.legend[1] }}
+            <span class="status inactive" v-if="item.legend[2]"></span>
+            {{ item.legend[2] }}
+          </p>
+        </div>
+      </template>
+      <div v-else-if="sites.status == 'loading'">Loading...</div>
+      <div v-else-if="sites.status == 'error'">Failed to load sites.</div>
+    </main>
+  </div>
 </template>
 
 <script lang="ts" setup>
