@@ -8,7 +8,7 @@ const showMenu = ref(false);
 
 <template>
   <header :class="{ dev: isDev }">
-    <div class="container">
+    <div class="container pagewidth">
       <a href="/" class="logo">
         <img :src="headerLogo" alt="Cloudnet data portal" />
       </a>
@@ -64,12 +64,9 @@ header {
 .container {
   display: flex;
   align-items: center;
-  max-width: $page-width;
-  box-sizing: content-box;
-  margin: 0 auto;
   height: $header-height;
-  padding: 0 1rem;
-  position: relative;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 img {

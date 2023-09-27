@@ -1,6 +1,6 @@
 <script setup lang="ts">
 interface Props {
-  type: "actris" | "volatile" | "legacy" | "experimental";
+  type: "actris" | "arm" | "volatile" | "legacy" | "experimental";
   title?: string;
 }
 
@@ -28,6 +28,10 @@ defineProps<Props>();
 
 .actris {
   background-color: $actris-turquoise;
+}
+
+.arm {
+  background-color: #194173;
 }
 
 .volatile {

@@ -9,16 +9,16 @@ defineProps<Props>();
 
 <template>
   <div>
-    <header>
-      <div class="title-container">
-        <h1 class="title">{{ title }}</h1>
-      </div>
-      <div class="tags">
-        <slot name="tags"></slot>
-      </div>
-      <slot name="actions"></slot>
+    <header class="pagewidth">
+      <h1 class="title">{{ title }}</h1>
       <div class="subtitle" v-if="subtitle">
         {{ subtitle }}
+      </div>
+      <div class="tags" v-if="$slots.tags">
+        <slot name="tags"></slot>
+      </div>
+      <div class="actions" v-if="$slots.actions">
+        <slot name="actions"></slot>
       </div>
     </header>
     <nav class="tab-container">
@@ -34,26 +34,17 @@ header {
   display: grid;
   grid-template-columns: minmax(min-content, max-content) auto min-content;
   align-items: center;
-  max-width: $page-width;
-  margin: 0 auto;
-  padding: 1rem;
-  box-sizing: content-box;
-  column-gap: 1rem;
-}
-
-.title-container {
-  grid-column: 1;
 }
 
 .title {
+  grid-column: 1;
   font-size: 170%;
   font-weight: 300;
-  display: inline-block;
 }
 
 .subtitle {
   grid-row: 2;
-  grid-column: 1;
+  grid-column: 1 / 3;
   font-weight: 400;
   color: gray;
 }
@@ -61,7 +52,11 @@ header {
 .tags {
   grid-row: 1;
   grid-column: 2;
-  margin-top: 0.5rem;
+  margin-left: 0.5rem;
+}
+
+.actions {
+  margin-left: 1rem;
 }
 
 .tab-container {

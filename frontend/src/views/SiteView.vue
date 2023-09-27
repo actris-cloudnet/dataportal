@@ -15,6 +15,9 @@
 #sitelanding .details
   height: 100%
 
+#sitemap
+  height: 300px
+
 #sitemap .details
   padding: 0
 
@@ -44,186 +47,190 @@
 </style>
 
 <template>
-  <main id="sitelanding" v-if="!error && response">
+  <div v-if="!error && response" id="sitelanding">
     <LandingHeader :title="response.humanReadableName" :subtitle="subtitle">
       <template #tags>
-        <BaseTag v-if="response.actrisId" type="actris" title="This station is part of an ACTRIS National Facility"
-          >ACTRIS</BaseTag
-        >
+        <BaseTag v-if="response.actrisId" type="actris" title="This station is part of an ACTRIS National Facility">
+          ACTRIS
+        </BaseTag>
         <BaseTag v-if="response.type.includes('campaign' as SiteType)" type="experimental">Campaign</BaseTag>
-        <BaseTag v-if="response.type.includes('arm' as SiteType)" type="experimental">ARM</BaseTag>
+        <BaseTag v-if="response.type.includes('arm' as SiteType)" type="arm">ARM</BaseTag>
         <BaseTag v-if="response.type.includes('model' as SiteType)" type="experimental">Model</BaseTag>
         <BaseTag v-else-if="response.type.includes('hidden' as SiteType)" type="experimental">Hidden</BaseTag>
       </template>
     </LandingHeader>
-    <main class="infoBox">
-      <section id="summary">
-        <header>Summary</header>
-        <section class="details">
-          <dl>
-            <dt>Location</dt>
-            <dd>
-              {{ response.humanReadableName }}<template v-if="response.country">, {{ response.country }}</template>
-            </dd>
-            <template v-if="response.latitude != null && response.longitude != null">
-              <dt>Coordinates</dt>
+    <main class="pagewidth">
+      <main class="infoBox">
+        <section id="summary">
+          <header>Summary</header>
+          <section class="details">
+            <dl>
+              <dt>Location</dt>
               <dd>
-                {{ formatCoordinates(response.latitude, response.longitude) }}
+                {{ response.humanReadableName }}<template v-if="response.country">, {{ response.country }}</template>
               </dd>
-            </template>
-            <template v-if="response.altitude != null">
-              <dt>Site altitude</dt>
-              <dd>{{ response.altitude }} m</dd>
-            </template>
-            <dt>GAW ID</dt>
-            <dd v-if="response.gaw">
-              <a
-                :href="`https://gawsis.meteoswiss.ch/GAWSIS/#/search/station/stationReportDetails/0-20008-0-${response.gaw}`"
-              >
-                {{ response.gaw }}
-              </a>
-            </dd>
-            <dd class="notAvailable" v-else></dd>
-            <dt>ACTRIS NF</dt>
-            <dd v-if="nfName" style="max-width: 300px">
-              <a :href="nfLink">{{ nfName }}</a>
-            </dd>
-            <dd class="notAvailable" v-else></dd>
-            <dt>Last measurement</dt>
-            <dd v-if="latestFile">{{ latestFile.measurementDate }}</dd>
-            <dd class="notAvailable" v-else></dd>
-          </dl>
+              <template v-if="response.latitude != null && response.longitude != null">
+                <dt>Coordinates</dt>
+                <dd>
+                  {{ formatCoordinates(response.latitude, response.longitude) }}
+                </dd>
+              </template>
+              <template v-if="response.altitude != null">
+                <dt>Site altitude</dt>
+                <dd>{{ response.altitude }} m</dd>
+              </template>
+              <dt>GAW ID</dt>
+              <dd v-if="response.gaw">
+                <a
+                  :href="`https://gawsis.meteoswiss.ch/GAWSIS/#/search/station/stationReportDetails/0-20008-0-${response.gaw}`"
+                >
+                  {{ response.gaw }}
+                </a>
+              </dd>
+              <dd class="notAvailable" v-else></dd>
+              <dt>ACTRIS NF</dt>
+              <dd v-if="nfName" style="max-width: 300px">
+                <a :href="nfLink">{{ nfName }}</a>
+              </dd>
+              <dd class="notAvailable" v-else></dd>
+              <dt>Last measurement</dt>
+              <dd v-if="latestFile">{{ latestFile.measurementDate }}</dd>
+              <dd class="notAvailable" v-else></dd>
+            </dl>
+          </section>
         </section>
-      </section>
-      <section id="instruments">
-        <header>Instruments</header>
-        <section class="details">
-          <div v-if="instrumentsStatus === 'loading'" class="loadingoverlay">
-            <div class="lds-dual-ring"></div>
-          </div>
-          <div v-else-if="instrumentsStatus === 'error'" class="detailslistError">
-            Failed to load instrument information.
-          </div>
-          <div v-else-if="instruments && instruments.length" class="detailslist">
-            <div class="notice">
-              The site has submitted data from the following instruments in the last
-              {{ instrumentsFromLastDays }} days:
+        <section id="instruments">
+          <header>Instruments</header>
+          <section class="details">
+            <div v-if="instrumentsStatus === 'loading'" class="loadingoverlay">
+              <div class="lds-dual-ring"></div>
             </div>
-            <div v-for="(instrument, index) in instruments" :key="index" class="detailslistItem">
-              <img alt="instrument icon" :src="instrument.icon" class="product" />
-              <span v-if="instrument.pid">
-                <a :href="instrument.pid">{{ instrument.name }}</a>
-              </span>
-              <span v-else>{{ instrument.name }}</span>
+            <div v-else-if="instrumentsStatus === 'error'" class="detailslistError">
+              Failed to load instrument information.
             </div>
-          </div>
-          <div v-else class="detailslistNotAvailable">
-            No data received in the last {{ instrumentsFromLastDays }} days.
-          </div>
+            <div v-else-if="instruments && instruments.length" class="detailslist">
+              <div class="notice">
+                The site has submitted data from the following instruments in the last
+                {{ instrumentsFromLastDays }} days:
+              </div>
+              <div v-for="(instrument, index) in instruments" :key="index" class="detailslistItem">
+                <img alt="instrument icon" :src="instrument.icon" class="product" />
+                <span v-if="instrument.pid">
+                  <a :href="instrument.pid">{{ instrument.name }}</a>
+                </span>
+                <span v-else>{{ instrument.name }}</span>
+              </div>
+            </div>
+            <div v-else class="detailslistNotAvailable">
+              No data received in the last {{ instrumentsFromLastDays }} days.
+            </div>
+          </section>
         </section>
-      </section>
-      <section id="sitemap" v-if="response.type.includes('mobile' as SiteType)">
-        <header>Map</header>
-        <section class="details">
-          <div v-if="locations.status === 'loading'" class="loadingoverlay">
-            <div class="lds-dual-ring"></div>
-          </div>
-          <TrackMap v-else-if="locations.status === 'ready'" :site="response.id" :track="locations.value" />
-          <div v-else-if="locations.status === 'notFound'" style="padding: 10px; color: gray">No location history.</div>
-          <div v-else-if="locations.status === 'error'" style="padding: 10px; color: red">
-            Failed to load location history.
-          </div>
+        <section id="sitemap" v-if="response.type.includes('mobile' as SiteType)">
+          <header>Map</header>
+          <section class="details">
+            <div v-if="locations.status === 'loading'" class="loadingoverlay">
+              <div class="lds-dual-ring"></div>
+            </div>
+            <TrackMap v-else-if="locations.status === 'ready'" :site="response.id" :track="locations.value" />
+            <div v-else-if="locations.status === 'notFound'" style="padding: 10px; color: gray">
+              No location history.
+            </div>
+            <div v-else-if="locations.status === 'error'" style="padding: 10px; color: red">
+              Failed to load location history.
+            </div>
+          </section>
         </section>
-      </section>
-      <section id="sitemap" v-else-if="response.latitude != null && response.longitude != null">
-        <header>Map</header>
-        <section class="details">
-          <MyMap
-            v-if="!busy"
-            :sites="[response]"
-            :center="[response.latitude, response.longitude]"
-            :zoom="5"
-            :fullHeight="true"
-            :key="mapKey"
-          />
-          <div v-else class="loadingoverlay">
-            <div class="lds-dual-ring"></div>
-          </div>
+        <section id="sitemap" v-else-if="response.latitude != null && response.longitude != null">
+          <header>Map</header>
+          <section class="details">
+            <MyMap
+              v-if="!busy"
+              :sites="[response]"
+              :center="[response.latitude, response.longitude]"
+              :zoom="5"
+              :fullHeight="true"
+              :key="mapKey"
+            />
+            <div v-else class="loadingoverlay">
+              <div class="lds-dual-ring"></div>
+            </div>
+          </section>
         </section>
-      </section>
-      <div class="forcewrap"></div>
+        <div class="forcewrap"></div>
 
-      <section id="product_availability" class="graph" v-if="!selectedProductName">
-        <header>Product availability</header>
-        <section class="details">
-          <ProductAvailabilityVisualization
+        <section id="product_availability" class="graph" v-if="!selectedProductName">
+          <header>Product availability</header>
+          <section class="details">
+            <ProductAvailabilityVisualization
+              v-if="dataStatus"
+              :site="siteid"
+              :legend="true"
+              :tooltips="true"
+              :dataStatus="dataStatus"
+              :linkToSearch="!response.type.includes('hidden' as SiteType)"
+              :nLevel2FileTypes="nLevel2FileTypes"
+            />
+            <div v-else class="loadingoverlay">
+              <div class="lds-dual-ring"></div>
+            </div>
+          </section>
+        </section>
+
+        <section id="product_quality" class="graph">
+          <header>
+            Product quality
+            <template v-if="selectedProductName">/ availability ({{ selectedProductName }})</template>
+          </header>
+
+          <section class="details" v-if="selectedProductId">
+            <ProductAvailabilityVisualizationSingle
+              v-if="dataStatus"
+              :site="siteid"
+              legend
+              tooltips
+              qualityScores
+              :product="selectedProductId"
+              :dataStatus="dataStatus"
+            />
+            <div v-else class="loadingoverlay">
+              <div class="lds-dual-ring"></div>
+            </div>
+          </section>
+
+          <section class="details" v-else>
+            <ProductAvailabilityVisualization
+              v-if="dataStatus"
+              :site="siteid"
+              legend
+              tooltips
+              qualityScores
+              :dataStatus="dataStatus"
+              :linkToSearch="!response.type.includes('hidden' as SiteType)"
+              :nLevel2FileTypes="nLevel2FileTypes"
+            />
+            <div v-else class="loadingoverlay">
+              <div class="lds-dual-ring"></div>
+            </div>
+          </section>
+        </section>
+      </main>
+
+      <div v-if="dataStatus">
+        <div id="siteselect">
+          <custom-multiselect
             v-if="dataStatus"
-            :site="siteid"
-            :legend="true"
-            :tooltips="true"
-            :dataStatus="dataStatus"
-            :linkToSearch="!response.type.includes('hidden' as SiteType)"
-            :nLevel2FileTypes="nLevel2FileTypes"
+            v-model="selectedProductId"
+            label="Product filter"
+            :options="dataStatus.availableProducts"
+            id="singleProductSelect"
+            :getIcon="getProductIcon"
           />
-          <div v-else class="loadingoverlay">
-            <div class="lds-dual-ring"></div>
-          </div>
-        </section>
-      </section>
-
-      <section id="product_quality" class="graph">
-        <header>
-          Product quality
-          <template v-if="selectedProductName">/ availability ({{ selectedProductName }})</template>
-        </header>
-
-        <section class="details" v-if="selectedProductId">
-          <ProductAvailabilityVisualizationSingle
-            v-if="dataStatus"
-            :site="siteid"
-            legend
-            tooltips
-            qualityScores
-            :product="selectedProductId"
-            :dataStatus="dataStatus"
-          />
-          <div v-else class="loadingoverlay">
-            <div class="lds-dual-ring"></div>
-          </div>
-        </section>
-
-        <section class="details" v-else>
-          <ProductAvailabilityVisualization
-            v-if="dataStatus"
-            :site="siteid"
-            legend
-            tooltips
-            qualityScores
-            :dataStatus="dataStatus"
-            :linkToSearch="!response.type.includes('hidden' as SiteType)"
-            :nLevel2FileTypes="nLevel2FileTypes"
-          />
-          <div v-else class="loadingoverlay">
-            <div class="lds-dual-ring"></div>
-          </div>
-        </section>
-      </section>
-    </main>
-
-    <div v-if="dataStatus">
-      <div id="siteselect">
-        <custom-multiselect
-          v-if="dataStatus"
-          v-model="selectedProductId"
-          label="Product filter"
-          :options="dataStatus.availableProducts"
-          id="singleProductSelect"
-          :getIcon="getProductIcon"
-        />
+        </div>
+        <a @click="reset" id="reset">Reset filter</a>
       </div>
-      <a @click="reset" id="reset">Reset filter</a>
-    </div>
-  </main>
+    </main>
+  </div>
 
   <ApiError v-else-if="error" />
 </template>

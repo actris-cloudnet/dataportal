@@ -1,5 +1,6 @@
 @import "the-new-css-reset/css/reset.css";
 @import "inter-ui/inter.css";
+@import "./new-variables.scss";
 
 body {
   font-family: "Inter", sans-serif;
@@ -100,4 +101,11 @@ a {
 code,
 pre {
   font-family: "Oxygen Mono", monospace;
+}
+
+.pagewidth {
+  max-width: $page-width;
+  margin: 0 auto;
+  padding: 1rem;
+  box-sizing: content-box;
 }

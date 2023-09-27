@@ -8,10 +8,8 @@ footer {
 }
 
 .container {
-  max-width: $page-width;
-  margin: 0 auto;
-  padding: 0 1rem;
-  box-sizing: content-box;
+  padding-top: 0;
+  padding-bottom: 0;
   height: 7rem;
   display: flex;
   align-items: center;
@@ -45,7 +43,7 @@ footer {
 
 <template>
   <footer>
-    <div class="container">
+    <div class="container pagewidth">
       <div class="item">
         Contact:<br />
         <a href="mailto:actris-cloudnet@fmi.fi">actris-cloudnet@fmi.fi</a><br />

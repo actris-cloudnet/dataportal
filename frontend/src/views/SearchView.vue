@@ -834,9 +834,9 @@ const payload = computed(() => {
 const mainWidth = computed(() => {
   if (isVizMode.value) {
     if (vizWideMode.value) return { wideView: true };
-    else return { mediumView: true };
+    else return { pagewidth: true };
   }
-  return { narrowView: true };
+  return { pagewidth: true };
 });
 
 const selectableVariables = computed(() => {
