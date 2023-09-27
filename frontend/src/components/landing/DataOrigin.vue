@@ -10,64 +10,56 @@
 <template>
   <div class="summary-section" id="data-origin">
     <div class="summary-section-header">Provenance</div>
-    <table class="summary-section-table">
-      <tr>
-        <th>Data sources</th>
-        <td v-if="sourceFiles.length > 0">
-          <div class="data-source-list">
-            <!-- eslint-disable-next-line vue/require-v-for-key -->
-            <div class="data-source-container" v-for="sourceFile in sourceFiles">
-              <router-link :to="`/file/${sourceFile.value.uuid}`" v-if="sourceFile.ok">
-                <img
-                  :alt="sourceFile.value.product.id"
-                  :src="getProductIcon(sourceFile.value.product.id)"
-                  class="product-icon"
-                />
-                {{ sourceFile.value.product.humanReadableName }}
-              </router-link>
-              <a v-else>
-                <span class="product-icon">?</span>
-                Unknown file
-              </a>
-            </div>
+    <dl class="summary-section-table">
+      <dt>Data sources</dt>
+      <dd v-if="sourceFiles.length > 0">
+        <div class="data-source-list">
+          <!-- eslint-disable-next-line vue/require-v-for-key -->
+          <div class="data-source-container" v-for="sourceFile in sourceFiles">
+            <router-link :to="`/file/${sourceFile.value.uuid}`" v-if="sourceFile.ok">
+              <img
+                :alt="sourceFile.value.product.id"
+                :src="getProductIcon(sourceFile.value.product.id)"
+                class="product-icon"
+              />
+              {{ sourceFile.value.product.humanReadableName }}
+            </router-link>
+            <a v-else>
+              <span class="product-icon">?</span>
+              Unknown file
+            </a>
           </div>
-        </td>
-        <td v-else>
-          <span class="notAvailable" />
-        </td>
-      </tr>
-      <tr>
-        <th>Versions</th>
-        <td>
-          <router-link v-if="!isBusy && previousVersion" id="previousVersion" :to="`/file/${previousVersion}`" replace>
-            previous
-          </router-link>
-          <span v-if="!isBusy && previousVersion && nextVersion">-</span>
-          <router-link v-if="!isBusy && nextVersion" id="nextVersion" :to="`/file/${nextVersion}`" replace>
-            next</router-link
-          >
-          <span v-if="isBusy || (!previousVersion && !nextVersion)" class="notAvailable"></span>
-        </td>
-      </tr>
-      <tr>
-        <th>Software</th>
-        <td v-if="response.software.length > 0">
-          <ul class="software">
-            <li v-for="software in response.software" :key="software.title">
-              <a :href="software.url" v-if="software.url">
-                {{ software.title }}
-              </a>
-              <span v-else>
-                {{ software.title }}
-              </span>
-            </li>
-          </ul>
-        </td>
-        <td v-else>
-          <span class="notAvailable" />
-        </td>
-      </tr>
-    </table>
+        </div>
+      </dd>
+      <dd class="notAvailable" v-else></dd>
+      <dt>Versions</dt>
+      <dd>
+        <router-link v-if="!isBusy && previousVersion" id="previousVersion" :to="`/file/${previousVersion}`" replace>
+          previous
+        </router-link>
+        <span v-if="!isBusy && previousVersion && nextVersion">-</span>
+        <router-link v-if="!isBusy && nextVersion" id="nextVersion" :to="`/file/${nextVersion}`" replace>
+          next
+        </router-link>
+        <span v-if="isBusy || (!previousVersion && !nextVersion)" class="notAvailable"></span>
+      </dd>
+      <dt>Software</dt>
+      <dd v-if="response.software.length > 0">
+        <ul class="software">
+          <li v-for="software in response.software" :key="software.title">
+            <a :href="software.url" v-if="software.url">
+              {{ software.title }}
+            </a>
+            <span v-else>
+              {{ software.title }}
+            </span>
+          </li>
+        </ul>
+      </dd>
+      <dd v-else>
+        <span class="notAvailable" />
+      </dd>
+    </dl>
   </div>
 </template>
 

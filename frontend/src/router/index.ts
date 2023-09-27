@@ -37,7 +37,7 @@ const router = createRouter({
           path: "visualizations",
           name: "FileVisualizations",
           meta: { title: false },
-          component: () => import("@/components/landing/LandingVisualisations.vue"),
+          component: () => import("@/components/landing/LandingVisualizations.vue"),
         },
         {
           path: "quality",

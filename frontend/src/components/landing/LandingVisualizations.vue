@@ -3,8 +3,8 @@
 </style>
 
 <template>
-  <div class="landing-visualisations-container">
-    <div v-if="visualizations.length > 0" class="visualisations-box">
+  <div class="landing-visualizations-container pagewidth">
+    <div v-if="visualizations.length > 0" class="visualizations-box">
       <div v-for="visualization in visualizations" :key="visualization.productVariable.id">
         <Visualization
           :data="visualization"
@@ -15,7 +15,7 @@
         />
       </div>
     </div>
-    <div v-else class="visualisations-box">No visualisations available.</div>
+    <div v-else class="visualizations-box">No visualisations available.</div>
   </div>
 </template>
 

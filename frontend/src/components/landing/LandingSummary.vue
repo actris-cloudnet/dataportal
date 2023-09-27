@@ -3,26 +3,22 @@
 </style>
 
 <template>
-  <div class="landing-summary-container">
-    <div class="main-content">
-      <div class="summary-box">
-        <ProductInformation
-          :response="response"
-          :location="location"
-          :instrument="instrument"
-          :instrumentStatus="instrumentStatus"
-        />
-        <FileInformation :response="response" />
-        <DataOrigin :response="response" :isBusy="isBusy" :versions="versions" :sourceFiles="sourceFiles" />
-      </div>
+  <div class="landing-summary-container pagewidth">
+    <div class="summary-box summary-box-product-information">
+      <ProductInformation
+        :response="response"
+        :location="location"
+        :instrument="instrument"
+        :instrumentStatus="instrumentStatus"
+      />
+      <FileInformation :response="response" />
+      <DataOrigin :response="response" :isBusy="isBusy" :versions="versions" :sourceFiles="sourceFiles" />
     </div>
-    <div class="side-content">
-      <div class="summary-box">
-        <Preview :visualization="visualization" :loading="loadingVisualizations" />
-      </div>
-      <div class="summary-box" id="citation" :class="{ volatile: response.volatile }">
-        <Citation :uuid="uuid" :file="response" v-if="response" />
-      </div>
+    <div class="summary-box summary-box-visualization">
+      <Preview :visualization="visualization" :loading="loadingVisualizations" />
+    </div>
+    <div class="summary-box summary-box-citation" id="citation" :class="{ volatile: response.volatile }">
+      <Citation :uuid="uuid" :file="response" v-if="response" />
     </div>
   </div>
 </template>
