@@ -83,7 +83,7 @@
         </div>
       </div>
       <div v-if="citation.status == 'ready'" class="example citation-section-content" v-html="citation.citation"></div>
-      <div v-else-if="citation.status == 'loading'" class="loading">Loading...</div>
+      <BaseSpinner v-else-if="citation.status == 'loading'" />
       <div v-else-if="citation.status == 'error'" class="error">Failed to load citation.</div>
     </section>
     <section class="citation-section" v-if="citation.status == 'ready'">
@@ -108,6 +108,7 @@ import axios from "axios";
 import type { FileResponse } from "@/views/FileView.vue";
 
 import warningIcon from "@/assets/icons/test-warning-mono.svg";
+import BaseSpinner from "@/components/BaseSpinner.vue";
 
 export interface Props {
   uuid: string;
