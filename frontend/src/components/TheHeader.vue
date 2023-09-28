@@ -12,7 +12,11 @@ const showMenu = ref(false);
       <a href="/" class="logo">
         <img :src="headerLogo" alt="Cloudnet data portal" />
       </a>
-      <div class="menu-toggle" @click="showMenu = !showMenu">☰</div>
+      <div :class="{ 'menu-toggle': true, 'active': showMenu }" @click="showMenu = !showMenu">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+        <div class="bar3"></div>
+      </div>
       <ul :class="{ show: showMenu }">
         <li>
           <a href="/search">
@@ -46,15 +50,26 @@ $header-height: 4.5rem;
 $header-color: darken(#78c0e0, 25%);
 
 header {
-  background-image: linear-gradient(to bottom, transparent 75%, rgba(0, 0, 0, 0.05)),
-    linear-gradient(to left, rgba($header-color, 0.5), $header-color 70%), url("@/assets/clouds3.jpg");
-  opacity: 0.7;
-  background-position: right 0px top 20%;
-  background-repeat: no-repeat;
-  background-size: cover;
   z-index: 999;
+  position: relative;
 
-  &.dev {
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-image: linear-gradient(to bottom, transparent 75%, rgba(0, 0, 0, 0.05)),
+      linear-gradient(to left, rgba($header-color, 0.5), $header-color 70%), url("@/assets/clouds3.jpg");
+    opacity: 0.7;
+    background-position: right 0px top 20%;
+    background-repeat: no-repeat;
+    background-size: cover;
+    z-index: -1;
+  }
+
+  &.dev::before {
     background-image: linear-gradient(to bottom, transparent 75%, rgba(0, 0, 0, 0.05)),
       repeating-linear-gradient(-45deg, #ff6dbc55, #ff6dbc55 15px, #ff529855 15px, #ff529855 30px),
       linear-gradient(to left, rgba($header-color, 0.5), $header-color 70%), url("@/assets/clouds3.jpg");
@@ -80,9 +95,6 @@ img {
 }
 
 ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
   display: flex;
   align-items: center;
   margin-left: 1rem;
@@ -124,10 +136,34 @@ li a {
   }
 }
 
+.bar1,
+.bar2,
+.bar3 {
+  width: 32px;
+  height: 3px;
+  background-color: white;
+  margin: 8px 0;
+  border-radius: 2px;
+}
+
 .menu-toggle {
   display: none;
   padding: 1rem;
   color: white;
+
+  &.active {
+    .bar1 {
+      transform: translate(0, 11px) rotate(-45deg);
+    }
+
+    .bar2 {
+      opacity: 0;
+    }
+
+    .bar3 {
+      transform: translate(0, -11px) rotate(45deg);
+    }
+  }
 }
 
 @media screen and (max-width: 800px) {
@@ -145,17 +181,17 @@ li a {
     background-color: white;
     padding: 0;
     margin: 0;
-    border-bottom: 1px solid silver;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.25);
+
+    &.show {
+      display: block;
+    }
   }
 
   li a {
     color: black;
     margin: 0;
     padding: 0.5rem 1rem;
-  }
-
-  ul.show {
-    display: block;
   }
 }
 </style>
