@@ -25,19 +25,6 @@ main.column
   > h3:nth-child(1)
     margin-top: 0
 
-.internalNavi
-  margin-bottom: 2em
-  text-align: center
-
-  > a
-    margin: 0
-
-.router-link-active
-  color: black
-  font-weight: bold
-  text-decoration: none
-  cursor: default
-
 .download
   display: inline-block
   margin-top: 0.5em
@@ -51,101 +38,107 @@ main.column
     margin-top: 1em
   .infobox
     padding: 1em
+
+#sitemap .details
+  height: 300px
 </style>
 
 <template>
-  <main id="collectionlanding" v-if="!error && response">
-    <img id="backButton" :src="backIcon" @click="$router.back()" />
-    <header>
-      <h2>{{ response.title || "Custom collection" }}</h2>
-    </header>
-    <div class="flex">
-      <main class="infoBox column">
-        <section id="summary">
-          <header>Summary</header>
-          <section class="details">
-            <dl>
-              <dt>Date span</dt>
-              <dd>{{ startDate }} - {{ endDate }}</dd>
-              <dt>File count</dt>
-              <dd>{{ sortedFiles.length }}</dd>
-              <dt>Total size</dt>
-              <dd>{{ humanReadableSize(totalSize) }}</dd>
-            </dl>
-          </section>
-        </section>
-        <section id="sitemap" v-if="sites.length > 0">
-          <header>Sites</header>
-          <section class="details">
-            <my-map :sites="sites" :center="[34.0, -14.0]" :zoom="1" />
-          </section>
-        </section>
-        <section id="products">
-          <header>Products</header>
-          <section class="details">
-            <div v-for="product in products" :key="product.id">
-              <img :src="getProductIcon(product.id)" class="product" />
-              {{ product.humanReadableName }}
-            </div>
-          </section>
-        </section>
-      </main>
-      <div class="rightView">
-        <nav class="internalNavi">
+  <div>
+    <div v-if="!error && response">
+      <LandingHeader :title="response.title || 'Custom collection'">
+        <template #tabs>
           <router-link
+            class="tab"
             :to="{ name: 'Collection', params: { mode: 'general' } }"
             :replace="true"
             :class="{ 'router-link-active': mode === 'general' }"
           >
-            General
+            Summary
           </router-link>
-          |
           <router-link
+            class="tab"
             :to="{ name: 'Collection', params: { mode: 'files' } }"
             :replace="true"
             :class="{ 'router-link-active': mode === 'files' }"
           >
-            All files
+            Files
           </router-link>
-        </nav>
-        <section id="editCollection" class="rightView" v-if="mode === 'general'">
-          <h3>How to cite</h3>
-          <span v-if="citationBusy" style="color: gray">Generating citation...</span>
-          <div v-else-if="pidServiceError" class="errormsg">
-            PID service is unavailable. Please try again later. You may still download the collection.
+        </template>
+      </LandingHeader>
+      <main id="collectionlanding" class="pagewidth">
+        <div class="flex">
+          <main class="infoBox column">
+            <section id="summary">
+              <header>Summary</header>
+              <section class="details">
+                <dl>
+                  <dt>Date span</dt>
+                  <dd>{{ startDate }} - {{ endDate }}</dd>
+                  <dt>File count</dt>
+                  <dd>{{ sortedFiles.length }}</dd>
+                  <dt>Total size</dt>
+                  <dd>{{ humanReadableSize(totalSize) }}</dd>
+                </dl>
+              </section>
+            </section>
+            <section id="sitemap" v-if="sites.length > 0">
+              <header>Sites</header>
+              <section class="details">
+                <my-map :sites="sites" :center="[34.0, -14.0]" :zoom="1" />
+              </section>
+            </section>
+            <section id="products">
+              <header>Products</header>
+              <section class="details">
+                <div v-for="product in products" :key="product.id">
+                  <img :src="getProductIcon(product.id)" class="product" />
+                  {{ product.humanReadableName }}
+                </div>
+              </section>
+            </section>
+          </main>
+          <div class="rightView">
+            <section id="editCollection" class="rightView" v-if="mode === 'general'">
+              <h3>How to cite</h3>
+              <span v-if="citationBusy" style="color: gray">Generating citation...</span>
+              <div v-else-if="pidServiceError" class="errormsg">
+                PID service is unavailable. Please try again later. You may still download the collection.
+              </div>
+              <how-to-cite
+                v-if="!citationBusy"
+                :citation="citation"
+                :acknowledgements="acknowledgements"
+                :dataAvailability="dataAvailability"
+              />
+
+              <h3>License</h3>
+              <license></license>
+
+              <h3>Download</h3>
+              By clicking the download button you confirm that you have taken notice of the above data licensing
+              information.<br />
+              <BaseButton type="primary" :href="downloadUrl" id="downloadCollection">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                  <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                </svg>
+                Download
+              </BaseButton>
+            </section>
+            <data-search-result
+              v-else
+              :simplifiedView="true"
+              :apiResponse="sortedFiles"
+              :isBusy="busy"
+              :downloadUri="downloadUrl"
+            >
+            </data-search-result>
           </div>
-          <how-to-cite
-            v-if="!citationBusy"
-            :citation="citation"
-            :acknowledgements="acknowledgements"
-            :dataAvailability="dataAvailability"
-          />
-
-          <h3>License</h3>
-          <license></license>
-
-          <h3>Download</h3>
-          By clicking the download button you confirm that you have taken notice of the above data licensing
-          information.<br />
-          <a class="download" :href="downloadUrl" id="downloadCollection">
-            Download collection
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-              <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
-            </svg>
-          </a>
-        </section>
-        <data-search-result
-          v-else
-          :simplifiedView="true"
-          :apiResponse="sortedFiles"
-          :isBusy="busy"
-          :downloadUri="downloadUrl"
-        >
-        </data-search-result>
-      </div>
+        </div>
+      </main>
     </div>
-  </main>
-  <ApiError v-else-if="error" />
+    <ApiError v-else-if="error" />
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -163,6 +156,8 @@ import type { CollectionFileResponse } from "@shared/entity/CollectionFileRespon
 import type { Model } from "@shared/entity/Model";
 import ApiError from "./ApiError.vue";
 import backIcon from "@/assets/icons/back.png";
+import LandingHeader from "@/components/LandingHeader.vue";
+import BaseButton from "@/components/BaseButton.vue";
 
 export interface Props {
   uuid: string;
