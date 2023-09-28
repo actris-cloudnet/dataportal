@@ -102,9 +102,7 @@
         <section id="instruments">
           <header>Instruments</header>
           <section class="details">
-            <div v-if="instrumentsStatus === 'loading'" class="loadingoverlay">
-              <div class="lds-dual-ring"></div>
-            </div>
+            <BaseSpinner v-if="instrumentsStatus === 'loading'" />
             <div v-else-if="instrumentsStatus === 'error'" class="detailslistError">
               Failed to load instrument information.
             </div>
@@ -129,9 +127,7 @@
         <section id="sitemap" v-if="response.type.includes('mobile' as SiteType)">
           <header>Map</header>
           <section class="details">
-            <div v-if="locations.status === 'loading'" class="loadingoverlay">
-              <div class="lds-dual-ring"></div>
-            </div>
+            <BaseSpinner v-if="locations.status === 'loading'" />
             <TrackMap v-else-if="locations.status === 'ready'" :site="response.id" :track="locations.value" />
             <div v-else-if="locations.status === 'notFound'" style="padding: 10px; color: gray">
               No location history.
@@ -152,9 +148,7 @@
               :fullHeight="true"
               :key="mapKey"
             />
-            <div v-else class="loadingoverlay">
-              <div class="lds-dual-ring"></div>
-            </div>
+            <BaseSpinner v-else />
           </section>
         </section>
         <div class="forcewrap"></div>
@@ -171,9 +165,7 @@
               :linkToSearch="!response.type.includes('hidden' as SiteType)"
               :nLevel2FileTypes="nLevel2FileTypes"
             />
-            <div v-else class="loadingoverlay">
-              <div class="lds-dual-ring"></div>
-            </div>
+            <BaseSpinner v-else />
           </section>
         </section>
 
@@ -193,9 +185,7 @@
               :product="selectedProductId"
               :dataStatus="dataStatus"
             />
-            <div v-else class="loadingoverlay">
-              <div class="lds-dual-ring"></div>
-            </div>
+            <BaseSpinner v-else />
           </section>
 
           <section class="details" v-else>
@@ -209,9 +199,7 @@
               :linkToSearch="!response.type.includes('hidden' as SiteType)"
               :nLevel2FileTypes="nLevel2FileTypes"
             />
-            <div v-else class="loadingoverlay">
-              <div class="lds-dual-ring"></div>
-            </div>
+            <BaseSpinner v-else />
           </section>
         </section>
       </main>
@@ -253,6 +241,7 @@ import { useTitle } from "@/router";
 import type { Product } from "@shared/entity/Product";
 import BaseTag from "@/components/BaseTag.vue";
 import LandingHeader from "@/components/LandingHeader.vue";
+import BaseSpinner from "@/components/BaseSpinner.vue";
 
 export interface Props {
   siteid: string;
