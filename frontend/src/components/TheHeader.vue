@@ -52,6 +52,7 @@ $header-color: darken(#78c0e0, 25%);
 header {
   z-index: 999;
   position: relative;
+  font-weight: 500;
 
   &::before {
     content: "";
@@ -88,10 +89,13 @@ img {
   display: block;
 }
 
-.logo img {
-  max-width: 100%;
-  height: 2.5rem;
-  filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.05));
+.logo {
+  flex-shrink: 0;
+
+  img {
+    height: 2.5rem;
+    filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.05));
+  }
 }
 
 ul {
@@ -108,12 +112,6 @@ li a {
   padding: 0.5rem;
   margin-left: 1rem;
   display: flex;
-  opacity: 0.9;
-
-  &:hover {
-    text-decoration: none;
-    opacity: 1;
-  }
 
   span {
     padding: 0.25rem 0;
@@ -121,18 +119,9 @@ li a {
     border-bottom: 2px solid transparent;
   }
 
-  &.router-link-active {
-    opacity: 1;
-
-    span {
-      border-bottom: 2px solid white;
-    }
-  }
-
-  img {
-    width: auto;
-    height: 1.4rem;
-    margin-right: 0.5rem;
+  &:hover {
+    text-decoration: none;
+    opacity: 0.9;
   }
 }
 

@@ -164,7 +164,7 @@ section#fileTable
   row-gap: .5rem
 
   dt
-    font-weight: bold
+    font-weight: 500
 
 .filePreview
   margin-top: 1rem

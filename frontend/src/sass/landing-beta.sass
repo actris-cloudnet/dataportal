@@ -55,8 +55,6 @@ $shadowdark: 0 0.1em 0.6em 0 rgba(0,0,0,0.25)
 $shadowlight: 0 0.1em 0.6em 0 rgba(0,0,0,0.10)
 
 main#landing
-  font-size: 16px
-  font-weight: 300
   display: flex
   flex-direction: column
   margin: 0
@@ -186,6 +184,8 @@ main#landing
     display: grid
     grid-template-columns: 1fr 1fr
     gap: 1rem
+    padding-top: 1rem
+    padding-bottom: 1rem
 
     .main-content
       max-inline-size: 50%
@@ -202,14 +202,10 @@ main#landing
       .summary-section-table
         display: grid
         grid-template-columns: minmax(min-content, 14rem) auto
+        row-gap: 0.5rem
 
         dt
-          font-weight: 200
-          padding: 0.2em 0
-          font-weight: 400
-
-        dd
-          font-weight: 300
+          font-weight: 500
 
     .product-container
       display: flex
@@ -290,10 +286,8 @@ main#landing
     .citation-section
       .citation-section-content
         font-size: 90%
-        font-weight: 300
       .citation-section-note
         font-size: 90%
-        font-weight: 400
         color: rgba(0,0,0,0.6)
       .citation-section-note:not(:last-child)
         margin-bottom: 0.25*$basespacing
@@ -333,6 +327,9 @@ main#landing
         transform: rotate(-45deg)
 
   .landing-visualizations-container
+    padding-top: 1rem
+    padding-bottom: 1rem
+
     .visualizations-box
       display: grid
       gap: $basespacing
