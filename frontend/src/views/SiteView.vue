@@ -55,7 +55,7 @@
         </BaseTag>
         <BaseTag v-if="response.type.includes('campaign' as SiteType)" type="experimental">Campaign</BaseTag>
         <BaseTag v-if="response.type.includes('arm' as SiteType)" type="arm">ARM</BaseTag>
-        <BaseTag v-if="response.type.includes('model' as SiteType)" type="experimental">Model</BaseTag>
+        <BaseTag v-if="response.type.includes('model' as SiteType)" type="volatile">Model</BaseTag>
         <BaseTag v-else-if="response.type.includes('hidden' as SiteType)" type="experimental">Hidden</BaseTag>
       </template>
     </LandingHeader>
