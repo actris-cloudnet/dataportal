@@ -444,8 +444,20 @@ main#landing
 @media screen and (max-width: 1000px)
   main#landing
     .landing-summary-container
-      display: flex
-      flex-direction: column
+      grid-template-columns: 1fr
+      margin-bottom: 1rem
+
+      .summary-box-visualization
+        grid-row: 1
+        grid-column: 1
+
+      .summary-box-product-information
+        grid-row: 2
+        grid-column: 1
+
+      .summary-box-citation
+        grid-row: 3
+        grid-column: 1
 
 @media screen and (max-width: 1250px)
   main#landing

@@ -21,7 +21,7 @@ defineProps<Props>();
         <slot name="actions"></slot>
       </div>
     </header>
-    <nav class="tab-container">
+    <nav class="tab-container" v-if="$slots.tabs">
       <slot name="tabs"></slot>
     </nav>
   </div>
@@ -64,6 +64,7 @@ header {
   justify-content: center;
   flex-direction: row;
   margin-bottom: 1rem;
+  flex-wrap: wrap;
 }
 
 :slotted(.tab) {
@@ -77,6 +78,7 @@ header {
   padding: 0.5rem 0.25rem;
   line-height: 1;
   font-weight: 400;
+  border-bottom: 2px solid transparent;
 
   img {
     width: 1.1rem;
@@ -94,6 +96,33 @@ header {
   }
   &:hover:not(.router-link-exact-active) {
     color: black;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  header {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .title,
+  .subtitle {
+    text-align: center;
+  }
+
+  .tags {
+    margin-top: 0.5rem;
+    margin-left: 0;
+  }
+
+  .actions {
+    margin-top: 1rem;
+    margin-left: 0;
+    width: 100%;
+
+    :slotted(.button) {
+      width: 100%;
+    }
   }
 }
 </style>
