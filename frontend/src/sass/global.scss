@@ -23,21 +23,6 @@ body {
   margin: 0;
 }
 
-.vertical-center {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.note {
-  border-width: 1px;
-  border-style: solid;
-  border-radius: 2px;
-  width: 100%;
-  padding: 0.5em 1em;
-  margin-bottom: 2em;
-}
-
 div.errormsg {
   border-style: solid;
   border-width: 1px;

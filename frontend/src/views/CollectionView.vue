@@ -105,9 +105,9 @@ main.column
           </main>
           <div class="rightView">
             <section id="editCollection" class="rightView" v-if="mode === 'general'">
-              <div v-if="pidServiceError" class="errormsg">
+              <BaseAlert type="error" v-if="pidServiceError">
                 Failed to create DOI for this collection. Please try again later.
-              </div>
+              </BaseAlert>
               <how-to-cite :uuid="citationBusy ? undefined : response.uuid" />
               <h3>License</h3>
               <license></license>
@@ -155,6 +155,7 @@ import folderIcon from "@/assets/icons/icons8-folder-48.png";
 import briedIcon from "@/assets/icons/icons8-brief-48.png";
 import LandingHeader from "@/components/LandingHeader.vue";
 import BaseButton from "@/components/BaseButton.vue";
+import BaseAlert from "@/components/BaseAlert.vue";
 
 export interface Props {
   uuid: string;
