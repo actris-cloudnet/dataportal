@@ -132,7 +132,6 @@ const sites = ref<Site[]>([]);
 const products = ref<Product[]>([]);
 const models = ref<Model[]>([]);
 const apiUrl = import.meta.env.VITE_BACKEND_URL;
-const busy = ref(false);
 const nonModelSiteIds = ref<string[]>([]);
 
 const startDate = computed(() => sortedFiles.value && sortedFiles.value[sortedFiles.value.length - 1].measurementDate);
@@ -150,7 +149,6 @@ const totalSize = computed(() => {
 });
 
 onMounted(async () => {
-  busy.value = true;
   try {
     const res = await axios.get(`${apiUrl}collection/${props.uuid}`);
     response.value = res.data;
@@ -178,8 +176,6 @@ onMounted(async () => {
   } catch (err: any) {
     error.value = true;
     response.value = err.response;
-  } finally {
-    busy.value = false;
   }
 });
 </script>

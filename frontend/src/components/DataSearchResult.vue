@@ -362,11 +362,11 @@ import type { FileResponse } from "@/views/FileView.vue";
 
 export interface Props {
   apiResponse: SearchFileResponse[];
-  isBusy: boolean;
+  isBusy?: boolean;
   simplifiedView?: boolean;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), { isBusy: false });
 
 const router = useRouter();
 
