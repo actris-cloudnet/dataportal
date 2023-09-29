@@ -41,6 +41,7 @@ main.column
 
 #sitemap .details
   height: 300px
+  padding: 0
 </style>
 
 <template>
@@ -79,7 +80,7 @@ main.column
               <section class="details">
                 <dl>
                   <dt>Date span</dt>
-                  <dd>{{ startDate }} - {{ endDate }}</dd>
+                  <dd>{{ startDate }} &ndash; {{ endDate }}</dd>
                   <dt>File count</dt>
                   <dd>{{ sortedFiles.length }}</dd>
                   <dt>Total size</dt>
@@ -90,7 +91,7 @@ main.column
             <section id="sitemap" v-if="sites.length > 0">
               <header>Sites</header>
               <section class="details">
-                <my-map :sites="sites" :center="[34.0, -14.0]" :zoom="1" />
+                <SuperMap :sites="sites" :zoom="3" />
               </section>
             </section>
             <section id="products">
@@ -143,7 +144,7 @@ import axios from "axios";
 import type { CollectionResponse } from "@shared/entity/CollectionResponse";
 import { combinedFileSize, constructTitle, getProductIcon, humanReadableSize } from "@/lib";
 import type { Site } from "@shared/entity/Site";
-import MyMap from "@/components/SuperMap.vue";
+import SuperMap from "@/components/SuperMap.vue";
 import type { Product } from "@shared/entity/Product";
 import DataSearchResult from "@/components/DataSearchResult.vue";
 import HowToCite from "@/components/HowToCite.vue";
@@ -211,48 +212,41 @@ async function generatePid(): Promise<void> {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   busy.value = true;
   citationBusy.value = true;
-  return axios
-    .get(`${apiUrl}collection/${props.uuid}`)
-    .then((res) => {
-      response.value = res.data;
-      if (response.value == null) return;
-      sortedFiles.value = constructTitle(
-        response.value.files.sort(
-          (a, b) => new Date(b.measurementDate).getTime() - new Date(a.measurementDate).getTime(),
-        ),
-      );
-      nonModelSiteIds.value = getUnique(
-        sortedFiles.value.filter((file) => file.productId != "model"),
-        "siteId",
-      );
-    })
-    .catch((error) => {
-      error.value = true;
-      response.value = error.response;
-    })
-    .then(() => {
-      generatePid().finally(() => {
-        citationBusy.value = false;
-      });
-      const siteIds = getUnique(sortedFiles.value, "siteId");
-      const productIds = getUnique(sortedFiles.value, "productId");
-      const modelIds = getUnique(sortedFiles.value, "modelId");
-      return Promise.all([
-        axios.get(`${apiUrl}sites/`),
-        axios.get(`${apiUrl}models/`),
-        axios.get(`${apiUrl}products/`),
-      ]).then(([sitesRes, modelsRes, productsRes]) => {
-        sites.value = sitesRes.data.filter((site: Site) => siteIds.includes(site.id));
-        products.value = productsRes.data.filter((product: Product) => productIds.includes(product.id));
-        models.value = modelsRes.data.filter((model: Product) => modelIds.includes(model.id));
-      });
-    })
-    .catch(console.error)
-    .finally(() => {
-      busy.value = false;
+  try {
+    const res = await axios.get(`${apiUrl}collection/${props.uuid}`);
+    response.value = res.data;
+    if (response.value == null) return;
+    sortedFiles.value = constructTitle(
+      response.value.files.sort(
+        (a, b) => new Date(b.measurementDate).getTime() - new Date(a.measurementDate).getTime(),
+      ),
+    );
+    nonModelSiteIds.value = getUnique(
+      sortedFiles.value.filter((file) => file.productId != "model"),
+      "siteId",
+    );
+    generatePid().finally(() => {
+      citationBusy.value = false;
     });
+    const siteIds = getUnique(sortedFiles.value, "siteId");
+    const productIds = getUnique(sortedFiles.value, "productId");
+    const modelIds = getUnique(sortedFiles.value, "modelId");
+    const [sitesRes, modelsRes, productsRes] = await Promise.all([
+      axios.get(`${apiUrl}sites/`),
+      axios.get(`${apiUrl}models/`),
+      axios.get(`${apiUrl}products/`),
+    ]);
+    sites.value = sitesRes.data.filter((site: Site) => siteIds.includes(site.id));
+    products.value = productsRes.data.filter((product: Product) => productIds.includes(product.id));
+    models.value = modelsRes.data.filter((model: Product) => modelIds.includes(model.id));
+  } catch (err: any) {
+    error.value = true;
+    response.value = err.response;
+  } finally {
+    busy.value = false;
+  }
 });
 </script>

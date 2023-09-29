@@ -80,8 +80,8 @@ export interface Props {
   sites: Site[];
   selectedSiteIds?: string[];
   onMapMarkerClick?: Function;
-  zoom: number;
-  center: [number, number];
+  zoom?: number;
+  center?: [number, number];
   showLegend?: boolean;
   fullHeight?: boolean;
   enableBoundingBox?: boolean;
@@ -148,7 +148,10 @@ function initMap() {
   legend.onAdd = generateLegend;
   map = L.map(mapElement.value as unknown as HTMLElement, {
     maxBounds: setMapBounds(),
-  }).setView(getMapCenter(), props.zoom);
+  });
+  if (props.center) {
+    map.setView(getMapCenter()!, props.zoom);
+  }
   tileLayer = L.tileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png");
   tileLayer.addTo(map);
   if (props.showLegend) legend.addTo(map);
@@ -259,6 +262,10 @@ onMounted(() => {
   initLayers();
   setMarkerIcons();
   if (props.enableBoundingBox) initBoundingBoxTool();
+  if (!props.center && map) {
+    const bounds = L.latLngBounds(Object.values(allMarkers).map((marker) => marker.getLatLng()));
+    map.fitBounds(bounds, { maxZoom: props.zoom });
+  }
 });
 
 onBeforeUnmount(() => {
