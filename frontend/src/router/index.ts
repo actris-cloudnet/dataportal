@@ -79,16 +79,28 @@ const router = createRouter({
       props: true,
     },
     {
-      path: "/collection/:uuid/:mode?",
+      path: "/collection/:uuid",
       name: "Collection",
       meta: {
         title: "Collection",
       },
       component: () => import("@/views/CollectionView.vue"),
-      props: (to) => ({
-        ...to.params,
-        mode: to.params.mode || "general",
-      }),
+      props: true,
+      children: [
+        {
+          path: "",
+          alias: "general", // Backward compatible with old layout.
+          name: "CollectionSummary",
+          meta: { title: false },
+          component: () => import("@/components/collection/CollectionSummary.vue"),
+        },
+        {
+          path: "files",
+          name: "CollectionFiles",
+          meta: { title: false },
+          component: () => import("@/components/collection/CollectionFiles.vue"),
+        },
+      ],
     },
     {
       path: "/stats",

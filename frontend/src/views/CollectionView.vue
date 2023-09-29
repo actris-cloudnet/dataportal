@@ -52,21 +52,11 @@ main.column
         subtitle="User-defined selection of files from Cloudnet data portal"
       >
         <template #tabs>
-          <router-link
-            class="tab"
-            :to="{ name: 'Collection', params: { mode: 'general' } }"
-            :replace="true"
-            :class="{ 'router-link-active': mode === 'general' }"
-          >
+          <router-link class="tab" :to="{ name: 'CollectionSummary' }">
             <img :src="briedIcon" alt="" />
             Summary
           </router-link>
-          <router-link
-            class="tab"
-            :to="{ name: 'Collection', params: { mode: 'files' } }"
-            :replace="true"
-            :class="{ 'router-link-active': mode === 'files' }"
-          >
+          <router-link class="tab" :to="{ name: 'CollectionFiles' }">
             <img :src="folderIcon" alt="" />
             Files
           </router-link>
@@ -105,31 +95,7 @@ main.column
             </section>
           </main>
           <div class="rightView">
-            <section id="editCollection" class="rightView" v-if="mode === 'general'">
-              <BaseAlert type="error" v-if="pidServiceError">
-                Failed to create DOI for this collection. Please try again later.
-              </BaseAlert>
-              <how-to-cite :uuid="citationBusy ? undefined : response.uuid" />
-              <h3>License</h3>
-              <license></license>
-              <h3>Download</h3>
-              By clicking the download button you confirm that you have taken notice of the above data licensing
-              information.<br />
-              <BaseButton type="primary" :href="downloadUrl" id="downloadCollection">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                  <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
-                </svg>
-                Download
-              </BaseButton>
-            </section>
-            <data-search-result
-              v-else
-              :simplifiedView="true"
-              :apiResponse="sortedFiles"
-              :isBusy="busy"
-              :downloadUri="downloadUrl"
-            >
-            </data-search-result>
+            <RouterView :collection="response" :files="sortedFiles" />
           </div>
         </div>
       </main>
@@ -146,21 +112,15 @@ import { combinedFileSize, constructTitle, getProductIcon, humanReadableSize } f
 import type { Site } from "@shared/entity/Site";
 import SuperMap from "@/components/SuperMap.vue";
 import type { Product } from "@shared/entity/Product";
-import DataSearchResult from "@/components/DataSearchResult.vue";
-import HowToCite from "@/components/HowToCite.vue";
-import License from "@/components/LicenseInfo.vue";
 import type { CollectionFileResponse } from "@shared/entity/CollectionFileResponse";
 import type { Model } from "@shared/entity/Model";
 import ApiError from "./ApiError.vue";
 import folderIcon from "@/assets/icons/icons8-folder-48.png";
 import briedIcon from "@/assets/icons/icons8-brief-48.png";
 import LandingHeader from "@/components/LandingHeader.vue";
-import BaseButton from "@/components/BaseButton.vue";
-import BaseAlert from "@/components/BaseAlert.vue";
 
 export interface Props {
   uuid: string;
-  mode: string;
 }
 
 const props = defineProps<Props>();
@@ -173,18 +133,11 @@ const products = ref<Product[]>([]);
 const models = ref<Model[]>([]);
 const apiUrl = import.meta.env.VITE_BACKEND_URL;
 const busy = ref(false);
-const citationBusy = ref(false);
-const pidServiceError = ref(false);
 const nonModelSiteIds = ref<string[]>([]);
 
 const startDate = computed(() => sortedFiles.value && sortedFiles.value[sortedFiles.value.length - 1].measurementDate);
 
 const endDate = computed(() => sortedFiles.value[0].measurementDate);
-
-const downloadUrl = computed(() => {
-  if (!response.value) return undefined;
-  return `${apiUrl}download/collection/${response.value.uuid}`;
-});
 
 function getUnique(arr: CollectionFileResponse[], field: keyof CollectionFileResponse) {
   return arr
@@ -196,25 +149,8 @@ const totalSize = computed(() => {
   return combinedFileSize(sortedFiles.value);
 });
 
-async function generatePid(): Promise<void> {
-  if (!response.value || response.value.pid) return;
-  try {
-    const payload = {
-      type: "collection",
-      uuid: props.uuid,
-    };
-    const pidRes = await axios.post(`${apiUrl}generate-pid`, payload);
-    if (!response.value) return;
-    response.value.pid = pidRes.data.pid;
-  } catch (error) {
-    pidServiceError.value = true;
-    console.error(error);
-  }
-}
-
 onMounted(async () => {
   busy.value = true;
-  citationBusy.value = true;
   try {
     const res = await axios.get(`${apiUrl}collection/${props.uuid}`);
     response.value = res.data;
@@ -228,9 +164,6 @@ onMounted(async () => {
       sortedFiles.value.filter((file) => file.productId != "model"),
       "siteId",
     );
-    generatePid().finally(() => {
-      citationBusy.value = false;
-    });
     const siteIds = getUnique(sortedFiles.value, "siteId");
     const productIds = getUnique(sortedFiles.value, "productId");
     const modelIds = getUnique(sortedFiles.value, "modelId");
