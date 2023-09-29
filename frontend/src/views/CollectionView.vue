@@ -46,7 +46,10 @@ main.column
 <template>
   <div>
     <div v-if="!error && response">
-      <LandingHeader :title="response.title || 'Custom collection'">
+      <LandingHeader
+        :title="response.title || 'Custom collection'"
+        subtitle="User-defined selection of files from Cloudnet data portal"
+      >
         <template #tabs>
           <router-link
             class="tab"
@@ -54,6 +57,7 @@ main.column
             :replace="true"
             :class="{ 'router-link-active': mode === 'general' }"
           >
+            <img :src="briedIcon" alt="" />
             Summary
           </router-link>
           <router-link
@@ -62,6 +66,7 @@ main.column
             :replace="true"
             :class="{ 'router-link-active': mode === 'files' }"
           >
+            <img :src="folderIcon" alt="" />
             Files
           </router-link>
         </template>
@@ -100,21 +105,12 @@ main.column
           </main>
           <div class="rightView">
             <section id="editCollection" class="rightView" v-if="mode === 'general'">
-              <h3>How to cite</h3>
-              <span v-if="citationBusy" style="color: gray">Generating citation...</span>
-              <div v-else-if="pidServiceError" class="errormsg">
-                PID service is unavailable. Please try again later. You may still download the collection.
+              <div v-if="pidServiceError" class="errormsg">
+                Failed to create DOI for this collection. Please try again later.
               </div>
-              <how-to-cite
-                v-if="!citationBusy"
-                :citation="citation"
-                :acknowledgements="acknowledgements"
-                :dataAvailability="dataAvailability"
-              />
-
+              <how-to-cite :uuid="citationBusy ? undefined : response.uuid" />
               <h3>License</h3>
               <license></license>
-
               <h3>Download</h3>
               By clicking the download button you confirm that you have taken notice of the above data licensing
               information.<br />
@@ -155,7 +151,8 @@ import License from "@/components/LicenseInfo.vue";
 import type { CollectionFileResponse } from "@shared/entity/CollectionFileResponse";
 import type { Model } from "@shared/entity/Model";
 import ApiError from "./ApiError.vue";
-import backIcon from "@/assets/icons/back.png";
+import folderIcon from "@/assets/icons/icons8-folder-48.png";
+import briedIcon from "@/assets/icons/icons8-brief-48.png";
 import LandingHeader from "@/components/LandingHeader.vue";
 import BaseButton from "@/components/BaseButton.vue";
 
@@ -177,9 +174,6 @@ const busy = ref(false);
 const citationBusy = ref(false);
 const pidServiceError = ref(false);
 const nonModelSiteIds = ref<string[]>([]);
-const citation = ref<string>("");
-const acknowledgements = ref<string>("");
-const dataAvailability = ref<string>("");
 
 const startDate = computed(() => sortedFiles.value && sortedFiles.value[sortedFiles.value.length - 1].measurementDate);
 
@@ -240,16 +234,7 @@ onMounted(() => {
     })
     .then(() => {
       generatePid().finally(() => {
-        Promise.all([
-          axios.get(`${apiUrl}reference/${props.uuid}?citation=true&format=html`),
-          axios.get(`${apiUrl}reference/${props.uuid}?acknowledgements=true&format=html`),
-          axios.get(`${apiUrl}reference/${props.uuid}?dataAvailability=true&format=html`),
-        ]).then(([citationRes, ackRes, availRes]) => {
-          citationBusy.value = false;
-          citation.value = citationRes.data;
-          acknowledgements.value = ackRes.data;
-          dataAvailability.value = availRes.data;
-        });
+        citationBusy.value = false;
       });
       const siteIds = getUnique(sortedFiles.value, "siteId");
       const productIds = getUnique(sortedFiles.value, "productId");

@@ -34,7 +34,8 @@ header {
   display: grid;
   grid-template-columns: minmax(min-content, max-content) auto min-content;
   align-items: center;
-  padding-top: 1rem;
+  gap: 0.25rem;
+  padding-top: 2rem;
   padding-bottom: 1rem;
 }
 
@@ -59,6 +60,7 @@ header {
 
 .actions {
   margin-left: 1rem;
+  grid-row: 1 / 3;
 }
 
 .tab-container {
