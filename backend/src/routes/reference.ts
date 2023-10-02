@@ -4,7 +4,7 @@ import { Request, RequestHandler, Response } from "express";
 import { RegularFile, ModelFile } from "../entity/File";
 import { Collection } from "../entity/Collection";
 import { formatList, getObjectLandingPage } from "../lib";
-import { Citation, CitationService } from "../lib/cite";
+import { Citation, CitationService, Person } from "../lib/cite";
 
 export class ReferenceRoutes {
   private fileRepo: Repository<RegularFile>;
@@ -80,7 +80,7 @@ export class ReferenceRoutes {
 
 function citation2bibtex(c: Citation, citekey: string) {
   const fields = {
-    author: c.authors.map((a) => `${a.lastName}, ${a.firstName}`).join(" and "),
+    author: c.authors.map((a) => citationName(a)).join(" and "),
     title: c.title,
     year: c.year,
     url: c.url,
@@ -101,37 +101,31 @@ function getInitials(name: string): string {
 
 function citation2html(c: Citation) {
   const authors = formatList(
-    c.authors.map((a) => `${a.lastName}, ${getInitials(a.firstName)}`),
+    c.authors.map((a) => citationName(a, getInitials)),
     ", & ",
   );
   const year = `(${c.year})`;
   const title = c.title;
   const publisher = c.publisher;
   const link = `<a href="${c.url}">${c.url}</a>`;
-  if (!authors) {
-    return `${title}. ${year}. ${publisher}. ${link}`;
-  }
   return `${authors} ${year}. ${title}. ${publisher}. ${link}`;
 }
 
 export function citation2txt(c: Citation) {
   const authors = formatList(
-    c.authors.map((a) => `${a.lastName}, ${getInitials(a.firstName)}`),
+    c.authors.map((a) => citationName(a, getInitials)),
     ", & ",
   );
   const year = `(${c.year})`;
   const title = c.title;
   const publisher = c.publisher;
   const link = c.url;
-  if (!authors) {
-    return `${title}. ${year}. ${publisher}. ${link}`;
-  }
   return `${authors} ${year}. ${title}. ${publisher}. ${link}`;
 }
 
 function citation2ris(c: Citation) {
   const newline = "\r\n";
-  let authors = c.authors.map((a) => `AU  - ${a.lastName}, ${a.firstName}`).join(newline);
+  let authors = c.authors.map((a) => `AU  - ${citationName(a)}`).join(newline);
   if (authors == "") {
     authors = "AU  - ";
   }
@@ -149,4 +143,10 @@ function citation2ris(c: Citation) {
 
 function getLicenseUrl() {
   return `https://creativecommons.org/licenses/by/4.0/`;
+}
+
+function citationName(person: Person, transformFirstName = (name: string) => name): string {
+  if (!person.firstName) return person.lastName || "N.N.";
+  if (!person.lastName) return person.firstName || "N.N.";
+  return person.lastName + ", " + transformFirstName(person.firstName);
 }

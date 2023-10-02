@@ -290,5 +290,23 @@
     "instrumentPid": "https://hdl.handle.net/123/bucharest_radar",
     "software": [{ "id": 1 }],
     "instrument": "rpg-fmcw-94"
+  },
+  {
+    "uuid": "0afca83a-7b6b-4288-82f6-a59685346617",
+    "pid": "",
+    "volatile": false,
+    "legacy": true,
+    "measurementDate": "2009-07-16",
+    "product": "classification",
+    "createdAt": "2020-02-19T10:59:58.449Z",
+    "updatedAt": "2020-02-19T10:59:58.449Z",
+    "s3key": "legacy/20090716_newyork_classification.nc",
+    "checksum": "65d29c507d0ebeec46a6c93deb8ebe3b86dfd678fc73e1a70816cca2fe279025",
+    "size": 7127282,
+    "format": "HDF5 (NetCDF4)",
+    "site": "newyork",
+    "version": "123",
+    "errorLevel": null,
+    "software": [{ "id": 1 }]
   }
 ]

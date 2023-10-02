@@ -7,6 +7,7 @@ import { formatList, getCollectionLandingPage, getFileLandingPage, truncateList 
 import env from "../lib/env";
 
 const MODEL_AUTHOR: Person = { firstName: "Ewan", lastName: "O'Connor", orcid: "0000-0001-9834-5100", role: "modelPi" };
+const UNKNOWN_AUTHOR: Person = { firstName: "", lastName: "CLU", orcid: null, role: "instrumentPi" };
 const PUBLISHER = "ACTRIS Cloud remote sensing data centre unit (CLU)";
 const MONTHS_FULL = [
   "January",
@@ -451,6 +452,10 @@ function removeDuplicateNames(pis: Person[]): Person[] {
     if (!nameExists) {
       out.push(pi);
     }
+  }
+  // DataCite requires at least one author.
+  if (out.length === 0) {
+    out.push(UNKNOWN_AUTHOR);
   }
   return out;
 }

@@ -11,9 +11,13 @@ const uuids = [
   "f036da43-c19c-4832-99f9-6cc88f3255c5",
   // Model files
   "a45a2e9a-e39d-4af2-9798-5ea0fadf041e",
-  // Collections
+  // Legacy files
+  "0afca83a-7b6b-4288-82f6-a59685346617",
+  // Collections of regular and model files
   "48092c00-161d-4ca2-a29d-628cf8e960f6",
   "7a6c6675-af65-4650-a20c-e061344393d1",
+  // Collection of legacy files
+  "6e145ec8-7d66-4a5b-9c5e-c1fdfadafc6b",
 ];
 
 describe("GET /api/reference", () => {
