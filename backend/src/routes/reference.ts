@@ -48,7 +48,10 @@ export class ReferenceRoutes {
     const citation = await (object instanceof Collection
       ? this.citationService.getCollectionCitation(object)
       : this.citationService.getFileCitation(object));
-    const citekey = (citation.authors.length > 0 ? citation.authors[0].lastName.toLowerCase() : "nn") + citation.year;
+    const citekey =
+      (citation.authors.length > 0
+        ? (citation.authors[0].lastName || citation.authors[0].firstName || "N.N.").toLowerCase().replace(/[^a-z]/g, "")
+        : "nn") + citation.year;
     if (req.query.format === "bibtex") {
       res.setHeader("Content-type", "text/plain; charset=utf-8");
       res.setHeader("Content-Disposition", `inline; filename="${citekey}.bib"`);

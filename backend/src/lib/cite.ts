@@ -75,7 +75,7 @@ export class CitationService {
       this.queryCollectionSiteNames(collection),
       this.queryCollectionDateRange(collection),
     ]);
-    if (usesModelData) {
+    if (usesModelData || productNames.includes("Model")) {
       instrumentPis.push(MODEL_AUTHOR);
     }
     const siteAuthors = await this.queryCollectionSitePersons(collection);

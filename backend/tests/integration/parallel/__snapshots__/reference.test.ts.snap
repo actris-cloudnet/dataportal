@@ -155,8 +155,8 @@ exports[`GET /api/reference /7a6c6675-af65-4650-a20c-e061344393d1 outputs data a
 exports[`GET /api/reference /48092c00-161d-4ca2-a29d-628cf8e960f6 outputs acknowledgements 1`] = `"We acknowledge ACTRIS and Finnish Meteorological Institute for providing the data set which is available for download from <a href="http://localhost:8080">http://localhost:8080</a>. Hyytiälä test citation."`;
 
 exports[`GET /api/reference /48092c00-161d-4ca2-a29d-628cf8e960f6 outputs citation as bibtex 1`] = `
-"@misc{clu2020,
-  author = {CLU},
+"@misc{oconnor2020,
+  author = {O'Connor, Ewan},
   title = {Custom collection of model, and radar data from Hyytiälä, and Mace Head between 5 Dec 2014 and 1 Sep 2019},
   year = {2020},
   url = {http://localhost:8080/collection/48092c00-161d-4ca2-a29d-628cf8e960f6},
@@ -165,11 +165,11 @@ exports[`GET /api/reference /48092c00-161d-4ca2-a29d-628cf8e960f6 outputs citati
 }"
 `;
 
-exports[`GET /api/reference /48092c00-161d-4ca2-a29d-628cf8e960f6 outputs citation as html 1`] = `"CLU (2020). Custom collection of model, and radar data from Hyytiälä, and Mace Head between 5 Dec 2014 and 1 Sep 2019. ACTRIS Cloud remote sensing data centre unit (CLU). <a href="http://localhost:8080/collection/48092c00-161d-4ca2-a29d-628cf8e960f6">http://localhost:8080/collection/48092c00-161d-4ca2-a29d-628cf8e960f6</a>"`;
+exports[`GET /api/reference /48092c00-161d-4ca2-a29d-628cf8e960f6 outputs citation as html 1`] = `"O'Connor, E. (2020). Custom collection of model, and radar data from Hyytiälä, and Mace Head between 5 Dec 2014 and 1 Sep 2019. ACTRIS Cloud remote sensing data centre unit (CLU). <a href="http://localhost:8080/collection/48092c00-161d-4ca2-a29d-628cf8e960f6">http://localhost:8080/collection/48092c00-161d-4ca2-a29d-628cf8e960f6</a>"`;
 
 exports[`GET /api/reference /48092c00-161d-4ca2-a29d-628cf8e960f6 outputs citation as ris 1`] = `
 "TY  - DATA
-AU  - CLU
+AU  - O'Connor, Ewan
 T1  - Custom collection of model, and radar data from Hyytiälä, and Mace Head between 5 Dec 2014 and 1 Sep 2019
 PY  - 2020
 PB  - ACTRIS Cloud remote sensing data centre unit (CLU)
@@ -183,7 +183,7 @@ exports[`GET /api/reference /48092c00-161d-4ca2-a29d-628cf8e960f6 outputs data a
 exports[`GET /api/reference /a45a2e9a-e39d-4af2-9798-5ea0fadf041e outputs acknowledgements 1`] = `"We acknowledge ACTRIS and Finnish Meteorological Institute for providing the data set which is available for download from <a href="http://localhost:8080">http://localhost:8080</a>. We acknowledge ECMWF citation text."`;
 
 exports[`GET /api/reference /a45a2e9a-e39d-4af2-9798-5ea0fadf041e outputs citation as bibtex 1`] = `
-"@misc{o'connor2020,
+"@misc{oconnor2020,
   author = {O'Connor, Ewan},
   title = {Model data from Bucharest on 16 July 2019},
   year = {2020},
