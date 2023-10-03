@@ -1,36 +1,11 @@
 <style scoped lang="sass">
 @import "@/sass/landing-beta.sass"
-.landing-tags
-  .tag
-    display: flex
-    justify-content: center
-    align-items: center
-    color: white
-    font-size: 90%
-    font-weight: 600
-    inline-size: max-content
-    block-size: min-content
-    padding: 0.25*$basespacing 0.65*$basespacing
-    border-radius: 999px
-    cursor: default
-    &:first-child
-      margin-left: $basespacing
-    &:not(:first-child)
-      margin-left: 0.5*$basespacing
-  .experimental
-    background-color: #EC9706
-  .actris
-    background-color: $actris-turquoise
-  .volatile
-    background-color: $BLUE-3-hex
-  .legacy
-    background-color: $GRAY-4-hex
 </style>
 
 <template>
   <main v-if="response" id="landing">
     <div v-if="!isBusy && newestVersion" class="landing-version-banner-container">
-      <div class="landing-version-banner">
+      <div class="landing-version-banner pagewidth">
         There is a
         <router-link class="landing-version-banner-link" :to="`/file/${newestVersion}`">newer version</router-link>
         of this data available.
