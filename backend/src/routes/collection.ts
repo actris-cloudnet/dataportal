@@ -2,7 +2,7 @@ import { Request, RequestHandler, Response } from "express";
 import { Collection } from "../entity/Collection";
 import { CollectionResponse } from "../entity/CollectionResponse";
 import { validate as validateUuid } from "uuid";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { DataSource, In, Repository } from "typeorm";
 import { File, ModelFile, RegularFile } from "../entity/File";
 import { getCollectionLandingPage, convertToSearchResponse } from "../lib";
@@ -79,6 +79,15 @@ export class CollectionRoutes {
       await this.collectionRepo.save(collection);
       res.send({ pid: collection.pid });
     } catch (e: any) {
+      if (e instanceof AxiosError) {
+        console.error(
+          JSON.stringify({
+            err: `AxiosError: ${e.message}`,
+            req: e.request && { url: e.request.url, body: e.request.body },
+            res: e.response && { status: e.response.status, data: e.response.data },
+          }),
+        );
+      }
       if (e.code && e.code == "ECONNABORTED") {
         return next({ status: 504, errors: ["PID service took too long to respond"] });
       }
