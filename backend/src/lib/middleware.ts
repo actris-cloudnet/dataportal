@@ -71,6 +71,7 @@ export class Middleware {
       "s3path",
       "status",
       "privateFrontendOrder",
+      "dvasUpdated",
     ];
 
     if (req.path.includes("visualization")) validKeys.push("variable");
@@ -82,7 +83,18 @@ export class Middleware {
       requestError.errors.push(`Unknown query parameters: ${unknownFields}`);
     }
 
-    const keys = ["site", "product", "dateFrom", "dateTo", "updatedAtFrom", "updatedAtTo", "volatile", "limit", "date"];
+    const keys = [
+      "site",
+      "product",
+      "dateFrom",
+      "dateTo",
+      "updatedAtFrom",
+      "updatedAtTo",
+      "volatile",
+      "limit",
+      "date",
+      "dvasUpdated",
+    ];
     keys.forEach((key) => {
       const keyError = this.checkField(key, req.query);
       if (keyError) requestError.errors.push(keyError);
@@ -221,6 +233,7 @@ export class Middleware {
           return `Malformed value in property "${key}"`;
         }
         break;
+      case "dvasUpdated":
       case "volatile":
         if (key in query && !(query[key].toLowerCase() == "true" || query[key].toLowerCase() == "false")) {
           return `Malformed value in property "${key}"`;

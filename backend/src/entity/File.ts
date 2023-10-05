@@ -75,6 +75,9 @@ export abstract class File {
   @Column()
   updatedAt!: Date;
 
+  @Column({ type: "timestamptz", nullable: true })
+  dvasUpdatedAt!: Date | null;
+
   @ManyToMany(() => Software)
   @JoinTable()
   software!: Software[];
