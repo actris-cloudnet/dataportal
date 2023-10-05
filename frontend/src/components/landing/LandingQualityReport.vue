@@ -1,10 +1,6 @@
-<style scoped lang="sass">
-@import "@/sass/landing-beta.sass"
-</style>
-
 <template>
   <div class="landing-quality-report-container">
-    <div class="quality-report-box">
+    <div class="summary-box">
       <BaseSpinner v-if="report.status === 'loading'" />
       <div v-else-if="report.status === 'notFound'">No quality report available.</div>
       <div v-else-if="report.status === 'error'" style="color: red">Failed to load report.</div>
@@ -149,3 +145,146 @@ function formatMessage(message: string): string {
   return escapeHtml(message).replace(/&#39;(\w+)&#39;|(\w+_\w+)/gi, "<code>$1$2</code>");
 }
 </script>
+
+<style scoped lang="scss">
+@import "@/sass/new-variables.scss";
+
+.landing-quality-report-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.quality-software {
+  max-inline-size: max-content;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.5);
+  margin-top: 0.5rem;
+  font-size: 90%;
+}
+
+.quality-report-header {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  border-bottom: thin solid rgba(0, 0, 0, 0.2);
+  padding: 0 0 1rem;
+  column-gap: 2rem;
+
+  .donut {
+    margin-right: 4rem;
+  }
+}
+
+.quality-report-stats {
+  background-color: rgba(0, 0, 0, 0.01);
+  padding: 1rem;
+  block-size: max-content;
+  inline-size: max-content;
+  display: grid;
+  justify-items: center;
+  grid-template-columns: repeat(4, 6em);
+  border: thin solid rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+
+  .header {
+    grid-row: 1;
+    font-size: 100%;
+    font-weight: 400;
+    align-self: end;
+  }
+
+  .data {
+    align-self: start;
+    grid-row: 2;
+    font-size: 250%;
+    font-weight: 400;
+  }
+
+  #tests,
+  #ntests {
+    grid-column: 1;
+  }
+
+  #errors,
+  #nerrors {
+    grid-column: 2;
+  }
+
+  #warnings,
+  #nwarnings {
+    grid-column: 3;
+  }
+
+  #info,
+  #ninfo {
+    grid-column: 4;
+  }
+}
+
+.quality-test-description {
+  color: $gray4;
+}
+
+.quality-test-list-header {
+  padding: 1rem 0 1rem;
+  font-size: 140%;
+  font-weight: 400;
+}
+
+.quality-test-list {
+  display: flex;
+  flex-direction: column;
+
+  .quality-test {
+    display: grid;
+    grid-template-columns: fit-content(40px) 1fr;
+    margin-bottom: 1rem;
+
+    .quality-test-icon {
+      grid-column: 1;
+      padding: 0 1rem 0;
+
+      img {
+        height: 20px;
+        min-width: 20px;
+      }
+    }
+
+    .quality-test-id {
+      grid-column: 2;
+      font-size: 120%;
+      font-weight: 400;
+    }
+
+    .quality-test-description {
+      grid-column: 2;
+      margin-bottom: 0.5rem;
+    }
+
+    .quality-test-exception-list {
+      grid-column: 2;
+      padding: 0;
+
+      .quality-test-exception {
+        padding: 0.2rem;
+        font-size: 105%;
+        font-weight: 400;
+      }
+
+      .quality-test-exception-error {
+        color: $red4;
+      }
+
+      .quality-test-exception-warning {
+        color: $yellow3;
+      }
+
+      .quality-test-exception-info {
+        color: #606060;
+      }
+    }
+  }
+}
+</style>

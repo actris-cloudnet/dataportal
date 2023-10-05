@@ -1,7 +1,3 @@
-<style scoped lang="sass">
-@import "@/sass/landing-beta.sass"
-</style>
-
 <template>
   <div class="summary-section" id="preview">
     <div class="summary-section-header">Preview</div>

@@ -1,13 +1,9 @@
-<style scoped lang="sass">
-@import "@/sass/landing-beta.sass"
-</style>
-
 <template>
   <main v-if="response" id="landing">
-    <div v-if="!isBusy && newestVersion" class="landing-version-banner-container">
-      <div class="landing-version-banner pagewidth">
+    <div v-if="!isBusy && newestVersion" class="banner-container">
+      <div class="banner pagewidth">
         There is a
-        <router-link class="landing-version-banner-link" :to="`/file/${newestVersion}`">newer version</router-link>
+        <router-link :to="`/file/${newestVersion}`">newer version</router-link>
         of this data available.
       </div>
     </div>
@@ -72,7 +68,7 @@ import { getProductIcon, getQcIcon } from "@/lib";
 import PhotoGalleryIcon from "@/assets/icons/photo-gallery.png";
 import LandingHeader from "@/components/LandingHeader.vue";
 
-export type SourceFile = { ok: true; value: File } | { ok: false; value: Error };
+export type SourceFile = { ok: true; uuid: string; value: File } | { ok: false; uuid: string; value: Error };
 
 export interface Props {
   uuid: string;
@@ -179,8 +175,8 @@ async function fetchSourceFiles(response: RegularFile | ModelFile) {
     response.sourceFileIds.map((uuid) =>
       axios
         .get(`${apiUrl}files/${uuid}`)
-        .then((response) => ({ ok: true, value: response.data }))
-        .catch((error) => ({ ok: false, value: error })),
+        .then((response) => ({ ok: true, uuid, value: response.data }))
+        .catch((error) => ({ ok: false, uuid, value: error })),
     ),
   );
   results.sort((a, b) => {
@@ -221,3 +217,82 @@ watch(
   { immediate: true },
 );
 </script>
+
+<style scoped lang="scss">
+@import "@/sass/new-variables.scss";
+
+main {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.banner-container {
+  background-color: $actris-yellow;
+}
+
+.banner {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+
+  a {
+    font-weight: 600;
+  }
+}
+
+.landing-content-background {
+  background-color: #edf0f2;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  height: 100%;
+}
+
+:deep {
+  .summary-box {
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 0.1em 0.6em 0 rgba(0, 0, 0, 0.15);
+    block-size: 100%;
+  }
+
+  .summary-section + .summary-section {
+    margin-top: 2rem;
+  }
+
+  .summary-section-header {
+    margin-bottom: 0.5rem;
+    font-size: 140%;
+    font-weight: 400;
+  }
+
+  .summary-section-table {
+    display: grid;
+    grid-template-columns: minmax(min-content, 14rem) auto;
+    row-gap: 0.5rem;
+
+    dt {
+      font-weight: 500;
+    }
+  }
+
+  @media screen and (max-width: 600px) {
+    .summary-box {
+      padding: 1rem;
+      box-shadow: none;
+      border-radius: 0;
+    }
+
+    .summary-section-table {
+      display: flex;
+      flex-direction: column;
+
+      dd + dt {
+        margin-top: 0.5rem;
+      }
+    }
+  }
+}
+</style>

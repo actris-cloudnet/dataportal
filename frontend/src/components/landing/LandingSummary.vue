@@ -1,6 +1,4 @@
-<style scoped lang="sass">
-@import "@/sass/landing-beta.sass"
-</style>
+<style scoped lang="sass"></style>
 
 <template>
   <div class="landing-summary-container pagewidth">
@@ -12,7 +10,7 @@
         :instrumentStatus="instrumentStatus"
       />
       <FileInformation :response="response" />
-      <DataOrigin :response="response" :isBusy="isBusy" :versions="versions" :sourceFiles="sourceFiles" />
+      <Provenance :response="response" :isBusy="isBusy" :versions="versions" :sourceFiles="sourceFiles" />
     </div>
     <div class="summary-box summary-box-visualization">
       <Preview :visualization="visualization" :loading="loadingVisualizations" />
@@ -22,6 +20,7 @@
     </div>
   </div>
 </template>
+
 <script lang="ts" setup>
 import { computed } from "vue";
 import type { SiteLocation } from "@shared/entity/SiteLocation";
@@ -29,7 +28,7 @@ import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
 
 import FileInformation from "./FileInformation.vue";
 import ProductInformation from "./ProductInformation.vue";
-import DataOrigin from "./DataOrigin.vue";
+import Provenance from "./Provenance.vue";
 import Preview from "./FilePreview.vue";
 import Citation from "./FileCitation.vue";
 import type { SourceFile, FileResponse } from "@/views/FileView.vue";
@@ -61,3 +60,48 @@ const visualization = computed(() => {
   }
 });
 </script>
+
+<style scoped lang="scss">
+.landing-summary-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.summary-box-product-information {
+  grid-row: 1 / 3;
+  grid-column: 1;
+}
+
+.summary-box-visualization {
+  grid-row: 1;
+  grid-column: 2;
+}
+
+.summary-box-citation {
+  grid-row: 2;
+  grid-column: 2;
+}
+
+@media screen and (max-width: 1000px) {
+  .landing-summary-container {
+    grid-template-columns: 1fr;
+    margin-bottom: 1rem;
+  }
+
+  .summary-box-visualization {
+    grid-row: 1;
+    grid-column: 1;
+  }
+
+  .summary-box-product-information {
+    grid-row: 2;
+    grid-column: 1;
+  }
+
+  .summary-box-citation {
+    grid-row: 3;
+    grid-column: 1;
+  }
+}
+</style>

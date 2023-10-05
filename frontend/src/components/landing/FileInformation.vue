@@ -1,7 +1,3 @@
-<style scoped lang="sass">
-@import "@/sass/landing-beta.sass"
-</style>
-
 <template>
   <div v-if="response" class="summary-section" id="file-information">
     <div class="summary-section-header">File</div>

@@ -1,9 +1,23 @@
 <style scoped lang="scss">
-@import "@/sass/landing-beta.sass";
+.data-sources {
+  li {
+    padding: 0.1rem 0;
+  }
 
-.software {
-  list-style: none;
-  padding: 0;
+  a {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  img {
+    width: 1.1rem;
+    height: 1.1rem;
+    line-height: 1.1rem;
+    margin-right: 0.5rem;
+    color: gray;
+    text-align: center;
+    font-size: 90%;
+  }
 }
 </style>
 
@@ -13,9 +27,8 @@
     <dl class="summary-section-table">
       <dt>Data sources</dt>
       <dd v-if="sourceFiles.length > 0">
-        <div class="data-source-list">
-          <!-- eslint-disable-next-line vue/require-v-for-key -->
-          <div class="data-source-container" v-for="sourceFile in sourceFiles">
+        <ul class="data-sources">
+          <li v-for="sourceFile in sourceFiles" :key="sourceFile.uuid">
             <router-link :to="`/file/${sourceFile.value.uuid}`" v-if="sourceFile.ok">
               <img
                 :alt="sourceFile.value.product.id"
@@ -28,8 +41,8 @@
               <span class="product-icon">?</span>
               Unknown file
             </a>
-          </div>
-        </div>
+          </li>
+        </ul>
       </dd>
       <dd class="notAvailable" v-else></dd>
       <dt>Versions</dt>

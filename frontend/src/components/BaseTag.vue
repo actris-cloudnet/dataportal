@@ -12,13 +12,13 @@ defineProps<Props>();
 </template>
 
 <style scoped lang="scss">
-@import "@/sass/landing-beta.sass";
+@import "@/sass/new-variables.scss";
 
 .tag {
   color: white;
   font-size: 90%;
   font-weight: 600;
-  padding: 0.25 * $basespacing 0.65 * $basespacing;
+  padding: 0.25rem 0.65rem;
   border-radius: 999px;
 }
 
@@ -35,10 +35,10 @@ defineProps<Props>();
 }
 
 .volatile {
-  background-color: $BLUE-3-hex;
+  background-color: $blue3;
 }
 
 .legacy {
-  background-color: $GRAY-4-hex;
+  background-color: $gray4;
 }
 </style>

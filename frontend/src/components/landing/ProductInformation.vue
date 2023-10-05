@@ -1,24 +1,3 @@
-<style scoped lang="sass">
-@import "@/sass/landing-beta.sass"
-.summary-section-header-container
-  display: flex
-  flex-direction: row
-  justify-content: space-between
-
-.metadata-container
-  font-size: 85%
-  font-weight: 500
-
-.error
-  color: $RED-4-hex
-
-.loading
-  color: $GRAY-4-hex
-
-.coordinates
-  font-size: 90%
-</style>
-
 <template>
   <div class="summary-section" id="product-information">
     <div class="summary-section-header-container">
@@ -93,3 +72,40 @@ const productIconUrl = computed(() => getProductIcon(props.response.product.id))
 
 const jsonUrl = computed(() => `${import.meta.env.VITE_BACKEND_URL}files/${props.response.uuid}`);
 </script>
+
+<style scoped lang="scss">
+@import "@/sass/new-variables.scss";
+
+.summary-section-header-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.metadata-container {
+  font-size: 85%;
+  font-weight: 500;
+}
+
+.error {
+  color: $red4;
+}
+
+.loading {
+  color: $gray4;
+}
+
+.coordinates {
+  font-size: 90%;
+}
+
+.product-container {
+  display: flex;
+  align-items: center;
+}
+
+.product-icon {
+  height: 1.1rem;
+  margin-right: 0.5rem;
+}
+</style>

@@ -1,12 +1,10 @@
-<style scoped lang="sass">
-@import "@/sass/landing-beta.sass"
-</style>
-
 <template>
   <div class="landing-visualizations-container pagewidth">
-    <div v-if="visualizations.length > 0" class="visualizations-box">
-      <div v-for="visualization in visualizations" :key="visualization.productVariable.id">
+    <div class="summary-box">
+      <div class="visualizations" v-if="visualizations.length > 0">
         <Visualization
+          v-for="visualization in visualizations"
+          :key="visualization.productVariable.id"
           :data="visualization"
           :maxMarginLeft="maxMarginLeft"
           :maxMarginRight="maxMarginRight"
@@ -14,8 +12,8 @@
           linkToVocabulary
         />
       </div>
+      <div v-else>No visualisations available.</div>
     </div>
-    <div v-else class="visualizations-box">No visualisations available.</div>
   </div>
 </template>
 
@@ -56,3 +54,11 @@ const maxMarginRight = computed(() => {
   return max;
 });
 </script>
+
+<style scoped lang="scss">
+.visualizations {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(700px, 100%), 1fr));
+  gap: 1rem;
+}
+</style>
