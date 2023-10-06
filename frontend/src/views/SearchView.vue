@@ -973,7 +973,7 @@ div.checkbox {
   }
 }
 
-.rowtags {
+:deep(.rowtags) {
   display: flex;
   gap: 0.25em;
   justify-content: center;
