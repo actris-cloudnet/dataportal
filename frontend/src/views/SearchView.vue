@@ -722,8 +722,8 @@ watch(
 <style scoped lang="scss">
 @import "@/sass/variables.scss";
 
-$lightpadding: 1em;
-$heavypadding: 5em;
+$lightpadding: 1rem;
+$heavypadding: 5rem;
 $filter-margin: 2em;
 
 main#search {
@@ -767,6 +767,11 @@ section#sideBar {
   section#sideBar {
     margin-left: 80px;
     margin-right: 80px;
+  }
+
+  main#search.wideView {
+    padding-left: $lightpadding;
+    padding-right: $lightpadding;
   }
 }
 

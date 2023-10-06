@@ -1,14 +1,17 @@
 <script setup lang="ts">
-interface Props {
+export type TagSize = "normal" | "small";
+
+export interface Props {
   type: "actris" | "arm" | "volatile" | "legacy" | "experimental";
   title?: string;
+  size?: TagSize;
 }
 
-defineProps<Props>();
+withDefaults(defineProps<Props>(), { size: "normal" });
 </script>
 
 <template>
-  <span :class="['tag', type]" :title="title"><slot></slot></span>
+  <span :class="['tag', size, type]" :title="title"><slot></slot></span>
 </template>
 
 <style scoped lang="scss">
@@ -16,10 +19,18 @@ defineProps<Props>();
 
 .tag {
   color: white;
-  font-size: 90%;
   font-weight: 600;
-  padding: 0.25rem 0.65rem;
   border-radius: 999px;
+}
+
+.normal {
+  font-size: 90%;
+  padding: 0.25rem 0.65rem;
+}
+
+.small {
+  font-size: 75%;
+  padding: 0.4rem 0.2rem;
 }
 
 .experimental {

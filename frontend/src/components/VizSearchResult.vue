@@ -43,7 +43,7 @@
               />
             </svg>
           </router-link>
-          <FileTags :response="file" />
+          <FileTags class="tags" :response="file" size="small" />
         </h3>
         <div class="variables">
           <visualization
@@ -203,6 +203,10 @@ input:checked + .slider:before {
   color: inherit;
 }
 
+.tags {
+  margin-left: 0.5rem;
+}
+
 div.sourceFile .variables {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(700px, 100%), 1fr));
@@ -240,6 +244,7 @@ div.paddedSourceFile + div.paddedSourceFile,
     flex-basis: 100%;
   }
 }
+
 .sourceFile h3 {
   width: 100%;
   margin-bottom: 1.5em;
