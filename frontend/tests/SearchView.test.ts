@@ -1,6 +1,6 @@
 import { mount, VueWrapper } from "@vue/test-utils";
 import SearchView from "../src/views/SearchView.vue";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import {
   augmentAxiosResponse,
   dateFromPast,
