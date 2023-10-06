@@ -271,7 +271,7 @@ main {
   .summary-section-table {
     display: grid;
     grid-template-columns: minmax(min-content, 14rem) auto;
-    row-gap: 0.5rem;
+    row-gap: 0.4rem;
 
     dt {
       font-weight: 500;

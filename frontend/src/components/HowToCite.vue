@@ -1,3 +1,32 @@
+<template>
+  <div>
+    <div class="title-container">
+      <div :class="['title', titleClass]">Citation</div>
+      <ul class="export" v-if="citation.status == 'ready'">
+        <li><a :href="citation.bibtexUrl">BibTeX</a></li>
+        <li><a :href="citation.risUrl">RIS</a></li>
+      </ul>
+    </div>
+    <template v-if="citation.status == 'ready'">
+      <div class="infobox infocolor">
+        <div class="citationtext" v-html="citation.citation"></div>
+      </div>
+      <p>
+        Please include the following information in your publication. You may edit the text to suit publication
+        standards.
+      </p>
+      <div class="infobox infocolor">
+        <h4>Data availability</h4>
+        <div class="citationtext" v-html="citation.dataAvailability"></div>
+        <h4>Acknowledgements</h4>
+        <div class="citationtext" v-html="citation.acknowledgements"></div>
+      </div>
+    </template>
+    <BaseSpinner v-else-if="citation.status == 'loading'" />
+    <div v-else-if="citation.status == 'error'" class="error">Failed to load citation.</div>
+  </div>
+</template>
+
 <script lang="ts" setup>
 import axios from "axios";
 import { ref, watchEffect } from "vue";
@@ -5,6 +34,7 @@ import BaseSpinner from "@/components/BaseSpinner.vue";
 
 export interface Props {
   uuid?: string;
+  titleClass?: string;
 }
 
 const props = defineProps<Props>();
@@ -53,37 +83,8 @@ watchEffect(async () => {
 });
 </script>
 
-<template>
-  <section id="howtocite">
-    <div class="title-container">
-      <h4 class="title">Citation</h4>
-      <ul class="export" v-if="citation.status == 'ready'">
-        <li><a :href="citation.bibtexUrl">BibTeX</a></li>
-        <li><a :href="citation.risUrl">RIS</a></li>
-      </ul>
-    </div>
-    <template v-if="citation.status == 'ready'">
-      <div class="infobox infocolor">
-        <div class="citationtext" v-html="citation.citation"></div>
-      </div>
-      <p>
-        Please include the following information in your publication. You may edit the text to suit publication
-        standards.
-      </p>
-      <div class="infobox infocolor">
-        <h4>Data availability</h4>
-        <div class="citationtext" v-html="citation.dataAvailability"></div>
-        <h4>Acknowledgements</h4>
-        <div class="citationtext" v-html="citation.acknowledgements"></div>
-      </div>
-    </template>
-    <BaseSpinner v-else-if="citation.status == 'loading'" />
-    <div v-else-if="citation.status == 'error'" class="error">Failed to load citation.</div>
-  </section>
-</template>
-
 <style scoped lang="scss">
-@import "@/sass/variables.sass";
+@import "@/sass/new-variables.scss";
 
 .error {
   color: red;
@@ -91,6 +92,7 @@ watchEffect(async () => {
 
 .title-container {
   display: flex;
+  align-items: center;
 }
 
 .title {
@@ -100,6 +102,12 @@ watchEffect(async () => {
 .export {
   display: flex;
   gap: 0.5rem;
+  font-weight: 600;
+  font-size: 75%;
+}
+
+p {
+  margin: 1rem 0;
 }
 
 .infobox {
@@ -108,7 +116,7 @@ watchEffect(async () => {
 }
 
 .infocolor {
-  background: $landing-header;
+  background: $blue-dust;
   font-size: 0.9em;
 
   h4 {

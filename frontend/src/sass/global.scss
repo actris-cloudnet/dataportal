@@ -6,6 +6,7 @@ body {
   font-family: "Inter", sans-serif;
   font-size: 16px;
   font-weight: 400;
+  line-height: 1.4;
 }
 
 @supports (font-variation-settings: normal) {
@@ -55,14 +56,6 @@ a {
 }
 .notAvailable::after {
   content: "n/a";
-}
-
-.qualitycheck {
-  img {
-    height: 1.15em;
-    margin-top: -4px;
-    margin-right: 5px;
-  }
 }
 
 code,
