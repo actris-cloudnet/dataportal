@@ -979,7 +979,7 @@ div.checkbox {
   justify-content: center;
 }
 
-.rowtag {
+:deep(.rowtag) {
   display: inline-block;
   min-width: 1em;
   min-height: 1em;
@@ -987,18 +987,18 @@ div.checkbox {
   text-align: center;
   padding: 0.2em;
   border-radius: 0.25rem;
-}
 
-.volatile {
-  background: #cad7ff;
-}
+  &.volatile {
+    background: #cad7ff;
+  }
 
-.legacy {
-  background: #cecece;
-}
+  &.legacy {
+    background: #cecece;
+  }
 
-.experimental {
-  background-color: #ec9706;
+  &.experimental {
+    background-color: #ec9706;
+  }
 }
 
 .smallmap {
