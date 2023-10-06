@@ -1,51 +1,3 @@
-<style scoped lang="sass">
-h1
-  margin-bottom: 1rem
-
-table
-  border-collapse: collapse
-
-  &.loading
-    opacity: 0.25
-
-td, th
-  padding: .25rem 1rem 0 0
-
-  &:first-child
-    text-align: right
-
-.bar
-  display: flex
-  align-items: center
-
-.bar-bar
-  height: 1rem
-  background-color: steelblue
-  border-radius: 2px
-
-.bar-number
-  font-size: 70%
-  margin-left: 4px
-
-.placeholder
-  color: gray
-
-table,
-.placeholder
-  margin-top: 1rem
-
-button
-  margin-top: .5rem
-
-legend
-  font-size: inherit
-  font-weight: bold
-  margin: 0
-
-.label
-  font-weight: bold
-</style>
-
 <template>
   <main>
     <h1>Download statistics</h1>
@@ -258,3 +210,65 @@ async function onSearch() {
   }
 }
 </script>
+
+<style scoped lang="scss">
+h1 {
+  margin-bottom: 1rem;
+}
+
+table {
+  border-collapse: collapse;
+
+  &.loading {
+    opacity: 0.25;
+  }
+}
+
+td,
+th {
+  padding: 0.25rem 1rem 0 0;
+
+  &:first-child {
+    text-align: right;
+  }
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+}
+
+.bar-bar {
+  height: 1rem;
+  background-color: steelblue;
+  border-radius: 2px;
+}
+
+.bar-number {
+  font-size: 70%;
+  margin-left: 4px;
+}
+
+.placeholder {
+  color: gray;
+}
+
+table,
+.placeholder {
+  margin-top: 1rem;
+}
+
+button {
+  margin-top: 0.5rem;
+}
+
+legend {
+  font-size: inherit;
+  font-weight: bold;
+  margin: 0;
+}
+
+.label {
+  font-weight: bold;
+}
+</style>

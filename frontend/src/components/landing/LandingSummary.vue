@@ -1,5 +1,3 @@
-<style scoped lang="sass"></style>
-
 <template>
   <div class="landing-summary-container pagewidth">
     <div class="summary-box summary-box-product-information">

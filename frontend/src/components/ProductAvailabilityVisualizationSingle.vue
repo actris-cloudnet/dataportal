@@ -225,7 +225,7 @@ const debouncedHideTooltip = debounce(hideTooltip, debounceMs);
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/availability.sass";
+@import "@/sass/availability.scss";
 
 .dataviz-date {
   width: calc(1% / 3.66);

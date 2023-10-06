@@ -136,7 +136,7 @@ onMounted(async () => {
 
 <style scoped lang="scss">
 @import "@/sass/variables.scss";
-@import "@/sass/landing.sass";
+@import "@/sass/landing.scss";
 
 div.flex {
   display: flex;

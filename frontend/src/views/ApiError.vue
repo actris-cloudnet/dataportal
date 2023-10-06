@@ -1,20 +1,3 @@
-<style scoped lang="sass">
-h1
-  font-size: 4em
-  text-align: center
-
-h2
-  text-align: center
-
-section
-  margin-top: 2em
-  margin-left: auto
-  margin-right: auto
-  width: 35em
-  text-align: center
-  display: block
-</style>
-
 <template>
   <main id="error">
     <h1>{{ response?.status || "Unknown error" }}</h1>
@@ -42,3 +25,23 @@ const message = computed(() =>
     : undefined,
 );
 </script>
+
+<style scoped lang="scss">
+h1 {
+  font-size: 4em;
+  text-align: center;
+}
+
+h2 {
+  text-align: center;
+}
+
+section {
+  margin-top: 2em;
+  margin-left: auto;
+  margin-right: auto;
+  width: 35em;
+  text-align: center;
+  display: block;
+}
+</style>

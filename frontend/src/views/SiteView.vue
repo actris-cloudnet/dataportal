@@ -1,49 +1,3 @@
-<style scoped lang="sass">
-@import "@/sass/landing.sass"
-
-.forcewrap
-  flex-basis: 100%
-  height: 0
-
-#sitelanding .graph
-  flex-grow: 1
-  flex-basis: 0
-  min-width: 600px
-
-#sitelanding .details
-  height: 100%
-
-#sitemap
-  height: 300px
-
-#sitemap .details
-  padding: 0
-
-#siteselect
-  padding-top: 25px
-  width: 250px
-
-#reset
-  cursor: pointer
-  text-decoration: underline
-  color: #bcd2e2
-  margin-bottom: 2rem
-  margin-top: 20px
-  display: block
-
-#instruments
-  max-width: 650px
-
-.warningnote
-  margin: 1em 0 0
-  border-color: #fff2ca
-  background: #fffdee
-
-.errornote
-  border-color: #ffcaca
-  background: #fee
-</style>
-
 <template>
   <div v-if="!error && response" id="sitelanding">
     <LandingHeader :title="response.humanReadableName" :subtitle="subtitle">
@@ -425,3 +379,48 @@ async function fetchLatestLevel1Product() {
   ).length;
 }
 </script>
+
+<style scoped lang="scss">
+@import "@/sass/landing.scss";
+
+.forcewrap {
+  flex-basis: 100%;
+  height: 0;
+}
+
+#sitelanding .graph {
+  flex-grow: 1;
+  flex-basis: 0;
+  min-width: 600px;
+}
+
+#sitelanding .details {
+  height: 100%;
+}
+
+#sitemap {
+  height: 300px;
+}
+
+#sitemap .details {
+  padding: 0;
+}
+
+#siteselect {
+  padding-top: 25px;
+  width: 250px;
+}
+
+#reset {
+  cursor: pointer;
+  text-decoration: underline;
+  color: #bcd2e2;
+  margin-bottom: 2rem;
+  margin-top: 20px;
+  display: block;
+}
+
+#instruments {
+  max-width: 650px;
+}
+</style>
