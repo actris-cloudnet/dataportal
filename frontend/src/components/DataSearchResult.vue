@@ -6,7 +6,7 @@
         <div class="results-subtitle" v-if="!simplifiedView && listLength > 0">
           <span v-if="isBusy">Searching...</span>
           <span v-else>Found {{ listLength }} results</span>
-          <ul class="listLegend">
+          <ul class="legend">
             <li v-if="hasVolatile"><span class="rowtag volatile rounded"></span> volatile</li>
             <li v-if="hasLegacy"><span class="rowtag legacy rounded"></span> legacy</li>
             <li v-if="hasExperimental"><span class="rowtag experimental rounded"></span> experimental</li>
@@ -81,10 +81,10 @@
             Download all
           </BaseButton>
           <br />
-          <span v-if="!downloadFailed" class="dlcount" :class="{ disabled: isBusy || downloadIsBusy }">
+          <span v-if="!downloadFailed" class="download-size" :class="{ disabled: isBusy || downloadIsBusy }">
             {{ listLength }} files ({{ humanReadableSize(combinedFileSize(apiResponse)) }})
           </span>
-          <div v-else class="dlcount errormsg">
+          <div v-else class="download-size errormsg">
             {{ dlFailedMessage || "Download failed!" }}
           </div>
         </div>
@@ -98,7 +98,7 @@
         <div class="preview-subtitle">
           {{ humanReadableDate(previewResponse.measurementDate) }}
         </div>
-        <div class="filePreview">
+        <div class="preview-visualization">
           <visualization
             :data="pendingVisualization"
             @load="changePreview"
@@ -181,8 +181,6 @@ import BaseButton from "./BaseButton.vue";
 import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
 import Visualization from "./ImageVisualization.vue";
 import type { FileResponse } from "@/views/FileView.vue";
-// import styles from './DataSearchResult.vue?vue&type=style&index=0&lang=sass&module=1';
-// console.log(styles);
 
 export interface Props {
   apiResponse: SearchFileResponse[];
@@ -312,155 +310,139 @@ onBeforeUnmount(() => {
 });
 </script>
 
-<style scoped lang="sass">
-@import "@/sass/variables.sass"
-@import "@/sass/landing.sass"
+<style scoped lang="scss">
+#fileTable {
+  display: flex;
+  width: 100%;
+  text-align: left;
 
-:export
-  helo: 1
+  :deep(.icon) {
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: 20px !important;
+    font-size: 0;
+  }
 
-#fileTable
-  display: flex
-  width: 100%
-  text-align: left
+  .download-size {
+    color: gray;
+    font-size: 85%;
+    text-align: center;
+    display: block;
+    float: right;
+  }
+}
 
-  #tableContent
-    margin-top: 10px
+.preview-title,
+.results-title {
+  font-size: 1.2rem;
+  margin-bottom: 0.25rem;
+}
 
-  :deep(.icon)
-    background-repeat: no-repeat !important
-    background-position: center !important
-    background-size: 20px !important
-    font-size: 0
+.preview-subtitle,
+.results-subtitle {
+  color: gray;
+}
 
-  .downloadinfo
-    float: right
-    margin-top: 30px
+.noresults {
+  text-align: center;
+  margin-top: 3em;
+}
 
-  .downloadinfo > .download
-    float: right
+.column1 {
+  flex-basis: 55%;
+  padding-top: 2rem;
+}
 
-  .dlcount
-    color: gray
-    font-size: 85%
-    text-align: center
-    display: block
-    float: right
+.results {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
 
-  .download:focus
-    outline: thin dotted black
+.results-title {
+  grid-row: 1;
+  grid-column: 1 / 3;
+}
 
-.preview-title, .results-title
-  font-size: 1.2rem
-  margin-bottom: .25rem
+.results-subtitle {
+  grid-row: 2;
+  grid-column: 1 / 3;
+  font-size: 85%;
+}
 
-.preview-subtitle, .results-subtitle
-  color: gray
+.results-content {
+  grid-row: 3;
+  grid-column: 1 / 3;
+  margin: 1rem 0 2rem;
+}
 
-.noresults
-  text-align: center
-  margin-top: 3em
+.results-pagination {
+  grid-row: 4;
+  grid-column: 1;
+}
 
-.column1
-  flex-basis: 55%
-  padding-top: 2rem
+.results-download {
+  grid-row: 4;
+  grid-column: 2;
+}
 
-.results
-  display: grid
-  grid-template-columns: 1fr 1fr
+.column2 {
+  flex-basis: 45%;
+  border-left: 1px solid #ddd;
+  padding: 2rem;
+  padding-right: 0;
+  margin-left: 2rem;
 
-.results-title
-  grid-row: 1
-  grid-column: 1 / 3
-
-.results-subtitle
-  grid-row: 2
-  grid-column: 1 / 3
-  color: gray
-  font-size: 85%
-
-.results-content
-  grid-row: 3
-  grid-column: 1 / 3
-  margin: 1rem 0 2rem
-
-.results-pagination
-  grid-row: 4
-  grid-column: 1
-
-.results-download
-  grid-row: 4
-  grid-column: 2
-
-.column2
-  flex-basis: 45%
-  border-left: 1px solid #ddd
-  padding: 2rem
-  padding-right: 0
-  margin-left: 2rem
-
-  .infoBox
-    margin: 0
-
-  #file
-    width: 100%
-
-  &.busy
-    opacity: 0.5
-    pointer-events: none
-
+  &.busy {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}
 
 // NOTE: Keep the breakpoint in sync with JavaScript above.
-@media screen and (max-width: 1200px)
-  .column2
-    display: none
-  .column1
-    flex-basis: 100%
+@media screen and (max-width: 1200px) {
+  .column2 {
+    display: none;
+  }
 
-.listLegend
-  list-style: none
-  display: flex
-  gap: .5em
-  float: right
-  text-align: right
+  .column1 {
+    flex-basis: 100%;
+  }
+}
 
-.inlineblock
-  display: inline-block
+.legend {
+  list-style: none;
+  display: flex;
+  gap: 0.5rem;
+  float: right;
+  text-align: right;
+}
 
-.center
-  text-align: center
+.inffff {
+  display: grid;
+  grid-template-columns: auto 4fr;
+  column-gap: 2rem;
+  row-gap: 0.4rem;
 
-#preview
-  width: 100%
+  dt {
+    font-weight: 500;
+  }
+}
 
-.visualization
-  width: 100%
-  height: auto
+.preview-visualization {
+  margin-top: 1rem;
+  aspect-ratio: 5 / 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-.inffff
-  display: grid
-  grid-template-columns: auto 4fr
-  column-gap: 2rem
-  row-gap: .4rem
+.qualitycheck {
+  display: flex;
+  align-items: center;
 
-  dt
-    font-weight: 500
-
-.filePreview
-  margin-top: 1rem
-  aspect-ratio: 5 / 2
-  display: flex
-  align-items: center
-  justify-content: center
-
-.download
-  margin-top: 0rem
-
-.qualitycheck
-  display: flex
-  align-items: center
-
-  img
-    height: 1.15em
-    margin-right: 5px
+  img {
+    height: 1.15em;
+    margin-right: 5px;
+  }
+}
 </style>

@@ -1,49 +1,3 @@
-<style scoped lang="sass">
-@import "@/sass/variables.sass"
-@import "@/sass/landing.sass"
-
-div.flex
-  display: flex
-  justify-content: center
-  flex-wrap: wrap
-
-main.column
-  flex-direction: column
-  align-content: flex-start
-  margin-right: 80px
-  margin-bottom: 40px
-@media screen and (max-width: $narrow-screen)
-  main.column
-    margin-right: 0
-
-.rightView
-  flex: 1 1 600px
-
-  > h3
-    margin-top: 2em
-    margin-bottom: 0.7em
-  > h3:nth-child(1)
-    margin-top: 0
-
-.download
-  display: inline-block
-  margin-top: 0.5em
-
-#editCollection
-  ul
-    margin-top: 0.5em
-  li
-    list-style: none
-  h4
-    margin-top: 1em
-  .infobox
-    padding: 1em
-
-#sitemap .details
-  height: 300px
-  padding: 0
-</style>
-
 <template>
   <div>
     <div v-if="!error && response">
@@ -179,3 +133,45 @@ onMounted(async () => {
   }
 });
 </script>
+
+<style scoped lang="scss">
+@import "@/sass/variables.scss";
+@import "@/sass/landing.sass";
+
+div.flex {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+main.column {
+  flex-direction: column;
+  align-content: flex-start;
+  margin-right: 80px;
+  margin-bottom: 40px;
+}
+
+@media screen and (max-width: $narrow-screen) {
+  main.column {
+    margin-right: 0;
+  }
+}
+
+.rightView {
+  flex: 1 1 600px;
+
+  > h3 {
+    margin-top: 2em;
+    margin-bottom: 0.7em;
+  }
+
+  > h3:nth-child(1) {
+    margin-top: 0;
+  }
+}
+
+#sitemap .details {
+  height: 300px;
+  padding: 0;
+}
+</style>

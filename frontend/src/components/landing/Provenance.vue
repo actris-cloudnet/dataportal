@@ -1,9 +1,5 @@
 <style scoped lang="scss">
 .data-sources {
-  li {
-    padding: 0.1rem 0;
-  }
-
   a {
     display: inline-flex;
     align-items: center;

@@ -1,17 +1,3 @@
-<style scoped lang="sass">
-@import "@/sass/variables.sass"
-
-svg
-  height: 180px
-  width: 180px
-
-text
-  fill: white
-  font-family: "Roboto", sans-serif
-  font-size: .70rem
-  font-weight: bold
-</style>
-
 <template>
   <svg viewBox="0 0 170 170">
     <g v-for="(segment, index) in segments()" :key="index">
@@ -112,3 +98,16 @@ function segmentBigEnough(segment: Segment): boolean {
   return segment.value > 0.05;
 }
 </script>
+
+<style scoped lang="scss">
+svg {
+  height: 180px;
+  width: 180px;
+}
+
+text {
+  fill: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+</style>

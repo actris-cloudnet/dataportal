@@ -16,7 +16,7 @@ defineProps<Props>();
 </template>
 
 <style lang="scss" scoped>
-@import "@/sass/new-variables.scss";
+@import "@/sass/variables.scss";
 
 .alert {
   display: flex;

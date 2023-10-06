@@ -1,71 +1,5 @@
-<style lang="sass">
-@import "@/sass/variables.sass"
-@import "leaflet/dist/leaflet.css"
-@import "leaflet-draw/dist/leaflet.draw.css"
-
-.map
-  width: 100%
-  height: 100%
-
-.legend
-  background: white
-  padding: 0.5em
-  opacity: 0.8
-  border: 2px solid rgba(0,0,0,0.2)
-  border-radius: 2px
-  background-clip: padding-box
-
-.legendlist
-  list-style: none
-  padding-left: 0
-  margin-bottom: 0
-  line-height: 1.2em
-  li
-    text-transform: capitalize
-  li.violet
-    /* for arm */
-    text-transform: uppercase
-  li:before
-    content: '■ '
-    font-size: 1.4em
-  li.blue:before
-    color: #4393d0
-  li.yellow:before
-    color: #ccc334
-  li.violet:before
-    color: #9b29cb
-  li.orange:before
-    color: #cc832c
-  li.green:before
-    color: #00B100
-  li.red:before
-    color: #cc2c47
-
-.custom-popup .leaflet-popup-content-wrapper
-  opacity: 0.7
-  background: white
-  color: black
-  box-shadow: 0 3px 14px rgba(0,0,0,0.4)
-  text-align: center
-  padding-left: 1em
-  padding-right: 1em
-
-.custom-popup .leaflet-popup-content
-  margin: 0.8em -0.2em
-  line-height: 0.4
-  font-size: 12px
-  width: auto
-
-.custom-popup .leaflet-popup-tip
-  opacity: 0.8
-  overflow: hidden
-
-.fullHeight
-  height: 100%
-</style>
-
 <template>
-  <div id="mapContainer" ref="mapElement" class="map" style="z-index: 4"></div>
+  <div ref="mapElement" class="map"></div>
 </template>
 
 <script lang="ts" setup>
@@ -280,3 +214,93 @@ watch(
   },
 );
 </script>
+
+<style src="leaflet/dist/leaflet.css"></style>
+
+<style src="leaflet-draw/dist/leaflet.draw.css"></style>
+
+<style scoped lang="scss">
+.map {
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+}
+
+:deep() {
+  .legend {
+    background: white;
+    padding: 0.5em;
+    opacity: 0.8;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+    background-clip: padding-box;
+  }
+
+  .legendlist {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+    line-height: 1.2em;
+
+    li {
+      text-transform: capitalize;
+    }
+
+    li.violet {
+      /* for arm */
+      text-transform: uppercase;
+    }
+
+    li:before {
+      content: "■ ";
+      font-size: 1.4em;
+    }
+
+    li.blue:before {
+      color: #4393d0;
+    }
+
+    li.yellow:before {
+      color: #ccc334;
+    }
+
+    li.violet:before {
+      color: #9b29cb;
+    }
+
+    li.orange:before {
+      color: #cc832c;
+    }
+
+    li.green:before {
+      color: #00b100;
+    }
+
+    li.red:before {
+      color: #cc2c47;
+    }
+  }
+
+  .custom-popup .leaflet-popup-content-wrapper {
+    opacity: 0.7;
+    background: white;
+    color: black;
+    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    padding-left: 1em;
+    padding-right: 1em;
+  }
+
+  .custom-popup .leaflet-popup-content {
+    margin: 0.8em -0.2em;
+    line-height: 0.4;
+    font-size: 12px;
+    width: auto;
+  }
+
+  .custom-popup .leaflet-popup-tip {
+    opacity: 0.8;
+    overflow: hidden;
+  }
+}
+</style>

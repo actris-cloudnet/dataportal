@@ -84,7 +84,7 @@ watchEffect(async () => {
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/new-variables.scss";
+@import "@/sass/variables.scss";
 
 .error {
   color: red;

@@ -1,6 +1,6 @@
 @import "the-new-css-reset/css/reset.css";
 @import "inter-ui/inter.css";
-@import "./new-variables.scss";
+@import "./variables.scss";
 
 body {
   font-family: "Inter", sans-serif;
@@ -41,6 +41,10 @@ div.errormsg,
 
 a {
   color: $blue-sapphire;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .closeX {

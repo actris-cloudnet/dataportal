@@ -19,43 +19,16 @@ import ConceptPopup from "@/components/ConceptPopup.vue";
   </div>
 </template>
 
-<style lang="sass">
-@import "./sass/variables.sass"
-@import "./sass/new-variables.scss"
-@import "./sass/global.scss"
+<style lang="scss">
+@import "./sass/global.scss";
 
-#app
-  display: flex
-  flex-direction: column
-  min-height: 100vh
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
 
-#content
-  flex: 1 1 0
-
-#consent
-  position: fixed
-  background: white
-  width: 100%
-  bottom: 0
-  text-align: center
-  z-index: 100
-  padding: 1em
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3)
-
-  .secondaryButton
-    margin-left: 2em
-
-
-@media screen and (max-width: $narrow-screen)
-  #app > main
-    //margin: 3em auto calc(#{$footer-height-narrow} + 4em)
-    padding-left: 1em
-    padding-right: 1em
-
-#app > main.wide
-  max-width: none
-
-h1, h2, h3, h4, h5, h6
-  line-height: 1
-  font-weight: normal
+#content {
+  flex: 1 1 0;
+}
 </style>

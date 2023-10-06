@@ -27,7 +27,7 @@ defineEmits<{
 </template>
 
 <style lang="scss" scoped>
-@import "@/sass/new-variables";
+@import "@/sass/variables.scss";
 
 .button {
   display: inline-flex;

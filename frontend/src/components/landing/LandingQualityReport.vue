@@ -147,7 +147,7 @@ function formatMessage(message: string): string {
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/new-variables.scss";
+@import "@/sass/variables.scss";
 
 .landing-quality-report-container {
   max-width: 900px;

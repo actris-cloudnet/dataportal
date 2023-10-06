@@ -30,7 +30,7 @@ const id = `checkbox-${idCounter++}`;
 </template>
 
 <style lang="scss" scoped>
-@import "@/sass/new-variables.scss";
+@import "@/sass/variables.scss";
 
 input {
   position: relative;

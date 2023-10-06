@@ -1,7 +1,5 @@
 <style scoped lang="sass">
-@import "@/sass/variables.sass"
 @import "@/sass/landing.sass"
-@import "@/sass/spinner.sass"
 
 .forcewrap
   flex-basis: 100%
@@ -29,7 +27,7 @@
   cursor: pointer
   text-decoration: underline
   color: #bcd2e2
-  margin-bottom: $filter-margin
+  margin-bottom: 2rem
   margin-top: 20px
   display: block
 

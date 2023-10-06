@@ -74,7 +74,7 @@ const jsonUrl = computed(() => `${import.meta.env.VITE_BACKEND_URL}files/${props
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/new-variables.scss";
+@import "@/sass/variables.scss";
 
 .summary-section-header-container {
   display: flex;

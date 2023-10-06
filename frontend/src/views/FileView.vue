@@ -219,7 +219,7 @@ watch(
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/new-variables.scss";
+@import "@/sass/variables.scss";
 
 main {
   display: flex;
@@ -247,7 +247,7 @@ main {
   height: 100%;
 }
 
-:deep {
+:deep() {
   .summary-box {
     display: flex;
     flex-direction: column;

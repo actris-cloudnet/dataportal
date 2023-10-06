@@ -1,52 +1,3 @@
-<style src="vue-multiselect/dist/vue-multiselect.css"></style>
-
-<style lang="sass">
-@import "@/sass/variables.sass"
-
-.nobottommargin
-  margin-top: 15px
-
-.multiselect__input
-  padding: 2px
-  padding-left: 0
-  &::placeholder
-    font-size: 88%
-    color: gray
-
-.multiselect__tags-wrap
-  span, span i:hover
-    color: black
-    background-color: $steel-warrior
-
-.multiselect__element
-  font-size: 90%
-  color: black
-  .multiselect__option--highlight
-    color: black
-    background-color: $steel-warrior
-    span
-      background-color: $steel-warrior
-  .multiselect__option--selected
-    background-color: white
-    pointer-events: none
-    span
-      background-color: white
-      font-weight: normal
-      color: #bbbbbb
-      img
-        opacity: 0.5
-
-.multiselect__tag-icon:after
-  color: gray
-
-.option__image
-  height: 1.2em
-  width: auto
-  position: relative
-  top: -1px
-  margin-right: 0.4em
-</style>
-
 <template>
   <div>
     <label :for="id">{{ label }}</label>
@@ -134,3 +85,69 @@ const value = computed({
   },
 });
 </script>
+
+<style src="vue-multiselect/dist/vue-multiselect.css"></style>
+
+<style lang="scss">
+@import "@/sass/variables.scss";
+
+.multiselect__input {
+  padding: 2px;
+  padding-left: 0;
+
+  &::placeholder {
+    font-size: 88%;
+    color: gray;
+  }
+}
+
+.multiselect__tags-wrap {
+  span,
+  span i:hover {
+    color: black;
+    background-color: $steel-warrior;
+  }
+}
+
+.multiselect__element {
+  font-size: 90%;
+  color: black;
+
+  .multiselect__option--highlight {
+    color: black;
+    background-color: $steel-warrior;
+
+    span {
+      background-color: $steel-warrior;
+    }
+  }
+
+  .multiselect__option--selected {
+    background-color: white;
+    pointer-events: none;
+
+    span {
+      background-color: white;
+      font-weight: normal;
+      color: #bbbbbb;
+
+      img {
+        opacity: 0.5;
+      }
+    }
+  }
+}
+
+.multiselect__tag-icon::after {
+  color: gray;
+}
+
+.option__image {
+  height: 1.2em;
+  width: auto;
+  position: relative;
+  top: -1px;
+  margin-right: 0.4em;
+  vertical-align: middle;
+}
+</style>

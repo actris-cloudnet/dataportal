@@ -1,97 +1,3 @@
-<style lang="sass">
-@import "@/sass/variables.sass"
-@import "@/sass/visualizations.sass"
-
-main#vizSearchResults
-  width: 100%
-  margin-bottom: 7em
-  padding-top: 2rem
-
-  header
-    display: flex
-    align-items: center
-    justify-content: space-between
-    margin-bottom: 1em
-.modeSelector
-  display: flex
-  span
-    padding-right: 5px
-
-.notfound
-  margin-top: $filter-margin
-  text-align: center
-
-.switch
-  position: relative
-  display: inline-block
-  width: 30px
-  min-width: 30px
-  height: 19px
-  margin-top: 2px
-
-.switch input
-  opacity: 0
-  width: 0
-  height: 0
-
-.slider
-  position: absolute
-  cursor: pointer
-  top: 0
-  left: 0
-  right: 0
-  bottom: 0
-  background-color: #ccc
-  -webkit-transition: .4s
-  transition: .4s
-
-.slider:before
-  position: absolute
-  content: ""
-  height: 13px
-  width: 13px
-  left: 3px
-  bottom: 3px
-  background-color: white
-  -webkit-transition: .4s
-  transition: .4s
-
-input:checked + .slider
-  background-color: $blue-sapphire-light
-
-input:focus + .slider
-  box-shadow: 0 0 1px $blue-sapphire-light
-
-input:checked + .slider:before
-  -webkit-transform: translateX(11px)
-  -ms-transform: translateX(11px)
-  transform: translateX(11px)
-
-.slider.round
-  border-radius: 15px
-
-.slider.round:before
-  border-radius: 50%
-
-#switchlabel
-  font-size: 90%
-  padding-right: 5px
-  cursor: pointer
-
-h3 > .rowtag
-  margin-left: 1em
-  padding: 0.4em
-  font-size: 0.8em
-  border-radius: 5px
-
-.sourceFileLink
-  color: inherit
-  text-decoration: none
-
-.experimental
-  background-color: #EC9706
-</style>
-
 <template>
   <main id="vizSearchResults" :class="{ singleColumn: !comparisonView, opaque: isBusy }">
     <header>
@@ -197,3 +103,153 @@ watchEffect(() => {
   props.setWideMode(comparisonView);
 });
 </script>
+
+<style scoped lang="scss">
+@import "@/sass/variables.scss";
+
+$filter-margin: 2rem;
+$column-spacing: 10px;
+
+main#vizSearchResults {
+  width: 100%;
+  margin-bottom: 7em;
+  padding-top: 2rem;
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1em;
+  }
+}
+
+.modeSelector {
+  display: flex;
+
+  span {
+    padding-right: 5px;
+  }
+}
+
+.notfound {
+  margin-top: 2rem;
+  color: gray;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  min-width: 30px;
+  height: 19px;
+  margin-top: 2px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+}
+
+.slider::before {
+  position: absolute;
+  content: "";
+  height: 13px;
+  width: 13px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+}
+
+input:checked + .slider {
+  background-color: $blue-sapphire-light;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px $blue-sapphire-light;
+}
+
+input:checked + .slider:before {
+  transform: translateX(11px);
+}
+
+.slider.round {
+  border-radius: 15px;
+}
+
+.slider.round::before {
+  border-radius: 50%;
+}
+
+#switchlabel {
+  font-size: 90%;
+  padding-right: 5px;
+  cursor: pointer;
+}
+
+.sourceFileLink {
+  color: inherit;
+}
+
+div.sourceFile .variables {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(700px, 100%), 1fr));
+  row-gap: 1rem;
+}
+
+div.paddedSourceFile + div.paddedSourceFile,
+.sideBySide div.sourceFile:nth-child(n + 3) {
+  border-top: 1px solid silver;
+  padding-top: 1em;
+  margin-top: $filter-margin;
+}
+
+.sideBySide {
+  display: flex;
+  flex-wrap: wrap;
+
+  div.sourceFile {
+    flex-basis: calc(50% - #{$column-spacing});
+    align-content: flex-start;
+    padding: 0;
+    border: none;
+    margin: 0;
+  }
+
+  div.sourceFile:nth-child(odd) {
+    padding-right: calc($column-spacing/2);
+  }
+
+  div.sourceFile:nth-child(even) {
+    padding-left: calc($column-spacing/2);
+  }
+
+  div.sourceFile:only-child {
+    flex-basis: 100%;
+  }
+}
+.sourceFile h3 {
+  width: 100%;
+  margin-bottom: 1.5em;
+  font-size: 1.1em;
+
+  svg {
+    position: relative;
+    top: -1px;
+    width: 0.9em;
+    height: auto;
+  }
+}
+</style>

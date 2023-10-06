@@ -44,7 +44,7 @@ const showMenu = ref(false);
 </template>
 
 <style scoped lang="scss">
-@import "@/sass/new-variables";
+@import "@/sass/variables.scss";
 
 $header-height: 4.5rem;
 $header-color: darken(#78c0e0, 25%);

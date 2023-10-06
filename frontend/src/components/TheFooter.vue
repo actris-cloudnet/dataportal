@@ -1,6 +1,30 @@
+<template>
+  <footer>
+    <div class="container pagewidth">
+      <div class="item">
+        Contact:<br />
+        <a href="mailto:actris-cloudnet@fmi.fi">actris-cloudnet@fmi.fi</a><br />
+        <a href="https://github.com/actris-cloudnet/">GitHub organization</a>
+      </div>
+      <div class="item hidden-links">
+        <span> &copy; <a href="https://en.ilmatieteenlaitos.fi/">Finnish Meteorological Institute</a> </span><br />
+        <span class="small">
+          <a href="https://www.flickr.com/photos/theaucitron/5810163712/">Header photo</a>
+          by <a href="https://www.flickr.com/photos/theaucitron/">theaucitron</a>,
+          <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a>.<br />
+          Icons from <a href="https://icons8.com/">icons8.com</a>.
+        </span>
+      </div>
+      <div class="item">
+        <a href="https://docs.cloudnet.fmi.fi/api/data-portal.html">API documentation</a><br />
+        <router-link to="/privacy">Privacy policy</router-link>
+      </div>
+    </div>
+  </footer>
+</template>
+
 <style scoped lang="scss">
-@import "@/sass/variables.sass";
-@import "@/sass/new-variables.scss";
+@import "@/sass/variables.scss";
 
 footer {
   background: #fdfdfd;
@@ -40,28 +64,3 @@ footer {
   font-size: 60%;
 }
 </style>
-
-<template>
-  <footer>
-    <div class="container pagewidth">
-      <div class="item">
-        Contact:<br />
-        <a href="mailto:actris-cloudnet@fmi.fi">actris-cloudnet@fmi.fi</a><br />
-        <a href="https://github.com/actris-cloudnet/">GitHub organization</a>
-      </div>
-      <div class="item hidden-links">
-        <span> &copy; <a href="https://en.ilmatieteenlaitos.fi/">Finnish Meteorological Institute</a> </span><br />
-        <span class="small">
-          <a href="https://www.flickr.com/photos/theaucitron/5810163712/">Header photo</a>
-          by <a href="https://www.flickr.com/photos/theaucitron/">theaucitron</a>,
-          <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a>.<br />
-          Icons from <a href="https://icons8.com/">icons8.com</a>.
-        </span>
-      </div>
-      <div class="item">
-        <a href="https://docs.cloudnet.fmi.fi/api/data-portal.html">API documentation</a><br />
-        <router-link to="/privacy">Privacy policy</router-link>
-      </div>
-    </div>
-  </footer>
-</template>

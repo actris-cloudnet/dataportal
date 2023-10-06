@@ -1,6 +1,5 @@
 <style lang="scss" scoped>
-@import "@/sass/variables.sass";
-@import "@/sass/new-variables.scss";
+@import "@/sass/variables.scss";
 
 main {
   box-sizing: content-box;
@@ -9,12 +8,9 @@ main {
   padding: 1rem;
 }
 
-h1 {
-  margin-bottom: 3rem;
-}
-
 h2 {
   margin-bottom: 1rem;
+  font-size: 1.2rem;
 }
 
 p {
@@ -23,12 +19,14 @@ p {
 
 .table {
   width: unset;
+  margin-top: 0.5rem;
 }
 
 .table-striped {
   th:focus {
     outline: thin dotted;
   }
+
   td,
   th {
     padding: 9px;
@@ -37,6 +35,7 @@ p {
       padding-right: 0;
     }
   }
+
   tr:nth-child(2n + 1) > td {
     background-color: $blue-dust;
   }
@@ -47,9 +46,11 @@ p {
     cursor: pointer;
     background-color: #e4eff7;
   }
+
   tr:focus td {
     background-color: #e4eff7;
   }
+
   tr {
     outline: none;
   }

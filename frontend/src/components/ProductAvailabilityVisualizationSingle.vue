@@ -1,30 +1,3 @@
-<style scoped lang="sass">
-@import "@/sass/variables.sass"
-@import "@/sass/spinner.sass"
-@import "@/sass/availability.sass"
-
-.dataviz-date
-  width: calc(1%/3.66)
-  height: 1em
-  display: inline-block
-  position: relative
-  border-top: 1px solid gray
-  border-bottom: 1px solid gray
-
-.dataviz-tooltip
-  position: fixed
-  z-index: 10
-  background: white
-  padding-top: 0.1em
-  padding-left: 0.2em
-  padding-right: 0.2em
-  box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.2)
-
-  img
-    height: 1em
-    margin-top: -4px
-</style>
-
 <template>
   <!-- eslint-disable vue/require-v-for-key -->
   <div id="data_availability_visualization" v-if="!busy">
@@ -250,3 +223,31 @@ const debounceMs = 1000 / 60;
 const debouncedSetCurrentYearDate = debounce(setCurrentYearDate, debounceMs);
 const debouncedHideTooltip = debounce(hideTooltip, debounceMs);
 </script>
+
+<style scoped lang="scss">
+@import "@/sass/availability.sass";
+
+.dataviz-date {
+  width: calc(1% / 3.66);
+  height: 1em;
+  display: inline-block;
+  position: relative;
+  border-top: 1px solid gray;
+  border-bottom: 1px solid gray;
+}
+
+.dataviz-tooltip {
+  position: fixed;
+  z-index: 10;
+  background: white;
+  padding-top: 0.1em;
+  padding-left: 0.2em;
+  padding-right: 0.2em;
+  box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.2);
+
+  img {
+    height: 1em;
+    margin-top: -4px;
+  }
+}
+</style>
