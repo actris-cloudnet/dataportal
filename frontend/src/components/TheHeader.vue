@@ -25,7 +25,7 @@ const showMenu = ref(false);
         </li>
         <li>
           <a href="/search/visualizations">
-            <span>Visualize data</span>
+            <span>Visualise data</span>
           </a>
         </li>
         <li style="margin-left: auto">

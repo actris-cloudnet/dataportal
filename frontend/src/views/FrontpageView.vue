@@ -23,7 +23,7 @@
         </BaseButton>
         <BaseButton to="search/visualizations" type="primary">
           <img alt="graph" :src="graphIcon" />
-          View data visualizations
+          View data visualisations
         </BaseButton>
         <BaseButton href="https://docs.cloudnet.fmi.fi" type="primary">
           <img alt="documents" :src="docsIcon" />

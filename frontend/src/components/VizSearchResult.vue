@@ -1,7 +1,7 @@
 <template>
   <main id="vizSearchResults" :class="{ singleColumn: !comparisonView, opaque: isBusy }">
     <header>
-      <h3>Visualizations for {{ humanReadableDate(date) }}</h3>
+      <h3>Visualisations for {{ humanReadableDate(date) }}</h3>
       <span v-if="isBusy" class="listTitle">Loading...</span>
       <div v-if="searchYieldedResults">
         <div class="modeSelector">
@@ -14,7 +14,7 @@
       </div>
     </header>
     <section v-if="noSelectionsMade" class="notfound">
-      Please make a selection in the search filters to display visualizations.
+      Please make a selection in the search filters to display visualisations.
     </section>
     <section v-else-if="searchYieldedResults" class="vizContainer" :class="{ sideBySide: comparisonView }">
       <div
@@ -58,7 +58,7 @@
         </div>
       </div>
     </section>
-    <section class="notfound" v-else>No visualizations were found with the selected parameters.</section>
+    <section class="notfound" v-else>No visualisations were found with the selected parameters.</section>
   </main>
 </template>
 
