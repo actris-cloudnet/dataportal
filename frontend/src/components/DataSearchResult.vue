@@ -383,6 +383,7 @@ onBeforeUnmount(() => {
 .results-download {
   grid-row: 4;
   grid-column: 2;
+  justify-self: end;
 }
 
 .column2 {

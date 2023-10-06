@@ -1,6 +1,8 @@
 <template>
   <main v-if="mode === 'visualizations' || mode === 'data'" id="search" :class="mainWidth">
-    <div v-if="error" class="note rednote">Error: Search backend is offline, {{ error }}</div>
+    <BaseAlert v-if="error" type="error" style="margin-top: 1rem">
+      Error: Search backend is offline, {{ error }}
+    </BaseAlert>
 
     <div v-if="allSites && allSites.length > 0 && showAllSites" class="widemap">
       <SuperMap
@@ -234,6 +236,7 @@ import { useRoute, useRouter } from "vue-router";
 import ApiError from "./ApiError.vue";
 import CheckBox from "@/components/CheckBox.vue";
 import BaseButton from "@/components/BaseButton.vue";
+import BaseAlert from "@/components/BaseAlert.vue";
 
 import datePreviousIcon from "@/assets/icons/date-previous.png";
 import dateNextIcon from "@/assets/icons/date-next.png";
@@ -748,24 +751,6 @@ a:focus {
   outline: thin dotted;
 }
 
-.rednote {
-  border-color: #ffcfcf;
-  background: #fde5e5;
-}
-
-.close {
-  float: right;
-  font-weight: bold;
-  color: lightgrey;
-  cursor: pointer;
-  margin-left: 1em;
-}
-
-.rednote > .close {
-  color: grey;
-  font-weight: normal;
-}
-
 section#sideBar {
   margin-right: 80px;
   width: 300px;
@@ -807,14 +792,6 @@ div.date {
   color: #bcd2e2;
   margin-bottom: $filter-margin;
   display: block;
-}
-
-.disabled {
-  opacity: 0.5;
-}
-
-.hidden {
-  display: none;
 }
 
 .multiselect--disabled {
