@@ -8,13 +8,13 @@
         :instrumentStatus="instrumentStatus"
       />
       <FileInformation :response="response" />
-      <Provenance :response="response" :isBusy="isBusy" :versions="versions" :sourceFiles="sourceFiles" />
+      <FileProvenance :response="response" :isBusy="isBusy" :versions="versions" :sourceFiles="sourceFiles" />
     </div>
     <div class="summary-box summary-box-visualization">
-      <Preview :visualization="visualization" :loading="loadingVisualizations" />
+      <FilePreview :visualization="visualization" :loading="loadingVisualizations" />
     </div>
     <div class="summary-box summary-box-citation" id="citation" :class="{ volatile: response.volatile }">
-      <Citation :uuid="uuid" :file="response" v-if="response" />
+      <FileCitation :uuid="uuid" :file="response" v-if="response" />
     </div>
   </div>
 </template>
@@ -26,9 +26,9 @@ import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
 
 import FileInformation from "./FileInformation.vue";
 import ProductInformation from "./ProductInformation.vue";
-import Provenance from "./Provenance.vue";
-import Preview from "./FilePreview.vue";
-import Citation from "./FileCitation.vue";
+import FileProvenance from "./FileProvenance.vue";
+import FilePreview from "./FilePreview.vue";
+import FileCitation from "./FileCitation.vue";
 import type { SourceFile, FileResponse } from "@/views/FileView.vue";
 import { useTitle } from "@/router";
 

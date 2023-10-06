@@ -556,13 +556,6 @@ function replaceUrlQueryString(params: Record<string, Date | string[]>) {
   });
 }
 
-const downloadUri = computed(() =>
-  axios.getUri({
-    ...{ method: "post", url: `${apiUrl}download/` },
-    ...payload,
-  }),
-);
-
 const payload = computed(() => {
   return {
     params: {

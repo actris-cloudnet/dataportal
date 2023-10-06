@@ -97,13 +97,6 @@ const title = computed(() =>
     : "",
 );
 
-const isActrisObject = computed(() => {
-  if (!response.value) {
-    return false;
-  }
-  return response.value.site.actrisId != null;
-});
-
 const currentVersionIndex = computed(() => {
   if (response.value == null) return null;
   return versions.value.findIndex((uuid) => uuid == props.uuid);
