@@ -62,7 +62,7 @@
           </template>
         </BaseTable>
         <BasePagination
-          class="results-pagitation"
+          class="results-pagination"
           v-if="listLength > perPage"
           v-model="currentPage"
           :total-rows="listLength"
