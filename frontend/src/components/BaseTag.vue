@@ -30,7 +30,7 @@ withDefaults(defineProps<Props>(), { size: "normal" });
 
 .small {
   font-size: 75%;
-  padding: 0.1rem 0.4rem;
+  padding: 0.1rem 0.5rem;
 }
 
 .experimental {
