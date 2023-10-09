@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import axios from "axios";
 import type { CollectionResponse } from "@shared/entity/CollectionResponse";
 import HowToCite from "@/components/HowToCite.vue";
-import License from "@/components/LicenseInfo.vue";
+import LicenseInfo from "@/components/LicenseInfo.vue";
 import BaseButton from "@/components/BaseButton.vue";
 import BaseAlert from "@/components/BaseAlert.vue";
 
@@ -48,11 +48,13 @@ onMounted(() => {
     <BaseAlert type="error" v-if="pidServiceError">
       Failed to create DOI for this collection. Please try again later.
     </BaseAlert>
-    <HowToCite :uuid="citationBusy ? undefined : collection.uuid" />
-    <h3>License</h3>
-    <license></license>
-    <h3>Download</h3>
-    By clicking the download button you confirm that you have taken notice of the above data licensing information.<br />
+    <HowToCite :uuid="citationBusy ? undefined : collection.uuid" titleClass="title" />
+    <h3 class="title">License</h3>
+    <LicenseInfo />
+    <h3 class="title">Download</h3>
+    <p>
+      By clicking the download button you confirm that you have taken notice of the above data licensing information.
+    </p>
     <BaseButton type="primary" :href="downloadUrl" id="downloadCollection">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
         <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
@@ -61,3 +63,22 @@ onMounted(() => {
     </BaseButton>
   </section>
 </template>
+
+<style scoped lang="scss">
+section {
+  padding-bottom: 1rem;
+}
+
+:deep(.title) {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+
+  &:not(:first-child) {
+    margin-top: 2rem;
+  }
+}
+
+p {
+  margin-bottom: 1rem;
+}
+</style>
