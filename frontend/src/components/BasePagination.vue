@@ -81,5 +81,9 @@ button {
     background-color: $steel-warrior;
     border-color: $steel-warrior;
   }
+
+  &:disabled {
+    color: silver;
+  }
 }
 </style>

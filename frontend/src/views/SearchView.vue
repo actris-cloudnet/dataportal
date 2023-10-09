@@ -42,7 +42,7 @@
             :multiple="true"
             :getIcon="getMarkerIcon"
           />
-          <CheckBox v-model="showAllSites" label="Show all sites" />
+          <CheckBox class="checkbox" v-model="showAllSites" label="Show all sites" />
         </div>
 
         <div class="filterbox">
@@ -118,12 +118,18 @@
               :key="vizDateUpdate"
             />
             <div class="dateButtons">
-              <button id="previousBtn" class="dateBtn" @click="setPreviousDate()" :disabled="!hasPreviousDate()">
-                <img alt="calendar" class="dateIcon" :src="datePreviousIcon" />
-              </button>
-              <button id="nextBtn" class="dateBtn" @click="setNextDate()" :disabled="!hasNextDate()">
-                <img alt="calendar" class="dateIcon" :src="dateNextIcon" />
-              </button>
+              <BaseButton type="secondary" id="previousBtn" @click="setPreviousDate()" :disabled="!hasPreviousDate()">
+                &larr;
+              </BaseButton>
+              <BaseButton
+                type="secondary"
+                id="nextBtn"
+                @click="setNextDate()"
+                :disabled="!hasNextDate()"
+                style="margin-left: 0.5rem"
+              >
+                &rarr;
+              </BaseButton>
             </div>
             <div v-if="dateToError && !dateToError.isValidDateString" class="errormsg">
               Invalid input. Insert date in the format <i>yyyy-mm-dd</i>.
@@ -132,7 +138,7 @@
               Provided date is in the future.
             </div>
           </div>
-          <CheckBox v-model="showDateRange" label="Show date range" />
+          <CheckBox class="checkbox" v-model="showDateRange" label="Show date range" v-if="!isVizMode" />
         </div>
 
         <div class="filterbox">
@@ -144,7 +150,7 @@
             :multiple="true"
             :getIcon="getProductIcon"
           />
-          <CheckBox v-model="showExpProducts" label="Show experimental products" />
+          <CheckBox class="checkbox" v-model="showExpProducts" label="Show experimental products" />
         </div>
 
         <div class="filterbox">
@@ -849,6 +855,7 @@ div.date {
     border-radius: 3px;
     background-color: $blue-dust;
     flex-grow: 1;
+    text-align: center;
 
     &:hover {
       background-color: $steel-warrior;
@@ -886,25 +893,6 @@ div.date {
   .dateBtn:hover:enabled {
     background-color: $steel-warrior;
   }
-
-  .dateBtn {
-    padding-left: 10px;
-    padding-right: 10px;
-    margin-right: 12px;
-    border: 1px solid $steel-warrior;
-    border-radius: 3px;
-    background-color: $blue-dust;
-
-    &:focus {
-      outline: thin dotted;
-    }
-
-    .dateIcon {
-      height: 1.5em;
-      width: auto;
-      margin-right: 1.5em;
-    }
-  }
 }
 
 span.centerlabel {
@@ -934,24 +922,6 @@ span.centerlabel {
 @media screen and (max-width: $medium-screen) {
   .widemapmarginright {
     margin-top: 0px;
-  }
-}
-
-div.checkbox {
-  position: relative;
-  top: -1.5em;
-  margin-bottom: 1em;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-
-  label {
-    margin-left: 0.5em;
-    margin-top: 0;
-
-    &::after {
-      content: "";
-    }
   }
 }
 
@@ -994,5 +964,9 @@ div.checkbox {
 
 .filterbox {
   margin-top: 1rem;
+}
+
+.checkbox {
+  margin-top: 0.25rem;
 }
 </style>

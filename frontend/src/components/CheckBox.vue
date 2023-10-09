@@ -18,7 +18,7 @@ const id = `checkbox-${idCounter++}`;
 </script>
 
 <template>
-  <div>
+  <div class="wrapper">
     <input
       :id="id"
       type="checkbox"
@@ -31,6 +31,12 @@ const id = `checkbox-${idCounter++}`;
 
 <style lang="scss" scoped>
 @import "@/sass/variables.scss";
+
+.wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
 
 input {
   position: relative;
@@ -67,5 +73,6 @@ input {
 
 label {
   cursor: default;
+  font-size: 90%;
 }
 </style>
