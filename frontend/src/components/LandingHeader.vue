@@ -34,7 +34,6 @@ header {
   display: grid;
   grid-template-columns: minmax(min-content, max-content) auto min-content;
   align-items: center;
-  gap: 0.25rem;
   padding-top: 2rem;
   padding-bottom: 1rem;
 }
