@@ -287,4 +287,59 @@ function formatMessage(message: string): string {
     }
   }
 }
+
+@media screen and (max-width: $narrow-screen) {
+  .quality-report-header .donut {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .quality-report-stats {
+    grid-template-rows: repeat(4, auto);
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-left: auto;
+    margin-right: auto;
+
+    #tests {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    #ntests {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    #errors {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    #nerrors {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    #warnings {
+      grid-column: 1;
+      grid-row: 3;
+    }
+
+    #nwarnings {
+      grid-column: 1;
+      grid-row: 4;
+    }
+
+    #info {
+      grid-column: 2;
+      grid-row: 3;
+    }
+
+    #ninfo {
+      grid-column: 2;
+      grid-row: 4;
+    }
+  }
+}
 </style>

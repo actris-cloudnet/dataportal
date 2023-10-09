@@ -273,6 +273,7 @@ main {
 
   @media screen and (max-width: 600px) {
     .summary-box {
+      margin: 0 -1rem;
       padding: 1rem;
       box-shadow: none;
       border-radius: 0;

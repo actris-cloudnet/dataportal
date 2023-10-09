@@ -740,7 +740,6 @@ main#search {
 #searchContainer {
   display: flex;
   justify-content: center;
-  flex-wrap: wrap;
 }
 
 main#search.mediumView {
@@ -761,26 +760,24 @@ section#sideBar {
   margin-right: 80px;
   width: 300px;
   padding: 2rem 0;
+  flex-basis: 300px;
+  flex-shrink: 0;
 }
 
 @media screen and (max-width: $narrow-screen) {
+  #searchContainer {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .results {
+    width: 100%;
+  }
+
   section#sideBar {
     margin-right: 0;
   }
 }
-
-@media screen and (max-width: $medium-screen) {
-  section#sideBar {
-    margin-left: 80px;
-    margin-right: 80px;
-  }
-
-  main#search.wideView {
-    padding-left: $lightpadding;
-    padding-right: $lightpadding;
-  }
-}
-
 div.date {
   display: grid;
   grid-template-columns: 42.5% 15% 42.5%;
@@ -814,14 +811,6 @@ div.date {
 .results {
   display: inline-flex;
   flex-grow: 1;
-  min-width: 600px;
-  flex-basis: 600px;
-}
-
-@media screen and (max-width: 1010px) {
-  .results {
-    min-width: 0;
-  }
 }
 
 .widebutton {
