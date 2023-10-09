@@ -777,6 +777,11 @@ section#sideBar {
   section#sideBar {
     margin-right: 0;
   }
+
+  main#search.wideView {
+    padding-left: $lightpadding;
+    padding-right: $lightpadding;
+  }
 }
 div.date {
   display: grid;
