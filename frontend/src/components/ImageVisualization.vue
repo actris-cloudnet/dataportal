@@ -55,6 +55,7 @@ img {
         class="visualization"
         :style="imageStyle"
         @load="onLoad"
+        ref="imgElement"
       />
     </a>
     <router-link :to="linkTo" v-else-if="linkTo">
@@ -66,6 +67,7 @@ img {
         class="visualization"
         :style="imageStyle"
         @load="onLoad"
+        ref="imgElement"
       />
     </router-link>
     <img
@@ -77,6 +79,7 @@ img {
       class="visualization"
       :style="imageStyle"
       @load="onLoad"
+      ref="imgElement"
     />
   </figure>
 </template>
@@ -84,7 +87,7 @@ img {
 <script lang="ts" setup>
 import type { RouteLocationRaw } from "vue-router";
 import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
-import { computed, ref, watchEffect } from "vue";
+import { computed, nextTick, ref, watchEffect } from "vue";
 
 export interface Props {
   data: VisualizationItem;
@@ -108,6 +111,7 @@ const emit = defineEmits<{
 
 const currentData = ref(props.data);
 const nextData = ref(props.data);
+const imgElement = ref<HTMLImageElement | null>(null);
 
 const imageStyle = computed(() => {
   if (
@@ -145,8 +149,12 @@ const captionStyle = computed(() => {
 
 const imageUrl = computed(() => `${import.meta.env.VITE_BACKEND_URL}download/image/${nextData.value.s3key}`);
 
-watchEffect(() => {
+watchEffect(async () => {
   nextData.value = props.data;
+  await nextTick();
+  if (imgElement.value?.complete) {
+    onLoad();
+  }
 });
 
 function onLoad() {
