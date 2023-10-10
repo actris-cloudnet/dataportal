@@ -764,6 +764,13 @@ section#sideBar {
   flex-shrink: 0;
 }
 
+@media screen and (max-width: $page-width) {
+  main#search.wideView {
+    padding-left: $lightpadding;
+    padding-right: $lightpadding;
+  }
+}
+
 @media screen and (max-width: $narrow-screen) {
   #searchContainer {
     flex-direction: column;
@@ -777,12 +784,8 @@ section#sideBar {
   section#sideBar {
     margin-right: 0;
   }
-
-  main#search.wideView {
-    padding-left: $lightpadding;
-    padding-right: $lightpadding;
-  }
 }
+
 div.date {
   display: grid;
   grid-template-columns: 42.5% 15% 42.5%;
