@@ -20,6 +20,7 @@
         <BaseTable
           v-else
           class="results-content"
+          id="tableContent"
           :items="apiResponse"
           keyField="uuid"
           :fields="[

@@ -138,7 +138,13 @@
               Provided date is in the future.
             </div>
           </div>
-          <CheckBox class="checkbox" v-model="showDateRange" label="Show date range" v-if="!isVizMode" />
+          <CheckBox
+            id="showDateRangeCheckbox"
+            class="checkbox"
+            v-model="showDateRange"
+            label="Show date range"
+            v-if="!isVizMode"
+          />
         </div>
 
         <div class="filterbox">
@@ -150,7 +156,12 @@
             :multiple="true"
             :getIcon="getProductIcon"
           />
-          <CheckBox class="checkbox" v-model="showExpProducts" label="Show experimental products" />
+          <CheckBox
+            id="showExpProductsCheckbox"
+            class="checkbox"
+            v-model="showExpProducts"
+            label="Show experimental products"
+          />
         </div>
 
         <div class="filterbox">
