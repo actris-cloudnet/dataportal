@@ -391,7 +391,6 @@ async function fetchLatestLevel1Product() {
 #sitelanding .graph {
   flex-grow: 1;
   flex-basis: 0;
-  min-width: 600px;
 }
 
 #sitelanding .details {
