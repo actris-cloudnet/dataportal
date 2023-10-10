@@ -6,7 +6,7 @@
         subtitle="User-defined selection of files from Cloudnet data portal"
       >
         <template #tabs>
-          <router-link class="tab" :to="{ name: 'CollectionSummary' }">
+          <router-link class="tab" :to="{ name: 'Collection' }">
             <img :src="briedIcon" alt="" />
             Summary
           </router-link>

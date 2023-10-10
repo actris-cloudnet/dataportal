@@ -71,13 +71,7 @@
           aria-controls="fileTable"
         />
         <div class="results-download" v-if="listLength > 0 && !simplifiedView">
-          <BaseButton
-            type="primary"
-            class="download"
-            :class="{ disabled: isBusy || downloadIsBusy }"
-            href=""
-            @click.prevent="createCollection()"
-          >
+          <BaseButton type="primary" class="download" :disabled="isBusy || downloadIsBusy" @click="createCollection()">
             Download all
           </BaseButton>
           <br />

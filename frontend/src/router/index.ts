@@ -80,7 +80,6 @@ const router = createRouter({
     },
     {
       path: "/collection/:uuid",
-      name: "Collection",
       meta: {
         title: "Collection",
       },
@@ -90,7 +89,7 @@ const router = createRouter({
         {
           path: "",
           alias: "general", // Backward compatible with old layout.
-          name: "CollectionSummary",
+          name: "Collection",
           meta: { title: false },
           component: () => import("@/components/collection/CollectionSummary.vue"),
         },

@@ -5,9 +5,10 @@ export interface Props {
   to?: RouteLocationRaw;
   href?: string;
   type: "primary" | "secondary";
+  disabled?: boolean;
 }
 
-defineProps<Props>();
+withDefaults(defineProps<Props>(), { disabled: false });
 
 defineEmits<{
   (e: "click"): void;
@@ -15,13 +16,13 @@ defineEmits<{
 </script>
 
 <template>
-  <router-link :to="to" class="button" :class="type" @click="$emit('click')" v-if="to">
+  <router-link :to="to" class="button" :class="type" @click="$emit('click')" v-if="to && !disabled">
     <slot></slot>
   </router-link>
-  <a :href="href" class="button" :class="type" @click="$emit('click')" v-else-if="href">
+  <a :href="href" class="button" :class="type" @click="$emit('click')" v-else-if="href && !disabled">
     <slot></slot>
   </a>
-  <button class="button" :class="type" @click="$emit('click')" v-else>
+  <button class="button" :class="type" @click="$emit('click')" :disabled="disabled" v-else>
     <slot></slot>
   </button>
 </template>
@@ -61,6 +62,11 @@ defineEmits<{
       text-decoration: none;
       background-color: darken($gray1, 10%);
     }
+  }
+
+  &:disabled {
+    pointer-events: none;
+    opacity: 0.5;
   }
 }
 </style>
