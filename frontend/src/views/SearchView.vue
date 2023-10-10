@@ -255,8 +255,6 @@ import CheckBox from "@/components/CheckBox.vue";
 import BaseButton from "@/components/BaseButton.vue";
 import BaseAlert from "@/components/BaseAlert.vue";
 
-import datePreviousIcon from "@/assets/icons/date-previous.png";
-import dateNextIcon from "@/assets/icons/date-next.png";
 import type { VisualizationResponse } from "@shared/entity/VisualizationResponse";
 import type { Instrument } from "@shared/entity/Instrument";
 

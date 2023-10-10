@@ -1,6 +1,6 @@
 import { mount, VueWrapper } from "@vue/test-utils";
 import axios, { AxiosPromise } from "axios";
-import { augmentAxiosResponse, nextTick } from "./lib";
+import { augmentAxiosResponse } from "./lib";
 import { readResources } from "../../shared/lib";
 import { routes } from "../src/router";
 import App from "../src/App.vue";
