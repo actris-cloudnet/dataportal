@@ -1,3 +1,7 @@
+<template>
+  <div ref="mapContainer" class="map"></div>
+</template>
+
 <script lang="ts" setup>
 import { ref, onMounted, onBeforeUnmount, watch } from "vue";
 import L from "leaflet";
@@ -73,12 +77,9 @@ onBeforeUnmount(() => {
 });
 </script>
 
-<style lang="sass" scoped>
-.map
-  width: 100%
-  height: 300px
+<style scoped lang="scss">
+.map {
+  width: 100%;
+  height: 300px;
+}
 </style>
-
-<template>
-  <div ref="mapContainer" class="map"></div>
-</template>

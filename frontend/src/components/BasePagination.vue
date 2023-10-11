@@ -44,35 +44,46 @@ const visiblePages = computed(() => {
   </div>
 </template>
 
-<style lang="sass" scoped>
-@import "@/sass/variables.sass"
+<style lang="scss" scoped>
+@import "@/sass/variables.scss";
 
-button
-  border: none
-  background: none
-  padding: .5rem .75rem
-  font: inherit
-  border: 1px solid #dee2e6
+button {
+  border: none;
+  background: none;
+  padding: 0.5rem 0.75rem;
+  font: inherit;
+  border: 1px solid #dee2e6;
 
-button:not(:first-child)
-  border-left: none
+  &:not(:first-child) {
+    border-left: none;
+  }
 
-button:first-child
-  border-top-left-radius: .25rem
-  border-bottom-left-radius: .25rem
+  &:first-child {
+    border-top-left-radius: 0.25rem;
+    border-bottom-left-radius: 0.25rem;
+  }
 
-button:last-child
-  border-top-right-radius: .25rem
-  border-bottom-right-radius: .25rem
+  &:last-child {
+    border-top-right-radius: 0.25rem;
+    border-bottom-right-radius: 0.25rem;
+  }
 
-button:enabled
-  color: $blue-sapphire
-  cursor: pointer
+  &:enabled {
+    color: $blue-sapphire;
+    cursor: pointer;
 
-  &:hover
-    background-color: $blue-dust
+    &:hover {
+      background-color: $blue-dust;
+    }
+  }
 
-button.current
-  background-color: $steel-warrior
-  border-color: $steel-warrior
+  &.current {
+    background-color: $steel-warrior;
+    border-color: $steel-warrior;
+  }
+
+  &:disabled {
+    color: silver;
+  }
+}
 </style>

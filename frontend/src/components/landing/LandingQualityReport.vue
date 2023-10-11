@@ -1,58 +1,56 @@
-<style scoped lang="sass">
-@import "@/sass/landing-beta.sass"
-</style>
-
 <template>
   <div class="landing-quality-report-container">
-    <div v-if="report.status === 'loading'" class="quality-report-box quality-report-box-loading">Loading...</div>
-    <div v-else-if="report.status === 'notFound'" class="quality-report-box quality-report-box-loading">
-      No quality report available.
-    </div>
-    <div v-else-if="report.status === 'error'" class="quality-report-box" style="color: red">
-      Failed to load report.
-    </div>
-    <div v-else class="quality-report-box">
-      <div class="quality-report-header">
-        <div class="donut">
-          <Donut :data="donutData" />
-        </div>
-        <div class="quality-report-stats">
-          <div class="header" id="tests">Tests</div>
-          <div class="data" id="ntests">{{ report.value.tests }}</div>
-          <div class="header" id="info">Info</div>
-          <div class="data" id="ninfo">{{ report.value.info }}</div>
-          <div class="header" id="warnings">Warnings</div>
-          <div class="data" id="nwarnings">{{ report.value.warnings }}</div>
-          <div class="header" id="errors">Errors</div>
-          <div class="data" id="nerrors">{{ report.value.errors }}</div>
-        </div>
-      </div>
-      <div class="quality-software">
-        Tested with
-        <a :href="`https://github.com/actris-cloudnet/cloudnetpy-qc/tree/v${report.value.qcVersion}`">
-          CloudnetPy-QC v{{ report.value.qcVersion }}
-        </a>
-        at
-        {{ humanReadableTimestamp(report.value.timestamp) }}
-      </div>
-      <div class="quality-test-list-header">Tests</div>
-      <div class="quality-test-list">
-        <div class="quality-test" v-for="test in report.value.testReports" :key="test.testId">
-          <div class="quality-test-icon">
-            <img :src="getQcIcon(test.result)" alt="" />
+    <div class="summary-box">
+      <BaseSpinner v-if="report.status === 'loading'" />
+      <div v-else-if="report.status === 'notFound'">No quality report available.</div>
+      <div v-else-if="report.status === 'error'" style="color: red">Failed to load report.</div>
+      <div v-else>
+        <div class="quality-report-header">
+          <div class="donut">
+            <Donut :data="donutData" />
           </div>
-          <div class="quality-test-id">{{ test.name }}</div>
-          <div v-if="test.description" class="quality-test-description" v-html="formatMessage(test.description)"></div>
-          <ul class="quality-test-exception-list">
-            <li
-              v-for="(exception, i) in test.exceptions"
-              :key="exception.result + i"
-              :class="['quality-test-exception', 'quality-test-exception-' + exception.result]"
-            >
-              <div v-if="Object.keys(exception).length <= 1 || !('message' in exception)">test failed</div>
-              <div v-else v-html="formatMessage(exception.message)"></div>
-            </li>
-          </ul>
+          <div class="quality-report-stats">
+            <div class="header" id="tests">Tests</div>
+            <div class="data" id="ntests">{{ report.value.tests }}</div>
+            <div class="header" id="info">Info</div>
+            <div class="data" id="ninfo">{{ report.value.info }}</div>
+            <div class="header" id="warnings">Warnings</div>
+            <div class="data" id="nwarnings">{{ report.value.warnings }}</div>
+            <div class="header" id="errors">Errors</div>
+            <div class="data" id="nerrors">{{ report.value.errors }}</div>
+          </div>
+        </div>
+        <div class="quality-software">
+          Tested with
+          <a :href="`https://github.com/actris-cloudnet/cloudnetpy-qc/tree/v${report.value.qcVersion}`">
+            CloudnetPy-QC v{{ report.value.qcVersion }}
+          </a>
+          at
+          {{ humanReadableTimestamp(report.value.timestamp) }}
+        </div>
+        <div class="quality-test-list-header">Tests</div>
+        <div class="quality-test-list">
+          <div class="quality-test" v-for="test in report.value.testReports" :key="test.testId">
+            <div class="quality-test-icon">
+              <img :src="getQcIcon(test.result)" alt="" />
+            </div>
+            <div class="quality-test-id">{{ test.name }}</div>
+            <div
+              v-if="test.description"
+              class="quality-test-description"
+              v-html="formatMessage(test.description)"
+            ></div>
+            <ul class="quality-test-exception-list">
+              <li
+                v-for="(exception, i) in test.exceptions"
+                :key="exception.result + i"
+                :class="['quality-test-exception', 'quality-test-exception-' + exception.result]"
+              >
+                <div v-if="Object.keys(exception).length <= 1 || !('message' in exception)">test failed</div>
+                <div v-else v-html="formatMessage(exception.message)"></div>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -67,6 +65,7 @@ import { computed, ref, watch } from "vue";
 import Donut from "@/components/DonutVisualization.vue";
 import { humanReadableTimestamp, getQcIcon } from "@/lib";
 import { useTitle } from "@/router";
+import BaseSpinner from "@/components/BaseSpinner.vue";
 
 export interface Props {
   uuid: string;
@@ -146,3 +145,201 @@ function formatMessage(message: string): string {
   return escapeHtml(message).replace(/&#39;(\w+)&#39;|(\w+_\w+)/gi, "<code>$1$2</code>");
 }
 </script>
+
+<style scoped lang="scss">
+@import "@/sass/variables.scss";
+
+.landing-quality-report-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.quality-software {
+  max-inline-size: max-content;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.5);
+  margin-top: 0.5rem;
+  font-size: 90%;
+}
+
+.quality-report-header {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  border-bottom: thin solid rgba(0, 0, 0, 0.2);
+  padding: 0 0 1rem;
+  column-gap: 2rem;
+
+  .donut {
+    margin-right: 4rem;
+  }
+}
+
+.quality-report-stats {
+  background-color: rgba(0, 0, 0, 0.01);
+  padding: 1rem;
+  block-size: max-content;
+  inline-size: max-content;
+  display: grid;
+  justify-items: center;
+  grid-template-columns: repeat(4, 6em);
+  border: thin solid rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+
+  .header {
+    grid-row: 1;
+    font-size: 100%;
+    font-weight: 400;
+    align-self: end;
+  }
+
+  .data {
+    align-self: start;
+    grid-row: 2;
+    font-size: 250%;
+    font-weight: 400;
+  }
+
+  #tests,
+  #ntests {
+    grid-column: 1;
+  }
+
+  #errors,
+  #nerrors {
+    grid-column: 2;
+  }
+
+  #warnings,
+  #nwarnings {
+    grid-column: 3;
+  }
+
+  #info,
+  #ninfo {
+    grid-column: 4;
+  }
+}
+
+.quality-test-description {
+  color: $gray4;
+}
+
+.quality-test-list-header {
+  padding: 1rem 0 1rem;
+  font-size: 140%;
+  font-weight: 400;
+}
+
+.quality-test-list {
+  display: flex;
+  flex-direction: column;
+
+  .quality-test {
+    display: grid;
+    grid-template-columns: fit-content(40px) 1fr;
+    margin-bottom: 1rem;
+
+    .quality-test-icon {
+      grid-column: 1;
+      padding: 0 1rem 0;
+
+      img {
+        height: 20px;
+        min-width: 20px;
+      }
+    }
+
+    .quality-test-id {
+      grid-column: 2;
+      font-size: 120%;
+      font-weight: 400;
+    }
+
+    .quality-test-description {
+      grid-column: 2;
+      margin-bottom: 0.5rem;
+    }
+
+    .quality-test-exception-list {
+      grid-column: 2;
+      padding: 0;
+
+      .quality-test-exception {
+        padding: 0.2rem;
+        font-size: 105%;
+        font-weight: 400;
+      }
+
+      .quality-test-exception-error {
+        color: $red4;
+      }
+
+      .quality-test-exception-warning {
+        color: $yellow3;
+      }
+
+      .quality-test-exception-info {
+        color: #606060;
+      }
+    }
+  }
+}
+
+@media screen and (max-width: $narrow-screen) {
+  .quality-report-header .donut {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .quality-report-stats {
+    grid-template-rows: repeat(4, auto);
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-left: auto;
+    margin-right: auto;
+
+    #tests {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    #ntests {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    #errors {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    #nerrors {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    #warnings {
+      grid-column: 1;
+      grid-row: 3;
+    }
+
+    #nwarnings {
+      grid-column: 1;
+      grid-row: 4;
+    }
+
+    #info {
+      grid-column: 2;
+      grid-row: 3;
+    }
+
+    #ninfo {
+      grid-column: 2;
+      grid-row: 4;
+    }
+  }
+}
+</style>

@@ -1,29 +1,132 @@
-<style scoped lang="sass">
-@import "@/sass/variables.sass"
-@import "@/sass/global.sass"
-</style>
-
 <template>
-  <!-- eslint-disable max-len -->
-  <section id="howtocite">
-    This is an example of how to cite Cloudnet datasets. You may edit the text to suit publication standards.
-    <div class="infobox infocolor">
-      <h4>Data availability</h4>
-      <div class="citationtext" v-html="dataAvailability"></div>
-      <h4>Acknowledgements</h4>
-      <div class="citationtext" v-html="acknowledgements"></div>
-      <h4>Citation</h4>
-      <div class="citationtext" v-html="citation"></div>
+  <div>
+    <div class="title-container">
+      <div :class="['title', titleClass]">Citation</div>
+      <ul class="export" v-if="citation.status == 'ready'">
+        <li><a :href="citation.bibtexUrl">BibTeX</a></li>
+        <li><a :href="citation.risUrl">RIS</a></li>
+      </ul>
     </div>
-  </section>
+    <template v-if="citation.status == 'ready'">
+      <div class="infobox infocolor">
+        <div class="citationtext" v-html="citation.citation"></div>
+      </div>
+      <p>
+        Please include the following information in your publication. You may edit the text to suit publication
+        standards.
+      </p>
+      <div class="infobox infocolor">
+        <h4>Data availability</h4>
+        <div class="citationtext" v-html="citation.dataAvailability"></div>
+        <h4>Acknowledgements</h4>
+        <div class="citationtext" v-html="citation.acknowledgements"></div>
+      </div>
+    </template>
+    <BaseSpinner v-else-if="citation.status == 'loading'" />
+    <div v-else-if="citation.status == 'error'" class="error">Failed to load citation.</div>
+  </div>
 </template>
 
 <script lang="ts" setup>
+import axios from "axios";
+import { ref, watchEffect } from "vue";
+import BaseSpinner from "@/components/BaseSpinner.vue";
+
 export interface Props {
-  dataAvailability: string;
-  acknowledgements: string;
-  citation: string;
+  uuid?: string;
+  titleClass?: string;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
+
+type CitationState =
+  | { status: "loading" }
+  | {
+      status: "ready";
+      citation: string;
+      acknowledgements: string;
+      dataAvailability: string;
+      bibtexUrl: string;
+      risUrl: string;
+    }
+  | { status: "error" };
+
+const citation = ref<CitationState>({ status: "loading" });
+
+async function fetchReferenceStrings(uuid: string) {
+  const baseUrl = `${import.meta.env.VITE_BACKEND_URL}reference/${uuid}/`;
+  try {
+    const responses = await Promise.all([
+      axios.get(`${baseUrl}?citation=true&format=html`),
+      axios.get(`${baseUrl}?acknowledgements=true&format=html`),
+      axios.get(`${baseUrl}?dataAvailability=true&format=html`),
+    ]);
+    citation.value = {
+      status: "ready",
+      citation: responses[0].data,
+      acknowledgements: responses[1].data,
+      dataAvailability: responses[2].data,
+      bibtexUrl: `${baseUrl}?citation=true&format=bibtex`,
+      risUrl: `${baseUrl}?citation=true&format=ris`,
+    };
+  } catch (error) {
+    console.error("Failed to load citation:", error);
+    citation.value = { status: "error" };
+  }
+}
+
+watchEffect(async () => {
+  citation.value = { status: "loading" };
+  if (props.uuid) {
+    await fetchReferenceStrings(props.uuid);
+  }
+});
 </script>
+
+<style scoped lang="scss">
+@import "@/sass/variables.scss";
+
+.error {
+  color: red;
+}
+
+.title-container {
+  display: flex;
+  align-items: center;
+}
+
+.title {
+  flex-grow: 1;
+}
+
+.export {
+  display: flex;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 75%;
+}
+
+p {
+  margin: 1rem 0;
+}
+
+.infobox {
+  padding: 1rem;
+  border-radius: 0.3rem;
+}
+
+.infocolor {
+  background: $blue-dust;
+  font-size: 0.9em;
+
+  h4 {
+    font-size: 1.1em;
+    margin-top: 1rem;
+    margin-bottom: 0.25rem;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+}
+</style>

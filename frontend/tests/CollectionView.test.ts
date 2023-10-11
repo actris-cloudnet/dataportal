@@ -1,22 +1,17 @@
 import { mount, VueWrapper } from "@vue/test-utils";
-import CollectionView from "../src/views/CollectionView.vue";
 import axios, { AxiosPromise } from "axios";
-import { augmentAxiosResponse, nextTick } from "./lib";
+import { augmentAxiosResponse } from "./lib";
 import { readResources } from "../../shared/lib";
+import { routes } from "../src/router";
+import App from "../src/App.vue";
 
 import { beforeAll, describe, expect, it, vi } from "vitest";
+import { createRouter, createWebHistory } from "vue-router";
 
 vi.mock("axios");
-vi.mock("vue-router", () => ({
-  useRoute: vi.fn(),
-  useRouter: vi.fn(() => ({
-    push: () => {},
-  })),
-}));
 
 let mockAxios: Function;
 let resources: any;
-let wrapper: VueWrapper;
 
 describe("CollectionView.vue", () => {
   beforeAll(async () => {
@@ -35,13 +30,13 @@ describe("CollectionView.vue", () => {
           return Promise.resolve(augmentAxiosResponse(resources["models"]));
         } else if (url.includes("/generate-pid")) {
           return Promise.resolve(augmentAxiosResponse({ pid: "testpid" }));
-        } else if (url.includes("/reference/testuuid?citation=true&format=html")) {
+        } else if (url.includes("/reference/") && url.includes("?citation=true&format=html")) {
           return Promise.resolve(
             augmentAxiosResponse('Meikäläinen, M. (2023). Custom collection. <a href="">testpid</a>'),
           );
-        } else if (url.includes("/reference/testuuid?acknowledgements=true&format=html")) {
+        } else if (url.includes("/reference/") && url.includes("?acknowledgements=true&format=html")) {
           return Promise.resolve(augmentAxiosResponse("We acknowledge many people and organizations."));
-        } else if (url.includes("/reference/testuuid?dataAvailability=true&format=html")) {
+        } else if (url.includes("/reference/") && url.includes("?dataAvailability=true&format=html")) {
           return Promise.resolve(augmentAxiosResponse("Only available in the amazing Cloudnet data portal."));
         }
         return Promise.reject(new Error(`Unmocked URL: ${url}`));
@@ -51,19 +46,21 @@ describe("CollectionView.vue", () => {
     vi.mocked(axios.post).mockImplementation(mockAxios());
   });
 
-  describe("general view", () => {
+  describe("summary view", () => {
+    const router = createRouter({
+      history: createWebHistory(),
+      routes: routes,
+    });
+    let wrapper: VueWrapper;
+
     beforeAll(async () => {
-      wrapper = mount(CollectionView, {
-        propsData: { uuid: "testuuid", mode: "general" },
-        global: {
-          stubs: ["router-link", "router-view"],
-        },
-      });
-      await nextTick(1);
+      wrapper = mount(App, { global: { plugins: [router] } });
+      router.push({ name: "Collection", params: { uuid: "testuuid" } });
+      await router.isReady();
     });
 
     it("displays date span", () => {
-      expect(wrapper.find("#summary").text()).toContain("2014-12-05 - 2019-09-01");
+      expect(wrapper.find("#summary").text()).toContain("2014-12-05 – 2019-09-01");
     });
 
     it("displays size", () => {
@@ -85,19 +82,16 @@ describe("CollectionView.vue", () => {
     });
 
     it("displays PID", async () => {
-      await nextTick(2);
       expect(wrapper.text()).toContain("testpid");
     });
 
     it("displays license", async () => {
-      await nextTick(2);
       expect(wrapper.text()).toMatch(
         /Cloudnet data is licensed under a[\s\n]*Creative Commons Attribution 4\.0 international licence\./,
       );
     });
 
     it("displays custom citation info", async () => {
-      await nextTick(2);
       expect(wrapper.text()).toContain("Only available in the amazing Cloudnet data portal.");
       expect(wrapper.text()).toContain("We acknowledge many people and organizations.");
       expect(wrapper.text()).toContain("Meikäläinen, M. (2023). Custom collection. testpid");
@@ -105,14 +99,16 @@ describe("CollectionView.vue", () => {
   });
 
   describe("file view", () => {
+    const router = createRouter({
+      history: createWebHistory(),
+      routes: routes,
+    });
+    let wrapper: VueWrapper;
+
     beforeAll(async () => {
-      wrapper = mount(CollectionView, {
-        propsData: { uuid: "testuuid", mode: "files" },
-        global: {
-          stubs: ["router-link", "router-view"],
-        },
-      });
-      await nextTick(1);
+      wrapper = mount(App, { global: { plugins: [router] } });
+      router.push({ name: "CollectionFiles", params: { uuid: "testuuid" } });
+      await router.isReady();
     });
 
     it("displays a list of files", () => {

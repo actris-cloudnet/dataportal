@@ -1,15 +1,23 @@
 <script setup lang="ts">
 import headerLogo from "@/assets/header-logo.svg";
+import { ref } from "vue";
+
 const isDev = import.meta.env.DEV;
+const showMenu = ref(false);
 </script>
 
 <template>
   <header :class="{ dev: isDev }">
-    <div class="container">
+    <div class="container pagewidth">
       <a href="/" class="logo">
         <img :src="headerLogo" alt="Cloudnet data portal" />
       </a>
-      <ul>
+      <div :class="{ 'menu-toggle': true, 'active': showMenu }" @click="showMenu = !showMenu">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+        <div class="bar3"></div>
+      </div>
+      <ul :class="{ show: showMenu }">
         <li>
           <a href="/search">
             <span>Browse data</span>
@@ -17,7 +25,7 @@ const isDev = import.meta.env.DEV;
         </li>
         <li>
           <a href="/search/visualizations">
-            <span>Visualize data</span>
+            <span>Visualise data</span>
           </a>
         </li>
         <li style="margin-left: auto">
@@ -36,19 +44,33 @@ const isDev = import.meta.env.DEV;
 </template>
 
 <style scoped lang="scss">
-@import "@/sass/new-variables";
+@import "@/sass/variables.scss";
 
+$header-height: 4.5rem;
 $header-color: darken(#78c0e0, 25%);
 
 header {
-  background-image: linear-gradient(to bottom, transparent 75%, rgba(0, 0, 0, 0.05)),
-    linear-gradient(to left, rgba($header-color, 0.5), $header-color 70%), url("@/assets/clouds3.jpg");
-  opacity: 0.7;
-  background-position: right 0px top 20%;
-  background-repeat: no-repeat;
-  background-size: cover;
+  z-index: 999;
+  position: relative;
+  font-weight: 500;
 
-  &.dev {
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-image: linear-gradient(to bottom, transparent 75%, rgba(0, 0, 0, 0.05)),
+      linear-gradient(to left, rgba($header-color, 0.5), $header-color 70%), url("@/assets/clouds3.jpg");
+    opacity: 0.7;
+    background-position: right 0px top 20%;
+    background-repeat: no-repeat;
+    background-size: cover;
+    z-index: -1;
+  }
+
+  &.dev::before {
     background-image: linear-gradient(to bottom, transparent 75%, rgba(0, 0, 0, 0.05)),
       repeating-linear-gradient(-45deg, #ff6dbc55, #ff6dbc55 15px, #ff529855 15px, #ff529855 30px),
       linear-gradient(to left, rgba($header-color, 0.5), $header-color 70%), url("@/assets/clouds3.jpg");
@@ -58,27 +80,25 @@ header {
 .container {
   display: flex;
   align-items: center;
-  max-width: $page-width;
-  box-sizing: content-box;
-  margin: 0 auto;
-  height: 4.5rem;
-  padding: 0 1rem;
+  height: $header-height;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 img {
   display: block;
 }
 
-.logo img {
-  max-width: 100%;
-  height: 2.5rem;
-  filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.05));
+.logo {
+  flex-shrink: 0;
+
+  img {
+    height: 2.5rem;
+    filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.05));
+  }
 }
 
 ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
   display: flex;
   align-items: center;
   margin-left: 1rem;
@@ -92,12 +112,6 @@ li a {
   padding: 0.5rem;
   margin-left: 1rem;
   display: flex;
-  opacity: 0.9;
-
-  &:hover {
-    text-decoration: none;
-    opacity: 1;
-  }
 
   span {
     padding: 0.25rem 0;
@@ -105,18 +119,68 @@ li a {
     border-bottom: 2px solid transparent;
   }
 
-  &.router-link-active {
-    opacity: 1;
+  &:hover {
+    text-decoration: none;
+    opacity: 0.9;
+  }
+}
 
-    span {
-      border-bottom: 2px solid white;
+.bar1,
+.bar2,
+.bar3 {
+  width: 32px;
+  height: 3px;
+  background-color: white;
+  margin: 8px 0;
+  border-radius: 2px;
+}
+
+.menu-toggle {
+  display: none;
+  padding: 1rem;
+  color: white;
+
+  &.active {
+    .bar1 {
+      transform: translate(0, 11px) rotate(-45deg);
+    }
+
+    .bar2 {
+      opacity: 0;
+    }
+
+    .bar3 {
+      transform: translate(0, -11px) rotate(45deg);
+    }
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .menu-toggle {
+    display: block;
+    margin-left: auto;
+  }
+
+  ul {
+    display: none;
+    position: absolute;
+    top: $header-height;
+    left: 0;
+    right: 0;
+    background-color: white;
+    padding: 0;
+    margin: 0;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.25);
+
+    &.show {
+      display: block;
     }
   }
 
-  img {
-    width: auto;
-    height: 1.4rem;
-    margin-right: 0.5rem;
+  li a {
+    color: black;
+    margin: 0;
+    padding: 0.5rem 1rem;
   }
 }
 </style>

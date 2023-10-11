@@ -1,74 +1,39 @@
-<style scoped lang="sass">
-@import "@/sass/landing-beta.sass"
-.landing-tags
-  .tag
-    display: flex
-    justify-content: center
-    align-items: center
-    color: white
-    font-size: 90%
-    font-weight: 600
-    inline-size: max-content
-    block-size: min-content
-    padding: 0.25*$basespacing 0.65*$basespacing
-    border-radius: 999px
-    cursor: default
-    &:first-child
-      margin-left: $basespacing
-    &:not(:first-child)
-      margin-left: 0.5*$basespacing
-  .experimental
-    background-color: #EC9706
-  .actris
-    background-color: $actris-turquoise
-  .volatile
-    background-color: $BLUE-3-hex
-  .legacy
-    background-color: $GRAY-4-hex
-</style>
-
 <template>
   <main v-if="response" id="landing">
-    <div v-if="!isBusy && newestVersion" class="landing-version-banner-container">
-      <div class="landing-version-banner">
+    <div v-if="!isBusy && newestVersion" class="banner-container">
+      <div class="banner pagewidth">
         There is a
-        <router-link class="landing-version-banner-link" :to="`/file/${newestVersion}`">newer version</router-link>
+        <router-link :to="`/file/${newestVersion}`">newer version</router-link>
         of this data available.
       </div>
     </div>
-    <div class="landing-header-container">
-      <div class="landing-title">
-        {{ title }}
-      </div>
-      <div class="landing-tags">
-        <div v-if="isActrisObject" class="tag actris" title="Data from ACTRIS site">ACTRIS</div>
-        <div v-if="response.volatile" class="tag volatile" title="Data may change in future">Volatile</div>
-        <div v-if="response.legacy" class="tag legacy" title="Produced using non-standardized processing">Legacy</div>
-        <div v-if="response.product.experimental" class="tag experimental" title="Experimental product">
-          Experimental
-        </div>
-      </div>
-      <div class="landing-download">
-        <DownloadButton :downloadUrl="response.downloadUrl" />
-      </div>
-      <div class="landing-subtitle">
-        {{ humanReadableDate(response.measurementDate) }}
-      </div>
-    </div>
-    <div class="tab-container">
-      <router-link class="tab" :to="{ name: 'File' }">
-        <img :src="getProductIcon(response.product.id)" alt="" />
-        Summary
-      </router-link>
-      <router-link class="tab" :to="{ name: 'FileVisualizations' }">
-        <img :src="PhotoGalleryIcon" alt="" />
-        Visualisations
-      </router-link>
-      <router-link class="tab" :to="{ name: 'FileQualityReport' }" v-if="response.errorLevel">
-        <img :src="getQcIcon(response.errorLevel)" alt="" />
-        Quality report
-      </router-link>
-    </div>
+    <LandingHeader :title="title" :subtitle="humanReadableDate(response.measurementDate)">
+      <template #tags>
+        <FileTags :response="response" />
+      </template>
+      <template #actions>
+        <BaseButton type="primary" :href="response.downloadUrl">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+          </svg>
+          Download
+        </BaseButton>
+      </template>
+      <template #tabs>
+        <router-link class="tab" :to="{ name: 'File' }">
+          <img :src="getProductIcon(response.product.id)" alt="" />
+          Summary
+        </router-link>
+        <router-link class="tab" :to="{ name: 'FileVisualizations' }">
+          <img :src="PhotoGalleryIcon" alt="" />
+          Visualisations
+        </router-link>
+        <router-link class="tab" :to="{ name: 'FileQualityReport' }" v-if="response.errorLevel">
+          <img :src="getQcIcon(response.errorLevel)" alt="" />
+          Quality report
+        </router-link>
+      </template>
+    </LandingHeader>
     <div class="landing-content-background">
       <router-view
         :uuid="uuid"
@@ -96,12 +61,14 @@ import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
 import type { SiteType } from "@shared/entity/Site";
 import type { SiteLocation } from "@shared/entity/SiteLocation";
 import type { File } from "@shared/entity/File";
-import DownloadButton from "@/components/landing/DownloadButton.vue";
+import BaseButton from "@/components/BaseButton.vue";
+import FileTags from "@/components/FileTags.vue";
 import { getProductIcon, getQcIcon } from "@/lib";
 
 import PhotoGalleryIcon from "@/assets/icons/photo-gallery.png";
+import LandingHeader from "@/components/LandingHeader.vue";
 
-export type SourceFile = { ok: true; value: File } | { ok: false; value: Error };
+export type SourceFile = { ok: true; uuid: string; value: File } | { ok: false; uuid: string; value: Error };
 
 export interface Props {
   uuid: string;
@@ -127,15 +94,8 @@ const location = ref<SiteLocation | null>(null);
 const title = computed(() =>
   response.value
     ? `${response.value.product.humanReadableName} data from ${response.value.site.humanReadableName}`
-    : undefined,
+    : "",
 );
-
-const isActrisObject = computed(() => {
-  if (!response.value) {
-    return false;
-  }
-  return response.value.site.actrisId != null;
-});
 
 const currentVersionIndex = computed(() => {
   if (response.value == null) return null;
@@ -208,8 +168,8 @@ async function fetchSourceFiles(response: RegularFile | ModelFile) {
     response.sourceFileIds.map((uuid) =>
       axios
         .get(`${apiUrl}files/${uuid}`)
-        .then((response) => ({ ok: true, value: response.data }))
-        .catch((error) => ({ ok: false, value: error })),
+        .then((response) => ({ ok: true, uuid, value: response.data }))
+        .catch((error) => ({ ok: false, uuid, value: error })),
     ),
   );
   results.sort((a, b) => {
@@ -250,3 +210,83 @@ watch(
   { immediate: true },
 );
 </script>
+
+<style scoped lang="scss">
+@import "@/sass/variables.scss";
+
+main {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.banner-container {
+  background-color: $actris-yellow;
+}
+
+.banner {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+
+  a {
+    font-weight: 600;
+  }
+}
+
+.landing-content-background {
+  background-color: #edf0f2;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  height: 100%;
+}
+
+:deep() {
+  .summary-box {
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 0.1em 0.6em 0 rgba(0, 0, 0, 0.15);
+    block-size: 100%;
+  }
+
+  .summary-section + .summary-section {
+    margin-top: 2rem;
+  }
+
+  .summary-section-header {
+    margin-bottom: 0.5rem;
+    font-size: 140%;
+    font-weight: 400;
+  }
+
+  .summary-section-table {
+    display: grid;
+    grid-template-columns: minmax(min-content, 14rem) auto;
+    row-gap: 0.4rem;
+
+    dt {
+      font-weight: 500;
+    }
+  }
+
+  @media screen and (max-width: 600px) {
+    .summary-box {
+      margin: 0 -1rem;
+      padding: 1rem;
+      box-shadow: none;
+      border-radius: 0;
+    }
+
+    .summary-section-table {
+      display: flex;
+      flex-direction: column;
+
+      dd + dt {
+        margin-top: 0.5rem;
+      }
+    }
+  }
+}
+</style>

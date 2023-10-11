@@ -1,98 +1,3 @@
-<style scoped lang="sass">
-@import "@/sass/variables.sass"
-@import "@/sass/global.sass"
-@import "@/sass/spinner.sass"
-@import "@/sass/availability.sass"
-
-.dataviz-date
-  width: calc(1%/3.66)
-  height: 1em
-  display: inline-block
-  position: relative
-  border-top: 1px solid gray
-  border-bottom: 1px solid gray
-  cursor: default
-
-.dataviz-date[href]
-  cursor: pointer
-
-.legacy-label
-  color: grey
-
-.dataviz-tooltip
-  position: fixed
-  z-index: 6
-  background: white
-  padding: .75em 1em
-  box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.2)
-  border-radius: 8px
-
-  section
-    display: flex
-    justify-content: space-between
-    font-size: 0.9em
-    margin-top: .5em
-
-    ul
-      padding: 0
-      list-style: none
-      white-space: pre-wrap
-      margin-bottom: 0
-
-      li.header
-        font-weight: bold
-
-      li.modelitem
-        margin-top: 0.8em
-
-      li.productitem::before, li.qualityitem::before
-        margin-right: 5px
-
-      // Product availability:
-
-      li.productitem::before
-        content: '    '
-        background-repeat: no-repeat
-        background-position: center
-        background-size: contain
-
-      li.productitem.found::before
-        background-image: url('@/assets/icons/test-pass.svg')
-
-      li.productitem:not(.found)::before
-        background-image: url('@/assets/icons/test-missing.svg')
-
-      // Quality:
-
-      li.qualityitem::before
-        content: '    '
-        background-repeat: no-repeat
-        background-position: center
-        background-size: contain
-
-      li.qualityitem:not(.found).na::before
-        background-image: url('@/assets/icons/test-missing.svg')
-
-      li.qualityitem:not(.found)::before
-        background-image: url('@/assets/icons/test-fail.svg')
-
-      li.qualityitem.found::before
-        background-image: url('@/assets/icons/test-pass.svg')
-
-      li.qualityitem.info::before
-        background-image: url('@/assets/icons/test-info.svg')
-
-      li.qualityitem.warning::before
-        background-image: url('@/assets/icons/test-warning.svg')
-
-      li.qualityitem.error::before
-        background-image: url('@/assets/icons/test-fail.svg')
-
-
-.dataviz-date:hover .dataviz-tooltip
-  display: block
-</style>
-
 <template>
   <!-- eslint-disable vue/require-v-for-key -->
   <div id="data_availability_visualization" v-if="!busy">
@@ -425,3 +330,115 @@ function createLinkToSearchPage(date: string, products: ProductLevels): string |
   }
 }
 </script>
+
+<style scoped lang="scss">
+@import "@/sass/availability.scss";
+
+.dataviz-date {
+  width: calc(1% / 3.66);
+  height: 1em;
+  display: inline-block;
+  position: relative;
+  border-top: 1px solid gray;
+  border-bottom: 1px solid gray;
+  cursor: default;
+}
+
+.dataviz-date[href] {
+  cursor: pointer;
+}
+
+.legacy-label {
+  color: grey;
+}
+
+.dataviz-tooltip {
+  position: fixed;
+  z-index: 6;
+  background: white;
+  padding: 0.75em 1em;
+  box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+
+  section {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9em;
+    margin-top: 0.5em;
+
+    ul {
+      padding: 0;
+      list-style: none;
+      white-space: pre-wrap;
+      margin-bottom: 0;
+
+      li.header {
+        font-weight: bold;
+      }
+
+      li.modelitem {
+        margin-top: 0.8em;
+      }
+
+      li.productitem::before,
+      li.qualityitem::before {
+        margin-right: 5px;
+      }
+
+      // Product availability:
+
+      li.productitem::before {
+        content: "    ";
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;
+      }
+
+      li.productitem.found::before {
+        background-image: url("@/assets/icons/test-pass.svg");
+      }
+
+      li.productitem:not(.found)::before {
+        background-image: url("@/assets/icons/test-missing.svg");
+      }
+
+      // Quality:
+
+      li.qualityitem::before {
+        content: "    ";
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;
+      }
+
+      li.qualityitem:not(.found).na::before {
+        background-image: url("@/assets/icons/test-missing.svg");
+      }
+
+      li.qualityitem:not(.found)::before {
+        background-image: url("@/assets/icons/test-fail.svg");
+      }
+
+      li.qualityitem.found::before {
+        background-image: url("@/assets/icons/test-pass.svg");
+      }
+
+      li.qualityitem.info::before {
+        background-image: url("@/assets/icons/test-info.svg");
+      }
+
+      li.qualityitem.warning::before {
+        background-image: url("@/assets/icons/test-warning.svg");
+      }
+
+      li.qualityitem.error::before {
+        background-image: url("@/assets/icons/test-fail.svg");
+      }
+    }
+  }
+}
+
+.dataviz-date:hover .dataviz-tooltip {
+  display: block;
+}
+</style>

@@ -1,6 +1,6 @@
 import { mount, VueWrapper } from "@vue/test-utils";
 import SearchView from "../src/views/SearchView.vue";
-import axios, { AxiosPromise } from "axios";
+import axios, { AxiosResponse } from "axios";
 import {
   augmentAxiosResponse,
   dateFromPast,
@@ -88,16 +88,16 @@ describe("SearchView.vue", () => {
 
     it("sets correct date ranges from quickselector buttons", async () => {
       await findElementById("weekBtn").trigger("click");
-      expect((wrapper.find("#showDateRangeCheckbox").element as HTMLInputElement).checked).toBe(false);
+      expect((wrapper.find("#showDateRangeCheckbox input").element as HTMLInputElement).checked).toBe(false);
       expect(wrapper.find("#dateFrom").exists()).toBe(false);
       expect(getInputValueByName("dateTo")).toBe(dateToDefault);
       await findElementById("yearBtn").trigger("click");
       const year = new Date().getFullYear();
-      expect((wrapper.find("#showDateRangeCheckbox").element as HTMLInputElement).checked).toBe(true);
+      expect((wrapper.find("#showDateRangeCheckbox input").element as HTMLInputElement).checked).toBe(true);
       expect(getInputValueByName("dateFrom")).toBe(`${year}-01-01`);
       expect(getInputValueByName("dateTo")).toBe(dateToDefault);
       await findElementById("monthBtn").trigger("click");
-      expect((wrapper.find("#showDateRangeCheckbox").element as HTMLInputElement).checked).toBe(true);
+      expect((wrapper.find("#showDateRangeCheckbox input").element as HTMLInputElement).checked).toBe(true);
       expect(getInputValueByName("dateFrom")).toBe(dateFromPast(29));
       expect(getInputValueByName("dateTo")).toBe(dateToDefault);
     });
@@ -219,7 +219,7 @@ describe("SearchView.vue", () => {
       let calls = vi.mocked(axios.get).mock.calls;
       let lastCall = calls[calls.length - 1][1] as any;
       expect(lastCall.params.product).not.toContain("l3-cf");
-      await findElementById("showExpProductsCheckbox").setValue();
+      await findElementById("showExpProductsCheckbox").find("input").setValue();
       await nextTick(1);
       calls = vi.mocked(axios.get).mock.calls;
       lastCall = calls[calls.length - 1][1] as any;

@@ -1,21 +1,3 @@
-<style scoped lang="sass">
-.dateform
-  overflow: hidden
-  white-space: nowrap
-
-.container
-  display: flex
-  height: 2em
-
-input.date
-  box-sizing: content-box
-  width: 6.3em
-  font-size: 0.9em
-  border: 1px solid #e8e8e8
-  border-right: none
-  border-radius: 2px 0 0 2px
-</style>
-
 <template>
   <div class="dateform" :id="name" :class="{ error: hasError }">
     <label v-if="label" :for="name">{{ label }}</label>
@@ -123,3 +105,61 @@ const dateString = computed({
   },
 });
 </script>
+
+<style scoped lang="scss">
+@import "@/sass/variables.scss";
+
+.dateform {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.container {
+  display: flex;
+  height: 2em;
+}
+
+input.date {
+  box-sizing: content-box;
+  width: 6.3em;
+  font-size: 0.9em;
+  border: 1px solid #e8e8e8;
+  border-right: none;
+  border-radius: 2px 0 0 2px;
+}
+
+button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 2em;
+  height: 100%;
+  background-color: $blue-dust;
+  color: white;
+  border: 1px solid $steel-warrior;
+  border-radius: 0 2px 2px 0;
+  font-size: 1em;
+  cursor: pointer;
+
+  &:focus {
+    background-color: $steel-warrior;
+    outline: none;
+  }
+
+  &:hover {
+    background-color: $steel-warrior;
+  }
+
+  &:active {
+    background-color: $steel-warrior;
+    border-color: $blue-dust;
+  }
+
+  & > svg {
+    color: black;
+    width: 1em;
+    height: 1em;
+  }
+}
+</style>

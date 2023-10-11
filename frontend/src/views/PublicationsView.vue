@@ -1,48 +1,25 @@
-<style scoped lang="sass">
-@import "@/sass/variables.sass"
-
-h1
-  margin-bottom: 4rem
-
-.year
-  display: flex
-  align-items: top
-  margin-top: 2rem
-
-h2
-  flex: 0 0 80px
-
-ul
-  padding-left: 1em
-
-@media screen and (max-width: $narrow-screen)
-  h1
-    margin-bottom: 2rem
-
-  .year
-    display: block
-    margin-top: 3rem
-
-  h2
-    margin-bottom: 1em
-</style>
-
 <template>
-  <main>
-    <h1>Cloudnet publications</h1>
-    <template v-if="publications.status == 'ready'">
-      <div v-for="[year, pubs] in publications.data" :key="year" class="year">
-        <h2>{{ year }}</h2>
-        <ul>
-          <li v-for="pub in pubs" :key="pub.pid">
-            <p v-html="pub.citation"></p>
-          </li>
-        </ul>
-      </div>
-    </template>
-    <div v-else-if="publications.status == 'loading'">Loading publications...</div>
-    <div v-else-if="publications.status == 'error'">Failed to load publications.</div>
-  </main>
+  <div>
+    <LandingHeader title="Publications" />
+    <main class="pagewidth">
+      <p>
+        List of publications that are related to the Cloudnet processing scheme or use data from the Cloudnet data
+        portal.
+      </p>
+      <template v-if="publications.status == 'ready'">
+        <div v-for="[year, pubs] in publications.data" :key="year" class="year">
+          <h2>{{ year }}</h2>
+          <ul>
+            <li v-for="pub in pubs" :key="pub.pid">
+              <p v-html="pub.citation"></p>
+            </li>
+          </ul>
+        </div>
+      </template>
+      <BaseSpinner v-else-if="publications.status == 'loading'" />
+      <div v-else-if="publications.status == 'error'">Failed to load publications.</div>
+    </main>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -50,6 +27,8 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 import type { AxiosResponse } from "axios";
 import type { Publication } from "@shared/entity/Publication";
+import LandingHeader from "@/components/LandingHeader.vue";
+import BaseSpinner from "@/components/BaseSpinner.vue";
 
 function groupBySorted<T, K extends keyof T>(items: T[], key: K, order: "asc" | "desc"): [T[K], T[]][] {
   const grouped = items.reduce((result, item) => {
@@ -88,3 +67,49 @@ onMounted(async () => {
   }
 });
 </script>
+
+<style scoped lang="scss">
+@import "@/sass/variables.scss";
+
+main {
+  padding-bottom: 1rem;
+}
+
+.year {
+  display: flex;
+  align-items: top;
+  margin-top: 2rem;
+}
+
+h2 {
+  font-size: 1.4rem;
+  flex: 0 0 80px;
+}
+
+ul {
+  margin-left: 2rem;
+}
+
+li {
+  text-indent: -2rem;
+}
+
+li + li {
+  margin-top: 0.5rem;
+}
+
+@media screen and (max-width: $narrow-screen) {
+  h1 {
+    margin-bottom: 2rem;
+  }
+
+  .year {
+    display: block;
+    margin-top: 3rem;
+  }
+
+  h2 {
+    margin-bottom: 1em;
+  }
+}
+</style>

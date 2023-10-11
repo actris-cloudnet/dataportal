@@ -1,3 +1,34 @@
+<template>
+  <table :aria-busy="busy">
+    <thead>
+      <tr>
+        <th v-for="field in fields" :key="field.key">
+          {{ field.label }}
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        v-for="item in visibleItems"
+        :key="item[keyField]"
+        @click="selectRow(item)"
+        :class="{ selected: item === selectedRow }"
+      >
+        <td
+          v-for="field in fields"
+          :key="field.key"
+          :class="field.tdClass"
+          :style="field.tdStyle ? field.tdStyle(item) : ''"
+        >
+          <slot :name="`cell(${field.key})`" :item="item">
+            {{ item[field.key] }}
+          </slot>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</template>
+
 <script lang="ts" setup>
 import { ref, computed } from "vue";
 
@@ -35,63 +66,40 @@ function selectRow(row: any) {
 }
 </script>
 
-<style lang="sass" scoped>
-@import "@/sass/variables.sass"
+<style lang="scss" scoped>
+@import "@/sass/variables.scss";
 
-$cell-padding: 9px
-$header-padding: 5px
+$cell-padding: 9px;
+$header-padding: 5px;
 
-table
-  border-collapse: collapse
-  width: 100%
+table {
+  border-collapse: collapse;
+  width: 100%;
 
-  &[aria-busy=true]
-    opacity: .5
-    pointer-events: none
+  &[aria-busy="true"] {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}
 
-th
-  padding: $header-padding $cell-padding
+th {
+  padding: $header-padding $cell-padding;
+  font-weight: 500;
+}
 
-td
-  padding: $cell-padding
+td {
+  padding: $cell-padding;
+}
 
-tbody tr
-  cursor: pointer
+tbody tr {
+  cursor: pointer;
 
-  &:nth-child(odd)
-    background-color: $blue-dust
+  &:nth-child(odd) {
+    background-color: $blue-dust;
+  }
 
-  &.selected
-    background: darken($blue-dust, 25%)
+  &.selected {
+    background: darken($blue-dust, 25%);
+  }
+}
 </style>
-
-<template>
-  <table :aria-busy="busy">
-    <thead>
-      <tr>
-        <th v-for="field in fields" :key="field.key">
-          {{ field.label }}
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr
-        v-for="item in visibleItems"
-        :key="item[keyField]"
-        @click="selectRow(item)"
-        :class="{ selected: item === selectedRow }"
-      >
-        <td
-          v-for="field in fields"
-          :key="field.key"
-          :class="field.tdClass"
-          :style="field.tdStyle ? field.tdStyle(item) : ''"
-        >
-          <slot :name="`cell(${field.key})`" :item="item">
-            {{ item[field.key] }}
-          </slot>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</template>

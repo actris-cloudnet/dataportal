@@ -1,15 +1,7 @@
-<style scoped lang="sass">
-@import "@/sass/landing-beta.sass"
-
-.placeholder
-  color: $GRAY-3-hex
-  margin-top: .5*$basespacing
-</style>
-
 <template>
   <div class="summary-section" id="preview">
     <div class="summary-section-header">Preview</div>
-    <div v-if="loading" class="placeholder">Loading...</div>
+    <BaseSpinner v-if="loading" />
     <Visualization
       v-else-if="visualization"
       :data="visualization"
@@ -23,6 +15,7 @@
 <script lang="ts" setup>
 import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
 import Visualization from "@/components/ImageVisualization.vue";
+import BaseSpinner from "@/components/BaseSpinner.vue";
 
 export interface Props {
   visualization: VisualizationItem | null;

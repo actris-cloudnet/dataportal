@@ -1,82 +1,51 @@
-<style scoped lang="sass">
-@import "@/sass/landing-beta.sass"
-.summary-section-header-container
-  display: flex
-  flex-direction: row
-  justify-content: space-between
-
-.metadata-container
-  font-size: 85%
-  font-weight: 500
-
-.error
-  color: $RED-4-hex
-
-.loading
-  color: $GRAY-4-hex
-
-.coordinates
-  font-size: 90%
-</style>
-
 <template>
   <div class="summary-section" id="product-information">
     <div class="summary-section-header-container">
       <div class="summary-section-header">Product</div>
       <div class="metadata-container"><a :href="jsonUrl">JSON</a></div>
     </div>
-    <table class="summary-section-table">
-      <tr>
-        <th>Type</th>
-        <td>
-          <div class="product-container">
-            <img :alt="response.product.id" :src="productIconUrl" class="product-icon" />
-            {{ response.product.humanReadableName }}
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <th>Level</th>
-        <td>
-          {{ response.product.level }}
-          (<a :href="'https://docs.cloudnet.fmi.fi/levels.html#level-' + response.product.level">definition</a>)
-        </td>
-      </tr>
-      <tr v-if="'instrumentPid' in response && response.instrumentPid">
-        <th>Instrument</th>
-        <td>
+    <dl class="summary-section-table">
+      <dt>Type</dt>
+      <dd>
+        <div class="product-container">
+          <img :alt="response.product.id" :src="productIconUrl" class="product-icon" />
+          {{ response.product.humanReadableName }}
+        </div>
+      </dd>
+      <dt>Level</dt>
+      <dd>
+        {{ response.product.level }}
+        (<a :href="'https://docs.cloudnet.fmi.fi/levels.html#level-' + response.product.level">definition</a>)
+      </dd>
+      <template v-if="'instrumentPid' in response && response.instrumentPid">
+        <dt>Instrument</dt>
+        <dd>
           <span v-if="instrumentStatus === 'loading'" class="loading"> Loading... </span>
           <a v-else-if="instrumentStatus === 'error'" :href="response.instrumentPid" class="error">
             Failed to load information
           </a>
           <a v-else :href="response.instrumentPid">{{ instrument }}</a>
-        </td>
-      </tr>
-      <tr v-if="'model' in response">
-        <th>Model</th>
-        <td>{{ response.model.humanReadableName }}</td>
-      </tr>
-      <tr>
-        <th>Timeliness</th>
-        <td>{{ timelinessString }}</td>
-      </tr>
-      <tr>
-        <th>Measurement date</th>
-        <td>{{ response.measurementDate }}</td>
-      </tr>
-      <tr>
-        <th>Location</th>
-        <td>
-          <router-link :to="`/site/${response.site.id}`">
-            {{ response.site.humanReadableName
-            }}<template v-if="response.site.country">, {{ response.site.country }}</template>
-          </router-link>
-          <template v-if="location">
-            <span class="coordinates"> ({{ formatCoordinates(location.latitude, location.longitude) }}) </span>
-          </template>
-        </td>
-      </tr>
-    </table>
+        </dd>
+      </template>
+      <template v-if="'model' in response">
+        <dt>Model</dt>
+        <dd>{{ response.model.humanReadableName }}</dd>
+      </template>
+      <dt>Timeliness</dt>
+      <dd>{{ timelinessString }}</dd>
+      <dt>Measurement date</dt>
+      <dd>{{ response.measurementDate }}</dd>
+      <dt>Location</dt>
+      <dd>
+        <router-link :to="{ name: 'Site', params: { siteid: response.site.id } }">
+          {{ response.site.humanReadableName
+          }}<template v-if="response.site.country">, {{ response.site.country }}</template>
+        </router-link>
+        <span class="coordinates" v-if="location">
+          ({{ formatCoordinates(location.latitude, location.longitude) }})
+        </span>
+      </dd>
+    </dl>
   </div>
 </template>
 
@@ -103,3 +72,40 @@ const productIconUrl = computed(() => getProductIcon(props.response.product.id))
 
 const jsonUrl = computed(() => `${import.meta.env.VITE_BACKEND_URL}files/${props.response.uuid}`);
 </script>
+
+<style scoped lang="scss">
+@import "@/sass/variables.scss";
+
+.summary-section-header-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.metadata-container {
+  font-size: 85%;
+  font-weight: 500;
+}
+
+.error {
+  color: $red4;
+}
+
+.loading {
+  color: $gray4;
+}
+
+.coordinates {
+  font-size: 90%;
+}
+
+.product-container {
+  display: flex;
+  align-items: center;
+}
+
+.product-icon {
+  height: 1.1rem;
+  margin-right: 0.5rem;
+}
+</style>

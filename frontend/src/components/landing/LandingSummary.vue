@@ -1,31 +1,24 @@
-<style scoped lang="sass">
-@import "@/sass/landing-beta.sass"
-</style>
-
 <template>
-  <div class="landing-summary-container">
-    <div class="main-content">
-      <div class="summary-box">
-        <ProductInformation
-          :response="response"
-          :location="location"
-          :instrument="instrument"
-          :instrumentStatus="instrumentStatus"
-        />
-        <FileInformation :response="response" />
-        <DataOrigin :response="response" :isBusy="isBusy" :versions="versions" :sourceFiles="sourceFiles" />
-      </div>
+  <div class="landing-summary-container pagewidth">
+    <div class="summary-box summary-box-product-information">
+      <ProductInformation
+        :response="response"
+        :location="location"
+        :instrument="instrument"
+        :instrumentStatus="instrumentStatus"
+      />
+      <FileInformation :response="response" />
+      <FileProvenance :response="response" :isBusy="isBusy" :versions="versions" :sourceFiles="sourceFiles" />
     </div>
-    <div class="side-content">
-      <div class="summary-box">
-        <Preview :visualization="visualization" :loading="loadingVisualizations" />
-      </div>
-      <div class="summary-box" id="citation" :class="{ volatile: response.volatile }">
-        <Citation :uuid="uuid" :file="response" v-if="response" />
-      </div>
+    <div class="summary-box summary-box-visualization">
+      <FilePreview :visualization="visualization" :loading="loadingVisualizations" />
+    </div>
+    <div class="summary-box summary-box-citation" id="citation" :class="{ volatile: response.volatile }">
+      <FileCitation :uuid="uuid" :file="response" v-if="response" />
     </div>
   </div>
 </template>
+
 <script lang="ts" setup>
 import { computed } from "vue";
 import type { SiteLocation } from "@shared/entity/SiteLocation";
@@ -33,9 +26,9 @@ import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
 
 import FileInformation from "./FileInformation.vue";
 import ProductInformation from "./ProductInformation.vue";
-import DataOrigin from "./DataOrigin.vue";
-import Preview from "./FilePreview.vue";
-import Citation from "./FileCitation.vue";
+import FileProvenance from "./FileProvenance.vue";
+import FilePreview from "./FilePreview.vue";
+import FileCitation from "./FileCitation.vue";
 import type { SourceFile, FileResponse } from "@/views/FileView.vue";
 import { useTitle } from "@/router";
 
@@ -65,3 +58,48 @@ const visualization = computed(() => {
   }
 });
 </script>
+
+<style scoped lang="scss">
+.landing-summary-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.summary-box-product-information {
+  grid-row: 1 / 3;
+  grid-column: 1;
+}
+
+.summary-box-visualization {
+  grid-row: 1;
+  grid-column: 2;
+}
+
+.summary-box-citation {
+  grid-row: 2;
+  grid-column: 2;
+}
+
+@media screen and (max-width: 1000px) {
+  .landing-summary-container {
+    grid-template-columns: 1fr;
+    margin-bottom: 1rem;
+  }
+
+  .summary-box-visualization {
+    grid-row: 1;
+    grid-column: 1;
+  }
+
+  .summary-box-product-information {
+    grid-row: 2;
+    grid-column: 1;
+  }
+
+  .summary-box-citation {
+    grid-row: 3;
+    grid-column: 1;
+  }
+}
+</style>
