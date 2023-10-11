@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import TheHeader from "@/components/TheHeader.vue";
 import TheFooter from "@/components/TheFooter.vue";
-import ConceptPopup from "@/components/ConceptPopup.vue";
+import ConsentPopup from "@/components/ConsentPopup.vue";
 </script>
 
 <template>
@@ -15,7 +15,7 @@ import ConceptPopup from "@/components/ConceptPopup.vue";
       </router-view>
     </div>
     <TheFooter />
-    <ConceptPopup />
+    <ConsentPopup />
   </div>
 </template>
 
