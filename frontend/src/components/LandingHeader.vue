@@ -71,8 +71,9 @@ header {
 }
 
 :slotted(.tab) {
-  position: relative;
-  min-inline-size: max-content;
+  display: flex;
+  align-items: center;
+  min-width: max-content;
   font-size: 120%;
   margin: 0 0.5rem;
   text-align: center;
@@ -87,6 +88,7 @@ header {
     width: 1.1rem;
     height: 1.1rem;
     opacity: 0.75;
+    margin-right: 0.25rem;
   }
 
   &.router-link-exact-active {
