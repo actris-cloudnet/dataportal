@@ -12,11 +12,6 @@
           {{ response.product.humanReadableName }}
         </div>
       </dd>
-      <dt>Level</dt>
-      <dd>
-        {{ response.product.level }}
-        (<a :href="'https://docs.cloudnet.fmi.fi/levels.html#level-' + response.product.level">definition</a>)
-      </dd>
       <template v-if="'instrumentPid' in response && response.instrumentPid">
         <dt>Instrument</dt>
         <dd>
