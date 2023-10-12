@@ -248,7 +248,6 @@
     "format": "HDF5 (NetCDF4)",
     "site": "bucharest",
     "version": "123",
-    "quality": "qc",
     "errorLevel": "error",
     "software": [{ "id": 1 }],
     "instrument": "mira"

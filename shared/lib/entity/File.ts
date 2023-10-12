@@ -7,9 +7,10 @@ import type { ErrorLevel } from "./QualityReport";
 import type { Software } from "./Software";
 import type { Instrument } from "./Instrument";
 
-export enum Quality {
+export enum Timeliness {
   NRT = "nrt",
-  QC = "qc",
+  RRT = "rrt",
+  SCHEDULED = "scheduled",
 }
 
 export interface File {
@@ -19,7 +20,7 @@ export interface File {
   pid: string;
   volatile: boolean;
   legacy: boolean;
-  quality: Quality;
+  timeliness: Timeliness;
   measurementDate: string;
   site: Site;
   checksum: string;

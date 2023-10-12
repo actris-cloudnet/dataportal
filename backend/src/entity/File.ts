@@ -22,11 +22,6 @@ import { ErrorLevel } from "./QualityReport";
 import { Software } from "./Software";
 import { Instrument } from "./Instrument";
 
-export enum Quality {
-  NRT = "nrt",
-  QC = "qc",
-}
-
 @Entity()
 @Unique(["checksum"])
 @Index(["measurementDate", "site", "product"])
@@ -48,9 +43,6 @@ export abstract class File {
 
   @Column({ default: false })
   legacy!: boolean;
-
-  @Column({ type: "enum", enum: Quality, default: Quality.NRT })
-  quality!: Quality;
 
   @Column({ type: "date" })
   measurementDate!: Date;

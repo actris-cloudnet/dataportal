@@ -25,7 +25,6 @@ exports[`/api/files/:uuid request succeeds on instrument file 1`] = `
     "id": "radar",
     "level": "1b",
   },
-  "quality": "nrt",
   "site": {
     "actrisId": null,
     "altitude": 16,
@@ -52,6 +51,7 @@ exports[`/api/files/:uuid request succeeds on instrument file 1`] = `
     },
   ],
   "sourceFileIds": null,
+  "timeliness": "scheduled",
   "updatedAt": "2020-02-20T10:56:19.382Z",
   "uuid": "38092c00-161d-4ca2-a29d-628cf8e960f6",
   "version": "123",
@@ -81,7 +81,6 @@ exports[`/api/files/:uuid request succeeds on model file 1`] = `
     "id": "model",
     "level": "1b",
   },
-  "quality": "nrt",
   "site": {
     "actrisId": 1337,
     "altitude": 93,
@@ -100,6 +99,7 @@ exports[`/api/files/:uuid request succeeds on model file 1`] = `
   },
   "size": "500452",
   "software": [],
+  "timeliness": "scheduled",
   "updatedAt": "2020-02-20T10:52:59.073Z",
   "uuid": "b5d1d5af-3667-41bc-b952-e684f627d91c",
   "version": "123",

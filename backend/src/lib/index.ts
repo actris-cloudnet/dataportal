@@ -93,6 +93,7 @@ export const augmentFile = (includeS3path: boolean) => (file: RegularFile | Mode
         url: software.url,
       }))
     : undefined,
+  timeliness: daysBetweenDates(file.createdAt, file.measurementDate) <= 3 ? "nrt" : "scheduled",
 });
 
 export const ssAuthString = () =>
@@ -237,4 +238,12 @@ export function formatList(parts: string[], conjunction: string): string {
 // TODO: Workaround for TypeORM 0.3
 export function ArrayEqual<T>(value: T[] | FindOperator<T>): FindOperator<any> {
   return new FindOperator("equal", value as any);
+}
+
+function daysBetweenDates(a: Date, b: Date): number {
+  a = new Date(a);
+  b = new Date(b);
+  a.setHours(0, 0, 0, 0);
+  b.setHours(0, 0, 0, 0);
+  return Math.floor(Math.abs(a.getTime() - b.getTime()) / (24 * 60 * 60 * 1000));
 }

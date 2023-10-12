@@ -15,7 +15,7 @@
       <template v-if="'instrumentPid' in response && response.instrumentPid">
         <dt>Instrument</dt>
         <dd>
-          <span v-if="instrumentStatus === 'loading'" class="loading"> Loading... </span>
+          <span v-if="instrumentStatus === 'loading'" class="loading">Loading...</span>
           <a v-else-if="instrumentStatus === 'error'" :href="response.instrumentPid" class="error">
             Failed to load information
           </a>
@@ -27,7 +27,11 @@
         <dd>{{ response.model.humanReadableName }}</dd>
       </template>
       <dt>Timeliness</dt>
-      <dd>{{ timelinessString }}</dd>
+      <dd>
+        <a :href="timelinessDisplay[response.timeliness].url" target="_blank">
+          {{ timelinessDisplay[response.timeliness].label }}
+        </a>
+      </dd>
       <dt>Measurement date</dt>
       <dd>{{ response.measurementDate }}</dd>
       <dt>Location</dt>
@@ -49,6 +53,7 @@ import type { FileResponse } from "@/views/FileView.vue";
 import type { SiteLocation } from "@shared/entity/SiteLocation";
 import { computed } from "vue";
 import { getProductIcon, formatCoordinates } from "@/lib";
+import type { Timeliness } from "@shared/entity/File";
 
 export interface Props {
   response: FileResponse;
@@ -59,9 +64,11 @@ export interface Props {
 
 const props = defineProps<Props>();
 
-const timelinessString = computed(() =>
-  props.response.quality === "qc" ? "Quality Controlled (QC)" : "Near Real Time (NRT)",
-);
+const timelinessDisplay: Record<Timeliness, { label: string; url: string }> = {
+  rrt: { label: "Real real-time (RRT)", url: "https://vocabulary.actris.nilu.no/actris_vocab/realreal-time" },
+  nrt: { label: "Near real-time (NRT)", url: "https://vocabulary.actris.nilu.no/actris_vocab/nearreal-time" },
+  scheduled: { label: "Scheduled", url: "https://vocabulary.actris.nilu.no/actris_vocab/scheduled" },
+};
 
 const productIconUrl = computed(() => getProductIcon(props.response.product.id));
 

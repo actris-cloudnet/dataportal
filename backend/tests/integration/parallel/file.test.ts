@@ -22,6 +22,16 @@ describe("/api/files/:uuid", () => {
     expect(res.data).toMatchSnapshot();
   });
 
+  it("returns scheduled timeliness", async () => {
+    const res = await axios.get(`${url}b6de8cf4-8825-47b0-aaa9-4fd413bbb0d7`);
+    expect(res.data.timeliness).toBe("scheduled");
+  });
+
+  it("returns NRT timeliness", async () => {
+    const res = await axios.get(`${url}acf78456-11b1-41a6-b2de-aa7590a75675`);
+    expect(res.data.timeliness).toBe("nrt");
+  });
+
   it("responds with a 404 on test file if in normal mode", async () => {
     return expect(axios.get(url + testUuid)).rejects.toMatchObject({ response: { data: expectedBody404 } });
   });
