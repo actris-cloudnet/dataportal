@@ -114,7 +114,7 @@ describe("SearchView.vue", () => {
       const newValue = filesSortedByDate[1].measurementDate;
       await changeInputAndNextTick("dateFrom", newValue);
       const secondArg = getMockedAxiosLastCallSecondArgument();
-      expect(dateToISOString(secondArg.params.dateFrom)).toEqual(newValue);
+      expect(secondArg.params.dateFrom).toEqual(newValue);
     });
 
     it("Inserts correct parameters to url query string", async () => {
@@ -130,7 +130,7 @@ describe("SearchView.vue", () => {
       const newValue = filesSortedByDate[3].measurementDate;
       await changeInputAndNextTick("dateTo", newValue);
       const secondArg = getMockedAxiosLastCallSecondArgument();
-      expect(dateToISOString(secondArg.params.dateTo)).toEqual(newValue);
+      expect(secondArg.params.dateTo).toEqual(newValue);
     });
 
     it("updates table based on api response", async () => {

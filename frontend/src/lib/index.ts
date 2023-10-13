@@ -89,6 +89,7 @@ export const humanReadableDate = (date: string | Date) =>
     year: "numeric",
     month: "long",
     day: "numeric",
+    timeZone: "UTC",
   });
 
 export const humanReadableTimestamp = (date: string | Date) => {
@@ -99,11 +100,8 @@ export const humanReadableTimestamp = (date: string | Date) => {
 export const combinedFileSize = (files: SearchFileResponse[]) =>
   files.map((file) => file.size).reduce((prev, cur) => cur + prev, 0);
 
-export const dateToUTC = (date: Date) => new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-
 export const dateToString = (date: Date) => {
-  const utcTime = dateToUTC(date);
-  return utcTime.toISOString().slice(0, 10);
+  return date.toISOString().slice(0, 10);
 };
 
 export const fixedRanges = Object.freeze({ week: 6, month: 29, day: 0 });

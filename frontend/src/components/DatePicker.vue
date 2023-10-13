@@ -36,7 +36,7 @@
 
 <script lang="ts" setup>
 import { computed, watchEffect, ref } from "vue";
-import { dateToString, dateToUTC } from "@/lib";
+import { dateToString } from "@/lib";
 import { DatePicker as VDatePicker } from "v-calendar";
 import "v-calendar/dist/style.css";
 
@@ -71,7 +71,7 @@ function truncateDate(date: Date) {
 function validateDate(value: Date) {
   const result = {
     isValidDateString: !isNaN(value.getDate()),
-    isNotInFuture: truncateDate(value) <= truncateDate(dateToUTC(new Date())),
+    isNotInFuture: truncateDate(value) <= truncateDate(new Date()),
     isBeforeEnd: truncateDate(value) <= truncateDate(props.end),
     isAfterStart: truncateDate(value) >= truncateDate(props.start),
   };

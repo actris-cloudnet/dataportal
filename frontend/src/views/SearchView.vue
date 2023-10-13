@@ -270,11 +270,6 @@ function resetResponse() {
 
 const isVizMode = computed(() => props.mode == "visualizations");
 
-function getInitialDateFrom() {
-  const date = new Date();
-  return new Date(date.setDate(date.getDate() - fixedRanges.day));
-}
-
 // api call
 const apiUrl = import.meta.env.VITE_BACKEND_URL;
 const apiResponse = ref<SearchFileResponse[] | VisualizationResponse[]>(resetResponse());
@@ -296,7 +291,7 @@ const showAllSites = ref(false);
 const beginningOfHistory = ref(new Date("1970-01-01"));
 const today = ref(new Date());
 const dateTo = ref(new Date());
-const dateFrom = ref(isVizMode.value ? new Date() : getInitialDateFrom());
+const dateFrom = ref(new Date());
 const dateFromError = ref<DateErrors>();
 const dateToError = ref<DateErrors>();
 const activeBtn = ref("");
@@ -539,7 +534,7 @@ function hasPreviousDate() {
 function setPreviousDate() {
   if (hasPreviousDate()) {
     const date = new Date(dateTo.value);
-    date.setDate(date.getDate() - 1);
+    date.setUTCDate(date.getUTCDate() - 1);
     dateTo.value = date;
   }
 }
@@ -547,7 +542,7 @@ function setPreviousDate() {
 function setNextDate() {
   if (hasNextDate()) {
     const date = new Date(dateTo.value);
-    date.setDate(date.getDate() + 1);
+    date.setUTCDate(date.getUTCDate() + 1);
     dateTo.value = date;
   }
 }
@@ -578,8 +573,8 @@ const payload = computed(() => {
   return {
     params: {
       site: selectedSiteIds.value.length ? selectedSiteIds.value : allSites.value.map((site) => site.id),
-      dateFrom: isVizMode.value ? dateTo.value : dateFrom.value,
-      dateTo: dateTo.value,
+      dateFrom: isVizMode.value ? dateToString(dateTo.value) : dateToString(dateFrom.value),
+      dateTo: dateToString(dateTo.value),
       product: selectedProductIds.value.length ? selectedProductIds.value : allProducts.value.map((prod) => prod.id),
       variable: isVizMode.value ? selectedVariableIds.value : undefined,
       instrument: selectedInstrumentIds.value.length ? selectedInstrumentIds.value : undefined,
