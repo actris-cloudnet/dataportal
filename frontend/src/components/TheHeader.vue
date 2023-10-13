@@ -20,7 +20,7 @@ const showMenu = ref(false);
       <ul :class="{ show: showMenu }">
         <li>
           <a href="/search">
-            <span>Browse data</span>
+            <span>Search data</span>
           </a>
         </li>
         <li>
