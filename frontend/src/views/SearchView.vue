@@ -377,10 +377,7 @@ async function initView() {
     normalSiteIds.value = normalSites.value.map((site) => site.id);
     extraSiteIds.value = extraSites.value.map((site) => site.id);
     allProducts.value = products.data.filter(discardExperimentalProducts).sort(alphabeticalSort);
-    allInstruments.value = instruments.data.sort(instrumentSort).map((i: Instrument) => ({
-      ...i,
-      humanReadableName: i.shortName || i.humanReadableName,
-    }));
+    allInstruments.value = instruments.data.sort(instrumentSort);
     normalProducts.value = products.data.filter((prod: Product) => !prod.experimental).sort(alphabeticalSort);
     experimentalProducts.value = products.data.filter((prod: Product) => prod.experimental).sort(alphabeticalSort);
     normalProductIds.value = normalProducts.value.map((prod) => prod.id);

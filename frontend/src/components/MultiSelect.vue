@@ -8,27 +8,29 @@
       placeholder="Select"
       track-by="id"
       label="humanReadableName"
-      :options="options"
+      :options="filteredOptions"
       :show-labels="false"
       :multiple="multiple"
       :hideSelected="false"
+      :internal-search="false"
+      @search-change="searchChange"
     >
       <template #tag="slotProps">
         <span class="multiselect__tag">
           <img v-if="getIcon" class="option__image" :src="getIcon(slotProps.option)" alt="" />
-          {{ slotProps.option.humanReadableName }}
+          {{ slotProps.option.shortName || slotProps.option.humanReadableName }}
           <i class="multiselect__tag-icon" @click="slotProps.remove(slotProps.option)"></i>
         </span>
       </template>
       <template #option="slotProps">
         <span>
           <img v-if="getIcon" class="option__image" :src="getIcon(slotProps.option)" alt="" />
-          {{ slotProps.option.humanReadableName }}
+          {{ slotProps.option.shortName || slotProps.option.humanReadableName }}
         </span>
       </template>
       <template #singleLabel="slotProps">
         <img v-if="getIcon" class="option__image" :src="getIcon(slotProps.option)" alt="" />
-        {{ slotProps.option.humanReadableName }}
+        {{ slotProps.option.shortName || slotProps.option.humanReadableName }}
       </template>
       <template #noResult>
         <span id="noRes">Not found</span>
@@ -40,12 +42,13 @@
 <script lang="ts" setup>
 import VueMultiselect from "vue-multiselect";
 import { notEmpty } from "@/lib";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import type { PropType } from "vue";
 
 export interface Option {
   id: string;
   humanReadableName: string;
+  shortName?: string;
 }
 
 type OptionId = Option["id"];
@@ -71,6 +74,24 @@ const emit = defineEmits<{
   (e: "update:modelValue", value: ModelValue): void;
 }>();
 
+const searchQuery = ref("");
+
+function normalizeGeneric(input: string): string {
+  return input
+    .trim()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036F]/g, "")
+    .toLowerCase();
+}
+
+function normalizeGerman(input: string): string {
+  return input.trim().normalize("NFKC").toLowerCase().replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue");
+}
+
+function searchChange(query: string) {
+  searchQuery.value = normalizeGeneric(query);
+}
+
 const value = computed({
   get() {
     if (Array.isArray(props.modelValue)) {
@@ -84,6 +105,27 @@ const value = computed({
     emit("update:modelValue", Array.isArray(value) ? value.map((v) => v.id) : value != null ? value.id : null);
   },
 });
+
+const optionIndex = computed<[string, Option][]>(() =>
+  props.options.flatMap((option) => {
+    const output: [string, Option][] = [
+      [option.id, option],
+      [normalizeGeneric(option.humanReadableName), option],
+      [normalizeGerman(option.humanReadableName), option],
+    ];
+    if (typeof option.shortName !== "undefined") {
+      output.push([normalizeGeneric(option.shortName), option]);
+      output.push([normalizeGerman(option.shortName), option]);
+    }
+    return output;
+  }),
+);
+
+const filteredOptions = computed(() => [
+  ...new Set(
+    optionIndex.value.filter(([term, _option]) => term.includes(searchQuery.value)).map(([_term, option]) => option),
+  ),
+]);
 </script>
 
 <style src="vue-multiselect/dist/vue-multiselect.css"></style>
