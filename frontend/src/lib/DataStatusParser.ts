@@ -88,7 +88,7 @@ export async function parseDataStatus(searchPayload: any): Promise<DataStatus> {
   const allDates: string[] = [];
   while (initialDate <= endDate) {
     allDates.push(dateToString(new Date(initialDate)));
-    initialDate.setDate(initialDate.getDate() + 1);
+    initialDate.setUTCDate(initialDate.getUTCDate() + 1);
   }
   const years = searchResponse.reduce((acc: ProductYear[], cur) => {
     const [year, month, day] = cur.measurementDate.toString().split("-");
