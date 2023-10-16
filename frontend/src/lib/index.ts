@@ -100,6 +100,7 @@ export const humanReadableTimestamp = (date: string | Date) => {
 export const combinedFileSize = (files: SearchFileResponse[]) =>
   files.map((file) => file.size).reduce((prev, cur) => cur + prev, 0);
 
+/** Convert date to ISO 8601 date in UTC. */
 export const dateToString = (date: Date) => {
   return date.toISOString().slice(0, 10);
 };
@@ -231,3 +232,14 @@ export type ColorClass =
   | "all-data"
   | "all-raw"
   | "contains-info";
+
+export const classColor: Record<ColorClass, string> = {
+  "no-data": "white",
+  "all-data": "#5ac413",
+  "all-raw": "#a0df7b",
+  "only-legacy-data": "#9fb4c4",
+  "contains-warnings": "#f7e91b",
+  "contains-errors": "#cd5c5c",
+  "contains-info": "#a0df7b",
+  "only-model-data": "#d3d3d3",
+};

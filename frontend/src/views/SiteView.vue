@@ -110,12 +110,8 @@
           <section class="details">
             <ProductAvailabilityVisualization
               v-if="dataStatus"
-              :site="siteid"
-              :legend="true"
-              :tooltips="true"
               :dataStatus="dataStatus"
-              :linkToSearch="!response.type.includes('hidden' as SiteType)"
-              :nLevel2FileTypes="nLevel2FileTypes"
+              :siteId="response.type.includes('hidden' as SiteType) ? '' : siteid"
             />
             <BaseSpinner v-else />
           </section>
@@ -130,26 +126,17 @@
           <section class="details" v-if="selectedProductId">
             <ProductAvailabilityVisualizationSingle
               v-if="dataStatus"
-              :site="siteid"
-              legend
-              tooltips
-              qualityScores
-              :product="selectedProductId"
               :dataStatus="dataStatus"
+              :productId="selectedProductId"
             />
             <BaseSpinner v-else />
           </section>
 
           <section class="details" v-else>
-            <ProductAvailabilityVisualization
+            <ProductQualityVisualization
               v-if="dataStatus"
-              :site="siteid"
-              legend
-              tooltips
-              qualityScores
               :dataStatus="dataStatus"
-              :linkToSearch="!response.type.includes('hidden' as SiteType)"
-              :nLevel2FileTypes="nLevel2FileTypes"
+              :siteId="response.type.includes('hidden' as SiteType) ? '' : siteid"
             />
             <BaseSpinner v-else />
           </section>
@@ -183,6 +170,7 @@ import type { SearchFileResponse } from "@shared/entity/SearchFileResponse";
 import MyMap from "@/components/SuperMap.vue";
 import ProductAvailabilityVisualization from "@/components/ProductAvailabilityVisualization.vue";
 import ProductAvailabilityVisualizationSingle from "@/components/ProductAvailabilityVisualizationSingle.vue";
+import ProductQualityVisualization from "@/components/ProductQualityVisualization.vue";
 import { getProductIcon, formatCoordinates, fetchInstrumentName, actrisNfUrl, getInstrumentIcon } from "@/lib";
 import { parseDataStatus, type DataStatus } from "@/lib/DataStatusParser";
 import CustomMultiselect from "@/components/MultiSelect.vue";
@@ -272,9 +260,13 @@ onMounted(() => {
       error.value = true;
       response.value = error.response;
     });
-  initDataStatusParser().catch((error) => {
-    console.error(error);
-  });
+  parseDataStatus(props.siteid)
+    .then((data) => {
+      dataStatus.value = data;
+    })
+    .catch((error) => {
+      console.error(error);
+    });
   fetchLatestLevel1Product().catch((error) => {
     console.error(error);
   });
@@ -314,17 +306,6 @@ const selectedProductName = computed(() => {
 
 function reset() {
   selectedProductId.value = null;
-}
-
-async function initDataStatusParser(product: string | null = null) {
-  const properties = ["measurementDate", "productId", "legacy", "uuid", "errorLevel"];
-  const payload = {
-    site: props.siteid,
-    showLegacy: true,
-    product: product,
-    properties,
-  };
-  dataStatus.value = await parseDataStatus(payload);
 }
 
 async function handleInstrument(response: ReducedMetadataResponse): Promise<Instrument> {
