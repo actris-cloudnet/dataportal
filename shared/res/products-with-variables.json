@@ -27,25 +27,25 @@
     "experimental": false,
     "variables": [
       {
-        "actrisVocabUri": null,
+        "actrisName": null,
         "id": "classification-target_classification",
         "humanReadableName": "Target classification",
         "order": 0
       },
       {
-        "actrisVocabUri": null,
+        "actrisName": null,
         "id": "classification-detection_status",
         "humanReadableName": "Classification detection status",
         "order": 1
       },
       {
-        "actrisVocabUri": null,
+        "actrisName": null,
         "id": "classification-v",
         "humanReadableName": "Classification velocity",
         "order": 2
       },
       {
-        "actrisVocabUri": null,
+        "actrisName": null,
         "id": "classification-ldr",
         "humanReadableName": "Classification LDR",
         "order": 3
@@ -115,25 +115,25 @@
     "experimental": false,
     "variables": [
       {
-        "actrisVocabUri": null,
+        "actrisName": null,
         "id": "test2",
         "humanReadableName": "Kaljanhimo",
         "order": 0
       },
       {
-        "actrisVocabUri": null,
+        "actrisName": null,
         "id": "test1",
         "humanReadableName": "Auringonpaisteen määrä",
         "order": 1
       },
       {
-        "actrisVocabUri": null,
+        "actrisName": null,
         "id": "categorize-v",
         "humanReadableName": "Categorize velocity",
         "order": 2
       },
       {
-        "actrisVocabUri": null,
+        "actrisName": null,
         "id": "categorize-ldr",
         "humanReadableName": "Categorize LDR",
         "order": 3
@@ -185,7 +185,7 @@
         "id": "model-temperature",
         "humanReadableName": "Model temperature",
         "order": 0,
-        "actrisVocabUri": "http://example.org/vocab/model-temperature"
+        "actrisName": "model temperature"
       }
     ]
   },
@@ -206,13 +206,13 @@
         "id": "radar-v",
         "humanReadableName": "Radar velocity",
         "order": 2,
-        "actrisVocabUri": "http://example.org/vocab/radar-velocity"
+        "actrisName": "radar velocity"
       },
       {
         "id": "radar-ldr",
         "humanReadableName": "Radar LDR",
         "order": 3,
-        "actrisVocabUri": "http://example.org/vocab/radar-linear-depolarisation-ratio"
+        "actrisName": "radar linear depolarisation ratio"
       }
     ]
   },

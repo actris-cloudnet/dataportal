@@ -38,10 +38,10 @@ img {
     <figcaption :style="captionStyle">
       {{ currentData.productVariable.humanReadableName }}
       <a
-        :href="currentData.productVariable.actrisVocabUri"
+        :href="dvasVocabUri()"
         title="Definition for the variable in ACTRIS vocabulary"
         class="tag"
-        v-if="linkToVocabulary && currentData.productVariable.actrisVocabUri"
+        v-if="linkToVocabulary && currentData.productVariable.actrisName"
       >
         definition
       </a>
@@ -148,6 +148,12 @@ const captionStyle = computed(() => {
 });
 
 const imageUrl = computed(() => `${import.meta.env.VITE_BACKEND_URL}download/image/${nextData.value.s3key}`);
+
+function dvasVocabUri(): string | undefined {
+  const baseUrl = "https://vocabulary.actris.nilu.no/actris_vocab/";
+  const resource = currentData.value.productVariable.actrisName;
+  if (resource) return baseUrl + resource.replace(/\s/g, "");
+}
 
 watchEffect(async () => {
   nextData.value = props.data;

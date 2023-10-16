@@ -40,7 +40,7 @@ export class Site {
   @Column({ type: "char", length: 3, nullable: true })
   gaw!: string | null;
 
-  @Column({ type: "char", length: 3, nullable: true })
+  @Column({ type: "text", nullable: true })
   dvasId!: string | null;
 
   @Column({ type: "smallint", nullable: true })

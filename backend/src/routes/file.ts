@@ -217,9 +217,12 @@ export class FileRoutes {
       let repo: Repository<RegularFile | ModelFile> = this.fileRepo;
       if (existingFile.product.id == "model") repo = this.modelFileRepo;
       await repo.update({ uuid: partialFile.uuid }, partialFile);
-      delete partialFile.pid; // No PID in SearchFile
-      delete partialFile.checksum; // No checksum in SearchFile
-      delete partialFile.version; // No version in SearchFile
+      ["pid", "checksum", "version", "dvasUpdatedAt"].forEach((prop) => {
+        // Not in SearchFile
+        if (prop in partialFile) {
+          delete partialFile[prop];
+        }
+      });
       if (await this.searchFileRepo.findOneBy({ uuid: partialFile.uuid }))
         await this.searchFileRepo.update({ uuid: partialFile.uuid }, partialFile);
       res.sendStatus(200);
@@ -310,6 +313,11 @@ export class FileRoutes {
     if (query.updatedAtFrom) qb.andWhere("file.updatedAt >= :updatedAtFrom", query);
     if (query.updatedAtTo) qb.andWhere("file.updatedAt <= :updatedAtTo", query);
     if (query.instrumentPid) qb.andWhere("file.instrumentPid IN (:...instrumentPid)", query);
+    if (query.dvasUpdated) {
+      const value = query.dvasUpdated.toLowerCase();
+      if (value == "true") qb.andWhere("file.dvasUpdatedAt IS NOT NULL");
+      if (value == "false") qb.andWhere("file.dvasUpdatedAt IS NULL");
+    }
 
     // No allVersions, allModels or model/filename params (default)
     if (
