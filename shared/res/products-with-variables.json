@@ -185,7 +185,7 @@
         "id": "model-temperature",
         "humanReadableName": "Model temperature",
         "order": 0,
-        "actrisName": "http://example.org/vocab/model-temperature"
+        "actrisName": "model temperature"
       }
     ]
   },
@@ -206,13 +206,13 @@
         "id": "radar-v",
         "humanReadableName": "Radar velocity",
         "order": 2,
-        "actrisName": "http://example.org/vocab/radar-velocity"
+        "actrisName": "radar velocity"
       },
       {
         "id": "radar-ldr",
         "humanReadableName": "Radar LDR",
         "order": 3,
-        "actrisName": "http://example.org/vocab/radar-linear-depolarisation-ratio"
+        "actrisName": "radar linear depolarisation ratio"
       }
     ]
   },
