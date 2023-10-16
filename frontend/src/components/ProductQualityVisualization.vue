@@ -2,10 +2,11 @@
   <DateVisualization
     :data="dates"
     :legend="{
-      'all-data': { name: 'All level 2', color: '#5ac413' },
-      'all-raw': { name: 'Some level 1b', color: '#a0df7b' },
-      'only-legacy-data': { name: 'Only legacy', color: '#9fb4c4' },
-      'only-model-data': { name: 'Only model', color: '#d3d3d3' },
+      'all-data': { name: 'L2 pass', color: '#5ac413' },
+      'all-raw': { name: 'L2 warnings / info', color: '#a0df7b' },
+      'contains-errors': { name: 'L2 errors', color: '#cd5c5c' },
+      'only-legacy-data': { name: 'Legacy L2', color: '#9fb4c4' },
+      'only-model-data': { name: 'Products / tests missing', color: '#d3d3d3' },
       'no-data': { name: 'No data', color: '#ffffff' },
     }"
   >
@@ -18,9 +19,13 @@
             <li
               v-for="product in filterProductsByLvl(lvl)"
               :key="product.id"
-              class="productitem"
+              class="qualityitem"
               :class="{
                 found: data && getProductStatus(data.products[lvl], product.id),
+                na: data && !getReportExists(data.products[lvl], product.id),
+                info: data && isFileWithInfo(data.products[lvl], product.id),
+                warning: data && isFileWithWarning(data.products[lvl], product.id),
+                error: data && isFileWithError(data.products[lvl], product.id),
               }"
             >
               {{ idToHumanReadable(product.id) }}
@@ -28,7 +33,7 @@
             </li>
             <li
               v-if="lvl === '1b'"
-              class="productitem modelitem"
+              class="qualityitem modelitem"
               :class="{
                 found: data && getProductStatus(data.products[lvl], 'model'),
                 na: data && !getReportExists(data.products[lvl], 'model'),
@@ -51,29 +56,29 @@ import { computed } from "vue";
 import {
   isLegacyFile,
   noData,
-  onlyModel,
-  allLvl2,
+  isFileWithInfo,
+  isFileWithError,
+  isFileWithWarning,
   getProductStatus,
   getReportExists,
-  missingData,
-  onlyLegacy,
+  allLevel2Pass,
+  hasSomeLevel2Tests,
+  level2ContainsErrors,
+  level2containsWarningsOrInfo,
+  onlyLegacyLevel2,
 } from "@/lib/ProductAvailabilityTools";
-import { useRouter } from "vue-router";
 import DateVisualization from "./DateVisualization.vue";
 import type { DataStatus } from "@/lib/DataStatusParser";
 
 export interface Props {
-  siteId: string;
   dataStatus: DataStatus;
 }
 
 const props = defineProps<Props>();
-const router = useRouter();
 const dates = computed(() =>
   props.dataStatus.dates.map((date) => ({
     date: date.date,
     color: createColorClass(date.products),
-    link: createLinkToSearchPage(date.date, date.products),
     products: date.products,
   })),
 );
@@ -87,20 +92,11 @@ function filterProductsByLvl(lvl: string) {
 
 function createColorClass(products: ProductLevels): ColorClass {
   if (noData(products)) return "no-data";
-  if (onlyModel(products)) return "only-model-data";
-  if (onlyLegacy(products)) return "only-legacy-data";
-  if (allLvl2(products, props.dataStatus.l2ProductCount)) return "all-data";
-  if (missingData(products)) return "all-raw";
-  return "contains-errors";
-}
-
-function createLinkToSearchPage(date: string, products: ProductLevels): string | undefined {
-  if (noData(products) || !props.siteId) return;
-  return router.resolve({
-    name: "Search",
-    params: { mode: "data" },
-    query: { site: props.siteId, dateFrom: date, dateTo: date },
-  }).href;
+  if (hasSomeLevel2Tests(products) && onlyLegacyLevel2(products)) return "only-legacy-data";
+  if (allLevel2Pass(products, props.dataStatus.l2ProductCount)) return "all-data";
+  if (level2ContainsErrors(products)) return "contains-errors";
+  if (level2containsWarningsOrInfo(products)) return "all-raw";
+  return "only-model-data";
 }
 </script>
 

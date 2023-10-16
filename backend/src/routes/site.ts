@@ -4,6 +4,7 @@ import { hideTestDataFromNormalUsers, toArray } from "../lib";
 import { Site, SiteType } from "../entity/Site";
 import { SiteLocation } from "../entity/SiteLocation";
 import { ModelFile, RegularFile } from "../entity/File";
+import { SearchFile } from "../entity/SearchFile";
 
 export class SiteRoutes {
   constructor(dataSource: DataSource) {
@@ -12,6 +13,7 @@ export class SiteRoutes {
     this.regularFileRepo = dataSource.getRepository(RegularFile);
     this.modelFileRepo = dataSource.getRepository(ModelFile);
     this.siteLocationRepo = dataSource.getRepository(SiteLocation);
+    this.searchFileRepo = dataSource.getRepository(SearchFile);
   }
 
   readonly dataSource: DataSource;
@@ -19,6 +21,7 @@ export class SiteRoutes {
   readonly regularFileRepo: Repository<RegularFile>;
   readonly modelFileRepo: Repository<ModelFile>;
   readonly siteLocationRepo: Repository<SiteLocation>;
+  readonly searchFileRepo: Repository<SearchFile>;
 
   site: RequestHandler = async (req: Request, res: Response, next) => {
     try {
@@ -126,6 +129,37 @@ export class SiteRoutes {
       const locations = await this.siteLocationRepo.find({ where: { siteId: site.id }, order: { date: "ASC" } });
       res.send(locations);
     } catch (err: any) {
+      return next({ status: 500, errors: err });
+    }
+  };
+
+  productAvailability: RequestHandler = async (req: Request, res: Response, next) => {
+    try {
+      const siteQb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteid", req.params);
+      const site = await hideTestDataFromNormalUsers<Site>(siteQb, req).getExists();
+      if (!site) {
+        return next({ status: 404, errors: ["No sites match this id"] });
+      }
+      const fileQb = this.searchFileRepo
+        .createQueryBuilder("file")
+        .select([
+          "file.uuid AS uuid",
+          'file."measurementDate"::text AS "measurementDate"',
+          'file."productId" as "productId"',
+          'file."errorLevel" AS "errorLevel"',
+          "file.legacy AS legacy",
+        ])
+        .distinctOn(['file."measurementDate"', "file.productId", "file.errorLevel"])
+        .leftJoin("file.product", "product")
+        .where("file.siteId = :siteId", { siteId: req.params.siteid })
+        .orderBy("file.measurementDate", "DESC")
+        .addOrderBy("file.productId", "ASC")
+        .addOrderBy("file.errorLevel", "ASC");
+      if (!("includeExperimental" in req.query)) {
+        fileQb.andWhere("product.experimental = false");
+      }
+      res.send(await fileQb.getRawMany());
+    } catch (err) {
       return next({ status: 500, errors: err });
     }
   };

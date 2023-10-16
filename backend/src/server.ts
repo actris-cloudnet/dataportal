@@ -171,6 +171,7 @@ async function createServer(): Promise<void> {
   app.get("/api/reference/:uuid", middleware.validateUuidParam, referenceRoutes.getReference);
   app.get("/api/sites/:siteid/locations", siteRoutes.locations);
   app.get("/api/sites/:siteid/locations/:date", siteRoutes.location);
+  app.get("/api/sites/:siteid/product-availability", siteRoutes.productAvailability);
 
   // TODO: Depreciated. Needed for now, but in the future these should public
   // and properly documented.
