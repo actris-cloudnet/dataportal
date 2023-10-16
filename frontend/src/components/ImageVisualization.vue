@@ -41,7 +41,7 @@ img {
         :href="dvasVocabUri()"
         title="Definition for the variable in ACTRIS vocabulary"
         class="tag"
-        v-if="linkToVocabulary && currentData.productVariable.actrisVocabUri"
+        v-if="linkToVocabulary && currentData.productVariable.actrisName"
       >
         definition
       </a>
@@ -151,7 +151,7 @@ const imageUrl = computed(() => `${import.meta.env.VITE_BACKEND_URL}download/ima
 
 function dvasVocabUri(): string | undefined {
   const baseUrl = "https://vocabulary.actris.nilu.no/actris_vocab/";
-  const resource = currentData.value.productVariable.actrisVocabUri;
+  const resource = currentData.value.productVariable.actrisName;
   if (resource) return baseUrl + resource.replace(/\s/g, "");
 }
 

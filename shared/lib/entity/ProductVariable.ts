@@ -5,7 +5,7 @@ export interface ProductVariable {
   id: string;
   humanReadableName: string;
   order: string;
-  actrisVocabUri: string | null;
+  actrisName: string | null;
   visualizations: Visualization[];
   product: Product;
 }

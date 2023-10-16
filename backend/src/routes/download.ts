@@ -238,7 +238,7 @@ export class DownloadRoutes {
     }
 
     const productFileJoin = 'JOIN product_variable USING ("productId")';
-    const productFileWhere = 'WHERE product_variable."actrisVocabUri" IS NOT NULL';
+    const productFileWhere = 'WHERE product_variable."actrisName" IS NOT NULL';
     let fileJoin = "";
     let fileWhere = "";
     if (req.query.site && req.query.country) {
