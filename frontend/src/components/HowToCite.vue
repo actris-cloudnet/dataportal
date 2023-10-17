@@ -31,6 +31,7 @@
 import axios from "axios";
 import { ref, watchEffect } from "vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
+import { backendUrl } from "@/lib";
 
 export interface Props {
   uuid?: string;
@@ -54,7 +55,7 @@ type CitationState =
 const citation = ref<CitationState>({ status: "loading" });
 
 async function fetchReferenceStrings(uuid: string) {
-  const baseUrl = `${import.meta.env.VITE_BACKEND_URL}reference/${uuid}/`;
+  const baseUrl = `${backendUrl}reference/${uuid}/`;
   try {
     const responses = await Promise.all([
       axios.get(`${baseUrl}?citation=true&format=html`),

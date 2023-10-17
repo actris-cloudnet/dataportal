@@ -38,10 +38,10 @@ img {
     <figcaption :style="captionStyle">
       {{ currentData.productVariable.humanReadableName }}
       <a
-        :href="dvasVocabUri()"
+        :href="dvasVocabUri"
         title="Definition for the variable in ACTRIS vocabulary"
         class="tag"
-        v-if="linkToVocabulary && currentData.productVariable.actrisName"
+        v-if="linkToVocabulary && dvasVocabUri"
       >
         definition
       </a>
@@ -88,6 +88,7 @@ img {
 import type { RouteLocationRaw } from "vue-router";
 import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
 import { computed, nextTick, ref, watchEffect } from "vue";
+import { backendUrl, vocabularyUrl } from "@/lib";
 
 export interface Props {
   data: VisualizationItem;
@@ -147,13 +148,13 @@ const captionStyle = computed(() => {
   };
 });
 
-const imageUrl = computed(() => `${import.meta.env.VITE_BACKEND_URL}download/image/${nextData.value.s3key}`);
+const imageUrl = computed(() => `${backendUrl}download/image/${nextData.value.s3key}`);
 
-function dvasVocabUri(): string | undefined {
-  const baseUrl = "https://vocabulary.actris.nilu.no/actris_vocab/";
-  const resource = currentData.value.productVariable.actrisName;
-  if (resource) return baseUrl + resource.replace(/\s/g, "");
-}
+const dvasVocabUri = computed(() => {
+  const name = currentData.value.productVariable.actrisName;
+  if (!name) return undefined;
+  return vocabularyUrl + name.replace(/\s/g, "");
+});
 
 watchEffect(async () => {
   nextData.value = props.data;

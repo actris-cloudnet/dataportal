@@ -62,7 +62,7 @@
 import { ref, computed, onMounted } from "vue";
 import axios from "axios";
 import type { CollectionResponse } from "@shared/entity/CollectionResponse";
-import { combinedFileSize, constructTitle, getProductIcon, humanReadableSize } from "@/lib";
+import { backendUrl, combinedFileSize, constructTitle, getProductIcon, humanReadableSize } from "@/lib";
 import type { Site } from "@shared/entity/Site";
 import SuperMap from "@/components/SuperMap.vue";
 import type { Product } from "@shared/entity/Product";
@@ -85,7 +85,6 @@ const sortedFiles = ref<CollectionFileResponse[]>([]);
 const sites = ref<Site[]>([]);
 const products = ref<Product[]>([]);
 const models = ref<Model[]>([]);
-const apiUrl = import.meta.env.VITE_BACKEND_URL;
 const nonModelSiteIds = ref<string[]>([]);
 
 const startDate = computed(() => sortedFiles.value && sortedFiles.value[sortedFiles.value.length - 1].measurementDate);
@@ -104,7 +103,7 @@ const totalSize = computed(() => {
 
 onMounted(async () => {
   try {
-    const res = await axios.get(`${apiUrl}collection/${props.uuid}`);
+    const res = await axios.get(`${backendUrl}collection/${props.uuid}`);
     response.value = res.data;
     if (response.value == null) return;
     sortedFiles.value = constructTitle(
@@ -120,9 +119,9 @@ onMounted(async () => {
     const productIds = getUnique(sortedFiles.value, "productId");
     const modelIds = getUnique(sortedFiles.value, "modelId");
     const [sitesRes, modelsRes, productsRes] = await Promise.all([
-      axios.get(`${apiUrl}sites/`),
-      axios.get(`${apiUrl}models/`),
-      axios.get(`${apiUrl}products/`),
+      axios.get(`${backendUrl}sites/`),
+      axios.get(`${backendUrl}models/`),
+      axios.get(`${backendUrl}products/`),
     ]);
     sites.value = sitesRes.data.filter((site: Site) => siteIds.includes(site.id));
     products.value = productsRes.data.filter((product: Product) => productIds.includes(product.id));

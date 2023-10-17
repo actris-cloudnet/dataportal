@@ -244,6 +244,7 @@ import {
   isValidDate,
   getMarkerIcon,
   getInstrumentIcon,
+  backendUrl,
 } from "@/lib";
 import VizSearchResult from "@/components/VizSearchResult.vue";
 import type { Product } from "@shared/entity/Product";
@@ -271,7 +272,6 @@ function resetResponse() {
 const isVizMode = computed(() => props.mode == "visualizations");
 
 // api call
-const apiUrl = import.meta.env.VITE_BACKEND_URL;
 const apiResponse = ref<SearchFileResponse[] | VisualizationResponse[]>(resetResponse());
 const pendingUpdates = ref(false);
 
@@ -367,9 +367,9 @@ async function initView() {
     params: { type: ["cloudnet", "campaign", "arm"] },
   };
   await Promise.all([
-    axios.get(`${apiUrl}sites/`, sitesPayload),
-    axios.get(`${apiUrl}products/variables`),
-    axios.get(`${apiUrl}instruments`),
+    axios.get(`${backendUrl}sites/`, sitesPayload),
+    axios.get(`${backendUrl}products/variables`),
+    axios.get(`${backendUrl}instruments`),
   ]).then(([sites, products, instruments]) => {
     allSites.value = sites.data.sort(alphabeticalSort).filter(selectNormalSites);
     normalSites.value = sites.data.sort(alphabeticalSort).filter(selectNormalSites);
@@ -431,7 +431,7 @@ function fetchData() {
       const apiPath = isVizMode.value ? "visualizations/" : "search/";
       if (!isVizMode.value) checkIfButtonShouldBeActive();
       return axios
-        .get(`${apiUrl}${apiPath}`, payload.value)
+        .get(`${backendUrl}${apiPath}`, payload.value)
         .then((res) => {
           apiResponse.value = constructTitle(res.data);
           isBusy.value = false;
