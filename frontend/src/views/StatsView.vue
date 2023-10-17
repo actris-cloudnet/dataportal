@@ -99,7 +99,7 @@ import axios from "axios";
 
 import type { Site, SiteType } from "@shared/entity/Site";
 import COUNTRY_NAMES from "@/assets/country-io-names.json";
-import { compareValues, notEmpty } from "@/lib";
+import { backendUrl, compareValues, notEmpty } from "@/lib";
 
 interface Option {
   id: string;
@@ -108,7 +108,6 @@ interface Option {
 
 type Dimension = "year" | "yearMonth" | "country" | "downloads" | "uniqueIps";
 
-const apiUrl = import.meta.env.VITE_BACKEND_URL;
 const statistics = ref([]);
 const dimensions = ref<Dimension[]>([]);
 const loading = ref(false);
@@ -159,7 +158,7 @@ function getCountryName(countryCode: string): string {
 
 onMounted(async () => {
   try {
-    const response = await axios.get(`${apiUrl}sites`);
+    const response = await axios.get(`${backendUrl}sites`);
     const data: Site[] = response.data;
     countries.value = Array.from(new Set(data.map((site) => site.countryCode).filter(notEmpty)))
       .map((countryCode) => ({
@@ -191,7 +190,7 @@ async function onSearch() {
     downloadDateTo: dateTo.value || undefined,
   };
   try {
-    const response = await axios.get(`${apiUrl}download/stats`, {
+    const response = await axios.get(`${backendUrl}download/stats`, {
       params,
       withCredentials: true,
     });

@@ -35,6 +35,8 @@ import markerIconOrange from "@/assets/markers/marker-icon-orange.png";
 import markerIconGrey from "@/assets/markers/marker-icon-grey.png";
 
 export const actrisNfUrl = "https://actris-nf-labelling.out.ocp.fmi.fi";
+export const backendUrl = import.meta.env.VITE_BACKEND_URL;
+export const vocabularyUrl = "https://vocabulary.actris.nilu.no/actris_vocab/";
 
 export const getQcText = (errorLevel: string) => {
   errorLevel = errorLevel != "info" ? errorLevel + "s" : errorLevel;

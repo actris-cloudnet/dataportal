@@ -63,7 +63,7 @@ import escapeHtml from "escape-html";
 import { computed, ref, watch } from "vue";
 
 import Donut from "@/components/DonutVisualization.vue";
-import { humanReadableTimestamp, getQcIcon } from "@/lib";
+import { humanReadableTimestamp, getQcIcon, backendUrl } from "@/lib";
 import { useTitle } from "@/router";
 import BaseSpinner from "@/components/BaseSpinner.vue";
 
@@ -112,7 +112,7 @@ watch(
   () => props.uuid,
   async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}quality/${props.uuid}`);
+      const response = await axios.get(`${backendUrl}quality/${props.uuid}`);
       report.value = { status: "ready", value: response.data };
     } catch (error: any) {
       if (error.response && error.response.status === 404) {

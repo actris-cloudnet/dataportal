@@ -168,6 +168,7 @@ import {
   getQcText,
   getQcLink,
   humanReadableDate,
+  backendUrl,
 } from "@/lib";
 import type { SearchFileResponse } from "@shared/entity/SearchFileResponse";
 import BaseTable from "./BaseTable.vue";
@@ -198,8 +199,6 @@ const currentPage = ref(1);
 const perPage = ref(15);
 const previewBusy = ref(false);
 
-const apiUrl = import.meta.env.VITE_BACKEND_URL;
-
 const listLength = computed(() => props.apiResponse.length);
 
 const hasVolatile = computed(() => props.apiResponse.some((item) => item.volatile));
@@ -220,7 +219,7 @@ function changePreview() {
 function loadPreview(record: FileResponse) {
   previewBusy.value = true;
   axios
-    .get(`${apiUrl}visualizations/${record.uuid}`)
+    .get(`${backendUrl}visualizations/${record.uuid}`)
     .then(({ data }) => {
       if (data.visualizations.length === 0) {
         clearPreview();
@@ -240,7 +239,7 @@ function rowSelected(item: FileResponse) {
     });
   } else {
     axios
-      .get(`${apiUrl}files/${item.uuid}`)
+      .get(`${backendUrl}files/${item.uuid}`)
       .then(({ data }) => {
         pendingPreviewResponse.value = data;
         if (!previewResponse.value) {
@@ -260,7 +259,7 @@ function createCollection() {
   }
   downloadIsBusy.value = true;
   axios
-    .post(`${apiUrl}collection`, {
+    .post(`${backendUrl}collection`, {
       files: props.apiResponse.map((file) => file.uuid),
     })
     .then(({ data: uuid }) => router.push({ name: "Collection", params: { uuid } }))

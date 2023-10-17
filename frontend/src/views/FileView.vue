@@ -55,7 +55,7 @@
 <script lang="ts" setup>
 import { ref, computed, watch } from "vue";
 import axios from "axios";
-import { humanReadableDate, fetchInstrumentName, compareValues } from "@/lib";
+import { humanReadableDate, fetchInstrumentName, compareValues, backendUrl } from "@/lib";
 import type { RegularFile, ModelFile } from "@shared/entity/File";
 import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
 import type { SiteType } from "@shared/entity/Site";
@@ -77,8 +77,6 @@ export interface Props {
 export type FileResponse = ModelFile | RegularFile;
 
 const props = defineProps<Props>();
-
-const apiUrl = import.meta.env.VITE_BACKEND_URL;
 
 const response = ref<FileResponse | null>(null);
 const visualizations = ref<VisualizationItem[]>([]);
@@ -109,7 +107,7 @@ const newestVersion = computed(() => {
 
 async function fetchVisualizations() {
   try {
-    const response = await axios.get(`${apiUrl}visualizations/${props.uuid}`);
+    const response = await axios.get(`${backendUrl}visualizations/${props.uuid}`);
     visualizations.value = response.data.visualizations;
   } catch (error) {
     console.error(error);
@@ -119,7 +117,7 @@ async function fetchVisualizations() {
 
 async function fetchFileMetadata() {
   try {
-    const res = await axios.get(`${apiUrl}files/${props.uuid}`);
+    const res = await axios.get(`${backendUrl}files/${props.uuid}`);
     response.value = res.data;
     if (response.value) {
       await fetchLocation(response.value);
@@ -136,7 +134,7 @@ async function fetchLocation(file: ModelFile | RegularFile) {
     return;
   }
   try {
-    const response = await axios.get(`${apiUrl}sites/${file.site.id}/locations/${file.measurementDate}`);
+    const response = await axios.get(`${backendUrl}sites/${file.site.id}/locations/${file.measurementDate}`);
     location.value = response.data;
   } catch (err) {
     location.value = null;
@@ -153,7 +151,7 @@ function fetchVersions(file: File) {
       showLegacy: true,
     },
   };
-  return axios.get(`${apiUrl}files`, payload).then((response) => {
+  return axios.get(`${backendUrl}files`, payload).then((response) => {
     const searchFiles = response.data as File[];
     versions.value = searchFiles.map((sf) => sf.uuid);
   });
@@ -167,7 +165,7 @@ async function fetchSourceFiles(response: RegularFile | ModelFile) {
   const results = await Promise.all(
     response.sourceFileIds.map((uuid) =>
       axios
-        .get(`${apiUrl}files/${uuid}`)
+        .get(`${backendUrl}files/${uuid}`)
         .then((response) => ({ ok: true, uuid, value: response.data }))
         .catch((error) => ({ ok: false, uuid, value: error })),
     ),

@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-import { notEmpty } from "@/lib/index";
+import { backendUrl, notEmpty } from "@/lib/index";
 import type { Product } from "@shared/entity/Product";
 import axios from "axios";
 
@@ -30,8 +29,6 @@ export interface DataStatus {
   availableProducts: Product[];
   l2ProductCount: number;
 }
-
-const apiUrl = import.meta.env.VITE_BACKEND_URL;
 
 function createProductLevels(lvlTranslate: LvlTranslate, productInfo?: ProductInfo, existingObj?: ProductLevels) {
   if (!existingObj) {
@@ -65,8 +62,8 @@ interface ProductAvailability {
 
 export async function parseDataStatus(siteId: string): Promise<DataStatus> {
   const [searchRes, prodRes] = await Promise.all([
-    axios.get<ProductAvailability[]>(`${apiUrl}sites/${siteId}/product-availability/`),
-    axios.get<Product[]>(`${apiUrl}products/`),
+    axios.get<ProductAvailability[]>(`${backendUrl}sites/${siteId}/product-availability/`),
+    axios.get<Product[]>(`${backendUrl}products/`),
   ]);
   const searchResponse = searchRes.data;
   const l2ProductCount = prodRes.data.filter((product) => product.level === "2" && !product.experimental).length;

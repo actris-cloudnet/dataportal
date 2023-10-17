@@ -29,6 +29,7 @@ import type { AxiosResponse } from "axios";
 import type { Publication } from "@shared/entity/Publication";
 import LandingHeader from "@/components/LandingHeader.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
+import { backendUrl } from "@/lib";
 
 function groupBySorted<T, K extends keyof T>(items: T[], key: K, order: "asc" | "desc"): [T[K], T[]][] {
   const grouped = items.reduce((result, item) => {
@@ -56,7 +57,7 @@ const publications = ref<PublicationState>({ status: "loading" });
 
 onMounted(async () => {
   try {
-    const response: AxiosResponse<Publication[]> = await axios.get(`${import.meta.env.VITE_BACKEND_URL}publications`);
+    const response: AxiosResponse<Publication[]> = await axios.get(`${backendUrl}publications`);
     publications.value = {
       status: "ready",
       data: groupBySorted(response.data, "year", "desc"),

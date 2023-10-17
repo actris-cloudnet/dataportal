@@ -52,7 +52,7 @@
 import type { FileResponse } from "@/views/FileView.vue";
 import type { SiteLocation } from "@shared/entity/SiteLocation";
 import { computed } from "vue";
-import { getProductIcon, formatCoordinates } from "@/lib";
+import { getProductIcon, formatCoordinates, backendUrl } from "@/lib";
 import type { Timeliness } from "@shared/entity/File";
 
 export interface Props {
@@ -72,7 +72,7 @@ const timelinessDisplay: Record<Timeliness, { label: string; url: string }> = {
 
 const productIconUrl = computed(() => getProductIcon(props.response.product.id));
 
-const jsonUrl = computed(() => `${import.meta.env.VITE_BACKEND_URL}files/${props.response.uuid}`);
+const jsonUrl = computed(() => `${backendUrl}files/${props.response.uuid}`);
 </script>
 
 <style scoped lang="scss">

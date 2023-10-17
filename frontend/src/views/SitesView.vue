@@ -59,7 +59,7 @@
 <script lang="ts" setup>
 import type { Site, SiteType } from "@shared/entity/Site";
 import axios from "axios";
-import { formatLatitude, formatLongitude } from "@/lib";
+import { backendUrl, formatLatitude, formatLongitude } from "@/lib";
 import { ref, onMounted } from "vue";
 import LandingHeader from "@/components/LandingHeader.vue";
 
@@ -75,7 +75,7 @@ const sites = ref<SitesState>({ status: "loading" });
 
 onMounted(async () => {
   try {
-    const response = await axios.get<Site[]>(`${import.meta.env.VITE_BACKEND_URL}sites`);
+    const response = await axios.get<Site[]>(`${backendUrl}sites`);
     sites.value = {
       status: "ready",
       items: [

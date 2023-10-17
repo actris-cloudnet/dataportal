@@ -6,6 +6,7 @@ import HowToCite from "@/components/HowToCite.vue";
 import LicenseInfo from "@/components/LicenseInfo.vue";
 import BaseButton from "@/components/BaseButton.vue";
 import BaseAlert from "@/components/BaseAlert.vue";
+import { backendUrl } from "@/lib";
 
 export interface Props {
   collection: CollectionResponse;
@@ -13,12 +14,11 @@ export interface Props {
 
 const props = defineProps<Props>();
 
-const apiUrl = import.meta.env.VITE_BACKEND_URL;
 const citationBusy = ref(false);
 const pidServiceError = ref(false);
 
 const downloadUrl = computed(() => {
-  return `${apiUrl}download/collection/${props.collection.uuid}`;
+  return `${backendUrl}download/collection/${props.collection.uuid}`;
 });
 
 async function generatePid(): Promise<void> {
@@ -28,7 +28,7 @@ async function generatePid(): Promise<void> {
       type: "collection",
       uuid: props.collection.uuid,
     };
-    await axios.post(`${apiUrl}generate-pid`, payload);
+    await axios.post(`${backendUrl}generate-pid`, payload);
   } catch (error) {
     pidServiceError.value = true;
     console.error(error);

@@ -171,7 +171,14 @@ import MyMap from "@/components/SuperMap.vue";
 import ProductAvailabilityVisualization from "@/components/ProductAvailabilityVisualization.vue";
 import ProductAvailabilityVisualizationSingle from "@/components/ProductAvailabilityVisualizationSingle.vue";
 import ProductQualityVisualization from "@/components/ProductQualityVisualization.vue";
-import { getProductIcon, formatCoordinates, fetchInstrumentName, actrisNfUrl, getInstrumentIcon } from "@/lib";
+import {
+  getProductIcon,
+  formatCoordinates,
+  fetchInstrumentName,
+  actrisNfUrl,
+  getInstrumentIcon,
+  backendUrl,
+} from "@/lib";
 import { parseDataStatus, type DataStatus } from "@/lib/DataStatusParser";
 import CustomMultiselect from "@/components/MultiSelect.vue";
 import type { ReducedMetadataResponse } from "@shared/entity/ReducedMetadataResponse";
@@ -201,7 +208,6 @@ type LocationsResult =
 
 const props = defineProps<Props>();
 
-const apiUrl = import.meta.env.VITE_BACKEND_URL;
 const response = ref<Site | null>(null);
 const latestFile = ref<SearchFileResponse | null>(null);
 const error = ref(false);
@@ -231,12 +237,12 @@ const subtitle = computed(() => {
 
 onMounted(() => {
   axios
-    .get(`${apiUrl}sites/${props.siteid}`)
+    .get(`${backendUrl}sites/${props.siteid}`)
     .then((res) => {
       response.value = res.data;
       if (response.value?.type.includes("mobile" as SiteType)) {
         axios
-          .get(`${apiUrl}sites/${props.siteid}/locations`)
+          .get(`${backendUrl}sites/${props.siteid}/locations`)
           .then((res) => {
             if (res.data.length > 0) {
               locations.value = { status: "ready", value: res.data };
@@ -330,7 +336,7 @@ async function handleInstrument(response: ReducedMetadataResponse): Promise<Inst
 async function loadInstruments() {
   const dateFrom = new Date();
   dateFrom.setDate(dateFrom.getDate() - instrumentsFromLastDays);
-  const res = await axios.get(`${apiUrl}uploaded-metadata/`, {
+  const res = await axios.get(`${backendUrl}uploaded-metadata/`, {
     params: {
       site: props.siteid,
       updatedAtFrom: dateFrom,
@@ -342,11 +348,11 @@ async function loadInstruments() {
 }
 
 async function fetchLatestLevel1Product() {
-  const productsResponse = await axios.get(`${apiUrl}products`);
+  const productsResponse = await axios.get(`${backendUrl}products`);
   const level1bProducts = productsResponse.data
     .filter((product: Product) => product.level === "1b")
     .map((product: Product) => product.id);
-  const searchResponse = await axios.get(`${apiUrl}search/`, {
+  const searchResponse = await axios.get(`${backendUrl}search/`, {
     params: {
       site: props.siteid,
       product: level1bProducts,
