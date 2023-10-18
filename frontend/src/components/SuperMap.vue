@@ -82,6 +82,7 @@ function initMap() {
   legend.onAdd = generateLegend;
   map = L.map(mapElement.value as unknown as HTMLElement, {
     maxBounds: setMapBounds(),
+    zoomSnap: 0.5,
   });
   if (props.center) {
     map.setView(getMapCenter()!, props.zoom);
