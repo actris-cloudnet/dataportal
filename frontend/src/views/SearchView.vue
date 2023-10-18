@@ -25,8 +25,8 @@
             :sites="allSites"
             :selectedSiteIds="selectedSiteIds"
             :onMapMarkerClick="onMapMarkerClick"
-            :center="[54.0, 14.0]"
-            :zoom="3"
+            :center="[58.0, 14.0]"
+            :zoom="2.5"
             enableBoundingBox
           />
         </div>
