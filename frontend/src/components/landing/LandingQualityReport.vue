@@ -31,9 +31,7 @@
         <div class="quality-test-list-header">Tests</div>
         <div class="quality-test-list">
           <div class="quality-test" v-for="test in report.value.testReports" :key="test.testId">
-            <div class="quality-test-icon">
-              <img :src="getQcIcon(test.result)" alt="" />
-            </div>
+            <img class="quality-test-icon" :src="getQcIcon(test.result)" alt="" />
             <div class="quality-test-id">{{ test.name }}</div>
             <div
               v-if="test.description"
@@ -244,12 +242,10 @@ function formatMessage(message: string): string {
 
     .quality-test-icon {
       grid-column: 1;
-      padding: 0 1rem 0;
-
-      img {
-        height: 20px;
-        min-width: 20px;
-      }
+      margin: 0 2rem 0 1rem;
+      height: 20px;
+      width: 20px;
+      align-self: center;
     }
 
     .quality-test-id {
@@ -265,10 +261,10 @@ function formatMessage(message: string): string {
 
     .quality-test-exception-list {
       grid-column: 2;
-      padding: 0;
+      list-style-type: disc;
 
       .quality-test-exception {
-        padding: 0.2rem;
+        padding: 0.2rem 0;
         font-size: 105%;
         font-weight: 400;
       }
