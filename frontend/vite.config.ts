@@ -11,4 +11,7 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
+  define: {
+    "import.meta.env.DATAPORTAL_VERSION": JSON.stringify(process.env.npm_package_version),
+  },
 });
