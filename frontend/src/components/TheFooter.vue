@@ -17,11 +17,21 @@
       </div>
       <div class="item">
         <a href="https://docs.cloudnet.fmi.fi/api/data-portal.html">API documentation</a><br />
-        <router-link to="/privacy">Privacy policy</router-link>
+        <router-link to="/privacy">Privacy policy</router-link><br />
+        <span class="hidden-links">
+          Version:
+          <a :href="`https://github.com/actris-cloudnet/dataportal/tree/v${dataportalVersion}`">
+            {{ dataportalVersion }}
+          </a>
+        </span>
       </div>
     </div>
   </footer>
 </template>
+
+<script setup lang="ts">
+const dataportalVersion = import.meta.env.DATAPORTAL_VERSION;
+</script>
 
 <style scoped lang="scss">
 @import "@/sass/variables.scss";
