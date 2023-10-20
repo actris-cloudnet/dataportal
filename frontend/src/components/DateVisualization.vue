@@ -170,6 +170,11 @@ $year-height: 1rem;
   display: grid;
   grid-template-columns: auto auto;
   column-gap: 0.5rem;
+  row-gap: 6px;
+}
+
+:deep(a) {
+  height: $year-height;
 }
 
 :deep(canvas) {
