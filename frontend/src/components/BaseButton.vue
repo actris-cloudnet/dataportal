@@ -4,7 +4,7 @@ import type { RouteLocationRaw } from "vue-router";
 export interface Props {
   to?: RouteLocationRaw;
   href?: string;
-  type: "primary" | "secondary";
+  type: "primary" | "secondary" | "brand";
   disabled?: boolean;
 }
 
@@ -50,6 +50,15 @@ defineEmits<{
     &:hover {
       text-decoration: none;
       background-color: darken($actris-green, 10%);
+    }
+  }
+
+  &.brand {
+    background-color: $blue-sapphire;
+
+    &:hover {
+      text-decoration: none;
+      background-color: darken($blue-sapphire, 10%);
     }
   }
 
