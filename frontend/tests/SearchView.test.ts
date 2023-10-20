@@ -70,7 +70,7 @@ describe("SearchView.vue", () => {
     await router.isReady();
 
     wrapper = mount(SearchView, {
-      propsData: { mode: "data" },
+      props: { mode: "data" },
       stubs: ["SuperMap"],
       global: { plugins: [router] },
     });
