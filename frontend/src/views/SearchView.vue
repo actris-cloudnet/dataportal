@@ -807,7 +807,7 @@ div.date {
   cursor: pointer;
   text-decoration: underline;
   color: #bcd2e2;
-  margin-bottom: $filter-margin;
+  margin-top: 1rem;
   display: block;
 }
 
