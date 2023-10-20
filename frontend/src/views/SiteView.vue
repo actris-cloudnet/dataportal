@@ -111,7 +111,7 @@
             <ProductAvailabilityVisualization
               v-if="dataStatus"
               :dataStatus="dataStatus"
-              :siteId="response.type.includes('hidden' as SiteType) ? '' : siteid"
+              :siteId="response.type.includes('hidden' as SiteType) ? '' : siteId"
             />
             <BaseSpinner v-else />
           </section>
@@ -136,7 +136,7 @@
             <ProductQualityVisualization
               v-if="dataStatus"
               :dataStatus="dataStatus"
-              :siteId="response.type.includes('hidden' as SiteType) ? '' : siteid"
+              :siteId="response.type.includes('hidden' as SiteType) ? '' : siteId"
             />
             <BaseSpinner v-else />
           </section>
@@ -191,7 +191,7 @@ import LandingHeader from "@/components/LandingHeader.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
 
 export interface Props {
-  siteid: string;
+  siteId: string;
 }
 
 interface Instrument {
@@ -237,12 +237,12 @@ const subtitle = computed(() => {
 
 onMounted(() => {
   axios
-    .get(`${backendUrl}sites/${props.siteid}`)
+    .get(`${backendUrl}sites/${props.siteId}`)
     .then((res) => {
       response.value = res.data;
       if (response.value?.type.includes("mobile" as SiteType)) {
         axios
-          .get(`${backendUrl}sites/${props.siteid}/locations`)
+          .get(`${backendUrl}sites/${props.siteId}/locations`)
           .then((res) => {
             if (res.data.length > 0) {
               locations.value = { status: "ready", value: res.data };
@@ -266,7 +266,7 @@ onMounted(() => {
       error.value = true;
       response.value = error.response;
     });
-  parseDataStatus(props.siteid)
+  parseDataStatus(props.siteId)
     .then((data) => {
       dataStatus.value = data;
     })
@@ -338,7 +338,7 @@ async function loadInstruments() {
   dateFrom.setDate(dateFrom.getDate() - instrumentsFromLastDays);
   const res = await axios.get(`${backendUrl}uploaded-metadata/`, {
     params: {
-      site: props.siteid,
+      site: props.siteId,
       updatedAtFrom: dateFrom,
       status: ["uploaded", "processed"],
     },
@@ -354,7 +354,7 @@ async function fetchLatestLevel1Product() {
     .map((product: Product) => product.id);
   const searchResponse = await axios.get(`${backendUrl}search/`, {
     params: {
-      site: props.siteid,
+      site: props.siteId,
       product: level1bProducts,
       limit: 1,
     },

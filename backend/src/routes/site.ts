@@ -25,7 +25,7 @@ export class SiteRoutes {
 
   site: RequestHandler = async (req: Request, res: Response, next) => {
     try {
-      const qb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteid", req.params);
+      const qb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteId", req.params);
       const site = await hideTestDataFromNormalUsers<Site>(qb, req).getOne();
       if (!site) {
         return next({ status: 404, errors: ["No sites match this id"] });
@@ -110,7 +110,7 @@ export class SiteRoutes {
 
   location: RequestHandler = async (req, res, next) => {
     try {
-      const qb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteid", req.params);
+      const qb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteId", req.params);
       const site = await hideTestDataFromNormalUsers<Site>(qb, req).getOne();
       if (!site) return next({ status: 404, errors: ["No sites match this id"] });
       const location = await this.siteLocationRepo.findOneBy({ siteId: site.id, date: new Date(req.params.date) });
@@ -123,7 +123,7 @@ export class SiteRoutes {
 
   locations: RequestHandler = async (req, res, next) => {
     try {
-      const qb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteid", req.params);
+      const qb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteId", req.params);
       const site = await hideTestDataFromNormalUsers<Site>(qb, req).getOne();
       if (!site) return next({ status: 404, errors: ["No sites match this id"] });
       const locations = await this.siteLocationRepo.find({ where: { siteId: site.id }, order: { date: "ASC" } });
@@ -135,7 +135,7 @@ export class SiteRoutes {
 
   productAvailability: RequestHandler = async (req: Request, res: Response, next) => {
     try {
-      const siteQb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteid", req.params);
+      const siteQb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteId", req.params);
       const site = await hideTestDataFromNormalUsers<Site>(siteQb, req).getExists();
       if (!site) {
         return next({ status: 404, errors: ["No sites match this id"] });
@@ -151,7 +151,7 @@ export class SiteRoutes {
         ])
         .distinctOn(['file."measurementDate"', "file.productId", "file.errorLevel"])
         .leftJoin("file.product", "product")
-        .where("file.siteId = :siteId", { siteId: req.params.siteid })
+        .where("file.siteId = :siteId", { siteId: req.params.siteId })
         .orderBy("file.measurementDate", "DESC")
         .addOrderBy("file.productId", "ASC")
         .addOrderBy("file.errorLevel", "ASC");

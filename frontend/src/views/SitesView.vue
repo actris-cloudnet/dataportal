@@ -24,7 +24,7 @@
                     <span :class="{ status: true, [site.status]: true }"></span>
                   </td>
                   <td>
-                    <router-link :to="{ name: 'Site', params: { siteid: site.id } }">
+                    <router-link :to="{ name: 'Site', params: { siteId: site.id } }">
                       {{ site.humanReadableName }}
                     </router-link>
                   </td>

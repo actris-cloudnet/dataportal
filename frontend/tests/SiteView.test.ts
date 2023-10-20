@@ -41,7 +41,7 @@ describe("SiteView.vue", () => {
   it("displays basic information", async () => {
     const expected = ["Bucharest, Romania", "44.348°N, 26.029°E", "93 m", "2019-07-16"];
     vi.mocked(axios.get).mockImplementation(axiosMockWithIdx(0, 7));
-    wrapper = mount(SiteView, { props: { siteid: "bucharest" }, global: { plugins: [router] } });
+    wrapper = mount(SiteView, { props: { siteId: "bucharest" }, global: { plugins: [router] } });
     await nextTick(50);
     const summaryText = wrapper.find("#summary").text();
     expected.forEach((str) => expect(summaryText).toContain(str));
@@ -50,7 +50,7 @@ describe("SiteView.vue", () => {
   it("displays negative coordinate information", async () => {
     const expected = ["Mace Head", "53.326°N, 9.9°W", "16 m", "2019-07-16"];
     vi.mocked(axios.get).mockImplementation(axiosMockWithIdx(1, 7));
-    wrapper = mount(SiteView, { props: { siteid: "mace-head" }, global: { plugins: [router] } });
+    wrapper = mount(SiteView, { props: { siteId: "mace-head" }, global: { plugins: [router] } });
     await nextTick(50);
     const summaryText = wrapper.find("#summary").text();
     expected.forEach((str) => expect(summaryText).toContain(str));
@@ -59,7 +59,7 @@ describe("SiteView.vue", () => {
   it("displays instruments when they are found", async () => {
     const expected = ["Lufft CHM15k ceilometer", "METEK MIRA-35 cloud radar"];
     vi.mocked(axios.get).mockImplementation(axiosMockWithIdx(0, 7, resources["uploaded-metadata-public"]));
-    wrapper = mount(SiteView, { props: { siteid: "whatever" }, global: { plugins: [router] } });
+    wrapper = mount(SiteView, { props: { siteId: "whatever" }, global: { plugins: [router] } });
     await nextTick(50);
     const instrumentText = wrapper.find("#instruments").text();
     expected.forEach((str) => expect(instrumentText).toContain(str));
@@ -67,7 +67,7 @@ describe("SiteView.vue", () => {
 
   it("displays notification when instruments are not found", async () => {
     vi.mocked(axios.get).mockImplementation(axiosMockWithIdx(1, 0));
-    wrapper = mount(SiteView, { props: { siteid: "whatever" }, global: { plugins: [router] } });
+    wrapper = mount(SiteView, { props: { siteId: "whatever" }, global: { plugins: [router] } });
     await nextTick(50);
     const instrumentText = wrapper.find("#instruments").text();
     expect(instrumentText).toContain("No data received in the last");
@@ -76,7 +76,7 @@ describe("SiteView.vue", () => {
   it("fetches instruments from last n days", async () => {
     const expectedString = "The site has submitted data from the following instruments in the last";
     vi.mocked(axios.get).mockImplementation(axiosMockWithIdx(0, 8, resources["uploaded-metadata-public"]));
-    wrapper = mount(SiteView, { props: { siteid: "whatever" }, global: { plugins: [router] } });
+    wrapper = mount(SiteView, { props: { siteId: "whatever" }, global: { plugins: [router] } });
     await nextTick(50);
     const instrumentText = wrapper.find("#instruments").text();
     expect(instrumentText).toContain(expectedString);
