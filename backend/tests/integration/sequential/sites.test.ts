@@ -133,7 +133,7 @@ describe("GET /api/sites", () => {
   });
 });
 
-describe("GET /api/sites/:siteid", () => {
+describe("GET /api/sites/:siteId", () => {
   it("responds with the correct json on valid id", async () => {
     const validUrl = `${url}mace-head`;
     const res = await axios.get(validUrl);
@@ -148,7 +148,7 @@ describe("GET /api/sites/:siteid", () => {
   });
 });
 
-describe("GET /api/sites/:siteid/locations", () => {
+describe("GET /api/sites/:siteId/locations", () => {
   it("responds with the correct json on valid id", async () => {
     const validUrl = `${url}boaty/locations`;
     const res = await axios.get(validUrl);
@@ -179,7 +179,7 @@ describe("GET /api/sites/:siteid/locations", () => {
   });
 });
 
-describe("GET /api/sites/:siteid/locations/:date", () => {
+describe("GET /api/sites/:siteId/locations/:date", () => {
   it("responds with the correct json on valid date", async () => {
     const validUrl = `${url}boaty/locations/2022-01-03`;
     const res = await axios.get(validUrl);

@@ -36,7 +36,7 @@
       <dd>{{ response.measurementDate }}</dd>
       <dt>Location</dt>
       <dd>
-        <router-link :to="{ name: 'Site', params: { siteid: response.site.id } }">
+        <router-link :to="{ name: 'Site', params: { siteId: response.site.id } }">
           {{ response.site.humanReadableName
           }}<template v-if="response.site.country">, {{ response.site.country }}</template>
         </router-link>

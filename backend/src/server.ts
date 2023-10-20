@@ -121,7 +121,7 @@ async function createServer(): Promise<void> {
   );
   app.get("/api/files/:uuid", middleware.validateUuidParam, fileRoutes.file);
   app.get("/api/sites", siteRoutes.sites);
-  app.get("/api/sites/:siteid", siteRoutes.site);
+  app.get("/api/sites/:siteId", siteRoutes.site);
   app.get("/api/products", prodRoutes.products);
   app.get("/api/instruments", instrRoutes.instruments);
   app.get("/api/models", modelRoutes.models);
@@ -169,9 +169,9 @@ async function createServer(): Promise<void> {
   app.get("/api/download/image/*", dlRoutes.image);
   app.get("/api/quality/:uuid", middleware.validateUuidParam, qualityRoutes.qualityReport);
   app.get("/api/reference/:uuid", middleware.validateUuidParam, referenceRoutes.getReference);
-  app.get("/api/sites/:siteid/locations", siteRoutes.locations);
-  app.get("/api/sites/:siteid/locations/:date", siteRoutes.location);
-  app.get("/api/sites/:siteid/product-availability", siteRoutes.productAvailability);
+  app.get("/api/sites/:siteId/locations", siteRoutes.locations);
+  app.get("/api/sites/:siteId/locations/:date", siteRoutes.location);
+  app.get("/api/sites/:siteId/product-availability", siteRoutes.productAvailability);
 
   // TODO: Depreciated. Needed for now, but in the future these should public
   // and properly documented.

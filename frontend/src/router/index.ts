@@ -70,7 +70,7 @@ const routes = [
     props: true,
   },
   {
-    path: "/site/:siteid",
+    path: "/site/:siteId",
     name: "Site",
     meta: { title: false },
     component: () => import("@/views/SiteView.vue"),
