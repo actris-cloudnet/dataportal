@@ -17,15 +17,15 @@
         <a href="https://en.ilmatieteenlaitos.fi/">Finnish Meteorological Institute</a>.
       </p>
       <div class="buttons">
-        <BaseButton to="search/data" type="primary">
+        <BaseButton to="search/data" type="brand">
           <img alt="magnifying glass" :src="searchIcon" />
           Search and download data
         </BaseButton>
-        <BaseButton to="search/visualizations" type="primary">
+        <BaseButton to="search/visualizations" type="brand">
           <img alt="graph" :src="graphIcon" />
           View data visualisations
         </BaseButton>
-        <BaseButton href="https://docs.cloudnet.fmi.fi" type="primary">
+        <BaseButton href="https://docs.cloudnet.fmi.fi" type="brand">
           <img alt="documents" :src="docsIcon" />
           Read documentation
         </BaseButton>
@@ -53,7 +53,7 @@ main#frontpage {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1rem;
+  padding: 3rem 1rem;
   margin: 0 auto;
 }
 
