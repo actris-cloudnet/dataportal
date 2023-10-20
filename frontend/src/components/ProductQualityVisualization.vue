@@ -22,7 +22,7 @@
               class="qualityitem"
               :class="{
                 found: data && getProductStatus(data.products[lvl], product.id),
-                na: data && !getReportExists(data.products[lvl], product.id),
+                na: !data || !getReportExists(data.products[lvl], product.id),
                 info: data && isFileWithInfo(data.products[lvl], product.id),
                 warning: data && isFileWithWarning(data.products[lvl], product.id),
                 error: data && isFileWithError(data.products[lvl], product.id),
@@ -36,7 +36,7 @@
               class="qualityitem modelitem"
               :class="{
                 found: data && getProductStatus(data.products[lvl], 'model'),
-                na: data && !getReportExists(data.products[lvl], 'model'),
+                na: !data || !getReportExists(data.products[lvl], 'model'),
               }"
             >
               Model
