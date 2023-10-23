@@ -21,10 +21,6 @@
       </dd>
       <dt>Last modified</dt>
       <dd>{{ humanReadableTimestamp(response.updatedAt) }}</dd>
-      <dt>Licence</dt>
-      <dd>
-        <a href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a>
-      </dd>
     </dl>
   </div>
 </template>

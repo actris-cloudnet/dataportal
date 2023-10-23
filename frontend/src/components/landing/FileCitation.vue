@@ -15,7 +15,7 @@ defineProps<Props>();
     <BaseAlert type="note" v-if="file.volatile">
       This data object is volatile and may be updated in the future.
     </BaseAlert>
-    <BaseAlert type="info" v-if="file.legacy"> This data object was produced using nonstandard processing. </BaseAlert>
+    <BaseAlert type="info" v-if="file.legacy">This data object was produced using nonstandard processing.</BaseAlert>
     <HowToCite :uuid="file.uuid" titleClass="summary-section-header" />
   </div>
 </template>

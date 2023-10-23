@@ -24,6 +24,13 @@
     </template>
     <BaseSpinner v-else-if="citation.status == 'loading'" />
     <div v-else-if="citation.status == 'error'" class="error">Failed to load citation.</div>
+    <p xmlns:cc="http://creativecommons.org/ns#">
+      Cloudnet data is licensed under
+      <a href="http://creativecommons.org/licenses/by/4.0/" target="_blank" rel="license noopener noreferrer">
+        CC BY 4.0
+        <img :src="ccIcon" /><img :src="byIcon" />
+      </a>
+    </p>
   </div>
 </template>
 
@@ -32,6 +39,9 @@ import axios from "axios";
 import { ref, watchEffect } from "vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
 import { backendUrl } from "@/lib";
+
+import ccIcon from "@/assets/icons/cc.svg";
+import byIcon from "@/assets/icons/by.svg";
 
 export interface Props {
   uuid?: string;
@@ -129,5 +139,11 @@ p {
       margin-top: 0;
     }
   }
+}
+
+img {
+  height: 22px;
+  margin-left: 3px;
+  vertical-align: text-bottom;
 }
 </style>
