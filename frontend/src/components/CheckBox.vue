@@ -3,12 +3,20 @@ let idCounter = 0;
 </script>
 
 <script lang="ts" setup>
+import { computed } from "vue";
+
 export interface Props {
-  modelValue: boolean;
+  modelValue: boolean | string | boolean[] | string[];
   label: string;
+  value?: string;
 }
 
 const props = defineProps<Props>();
+
+const internalModel = computed({
+  get: () => props.modelValue,
+  set: (value) => emit("update:modelValue", value),
+});
 
 const emit = defineEmits<{
   (e: "update:modelValue", value: Props["modelValue"]): void;
@@ -19,12 +27,7 @@ const id = `checkbox-${idCounter++}`;
 
 <template>
   <div class="wrapper">
-    <input
-      :id="id"
-      type="checkbox"
-      :checked="props.modelValue"
-      @change="emit('update:modelValue', ($event.target as HTMLInputElement).checked)"
-    />
+    <input :id="id" type="checkbox" :value="value" v-model="internalModel" />
     <label :for="id">{{ props.label }}</label>
   </div>
 </template>

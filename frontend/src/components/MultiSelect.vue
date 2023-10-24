@@ -4,7 +4,7 @@
     <VueMultiselect
       :name="id"
       :id="id"
-      v-model="value"
+      v-model="internalModel"
       placeholder="Select"
       track-by="id"
       label="humanReadableName"
@@ -92,7 +92,7 @@ function searchChange(query: string) {
   searchQuery.value = normalizeGeneric(query);
 }
 
-const value = computed({
+const internalModel = computed({
   get() {
     if (Array.isArray(props.modelValue)) {
       return props.modelValue.map((v) => props.options.find((option) => option.id === v)).filter(notEmpty);

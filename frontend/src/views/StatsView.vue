@@ -1,96 +1,93 @@
 <template>
-  <main>
-    <h1>Download statistics</h1>
-    <span v-if="loadingSites" class="placeholder">Loading...</span>
-    <template v-else>
-      <label>
-        <div class="label">Metric:</div>
-        <select v-model="selectedDimensions">
-          <option value="yearMonth,downloads">Monthly downloads</option>
-          <option value="yearMonth,uniqueIps">Monthly unique IPs</option>
-          <option value="year,uniqueIps">Yearly unique IPs</option>
-          <option value="country,downloads">Downloads by country</option>
-        </select> </label
-      ><br />
-      <div style="display: flex; align-items: center">
-        <label>
-          <div class="label">Site:</div>
-          <select v-model="siteModel">
-            <option :value="null">--- any ---</option>
-            <option v-for="option in sites" :key="option.id" :value="option.id">
-              {{ option.label }}
-            </option>
-          </select>
-        </label>
-        <span style="padding: 0 1rem; color: gray"> or </span>
-        <label>
-          <div class="label">All sites in country:</div>
-          <select v-model="countryModel">
-            <option :value="null">--- any ---</option>
-            <option v-for="option in countries" :key="option.id" :value="option.id">
-              {{ option.label }}
-            </option>
-          </select>
-        </label>
-      </div>
-      <fieldset>
-        <legend class="label">Product type:</legend>
-        <label>
-          <input type="checkbox" value="observation" v-model="productTypes" />
-          Observation
-        </label>
-        <label style="margin-left: 0.5rem">
-          <input type="checkbox" value="model" v-model="productTypes" />
-          Model
-        </label>
-      </fieldset>
-      <div>
-        <div class="label">Download date:</div>
-        <input type="date" v-model="dateFrom" /> –
-        <input type="date" v-model="dateTo" />
-      </div>
-      <button @click="onSearch" :disabled="loading">
-        {{ loading ? "Loading..." : "Search" }}
-      </button>
-      <template v-if="!initial">
-        <div v-if="statistics.length == 0" class="placeholder">No downloads.</div>
-        <table v-else :class="{ loading }">
-          <thead>
-            <tr>
-              <th>{{ dimensionLabel[dimensions[0]] }}</th>
-              <th>{{ dimensionLabel[dimensions[1]] }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in statistics" :key="item[item[dimensions[0]]]">
-              <td v-if="dimensions[0] == 'country'">
-                {{ item[dimensions[0]] ? getCountryName(item[dimensions[0]]) : "Unknown" }}
-              </td>
-              <td v-else>
-                {{ item[dimensions[0]] || "Unknown" }}
-              </td>
-              <td>
-                <div class="bar">
-                  <div
-                    class="bar-bar"
-                    :style="{
-                      // Calculate bar width of at least 1 pixel.
-                      width: Math.max(1, (100 * item[dimensions[1]]) / maxValue) + 'px',
-                      // For 1 pixel bar, indicate quantity with opacity.
-                      opacity: Math.min(1, 0.25 + 0.75 * ((100 * item[dimensions[1]]) / maxValue)),
-                    }"
-                  ></div>
-                  <div class="bar-number">
-                    {{ numberFormat.format(item[dimensions[1]]) }}
+  <div>
+    <LandingHeader title="Download statistics" />
+    <main class="pagewidth">
+      <span v-if="loadingSites" class="placeholder">Loading...</span>
+      <template v-else>
+        <MultiSelect
+          class="field"
+          id="metric"
+          label="Metric"
+          v-model="selectedDimensions"
+          :options="[
+            { id: 'yearMonth,downloads', humanReadableName: 'Monthly downloads' },
+            { id: 'yearMonth,uniqueIps', humanReadableName: 'Monthly unique IPs' },
+            { id: 'year,uniqueIps', humanReadableName: 'Yearly unique IPs' },
+            { id: 'country,downloads', humanReadableName: 'Downloads by country' },
+          ]"
+          style="width: 300px"
+        />
+        <div class="daterange field">
+          <MultiSelect id="site" label="Site" v-model="siteModel" :options="sites" style="width: 300px" />
+          <span>or</span>
+          <MultiSelect
+            id="country"
+            label="Sites in country"
+            v-model="countryModel"
+            :options="countries"
+            style="width: 300px"
+          />
+        </div>
+        <fieldset class="field">
+          <legend class="label">Product type</legend>
+          <CheckBox v-model="productTypes" value="observation" label="Observation" />
+          <CheckBox v-model="productTypes" value="model" label="Model" style="margin-left: 0.5rem" />
+        </fieldset>
+        <fieldset class="field">
+          <legend class="label">Download date</legend>
+          <div class="daterange">
+            <DatePicker v-model="dateFrom" :end="dateTo || undefined" name="dateFrom" />
+            <span>–</span>
+            <DatePicker v-model="dateTo" :start="dateFrom || undefined" name="dateTo" />
+          </div>
+        </fieldset>
+        <div></div>
+        <div style="display: flex; gap: 1rem; margin-top: 1rem">
+          <BaseButton type="primary" @click="onSearch" :disabled="loading">
+            {{ loading ? "Loading..." : "Search" }}
+          </BaseButton>
+          <BaseButton type="secondary" href="/stats"> Reset </BaseButton>
+        </div>
+        <template v-if="!initial">
+          <div v-if="statistics.length == 0" class="placeholder">No downloads.</div>
+          <table v-else :class="{ loading }">
+            <thead>
+              <tr>
+                <th>{{ dimensionLabel[dimensions[0]] }}</th>
+                <th>{{ dimensionLabel[dimensions[1]] }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in statistics" :key="item[item[dimensions[0]]]">
+                <td v-if="dimensions[0] == 'country'">
+                  {{ item[dimensions[0]] ? getCountryName(item[dimensions[0]]) : "Unknown" }}
+                </td>
+                <td v-else>
+                  {{ item[dimensions[0]] || "Unknown" }}
+                </td>
+                <td>
+                  <div class="bar">
+                    <div
+                      class="bar-bar"
+                      :style="{
+                        // Calculate bar width of at least 1 pixel.
+                        width: Math.max(1, (100 * item[dimensions[1]]) / maxValue) + 'px',
+                        // For 1 pixel bar, indicate quantity with opacity.
+                        opacity: Math.min(1, 0.25 + 0.75 * ((100 * item[dimensions[1]]) / maxValue)),
+                      }"
+                    ></div>
+                    <div class="bar-number">
+                      {{ numberFormat.format(item[dimensions[1]]) }}
+                    </div>
                   </div>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </template>
       </template>
-    </template>
-  </main>
+    </main>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -99,12 +96,12 @@ import axios from "axios";
 
 import type { Site, SiteType } from "@shared/entity/Site";
 import COUNTRY_NAMES from "@/assets/country-io-names.json";
-import { backendUrl, compareValues, notEmpty } from "@/lib";
-
-interface Option {
-  id: string;
-  label: string;
-}
+import { backendUrl, compareValues, dateToString, notEmpty } from "@/lib";
+import CheckBox from "@/components/CheckBox.vue";
+import BaseButton from "@/components/BaseButton.vue";
+import MultiSelect, { type Option } from "@/components/MultiSelect.vue";
+import DatePicker from "@/components/DatePicker.vue";
+import LandingHeader from "@/components/LandingHeader.vue";
 
 type Dimension = "year" | "yearMonth" | "country" | "downloads" | "uniqueIps";
 
@@ -128,17 +125,19 @@ const numberFormat = (Intl && Intl.NumberFormat && new Intl.NumberFormat("en-GB"
 };
 const loadingSites = ref(true);
 const countries = ref<Option[]>([]);
-const sites = ref<Option[]>([]);
+const sites = ref<Site[]>([]);
 const productTypes = ref(["observation", "model"]);
-const dateFrom = ref("");
-const dateTo = ref("");
+const dateFrom = ref<Date | null>(null);
+const dateTo = ref<Date | null>(null);
 
 const currentCountry = ref<string | null>(null);
 const currentSite = ref<string | null>(null);
 
 const countryModel = computed({
-  get: () => currentCountry.value,
-  set(country) {
+  get: () => {
+    return currentCountry.value;
+  },
+  set: (country) => {
     currentCountry.value = country;
     currentSite.value = null;
   },
@@ -146,7 +145,7 @@ const countryModel = computed({
 
 const siteModel = computed({
   get: () => currentSite.value,
-  set(site) {
+  set: (site) => {
     currentCountry.value = null;
     currentSite.value = site;
   },
@@ -163,16 +162,12 @@ onMounted(async () => {
     countries.value = Array.from(new Set(data.map((site) => site.countryCode).filter(notEmpty)))
       .map((countryCode) => ({
         id: countryCode,
-        label: getCountryName(countryCode),
+        humanReadableName: getCountryName(countryCode),
       }))
-      .sort((a, b) => compareValues(a.label, b.label));
+      .sort((a, b) => compareValues(a.humanReadableName, b.humanReadableName));
     sites.value = data
       .filter((site) => !site.type.includes("hidden" as SiteType))
-      .map((site) => ({
-        id: site.id,
-        label: site.humanReadableName,
-      }))
-      .sort((a, b) => compareValues(a.label, b.label));
+      .sort((a, b) => compareValues(a.humanReadableName, b.humanReadableName));
     loadingSites.value = false;
   } catch (e) {
     alert("Failed to download counties");
@@ -186,8 +181,8 @@ async function onSearch() {
     country: currentCountry.value || undefined,
     site: currentSite.value || undefined,
     productTypes: productTypes.value.join(","),
-    downloadDateFrom: dateFrom.value || undefined,
-    downloadDateTo: dateTo.value || undefined,
+    downloadDateFrom: dateFrom.value ? dateToString(dateFrom.value) : undefined,
+    downloadDateTo: dateTo.value ? dateToString(dateTo.value) : undefined,
   };
   try {
     const response = await axios.get(`${backendUrl}download/stats`, {
@@ -232,6 +227,10 @@ th {
   }
 }
 
+th {
+  font-weight: 500;
+}
+
 .bar {
   display: flex;
   align-items: center;
@@ -257,17 +256,13 @@ table,
   margin-top: 1rem;
 }
 
-button {
+.daterange {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.field {
   margin-top: 0.5rem;
-}
-
-legend {
-  font-size: inherit;
-  font-weight: bold;
-  margin: 0;
-}
-
-.label {
-  font-weight: bold;
 }
 </style>

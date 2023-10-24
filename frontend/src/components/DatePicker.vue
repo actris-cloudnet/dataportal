@@ -9,6 +9,7 @@
         type="text"
         v-model.lazy="dateString"
         @focus="($event.target as HTMLInputElement).select()"
+        placeholder="YYYY-MM-DD"
       />
       <v-date-picker
         locale="en-gb"
@@ -41,11 +42,11 @@ import { DatePicker as VDatePicker } from "v-calendar";
 import "v-calendar/dist/style.css";
 
 export interface Props {
-  modelValue: Date;
+  modelValue: Date | null;
   name: string;
   label?: string;
-  start: Date;
-  end: Date;
+  start?: Date;
+  end?: Date;
 }
 
 export interface DateErrors {
@@ -72,8 +73,8 @@ function validateDate(value: Date) {
   const result = {
     isValidDateString: !isNaN(value.getDate()),
     isNotInFuture: truncateDate(value) <= truncateDate(new Date()),
-    isBeforeEnd: truncateDate(value) <= truncateDate(props.end),
-    isAfterStart: truncateDate(value) >= truncateDate(props.start),
+    isBeforeEnd: props.end ? truncateDate(value) <= truncateDate(props.end) : true,
+    isAfterStart: props.start ? truncateDate(value) >= truncateDate(props.start) : true,
   };
   hasError.value = !result.isValidDateString || !result.isNotInFuture || !result.isAfterStart || !result.isBeforeEnd;
   emit("error", result);
@@ -81,7 +82,9 @@ function validateDate(value: Date) {
 }
 
 watchEffect(() => {
-  validateDate(props.modelValue);
+  if (props.modelValue) {
+    validateDate(props.modelValue);
+  }
 });
 
 const dateValue = computed({
@@ -95,12 +98,18 @@ const dateValue = computed({
 
 const dateString = computed({
   get() {
+    if (!props.modelValue) return "";
     return dateToString(props.modelValue);
   },
   set(value) {
-    const date = new Date(value);
-    if (validateDate(date).isValidDateString) {
-      emit("update:modelValue", date);
+    value = value.trim();
+    if (value) {
+      const date = new Date(value);
+      if (validateDate(date).isValidDateString) {
+        emit("update:modelValue", date);
+      }
+    } else {
+      emit("update:modelValue", null);
     }
   },
 });
@@ -126,6 +135,10 @@ input.date {
   border: 1px solid #e8e8e8;
   border-right: none;
   border-radius: 2px 0 0 2px;
+
+  &::placeholder {
+    font-size: 85%; // No condensed variant of Inter font
+  }
 }
 
 button {
