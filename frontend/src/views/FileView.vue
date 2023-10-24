@@ -1,6 +1,8 @@
 <template>
-  <main v-if="response" id="landing">
-    <div v-if="!isBusy && newestVersion" class="banner-container">
+  <div v-if="isBusy"></div>
+  <ApiError v-else-if="error" :response="response as any" />
+  <main v-else-if="response" id="landing">
+    <div v-if="newestVersion" class="banner-container">
       <div class="banner pagewidth">
         There is a
         <router-link :to="`/file/${newestVersion}`">newer version</router-link>
@@ -64,6 +66,7 @@ import type { File } from "@shared/entity/File";
 import BaseButton from "@/components/BaseButton.vue";
 import FileTags from "@/components/FileTags.vue";
 import { getProductIcon, getQcIcon } from "@/lib";
+import ApiError from "./ApiError.vue";
 
 import PhotoGalleryIcon from "@/assets/icons/photo-gallery.png";
 import LandingHeader from "@/components/LandingHeader.vue";
@@ -194,16 +197,19 @@ async function fetchInstrument(file: RegularFile | ModelFile) {
 watch(
   () => props.uuid,
   async () => {
-    isBusy.value = true;
-    await fetchFileMetadata();
-    if (response.value == null || error.value) return;
+    try {
+      isBusy.value = true;
+      await fetchFileMetadata();
+      if (response.value == null || error.value) return;
+    } finally {
+      isBusy.value = false;
+    }
     await Promise.all([
       fetchInstrument(response.value),
       fetchVisualizations(),
       fetchVersions(response.value),
       fetchSourceFiles(response.value),
     ]);
-    isBusy.value = false;
   },
   { immediate: true },
 );

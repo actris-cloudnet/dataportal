@@ -1,60 +1,58 @@
 <template>
-  <div>
-    <div v-if="!error && response">
-      <LandingHeader
-        :title="response.title || 'Custom collection'"
-        subtitle="User-defined selection of files from Cloudnet data portal"
-      >
-        <template #tabs>
-          <router-link class="tab" :to="{ name: 'Collection' }">
-            <img :src="briedIcon" alt="" />
-            Summary
-          </router-link>
-          <router-link class="tab" :to="{ name: 'CollectionFiles' }">
-            <img :src="folderIcon" alt="" />
-            Files
-          </router-link>
-        </template>
-      </LandingHeader>
-      <main id="collectionlanding" class="pagewidth">
-        <div class="flex">
-          <main class="infoBox column">
-            <section id="summary">
-              <header>Summary</header>
-              <section class="details">
-                <dl>
-                  <dt>Date span</dt>
-                  <dd>{{ startDate }} &ndash; {{ endDate }}</dd>
-                  <dt>File count</dt>
-                  <dd>{{ sortedFiles.length }}</dd>
-                  <dt>Total size</dt>
-                  <dd>{{ humanReadableSize(totalSize) }}</dd>
-                </dl>
-              </section>
+  <ApiError v-if="error" :response="response as any" />
+  <div v-else-if="response">
+    <LandingHeader
+      :title="response.title || 'Custom collection'"
+      subtitle="User-defined selection of files from Cloudnet data portal"
+    >
+      <template #tabs>
+        <router-link class="tab" :to="{ name: 'Collection' }">
+          <img :src="briedIcon" alt="" />
+          Summary
+        </router-link>
+        <router-link class="tab" :to="{ name: 'CollectionFiles' }">
+          <img :src="folderIcon" alt="" />
+          Files
+        </router-link>
+      </template>
+    </LandingHeader>
+    <main id="collectionlanding" class="pagewidth">
+      <div class="flex">
+        <main class="infoBox column">
+          <section id="summary">
+            <header>Summary</header>
+            <section class="details">
+              <dl>
+                <dt>Date span</dt>
+                <dd>{{ startDate }} &ndash; {{ endDate }}</dd>
+                <dt>File count</dt>
+                <dd>{{ sortedFiles.length }}</dd>
+                <dt>Total size</dt>
+                <dd>{{ humanReadableSize(totalSize) }}</dd>
+              </dl>
             </section>
-            <section id="sitemap" v-if="sites.length > 0">
-              <header>Sites</header>
-              <section class="details">
-                <SuperMap :sites="sites" :zoom="3" />
-              </section>
+          </section>
+          <section id="sitemap" v-if="sites.length > 0">
+            <header>Sites</header>
+            <section class="details">
+              <SuperMap :sites="sites" :zoom="3" />
             </section>
-            <section id="products">
-              <header>Products</header>
-              <section class="details">
-                <div v-for="product in products" :key="product.id">
-                  <img :src="getProductIcon(product.id)" class="product" />
-                  {{ product.humanReadableName }}
-                </div>
-              </section>
+          </section>
+          <section id="products">
+            <header>Products</header>
+            <section class="details">
+              <div v-for="product in products" :key="product.id">
+                <img :src="getProductIcon(product.id)" class="product" />
+                {{ product.humanReadableName }}
+              </div>
             </section>
-          </main>
-          <div class="rightView">
-            <RouterView :collection="response" :files="sortedFiles" />
-          </div>
+          </section>
+        </main>
+        <div class="rightView">
+          <RouterView :collection="response" :files="sortedFiles" />
         </div>
-      </main>
-    </div>
-    <ApiError v-else-if="error" />
+      </div>
+    </main>
   </div>
 </template>
 
