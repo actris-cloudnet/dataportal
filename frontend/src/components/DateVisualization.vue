@@ -208,7 +208,8 @@ $year-height: 1rem;
 .legend {
   margin-top: 1rem;
   display: flex;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
   font-size: 0.8em;
 }
 
