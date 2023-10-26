@@ -80,6 +80,6 @@ onBeforeUnmount(() => {
 <style scoped lang="scss">
 .map {
   width: 100%;
-  height: 300px;
+  height: 100%;
 }
 </style>
