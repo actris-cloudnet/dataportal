@@ -1,4 +1,4 @@
-import { backendUrl, notEmpty } from "@/lib/index";
+import { backendUrl, compareValues, notEmpty } from "@/lib/index";
 import type { Product } from "@shared/entity/Product";
 import axios from "axios";
 
@@ -79,7 +79,8 @@ export async function parseDataStatus(siteId: string): Promise<DataStatus> {
   const productIds = new Set(searchResponse.map((file) => file.productId));
   const availableProducts = Array.from(productIds)
     .map((productId) => productMap[productId])
-    .filter(notEmpty);
+    .filter(notEmpty)
+    .sort((a, b) => compareValues(a.humanReadableName, b.humanReadableName));
   const lvlTranslate = allProducts.reduce((acc, cur) => ({ ...acc, [cur.id]: cur.level as keyof ProductLevels }), {});
 
   const dates = searchResponse.reduce(
