@@ -7,7 +7,7 @@
       'contains-warnings': { name: 'Warning', color: '#f7e91b' },
       'contains-errors': { name: 'Error', color: '#cd5c5c' },
       'only-legacy-data': { name: 'Legacy', color: '#9fb4c4' },
-      'only-model-data': { name: 'Model missing', color: '#d3d3d3' },
+      'only-model-data': { name: 'Missing QC report', color: '#d3d3d3' },
       'no-data': { name: 'No data', color: '#ffffff' },
     }"
   >
