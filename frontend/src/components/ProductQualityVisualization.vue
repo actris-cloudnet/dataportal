@@ -2,13 +2,14 @@
   <DateVisualization
     :data="dates"
     :legend="{
-      'all-data': { name: 'L2 pass', color: '#5ac413' },
-      'all-raw': { name: 'L2 warnings / info', color: '#a0df7b' },
-      'contains-errors': { name: 'L2 errors', color: '#cd5c5c' },
-      'only-legacy-data': { name: 'Legacy L2', color: '#9fb4c4' },
-      'only-model-data': { name: 'Products / tests missing', color: '#d3d3d3' },
-      'no-data': { name: 'No data', color: '#ffffff' },
+      'all-data': 'L2 pass',
+      'all-raw': 'L2 warnings / info',
+      'contains-errors': 'L2 errors',
+      'only-legacy-data': 'Legacy L2',
+      'only-model-data': 'Products / tests missing',
+      'no-data': 'No data',
     }"
+    :colors="classColor"
   >
     <template #tooltip="{ date, data }">
       <div class="mega-tooltip">
@@ -49,7 +50,7 @@
 </template>
 
 <script lang="ts" setup>
-import { idToHumanReadable, type ColorClass } from "@/lib";
+import { idToHumanReadable, type ColorClass, classColor } from "@/lib";
 import type { ProductLevels } from "@/lib/DataStatusParser";
 import { computed } from "vue";
 

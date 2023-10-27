@@ -6,8 +6,8 @@
     </div>
     <ul class="legend">
       <li class="legend-item" v-for="(item, key) in legend" :key="key">
-        <div class="legend-color" :style="{ background: item.color }"></div>
-        {{ item.name }}
+        <div class="legend-color" :style="{ background: colors[key] }"></div>
+        {{ item }}
       </li>
     </ul>
   </div>
@@ -23,13 +23,9 @@ export type DataItem<X> = X & {
   link?: string;
 };
 
-export interface LegendItem {
-  name: string;
-  color: string;
-}
-
 export interface Props<X> {
-  legend: Record<string, LegendItem>;
+  legend: Record<string, string>;
+  colors: Record<string, string>;
   data: DataItem<X>[];
 }
 
@@ -118,12 +114,8 @@ watchEffect(() => {
     const ctx = $canvas.getContext("2d");
     if (!ctx) return;
     yearData.dates.forEach((dateData, dateIndex) => {
-      if (!dateData.data) return;
-      if (!dateData.data || !props.legend[dateData.data.color]) {
-        console.log(props.legend, dateData.data.color);
-        return;
-      }
-      ctx.fillStyle = props.legend[dateData.data.color].color;
+      if (!dateData.data || !props.colors[dateData.data.color]) return;
+      ctx.fillStyle = props.colors[dateData.data.color];
       ctx.fillRect(dateIndex, 0, 1, 1);
     });
   });

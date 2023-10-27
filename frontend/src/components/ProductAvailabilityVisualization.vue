@@ -2,12 +2,13 @@
   <DateVisualization
     :data="dates"
     :legend="{
-      'all-data': { name: 'All level 2', color: '#5ac413' },
-      'all-raw': { name: 'Some level 1b', color: '#a0df7b' },
-      'only-legacy-data': { name: 'Only legacy', color: '#9fb4c4' },
-      'only-model-data': { name: 'Only model', color: '#d3d3d3' },
-      'no-data': { name: 'No data', color: '#ffffff' },
+      'all-data': 'All level 2',
+      'all-raw': 'Some level 1b',
+      'only-legacy-data': 'Only legacy',
+      'only-model-data': 'Only model',
+      'no-data': 'No data',
     }"
+    :colors="classColor"
   >
     <template #tooltip="{ date, data }">
       <div class="mega-tooltip">
@@ -44,7 +45,7 @@
 </template>
 
 <script lang="ts" setup>
-import { idToHumanReadable, type ColorClass } from "@/lib";
+import { idToHumanReadable, classColor, type ColorClass } from "@/lib";
 import type { ProductLevels } from "@/lib/DataStatusParser";
 import { computed } from "vue";
 

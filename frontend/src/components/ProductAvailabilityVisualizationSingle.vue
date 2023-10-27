@@ -2,14 +2,15 @@
   <DateVisualization
     :data="dates"
     :legend="{
-      'all-data': { name: 'Pass', color: '#5ac413' },
-      'contains-info': { name: 'Info', color: '#a0df7b' },
-      'contains-warnings': { name: 'Warning', color: '#f7e91b' },
-      'contains-errors': { name: 'Error', color: '#cd5c5c' },
-      'only-legacy-data': { name: 'Legacy', color: '#9fb4c4' },
-      'only-model-data': { name: 'Missing QC report', color: '#d3d3d3' },
-      'no-data': { name: 'No data', color: '#ffffff' },
+      'all-data': 'Pass',
+      'contains-info': 'Info',
+      'contains-warnings': 'Warning',
+      'contains-errors': 'Error',
+      'only-legacy-data': 'Legacy',
+      'only-model-data': 'Missing QC report',
+      'no-data': 'No data',
     }"
+    :colors="classColor"
   >
     <template #tooltip="{ date, data }">
       <div class="dataviz-tooltip">
@@ -22,7 +23,7 @@
 
 <script lang="ts" setup>
 import type { ProductInfo } from "@/lib/DataStatusParser";
-import type { ColorClass } from "@/lib";
+import { classColor, type ColorClass } from "@/lib";
 import DateVisualization from "./DateVisualization.vue";
 import { isLegacy, isError, isWarning, isInfo, qualityExists, isPass } from "@/lib/ProductAvailabilityTools";
 import { computed } from "vue";
