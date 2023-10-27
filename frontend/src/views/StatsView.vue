@@ -196,6 +196,10 @@ async function onSearch() {
     maxValue.value = Math.max(...data.map((d: any) => d[dimensions.value[1]]));
     if (selectedDimensions.value === "country,downloads") {
       data.sort((a: any, b: any) => compareValues(b.downloads, a.downloads));
+    } else if (selectedDimensions.value.includes("yearMonth")) {
+      data.sort((a: any, b: any) => compareValues(b.yearMonth, a.yearMonth));
+    } else if (selectedDimensions.value.includes("year")) {
+      data.sort((a: any, b: any) => compareValues(b.year, a.year));
     }
     statistics.value = data;
   } catch (e) {
@@ -206,8 +210,8 @@ async function onSearch() {
 </script>
 
 <style scoped lang="scss">
-h1 {
-  margin-bottom: 1rem;
+main {
+  margin-bottom: 2rem;
 }
 
 table {
