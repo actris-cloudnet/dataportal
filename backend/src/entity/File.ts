@@ -78,6 +78,12 @@ export abstract class File {
   @Column({ type: "timestamp", nullable: true })
   dvasUpdatedAt!: Date | null;
 
+  @Column({ type: "timestamp", nullable: true })
+  startTime!: Date | null;
+
+  @Column({ type: "timestamp", nullable: true })
+  stopTime!: Date | null;
+
   @ManyToMany(() => Software)
   @JoinTable()
   software!: Software[];

@@ -32,8 +32,20 @@
           {{ timelinessDisplay[response.timeliness].label }}
         </a>
       </dd>
-      <dt>Measurement date</dt>
-      <dd>{{ response.measurementDate }}</dd>
+      <dt>Start time</dt>
+      <dd v-if="response.startTime">{{ humanReadableTimestamp(response.startTime) }}</dd>
+      <dd v-else>
+        <span class="notAvailable" />
+      </dd>
+      <dt>Stop time</dt>
+      <dd v-if="response.stopTime">{{ humanReadableTimestamp(response.stopTime) }}</dd>
+      <dd v-else>
+        <span class="notAvailable" />
+      </dd>
+      <template v-if="!response.startTime && !response.stopTime">
+        <dt>Date</dt>
+        <dd>{{ response.measurementDate }}</dd>
+      </template>
       <dt>Location</dt>
       <dd>
         <router-link :to="{ name: 'Site', params: { siteId: response.site.id } }">
@@ -52,7 +64,7 @@
 import type { FileResponse } from "@/views/FileView.vue";
 import type { SiteLocation } from "@shared/entity/SiteLocation";
 import { computed } from "vue";
-import { getProductIcon, formatCoordinates, backendUrl } from "@/lib";
+import { getProductIcon, formatCoordinates, backendUrl, humanReadableTimestamp } from "@/lib";
 import type { Timeliness } from "@shared/entity/File";
 
 export interface Props {

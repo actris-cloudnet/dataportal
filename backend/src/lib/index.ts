@@ -93,8 +93,23 @@ export const augmentFile = (includeS3path: boolean) => (file: RegularFile | Mode
         url: software.url,
       }))
     : undefined,
-  timeliness: daysBetweenDates(file.createdAt, file.measurementDate) <= 3 ? "nrt" : "scheduled",
+  timeliness: calcTimeliness(file),
+  startTime: file.startTime || undefined,
+  stopTime: file.stopTime || undefined,
 });
+
+function calcTimeliness(file: RegularFile | ModelFile) {
+  if (!file.stopTime) {
+    const daysBetween = daysBetweenDates(file.updatedAt, file.measurementDate);
+    return daysBetween <= 3 ? "nrt" : "scheduled";
+  }
+  const msInHour = 1000 * 60 * 60;
+  const msInDay = msInHour * 24;
+  const diff = file.updatedAt.getTime() - file.stopTime.getTime();
+  if (diff < msInHour * 3) return "rrt";
+  else if (diff < msInDay * 3) return "nrt";
+  else return "scheduled";
+}
 
 export const ssAuthString = () =>
   "Basic " + // eslint-disable-line prefer-template

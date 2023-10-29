@@ -52,6 +52,8 @@ exports[`/api/files/:uuid request succeeds on instrument file 1`] = `
     },
   ],
   "sourceFileIds": null,
+  "startTime": "2018-11-15T10:56:19.382Z",
+  "stopTime": "2018-11-15T11:56:19.382Z",
   "timeliness": "scheduled",
   "updatedAt": "2020-02-20T10:56:19.382Z",
   "uuid": "38092c00-161d-4ca2-a29d-628cf8e960f6",

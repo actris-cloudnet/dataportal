@@ -30,6 +30,8 @@ export interface File {
   errorLevel: ErrorLevel | null;
   createdAt: Date;
   updatedAt: Date;
+  startTime: Date | null;
+  stopTime: Date | null;
   filename: string;
   downloadUrl: string;
   software: Software[];

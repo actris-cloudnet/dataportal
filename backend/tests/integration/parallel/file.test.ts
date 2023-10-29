@@ -32,6 +32,11 @@ describe("/api/files/:uuid", () => {
     expect(res.data.timeliness).toBe("nrt");
   });
 
+  it("returns RRT timeliness", async () => {
+    const res = await axios.get(`${url}f036da43-c19c-4832-99f9-6cc88f3255c5`);
+    expect(res.data.timeliness).toBe("rrt");
+  });
+
   it("responds with a 404 on test file if in normal mode", async () => {
     return expect(axios.get(url + testUuid)).rejects.toMatchObject({ response: { data: expectedBody404 } });
   });
