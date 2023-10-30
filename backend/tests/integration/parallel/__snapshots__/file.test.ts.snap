@@ -103,6 +103,8 @@ exports[`/api/files/:uuid request succeeds on model file 1`] = `
   },
   "size": "500452",
   "software": [],
+  "startTime": null,
+  "stopTime": null,
   "timeliness": "scheduled",
   "updatedAt": "2020-02-20T10:52:59.073Z",
   "uuid": "b5d1d5af-3667-41bc-b952-e684f627d91c",
