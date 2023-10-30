@@ -104,6 +104,10 @@ header {
   }
 }
 
+:slotted(.tag:not(:first-child)) {
+  margin-left: 0.5rem;
+}
+
 @media screen and (max-width: 600px) {
   header {
     display: flex;
