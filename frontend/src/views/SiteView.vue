@@ -28,8 +28,8 @@
                 </dd>
               </template>
               <template v-if="response.altitude != null">
-                <dt>Site altitude</dt>
-                <dd>{{ response.altitude }} m</dd>
+                <dt>Altitude</dt>
+                <dd>{{ response.altitude }} <abbr title="meters above mean sea level">m a.s.l.</abbr></dd>
               </template>
               <dt>GAW ID</dt>
               <dd v-if="response.gaw">

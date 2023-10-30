@@ -35,7 +35,7 @@
                   <td>
                     {{ site.longitude != null ? formatLongitude(site.longitude) : "-" }}
                   </td>
-                  <td>{{ site.altitude != null ? `${site.altitude}m` : "-" }}</td>
+                  <td>{{ site.altitude != null ? `${site.altitude} m` : "-" }}</td>
                 </tr>
               </tbody>
             </table>
