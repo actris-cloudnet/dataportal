@@ -1,0 +1,3 @@
+[tool.release-version]
+filename = ["backend/package.json", "frontend/package.json"]
+pattern = "\"version\": \"(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)\""
