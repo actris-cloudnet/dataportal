@@ -38,6 +38,9 @@ export abstract class File {
   @Column({ default: "" })
   pid!: string;
 
+  @Column({ type: "bigint", nullable: true })
+  dvasId!: number | null;
+
   @Column({ default: true })
   volatile!: boolean;
 

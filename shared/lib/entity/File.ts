@@ -35,6 +35,7 @@ export interface File {
   filename: string;
   downloadUrl: string;
   software: Software[];
+  dvasId: number | null;
 }
 
 export interface RegularFile extends File {

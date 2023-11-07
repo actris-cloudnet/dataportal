@@ -217,7 +217,7 @@ export class FileRoutes {
       let repo: Repository<RegularFile | ModelFile> = this.fileRepo;
       if (existingFile.product.id == "model") repo = this.modelFileRepo;
       await repo.update({ uuid: partialFile.uuid }, partialFile);
-      ["pid", "checksum", "version", "dvasUpdatedAt"].forEach((prop) => {
+      ["pid", "checksum", "version", "dvasUpdatedAt", "dvasId"].forEach((prop) => {
         // Not in SearchFile
         if (prop in partialFile) {
           delete partialFile[prop];
