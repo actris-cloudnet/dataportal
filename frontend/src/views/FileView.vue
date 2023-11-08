@@ -147,14 +147,7 @@ async function fetchLocation(file: ModelFile | RegularFile) {
 function fetchVersions(file: File) {
   // No need to reload versions
   if (versions.value.includes(file.uuid)) return;
-  const payload = {
-    params: {
-      filename: file.filename,
-      allVersions: true,
-      showLegacy: true,
-    },
-  };
-  return axios.get(`${backendUrl}files`, payload).then((response) => {
+  return axios.get(`${backendUrl}files/${response.value?.uuid}/versions`).then((response) => {
     const searchFiles = response.data as File[];
     versions.value = searchFiles.map((sf) => sf.uuid);
   });
@@ -203,6 +196,13 @@ watch(
       if (response.value == null || error.value) return;
     } finally {
       isBusy.value = false;
+    }
+    visualizations.value = [];
+    sourceFiles.value = [];
+    instrument.value = "";
+    instrumentStatus.value = "loading";
+    if (!versions.value.includes(response.value.uuid)) {
+      versions.value = [];
     }
     await Promise.all([
       fetchInstrument(response.value),

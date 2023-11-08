@@ -120,6 +120,7 @@ async function createServer(): Promise<void> {
     fileRoutes.modelFiles,
   );
   app.get("/api/files/:uuid", middleware.validateUuidParam, fileRoutes.file);
+  app.get("/api/files/:uuid/versions", middleware.validateUuidParam, fileRoutes.fileVersions);
   app.get("/api/sites", siteRoutes.sites);
   app.get("/api/sites/:siteId", siteRoutes.site);
   app.get("/api/products", prodRoutes.products);

@@ -1,6 +1,6 @@
 import { Request, RequestHandler, Response } from "express";
 import { Collection } from "../entity/Collection";
-import { EntityManager, Repository, SelectQueryBuilder, In, DataSource, ObjectLiteral } from "typeorm";
+import { EntityManager, Repository, SelectQueryBuilder, In, DataSource, ObjectLiteral, Raw } from "typeorm";
 import { isFile, RegularFile } from "../entity/File";
 import { FileQuality } from "../entity/FileQuality";
 import {
@@ -70,6 +70,47 @@ export class FileRoutes {
         return next({ status: 404, errors: ["No files match this UUID"] });
       }
       res.send(augmentFile(false)(file));
+    } catch (err) {
+      next({ status: 500, errors: err });
+    }
+  };
+
+  fileVersions: RequestHandler = async (req: Request, res: Response, next) => {
+    const getFileByUuid = (repo: Repository<RegularFile | ModelFile>, _isModel: boolean | undefined) =>
+      repo.createQueryBuilder("file").where("file.uuid = :uuid", req.params).getOne();
+
+    try {
+      const select: any = ["uuid", "createdAt"];
+      const allowedProps = ["pid", "dvasId", "legacy", "checksum", "size", "format"];
+      const extraProps = toArray(req.query.properties as any) || [];
+      const unknownProps = [];
+      for (const prop of extraProps) {
+        if (allowedProps.includes(prop)) {
+          select.push(prop);
+        } else {
+          unknownProps.push(prop);
+        }
+      }
+      if (unknownProps.length > 0) {
+        return next({
+          status: 400,
+          errors: [`Unknown values in properties query parameter: ${unknownProps.join(", ")}`],
+        });
+      }
+
+      const file = await this.findAnyFile(getFileByUuid);
+      if (!file) {
+        return next({ status: 404, errors: ["No files match this UUID"] });
+      }
+      const repo = file instanceof RegularFile ? this.fileRepo : this.modelFileRepo;
+      // Handle legacy filenames with 'legacy/' prefix.
+      const filename = Raw((alias) => `regexp_replace(${alias}, '.+/', '') = :filename`, { filename: file.filename });
+      const versions = await repo.find({
+        select,
+        where: { s3key: filename },
+        order: { createdAt: "DESC" },
+      });
+      res.send(versions);
     } catch (err) {
       next({ status: 500, errors: err });
     }

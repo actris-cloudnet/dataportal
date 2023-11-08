@@ -47,15 +47,15 @@ describe("FileView.vue", () => {
           return Promise.resolve(augmentAxiosResponse(resources["sites"]));
         } else if (url.includes("/models")) {
           return Promise.resolve(augmentAxiosResponse(resources["models"]));
+        } else if (url.match("/files/.*/versions")) {
+          return Promise.resolve(
+            augmentAxiosResponse([
+              findByUuid(resources["allfiles"], "8bb"),
+              findByUuid(resources["allfiles"], "6cb"),
+              findByUuid(resources["allfiles"], "22b"),
+            ]),
+          );
         } else if (url.includes("/files")) {
-          if (req && req.params["allVersions"])
-            return Promise.resolve(
-              augmentAxiosResponse([
-                findByUuid(resources["allfiles"], "8bb"),
-                findByUuid(resources["allfiles"], "6cb"),
-                findByUuid(resources["allfiles"], "22b"),
-              ]),
-            );
           const i = Array.isArray(uuid) ? uuid[nreq] : uuid;
           nreq += 1;
           return Promise.resolve(augmentAxiosResponse(findByUuid(resources["allfiles"], i)));

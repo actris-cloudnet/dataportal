@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
 import { Site } from "./Site";
 import { Product } from "./Product";
-import { ModelFile, RegularFile, File } from "./File";
+import { ModelFile, RegularFile } from "./File";
 import { ErrorLevel } from "./QualityReport";
 import { Instrument } from "./Instrument";
 

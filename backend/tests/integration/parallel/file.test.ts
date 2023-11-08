@@ -49,4 +49,26 @@ describe("/api/files/:uuid", () => {
   it("request succeeds on a test file in developer mode", async () => {
     return expect(axios.get(url + testUuid, { params: { developer: "" } })).resolves.toBeTruthy();
   });
+
+  it("returns list of file versions", async () => {
+    const res = await axios.get(`${url}22b32746-faf0-4057-9076-ed2e698dcc34/versions`);
+    expect(res.data).toMatchSnapshot();
+  });
+
+  it("returns list of file versions with PID and checksum", async () => {
+    const res = await axios.get(`${url}22b32746-faf0-4057-9076-ed2e698dcc34/versions`, {
+      params: { properties: ["pid", "checksum"] },
+    });
+    expect(res.data).toMatchSnapshot();
+  });
+
+  it("returns list of file versions with PID and checksum", async () => {
+    return expect(
+      axios.get(`${url}22b32746-faf0-4057-9076-ed2e698dcc34/versions`, {
+        params: { properties: ["kisuli", "hauveli"] },
+      }),
+    ).rejects.toMatchObject({
+      response: { status: 400, data: { errors: ["Unknown values in properties query parameter: kisuli, hauveli"] } },
+    });
+  });
 });
