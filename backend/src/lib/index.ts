@@ -116,8 +116,14 @@ export const ssAuthString = () =>
 
 export const getBucketForFile = (file: File) => (file.volatile ? "cloudnet-product-volatile" : "cloudnet-product");
 
-export const getS3pathForUpload = (upload: Upload) =>
-  `/cloudnet-upload/${upload.site.id}/${upload.uuid}/${upload.filename}`;
+export const uploadBucket = "cloudnet-upload";
+
+export const generateS3keyForUpload = (upload: Upload) => `${upload.site.id}/${upload.uuid}/${upload.filename}`;
+
+export const getS3pathForUpload = (upload: Upload) => {
+  const s3key = upload.s3key || generateS3keyForUpload(upload);
+  return `/${uploadBucket}/${s3key}`;
+};
 
 export const getS3pathForFile = (file: File) => `/${getBucketForFile(file)}/${file.s3key}`;
 

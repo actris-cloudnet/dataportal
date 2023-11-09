@@ -30,6 +30,9 @@ export abstract class Upload {
   @Column()
   filename!: string;
 
+  @Column({ type: "varchar", nullable: true })
+  s3key!: string | null;
+
   @Column({ type: "date" })
   measurementDate!: Date;
 

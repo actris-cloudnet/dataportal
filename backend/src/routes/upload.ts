@@ -5,12 +5,14 @@ import { NextFunction, Request, RequestHandler, Response } from "express";
 import {
   ArrayEqual,
   dateforsize,
+  generateS3keyForUpload,
   getS3pathForUpload,
   isValidDate,
   ssAuthString,
   streamHandler,
   toArray,
   tomorrow,
+  uploadBucket,
   validateInstrumentPid,
 } from "../lib";
 import { basename } from "path";
@@ -211,11 +213,13 @@ export class UploadRoutes {
       if (!upload) return next({ status: 400, errors: "No metadata matches this hash" });
       if (upload.status != Status.CREATED) return res.sendStatus(200); // Already uploaded
 
-      const { status, body } = await this.makeRequest(getS3pathForUpload(upload), checksum, req);
+      const s3key = generateS3keyForUpload(upload);
+      const s3path = `/${uploadBucket}/${s3key}`;
+      const { status, body } = await this.makeRequest(s3path, checksum, req);
 
       await this.findRepoForUpload(upload).update(
         { checksum: checksum },
-        { status: Status.UPLOADED, updatedAt: new Date(), size: body.size },
+        { status: Status.UPLOADED, updatedAt: new Date(), size: body.size, s3key },
       );
       res.sendStatus(status);
     } catch (err: any) {
