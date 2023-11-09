@@ -16,8 +16,8 @@
         </div>
       </div>
       <div class="item">
-        <a href="https://docs.cloudnet.fmi.fi/api/data-portal.html">API documentation</a><br />
         <router-link to="/privacy">Privacy policy</router-link><br />
+        <a href="https://stats.uptimerobot.com/4jBrVtYm47">Service status</a><br />
         <span class="hidden-links">
           Version:
           <a :href="`https://github.com/actris-cloudnet/dataportal/tree/v${dataportalVersion}`">
