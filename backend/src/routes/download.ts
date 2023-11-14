@@ -3,9 +3,9 @@ import { CountryResponse, Reader } from "maxmind";
 import { readFileSync } from "fs";
 
 import { Collection } from "../entity/Collection";
-import { DataSource, Repository } from "typeorm";
+import { DataSource, Not, Repository } from "typeorm";
 import { File, RegularFile } from "../entity/File";
-import { Upload } from "../entity/Upload";
+import { Status, Upload } from "../entity/Upload";
 import { Download, ObjectType } from "../entity/Download";
 import {
   getS3pathForFile,
@@ -89,7 +89,10 @@ export class DownloadRoutes {
     const filename = req.params[0];
     try {
       const file = await this.uploadController.findAnyUpload((repo) =>
-        repo.findOne({ where: { uuid: req.params.uuid, filename }, relations: { site: true } }),
+        repo.findOne({
+          where: { uuid: req.params.uuid, filename, status: Not(Status.CREATED) },
+          relations: { site: true },
+        }),
       );
       if (!file) return next({ status: 404, errors: ["File not found"] });
       const upstreamRes = await this.makeRawFileRequest(file);

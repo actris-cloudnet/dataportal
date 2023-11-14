@@ -61,4 +61,10 @@ describe("GET /api/download/raw/:uuid/:filename", () => {
       genResponse(404, { errors: ["Not found: invalid UUID"] }),
     );
   });
+
+  it("responds 404 if file has 'created' status", async () => {
+    return expect(
+      axios.get(`${url}b8e96ee1-d3e1-49ba-a557-c131d56beeab/file1-dc460da4ad72c48223.LV1`),
+    ).rejects.toMatchObject(genResponse(404, { errors: ["File not found"] }));
+  });
 });
