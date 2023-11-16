@@ -159,7 +159,8 @@
     </main>
   </div>
 
-  <ApiError v-else-if="error" />
+  <!-- prettier-ignore -->
+  <ApiError :response="(response as any)" v-else-if="error" />
 </template>
 
 <script lang="ts" setup>
@@ -262,9 +263,9 @@ onMounted(() => {
         locations.value = { status: "notFound" };
       }
     })
-    .catch((error) => {
+    .catch((e) => {
       error.value = true;
-      response.value = error.response;
+      response.value = e.response;
     });
   parseDataStatus(props.siteId)
     .then((data) => {
