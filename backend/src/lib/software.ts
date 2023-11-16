@@ -1,6 +1,6 @@
 import { DataSource, Repository } from "typeorm";
 import { Software } from "../entity/Software";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 interface Metadata {
   humanReadableName: string;
@@ -69,13 +69,17 @@ export class SoftwareService {
     }
     software.humanReadableName = metadata.humanReadableName;
     if (metadata.zenodoConceptId) {
-      const res = await axios.get("https://zenodo.org/api/records", {
-        params: {
-          q: `conceptrecid:"${metadata.zenodoConceptId}" AND version:"v${software.version}"`,
-          all_versions: "true",
-        },
-      });
-      software.url = res.data[0]?.links?.doi;
+      try {
+        const res = await axios.get("https://zenodo.org/api/records", {
+          params: {
+            q: `conceptrecid:"${metadata.zenodoConceptId}" AND version:"v${software.version}"`,
+            all_versions: "true",
+          },
+        });
+        software.url = res.data[0]?.links?.doi;
+      } catch (e: any) {
+        console.error("Failed to fetch metadata from Zenodo", e, e.response);
+      }
     }
     if (!software.url) {
       software.url = `https://github.com/${metadata.githubRepository}/tree/v${software.version}`;
