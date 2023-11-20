@@ -13,5 +13,8 @@ export default defineConfig({
   },
   define: {
     "import.meta.env.DATAPORTAL_VERSION": JSON.stringify(process.env.npm_package_version),
+    "import.meta.env.FAVICON_URL": JSON.stringify(
+      process.env.NODE_ENV === "production" ? "/cloudnet.png" : "/cloudnet-dev.png",
+    ),
   },
 });
