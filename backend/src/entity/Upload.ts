@@ -83,8 +83,8 @@ export class InstrumentUpload extends Upload {
   @ManyToOne((_) => Instrument, (instrument) => instrument.uploads, { nullable: false })
   instrument!: Instrument;
 
-  @Column({ type: "text", nullable: true })
-  instrumentPid!: string | null;
+  @Column({ type: "text" })
+  instrumentPid!: string;
 
   @Column({ type: "text", array: true, default: [], nullable: false })
   tags!: string[];
