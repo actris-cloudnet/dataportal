@@ -55,14 +55,14 @@ function setMapBounds() {
   return L.latLngBounds(southWest, northEast);
 }
 
-const markerColors: Record<SiteType | "selected", string> = {
+const markerColors: Record<SiteType | "selected", string | undefined> = {
   selected: "red",
   cloudnet: "blue",
   arm: "violet",
   campaign: "orange",
-  mobile: "gray",
-  test: "hidden",
-  hidden: "hidden",
+  mobile: undefined,
+  test: undefined,
+  hidden: undefined,
 };
 
 function generateLegend() {
@@ -70,6 +70,7 @@ function generateLegend() {
   div.innerHTML = "<h4>Site types</h4>";
   const ul = L.DomUtil.create("ul", "legendlist");
   for (const [type, className] of Object.entries(markerColors)) {
+    if (typeof className === "undefined") continue;
     const li = L.DomUtil.create("li", className);
     li.innerText = type;
     ul.appendChild(li);
@@ -101,6 +102,7 @@ function customPopup(site: Site) {
 
 function initLayers() {
   props.sites.map((site) => {
+    if (site.type.includes("hidden" as SiteType)) return;
     if (site.latitude !== null && site.longitude !== null) {
       const mark = L.marker([site.latitude, site.longitude]); // CHANGED THESE ARGUMENTS
       mark.bindPopup(customPopup(site));
