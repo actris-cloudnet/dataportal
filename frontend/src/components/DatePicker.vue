@@ -36,17 +36,17 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, watchEffect, ref } from "vue";
+import { computed, watchEffect, ref, watch } from "vue";
 import { dateToString } from "@/lib";
 import { DatePicker as VDatePicker } from "v-calendar";
 import "v-calendar/dist/style.css";
 
 export interface Props {
-  modelValue: Date | null;
+  modelValue: string | null;
   name: string;
   label?: string;
-  start?: Date;
-  end?: Date;
+  start?: string;
+  end?: string;
 }
 
 export interface DateErrors {
@@ -65,52 +65,46 @@ const emit = defineEmits<{
   (e: "error", error: DateErrors): void;
 }>();
 
-function truncateDate(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-}
-
-function validateDate(value: Date) {
+function validateDate(value: string) {
   const result = {
-    isValidDateString: !isNaN(value.getDate()),
-    isNotInFuture: truncateDate(value) <= truncateDate(new Date()),
-    isBeforeEnd: props.end ? truncateDate(value) <= truncateDate(props.end) : true,
-    isAfterStart: props.start ? truncateDate(value) >= truncateDate(props.start) : true,
+    isValidDateString: !isNaN(new Date(value).getDate()),
+    isNotInFuture: value <= dateToString(new Date()),
+    isBeforeEnd: props.end ? value <= props.end : true,
+    isAfterStart: props.start ? value >= props.start : true,
   };
   hasError.value = !result.isValidDateString || !result.isNotInFuture || !result.isAfterStart || !result.isBeforeEnd;
   emit("error", result);
   return result;
 }
 
+const dateString = ref("");
+
 watchEffect(() => {
   if (props.modelValue) {
     validateDate(props.modelValue);
+    dateString.value = props.modelValue;
   }
 });
 
-const dateValue = computed({
-  get() {
-    return props.modelValue;
-  },
-  set(value) {
-    emit("update:modelValue", value);
-  },
-});
-
-const dateString = computed({
-  get() {
-    if (!props.modelValue) return "";
-    return dateToString(props.modelValue);
-  },
-  set(value) {
+watch(
+  () => dateString.value,
+  (value) => {
     value = value.trim();
     if (value) {
-      const date = new Date(value);
-      if (validateDate(date).isValidDateString) {
-        emit("update:modelValue", date);
-      }
+      if (!validateDate(value).isValidDateString) return;
+      emit("update:modelValue", dateToString(new Date(value)));
     } else {
       emit("update:modelValue", null);
     }
+  },
+);
+
+const dateValue = computed({
+  get() {
+    return new Date(props.modelValue!);
+  },
+  set(value) {
+    emit("update:modelValue", dateToString(value));
   },
 });
 </script>

@@ -45,7 +45,7 @@
 <script lang="ts" setup>
 import VueMultiselect from "vue-multiselect";
 import { notEmpty } from "@/lib";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import type { PropType } from "vue";
 
 export interface Option {
@@ -130,6 +130,21 @@ const filteredOptions = computed(() => [
     optionIndex.value.filter(([term, _option]) => term.includes(searchQuery.value)).map(([_term, option]) => option),
   ),
 ]);
+
+// If the list of possible options change, remove invalid values from selection.
+watch(
+  () => props.options,
+  (options) => {
+    if (Array.isArray(props.modelValue)) {
+      emit(
+        "update:modelValue",
+        props.modelValue.filter((selectedId) => options.find((product) => product.id === selectedId)),
+      );
+    } else if (!options.some((option) => option.id === props.modelValue)) {
+      emit("update:modelValue", null);
+    }
+  },
+);
 </script>
 
 <style src="vue-multiselect/dist/vue-multiselect.css"></style>

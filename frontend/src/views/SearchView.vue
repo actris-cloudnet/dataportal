@@ -7,7 +7,7 @@
     <div v-if="allSites && allSites.length > 0 && showAllSites" class="widemap">
       <SuperMap
         :key="mapKey"
-        :sites="allSites"
+        :sites="siteOptions"
         :selectedSiteIds="selectedSiteIds"
         :onMapMarkerClick="onMapMarkerClick"
         :center="[54.0, 14.0]"
@@ -22,7 +22,7 @@
         <div v-if="allSites && allSites.length > 0 && !showAllSites" class="smallmap">
           <SuperMap
             :key="mapKey"
-            :sites="allSites"
+            :sites="siteOptions"
             :selectedSiteIds="selectedSiteIds"
             :onMapMarkerClick="onMapMarkerClick"
             :center="[58.0, 14.0]"
@@ -35,7 +35,7 @@
           <custom-multiselect
             label="Location"
             v-model="selectedSiteIds"
-            :options="allSites"
+            :options="siteOptions"
             id="siteSelect"
             class="nobottommargin"
             :class="{ widemapmarginleft: showAllSites }"
@@ -151,7 +151,7 @@
           <custom-multiselect
             label="Product"
             v-model="selectedProductIds"
-            :options="allProducts"
+            :options="productOptions"
             id="productSelect"
             :multiple="true"
             :getIcon="getProductIcon"
@@ -180,7 +180,7 @@
             v-show="isVizMode"
             label="Variable"
             v-model="selectedVariableIds"
-            :options="selectableVariables"
+            :options="variableOptions"
             :multiple="true"
             id="variableSelect"
             :getIcon="getVariableIcon"
@@ -227,9 +227,9 @@ export default {
 </script>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, nextTick, watch } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import axios from "axios";
-import type { Site } from "@shared/entity/Site";
+import type { Site, SiteType } from "@shared/entity/Site";
 import Datepicker, { type DateErrors } from "@/components/DatePicker.vue";
 import CustomMultiselect from "@/components/MultiSelect.vue";
 import type { Option } from "@/components/MultiSelect.vue";
@@ -241,10 +241,10 @@ import {
   getDateFromBeginningOfYear,
   getProductIcon,
   isSameDay,
-  isValidDate,
   getMarkerIcon,
   getInstrumentIcon,
   backendUrl,
+  compareValues,
 } from "@/lib";
 import VizSearchResult from "@/components/VizSearchResult.vue";
 import type { Product } from "@shared/entity/Product";
@@ -258,10 +258,26 @@ import BaseAlert from "@/components/BaseAlert.vue";
 
 import type { VisualizationResponse } from "@shared/entity/VisualizationResponse";
 import type { Instrument } from "@shared/entity/Instrument";
+import { useRouteQuery, type QueryType } from "@/lib/useRouteQuery";
 
 export interface Props {
   mode: string;
 }
+
+const queryString: QueryType<string> = {
+  parse: (x) => x,
+  format: (x) => x,
+};
+
+const queryStringArray: QueryType<string[]> = {
+  parse: (x) => x.split(","),
+  format: (x) => x.join(",") || undefined,
+};
+
+const queryBoolean: QueryType<boolean> = {
+  parse: (x) => x === "true",
+  format: (x) => (x ? "true" : undefined),
+};
 
 const props = defineProps<Props>();
 
@@ -273,46 +289,50 @@ const isVizMode = computed(() => props.mode == "visualizations");
 
 // api call
 const apiResponse = ref<SearchFileResponse[] | VisualizationResponse[]>(resetResponse());
-const pendingUpdates = ref(false);
+let requestController: AbortController | null = null;
 
 // file list
 const isBusy = ref(false);
 
 // site selector
-const normalSites = ref<Site[]>([]);
-const extraSites = ref<Site[]>([]);
-const allSites = ref<Site[]>([]); // options in site selector
-const normalSiteIds = ref<string[]>([]);
-const extraSiteIds = ref<string[]>([]);
-const selectedSiteIds = ref<string[]>([]);
+const allSites = ref<Site[]>([]);
+const selectedSiteIds = useRouteQuery({ name: "site", defaultValue: [], type: queryStringArray });
 const showAllSites = ref(false);
+const siteOptions = computed(() =>
+  showAllSites.value ? allSites.value : allSites.value.filter((site) => site.type.includes("cloudnet" as SiteType)),
+);
 
 // dates
-const beginningOfHistory = ref(new Date("1970-01-01"));
-const today = ref(new Date());
-const dateTo = ref(new Date());
-const dateFrom = ref(new Date());
+const beginningOfHistory = ref("1970-01-01");
+const today = ref(dateToString(new Date()));
+const dateFrom = useRouteQuery({ name: "dateFrom", defaultValue: today.value, type: queryString });
 const dateFromError = ref<DateErrors>();
+const dateTo = useRouteQuery({ name: "dateTo", defaultValue: today.value, type: queryString });
 const dateToError = ref<DateErrors>();
 const activeBtn = ref("");
 const showDateRange = ref(false);
 
 // products
-const normalProducts = ref<Product[]>([]);
-const experimentalProducts = ref<Product[]>([]);
-const allProducts = ref<Product[]>([]); // options in product selector
-const normalProductIds = ref<string[]>([]);
-const experimentalProductIds = ref<string[]>([]);
-const selectedProductIds = ref<string[]>([]);
-const showExpProducts = ref(false);
+const allProducts = ref<Product[]>([]);
+const selectedProductIds = useRouteQuery({ name: "product", defaultValue: [], type: queryStringArray });
+const showExpProducts = useRouteQuery({ name: "experimental", defaultValue: false, type: queryBoolean });
+const productOptions = computed(() =>
+  allProducts.value.filter((product) => showExpProducts.value || !product.experimental),
+);
 
 // variables
-const experimentalVariableIds = ref<string[]>([]);
-const selectedVariableIds = ref<string[]>([]);
+const selectedVariableIds = useRouteQuery({ name: "variable", defaultValue: [], type: queryStringArray });
+const variableOptions = computed(() => {
+  const formatProduct = (prod: Product) => prod.variables.map((variable) => ({ ...variable, product: prod }));
+  if (selectedProductIds.value.length == 0) {
+    return allProducts.value.flatMap(formatProduct);
+  }
+  return allProducts.value.filter((prod) => selectedProductIds.value.includes(prod.id)).flatMap(formatProduct);
+});
 
 // instruments
 const allInstruments = ref<Instrument[]>([]);
-const selectedInstrumentIds = ref<string[]>([]);
+const selectedInstrumentIds = useRouteQuery({ name: "instrument", defaultValue: [], type: queryStringArray });
 
 // other
 const renderComplete = ref(false);
@@ -331,131 +351,73 @@ const router = useRouter();
 const route = useRoute();
 
 onMounted(async () => {
-  nextTick(() => {
-    renderComplete.value = true;
-  });
   addKeyPressListener();
   await initView();
-  const query = route.query;
-  const params = ["site", "product", "variable", "dateFrom", "dateTo", "instrument"];
-  const paramsSet = params.filter((param) => param in query && query[param] != null);
-  for (const param of paramsSet) {
-    const value = route.query[param] as string;
-    if (param === "site") selectedSiteIds.value = parseQuery(param, value);
-    if (param === "product") selectedProductIds.value = parseQuery(param, value);
-    if (param === "variable") selectedVariableIds.value = parseQuery(param, value);
-    if (param === "instrument") selectedInstrumentIds.value = parseQuery(param, value);
-    if (param === "dateFrom" || param === "dateTo") {
-      if (isValidDate(value)) {
-        const date = new Date(value);
-        if (param === "dateFrom") {
-          dateFrom.value = date;
-        } else {
-          dateTo.value = date;
-        }
-      }
-    }
-  }
-  showDateRange.value = !isSameDay(dateFrom.value, dateTo.value);
-  if (paramsSet.length === 0) {
-    await fetchData();
-  }
+  renderComplete.value = true;
 });
 
 async function initView() {
-  const sitesPayload = {
-    params: { type: ["cloudnet", "campaign", "arm"] },
-  };
-  await Promise.all([
-    axios.get(`${backendUrl}sites/`, sitesPayload),
+  showDateRange.value = dateFrom.value !== dateTo.value;
+  const [sites, products, instruments] = await Promise.all([
+    initSites(),
     axios.get(`${backendUrl}products/variables`),
     axios.get(`${backendUrl}instruments`),
-  ]).then(([sites, products, instruments]) => {
-    allSites.value = sites.data.sort(alphabeticalSort).filter(selectNormalSites);
-    normalSites.value = sites.data.sort(alphabeticalSort).filter(selectNormalSites);
-    extraSites.value = sites.data.sort(alphabeticalSort).filter(selectExtraSites);
-    normalSiteIds.value = normalSites.value.map((site) => site.id);
-    extraSiteIds.value = extraSites.value.map((site) => site.id);
-    allProducts.value = products.data.filter(discardExperimentalProducts).sort(alphabeticalSort);
-    allInstruments.value = instruments.data.sort(instrumentSort);
-    normalProducts.value = products.data.filter((prod: Product) => !prod.experimental).sort(alphabeticalSort);
-    experimentalProducts.value = products.data.filter((prod: Product) => prod.experimental).sort(alphabeticalSort);
-    normalProductIds.value = normalProducts.value.map((prod) => prod.id);
-    experimentalProductIds.value = experimentalProducts.value.map((prod) => prod.id);
-    experimentalVariableIds.value = experimentalProducts.value.flatMap((prod) => prod.variables).map((prod) => prod.id);
+  ]);
+  allSites.value = sites.sort(alphabeticalSort);
+  allProducts.value = products.data.sort(alphabeticalSort);
+  allInstruments.value = instruments.data.sort(instrumentSort);
+  showExpProducts.value = selectedProductIds.value.some((productId) => {
+    const product = allProducts.value.find((product) => product.id === productId);
+    return product && product.experimental;
+  });
+  showAllSites.value = selectedSiteIds.value.some((siteId) => {
+    const site = allSites.value.find((site) => site.id === siteId);
+    return site && !site.type.includes("cloudnet" as SiteType);
   });
 }
 
-function parseQuery(param: string, value: string): string[] {
-  let validChoices: string | string[];
-  const valueArray = value.split(",");
-  if (param === "product") {
-    for (const productId of valueArray) {
-      if (experimentalProductIds.value.includes(productId) && !showExpProducts.value) {
-        showExpProducts.value = true;
-        allProducts.value = normalProducts.value.concat(experimentalProducts.value);
-      }
-    }
-    validChoices = normalProductIds.value.concat(experimentalProductIds.value);
-  }
-  if (param === "site") {
-    for (const siteId of valueArray) {
-      if (extraSiteIds.value.includes(siteId) && !showAllSites.value) {
-        showAllSites.value = true;
-        allSites.value = normalSites.value.concat(extraSites.value);
-      }
-    }
-    validChoices = allSites.value.map((site) => site.id);
-  }
-  if (param === "variable") {
-    validChoices = allProducts.value.flatMap((prod) => prod.variables).map((variable) => variable.id);
-  }
-  if (param == "instrument") {
-    validChoices = allInstruments.value.map((instrument) => instrument.id);
-  }
-  const validValues = valueArray.filter((value) => validChoices.includes(value));
-  return Array.from(new Set(validValues));
+async function initSites(): Promise<Site[]> {
+  const res = await axios.get<Site[]>(`${backendUrl}sites/`, { params: { type: ["cloudnet", "campaign", "arm"] } });
+  return res.data.filter((site) => !site.type.includes("hidden" as SiteType));
 }
 
 function fetchData() {
-  if (pendingUpdates.value) return Promise.resolve();
-  pendingUpdates.value = true;
+  if (requestController) requestController.abort();
+  requestController = new AbortController();
   return new Promise((resolve, reject) => {
-    nextTick(() => {
-      pendingUpdates.value = false;
-      if (isVizMode.value && noSelectionsMade.value) {
+    if (isVizMode.value && noSelectionsMade.value) {
+      resolve(undefined);
+      return;
+    }
+    isBusy.value = true;
+    const apiPath = isVizMode.value ? "visualizations/" : "search/";
+    if (!isVizMode.value) checkIfButtonShouldBeActive();
+    const payload = {
+      site: selectedSiteIds.value.length ? selectedSiteIds.value : siteOptions.value.map((site) => site.id),
+      dateFrom: isVizMode.value ? dateTo.value : dateFrom.value,
+      dateTo: dateTo.value,
+      product: selectedProductIds.value.length ? selectedProductIds.value : productOptions.value.map((prod) => prod.id),
+      variable: isVizMode.value ? selectedVariableIds.value : undefined,
+      instrument: selectedInstrumentIds.value.length ? selectedInstrumentIds.value : undefined,
+      showLegacy: true,
+      privateFrontendOrder: true,
+    };
+    return axios
+      .get(`${backendUrl}${apiPath}`, { params: payload, signal: requestController!.signal })
+      .then((res) => {
+        apiResponse.value = constructTitle(res.data);
+        isBusy.value = false;
         resolve(undefined);
-        return;
-      }
-      isBusy.value = true;
-      const apiPath = isVizMode.value ? "visualizations/" : "search/";
-      if (!isVizMode.value) checkIfButtonShouldBeActive();
-      return axios
-        .get(`${backendUrl}${apiPath}`, payload.value)
-        .then((res) => {
-          apiResponse.value = constructTitle(res.data);
-          isBusy.value = false;
-          resolve(undefined);
-        })
-        .catch((err) => {
-          console.error(err);
-          error.value = (err.response && err.response.statusText) || "unknown error";
-          apiResponse.value = resetResponse();
-          isBusy.value = false;
-          reject();
-        });
-    });
+      })
+      .catch((err) => {
+        if (axios.isCancel(err)) return;
+        console.error(err);
+        error.value = (err.response && err.response.statusText) || "unknown error";
+        apiResponse.value = resetResponse();
+        isBusy.value = false;
+        reject();
+      });
   });
-}
-
-function dateErrorsExist(dateError?: DateErrors) {
-  return !(
-    dateError &&
-    dateError.isValidDateString &&
-    dateError.isAfterStart &&
-    dateError.isBeforeEnd &&
-    dateError.isNotInFuture
-  );
 }
 
 function setVizWideMode(wide: boolean) {
@@ -476,20 +438,14 @@ function onMapMarkerClick(ids: string[]) {
   selectedSiteIds.value = union.filter((id) => !intersection.includes(id));
 }
 
-const alphabeticalSort = (a: Option, b: Option) => a.humanReadableName > b.humanReadableName;
+const alphabeticalSort = (a: Option, b: Option) => compareValues(a.humanReadableName, b.humanReadableName);
 
 const instrumentSort = (a: Instrument, b: Instrument) =>
-  a.type == b.type ? a.shortName || a.humanReadableName > b.shortName || b.humanReadableName : a.type > b.type;
-
-const selectNormalSites = (site: Site) => (site.type as string[]).includes("cloudnet");
-
-const selectExtraSites = (site: Site) => !(site.type as string[]).includes("cloudnet");
+  a.type == b.type
+    ? compareValues(a.shortName || a.humanReadableName, b.shortName || b.humanReadableName)
+    : compareValues(a.type, b.type);
 
 const getVariableIcon = (variable: any) => getProductIcon(variable.product);
-
-function discardExperimentalProducts(prod: Product) {
-  return showExpProducts.value || !prod.experimental;
-}
 
 function navigateToSearch(mode: string) {
   router.push({ name: "Search", params: { mode }, query: route.query }).catch(() => {
@@ -498,16 +454,16 @@ function navigateToSearch(mode: string) {
 }
 
 function setDateRange(n: number) {
-  dateTo.value = new Date();
+  dateTo.value = dateToString(new Date());
   const date = new Date();
   date.setDate(date.getDate() - n);
-  dateFrom.value = date;
+  dateFrom.value = dateToString(date);
   showDateRange.value = n != 0;
 }
 
 function setDateRangeForCurrentYear() {
-  dateTo.value = new Date();
-  dateFrom.value = getDateFromBeginningOfYear();
+  dateTo.value = dateToString(new Date());
+  dateFrom.value = dateToString(getDateFromBeginningOfYear());
   showDateRange.value = true;
 }
 
@@ -521,33 +477,35 @@ function addKeyPressListener() {
 }
 
 function hasNextDate() {
-  return !isSameDay(dateTo.value, new Date());
+  return !isSameDay(new Date(dateTo.value), new Date());
 }
 
 function hasPreviousDate() {
-  return !isSameDay(dateTo.value, beginningOfHistory.value);
+  return !isSameDay(new Date(dateTo.value), new Date(beginningOfHistory.value));
 }
 
 function setPreviousDate() {
-  if (hasPreviousDate()) {
+  if (!showDateRange.value && hasPreviousDate()) {
     const date = new Date(dateTo.value);
     date.setUTCDate(date.getUTCDate() - 1);
-    dateTo.value = date;
+    dateTo.value = dateFrom.value = dateToString(date);
   }
 }
 
 function setNextDate() {
-  if (hasNextDate()) {
+  if (!showDateRange.value && hasNextDate()) {
     const date = new Date(dateTo.value);
     date.setUTCDate(date.getUTCDate() + 1);
-    dateTo.value = date;
+    dateTo.value = dateFrom.value = dateToString(date);
   }
 }
 
 function checkIfButtonShouldBeActive() {
   const oneDay = 24 * 60 * 60 * 1000;
-  const diffDays = Math.round(Math.abs((dateTo.value.valueOf() - dateFrom.value.valueOf()) / oneDay));
-  const isDateToToday = isSameDay(dateTo.value, new Date());
+  const diffDays = Math.round(
+    Math.abs((new Date(dateTo.value).valueOf() - new Date(dateFrom.value).valueOf()) / oneDay),
+  );
+  const isDateToToday = isSameDay(new Date(dateTo.value), new Date());
   const isDateFromBeginningOfYear = isSameDay(new Date(dateFrom.value), getDateFromBeginningOfYear());
   if (isDateToToday && isDateFromBeginningOfYear) activeBtn.value = "btn1";
   else if (isDateToToday && diffDays === fixedRanges.month) activeBtn.value = "btn2";
@@ -555,46 +513,12 @@ function checkIfButtonShouldBeActive() {
   else activeBtn.value = "";
 }
 
-function replaceUrlQueryString(params: Record<string, Date | string[]>) {
-  const query = { ...route.query };
-  for (const [param, value] of Object.entries(params)) {
-    const valueToUrl = value instanceof Date ? dateToString(value) : value.join(",");
-    query[param] = valueToUrl === "" ? [] : valueToUrl;
-  }
-  router.replace({ path: route.path, query }).catch(() => {
-    // Ignore useless error when URL doesn't change.
-  });
-}
-
-const payload = computed(() => {
-  return {
-    params: {
-      site: selectedSiteIds.value.length ? selectedSiteIds.value : allSites.value.map((site) => site.id),
-      dateFrom: isVizMode.value ? dateToString(dateTo.value) : dateToString(dateFrom.value),
-      dateTo: dateToString(dateTo.value),
-      product: selectedProductIds.value.length ? selectedProductIds.value : allProducts.value.map((prod) => prod.id),
-      variable: isVizMode.value ? selectedVariableIds.value : undefined,
-      instrument: selectedInstrumentIds.value.length ? selectedInstrumentIds.value : undefined,
-      showLegacy: true,
-      privateFrontendOrder: true,
-    },
-  };
-});
-
 const mainWidth = computed(() => {
   if (isVizMode.value) {
     if (vizWideMode.value) return { wideView: true };
     else return { pagewidth: true };
   }
   return { pagewidth: true };
-});
-
-const selectableVariables = computed(() => {
-  const formatProduct = (prod: Product) => prod.variables.map((variable) => ({ ...variable, product: prod }));
-  if (selectedProductIds.value.length == 0) {
-    return allProducts.value.flatMap(formatProduct);
-  }
-  return allProducts.value.filter((prod) => selectedProductIds.value.includes(prod.id)).flatMap(formatProduct);
 });
 
 const noSelectionsMade = computed(() => {
@@ -607,96 +531,39 @@ const noSelectionsMade = computed(() => {
 });
 
 watch(
-  () => selectedSiteIds.value,
+  () => [
+    renderComplete.value,
+    dateFrom.value,
+    dateTo.value,
+    selectedSiteIds.value,
+    selectedInstrumentIds.value,
+    selectedProductIds.value,
+    selectedVariableIds.value,
+    siteOptions.value,
+    productOptions.value,
+  ],
   async () => {
-    replaceUrlQueryString({ site: selectedSiteIds.value });
+    if (!renderComplete.value) return;
     await fetchData();
   },
-);
-
-watch(
-  () => dateFrom.value,
-  async () => {
-    if (!renderComplete.value || dateErrorsExist(dateFromError.value)) return;
-    replaceUrlQueryString({ dateFrom: dateFrom.value, dateTo: dateTo.value });
-    await fetchData();
-  },
+  { immediate: true },
 );
 
 watch(
   () => dateTo.value,
-  async () => {
-    if (!renderComplete.value || dateErrorsExist(dateToError.value)) return;
-    if (isVizMode.value || !showDateRange.value) {
+  (newValue) => {
+    if (!showDateRange.value) {
+      dateFrom.value = newValue;
+    }
+  },
+);
+
+watch(
+  () => showDateRange.value,
+  (enabled) => {
+    if (!enabled) {
       dateFrom.value = dateTo.value;
     }
-    replaceUrlQueryString({ dateFrom: dateFrom.value, dateTo: dateTo.value });
-    await fetchData();
-  },
-);
-
-watch(
-  () => selectedProductIds.value,
-  async () => {
-    replaceUrlQueryString({ product: selectedProductIds.value });
-    await fetchData();
-  },
-);
-
-watch(
-  () => selectedVariableIds.value,
-  async () => {
-    replaceUrlQueryString({ variable: selectedVariableIds.value });
-    await fetchData();
-  },
-);
-
-watch(
-  () => selectedInstrumentIds.value,
-  async () => {
-    replaceUrlQueryString({ instrument: selectedInstrumentIds.value });
-    await fetchData();
-  },
-);
-
-watch(
-  () => showAllSites.value,
-  async () => {
-    if (!showAllSites.value) {
-      // remove selected campaign and arm sites
-      allSites.value = normalSites.value;
-      selectedSiteIds.value = selectedSiteIds.value.filter((site) => !extraSiteIds.value.includes(site));
-    } else {
-      allSites.value = normalSites.value.concat(extraSites.value);
-    }
-    mapKey.value = mapKey.value + 1;
-    await fetchData();
-  },
-);
-
-watch(
-  () => showExpProducts.value,
-  async () => {
-    if (!showExpProducts.value) {
-      // remove selected experimental products and variables
-      allProducts.value = normalProducts.value;
-      selectedProductIds.value = selectedProductIds.value.filter(
-        (prod) => !experimentalProductIds.value.includes(prod),
-      );
-      selectedVariableIds.value = selectedVariableIds.value.filter(
-        (variable) => !experimentalVariableIds.value.includes(variable),
-      );
-    } else {
-      allProducts.value = normalProducts.value.concat(experimentalProducts.value);
-    }
-    await fetchData();
-  },
-);
-
-watch(
-  () => allProducts.value,
-  () => {
-    showExpProducts.value = allProducts.value.length > normalProducts.value.length;
   },
 );
 
@@ -713,15 +580,6 @@ watch(
     mapKey.value = mapKey.value + 1;
     await fetchData();
     renderComplete.value = true;
-  },
-);
-
-watch(
-  () => showDateRange.value,
-  (enabled) => {
-    if (!enabled) {
-      dateFrom.value = dateTo.value;
-    }
   },
 );
 </script>

@@ -138,8 +138,8 @@ const loadingSites = ref(true);
 const countries = ref<Option[]>([]);
 const sites = ref<Site[]>([]);
 const productTypes = ref(["observation", "model"]);
-const dateFrom = ref<Date | null>(null);
-const dateTo = ref<Date | null>(null);
+const dateFrom = ref<string | null>(null);
+const dateTo = ref<string | null>(null);
 const visitStatistics = computed(() => selectedDimensions.value.includes("visit"));
 
 const currentCountry = ref<string | null>(null);
@@ -193,8 +193,8 @@ async function onSearch() {
     country: currentCountry.value || undefined,
     site: currentSite.value || undefined,
     productTypes: productTypes.value.join(","),
-    downloadDateFrom: dateFrom.value ? dateToString(dateFrom.value) : undefined,
-    downloadDateTo: dateTo.value ? dateToString(dateTo.value) : undefined,
+    downloadDateFrom: dateFrom.value ? dateFrom.value : undefined,
+    downloadDateTo: dateTo.value ? dateTo.value : undefined,
   };
   try {
     const response = await axios.get(`${backendUrl}download/stats`, {

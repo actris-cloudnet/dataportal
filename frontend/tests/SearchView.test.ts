@@ -120,8 +120,8 @@ describe("SearchView.vue", () => {
     it("Inserts correct parameters to url query string", async () => {
       const dateFrom = "2019-01-01";
       const dateTo = "2020-01-01";
-      await changeInputAndNextTick("dateFrom", dateFrom);
       await changeInputAndNextTick("dateTo", dateTo);
+      await changeInputAndNextTick("dateFrom", dateFrom);
       await nextTick(10);
       expect(router.currentRoute.value.query).toEqual({ dateFrom, dateTo });
     });
@@ -180,8 +180,8 @@ describe("SearchView.vue", () => {
     });
 
     it("displays error if date is in the future", async () => {
-      await changeInputAndNextTick("dateFrom", dateToISOString(tomorrow()));
       await changeInputAndNextTick("dateTo", dateToISOString(tomorrow()));
+      await changeInputAndNextTick("dateFrom", dateToISOString(tomorrow()));
       expect(wrapper.text()).toContain("Provided date is in the future.");
       expect(findElementById("dateFrom").classes()).toContain("error");
       expect(findElementById("dateTo").classes()).toContain("error");

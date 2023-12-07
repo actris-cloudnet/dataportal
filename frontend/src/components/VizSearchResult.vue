@@ -72,7 +72,7 @@ import FileTags from "./FileTags.vue";
 export interface Props {
   apiResponse: VisualizationResponse[];
   isBusy: boolean;
-  date: Date;
+  date: string;
   setWideMode: Function;
   noSelectionsMade: boolean;
 }
