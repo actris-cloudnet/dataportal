@@ -282,6 +282,13 @@ export class UploadRoutes {
       model: model ? query.model : undefined,
       updatedAtFrom: query.updatedAtFrom ? new Date(query.updatedAtFrom) : "1970-01-01T00:00:00.000Z",
       updatedAtTo: query.updatedAtTo ? new Date(query.updatedAtTo) : tomorrow(),
+      filename: query.filename,
+      filenamePrefix: query.filenamePrefix
+        ? `{${query.filenamePrefix.map((pre: string) => pre + "%").join(",")}}`
+        : undefined,
+      filenameSuffix: query.filenameSuffix
+        ? `{${query.filenameSuffix.map((suf: string) => "%" + suf).join(",")}}`
+        : undefined,
     };
 
     const fieldsToArray = ["site", "status", "instrument", "model", "instrumentPid"];
@@ -302,6 +309,10 @@ export class UploadRoutes {
     if (query.instrument) qb.andWhere("instrument.id IN (:...instrument)", augmentedQuery);
     if (query.instrumentPid) qb.andWhere("um.instrumentPid IN (:...instrumentPid)", augmentedQuery);
     if (query.model) qb.andWhere("model.id IN (:...model)", augmentedQuery);
+
+    if (query.filename) qb.andWhere("um.filename IN (:...filename)", augmentedQuery);
+    if (query.filenamePrefix) qb.andWhere("um.filename LIKE ANY(:filenamePrefix)", augmentedQuery);
+    if (query.filenameSuffix) qb.andWhere("um.filename LIKE ANY(:filenameSuffix)", augmentedQuery);
 
     if (!onlyDistinctInstruments) qb.addOrderBy("size", "DESC");
 
