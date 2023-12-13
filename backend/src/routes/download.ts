@@ -1,4 +1,4 @@
-import { Request, RequestHandler } from "express";
+import { Request, RequestHandler, Response, NextFunction } from "express";
 import { CountryResponse, Reader } from "maxmind";
 import { readFileSync } from "fs";
 
@@ -24,6 +24,7 @@ import { CollectionRoutes } from "./collection";
 import { UploadRoutes } from "./upload";
 import { CitationService } from "../lib/cite";
 import { citation2txt } from "./reference";
+import axios from "axios";
 
 enum ProductType {
   Observation = "observation",
@@ -197,6 +198,10 @@ export class DownloadRoutes {
         group = "GROUP BY country";
         order = "ORDER BY country";
         break;
+      case "yearMonth,visits":
+        return this.matomoStats(req, res, next, this.monthlyVisits.bind(this));
+      case "country,visits":
+        return this.matomoStats(req, res, next, this.visitsByCountry.bind(this));
       default:
         return next({ status: 400, errors: "invalid dimensions" });
     }
@@ -310,6 +315,79 @@ export class DownloadRoutes {
       return next({ status: 500, errors: e });
     }
   };
+
+  private matomoStats = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+    getData: (startDate?: string, endDate?: string) => Promise<any>,
+  ) => {
+    if (req.query.downloadDateFrom) {
+      if (typeof req.query.downloadDateFrom !== "string" || !isValidDate(req.query.downloadDateFrom)) {
+        return next({ status: 400, errors: "invalid downloadDateFrom" });
+      }
+    }
+    if (req.query.downloadDateTo) {
+      if (typeof req.query.downloadDateTo !== "string" || !isValidDate(req.query.downloadDateTo)) {
+        return next({ status: 400, errors: "invalid downloadDateTo" });
+      }
+    }
+    try {
+      res.send(await getData(req.query.downloadDateFrom, req.query.downloadDateTo));
+    } catch (e) {
+      return next({ status: 500, errors: e });
+    }
+  };
+
+  private async monthlyVisits(startDate?: string, endDate?: string) {
+    const data = await this.makeMatomoRequest(
+      { method: "API.get", columns: "nb_visits", period: "month" },
+      startDate,
+      endDate,
+    );
+    return Object.entries(data).map(([yearMonth, visits]) => ({ yearMonth, visits }));
+  }
+
+  private async visitsByCountry(startDate?: string, endDate?: string) {
+    const data = await this.makeMatomoRequest(
+      { method: "UserCountry.getCountry", period: "range" },
+      startDate,
+      endDate,
+    );
+    return data.map((item: any) => ({
+      country: item.code !== "xx" ? item.code.toUpperCase() : null,
+      visits: item.nb_visits,
+    }));
+  }
+
+  private async makeMatomoRequest(params: Record<string, string>, startDate?: string, endDate?: string): Promise<any> {
+    if (typeof env.MATOMO_HOST == "undefined") {
+      throw new Error("Matomo not configured");
+    }
+    const res = await axios.post(
+      env.MATOMO_HOST,
+      { token_auth: env.MATOMO_TOKEN },
+      {
+        params: {
+          ...params,
+          module: "API",
+          idSite: env.MATOMO_SITE_ID,
+          date: [
+            typeof startDate !== "undefined" ? startDate : env.MATOMO_START_DATE,
+            typeof endDate !== "undefined" ? endDate : "today",
+          ].join(","),
+          format: "json",
+        },
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      },
+    );
+    if (res.data.result === "error") {
+      throw new Error(`Error from Matomo: ${res.data.message}`);
+    }
+    return res.data;
+  }
 
   private makeFileRequest(file: File): Promise<IncomingMessage> {
     return this.makeRequest(getS3pathForFile(file), file.version);

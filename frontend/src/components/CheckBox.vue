@@ -72,6 +72,11 @@ input {
       opacity: 1;
     }
   }
+
+  &:disabled {
+    background: $gray3;
+    border-color: $gray3;
+  }
 }
 
 label {

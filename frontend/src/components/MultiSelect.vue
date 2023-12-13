@@ -13,6 +13,7 @@
       :multiple="multiple"
       :hideSelected="false"
       :internal-search="false"
+      :disabled="disabled"
       @search-change="searchChange"
     >
       <template #tag="slotProps">
@@ -68,6 +69,7 @@ const props = defineProps({
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     validator: (v: any) => typeof v === "string" || Array.isArray(v) || v === null,
   },
+  disabled: Boolean,
 });
 
 const emit = defineEmits<{
