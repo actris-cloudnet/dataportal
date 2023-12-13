@@ -1,6 +1,6 @@
 <template>
   <div>
-    <LandingHeader title="Download statistics" />
+    <LandingHeader title="Statistics" />
     <main class="pagewidth">
       <span v-if="loadingSites" class="placeholder">Loading...</span>
       <template v-else>
@@ -14,11 +14,20 @@
             { id: 'yearMonth,uniqueIps', humanReadableName: 'Monthly unique IPs' },
             { id: 'year,uniqueIps', humanReadableName: 'Yearly unique IPs' },
             { id: 'country,downloads', humanReadableName: 'Downloads by country' },
+            { id: 'yearMonth,visits', humanReadableName: 'Monthly visits' },
+            { id: 'country,visits', humanReadableName: 'Visits by country' },
           ]"
           style="width: 300px"
         />
         <div class="daterange field">
-          <MultiSelect id="site" label="Site" v-model="siteModel" :options="sites" style="width: 300px" />
+          <MultiSelect
+            id="site"
+            label="Site"
+            v-model="siteModel"
+            :options="sites"
+            style="width: 300px"
+            :disabled="visitStatistics"
+          />
           <span>or</span>
           <MultiSelect
             id="country"
@@ -26,15 +35,16 @@
             v-model="countryModel"
             :options="countries"
             style="width: 300px"
+            :disabled="visitStatistics"
           />
         </div>
-        <fieldset class="field">
+        <fieldset class="field" :disabled="visitStatistics">
           <legend class="label">Product type</legend>
           <CheckBox v-model="productTypes" value="observation" label="Observation" />
           <CheckBox v-model="productTypes" value="model" label="Model" style="margin-left: 0.5rem" />
         </fieldset>
         <fieldset class="field">
-          <legend class="label">Download date</legend>
+          <legend class="label">Date range</legend>
           <div class="daterange">
             <DatePicker v-model="dateFrom" :end="dateTo || undefined" name="dateFrom" />
             <span>–</span>
@@ -103,7 +113,7 @@ import MultiSelect, { type Option } from "@/components/MultiSelect.vue";
 import DatePicker from "@/components/DatePicker.vue";
 import LandingHeader from "@/components/LandingHeader.vue";
 
-type Dimension = "year" | "yearMonth" | "country" | "downloads" | "uniqueIps";
+type Dimension = "year" | "yearMonth" | "country" | "downloads" | "uniqueIps" | "visits";
 
 const statistics = ref([]);
 const dimensions = ref<Dimension[]>([]);
@@ -117,6 +127,7 @@ const dimensionLabel: Record<Dimension, string> = {
   country: "Country",
   downloads: "Downloads (in variable years)",
   uniqueIps: "Unique IPs",
+  visits: "Visits",
 };
 const numberFormat = (Intl && Intl.NumberFormat && new Intl.NumberFormat("en-GB")) || {
   format(number: number): string {
@@ -129,6 +140,7 @@ const sites = ref<Site[]>([]);
 const productTypes = ref(["observation", "model"]);
 const dateFrom = ref<Date | null>(null);
 const dateTo = ref<Date | null>(null);
+const visitStatistics = computed(() => selectedDimensions.value.includes("visit"));
 
 const currentCountry = ref<string | null>(null);
 const currentSite = ref<string | null>(null);

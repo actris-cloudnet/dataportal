@@ -68,6 +68,10 @@ interface Env {
   TYPEORM_MIGRATIONS_RUN: boolean;
   TYPEORM_LOGGING: boolean;
   TYPEORM_ENTITIES: string;
+  MATOMO_HOST?: string;
+  MATOMO_TOKEN?: string;
+  MATOMO_SITE_ID?: number;
+  MATOMO_START_DATE?: string;
 }
 
 const env: Env = {
@@ -83,6 +87,10 @@ const env: Env = {
   TYPEORM_SYNCHRONIZE: readBoolean(rawEnv.TYPEORM_SYNCHRONIZE),
   TYPEORM_MIGRATIONS_RUN: readBoolean(rawEnv.TYPEORM_MIGRATIONS_RUN),
   TYPEORM_LOGGING: readBoolean(rawEnv.TYPEORM_LOGGING),
+  MATOMO_HOST: typeof rawEnv.MATOMO_HOST !== "undefined" ? readUrl(rawEnv.MATOMO_HOST) : undefined,
+  MATOMO_SITE_ID: typeof rawEnv.MATOMO_SITE_ID !== "undefined" ? readInteger(rawEnv.MATOMO_SITE_ID) : undefined,
+  MATOMO_START_DATE:
+    typeof rawEnv.MATOMO_START_DATE !== "undefined" ? readIsoDate(rawEnv.MATOMO_START_DATE) : undefined,
 };
 
 export default env;
@@ -112,4 +120,11 @@ function readUrl(input: string): string {
     throw new Error(`Invalid URL: ${input}`);
   }
   return input.replace(/\/$/, "");
+}
+
+function readIsoDate(input: string): string {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(input) || isNaN(new Date(input).valueOf())) {
+    throw new Error(`Invalid URL: ${input}`);
+  }
+  return input;
 }

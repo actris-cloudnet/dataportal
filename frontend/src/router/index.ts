@@ -101,9 +101,9 @@ const routes = [
   },
   {
     path: "/stats",
-    name: "Download statistics",
+    name: "Statistics",
     meta: {
-      title: "Download statistics",
+      title: "Statistics",
     },
     component: () => import("@/views/StatsView.vue"),
     props: true,
