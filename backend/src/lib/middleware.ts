@@ -65,6 +65,8 @@ export class Middleware {
       "allModels",
       "date",
       "filename",
+      "filenamePrefix",
+      "filenameSuffix",
       "properties",
       "updatedAtFrom",
       "updatedAtTo",
@@ -94,6 +96,9 @@ export class Middleware {
       "limit",
       "date",
       "dvasUpdated",
+      "filename",
+      "filenamePrefix",
+      "filenameSuffix",
     ];
     keys.forEach((key) => {
       const keyError = this.checkField(key, req.query);
@@ -142,6 +147,8 @@ export class Middleware {
     query.model = toArray(query.model);
     query.volatile = toArray(query.volatile);
     query.filename = toArray(query.filename);
+    query.filenamePrefix = toArray(query.filenamePrefix);
+    query.filenameSuffix = toArray(query.filenameSuffix);
     query.instrument = toArray(query.instrument);
     query.instrumentPid = toArray(query.instrumentPid);
     query.legacy = setLegacy();
@@ -238,6 +245,18 @@ export class Middleware {
         if (key in query && !(query[key].toLowerCase() == "true" || query[key].toLowerCase() == "false")) {
           return `Malformed value in property "${key}"`;
         }
+        break;
+      case "filename":
+      case "filenamePrefix":
+      case "filenameSuffix":
+        if (
+          key in query &&
+          Array.isArray(query[key]) &&
+          !query[key].every((item: any) => typeof item === "string" && item.trim() !== "")
+        ) {
+          return `Malformed ${key}`;
+        }
+        break;
     }
   };
 

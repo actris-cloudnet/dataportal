@@ -1,6 +1,6 @@
 import { Site } from "../entity/Site";
 import { InstrumentUpload, ModelUpload, Status, Upload } from "../entity/Upload";
-import { DataSource, EntityTarget, FindOptionsWhere, Repository } from "typeorm";
+import { DataSource, EntityTarget, FindOptionsWhere, Repository, Brackets, SelectQueryBuilder } from "typeorm";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import {
   ArrayEqual,
@@ -282,6 +282,7 @@ export class UploadRoutes {
       model: model ? query.model : undefined,
       updatedAtFrom: query.updatedAtFrom ? new Date(query.updatedAtFrom) : "1970-01-01T00:00:00.000Z",
       updatedAtTo: query.updatedAtTo ? new Date(query.updatedAtTo) : tomorrow(),
+      filename: query.filename,
     };
 
     const fieldsToArray = ["site", "status", "instrument", "model", "instrumentPid"];
@@ -302,6 +303,11 @@ export class UploadRoutes {
     if (query.instrument) qb.andWhere("instrument.id IN (:...instrument)", augmentedQuery);
     if (query.instrumentPid) qb.andWhere("um.instrumentPid IN (:...instrumentPid)", augmentedQuery);
     if (query.model) qb.andWhere("model.id IN (:...model)", augmentedQuery);
+
+    if (query.filename) qb.andWhere("um.filename IN (:...filename)", augmentedQuery);
+
+    if (query.filenamePrefix) addFilenameAffixClause(query.filenamePrefix, qb, "prefix");
+    if (query.filenameSuffix) addFilenameAffixClause(query.filenameSuffix, qb, "suffix");
 
     if (!onlyDistinctInstruments) qb.addOrderBy("size", "DESC");
 
@@ -441,4 +447,21 @@ export class UploadRoutes {
   findRepoForUpload(upload: InstrumentUpload | ModelUpload) {
     return "instrument" in upload ? this.instrumentUploadRepo : this.modelUploadRepo;
   }
+}
+
+function addFilenameAffixClause(affixList: string[], qb: SelectQueryBuilder<any>, affixType: "prefix" | "suffix") {
+  qb.andWhere(
+    new Brackets((qb_or) => {
+      affixList.forEach((raw: string, index: number) => {
+        const affix = escapeLikeString(raw);
+        const parameterName = `filenameAffixParameter${affixType}${index}`;
+        const pattern = affixType === "prefix" ? `${affix}%` : `%${affix}`;
+        qb_or.orWhere(`um.filename LIKE :${parameterName}`, { [parameterName]: pattern });
+      });
+    }),
+  );
+}
+
+function escapeLikeString(raw: string): string {
+  return raw.replace(/[\\%_]/g, "\\$&");
 }

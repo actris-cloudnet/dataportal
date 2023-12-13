@@ -92,6 +92,71 @@ describe("GET /api/raw-files", () => {
     });
     expect(res.data[0]).not.toHaveProperty("s3path");
   });
+  it("responds with correct stare record", async () => {
+    const res = await axios.get(`${rawFilesUrl}`, {
+      params: { filename: "Stare_213_20221205_04.hpl", developer: true },
+    });
+    expect(res.data).toHaveLength(1);
+    expect(res).toMatchObject({
+      status: 200,
+      data: [{ filename: "Stare_213_20221205_04.hpl" }],
+    });
+  });
+  it("responds with correct stare record", async () => {
+    const res = await axios.get(`${rawFilesUrl}`, {
+      params: { filenameSuffix: ".hpl", developer: true },
+    });
+    expect(res.data).toHaveLength(1);
+    expect(res).toMatchObject({
+      status: 200,
+      data: [{ filename: "Stare_213_20221205_04.hpl" }],
+    });
+  });
+  it("responds with correct stare and mira record", async () => {
+    const res = await axios.get(`${rawFilesUrl}`, {
+      params: { filenamePrefix: ["Stare", "file1"], developer: true },
+    });
+    expect(res.data).toHaveLength(2);
+    expect(res.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ filename: "Stare_213_20221205_04.hpl" }),
+        expect.objectContaining({ filename: "file1-dc460da4ad72c48223.LV1" }),
+      ]),
+    );
+  });
+  it("responds with correct stare record", async () => {
+    const res = await axios.get(`${rawFilesUrl}`, {
+      params: { filenamePrefix: ["Stare", "file1"], filenameSuffix: "hpl", developer: true },
+    });
+    expect(res.data).toHaveLength(1);
+    expect(res).toMatchObject({
+      status: 200,
+      data: [{ filename: "Stare_213_20221205_04.hpl" }],
+    });
+  });
+  it("responds with 400 if prefix empty", async () => {
+    expect(
+      axios.get(`${rawFilesUrl}`, {
+        params: { filenamePrefix: "", developer: true },
+      }),
+    ).rejects.toMatchObject({ response: { status: 400 } });
+  });
+  it("responds with 400 if prefixes empty", async () => {
+    expect(
+      axios.get(`${rawFilesUrl}`, {
+        params: { filenamePrefix: ["", ""], developer: true },
+      }),
+    ).rejects.toMatchObject({ response: { status: 400 } });
+  });
+  it("responds with empty array if non existing filename", async () => {
+    const res = await axios.get(`${rawFilesUrl}`, {
+      params: { filename: "i-dont-exist.LV0", developer: true },
+    });
+    expect(res.data).toHaveLength(0);
+    expect(res).toMatchObject({
+      status: 200,
+    });
+  });
 });
 
 describe("GET /api/raw-model-files", () => {
