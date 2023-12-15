@@ -1,16 +1,19 @@
 <script setup lang="ts">
-import headerLogo from "@/assets/header-logo.svg";
+import defaultLogo from "@/assets/header-logo.svg";
+import xmasLogo from "@/assets/header-logo-xmas.svg";
 import { ref } from "vue";
 
 const isDev = import.meta.env.DEV;
+const isXmas = !isDev && new Date().getMonth() === 11;
+const logo = isXmas ? xmasLogo : defaultLogo;
 const showMenu = ref(false);
 </script>
 
 <template>
-  <header :class="{ dev: isDev }">
+  <header :class="{ dev: isDev, xmas: isXmas }">
     <div class="container pagewidth">
       <a href="/" class="logo">
-        <img :src="headerLogo" alt="Cloudnet data portal" />
+        <img :src="logo" alt="Cloudnet data portal" />
       </a>
       <div :class="{ 'menu-toggle': true, 'active': showMenu }" @click="showMenu = !showMenu">
         <div class="bar1"></div>
@@ -75,6 +78,13 @@ header {
       repeating-linear-gradient(-45deg, #ff6dbc55, #ff6dbc55 15px, #ff529855 15px, #ff529855 30px),
       linear-gradient(to left, rgba($header-color, 0.5), $header-color 70%), url("@/assets/clouds3.jpg");
   }
+
+  &.xmas::before {
+    background-image: linear-gradient(to bottom, transparent 75%, rgba(0, 0, 0, 0.05)), url("@/assets/snow.png"),
+      linear-gradient(to left, rgba($header-color, 0.5), $header-color 70%), url("@/assets/clouds3.jpg");
+    background-size: auto, auto, auto, cover;
+    background-repeat: no-repeat, repeat, no-repeat, no-repeat;
+  }
 }
 
 .container {
@@ -95,6 +105,11 @@ img {
   img {
     height: 2.5rem;
     filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.05));
+
+    header.xmas & {
+      transform: scale(1.8);
+      padding: 0 2rem;
+    }
   }
 }
 
