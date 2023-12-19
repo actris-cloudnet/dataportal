@@ -173,6 +173,7 @@ async function createServer(): Promise<void> {
   app.get("/api/sites/:siteId/locations", siteRoutes.locations);
   app.get("/api/sites/:siteId/locations/:date", siteRoutes.location);
   app.get("/api/sites/:siteId/product-availability", siteRoutes.productAvailability);
+  app.post("/api/feedback", express.json(), feedbackRoutes.postFeedback);
 
   // TODO: Depreciated. Needed for now, but in the future these should public
   // and properly documented.
@@ -231,7 +232,6 @@ async function createServer(): Promise<void> {
   app.post("/credentials/:token", userActivationRoutes.post);
 
   // private
-  app.post("/api/slack", express.json(), feedbackRoutes.postFeedback);
   app.put("/files/*", express.json(), fileRoutes.putFile);
   app.post("/files/", express.json(), fileRoutes.postFile);
   app.post("/upload-metadata", express.json(), uploadRoutes.updateMetadata);

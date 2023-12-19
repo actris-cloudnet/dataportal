@@ -5,13 +5,13 @@
       <form @submit.prevent="sendFeedback">
         <span> Let us know your thoughts to enhance our services. </span>
         <label id="name-label" for="name"><strong>Name</strong> (optional)</label>
-        <input type="text" id="name" name="name" v-model="name" />
-        <label for="email"><strong>Email</strong> (optional)</label>
-        <input type="email" id="email" name="email" v-model="email" />
-        <label for="message"><strong>Message</strong></label>
-        <textarea name="message" required v-model="message"></textarea>
+        <input id="name" type="text" name="name" v-model="name" />
+        <label id="email-label" for="email"><strong>Email</strong> (optional)</label>
+        <input id="email" type="email" name="email" v-model="email" />
+        <label id="message-label" for="message"><strong>Message</strong></label>
+        <textarea id="message" name="message" required v-model="message"></textarea>
         <BaseButton type="primary" :disabled="!isActive">Submit</BaseButton>
-        <BaseAlert type="note" v-if="!isActive"> {{ msg }} </BaseAlert>
+        <BaseAlert :type="isError ? 'error' : 'note'" v-if="!isActive">{{ msg }}</BaseAlert>
       </form>
     </main>
   </div>
@@ -19,7 +19,7 @@
 
 <script lang="ts" setup>
 import LandingHeader from "@/components/LandingHeader.vue";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import axios from "axios";
 import { backendUrl } from "@/lib";
 import BaseAlert from "@/components/BaseAlert.vue";
@@ -28,8 +28,8 @@ import BaseButton from "@/components/BaseButton.vue";
 const name = ref("");
 const email = ref("");
 const message = ref("");
-const msg = "Thank you for your feedback!";
 let isActive = ref(true);
+let isError = ref(false);
 
 async function sendFeedback() {
   const feedback = {
@@ -39,18 +39,28 @@ async function sendFeedback() {
   };
 
   try {
+    isActive.value = false;
+    await axios.post(`${backendUrl}feedback`, feedback);
     name.value = "";
     email.value = "";
     message.value = "";
-    isActive.value = false;
-    axios.post(`${backendUrl}slack`, feedback);
-    await timeout(1750);
   } catch (error) {
-    console.error(error);
+    console.error("Feedback submission error:", error);
+    isError.value = true;
   } finally {
+    await timeout(1750);
     isActive.value = true;
+    isError.value = false;
   }
 }
+
+const msg = computed(() => {
+  if (isError.value) {
+    return "Something went wrong. Please try again later.";
+  } else {
+    return "Thank you for your feedback!";
+  }
+});
 
 function timeout(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
