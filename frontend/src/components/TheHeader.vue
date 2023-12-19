@@ -32,6 +32,11 @@ const showMenu = ref(false);
           </a>
         </li>
         <li style="margin-left: auto">
+          <a href="/feedback">
+            <span>Feedback</span>
+          </a>
+        </li>
+        <li>
           <a href="/sites">
             <span>Measurement sites</span>
           </a>

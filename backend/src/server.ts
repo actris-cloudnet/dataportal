@@ -21,6 +21,7 @@ import { Authenticator, Authorizator } from "./lib/auth";
 import { PermissionType } from "./entity/Permission";
 import { UserActivationRoutes } from "./routes/userActivation";
 import { ReferenceRoutes } from "./routes/reference";
+import { FeedbackRoutes } from "./routes/feedback";
 import * as http from "http";
 import { AppDataSource } from "./data-source";
 
@@ -48,11 +49,10 @@ async function createServer(): Promise<void> {
   const qualityRoutes = new QualityReportRoutes(AppDataSource, fileRoutes);
   const publicationRoutes = new PublicationRoutes(AppDataSource);
   const userActivationRoutes = new UserActivationRoutes(AppDataSource);
-
   const siteContactRoutes = new SiteContactRoutes(AppDataSource);
   const userAccountRoutes = new UserAccountRoutes(AppDataSource);
-
   const referenceRoutes = new ReferenceRoutes(AppDataSource);
+  const feedbackRoutes = new FeedbackRoutes(AppDataSource);
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     console.error(
@@ -173,6 +173,7 @@ async function createServer(): Promise<void> {
   app.get("/api/sites/:siteId/locations", siteRoutes.locations);
   app.get("/api/sites/:siteId/locations/:date", siteRoutes.location);
   app.get("/api/sites/:siteId/product-availability", siteRoutes.productAvailability);
+  app.post("/api/feedback", express.json(), feedbackRoutes.postFeedback);
 
   // TODO: Depreciated. Needed for now, but in the future these should public
   // and properly documented.

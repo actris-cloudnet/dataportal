@@ -72,6 +72,8 @@ interface Env {
   MATOMO_TOKEN?: string;
   MATOMO_SITE_ID?: number;
   MATOMO_START_DATE?: string;
+  SLACK_API_TOKEN?: string;
+  SLACK_NOTIFICATION_CHANNEL?: string;
 }
 
 const env: Env = {

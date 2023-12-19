@@ -2,9 +2,9 @@
   <footer>
     <div class="container pagewidth">
       <div class="item">
-        Contact:<br />
         <a href="mailto:actris-cloudnet@fmi.fi">actris-cloudnet@fmi.fi</a><br />
-        <a href="https://github.com/actris-cloudnet/">GitHub organization</a>
+        <a href="https://github.com/actris-cloudnet/">GitHub organization</a><br />
+        <a href="/feedback">Feedback</a>
       </div>
       <div class="item hidden-links">
         <span>&copy; <a href="https://en.ilmatieteenlaitos.fi/">Finnish Meteorological Institute</a></span>
