@@ -109,6 +109,15 @@ const routes = [
     props: true,
   },
   {
+    path: "/feedback",
+    name: "Feedback",
+    meta: {
+      title: "Feedback",
+    },
+    component: () => import("@/views/FeedbackFormView.vue"),
+    props: true,
+  },
+  {
     path: "/publications",
     name: "Cloudnet Publications",
     meta: {
