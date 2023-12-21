@@ -148,7 +148,6 @@ export class SiteRoutes {
           'file."productId" as "productId"',
           'file."errorLevel" AS "errorLevel"',
           "file.legacy AS legacy",
-          "product.experimental AS experimental",
         ])
         .distinctOn(['file."measurementDate"', "file.productId", "file.errorLevel"])
         .leftJoin("file.product", "product")

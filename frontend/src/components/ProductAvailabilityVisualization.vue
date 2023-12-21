@@ -83,9 +83,7 @@ const allLevels = computed(() => Array.from(new Set(Object.values(props.dataStat
 
 function filterProductsByLvl(lvl: string) {
   if (!props.dataStatus.allProducts) return null;
-  return props.dataStatus.allProducts
-    .filter(({ id }) => props.dataStatus.lvlTranslate[id] == lvl && id != "model")
-    .filter(({ experimental }) => !experimental);
+  return props.dataStatus.allProducts.filter(({ id }) => props.dataStatus.lvlTranslate[id] == lvl && id != "model");
 }
 
 function createColorClass(products: ProductLevels): ColorClass {
