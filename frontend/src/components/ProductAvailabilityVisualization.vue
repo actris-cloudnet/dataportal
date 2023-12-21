@@ -17,7 +17,7 @@
           <ul v-for="lvl in allLevels" :key="lvl">
             <li class="header">Level {{ lvl }}</li>
             <li
-              v-for="product in filterProductsByLvl(lvl)"
+              v-for="product in filterProductsByLvl(props, lvl)"
               :key="product.id"
               class="productitem"
               :class="{
@@ -58,15 +58,11 @@ import {
   getReportExists,
   missingData,
   onlyLegacy,
+  filterProductsByLvl,
+  type Props,
 } from "@/lib/ProductAvailabilityTools";
 import { useRouter } from "vue-router";
 import DateVisualization from "./DateVisualization.vue";
-import type { DataStatus } from "@/lib/DataStatusParser";
-
-export interface Props {
-  siteId: string;
-  dataStatus: DataStatus;
-}
 
 const props = defineProps<Props>();
 const router = useRouter();
@@ -80,11 +76,6 @@ const dates = computed(() =>
 );
 
 const allLevels = computed(() => Array.from(new Set(Object.values(props.dataStatus.lvlTranslate))).sort());
-
-function filterProductsByLvl(lvl: string) {
-  if (!props.dataStatus.allProducts) return null;
-  return props.dataStatus.allProducts.filter(({ id }) => props.dataStatus.lvlTranslate[id] == lvl && id != "model");
-}
 
 function createColorClass(products: ProductLevels): ColorClass {
   if (noData(products)) return "no-data";

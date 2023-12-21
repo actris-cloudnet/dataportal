@@ -6,6 +6,7 @@ export interface ProductInfo {
   id: string;
   legacy: boolean;
   uuid: string;
+  experimental: boolean;
   errorLevel?: string | null;
 }
 
@@ -39,7 +40,7 @@ function createProductLevels(lvlTranslate: LvlTranslate, productInfo?: ProductIn
     };
   }
   if (productInfo) {
-    const { id, legacy, errorLevel, uuid } = productInfo;
+    const { id, legacy, errorLevel, uuid, experimental } = productInfo;
     const lvl = lvlTranslate[id];
     if (!lvl) return existingObj;
     existingObj[lvl].push({
@@ -47,6 +48,7 @@ function createProductLevels(lvlTranslate: LvlTranslate, productInfo?: ProductIn
       legacy,
       errorLevel,
       uuid,
+      experimental,
     });
   }
   return existingObj;
@@ -58,16 +60,19 @@ interface ProductAvailability {
   productId: string;
   errorLevel: string;
   legacy: boolean;
+  experimental: boolean;
 }
 
 export async function parseDataStatus(siteId: string): Promise<DataStatus> {
   const [searchRes, prodRes] = await Promise.all([
-    axios.get<ProductAvailability[]>(`${backendUrl}sites/${siteId}/product-availability/`),
+    axios.get<ProductAvailability[]>(`${backendUrl}sites/${siteId}/product-availability/`, {
+      params: { includeExperimental: true },
+    }),
     axios.get<Product[]>(`${backendUrl}products/`),
   ]);
   const searchResponse = searchRes.data;
   const l2ProductCount = prodRes.data.filter((product) => product.level === "2" && !product.experimental).length;
-  const allProducts = prodRes.data.filter((prod) => !prod.experimental);
+  const allProducts = prodRes.data.filter((prod) => prod.level !== "3");
   if (!searchResponse || !allProducts || searchResponse.length == 0) {
     return { allProducts, dates: [], lvlTranslate: {}, availableProducts: [], l2ProductCount: 0 };
   }
@@ -89,6 +94,7 @@ export async function parseDataStatus(siteId: string): Promise<DataStatus> {
         id: cur.productId,
         legacy: cur.legacy,
         uuid: cur.uuid,
+        experimental: cur.experimental,
         errorLevel: "errorLevel" in cur ? cur.errorLevel : undefined,
       };
       if (!obj[cur.measurementDate]) {
