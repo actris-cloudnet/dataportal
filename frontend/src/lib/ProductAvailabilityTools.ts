@@ -39,9 +39,9 @@ export function onlyLegacyLevel2(products: ProductLevels) {
 
 export function onlyModel(products: ProductLevels) {
   return (
-    products["2"].length == 0 &&
-    products["1c"].length == 0 &&
-    products["1b"].length == 1 &&
+    products["2"].filter(isNotExperimental).length == 0 &&
+    products["1c"].filter(isNotExperimental).length == 0 &&
+    products["1b"].filter(isNotExperimental).length == 1 &&
     products["1b"][0].id == "model"
   );
 }
@@ -84,15 +84,15 @@ export function getReportExists(existingProducts: ProductInfo[], productId: Prod
 }
 
 export function hasSomeLevel2Tests(products: ProductLevels) {
-  return products["2"].filter(qualityExists).length > 0;
+  return products["2"].filter((x) => isNotExperimental(x) && qualityExists(x)).length > 0;
 }
 
 export function level2ContainsErrors(products: ProductLevels) {
-  return products["2"].filter(isError).length > 0;
+  return products["2"].filter((x) => isNotExperimental(x) && isError(x)).length > 0;
 }
 
 export function level2containsWarningsOrInfo(products: ProductLevels) {
-  return products["2"].filter((x) => isWarning(x) || isInfo(x)).length > 0;
+  return products["2"].filter((x) => isNotExperimental(x) && (isWarning(x) || isInfo(x))).length > 0;
 }
 
 export function allLevel2Pass(products: ProductLevels, l2ProductCount: number): boolean {
