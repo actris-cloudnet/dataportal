@@ -2,6 +2,8 @@ import type { ProductLevels, ProductInfo } from "@/lib/DataStatusParser";
 
 export const isLegacy = (prod: ProductInfo): boolean => prod.legacy;
 
+export const isExperimental = (prod: ProductInfo): boolean => prod.experimental;
+
 export const isError = (prod: ProductInfo): boolean => prod?.errorLevel === "error";
 
 export const isWarning = (prod: ProductInfo): boolean => prod?.errorLevel === "warning";
@@ -21,6 +23,10 @@ export function isLegacyOrModel(prod: ProductInfo): boolean {
 
 export function isNotLegacy(prod: ProductInfo): boolean {
   return !isLegacy(prod);
+}
+
+export function isNotExperimental(prod: ProductInfo): boolean {
+  return !isExperimental(prod);
 }
 
 export function onlyLegacy(products: ProductLevels) {
@@ -90,17 +96,17 @@ export function level2containsWarningsOrInfo(products: ProductLevels) {
 }
 
 export function allLevel2Pass(products: ProductLevels, l2ProductCount: number): boolean {
-  return products["2"].filter(isPass).length == l2ProductCount;
+  return products["2"].filter(isNotExperimental).filter(isPass).length == l2ProductCount;
 }
 
 export function allLvl2(products: ProductLevels, l2ProductCount: number): boolean {
-  return products["2"].filter(isNotLegacy).length == l2ProductCount;
+  return products["2"].filter(isNotLegacy).filter(isNotExperimental).length == l2ProductCount;
 }
 
 export function missingData(products: ProductLevels) {
   return (
-    products["2"].filter(isNotLegacy).length ||
-    products["1c"].filter(isNotLegacy).length ||
-    products["1b"].filter(isNotLegacy).length
+    products["2"].filter(isNotLegacy).filter(isNotExperimental).length ||
+    products["1c"].filter(isNotLegacy).filter(isNotExperimental).length ||
+    products["1b"].filter(isNotLegacy).filter(isNotExperimental).length
   );
 }
