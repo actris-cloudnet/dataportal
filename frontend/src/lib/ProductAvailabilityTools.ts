@@ -38,11 +38,12 @@ export function onlyLegacyLevel2(products: ProductLevels) {
 }
 
 export function onlyModel(products: ProductLevels) {
+  const level1bWithoutExperimental = products["1b"].filter(isNotExperimental);
   return (
     products["2"].filter(isNotExperimental).length == 0 &&
     products["1c"].filter(isNotExperimental).length == 0 &&
-    products["1b"].filter(isNotExperimental).length == 1 &&
-    products["1b"][0].id == "model"
+    level1bWithoutExperimental.length == 1 &&
+    level1bWithoutExperimental[0].id == "model"
   );
 }
 
