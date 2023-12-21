@@ -395,7 +395,7 @@ async function fetchLatestLevel1Product() {
 
 #siteselect {
   padding-top: 25px;
-  width: 250px;
+  width: 260px;
 }
 
 #reset {
@@ -409,9 +409,5 @@ async function fetchLatestLevel1Product() {
 
 #instruments {
   max-width: 650px;
-}
-
-#singleProductSelect {
-  width: 1500px;
 }
 </style>
