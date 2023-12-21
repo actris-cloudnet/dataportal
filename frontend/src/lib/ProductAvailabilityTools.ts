@@ -96,17 +96,30 @@ export function level2containsWarningsOrInfo(products: ProductLevels) {
 }
 
 export function allLevel2Pass(products: ProductLevels, l2ProductCount: number): boolean {
-  return products["2"].filter(isNotExperimental).filter(isPass).length == l2ProductCount;
+  return products["2"].filter((x) => isNotExperimental(x) && isPass(x)).length == l2ProductCount;
 }
 
 export function allLvl2(products: ProductLevels, l2ProductCount: number): boolean {
-  return products["2"].filter(isNotLegacy).filter(isNotExperimental).length == l2ProductCount;
+  return products["2"].filter((x) => isNotLegacy(x) && isNotExperimental(x)).length == l2ProductCount;
 }
 
 export function missingData(products: ProductLevels) {
   return (
-    products["2"].filter(isNotLegacy).filter(isNotExperimental).length ||
-    products["1c"].filter(isNotLegacy).filter(isNotExperimental).length ||
-    products["1b"].filter(isNotLegacy).filter(isNotExperimental).length
+    products["2"].filter((x) => isNotLegacy(x) && isNotExperimental(x)).length ||
+    products["1c"].filter((x) => isNotLegacy(x) && isNotExperimental(x)).length ||
+    products["1b"].filter((x) => isNotLegacy(x) && isNotExperimental(x)).length
   );
+}
+
+export interface Props {
+  siteId: string;
+  dataStatus: DataStatus;
+}
+import type { DataStatus } from "@/lib/DataStatusParser";
+
+export function filterProductsByLvl(props: Props, lvl: string) {
+  if (!props.dataStatus.allProducts) return null;
+  return props.dataStatus.allProducts
+    .filter(({ id }) => props.dataStatus.lvlTranslate[id] == lvl && id != "model")
+    .filter(({ experimental }) => !experimental);
 }
