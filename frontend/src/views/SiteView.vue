@@ -410,4 +410,8 @@ async function fetchLatestLevel1Product() {
 #instruments {
   max-width: 650px;
 }
+
+#singleProductSelect {
+  width: 1500px;
+}
 </style>
