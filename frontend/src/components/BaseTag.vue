@@ -34,7 +34,7 @@ withDefaults(defineProps<Props>(), { size: "normal" });
 }
 
 .experimental {
-  background-color: #ec9706;
+  background-color: $experimental;
 }
 
 .actris {

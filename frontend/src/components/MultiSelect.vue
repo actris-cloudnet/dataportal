@@ -19,6 +19,7 @@
       <template #tag="slotProps">
         <span class="multiselect__tag">
           <img v-if="getIcon" class="option__image" :src="getIcon(slotProps.option)" alt="" />
+          <span v-if="slotProps.option.experimental" class="option__circle"></span>
           {{ slotProps.option.shortName || slotProps.option.humanReadableName }}
           <i class="multiselect__tag-icon" @click="slotProps.remove(slotProps.option)"></i>
         </span>
@@ -26,11 +27,13 @@
       <template #option="slotProps">
         <span>
           <img v-if="getIcon" class="option__image" :src="getIcon(slotProps.option)" alt="" />
+          <span v-if="slotProps.option.experimental" class="option__circle"></span>
           {{ slotProps.option.shortName || slotProps.option.humanReadableName }}
         </span>
       </template>
       <template #singleLabel="slotProps">
         <img v-if="getIcon" class="option__image" :src="getIcon(slotProps.option)" alt="" />
+        <span v-if="slotProps.option.experimental" class="option__circle"></span>
         {{ slotProps.option.shortName || slotProps.option.humanReadableName }}
       </template>
       <template #noResult>
@@ -193,5 +196,17 @@ const filteredOptions = computed(() => [
   top: -1px;
   margin-right: 0.4em;
   vertical-align: middle;
+}
+
+.option__circle {
+  display: inline-block;
+  width: 0.4em;
+  height: 0.4em;
+  border-radius: 50%;
+  border: 0.25em solid $experimental;
+  margin-left: -0.8em;
+  vertical-align: bottom;
+  box-sizing: border-box;
+  position: relative;
 }
 </style>

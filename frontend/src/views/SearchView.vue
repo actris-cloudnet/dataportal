@@ -947,7 +947,7 @@ span.centerlabel {
   }
 
   &.experimental {
-    background-color: #ec9706;
+    background-color: $experimental;
   }
 }
 
