@@ -569,7 +569,7 @@ watch(
 
 watch(
   () => props.mode,
-  async () => {
+  async (nextMode) => {
     renderComplete.value = false;
     apiResponse.value = resetResponse();
     dateFromUpdate.value = dateFromUpdate.value + 1;
@@ -578,7 +578,10 @@ watch(
     dataSearchUpdate.value = dataSearchUpdate.value + 1;
     vizSearchUpdate.value = vizSearchUpdate.value + 1;
     mapKey.value = mapKey.value + 1;
-    await fetchData();
+    if (nextMode == "visualizations") {
+      dateFrom.value = dateTo.value;
+      showDateRange.value = false;
+    }
     renderComplete.value = true;
   },
 );
