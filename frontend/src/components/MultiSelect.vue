@@ -17,9 +17,8 @@
       @search-change="searchChange"
     >
       <template #tag="slotProps">
-        <span class="multiselect__tag">
+        <span class="multiselect__tag" :class="{ 'experimental-background': slotProps.option.experimental }">
           <img v-if="getIcon" class="option__image" :src="getIcon(slotProps.option)" alt="" />
-          <span v-if="slotProps.option.experimental" class="option__circle"></span>
           {{ slotProps.option.shortName || slotProps.option.humanReadableName }}
           <i class="multiselect__tag-icon" @click="slotProps.remove(slotProps.option)"></i>
         </span>
@@ -27,14 +26,14 @@
       <template #option="slotProps">
         <span>
           <img v-if="getIcon" class="option__image" :src="getIcon(slotProps.option)" alt="" />
-          <span v-if="slotProps.option.experimental" class="option__circle"></span>
           {{ slotProps.option.shortName || slotProps.option.humanReadableName }}
+          <span v-if="slotProps.option.experimental" class="option__tag">EXP</span>
         </span>
       </template>
       <template #singleLabel="slotProps">
         <img v-if="getIcon" class="option__image" :src="getIcon(slotProps.option)" alt="" />
-        <span v-if="slotProps.option.experimental" class="option__circle"></span>
         {{ slotProps.option.shortName || slotProps.option.humanReadableName }}
+        <span v-if="slotProps.option.experimental" class="option__tag">EXP</span>
       </template>
       <template #noResult>
         <span id="noRes">Not found</span>
@@ -181,6 +180,13 @@ const filteredOptions = computed(() => [
       img {
         opacity: 0.5;
       }
+
+      .option__tag {
+        font-size: 75%;
+        font-weight: bold;
+        color: white;
+        background-color: rgba(236, 151, 6, 0.3) !important;
+      }
     }
   }
 }
@@ -196,6 +202,22 @@ const filteredOptions = computed(() => [
   top: -1px;
   margin-right: 0.4em;
   vertical-align: middle;
+}
+
+.option__tag {
+  border-radius: 15%;
+  background-color: $experimental !important;
+  margin-left: 0.4em;
+  padding: 0.2em 0.4em;
+  text-align: center;
+  line-height: normal;
+  font-size: 75%;
+  font-weight: bold;
+  color: white;
+}
+
+.experimental-background {
+  background-color: rgba(236, 151, 6, 0.3) !important;
 }
 
 .option__circle {
