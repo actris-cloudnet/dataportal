@@ -1,6 +1,6 @@
 {
   "name": "dataportal-frontend",
-  "version": "2.86.1",
+  "version": "2.86.2",
   "private": true,
   "scripts": {
     "dev": "vite --host --port 8080",
