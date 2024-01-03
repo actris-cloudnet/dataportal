@@ -205,12 +205,10 @@ const filteredOptions = computed(() => [
 }
 
 .option__tag {
-  border-radius: 15%;
+  border-radius: 4px;
   background-color: $experimental;
   margin-left: 0.4em;
   padding: 0.2em 0.4em;
-  text-align: center;
-  line-height: normal;
   font-size: 75%;
   font-weight: bold;
   color: white;
