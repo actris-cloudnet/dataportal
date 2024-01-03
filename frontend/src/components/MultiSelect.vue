@@ -185,7 +185,7 @@ const filteredOptions = computed(() => [
         font-size: 75%;
         font-weight: bold;
         color: white;
-        background-color: rgba(236, 151, 6, 0.3);
+        background-color: rgba($experimental, 0.3);
       }
     }
   }
@@ -218,18 +218,6 @@ const filteredOptions = computed(() => [
 
 .multiselect__tag.experimental-background,
 .multiselect__tag.experimental-background i:hover {
-  background-color: rgba(236, 151, 6, 0.3);
-}
-
-.option__circle {
-  display: inline-block;
-  width: 0.4em;
-  height: 0.4em;
-  border-radius: 50%;
-  border: 0.25em solid $experimental;
-  margin-left: -0.8em;
-  vertical-align: bottom;
-  box-sizing: border-box;
-  position: relative;
+  background-color: rgba($experimental, 0.3);
 }
 </style>
