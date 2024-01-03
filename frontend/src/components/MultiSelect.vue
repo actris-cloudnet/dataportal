@@ -44,9 +44,10 @@
 
 <script lang="ts" setup>
 import VueMultiselect from "vue-multiselect";
-import { notEmpty } from "@/lib";
+import { compareValues, notEmpty } from "@/lib";
 import { computed, ref, watch } from "vue";
 import type { PropType } from "vue";
+import { setOptions } from "leaflet";
 
 export interface Option {
   id: string;
@@ -110,26 +111,42 @@ const internalModel = computed({
   },
 });
 
-const optionIndex = computed<[string, Option][]>(() =>
+const optionIndex = computed<{ term: string; option: Option }[]>(() =>
   props.options.flatMap((option) => {
-    const output: [string, Option][] = [
-      [option.id, option],
-      [normalizeGeneric(option.humanReadableName), option],
-      [normalizeGerman(option.humanReadableName), option],
+    const output = [
+      { term: option.id, option },
+      { term: normalizeGeneric(option.humanReadableName), option },
+      { term: normalizeGerman(option.humanReadableName), option },
     ];
     if (typeof option.shortName !== "undefined") {
-      output.push([normalizeGeneric(option.shortName), option]);
-      output.push([normalizeGerman(option.shortName), option]);
+      output.push({ term: normalizeGeneric(option.shortName), option });
+      output.push({ term: normalizeGerman(option.shortName), option });
     }
     return output;
   }),
 );
 
-const filteredOptions = computed(() => [
-  ...new Set(
-    optionIndex.value.filter(([term, _option]) => term.includes(searchQuery.value)).map(([_term, option]) => option),
-  ),
-]);
+const filteredOptions = computed(() => {
+  const results = optionIndex.value
+    .map((item) => {
+      const i = item.term.indexOf(searchQuery.value);
+      let score;
+      if (i === -1) {
+        score = 0;
+      } else if (i === 0) {
+        score = 3;
+      } else if (item.term.charAt(i - 1) === " ") {
+        score = 2;
+      } else {
+        score = 1;
+      }
+      return { option: item.option, score };
+    })
+    .filter((data) => data.score > 0)
+    .sort((a, b) => compareValues(b.score, a.score))
+    .map((data) => data.option);
+  return [...new Set(results)];
+});
 
 // If the list of possible options change, remove invalid values from selection.
 watch(
