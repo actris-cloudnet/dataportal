@@ -395,7 +395,7 @@ async function fetchLatestLevel1Product() {
 
 #siteselect {
   padding-top: 25px;
-  width: 260px;
+  width: 300px;
 }
 
 #reset {
