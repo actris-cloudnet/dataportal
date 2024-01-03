@@ -216,7 +216,8 @@ const filteredOptions = computed(() => [
   color: white;
 }
 
-.multiselect__tag.experimental-background {
+.multiselect__tag.experimental-background,
+.multiselect__tag.experimental-background i:hover {
   background-color: rgba(236, 151, 6, 0.3);
 }
 
