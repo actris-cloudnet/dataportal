@@ -24,7 +24,7 @@
         </span>
       </template>
       <template #option="slotProps">
-        <span>
+        <span class="custom-option">
           <img v-if="getIcon" class="option__image" :src="getIcon(slotProps.option)" alt="" />
           {{ slotProps.option.shortName || slotProps.option.humanReadableName }}
           <span v-if="slotProps.option.experimental" class="option__tag">EXP</span>
@@ -148,8 +148,8 @@ const filteredOptions = computed(() => [
 }
 
 .multiselect__tags-wrap {
-  span,
-  span i:hover {
+  .multiselect__tag,
+  .multiselect__tag i:hover {
     color: black;
     background-color: $steel-warrior;
   }
@@ -163,7 +163,7 @@ const filteredOptions = computed(() => [
     color: black;
     background-color: $steel-warrior;
 
-    span {
+    .custom-option {
       background-color: $steel-warrior;
     }
   }
@@ -172,7 +172,7 @@ const filteredOptions = computed(() => [
     background-color: white;
     pointer-events: none;
 
-    span {
+    .custom-option {
       background-color: white;
       font-weight: normal;
       color: #bbbbbb;
@@ -185,7 +185,7 @@ const filteredOptions = computed(() => [
         font-size: 75%;
         font-weight: bold;
         color: white;
-        background-color: rgba(236, 151, 6, 0.3) !important;
+        background-color: rgba(236, 151, 6, 0.3);
       }
     }
   }
@@ -206,7 +206,7 @@ const filteredOptions = computed(() => [
 
 .option__tag {
   border-radius: 15%;
-  background-color: $experimental !important;
+  background-color: $experimental;
   margin-left: 0.4em;
   padding: 0.2em 0.4em;
   text-align: center;
@@ -216,8 +216,8 @@ const filteredOptions = computed(() => [
   color: white;
 }
 
-.experimental-background {
-  background-color: rgba(236, 151, 6, 0.3) !important;
+.multiselect__tag.experimental-background {
+  background-color: rgba(236, 151, 6, 0.3);
 }
 
 .option__circle {
