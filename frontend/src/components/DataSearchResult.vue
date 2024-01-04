@@ -217,7 +217,7 @@ function changePreview() {
   previewBusy.value = false;
 }
 
-function loadPreview(record: FileResponse) {
+function loadPreview(record: SearchFileResponse) {
   previewBusy.value = true;
   axios
     .get(`${backendUrl}visualizations/${record.uuid}`)
@@ -232,7 +232,7 @@ function loadPreview(record: FileResponse) {
     .catch((error) => console.error(`Failed to load preview: ${error}`));
 }
 
-function rowSelected(item: FileResponse) {
+function rowSelected(item: SearchFileResponse) {
   // NOTE: Keep the breakpoint in sync with SASS below.
   if (window.innerWidth <= 1200) {
     router.push(`/file/${item.uuid}`).catch(() => {

@@ -34,47 +34,47 @@
   </div>
 </template>
 
-<script lang="ts" setup>
-import { ref, computed } from "vue";
+<script lang="ts" setup generic="T extends Record<string, any>">
+import { ref, computed, type Ref } from "vue";
 import { useRouter, type RouteLocationRaw } from "vue-router";
 
-export interface Field {
+export interface Field<T> {
   key: string;
   label: string;
   tdClass?: string;
-  tdStyle?: (item: any) => Record<string, string>;
+  tdStyle?: (item: T) => Record<string, string>;
 }
 
-export interface Props {
-  items: any[];
+export interface Props<T> {
+  items: T[];
   keyField: string;
-  fields: Field[];
+  fields: Field<T>[];
   currentPage: number;
   perPage: number;
   busy: boolean;
-  link?: (item: any) => RouteLocationRaw;
+  link?: (item: T) => RouteLocationRaw;
 }
 
-const props = defineProps<Props>();
+const props = defineProps<Props<T>>();
 
 const router = useRouter();
 
 const emit = defineEmits<{
-  (e: "rowSelected", item: any): void;
+  (e: "rowSelected", item: T): void;
 }>();
 
-const selectedRow = ref<any>(null);
+const selectedRow: Ref<T | null> = ref(null);
 
 const visibleItems = computed(() =>
   props.items.slice((props.currentPage - 1) * props.perPage, props.currentPage * props.perPage),
 );
 
-function clickRow(row: any) {
+function clickRow(row: T) {
   selectedRow.value = row;
   emit("rowSelected", row);
 }
 
-function doubleClickRow(row: any) {
+function doubleClickRow(row: T) {
   if (!props.link) return;
   router.push(props.link(row));
 }
