@@ -1,20 +1,25 @@
 <template>
-  <table :aria-busy="busy">
-    <thead>
-      <tr>
-        <th v-for="field in fields" :key="field.key">
+  <div class="table" role="grid" :aria-busy="busy" @focusin="focusIn" @focusout="focusOut">
+    <div class="thead">
+      <div class="tr">
+        <div class="th" v-for="field in fields" :key="field.key">
           {{ field.label }}
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr
+        </div>
+      </div>
+    </div>
+    <div class="tbody">
+      <a
         v-for="item in visibleItems"
         :key="item[keyField]"
-        @click="selectRow(item)"
+        class="tr"
+        :href="link ? router.resolve(link(item)).href : ''"
+        tabindex="-1"
+        @click.prevent="clickRow(item)"
+        @dblclick.prevent="doubleClickRow(item)"
         :class="{ selected: item === selectedRow }"
       >
-        <td
+        <div
+          class="td"
           v-for="field in fields"
           :key="field.key"
           :class="field.tdClass"
@@ -23,14 +28,15 @@
           <slot :name="`cell(${field.key})`" :item="item">
             {{ item[field.key] }}
           </slot>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+        </div>
+      </a>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed } from "vue";
+import { useRouter, type RouteLocationRaw } from "vue-router";
 
 export interface Field {
   key: string;
@@ -46,9 +52,12 @@ export interface Props {
   currentPage: number;
   perPage: number;
   busy: boolean;
+  link?: (item: any) => RouteLocationRaw;
 }
 
 const props = defineProps<Props>();
+
+const router = useRouter();
 
 const emit = defineEmits<{
   (e: "rowSelected", item: any): void;
@@ -60,9 +69,38 @@ const visibleItems = computed(() =>
   props.items.slice((props.currentPage - 1) * props.perPage, props.currentPage * props.perPage),
 );
 
-function selectRow(row: any) {
+function clickRow(row: any) {
   selectedRow.value = row;
   emit("rowSelected", row);
+}
+
+function doubleClickRow(row: any) {
+  if (!props.link) return;
+  router.push(props.link(row));
+}
+
+function keyDown(event: KeyboardEvent) {
+  if (!selectedRow.value) return;
+  const index = visibleItems.value.indexOf(selectedRow.value);
+  if (event.code == "ArrowUp") {
+    if (index > 0) {
+      clickRow(visibleItems.value[index - 1]);
+    }
+    event.preventDefault();
+  } else if (event.code == "ArrowDown") {
+    if (index < visibleItems.value.length - 1) {
+      clickRow(visibleItems.value[index + 1]);
+    }
+    event.preventDefault();
+  }
+}
+
+function focusIn(event: FocusEvent) {
+  window.addEventListener("keydown", keyDown);
+}
+
+function focusOut(event: FocusEvent) {
+  window.removeEventListener("keydown", keyDown);
 }
 </script>
 
@@ -72,7 +110,8 @@ function selectRow(row: any) {
 $cell-padding: 9px;
 $header-padding: 5px;
 
-table {
+.table {
+  display: table;
   border-collapse: collapse;
   width: 100%;
 
@@ -82,16 +121,32 @@ table {
   }
 }
 
-th {
+.thead {
+  display: table-header-group;
+}
+
+.tbody {
+  display: table-row-group;
+}
+
+.tr {
+  display: table-row;
+  color: inherit;
+  text-decoration: inherit;
+}
+
+.th {
+  display: table-cell;
   padding: $header-padding $cell-padding;
   font-weight: 500;
 }
 
-td {
+.td {
+  display: table-cell;
   padding: $cell-padding;
 }
 
-tbody tr {
+.tbody .tr {
   cursor: pointer;
 
   &:nth-child(odd) {
