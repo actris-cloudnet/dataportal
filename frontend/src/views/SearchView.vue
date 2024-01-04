@@ -366,10 +366,15 @@ async function initView() {
   allSites.value = sites.sort(alphabeticalSort);
   allProducts.value = products.data.sort(alphabeticalSort);
   allInstruments.value = instruments.data.sort(instrumentSort);
-  showExpProducts.value = selectedProductIds.value.some((productId) => {
-    const product = allProducts.value.find((product) => product.id === productId);
-    return product && product.experimental;
-  });
+  if (
+    !showExpProducts.value &&
+    selectedProductIds.value.some((productId) => {
+      const product = allProducts.value.find((product) => product.id === productId);
+      return product && product.experimental;
+    })
+  ) {
+    showExpProducts.value = true;
+  }
   showAllSites.value = selectedSiteIds.value.some((siteId) => {
     const site = allSites.value.find((site) => site.id === siteId);
     return site && !site.type.includes("cloudnet" as SiteType);
