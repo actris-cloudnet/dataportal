@@ -76,7 +76,7 @@ export class SoftwareService {
             all_versions: "true",
           },
         });
-        software.url = res.data[0]?.links?.doi;
+        software.url = res.data.hits?.hits[0]?.links?.doi;
       } catch (e: any) {
         console.error("Failed to fetch metadata from Zenodo", e, e.response);
       }
