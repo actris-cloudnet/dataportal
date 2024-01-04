@@ -72,7 +72,7 @@ export class SoftwareService {
       try {
         const res = await axios.get("https://zenodo.org/api/records", {
           params: {
-            q: `conceptrecid:"${metadata.zenodoConceptId}" AND version:"v${software.version}"`,
+            q: `parent.id:${metadata.zenodoConceptId} AND metadata.version:v${software.version}`,
             all_versions: "true",
           },
         });
