@@ -22,7 +22,6 @@ import { ErrorLevel } from "./QualityReport";
 import { Software } from "./Software";
 import { Instrument } from "./Instrument";
 
-@Entity()
 @Unique(["checksum"])
 @Index(["measurementDate", "site", "product"])
 export abstract class File {
@@ -50,7 +49,7 @@ export abstract class File {
   @Column({ type: "date" })
   measurementDate!: Date;
 
-  @ManyToOne((_) => Site, (site) => site.files, { nullable: false })
+  @ManyToOne((_) => Site, { nullable: false })
   site!: Site;
 
   @Column()
@@ -62,7 +61,7 @@ export abstract class File {
   @Column()
   format!: string;
 
-  @ManyToOne((_) => Product, (product) => product.files, { nullable: false })
+  @ManyToOne((_) => Product, { nullable: false })
   product!: Product;
 
   @Column({

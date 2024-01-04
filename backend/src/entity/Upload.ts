@@ -19,7 +19,6 @@ export type UploadOptions = {
   status: Status;
 };
 
-@Entity()
 export abstract class Upload {
   @PrimaryColumn("uuid")
   uuid!: string;
@@ -52,7 +51,7 @@ export abstract class Upload {
   @Column()
   updatedAt!: Date;
 
-  @ManyToOne((_) => Site, (site) => site.uploads, { nullable: false })
+  @ManyToOne((_) => Site, { nullable: false })
   site!: Site;
 
   @BeforeInsert()

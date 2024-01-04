@@ -1,6 +1,4 @@
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn } from "typeorm";
-import { File } from "./File";
-import { Upload } from "./Upload";
 import { RegularCitation } from "./Citation";
 import { SiteContact } from "./SiteContact";
 import { Permission } from "./Permission";
@@ -54,12 +52,6 @@ export class Site {
 
   @Column({ type: "varchar", length: 6, nullable: true })
   countrySubdivisionCode!: string | null;
-
-  @OneToMany((_) => File, (file) => file.site)
-  files!: File[];
-
-  @OneToMany((_) => Upload, (upload) => upload.site)
-  uploads!: Upload[];
 
   @ManyToMany((_) => Person, (person) => person.sites)
   @JoinTable()
