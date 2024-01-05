@@ -172,6 +172,10 @@ $header-padding: 5px;
     background-color: $blue-dust;
   }
 
+  &:not(.selected):hover {
+    background-color: darken($blue-dust, 5%);
+  }
+
   &.selected {
     background: darken($blue-dust, 25%);
   }
