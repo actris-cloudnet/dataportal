@@ -39,6 +39,7 @@ defineEmits<{
   color: white;
   fill: white;
   border-radius: 4px;
+  user-select: none;
 
   &:hover {
     text-decoration: none;
@@ -47,18 +48,28 @@ defineEmits<{
   &.primary {
     background-color: $actris-green;
 
-    &:hover {
+    &:hover,
+    &:focus-visible {
       text-decoration: none;
       background-color: darken($actris-green, 10%);
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba($actris-green, 0.5);
     }
   }
 
   &.brand {
     background-color: $blue-sapphire;
 
-    &:hover {
+    &:hover,
+    &:focus-visible {
       text-decoration: none;
       background-color: darken($blue-sapphire, 10%);
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba($blue-sapphire, 0.5);
     }
   }
 
@@ -67,9 +78,14 @@ defineEmits<{
     fill: #333;
     background-color: $gray1;
 
-    &:hover {
+    &:hover,
+    &:focus-visible {
       text-decoration: none;
       background-color: darken($gray1, 10%);
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba($gray1, 0.75);
     }
   }
 
