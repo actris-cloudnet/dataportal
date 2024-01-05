@@ -199,6 +199,8 @@ const pendingVisualization = ref<VisualizationItem | null>(null);
 const currentPage = ref(1);
 const perPage = ref(15);
 const previewBusy = ref(false);
+let previewController: AbortController | null = null;
+let visualizationController: AbortController | null = null;
 
 const listLength = computed(() => props.apiResponse.length);
 
@@ -217,19 +219,39 @@ function changePreview() {
   previewBusy.value = false;
 }
 
-function loadPreview(record: SearchFileResponse) {
-  previewBusy.value = true;
-  axios
-    .get(`${backendUrl}visualizations/${record.uuid}`)
-    .then(({ data }) => {
-      if (data.visualizations.length === 0) {
-        clearPreview();
-        changePreview();
-        return;
-      }
-      pendingVisualization.value = data.visualizations[0];
-    })
-    .catch((error) => console.error(`Failed to load preview: ${error}`));
+async function loadPreview(file: SearchFileResponse) {
+  try {
+    if (previewController) previewController.abort();
+    previewController = new AbortController();
+    const res = await axios.get(`${backendUrl}files/${file.uuid}`, { signal: previewController.signal });
+    pendingPreviewResponse.value = res.data;
+    if (!previewResponse.value) {
+      previewResponse.value = pendingPreviewResponse.value;
+    }
+  } catch (error) {
+    if (axios.isCancel(error)) return;
+    console.error(`Failed to load preview: ${error}`);
+  }
+}
+
+async function loadVisualization(file: SearchFileResponse) {
+  try {
+    if (visualizationController) visualizationController.abort();
+    visualizationController = new AbortController();
+    previewBusy.value = true;
+    const res = await axios.get(`${backendUrl}visualizations/${file.uuid}`, { signal: visualizationController.signal });
+    if (res.data.visualizations.length === 0) {
+      clearPreview();
+      changePreview();
+      return;
+    }
+    pendingVisualization.value = res.data.visualizations[0];
+    // Browser will start loading the visualization and call `changePreview`
+    // once it's fully loaded.
+  } catch (error) {
+    if (axios.isCancel(error)) return;
+    console.error(`Failed to load preview: ${error}`);
+  }
 }
 
 function rowSelected(item: SearchFileResponse) {
@@ -239,16 +261,8 @@ function rowSelected(item: SearchFileResponse) {
       /* */
     });
   } else {
-    axios
-      .get(`${backendUrl}files/${item.uuid}`)
-      .then(({ data }) => {
-        pendingPreviewResponse.value = data;
-        if (!previewResponse.value) {
-          previewResponse.value = pendingPreviewResponse.value;
-        }
-      })
-      .catch((error) => console.error(`Failed to load preview: ${error}`));
     loadPreview(item);
+    loadVisualization(item);
   }
 }
 
