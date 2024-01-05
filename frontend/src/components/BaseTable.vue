@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts" setup generic="T extends Record<string, any>">
-import { ref, computed, type Ref, nextTick } from "vue";
+import { ref, computed, type Ref, nextTick, watch } from "vue";
 import { useRouter, type RouteLocationRaw } from "vue-router";
 
 export interface Field<T> {
@@ -109,6 +109,18 @@ function focusIn(event: FocusEvent) {
 function focusOut(event: FocusEvent) {
   window.removeEventListener("keydown", keyDown);
 }
+
+watch(
+  () => props.perPage,
+  (perPage) => {
+    let newPage = 1;
+    if (selectedRow.value) {
+      const index = props.items.indexOf(selectedRow.value);
+      newPage = Math.floor(index / perPage) + 1;
+    }
+    emit("update:currentPage", newPage);
+  },
+);
 </script>
 
 <style lang="scss" scoped>
