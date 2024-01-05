@@ -39,6 +39,7 @@
           :busy="isBusy"
           :link="(file) => ({ name: 'File', params: { uuid: file.uuid } })"
           @row-selected="rowSelected"
+          :selectable="selectable"
         >
           <template #cell(volatile)="data">
             <span class="rowtags">
@@ -178,6 +179,7 @@ import BaseButton from "./BaseButton.vue";
 import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
 import Visualization from "./ImageVisualization.vue";
 import type { FileResponse } from "@/views/FileView.vue";
+import { useInnerSize } from "@/lib/useInnerSize";
 
 export interface Props {
   apiResponse: SearchFileResponse[];
@@ -207,6 +209,10 @@ const listLength = computed(() => props.apiResponse.length);
 const hasVolatile = computed(() => props.apiResponse.some((item) => item.volatile));
 const hasLegacy = computed(() => props.apiResponse.some((item) => item.legacy));
 const hasExperimental = computed(() => props.apiResponse.some((item) => item.experimental));
+
+const { innerWidth } = useInnerSize();
+// NOTE: Keep the breakpoint in sync with SASS below.
+const selectable = computed(() => innerWidth.value > 1200);
 
 function clearPreview() {
   currentVisualization.value = null;
@@ -255,15 +261,8 @@ async function loadVisualization(file: SearchFileResponse) {
 }
 
 function rowSelected(item: SearchFileResponse) {
-  // NOTE: Keep the breakpoint in sync with SASS below.
-  if (window.innerWidth <= 1200) {
-    router.push(`/file/${item.uuid}`).catch(() => {
-      /* */
-    });
-  } else {
-    loadPreview(item);
-    loadVisualization(item);
-  }
+  loadPreview(item);
+  loadVisualization(item);
 }
 
 function createCollection() {

@@ -14,9 +14,9 @@
         class="tr"
         :href="link ? router.resolve(link(item)).href : ''"
         tabindex="-1"
-        @click.prevent="selectRow(item)"
-        @dblclick.prevent="navigateToRow(item)"
-        :class="{ selected: item === selectedRow }"
+        @click="handleClick($event, selectRow, item)"
+        @dblclick="handleClick($event, navigateToRow, item)"
+        :class="{ selected: selectable && item === selectedRow }"
       >
         <div
           class="td"
@@ -53,6 +53,7 @@ export interface Props<T> {
   perPage: number;
   busy: boolean;
   link?: (item: T) => RouteLocationRaw;
+  selectable: boolean;
 }
 
 const props = defineProps<Props<T>>();
@@ -70,7 +71,14 @@ const visibleItems = computed(() =>
   props.items.slice((props.currentPage - 1) * props.perPage, props.currentPage * props.perPage),
 );
 
+function handleClick(event: MouseEvent, handler: (item: T) => void, row: T) {
+  if (!props.selectable || event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) return;
+  event.preventDefault();
+  handler(row);
+}
+
 function selectRow(row: T) {
+  if (row === selectedRow.value) return;
   selectedRow.value = row;
   emit("rowSelected", row);
 }
