@@ -34,7 +34,7 @@
             { key: 'volatile', label: '' },
             { key: 'measurementDate', label: 'Date' },
           ]"
-          :current-page="currentPage"
+          v-model:currentPage="currentPage"
           :per-page="perPage"
           :busy="isBusy"
           :link="(file) => ({ name: 'File', params: { uuid: file.uuid } })"

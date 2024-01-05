@@ -14,8 +14,8 @@
         class="tr"
         :href="link ? router.resolve(link(item)).href : ''"
         tabindex="-1"
-        @click.prevent="clickRow(item)"
-        @dblclick.prevent="doubleClickRow(item)"
+        @click.prevent="selectRow(item)"
+        @dblclick.prevent="navigateToRow(item)"
         :class="{ selected: item === selectedRow }"
       >
         <div
@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts" setup generic="T extends Record<string, any>">
-import { ref, computed, type Ref } from "vue";
+import { ref, computed, type Ref, nextTick } from "vue";
 import { useRouter, type RouteLocationRaw } from "vue-router";
 
 export interface Field<T> {
@@ -61,6 +61,7 @@ const router = useRouter();
 
 const emit = defineEmits<{
   (e: "rowSelected", item: T): void;
+  (e: "update:currentPage", value: number): void;
 }>();
 
 const selectedRow: Ref<T | null> = ref(null);
@@ -69,27 +70,33 @@ const visibleItems = computed(() =>
   props.items.slice((props.currentPage - 1) * props.perPage, props.currentPage * props.perPage),
 );
 
-function clickRow(row: T) {
+function selectRow(row: T) {
   selectedRow.value = row;
   emit("rowSelected", row);
 }
 
-function doubleClickRow(row: T) {
+function navigateToRow(row: T) {
   if (!props.link) return;
   router.push(props.link(row));
 }
 
 function keyDown(event: KeyboardEvent) {
   if (!selectedRow.value) return;
-  const index = visibleItems.value.indexOf(selectedRow.value);
+  const index = props.items.indexOf(selectedRow.value);
   if (event.code == "ArrowUp") {
-    if (index > 0) {
-      clickRow(visibleItems.value[index - 1]);
+    if (index !== 0) {
+      selectRow(props.items[index - 1]);
+      if (index % props.perPage === 0) {
+        emit("update:currentPage", props.currentPage - 1);
+      }
     }
     event.preventDefault();
   } else if (event.code == "ArrowDown") {
-    if (index < visibleItems.value.length - 1) {
-      clickRow(visibleItems.value[index + 1]);
+    if (index !== props.items.length - 1) {
+      selectRow(props.items[index + 1]);
+      if (index % props.perPage === props.perPage - 1) {
+        emit("update:currentPage", props.currentPage + 1);
+      }
     }
     event.preventDefault();
   }
