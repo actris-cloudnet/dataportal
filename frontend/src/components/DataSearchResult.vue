@@ -287,7 +287,7 @@ function createCollection() {
 
 function iconCellStyle(item: any) {
   return {
-    backgroundImage: `url(${getProductIcon(item.productId)})`,
+    backgroundImage: `url("${getProductIcon(item.productId)}")`,
     width: "40px",
   };
 }
