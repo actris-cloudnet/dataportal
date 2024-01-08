@@ -24,6 +24,7 @@ import { ReferenceRoutes } from "./routes/reference";
 import { FeedbackRoutes } from "./routes/feedback";
 import * as http from "http";
 import { AppDataSource } from "./data-source";
+import { rateLimit } from "express-rate-limit";
 
 async function createServer(): Promise<void> {
   const port = 3000;
@@ -161,9 +162,14 @@ async function createServer(): Promise<void> {
 
   // public/internal
   app.get("/api/uploaded-metadata", uploadRoutes.listInstrumentsFromMetadata);
-  app.post("/api/collection", express.json({ limit: "1mb" }), collRoutes.postCollection);
+  app.post(
+    "/api/collection",
+    rateLimit({ windowMs: 60 * 1000, limit: 10 }),
+    express.json({ limit: "1mb" }),
+    collRoutes.postCollection,
+  );
   app.get("/api/collection/:uuid", middleware.validateUuidParam, collRoutes.collection);
-  app.post("/api/generate-pid", express.json(), collRoutes.generatePid);
+  app.post("/api/generate-pid", rateLimit({ windowMs: 60 * 1000, limit: 10 }), express.json(), collRoutes.generatePid);
   app.get("/api/download/product/:uuid/*", middleware.validateUuidParam, dlRoutes.product);
   app.get("/api/download/raw/:uuid/*", middleware.validateUuidParam, dlRoutes.raw);
   app.get("/api/download/collection/:uuid", middleware.validateUuidParam, dlRoutes.collection);
@@ -173,7 +179,7 @@ async function createServer(): Promise<void> {
   app.get("/api/sites/:siteId/locations", siteRoutes.locations);
   app.get("/api/sites/:siteId/locations/:date", siteRoutes.location);
   app.get("/api/sites/:siteId/product-availability", siteRoutes.productAvailability);
-  app.post("/api/feedback", express.json(), feedbackRoutes.postFeedback);
+  app.post("/api/feedback", rateLimit({ windowMs: 60 * 1000, limit: 10 }), express.json(), feedbackRoutes.postFeedback);
 
   // TODO: Depreciated. Needed for now, but in the future these should public
   // and properly documented.
