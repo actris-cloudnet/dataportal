@@ -1,5 +1,5 @@
 <template>
-  <div class="table" role="grid" :aria-busy="busy" @focusin="focusIn" @focusout="focusOut">
+  <div class="table" role="grid" :aria-busy="busy" @focusin="focusIn" @focusout="focusOut" ref="tableElement">
     <div class="thead">
       <div class="tr">
         <div class="th" v-for="field in fields" :key="field.key">
@@ -67,6 +67,8 @@ const emit = defineEmits<{
 
 const selectedRow: Ref<T | null> = ref(null);
 
+const tableElement = ref<HTMLDivElement | null>(null);
+
 const visibleItems = computed(() =>
   props.items.slice((props.currentPage - 1) * props.perPage, props.currentPage * props.perPage),
 );
@@ -81,6 +83,9 @@ function selectRow(row: T) {
   if (row === selectedRow.value) return;
   selectedRow.value = row;
   emit("rowSelected", row);
+  nextTick(() => {
+    tableElement.value?.querySelector<HTMLElement>(".selected")?.focus();
+  });
 }
 
 function navigateToRow(row: T) {
@@ -106,6 +111,31 @@ function keyDown(event: KeyboardEvent) {
         emit("update:currentPage", props.currentPage + 1);
       }
     }
+    event.preventDefault();
+  } else if (event.code === "Enter") {
+    navigateToRow(selectedRow.value);
+    event.preventDefault();
+  } else if (event.code === "PageUp") {
+    if (props.currentPage > 1) {
+      const nextPage = props.currentPage - 1;
+      selectRow(props.items[nextPage * props.perPage - 1]);
+      emit("update:currentPage", nextPage);
+    }
+    event.preventDefault();
+  } else if (event.code === "PageDown") {
+    if (props.currentPage < Math.ceil(props.items.length / props.perPage)) {
+      const nextPage = props.currentPage + 1;
+      selectRow(props.items[(nextPage - 1) * props.perPage]);
+      emit("update:currentPage", nextPage);
+    }
+    event.preventDefault();
+  } else if (event.code === "Home") {
+    selectRow(props.items[0]);
+    emit("update:currentPage", 1);
+    event.preventDefault();
+  } else if (event.code === "End") {
+    selectRow(props.items[props.items.length - 1]);
+    emit("update:currentPage", Math.ceil(props.items.length / props.perPage));
     event.preventDefault();
   }
 }
