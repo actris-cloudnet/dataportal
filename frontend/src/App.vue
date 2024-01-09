@@ -8,11 +8,7 @@ import ConsentPopup from "@/components/ConsentPopup.vue";
   <div id="app">
     <TheHeader />
     <div id="content">
-      <router-view v-slot="{ Component }">
-        <keep-alive include="app-search">
-          <component :is="Component" />
-        </keep-alive>
-      </router-view>
+      <router-view></router-view>
     </div>
     <TheFooter />
     <ConsentPopup />
