@@ -24,9 +24,10 @@ import { ModelFile, RegularFile } from "../entity/File";
 import * as http from "http";
 import ReadableStream = NodeJS.ReadableStream;
 import env from "../lib/env";
+import { QueueService } from "../lib/queue";
 
 export class UploadRoutes {
-  constructor(dataSource: DataSource) {
+  constructor(dataSource: DataSource, queueService: QueueService) {
     this.dataSource = dataSource;
     this.instrumentUploadRepo = this.dataSource.getRepository(InstrumentUpload);
     this.modelUploadRepo = this.dataSource.getRepository(ModelUpload);
@@ -35,6 +36,7 @@ export class UploadRoutes {
     this.siteRepo = this.dataSource.getRepository(Site);
     this.modelFileRepo = this.dataSource.getRepository(ModelFile);
     this.regularFileRepo = this.dataSource.getRepository(RegularFile);
+    this.queueService = queueService;
   }
 
   readonly dataSource: DataSource;
@@ -45,6 +47,7 @@ export class UploadRoutes {
   readonly modelRepo: Repository<Model>;
   readonly modelFileRepo: Repository<ModelFile>;
   readonly regularFileRepo: Repository<RegularFile>;
+  readonly queueService: QueueService;
 
   postMetadata: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body;
@@ -222,11 +225,22 @@ export class UploadRoutes {
         { status: Status.UPLOADED, updatedAt: new Date(), size: body.size, s3key },
       );
       res.sendStatus(status);
+
+      if (upload instanceof ModelUpload) {
+        this.queueService
+          .publish({
+            type: "model",
+            modelId: upload.model.id,
+            measurementDate: upload.measurementDate as unknown as string,
+            siteId: upload.site.id,
+          })
+          .catch((err) => {
+            console.error("Task publish failed:", err);
+          });
+      }
     } catch (err: any) {
       if (err.status == 400 && err.errors == "Checksum does not match file contents") return next(err); // Client error
-      if (err.errors)
-        // Our error
-        return next({ status: 500, errors: `Internal server error: ${err.errors}` });
+      if (err.errors) return next({ status: 500, errors: `Internal server error: ${err.errors}` }); // Our error
       console.error("Unknown error", err);
       return next({ status: 500, errors: `Internal server error: ${err.code}` }); // Unknown error
     }

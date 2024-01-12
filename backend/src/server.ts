@@ -25,6 +25,8 @@ import { FeedbackRoutes } from "./routes/feedback";
 import * as http from "http";
 import { AppDataSource } from "./data-source";
 import { rateLimit } from "express-rate-limit";
+import { QueueRoutes } from "./routes/queue";
+import { QueueService } from "./lib/queue";
 
 async function createServer(): Promise<void> {
   const port = 3000;
@@ -36,13 +38,14 @@ async function createServer(): Promise<void> {
 
   const authenticator = new Authenticator(AppDataSource);
   const authorizator = new Authorizator(AppDataSource);
+  const queueService = new QueueService(AppDataSource);
 
   const fileRoutes = new FileRoutes(AppDataSource);
   const siteRoutes = new SiteRoutes(AppDataSource);
   const prodRoutes = new ProductRoutes(AppDataSource);
   const instrRoutes = new InstrumentRoutes(AppDataSource);
   const vizRoutes = new VisualizationRoutes(AppDataSource, fileRoutes);
-  const uploadRoutes = new UploadRoutes(AppDataSource);
+  const uploadRoutes = new UploadRoutes(AppDataSource, queueService);
   const collRoutes = new CollectionRoutes(AppDataSource);
   const modelRoutes = new ModelRoutes(AppDataSource);
   const dlRoutes = new DownloadRoutes(AppDataSource, fileRoutes, collRoutes, uploadRoutes, ipLookup);
@@ -54,6 +57,7 @@ async function createServer(): Promise<void> {
   const userAccountRoutes = new UserAccountRoutes(AppDataSource);
   const referenceRoutes = new ReferenceRoutes(AppDataSource);
   const feedbackRoutes = new FeedbackRoutes(AppDataSource);
+  const queueRoutes = new QueueRoutes(queueService);
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     console.error(
@@ -301,6 +305,10 @@ async function createServer(): Promise<void> {
   app.delete("/user-accounts/:id", userAccountRoutes.deleteUserAccount);
   app.put("/user-accounts/:id", express.json(), userAccountRoutes.validatePut, userAccountRoutes.putUserAccount);
   app.get("/user-accounts/", userAccountRoutes.getAllUserAccounts);
+
+  app.post("/queue/:type/receive", queueRoutes.receive);
+  app.put("/queue/:type/complete/:id", queueRoutes.complete);
+  app.put("/queue/:type/fail/:id", queueRoutes.fail);
 
   app.use(errorHandler);
 
