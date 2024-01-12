@@ -1,5 +1,5 @@
 <template>
-  <div class="table" role="grid" :aria-busy="busy" @focusin="focusIn" @focusout="focusOut" ref="tableElement">
+  <div class="table" role="grid" :aria-busy="busy" @focusin="onFocusIn" @focusout="onFocusOut" ref="tableElement">
     <div class="thead">
       <div class="tr">
         <div class="th" v-for="field in fields" :key="field.key">
@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts" setup generic="T extends Record<string, any>">
-import { ref, computed, type Ref, nextTick, watch } from "vue";
+import { ref, computed, type Ref, nextTick, watch, onUnmounted } from "vue";
 import { useRouter, type RouteLocationRaw } from "vue-router";
 
 export interface Field<T> {
@@ -93,7 +93,7 @@ function navigateToRow(row: T) {
   router.push(props.link(row));
 }
 
-function keyDown(event: KeyboardEvent) {
+function onKeyDown(event: KeyboardEvent) {
   if (!selectedRow.value) return;
   const index = props.items.indexOf(selectedRow.value);
   if (event.code == "ArrowUp") {
@@ -140,13 +140,17 @@ function keyDown(event: KeyboardEvent) {
   }
 }
 
-function focusIn(event: FocusEvent) {
-  window.addEventListener("keydown", keyDown);
+function onFocusIn() {
+  window.addEventListener("keydown", onKeyDown);
 }
 
-function focusOut(event: FocusEvent) {
-  window.removeEventListener("keydown", keyDown);
+function onFocusOut() {
+  window.removeEventListener("keydown", onKeyDown);
 }
+
+onUnmounted(() => {
+  onFocusOut();
+});
 
 watch(
   () => props.perPage,

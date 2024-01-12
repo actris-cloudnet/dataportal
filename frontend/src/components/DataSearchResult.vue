@@ -160,7 +160,7 @@
 <script lang="ts" setup>
 import axios from "axios";
 import { useRouter } from "vue-router";
-import { watch, onMounted, onBeforeUnmount, ref, computed } from "vue";
+import { watch, onMounted, ref, computed, onUnmounted } from "vue";
 import {
   combinedFileSize,
   getProductIcon,
@@ -313,7 +313,7 @@ onMounted(() => {
   adjustPerPageAccordingToWindowHeight();
 });
 
-onBeforeUnmount(() => {
+onUnmounted(() => {
   window.removeEventListener("resize", adjustPerPageAccordingToWindowHeight);
 });
 </script>

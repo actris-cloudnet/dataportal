@@ -227,7 +227,7 @@ export default {
 </script>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, watch, onUnmounted } from "vue";
 import axios from "axios";
 import type { Site, SiteType } from "@shared/entity/Site";
 import Datepicker, { type DateErrors } from "@/components/DatePicker.vue";
@@ -351,9 +351,13 @@ const router = useRouter();
 const route = useRoute();
 
 onMounted(async () => {
-  addKeyPressListener();
+  window.addEventListener("keydown", onKeyDown);
   await initView();
   renderComplete.value = true;
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", onKeyDown);
 });
 
 async function initView() {
@@ -472,13 +476,11 @@ function setDateRangeForCurrentYear() {
   showDateRange.value = true;
 }
 
-function addKeyPressListener() {
-  window.addEventListener("keydown", (e) => {
-    if (!document.activeElement || document.activeElement.tagName != "INPUT") {
-      if (e.code == "ArrowLeft") setPreviousDate();
-      else if (e.code == "ArrowRight") setNextDate();
-    }
-  });
+function onKeyDown(event: KeyboardEvent) {
+  if (!document.activeElement || document.activeElement.tagName != "INPUT") {
+    if (event.code == "ArrowLeft") setPreviousDate();
+    else if (event.code == "ArrowRight") setNextDate();
+  }
 }
 
 function hasNextDate() {
