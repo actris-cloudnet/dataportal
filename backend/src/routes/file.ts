@@ -274,7 +274,7 @@ export class FileRoutes {
 
   deleteVisualizations: RequestHandler = async (req: Request, res: Response, next) => {
     const uuid = req.params.uuid;
-    const images = req.body.images;
+    const images = req.query.images as string[];
     try {
       const existingFile = await this.findAnyFile((repo) =>
         repo.findOne({ where: { uuid }, relations: { product: true, site: true } }),

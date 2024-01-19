@@ -261,7 +261,6 @@ async function createServer(): Promise<void> {
   );
   app.delete(
     "/api/visualizations/:uuid",
-    express.json(),
     middleware.validateUuidParam,
     authenticator.verifyCredentials(),
     authorizator.verifyPermission(PermissionType.canDelete),
