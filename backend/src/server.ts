@@ -264,7 +264,7 @@ async function createServer(): Promise<void> {
     middleware.validateUuidParam,
     authenticator.verifyCredentials(),
     authorizator.verifyPermission(PermissionType.canDelete),
-    fileRoutes.deleteVisualizations,
+    vizRoutes.deleteVisualizations,
   );
   app.post(
     "/api/publications/",

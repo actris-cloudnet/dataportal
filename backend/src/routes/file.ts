@@ -269,20 +269,6 @@ export class FileRoutes {
     }
   };
 
-  deleteVisualizations: RequestHandler = async (req: Request, res: Response, next) => {
-    const uuid = req.params.uuid;
-    const images = req.query.images as string[];
-    try {
-      const file = await this.findAnyFile((repo) => repo.findOne({ where: { uuid } }));
-      if (!file) return next({ status: 422, errors: ["No file matches the provided uuid"] });
-      const visuRepo = file instanceof RegularFile ? this.visualizationRepo : this.modelVisualizationRepo;
-      await visuRepo.delete({ sourceFile: { uuid }, productVariable: In(images) });
-      res.sendStatus(200);
-    } catch (e) {
-      return next({ status: 500, errors: e });
-    }
-  };
-
   deleteFile: RequestHandler = async (req: Request, res: Response, next) => {
     // TODO: use transaction
     const query: any = req.query;
