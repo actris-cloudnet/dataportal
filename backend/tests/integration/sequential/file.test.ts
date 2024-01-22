@@ -482,6 +482,18 @@ describe("DELETE /api/files/", () => {
     await expect(vizRepo.findOneBy({ s3key: "radar-ldr.png" })).resolves.toBeFalsy();
   });
 
+  it("deletes images", async () => {
+    const radarFile = await putDummyFile();
+    await putDummyImage("radar-v.png", radarFile);
+    await putDummyImage("radar-ldr.png", radarFile);
+    const headers = { authorization: `Basic ${str2base64("bob:bobs_pass")}` };
+    const url = `${backendPrivateUrl}api/visualizations/${radarFile.uuid}`;
+    const params: any = { images: ["radar-v", "radar-ldr"] };
+    await axios.delete(url, { params: params, headers: headers });
+    await expect(vizRepo.findOneBy({ s3key: "radar-v.png" })).resolves.toBeFalsy();
+    await expect(vizRepo.findOneBy({ s3key: "radar-ldr.png" })).resolves.toBeFalsy();
+  });
+
   it("deletes higher-level volatile products too", async () => {
     const radarFile = await putDummyFile();
     await putDummyImage("radar-v.png", radarFile);

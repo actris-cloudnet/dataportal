@@ -259,6 +259,13 @@ async function createServer(): Promise<void> {
     authorizator.verifyPermission(PermissionType.canDelete),
     fileRoutes.deleteFile,
   );
+  app.delete(
+    "/api/visualizations/:uuid",
+    middleware.validateUuidParam,
+    authenticator.verifyCredentials(),
+    authorizator.verifyPermission(PermissionType.canDelete),
+    vizRoutes.deleteVisualizations,
+  );
   app.post(
     "/api/publications/",
     authenticator.verifyCredentials(),

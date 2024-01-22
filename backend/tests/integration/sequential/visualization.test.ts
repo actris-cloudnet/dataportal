@@ -1,7 +1,6 @@
 import { backendPrivateUrl, backendPublicUrl, storageServiceUrl } from "../../lib";
 import axios from "axios";
 import { DataSource, Repository } from "typeorm";
-import { Visualization } from "../../../src/entity/Visualization";
 import { promises as fsp } from "fs";
 import { AppDataSource } from "../../../src/data-source";
 import { ModelFile } from "../../../src/entity/File";
@@ -19,7 +18,7 @@ const validId = "test.png";
 const badId = "notfound";
 
 let dataSource: DataSource;
-let repo: Repository<Visualization>;
+let repo: Repository<ModelVisualization>;
 
 const privUrl = `${backendPrivateUrl}visualizations/`;
 const imgUrl = `${backendPublicUrl}download/image/`;
