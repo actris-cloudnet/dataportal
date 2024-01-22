@@ -17,7 +17,7 @@ export class Visualization {
   s3key!: string;
 
   @ManyToOne((_) => RegularFile, (file) => file.visualizations, { nullable: false })
-  sourceFile!: File;
+  sourceFile!: RegularFile;
 
   @ManyToOne((_) => ProductVariable, (prodVar) => prodVar.visualizations, { nullable: false })
   productVariable!: ProductVariable;
@@ -40,7 +40,7 @@ export class Visualization {
   @Column({ type: "smallint", nullable: true })
   marginLeft: number | null;
 
-  constructor(filename: string, sourceFile: File, productVariable: ProductVariable, dimensions?: Dimensions) {
+  constructor(filename: string, sourceFile: RegularFile, productVariable: ProductVariable, dimensions?: Dimensions) {
     this.s3key = filename;
     this.sourceFile = sourceFile;
     this.productVariable = productVariable;

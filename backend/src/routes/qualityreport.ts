@@ -1,4 +1,4 @@
-import { DataSource, Repository } from "typeorm";
+import { DataSource, Exclusion, Repository } from "typeorm";
 import { ErrorLevel, QualityReport } from "../entity/QualityReport";
 import { Request, RequestHandler, Response } from "express";
 import { FileRoutes } from "./file";
@@ -125,8 +125,8 @@ export class QualityReportRoutes {
           qualityUuid: uuid,
         });
       }
-      const repo = this.getRepoForFile(existingFile);
-      await repo.update(uuid, { errorLevel: maxErrorLevel });
+      const fileRepo = existingFile instanceof RegularFile ? this.fileRepo : this.modelFileRepo;
+      await fileRepo.update(uuid, { errorLevel: maxErrorLevel });
       await this.searchFileRepo.update(uuid, { errorLevel: maxErrorLevel });
       res.sendStatus(201);
     } catch (e) {
@@ -171,11 +171,6 @@ export class QualityReportRoutes {
       return ErrorLevel.INFO;
     }
     return ErrorLevel.PASS;
-  }
-
-  private getRepoForFile(file: RegularFile | ModelFile) {
-    if (file.product.id == "model") return this.modelFileRepo;
-    return this.fileRepo;
   }
 
   private countTestResults = (results: TestSummary[], level: ErrorLevel) =>

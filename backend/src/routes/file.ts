@@ -251,12 +251,9 @@ export class FileRoutes {
     const partialFile = req.body;
     if (!partialFile.uuid) return next({ status: 422, errors: ["Request body is missing uuid"] });
     try {
-      const existingFile = await this.findAnyFile((repo) =>
-        repo.findOne({ where: { uuid: partialFile.uuid }, relations: { product: true } }),
-      );
+      const existingFile = await this.findAnyFile((repo) => repo.findOne({ where: { uuid: partialFile.uuid } }));
       if (!existingFile) return next({ status: 422, errors: ["No file matches the provided uuid"] });
-      let repo: Repository<RegularFile | ModelFile> = this.fileRepo;
-      if (existingFile.product.id == "model") repo = this.modelFileRepo;
+      const repo = existingFile instanceof RegularFile ? this.fileRepo : this.modelFileRepo;
       await repo.update({ uuid: partialFile.uuid }, partialFile);
       ["pid", "checksum", "version", "dvasUpdatedAt", "dvasId"].forEach((prop) => {
         // Not in SearchFile
@@ -276,14 +273,9 @@ export class FileRoutes {
     const uuid = req.params.uuid;
     const images = req.query.images as string[];
     try {
-      const existingFile = await this.findAnyFile((repo) =>
-        repo.findOne({ where: { uuid }, relations: { product: true, site: true } }),
-      );
-      if (!existingFile) return next({ status: 422, errors: ["No file matches the provided uuid"] });
-      let visuRepo: Repository<Visualization | ModelVisualization> = this.visualizationRepo;
-      if (existingFile.product.id == "model") {
-        visuRepo = this.modelVisualizationRepo;
-      }
+      const file = await this.findAnyFile((repo) => repo.findOne({ where: { uuid } }));
+      if (!file) return next({ status: 422, errors: ["No file matches the provided uuid"] });
+      const visuRepo = file instanceof RegularFile ? this.visualizationRepo : this.modelVisualizationRepo;
       await visuRepo.delete({ sourceFile: { uuid }, productVariable: In(images) });
       res.sendStatus(200);
     } catch (e) {
@@ -303,12 +295,10 @@ export class FileRoutes {
       );
       if (!existingFile) return next({ status: 422, errors: ["No file matches the provided uuid"] });
       if (!existingFile.volatile) return next({ status: 422, errors: ["Forbidden to delete a stable file"] });
-      let fileRepo: Repository<RegularFile | ModelFile> = this.fileRepo;
-      let visuRepo: Repository<Visualization | ModelVisualization> = this.visualizationRepo;
-      if (existingFile.product.id == "model") {
-        fileRepo = this.modelFileRepo;
-        visuRepo = this.modelVisualizationRepo;
-      }
+      const [fileRepo, visuRepo] =
+        existingFile instanceof RegularFile
+          ? [this.fileRepo, this.visualizationRepo]
+          : [this.modelFileRepo, this.modelVisualizationRepo];
       const higherLevelProductNames = await this.getHigherLevelProducts(existingFile.product);
       const products = await this.fileRepo.findBy({
         site: { id: existingFile.site.id },

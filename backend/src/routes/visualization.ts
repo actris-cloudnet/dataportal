@@ -35,9 +35,7 @@ export class VisualizationRoutes {
     }
     try {
       const [file, productVariable] = await Promise.all([
-        this.fileController.findAnyFile((repo) =>
-          repo.findOne({ where: { uuid: body.sourceFileId }, relations: { product: true } }),
-        ),
+        this.fileController.findAnyFile((repo) => repo.findOne({ where: { uuid: body.sourceFileId } })),
         this.productVariableRepo.findOneBy({ id: body.variableId }),
       ]);
       if (!file) {
@@ -47,8 +45,8 @@ export class VisualizationRoutes {
         return next({ status: 400, errors: "Variable not found" });
       }
 
-      if (file.product.id == "model") {
-        const viz = new ModelVisualization(req.params[0], file as ModelFile, productVariable, body.dimensions);
+      if (file instanceof ModelFile) {
+        const viz = new ModelVisualization(req.params[0], file, productVariable, body.dimensions);
         await this.modelVisualizationRepo.save(viz);
       } else {
         const viz = new Visualization(req.params[0], file, productVariable, body.dimensions);
