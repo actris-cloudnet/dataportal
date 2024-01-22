@@ -1,8 +1,7 @@
 import { backendPrivateUrl, backendPublicUrl, storageServiceUrl } from "../../lib";
 import axios from "axios";
 import { DataSource, Repository } from "typeorm";
-import { Visualization } from "../../../src/entity/Visualization";
-import { Mode, promises as fsp } from "fs";
+import { promises as fsp } from "fs";
 import { AppDataSource } from "../../../src/data-source";
 import { ModelFile } from "../../../src/entity/File";
 import { ModelVisualization } from "../../../src/entity/ModelVisualization";
