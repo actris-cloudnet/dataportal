@@ -1,6 +1,6 @@
 <template>
   <div class="landing-summary-container pagewidth">
-    <div class="summary-box summary-box-product-information">
+    <div class="summary-box summary-box-product-information" :class="{ obsolete: response.tombstoneReason }">
       <ProductInformation
         :response="response"
         :location="location"
@@ -10,10 +10,14 @@
       <FileInformation :response="response" />
       <FileProvenance :response="response" :isBusy="isBusy" :versions="versions" :sourceFiles="sourceFiles" />
     </div>
-    <div class="summary-box summary-box-visualization">
+    <div class="summary-box summary-box-visualization" :class="{ obsolete: response.tombstoneReason }">
       <FilePreview :visualization="visualization" :loading="loadingVisualizations" />
     </div>
-    <div class="summary-box summary-box-citation" id="citation" :class="{ volatile: response.volatile }">
+    <div
+      class="summary-box summary-box-citation"
+      id="citation"
+      :class="{ volatile: response.volatile, obsolete: response.tombstoneReason }"
+    >
       <FileCitation :uuid="uuid" :file="response" v-if="response" />
     </div>
   </div>
@@ -60,6 +64,8 @@ const visualization = computed(() => {
 </script>
 
 <style scoped lang="scss">
+@import "@/sass/variables.scss";
+
 .landing-summary-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -79,6 +85,11 @@ const visualization = computed(() => {
 .summary-box-citation {
   grid-row: 2;
   grid-column: 2;
+}
+
+.obsolete {
+  background-image: repeating-linear-gradient(-45deg, $tombstone, $tombstone 15px, white 15px, white 30px);
+  opacity: 0.6;
 }
 
 @media screen and (max-width: 1000px) {

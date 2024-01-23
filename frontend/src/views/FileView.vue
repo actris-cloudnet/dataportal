@@ -2,6 +2,9 @@
   <div v-if="isBusy"></div>
   <ApiError v-else-if="error" :response="response as any" />
   <main v-else-if="response" id="landing">
+    <div v-if="response.tombstoneReason" class="banner-container-obsolete">
+      <div class="banner pagewidth">{{ `This data object is not suitable for use - ${response.tombstoneReason}` }}</div>
+    </div>
     <div v-if="newestVersion" class="banner-container">
       <div class="banner pagewidth">
         There is a
@@ -226,6 +229,9 @@ main {
 
 .banner-container {
   background-color: $actris-yellow;
+}
+.banner-container-obsolete {
+  background-color: $red6;
 }
 
 .banner {

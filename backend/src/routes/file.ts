@@ -1,6 +1,15 @@
 import { Request, RequestHandler, Response } from "express";
 import { Collection } from "../entity/Collection";
-import { EntityManager, Repository, SelectQueryBuilder, In, DataSource, ObjectLiteral, Raw } from "typeorm";
+import {
+  EntityManager,
+  Repository,
+  SelectQueryBuilder,
+  In,
+  DataSource,
+  ObjectLiteral,
+  Raw,
+  QueryRunner,
+} from "typeorm";
 import { isFile, RegularFile } from "../entity/File";
 import { FileQuality } from "../entity/FileQuality";
 import {
@@ -246,6 +255,48 @@ export class FileRoutes {
       next({ status: 500, errors: e });
     }
   };
+
+  addTombstone: RequestHandler = async (req: Request, res: Response, next) => {
+    const uuid = req.params.uuid;
+    const reason = req.body.tombstoneReason;
+    if (!reason || typeof reason !== "string" || reason.trim().length === 0) {
+      return next({ status: 422, errors: ["Request query is missing valid tombstoneReason"] });
+    }
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const fileEntity = await this.determineFileEntityType(queryRunner, uuid);
+      if (!fileEntity) {
+        await queryRunner.rollbackTransaction();
+        return next({ status: 422, errors: ["No file matches the provided uuid"] });
+      }
+      await queryRunner.manager.update(fileEntity, { uuid }, { tombstoneReason: reason.trim() });
+      const existingSearchFile = await queryRunner.manager.findOneBy(SearchFile, { uuid });
+      if (existingSearchFile) {
+        await queryRunner.manager.delete(SearchFile, { uuid });
+      }
+      await queryRunner.commitTransaction();
+      res.sendStatus(200);
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      return next({ status: 500, errors: e });
+    } finally {
+      await queryRunner.release();
+    }
+  };
+
+  private async determineFileEntityType(
+    queryRunner: QueryRunner,
+    uuid: string,
+  ): Promise<typeof RegularFile | typeof ModelFile | null> {
+    let existingFile: RegularFile | ModelFile | null = await queryRunner.manager.findOneBy(RegularFile, { uuid });
+    if (existingFile) {
+      return RegularFile;
+    }
+    existingFile = await queryRunner.manager.findOneBy(ModelFile, { uuid });
+    return existingFile ? ModelFile : null;
+  }
 
   postFile: RequestHandler = async (req: Request, res: Response, next) => {
     const partialFile = req.body;

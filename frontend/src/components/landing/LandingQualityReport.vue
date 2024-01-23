@@ -1,6 +1,6 @@
 <template>
   <div class="landing-quality-report-container">
-    <div class="summary-box">
+    <div class="summary-box" :class="{ obsolete: response.tombstoneReason }">
       <BaseSpinner v-if="report.status === 'loading'" />
       <div v-else-if="report.status === 'notFound'">No quality report available.</div>
       <div v-else-if="report.status === 'error'" style="color: red">Failed to load report.</div>
@@ -64,10 +64,12 @@ import Donut from "@/components/DonutVisualization.vue";
 import { humanReadableTimestamp, getQcIcon, backendUrl } from "@/lib";
 import { useTitle } from "@/router";
 import BaseSpinner from "@/components/BaseSpinner.vue";
+import type { FileResponse } from "@/views/FileView.vue";
 
 export interface Props {
   uuid: string;
   title: string;
+  response: FileResponse;
 }
 
 const props = defineProps<Props>();
@@ -337,5 +339,9 @@ function formatMessage(message: string): string {
       grid-row: 4;
     }
   }
+}
+.obsolete {
+  background-image: repeating-linear-gradient(-45deg, $tombstone, $tombstone 15px, white 15px, white 30px);
+  opacity: 0.6;
 }
 </style>

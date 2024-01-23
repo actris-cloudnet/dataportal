@@ -581,7 +581,16 @@ describe("DELETE /api/files/", () => {
     await expect(fileRepo.findOneBy({ uuid: file.uuid })).resolves.toBeFalsy();
     await expect(fileQualityRepo.findOneBy({ uuid: file.uuid })).resolves.toBeFalsy();
     reports = await qualityReportRepo.findBy({ qualityUuid: file.uuid });
-    await expect(reports).toMatchObject([]);
+    expect(reports).toMatchObject([]);
+  });
+
+  it("Tombstone works", async () => {
+    const radarFile = await putDummyFile();
+    const headers = { authorization: `Basic ${str2base64("bob:bobs_pass")}` };
+    const url = `${backendPrivateUrl}api/files/${radarFile.uuid}`;
+    const body: any = { tombstoneReason: "Kaljaa" };
+    await axios.patch(url, body, { headers: headers });
+    return;
   });
 
   async function putDummyFile(fileType: string = "radar", volatile: boolean = true) {

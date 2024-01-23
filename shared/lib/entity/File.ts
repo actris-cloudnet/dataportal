@@ -36,6 +36,7 @@ export interface File {
   downloadUrl: string;
   software: Software[];
   dvasId: number | null;
+  tombstoneReason: string | null;
 }
 
 export interface RegularFile extends File {
