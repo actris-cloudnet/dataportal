@@ -263,23 +263,20 @@ main {
     border-radius: $border-radius;
     box-shadow: 0 0.1em 0.6em 0 rgba(0, 0, 0, 0.15);
     block-size: 100%;
+    position: relative;
 
-    &.obsolete {
-      position: relative;
-
-      &::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        background-image: repeating-linear-gradient(-45deg, #faf5ef, #faf5ef 15px, white 15px, white 30px);
-        opacity: 0.6;
-        pointer-events: none;
-        z-index: 100;
-        border-radius: $border-radius;
-      }
+    &.obsolete::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background-image: repeating-linear-gradient(-45deg, #faf5ef, #faf5ef 15px, white 15px, white 30px);
+      opacity: 0.6;
+      pointer-events: none;
+      z-index: 100;
+      border-radius: $border-radius;
     }
   }
 
