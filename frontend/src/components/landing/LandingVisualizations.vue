@@ -1,8 +1,8 @@
 <template>
   <div class="landing-visualizations-container pagewidth">
-    <div class="summary-box">
+    <div class="summary-box" :class="{ obsolete: response.tombstoneReason }">
       <template v-if="visualizations.length > 0">
-        <div class="visualizations" v-if="visualizations.length > 0" :class="{ obsolete: response.tombstoneReason }">
+        <div class="visualizations">
           <Visualization
             v-for="visualization in visualizations"
             :key="visualization.productVariable.id"
@@ -82,8 +82,5 @@ const linkToVisualizationSearch = computed(() => {
 }
 .link-to-viz {
   margin-top: 0.5rem;
-}
-.obsolete {
-  opacity: 0.6;
 }
 </style>

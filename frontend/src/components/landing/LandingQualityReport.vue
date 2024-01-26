@@ -340,8 +340,4 @@ function formatMessage(message: string): string {
     }
   }
 }
-.obsolete {
-  background-image: repeating-linear-gradient(-45deg, $tombstone, $tombstone 15px, white 15px, white 30px);
-  opacity: 0.6;
-}
 </style>

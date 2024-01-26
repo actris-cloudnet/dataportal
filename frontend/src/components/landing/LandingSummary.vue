@@ -87,11 +87,6 @@ const visualization = computed(() => {
   grid-column: 2;
 }
 
-.obsolete {
-  background-image: repeating-linear-gradient(-45deg, $tombstone, $tombstone 15px, white 15px, white 30px);
-  opacity: 0.6;
-}
-
 @media screen and (max-width: 1000px) {
   .landing-summary-container {
     grid-template-columns: 1fr;
