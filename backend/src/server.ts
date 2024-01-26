@@ -251,6 +251,14 @@ async function createServer(): Promise<void> {
     authorizator.verifyPermission(PermissionType.canGetStats),
     dlRoutes.stats,
   );
+  app.patch(
+    "/api/files/:uuid",
+    middleware.validateUuidParam,
+    authenticator.verifyCredentials(),
+    authorizator.verifyPermission(PermissionType.canDelete),
+    express.json(),
+    fileRoutes.addTombstone,
+  );
   app.delete(
     "/api/files/:uuid",
     middleware.validateUuidParam,

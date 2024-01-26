@@ -581,7 +581,32 @@ describe("DELETE /api/files/", () => {
     await expect(fileRepo.findOneBy({ uuid: file.uuid })).resolves.toBeFalsy();
     await expect(fileQualityRepo.findOneBy({ uuid: file.uuid })).resolves.toBeFalsy();
     reports = await qualityReportRepo.findBy({ qualityUuid: file.uuid });
-    await expect(reports).toMatchObject([]);
+    expect(reports).toMatchObject([]);
+  });
+
+  it("Patches file with tombstone and removes from search file", async () => {
+    const radarFile = await putDummyFile();
+    const headers = { authorization: `Basic ${str2base64("bob:bobs_pass")}` };
+    const url = `${backendPrivateUrl}api/files/${radarFile.uuid}`;
+    const body: any = { tombstoneReason: "Kaljaa" };
+    await expect(axios.patch(url, body, { headers: headers })).resolves.toMatchObject({ status: 200 });
+    const file = await fileRepo.findOneByOrFail({ uuid: radarFile.uuid });
+    expect(file.tombstoneReason).toEqual("Kaljaa");
+    const searchFile = await searchFileRepo.findOneBy({ uuid: radarFile.uuid });
+    return expect(searchFile).toBeNull();
+  });
+
+  it("Rejects bad tombstone payload", async () => {
+    const radarFile = await putDummyFile();
+    const headers = { authorization: `Basic ${str2base64("bob:bobs_pass")}` };
+    const url = `${backendPrivateUrl}api/files/${radarFile.uuid}`;
+    const badPayloads = [" ", "", 123];
+    for (const badPayload of badPayloads) {
+      const body: any = { tombstoneReason: badPayload };
+      await expect(axios.patch(url, body, { headers: headers })).rejects.toMatchObject({ response: { status: 422 } });
+      const searchFile = await searchFileRepo.findOneBy({ uuid: radarFile.uuid });
+      expect(searchFile).not.toBeNull();
+    }
   });
 
   async function putDummyFile(fileType: string = "radar", volatile: boolean = true) {

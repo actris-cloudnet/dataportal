@@ -1,8 +1,8 @@
 <template>
   <div class="landing-visualizations-container pagewidth">
-    <div class="summary-box">
+    <div class="summary-box" :class="{ obsolete: response.tombstoneReason }">
       <template v-if="visualizations.length > 0">
-        <div class="visualizations" v-if="visualizations.length > 0">
+        <div class="visualizations">
           <Visualization
             v-for="visualization in visualizations"
             :key="visualization.productVariable.id"
@@ -13,7 +13,7 @@
             linkToVocabulary
           />
         </div>
-        <div class="link-to-viz">
+        <div class="link-to-viz" v-if="!response.tombstoneReason">
           <router-link :to="linkToVisualizationSearch">View in visualisation search</router-link>
         </div>
       </template>

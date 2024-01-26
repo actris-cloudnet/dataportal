@@ -2,6 +2,11 @@
   <div v-if="isBusy"></div>
   <ApiError v-else-if="error" :response="response as any" />
   <main v-else-if="response" id="landing">
+    <div v-if="response.tombstoneReason" class="banner-container-obsolete">
+      <div class="banner pagewidth">
+        This data object is not suitable for use: {{ response.tombstoneReason.replace(/\.$/, "") }}.
+      </div>
+    </div>
     <div v-if="newestVersion" class="banner-container">
       <div class="banner pagewidth">
         There is a
@@ -227,6 +232,9 @@ main {
 .banner-container {
   background-color: $actris-yellow;
 }
+.banner-container-obsolete {
+  background-color: $red6;
+}
 
 .banner {
   padding-top: 1rem;
@@ -246,13 +254,30 @@ main {
 
 :deep() {
   .summary-box {
+    $border-radius: 5px;
+
     display: flex;
     flex-direction: column;
     padding: 2rem;
     background-color: white;
-    border-radius: 5px;
+    border-radius: $border-radius;
     box-shadow: 0 0.1em 0.6em 0 rgba(0, 0, 0, 0.15);
     block-size: 100%;
+    position: relative;
+
+    &.obsolete::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background-image: repeating-linear-gradient(-45deg, #faf5ef, #faf5ef 15px, white 15px, white 30px);
+      opacity: 0.6;
+      pointer-events: none;
+      z-index: 100;
+      border-radius: $border-radius;
+    }
   }
 
   .summary-section + .summary-section {
