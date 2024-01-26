@@ -3,7 +3,9 @@
   <ApiError v-else-if="error" :response="response as any" />
   <main v-else-if="response" id="landing">
     <div v-if="response.tombstoneReason" class="banner-container-obsolete">
-      <div class="banner pagewidth">{{ `This data object is not suitable for use - ${response.tombstoneReason}` }}</div>
+      <div class="banner pagewidth">
+        This data object is not suitable for use: {{ response.tombstoneReason.replace(/\.$/, "") }}.
+      </div>
     </div>
     <div v-if="newestVersion" class="banner-container">
       <div class="banner pagewidth">
