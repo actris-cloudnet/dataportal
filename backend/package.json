@@ -57,7 +57,7 @@
     "build": "tsc",
     "lint": "eslint . --ext .js,.ts",
     "lint-fix": "eslint . --ext .js,.ts --fix",
-    "typeorm": "typeorm-ts-node-esm",
+    "typeorm": "typeorm-ts-node-commonjs",
     "migration:run": "npm run typeorm migration:run -- --dataSource src/data-source.ts",
     "migration:revert": "npm run typeorm migration:revert -- --dataSource src/data-source.ts",
     "migration:show": "npm run typeorm migration:show -- --dataSource src/data-source.ts",
