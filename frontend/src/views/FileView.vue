@@ -105,7 +105,8 @@ const title = computed(() =>
 
 const currentVersionIndex = computed(() => {
   if (response.value == null) return null;
-  return versions.value.findIndex((uuid) => uuid == props.uuid);
+  const fileUuid = response.value.uuid;
+  return versions.value.findIndex((uuid) => uuid == fileUuid);
 });
 
 const newestVersion = computed(() => {
