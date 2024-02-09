@@ -23,6 +23,7 @@ export class SoftwareService {
       zenodoConceptId: "3666030",
     },
     "halo-reader": { humanReadableName: "HALO reader", githubRepository: "actris-cloudnet/halo-reader" },
+    "doppy": { humanReadableName: "Doppy", githubRepository: "actris-cloudnet/doppy" },
     "mwrpy": { humanReadableName: "MWRPy", githubRepository: "actris-cloudnet/mwrpy" },
     "voodoonet": {
       humanReadableName: "VoodooNet",
