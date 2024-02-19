@@ -70,6 +70,13 @@ describe("PUT /files/:s3key", () => {
     expect(dbRow1.updatedAt < dbRow2.updatedAt);
   });
 
+  it("fails to update volatile file with different UUID", async () => {
+    const file = volatileFile;
+    const replaceFile = { ...file, uuid: "b306288a-e96b-4aef-a614-6087b2416fd9" };
+    await expect(putFile(file)).resolves.toMatchObject({ status: 201 });
+    await expect(putFile(replaceFile)).rejects.toMatchObject({ response: { status: 501 } });
+  });
+
   it("inserting new version of an existing freezed file", async () => {
     await expect(putFile(stableFile)).resolves.toMatchObject({ status: 201 });
     const newVersion = {
@@ -351,6 +358,16 @@ describe("PUT /files/:s3key", () => {
     tmpfile2.checksum = "610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678";
     await expect(putFile(tmpfile1)).resolves.toMatchObject({ status: 201 });
     await expect(putFile(tmpfile2)).rejects.toMatchObject({ response: { status: 501 } });
+  });
+
+  it("replaces on freezed model file", async () => {
+    const tmpfile1 = { ...stableFile };
+    tmpfile1.product = "model";
+    tmpfile1.model = "ecmwf";
+    const tmpfile2 = { ...tmpfile1 };
+    tmpfile2.checksum = "610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678";
+    await expect(putFile(tmpfile1)).resolves.toMatchObject({ status: 201 });
+    await expect(putFile(tmpfile2)).resolves.toMatchObject({ status: 200 });
   });
 
   it("errors on invalid filename", async () => {
