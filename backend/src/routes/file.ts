@@ -224,8 +224,11 @@ export class FileRoutes {
           await transactionalEntityManager.save(FileClass, file);
         });
         res.sendStatus(201);
-      } else if (existingFile.site.isTestSite || existingFile.volatile) {
+      } else if (existingFile.site.isTestSite || existingFile.volatile || isModel) {
         // Replace existing
+        if (existingFile.uuid != file.uuid) {
+          return next({ status: 501, errors: ["UUID should match the existing file"] });
+        }
         file.createdAt = existingFile.createdAt;
         await this.dataSource.transaction(async (transactionalEntityManager) => {
           await transactionalEntityManager.save(FileClass, file);
@@ -234,7 +237,6 @@ export class FileRoutes {
         res.sendStatus(200);
       } else if (existingFile.uuid != file.uuid) {
         // New version
-        if (isModel) return next({ status: 501, errors: ["Versioning is not supported for model files."] });
         await this.dataSource.transaction(async (transactionalEntityManager) => {
           file.createdAt = file.updatedAt;
           await transactionalEntityManager.save(FileClass, file);
