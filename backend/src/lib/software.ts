@@ -24,7 +24,7 @@ export class SoftwareService {
     },
     "halo-reader": { humanReadableName: "HALO reader", githubRepository: "actris-cloudnet/halo-reader" },
     "doppy": { humanReadableName: "Doppy", githubRepository: "actris-cloudnet/doppy" },
-    "mwrpy": { humanReadableName: "MWRPy", githubRepository: "actris-cloudnet/mwrpy" },
+    "mwrpy": { humanReadableName: "MWRpy", githubRepository: "actris-cloudnet/mwrpy" },
     "voodoonet": {
       humanReadableName: "VoodooNet",
       githubRepository: "actris-cloudnet/voodoonet",
