@@ -112,6 +112,7 @@
               v-if="dataStatus"
               :dataStatus="dataStatus"
               :siteId="response.type.includes('hidden' as SiteType) ? '' : siteId"
+              :year="selectedYear"
             />
             <BaseSpinner v-else />
           </section>
@@ -128,6 +129,7 @@
               v-if="dataStatus"
               :dataStatus="dataStatus"
               :productId="selectedProductId"
+              :year="selectedYear"
             />
             <BaseSpinner v-else />
           </section>
@@ -137,6 +139,7 @@
               v-if="dataStatus"
               :dataStatus="dataStatus"
               :siteId="response.type.includes('hidden' as SiteType) ? '' : siteId"
+              :year="selectedYear"
             />
             <BaseSpinner v-else />
           </section>
@@ -144,15 +147,26 @@
       </main>
 
       <div v-if="dataStatus">
-        <div id="siteselect">
-          <custom-multiselect
-            v-if="dataStatus"
-            v-model="selectedProductId"
-            label="Product filter"
-            :options="dataStatus.availableProducts"
-            id="singleProductSelect"
-            :getIcon="getProductIcon"
-          />
+        <div class="viz-options">
+          <div class="viz-option" style="width: 300px">
+            <custom-multiselect
+              v-model="selectedProductId"
+              label="Product"
+              :options="dataStatus.availableProducts"
+              id="singleProductSelect"
+              :getIcon="getProductIcon"
+              clearable
+            />
+          </div>
+          <div class="viz-option" style="width: 130px">
+            <custom-multiselect
+              v-model="selectedYearOption"
+              label="Year"
+              :options="yearOptions"
+              id="yearSelect"
+              clearable
+            />
+          </div>
         </div>
         <a @click="reset" id="reset">Reset filter</a>
       </div>
@@ -223,6 +237,13 @@ const dataStatus = ref<DataStatus | null>(null);
 const nfName = ref<string>();
 const nfLink = ref<string>();
 const locations = ref<LocationsResult>({ status: "loading" });
+
+const selectedYearOption = ref(null);
+const selectedYear = computed(() => (selectedYearOption.value ? parseInt(selectedYearOption.value) : undefined));
+const yearOptions = computed(() => {
+  if (!dataStatus.value) return [];
+  return dataStatus.value.years.map((year) => ({ id: year.toString(), humanReadableName: year.toString() }));
+});
 
 const title = computed(() => [response.value?.humanReadableName, "Measurement sites"]);
 
@@ -313,6 +334,7 @@ const selectedProductName = computed(() => {
 
 function reset() {
   selectedProductId.value = null;
+  selectedYearOption.value = null;
 }
 
 async function handleInstrument(response: ReducedMetadataResponse): Promise<Instrument> {
@@ -393,9 +415,13 @@ async function fetchLatestLevel1Product() {
   padding: 0;
 }
 
-#siteselect {
-  padding-top: 25px;
-  width: 300px;
+.viz-options {
+  display: flex;
+  padding-top: 1rem;
+}
+
+.viz-option + .viz-option {
+  margin-left: 1rem;
 }
 
 #reset {

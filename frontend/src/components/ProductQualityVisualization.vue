@@ -10,6 +10,7 @@
       'no-data': 'No data',
     }"
     :colors="classColor"
+    :year="year"
   >
     <template #tooltip="{ date, data }">
       <div class="mega-tooltip">

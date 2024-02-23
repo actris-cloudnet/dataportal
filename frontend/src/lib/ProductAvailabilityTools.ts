@@ -115,6 +115,7 @@ export function missingData(products: ProductLevels) {
 export interface Props {
   siteId: string;
   dataStatus: DataStatus;
+  year?: number;
 }
 import type { DataStatus } from "@/lib/DataStatusParser";
 

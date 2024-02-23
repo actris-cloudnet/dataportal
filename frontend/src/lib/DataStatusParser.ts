@@ -29,6 +29,7 @@ export interface DataStatus {
   lvlTranslate: LvlTranslate;
   availableProducts: Product[];
   l2ProductCount: number;
+  years: number[];
 }
 
 function createProductLevels(lvlTranslate: LvlTranslate, productInfo?: ProductInfo, existingObj?: ProductLevels) {
@@ -74,7 +75,7 @@ export async function parseDataStatus(siteId: string): Promise<DataStatus> {
   const l2ProductCount = prodRes.data.filter((product) => product.level === "2" && !product.experimental).length;
   const allProducts = prodRes.data.filter((prod) => prod.level !== "3");
   if (!searchResponse || !allProducts || searchResponse.length == 0) {
-    return { allProducts, dates: [], lvlTranslate: {}, availableProducts: [], l2ProductCount: 0 };
+    return { allProducts, dates: [], lvlTranslate: {}, availableProducts: [], l2ProductCount: 0, years: [] };
   }
 
   const productMap = allProducts.reduce((map: Record<string, Product>, product) => {
@@ -106,5 +107,14 @@ export async function parseDataStatus(siteId: string): Promise<DataStatus> {
     {} as Record<string, ProductDate>,
   );
 
-  return { allProducts, dates: Object.values(dates), lvlTranslate, availableProducts, l2ProductCount };
+  const years = new Set(searchResponse.map((row) => parseInt(row.measurementDate.slice(0, 4))));
+
+  return {
+    allProducts,
+    dates: Object.values(dates),
+    lvlTranslate,
+    availableProducts,
+    l2ProductCount,
+    years: [...years],
+  };
 }
