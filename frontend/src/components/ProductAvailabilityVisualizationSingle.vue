@@ -11,6 +11,7 @@
       'no-data': 'No data',
     }"
     :colors="classColor"
+    :year="year"
   >
     <template #tooltip="{ date, data }">
       <div class="dataviz-tooltip">
@@ -39,6 +40,7 @@ import testMissingIcon from "@/assets/icons/test-missing.svg";
 export interface Props {
   dataStatus: DataStatus;
   productId: string;
+  year?: number;
 }
 
 const props = defineProps<Props>();

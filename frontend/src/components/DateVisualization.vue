@@ -1,6 +1,34 @@
 <template>
   <div>
-    <div class="years" ref="$years"></div>
+    <div class="year-viz-wrapper" v-if="year">
+      <table class="year-viz" v-memo="[yearGrid]">
+        <thead>
+          <tr>
+            <th></th>
+            <th v-for="header in monthLabels" :key="header.month" :colspan="header.length">
+              {{ MONTH_NAMES[header.month] }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(weekday, i) in yearGrid" :key="i">
+            <th>{{ i % 2 === 0 ? WEEKDAY_NAMES[i] : "" }}</th>
+            <td v-for="(column, j) in weekday" :key="j">
+              <component
+                :is="column.data?.link ? RouterLink : 'a'"
+                v-if="column !== undefined"
+                :to="column.data?.link"
+                @mouseenter="showYearVizTooltip(column, $event)"
+                @mouseleave="hideTooltip"
+              >
+                <div :style="{ background: column.data ? colors[column.data.color] : undefined }"></div>
+              </component>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="years" ref="$years" v-else></div>
     <div class="tooltip" ref="$tooltip" :style="tooltipStyle" v-if="$slots.tooltip && currentDate">
       <slot name="tooltip" :date="currentDate.date" :data="currentDate.data"></slot>
     </div>
@@ -16,6 +44,7 @@
 <script lang="ts" setup generic="T">
 import { compareValues, dateToString } from "@/lib";
 import { ref, computed, nextTick, watchEffect, type Ref } from "vue";
+import { RouterLink } from "vue-router";
 
 export type DataItem<X> = X & {
   date: string;
@@ -27,10 +56,12 @@ export interface Props<X> {
   legend: Record<string, string>;
   colors: Record<string, string>;
   data: DataItem<X>[];
+  year?: number;
 }
 
 interface DateItem<X> {
   date: string;
+  dateObj: Date;
   data: DataItem<X> | null;
 }
 
@@ -46,9 +77,15 @@ const tooltipStyle = ref<Record<string, string>>({});
 const $years = ref<HTMLDivElement | null>(null);
 const $tooltip = ref<HTMLDivElement | null>(null);
 
+/// Get day of the year in UTC.
 function dayOfYear(date: Date): number {
   const start = new Date(date.getUTCFullYear(), 0, 0);
   return Math.floor((date.getTime() - start.getTime()) / (24 * 60 * 60 * 1000));
+}
+
+/// Get day of the week in UTC. Returns 0 for Monday, 1 for Tuesday, and so on.
+function dayOfWeek(date: Date): number {
+  return (date.getUTCDay() + 6) % 7;
 }
 
 function initYear(year: number): YearItem<T> {
@@ -56,7 +93,7 @@ function initYear(year: number): YearItem<T> {
   const currentDate = new Date(`${year}-01-01`);
   const dates = [];
   while (currentDate.getUTCFullYear() == year && currentDate < today) {
-    dates.push({ date: dateToString(currentDate), data: null });
+    dates.push({ date: dateToString(currentDate), dateObj: new Date(currentDate), data: null });
     currentDate.setUTCDate(currentDate.getUTCDate() + 1);
   }
   return { year, dates };
@@ -75,6 +112,45 @@ const dataByYear = computed(() => {
   }
   return output;
 });
+
+const yearGrid = computed(() => {
+  const output: (DateItem<T> | undefined)[][] = [[], [], [], [], [], [], []];
+  const yearItem = dataByYear.value.find((item) => item.year === props.year);
+  if (!yearItem) return output;
+  const allDates = yearItem.dates;
+  const startIndex = dayOfWeek(allDates[0].dateObj);
+  for (let i = 0; i < startIndex; i++) {
+    output[i].push(undefined);
+  }
+  for (let i = 0; i < allDates.length; i++) {
+    output[(i + startIndex) % 7].push(allDates[i]);
+  }
+  return output;
+});
+
+const monthLabels = computed(() => {
+  if (!yearGrid.value) return;
+  const output = [{ month: 0, length: 0 }];
+  for (let i = 0; i < yearGrid.value[0].length; i++) {
+    let maxMonth = 0;
+    for (let j = 0; j < 7; j++) {
+      const month = yearGrid.value[j][i]?.dateObj.getUTCMonth();
+      if (typeof month !== "undefined" && month > maxMonth) {
+        maxMonth = month;
+      }
+    }
+    const item = output[output.length - 1];
+    if (item.month === maxMonth) {
+      item.length += 1;
+    } else {
+      output.push({ month: maxMonth, length: 1 });
+    }
+  }
+  return output;
+});
+
+const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const WEEKDAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 watchEffect(() => {
   if (!$years.value) return;
@@ -106,8 +182,8 @@ watchEffect(() => {
     const $canvas = document.createElement("canvas");
     $canvas.width = yearData.dates.length;
     $canvas.height = 1;
-    $canvas.addEventListener("mouseenter", (event) => setCurrentYearDate(yearData, event));
-    $canvas.addEventListener("mousemove", (event) => setCurrentYearDate(yearData, event));
+    $canvas.addEventListener("mouseenter", (event) => showFullVizTooltip(yearData, event));
+    $canvas.addEventListener("mousemove", (event) => showFullVizTooltip(yearData, event));
     $canvas.addEventListener("mouseleave", (_event) => hideTooltip());
     $wrapper.appendChild($canvas);
 
@@ -121,7 +197,7 @@ watchEffect(() => {
   });
 });
 
-function setCurrentYearDate(year: YearItem<T>, event: MouseEvent) {
+function showFullVizTooltip(year: YearItem<T>, event: MouseEvent) {
   const $canvas = event.target as HTMLElement;
   const canvasRect = $canvas.getBoundingClientRect();
   const dateIndex = Math.floor((year.dates.length * (event.clientX - canvasRect.x)) / canvasRect.width);
@@ -134,20 +210,36 @@ function setCurrentYearDate(year: YearItem<T>, event: MouseEvent) {
     $link.removeAttribute("href");
   }
 
-  nextTick(() => {
-    if (!$tooltip.value) return;
-    const tooltipWidth = $tooltip.value.getBoundingClientRect().width;
-    const tooltipMargin = 10;
-    const tooltipTop = canvasRect.top + 20;
-    const tooltipLeft = Math.min(
-      Math.max(tooltipMargin, canvasRect.x + dateIndex * (canvasRect.width / year.dates.length) - tooltipWidth / 2),
-      document.body.scrollWidth - tooltipWidth - tooltipMargin,
-    );
-    tooltipStyle.value = {
-      top: `${tooltipTop}px`,
-      left: `${tooltipLeft}px`,
-    };
-  });
+  const x = canvasRect.x + dateIndex * (canvasRect.width / year.dates.length);
+  const y = canvasRect.bottom;
+
+  nextTick(() => showTooltipAt(x, y));
+}
+
+function showYearVizTooltip(item: DateItem<T>, event: MouseEvent) {
+  currentDate.value = item;
+
+  const $target = event.target as HTMLElement;
+  const targetRect = $target.getBoundingClientRect();
+  const x = targetRect.x + targetRect.width / 2;
+  const y = targetRect.bottom;
+
+  nextTick(() => showTooltipAt(x, y));
+}
+
+function showTooltipAt(x: number, y: number) {
+  if (!$tooltip.value) return;
+  const tooltipWidth = $tooltip.value.getBoundingClientRect().width;
+  const tooltipMargin = 10;
+  const tooltipTop = y + 5;
+  const tooltipLeft = Math.min(
+    Math.max(tooltipMargin, x - tooltipWidth / 2),
+    document.body.scrollWidth - tooltipWidth - tooltipMargin,
+  );
+  tooltipStyle.value = {
+    top: `${tooltipTop}px`,
+    left: `${tooltipLeft}px`,
+  };
 }
 
 function hideTooltip() {
@@ -216,5 +308,48 @@ $year-height: 1rem;
   height: 1em;
   border: solid 1px rgba(0, 0, 0, 0.25);
   border-radius: 2px;
+}
+
+.year-viz-wrapper {
+  overflow-x: auto;
+}
+
+.year-viz {
+  $block-size: 12px;
+
+  th {
+    font-size: 10px;
+    color: #444;
+    height: $block-size;
+    line-height: $block-size;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  thead th {
+    padding-bottom: 2px;
+  }
+
+  tbody th {
+    padding-right: 2px;
+  }
+
+  td {
+    min-width: $block-size;
+  }
+
+  a {
+    display: block;
+    padding: 1px;
+    width: $block-size;
+    height: $block-size;
+  }
+
+  div {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    width: 100%;
+    height: 100%;
+  }
 }
 </style>
