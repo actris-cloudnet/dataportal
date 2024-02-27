@@ -28,6 +28,7 @@ import weatherStationIcon from "@/assets/icons/weather-station.png";
 import dopplerLidarIcon from "@/assets/icons/doppler-lidar.svg";
 import dopplerLidarWindIcon from "@/assets/icons/doppler-lidar-wind.svg";
 import rainRadarIcon from "@/assets/icons/rain-radar.svg";
+import pidIcon from "@/assets/icons/pid.png";
 
 import markerIconRed from "@/assets/markers/marker-icon-red.png";
 import markerIconBlue from "@/assets/markers/marker-icon-blue.png";
@@ -81,6 +82,8 @@ export const getProductIcon = (product: Product | string) => {
 };
 
 export const getInstrumentIcon = (instrument: Instrument) => getProductIcon(instrument.type);
+
+export const getPidIcon = () => pidIcon;
 
 export const humanReadableSize = (size: number) => {
   if (size == 0) return "0 B";
@@ -177,7 +180,7 @@ export function getQcIcon(errorLevel: string) {
   return testPassIcon;
 }
 
-export async function fetchInstrumentName(pid: string): Promise<string> {
+export async function fetchInstrumentName(pid: string, shortName: boolean = false): Promise<string> {
   const match = pid.match("^https?://hdl\\.handle\\.net/(.+)");
   if (!match) {
     throw new Error("Invalid PID format");
@@ -191,12 +194,17 @@ export async function fetchInstrumentName(pid: string): Promise<string> {
   }
 
   const nameItem = values.find((ele) => ele.type === "21.T11148/709a23220f2c3d64d1e1");
+
   if (!nameItem || !nameItem.data || nameItem.data.format !== "string" || !nameItem.data.value) {
     throw new Error("Invalid PID structure");
   }
   let nameValue = JSON.parse(nameItem.data.value);
   if (typeof nameValue !== "string") {
     throw new Error("Invalid PID content");
+  }
+
+  if (shortName) {
+    return nameValue;
   }
 
   const typeItem = values.find((ele) => ele.type === "21.T11148/f76ad9d0324302fc47dd");

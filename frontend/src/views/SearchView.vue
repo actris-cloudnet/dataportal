@@ -187,6 +187,20 @@
           />
         </div>
 
+        <details ref="detailsSection">
+          <summary>Advanced</summary>
+          <div class="filterbox">
+            <custom-multiselect
+              label="Instrument PID"
+              v-model="selectedInstrumentPids"
+              :options="allInstrumentPids"
+              :multiple="true"
+              id="instrumentPidSelect"
+              :getIcon="getPidIcon"
+            />
+          </div>
+        </details>
+
         <div class="filterbox">
           <BaseButton v-if="isVizMode" @click="navigateToSearch('data')" type="secondary" style="width: 100%">
             View in data search &rarr;
@@ -228,7 +242,7 @@ export default {
 
 <script lang="ts" setup>
 import { ref, computed, onMounted, watch, onUnmounted } from "vue";
-import axios from "axios";
+import axios, { all } from "axios";
 import type { Site, SiteType } from "@shared/entity/Site";
 import Datepicker, { type DateErrors } from "@/components/DatePicker.vue";
 import CustomMultiselect from "@/components/MultiSelect.vue";
@@ -245,6 +259,7 @@ import {
   getInstrumentIcon,
   backendUrl,
   compareValues,
+  getPidIcon,
 } from "@/lib";
 import VizSearchResult from "@/components/VizSearchResult.vue";
 import type { Product } from "@shared/entity/Product";
@@ -334,6 +349,22 @@ const variableOptions = computed(() => {
 const allInstruments = ref<Instrument[]>([]);
 const selectedInstrumentIds = useRouteQuery({ name: "instrument", defaultValue: [], type: queryStringArray });
 
+// instrument PIDs
+export interface InstrumentPid {
+  id: string;
+  humanReadableName: string;
+}
+
+const allInstrumentPids = ref<InstrumentPid[]>([]);
+const selectedInstrumentPids = useRouteQuery({ name: "instrumentPid", defaultValue: [], type: queryStringArray });
+
+const shouldOpenDetails = computed(() => {
+  return selectedInstrumentPids.value.length > 0;
+});
+
+const detailsSection = ref(null);
+const detailsOpen = ref(false);
+
 // other
 const renderComplete = ref(false);
 const vizWideMode = ref(false);
@@ -362,14 +393,19 @@ onUnmounted(() => {
 
 async function initView() {
   showDateRange.value = dateFrom.value !== dateTo.value;
-  const [sites, products, instruments] = await Promise.all([
+  const [sites, products, instruments, pids] = await Promise.all([
     initSites(),
     axios.get(`${backendUrl}products/variables`),
     axios.get(`${backendUrl}instruments`),
+    axios.get(`${backendUrl}raw-files/instrumentPids`),
   ]);
   allSites.value = sites.sort(alphabeticalSort);
   allProducts.value = products.data.sort(alphabeticalSort);
   allInstruments.value = instruments.data.sort(instrumentSort);
+  allInstrumentPids.value.push(
+    ...pids.data.sort().map((pid: string) => ({ id: pid, humanReadableName: pid.split("/").pop() })),
+  );
+
   if (
     !showExpProducts.value &&
     selectedProductIds.value.some((productId) => {
@@ -383,6 +419,11 @@ async function initView() {
     const site = allSites.value.find((site) => site.id === siteId);
     return site && !site.type.includes("cloudnet" as SiteType);
   });
+
+  if (selectedInstrumentPids.value.length > 0 && detailsSection.value) {
+    (detailsSection.value as HTMLDetailsElement).open = true;
+    detailsOpen.value = true;
+  }
 }
 
 async function initSites(): Promise<Site[]> {
@@ -401,6 +442,7 @@ function fetchData() {
     isBusy.value = true;
     const apiPath = isVizMode.value ? "visualizations/" : "search/";
     if (!isVizMode.value) checkIfButtonShouldBeActive();
+
     const payload = {
       site: selectedSiteIds.value.length ? selectedSiteIds.value : siteOptions.value.map((site) => site.id),
       dateFrom: isVizMode.value ? dateTo.value : dateFrom.value,
@@ -408,6 +450,7 @@ function fetchData() {
       product: selectedProductIds.value.length ? selectedProductIds.value : productOptions.value.map((prod) => prod.id),
       variable: isVizMode.value ? selectedVariableIds.value : undefined,
       instrument: selectedInstrumentIds.value.length ? selectedInstrumentIds.value : undefined,
+      instrumentPid: selectedInstrumentPids.value.length ? selectedInstrumentPids.value : undefined,
       showLegacy: true,
       privateFrontendOrder: true,
     };
@@ -533,7 +576,8 @@ const noSelectionsMade = computed(() => {
     selectedProductIds.value.length ||
     selectedSiteIds.value.length ||
     selectedVariableIds.value.length ||
-    selectedInstrumentIds.value.length
+    selectedInstrumentIds.value.length ||
+    selectedInstrumentPids.value.length
   );
 });
 
@@ -546,6 +590,7 @@ watch(
     selectedInstrumentIds.value,
     selectedProductIds.value,
     selectedVariableIds.value,
+    selectedInstrumentPids.value,
     siteOptions.value,
     productOptions.value,
   ],
@@ -834,5 +879,16 @@ span.centerlabel {
 
 .checkbox {
   margin-top: 0.25rem;
+}
+
+summary {
+  margin-left: 15px;
+  margin-top: 15px;
+  cursor: pointer;
+  list-style: disclosure-closed;
+}
+
+details[open] summary {
+  list-style: disclosure-open;
 }
 </style>

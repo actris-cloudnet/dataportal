@@ -1,6 +1,10 @@
-import { backendUrl, compareValues, notEmpty } from "@/lib/index";
+import { backendUrl, compareValues, fetchInstrumentName, notEmpty } from "@/lib/index";
 import type { Product } from "@shared/entity/Product";
 import axios from "axios";
+
+interface InstrumentPids {
+  [key: string]: { pid: string; humanReadableName: string }[];
+}
 
 export interface ProductInfo {
   id: string;
@@ -8,6 +12,7 @@ export interface ProductInfo {
   uuid: string;
   experimental: boolean;
   errorLevel?: string | null;
+  instrumentPid?: string | null;
 }
 
 export interface ProductLevels {
@@ -30,6 +35,7 @@ export interface DataStatus {
   availableProducts: Product[];
   l2ProductCount: number;
   years: number[];
+  allPids: InstrumentPids;
 }
 
 function createProductLevels(lvlTranslate: LvlTranslate, productInfo?: ProductInfo, existingObj?: ProductLevels) {
@@ -41,15 +47,16 @@ function createProductLevels(lvlTranslate: LvlTranslate, productInfo?: ProductIn
     };
   }
   if (productInfo) {
-    const { id, legacy, errorLevel, uuid, experimental } = productInfo;
+    const { id, legacy, uuid, experimental, errorLevel, instrumentPid } = productInfo;
     const lvl = lvlTranslate[id];
     if (!lvl) return existingObj;
     existingObj[lvl].push({
       id,
       legacy,
-      errorLevel,
       uuid,
       experimental,
+      errorLevel,
+      instrumentPid,
     });
   }
   return existingObj;
@@ -62,6 +69,7 @@ interface ProductAvailability {
   errorLevel: string;
   legacy: boolean;
   experimental: boolean;
+  instrumentPid: string;
 }
 
 export async function parseDataStatus(siteId: string): Promise<DataStatus> {
@@ -72,10 +80,19 @@ export async function parseDataStatus(siteId: string): Promise<DataStatus> {
     axios.get<Product[]>(`${backendUrl}products/`),
   ]);
   const searchResponse = searchRes.data;
+
   const l2ProductCount = prodRes.data.filter((product) => product.level === "2" && !product.experimental).length;
   const allProducts = prodRes.data.filter((prod) => prod.level !== "3");
   if (!searchResponse || !allProducts || searchResponse.length == 0) {
-    return { allProducts, dates: [], lvlTranslate: {}, availableProducts: [], l2ProductCount: 0, years: [] };
+    return {
+      allProducts,
+      dates: [],
+      lvlTranslate: {},
+      availableProducts: [],
+      l2ProductCount: 0,
+      years: [],
+      allPids: {},
+    };
   }
 
   const productMap = allProducts.reduce((map: Record<string, Product>, product) => {
@@ -97,6 +114,7 @@ export async function parseDataStatus(siteId: string): Promise<DataStatus> {
         uuid: cur.uuid,
         experimental: cur.experimental,
         errorLevel: "errorLevel" in cur ? cur.errorLevel : undefined,
+        instrumentPid: "instrumentPid" in cur ? cur.instrumentPid : undefined,
       };
       if (!obj[cur.measurementDate]) {
         obj[cur.measurementDate] = { date: cur.measurementDate, products: createProductLevels(lvlTranslate) };
@@ -109,6 +127,40 @@ export async function parseDataStatus(siteId: string): Promise<DataStatus> {
 
   const years = new Set(searchResponse.map((row) => parseInt(row.measurementDate.slice(0, 4))));
 
+  const allPids: InstrumentPids = {};
+  const pidLookup: { [key: string]: { [pid: string]: boolean } } = {};
+
+  availableProducts.forEach((product) => {
+    allPids[product.id] = [];
+    pidLookup[product.id] = {};
+  });
+
+  searchResponse.forEach((item) => {
+    if (item.instrumentPid && pidLookup[item.productId] && !pidLookup[item.productId][item.instrumentPid]) {
+      allPids[item.productId].push({
+        pid: item.instrumentPid,
+        humanReadableName: item.instrumentPid,
+      });
+      pidLookup[item.productId][item.instrumentPid] = true;
+    }
+  });
+
+  await Promise.all(
+    Object.entries(allPids).map(async ([_, pids]) => {
+      await Promise.all(
+        pids.map(async (p) => {
+          if (!p.pid) return;
+          try {
+            p.humanReadableName = await fetchInstrumentName(p.pid, true);
+          } catch (error) {
+            console.error(`Error fetching name for PID ${p.pid}:`, error);
+            p.humanReadableName = p.pid;
+          }
+        }),
+      );
+    }),
+  );
+
   return {
     allProducts,
     dates: Object.values(dates),
@@ -116,5 +168,6 @@ export async function parseDataStatus(siteId: string): Promise<DataStatus> {
     availableProducts,
     l2ProductCount,
     years: [...years],
+    allPids,
   };
 }

@@ -121,7 +121,8 @@
         <section id="product_quality" class="graph">
           <header>
             Product quality
-            <template v-if="selectedProductName">/ availability ({{ selectedProductName }})</template>
+            <template v-if="selectedProductName">/ availability - {{ selectedProductName }} </template>
+            <template v-if="instrumentName"> ({{ instrumentName }})</template>
           </header>
 
           <section class="details" v-if="selectedProductId">
@@ -130,6 +131,7 @@
               :dataStatus="dataStatus"
               :productId="selectedProductId"
               :year="selectedYear"
+              :instrumentPid="selectedPid"
             />
             <BaseSpinner v-else />
           </section>
@@ -164,6 +166,15 @@
               label="Year"
               :options="yearOptions"
               id="yearSelect"
+              clearable
+            />
+          </div>
+          <div class="viz-option" style="width: 300px" v-if="pidOptions.length > 1">
+            <custom-multiselect
+              v-model="selectedPidOption"
+              label="Instrument"
+              :options="pidOptions"
+              id="pidSelect"
               clearable
             />
           </div>
@@ -239,10 +250,33 @@ const nfLink = ref<string>();
 const locations = ref<LocationsResult>({ status: "loading" });
 
 const selectedYearOption = ref(null);
+const selectedPidOption = ref(null);
 const selectedYear = computed(() => (selectedYearOption.value ? parseInt(selectedYearOption.value) : undefined));
+const selectedPid = computed(() => (selectedPidOption.value ? selectedPidOption.value : undefined));
+
 const yearOptions = computed(() => {
   if (!dataStatus.value) return [];
   return dataStatus.value.years.map((year) => ({ id: year.toString(), humanReadableName: year.toString() }));
+});
+
+const pidOptions = computed(() => {
+  const { value: dataStatusValue } = dataStatus;
+  const { value: selectedProductIdValue } = selectedProductId;
+  if (!dataStatusValue || !selectedProductIdValue || !dataStatusValue.allPids[selectedProductIdValue]) {
+    return [];
+  }
+  return dataStatusValue.allPids[selectedProductIdValue].map((pid) => ({
+    id: pid.pid,
+    humanReadableName: pid.humanReadableName,
+  }));
+});
+
+const instrumentName = computed(() => {
+  if (!selectedPidOption.value && pidOptions.value.length === 1) {
+    return pidOptions.value[0].humanReadableName;
+  }
+  const selectedPid = pidOptions.value.find((pid) => pid.id === selectedPidOption.value);
+  return selectedPid ? selectedPid.humanReadableName : null;
 });
 
 const title = computed(() => [response.value?.humanReadableName, "Measurement sites"]);
@@ -335,7 +369,12 @@ const selectedProductName = computed(() => {
 function reset() {
   selectedProductId.value = null;
   selectedYearOption.value = null;
+  selectedPidOption.value = null;
 }
+
+watch(selectedProductId, () => {
+  selectedPidOption.value = null;
+});
 
 async function handleInstrument(response: ReducedMetadataResponse): Promise<Instrument> {
   if (response.instrumentPid) {

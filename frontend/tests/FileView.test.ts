@@ -40,7 +40,7 @@ describe("FileView.vue", () => {
     resources = await readResources();
     axiosMockWithFileUuid = (uuid: string | string[]) => {
       let nreq = 0;
-      return (url: string, req: AxiosRequestConfig | undefined): AxiosPromise => {
+      return (url: string, _req: AxiosRequestConfig | undefined): AxiosPromise => {
         if (url.includes("visualization")) {
           return Promise.resolve(augmentAxiosResponse(visualizationResponse));
         } else if (url.includes("/sites")) {

@@ -33,6 +33,7 @@ import { Visualization } from "../entity/Visualization";
 import { ModelVisualization } from "../entity/ModelVisualization";
 import { Product } from "../entity/Product";
 import { SoftwareService } from "../lib/software";
+import { InstrumentPidView } from "../entity/Upload";
 
 export class FileRoutes {
   constructor(dataSource: DataSource) {
@@ -46,6 +47,7 @@ export class FileRoutes {
     this.productRepo = dataSource.getRepository(Product);
     this.fileQualityRepo = dataSource.getRepository(FileQuality);
     this.softwareService = new SoftwareService(dataSource);
+    this.instrumentPidView = dataSource.getRepository(InstrumentPidView);
   }
 
   readonly dataSource: DataSource;
@@ -58,6 +60,7 @@ export class FileRoutes {
   readonly productRepo: Repository<Product>;
   readonly fileQualityRepo: Repository<FileQuality>;
   readonly softwareService: SoftwareService;
+  readonly instrumentPidView: Repository<InstrumentPidView>;
 
   file: RequestHandler = async (req: Request, res: Response, next) => {
     const getFileByUuid = (repo: Repository<RegularFile | ModelFile>, isModel: boolean | undefined) => {
@@ -395,13 +398,13 @@ export class FileRoutes {
     if (!isModel && query.instrument) qb.andWhere("file.instrument IN (:...instrument)", query);
 
     // Hack to prevent loading of model files when instrument is selected without product
-    if (isModel && query.instrument) qb.andWhere("1 = 0");
+    if (isModel && (query.instrument || query.instrumentPid)) qb.andWhere("1 = 0");
 
     if (query.filename) qb.andWhere("regexp_replace(s3key, '.+/', '') IN (:...filename)", query); // eslint-disable-line quotes
     if (query.releasedBefore) qb.andWhere("file.updatedAt < :releasedBefore", query);
     if (query.updatedAtFrom) qb.andWhere("file.updatedAt >= :updatedAtFrom", query);
     if (query.updatedAtTo) qb.andWhere("file.updatedAt <= :updatedAtTo", query);
-    if (query.instrumentPid) qb.andWhere("file.instrumentPid IN (:...instrumentPid)", query);
+    if (!isModel && query.instrumentPid) qb.andWhere("file.instrumentPid IN (:...instrumentPid)", query);
     if (query.dvasUpdated) {
       const value = query.dvasUpdated.toLowerCase();
       if (value == "true") qb.andWhere("file.dvasUpdatedAt IS NOT NULL");
@@ -457,6 +460,7 @@ export class FileRoutes {
       .leftJoinAndSelect("file.instrument", "instrument");
     qb = addCommonFilters(qb, query);
     if (query.instrument) qb.andWhere("instrument.id IN (:...instrument)", query);
+    if (query.instrumentPid) qb.andWhere("file.instrumentPid IN (:...instrumentPid)", query);
     qb.orderBy("file.measurementDate", "DESC")
       .addOrderBy("file.siteId", "ASC")
       .addOrderBy("product.level", "ASC")

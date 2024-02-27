@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { ProductInfo } from "@/lib/DataStatusParser";
+import type { ProductDate, ProductInfo } from "@/lib/DataStatusParser";
 import { classColor, type ColorClass } from "@/lib";
 import DateVisualization from "./DateVisualization.vue";
 import { isLegacy, isError, isWarning, isInfo, qualityExists, isPass } from "@/lib/ProductAvailabilityTools";
@@ -41,19 +41,30 @@ export interface Props {
   dataStatus: DataStatus;
   productId: string;
   year?: number;
+  instrumentPid?: string;
 }
 
 const props = defineProps<Props>();
+
+const getProduct = (date: ProductDate, pid: string | undefined, productId: string) => {
+  if (pid) {
+    return date.products["1b"].find((p) => p.instrumentPid == pid);
+  } else {
+    return (
+      date.products["1b"].find((p) => p.id == productId) ||
+      date.products["1c"].find((p) => p.id == productId) ||
+      date.products["2"].find((p) => p.id == productId)
+    );
+  }
+};
+
 const dates = computed(() =>
   props.dataStatus.dates.map((date) => {
-    const product =
-      date.products["1b"].find((p) => p.id == props.productId) ||
-      date.products["1c"].find((p) => p.id == props.productId) ||
-      date.products["2"].find((p) => p.id == props.productId);
+    const product = getProduct(date, props.instrumentPid, props.productId);
     return {
       date: date.date,
-      color: createColor(product!),
-      link: createLink(product!),
+      color: createColor(product),
+      link: createLink(product),
       product,
     };
   }),
