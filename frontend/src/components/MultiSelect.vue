@@ -35,6 +35,13 @@
         {{ slotProps.option.shortName || slotProps.option.humanReadableName }}
         <span v-if="slotProps.option.experimental" class="option__tag">EXP</span>
       </template>
+      <template #clear>
+        <div
+          class="multiselect__clear"
+          v-if="clearable && !multiple && internalModel"
+          @mousedown="internalModel = null"
+        ></div>
+      </template>
       <template #noResult>
         <span id="noRes">Not found</span>
       </template>
@@ -47,7 +54,6 @@ import VueMultiselect from "vue-multiselect";
 import { compareValues, notEmpty } from "@/lib";
 import { computed, ref, watch } from "vue";
 import type { PropType } from "vue";
-import { setOptions } from "leaflet";
 
 export interface Option {
   id: string;
@@ -73,6 +79,7 @@ const props = defineProps({
     validator: (v: any) => typeof v === "string" || Array.isArray(v) || v === null,
   },
   disabled: Boolean,
+  clearable: Boolean,
 });
 
 const emit = defineEmits<{
@@ -249,5 +256,39 @@ watch(
 .multiselect__tag.experimental-background,
 .multiselect__tag.experimental-background i:hover {
   background-color: rgba($experimental, 0.3);
+}
+
+.multiselect__clear {
+  position: absolute;
+  right: 41px;
+  height: 40px;
+  width: 20px;
+  display: block;
+  cursor: pointer;
+  z-index: 3;
+
+  &:hover {
+    opacity: 0.75;
+  }
+
+  &::before,
+  &::after {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 3px;
+    height: 16px;
+    background: #aaa;
+    top: 12px;
+    right: 4px;
+  }
+
+  &::before {
+    transform: rotate(45deg);
+  }
+
+  &::after {
+    transform: rotate(-45deg);
+  }
 }
 </style>
