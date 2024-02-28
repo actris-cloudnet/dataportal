@@ -27,6 +27,7 @@
             :options="sites"
             style="width: 300px"
             :disabled="visitStatistics"
+            clearable
           />
           <span>or</span>
           <MultiSelect
@@ -36,6 +37,7 @@
             :options="countries"
             style="width: 300px"
             :disabled="visitStatistics"
+            clearable
           />
         </div>
         <fieldset class="field" :disabled="visitStatistics">
