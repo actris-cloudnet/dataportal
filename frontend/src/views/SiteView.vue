@@ -431,6 +431,7 @@ async function fetchLatestLevel1Product() {
   margin-bottom: 2rem;
   margin-top: 20px;
   display: block;
+  width: 100px;
 }
 
 #instruments {
