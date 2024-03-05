@@ -189,6 +189,7 @@
 
         <details ref="detailsSection">
           <summary>Advanced</summary>
+          <div class="link-to-instrument-db"><a href="https://instrumentdb.out.ocp.fmi.fi/">(find instruments)</a></div>
           <div class="filterbox">
             <custom-multiselect
               label="Instrument PID"
@@ -242,7 +243,7 @@ export default {
 
 <script lang="ts" setup>
 import { ref, computed, onMounted, watch, onUnmounted } from "vue";
-import axios, { all } from "axios";
+import axios from "axios";
 import type { Site, SiteType } from "@shared/entity/Site";
 import Datepicker, { type DateErrors } from "@/components/DatePicker.vue";
 import CustomMultiselect from "@/components/MultiSelect.vue";
@@ -355,12 +356,10 @@ export interface InstrumentPid {
   humanReadableName: string;
 }
 
+const showPopUp = ref(false);
+
 const allInstrumentPids = ref<InstrumentPid[]>([]);
 const selectedInstrumentPids = useRouteQuery({ name: "instrumentPid", defaultValue: [], type: queryStringArray });
-
-const shouldOpenDetails = computed(() => {
-  return selectedInstrumentPids.value.length > 0;
-});
 
 const detailsSection = ref(null);
 const detailsOpen = ref(false);
@@ -890,5 +889,17 @@ summary {
 
 details[open] summary {
   list-style: disclosure-open;
+}
+
+.link-to-instrument-db {
+  position: absolute;
+  margin-top: 18px;
+  margin-left: 117px;
+  font-size: 80%;
+  color: gray;
+}
+
+.link-to-instrument-db a {
+  color: gray;
 }
 </style>
