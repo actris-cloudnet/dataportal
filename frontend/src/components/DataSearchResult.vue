@@ -79,7 +79,9 @@
           </BaseButton>
           <br />
           <span v-if="!downloadFailed" class="download-size" :class="{ disabled: isBusy || downloadIsBusy }">
-            {{ listLength }} files ({{ humanReadableSize(combinedFileSize(apiResponse)) }})
+            {{ listLength }} {{ listLength === 1 ? "file" : "files" }} ({{
+              humanReadableSize(combinedFileSize(apiResponse))
+            }})
           </span>
           <div v-else class="download-size errormsg">
             {{ dlFailedMessage || "Download failed!" }}
