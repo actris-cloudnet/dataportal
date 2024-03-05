@@ -396,7 +396,7 @@ async function initView() {
     initSites(),
     axios.get(`${backendUrl}products/variables`),
     axios.get(`${backendUrl}instruments`),
-    axios.get(`${backendUrl}raw-files/instrumentPids`),
+    axios.get(`${backendUrl}raw-files/instrument-pids`),
   ]);
   allSites.value = sites.sort(alphabeticalSort);
   allProducts.value = products.data.sort(alphabeticalSort);

@@ -46,29 +46,28 @@ export interface Props {
 
 const props = defineProps<Props>();
 
-const getProduct = (date: ProductDate, pid: string | undefined, productId: string) => {
-  if (pid) {
-    return date.products["1b"].find((p) => p.instrumentPid == pid);
-  } else {
-    return (
-      date.products["1b"].find((p) => p.id == productId) ||
-      date.products["1c"].find((p) => p.id == productId) ||
-      date.products["2"].find((p) => p.id == productId)
-    );
-  }
-};
-
 const dates = computed(() =>
   props.dataStatus.dates.map((date) => {
-    const product = getProduct(date, props.instrumentPid, props.productId);
+    const product = getProduct(date, props.productId, props.instrumentPid);
     return {
       date: date.date,
-      color: createColor(product),
-      link: createLink(product),
+      color: createColor(product!),
+      link: createLink(product!),
       product,
     };
   }),
 );
+
+const getProduct = (date: ProductDate, productId: string, pid: string | undefined) => {
+  if (pid) {
+    return date.products["1b"].find((p) => p.instrumentPid == pid);
+  }
+  return (
+    date.products["1b"].find((p) => p.id == productId) ||
+    date.products["1c"].find((p) => p.id == productId) ||
+    date.products["2"].find((p) => p.id == productId)
+  );
+};
 
 function createLink(product?: ProductInfo): string | undefined {
   if (product) {

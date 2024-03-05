@@ -163,7 +163,7 @@ async function createServer(): Promise<void> {
     middleware.checkParamsExistInDb,
     uploadRoutes.listMetadata(false),
   );
-  app.get("/api/raw-files/instrumentPids", uploadRoutes.listInstrumentPids);
+  app.get("/api/raw-files/instrument-pids", uploadRoutes.listInstrumentPids);
 
   // public/internal
   app.get("/api/uploaded-metadata", uploadRoutes.listInstrumentsFromMetadata);
