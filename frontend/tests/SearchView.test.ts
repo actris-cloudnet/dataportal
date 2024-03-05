@@ -56,6 +56,7 @@ describe("SearchView.vue", () => {
         "/search": "allsearch",
         "/products": "products-with-variables",
         "/instruments": "instruments",
+        "/raw-files/instrumentPids": "instrument-pids",
       };
       const resourceKey = Object.keys(resourceMappings).find((key) => url.includes(key));
       if (resourceKey) {
