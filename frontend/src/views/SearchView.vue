@@ -188,7 +188,7 @@
         </div>
 
         <details ref="detailsSection">
-          <summary>Advanced</summary>
+          <summary style="font-variant: small-caps">advanced</summary>
           <div class="link-to-instrument-db"><a href="https://instrumentdb.out.ocp.fmi.fi/">(find instruments)</a></div>
           <div class="filterbox">
             <custom-multiselect
