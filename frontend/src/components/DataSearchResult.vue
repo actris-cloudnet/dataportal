@@ -5,7 +5,7 @@
         <h3 class="results-title">Results</h3>
         <div class="results-subtitle" v-if="!simplifiedView && listLength > 0">
           <span v-if="isBusy">Searching...</span>
-          <span v-else>Found {{ listLength }} results</span>
+          <span v-else>Found {{ listLength }} {{ listLength === 1 ? "result" : "results" }}</span>
           <ul class="legend">
             <li v-if="hasVolatile"><span class="rowtag volatile rounded"></span> volatile</li>
             <li v-if="hasLegacy"><span class="rowtag legacy rounded"></span> legacy</li>
