@@ -361,8 +361,7 @@ const showPopUp = ref(false);
 const allInstrumentPids = ref<InstrumentPid[]>([]);
 const selectedInstrumentPids = useRouteQuery({ name: "instrumentPid", defaultValue: [], type: queryStringArray });
 
-const detailsSection = ref(null);
-const detailsOpen = ref(false);
+const detailsSection = ref<HTMLDetailsElement | null>(null);
 
 // other
 const renderComplete = ref(false);
@@ -420,8 +419,7 @@ async function initView() {
   });
 
   if (selectedInstrumentPids.value.length > 0 && detailsSection.value) {
-    (detailsSection.value as HTMLDetailsElement).open = true;
-    detailsOpen.value = true;
+    detailsSection.value.open = true;
   }
 }
 

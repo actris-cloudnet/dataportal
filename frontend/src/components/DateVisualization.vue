@@ -252,7 +252,7 @@ $year-height: 1rem;
 
 .years {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: min-content auto;
   column-gap: 0.5rem;
   row-gap: 6px;
 }
@@ -282,6 +282,7 @@ $year-height: 1rem;
   font-size: 90%;
   line-height: $year-height;
   height: $year-height;
+  white-space: nowrap;
 }
 
 .tooltip {

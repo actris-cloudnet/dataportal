@@ -146,8 +146,8 @@ export async function parseDataStatus(siteId: string): Promise<DataStatus> {
   });
 
   await Promise.all(
-    Object.entries(allPids).map(async ([_, pids]) => {
-      await Promise.all(
+    Object.values(allPids).map((pids) =>
+      Promise.all(
         pids.map(async (p) => {
           if (!p.pid) return;
           try {
@@ -157,8 +157,8 @@ export async function parseDataStatus(siteId: string): Promise<DataStatus> {
             p.humanReadableName = p.pid;
           }
         }),
-      );
-    }),
+      ),
+    ),
   );
 
   return {
