@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
-import { File, RegularFile } from "./File";
+import { RegularFile } from "./File";
 import { ProductVariable } from "./ProductVariable";
 
 export interface Dimensions {

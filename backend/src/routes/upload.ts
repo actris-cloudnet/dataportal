@@ -25,6 +25,7 @@ import * as http from "http";
 import ReadableStream = NodeJS.ReadableStream;
 import env from "../lib/env";
 import { QueueService } from "../lib/queue";
+import { InstrumentPidView } from "../entity/Upload";
 
 export class UploadRoutes {
   constructor(dataSource: DataSource, queueService: QueueService) {
@@ -37,6 +38,7 @@ export class UploadRoutes {
     this.modelFileRepo = this.dataSource.getRepository(ModelFile);
     this.regularFileRepo = this.dataSource.getRepository(RegularFile);
     this.queueService = queueService;
+    this.instrumentPidView = this.dataSource.getRepository(InstrumentPidView);
   }
 
   readonly dataSource: DataSource;
@@ -48,6 +50,7 @@ export class UploadRoutes {
   readonly modelFileRepo: Repository<ModelFile>;
   readonly regularFileRepo: Repository<RegularFile>;
   readonly queueService: QueueService;
+  readonly instrumentPidView: Repository<InstrumentPidView>;
 
   postMetadata: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body;
@@ -198,6 +201,16 @@ export class UploadRoutes {
       )) as InstrumentUpload[];
       const reducedMetadataResponses = instrumentUploads.map((md) => new ReducedMetadataResponse(md));
       res.send(reducedMetadataResponses);
+    } catch (error) {
+      next({ status: 500, errors: error });
+    }
+  };
+
+  listInstrumentPids: RequestHandler = async (req, res, next) => {
+    try {
+      const result = await this.instrumentPidView.find();
+      const instrumentPids = result.map((row) => row.instrumentPid);
+      res.send(instrumentPids);
     } catch (error) {
       next({ status: 500, errors: error });
     }

@@ -1,4 +1,14 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, ManyToOne, PrimaryColumn, Unique } from "typeorm";
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryColumn,
+  Unique,
+  ViewColumn,
+  ViewEntity,
+} from "typeorm";
 import { Site } from "./Site";
 import { Instrument } from "./Instrument";
 import { Model } from "./Model";
@@ -106,4 +116,13 @@ export class ModelUpload extends Upload {
     super(args);
     this.model = model;
   }
+}
+
+@ViewEntity({
+  expression: `SELECT DISTINCT "instrumentPid" FROM instrument_upload`,
+  materialized: true,
+})
+export class InstrumentPidView {
+  @ViewColumn()
+  instrumentPid!: string;
 }

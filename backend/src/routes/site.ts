@@ -149,8 +149,8 @@ export class SiteRoutes {
           'file."errorLevel" AS "errorLevel"',
           "file.legacy AS legacy",
           "product.experimental AS experimental",
+          'file."instrumentPid"::text AS "instrumentPid"',
         ])
-        .distinctOn(['file."measurementDate"', "file.productId", "file.errorLevel"])
         .leftJoin("file.product", "product")
         .where("file.siteId = :siteId", { siteId: req.params.siteId })
         .orderBy("file.measurementDate", "DESC")
