@@ -69,7 +69,7 @@ const linkToVisualizationSearch = computed(() => {
       product: response.product.id,
       dateFrom: response.measurementDate,
       dateTo: response.measurementDate,
-      instrumentPid: "instrumentPid" in response ? response.instrumentPid : undefined,
+      instrumentPid: "instrumentPid" in response && response.instrumentPid ? response.instrumentPid : undefined,
     },
   };
 });
