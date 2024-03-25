@@ -33,6 +33,12 @@ export class VisualizationRoutes {
     } catch (err) {
       return next({ status: 400, errors: err });
     }
+    if (!body.sourceFileId) {
+      return next({ status: 400, errors: "sourceFileId is missing" });
+    }
+    if (!body.variableId) {
+      return next({ status: 400, errors: "variableId is missing" });
+    }
     try {
       const [file, productVariable] = await Promise.all([
         this.fileController.findAnyFile((repo) => repo.findOne({ where: { uuid: body.sourceFileId } })),
