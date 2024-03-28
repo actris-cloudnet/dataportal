@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import defaultLogo from "@/assets/header-logo.svg";
+import foolLogo from "@/assets/header-logo-fool.svg";
 import xmasLogo from "@/assets/header-logo-xmas.svg";
 import { ref } from "vue";
 
 const isDev = import.meta.env.DEV;
-const isXmas = !isDev && new Date().getMonth() === 11;
-const logo = isXmas ? xmasLogo : defaultLogo;
+const today = new Date();
+const isXmas = !isDev && today.getMonth() === 11;
+const isFool = !isDev && today.getMonth() === 3 && today.getDate() === 1;
+const logo = isXmas ? xmasLogo : isFool ? foolLogo : defaultLogo;
 const showMenu = ref(false);
 </script>
 
 <template>
-  <header :class="{ dev: isDev, xmas: isXmas }">
+  <header :class="{ dev: isDev, xmas: isXmas, fool: isFool }">
     <div class="container pagewidth">
       <a href="/" class="logo">
         <img :src="logo" alt="Cloudnet data portal" />
@@ -90,6 +93,10 @@ header {
     background-size: auto, auto, auto, cover;
     background-repeat: no-repeat, repeat, no-repeat, no-repeat;
   }
+
+  &.fool::before {
+    background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 1)), url("@/assets/clouds3.jpg");
+  }
 }
 
 .container {
@@ -114,6 +121,10 @@ img {
     header.xmas & {
       transform: scale(1.8);
       padding: 0 2rem;
+    }
+
+    header.fool & {
+      filter: drop-shadow(1px 2px 2px rgba(255, 0, 0, 0.5));
     }
   }
 }
