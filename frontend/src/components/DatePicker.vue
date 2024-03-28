@@ -14,6 +14,7 @@
       <v-date-picker
         locale="en-gb"
         v-model="dateValue"
+        timezone="UTC"
         :popover="{ placement: 'bottom' }"
         :input-debounce="100"
         :min-date="start"
