@@ -1,8 +1,5 @@
 <template>
   <main id="frontpage">
-    <div class="banner">
-      Enjoying Cloudnet data portal? Share <router-link :to="{ name: 'Feedback' }">your feedback</router-link>!
-    </div>
     <header class="logos">
       <img alt="Actris logo" :src="actrisLogo" />
       <img alt="Cloudnet logo" :src="cloudnetLogo" style="padding-top: 2em" />
@@ -51,26 +48,12 @@ import BaseButton from "@/components/BaseButton.vue";
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
-
-.banner {
-  padding: 1rem;
-  text-align: center;
-  background-color: $actris-yellow;
-  width: 100%;
-  margin-bottom: 3rem;
-  border-radius: 8px;
-
-  a {
-    font-weight: 600;
-  }
-}
 main#frontpage {
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem 1rem;
+  padding: 3rem 1rem;
   margin: 0 auto;
 }
 
