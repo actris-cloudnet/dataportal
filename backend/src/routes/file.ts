@@ -33,7 +33,7 @@ import { Visualization } from "../entity/Visualization";
 import { ModelVisualization } from "../entity/ModelVisualization";
 import { Product } from "../entity/Product";
 import { SoftwareService } from "../lib/software";
-import { InstrumentPidView } from "../entity/Upload";
+import { InstrumentInfo } from "../entity/Instrument";
 
 export class FileRoutes {
   constructor(dataSource: DataSource) {
@@ -46,8 +46,8 @@ export class FileRoutes {
     this.modelVisualizationRepo = dataSource.getRepository(ModelVisualization);
     this.productRepo = dataSource.getRepository(Product);
     this.fileQualityRepo = dataSource.getRepository(FileQuality);
+    this.instrumentInfoRepo = dataSource.getRepository(InstrumentInfo);
     this.softwareService = new SoftwareService(dataSource);
-    this.instrumentPidView = dataSource.getRepository(InstrumentPidView);
   }
 
   readonly dataSource: DataSource;
@@ -59,8 +59,8 @@ export class FileRoutes {
   readonly modelVisualizationRepo: Repository<ModelVisualization>;
   readonly productRepo: Repository<Product>;
   readonly fileQualityRepo: Repository<FileQuality>;
+  readonly instrumentInfoRepo: Repository<InstrumentInfo>;
   readonly softwareService: SoftwareService;
-  readonly instrumentPidView: Repository<InstrumentPidView>;
 
   file: RequestHandler = async (req: Request, res: Response, next) => {
     const getFileByUuid = (repo: Repository<RegularFile | ModelFile>, isModel: boolean | undefined) => {
@@ -70,8 +70,12 @@ export class FileRoutes {
         .leftJoinAndSelect("file.product", "product")
         .leftJoinAndSelect("file.software", "software")
         .orderBy('COALESCE(software."humanReadableName", software.code)', "ASC");
-      const prop = isModel ? "model" : "instrument";
-      qb.leftJoinAndSelect(`file.${prop}`, prop);
+      if (isModel) {
+        qb.leftJoinAndSelect("file.model", "model");
+      } else {
+        qb.leftJoinAndSelect("file.instrument", "instrument");
+        qb.leftJoinAndSelect("file.instrumentInfo", "instrumentInfo");
+      }
       qb.where("file.uuid = :uuid", req.params);
       return hideTestDataFromNormalUsers<RegularFile | ModelFile>(qb, req).getOne();
     };
@@ -195,6 +199,19 @@ export class FileRoutes {
           this.softwareService.getSoftware(code, version as string),
         ),
       );
+    }
+
+    if (file.instrumentPid) {
+      file.instrumentInfo = await this.instrumentInfoRepo.findOne({
+        where: { pid: file.instrumentPid },
+        relations: { instrument: true },
+      });
+      if (!file.instrumentInfo) {
+        return next({ status: 422, errors: "Unknown instrument PID" });
+      }
+      if (file.instrument !== file.instrumentInfo.instrument.id) {
+        return next({ status: 422, errors: "Instrument doesn't match instrument PID" });
+      }
     }
 
     try {

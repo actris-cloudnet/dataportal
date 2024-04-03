@@ -19,7 +19,7 @@ describe("POST /api/collection", () => {
     dataSource = await AppDataSource.initialize();
     repo = dataSource.getRepository(Collection);
     fileRepo = dataSource.getRepository(RegularFile);
-    await fileRepo.save(JSON.parse((await fsp.readFile("fixtures/2-regular_file.json")).toString()));
+    await fileRepo.save(JSON.parse((await fsp.readFile("fixtures/5-regular_file.json")).toString()));
   });
 
   beforeEach(async () => {

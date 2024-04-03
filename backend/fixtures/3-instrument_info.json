@@ -1,0 +1,42 @@
+[
+  {
+    "uuid": "9e0f4b27-d5f3-40ad-8b73-2ae5dabbf81f",
+    "pid": "https://hdl.handle.net/123/granada-mira",
+    "name": "Granada MIRA",
+    "serialNumber": null,
+    "model": "MIRA",
+    "type": "cloud radar",
+    "owners": ["University of Granada"],
+    "instrument": "mira"
+  },
+  {
+    "pid": "https://hdl.handle.net/123/bucharest-chm15k",
+    "uuid": "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+    "name": "Bucharest CHM 15k",
+    "serialNumber": null,
+    "model": "CHM 15k",
+    "type": "ceilometer",
+    "owners": ["University of Bucharest"],
+    "instrument": "chm15k"
+  },
+  {
+    "pid": "https://hdl.handle.net/123/bucharest-mira",
+    "uuid": "0b3a7fa0-4812-4964-af23-1162e8b3a665",
+    "name": "Bucharest MIRA",
+    "serialNumber": null,
+    "model": "MIRA",
+    "type": "cloud radar",
+    "owners": ["University of Bucharest"],
+    "instrument": "mira"
+  },
+  {
+    "pid": "https://hdl.handle.net/123/warsaw-halo",
+    "uuid": "eb4b39e5-6bc8-40f0-92d2-43d31f224de6",
+    "name": "Warsaw HALO",
+    "serialNumber": null,
+    "model": "HALO",
+    "type": "Doppler lidar",
+    "owners": ["University of Warsaw"],
+    "instrument": "halo-doppler-lidar"
+  }
+]

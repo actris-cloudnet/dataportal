@@ -46,8 +46,6 @@
         :uuid="uuid"
         :response="response"
         :location="location"
-        :instrument="instrument"
-        :instrumentStatus="instrumentStatus"
         :isBusy="isBusy"
         :versions="versions"
         :sourceFiles="sourceFiles"
@@ -62,7 +60,7 @@
 <script lang="ts" setup>
 import { ref, computed, watch } from "vue";
 import axios from "axios";
-import { humanReadableDate, fetchInstrumentName, compareValues, backendUrl } from "@/lib";
+import { humanReadableDate, compareValues, backendUrl } from "@/lib";
 import type { RegularFile, ModelFile } from "@shared/entity/File";
 import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
 import type { SiteType } from "@shared/entity/Site";
@@ -92,8 +90,6 @@ const versions = ref<string[]>([]);
 const error = ref(false);
 const sourceFiles = ref<SourceFile[]>([]);
 const isBusy = ref(false);
-const instrument = ref("");
-const instrumentStatus = ref<"loading" | "error" | "ready">("loading");
 const loadingVisualizations = ref(true);
 const location = ref<SiteLocation | null>(null);
 
@@ -179,20 +175,6 @@ async function fetchSourceFiles(response: RegularFile | ModelFile) {
   sourceFiles.value = results;
 }
 
-async function fetchInstrument(file: RegularFile | ModelFile) {
-  if (!("instrumentPid" in file) || file.instrumentPid == null) {
-    return;
-  }
-  const pid = (file as RegularFile).instrumentPid;
-  try {
-    instrument.value = await fetchInstrumentName(pid);
-    instrumentStatus.value = "ready";
-  } catch (err) {
-    console.error("Failed to load instrument:", err);
-    instrumentStatus.value = "error";
-  }
-}
-
 watch(
   () => props.uuid,
   async () => {
@@ -205,17 +187,10 @@ watch(
     }
     visualizations.value = [];
     sourceFiles.value = [];
-    instrument.value = "";
-    instrumentStatus.value = "loading";
     if (!versions.value.includes(response.value.uuid)) {
       versions.value = [];
     }
-    await Promise.all([
-      fetchInstrument(response.value),
-      fetchVisualizations(),
-      fetchVersions(response.value),
-      fetchSourceFiles(response.value),
-    ]);
+    await Promise.all([fetchVisualizations(), fetchVersions(response.value), fetchSourceFiles(response.value)]);
   },
   { immediate: true },
 );

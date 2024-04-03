@@ -132,36 +132,4 @@ export class SiteRoutes {
       return next({ status: 500, errors: err });
     }
   };
-
-  productAvailability: RequestHandler = async (req: Request, res: Response, next) => {
-    try {
-      const siteQb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteId", req.params);
-      const site = await hideTestDataFromNormalUsers<Site>(siteQb, req).getExists();
-      if (!site) {
-        return next({ status: 404, errors: ["No sites match this id"] });
-      }
-      const fileQb = this.searchFileRepo
-        .createQueryBuilder("file")
-        .select([
-          "file.uuid AS uuid",
-          'file."measurementDate"::text AS "measurementDate"',
-          'file."productId" as "productId"',
-          'file."errorLevel" AS "errorLevel"',
-          "file.legacy AS legacy",
-          "product.experimental AS experimental",
-          'file."instrumentPid"::text AS "instrumentPid"',
-        ])
-        .leftJoin("file.product", "product")
-        .where("file.siteId = :siteId", { siteId: req.params.siteId })
-        .orderBy("file.measurementDate", "DESC")
-        .addOrderBy("file.productId", "ASC")
-        .addOrderBy("file.errorLevel", "ASC");
-      if (!("includeExperimental" in req.query)) {
-        fileQb.andWhere("product.experimental = false");
-      }
-      res.send(await fileQb.getRawMany());
-    } catch (err) {
-      return next({ status: 500, errors: err });
-    }
-  };
 }

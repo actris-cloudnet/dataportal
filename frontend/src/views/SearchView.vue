@@ -166,7 +166,7 @@
 
         <div class="filterbox">
           <custom-multiselect
-            label="Instrument"
+            label="Instrument model"
             v-model="selectedInstrumentIds"
             :options="allInstruments"
             id="instrumentSelect"
@@ -187,20 +187,16 @@
           />
         </div>
 
-        <details ref="detailsSection">
-          <summary style="font-variant: small-caps">advanced</summary>
-          <div class="link-to-instrument-db"><a href="https://instrumentdb.out.ocp.fmi.fi/">(find instruments)</a></div>
-          <div class="filterbox">
-            <custom-multiselect
-              label="Instrument PID"
-              v-model="selectedInstrumentPids"
-              :options="allInstrumentPids"
-              :multiple="true"
-              id="instrumentPidSelect"
-              :getIcon="getPidIcon"
-            />
-          </div>
-        </details>
+        <div class="filterbox">
+          <custom-multiselect
+            label="Instrument"
+            v-model="selectedInstrumentPids"
+            :options="allInstrumentPids"
+            :multiple="true"
+            id="instrumentPidSelect"
+            :getIcon="getInstrumentIcon"
+          />
+        </div>
 
         <div class="filterbox">
           <BaseButton v-if="isVizMode" @click="navigateToSearch('data')" type="secondary" style="width: 100%">
@@ -260,7 +256,6 @@ import {
   getInstrumentIcon,
   backendUrl,
   compareValues,
-  getPidIcon,
 } from "@/lib";
 import VizSearchResult from "@/components/VizSearchResult.vue";
 import type { Product } from "@shared/entity/Product";
@@ -273,7 +268,7 @@ import BaseButton from "@/components/BaseButton.vue";
 import BaseAlert from "@/components/BaseAlert.vue";
 
 import type { VisualizationResponse } from "@shared/entity/VisualizationResponse";
-import type { Instrument } from "@shared/entity/Instrument";
+import type { Instrument, InstrumentInfo } from "@shared/entity/Instrument";
 import { useRouteQuery, type QueryType } from "@/lib/useRouteQuery";
 
 export interface Props {
@@ -351,17 +346,8 @@ const allInstruments = ref<Instrument[]>([]);
 const selectedInstrumentIds = useRouteQuery({ name: "instrument", defaultValue: [], type: queryStringArray });
 
 // instrument PIDs
-export interface InstrumentPid {
-  id: string;
-  humanReadableName: string;
-}
-
-const showPopUp = ref(false);
-
-const allInstrumentPids = ref<InstrumentPid[]>([]);
+const allInstrumentPids = ref<Option[]>([]);
 const selectedInstrumentPids = useRouteQuery({ name: "instrumentPid", defaultValue: [], type: queryStringArray });
-
-const detailsSection = ref<HTMLDetailsElement | null>(null);
 
 // other
 const renderComplete = ref(false);
@@ -393,16 +379,16 @@ async function initView() {
   showDateRange.value = dateFrom.value !== dateTo.value;
   const [sites, products, instruments, pids] = await Promise.all([
     initSites(),
-    axios.get(`${backendUrl}products/variables`),
-    axios.get(`${backendUrl}instruments`),
-    axios.get(`${backendUrl}raw-files/instrument-pids`),
+    axios.get<Product[]>(`${backendUrl}products/variables`),
+    axios.get<Instrument[]>(`${backendUrl}instruments`),
+    axios.get<InstrumentInfo[]>(`${backendUrl}instrument-pids`),
   ]);
   allSites.value = sites.sort(alphabeticalSort);
   allProducts.value = products.data.sort(alphabeticalSort);
   allInstruments.value = instruments.data.sort(instrumentSort);
-  allInstrumentPids.value.push(
-    ...pids.data.sort().map((pid: string) => ({ id: pid, humanReadableName: pid.split("/").pop() })),
-  );
+  allInstrumentPids.value = pids.data
+    .map((obj) => ({ id: obj.pid, humanReadableName: obj.name, type: obj.instrument.type }))
+    .sort(alphabeticalSort);
 
   if (
     !showExpProducts.value &&
@@ -417,10 +403,6 @@ async function initView() {
     const site = allSites.value.find((site) => site.id === siteId);
     return site && !site.type.includes("cloudnet" as SiteType);
   });
-
-  if (selectedInstrumentPids.value.length > 0 && detailsSection.value) {
-    detailsSection.value.open = true;
-  }
 }
 
 async function initSites(): Promise<Site[]> {

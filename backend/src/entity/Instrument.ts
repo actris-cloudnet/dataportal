@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 import { InstrumentUpload } from "./Upload";
 import { RegularFile } from "./File";
 
@@ -31,4 +31,31 @@ export class Instrument {
 
   @OneToMany((_) => RegularFile, (regularFile) => regularFile.instrument)
   files!: RegularFile[];
+}
+
+@Entity()
+export class InstrumentInfo {
+  @PrimaryColumn("uuid")
+  uuid!: string;
+
+  @Column({ unique: true })
+  pid!: string;
+
+  @ManyToOne((_) => Instrument)
+  instrument!: Instrument;
+
+  @Column()
+  name!: string;
+
+  @Column({ type: "text", array: true })
+  owners!: string[];
+
+  @Column()
+  model!: string;
+
+  @Column()
+  type!: string;
+
+  @Column({ type: "text", nullable: true })
+  serialNumber!: string | null;
 }

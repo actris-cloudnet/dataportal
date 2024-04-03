@@ -1,12 +1,7 @@
 <template>
   <div class="landing-summary-container pagewidth">
     <div class="summary-box summary-box-product-information" :class="{ obsolete: response.tombstoneReason }">
-      <ProductInformation
-        :response="response"
-        :location="location"
-        :instrument="instrument"
-        :instrumentStatus="instrumentStatus"
-      />
+      <ProductInformation :response="response" :location="location" />
       <FileInformation :response="response" />
       <FileProvenance :response="response" :isBusy="isBusy" :versions="versions" :sourceFiles="sourceFiles" />
     </div>
@@ -40,8 +35,6 @@ export interface Props {
   response: FileResponse;
   location: SiteLocation | null;
   uuid: string;
-  instrument: string | null;
-  instrumentStatus: "loading" | "error" | "ready";
   isBusy: boolean;
   versions: string[];
   sourceFiles: SourceFile[];

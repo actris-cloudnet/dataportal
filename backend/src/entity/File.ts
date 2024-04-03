@@ -20,7 +20,7 @@ import { Model } from "./Model";
 import { ModelVisualization } from "./ModelVisualization";
 import { ErrorLevel } from "./QualityReport";
 import { Software } from "./Software";
-import { Instrument } from "./Instrument";
+import { Instrument, InstrumentInfo } from "./Instrument";
 
 @Unique(["checksum"])
 @Index(["measurementDate", "site", "product"])
@@ -123,6 +123,9 @@ export class RegularFile extends File {
 
   @ManyToOne((_) => Instrument, (instrument) => instrument.files, { nullable: true })
   instrument!: Instrument | null;
+
+  @ManyToOne(() => InstrumentInfo, { nullable: true })
+  instrumentInfo!: InstrumentInfo | null;
 }
 
 @Entity()

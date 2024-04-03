@@ -16,3 +16,22 @@ export interface Instrument {
   calibrations: Calibration[];
   shortName: string;
 }
+
+export interface InstrumentPidLocation {
+  siteId: string;
+  humanReadableName: string;
+  startDate: string;
+  endDate: string;
+}
+
+export interface InstrumentInfo {
+  uuid: string;
+  pid: string;
+  name: string;
+  serialNumber: string | null;
+  instrument: Instrument;
+  locations: InstrumentPidLocation[];
+  model: string;
+  owners: string[];
+  type: string;
+}

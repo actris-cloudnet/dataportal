@@ -1,16 +1,6 @@
-import {
-  BeforeInsert,
-  BeforeUpdate,
-  Column,
-  Entity,
-  ManyToOne,
-  PrimaryColumn,
-  Unique,
-  ViewColumn,
-  ViewEntity,
-} from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, Unique } from "typeorm";
 import { Site } from "./Site";
-import { Instrument } from "./Instrument";
+import { Instrument, InstrumentInfo } from "./Instrument";
 import { Model } from "./Model";
 import { v4 as generateUuidV4 } from "uuid";
 
@@ -95,13 +85,19 @@ export class InstrumentUpload extends Upload {
   @Column({ type: "text" })
   instrumentPid!: string;
 
+  @ManyToOne(() => InstrumentInfo, { nullable: true })
+  instrumentInfo!: InstrumentInfo | null;
+
   @Column({ type: "text", array: true, default: [], nullable: false })
   tags!: string[];
 
-  constructor(args: UploadOptions, instrument: Instrument, instrumentPid: string, tags: Array<string>) {
+  constructor(args: UploadOptions, instrumentInfo: InstrumentInfo, tags: Array<string>) {
     super(args);
-    this.instrument = instrument;
-    this.instrumentPid = instrumentPid;
+    if (instrumentInfo) {
+      this.instrument = instrumentInfo.instrument;
+      this.instrumentPid = instrumentInfo.pid;
+    }
+    this.instrumentInfo = instrumentInfo;
     this.tags = tags;
   }
 }
@@ -116,13 +112,4 @@ export class ModelUpload extends Upload {
     super(args);
     this.model = model;
   }
-}
-
-@ViewEntity({
-  expression: `SELECT DISTINCT "instrumentPid" FROM instrument_upload`,
-  materialized: true,
-})
-export class InstrumentPidView {
-  @ViewColumn()
-  instrumentPid!: string;
 }

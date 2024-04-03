@@ -18,14 +18,13 @@ import {
 import { basename } from "path";
 import { ReducedMetadataResponse } from "../entity/ReducedMetadataResponse";
 import validator from "validator";
-import { Instrument } from "../entity/Instrument";
+import { Instrument, InstrumentInfo } from "../entity/Instrument";
 import { Model } from "../entity/Model";
 import { ModelFile, RegularFile } from "../entity/File";
 import * as http from "http";
 import ReadableStream = NodeJS.ReadableStream;
 import env from "../lib/env";
 import { QueueService } from "../lib/queue";
-import { InstrumentPidView } from "../entity/Upload";
 
 export class UploadRoutes {
   constructor(dataSource: DataSource, queueService: QueueService) {
@@ -33,31 +32,31 @@ export class UploadRoutes {
     this.instrumentUploadRepo = this.dataSource.getRepository(InstrumentUpload);
     this.modelUploadRepo = this.dataSource.getRepository(ModelUpload);
     this.instrumentRepo = this.dataSource.getRepository(Instrument);
+    this.instrumentInfoRepo = this.dataSource.getRepository(InstrumentInfo);
     this.modelRepo = this.dataSource.getRepository(Model);
     this.siteRepo = this.dataSource.getRepository(Site);
     this.modelFileRepo = this.dataSource.getRepository(ModelFile);
     this.regularFileRepo = this.dataSource.getRepository(RegularFile);
     this.queueService = queueService;
-    this.instrumentPidView = this.dataSource.getRepository(InstrumentPidView);
   }
 
   readonly dataSource: DataSource;
   readonly instrumentUploadRepo: Repository<InstrumentUpload>;
   readonly modelUploadRepo: Repository<ModelUpload>;
   readonly instrumentRepo: Repository<Instrument>;
+  readonly instrumentInfoRepo: Repository<InstrumentInfo>;
   readonly siteRepo: Repository<Site>;
   readonly modelRepo: Repository<Model>;
   readonly modelFileRepo: Repository<ModelFile>;
   readonly regularFileRepo: Repository<RegularFile>;
   readonly queueService: QueueService;
-  readonly instrumentPidView: Repository<InstrumentPidView>;
 
   postMetadata: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body;
     const filename = basename(body.filename);
     let UploadEntity: EntityTarget<InstrumentUpload | ModelUpload>;
     const instrumentUpload = "instrument" in body;
-    let dataSource: any;
+    let dataSource: InstrumentInfo | Model | null = null;
     let uploadedMetadata;
     let sortedTags = [] as string[];
 
@@ -67,13 +66,19 @@ export class UploadRoutes {
         return next({ status: 422, errors: "Unknown site" });
       }
       if (instrumentUpload) {
-        dataSource = await this.instrumentRepo.findOneBy({ id: body.instrument });
+        dataSource = await this.instrumentInfoRepo.findOne({
+          where: { pid: body.instrumentPid },
+          relations: { instrument: true },
+        });
         if (!dataSource) {
-          return next({ status: 422, errors: "Unknown instrument" });
+          return next({ status: 422, errors: "Unknown instrument PID" });
+        }
+        if (body.instrument !== dataSource.instrument.id) {
+          return next({ status: 422, errors: "Instrument doesn't match instrument PID" });
         }
         UploadEntity = InstrumentUpload;
 
-        const allowedTags = new Set((dataSource as Instrument).allowedTags);
+        const allowedTags = new Set(dataSource.instrument.allowedTags);
         const metadataTags = new Set(body.tags as string[]);
         sortedTags = Array.from(metadataTags)
           .filter((x) => allowedTags.has(x))
@@ -127,7 +132,7 @@ export class UploadRoutes {
         // If no matching row was found, insert a new one.
         const args = { ...params, site, checksum: body.checksum, status: Status.CREATED };
         if (instrumentUpload) {
-          uploadedMetadata = new InstrumentUpload(args, dataSource as Instrument, body.instrumentPid, sortedTags);
+          uploadedMetadata = new InstrumentUpload(args, dataSource as InstrumentInfo, sortedTags);
         } else {
           uploadedMetadata = new ModelUpload(args, dataSource as Model);
         }
@@ -201,16 +206,6 @@ export class UploadRoutes {
       )) as InstrumentUpload[];
       const reducedMetadataResponses = instrumentUploads.map((md) => new ReducedMetadataResponse(md));
       res.send(reducedMetadataResponses);
-    } catch (error) {
-      next({ status: 500, errors: error });
-    }
-  };
-
-  listInstrumentPids: RequestHandler = async (req, res, next) => {
-    try {
-      const result = await this.instrumentPidView.find();
-      const instrumentPids = result.map((row) => row.instrumentPid);
-      res.send(instrumentPids);
     } catch (error) {
       next({ status: 500, errors: error });
     }
@@ -319,7 +314,8 @@ export class UploadRoutes {
     qb.leftJoinAndSelect("um.site", "site");
     if (!model) {
       qb.leftJoinAndSelect("um.instrument", "instrument");
-      if (onlyDistinctInstruments) qb.distinctOn(["instrument.id", "um.instrumentPid"]);
+      qb.leftJoinAndSelect("um.instrumentInfo", "instrumentInfo");
+      if (onlyDistinctInstruments) qb.distinctOn(["instrument.id", "um.instrumentPid", "instrumentInfo.uuid"]);
     } else {
       qb.leftJoinAndSelect("um.model", "model");
     }
