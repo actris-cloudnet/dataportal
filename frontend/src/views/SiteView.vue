@@ -65,8 +65,8 @@
               </div>
               <div v-for="(instrument, index) in instruments" :key="index" class="detailslistItem">
                 <img alt="instrument icon" :src="instrument.icon" class="product" />
-                <span v-if="instrument.pid">
-                  <a :href="instrument.pid">{{ instrument.name }}</a>
+                <span v-if="instrument.to">
+                  <router-link :to="instrument.to">{{ instrument.name }}</router-link>
                 </span>
                 <span v-else>{{ instrument.name }}</span>
               </div>
@@ -197,14 +197,7 @@ import MyMap from "@/components/SuperMap.vue";
 import ProductAvailabilityVisualization from "@/components/ProductAvailabilityVisualization.vue";
 import ProductAvailabilityVisualizationSingle from "@/components/ProductAvailabilityVisualizationSingle.vue";
 import ProductQualityVisualization from "@/components/ProductQualityVisualization.vue";
-import {
-  getProductIcon,
-  formatCoordinates,
-  fetchInstrumentName,
-  actrisNfUrl,
-  getInstrumentIcon,
-  backendUrl,
-} from "@/lib";
+import { getProductIcon, formatCoordinates, actrisNfUrl, getInstrumentIcon, backendUrl } from "@/lib";
 import { parseDataStatus, type DataStatus } from "@/lib/DataStatusParser";
 import CustomMultiselect from "@/components/MultiSelect.vue";
 import type { ReducedMetadataResponse } from "@shared/entity/ReducedMetadataResponse";
@@ -215,13 +208,14 @@ import type { Product } from "@shared/entity/Product";
 import BaseTag from "@/components/BaseTag.vue";
 import LandingHeader from "@/components/LandingHeader.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
+import type { RouteLocationRaw } from "vue-router";
 
 export interface Props {
   siteId: string;
 }
 
 interface Instrument {
-  pid: string | null;
+  to: RouteLocationRaw | null;
   name: string;
   icon: string;
 }
@@ -322,7 +316,7 @@ onMounted(() => {
       error.value = true;
       response.value = e.response;
     });
-  parseDataStatus(props.siteId)
+  parseDataStatus({ site: props.siteId })
     .then((data) => {
       dataStatus.value = data;
     })
@@ -376,19 +370,17 @@ watch(selectedProductId, () => {
   selectedPidOption.value = null;
 });
 
-async function handleInstrument(response: ReducedMetadataResponse): Promise<Instrument> {
-  if (response.instrumentPid) {
+function handleInstrument(response: ReducedMetadataResponse): Instrument {
+  // TODO: Should be always available...
+  if (response.instrumentInfo) {
     return {
-      pid: response.instrumentPid,
-      name: await fetchInstrumentName(response.instrumentPid).catch((error) => {
-        console.error("Failed to load instrument information", error);
-        return response.instrument.humanReadableName;
-      }),
+      to: { name: "Instrument", params: { uuid: response.instrumentInfo.uuid } },
+      name: `${response.instrumentInfo.name} ${response.instrumentInfo.type}`,
       icon: getInstrumentIcon(response.instrument),
     };
   } else {
     return {
-      pid: null,
+      to: null,
       name: `Unidentified ${response.instrument.humanReadableName}`,
       icon: getInstrumentIcon(response.instrument),
     };
@@ -405,7 +397,7 @@ async function loadInstruments() {
       status: ["uploaded", "processed"],
     },
   });
-  instruments.value = await Promise.all(res.data.map(handleInstrument));
+  instruments.value = res.data.map(handleInstrument);
   instrumentsStatus.value = "ready";
 }
 

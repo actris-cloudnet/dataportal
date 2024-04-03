@@ -140,6 +140,13 @@ const routes = [
       },
     },
   },
+  {
+    path: "/instrument/:uuid",
+    name: "Instrument",
+    meta: { title: false },
+    component: () => import("@/views/InstrumentView.vue"),
+    props: true,
+  },
 ];
 
 const router = createRouter({

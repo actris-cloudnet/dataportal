@@ -40,7 +40,7 @@ const validMetadata = {
   measurementDate: "2020-08-11",
   checksum: "9a0364b9e99bb480dd25e1f0284c8555",
   instrument: "mira",
-  instrumentPid: "https://hdl.handle.net/123/mira1",
+  instrumentPid: "https://hdl.handle.net/123/granada-mira",
   site: "granada",
 };
 
@@ -49,7 +49,7 @@ const validMetadataAndStableProduct = {
   measurementDate: "2021-02-20",
   checksum: "3a0364b9e99bb480dd25e1f0284c8555",
   instrument: "mira",
-  instrumentPid: "https://hdl.handle.net/123/mira2",
+  instrumentPid: "https://hdl.handle.net/123/bucharest-mira",
   site: "bucharest",
 };
 
@@ -58,7 +58,7 @@ const validMetadataAndVolatileProduct = {
   measurementDate: "2018-11-15",
   checksum: "3a0364b9e99bb480dd25e1f0284c8555",
   instrument: "mira",
-  instrumentPid: "https://hdl.handle.net/123/mira3",
+  instrumentPid: "https://hdl.handle.net/123/bucharest-mira",
   site: "mace-head",
 };
 
@@ -79,10 +79,10 @@ beforeAll(async () => {
   // Make sure these tables are initialized correctly
   await dataSource
     .getRepository(RegularFile)
-    .save(JSON.parse((await fsp.readFile("fixtures/2-regular_file.json")).toString()));
+    .save(JSON.parse((await fsp.readFile("fixtures/5-regular_file.json")).toString()));
   await dataSource
     .getRepository(ModelFile)
-    .save(JSON.parse((await fsp.readFile("fixtures/2-model_file.json")).toString()));
+    .save(JSON.parse((await fsp.readFile("fixtures/5-model_file.json")).toString()));
 
   await instrumentRepo.delete({});
   await modelRepo.delete({});
@@ -229,15 +229,52 @@ describe("POST /upload/metadata", () => {
     );
   });
 
+  it("rejects metadata with non-existing instrumentPid", async () => {
+    const payload = {
+      ...validMetadata,
+      instrument: "hatpro",
+      instrumentPid: "https://hdl.handle.net/123/bucharest-katti",
+    };
+    await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject(
+      genResponse(422, "Unknown instrument PID"),
+    );
+  });
+
+  it("rejects metadata with mismatching instrument and instrumentPid", async () => {
+    const payload = {
+      ...validMetadata,
+      instrument: "hatpro",
+      instrumentPid: "https://hdl.handle.net/123/bucharest-chm15k",
+    };
+    await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject(
+      genResponse(422, "Instrument doesn't match instrument PID"),
+    );
+  });
+
   it("inserts new metadata containing instrumentPid", async () => {
-    const payload = { ...validMetadata, instrumentPid: "https://hdl.handle.net/21.12132/3.191564170f8a4686" };
+    const payload = validMetadata;
     await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
-    await instrumentRepo.findOneByOrFail({ instrumentPid: payload.instrumentPid });
+    const file = await instrumentRepo.findOneOrFail({
+      where: { instrumentPid: payload.instrumentPid },
+      relations: { instrumentInfo: true },
+    });
+    expect(file.instrumentInfo).toMatchObject({
+      uuid: "9e0f4b27-d5f3-40ad-8b73-2ae5dabbf81f",
+      pid: "https://hdl.handle.net/123/granada-mira",
+    });
   });
 
   it("inserts similar metadata with different instrumentPids", async () => {
-    const metadata1 = { ...validMetadata, instrumentPid: "https://hdl.handle.net/123/pid1", checksum: randomMd5() };
-    const metadata2 = { ...validMetadata, instrumentPid: "https://hdl.handle.net/123/pid2", checksum: randomMd5() };
+    const metadata1 = {
+      ...validMetadata,
+      instrumentPid: "https://hdl.handle.net/123/bucharest-mira",
+      checksum: randomMd5(),
+    };
+    const metadata2 = {
+      ...validMetadata,
+      instrumentPid: "https://hdl.handle.net/123/granada-mira",
+      checksum: randomMd5(),
+    };
     await expect(axios.post(metadataUrl, metadata1, { headers })).resolves.toMatchObject({ status: 200 });
     await expect(axios.post(metadataUrl, metadata2, { headers })).resolves.toMatchObject({ status: 200 });
     const md1 = await instrumentRepo.findOneByOrFail({ checksum: metadata1.checksum });
@@ -263,7 +300,7 @@ describe("POST /upload/metadata", () => {
     const payload = {
       ...validMetadata,
       instrument: "halo-doppler-lidar",
-      instrumentPid: "https://hdl.handle.net/21.12132/3.191564170f8a4686",
+      instrumentPid: "https://hdl.handle.net/123/warsaw-halo",
     };
     await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
     await instrumentRepo.findOneByOrFail({ instrumentPid: payload.instrumentPid });
@@ -290,7 +327,12 @@ describe("POST /upload/metadata", () => {
   it("inserts new metadata if different instrument", async () => {
     const payload = { ...validMetadata };
     await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
-    const payloadResub = { ...payload, instrument: "hatpro", checksum: "ac5c1f6c923cc8b259c2e22c7b258ee4" };
+    const payloadResub = {
+      ...payload,
+      instrumentPid: "https://hdl.handle.net/123/bucharest-chm15k",
+      instrument: "chm15k",
+      checksum: "ac5c1f6c923cc8b259c2e22c7b258ee4",
+    };
     await expect(axios.post(metadataUrl, payloadResub, { headers })).resolves.toMatchObject({ status: 200 });
     await instrumentRepo.findOneByOrFail({ checksum: payload.checksum });
     await instrumentRepo.findOneByOrFail({ checksum: payloadResub.checksum });
@@ -298,7 +340,11 @@ describe("POST /upload/metadata", () => {
 
   it("inserts new metadata for halo upload", async () => {
     const now = new Date();
-    const payload = { ...validMetadata, instrument: "halo-doppler-lidar" };
+    const payload = {
+      ...validMetadata,
+      instrumentPid: "https://hdl.handle.net/123/warsaw-halo",
+      instrument: "halo-doppler-lidar",
+    };
     await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
     const md = await instrumentRepo.findOneByOrFail({ checksum: validMetadata.checksum });
     expect(md).toBeTruthy();
@@ -494,7 +540,11 @@ describe("PUT /upload/data/:checksum", () => {
   });
 
   it("responds with 201 on submitting new doppler-lidar file", async () => {
-    const haloMetadata = { ...validMetadata, instrument: "halo-doppler-lidar" };
+    const haloMetadata = {
+      ...validMetadata,
+      instrumentPid: "https://hdl.handle.net/123/warsaw-halo",
+      instrument: "halo-doppler-lidar",
+    };
     await expect(axios.post(metadataUrl, haloMetadata, { headers })).resolves.toMatchObject({ status: 200 });
     let md = await instrumentRepo.findOneByOrFail({ checksum: validMetadata.checksum });
     expect(md.status).toEqual(Status.CREATED);
@@ -700,7 +750,7 @@ describe("test content upload", () => {
     measurementDate: "2020-08-11",
     checksum: "9a0364b9e99bb480dd25e1f0284c8555",
     instrument: "mira",
-    instrumentPid: "https://hdl.handle.net/123/mira",
+    instrumentPid: "https://hdl.handle.net/123/granada-mira",
     site: "granada",
   };
   const content = "content";
@@ -736,7 +786,7 @@ describe("Test instrument upload with tags", () => {
     site: "hyytiala",
     filename: "Stare_34_20220101_19.hpl",
     instrument: "halo-doppler-lidar",
-    instrumentPid: "https://hdl.handle.net/123/halo",
+    instrumentPid: "https://hdl.handle.net/123/warsaw-halo",
     measurementDate: "2022-01-01",
     checksum: "947eb3a21cdbafc0d2c9027adf8ac42e",
     tags: ["co"],
@@ -745,7 +795,7 @@ describe("Test instrument upload with tags", () => {
     site: "hyytiala",
     filename: "Stare_34_20220101_19.hpl",
     instrument: "halo-doppler-lidar",
-    instrumentPid: "https://hdl.handle.net/123/halo",
+    instrumentPid: "https://hdl.handle.net/123/warsaw-halo",
     measurementDate: "2022-01-01",
     checksum: "b5a221450f2029ed4d20196851a01a0a",
     tags: ["cross"],
@@ -799,7 +849,7 @@ describe("tags: Test instrument upload metadata tag update", () => {
     site: "hyytiala",
     filename: "Stare_34_20220101_19.hpl",
     instrument: "halo-doppler-lidar",
-    instrumentPid: "https://hdl.handle.net/123/halo",
+    instrumentPid: "https://hdl.handle.net/123/warsaw-halo",
     measurementDate: "2022-01-01",
     checksum: "947eb3a21cdbafc0d2c9027adf8ac42e",
     tags: ["co"],
@@ -808,7 +858,7 @@ describe("tags: Test instrument upload metadata tag update", () => {
     site: "hyytiala",
     filename: "Stare_34_20220101_19.hpl",
     instrument: "halo-doppler-lidar",
-    instrumentPid: "https://hdl.handle.net/123/halo",
+    instrumentPid: "https://hdl.handle.net/123/warsaw-halo",
     measurementDate: "2022-01-01",
     checksum: "b5a221450f2029ed4d20196851a01a0a",
     tags: ["cross"],
@@ -851,7 +901,7 @@ describe("Test instrument upload with various tags", () => {
     site: "hyytiala",
     filename: "Stare_34_20220101_19.hpl",
     instrument: "halo-doppler-lidar",
-    instrumentPid: "https://hdl.handle.net/123/halo",
+    instrumentPid: "https://hdl.handle.net/123/warsaw-halo",
     measurementDate: "2022-01-01",
     checksum: "947eb3a21cdbafc0d2c9027adf8ac42e",
     tags: ["co"],
@@ -1052,7 +1102,7 @@ async function expectSuccessfulUploadInstrument(username: string, password: stri
     filename: "file1.LV1",
     measurementDate: "2020-08-11",
     instrument: "mira",
-    instrumentPid: "https://hdl.handle.net/123/mira",
+    instrumentPid: "https://hdl.handle.net/123/bucharest-mira",
     checksum: checksum,
     site: siteId,
   };
@@ -1089,7 +1139,7 @@ async function expectFailedUploadInstrument(
     filename: "file1.LV1",
     measurementDate: "2020-08-11",
     instrument: "mira",
-    instrumentPid: "https://hdl.handle.net/123/mira",
+    instrumentPid: "https://hdl.handle.net/123/bucharest-mira",
     checksum: checksum,
     site: siteId,
   };

@@ -1,5 +1,3 @@
-import axios from "axios";
-
 import type { SearchFileResponse } from "@shared/entity/SearchFileResponse";
 import type { Product } from "@shared/entity/Product";
 import type { CollectionFileResponse } from "@shared/entity/CollectionFileResponse";
@@ -28,7 +26,6 @@ import weatherStationIcon from "@/assets/icons/weather-station.png";
 import dopplerLidarIcon from "@/assets/icons/doppler-lidar.svg";
 import dopplerLidarWindIcon from "@/assets/icons/doppler-lidar-wind.svg";
 import rainRadarIcon from "@/assets/icons/rain-radar.svg";
-import pidIcon from "@/assets/icons/pid.png";
 
 import markerIconRed from "@/assets/markers/marker-icon-red.png";
 import markerIconBlue from "@/assets/markers/marker-icon-blue.png";
@@ -82,8 +79,6 @@ export const getProductIcon = (product: Product | string) => {
 };
 
 export const getInstrumentIcon = (instrument: Instrument) => getProductIcon(instrument.type);
-
-export const getPidIcon = () => pidIcon;
 
 export const humanReadableSize = (size: number) => {
   if (size == 0) return "0 B";
@@ -178,47 +173,6 @@ export function getQcIcon(errorLevel: string) {
     return testInfoIcon;
   }
   return testPassIcon;
-}
-
-export async function fetchInstrumentName(pid: string, shortName: boolean = false): Promise<string> {
-  const match = pid.match("^https?://hdl\\.handle\\.net/(.+)");
-  if (!match) {
-    throw new Error("Invalid PID format");
-  }
-  const url = "https://hdl.handle.net/api/handles/" + match[1];
-  const response = await axios.get(url);
-
-  const values = response.data.values;
-  if (!Array.isArray(values)) {
-    throw new Error("Invalid PID response");
-  }
-
-  const nameItem = values.find((ele) => ele.type === "21.T11148/709a23220f2c3d64d1e1");
-
-  if (!nameItem || !nameItem.data || nameItem.data.format !== "string" || !nameItem.data.value) {
-    throw new Error("Invalid PID structure");
-  }
-  let nameValue = JSON.parse(nameItem.data.value);
-  if (typeof nameValue !== "string") {
-    throw new Error("Invalid PID content");
-  }
-
-  if (shortName) {
-    return nameValue;
-  }
-
-  const typeItem = values.find((ele) => ele.type === "21.T11148/f76ad9d0324302fc47dd");
-  if (typeItem && typeItem.data && typeItem.data.format === "string" && typeItem.data.value) {
-    const typeValue = JSON.parse(typeItem.data.value);
-    if (Array.isArray(typeValue) && typeValue.length > 0) {
-      const firstValue = typeValue[0];
-      if (firstValue && firstValue.instrumentType && firstValue.instrumentType.instrumentTypeName) {
-        nameValue += " " + firstValue.instrumentType.instrumentTypeName;
-      }
-    }
-  }
-
-  return nameValue;
 }
 
 export const markerColors: Record<SiteType, string> = {

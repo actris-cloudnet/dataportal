@@ -22,7 +22,7 @@ describe("SiteView.vue", () => {
     resources = await readResources();
     axiosMockWithIdx = (siteIdx: number, searchIdx: number, instruments = []) => {
       return (url: string): AxiosPromise => {
-        if (url.includes("/api/sites/") && url.includes("/product-availability")) {
+        if (url.includes("/api/product-availability")) {
           return Promise.resolve(augmentAxiosResponse(resources["productavailability"]));
         } else if (url.includes("/api/sites")) {
           return Promise.resolve(augmentAxiosResponse(resources["sites"][siteIdx]));

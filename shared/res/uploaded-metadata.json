@@ -108,7 +108,7 @@
     "status": "uploaded",
     "createdAt": "2022-12-06T00:31:17.507Z",
     "updatedAt": "2022-12-06T00:31:22.497Z",
-    "instrumentPid": "http://example.org",
+    "instrumentPid": "https://hdl.handle.net/123/warsaw-halo",
     "siteId": "warsaw",
     "instrumentId": "halo-doppler-lidar",
     "site": {

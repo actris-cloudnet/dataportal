@@ -15,11 +15,14 @@
       <template v-if="'instrumentPid' in response && response.instrumentPid">
         <dt>Instrument</dt>
         <dd>
-          <span v-if="instrumentStatus === 'loading'" class="loading">Loading...</span>
-          <a v-else-if="instrumentStatus === 'error'" :href="response.instrumentPid" class="error">
-            Failed to load information
-          </a>
-          <a v-else :href="response.instrumentPid">{{ instrument }}</a>
+          <router-link
+            v-if="response.instrumentInfo"
+            :to="{ name: 'Instrument', params: { uuid: response.instrumentInfo.uuid } }"
+          >
+            {{ response.instrumentInfo.name }}
+            {{ response.instrumentInfo.type }}
+          </router-link>
+          <a v-else :href="response.instrumentPid">{{ response.instrumentPid }}</a>
         </dd>
       </template>
       <template v-if="'model' in response">
@@ -70,8 +73,6 @@ import type { Timeliness } from "@shared/entity/File";
 export interface Props {
   response: FileResponse;
   location: SiteLocation | null;
-  instrument: string | null;
-  instrumentStatus: "loading" | "error" | "ready";
 }
 
 const props = defineProps<Props>();

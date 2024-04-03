@@ -30,7 +30,7 @@ describe("PUT /visualizations", () => {
     // File fixtures are needed here
     await dataSource
       .getRepository(ModelFile)
-      .save(JSON.parse((await fsp.readFile("fixtures/2-model_file.json")).toString()));
+      .save(JSON.parse((await fsp.readFile("fixtures/5-model_file.json")).toString()));
     await axios.put(`${storageServiceUrl}cloudnet-img/${validId}`, "content");
   });
 

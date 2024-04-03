@@ -27,6 +27,7 @@ import { AppDataSource } from "./data-source";
 import { rateLimit } from "express-rate-limit";
 import { QueueRoutes } from "./routes/queue";
 import { QueueService } from "./lib/queue";
+import { ProductAvailabilityRoutes } from "./routes/productAvailability";
 
 async function createServer(): Promise<void> {
   const port = 3000;
@@ -58,6 +59,7 @@ async function createServer(): Promise<void> {
   const referenceRoutes = new ReferenceRoutes(AppDataSource);
   const feedbackRoutes = new FeedbackRoutes(AppDataSource);
   const queueRoutes = new QueueRoutes(queueService);
+  const productAvailabilityRoutes = new ProductAvailabilityRoutes(AppDataSource);
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     console.error(
@@ -163,7 +165,8 @@ async function createServer(): Promise<void> {
     middleware.checkParamsExistInDb,
     uploadRoutes.listMetadata(false),
   );
-  app.get("/api/raw-files/instrument-pids", uploadRoutes.listInstrumentPids);
+  app.get("/api/instrument-pids", instrRoutes.listInstrumentPids);
+  app.get("/api/instrument-pids/:uuid", middleware.validateUuidParam, instrRoutes.instrumentPid);
 
   // public/internal
   app.get("/api/uploaded-metadata", uploadRoutes.listInstrumentsFromMetadata);
@@ -183,7 +186,7 @@ async function createServer(): Promise<void> {
   app.get("/api/reference/:uuid", middleware.validateUuidParam, referenceRoutes.getReference);
   app.get("/api/sites/:siteId/locations", siteRoutes.locations);
   app.get("/api/sites/:siteId/locations/:date", siteRoutes.location);
-  app.get("/api/sites/:siteId/product-availability", siteRoutes.productAvailability);
+  app.get("/api/product-availability", productAvailabilityRoutes.productAvailability);
   app.post("/api/feedback", rateLimit({ windowMs: 60 * 1000, limit: 10 }), express.json(), feedbackRoutes.postFeedback);
 
   // TODO: Depreciated. Needed for now, but in the future these should public

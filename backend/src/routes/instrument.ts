@@ -1,13 +1,20 @@
 import { Request, RequestHandler, Response } from "express";
 import { DataSource, Repository } from "typeorm";
-import { Instrument } from "../entity/Instrument";
+import { Instrument, InstrumentInfo } from "../entity/Instrument";
+import { InstrumentUpload } from "../entity/Upload";
 
 export class InstrumentRoutes {
   constructor(dataSource: DataSource) {
+    this.dataSource = dataSource;
     this.instrumentRepo = dataSource.getRepository(Instrument);
+    this.instrumentInfoRepo = dataSource.getRepository(InstrumentInfo);
+    this.instrumentUploadRepo = dataSource.getRepository(InstrumentUpload);
   }
 
+  readonly dataSource: DataSource;
   readonly instrumentRepo: Repository<Instrument>;
+  readonly instrumentInfoRepo: Repository<InstrumentInfo>;
+  readonly instrumentUploadRepo: Repository<InstrumentUpload>;
 
   instruments: RequestHandler = async (req: Request, res: Response, next) => {
     try {
@@ -15,6 +22,65 @@ export class InstrumentRoutes {
       res.send(instruments);
     } catch (err) {
       next({ status: 500, errors: err });
+    }
+  };
+
+  listInstrumentPids: RequestHandler = async (req, res, next) => {
+    try {
+      const pids = await this.instrumentInfoRepo.find({ relations: { instrument: true } });
+      res.send(pids);
+    } catch (error) {
+      next({ status: 500, errors: error });
+    }
+  };
+
+  instrumentPid: RequestHandler = async (req, res, next) => {
+    try {
+      const pid = await this.instrumentInfoRepo.findOne({
+        where: { uuid: req.params.uuid },
+        relations: { instrument: true },
+      });
+      if (!pid) {
+        return next({ status: 404, errors: ["No instrument PID match this id"] });
+      }
+      const locations = await this.dataSource.query(
+        `WITH dates AS (
+          SELECT
+            "siteId",
+            "measurementDate",
+            LAG("measurementDate") OVER (PARTITION BY "siteId" ORDER BY "measurementDate") AS "prevDate"
+          FROM regular_file
+          WHERE "instrumentPid" = $1
+        ), gaps AS (
+          SELECT
+            "siteId",
+            "measurementDate",
+            CASE
+              WHEN "prevDate" IS NULL OR "measurementDate" - "prevDate" > 30 THEN 1
+              ELSE 0
+            END AS "isNewPeriod"
+          FROM dates
+        ), periods AS (
+          SELECT
+            "siteId",
+            "measurementDate",
+            SUM("isNewPeriod") OVER (ORDER BY "measurementDate") AS "periodId"
+          FROM gaps
+        )
+        SELECT
+          "siteId",
+          "humanReadableName",
+          MIN("measurementDate")::text AS "startDate",
+          MAX("measurementDate")::text AS "endDate"
+        FROM periods
+        JOIN site ON "siteId" = site.id
+        GROUP BY "siteId", "humanReadableName", "periodId"
+        ORDER BY "startDate" DESC;`,
+        [pid.pid],
+      );
+      res.send({ ...pid, locations });
+    } catch (error) {
+      next({ status: 500, errors: error });
     }
   };
 }

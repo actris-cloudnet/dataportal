@@ -5,7 +5,7 @@ import type { Model } from "./Model";
 import type { ModelVisualization } from "./ModelVisualization";
 import type { ErrorLevel } from "./QualityReport";
 import type { Software } from "./Software";
-import type { Instrument } from "./Instrument";
+import type { Instrument, InstrumentInfo } from "./Instrument";
 
 export enum Timeliness {
   NRT = "nrt",
@@ -43,6 +43,7 @@ export interface RegularFile extends File {
   sourceFileIds: string[] | null;
   visualizations: Visualization[];
   instrumentPid: string;
+  instrumentInfo: InstrumentInfo | null;
   instrument: Instrument;
 }
 

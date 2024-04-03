@@ -25,7 +25,7 @@ describe("Product availability visualization", () => {
   beforeAll(async () => {
     resources = await readResources();
     const axiosMock = (url: string): AxiosPromise => {
-      if (url.includes("/api/sites/palaiseau/product-availability")) {
+      if (url.includes("/api/product-availability")) {
         return Promise.resolve(augmentAxiosResponse(resources["productavailabilitysearch"]));
       } else if (url.includes("/api/products")) {
         return Promise.resolve(augmentAxiosResponse(resources["products"]));
@@ -33,7 +33,7 @@ describe("Product availability visualization", () => {
       return Promise.reject(new Error(`Unmocked URL: ${url}`));
     };
     vi.mocked(axios.get).mockImplementation(axiosMock);
-    const dataStatus = await parseDataStatus("palaiseau");
+    const dataStatus = await parseDataStatus({ site: "palaiseau" });
     props = {
       siteId: "palaiseau",
       dataStatus,

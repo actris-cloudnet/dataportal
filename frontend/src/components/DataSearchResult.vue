@@ -124,7 +124,12 @@
         <dl class="inffff">
           <template v-if="'instrument' in previewResponse && previewResponse.instrument !== null">
             <dt>Instrument</dt>
-            <dd>{{ previewResponse.instrument.shortName }}</dd>
+            <dd v-if="previewResponse.instrumentInfo !== null">
+              <router-link :to="{ name: 'Instrument', params: { uuid: previewResponse.instrumentInfo.uuid } }">
+                {{ previewResponse.instrumentInfo.name }}
+              </router-link>
+            </dd>
+            <dd v-else>{{ previewResponse.instrument.shortName }}</dd>
           </template>
           <template v-else-if="'model' in previewResponse">
             <dt>Model</dt>

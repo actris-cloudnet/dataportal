@@ -43,9 +43,9 @@ describe("GET /api/download/stats", () => {
     instrumentUploadRepo = dataSource.getRepository(InstrumentUpload);
     await downloadRepo.delete({});
     await initUsersAndPermissions();
-    await regularFileRepo.save(JSON.parse((await fsp.readFile("fixtures/2-regular_file.json")).toString()));
-    await modelFileRepo.save(JSON.parse((await fsp.readFile("fixtures/2-model_file.json")).toString()));
-    await collectionRepo.save(JSON.parse((await fsp.readFile("fixtures/3-collection.json")).toString()));
+    await regularFileRepo.save(JSON.parse((await fsp.readFile("fixtures/5-regular_file.json")).toString()));
+    await modelFileRepo.save(JSON.parse((await fsp.readFile("fixtures/5-model_file.json")).toString()));
+    await collectionRepo.save(JSON.parse((await fsp.readFile("fixtures/6-collection.json")).toString()));
     // Download half year of Mace Head data with two variables ≈ 1 variable year.
     await downloadRepo.save(
       Array.from(

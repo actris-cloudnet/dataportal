@@ -1,4 +1,5 @@
-import { backendUrl, compareValues, fetchInstrumentName, notEmpty } from "@/lib/index";
+import { backendUrl, compareValues, notEmpty } from "@/lib/index";
+import type { InstrumentInfo } from "@shared/entity/Instrument";
 import type { Product } from "@shared/entity/Product";
 import axios from "axios";
 
@@ -70,12 +71,18 @@ interface ProductAvailability {
   legacy: boolean;
   experimental: boolean;
   instrumentPid: string;
+  instrumentInfo: InstrumentInfo;
 }
 
-export async function parseDataStatus(siteId: string): Promise<DataStatus> {
+interface DataStatusConfig {
+  site?: string;
+  instrumentPid?: string;
+}
+
+export async function parseDataStatus(config: DataStatusConfig): Promise<DataStatus> {
   const [searchRes, prodRes] = await Promise.all([
-    axios.get<ProductAvailability[]>(`${backendUrl}sites/${siteId}/product-availability/`, {
-      params: { includeExperimental: true },
+    axios.get<ProductAvailability[]>(`${backendUrl}product-availability/`, {
+      params: { site: config.site, instrumentPid: config.instrumentPid, includeExperimental: true },
     }),
     axios.get<Product[]>(`${backendUrl}products/`),
   ]);
@@ -139,27 +146,11 @@ export async function parseDataStatus(siteId: string): Promise<DataStatus> {
     if (item.instrumentPid && pidLookup[item.productId] && !pidLookup[item.productId][item.instrumentPid]) {
       allPids[item.productId].push({
         pid: item.instrumentPid,
-        humanReadableName: item.instrumentPid,
+        humanReadableName: item.instrumentInfo ? item.instrumentInfo.name : item.instrumentPid,
       });
       pidLookup[item.productId][item.instrumentPid] = true;
     }
   });
-
-  await Promise.all(
-    Object.values(allPids).map((pids) =>
-      Promise.all(
-        pids.map(async (p) => {
-          if (!p.pid) return;
-          try {
-            p.humanReadableName = await fetchInstrumentName(p.pid, true);
-          } catch (error) {
-            console.error(`Error fetching name for PID ${p.pid}:`, error);
-            p.humanReadableName = p.pid;
-          }
-        }),
-      ),
-    ),
-  );
 
   return {
     allProducts,
