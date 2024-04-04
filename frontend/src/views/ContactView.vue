@@ -1,9 +1,12 @@
 <template>
-  <div>
-    <LandingHeader title="Send feedback!" />
+  <div class="container">
+    <LandingHeader title="Contact" />
     <main class="pagewidth">
       <form @submit.prevent="sendFeedback">
-        <span> Let us know your thoughts to enhance our services. </span>
+        <div>
+          Do you have questions or feedback about the Cloudnet data portal? You can reach us by sending email to
+          <a href="mailto:actris-cloudnet@fmi.fi">actris-cloudnet@fmi.fi</a> or by filling the form below.
+        </div>
         <label id="name-label" for="name"><strong>Name</strong> (optional)</label>
         <input id="name" type="text" name="name" v-model="name" />
         <label id="email-label" for="email"><strong>Email</strong> (optional)</label>
@@ -45,7 +48,7 @@ async function sendFeedback() {
     email.value = "";
     message.value = "";
   } catch (error) {
-    console.error("Feedback submission error:", error);
+    console.error("Form submission error:", error);
     isError.value = true;
   } finally {
     await timeout(1750);
@@ -69,15 +72,16 @@ function timeout(ms: number) {
 
 <style scoped lang="scss">
 @import "@/sass/variables.scss";
-main {
+.container {
   margin-bottom: 2rem;
+  margin: 0 auto;
+  max-width: 700px;
 }
 
 form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  max-width: 800px;
 }
 
 strong {

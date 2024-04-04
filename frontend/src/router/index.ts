@@ -109,12 +109,12 @@ const routes = [
     props: true,
   },
   {
-    path: "/feedback",
-    name: "Feedback",
+    path: "/contact",
+    name: "Contact",
     meta: {
-      title: "Feedback",
+      title: "Contact",
     },
-    component: () => import("@/views/FeedbackFormView.vue"),
+    component: () => import("@/views/ContactView.vue"),
     props: true,
   },
   {

@@ -35,8 +35,8 @@ const showMenu = ref(false);
           </a>
         </li>
         <li style="margin-left: auto">
-          <a href="/feedback">
-            <span>Feedback</span>
+          <a href="https://docs.cloudnet.fmi.fi">
+            <span>Documentation</span>
           </a>
         </li>
         <li>
@@ -45,8 +45,8 @@ const showMenu = ref(false);
           </a>
         </li>
         <li>
-          <a href="https://docs.cloudnet.fmi.fi">
-            <span>Documentation</span>
+          <a href="/contact">
+            <span>Contact</span>
           </a>
         </li>
       </ul>
