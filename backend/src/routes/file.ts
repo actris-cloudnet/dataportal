@@ -209,7 +209,7 @@ export class FileRoutes {
       if (!file.instrumentInfo) {
         return next({ status: 422, errors: "Unknown instrument PID" });
       }
-      if (file.instrument !== file.instrumentInfo.instrument.id) {
+      if (file.instrument && file.instrument !== file.instrumentInfo.instrument.id) {
         return next({ status: 422, errors: "Instrument doesn't match instrument PID" });
       }
     }
