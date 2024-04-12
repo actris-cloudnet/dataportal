@@ -147,6 +147,20 @@ const routes = [
     component: () => import("@/views/InstrumentView.vue"),
     props: true,
   },
+  {
+    path: "/products",
+    name: "Products",
+    meta: { title: false },
+    component: () => import("@/views/ProductsView.vue"),
+    props: true,
+  },
+  {
+    path: "/product/:product",
+    name: "Product",
+    meta: { title: false },
+    component: () => import("@/views/ProductView.vue"),
+    props: true,
+  },
 ];
 
 const router = createRouter({

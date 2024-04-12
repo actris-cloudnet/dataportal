@@ -7,10 +7,10 @@
     <dl class="summary-section-table">
       <dt>Type</dt>
       <dd>
-        <div class="product-container">
+        <router-link :to="{ name: 'Product', params: { product: response.product.id } }" class="product-container">
           <img :alt="response.product.id" :src="productIconUrl" class="product-icon" />
           {{ response.product.humanReadableName }}
-        </div>
+        </router-link>
       </dd>
       <template v-if="'instrumentPid' in response && response.instrumentPid">
         <dt>Instrument</dt>

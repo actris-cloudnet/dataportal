@@ -137,7 +137,11 @@
           </template>
           <template v-else>
             <dt>Product</dt>
-            <dd>{{ previewResponse.product.humanReadableName }}</dd>
+            <dd>
+              <router-link :to="{ name: 'Product', params: { product: previewResponse.product.id } }">
+                {{ previewResponse.product.humanReadableName }}
+              </router-link>
+            </dd>
           </template>
           <dt>Date</dt>
           <dd>{{ previewResponse.measurementDate }}</dd>

@@ -18,6 +18,18 @@ export class ProductRoutes {
     }
   };
 
+  product: RequestHandler = async (req: Request, res: Response, next) => {
+    try {
+      const product = await this.productRepo.findOneBy({ id: req.params.productId });
+      if (!product) {
+        return next({ status: 404, errors: ["No product match this id"] });
+      }
+      res.send(product);
+    } catch (err) {
+      next({ status: 500, errors: err });
+    }
+  };
+
   productVariables: RequestHandler = async (req: Request, res: Response, next) => {
     try {
       const products = await this.productRepo.find({

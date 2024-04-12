@@ -1,0 +1,93 @@
+<template>
+  <div v-if="products.status === 'ready'">
+    <LandingHeader title="Products" />
+    <main class="pagewidth">
+      <h2>Instrument products</h2>
+      <ul>
+        <li v-for="product in instrumentProducts" :key="product.id">
+          <router-link :to="{ name: 'Product', params: { product: product.id } }">
+            {{ product.humanReadableName }}
+          </router-link>
+        </li>
+      </ul>
+      <h2>Synergetic products</h2>
+      <ul>
+        <li v-for="product in derivedProducts" :key="product.id">
+          <router-link :to="{ name: 'Product', params: { product: product.id } }">
+            {{ product.humanReadableName }}
+          </router-link>
+        </li>
+      </ul>
+      <h2>Experimental products</h2>
+      <ul>
+        <li v-for="product in expProducts" :key="product.id">
+          <router-link :to="{ name: 'Product', params: { product: product.id } }">
+            {{ product.humanReadableName }}
+          </router-link>
+        </li>
+      </ul>
+    </main>
+  </div>
+  <ApiError :response="(products.error as any).response" v-else-if="products.status === 'error'" />
+</template>
+
+<script lang="ts" setup>
+import { computed, onMounted, ref } from "vue";
+import axios from "axios";
+
+import type { Product } from "@shared/entity/Product";
+import { backendUrl, compareValues } from "@/lib";
+import LandingHeader from "@/components/LandingHeader.vue";
+import ApiError from "@/views/ApiError.vue";
+
+const alphabeticalSort = (a: Product, b: Product) => compareValues(a.humanReadableName, b.humanReadableName);
+
+type ProductResult = { status: "loading" } | { status: "ready"; value: Product[] } | { status: "error"; error: Error };
+
+const products = ref<ProductResult>({ status: "loading" });
+
+const instrumentProducts = computed(() =>
+  products.value.status === "ready"
+    ? products.value.value
+        .filter((product) => product.level == "1b" && product.experimental === false)
+        .sort(alphabeticalSort)
+    : [],
+);
+const derivedProducts = computed(() =>
+  products.value.status === "ready"
+    ? products.value.value
+        .filter((product) => (product.level == "1c" || product.level == "2") && product.experimental === false)
+        .sort(alphabeticalSort)
+    : [],
+);
+const expProducts = computed(() =>
+  products.value.status === "ready"
+    ? products.value.value
+        .filter((product) => product.level != "3" && product.experimental === true)
+        .sort(alphabeticalSort)
+    : [],
+);
+
+onMounted(async () => {
+  try {
+    const res = await axios.get<Product[]>(`${backendUrl}products`);
+    products.value = { status: "ready", value: res.data };
+  } catch (error) {
+    products.value = { status: "error", error: error as Error };
+  }
+});
+</script>
+
+<style scoped lang="scss">
+h2 {
+  font-size: 150%;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+ul {
+  list-style: disc;
+  padding-left: 2rem;
+  margin-bottom: 2rem;
+}
+</style>
