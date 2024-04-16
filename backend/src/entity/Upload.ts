@@ -1,4 +1,4 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, Unique } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, ManyToOne, PrimaryColumn, Unique } from "typeorm";
 import { Site } from "./Site";
 import { Instrument, InstrumentInfo } from "./Instrument";
 import { Model } from "./Model";

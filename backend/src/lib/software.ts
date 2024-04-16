@@ -1,6 +1,6 @@
 import { DataSource, Repository } from "typeorm";
 import { Software } from "../entity/Software";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 
 interface Metadata {
   humanReadableName: string;

@@ -1,4 +1,4 @@
-import { DataSource, Exclusion, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { ErrorLevel, QualityReport } from "../entity/QualityReport";
 import { Request, RequestHandler, Response } from "express";
 import { FileRoutes } from "./file";
