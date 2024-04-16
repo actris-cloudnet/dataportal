@@ -141,6 +141,13 @@ const routes = [
     },
   },
   {
+    path: "/instruments",
+    name: "Instruments",
+    meta: { title: false },
+    component: () => import("@/views/InstrumentsView.vue"),
+    props: true,
+  },
+  {
     path: "/instrument/:uuid",
     name: "Instrument",
     meta: { title: false },

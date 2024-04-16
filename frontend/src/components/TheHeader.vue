@@ -45,6 +45,11 @@ const showMenu = ref(false);
           </a>
         </li>
         <li>
+          <a href="/instruments">
+            <span>Instruments</span>
+          </a>
+        </li>
+        <li>
           <a href="/products">
             <span>Products</span>
           </a>
@@ -191,7 +196,7 @@ li a {
   }
 }
 
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 1000px) {
   .menu-toggle {
     display: block;
     margin-left: auto;

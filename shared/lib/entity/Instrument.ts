@@ -31,6 +31,7 @@ export interface InstrumentInfo {
   serialNumber: string | null;
   instrument: Instrument;
   locations: InstrumentPidLocation[];
+  siteId: string;
   model: string;
   owners: string[];
   type: string;

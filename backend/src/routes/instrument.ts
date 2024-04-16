@@ -27,8 +27,43 @@ export class InstrumentRoutes {
 
   listInstrumentPids: RequestHandler = async (req, res, next) => {
     try {
-      const pids = await this.instrumentInfoRepo.find({ relations: { instrument: true } });
-      res.send(pids);
+      if ("includeSite" in req.query) {
+        const latestSite = this.instrumentUploadRepo
+          .createQueryBuilder("upload")
+          .distinctOn(["upload.instrumentInfoUuid"])
+          .select(["upload.instrumentInfoUuid", "upload.siteId"])
+          .where("upload.measurementDate > CURRENT_DATE - 30")
+          .orderBy("upload.instrumentInfoUuid")
+          .addOrderBy("upload.measurementDate", "DESC")
+          .getQuery();
+        const rawData = await this.instrumentInfoRepo
+          .createQueryBuilder("instrument_info")
+          .select(["instrument_info.*", 'latest_site."siteId"'])
+          .leftJoin("(" + latestSite + ")", "latest_site", 'instrument_info.uuid = latest_site."instrumentInfoUuid"')
+          .leftJoinAndSelect(Instrument, "instrument", "instrument_info.instrumentId = instrument.id")
+          .getRawMany();
+        const data = rawData.map((row) => ({
+          uuid: row.uuid,
+          pid: row.pid,
+          name: row.name,
+          owners: row.owners,
+          model: row.model,
+          type: row.type,
+          serialNumber: row.serialNumber,
+          siteId: row.siteId,
+          instrument: {
+            id: row.instrument_id,
+            type: row.instrument_type,
+            humanReadableName: row.instrument_humanReadableName,
+            shortName: row.instrument_shortName,
+            allowedTags: row.instrument_allowedTags,
+          },
+        }));
+        res.send(data);
+      } else {
+        const data = await this.instrumentInfoRepo.find({ relations: { instrument: true } });
+        res.send(data);
+      }
     } catch (error) {
       next({ status: 500, errors: error });
     }

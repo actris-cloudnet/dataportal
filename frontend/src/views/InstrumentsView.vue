@@ -1,0 +1,87 @@
+<template>
+  <ApiError :response="(instruments.error as any).response" v-if="instruments.status === 'error'" />
+  <div v-else>
+    <LandingHeader title="Instruments" />
+    <main class="pagewidth">
+      <template v-if="instruments.status === 'ready'">
+        <div class="site" v-for="site in instruments.value" :key="site.id">
+          <h2>{{ site.humanReadableName }}</h2>
+          <ul>
+            <li v-for="instrument in site.instruments" :key="instrument.uuid">
+              <router-link :to="{ name: 'Instrument', params: { uuid: instrument.uuid } }">
+                {{ instrument.name }} </router-link
+              ><br />
+              {{ instrument.type }}
+            </li>
+          </ul>
+        </div>
+      </template>
+      <BaseSpinner v-else />
+    </main>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { onMounted, ref } from "vue";
+import axios from "axios";
+
+import type { InstrumentInfo } from "@shared/entity/Instrument";
+import type { Site } from "@shared/entity/Site";
+import { backendUrl } from "@/lib";
+import LandingHeader from "@/components/LandingHeader.vue";
+import BaseSpinner from "@/components/BaseSpinner.vue";
+import ApiError from "@/views/ApiError.vue";
+
+type SiteWithInstruments = Site & { instruments: InstrumentInfo[] };
+type ProductResult =
+  | { status: "loading" }
+  | { status: "ready"; value: SiteWithInstruments[] }
+  | { status: "error"; error: Error };
+
+const instruments = ref<ProductResult>({ status: "loading" });
+
+onMounted(async () => {
+  try {
+    const [siteRes, instruRes] = await Promise.all([
+      axios.get<Site[]>(`${backendUrl}sites`, { params: { type: ["cloudnet", "campaign"] } }),
+      axios.get<InstrumentInfo[]>(`${backendUrl}instrument-pids`, { params: { includeSite: 1 } }),
+    ]);
+    const instruBySite = instruRes.data.reduce(
+      (obj: Record<InstrumentInfo["siteId"], InstrumentInfo[]>, instrument) => {
+        if (!(instrument.siteId in obj)) {
+          obj[instrument.siteId] = [];
+        }
+        obj[instrument.siteId].push(instrument);
+        return obj;
+      },
+      {},
+    );
+    instruments.value = {
+      status: "ready",
+      value: siteRes.data
+        .map((site) => ({ ...site, instruments: instruBySite[site.id] }))
+        .filter((site) => site.instruments),
+    };
+  } catch (error) {
+    instruments.value = { status: "error", error: error as Error };
+  }
+});
+</script>
+
+<style scoped lang="scss">
+h2 {
+  font-size: 150%;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.site {
+  margin-bottom: 2rem;
+}
+
+ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  gap: 1rem;
+}
+</style>
