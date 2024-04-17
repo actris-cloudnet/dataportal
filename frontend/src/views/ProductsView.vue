@@ -3,6 +3,9 @@
     <LandingHeader title="Products" />
     <main class="pagewidth">
       <h2>Instrument products</h2>
+      <p>
+        Measurements from an instrument in a harmonised format with some additional processing such as noise screening.
+      </p>
       <ul>
         <li v-for="product in instrumentProducts" :key="product.id">
           <router-link :to="{ name: 'Product', params: { product: product.id } }">
@@ -11,6 +14,7 @@
         </li>
       </ul>
       <h2>Synergetic products</h2>
+      <p>Cloud properties derived from multiple instruments of different type.</p>
       <ul>
         <li v-for="product in derivedProducts" :key="product.id">
           <router-link :to="{ name: 'Product', params: { product: product.id } }">
@@ -19,6 +23,7 @@
         </li>
       </ul>
       <h2>Experimental products</h2>
+      <p>Products based on novel methods or processing software still under development.</p>
       <ul>
         <li v-for="product in expProducts" :key="product.id">
           <router-link :to="{ name: 'Product', params: { product: product.id } }">
@@ -82,6 +87,11 @@ onMounted(async () => {
 h2 {
   font-size: 150%;
   margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+p {
+  max-width: 600px;
   margin-bottom: 1rem;
 }
 
