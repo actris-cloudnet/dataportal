@@ -23,21 +23,25 @@
           <dd>{{ instrumentPid.value.serialNumber }}</dd>
         </template>
       </dl>
-      <h2>Locations</h2>
-      <table class="locations">
-        <tr v-for="location in instrumentPid.value.locations" :key="location.siteId">
-          <td>{{ location.startDate }}</td>
-          <td>–</td>
-          <td>{{ location.endDate }}</td>
-          <td>
-            <router-link :to="{ name: 'Site', params: { siteId: location.siteId } }">
-              {{ location.humanReadableName }}
-            </router-link>
-          </td>
-        </tr>
-      </table>
-      <h2>Products</h2>
-      <InstrumentVisualization :siteId="''" :dataStatus="dataStatus" />
+      <template v-if="instrumentPid.value.locations.length > 0">
+        <h2>Locations</h2>
+        <table class="locations">
+          <tr v-for="location in instrumentPid.value.locations" :key="location.siteId">
+            <td>{{ location.startDate }}</td>
+            <td>–</td>
+            <td>{{ location.endDate }}</td>
+            <td>
+              <router-link :to="{ name: 'Site', params: { siteId: location.siteId } }">
+                {{ location.humanReadableName }}
+              </router-link>
+            </td>
+          </tr>
+        </table>
+      </template>
+      <template v-if="dataStatus && dataStatus.availableProducts.length > 0">
+        <h2>Products</h2>
+        <InstrumentVisualization :dataStatus="dataStatus" />
+      </template>
     </main>
   </div>
   <ApiError :response="(instrumentPid.error as any).response" v-else-if="instrumentPid.status === 'error'" />
@@ -51,7 +55,7 @@ import type { InstrumentInfo } from "@shared/entity/Instrument";
 import { backendUrl } from "@/lib";
 import LandingHeader from "@/components/LandingHeader.vue";
 import ApiError from "@/views/ApiError.vue";
-import { parseDataStatus } from "@/lib/DataStatusParser";
+import { parseDataStatus, type DataStatus } from "@/lib/DataStatusParser";
 import InstrumentVisualization from "@/components/InstrumentVisualization.vue";
 
 export interface Props {
@@ -67,7 +71,7 @@ type InstrumentPidResult =
 
 const instrumentPid = ref<InstrumentPidResult>({ status: "loading" });
 
-const dataStatus = ref();
+const dataStatus = ref<DataStatus>();
 
 onMounted(async () => {
   try {
