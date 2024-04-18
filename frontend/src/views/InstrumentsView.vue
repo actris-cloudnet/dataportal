@@ -7,11 +7,14 @@
         <div class="site" v-for="site in instruments.value" :key="site.id">
           <h2>{{ site.humanReadableName }}</h2>
           <ul>
-            <li v-for="instrument in site.instruments" :key="instrument.uuid">
-              <router-link :to="{ name: 'Instrument', params: { uuid: instrument.uuid } }">
-                {{ instrument.name }} </router-link
-              ><br />
-              {{ instrument.type }}
+            <li v-for="instrument in site.instruments" :key="instrument.uuid" class="instrument">
+              <span :class="{ status: true, [instrument.status]: true }"></span>
+              <router-link :to="{ name: 'Instrument', params: { uuid: instrument.uuid } }" class="name">
+                {{ instrument.name }}
+              </router-link>
+              <div class="type">
+                {{ instrument.type }}
+              </div>
             </li>
           </ul>
         </div>
@@ -83,5 +86,31 @@ ul {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
   gap: 1rem;
+}
+
+.instrument {
+  display: grid;
+  grid-template-columns: min-content auto;
+  column-gap: 0.25rem;
+
+  .type {
+    grid-column: 2 / 3;
+  }
+}
+
+.status {
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  align-self: center;
+
+  &.active {
+    background: #25910f;
+  }
+
+  &.inactive {
+    background: #ddd;
+  }
 }
 </style>

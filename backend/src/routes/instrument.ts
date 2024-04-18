@@ -31,14 +31,16 @@ export class InstrumentRoutes {
         const latestSite = this.instrumentUploadRepo
           .createQueryBuilder("upload")
           .distinctOn(["upload.instrumentInfoUuid"])
-          .select(["upload.instrumentInfoUuid", "upload.siteId"])
-          .where("upload.measurementDate > CURRENT_DATE - 30")
+          .select("upload.instrumentInfoUuid")
+          .addSelect("upload.siteId")
+          .addSelect("upload.measurementDate > CURRENT_DATE - 3", "active")
+          .where("upload.measurementDate > CURRENT_DATE - 182")
           .orderBy("upload.instrumentInfoUuid")
           .addOrderBy("upload.measurementDate", "DESC")
           .getQuery();
         const rawData = await this.instrumentInfoRepo
           .createQueryBuilder("instrument_info")
-          .select(["instrument_info.*", 'latest_site."siteId"'])
+          .select(["instrument_info.*", "latest_site.*"])
           .leftJoin("(" + latestSite + ")", "latest_site", 'instrument_info.uuid = latest_site."instrumentInfoUuid"')
           .leftJoinAndSelect(Instrument, "instrument", "instrument_info.instrumentId = instrument.id")
           .getRawMany();
@@ -51,6 +53,7 @@ export class InstrumentRoutes {
           type: row.type,
           serialNumber: row.serialNumber,
           siteId: row.siteId,
+          status: row.active ? "active" : "inactive",
           instrument: {
             id: row.instrument_id,
             type: row.instrument_type,
