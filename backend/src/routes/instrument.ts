@@ -33,17 +33,20 @@ export class InstrumentRoutes {
           .distinctOn(["upload.instrumentInfoUuid"])
           .select("upload.instrumentInfoUuid")
           .addSelect("upload.siteId")
+          .addSelect("MAX(upload.measurementDate)", "latestDate")
           .addSelect(
             `CASE
-               WHEN upload.measurementDate > CURRENT_DATE - 3 THEN 'active'
-               WHEN upload.measurementDate > CURRENT_DATE - 7 THEN 'recent'
+               WHEN MAX(upload.measurementDate) > CURRENT_DATE - 3 THEN 'active'
+               WHEN MAX(upload.measurementDate) > CURRENT_DATE - 7 THEN 'recent'
                ELSE 'inactive'
              END`,
             "status",
           )
           .where("upload.measurementDate > CURRENT_DATE - 182")
+          .groupBy("upload.instrumentInfoUuid")
+          .addGroupBy("upload.siteId")
           .orderBy("upload.instrumentInfoUuid")
-          .addOrderBy("upload.measurementDate", "DESC")
+          .addOrderBy('"latestDate"', "DESC")
           .getQuery();
         const rawData = await this.instrumentInfoRepo
           .createQueryBuilder("instrument_info")
