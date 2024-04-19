@@ -35,5 +35,5 @@ export interface InstrumentInfo {
   owners: string[];
   type: string;
   siteId: string;
-  status: "active" | "inactive";
+  status: "active" | "recent" | "inactive";
 }

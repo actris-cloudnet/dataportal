@@ -33,7 +33,14 @@ export class InstrumentRoutes {
           .distinctOn(["upload.instrumentInfoUuid"])
           .select("upload.instrumentInfoUuid")
           .addSelect("upload.siteId")
-          .addSelect("upload.measurementDate > CURRENT_DATE - 3", "active")
+          .addSelect(
+            `CASE
+               WHEN upload.measurementDate > CURRENT_DATE - 3 THEN 'active'
+               WHEN upload.measurementDate > CURRENT_DATE - 7 THEN 'recent'
+               ELSE 'inactive'
+             END`,
+            "status",
+          )
           .where("upload.measurementDate > CURRENT_DATE - 182")
           .orderBy("upload.instrumentInfoUuid")
           .addOrderBy("upload.measurementDate", "DESC")
@@ -53,7 +60,7 @@ export class InstrumentRoutes {
           type: row.type,
           serialNumber: row.serialNumber,
           siteId: row.siteId,
-          status: row.active ? "active" : "inactive",
+          status: row.status,
           instrument: {
             id: row.instrument_id,
             type: row.instrument_type,

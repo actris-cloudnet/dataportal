@@ -40,7 +40,7 @@
               </tbody>
             </table>
           </div>
-          <p class="a-legend-class-not-overridden-by-some-global-style">
+          <p class="legend">
             <span class="status cloudnet" v-if="item.legend[0]"></span>
             {{ item.legend[0] }}
             <span class="status active" v-if="item.legend[1]"></span>
@@ -206,7 +206,7 @@ p {
   }
 }
 
-.a-legend-class-not-overridden-by-some-global-style {
+.legend {
   font-size: 75%;
   margin-top: 1rem;
   color: #666;

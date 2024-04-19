@@ -18,6 +18,14 @@
             </li>
           </ul>
         </div>
+        <p class="legend">
+          <span class="status active"></span>
+          Data within 3 days
+          <span class="status recent"></span>
+          Data within 7 days
+          <span class="status inactive"></span>
+          No recent data
+        </p>
       </template>
       <BaseSpinner v-else />
     </main>
@@ -109,8 +117,26 @@ ul {
     background: #25910f;
   }
 
+  &.recent {
+    background: #eed679;
+  }
+
   &.inactive {
     background: #ddd;
+  }
+}
+
+.legend {
+  font-size: 75%;
+  margin-top: 1rem;
+  color: #666;
+  border-top: 1px solid #ddd;
+  padding-top: 0.5rem;
+  padding-bottom: 1rem;
+  display: inline-block;
+
+  .status:not(:first-child) {
+    margin-left: 8px;
   }
 }
 </style>
