@@ -32,6 +32,12 @@
                 class="product-icon"
               />
               {{ sourceFile.value.product.humanReadableName }}
+              <template v-if="'instrumentInfo' in sourceFile.value && sourceFile.value.instrumentInfo">
+                ({{ sourceFile.value.instrumentInfo.model }})
+              </template>
+              <template v-else-if="'model' in sourceFile.value">
+                ({{ sourceFile.value.model.humanReadableName }})
+              </template>
             </router-link>
             <a v-else>
               <span class="product-icon">?</span>

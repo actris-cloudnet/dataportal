@@ -74,7 +74,9 @@ import ApiError from "./ApiError.vue";
 import PhotoGalleryIcon from "@/assets/icons/photo-gallery.png";
 import LandingHeader from "@/components/LandingHeader.vue";
 
-export type SourceFile = { ok: true; uuid: string; value: File } | { ok: false; uuid: string; value: Error };
+export type SourceFile =
+  | { ok: true; uuid: string; value: RegularFile | ModelFile }
+  | { ok: false; uuid: string; value: Error };
 
 export interface Props {
   uuid: string;
