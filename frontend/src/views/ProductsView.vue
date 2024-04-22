@@ -9,6 +9,7 @@
       <ul>
         <li v-for="product in instrumentProducts" :key="product.id">
           <router-link :to="{ name: 'Product', params: { product: product.id } }">
+            <img :src="getProductIcon(product.id)" alt="" class="product-icon" />
             {{ product.humanReadableName }}
           </router-link>
         </li>
@@ -18,6 +19,7 @@
       <ul>
         <li v-for="product in derivedProducts" :key="product.id">
           <router-link :to="{ name: 'Product', params: { product: product.id } }">
+            <img :src="getProductIcon(product.id)" alt="" class="product-icon" />
             {{ product.humanReadableName }}
           </router-link>
         </li>
@@ -27,6 +29,7 @@
       <ul>
         <li v-for="product in expProducts" :key="product.id">
           <router-link :to="{ name: 'Product', params: { product: product.id } }">
+            <img :src="getProductIcon(product.id)" alt="" class="product-icon" />
             {{ product.humanReadableName }}
           </router-link>
         </li>
@@ -41,7 +44,7 @@ import { computed, onMounted, ref } from "vue";
 import axios from "axios";
 
 import type { Product } from "@shared/entity/Product";
-import { backendUrl, compareValues } from "@/lib";
+import { backendUrl, compareValues, getProductIcon } from "@/lib";
 import LandingHeader from "@/components/LandingHeader.vue";
 import ApiError from "@/views/ApiError.vue";
 
@@ -96,8 +99,16 @@ p {
 }
 
 ul {
-  list-style: disc;
-  padding-left: 2rem;
+  max-width: 600px;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr));
   margin-bottom: 2rem;
+}
+
+.product-icon {
+  height: 1.1rem;
+  margin-right: 0.25rem;
+  vertical-align: middle;
 }
 </style>
