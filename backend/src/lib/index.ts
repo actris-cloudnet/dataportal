@@ -87,6 +87,9 @@ export const augmentFile = (includeS3path: boolean) => (file: RegularFile | Mode
   model: "model" in file ? file.model : undefined,
   software: parseSoftware(file),
   timeliness: calcTimeliness(file),
+  sourceRegularFiles: undefined,
+  sourceModelFiles: undefined,
+  sourceFileIds: getSourceFileIds(file),
 });
 
 const parseSoftware = (file: RegularFile | ModelFile) =>
@@ -108,6 +111,13 @@ function calcTimeliness(file: RegularFile | ModelFile) {
   if (diff < msInHour * 3) return "rrt";
   else if (diff < msInDay * 3) return "nrt";
   else return "scheduled";
+}
+
+function getSourceFileIds(file: RegularFile | ModelFile) {
+  if (file instanceof ModelFile || !file.sourceRegularFiles || !file.sourceModelFiles) {
+    return undefined;
+  }
+  return [...file.sourceRegularFiles.map((file) => file.uuid), ...file.sourceModelFiles.map((file) => file.uuid)];
 }
 
 export const ssAuthString = () =>

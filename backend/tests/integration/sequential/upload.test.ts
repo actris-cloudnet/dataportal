@@ -78,11 +78,11 @@ beforeAll(async () => {
   modelRepo = dataSource.getRepository(ModelUpload);
   // Make sure these tables are initialized correctly
   await dataSource
-    .getRepository(RegularFile)
-    .save(JSON.parse((await fsp.readFile("fixtures/5-regular_file.json")).toString()));
-  await dataSource
     .getRepository(ModelFile)
     .save(JSON.parse((await fsp.readFile("fixtures/5-model_file.json")).toString()));
+  await dataSource
+    .getRepository(RegularFile)
+    .save(JSON.parse((await fsp.readFile("fixtures/5-regular_file.json")).toString()));
 
   await instrumentRepo.delete({});
   await modelRepo.delete({});

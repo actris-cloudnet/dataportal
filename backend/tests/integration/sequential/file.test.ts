@@ -25,8 +25,13 @@ let fileQualityRepo: Repository<FileQuality>;
 let qualityReportRepo: Repository<QualityReport>;
 
 const volatileFile = JSON.parse(readFileSync("tests/data/file.json", "utf8"));
-const stableFile = { ...volatileFile, ...{ volatile: false, pid: "1234" } };
-const volatileModelFile = { ...volatileFile, ...{ model: "ecmwf", product: "model" } };
+const stableFile = { ...volatileFile, volatile: false, pid: "1234", uuid: "487b77b0-3401-4ff0-afb0-925bb42d7ab6" };
+const volatileModelFile = {
+  ...volatileFile,
+  model: "ecmwf",
+  product: "model",
+  uuid: "f47f2fb7-62c2-4884-a3c5-98421c1589cd",
+};
 
 beforeAll(async () => {
   dataSource = await AppDataSource.initialize();
@@ -363,18 +368,25 @@ describe("PUT /files/:s3key", () => {
     expect(dbRow1.updatedAt < dbRow2.updatedAt);
   });
 
-  it("inserting new file with source files", async () => {
+  it("inserts new file with source files", async () => {
     await putFile(stableFile);
+    await putFile(volatileModelFile);
     const tmpfile = { ...stableFile };
-    tmpfile.sourceFileIds = [stableFile.uuid];
+    tmpfile.sourceFileIds = [stableFile.uuid, volatileModelFile.uuid];
     tmpfile.uuid = "62b32746-faf0-4057-9076-ed2e698dcc34";
     tmpfile.checksum = "dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b5";
     tmpfile.s3key = "20181115_mace-head_hatpro.nc";
     tmpfile.product = "categorize";
     await axios.put(`${storageServiceUrl}cloudnet-product/${tmpfile.s3key}`, "content");
     await expect(putFile(tmpfile)).resolves.toMatchObject({ status: 201 });
-    const dbRow1 = await fileRepo.findOneByOrFail({ uuid: tmpfile.uuid });
-    expect(dbRow1.sourceFileIds).toMatchObject([stableFile.uuid]);
+    const dbRow1 = await fileRepo.findOneOrFail({
+      where: { uuid: tmpfile.uuid },
+      relations: { sourceRegularFiles: true, sourceModelFiles: true },
+    });
+    expect(dbRow1.sourceRegularFiles).toHaveLength(1);
+    expect(dbRow1.sourceRegularFiles[0].uuid).toBe(stableFile.uuid);
+    expect(dbRow1.sourceModelFiles).toHaveLength(1);
+    expect(dbRow1.sourceModelFiles[0].uuid).toBe(volatileModelFile.uuid);
   });
 
   it("errors on nonexisting source files", async () => {

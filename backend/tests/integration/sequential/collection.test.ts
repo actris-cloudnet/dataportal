@@ -3,7 +3,7 @@ import { backendPublicUrl, genResponse } from "../../lib";
 import { DataSource, Repository } from "typeorm";
 import { Collection } from "../../../src/entity/Collection";
 import { promises as fsp } from "fs";
-import { File, RegularFile } from "../../../src/entity/File";
+import { File, ModelFile, RegularFile } from "../../../src/entity/File";
 import { AppDataSource } from "../../../src/data-source";
 import { describe, expect, it, beforeAll, afterAll, beforeEach } from "@jest/globals";
 
@@ -19,6 +19,9 @@ describe("POST /api/collection", () => {
     dataSource = await AppDataSource.initialize();
     repo = dataSource.getRepository(Collection);
     fileRepo = dataSource.getRepository(RegularFile);
+    await dataSource
+      .getRepository(ModelFile)
+      .save(JSON.parse((await fsp.readFile("fixtures/5-model_file.json")).toString()));
     await fileRepo.save(JSON.parse((await fsp.readFile("fixtures/5-regular_file.json")).toString()));
   });
 

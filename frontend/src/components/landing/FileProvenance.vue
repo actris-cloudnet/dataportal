@@ -25,24 +25,14 @@
       <dd v-if="sourceFiles.length > 0">
         <ul class="data-sources">
           <li v-for="sourceFile in sourceFiles" :key="sourceFile.uuid">
-            <router-link :to="`/file/${sourceFile.value.uuid}`" v-if="sourceFile.ok">
-              <img
-                :alt="sourceFile.value.product.id"
-                :src="getProductIcon(sourceFile.value.product.id)"
-                class="product-icon"
-              />
-              {{ sourceFile.value.product.humanReadableName }}
-              <template v-if="'instrumentInfo' in sourceFile.value && sourceFile.value.instrumentInfo">
-                ({{ sourceFile.value.instrumentInfo.model }})
+            <router-link :to="{ name: 'File', params: { uuid: sourceFile.uuid } }">
+              <img :alt="sourceFile.product.id" :src="getProductIcon(sourceFile.product.id)" class="product-icon" />
+              {{ sourceFile.product.humanReadableName }}
+              <template v-if="'instrumentInfo' in sourceFile && sourceFile.instrumentInfo">
+                ({{ sourceFile.instrumentInfo.model }})
               </template>
-              <template v-else-if="'model' in sourceFile.value">
-                ({{ sourceFile.value.model.humanReadableName }})
-              </template>
+              <template v-else-if="'model' in sourceFile"> ({{ sourceFile.model.humanReadableName }}) </template>
             </router-link>
-            <a v-else>
-              <span class="product-icon">?</span>
-              Unknown file
-            </a>
           </li>
         </ul>
       </dd>
@@ -81,13 +71,13 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 import { getProductIcon } from "@/lib";
-import type { FileResponse, SourceFile } from "@/views/FileView.vue";
+import type { FileResponse } from "@/views/FileView.vue";
 
 export interface Props {
   response: FileResponse;
   isBusy: boolean;
   versions: string[];
-  sourceFiles: SourceFile[];
+  sourceFiles: FileResponse[];
 }
 
 const props = defineProps<Props>();

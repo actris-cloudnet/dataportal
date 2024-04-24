@@ -63,7 +63,7 @@ exports[`/api/files/:uuid request succeeds on instrument file 1`] = `
       "version": "1.0.4",
     },
   ],
-  "sourceFileIds": null,
+  "sourceFileIds": [],
   "startTime": "2018-11-15T10:56:19.382Z",
   "stopTime": "2018-11-15T11:56:19.382Z",
   "timeliness": "scheduled",

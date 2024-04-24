@@ -40,7 +40,7 @@ export interface File {
 }
 
 export interface RegularFile extends File {
-  sourceFileIds: string[] | null;
+  sourceFileIds: string[];
   visualizations: Visualization[];
   instrumentPid: string;
   instrumentInfo: InstrumentInfo | null;

@@ -181,7 +181,7 @@ export class CitationService {
       object,
       `SELECT 1
        FROM traverse
-       JOIN model_file ON traverse.uuid = model_file.uuid
+       JOIN regular_file_source_model_files_model_file source_model_file ON traverse.uuid = source_model_file."regularFileUuid"
        LIMIT 1`,
     );
     return rows.length > 0;
@@ -281,7 +281,8 @@ export class CitationService {
       object,
       `SELECT DISTINCT acknowledgements
        FROM traverse
-       JOIN model_file ON traverse.uuid = model_file.uuid
+       JOIN regular_file_source_model_files_model_file source_model_file ON traverse.uuid = source_model_file."regularFileUuid"
+       JOIN model_file ON source_model_file."modelFileUuid" = model_file.uuid
        JOIN model_citations_model_citation ON model_file."modelId" = model_citations_model_citation."modelId"
        JOIN model_citation ON model_citations_model_citation."modelCitationId" = model_citation.id`,
     );
@@ -319,9 +320,9 @@ export class CitationService {
          FROM regular_file
          ${filter}
          UNION ALL
-         SELECT "sourceFileUuid"
-         FROM regular_file, UNNEST("sourceFileIds") AS "sourceFileUuid", traverse
-         WHERE regular_file.uuid = traverse.uuid
+         SELECT "regularFileUuid_2"
+         FROM regular_file_source_regular_files_regular_file
+         JOIN traverse ON "regularFileUuid_1" = traverse.uuid
        )
        ${query}`,
       [object.uuid],

@@ -74,10 +74,6 @@ import ApiError from "./ApiError.vue";
 import PhotoGalleryIcon from "@/assets/icons/photo-gallery.png";
 import LandingHeader from "@/components/LandingHeader.vue";
 
-export type SourceFile =
-  | { ok: true; uuid: string; value: RegularFile | ModelFile }
-  | { ok: false; uuid: string; value: Error };
-
 export interface Props {
   uuid: string;
 }
@@ -90,7 +86,7 @@ const response = ref<FileResponse | null>(null);
 const visualizations = ref<VisualizationItem[]>([]);
 const versions = ref<string[]>([]);
 const error = ref(false);
-const sourceFiles = ref<SourceFile[]>([]);
+const sourceFiles = ref<FileResponse[]>([]);
 const isBusy = ref(false);
 const loadingVisualizations = ref(true);
 const location = ref<SiteLocation | null>(null);
@@ -135,7 +131,7 @@ async function fetchFileMetadata() {
   }
 }
 
-async function fetchLocation(file: ModelFile | RegularFile) {
+async function fetchLocation(file: FileResponse) {
   if (!file.site.type.includes("mobile" as SiteType)) {
     location.value = null;
     return;
@@ -157,24 +153,21 @@ function fetchVersions(file: File) {
   });
 }
 
-async function fetchSourceFiles(response: RegularFile | ModelFile) {
+async function fetchSourceFiles(response: FileResponse) {
   if (!("sourceFileIds" in response) || !response.sourceFileIds) {
     sourceFiles.value = [];
     return;
   }
-  const results = await Promise.all(
-    response.sourceFileIds.map((uuid) =>
-      axios
-        .get(`${backendUrl}files/${uuid}`)
-        .then((response) => ({ ok: true, uuid, value: response.data }))
-        .catch((error) => ({ ok: false, uuid, value: error })),
-    ),
+  const files = await Promise.all(
+    response.sourceFileIds.map(async (uuid) => {
+      const res = await axios.get<FileResponse>(`${backendUrl}files/${uuid}`);
+      return res.data;
+    }),
   );
-  results.sort((a, b) => {
-    if (!a.ok || !b.ok) return -1;
-    return compareValues(a.value.product.humanReadableName, b.value.product.humanReadableName);
+  files.sort((a, b) => {
+    return compareValues(a.product.humanReadableName, b.product.humanReadableName);
   });
-  sourceFiles.value = results;
+  sourceFiles.value = files;
 }
 
 watch(

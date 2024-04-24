@@ -75,6 +75,8 @@ export class FileRoutes {
       } else {
         qb.leftJoinAndSelect("file.instrument", "instrument");
         qb.leftJoinAndSelect("file.instrumentInfo", "instrumentInfo");
+        qb.leftJoinAndSelect("file.sourceRegularFiles", "sourceRegularFiles");
+        qb.leftJoinAndSelect("file.sourceModelFiles", "sourceModelFiles");
       }
       qb.where("file.uuid = :uuid", req.params);
       return hideTestDataFromNormalUsers<RegularFile | ModelFile>(qb, req).getOne();
@@ -175,13 +177,18 @@ export class FileRoutes {
     if (!isValidFilename(file)) return next({ status: 400, errors: ["Filename does not match file metadata"] });
     const isModel = file.model && true;
 
+    const sourceFileIds = req.body.sourceFileIds || [];
+    if (!Array.isArray(sourceFileIds) || sourceFileIds.some((id) => typeof id !== "string")) {
+      return next({ status: 422, errors: ["sourceFileIds must be array of strings"] });
+    }
     try {
-      const sourceFileIds = req.body.sourceFileIds || [];
-      await Promise.all(
+      const sourceFiles = await Promise.all(
         sourceFileIds.map(
-          async (uuid: string) => (await this.findAnyFile((repo) => repo.findOneBy({ uuid }))) || Promise.reject(),
+          async (uuid) => (await this.findAnyFile((repo) => repo.findOneBy({ uuid }))) || Promise.reject(),
         ),
       );
+      file.sourceRegularFiles = sourceFiles.filter((file) => file instanceof RegularFile);
+      file.sourceModelFiles = sourceFiles.filter((file) => file instanceof ModelFile);
     } catch (e) {
       return next({ status: 422, errors: ["One or more of the specified source files were not found"] });
     }

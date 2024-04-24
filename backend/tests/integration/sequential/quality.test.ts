@@ -39,8 +39,8 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   await cleanRepos();
-  await regularFileRepo.save(JSON.parse((await fsp.readFile("fixtures/5-regular_file.json")).toString()));
   await modelFileRepo.save(JSON.parse((await fsp.readFile("fixtures/5-model_file.json")).toString()));
+  await regularFileRepo.save(JSON.parse((await fsp.readFile("fixtures/5-regular_file.json")).toString()));
   await searchFileRepo.save(JSON.parse((await fsp.readFile("fixtures/5-search_file.json")).toString()));
   await testInfoRepo.save(JSON.parse((await fsp.readFile("fixtures/0-test_info.json")).toString()));
 });

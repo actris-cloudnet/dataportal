@@ -28,7 +28,7 @@ import ProductInformation from "./ProductInformation.vue";
 import FileProvenance from "./FileProvenance.vue";
 import FilePreview from "./FilePreview.vue";
 import FileCitation from "./FileCitation.vue";
-import type { SourceFile, FileResponse } from "@/views/FileView.vue";
+import type { FileResponse } from "@/views/FileView.vue";
 import { useTitle } from "@/router";
 
 export interface Props {
@@ -37,7 +37,7 @@ export interface Props {
   uuid: string;
   isBusy: boolean;
   versions: string[];
-  sourceFiles: SourceFile[];
+  sourceFiles: FileResponse[];
   visualizations: VisualizationItem[];
   loadingVisualizations: boolean;
   title: string;
