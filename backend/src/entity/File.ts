@@ -112,9 +112,6 @@ export abstract class File {
 @Index(["instrument"])
 @Entity()
 export class RegularFile extends File {
-  @Column("uuid", { array: true, nullable: true })
-  sourceFileIds!: string[] | null;
-
   @ManyToMany(() => RegularFile)
   @JoinTable()
   sourceRegularFiles!: RegularFile[];
