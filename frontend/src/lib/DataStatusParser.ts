@@ -14,6 +14,7 @@ export interface ProductInfo {
   experimental: boolean;
   errorLevel?: string | null;
   instrumentPid?: string | null;
+  siteId: string;
 }
 
 export interface ProductLevels {
@@ -48,7 +49,7 @@ function createProductLevels(lvlTranslate: LvlTranslate, productInfo?: ProductIn
     };
   }
   if (productInfo) {
-    const { id, legacy, uuid, experimental, errorLevel, instrumentPid } = productInfo;
+    const { id, legacy, uuid, experimental, errorLevel, instrumentPid, siteId } = productInfo;
     const lvl = lvlTranslate[id];
     if (!lvl) return existingObj;
     existingObj[lvl].push({
@@ -58,6 +59,7 @@ function createProductLevels(lvlTranslate: LvlTranslate, productInfo?: ProductIn
       experimental,
       errorLevel,
       instrumentPid,
+      siteId,
     });
   }
   return existingObj;
@@ -72,6 +74,7 @@ interface ProductAvailability {
   experimental: boolean;
   instrumentPid: string;
   instrumentInfo: InstrumentInfo;
+  siteId: string;
 }
 
 interface DataStatusConfig {
@@ -122,6 +125,7 @@ export async function parseDataStatus(config: DataStatusConfig): Promise<DataSta
         experimental: cur.experimental,
         errorLevel: "errorLevel" in cur ? cur.errorLevel : undefined,
         instrumentPid: "instrumentPid" in cur ? cur.instrumentPid : undefined,
+        siteId: cur.siteId,
       };
       if (!obj[cur.measurementDate]) {
         obj[cur.measurementDate] = { date: cur.measurementDate, products: createProductLevels(lvlTranslate) };

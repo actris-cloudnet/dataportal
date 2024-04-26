@@ -21,6 +21,7 @@ export class ProductAvailabilityRoutes {
           "file.legacy AS legacy",
           "product.experimental AS experimental",
           'file."instrumentPid" AS "instrumentPid"',
+          'file."siteId" AS "siteId"',
         ])
         .leftJoin("file.product", "product")
         .leftJoinAndSelect("file.instrumentInfo", "instrumentInfo")
@@ -44,6 +45,7 @@ export class ProductAvailabilityRoutes {
         errorLevel: data.errorLevel,
         legacy: data.legacy,
         experimental: data.experimental,
+        siteId: data.siteId,
         instrumentPid: data.instrumentPid,
         instrumentInfo: data.instrumentInfo_uuid
           ? {

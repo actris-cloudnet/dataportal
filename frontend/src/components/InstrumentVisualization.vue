@@ -65,11 +65,12 @@ function getProductStatus(products: ProductLevels, productId: string): boolean {
 
 function createLinkToSearchPage(date: string, products: ProductLevels): string | undefined {
   if (noData(products)) return;
-  const allProducts = Object.values(products).flat();
+  const allProducts = [...products["1b"], ...products["1c"], ...products["2"]];
   return router.resolve({
     name: "Search",
     params: { mode: "data" },
     query: {
+      site: [...new Set(allProducts.map((product) => product.siteId))].join(","),
       product: allProducts.map((product) => product.id).join(","),
       instrumentPid: allProducts[0].instrumentPid,
       dateFrom: date,
