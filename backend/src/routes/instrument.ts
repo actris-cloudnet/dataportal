@@ -92,22 +92,13 @@ export class InstrumentRoutes {
         return next({ status: 404, errors: ["No instrument PID match this id"] });
       }
       const locations = await this.dataSource.query(
-        `WITH dates AS (
+        `WITH gaps AS (
           SELECT
             "siteId",
             "measurementDate",
-            LAG("measurementDate") OVER (PARTITION BY "siteId" ORDER BY "measurementDate") AS "prevDate"
+            COALESCE(CAST("siteId" != LAG("siteId") OVER (PARTITION BY "siteId" ORDER BY "measurementDate") AS INT), 1) AS "isNewPeriod"
           FROM regular_file
           WHERE "instrumentPid" = $1
-        ), gaps AS (
-          SELECT
-            "siteId",
-            "measurementDate",
-            CASE
-              WHEN "prevDate" IS NULL OR "measurementDate" - "prevDate" > 30 THEN 1
-              ELSE 0
-            END AS "isNewPeriod"
-          FROM dates
         ), periods AS (
           SELECT
             "siteId",
@@ -123,7 +114,7 @@ export class InstrumentRoutes {
         FROM periods
         JOIN site ON "siteId" = site.id
         GROUP BY "siteId", "humanReadableName", "periodId"
-        ORDER BY "startDate" DESC;`,
+        ORDER BY "startDate" DESC`,
         [pid.pid],
       );
       res.send({ ...pid, locations });

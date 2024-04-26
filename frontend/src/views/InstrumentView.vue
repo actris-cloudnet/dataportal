@@ -29,7 +29,7 @@
           <tr v-for="location in instrumentPid.value.locations" :key="location.siteId">
             <td>{{ location.startDate }}</td>
             <td>–</td>
-            <td>{{ location.endDate }}</td>
+            <td>{{ location.endDate >= yesterdayString ? "now" : location.endDate }}</td>
             <td>
               <router-link :to="{ name: 'Site', params: { siteId: location.siteId } }">
                 {{ location.humanReadableName }}
@@ -52,7 +52,7 @@ import { onMounted, ref } from "vue";
 import axios from "axios";
 
 import type { InstrumentInfo } from "@shared/entity/Instrument";
-import { backendUrl } from "@/lib";
+import { backendUrl, dateToString } from "@/lib";
 import LandingHeader from "@/components/LandingHeader.vue";
 import ApiError from "@/views/ApiError.vue";
 import { parseDataStatus, type DataStatus } from "@/lib/DataStatusParser";
@@ -72,6 +72,10 @@ type InstrumentPidResult =
 const instrumentPid = ref<InstrumentPidResult>({ status: "loading" });
 
 const dataStatus = ref<DataStatus>();
+
+const yesterday = new Date();
+yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+const yesterdayString = dateToString(yesterday);
 
 onMounted(async () => {
   try {
