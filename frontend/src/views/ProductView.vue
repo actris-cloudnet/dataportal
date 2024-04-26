@@ -95,7 +95,7 @@ const titles: Record<Section, string> = {
 
 const descriptions: Record<Section, string> = {
   common_variables:
-    "The following variables are available in all products of this type but additional variables may be present depending of the source instrument.",
+    "The following variables are available in all products of this type but additional variables may be present depending on the source instrument.",
 };
 
 onMounted(async () => {
