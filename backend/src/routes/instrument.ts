@@ -50,7 +50,9 @@ export class InstrumentRoutes {
           .getQuery();
         const rawData = await this.instrumentInfoRepo
           .createQueryBuilder("instrument_info")
-          .select(["instrument_info.*", "latest_site.*"])
+          .select("instrument_info.*")
+          .addSelect('latest_site."siteId"')
+          .addSelect("COALESCE(latest_site.status, 'inactive')", "status")
           .leftJoin("(" + latestSite + ")", "latest_site", 'instrument_info.uuid = latest_site."instrumentInfoUuid"')
           .leftJoinAndSelect(Instrument, "instrument", "instrument_info.instrumentId = instrument.id")
           .getRawMany();

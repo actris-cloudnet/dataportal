@@ -38,12 +38,12 @@ import axios from "axios";
 
 import type { InstrumentInfo } from "@shared/entity/Instrument";
 import type { Site } from "@shared/entity/Site";
-import { backendUrl } from "@/lib";
+import { backendUrl, compareValues } from "@/lib";
 import LandingHeader from "@/components/LandingHeader.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
 import ApiError from "@/views/ApiError.vue";
 
-type SiteWithInstruments = Site & { instruments: InstrumentInfo[] };
+type SiteWithInstruments = { id: string; humanReadableName: string; instruments: InstrumentInfo[] };
 type ProductResult =
   | { status: "loading" }
   | { status: "ready"; value: SiteWithInstruments[] }
@@ -51,27 +51,39 @@ type ProductResult =
 
 const instruments = ref<ProductResult>({ status: "loading" });
 
+function sortInstrument(a: InstrumentInfo, b: InstrumentInfo) {
+  if (a.status == b.status) {
+    return compareValues(a.name, b.name);
+  }
+  const statusOrder = ["active", "recent", "inactive"];
+  return compareValues(statusOrder.indexOf(a.status), statusOrder.indexOf(b.status));
+}
+
 onMounted(async () => {
   try {
     const [siteRes, instruRes] = await Promise.all([
-      axios.get<Site[]>(`${backendUrl}sites`, { params: { type: ["cloudnet", "campaign"] } }),
+      axios.get<Site[]>(`${backendUrl}sites`),
       axios.get<InstrumentInfo[]>(`${backendUrl}instrument-pids`, { params: { includeSite: 1 } }),
     ]);
-    const instruBySite = instruRes.data.reduce(
-      (obj: Record<InstrumentInfo["siteId"], InstrumentInfo[]>, instrument) => {
+    const sites = [
+      ...siteRes.data,
+      {
+        id: "null",
+        humanReadableName: "Graveyard",
+      },
+    ];
+    const instruBySite = instruRes.data
+      .sort(sortInstrument)
+      .reduce((obj: Record<InstrumentInfo["siteId"], InstrumentInfo[]>, instrument) => {
         if (!(instrument.siteId in obj)) {
           obj[instrument.siteId] = [];
         }
         obj[instrument.siteId].push(instrument);
         return obj;
-      },
-      {},
-    );
+      }, {});
     instruments.value = {
       status: "ready",
-      value: siteRes.data
-        .map((site) => ({ ...site, instruments: instruBySite[site.id] }))
-        .filter((site) => site.instruments),
+      value: sites.map((site) => ({ ...site, instruments: instruBySite[site.id] })).filter((site) => site.instruments),
     };
   } catch (error) {
     instruments.value = { status: "error", error: error as Error };
