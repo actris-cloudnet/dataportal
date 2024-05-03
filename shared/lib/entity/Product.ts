@@ -1,5 +1,5 @@
 import type { File } from "./File";
-import { Instrument } from "./Instrument";
+import type { Instrument } from "./Instrument";
 import type { ProductVariable } from "./ProductVariable";
 import type { Upload } from "./Upload";
 

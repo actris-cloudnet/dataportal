@@ -268,7 +268,7 @@ export function ArrayEqual<T>(value: T[] | FindOperator<T>): FindOperator<any> {
   return new FindOperator("equal", value as any);
 }
 
-function daysBetweenDates(a: Date, b: Date): number {
+export function daysBetweenDates(a: Date, b: Date): number {
   a = new Date(a);
   b = new Date(b);
   a.setHours(0, 0, 0, 0);

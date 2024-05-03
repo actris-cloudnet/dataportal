@@ -14,6 +14,7 @@ import {
   tomorrow,
   uploadBucket,
   validateInstrumentPid,
+  daysBetweenDates,
   validateInstrument,
 } from "../lib";
 import { basename } from "path";
@@ -26,6 +27,7 @@ import * as http from "http";
 import ReadableStream = NodeJS.ReadableStream;
 import env from "../lib/env";
 import { QueueService } from "../lib/queue";
+import { Task, TaskType } from "../entity/Task";
 
 export class UploadRoutes {
   constructor(dataSource: DataSource, queueService: QueueService) {
@@ -219,7 +221,15 @@ export class UploadRoutes {
       const upload = await this.findAnyUpload((repo, model) =>
         repo.findOne({
           where: { checksum: checksum, site: { id: site } },
-          relations: ["site", model ? "model" : "instrument"],
+          relations: model
+            ? { site: true, model: true }
+            : {
+                site: true,
+                instrument: {
+                  derivedProducts: true,
+                },
+                instrumentInfo: true,
+              },
         }),
       );
       if (!upload) return next({ status: 400, errors: "No metadata matches this hash" });
@@ -235,18 +245,9 @@ export class UploadRoutes {
       );
       res.sendStatus(status);
 
-      if (upload instanceof ModelUpload) {
-        this.queueService
-          .publish({
-            type: "model",
-            modelId: upload.model.id,
-            measurementDate: upload.measurementDate as unknown as string,
-            siteId: upload.site.id,
-          })
-          .catch((err) => {
-            console.error("Task publish failed:", err);
-          });
-      }
+      this.publishTask(upload).catch((err) => {
+        console.error("Task publish failed:", err);
+      });
     } catch (err: any) {
       if (err.status == 400 && err.errors == "Checksum does not match file contents") return next(err); // Client error
       if (err.errors) return next({ status: 500, errors: `Internal server error: ${err.errors}` }); // Our error
@@ -254,6 +255,40 @@ export class UploadRoutes {
       return next({ status: 500, errors: `Internal server error: ${err.code}` }); // Unknown error
     }
   };
+
+  private async publishTask(upload: InstrumentUpload | ModelUpload) {
+    if (upload instanceof ModelUpload) {
+      const task = this.makeTask(upload);
+      task.productId = "model";
+      task.model = upload.model;
+      await this.queueService.publish(task);
+    } else {
+      for (const product of upload.instrument.derivedProducts) {
+        const existingFile = await this.regularFileRepo.findOneBy({
+          site: { id: upload.site.id },
+          measurementDate: upload.measurementDate,
+          product: { id: product.id },
+          instrumentInfo: { uuid: upload.instrumentInfo!.uuid },
+        });
+        const stableFileExists = existingFile && !existingFile.volatile;
+        const task = this.makeTask(upload, stableFileExists ? 60 : 5);
+        task.product = product;
+        task.instrumentInfo = upload.instrumentInfo;
+        await this.queueService.publish(task);
+      }
+    }
+  }
+
+  private makeTask(upload: Upload, delayMinutes: number = 0) {
+    const now = new Date();
+    const task = new Task();
+    task.type = TaskType.PROCESS;
+    task.site = upload.site;
+    task.measurementDate = upload.measurementDate;
+    task.priority = Math.min(daysBetweenDates(now, upload.measurementDate), 10);
+    task.scheduledAt = new Date(now.getTime() + delayMinutes * 60 * 1000);
+    return task;
+  }
 
   private async makeRequest(
     s3path: string,
