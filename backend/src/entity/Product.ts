@@ -1,5 +1,6 @@
-import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn } from "typeorm";
 import { ProductVariable } from "./ProductVariable";
+import { Instrument } from "./Instrument";
 
 @Entity()
 export class Product {
@@ -15,6 +16,16 @@ export class Product {
   @Column({ default: false })
   experimental!: boolean;
 
-  @OneToMany((_) => ProductVariable, (prodVar) => prodVar.product)
+  @OneToMany(() => ProductVariable, (prodVar) => prodVar.product)
   variables!: ProductVariable[];
+
+  @ManyToMany(() => Instrument, (instrument) => instrument.derivedProducts)
+  sourceInstruments!: Instrument[];
+
+  @ManyToMany(() => Product, (product) => product.derivedProducts)
+  @JoinTable()
+  sourceProducts!: Product[];
+
+  @ManyToMany(() => Product, (product) => product.sourceProducts)
+  derivedProducts!: Product[];
 }

@@ -1,6 +1,7 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 import { InstrumentUpload } from "./Upload";
 import { RegularFile } from "./File";
+import { Product } from "./Product";
 
 export enum InstrumentType {
   RADAR = "radar",
@@ -31,6 +32,10 @@ export class Instrument {
 
   @OneToMany((_) => RegularFile, (regularFile) => regularFile.instrument)
   files!: RegularFile[];
+
+  @ManyToMany((_) => Product, (product) => product.sourceInstruments)
+  @JoinTable()
+  derivedProducts!: Product[];
 }
 
 @Entity()

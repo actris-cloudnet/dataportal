@@ -10,6 +10,37 @@
     <main class="pagewidth">
       <h2>Description</h2>
       <p>{{ productInfo.variables.description }}</p>
+      <template v-if="productInfo.value.sourceInstruments.length > 0">
+        <p>Cloudnet supports the following instruments:</p>
+        <ul>
+          <li v-for="sourceInstrument in productInfo.value.sourceInstruments" :key="sourceInstrument.id">
+            <img :src="getProductIcon(productInfo.value.id)" alt="" class="product-icon" />
+            {{ sourceInstrument.humanReadableName }}
+          </li>
+        </ul>
+      </template>
+      <template v-if="productInfo.value.sourceProducts.length > 0">
+        <p>The {{ lowerCaseProductName(productInfo.value) }} product is based on these products:</p>
+        <ul>
+          <li v-for="sourceProduct in productInfo.value.sourceProducts" :key="sourceProduct.id">
+            <router-link :to="{ name: 'Product', params: { product: sourceProduct.id } }">
+              <img :src="getProductIcon(sourceProduct.id)" alt="" class="product-icon" />
+              {{ sourceProduct.humanReadableName }}
+            </router-link>
+          </li>
+        </ul>
+      </template>
+      <template v-if="productInfo.value.derivedProducts.length > 0">
+        <p>The {{ lowerCaseProductName(productInfo.value) }} product is used for generating these products:</p>
+        <ul>
+          <li v-for="derivedProduct in productInfo.value.derivedProducts" :key="derivedProduct.id">
+            <router-link :to="{ name: 'Product', params: { product: derivedProduct.id } }">
+              <img :src="getProductIcon(derivedProduct.id)" alt="" class="product-icon" />
+              {{ derivedProduct.humanReadableName }}
+            </router-link>
+          </li>
+        </ul>
+      </template>
       <template v-if="productInfo.variables.references_html.length > 0">
         <h2>References</h2>
         <ul class="references">
@@ -57,11 +88,11 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import { ref, watch } from "vue";
 import axios from "axios";
 
 import type { Product } from "@shared/entity/Product";
-import { backendUrl } from "@/lib";
+import { backendUrl, getProductIcon } from "@/lib";
 import LandingHeader from "@/components/LandingHeader.vue";
 import BaseTag from "@/components/BaseTag.vue";
 import ApiError from "@/views/ApiError.vue";
@@ -98,21 +129,28 @@ const descriptions: Record<Section, string> = {
     "The following variables are available in all products of this type but additional variables may be present depending on the source instrument.",
 };
 
-onMounted(async () => {
-  try {
-    const res = await axios.get<Product>(`${backendUrl}products/${props.product}`);
-    const variables = (productData as any)[props.product];
-    if (variables) {
-      productInfo.value = { status: "ready", value: res.data, variables };
-    } else {
-      const error = new Error();
-      (error as any).response = { status: 404, data: "Not found" };
-      productInfo.value = { status: "error", error };
+const lowerCaseProductName = (product: Product) =>
+  product.humanReadableName.toLowerCase().replace("mwr", "MWR").replace("doppler", "Doppler");
+
+watch(
+  () => props.product,
+  async () => {
+    try {
+      const res = await axios.get<Product>(`${backendUrl}products/${props.product}`);
+      const variables = (productData as any)[props.product];
+      if (variables) {
+        productInfo.value = { status: "ready", value: res.data, variables };
+      } else {
+        const error = new Error();
+        (error as any).response = { status: 404, data: "Not found" };
+        productInfo.value = { status: "error", error };
+      }
+    } catch (error) {
+      productInfo.value = { status: "error", error: error as Error };
     }
-  } catch (error) {
-    productInfo.value = { status: "error", error: error as Error };
-  }
-});
+  },
+  { immediate: true },
+);
 </script>
 
 <style scoped lang="scss">
@@ -150,8 +188,12 @@ code {
 }
 
 p {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   max-width: 800px;
+}
+
+ul {
+  margin: 1rem 0;
 }
 
 .references {
@@ -165,5 +207,11 @@ p {
   li + li {
     margin-top: 0.5rem;
   }
+}
+
+.product-icon {
+  height: 1.1rem;
+  margin-right: 0.25rem;
+  vertical-align: middle;
 }
 </style>
