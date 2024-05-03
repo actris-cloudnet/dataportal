@@ -20,7 +20,10 @@ export class ProductRoutes {
 
   product: RequestHandler = async (req: Request, res: Response, next) => {
     try {
-      const product = await this.productRepo.findOneBy({ id: req.params.productId });
+      const product = await this.productRepo.findOne({
+        where: { id: req.params.productId },
+        relations: { sourceInstruments: true, sourceProducts: true, derivedProducts: true },
+      });
       if (!product) {
         return next({ status: 404, errors: ["No product match this id"] });
       }
