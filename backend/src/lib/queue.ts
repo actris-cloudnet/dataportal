@@ -1,125 +1,109 @@
 import { DataSource, Not, Repository } from "typeorm";
-import { ModelTask, ProductTask, Status, UploadTask } from "../entity/Task";
-
-export type TaskRequest = { siteId: string; measurementDate: string } & (
-  | { type: "upload"; instrumentId: string; instrumentPid: string }
-  | { type: "product"; productId: string }
-  | { type: "model"; modelId: string }
-);
-export type TaskResponse = TaskRequest & { id: number; status: string; scheduledAt: Date };
-
-type TaskId = TaskResponse["id"];
-type TaskType = TaskResponse["type"];
+import { Task, TaskStatus } from "../entity/Task";
 
 export class QueueService {
-  private uploadTaskRepo: Repository<UploadTask>;
-  private productTaskRepo: Repository<ProductTask>;
-  private modelTaskRepo: Repository<ModelTask>;
+  private taskRepo: Repository<Task>;
 
   constructor(dataSource: DataSource) {
-    this.uploadTaskRepo = dataSource.getRepository(UploadTask);
-    this.productTaskRepo = dataSource.getRepository(ProductTask);
-    this.modelTaskRepo = dataSource.getRepository(ModelTask);
+    this.taskRepo = dataSource.getRepository(Task);
   }
 
-  async publish(task: TaskRequest, options?: { delayMinutes?: number; now?: Date }) {
-    const now = (options && options.now) || new Date();
-    const delayMinutes = (options && options.delayMinutes) || 0;
-    const scheduledAt = new Date(now.getTime() + delayMinutes * 60 * 1000);
-    const insertData: Record<any, any> = {
-      siteId: task.siteId,
-      measurementDate: task.measurementDate,
-      status: Status.CREATED,
-      scheduledAt: scheduledAt.toISOString(),
-    };
-    const index = ["siteId", "measurementDate"];
-    const repo = this.getRepository(task.type);
-    if (task.type === "upload") {
-      insertData.instrumentId = task.instrumentId;
-      insertData.instrumentPid = task.instrumentPid;
-      index.push("instrumentId", "instrumentPid");
-    } else if (task.type == "product") {
-      insertData.productId = task.productId;
-      index.push("productId");
-    } else {
-      insertData.modelId = task.modelId;
-      index.push("modelId");
-    }
-    const table = repo.metadata.tableName;
-    const columns = '"' + Object.keys(insertData).join('", "') + '"';
-    const values = Array.from({ length: Object.keys(insertData).length }, (v, i) => `$${i + 1}`).join(", ");
-    const indexColumns = '"' + index.join('", "') + '"';
-    await this.uploadTaskRepo.query(
-      `INSERT INTO ${table} (${columns}) VALUES (${values})
-       ON CONFLICT (${indexColumns}) DO UPDATE SET status = CASE
-         WHEN ${table}.status = '${Status.CREATED}' THEN '${Status.CREATED}'::${table}_status_enum
-         WHEN ${table}.status = '${Status.RUNNING}' THEN '${Status.RESTART}'::${table}_status_enum
-         WHEN ${table}.status = '${Status.RESTART}' THEN '${Status.RESTART}'::${table}_status_enum
-         WHEN ${table}.status = '${Status.FAILED}'  THEN '${Status.CREATED}'::${table}_status_enum
-       END
+  async publish(task: Task) {
+    await this.taskRepo.query(
+      `INSERT INTO task (
+         "type",
+         "siteId",
+         "measurementDate",
+         "productId",
+         "instrumentInfoUuid",
+         "modelId",
+         "status",
+         "priority",
+         "scheduledAt"
+       )
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       ON CONFLICT (
+         "type",
+         "siteId",
+         "measurementDate",
+         "productId",
+         "instrumentInfoUuid",
+         "modelId"
+       )
+       DO UPDATE SET
+         priority = LEAST(task.priority, EXCLUDED.priority),
+         status = CASE
+           WHEN task.status = '${TaskStatus.CREATED}' THEN '${TaskStatus.CREATED}'::task_status_enum
+           WHEN task.status = '${TaskStatus.RUNNING}' THEN '${TaskStatus.RESTART}'::task_status_enum
+           WHEN task.status = '${TaskStatus.RESTART}' THEN '${TaskStatus.RESTART}'::task_status_enum
+           WHEN task.status = '${TaskStatus.FAILED}'  THEN '${TaskStatus.CREATED}'::task_status_enum
+         END
        RETURNING id`,
-      Object.values(insertData),
+      [
+        task.type,
+        task.site ? task.site.id : task.siteId,
+        task.measurementDate,
+        task.product ? task.product.id : task.productId,
+        task.instrumentInfo ? task.instrumentInfo.uuid : task.instrumentInfoUuid,
+        task.model ? task.model.id : task.modelId,
+        TaskStatus.CREATED,
+        task.priority,
+        task.scheduledAt.toISOString(),
+      ],
     );
   }
 
-  async receive(type: TaskType, options?: { now?: Date }): Promise<TaskResponse | null> {
+  async receive(options?: { now?: Date }): Promise<Task | null> {
     const now = (options && options.now) || new Date();
-    const repo = this.getRepository(type);
-    const entity = repo.metadata.target;
-    const table = repo.metadata.tableName;
-    const query = repo
+    const entity = this.taskRepo.metadata.target;
+    const query = this.taskRepo
       .createQueryBuilder()
       .update()
-      .set({ status: Status.RUNNING })
+      .set({ status: TaskStatus.RUNNING })
       .where((qb) => {
         const subQuery = qb
           .select()
           .subQuery()
           .select("t.id")
           .from(entity, "t")
-          .where(`t.status = '${Status.CREATED}' AND t.scheduledAt <= :now`)
-          .orderBy("scheduledAt", "ASC")
+          .where(`t.status = '${TaskStatus.CREATED}'`)
+          .andWhere("t.scheduledAt <= :now")
+          .orderBy("t.priority - 100 * EXTRACT(MINUTE FROM :now - t.scheduledAt) / 1440", "ASC")
           .limit(1)
           .setLock("pessimistic_write")
           .setOnLocked("skip_locked")
           .getQuery();
-        return `${table}.id = ${subQuery}`;
+        return `task.id = ${subQuery}`;
       })
       .setParameter("now", now.toISOString())
-      .returning(`${table}.*`);
+      .returning(`task.*`);
     const result = await query.execute();
     return result.raw.length > 0
-      ? { type, ...result.raw[0], measurementDate: result.raw[0].measurementDate.toISOString().slice(0, 10) }
+      ? { ...result.raw[0], measurementDate: result.raw[0].measurementDate.toISOString().slice(0, 10) }
       : null;
   }
 
-  async complete(type: TaskType, id: TaskId, options?: { now: Date }) {
+  async complete(id: Task["id"], options?: { now?: Date }) {
     const now = (options && options.now) || new Date();
-    const repository = this.getRepository(type);
-    const result = await repository.delete({ id, status: Status.RUNNING });
+    const result = await this.taskRepo.delete({ id, status: TaskStatus.RUNNING });
     if (result.affected === 0) {
-      await repository.update({ id }, { status: Status.CREATED, scheduledAt: now });
+      await this.taskRepo.update({ id }, { status: TaskStatus.CREATED, scheduledAt: now });
     }
   }
 
-  async fail(type: TaskType, id: TaskId, options?: { now: Date }) {
+  async fail(id: Task["id"], options?: { now?: Date }) {
     const now = (options && options.now) || new Date();
-    const repository = this.getRepository(type);
-    const result = await repository.update({ id, status: Status.RUNNING }, { status: Status.FAILED });
+    const result = await this.taskRepo.update({ id, status: TaskStatus.RUNNING }, { status: TaskStatus.FAILED });
     if (result.affected === 0) {
-      await repository.update({ id }, { status: Status.CREATED, scheduledAt: now });
+      await this.taskRepo.update({ id }, { status: TaskStatus.CREATED, scheduledAt: now });
     }
   }
 
-  count(type: TaskType) {
-    return this.getRepository(type).count({ where: { status: Not(Status.FAILED) } });
+  count() {
+    return this.taskRepo.count({ where: { status: Not(TaskStatus.FAILED) } });
   }
 
-  async clear(type: TaskType) {
-    await this.getRepository(type).delete({});
-  }
-
-  private getRepository(type: TaskType) {
-    return { upload: this.uploadTaskRepo, product: this.productTaskRepo, model: this.modelTaskRepo }[type];
+  async clear() {
+    await this.taskRepo.delete({});
   }
 }

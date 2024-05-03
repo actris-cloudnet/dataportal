@@ -19,7 +19,7 @@ services:
       interval: 1s
       retries: 20
   db:
-    image: "postgres:13"
+    image: "postgres:16"
     environment:
       POSTGRES_DB: dataportal-test
       POSTGRES_USER: dataportal
