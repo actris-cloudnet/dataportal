@@ -14,6 +14,7 @@ import ReadableStream = NodeJS.ReadableStream;
 import maxmind, { CountryResponse, OpenOpts, Reader } from "maxmind";
 import { randomBytes } from "crypto";
 import { Collection } from "../entity/Collection";
+import { InstrumentInfo } from "../entity/Instrument";
 
 export const stringify = (obj: any): string => JSON.stringify(obj, null, 2);
 
@@ -273,4 +274,11 @@ function daysBetweenDates(a: Date, b: Date): number {
   a.setHours(0, 0, 0, 0);
   b.setHours(0, 0, 0, 0);
   return Math.floor(Math.abs(a.getTime() - b.getTime()) / (24 * 60 * 60 * 1000));
+}
+
+export function validateInstrument(instrument: string, instrumentInfo: InstrumentInfo) {
+  if (instrument == "chm15k" || instrument == "chm15kx") {
+    return instrumentInfo.instrument.id == "chm15k" || instrumentInfo.instrument.id == "chm15kx";
+  }
+  return instrument == instrumentInfo.instrument.id;
 }

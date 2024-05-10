@@ -22,6 +22,7 @@ import {
   toArray,
   dateforsize,
   streamHandler,
+  validateInstrument,
 } from "../lib";
 import { augmentFile } from "../lib/";
 import { SearchFile } from "../entity/SearchFile";
@@ -216,7 +217,7 @@ export class FileRoutes {
       if (!file.instrumentInfo) {
         return next({ status: 422, errors: "Unknown instrument PID" });
       }
-      if (file.instrument && file.instrument !== file.instrumentInfo.instrument.id) {
+      if (file.instrument && !validateInstrument(file.instrument, file.instrumentInfo)) {
         return next({ status: 422, errors: "Instrument doesn't match instrument PID" });
       }
     }
