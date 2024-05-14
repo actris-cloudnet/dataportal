@@ -166,3 +166,40 @@ export async function parseDataStatus(config: DataStatusConfig): Promise<DataSta
     allPids,
   };
 }
+
+export interface UploadDate {
+  date: string;
+  fileCount: number;
+  totalSize: number;
+}
+
+export interface UploadStatus {
+  dates: UploadDate[];
+  years: number[];
+  maxCount: number;
+  maxSize: number;
+}
+
+export async function parseUploadStatus(instrumentPid: string): Promise<UploadStatus> {
+  const uploadRes = await axios.get<UploadDate[]>(`${backendUrl}upload-amount/`, {
+    params: { instrumentPid: instrumentPid },
+  });
+  const uploadResponse = uploadRes.data;
+  if (!uploadResponse) {
+    return {
+      dates: [],
+      years: [],
+      maxCount: 0,
+      maxSize: 0,
+    };
+  }
+  const years = new Set(uploadResponse.map((row) => parseInt(row.date.slice(0, 4))));
+  const maxCount = Math.max(...uploadResponse.map((row) => row.fileCount));
+  const maxSize = Math.max(...uploadResponse.map((row) => row.totalSize));
+  return {
+    dates: uploadResponse,
+    years: [...years],
+    maxCount,
+    maxSize,
+  };
+}

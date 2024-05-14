@@ -197,7 +197,11 @@ export type ColorClass =
   | "only-model-data"
   | "all-data"
   | "all-raw"
-  | "contains-info";
+  | "contains-info"
+  | "green1"
+  | "green2"
+  | "green3"
+  | "green4";
 
 export const classColor: Record<ColorClass, string> = {
   "no-data": "white",
@@ -208,4 +212,8 @@ export const classColor: Record<ColorClass, string> = {
   "contains-errors": "#cd5c5c",
   "contains-info": "#a0df7b",
   "only-model-data": "#d3d3d3",
+  "green1": "rgb(155, 233, 168)",
+  "green2": "rgb(64, 196, 99)",
+  "green3": "rgb(48, 161, 78)",
+  "green4": "rgb(33, 110, 57)",
 };

@@ -188,6 +188,7 @@ async function createServer(): Promise<void> {
   app.get("/api/sites/:siteId/locations", siteRoutes.locations);
   app.get("/api/sites/:siteId/locations/:date", siteRoutes.location);
   app.get("/api/product-availability", productAvailabilityRoutes.productAvailability);
+  app.get("/api/upload-amount", productAvailabilityRoutes.uploadAmount);
   app.post("/api/feedback", rateLimit({ windowMs: 60 * 1000, limit: 10 }), express.json(), feedbackRoutes.postFeedback);
 
   // TODO: Depreciated. Needed for now, but in the future these should public
