@@ -634,7 +634,36 @@
         "standard_name": null,
         "long_name": "Liquid water content retrieval status",
         "comment": "This variable describes whether a retrieval was performed for each pixel,\nand its associated quality, in the form of 6 different classes. The classes\nare defined in the definition attribute. The most reliable retrieval is that\nwhen both radar and lidar detect the liquid layer, and microwave radiometer\ndata is present, indicated by the value 1. The next most reliable is when\nmicrowave radiometer data is used to adjust the cloud depth when the radar\ndoes not detect the liquid layer, indicated by the value 2, with a value of\n3 indicating the cloud pixels that have been added at cloud top to avoid\nthe profile becoming superadiabatic. A value of 4 indicates that microwave\nradiometer data were not available or not reliable (melting level present\nor unphysical values) but the liquid layers were well defined. If cloud top\nwas not well defined then this is indicated by a value of 5. The full\nretrieval of liquid water content, which requires reliable liquid water\npath from the microwave radiometer, was only performed for classes 1-3.\nNo attempt is made to retrieve liquid water content when rain is present;\nthis is indicated by the value 6.",
-        "definition": "\nValue 0: No liquid water detected.\nValue 1: Reliable retrieval.\nValue 2: Adiabatic retrieval where cloud top has been adjusted to match\n         liquid water path from microwave radiometer because layer is not\n         detected by radar.Value 3: Adiabatic retrieval: new cloud pixels where cloud top has been\n         adjusted to match liquid water path from microwave radiometer\n         because layer is not detected by radar.\nValue 4: No retrieval: either no liquid water path is available or liquid\n          water path is uncertain.\nValue 5: No retrieval: liquid water layer detected only by the lidar and\n         liquid water path is unavailable or uncertain: cloud top may be\n         higher than diagnosed cloud top since lidar signal has been\n         attenuated.Value 6: Rain present: cloud extent is difficult to ascertain and liquid\n         water path also uncertain.",
+        "definition": [
+          {
+            "label": "Value 0",
+            "description": "No liquid water detected."
+          },
+          {
+            "label": "Value 1",
+            "description": "Reliable retrieval."
+          },
+          {
+            "label": "Value 2",
+            "description": "Adiabatic retrieval where cloud top has been adjusted to match liquid water path from microwave radiometer because layer is not detected by radar."
+          },
+          {
+            "label": "Value 3",
+            "description": "Adiabatic retrieval: new cloud pixels where cloud top has been adjusted to match liquid water path from microwave radiometer because layer is not detected by radar."
+          },
+          {
+            "label": "Value 4",
+            "description": "No retrieval: either no liquid water path is available or liquid water path is uncertain."
+          },
+          {
+            "label": "Value 5",
+            "description": "No retrieval: liquid water layer detected only by the lidar and liquid water path is unavailable or uncertain: cloud top may be higher than diagnosed cloud top since lidar signal has been attenuated."
+          },
+          {
+            "label": "Value 6",
+            "description": "Rain present: cloud extent is difficult to ascertain and liquid water path also uncertain."
+          }
+        ],
         "dimensions": ["time", "height"],
         "dtype": "int32"
       },
@@ -980,7 +1009,40 @@
         "standard_name": null,
         "long_name": "Ice water content retrieval status",
         "comment": "This variable describes whether a retrieval was performed\nfor each pixel, and its associated quality.",
-        "definition": "\nValue 0: No ice present.\nValue 1: Reliable retrieval.\nValue 2: Unreliable retrieval due to uncorrected attenuation from liquid\n         water below the ice (no liquid water path measurement available).\nValue 3: Retrieval performed but radar corrected for liquid attenuation\n         using radiometer liquid water path which is not always accurate.\nValue 4: Ice detected only by the lidar.\nValue 5: Ice detected by radar but rain below so no retrieval performed\n         due to very uncertain attenuation.\nValue 6: Clear sky above rain and wet-bulb temperature less than 0degC:\n         if rain attenuation is strong, ice could be present but undetected.\nValue 7: Drizzle or rain that would have been classified as ice if the\n         wet-bulb temperature were less than 0degC: may be ice if\n         temperature is in error.",
+        "definition": [
+          {
+            "label": "Value 0",
+            "description": "No ice present."
+          },
+          {
+            "label": "Value 1",
+            "description": "Reliable retrieval."
+          },
+          {
+            "label": "Value 2",
+            "description": "Unreliable retrieval due to uncorrected attenuation from liquid water below the ice (no liquid water path measurement available)."
+          },
+          {
+            "label": "Value 3",
+            "description": "Retrieval performed but radar corrected for liquid attenuation using radiometer liquid water path which is not always accurate."
+          },
+          {
+            "label": "Value 4",
+            "description": "Ice detected only by the lidar."
+          },
+          {
+            "label": "Value 5",
+            "description": "Ice detected by radar but rain below so no retrieval performed due to very uncertain attenuation."
+          },
+          {
+            "label": "Value 6",
+            "description": "Clear sky above rain and wet-bulb temperature less than 0degC: if rain attenuation is strong, ice could be present but undetected."
+          },
+          {
+            "label": "Value 7",
+            "description": "Drizzle or rain that would have been classified as ice if the wet-bulb temperature were less than 0degC: may be ice if temperature is in error."
+          }
+        ],
         "dimensions": ["time", "height"],
         "dtype": "int32"
       },
@@ -1150,7 +1212,40 @@
         "standard_name": null,
         "long_name": "Ice effective radius retrieval status",
         "comment": "This variable describes whether a retrieval was performed\nfor each pixel, and its associated quality.",
-        "definition": "\nValue 0: No ice present.\nValue 1: Reliable retrieval.\nValue 2: Unreliable retrieval due to uncorrected attenuation from liquid\n         water below the ice (no liquid water path measurement available).\nValue 3: Retrieval performed but radar corrected for liquid attenuation\n         using radiometer liquid water path which is not always accurate.\nValue 4: Ice detected only by the lidar.\nValue 5: Ice detected by radar but rain below so no retrieval performed\n         due to very uncertain attenuation.\nValue 6: Clear sky above rain wet-bulb temperature less than 0degC: if\n         rain attenuation were strong then ice could be present but\n         undetected.Value 7: Drizzle or rain that would have been classified as ice if\n          the wet-bulb temperature were less than 0degC: may be ice\n          if temperature is in error.",
+        "definition": [
+          {
+            "label": "Value 0",
+            "description": "No ice present."
+          },
+          {
+            "label": "Value 1",
+            "description": "Reliable retrieval."
+          },
+          {
+            "label": "Value 2",
+            "description": "Unreliable retrieval due to uncorrected attenuation from liquid water below the ice (no liquid water path measurement available)."
+          },
+          {
+            "label": "Value 3",
+            "description": "Retrieval performed but radar corrected for liquid attenuation using radiometer liquid water path which is not always accurate."
+          },
+          {
+            "label": "Value 4",
+            "description": "Ice detected only by the lidar."
+          },
+          {
+            "label": "Value 5",
+            "description": "Ice detected by radar but rain below so no retrieval performed due to very uncertain attenuation."
+          },
+          {
+            "label": "Value 6",
+            "description": "Clear sky above rain wet-bulb temperature less than 0degC: if rain attenuation were strong then ice could be present but undetected."
+          },
+          {
+            "label": "Value 7",
+            "description": "Drizzle or rain that would have been classified as ice if the wet-bulb temperature were less than 0degC: may be ice if temperature is in error."
+          }
+        ],
         "dimensions": ["time", "height"],
         "dtype": "int32"
       },
@@ -1318,7 +1413,32 @@
         "standard_name": null,
         "long_name": "Target categorization bits",
         "comment": "This variable contains information on the nature of the targets\nat each pixel, thereby facilitating the application of algorithms that work\nwith only one type of target. The information is in the form of an array of\nbits, each of which states either whether a certain type of particle is\npresent (e.g. aerosols), or the whether some of the target particles have\na particular property. The definitions of each bit are given in the\ndefinition attribute. Bit 0 is the least significant.",
-        "definition": "\nBit 0: Small liquid droplets are present.\nBit 1: Falling hydrometeors are present; if Bit 2 is set then these are most\n       likely ice particles, otherwise they are drizzle or rain drops.\nBit 2: Wet-bulb temperature is less than 0 degrees C, implying the phase of\n       Bit-1 particles.\nBit 3: Melting ice particles are present.\nBit 4: Aerosol particles are present and visible to the lidar.\nBit 5: Insects are present and visible to the radar.",
+        "definition": [
+          {
+            "label": "Bit 0",
+            "description": "Small liquid droplets are present."
+          },
+          {
+            "label": "Bit 1",
+            "description": "Falling hydrometeors are present; if Bit 2 is set then these are most likely ice particles, otherwise they are drizzle or rain drops."
+          },
+          {
+            "label": "Bit 2",
+            "description": "Wet-bulb temperature is less than 0 degrees C, implying the phase of Bit-1 particles."
+          },
+          {
+            "label": "Bit 3",
+            "description": "Melting ice particles are present."
+          },
+          {
+            "label": "Bit 4",
+            "description": "Aerosol particles are present and visible to the lidar."
+          },
+          {
+            "label": "Bit 5",
+            "description": "Insects are present and visible to the radar."
+          }
+        ],
         "dimensions": ["time", "height"],
         "dtype": "int32"
       },
@@ -1418,7 +1538,32 @@
         "standard_name": null,
         "long_name": "Data quality bits",
         "comment": "This variable contains information on the quality of the data at each pixel.\nThe information is in the form of an array of bits, and the definitions of\neach bit are given in the definition attribute. Bit 0 is the least\nsignificant.",
-        "definition": "\nBit 0: An echo is detected by the radar.\nBit 1: An echo is detected by the lidar.\nBit 2: The apparent echo detected by the radar is ground clutter or some\n       other non-atmospheric artifact.\nBit 3: The lidar echo is due to clear-air molecular scattering.\nBit 4: Liquid water cloud, rainfall or melting ice below this pixel\n       will have caused radar and lidar attenuation; if bit 5 is set then\n       a correction for the radar attenuation has been performed;\n       otherwise do not trust the absolute values of reflectivity factor.\n       No correction is performed for lidar attenuation.\nBit 5: Radar reflectivity has been corrected for liquid-water attenuation\n       using the microwave radiometer measurements of liquid water path\n       and the lidar estimation of the location of liquid water cloud;\n       be aware that errors in reflectivity may result.\n",
+        "definition": [
+          {
+            "label": "Bit 0",
+            "description": "An echo is detected by the radar."
+          },
+          {
+            "label": "Bit 1",
+            "description": "An echo is detected by the lidar."
+          },
+          {
+            "label": "Bit 2",
+            "description": "The apparent echo detected by the radar is ground clutter or some other non-atmospheric artifact."
+          },
+          {
+            "label": "Bit 3",
+            "description": "The lidar echo is due to clear-air molecular scattering."
+          },
+          {
+            "label": "Bit 4",
+            "description": "Liquid water cloud, rainfall or melting ice below this pixel will have caused radar and lidar attenuation; if bit 5 is set then a correction for the radar attenuation has been performed; otherwise do not trust the absolute values of reflectivity factor. No correction is performed for lidar attenuation."
+          },
+          {
+            "label": "Bit 5",
+            "description": "Radar reflectivity has been corrected for liquid-water attenuation using the microwave radiometer measurements of liquid water path and the lidar estimation of the location of liquid water cloud; be aware that errors in reflectivity may result."
+          }
+        ],
         "dimensions": ["time", "height"],
         "dtype": "int32"
       },
@@ -1451,6 +1596,16 @@
         "definition": null,
         "dimensions": ["time", "height"],
         "dtype": "float32"
+      },
+      {
+        "name": "rain_detected",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Rain detected",
+        "comment": "1 = rain detected, 0 = no rain detected",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "int32"
       },
       {
         "name": "temperature",
@@ -1586,7 +1741,48 @@
         "standard_name": null,
         "long_name": "Radar and lidar detection status",
         "comment": "\nThis variable reports on the reliability of the radar and lidar data\nused to perform the classification.",
-        "definition": "\nValue 0: Clear sky.\nValue 1: Lidar echo only.\nValue 2: Radar echo but reflectivity may be unreliable as attenuation\n         by rain, melting ice or liquid cloud has not been corrected.\nValue 3: Good radar and lidar echos.\nValue 4: No radar echo but rain or liquid cloud beneath mean that\n         attenuation that would be experienced is unknown.\nValue 5: Good radar echo only.\nValue 6: No radar echo but known attenuation.\nValue 7: Radar echo corrected for liquid attenuation using microwave\n         radiometer data.\nValue 8: Radar ground clutter.\nValue 9: Lidar clear-air molecular scattering.",
+        "definition": [
+          {
+            "label": "Value 0",
+            "description": "Clear sky."
+          },
+          {
+            "label": "Value 1",
+            "description": "Lidar echo only."
+          },
+          {
+            "label": "Value 2",
+            "description": "Radar echo but reflectivity may be unreliable as attenuation by rain, melting ice or liquid cloud has not been corrected."
+          },
+          {
+            "label": "Value 3",
+            "description": "Good radar and lidar echos."
+          },
+          {
+            "label": "Value 4",
+            "description": "No radar echo but rain or liquid cloud beneath mean that attenuation that would be experienced is unknown."
+          },
+          {
+            "label": "Value 5",
+            "description": "Good radar echo only."
+          },
+          {
+            "label": "Value 6",
+            "description": "No radar echo but known attenuation."
+          },
+          {
+            "label": "Value 7",
+            "description": "Radar echo corrected for liquid attenuation using microwave radiometer data."
+          },
+          {
+            "label": "Value 8",
+            "description": "Radar ground clutter."
+          },
+          {
+            "label": "Value 9",
+            "description": "Lidar clear-air molecular scattering."
+          }
+        ],
         "dimensions": ["time", "height"],
         "dtype": "int32"
       },
@@ -1616,7 +1812,52 @@
         "standard_name": null,
         "long_name": "Target classification",
         "comment": "\nThis variable provides the main atmospheric target classifications\nthat can be distinguished by radar and lidar.",
-        "definition": "\nValue 0: Clear sky.\nValue 1: Cloud liquid droplets only.\nValue 2: Drizzle or rain.\nValue 3: Drizzle or rain coexisting with cloud liquid droplets.\nValue 4: Ice particles.\nValue 5: Ice coexisting with supercooled liquid droplets.\nValue 6: Melting ice particles.\nValue 7: Melting ice particles coexisting with cloud liquid droplets.\nValue 8: Aerosol particles, no cloud or precipitation.\nValue 9: Insects, no cloud or precipitation.\nValue 10: Aerosol coexisting with insects, no cloud or precipitation.",
+        "definition": [
+          {
+            "label": "Value 0",
+            "description": "Clear sky."
+          },
+          {
+            "label": "Value 1",
+            "description": "Cloud liquid droplets only."
+          },
+          {
+            "label": "Value 2",
+            "description": "Drizzle or rain."
+          },
+          {
+            "label": "Value 3",
+            "description": "Drizzle or rain coexisting with cloud liquid droplets."
+          },
+          {
+            "label": "Value 4",
+            "description": "Ice particles."
+          },
+          {
+            "label": "Value 5",
+            "description": "Ice coexisting with supercooled liquid droplets."
+          },
+          {
+            "label": "Value 6",
+            "description": "Melting ice particles."
+          },
+          {
+            "label": "Value 7",
+            "description": "Melting ice particles coexisting with cloud liquid droplets."
+          },
+          {
+            "label": "Value 8",
+            "description": "Aerosol particles, no cloud or precipitation."
+          },
+          {
+            "label": "Value 9",
+            "description": "Insects, no cloud or precipitation."
+          },
+          {
+            "label": "Value 10",
+            "description": "Aerosol coexisting with insects, no cloud or precipitation."
+          }
+        ],
         "dimensions": ["time", "height"],
         "dtype": "int32"
       }
@@ -1672,16 +1913,6 @@
         "dtype": "float32"
       },
       {
-        "name": "data_raw",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Raw data as a function of particle diameter and velocity",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time", "diameter", "velocity"],
-        "dtype": "int16"
-      },
-      {
         "name": "diameter_spread",
         "units": "m",
         "standard_name": null,
@@ -1710,16 +1941,6 @@
         "definition": null,
         "dimensions": [],
         "dtype": "float32"
-      },
-      {
-        "name": "n_particles",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Number of particles in time interval",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "int32"
       },
       {
         "name": "radar_reflectivity",
@@ -1945,7 +2166,48 @@
         "standard_name": null,
         "long_name": "Radar and lidar detection status",
         "comment": "\nThis variable reports on the reliability of the radar and lidar data\nused to perform the classification.",
-        "definition": "\nValue 0: Clear sky.\nValue 1: Lidar echo only.\nValue 2: Radar echo but reflectivity may be unreliable as attenuation\n         by rain, melting ice or liquid cloud has not been corrected.\nValue 3: Good radar and lidar echos.\nValue 4: No radar echo but rain or liquid cloud beneath mean that\n         attenuation that would be experienced is unknown.\nValue 5: Good radar echo only.\nValue 6: No radar echo but known attenuation.\nValue 7: Radar echo corrected for liquid attenuation using microwave\n         radiometer data.\nValue 8: Radar ground clutter.\nValue 9: Lidar clear-air molecular scattering.",
+        "definition": [
+          {
+            "label": "Value 0",
+            "description": "Clear sky."
+          },
+          {
+            "label": "Value 1",
+            "description": "Lidar echo only."
+          },
+          {
+            "label": "Value 2",
+            "description": "Radar echo but reflectivity may be unreliable as attenuation by rain, melting ice or liquid cloud has not been corrected."
+          },
+          {
+            "label": "Value 3",
+            "description": "Good radar and lidar echos."
+          },
+          {
+            "label": "Value 4",
+            "description": "No radar echo but rain or liquid cloud beneath mean that attenuation that would be experienced is unknown."
+          },
+          {
+            "label": "Value 5",
+            "description": "Good radar echo only."
+          },
+          {
+            "label": "Value 6",
+            "description": "No radar echo but known attenuation."
+          },
+          {
+            "label": "Value 7",
+            "description": "Radar echo corrected for liquid attenuation using microwave radiometer data."
+          },
+          {
+            "label": "Value 8",
+            "description": "Radar ground clutter."
+          },
+          {
+            "label": "Value 9",
+            "description": "Lidar clear-air molecular scattering."
+          }
+        ],
         "dimensions": ["time", "height"],
         "dtype": "int32"
       },
@@ -1975,7 +2237,52 @@
         "standard_name": null,
         "long_name": "Target classification",
         "comment": "\nThis variable provides the main atmospheric target classifications\nthat can be distinguished by radar and lidar.",
-        "definition": "\nValue 0: Clear sky.\nValue 1: Cloud liquid droplets only.\nValue 2: Drizzle or rain.\nValue 3: Drizzle or rain coexisting with cloud liquid droplets.\nValue 4: Ice particles.\nValue 5: Ice coexisting with supercooled liquid droplets.\nValue 6: Melting ice particles.\nValue 7: Melting ice particles coexisting with cloud liquid droplets.\nValue 8: Aerosol particles, no cloud or precipitation.\nValue 9: Insects, no cloud or precipitation.\nValue 10: Aerosol coexisting with insects, no cloud or precipitation.",
+        "definition": [
+          {
+            "label": "Value 0",
+            "description": "Clear sky."
+          },
+          {
+            "label": "Value 1",
+            "description": "Cloud liquid droplets only."
+          },
+          {
+            "label": "Value 2",
+            "description": "Drizzle or rain."
+          },
+          {
+            "label": "Value 3",
+            "description": "Drizzle or rain coexisting with cloud liquid droplets."
+          },
+          {
+            "label": "Value 4",
+            "description": "Ice particles."
+          },
+          {
+            "label": "Value 5",
+            "description": "Ice coexisting with supercooled liquid droplets."
+          },
+          {
+            "label": "Value 6",
+            "description": "Melting ice particles."
+          },
+          {
+            "label": "Value 7",
+            "description": "Melting ice particles coexisting with cloud liquid droplets."
+          },
+          {
+            "label": "Value 8",
+            "description": "Aerosol particles, no cloud or precipitation."
+          },
+          {
+            "label": "Value 9",
+            "description": "Insects, no cloud or precipitation."
+          },
+          {
+            "label": "Value 10",
+            "description": "Aerosol coexisting with insects, no cloud or precipitation."
+          }
+        ],
         "dimensions": ["time", "height"],
         "dtype": "int32"
       }
@@ -2055,7 +2362,28 @@
         "standard_name": null,
         "long_name": "Droplet effective radius retrieval status",
         "comment": null,
-        "definition": "\nValue 0: No data: No cloud observed.\nValue 1: Reliable retrieval.\nValue 2: Mix of drops and ice: Droplets and ice crystals coexist within\npixel. Z may be biased by large crystals.\nValue 3: Precipitation in profile: Drizzle and rain affects LWP retrieval\n         of MWR but also the target reflectivity.\nValue 4: Surrounding ice: Less crucial! Ice crystals in the vicinity of a\n         droplet pixel may also bias its reflectivity.\n",
+        "definition": [
+          {
+            "label": "Value 0",
+            "description": "No data: No cloud observed."
+          },
+          {
+            "label": "Value 1",
+            "description": "Reliable retrieval."
+          },
+          {
+            "label": "Value 2",
+            "description": "Mix of drops and ice: Droplets and ice crystals coexist within pixel. Z may be biased by large crystals."
+          },
+          {
+            "label": "Value 3",
+            "description": "Precipitation in profile: Drizzle and rain affects LWP retrieval of MWR but also the target reflectivity."
+          },
+          {
+            "label": "Value 4",
+            "description": "Surrounding ice: Less crucial! Ice crystals in the vicinity of a droplet pixel may also bias its reflectivity."
+          }
+        ],
         "dimensions": ["time", "height"],
         "dtype": "int32"
       },
@@ -2264,7 +2592,40 @@
         "standard_name": null,
         "long_name": "Quality flag",
         "comment": "0 indicates data with good quality according to applied tests.\nThe list of (not) applied tests is encoded in quality_flag_status",
-        "definition": "\nBit 1: missing_tb\nBit 2: tb_below_threshold\nBit 3: tb_above_threshold\nBit 4: spectral_consistency_above_threshold\nBit 5: receiver_sanity_failed\nBit 6: rain_detected\nBit 7: sun_moon_in_beam\nBit 8: tb_offset_above_threshold",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_below_threshold"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_above_threshold"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_above_threshold"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_failed"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_detected"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_above_threshold"
+          }
+        ],
         "dimensions": ["time"],
         "dtype": "int32"
       },
@@ -2274,7 +2635,40 @@
         "standard_name": null,
         "long_name": "Quality flag status",
         "comment": "Checks not executed in determination of quality_flag.\n0 indicates quality check has been applied.",
-        "definition": "\nBit 1: missing_tb_not_checked\nBit 2: tb_lower_threshold_not_checked\nBit 3: tb_upper_threshold_not_checked\nBit 4: spectral_consistency_not_checked\nBit 5: receiver_sanity_not_checked\nBit 6: rain_not_checked\nBit 7: sun_moon_in_beam_not_checked\nBit 8: tb_offset_not_checked",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb_not_checked"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_lower_threshold_not_checked"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_upper_threshold_not_checked"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_not_checked"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_not_checked"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_not_checked"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam_not_checked"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_not_checked"
+          }
+        ],
         "dimensions": ["time"],
         "dtype": "int32"
       },
@@ -2334,7 +2728,40 @@
         "standard_name": null,
         "long_name": "Quality flag",
         "comment": "0 indicates data with good quality according to applied tests.\nThe list of (not) applied tests is encoded in quality_flag_status",
-        "definition": "\nBit 1: missing_tb\nBit 2: tb_below_threshold\nBit 3: tb_above_threshold\nBit 4: spectral_consistency_above_threshold\nBit 5: receiver_sanity_failed\nBit 6: rain_detected\nBit 7: sun_moon_in_beam\nBit 8: tb_offset_above_threshold",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_below_threshold"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_above_threshold"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_above_threshold"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_failed"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_detected"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_above_threshold"
+          }
+        ],
         "dimensions": ["time"],
         "dtype": "int32"
       },
@@ -2344,7 +2771,40 @@
         "standard_name": null,
         "long_name": "Quality flag status",
         "comment": "Checks not executed in determination of quality_flag.\n0 indicates quality check has been applied.",
-        "definition": "\nBit 1: missing_tb_not_checked\nBit 2: tb_lower_threshold_not_checked\nBit 3: tb_upper_threshold_not_checked\nBit 4: spectral_consistency_not_checked\nBit 5: receiver_sanity_not_checked\nBit 6: rain_not_checked\nBit 7: sun_moon_in_beam_not_checked\nBit 8: tb_offset_not_checked",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb_not_checked"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_lower_threshold_not_checked"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_upper_threshold_not_checked"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_not_checked"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_not_checked"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_not_checked"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam_not_checked"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_not_checked"
+          }
+        ],
         "dimensions": ["time"],
         "dtype": "int32"
       },
@@ -2394,7 +2854,40 @@
         "standard_name": null,
         "long_name": "Quality flag",
         "comment": "0 indicates data with good quality according to applied tests.\nThe list of (not) applied tests is encoded in quality_flag_status",
-        "definition": "\nBit 1: missing_tb\nBit 2: tb_below_threshold\nBit 3: tb_above_threshold\nBit 4: spectral_consistency_above_threshold\nBit 5: receiver_sanity_failed\nBit 6: rain_detected\nBit 7: sun_moon_in_beam\nBit 8: tb_offset_above_threshold",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_below_threshold"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_above_threshold"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_above_threshold"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_failed"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_detected"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_above_threshold"
+          }
+        ],
         "dimensions": ["time"],
         "dtype": "int32"
       },
@@ -2404,7 +2897,40 @@
         "standard_name": null,
         "long_name": "Quality flag status",
         "comment": "Checks not executed in determination of quality_flag.\n0 indicates quality check has been applied.",
-        "definition": "\nBit 1: missing_tb_not_checked\nBit 2: tb_lower_threshold_not_checked\nBit 3: tb_upper_threshold_not_checked\nBit 4: spectral_consistency_not_checked\nBit 5: receiver_sanity_not_checked\nBit 6: rain_not_checked\nBit 7: sun_moon_in_beam_not_checked\nBit 8: tb_offset_not_checked",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb_not_checked"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_lower_threshold_not_checked"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_upper_threshold_not_checked"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_not_checked"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_not_checked"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_not_checked"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam_not_checked"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_not_checked"
+          }
+        ],
         "dimensions": ["time"],
         "dtype": "int32"
       },
@@ -2444,7 +2970,40 @@
         "standard_name": null,
         "long_name": "Quality flag",
         "comment": "0 indicates data with good quality according to applied tests.\nThe list of (not) applied tests is encoded in quality_flag_status",
-        "definition": "\nBit 1: missing_tb\nBit 2: tb_below_threshold\nBit 3: tb_above_threshold\nBit 4: spectral_consistency_above_threshold\nBit 5: receiver_sanity_failed\nBit 6: rain_detected\nBit 7: sun_moon_in_beam\nBit 8: tb_offset_above_threshold",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_below_threshold"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_above_threshold"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_above_threshold"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_failed"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_detected"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_above_threshold"
+          }
+        ],
         "dimensions": ["time"],
         "dtype": "int32"
       },
@@ -2454,7 +3013,40 @@
         "standard_name": null,
         "long_name": "Quality flag status",
         "comment": "Checks not executed in determination of quality_flag.\n0 indicates quality check has been applied.",
-        "definition": "\nBit 1: missing_tb_not_checked\nBit 2: tb_lower_threshold_not_checked\nBit 3: tb_upper_threshold_not_checked\nBit 4: spectral_consistency_not_checked\nBit 5: receiver_sanity_not_checked\nBit 6: rain_not_checked\nBit 7: sun_moon_in_beam_not_checked\nBit 8: tb_offset_not_checked",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb_not_checked"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_lower_threshold_not_checked"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_upper_threshold_not_checked"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_not_checked"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_not_checked"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_not_checked"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam_not_checked"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_not_checked"
+          }
+        ],
         "dimensions": ["time"],
         "dtype": "int32"
       }
@@ -2621,7 +3213,32 @@
         "standard_name": null,
         "long_name": "Meterological data quality flag",
         "comment": "0=ok, 1=problem. Note: should also be set to 1\nif corresponding sensor not available",
-        "definition": "\nBit 1: low_quality_air_temperature\nBit 2: low_quality_relative_humidity\nBit 3: low_quality_air_pressure\nBit 4: low_quality_rainfall_rate\nBit 5: low_quality_wind_direction\nBit 6: low_quality_wind_speed",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "low_quality_air_temperature"
+          },
+          {
+            "label": "Bit 2",
+            "description": "low_quality_relative_humidity"
+          },
+          {
+            "label": "Bit 3",
+            "description": "low_quality_air_pressure"
+          },
+          {
+            "label": "Bit 4",
+            "description": "low_quality_rainfall_rate"
+          },
+          {
+            "label": "Bit 5",
+            "description": "low_quality_wind_direction"
+          },
+          {
+            "label": "Bit 6",
+            "description": "low_quality_wind_speed"
+          }
+        ],
         "dimensions": ["time"],
         "dtype": "int32"
       },
@@ -2651,7 +3268,40 @@
         "standard_name": null,
         "long_name": "Quality flag",
         "comment": "0 indicates data with good quality according to applied tests.\nThe list of (not) applied tests is encoded in quality_flag_status",
-        "definition": "\nBit 1: missing_tb\nBit 2: tb_below_threshold\nBit 3: tb_above_threshold\nBit 4: spectral_consistency_above_threshold\nBit 5: receiver_sanity_failed\nBit 6: rain_detected\nBit 7: sun_moon_in_beam\nBit 8: tb_offset_above_threshold",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_below_threshold"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_above_threshold"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_above_threshold"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_failed"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_detected"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_above_threshold"
+          }
+        ],
         "dimensions": ["time", "frequency"],
         "dtype": "int32"
       },
@@ -2661,7 +3311,40 @@
         "standard_name": null,
         "long_name": "Quality flag status",
         "comment": "Checks not executed in determination of quality_flag.\n0 indicates quality check has been applied.",
-        "definition": "\nBit 1: missing_tb_not_checked\nBit 2: tb_lower_threshold_not_checked\nBit 3: tb_upper_threshold_not_checked\nBit 4: spectral_consistency_not_checked\nBit 5: receiver_sanity_not_checked\nBit 6: rain_not_checked\nBit 7: sun_moon_in_beam_not_checked\nBit 8: tb_offset_not_checked",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb_not_checked"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_lower_threshold_not_checked"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_upper_threshold_not_checked"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_not_checked"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_not_checked"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_not_checked"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam_not_checked"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_not_checked"
+          }
+        ],
         "dimensions": ["time", "frequency"],
         "dtype": "int32"
       },
@@ -3030,7 +3713,40 @@
         "standard_name": null,
         "long_name": "Quality flag",
         "comment": "0 indicates data with good quality according to applied tests.\nThe list of (not) applied tests is encoded in quality_flag_status",
-        "definition": "\nBit 1: missing_tb\nBit 2: tb_below_threshold\nBit 3: tb_above_threshold\nBit 4: spectral_consistency_above_threshold\nBit 5: receiver_sanity_failed\nBit 6: rain_detected\nBit 7: sun_moon_in_beam\nBit 8: tb_offset_above_threshold",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_below_threshold"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_above_threshold"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_above_threshold"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_failed"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_detected"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_above_threshold"
+          }
+        ],
         "dimensions": ["time"],
         "dtype": "int32"
       },
@@ -3040,7 +3756,40 @@
         "standard_name": null,
         "long_name": "Quality flag status",
         "comment": "Checks not executed in determination of quality_flag.\n0 indicates quality check has been applied.",
-        "definition": "\nBit 1: missing_tb_not_checked\nBit 2: tb_lower_threshold_not_checked\nBit 3: tb_upper_threshold_not_checked\nBit 4: spectral_consistency_not_checked\nBit 5: receiver_sanity_not_checked\nBit 6: rain_not_checked\nBit 7: sun_moon_in_beam_not_checked\nBit 8: tb_offset_not_checked",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb_not_checked"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_lower_threshold_not_checked"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_upper_threshold_not_checked"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_not_checked"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_not_checked"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_not_checked"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam_not_checked"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_not_checked"
+          }
+        ],
         "dimensions": ["time"],
         "dtype": "int32"
       }
@@ -3338,7 +4087,32 @@
         "standard_name": null,
         "long_name": "Target categorization bits",
         "comment": "This variable contains information on the nature of the targets\nat each pixel, thereby facilitating the application of algorithms that work\nwith only one type of target. The information is in the form of an array of\nbits, each of which states either whether a certain type of particle is\npresent (e.g. aerosols), or the whether some of the target particles have\na particular property. The definitions of each bit are given in the\ndefinition attribute. Bit 0 is the least significant.",
-        "definition": "\nBit 0: Small liquid droplets are present.\nBit 1: Falling hydrometeors are present; if Bit 2 is set then these are most\n       likely ice particles, otherwise they are drizzle or rain drops.\nBit 2: Wet-bulb temperature is less than 0 degrees C, implying the phase of\n       Bit-1 particles.\nBit 3: Melting ice particles are present.\nBit 4: Aerosol particles are present and visible to the lidar.\nBit 5: Insects are present and visible to the radar.",
+        "definition": [
+          {
+            "label": "Bit 0",
+            "description": "Small liquid droplets are present."
+          },
+          {
+            "label": "Bit 1",
+            "description": "Falling hydrometeors are present; if Bit 2 is set then these are most likely ice particles, otherwise they are drizzle or rain drops."
+          },
+          {
+            "label": "Bit 2",
+            "description": "Wet-bulb temperature is less than 0 degrees C, implying the phase of Bit-1 particles."
+          },
+          {
+            "label": "Bit 3",
+            "description": "Melting ice particles are present."
+          },
+          {
+            "label": "Bit 4",
+            "description": "Aerosol particles are present and visible to the lidar."
+          },
+          {
+            "label": "Bit 5",
+            "description": "Insects are present and visible to the radar."
+          }
+        ],
         "dimensions": ["time", "height"],
         "dtype": "int32"
       },
@@ -3448,7 +4222,32 @@
         "standard_name": null,
         "long_name": "Data quality bits",
         "comment": "This variable contains information on the quality of the data at each pixel.\nThe information is in the form of an array of bits, and the definitions of\neach bit are given in the definition attribute. Bit 0 is the least\nsignificant.",
-        "definition": "\nBit 0: An echo is detected by the radar.\nBit 1: An echo is detected by the lidar.\nBit 2: The apparent echo detected by the radar is ground clutter or some\n       other non-atmospheric artifact.\nBit 3: The lidar echo is due to clear-air molecular scattering.\nBit 4: Liquid water cloud, rainfall or melting ice below this pixel\n       will have caused radar and lidar attenuation; if bit 5 is set then\n       a correction for the radar attenuation has been performed;\n       otherwise do not trust the absolute values of reflectivity factor.\n       No correction is performed for lidar attenuation.\nBit 5: Radar reflectivity has been corrected for liquid-water attenuation\n       using the microwave radiometer measurements of liquid water path\n       and the lidar estimation of the location of liquid water cloud;\n       be aware that errors in reflectivity may result.\n",
+        "definition": [
+          {
+            "label": "Bit 0",
+            "description": "An echo is detected by the radar."
+          },
+          {
+            "label": "Bit 1",
+            "description": "An echo is detected by the lidar."
+          },
+          {
+            "label": "Bit 2",
+            "description": "The apparent echo detected by the radar is ground clutter or some other non-atmospheric artifact."
+          },
+          {
+            "label": "Bit 3",
+            "description": "The lidar echo is due to clear-air molecular scattering."
+          },
+          {
+            "label": "Bit 4",
+            "description": "Liquid water cloud, rainfall or melting ice below this pixel will have caused radar and lidar attenuation; if bit 5 is set then a correction for the radar attenuation has been performed; otherwise do not trust the absolute values of reflectivity factor. No correction is performed for lidar attenuation."
+          },
+          {
+            "label": "Bit 5",
+            "description": "Radar reflectivity has been corrected for liquid-water attenuation using the microwave radiometer measurements of liquid water path and the lidar estimation of the location of liquid water cloud; be aware that errors in reflectivity may result."
+          }
+        ],
         "dimensions": ["time", "height"],
         "dtype": "int32"
       },
