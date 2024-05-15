@@ -77,7 +77,14 @@
             </tr>
             <tr v-if="variable.definition">
               <th>Definition</th>
-              <td>{{ variable.definition }}</td>
+              <td>
+                <table class="definition">
+                  <tr v-for="definition in variable.definition" :key="definition.label">
+                    <th>{{ definition.label }}:</th>
+                    <td>{{ definition.description }}</td>
+                  </tr>
+                </table>
+              </td>
             </tr>
           </table>
         </div>
@@ -164,20 +171,28 @@ h2 {
   }
 }
 
-th {
-  font-weight: 500;
-  padding-right: 1rem;
-  width: 150px;
-}
-
 .variable {
   margin-bottom: 1rem;
+
+  > table {
+    margin-top: 1rem;
+    margin-left: 2rem;
+    max-width: 1000px;
+
+    > tr > th {
+      padding-right: 1rem;
+      width: 150px;
+    }
+  }
 }
 
-table {
-  margin-top: 1rem;
-  margin-left: 2rem;
-  max-width: 1000px;
+th {
+  font-weight: 500;
+  text-wrap: nowrap;
+}
+
+.definition th {
+  padding-right: 0.5rem;
 }
 
 code {
