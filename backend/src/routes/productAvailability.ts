@@ -24,15 +24,10 @@ export class ProductAvailabilityRoutes {
         ])
         .where("file.instrumentPid = :instrumentPid", { instrumentPid })
         .andWhere("file.status IN ('uploaded', 'processed')")
-        .groupBy('file."measurementDate"::date')
-        .orderBy('file."measurementDate"::date', "ASC")
+        .groupBy('file."measurementDate"')
+        .orderBy('file."measurementDate"', "ASC")
         .getRawMany();
-      const data = rawData.map((row) => ({
-        date: row.date,
-        fileCount: parseInt(row.fileCount),
-        totalSize: parseInt(row.totalSize),
-      }));
-      res.send(data);
+      res.send(rawData);
     } catch (err) {
       return next({ status: 500, errors: err });
     }

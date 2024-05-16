@@ -49,7 +49,7 @@ const dates = computed(() =>
 
 function formatCount(count: number): string {
   const suffix = count === 1 ? " file" : " files";
-  return count.toString() + suffix;
+  return count + suffix;
 }
 
 function createColorClass(statistics: number): ColorClass {

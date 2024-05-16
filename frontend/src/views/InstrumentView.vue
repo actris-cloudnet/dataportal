@@ -58,7 +58,7 @@
               <custom-multiselect
                 v-model="selectedViz"
                 label="Visualisation"
-                :options="getVizOptions"
+                :options="visualisationOptions"
                 id="instrumentVizSelect"
               />
             </div>
@@ -125,23 +125,28 @@ const yesterday = new Date();
 yesterday.setUTCDate(yesterday.getUTCDate() - 1);
 const yesterdayString = dateToString(yesterday);
 
-const getVizOptions = ref([
-  { id: "products", humanReadableName: "Products" },
-  { id: "count", humanReadableName: "File count" },
-  { id: "size", humanReadableName: "Total size" },
-]);
+const visualisationOptions = computed(() => {
+  if (!dataStatus.value) return [];
+  const a = [
+    { id: "products", humanReadableName: "Products" },
+    { id: "count", humanReadableName: "File count" },
+    { id: "size", humanReadableName: "Total size" },
+  ];
+  return dataStatus.value.availableProducts.length > 0 ? a : a.filter((option) => option.id !== "products");
+});
 
 onMounted(async () => {
   try {
     const res = await axios.get<InstrumentInfo>(`${backendUrl}instrument-pids/${props.uuid}`);
     instrumentPid.value = { status: "ready", value: res.data };
-    dataStatus.value = await parseDataStatus({ instrumentPid: res.data.pid });
-    uploadStatus.value = await parseUploadStatus(res.data.pid);
+    [dataStatus.value, uploadStatus.value] = await Promise.all([
+      parseDataStatus({ instrumentPid: res.data.pid }),
+      parseUploadStatus(res.data.pid),
+    ]);
     if (dataStatus.value.availableProducts.length > 0) {
       selectedViz.value = "products";
     } else if (uploadStatus.value.dates.length > 0) {
       selectedViz.value = "count";
-      getVizOptions.value = getVizOptions.value.filter((option) => option.id !== "products");
     }
   } catch (error) {
     instrumentPid.value = { status: "error", error: error as Error };
