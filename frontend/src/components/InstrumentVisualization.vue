@@ -8,7 +8,7 @@
     :colors="classColor"
   >
     <template #tooltip="{ date, data }">
-      <div class="mega-tooltip">
+      <div class="mega-tooltip" style="width: 280px">
         <header>{{ date }}</header>
         <section>
           <ul>

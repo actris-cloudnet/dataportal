@@ -1,13 +1,37 @@
 import { Request, RequestHandler, Response } from "express";
 import { DataSource, Repository } from "typeorm";
 import { SearchFile } from "../entity/SearchFile";
+import { InstrumentUpload } from "../entity/Upload";
 
 export class ProductAvailabilityRoutes {
   constructor(dataSource: DataSource) {
     this.searchFileRepo = dataSource.getRepository(SearchFile);
+    this.uploadRepo = dataSource.getRepository(InstrumentUpload);
   }
 
   readonly searchFileRepo: Repository<SearchFile>;
+  readonly uploadRepo: Repository<InstrumentUpload>;
+
+  uploadAmount: RequestHandler = async (req: Request, res: Response, next) => {
+    try {
+      const { instrumentPid } = req.query;
+      const rawData = await this.uploadRepo
+        .createQueryBuilder("file")
+        .select([
+          'file."measurementDate"::date AS "date"',
+          'COUNT(file."uuid") AS "fileCount"',
+          'SUM(file."size") AS "totalSize"',
+        ])
+        .where("file.instrumentPid = :instrumentPid", { instrumentPid })
+        .andWhere("file.status IN ('uploaded', 'processed')")
+        .groupBy('file."measurementDate"')
+        .orderBy('file."measurementDate"', "ASC")
+        .getRawMany();
+      res.send(rawData);
+    } catch (err) {
+      return next({ status: 500, errors: err });
+    }
+  };
 
   productAvailability: RequestHandler = async (req: Request, res: Response, next) => {
     try {
