@@ -150,7 +150,7 @@
 
       <div v-if="dataStatus">
         <div class="viz-options">
-          <div class="viz-option" style="width: 300px">
+          <div class="viz-option" style="width: 370px">
             <custom-multiselect
               v-model="selectedProductId"
               label="Product"
