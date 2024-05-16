@@ -39,7 +39,7 @@
         </table>
       </template>
 
-      <template v-if="uploadStatus" class="visualisations">
+      <template v-if="uploadStatus">
         <template v-if="selectedViz == 'products' && dataStatus && dataStatus.availableProducts.length > 0">
           <h2>Product availability</h2>
           <InstrumentVisualization :dataStatus="dataStatus" :year="selectedYear" />
