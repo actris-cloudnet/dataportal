@@ -157,6 +157,10 @@ h2 {
   font-weight: 400;
 }
 
+h2:not(:first-child) {
+  margin-top: 2rem;
+}
+
 dl {
   display: grid;
   grid-template-columns: minmax(min-content, 10rem) auto;
