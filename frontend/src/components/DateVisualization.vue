@@ -32,10 +32,17 @@
     <div class="tooltip" ref="$tooltip" :style="tooltipStyle" v-if="$slots.tooltip && currentDate">
       <slot name="tooltip" :date="currentDate.date" :data="currentDate.data"></slot>
     </div>
-    <ul class="legend">
-      <li class="legend-item" v-for="(item, key) in legend" :key="key">
-        <div class="legend-color" :style="{ background: colors[key] }"></div>
-        {{ item }}
+    <ul class="legend" v-if="legend">
+      <li class="legend-item" v-for="(label, color) in legend" :key="color">
+        <div class="legend-color" :style="{ background: colors[color] }"></div>
+        {{ label }}
+      </li>
+    </ul>
+    <ul class="legend" v-if="scale">
+      <li class="legend-item">
+        Less
+        <div v-for="color in scale" :key="color" class="legend-color" :style="{ background: colors[color] }"></div>
+        More
       </li>
     </ul>
   </div>
@@ -53,7 +60,8 @@ export type DataItem<X> = X & {
 };
 
 export interface Props<X> {
-  legend: Record<string, string>;
+  legend?: Record<string, string>;
+  scale?: string[];
   colors: Record<string, string>;
   data: DataItem<X>[];
   year?: number;

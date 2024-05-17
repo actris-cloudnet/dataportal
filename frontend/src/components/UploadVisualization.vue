@@ -1,15 +1,5 @@
 <template>
-  <DateVisualization
-    :data="dates"
-    :legend="{
-      green1: '',
-      green2: '',
-      green3: '',
-      green4: 'More',
-    }"
-    :colors="classColor"
-    :year="year"
-  >
+  <DateVisualization :data="dates" :scale="['green1', 'green2', 'green3', 'green4']" :colors="classColor" :year="year">
     <template #tooltip="{ date, data }">
       <div class="mega-tooltip" style="width: 150px">
         <header>{{ date }}</header>
