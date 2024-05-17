@@ -148,6 +148,13 @@ const routes = [
     props: true,
   },
   {
+    path: "/raw-files",
+    name: "Raw Files",
+    meta: { title: false },
+    component: () => import("@/views/RawDataView.vue"),
+    props: true,
+  },
+  {
     path: "/instrument/:uuid",
     name: "Instrument",
     meta: { title: false },

@@ -9,16 +9,17 @@
           <div class="donut">
             <Donut :data="donutData" />
           </div>
-          <div class="quality-report-stats">
-            <div class="header" id="tests">Tests</div>
-            <div class="data" id="ntests">{{ report.value.tests }}</div>
-            <div class="header" id="info">Info</div>
-            <div class="data" id="ninfo">{{ report.value.info }}</div>
-            <div class="header" id="warnings">Warnings</div>
-            <div class="data" id="nwarnings">{{ report.value.warnings }}</div>
-            <div class="header" id="errors">Errors</div>
-            <div class="data" id="nerrors">{{ report.value.errors }}</div>
-          </div>
+          <DonutLegend
+            :data="[
+              {
+                label: 'Tests',
+                value: report.value.tests,
+              },
+              { label: 'Errors', value: report.value.errors },
+              { label: 'Warnings', value: report.value.warnings },
+              { label: 'Info', value: report.value.info },
+            ]"
+          />
         </div>
         <div class="quality-software">
           Tested with
@@ -61,6 +62,7 @@ import escapeHtml from "escape-html";
 import { computed, ref, watch } from "vue";
 
 import Donut from "@/components/DonutVisualization.vue";
+import DonutLegend from "@/components/DonutLegend.vue";
 import { humanReadableTimestamp, getQcIcon, backendUrl } from "@/lib";
 import { useTitle } from "@/router";
 import BaseSpinner from "@/components/BaseSpinner.vue";
@@ -177,52 +179,6 @@ function formatMessage(message: string): string {
   }
 }
 
-.quality-report-stats {
-  background-color: rgba(0, 0, 0, 0.01);
-  padding: 1rem;
-  block-size: max-content;
-  inline-size: max-content;
-  display: grid;
-  justify-items: center;
-  grid-template-columns: repeat(4, 6em);
-  border: thin solid rgba(0, 0, 0, 0.3);
-  border-radius: 4px;
-
-  .header {
-    grid-row: 1;
-    font-size: 100%;
-    font-weight: 400;
-    align-self: end;
-  }
-
-  .data {
-    align-self: start;
-    grid-row: 2;
-    font-size: 250%;
-    font-weight: 400;
-  }
-
-  #tests,
-  #ntests {
-    grid-column: 1;
-  }
-
-  #errors,
-  #nerrors {
-    grid-column: 2;
-  }
-
-  #warnings,
-  #nwarnings {
-    grid-column: 3;
-  }
-
-  #info,
-  #ninfo {
-    grid-column: 4;
-  }
-}
-
 .quality-test-description {
   color: $gray4;
 }
@@ -290,54 +246,6 @@ function formatMessage(message: string): string {
   .quality-report-header .donut {
     margin-left: auto;
     margin-right: auto;
-  }
-
-  .quality-report-stats {
-    grid-template-rows: repeat(4, auto);
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-    margin-left: auto;
-    margin-right: auto;
-
-    #tests {
-      grid-column: 1;
-      grid-row: 1;
-    }
-
-    #ntests {
-      grid-column: 1;
-      grid-row: 2;
-    }
-
-    #errors {
-      grid-column: 2;
-      grid-row: 1;
-    }
-
-    #nerrors {
-      grid-column: 2;
-      grid-row: 2;
-    }
-
-    #warnings {
-      grid-column: 1;
-      grid-row: 3;
-    }
-
-    #nwarnings {
-      grid-column: 1;
-      grid-row: 4;
-    }
-
-    #info {
-      grid-column: 2;
-      grid-row: 3;
-    }
-
-    #ninfo {
-      grid-column: 2;
-      grid-row: 4;
-    }
   }
 }
 </style>
