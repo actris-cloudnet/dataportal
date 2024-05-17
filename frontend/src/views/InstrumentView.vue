@@ -46,11 +46,21 @@
         </template>
         <template v-else-if="selectedViz == 'count' && uploadStatus && uploadStatus.dates.length > 0">
           <h2>Number of uploaded raw files</h2>
-          <UploadVisualization :uploadStatus="uploadStatus" :type="selectedViz" :year="selectedYear" />
+          <UploadVisualization
+            :uploadStatus="uploadStatus"
+            :type="selectedViz"
+            :instrument="instrumentPid.value"
+            :year="selectedYear"
+          />
         </template>
         <template v-else-if="selectedViz == 'size' && uploadStatus && uploadStatus.dates.length > 0">
           <h2>Total size of uploaded raw files</h2>
-          <UploadVisualization :uploadStatus="uploadStatus" :type="selectedViz" :year="selectedYear" />
+          <UploadVisualization
+            :uploadStatus="uploadStatus"
+            :type="selectedViz"
+            :instrument="instrumentPid.value"
+            :year="selectedYear"
+          />
         </template>
         <template v-if="uploadStatus.dates.length > 0">
           <div class="viz-options">
@@ -103,7 +113,7 @@ export interface Props {
 
 const props = defineProps<Props>();
 
-type InstrumentPidResult =
+export type InstrumentPidResult =
   | { status: "loading" }
   | { status: "ready"; value: InstrumentInfo }
   | { status: "error"; error: Error };

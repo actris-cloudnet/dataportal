@@ -27,6 +27,7 @@ export interface Upload {
   createdAt: Date;
   updatedAt: Date;
   site: Site;
+  downloadUrl: string;
 }
 
 export interface InstrumentUpload extends Upload {
