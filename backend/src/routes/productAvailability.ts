@@ -27,7 +27,12 @@ export class ProductAvailabilityRoutes {
         .groupBy('file."measurementDate"')
         .orderBy('file."measurementDate"', "ASC")
         .getRawMany();
-      res.send(rawData);
+      const data = rawData.map((row) => ({
+        date: row.date,
+        fileCount: parseInt(row.fileCount),
+        totalSize: parseInt(row.totalSize),
+      }));
+      res.send(data);
     } catch (err) {
       return next({ status: 500, errors: err });
     }
