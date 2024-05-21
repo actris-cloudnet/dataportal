@@ -1,5 +1,5 @@
 <template>
-  <svg viewBox="0 0 170 170">
+  <svg :viewBox="viewBox">
     <g v-for="(segment, index) in segments()" :key="index">
       <circle
         :cx="cx"
@@ -43,10 +43,12 @@ function angleToRadians(angle: number): number {
   return (angle * Math.PI) / 180;
 }
 
-const cx = 80;
-const cy = 80;
 const radius = 55;
 const strokeWidth = 35;
+const width = 2 * radius + strokeWidth;
+const cx = width / 2;
+const cy = width / 2;
+const viewBox = `0 0 ${width} ${width}`;
 
 function segments(): Segment[] {
   const sumOfValues = props.data.reduce((sum, item) => sum + item.value, 0);
@@ -101,8 +103,8 @@ function segmentBigEnough(segment: Segment): boolean {
 
 <style scoped lang="scss">
 svg {
-  height: 180px;
-  width: 180px;
+  height: 150px;
+  width: 150px;
 }
 
 text {
