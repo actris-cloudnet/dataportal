@@ -148,18 +148,24 @@ const routes = [
     props: true,
   },
   {
-    path: "/raw-files",
-    name: "Raw Files",
-    meta: { title: false },
-    component: () => import("@/views/RawDataView.vue"),
-    props: true,
-  },
-  {
     path: "/instrument/:uuid",
-    name: "Instrument",
     meta: { title: false },
-    component: () => import("@/views/InstrumentView.vue"),
+    component: () => import("@/views/InstrumentWrapper.vue"),
     props: true,
+    children: [
+      {
+        path: "",
+        name: "Instrument",
+        meta: { title: false },
+        component: () => import("@/components/instrument/InstrumentOverview.vue"),
+      },
+      {
+        path: "raw-files",
+        name: "Raw Files",
+        meta: { title: false },
+        component: () => import("@/components/instrument/RawFiles.vue"),
+      },
+    ],
   },
   {
     path: "/products",

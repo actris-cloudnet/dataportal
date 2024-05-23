@@ -1,13 +1,14 @@
 <template>
   <div v-if="instrumentInfo.status === 'ready'">
-    <LandingHeader :title="instrumentInfo.value.name" :subtitle="instrumentInfo.value.instrument.humanReadableName" />
     <main class="pagewidth">
+      Date
+      <datepicker class="date-picker" name="date" v-model="selectedDate" :start="beginningOfHistory" :end="today" />
       <template v-if="files.length">
         <div class="upload-stats-header">
           <div class="donut">
             <Donut :data="donutData" />
           </div>
-          <DonutLegend :data="stats" />
+          <DonutLegend :data="stats" :fontSize="'175%'" />
         </div>
         <div class="table-wrapper">
           <table class="file-table">
@@ -34,30 +35,43 @@
           </table>
         </div>
       </template>
+      <template v-else>
+        <p class="no-data">No files found for this instrument on this date.</p>
+      </template>
     </main>
   </div>
   <ApiError :response="(instrumentInfo.error as any).response" v-else-if="instrumentInfo.status === 'error'" />
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import axios from "axios";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { backendUrl, humanReadableSize } from "@/lib";
-import LandingHeader from "@/components/LandingHeader.vue";
 import Donut from "@/components/DonutVisualization.vue";
 import DonutLegend from "@/components/DonutLegend.vue";
 import ApiError from "@/views/ApiError.vue";
-import type { InstrumentPidResult } from "@/views/InstrumentView.vue";
-
+import type { InstrumentPidResult } from "@/components/instrument/InstrumentOverview.vue";
+import Datepicker from "@/components/DatePicker.vue";
 import type { Upload } from "@shared/entity/Upload";
 
 const formatTimestamp = (date: string | Date) => date.toString().replace("T", " ").split(".")[0];
 
 const files = ref<Upload[]>([]);
 const route = useRoute();
+const router = useRouter();
 
 const instrumentInfo = ref<InstrumentPidResult>({ status: "loading" });
+const beginningOfHistory = "2001-01-01";
+const today = new Date().toISOString().split("T")[0];
+
+const selectedDate = ref<string>(route.query.date as string);
+
+onMounted(async () => {
+  if (!selectedDate.value) {
+    selectedDate.value = today;
+  }
+});
 
 const donutData = computed(() => {
   const created = files.value.filter((file) => file.status === "created").length;
@@ -86,20 +100,14 @@ const stats = computed(() => {
   ];
 });
 
-onMounted(async () => {
+async function fetchData() {
   try {
-    const { date, instrument } = route.query;
-    if (!date || !instrument) {
-      const error = new Error();
-      (error as any).response = { status: 404, data: "Not found" };
-      throw error;
-    }
-    const instrumentResponse = await axios.get(`${backendUrl}instrument-pids/${instrument}`);
+    const instrumentResponse = await axios.get(`${backendUrl}instrument-pids/${route.params.uuid}`);
     instrumentInfo.value = { status: "ready", value: instrumentResponse.data };
     const fileResponse = await axios.get(`${backendUrl}raw-files`, {
       params: {
         instrumentPid: instrumentInfo.value.value.pid,
-        date,
+        date: selectedDate.value,
       },
     });
     files.value = fileResponse.data;
@@ -107,7 +115,16 @@ onMounted(async () => {
   } catch (error) {
     instrumentInfo.value = { status: "error", error: error as Error };
   }
-});
+}
+
+watch(
+  () => [selectedDate.value],
+  async () => {
+    await fetchData();
+    router.push({ query: { date: selectedDate.value } });
+  },
+  { immediate: true },
+);
 
 function getStatusClass(status: string) {
   switch (status) {
@@ -180,6 +197,15 @@ tr {
   .donut {
     margin-right: 4rem;
   }
+}
+
+.date-picker {
+  margin-bottom: 1rem;
+}
+
+.no-data {
+  margin-top: 2rem;
+  color: gray;
 }
 
 @media screen and (max-width: $narrow-screen) {

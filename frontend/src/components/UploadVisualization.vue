@@ -20,12 +20,10 @@ import type { UploadStatus } from "@/lib/DataStatusParser";
 import { computed } from "vue";
 import DateVisualization from "./DateVisualization.vue";
 import router from "@/router";
-import type { InstrumentInfo } from "@shared/entity/Instrument";
 
 export interface Props {
   uploadStatus: UploadStatus;
   type: "size" | "count";
-  instrument: InstrumentInfo;
   year?: number;
 }
 
@@ -45,7 +43,6 @@ function createLink(date: string): string {
   return router.resolve({
     name: "Raw Files",
     query: {
-      instrument: props.instrument.uuid,
       date: date.substring(0, 10),
     },
   }).href;

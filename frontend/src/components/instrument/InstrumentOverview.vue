@@ -1,6 +1,5 @@
 <template>
   <div v-if="instrumentPid.status === 'ready'">
-    <LandingHeader :title="instrumentPid.value.name" :subtitle="instrumentPid.value.instrument.humanReadableName" />
     <main class="pagewidth">
       <h2>Instrument</h2>
       <dl>
@@ -46,21 +45,11 @@
         </template>
         <template v-else-if="selectedViz == 'count' && uploadStatus && uploadStatus.dates.length > 0">
           <h2>Number of uploaded raw files</h2>
-          <UploadVisualization
-            :uploadStatus="uploadStatus"
-            :type="selectedViz"
-            :instrument="instrumentPid.value"
-            :year="selectedYear"
-          />
+          <UploadVisualization :uploadStatus="uploadStatus" :type="selectedViz" :year="selectedYear" />
         </template>
         <template v-else-if="selectedViz == 'size' && uploadStatus && uploadStatus.dates.length > 0">
           <h2>Total size of uploaded raw files</h2>
-          <UploadVisualization
-            :uploadStatus="uploadStatus"
-            :type="selectedViz"
-            :instrument="instrumentPid.value"
-            :year="selectedYear"
-          />
+          <UploadVisualization :uploadStatus="uploadStatus" :type="selectedViz" :year="selectedYear" />
         </template>
         <template v-if="uploadStatus.dates.length > 0">
           <div class="viz-options">
@@ -99,19 +88,15 @@ import axios from "axios";
 
 import type { InstrumentInfo } from "@shared/entity/Instrument";
 import { backendUrl, dateToString } from "@/lib";
-import LandingHeader from "@/components/LandingHeader.vue";
 import ApiError from "@/views/ApiError.vue";
 import { parseDataStatus, parseUploadStatus, type DataStatus, type UploadStatus } from "@/lib/DataStatusParser";
 import InstrumentVisualization from "@/components/InstrumentVisualization.vue";
 import UploadVisualization from "@/components/UploadVisualization.vue";
 import CustomMultiselect from "@/components/MultiSelect.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
+import { useRoute } from "vue-router";
 
-export interface Props {
-  uuid: string;
-}
-
-const props = defineProps<Props>();
+const uuid = useRoute().params.uuid as string;
 
 export type InstrumentPidResult =
   | { status: "loading" }
@@ -147,7 +132,7 @@ const visualisationOptions = computed(() => {
 
 onMounted(async () => {
   try {
-    const res = await axios.get<InstrumentInfo>(`${backendUrl}instrument-pids/${props.uuid}`);
+    const res = await axios.get<InstrumentInfo>(`${backendUrl}instrument-pids/${uuid}`);
     instrumentPid.value = { status: "ready", value: res.data };
     [dataStatus.value, uploadStatus.value] = await Promise.all([
       parseDataStatus({ instrumentPid: res.data.pid }),

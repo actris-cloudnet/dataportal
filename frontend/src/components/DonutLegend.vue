@@ -1,19 +1,28 @@
 <template>
   <div class="legend">
-    <div class="header" id="label-0" :title="data[0].title">{{ props.data[0].label }}</div>
-    <div class="data" id="value-0" :title="data[0].title">{{ data[0].value }}</div>
-    <div class="header" id="label-1" :title="data[1].title">{{ props.data[1].label }}</div>
-    <div class="data" id="value-1" :title="data[1].title">{{ data[1].value }}</div>
-    <div class="header" id="label-2" :title="data[2].title">{{ props.data[2].label }}</div>
-    <div class="data" id="value-2" :title="data[2].title">{{ data[2].value }}</div>
-    <div class="header" id="label-3" :title="data[3].title">{{ props.data[3].label }}</div>
-    <div class="data" id="value-3" :title="data[3].title">{{ data[3].value }}</div>
+    <div class="header" id="label-0" :title="props.data[0].title">{{ props.data[0].label }}</div>
+    <div class="data" id="value-0" :title="props.data[0].title" :style="{ fontSize: props.fontSize }">
+      {{ props.data[0].value }}
+    </div>
+    <div class="header" id="label-1" :title="props.data[1].title">{{ props.data[1].label }}</div>
+    <div class="data" id="value-1" :title="props.data[1].title" :style="{ fontSize: props.fontSize }">
+      {{ props.data[1].value }}
+    </div>
+    <div class="header" id="label-2" :title="props.data[2].title">{{ props.data[2].label }}</div>
+    <div class="data" id="value-2" :title="props.data[2].title" :style="{ fontSize: props.fontSize }">
+      {{ props.data[2].value }}
+    </div>
+    <div class="header" id="label-3" :title="props.data[3].title">{{ props.data[3].label }}</div>
+    <div class="data" id="value-3" :title="props.data[3].title" :style="{ fontSize: props.fontSize }">
+      {{ props.data[3].value }}
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 const props = defineProps<{
   data: { label: string; title?: string; value: number }[];
+  fontSize?: string;
 }>();
 </script>
 
