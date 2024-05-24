@@ -272,7 +272,8 @@ $year-height: 1rem;
 :deep(canvas) {
   width: 100%;
   height: $year-height;
-  border: 1px solid gray;
+  outline: 1px solid gray;
+  border-radius: 2px;
   image-rendering: pixelated;
 }
 
