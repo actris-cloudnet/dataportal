@@ -2,8 +2,9 @@
   <DateVisualization
     :data="dates"
     :legend="{
-      'all-data': 'Data available',
-      'no-data': 'No data',
+      'all-data': 'All products',
+      'all-raw': 'Some products',
+      'no-data': 'No products',
     }"
     :colors="classColor"
   >
@@ -54,8 +55,14 @@ const dates = computed(() =>
 );
 
 function createColorClass(products: ProductLevels): ColorClass {
-  if (noData(products)) return "no-data";
-  return "all-data";
+  if (noData(products)) {
+    return "no-data";
+  }
+  const productCount = products["1b"].length + products["1c"].length + products["2"].length;
+  if (productCount === props.dataStatus.availableProducts.length) {
+    return "all-data";
+  }
+  return "all-raw";
 }
 
 function getProductStatus(products: ProductLevels, productId: string): boolean {
