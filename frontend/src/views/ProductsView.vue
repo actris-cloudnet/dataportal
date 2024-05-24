@@ -2,6 +2,10 @@
   <div v-if="products.status === 'ready'">
     <LandingHeader title="Products" />
     <main class="pagewidth">
+      <p>
+        Cloudnet data are organised in daily products and stored in netCDF 4 file format. For more information, see
+        <a href="https://docs.cloudnet.fmi.fi/netcdf.html">Cloudnet NetCDF Convention</a>.
+      </p>
       <h2>Instrument products</h2>
       <p>
         Measurements from an instrument in a harmonised format with some additional processing such as noise screening.
@@ -89,7 +93,7 @@ onMounted(async () => {
 <style scoped lang="scss">
 h2 {
   font-size: 150%;
-  margin-top: 1rem;
+  margin-top: 2rem;
   margin-bottom: 1rem;
 }
 
