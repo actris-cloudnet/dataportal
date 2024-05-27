@@ -89,9 +89,6 @@ import InstrumentVisualization from "@/components/InstrumentVisualization.vue";
 import UploadVisualization from "@/components/UploadVisualization.vue";
 import CustomMultiselect from "@/components/MultiSelect.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
-import { useRoute } from "vue-router";
-
-const uuid = useRoute().params.uuid as string;
 
 export interface Props {
   instrumentInfo: InstrumentInfo;
