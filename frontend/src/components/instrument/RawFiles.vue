@@ -1,46 +1,43 @@
 <template>
-  <div v-if="instrumentInfo.status === 'ready'">
-    <main class="pagewidth">
-      Date
-      <datepicker class="date-picker" name="date" v-model="selectedDate" :start="beginningOfHistory" :end="today" />
-      <template v-if="files.length">
-        <div class="upload-stats-header">
-          <div class="donut">
-            <Donut :data="donutData" />
-          </div>
-          <DonutLegend :data="stats" fontSize="175%" />
+  <main class="pagewidth">
+    Date
+    <datepicker class="date-picker" name="date" v-model="selectedDate" :start="beginningOfHistory" :end="today" />
+    <template v-if="files.length">
+      <div class="upload-stats-header">
+        <div class="donut">
+          <Donut :data="donutData" />
         </div>
-        <div class="table-wrapper">
-          <table class="file-table">
-            <thead class="table-header">
-              <tr>
-                <th>Filename</th>
-                <th>Size</th>
-                <th>Status</th>
-                <th>Created (UTC)</th>
-                <th>Updated (UTC)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="file in files" :key="file.uuid">
-                <td>
-                  <a :href="file.downloadUrl" target="_blank">{{ file.filename }}</a>
-                </td>
-                <td>{{ humanReadableSize(file.size) }}</td>
-                <td :class="getStatusClass(file.status)">{{ file.status }}</td>
-                <td>{{ formatTimestamp(file.createdAt) }}</td>
-                <td>{{ formatTimestamp(file.updatedAt) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </template>
-      <template v-else>
-        <p class="no-data">No files found for this instrument on this date.</p>
-      </template>
-    </main>
-  </div>
-  <ApiError :response="(instrumentInfo.error as any).response" v-else-if="instrumentInfo.status === 'error'" />
+        <DonutLegend :data="stats" fontSize="175%" />
+      </div>
+      <div class="table-wrapper">
+        <table class="file-table">
+          <thead class="table-header">
+            <tr>
+              <th>Filename</th>
+              <th>Size</th>
+              <th>Status</th>
+              <th>Created (UTC)</th>
+              <th>Updated (UTC)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="file in files" :key="file.uuid">
+              <td>
+                <a :href="file.downloadUrl" target="_blank">{{ file.filename }}</a>
+              </td>
+              <td>{{ humanReadableSize(file.size) }}</td>
+              <td :class="getStatusClass(file.status)">{{ file.status }}</td>
+              <td>{{ formatTimestamp(file.createdAt) }}</td>
+              <td>{{ formatTimestamp(file.updatedAt) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </template>
+    <template v-else>
+      <p class="no-data">No files found for this instrument on this date.</p>
+    </template>
+  </main>
 </template>
 
 <script lang="ts" setup>
@@ -50,10 +47,15 @@ import { useRoute, useRouter } from "vue-router";
 import { backendUrl, humanReadableSize } from "@/lib";
 import Donut from "@/components/DonutVisualization.vue";
 import DonutLegend from "@/components/DonutLegend.vue";
-import ApiError from "@/views/ApiError.vue";
-import type { InstrumentPidResult } from "@/components/instrument/InstrumentOverview.vue";
 import Datepicker from "@/components/DatePicker.vue";
 import type { Upload } from "@shared/entity/Upload";
+import type { InstrumentInfo } from "@shared/entity/Instrument";
+
+export interface Props {
+  instrumentInfo: InstrumentInfo;
+}
+
+const props = defineProps<Props>();
 
 const formatTimestamp = (date: string | Date) => date.toString().replace("T", " ").split(".")[0];
 
@@ -61,7 +63,6 @@ const files = ref<Upload[]>([]);
 const route = useRoute();
 const router = useRouter();
 
-const instrumentInfo = ref<InstrumentPidResult>({ status: "loading" });
 const beginningOfHistory = "2001-01-01";
 const today = new Date().toISOString().split("T")[0];
 
@@ -93,7 +94,7 @@ const stats = computed(() => {
   const invalid = files.value.filter((file) => file.status === "invalid").length;
 
   return [
-    { label: "Uploaded", title: "Succesfully uploaded files", value: uploaded + processed },
+    { label: "Uploaded", title: "Successfully uploaded files", value: uploaded + processed },
     { label: "Processed", title: "Files processed into product(s)", value: processed },
     { label: "Created", title: "Files with only metadata received", value: created },
     { label: "Invalid", title: "Files marked invalid manually", value: invalid },
@@ -101,20 +102,14 @@ const stats = computed(() => {
 });
 
 async function fetchData() {
-  try {
-    const instrumentResponse = await axios.get(`${backendUrl}instrument-pids/${route.params.uuid}`);
-    instrumentInfo.value = { status: "ready", value: instrumentResponse.data };
-    const fileResponse = await axios.get(`${backendUrl}raw-files`, {
-      params: {
-        instrumentPid: instrumentInfo.value.value.pid,
-        date: selectedDate.value,
-      },
-    });
-    files.value = fileResponse.data;
-    files.value.sort((a, b) => a.status.localeCompare(b.status));
-  } catch (error) {
-    instrumentInfo.value = { status: "error", error: error as Error };
-  }
+  const fileResponse = await axios.get(`${backendUrl}raw-files`, {
+    params: {
+      instrumentPid: props.instrumentInfo.pid,
+      date: selectedDate.value,
+    },
+  });
+  files.value = fileResponse.data;
+  files.value.sort((a, b) => a.status.localeCompare(b.status));
 }
 
 watch(
