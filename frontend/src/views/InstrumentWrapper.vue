@@ -12,8 +12,9 @@
         </router-link>
       </template>
     </LandingHeader>
-    <router-view />
+    <router-view :instrumentInfo="instrumentInfo.value" />
   </div>
+  <ApiError :response="(instrumentInfo.error as any).response" v-else-if="instrumentInfo.status === 'error'" />
 </template>
 
 <script lang="ts" setup>
@@ -23,18 +24,24 @@ import { useRoute } from "vue-router";
 import LandingHeader from "@/components/LandingHeader.vue";
 import folderIcon from "@/assets/icons/folder.png";
 import { backendUrl, getInstrumentIcon } from "@/lib";
-import type { InstrumentPidResult } from "@/components/instrument/InstrumentOverview.vue";
 import { useTitle } from "@/router";
+import type { InstrumentInfo } from "@shared/entity/Instrument";
+import ApiError from "@/views/ApiError.vue";
+
+type InstrumentInfoResult =
+  | { status: "loading" }
+  | { status: "ready"; value: InstrumentInfo }
+  | { status: "error"; error: Error };
 
 const route = useRoute();
 const uuid = route.params.uuid as string;
-const instrumentInfo = ref<InstrumentPidResult>({ status: "loading" });
+const instrumentInfo = ref<InstrumentInfoResult>({ status: "loading" });
 
 const title = computed(() => {
   if (instrumentInfo.value.status === "ready") {
     return [instrumentInfo.value.value.name, "Instruments"];
   }
-  return ["Loading...", "Instruments"];
+  return ["Instruments"];
 });
 
 useTitle(title);
