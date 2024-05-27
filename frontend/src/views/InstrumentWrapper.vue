@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import axios from "axios";
 import { useRoute } from "vue-router";
 import LandingHeader from "@/components/LandingHeader.vue";
@@ -25,10 +25,20 @@ import overviewIcon from "@/assets/icons/overview.png";
 import folderIcon from "@/assets/icons/folder.png";
 import { backendUrl } from "@/lib";
 import type { InstrumentPidResult } from "@/components/instrument/InstrumentOverview.vue";
+import { useTitle } from "@/router";
 
 const route = useRoute();
 const uuid = route.params.uuid as string;
 const instrumentInfo = ref<InstrumentPidResult>({ status: "loading" });
+
+const title = computed(() => {
+  if (instrumentInfo.value.status === "ready") {
+    return [instrumentInfo.value.value.name, "Instruments"];
+  }
+  return ["Loading...", "Instruments"];
+});
+
+useTitle(title);
 
 onMounted(async () => {
   try {

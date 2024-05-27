@@ -64,7 +64,7 @@ const routes = [
     path: "/sites",
     name: "Sites",
     meta: {
-      title: "Measurement sites",
+      title: "Sites",
     },
     component: () => import("@/views/SitesView.vue"),
     props: true,
@@ -143,7 +143,7 @@ const routes = [
   {
     path: "/instruments",
     name: "Instruments",
-    meta: { title: false },
+    meta: { title: "Instruments" },
     component: () => import("@/views/InstrumentsView.vue"),
     props: true,
   },
@@ -170,7 +170,7 @@ const routes = [
   {
     path: "/products",
     name: "Products",
-    meta: { title: false },
+    meta: { title: "Products" },
     component: () => import("@/views/ProductsView.vue"),
     props: true,
   },

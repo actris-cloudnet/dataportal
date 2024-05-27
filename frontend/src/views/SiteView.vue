@@ -273,7 +273,7 @@ const instrumentName = computed(() => {
   return selectedPid ? selectedPid.humanReadableName : null;
 });
 
-const title = computed(() => [response.value?.humanReadableName, "Measurement sites"]);
+const title = computed(() => [response.value?.humanReadableName, "Sites"]);
 
 useTitle(title);
 
