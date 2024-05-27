@@ -8,7 +8,7 @@
           <div class="donut">
             <Donut :data="donutData" />
           </div>
-          <DonutLegend :data="stats" :fontSize="'175%'" />
+          <DonutLegend :data="stats" fontSize="175%" />
         </div>
         <div class="table-wrapper">
           <table class="file-table">
