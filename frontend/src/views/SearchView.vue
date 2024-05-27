@@ -269,26 +269,11 @@ import BaseAlert from "@/components/BaseAlert.vue";
 
 import type { VisualizationResponse } from "@shared/entity/VisualizationResponse";
 import type { Instrument, InstrumentInfo } from "@shared/entity/Instrument";
-import { useRouteQuery, type QueryType } from "@/lib/useRouteQuery";
+import { useRouteQuery, queryBoolean, queryString, queryStringArray } from "@/lib/useRouteQuery";
 
 export interface Props {
   mode: string;
 }
-
-const queryString: QueryType<string> = {
-  parse: (x) => x,
-  format: (x) => x,
-};
-
-const queryStringArray: QueryType<string[]> = {
-  parse: (x) => x.split(","),
-  format: (x) => x.join(",") || undefined,
-};
-
-const queryBoolean: QueryType<boolean> = {
-  parse: (x) => x === "true",
-  format: (x) => (x ? "true" : undefined),
-};
 
 const props = defineProps<Props>();
 

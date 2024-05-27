@@ -95,3 +95,18 @@ export function useRouteQuery<T>(options: { name: string; defaultValue: T; type:
 
   return proxy;
 }
+
+export const queryString: QueryType<string> = {
+  parse: (x) => x,
+  format: (x) => x,
+};
+
+export const queryStringArray: QueryType<string[]> = {
+  parse: (x) => x.split(","),
+  format: (x) => x.join(",") || undefined,
+};
+
+export const queryBoolean: QueryType<boolean> = {
+  parse: (x) => x === "true",
+  format: (x) => (x ? "true" : undefined),
+};

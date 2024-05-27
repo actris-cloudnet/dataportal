@@ -1,7 +1,7 @@
 <template>
   <main class="pagewidth">
     Date
-    <datepicker class="date-picker" name="date" v-model="selectedDate" :start="beginningOfHistory" :end="today" />
+    <DatePicker class="date-picker" name="date" v-model="selectedDate" :end="today" />
     <template v-if="files.length">
       <div class="upload-stats-header">
         <div class="donut">
@@ -41,15 +41,15 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import axios from "axios";
-import { useRoute, useRouter } from "vue-router";
-import { backendUrl, humanReadableSize } from "@/lib";
+import { backendUrl, dateToString, humanReadableSize } from "@/lib";
 import Donut from "@/components/DonutVisualization.vue";
 import DonutLegend from "@/components/DonutLegend.vue";
-import Datepicker from "@/components/DatePicker.vue";
+import DatePicker from "@/components/DatePicker.vue";
 import type { Upload } from "@shared/entity/Upload";
 import type { InstrumentInfo } from "@shared/entity/Instrument";
+import { useRouteQuery, queryString } from "@/lib/useRouteQuery";
 
 export interface Props {
   instrumentInfo: InstrumentInfo;
@@ -60,19 +60,10 @@ const props = defineProps<Props>();
 const formatTimestamp = (date: string | Date) => date.toString().replace("T", " ").split(".")[0];
 
 const files = ref<Upload[]>([]);
-const route = useRoute();
-const router = useRouter();
 
-const beginningOfHistory = "2001-01-01";
-const today = new Date().toISOString().split("T")[0];
+const today = dateToString(new Date());
 
-const selectedDate = ref<string>(route.query.date as string);
-
-onMounted(async () => {
-  if (!selectedDate.value) {
-    selectedDate.value = today;
-  }
-});
+const selectedDate = useRouteQuery({ name: "date", defaultValue: today, type: queryString });
 
 const donutData = computed(() => {
   const created = files.value.filter((file) => file.status === "created").length;
@@ -116,7 +107,6 @@ watch(
   () => [selectedDate.value],
   async () => {
     await fetchData();
-    router.push({ query: { date: selectedDate.value } });
   },
   { immediate: true },
 );
