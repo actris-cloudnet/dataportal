@@ -30,13 +30,13 @@ describe("CollectionView.vue", () => {
           return Promise.resolve(augmentAxiosResponse(resources["models"]));
         } else if (url.includes("/generate-pid")) {
           return Promise.resolve(augmentAxiosResponse({ pid: "testpid" }));
-        } else if (url.includes("/reference/") && url.includes("?citation=true&format=html")) {
+        } else if (url.includes("/reference/") && url.includes("/citation?format=html")) {
           return Promise.resolve(
             augmentAxiosResponse('Meikäläinen, M. (2023). Custom collection. <a href="">testpid</a>'),
           );
-        } else if (url.includes("/reference/") && url.includes("?acknowledgements=true&format=html")) {
+        } else if (url.includes("/reference/") && url.includes("/acknowledgements?format=html")) {
           return Promise.resolve(augmentAxiosResponse("We acknowledge many people and organizations."));
-        } else if (url.includes("/reference/") && url.includes("?dataAvailability=true&format=html")) {
+        } else if (url.includes("/reference/") && url.includes("/data-availability?format=html")) {
           return Promise.resolve(augmentAxiosResponse("Only available in the amazing Cloudnet data portal."));
         }
         return Promise.reject(new Error(`Unmocked URL: ${url}`));

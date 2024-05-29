@@ -184,7 +184,13 @@ async function createServer(): Promise<void> {
   app.get("/api/download/collection/:uuid", middleware.validateUuidParam, dlRoutes.collection);
   app.get("/api/download/image/*", dlRoutes.image);
   app.get("/api/quality/:uuid", middleware.validateUuidParam, qualityRoutes.qualityReport);
-  app.get("/api/reference/:uuid", middleware.validateUuidParam, referenceRoutes.getReference);
+  app.get(
+    "/api/reference/:uuid/:type",
+    middleware.validateUuidParam,
+    middleware.validateCitationType,
+    middleware.validateCitationFormat,
+    referenceRoutes.getReference,
+  );
   app.get("/api/sites/:siteId/locations", siteRoutes.locations);
   app.get("/api/sites/:siteId/locations/:date", siteRoutes.location);
   app.get("/api/product-availability", productAvailabilityRoutes.productAvailability);

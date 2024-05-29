@@ -23,26 +23,32 @@ const uuids = [
 describe("GET /api/reference", () => {
   for (const uuid of uuids) {
     describe(`/${uuid}`, () => {
-      for (const format of ["html", "bibtex", "ris"]) {
+      for (const format of ["html", "bibtex", "ris", "txt"]) {
         it(`outputs citation as ${format}`, async () => {
-          const res = await axios.get(`${url}reference/${uuid}`, { params: { citation: "true", format } });
+          const res = await axios.get(`${url}reference/${uuid}/citation`, {
+            params: { format: format },
+          });
           expect(res.data).toMatchSnapshot();
         });
       }
 
-      it(`outputs acknowledgements`, async () => {
-        const res = await axios.get(`${url}reference/${uuid}`, {
-          params: { acknowledgements: "true", format: "html" },
+      for (const format of ["html", "txt"]) {
+        it(`outputs acknowledgements as ${format}`, async () => {
+          const res = await axios.get(`${url}reference/${uuid}/acknowledgements`, {
+            params: { format: format },
+          });
+          expect(res.data).toMatchSnapshot();
         });
-        expect(res.data).toMatchSnapshot();
-      });
+      }
 
-      it(`outputs data availability`, async () => {
-        const res = await axios.get(`${url}reference/${uuid}`, {
-          params: { dataAvailability: "true", format: "html" },
+      for (const format of ["html", "txt"]) {
+        it(`outputs data availability`, async () => {
+          const res = await axios.get(`${url}reference/${uuid}/data-availability`, {
+            params: { format: format },
+          });
+          expect(res.data).toMatchSnapshot();
         });
-        expect(res.data).toMatchSnapshot();
-      });
+      }
     });
   }
 });

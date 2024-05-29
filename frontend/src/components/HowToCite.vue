@@ -68,17 +68,17 @@ async function fetchReferenceStrings(uuid: string) {
   const baseUrl = `${backendUrl}reference/${uuid}/`;
   try {
     const responses = await Promise.all([
-      axios.get(`${baseUrl}?citation=true&format=html`),
-      axios.get(`${baseUrl}?acknowledgements=true&format=html`),
-      axios.get(`${baseUrl}?dataAvailability=true&format=html`),
+      axios.get(`${baseUrl}citation?format=html`),
+      axios.get(`${baseUrl}acknowledgements?format=html`),
+      axios.get(`${baseUrl}data-availability?format=html`),
     ]);
     citation.value = {
       status: "ready",
       citation: responses[0].data,
       acknowledgements: responses[1].data,
       dataAvailability: responses[2].data,
-      bibtexUrl: `${baseUrl}?citation=true&format=bibtex`,
-      risUrl: `${baseUrl}?citation=true&format=ris`,
+      bibtexUrl: `${baseUrl}/citation?format=bibtex`,
+      risUrl: `${baseUrl}/citation?format=ris`,
     };
   } catch (error) {
     console.error("Failed to load citation:", error);
