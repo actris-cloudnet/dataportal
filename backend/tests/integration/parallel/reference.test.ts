@@ -1,6 +1,7 @@
 import { backendPublicUrl } from "../../lib";
 import axios from "axios";
 import { describe, expect, it } from "@jest/globals";
+import { html2txt } from "../../../src/routes/reference";
 
 const url = `${backendPublicUrl}`;
 const uuids = [
@@ -19,6 +20,29 @@ const uuids = [
   // Collection of legacy files
   "6e145ec8-7d66-4a5b-9c5e-c1fdfadafc6b",
 ];
+
+describe("GET /api/reference", () => {
+  const examples = [
+    {
+      input: "This is a link.",
+      expected: "This is a link.",
+    },
+    {
+      input: "This is a link to <a href='https://example.com'>a website.</a>",
+      expected: "This is a link to a website.",
+    },
+    {
+      input: "This is a link to <a href='https://example.com'>https://example.com</a>.",
+      expected: "This is a link to https://example.com.",
+    },
+  ];
+
+  for (const example of examples) {
+    it("converts HTML to text", () => {
+      expect(html2txt(example.input)).toBe(example.expected);
+    });
+  }
+});
 
 describe("GET /api/reference", () => {
   for (const uuid of uuids) {

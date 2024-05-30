@@ -128,11 +128,12 @@ function citation2html(c: Citation) {
   return `${authors} ${year}. ${title}. ${publisher}. ${link}`;
 }
 
-const html2txt = (html: string): string => {
-  return html
+export const html2txt = (html: string): string => {
+  const text = html
     .replace(/<[^>]+>/g, " ")
     .replace(/\s\s+/g, " ")
     .trim();
+  return text.replace(/ \./g, ".");
 };
 
 export function citation2txt(c: Citation) {
