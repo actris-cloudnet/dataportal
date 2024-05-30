@@ -6,7 +6,7 @@ import json
 import os
 
 BASE_URL = os.environ.get("DP_BACKEND_URL", "http://localhost:3000")
-PERMISSIONS = ["canUpload", "canUploadModel", "canCalibrate", "canProcess", "canAddPublication", "canDelete", "canGetStats"]
+PERMISSIONS = ["canUpload", "canUploadModel", "canCalibrate", "canProcess", "canAddPublication", "canDelete", "canGetStats", "canPublishTask"]
 
 
 def get_all_users():

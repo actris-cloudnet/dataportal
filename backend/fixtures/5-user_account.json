@@ -1,16 +1,17 @@
 [
   {
-    "id": "1",
+    "id": 1,
     "username": "admin",
     "passwordHash": "$apr1$jgPboVo9$zZfzW6ufP/yoalt8fyoHJ/",
     "permissions": [
-      { "id": "1" },
-      { "id": "2" },
-      { "id": "3" },
-      { "id": "4" },
-      { "id": "5" },
-      { "id": "6" },
-      { "id": 7 }
+      { "id": 1 },
+      { "id": 2 },
+      { "id": 3 },
+      { "id": 4 },
+      { "id": 5 },
+      { "id": 6 },
+      { "id": 7 },
+      { "id": 8 }
     ]
   }
 ]

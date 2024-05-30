@@ -312,9 +312,16 @@ async function createServer(): Promise<void> {
   app.put("/user-accounts/:id", express.json(), userAccountRoutes.validatePut, userAccountRoutes.putUserAccount);
   app.get("/user-accounts/", userAccountRoutes.getAllUserAccounts);
 
-  app.post("/queue/:type/receive", queueRoutes.receive);
-  app.put("/queue/:type/complete/:id", queueRoutes.complete);
-  app.put("/queue/:type/fail/:id", queueRoutes.fail);
+  app.post(
+    "/api/queue/publish",
+    authenticator.verifyCredentials(),
+    authorizator.verifyPermission(PermissionType.canPublishTask),
+    express.json(),
+    queueRoutes.publish,
+  );
+  app.post("/queue/receive", queueRoutes.receive);
+  app.put("/queue/complete/:id", queueRoutes.complete);
+  app.put("/queue/fail/:id", queueRoutes.fail);
 
   app.use(errorHandler);
 

@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import { QueueService } from "../lib/queue";
+import { Task } from "../entity/Task";
 
 export class QueueRoutes {
   readonly queueService: QueueService;
@@ -7,6 +8,32 @@ export class QueueRoutes {
   constructor(queueService: QueueService) {
     this.queueService = queueService;
   }
+
+  publish: RequestHandler = async (req, res, next) => {
+    try {
+      const body = req.body;
+
+      const task = new Task();
+      task.type = body.type;
+      task.siteId = body.siteId;
+      task.productId = body.productId;
+      task.measurementDate = body.measurementDate;
+      if (body.instrumentInfoUuid) {
+        task.instrumentInfoUuid = body.instrumentInfoUuid;
+      }
+      if (body.modelId) {
+        task.modelId = body.modelId;
+      }
+      task.scheduledAt = new Date();
+      task.priority = 50;
+
+      await this.queueService.publish(task);
+      res.send(task);
+    } catch (err) {
+      console.log(err);
+      next({ status: 500, errors: err });
+    }
+  };
 
   receive: RequestHandler = async (req, res, next) => {
     try {
