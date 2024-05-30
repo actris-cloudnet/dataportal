@@ -200,6 +200,22 @@ export class Middleware {
     next();
   };
 
+  validateCitationType: RequestHandler = async (req, _res, next) => {
+    if (["acknowledgements", "data-availability", "citation"].includes(req.params.type)) return next();
+    next({ status: 404, errors: ["Invalid citation type"] });
+  };
+
+  validateCitationFormat: RequestHandler = async (req, _res, next) => {
+    const query = req.query as any;
+    if (!query.format) query.format = "html";
+    if (req.params.type === "citation") {
+      if (["bibtex", "ris", "html", "txt"].includes(query.format)) return next();
+    } else {
+      if (["html", "txt"].includes(query.format)) return next();
+    }
+    next({ status: 404, errors: ["Invalid citation format"] });
+  };
+
   private checkSite = async (req: any) => {
     if (!req.query["site"]) return Promise.resolve();
     let qb = this.siteRepo.createQueryBuilder("site").select().where("site.id IN (:...site)", req.query);
