@@ -18,6 +18,7 @@ export enum SiteType {
 export interface Site {
   id: string;
   humanReadableName: string;
+  description: string | null;
   type: SiteType[];
   latitude: number | null;
   longitude: number | null;

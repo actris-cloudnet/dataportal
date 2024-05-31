@@ -71,10 +71,21 @@ const routes = [
   },
   {
     path: "/site/:siteId",
-    name: "Site",
     meta: { title: false },
     component: () => import("@/views/SiteView.vue"),
     props: true,
+    children: [
+      {
+        path: "",
+        name: "Site",
+        component: () => import("@/components/site/SiteOverview.vue"),
+      },
+      {
+        path: "products",
+        name: "SiteProducts",
+        component: () => import("@/components/site/SiteProducts.vue"),
+      },
+    ],
   },
   {
     path: "/collection/:uuid",
