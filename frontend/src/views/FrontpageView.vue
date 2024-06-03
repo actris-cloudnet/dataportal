@@ -32,7 +32,6 @@
       </div>
     </main>
     <div class="publications">
-      <router-link to="/sites"> Measurement sites &#8594; </router-link><br />
       <router-link to="/publications"> Cloudnet publications &#8594; </router-link>
     </div>
   </main>
