@@ -7,7 +7,7 @@
     >
       <template #tabs>
         <router-link class="tab" :to="{ name: 'Collection' }">
-          <img :src="briedIcon" alt="" />
+          <img :src="briefIcon" alt="" />
           Summary
         </router-link>
         <router-link class="tab" :to="{ name: 'CollectionFiles' }">
@@ -68,7 +68,7 @@ import type { CollectionFileResponse } from "@shared/entity/CollectionFileRespon
 import type { Model } from "@shared/entity/Model";
 import ApiError from "./ApiError.vue";
 import folderIcon from "@/assets/icons/icons8-folder-48.png";
-import briedIcon from "@/assets/icons/icons8-brief-48.png";
+import briefIcon from "@/assets/icons/icons8-brief-48.png";
 import LandingHeader from "@/components/LandingHeader.vue";
 
 export interface Props {

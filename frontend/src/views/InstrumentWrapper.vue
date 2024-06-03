@@ -22,7 +22,7 @@ import { ref, onMounted, computed } from "vue";
 import axios from "axios";
 import { useRoute } from "vue-router";
 import LandingHeader from "@/components/LandingHeader.vue";
-import folderIcon from "@/assets/icons/folder.png";
+import folderIcon from "@/assets/icons/icons8-folder-48.png";
 import { backendUrl, getInstrumentIcon } from "@/lib";
 import { useTitle } from "@/router";
 import type { InstrumentInfo } from "@shared/entity/Instrument";

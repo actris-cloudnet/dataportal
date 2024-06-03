@@ -22,8 +22,14 @@
         <BaseTag v-else-if="response.type.includes('hidden' as SiteType)" type="experimental">Hidden</BaseTag>
       </template>
       <template #tabs>
-        <router-link class="tab" :to="{ name: 'Site' }"> Summary </router-link>
-        <router-link class="tab" :to="{ name: 'SiteProducts' }"> Products </router-link>
+        <router-link class="tab" :to="{ name: 'Site' }">
+          <img :src="radarIcon" alt="" />
+          Summary
+        </router-link>
+        <router-link class="tab" :to="{ name: 'SiteProducts' }">
+          <img :src="folderIcon" alt="" />
+          Products
+        </router-link>
       </template>
     </LandingHeader>
     <router-view :site="response" />
@@ -41,6 +47,8 @@ import ApiError from "./ApiError.vue";
 import { useTitle } from "@/router";
 import BaseTag from "@/components/BaseTag.vue";
 import LandingHeader from "@/components/LandingHeader.vue";
+import folderIcon from "@/assets/icons/icons8-folder-48.png";
+import radarIcon from "@/assets/icons/radar.png";
 
 export interface Props {
   siteId: string;
