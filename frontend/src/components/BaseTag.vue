@@ -2,7 +2,7 @@
 export type TagSize = "normal" | "small";
 
 export interface Props {
-  type: "actris" | "arm" | "volatile" | "legacy" | "experimental";
+  type: "actris" | "arm" | "volatile" | "legacy" | "experimental" | "cloudnet";
   title?: string;
   size?: TagSize;
 }
@@ -51,5 +51,9 @@ withDefaults(defineProps<Props>(), { size: "normal" });
 
 .legacy {
   background-color: $gray4;
+}
+
+.cloudnet {
+  background-color: $cloudnet-blue;
 }
 </style>

@@ -2,8 +2,19 @@
   <div v-if="!error && response" id="sitelanding">
     <LandingHeader :title="response.humanReadableName" :subtitle="subtitle">
       <template #tags>
-        <BaseTag v-if="response.actrisId" type="actris" title="This station is part of an ACTRIS National Facility">
+        <BaseTag
+          v-if="response.actrisId"
+          type="actris"
+          title="This station is a component of an ACTRIS National Facility."
+        >
           ACTRIS
+        </BaseTag>
+        <BaseTag
+          v-if="response.type.includes('cloudnet' as SiteType)"
+          type="cloudnet"
+          title="Permanent station with Cloudnet instrumentation."
+        >
+          Cloudnet
         </BaseTag>
         <BaseTag v-if="response.type.includes('campaign' as SiteType)" type="experimental">Campaign</BaseTag>
         <BaseTag v-if="response.type.includes('arm' as SiteType)" type="arm">ARM</BaseTag>
