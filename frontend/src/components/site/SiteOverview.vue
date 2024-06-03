@@ -230,10 +230,6 @@ img.product {
   flex-basis: 0;
 }
 
-#sitelanding .details {
-  height: 100%;
-}
-
 #sitemap {
   height: 300px;
 }
