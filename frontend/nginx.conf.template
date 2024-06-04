@@ -5,6 +5,17 @@ server {
     gzip_types application/json;
     gzip_proxied no-cache no-store private expired auth;
 
+    set $maintenance $MAINTENANCE;
+    if ($maintenance) {
+        return 503;
+    }
+
+    error_page 503 @maintenance;
+    location @maintenance {
+        rewrite ^(.*)$ /maintenance.html break;
+        root /app;
+    }
+
     location / {
         root /app;
         index index.html;

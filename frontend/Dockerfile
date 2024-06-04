@@ -33,7 +33,7 @@ ENV NODE_ENV=production
 RUN npm run build
 
 FROM nginxinc/nginx-unprivileged AS prod
-COPY frontend/nginx.conf.template /etc/nginx/templates/default.conf.template
-
 WORKDIR /app
 COPY --from=builder /app/dist /app
+COPY frontend/nginx.conf.template /etc/nginx/templates/default.conf.template
+COPY frontend/maintenance.html /app
