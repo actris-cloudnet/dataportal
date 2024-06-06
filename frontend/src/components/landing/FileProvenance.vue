@@ -36,6 +36,17 @@
           </li>
         </ul>
       </dd>
+      <dd v-else-if="'instrumentInfo' in response && response.instrumentInfo">
+        <router-link
+          :to="{
+            name: 'Raw Files',
+            params: { uuid: response.instrumentInfo.uuid },
+            query: { date: response.measurementDate },
+          }"
+        >
+          List of raw files
+        </router-link>
+      </dd>
       <dd class="notAvailable" v-else></dd>
       <dt>Versions</dt>
       <dd>
