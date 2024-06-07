@@ -162,8 +162,29 @@ export class FileRoutes {
       : convertToSearchResponse;
 
     try {
-      const stream = await this.searchFilesQueryBuilder(query).stream();
-      streamHandler(stream, res, "file", converterFunction);
+      const qb = this.searchFilesQueryBuilder(query);
+      if ("page" in query) {
+        const currentPage = parseInt(query.page);
+        const pageSize = "pageSize" in query ? parseInt(query.pageSize) : 15;
+        const offset = (currentPage - 1) * pageSize;
+        const sizeQb = qb.clone().select("SUM(size)", "totalBytes").orderBy();
+        const pageQb = qb.clone().limit(pageSize).offset(offset);
+        const [totalItems, size, pageItems] = await Promise.all([qb.getCount(), sizeQb.getRawOne(), pageQb.getMany()]);
+        const totalPages = Math.ceil(totalItems / pageSize);
+        res.send({
+          results: pageItems,
+          pagination: {
+            totalItems,
+            totalPages,
+            totalBytes: parseInt(size.totalBytes),
+            currentPage,
+            pageSize,
+          },
+        });
+      } else {
+        const stream = await qb.stream();
+        streamHandler(stream, res, "file", converterFunction);
+      }
     } catch (err) {
       next({ status: 500, errors: err });
     }
@@ -486,6 +507,13 @@ export class FileRoutes {
     qb = addCommonFilters(qb, query);
     if (query.instrument) qb.andWhere("instrument.id IN (:...instrument)", query);
     if (query.instrumentPid) qb.andWhere("file.instrumentPid IN (:...instrumentPid)", query);
+    if (query.collection) {
+      qb.andWhere(
+        `(file.uuid IN (SELECT "regularFileUuid" FROM collection_regular_files_regular_file WHERE "collectionUuid" = :collection) OR
+          file.uuid IN (SELECT "modelFileUuid"   FROM collection_model_files_model_file     WHERE "collectionUuid" = :collection))`,
+        query,
+      );
+    }
     qb.orderBy("file.measurementDate", "DESC")
       .addOrderBy("file.siteId", "ASC")
       .addOrderBy("product.level", "ASC")

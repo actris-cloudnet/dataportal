@@ -32,7 +32,7 @@
         </div>
 
         <div class="filterbox">
-          <custom-multiselect
+          <CustomMultiselect
             label="Location"
             v-model="selectedSiteIds"
             :options="siteOptions"
@@ -75,7 +75,7 @@
           </div>
 
           <div class="date" v-if="!isVizMode && showDateRange">
-            <datepicker
+            <DatePicker
               name="dateFrom"
               v-model="dateFrom"
               :start="beginningOfHistory"
@@ -84,7 +84,7 @@
               :key="dateFromUpdate"
             />
             <span class="centerlabel">&#8212;</span>
-            <datepicker
+            <DatePicker
               name="dateTo"
               v-model="dateTo"
               :start="showDateRange ? dateFrom : beginningOfHistory"
@@ -109,7 +109,7 @@
           </div>
 
           <div class="date" v-else>
-            <datepicker
+            <DatePicker
               name="dateTo"
               v-model="dateTo"
               :start="beginningOfHistory"
@@ -148,7 +148,7 @@
         </div>
 
         <div class="filterbox">
-          <custom-multiselect
+          <CustomMultiselect
             label="Product"
             v-model="selectedProductIds"
             :options="productOptions"
@@ -165,7 +165,7 @@
         </div>
 
         <div class="filterbox">
-          <custom-multiselect
+          <CustomMultiselect
             label="Instrument model"
             v-model="selectedInstrumentIds"
             :options="allInstruments"
@@ -176,7 +176,7 @@
         </div>
 
         <div class="filterbox">
-          <custom-multiselect
+          <CustomMultiselect
             v-show="isVizMode"
             label="Variable"
             v-model="selectedVariableIds"
@@ -188,7 +188,7 @@
         </div>
 
         <div class="filterbox">
-          <custom-multiselect
+          <CustomMultiselect
             label="Instrument"
             v-model="selectedInstrumentPids"
             :options="allInstrumentPids"
@@ -199,10 +199,10 @@
         </div>
 
         <div class="filterbox">
-          <BaseButton v-if="isVizMode" @click="navigateToSearch('data')" type="secondary" style="width: 100%">
+          <BaseButton v-if="isVizMode" :to="routeToSearch('data')" type="secondary" style="width: 100%">
             View in data search &rarr;
           </BaseButton>
-          <BaseButton v-else @click="navigateToSearch('visualizations')" type="secondary" style="width: 100%">
+          <BaseButton v-else :to="routeToSearch('visualizations')" type="secondary" style="width: 100%">
             View in visualization search &rarr;
           </BaseButton>
           <a :href="isVizMode ? '/search/visualizations' : '/search/data'" id="reset">Reset filter</a>
@@ -210,20 +210,26 @@
       </section>
 
       <div class="results">
-        <viz-search-result
-          v-if="isVizMode"
-          :apiResponse="apiResponse as VisualizationResponse[]"
-          :isBusy="isBusy"
-          :date="dateTo"
+        <VizSearchResult
+          v-if="isVizMode && renderComplete"
           :key="vizSearchUpdate"
-          :noSelectionsMade="noSelectionsMade"
           :setWideMode="setVizWideMode"
+          :sites="selectedSiteIds"
+          :date="dateTo"
+          :products="selectedProductIds"
+          :instruments="selectedInstrumentIds"
+          :instrumentPids="selectedInstrumentPids"
+          :variables="selectedVariableIds"
         />
-        <data-search-result
-          v-else
-          :apiResponse="apiResponse as SearchFileResponse[]"
-          :isBusy="isBusy"
+        <DataSearchResult
+          v-else-if="renderComplete"
           :key="dataSearchUpdate"
+          :sites="selectedSiteIds.length ? selectedSiteIds : siteOptions.map((site) => site.id)"
+          :dateFrom="dateFrom"
+          :dateTo="dateTo"
+          :products="selectedProductIds.length ? selectedProductIds : productOptions.map((prod) => prod.id)"
+          :instruments="selectedInstrumentIds"
+          :instrumentPids="selectedInstrumentPids"
         />
       </div>
     </div>
@@ -241,12 +247,10 @@ export default {
 import { ref, computed, onMounted, watch, onUnmounted } from "vue";
 import axios from "axios";
 import type { Site, SiteType } from "@shared/entity/Site";
-import Datepicker, { type DateErrors } from "@/components/DatePicker.vue";
-import CustomMultiselect from "@/components/MultiSelect.vue";
-import type { Option } from "@/components/MultiSelect.vue";
+import DatePicker, { type DateErrors } from "@/components/DatePicker.vue";
+import CustomMultiselect, { type Option } from "@/components/MultiSelect.vue";
 import DataSearchResult from "@/components/DataSearchResult.vue";
 import {
-  constructTitle,
   dateToString,
   fixedRanges,
   getDateFromBeginningOfYear,
@@ -259,15 +263,13 @@ import {
 } from "@/lib";
 import VizSearchResult from "@/components/VizSearchResult.vue";
 import type { Product } from "@shared/entity/Product";
-import type { SearchFileResponse } from "@shared/entity/SearchFileResponse";
 import SuperMap from "@/components/SuperMap.vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import ApiError from "./ApiError.vue";
 import CheckBox from "@/components/CheckBox.vue";
 import BaseButton from "@/components/BaseButton.vue";
 import BaseAlert from "@/components/BaseAlert.vue";
 
-import type { VisualizationResponse } from "@shared/entity/VisualizationResponse";
 import type { Instrument, InstrumentInfo } from "@shared/entity/Instrument";
 import { useRouteQuery, queryBoolean, queryString, queryStringArray } from "@/lib/useRouteQuery";
 
@@ -277,18 +279,7 @@ export interface Props {
 
 const props = defineProps<Props>();
 
-function resetResponse() {
-  return [];
-}
-
 const isVizMode = computed(() => props.mode == "visualizations");
-
-// api call
-const apiResponse = ref<SearchFileResponse[] | VisualizationResponse[]>(resetResponse());
-let requestController: AbortController | null = null;
-
-// file list
-const isBusy = ref(false);
 
 // site selector
 const allSites = ref<Site[]>([]);
@@ -305,7 +296,6 @@ const dateFrom = useRouteQuery({ name: "dateFrom", defaultValue: today.value, ty
 const dateFromError = ref<DateErrors>();
 const dateTo = useRouteQuery({ name: "dateTo", defaultValue: today.value, type: queryString });
 const dateToError = ref<DateErrors>();
-const activeBtn = ref("");
 const showDateRange = ref(false);
 
 // products
@@ -347,7 +337,6 @@ const dataSearchUpdate = ref(40000);
 const vizSearchUpdate = ref(50000);
 const mapKey = ref(60000);
 
-const router = useRouter();
 const route = useRoute();
 
 onMounted(async () => {
@@ -395,47 +384,6 @@ async function initSites(): Promise<Site[]> {
   return res.data.filter((site) => !site.type.includes("hidden" as SiteType));
 }
 
-function fetchData() {
-  if (requestController) requestController.abort();
-  requestController = new AbortController();
-  return new Promise((resolve, reject) => {
-    if (isVizMode.value && noSelectionsMade.value) {
-      resolve(undefined);
-      return;
-    }
-    isBusy.value = true;
-    const apiPath = isVizMode.value ? "visualizations/" : "search/";
-    if (!isVizMode.value) checkIfButtonShouldBeActive();
-
-    const payload = {
-      site: selectedSiteIds.value.length ? selectedSiteIds.value : siteOptions.value.map((site) => site.id),
-      dateFrom: isVizMode.value ? dateTo.value : dateFrom.value,
-      dateTo: dateTo.value,
-      product: selectedProductIds.value.length ? selectedProductIds.value : productOptions.value.map((prod) => prod.id),
-      variable: isVizMode.value ? selectedVariableIds.value : undefined,
-      instrument: selectedInstrumentIds.value.length ? selectedInstrumentIds.value : undefined,
-      instrumentPid: selectedInstrumentPids.value.length ? selectedInstrumentPids.value : undefined,
-      showLegacy: true,
-      privateFrontendOrder: true,
-    };
-    return axios
-      .get(`${backendUrl}${apiPath}`, { params: payload, signal: requestController!.signal })
-      .then((res) => {
-        apiResponse.value = constructTitle(res.data);
-        isBusy.value = false;
-        resolve(undefined);
-      })
-      .catch((err) => {
-        if (axios.isCancel(err)) return;
-        console.error(err);
-        error.value = (err.response && err.response.statusText) || "unknown error";
-        apiResponse.value = resetResponse();
-        isBusy.value = false;
-        reject();
-      });
-  });
-}
-
 function setVizWideMode(wide: boolean) {
   vizWideMode.value = wide;
   mapKey.value = mapKey.value + 1;
@@ -463,10 +411,8 @@ const instrumentSort = (a: Instrument, b: Instrument) =>
 
 const getVariableIcon = (variable: any) => getProductIcon(variable.product);
 
-function navigateToSearch(mode: string) {
-  router.push({ name: "Search", params: { mode }, query: route.query }).catch(() => {
-    // Ignore useless error when URL doesn't change.
-  });
+function routeToSearch(mode: string) {
+  return { name: "Search", params: { mode }, query: route.query };
 }
 
 function setDateRange(n: number) {
@@ -514,18 +460,18 @@ function setNextDate() {
   }
 }
 
-function checkIfButtonShouldBeActive() {
+const activeBtn = computed(() => {
   const oneDay = 24 * 60 * 60 * 1000;
   const diffDays = Math.round(
     Math.abs((new Date(dateTo.value).valueOf() - new Date(dateFrom.value).valueOf()) / oneDay),
   );
   const isDateToToday = isSameDay(new Date(dateTo.value), new Date());
   const isDateFromBeginningOfYear = isSameDay(new Date(dateFrom.value), getDateFromBeginningOfYear());
-  if (isDateToToday && isDateFromBeginningOfYear) activeBtn.value = "btn1";
-  else if (isDateToToday && diffDays === fixedRanges.month) activeBtn.value = "btn2";
-  else if (isDateToToday && diffDays === fixedRanges.day) activeBtn.value = "btn3";
-  else activeBtn.value = "";
-}
+  if (isDateToToday && isDateFromBeginningOfYear) return "btn1";
+  else if (isDateToToday && diffDays === fixedRanges.month) return "btn2";
+  else if (isDateToToday && diffDays === fixedRanges.day) return "btn3";
+  else return "";
+});
 
 const mainWidth = computed(() => {
   if (isVizMode.value) {
@@ -534,36 +480,6 @@ const mainWidth = computed(() => {
   }
   return { pagewidth: true };
 });
-
-const noSelectionsMade = computed(() => {
-  return !(
-    selectedProductIds.value.length ||
-    selectedSiteIds.value.length ||
-    selectedVariableIds.value.length ||
-    selectedInstrumentIds.value.length ||
-    selectedInstrumentPids.value.length
-  );
-});
-
-watch(
-  () => [
-    renderComplete.value,
-    dateFrom.value,
-    dateTo.value,
-    selectedSiteIds.value,
-    selectedInstrumentIds.value,
-    selectedProductIds.value,
-    selectedVariableIds.value,
-    selectedInstrumentPids.value,
-    siteOptions.value,
-    productOptions.value,
-  ],
-  async () => {
-    if (!renderComplete.value) return;
-    await fetchData();
-  },
-  { immediate: true },
-);
 
 watch(
   () => dateTo.value,
@@ -587,7 +503,6 @@ watch(
   () => props.mode,
   async (nextMode) => {
     renderComplete.value = false;
-    apiResponse.value = resetResponse();
     dateFromUpdate.value = dateFromUpdate.value + 1;
     dateToUpdate.value = dateToUpdate.value + 1;
     vizDateUpdate.value = vizDateUpdate.value + 1;

@@ -21,7 +21,19 @@ describe("CollectionView.vue", () => {
         if (url.includes("/collection/testuuid")) {
           return Promise.resolve(augmentAxiosResponse(resources["allcollections"][0]));
         } else if (url.includes("/search")) {
-          return Promise.resolve(augmentAxiosResponse([resources["allsearch"][0], resources["allsearch"][8]]));
+          const results = [resources["pagedsearch"].results[1], resources["pagedsearch"].results[9]];
+          return Promise.resolve(
+            augmentAxiosResponse({
+              results,
+              pagination: {
+                totalItems: 2,
+                totalPages: 1,
+                totalBytes: results.reduce((acc, result) => acc + result.size, 0),
+                currentPage: 1,
+                pageSize: 15,
+              },
+            }),
+          );
         } else if (url.includes("/sites")) {
           return Promise.resolve(augmentAxiosResponse(resources["sites"]));
         } else if (url.includes("/products")) {

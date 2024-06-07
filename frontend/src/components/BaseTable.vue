@@ -9,7 +9,7 @@
     </div>
     <div class="tbody">
       <a
-        v-for="item in visibleItems"
+        v-for="item in items"
         :key="item[keyField]"
         class="tr"
         :href="link ? router.resolve(link(item)).href : ''"
@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts" setup generic="T extends Record<string, any>">
-import { ref, computed, type Ref, nextTick, watch, onUnmounted } from "vue";
+import { ref, type Ref, nextTick, onUnmounted } from "vue";
 import { useRouter, type RouteLocationRaw } from "vue-router";
 
 export interface Field<T> {
@@ -49,8 +49,6 @@ export interface Props<T> {
   items: T[];
   keyField: string;
   fields: Field<T>[];
-  currentPage: number;
-  perPage: number;
   busy: boolean;
   link?: (item: T) => RouteLocationRaw;
   selectable: boolean;
@@ -62,16 +60,11 @@ const router = useRouter();
 
 const emit = defineEmits<{
   (e: "rowSelected", item: T): void;
-  (e: "update:currentPage", value: number): void;
 }>();
 
 const selectedRow: Ref<T | null> = ref(null);
 
 const tableElement = ref<HTMLDivElement | null>(null);
-
-const visibleItems = computed(() =>
-  props.items.slice((props.currentPage - 1) * props.perPage, props.currentPage * props.perPage),
-);
 
 function handleClick(event: MouseEvent, handler: (item: T) => void, row: T) {
   if (!props.selectable || event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) return;
@@ -99,43 +92,15 @@ function onKeyDown(event: KeyboardEvent) {
   if (event.code == "ArrowUp") {
     if (index !== 0) {
       selectRow(props.items[index - 1]);
-      if (index % props.perPage === 0) {
-        emit("update:currentPage", props.currentPage - 1);
-      }
     }
     event.preventDefault();
   } else if (event.code == "ArrowDown") {
     if (index !== props.items.length - 1) {
       selectRow(props.items[index + 1]);
-      if (index % props.perPage === props.perPage - 1) {
-        emit("update:currentPage", props.currentPage + 1);
-      }
     }
     event.preventDefault();
   } else if (event.code === "Enter") {
     navigateToRow(selectedRow.value);
-    event.preventDefault();
-  } else if (event.code === "PageUp") {
-    if (props.currentPage > 1) {
-      const nextPage = props.currentPage - 1;
-      selectRow(props.items[nextPage * props.perPage - 1]);
-      emit("update:currentPage", nextPage);
-    }
-    event.preventDefault();
-  } else if (event.code === "PageDown") {
-    if (props.currentPage < Math.ceil(props.items.length / props.perPage)) {
-      const nextPage = props.currentPage + 1;
-      selectRow(props.items[(nextPage - 1) * props.perPage]);
-      emit("update:currentPage", nextPage);
-    }
-    event.preventDefault();
-  } else if (event.code === "Home") {
-    selectRow(props.items[0]);
-    emit("update:currentPage", 1);
-    event.preventDefault();
-  } else if (event.code === "End") {
-    selectRow(props.items[props.items.length - 1]);
-    emit("update:currentPage", Math.ceil(props.items.length / props.perPage));
     event.preventDefault();
   }
 }
@@ -151,18 +116,6 @@ function onFocusOut() {
 onUnmounted(() => {
   onFocusOut();
 });
-
-watch(
-  () => props.perPage,
-  (perPage) => {
-    let newPage = 1;
-    if (selectedRow.value) {
-      const index = props.items.indexOf(selectedRow.value);
-      newPage = Math.floor(index / perPage) + 1;
-    }
-    emit("update:currentPage", newPage);
-  },
-);
 </script>
 
 <style lang="scss" scoped>

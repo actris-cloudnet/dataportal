@@ -373,4 +373,22 @@ describe("/api/search", () => {
     expect(res.data).toHaveLength(1);
     expect(res.data[0].measurementDate).toEqual("2021-02-20");
   });
+
+  it("can paginate results", async () => {
+    const res = await axios.get(url, { params: { dateFrom: "2000-01-01", page: 1, pageSize: 5 } });
+    expect(res.data.results).toHaveLength(5);
+    expect(res.data.pagination).toEqual({
+      currentPage: 1,
+      pageSize: 5,
+      totalBytes: 54068743,
+      totalItems: 9,
+      totalPages: 2,
+    });
+  });
+
+  it("filters by collection", async () => {
+    const res = await axios.get(url, { params: { collection: "48092c00-161d-4ca2-a29d-628cf8e960f6" } });
+    const fileUuids = res.data.map((file: any) => file.uuid).sort();
+    expect(fileUuids).toEqual(["a5d1d5af-3667-41bc-b952-e684f627d91c", "d21d6a9b-6804-4465-a026-74ec429fe17d"]);
+  });
 });
