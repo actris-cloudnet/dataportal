@@ -1,15 +1,12 @@
-import type { ErrorLevel } from "./QualityReport";
+import type { SearchFile } from "./SearchFile";
 
 export interface SearchFileResponse {
-  uuid: string;
-  measurementDate: string;
-  site: string;
-  siteId: string;
-  product: string;
-  productId: string;
-  size: number;
-  volatile: boolean;
-  legacy: boolean;
-  experimental: boolean;
-  errorLevel: ErrorLevel | null;
+  results: SearchFile[];
+  pagination: {
+    totalItems: number;
+    totalPages: number;
+    totalBytes: number;
+    currentPage: number;
+    pageSize: number;
+  };
 }

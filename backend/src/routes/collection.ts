@@ -25,12 +25,19 @@ export class CollectionRoutes {
   readonly citationService: CitationService;
 
   postCollection: RequestHandler = async (req: Request, res: Response, next) => {
-    if (!("files" in req.body) || !req.body.files || !Array.isArray(req.body.files)) {
-      next({ status: 422, errors: ['Request is missing field "files"'] });
-      return;
-    }
-    const fileUuids: string[] = req.body.files;
     try {
+      if (
+        !("files" in req.body) ||
+        !req.body.files ||
+        !Array.isArray(req.body.files) ||
+        !req.body.files.every((file: any) => typeof file == "string")
+      ) {
+        return next({ status: 422, errors: ['Request is missing field "files"'] });
+      }
+      const fileUuids: string[] = req.body.files;
+      if (fileUuids.length > 10_000) {
+        return next({ status: 422, errors: ["Maximum of 10 000 files is supported"] });
+      }
       const [files, modelFiles] = await Promise.all([
         this.fileRepo.findBy({ uuid: In(fileUuids) }),
         this.modelFileRepo.findBy({ uuid: In(fileUuids) }),

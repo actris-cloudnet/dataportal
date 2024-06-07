@@ -49,7 +49,7 @@
           </section>
         </main>
         <div class="rightView">
-          <RouterView :collection="response" :files="sortedFiles" />
+          <RouterView :collection="response" />
         </div>
       </div>
     </main>

@@ -16,6 +16,7 @@
     <section v-if="noSelectionsMade" class="notfound">
       Please make a selection in the search filters to display visualisations.
     </section>
+    <section v-else-if="error" class="notfound" style="color: red">Search failed: {{ error }}</section>
     <section v-else-if="searchYieldedResults" class="vizContainer" :class="{ sideBySide: comparisonView }">
       <div
         v-for="(file, index) in apiResponse"
@@ -64,26 +65,87 @@
 
 <script lang="ts" setup>
 import type { VisualizationResponse } from "@shared/entity/VisualizationResponse";
-import { humanReadableDate, notEmpty } from "@/lib";
-import { ref, watchEffect, computed } from "vue";
+import { backendUrl, humanReadableDate, notEmpty } from "@/lib";
+import { ref, watchEffect, computed, watch } from "vue";
 import Visualization from "./ImageVisualization.vue";
 import FileTags from "./FileTags.vue";
+import axios from "axios";
 
 export interface Props {
-  apiResponse: VisualizationResponse[];
-  isBusy: boolean;
-  date: string;
   setWideMode: Function;
-  noSelectionsMade: boolean;
+  date: string;
+  sites?: string[];
+  products?: string[];
+  instruments?: string[];
+  instrumentPids?: string[];
+  variables?: string[];
 }
 
 const props = defineProps<Props>();
+
+let requestController: AbortController | null = null;
+const isBusy = ref(true);
+const error = ref(null);
+const apiResponse = ref<VisualizationResponse[]>([]);
+
+const noSelectionsMade = computed(
+  () =>
+    !(
+      props.products?.length ||
+      props.sites?.length ||
+      props.variables?.length ||
+      props.instruments?.length ||
+      props.instrumentPids?.length
+    ),
+);
+
+async function fetchData() {
+  if (requestController) requestController.abort();
+  requestController = new AbortController();
+
+  if (noSelectionsMade.value) {
+    return;
+  }
+
+  isBusy.value = true;
+
+  const payload = {
+    site: props.sites,
+    date: props.date,
+    product: props.products,
+    variable: props.variables,
+    instrument: props.instruments,
+    instrumentPid: props.instrumentPids,
+    showLegacy: true,
+    privateFrontendOrder: true,
+  };
+
+  try {
+    const res = await axios.get(`${backendUrl}visualizations/`, { params: payload, signal: requestController!.signal });
+    apiResponse.value = res.data;
+    isBusy.value = false;
+  } catch (err: any) {
+    if (axios.isCancel(err)) return;
+    console.error(err);
+    error.value = (err.response && err.response.statusText) || "unknown error";
+    isBusy.value = false;
+  }
+}
+
+watch(
+  () => [props.date, props.sites, props.instruments, props.instrumentPids, props.products, props.variables],
+  async (newValue, oldValue) => {
+    if (JSON.stringify(oldValue) === JSON.stringify(newValue)) return;
+    await fetchData();
+  },
+  { immediate: true },
+);
 
 const comparisonView = ref(false);
 
 const maxMarginRight = computed(() =>
   Math.max(
-    ...props.apiResponse.flatMap((file) =>
+    ...apiResponse.value.flatMap((file) =>
       file.visualizations.map((viz) => viz.dimensions && viz.dimensions.marginRight).filter(notEmpty),
     ),
   ),
@@ -91,13 +153,13 @@ const maxMarginRight = computed(() =>
 
 const maxMarginLeft = computed(() =>
   Math.max(
-    ...props.apiResponse.flatMap((file) =>
+    ...apiResponse.value.flatMap((file) =>
       file.visualizations.map((viz) => viz.dimensions && viz.dimensions.marginLeft).filter(notEmpty),
     ),
   ),
 );
 
-const searchYieldedResults = computed(() => props.apiResponse.length > 0);
+const searchYieldedResults = computed(() => apiResponse.value.length > 0);
 
 watchEffect(() => {
   props.setWideMode(comparisonView);

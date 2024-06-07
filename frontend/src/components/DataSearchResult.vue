@@ -1,18 +1,29 @@
 <template>
   <section id="fileTable">
     <div class="column1">
-      <div class="results">
+      <div class="results" v-if="isBusy && !apiResponse">
         <h3 class="results-title">Results</h3>
-        <div class="results-subtitle" v-if="!simplifiedView && listLength > 0">
+        <div class="results-subtitle">Searching...</div>
+      </div>
+      <div class="results" v-if="error">
+        <h3 class="results-title">Results</h3>
+        <p style="color: red">Search failed: {{ error }}</p>
+      </div>
+      <div class="results" v-else-if="apiResponse">
+        <h3 class="results-title">Results</h3>
+        <div class="results-subtitle" v-if="!simplifiedView && apiResponse.pagination.totalItems > 0">
           <span v-if="isBusy">Searching...</span>
-          <span v-else>Found {{ listLength }} {{ listLength === 1 ? "result" : "results" }}</span>
+          <span v-else>
+            Found {{ apiResponse.pagination.totalItems }}
+            {{ apiResponse.pagination.totalItems === 1 ? "result" : "results" }}
+          </span>
           <ul class="legend">
             <li v-if="hasVolatile"><span class="rowtag volatile rounded"></span> volatile</li>
             <li v-if="hasLegacy"><span class="rowtag legacy rounded"></span> legacy</li>
             <li v-if="hasExperimental"><span class="rowtag experimental rounded"></span> experimental</li>
           </ul>
         </div>
-        <div v-if="listLength === 0 && !isBusy" class="noresults results-content">
+        <div v-if="apiResponse.pagination.totalItems === 0 && !isBusy" class="noresults results-content">
           <h2>No results</h2>
           Are we missing some data? Send an email to
           <a href="mailto:actris-cloudnet@fmi.fi">actris-cloudnet@fmi.fi</a>.
@@ -21,7 +32,7 @@
           v-else
           class="results-content"
           id="tableContent"
-          :items="apiResponse"
+          :items="apiResponse.results"
           keyField="uuid"
           :fields="[
             {
@@ -34,13 +45,14 @@
             { key: 'volatile', label: '' },
             { key: 'measurementDate', label: 'Date' },
           ]"
-          v-model:currentPage="currentPage"
-          :per-page="perPage"
           :busy="isBusy"
           :link="(file) => ({ name: 'File', params: { uuid: file.uuid } })"
           @row-selected="rowSelected"
           :selectable="selectable"
         >
+          <template #cell(title)="data">
+            {{ data.item.product.humanReadableName }} from {{ data.item.site.humanReadableName }}
+          </template>
           <template #cell(volatile)="data">
             <span class="rowtags">
               <span
@@ -56,7 +68,7 @@
               >
               </span>
               <span
-                v-if="data.item.experimental"
+                v-if="data.item.product.experimental"
                 class="rowtag experimental rounded"
                 title="This is experimental product."
               >
@@ -66,22 +78,26 @@
         </BaseTable>
         <BasePagination
           class="results-pagination"
-          v-if="listLength > perPage"
+          v-if="apiResponse.pagination.totalPages > 1"
           v-model="currentPage"
-          :total-rows="listLength"
-          :per-page="perPage"
+          :totalPages="apiResponse.pagination.totalPages"
           :disabled="isBusy"
           aria-controls="fileTable"
         />
-        <div class="results-download" v-if="listLength > 0 && !simplifiedView">
-          <BaseButton type="primary" class="download" :disabled="isBusy || downloadIsBusy" @click="createCollection()">
+        <div class="results-download" v-if="apiResponse.pagination.totalItems > 0 && !simplifiedView">
+          <BaseButton
+            type="primary"
+            class="download"
+            :disabled="isBusy || downloadIsBusy || apiResponse.pagination.totalItems > 10_000"
+            @click="createCollection()"
+          >
             Download all
           </BaseButton>
           <br />
           <span v-if="!downloadFailed" class="download-size" :class="{ disabled: isBusy || downloadIsBusy }">
-            {{ listLength }} {{ listLength === 1 ? "file" : "files" }} ({{
-              humanReadableSize(combinedFileSize(apiResponse))
-            }})
+            {{ apiResponse.pagination.totalItems }}
+            {{ apiResponse.pagination.totalItems === 1 ? "file" : "files" }}
+            ({{ humanReadableSize(apiResponse.pagination.totalBytes) }})
           </span>
           <div v-else class="download-size errormsg">
             {{ dlFailedMessage || "Download failed!" }}
@@ -171,9 +187,8 @@
 <script lang="ts" setup>
 import axios from "axios";
 import { useRouter } from "vue-router";
-import { watch, onMounted, ref, computed, onUnmounted } from "vue";
+import { watch, ref, computed } from "vue";
 import {
-  combinedFileSize,
   getProductIcon,
   humanReadableSize,
   humanReadableTimestamp,
@@ -191,14 +206,20 @@ import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
 import Visualization from "./ImageVisualization.vue";
 import type { FileResponse } from "@/views/FileView.vue";
 import { useInnerSize } from "@/lib/useInnerSize";
+import type { SearchFile } from "@shared/entity/SearchFile";
 
 export interface Props {
-  apiResponse: SearchFileResponse[];
-  isBusy?: boolean;
   simplifiedView?: boolean;
+  sites?: string[];
+  dateFrom?: string;
+  dateTo?: string;
+  products?: string[];
+  instruments?: string[];
+  instrumentPids?: string[];
+  collection?: string;
 }
 
-const props = withDefaults(defineProps<Props>(), { isBusy: false });
+const props = defineProps<Props>();
 
 const router = useRouter();
 
@@ -210,16 +231,13 @@ const pendingPreviewResponse = ref<FileResponse | null>(null);
 const currentVisualization = ref<VisualizationItem | null>(null);
 const pendingVisualization = ref<VisualizationItem | null>(null);
 const currentPage = ref(1);
-const perPage = ref(15);
 const previewBusy = ref(false);
 let previewController: AbortController | null = null;
 let visualizationController: AbortController | null = null;
 
-const listLength = computed(() => props.apiResponse.length);
-
-const hasVolatile = computed(() => props.apiResponse.some((item) => item.volatile));
-const hasLegacy = computed(() => props.apiResponse.some((item) => item.legacy));
-const hasExperimental = computed(() => props.apiResponse.some((item) => item.experimental));
+const hasVolatile = computed(() => apiResponse.value?.results.some((item) => item.volatile));
+const hasLegacy = computed(() => apiResponse.value?.results.some((item) => item.legacy));
+const hasExperimental = computed(() => apiResponse.value?.results.some((item) => item.product.experimental));
 
 const { innerWidth } = useInnerSize();
 // NOTE: Keep the breakpoint in sync with SASS below.
@@ -236,7 +254,80 @@ function changePreview() {
   previewBusy.value = false;
 }
 
-async function loadPreview(file: SearchFileResponse) {
+let requestController: AbortController | null = null;
+
+const isBusy = ref(true);
+const error = ref(null);
+const apiResponse = ref<SearchFileResponse | null>(null);
+
+const payload = computed(() => ({
+  site: props.sites,
+  dateFrom: props.dateFrom,
+  dateTo: props.dateTo,
+  product: props.products,
+  instrument: props.instruments,
+  instrumentPid: props.instrumentPids,
+  collection: props.collection,
+  showLegacy: true,
+  privateFrontendOrder: true,
+}));
+
+async function fetchData() {
+  if (requestController) {
+    requestController.abort();
+  }
+  requestController = new AbortController();
+  isBusy.value = true;
+
+  try {
+    const res = await axios.get(`${backendUrl}search`, {
+      params: { ...payload.value, page: currentPage.value },
+      signal: requestController!.signal,
+    });
+    apiResponse.value = res.data;
+    isBusy.value = false;
+  } catch (err: any) {
+    if (axios.isCancel(err)) return;
+    console.error(err);
+    error.value = (err.response && err.response.statusText) || "unknown error";
+    isBusy.value = false;
+  }
+}
+
+watch(
+  () => [
+    props.dateFrom,
+    props.dateTo,
+    props.sites,
+    props.instruments,
+    props.instrumentPids,
+    props.products,
+    props.collection,
+  ],
+  () => {
+    currentPage.value = 1;
+  },
+);
+
+watch(
+  () => [
+    props.dateFrom,
+    props.dateTo,
+    props.sites,
+    props.instruments,
+    props.instrumentPids,
+    props.products,
+    props.collection,
+    currentPage.value,
+  ],
+  async (newValue, oldValue) => {
+    if (JSON.stringify(oldValue) === JSON.stringify(newValue)) return;
+    await fetchData();
+  },
+  { immediate: true },
+);
+
+async function loadPreview(file: SearchFile) {
   try {
     if (previewController) previewController.abort();
     previewController = new AbortController();
@@ -251,7 +342,7 @@ async function loadPreview(file: SearchFileResponse) {
   }
 }
 
-async function loadVisualization(file: SearchFileResponse) {
+async function loadVisualization(file: SearchFile) {
   try {
     if (visualizationController) visualizationController.abort();
     visualizationController = new AbortController();
@@ -271,62 +362,33 @@ async function loadVisualization(file: SearchFileResponse) {
   }
 }
 
-function rowSelected(item: SearchFileResponse) {
+function rowSelected(item: SearchFile) {
   loadPreview(item);
   loadVisualization(item);
 }
 
-function createCollection() {
-  if (listLength.value > 10000) {
+async function createCollection() {
+  try {
+    downloadIsBusy.value = true;
+    const files = await axios.get<SearchFile[]>(`${backendUrl}search`, { params: payload.value });
+    const collectionUuid = await axios.post<string>(`${backendUrl}collection`, {
+      files: files.data.map((file) => file.uuid),
+    });
+    router.push({ name: "Collection", params: { uuid: collectionUuid.data } });
+  } catch (err) {
     downloadFailed.value = true;
-    dlFailedMessage.value = "You may only download a maximum of 10 000 files!";
-    return;
+    console.error(err);
+  } finally {
+    downloadIsBusy.value = false;
   }
-  downloadIsBusy.value = true;
-  axios
-    .post(`${backendUrl}collection`, {
-      files: props.apiResponse.map((file) => file.uuid),
-    })
-    .then(({ data: uuid }) => router.push({ name: "Collection", params: { uuid } }))
-    .catch((err) => {
-      downloadFailed.value = true;
-      // eslint-disable-next-line no-console
-      console.error(err);
-    })
-    .finally(() => (downloadIsBusy.value = false));
 }
 
 function iconCellStyle(item: any) {
   return {
-    backgroundImage: `url("${getProductIcon(item.productId)}")`,
+    backgroundImage: `url("${getProductIcon(item.product)}")`,
     width: "40px",
   };
 }
-
-function adjustPerPageAccordingToWindowHeight() {
-  perPage.value = Math.max(Math.floor(document.documentElement.clientHeight / 70), 10);
-}
-
-watch(
-  () => props.isBusy,
-  () => {
-    // Reset page on filter change
-    if (!props.isBusy) {
-      currentPage.value = 1;
-    }
-    downloadFailed.value = false;
-    previewResponse.value = null;
-  },
-);
-
-onMounted(() => {
-  window.addEventListener("resize", adjustPerPageAccordingToWindowHeight);
-  adjustPerPageAccordingToWindowHeight();
-});
-
-onUnmounted(() => {
-  window.removeEventListener("resize", adjustPerPageAccordingToWindowHeight);
-});
 </script>
 
 <style scoped lang="scss">
@@ -374,7 +436,7 @@ onUnmounted(() => {
 
 .results {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: auto auto;
 }
 
 .results-title {

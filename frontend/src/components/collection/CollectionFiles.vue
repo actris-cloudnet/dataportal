@@ -1,14 +1,14 @@
 <script lang="ts" setup>
-import type { CollectionFileResponse } from "@shared/entity/CollectionFileResponse";
 import DataSearchResult from "@/components/DataSearchResult.vue";
+import type { CollectionResponse } from "@shared/entity/CollectionResponse";
 
 export interface Props {
-  files: CollectionFileResponse[];
+  collection: CollectionResponse;
 }
 
 defineProps<Props>();
 </script>
 
 <template>
-  <DataSearchResult :apiResponse="files" simplifiedView />
+  <DataSearchResult :collection="collection.uuid" simplifiedView />
 </template>

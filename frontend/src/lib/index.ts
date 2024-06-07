@@ -1,4 +1,3 @@
-import type { SearchFileResponse } from "@shared/entity/SearchFileResponse";
 import type { Product } from "@shared/entity/Product";
 import type { CollectionFileResponse } from "@shared/entity/CollectionFileResponse";
 import type { Site, SiteType } from "@shared/entity/Site";
@@ -99,7 +98,7 @@ export const humanReadableTimestamp = (date: string | Date) => {
   return suffix.includes("Z") ? `${timestamp} UTC` : timestamp;
 };
 
-export const combinedFileSize = (files: SearchFileResponse[]) =>
+export const combinedFileSize = (files: CollectionFileResponse[]) =>
   files.map((file) => file.size).reduce((prev, cur) => cur + prev, 0);
 
 /** Convert date to ISO 8601 date in UTC. */

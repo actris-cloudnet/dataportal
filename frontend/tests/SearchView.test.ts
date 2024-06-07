@@ -53,7 +53,7 @@ describe("SearchView.vue", () => {
       const resourceMappings: Record<string, string> = {
         "/files": "allfiles",
         "/sites": "sites",
-        "/search": "allsearch",
+        "/search": "pagedsearch",
         "/products": "products-with-variables",
         "/instruments": "instruments",
         "/instrument-pids": "instrument-pids",
@@ -136,7 +136,12 @@ describe("SearchView.vue", () => {
 
     it("updates table based on api response", async () => {
       vi.mocked(axios.get).mockImplementationOnce(() =>
-        Promise.resolve(augmentAxiosResponse(resources["allsearch"].slice(3))),
+        Promise.resolve(
+          augmentAxiosResponse({
+            results: resources["pagedsearch"].results.slice(3),
+            pagination: resources["pagedsearch"].pagination,
+          }),
+        ),
       );
       const newValue = filesSortedByDate[0].measurementDate;
       await changeInputAndNextTick("dateFrom", newValue);
@@ -146,9 +151,9 @@ describe("SearchView.vue", () => {
         .slice(3)
         .map((file: any) => file.measurementDate)
         .forEach((date: any) => expect(wrapper.text()).toContain(date));
-      expect(wrapper.text()).not.toContain(resources["allsearch"][0].measurementDate);
-      expect(wrapper.text()).not.toContain(resources["allsearch"][1].measurementDate);
-      expect(wrapper.text()).not.toContain(resources["allsearch"][2].measurementDate);
+      expect(wrapper.text()).not.toContain(resources["pagedsearch"].results[0].measurementDate);
+      expect(wrapper.text()).not.toContain(resources["pagedsearch"].results[1].measurementDate);
+      expect(wrapper.text()).not.toContain(resources["pagedsearch"].results[2].measurementDate);
     });
 
     it("does not touch API on invalid input", async () => {
@@ -199,7 +204,7 @@ describe("SearchView.vue", () => {
 
   describe("volatility", () => {
     it("displays volatile label only next to volatile items", async () => {
-      expect(findElementById("tableContent").findAll(".volatile")).toHaveLength(4);
+      expect(findElementById("tableContent").findAll(".volatile")).toHaveLength(5);
     });
   });
 

@@ -74,6 +74,9 @@ export class Middleware {
       "status",
       "privateFrontendOrder",
       "dvasUpdated",
+      "page",
+      "pageSize",
+      "collection",
     ];
 
     if (req.path.includes("visualization")) validKeys.push("variable");

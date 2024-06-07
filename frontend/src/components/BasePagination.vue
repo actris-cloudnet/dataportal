@@ -3,8 +3,7 @@ import { computed } from "vue";
 
 export interface Props {
   modelValue: number;
-  totalRows: number;
-  perPage: number;
+  totalPages: number;
   disabled: boolean;
 }
 
@@ -14,13 +13,13 @@ const emit = defineEmits<{
   (e: "update:modelValue", value: Props["modelValue"]): void;
 }>();
 
-const totalPages = computed(() => Math.ceil(props.totalRows / props.perPage));
-
 const radius = 1;
 const visiblePages = computed(() => {
-  const middlePage = Math.min(Math.max(props.modelValue, radius + 1), totalPages.value - radius);
+  const middlePage = Math.min(Math.max(props.modelValue, radius + 1), props.totalPages - radius);
+  const startPage = Math.max(1, middlePage - radius);
+  const endPage = Math.min(middlePage + radius, props.totalPages);
   const output = [];
-  for (let page = Math.max(1, middlePage - radius); page <= Math.min(middlePage + radius, totalPages.value); page++) {
+  for (let page = startPage; page <= endPage; page++) {
     output.push(page);
   }
   return output;
