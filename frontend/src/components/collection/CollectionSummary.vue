@@ -6,6 +6,7 @@ import HowToCite from "@/components/HowToCite.vue";
 import BaseButton from "@/components/BaseButton.vue";
 import BaseAlert from "@/components/BaseAlert.vue";
 import { backendUrl } from "@/lib";
+import BaseSpinner from "../BaseSpinner.vue";
 
 export interface Props {
   collection: CollectionResponse;
@@ -13,7 +14,7 @@ export interface Props {
 
 const props = defineProps<Props>();
 
-const citationBusy = ref(false);
+const citationBusy = ref(true);
 const pidServiceError = ref(false);
 
 const downloadUrl = computed(() => {
@@ -47,7 +48,8 @@ onMounted(() => {
     <BaseAlert type="error" v-if="pidServiceError">
       Failed to create DOI for this collection. Please try again later.
     </BaseAlert>
-    <HowToCite :uuid="citationBusy ? undefined : collection.uuid" titleClass="title" />
+    <BaseSpinner v-if="citationBusy" />
+    <HowToCite v-else :uuid="collection.uuid" titleClass="title" />
     <h3 class="title">Download</h3>
     <p>
       By clicking the download button you confirm that you have taken notice of the above data licensing information.

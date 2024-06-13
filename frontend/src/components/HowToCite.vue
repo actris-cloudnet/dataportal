@@ -44,7 +44,7 @@ import ccIcon from "@/assets/icons/cc.svg";
 import byIcon from "@/assets/icons/by.svg";
 
 export interface Props {
-  uuid?: string;
+  uuid: string;
   titleClass?: string;
 }
 
@@ -88,9 +88,7 @@ async function fetchReferenceStrings(uuid: string) {
 
 watchEffect(async () => {
   citation.value = { status: "loading" };
-  if (props.uuid) {
-    await fetchReferenceStrings(props.uuid);
-  }
+  await fetchReferenceStrings(props.uuid);
 });
 </script>
 
