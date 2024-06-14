@@ -8,7 +8,8 @@
       </p>
       <h2>Instrument products</h2>
       <p>
-        Measurements from an instrument in a harmonised format with some additional processing such as noise screening.
+        Measurements from an instrument or a model in a harmonised format with some additional processing such as
+        background noise screening.
       </p>
       <ul>
         <li v-for="product in instrumentProducts" :key="product.id">
@@ -61,14 +62,17 @@ const products = ref<ProductResult>({ status: "loading" });
 const instrumentProducts = computed(() =>
   products.value.status === "ready"
     ? products.value.value
-        .filter((product) => product.level == "1b" && product.experimental === false)
+        .filter(
+          (product) =>
+            (product.type.includes("instrument") || product.type.includes("model")) && product.experimental === false,
+        )
         .sort(alphabeticalSort)
     : [],
 );
 const derivedProducts = computed(() =>
   products.value.status === "ready"
     ? products.value.value
-        .filter((product) => (product.level == "1c" || product.level == "2") && product.experimental === false)
+        .filter((product) => product.type.includes("synergetic") && product.experimental === false)
         .sort(alphabeticalSort)
     : [],
 );

@@ -15,7 +15,7 @@ export const isPass = (prod: ProductInfo): boolean => prod?.errorLevel === "pass
 export const qualityExists = (prod: ProductInfo): boolean => "errorLevel" in prod && prod.errorLevel !== null;
 
 export const noData = (products: ProductLevels): boolean =>
-  products["2"].length == 0 && products["1c"].length == 0 && products["1b"].length == 0;
+  products.instrument.length == 0 && products.synergetic.length == 0;
 
 export function isLegacyOrModel(prod: ProductInfo): boolean {
   return prod.legacy || prod.id == "model";
@@ -30,18 +30,17 @@ export function isNotExperimental(prod: ProductInfo): boolean {
 }
 
 export function onlyLegacy(products: ProductLevels) {
-  return products["2"].every(isLegacy) && products["1c"].every(isLegacy) && products["1b"].every(isLegacyOrModel);
+  return products.synergetic.every(isLegacy) && products.instrument.every(isLegacyOrModel);
 }
 
-export function onlyLegacyLevel2(products: ProductLevels) {
-  return products["2"].length > 0 && products["2"].every(isLegacy);
+export function onlyLegacySynergetic(products: ProductLevels) {
+  return products.synergetic.length > 0 && products.synergetic.every(isLegacy);
 }
 
 export function onlyModel(products: ProductLevels) {
-  const level1bWithoutExperimental = products["1b"].filter(isNotExperimental);
+  const level1bWithoutExperimental = products.instrument.filter(isNotExperimental);
   return (
-    products["2"].filter(isNotExperimental).length == 0 &&
-    products["1c"].filter(isNotExperimental).length == 0 &&
+    products.synergetic.filter(isNotExperimental).length == 0 &&
     level1bWithoutExperimental.length == 1 &&
     level1bWithoutExperimental[0].id == "model"
   );
@@ -52,63 +51,49 @@ export function getProductStatus(existingProducts: ProductInfo[], productId: Pro
 }
 
 export function isLegacyFile(existingProducts: ProductInfo[], productId: ProductInfo["id"]) {
-  const existingProduct = existingProducts.find((prod) => prod.id == productId);
-  if (existingProduct) {
-    return existingProduct.legacy;
-  }
+  return existingProducts.some((prod) => prod.id === productId && prod.legacy);
 }
 
 export function isFileWithWarning(existingProducts: ProductInfo[], productId: ProductInfo["id"]) {
-  const existingProduct = existingProducts.find((prod) => prod.id == productId);
-  if (existingProduct) {
-    return isWarning(existingProduct);
-  }
+  return existingProducts.some((prod) => prod.id === productId && isWarning(prod));
 }
 
 export function isFileWithInfo(existingProducts: ProductInfo[], productId: ProductInfo["id"]) {
-  const existingProduct = existingProducts.find((prod) => prod.id == productId);
-  if (existingProduct) {
-    return isInfo(existingProduct);
-  }
+  return existingProducts.some((prod) => prod.id === productId && isInfo(prod));
 }
 
 export function isFileWithError(existingProducts: ProductInfo[], productId: ProductInfo["id"]) {
-  const existingProduct = existingProducts.find((prod) => prod.id == productId);
-  if (existingProduct) {
-    return isError(existingProduct);
-  }
+  return existingProducts.some((prod) => prod.id === productId && isError(prod));
 }
 
 export function getReportExists(existingProducts: ProductInfo[], productId: ProductInfo["id"]) {
-  const existingProduct = existingProducts.find((prod) => prod.id == productId);
-  return existingProduct && qualityExists(existingProduct);
+  return existingProducts.some((prod) => prod.id === productId && qualityExists(prod));
 }
 
-export function hasSomeLevel2Tests(products: ProductLevels) {
-  return products["2"].filter((x) => isNotExperimental(x) && qualityExists(x)).length > 0;
+export function hasSomeSynergeticTests(products: ProductLevels) {
+  return products.synergetic.filter((x) => isNotExperimental(x) && qualityExists(x)).length > 0;
 }
 
-export function level2ContainsErrors(products: ProductLevels) {
-  return products["2"].filter((x) => isNotExperimental(x) && isError(x)).length > 0;
+export function synergeticContainsErrors(products: ProductLevels) {
+  return products.synergetic.filter((x) => isNotExperimental(x) && isError(x)).length > 0;
 }
 
-export function level2containsWarningsOrInfo(products: ProductLevels) {
-  return products["2"].filter((x) => isNotExperimental(x) && (isWarning(x) || isInfo(x))).length > 0;
+export function synergeticContainsWarningsOrInfo(products: ProductLevels) {
+  return products.synergetic.filter((x) => isNotExperimental(x) && (isWarning(x) || isInfo(x))).length > 0;
 }
 
-export function allLevel2Pass(products: ProductLevels, l2ProductCount: number): boolean {
-  return products["2"].filter((x) => isNotExperimental(x) && isPass(x)).length == l2ProductCount;
+export function allSynergeticPass(products: ProductLevels, synergeticCount: number): boolean {
+  return products.synergetic.filter((x) => isNotExperimental(x) && isPass(x)).length == synergeticCount;
 }
 
-export function allLvl2(products: ProductLevels, l2ProductCount: number): boolean {
-  return products["2"].filter((x) => isNotLegacy(x) && isNotExperimental(x)).length == l2ProductCount;
+export function allSynergetic(products: ProductLevels, synergeticCount: number): boolean {
+  return products.synergetic.filter((x) => isNotLegacy(x) && isNotExperimental(x)).length == synergeticCount;
 }
 
 export function missingData(products: ProductLevels) {
   return (
-    products["2"].filter((x) => isNotLegacy(x) && isNotExperimental(x)).length ||
-    products["1c"].filter((x) => isNotLegacy(x) && isNotExperimental(x)).length ||
-    products["1b"].filter((x) => isNotLegacy(x) && isNotExperimental(x)).length
+    products.synergetic.filter((x) => isNotLegacy(x) && isNotExperimental(x)).length ||
+    products.instrument.filter((x) => isNotLegacy(x) && isNotExperimental(x)).length
   );
 }
 
@@ -125,3 +110,13 @@ export function filterProductsByLvl(props: Props, lvl: string) {
     .filter(({ id }) => props.dataStatus.lvlTranslate[id] == lvl && id != "model")
     .filter(({ experimental }) => !experimental);
 }
+
+export function findProducts(props: Props, lvl: string) {
+  if (!props.dataStatus.allProducts) return null;
+  return props.dataStatus.allProducts
+    .filter(({ id }) => props.dataStatus.lvlTranslate[id] == lvl)
+    .filter(({ experimental }) => !experimental)
+    .sort((a, b) => a.id.localeCompare(b.id));
+}
+
+export const toolTipTitle = (prodType: string) => `${prodType.charAt(0).toUpperCase()}${prodType.slice(1)} products`;

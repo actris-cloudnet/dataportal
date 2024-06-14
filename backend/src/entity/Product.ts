@@ -2,6 +2,14 @@ import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn } from 
 import { ProductVariable } from "./ProductVariable";
 import { Instrument } from "./Instrument";
 
+export enum ProductType {
+  INSTRUMENT = "instrument",
+  MODEL = "model",
+  SYNERGETIC = "synergetic",
+  EVALUATION = "evaluation",
+  EXPERIMENTAL = "experimental",
+}
+
 @Entity()
 export class Product {
   @PrimaryColumn()
@@ -12,6 +20,9 @@ export class Product {
 
   @Column()
   level!: string;
+
+  @Column({ type: "enum", enum: ProductType, array: true, default: [] })
+  type!: ProductType[];
 
   @Column({ default: false })
   experimental!: boolean;

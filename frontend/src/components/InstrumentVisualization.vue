@@ -58,7 +58,7 @@ function createColorClass(products: ProductLevels): ColorClass {
   if (noData(products)) {
     return "no-data";
   }
-  const productCount = products["1b"].length + products["1c"].length + products["2"].length;
+  const productCount = products.instrument.length + products.synergetic.length;
   if (productCount === props.dataStatus.availableProducts.length) {
     return "all-data";
   }
@@ -67,12 +67,12 @@ function createColorClass(products: ProductLevels): ColorClass {
 
 function getProductStatus(products: ProductLevels, productId: string): boolean {
   const isProduct = (p: ProductInfo) => p.id === productId;
-  return products["1b"].some(isProduct) || products["1c"].some(isProduct) || products["2"].some(isProduct);
+  return products.instrument.some(isProduct) || products.synergetic.some(isProduct);
 }
 
 function createLinkToSearchPage(date: string, products: ProductLevels): string | undefined {
   if (noData(products)) return;
-  const allProducts = [...products["1b"], ...products["1c"], ...products["2"]];
+  const allProducts = [...products.instrument, ...products.synergetic];
   const to =
     allProducts.length === 1
       ? { name: "File", params: { uuid: allProducts[0].uuid } }

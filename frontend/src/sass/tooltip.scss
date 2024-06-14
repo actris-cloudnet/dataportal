@@ -3,7 +3,7 @@
   padding: 0.75em 1em;
   box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.2);
   border-radius: 8px;
-  width: 420px;
+  width: 400px;
 
   .legacy-label {
     color: grey;
@@ -11,7 +11,7 @@
 
   section {
     display: flex;
-    font-size: 0.9em;
+    font-size: 0.8em;
     margin-top: 0.5em;
 
     ul {
@@ -21,18 +21,17 @@
       margin-bottom: 0;
       flex-grow: 1;
       flex-basis: 0;
+      margin-left: 20px;
 
       li.header {
         font-weight: bold;
-      }
-
-      li.modelitem {
-        margin-top: 0.8em;
+        margin-left: -20px;
       }
 
       li.productitem::before,
       li.qualityitem::before {
         margin-right: 5px;
+        margin-left: -20px;
       }
 
       // Product availability:

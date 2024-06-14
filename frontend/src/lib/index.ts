@@ -124,12 +124,6 @@ export function constructTitle(files: CollectionFileResponse[]) {
   }));
 }
 
-export const idToHumanReadable = (id: string) => {
-  if (id.length < 4) return id.toUpperCase();
-  const name = id.replace("-", " ").replace("mwr", "MWR").replace("l1c", "L1C");
-  return name.charAt(0).toUpperCase() + name.slice(1);
-};
-
 export function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
   return value !== null && value !== undefined;
 }

@@ -60,12 +60,10 @@ const dates = computed(() =>
 
 const getProduct = (date: ProductDate, productId: string, pid: string | undefined) => {
   if (pid) {
-    return date.products["1b"].find((p) => p.instrumentPid == pid);
+    return date.products.instrument.find((p) => p.instrumentPid == pid);
   }
   return (
-    date.products["1b"].find((p) => p.id == productId) ||
-    date.products["1c"].find((p) => p.id == productId) ||
-    date.products["2"].find((p) => p.id == productId)
+    date.products.instrument.find((p) => p.id == productId) || date.products.synergetic.find((p) => p.id == productId)
   );
 };
 

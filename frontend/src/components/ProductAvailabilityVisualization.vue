@@ -2,8 +2,8 @@
   <DateVisualization
     :data="dates"
     :legend="{
-      'all-data': 'All level 2',
-      'all-raw': 'Some level 1b',
+      'all-data': 'All synergetic products',
+      'all-raw': 'Some instrument products',
       'only-legacy-data': 'Only legacy',
       'only-model-data': 'Only model',
       'no-data': 'No data',
@@ -15,28 +15,20 @@
       <div class="mega-tooltip">
         <header>{{ date }}</header>
         <section>
-          <ul v-for="lvl in allLevels" :key="lvl">
-            <li class="header">Level {{ lvl }}</li>
+          <ul v-for="prodType in allProdTypes" :key="prodType">
+            <li class="header">{{ toolTipTitle(prodType) }}</li>
             <li
-              v-for="product in filterProductsByLvl(props, lvl)"
+              v-for="product in findProducts(props, prodType)"
               :key="product.id"
               class="productitem"
-              :class="{
-                found: data && getProductStatus(data.products[lvl], product.id),
-              }"
+              :class="{ found: data && getProductStatus(data.products[prodType], product.id) }"
             >
-              {{ idToHumanReadable(product.id) }}
-              <sup class="legacy-label" v-if="data && isLegacyFile(data.products[lvl], product.id)">L</sup>
-            </li>
-            <li
-              v-if="lvl === '1b'"
-              class="productitem modelitem"
-              :class="{
-                found: data && getProductStatus(data.products[lvl], 'model'),
-                na: data && !getReportExists(data.products[lvl], 'model'),
-              }"
-            >
-              Model
+              {{ product.humanReadableName }}
+              <sup
+                class="legacy-label"
+                v-if="prodType === 'synergetic' && data && isLegacyFile(data.products[prodType], product.id)"
+                >L</sup
+              >
             </li>
           </ul>
         </section>
@@ -46,7 +38,7 @@
 </template>
 
 <script lang="ts" setup>
-import { idToHumanReadable, classColor, type ColorClass } from "@/lib";
+import { classColor, type ColorClass } from "@/lib";
 import type { ProductLevels } from "@/lib/DataStatusParser";
 import { computed } from "vue";
 
@@ -54,12 +46,12 @@ import {
   isLegacyFile,
   noData,
   onlyModel,
-  allLvl2,
+  allSynergetic,
   getProductStatus,
-  getReportExists,
   missingData,
   onlyLegacy,
-  filterProductsByLvl,
+  findProducts,
+  toolTipTitle,
   type Props,
 } from "@/lib/ProductAvailabilityTools";
 import { useRouter } from "vue-router";
@@ -76,13 +68,13 @@ const dates = computed(() =>
   })),
 );
 
-const allLevels = computed(() => Array.from(new Set(Object.values(props.dataStatus.lvlTranslate))).sort());
+const allProdTypes = computed(() => Array.from(new Set(Object.values(props.dataStatus.lvlTranslate))).sort());
 
 function createColorClass(products: ProductLevels): ColorClass {
   if (noData(products)) return "no-data";
   if (onlyModel(products)) return "only-model-data";
   if (onlyLegacy(products)) return "only-legacy-data";
-  if (allLvl2(products, props.dataStatus.l2ProductCount)) return "all-data";
+  if (allSynergetic(products, props.dataStatus.synergeticProductCount)) return "all-data";
   if (missingData(products)) return "all-raw";
   return "contains-errors";
 }

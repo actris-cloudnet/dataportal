@@ -1,6 +1,6 @@
 import { backendUrl, compareValues, notEmpty } from "@/lib/index";
 import type { InstrumentInfo } from "@shared/entity/Instrument";
-import type { Product } from "@shared/entity/Product";
+import type { Product, ProductType } from "@shared/entity/Product";
 import axios from "axios";
 
 interface InstrumentPids {
@@ -18,9 +18,8 @@ export interface ProductInfo {
 }
 
 export interface ProductLevels {
-  "1b": ProductInfo[];
-  "1c": ProductInfo[];
-  "2": ProductInfo[];
+  instrument: ProductInfo[];
+  synergetic: ProductInfo[];
 }
 
 export interface ProductDate {
@@ -35,7 +34,7 @@ export interface DataStatus {
   dates: ProductDate[];
   lvlTranslate: LvlTranslate;
   availableProducts: Product[];
-  l2ProductCount: number;
+  synergeticProductCount: number;
   years: number[];
   allPids: InstrumentPids;
 }
@@ -43,9 +42,8 @@ export interface DataStatus {
 function createProductLevels(lvlTranslate: LvlTranslate, productInfo?: ProductInfo, existingObj?: ProductLevels) {
   if (!existingObj) {
     existingObj = {
-      "1b": [],
-      "1c": [],
-      "2": [],
+      instrument: [],
+      synergetic: [],
     };
   }
   if (productInfo) {
@@ -91,7 +89,12 @@ export async function parseDataStatus(config: DataStatusConfig): Promise<DataSta
   ]);
   const searchResponse = searchRes.data;
 
-  const l2ProductCount = prodRes.data.filter((product) => product.level === "2" && !product.experimental).length;
+  const synergeticProductCount = prodRes.data.filter(
+    (product) => product.type.includes("synergetic" as ProductType) && !product.experimental,
+  ).length;
+
+  console.log(synergeticProductCount);
+
   const allProducts = prodRes.data.filter((prod) => prod.level !== "3");
   if (!searchResponse || !allProducts || searchResponse.length == 0) {
     return {
@@ -99,7 +102,7 @@ export async function parseDataStatus(config: DataStatusConfig): Promise<DataSta
       dates: [],
       lvlTranslate: {},
       availableProducts: [],
-      l2ProductCount: 0,
+      synergeticProductCount: 0,
       years: [],
       allPids: {},
     };
@@ -114,7 +117,17 @@ export async function parseDataStatus(config: DataStatusConfig): Promise<DataSta
     .map((productId) => productMap[productId])
     .filter(notEmpty)
     .sort((a, b) => compareValues(a.humanReadableName, b.humanReadableName));
-  const lvlTranslate = allProducts.reduce((acc, cur) => ({ ...acc, [cur.id]: cur.level as keyof ProductLevels }), {});
+
+  const lvlTranslate = allProducts.reduce(
+    (acc, cur) => ({
+      ...acc,
+      [cur.id]:
+        cur.type.includes("instrument" as ProductType) || cur.type.includes("model" as ProductType)
+          ? "instrument"
+          : "synergetic",
+    }),
+    {},
+  );
 
   const dates = searchResponse.reduce(
     (obj, cur) => {
@@ -161,7 +174,7 @@ export async function parseDataStatus(config: DataStatusConfig): Promise<DataSta
     dates: Object.values(dates),
     lvlTranslate,
     availableProducts,
-    l2ProductCount,
+    synergeticProductCount,
     years: [...years],
     allPids,
   };

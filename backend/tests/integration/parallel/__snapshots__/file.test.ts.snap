@@ -37,6 +37,9 @@ exports[`/api/files/:uuid request succeeds on instrument file 1`] = `
     "humanReadableName": "Radar",
     "id": "radar",
     "level": "1b",
+    "type": [
+      "instrument",
+    ],
   },
   "site": {
     "actrisId": null,
@@ -99,6 +102,9 @@ exports[`/api/files/:uuid request succeeds on model file 1`] = `
     "humanReadableName": "Model",
     "id": "model",
     "level": "1b",
+    "type": [
+      "model",
+    ],
   },
   "site": {
     "actrisId": 1337,
