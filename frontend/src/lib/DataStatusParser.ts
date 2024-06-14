@@ -1,6 +1,6 @@
 import { backendUrl, compareValues, notEmpty } from "@/lib/index";
 import type { InstrumentInfo } from "@shared/entity/Instrument";
-import type { Product, ProductType } from "@shared/entity/Product";
+import type { Product } from "@shared/entity/Product";
 import axios from "axios";
 
 interface InstrumentPids {
@@ -90,7 +90,7 @@ export async function parseDataStatus(config: DataStatusConfig): Promise<DataSta
   const searchResponse = searchRes.data;
 
   const synergeticProductCount = prodRes.data.filter(
-    (product) => product.type.includes("synergetic" as ProductType) && !product.experimental,
+    (product) => product.type.includes("synergetic") && !product.experimental,
   ).length;
 
   console.log(synergeticProductCount);
@@ -121,10 +121,7 @@ export async function parseDataStatus(config: DataStatusConfig): Promise<DataSta
   const lvlTranslate = allProducts.reduce(
     (acc, cur) => ({
       ...acc,
-      [cur.id]:
-        cur.type.includes("instrument" as ProductType) || cur.type.includes("model" as ProductType)
-          ? "instrument"
-          : "synergetic",
+      [cur.id]: cur.type.includes("instrument") || cur.type.includes("model") ? "instrument" : "synergetic",
     }),
     {},
   );
