@@ -2,7 +2,7 @@
   <main class="pagewidth">
     <div class="new-layout">
       <section class="description">
-        <div v-html="site.description" v-if="site.description"></div>
+        <div v-html="description[0]" v-if="description"></div>
         <div v-else class="detailslistNotAvailable">Site description is missing.</div>
         <h2>Instruments</h2>
         <BaseSpinner v-if="instrumentsStatus === 'loading'" />
@@ -25,6 +25,7 @@
         <div v-else class="detailslistNotAvailable">
           No data received in the last {{ instrumentsFromLastDays }} days.
         </div>
+        <div v-html="description[1]" v-if="description"></div>
       </section>
       <aside>
         <section id="sitemap" v-if="site.type.includes('mobile' as SiteType)">
@@ -80,9 +81,9 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import axios from "axios";
-import type { Site, SiteType } from "@shared/entity/Site";
+import { SiteType, type Site } from "@shared/entity/Site";
 import MyMap from "@/components/SuperMap.vue";
 import { formatCoordinates, actrisNfUrl, getInstrumentIcon, backendUrl } from "@/lib";
 import type { ReducedMetadataResponse } from "@shared/entity/ReducedMetadataResponse";
@@ -116,6 +117,12 @@ const busy = ref(false);
 const nfName = ref<string>();
 const nfLink = ref<string>();
 const locations = ref<LocationsResult>({ status: "loading" });
+
+const description = computed(() => {
+  if (!props.site.description) return null;
+  const i = props.site.description.indexOf("<h2>");
+  return [props.site.description.slice(0, i), props.site.description.slice(i)];
+});
 
 onMounted(() => {
   if (props.site.type.includes("mobile" as SiteType)) {
@@ -281,10 +288,14 @@ aside {
   margin-top: 0.5rem;
 }
 
-h2 {
+:deep(h2) {
   margin-top: 2rem;
   margin-bottom: 1rem;
   font-size: 125%;
+}
+
+:deep(em) {
+  font-style: italic;
 }
 
 dt {
