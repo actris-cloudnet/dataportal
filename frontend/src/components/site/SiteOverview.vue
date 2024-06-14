@@ -83,7 +83,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from "vue";
 import axios from "axios";
-import { SiteType, type Site } from "@shared/entity/Site";
+import type { SiteType, Site } from "@shared/entity/Site";
 import MyMap from "@/components/SuperMap.vue";
 import { formatCoordinates, actrisNfUrl, getInstrumentIcon, backendUrl } from "@/lib";
 import type { ReducedMetadataResponse } from "@shared/entity/ReducedMetadataResponse";
