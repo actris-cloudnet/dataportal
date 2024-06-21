@@ -2,6 +2,7 @@
 import defaultLogo from "@/assets/header-logo.svg";
 import foolLogo from "@/assets/header-logo-fool.svg";
 import xmasLogo from "@/assets/header-logo-xmas.svg";
+import actrisLogo from "@/assets/logos/actris-white.svg";
 import { ref } from "vue";
 
 const isDev = import.meta.env.DEV;
@@ -15,6 +16,9 @@ const showMenu = ref(false);
 <template>
   <header :class="{ dev: isDev, xmas: isXmas, fool: isFool }">
     <div class="container pagewidth">
+      <a href="/" class="logo">
+        <img :src="actrisLogo" alt="Cloudnet data portal" class="actris-logo" />
+      </a>
       <a href="/" class="logo">
         <img :src="logo" alt="Cloudnet data portal" />
       </a>
@@ -136,6 +140,12 @@ img {
     header.fool & {
       filter: drop-shadow(1px 2px 2px rgba(255, 0, 0, 0.5));
     }
+  }
+
+  .actris-logo {
+    height: 3rem;
+    padding-right: 0.3rem;
+    margin-top: -0.4rem;
   }
 }
 
