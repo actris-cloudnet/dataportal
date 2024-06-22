@@ -68,7 +68,7 @@ const emit = defineEmits<{
 
 function validateDate(value: string) {
   const result = {
-    isValidDateString: !isNaN(new Date(value).getDate()),
+    isValidDateString: !isNaN(new Date(value).getDate()) && value.split("-")[0].length === 4,
     isNotInFuture: value <= dateToString(new Date()),
     isBeforeEnd: props.end ? value <= props.end : true,
     isAfterStart: props.start ? value >= props.start : true,
