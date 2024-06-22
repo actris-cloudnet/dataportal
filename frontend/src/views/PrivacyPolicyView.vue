@@ -4,14 +4,14 @@
     <main class="pagewidth">
       <h3>Scope</h3>
       <p>
-        This policy describes how we, ACTRIS Cloud remote sensing data centre unit (later Cloudnet) at the Finnish
-        Meteorological Institute (later FMI), use your personal data when you visit the Cloudnet website cloudnet.fmi.fi
-        (later Cloudnet data portal).
+        This policy describes how we, ACTRIS Cloud remote sensing data centre unit (later CLU) at the Finnish
+        Meteorological Institute (later FMI), use your personal data when you visit the ACTRIS Cloudnet website
+        cloudnet.fmi.fi (later Cloudnet data portal).
       </p>
       <h3>Who is responsible for my data?</h3>
       <p>
-        The Cloudnet unit at FMI is the data controller. That means we are responsible for collecting your data and
-        looking after it.
+        The CLU unit at FMI is the data controller. That means we are responsible for collecting your data and looking
+        after it.
       </p>
       <h3>What data is used?</h3>
       <p>
@@ -23,7 +23,7 @@
       <h3>Who gets my data?</h3>
       <p>
         Personal data will be used for the purpose it was first collected for. We won’t transfer your personal
-        information outside of Cloudnet.
+        information outside of Cloudnet data portal.
       </p>
       <h3>Data security</h3>
       <p>

@@ -1,6 +1,6 @@
 export class ActiveConsent {
   // EDIT THE FOLLOWING LINE WHEN CHANGING PRIVACY POLICY
-  privacyPolicyEdited = "2020-12-18";
+  privacyPolicyEdited = "2024-06-22";
   // LEAVE THE REST OF THE LINES IN THIS FILE ALONE
 
   askConsent: boolean;
