@@ -25,7 +25,7 @@
     <BaseSpinner v-else-if="citation.status == 'loading'" />
     <div v-else-if="citation.status == 'error'" class="error">Failed to load citation.</div>
     <p xmlns:cc="http://creativecommons.org/ns#">
-      Cloudnet data is licensed under
+      ACTRIS Cloudnet data is licensed under
       <a href="http://creativecommons.org/licenses/by/4.0/" target="_blank" rel="license noopener noreferrer">
         CC BY 4.0
         <img :src="ccIcon" /><img :src="byIcon" />

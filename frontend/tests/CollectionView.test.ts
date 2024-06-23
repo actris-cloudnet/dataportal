@@ -98,7 +98,7 @@ describe("CollectionView.vue", () => {
     });
 
     it("displays license", async () => {
-      expect(wrapper.text()).toMatch(/Cloudnet data is licensed under\s+CC BY 4\.0/);
+      expect(wrapper.text()).toMatch(/ACTRIS Cloudnet data is licensed under\s+CC BY 4\.0/);
     });
 
     it("displays custom citation info", async () => {
