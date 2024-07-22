@@ -16,10 +16,10 @@ const showMenu = ref(false);
 <template>
   <header :class="{ dev: isDev, xmas: isXmas, fool: isFool }">
     <div class="container pagewidth">
-      <a href="/" class="logo">
-        <img :src="actrisLogo" alt="Cloudnet data portal" class="actris-logo" />
+      <a href="/" class="logo actris-logo">
+        <img :src="actrisLogo" alt="ACTRIS" />
       </a>
-      <a href="/" class="logo">
+      <a href="/" class="logo cloudnet-logo">
         <img :src="logo" alt="Cloudnet data portal" />
       </a>
       <div :class="{ 'menu-toggle': true, 'active': showMenu }" @click="showMenu = !showMenu">
@@ -131,22 +131,26 @@ img {
   img {
     height: 2.5rem;
     filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.05));
-
-    header.xmas & {
-      transform: scale(1.8);
-      padding: 0 2rem;
-    }
-
-    header.fool & {
-      filter: drop-shadow(1px 2px 2px rgba(255, 0, 0, 0.5));
-    }
   }
+}
 
-  .actris-logo {
-    height: 3rem;
-    padding-right: 0.3rem;
-    margin-top: -0.4rem;
+header.xmas .cloudnet-logo img {
+  transform: scale(1.8);
+  padding: 0 2rem;
+}
+
+header.fool {
+  text-shadow: 1px 2px 2px rgba(255, 0, 0, 0.5);
+
+  .logo img {
+    filter: drop-shadow(1px 2px 2px rgba(255, 0, 0, 0.5));
   }
+}
+
+.actris-logo img {
+  height: 2.6rem;
+  padding-right: 0.3rem;
+  margin-top: -0.12rem;
 }
 
 ul {
