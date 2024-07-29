@@ -159,7 +159,7 @@ describe("visualizations page", () => {
     expect(await dateTo).toContain("May 03 2020");
   });
 
-  it("does nothing by clicking to left button if begining of history", async () => {
+  it("does nothing by clicking to left button if beginning of history", async () => {
     await selenium.sendInput("dateTo", "1970-01-01");
     await wait(200);
     await selenium.clickId("previousBtn");
@@ -196,7 +196,7 @@ describe("visualizations page", () => {
     expect(await dateTo).toContain("May 03 2020");
   });
 
-  it("does nothing by pressing left key if begining of history", async () => {
+  it("does nothing by pressing left key if beginning of history", async () => {
     await selenium.sendInput("dateTo", "1970-01-01");
     await wait(200);
     await pressLeftKey();

@@ -38,18 +38,18 @@ describe("test /site-contacts and /persons private api", () => {
   });
 
   it("responds with two site contacts and two persons", async () => {
-    const resSiteContacs = await axios.get(SITE_CONTACTS_URL);
+    const resSiteContacts = await axios.get(SITE_CONTACTS_URL);
     const resPersons = await axios.get(PERSONS_URL);
-    expect(resSiteContacs.data).toHaveLength(2);
+    expect(resSiteContacts.data).toHaveLength(2);
     expect(resPersons.data).toHaveLength(2);
   });
 
   it("deletes all (zero) persons without site contact roles ", async () => {
     const resDelete = await axios.delete(PERSONS_URL);
     expect(resDelete.status).toBe(200);
-    const resSiteContacs = await axios.get(SITE_CONTACTS_URL);
+    const resSiteContacts = await axios.get(SITE_CONTACTS_URL);
     const resPersons = await axios.get(PERSONS_URL);
-    expect(resSiteContacs.data).toHaveLength(2);
+    expect(resSiteContacts.data).toHaveLength(2);
     expect(resPersons.data).toHaveLength(2);
   });
 
