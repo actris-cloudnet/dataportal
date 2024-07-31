@@ -164,6 +164,17 @@
           />
         </div>
 
+        <div class="filterbox" v-show="isVizMode">
+          <CustomMultiselect
+            label="Variable"
+            v-model="selectedVariableIds"
+            :options="variableOptions"
+            :multiple="true"
+            id="variableSelect"
+            :getIcon="getVariableIcon"
+          />
+        </div>
+
         <div class="filterbox">
           <CustomMultiselect
             label="Instrument model"
@@ -177,19 +188,7 @@
 
         <div class="filterbox">
           <CustomMultiselect
-            v-show="isVizMode"
-            label="Variable"
-            v-model="selectedVariableIds"
-            :options="variableOptions"
-            :multiple="true"
-            id="variableSelect"
-            :getIcon="getVariableIcon"
-          />
-        </div>
-
-        <div class="filterbox">
-          <CustomMultiselect
-            label="Instrument"
+            label="Specific instrument"
             v-model="selectedInstrumentPids"
             :options="allInstrumentPids"
             :multiple="true"
