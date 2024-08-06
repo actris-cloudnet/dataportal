@@ -16,6 +16,7 @@
                   <th>Latitude</th>
                   <th>Longitude</th>
                   <th>Altitude</th>
+                  <th>Network</th>
                 </tr>
               </thead>
               <tbody>
@@ -36,6 +37,17 @@
                     {{ site.longitude != null ? formatLongitude(site.longitude) : "-" }}
                   </td>
                   <td>{{ site.altitude != null ? `${site.altitude} m` : "-" }}</td>
+                  <td>
+                    <BaseTag
+                      v-if="site.actrisId"
+                      type="actris"
+                      size="small"
+                      title="This station is a component of an ACTRIS National Facility."
+                    >
+                      ACTRIS
+                    </BaseTag>
+                    <BaseTag v-if="site.type.includes('arm' as SiteType)" type="arm" size="small"> ARM </BaseTag>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -62,6 +74,7 @@ import axios from "axios";
 import { backendUrl, formatLatitude, formatLongitude } from "@/lib";
 import { ref, onMounted } from "vue";
 import LandingHeader from "@/components/LandingHeader.vue";
+import BaseTag from "@/components/BaseTag.vue";
 
 type SitesState =
   | { status: "loading" }
