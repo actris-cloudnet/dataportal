@@ -24,8 +24,8 @@ export class QueueRoutes {
       if (body.modelId) {
         task.modelId = body.modelId;
       }
-      task.scheduledAt = new Date();
-      task.priority = 50;
+      task.scheduledAt = "scheduledAt" in body ? new Date(body.scheduledAt) : new Date();
+      task.priority = "priority" in body ? body.priority : 50;
 
       await this.queueService.publish(task);
       res.send(task);
