@@ -185,6 +185,12 @@ const routes = [
         meta: { title: false },
         component: () => import("@/components/instrument/RawFiles.vue"),
       },
+      {
+        path: "calibration",
+        name: "InstrumentCalibration",
+        meta: { title: false },
+        component: () => import("@/components/instrument/InstrumentCalibration.vue"),
+      },
     ],
   },
   {

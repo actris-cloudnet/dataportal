@@ -10,6 +10,10 @@
           <img :src="folderIcon" alt="" />
           Raw files
         </router-link>
+        <router-link class="tab" :to="{ name: 'InstrumentCalibration' }">
+          <img :src="CalibrationIcon" alt="" />
+          Calibration
+        </router-link>
       </template>
     </LandingHeader>
     <router-view :instrumentInfo="instrumentInfo.value" />
@@ -23,6 +27,7 @@ import axios from "axios";
 import { useRoute } from "vue-router";
 import LandingHeader from "@/components/LandingHeader.vue";
 import folderIcon from "@/assets/icons/icons8-folder-48.png";
+import CalibrationIcon from "@/assets/icons/calibration.svg";
 import { backendUrl, getInstrumentIcon } from "@/lib";
 import { useTitle } from "@/router";
 import type { InstrumentInfo } from "@shared/entity/Instrument";
