@@ -219,6 +219,8 @@
           :instruments="selectedInstrumentIds"
           :instrumentPids="selectedInstrumentPids"
           :variables="selectedVariableIds"
+          :defaultProducts="productOptions.map((prod) => prod.id)"
+          :defaultSites="siteOptions.map((site) => site.id)"
         />
         <DataSearchResult
           v-else-if="renderComplete"

@@ -79,6 +79,8 @@ export interface Props {
   instruments?: string[];
   instrumentPids?: string[];
   variables?: string[];
+  defaultProducts?: string[];
+  defaultSites?: string[];
 }
 
 const props = defineProps<Props>();
@@ -110,9 +112,9 @@ async function fetchData() {
   isBusy.value = true;
 
   const payload = {
-    site: props.sites,
+    site: props.sites?.length ? props.sites : props.defaultSites,
     date: props.date,
-    product: props.products,
+    product: props.products?.length ? props.products : props.defaultProducts,
     variable: props.variables,
     instrument: props.instruments,
     instrumentPid: props.instrumentPids,
@@ -133,7 +135,16 @@ async function fetchData() {
 }
 
 watch(
-  () => [props.date, props.sites, props.instruments, props.instrumentPids, props.products, props.variables],
+  () => [
+    props.date,
+    props.sites,
+    props.instruments,
+    props.instrumentPids,
+    props.products,
+    props.variables,
+    props.defaultProducts,
+    props.defaultSites,
+  ],
   async (newValue, oldValue) => {
     if (JSON.stringify(oldValue) === JSON.stringify(newValue)) return;
     await fetchData();
