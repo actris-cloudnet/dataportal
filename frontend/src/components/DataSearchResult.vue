@@ -138,14 +138,13 @@
           </BaseButton>
         </div>
         <dl class="inffff">
-          <template v-if="'instrument' in previewResponse && previewResponse.instrument !== null">
+          <template v-if="'instrumentInfo' in previewResponse && previewResponse.instrumentInfo">
             <dt>Instrument</dt>
-            <dd v-if="previewResponse.instrumentInfo !== null">
+            <dd>
               <router-link :to="{ name: 'Instrument', params: { uuid: previewResponse.instrumentInfo.uuid } }">
                 {{ previewResponse.instrumentInfo.name }}
               </router-link>
             </dd>
-            <dd v-else>{{ previewResponse.instrument.shortName }}</dd>
           </template>
           <template v-else-if="'model' in previewResponse">
             <dt>Model</dt>
@@ -154,11 +153,16 @@
           <template v-else>
             <dt>Product</dt>
             <dd>
-              <router-link :to="{ name: 'Product', params: { product: previewResponse.product.id } }">
-                {{ previewResponse.product.humanReadableName }}
-              </router-link>
+              {{ previewResponse.product.humanReadableName }}
             </dd>
           </template>
+          <dt>Location</dt>
+          <dd>
+            <router-link :to="{ name: 'Site', params: { siteId: previewResponse.site.id } }">
+              {{ previewResponse.site.humanReadableName
+              }}<template v-if="previewResponse.site.country">, {{ previewResponse.site.country }}</template>
+            </router-link>
+          </dd>
           <dt>Date</dt>
           <dd>{{ previewResponse.measurementDate }}</dd>
           <dt>Size</dt>
