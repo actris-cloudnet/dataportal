@@ -129,6 +129,15 @@ const routes = [
     props: true,
   },
   {
+    path: "/queue",
+    name: "Queue",
+    meta: {
+      title: "Queue",
+    },
+    component: () => import("@/views/QueueView.vue"),
+    props: true,
+  },
+  {
     path: "/publications",
     name: "Cloudnet Publications",
     meta: {
