@@ -1,6 +1,24 @@
 <template>
-  <div class="lds-dual-ring"></div>
+  <div :class="spinnerClass"></div>
 </template>
+
+<script lang="ts" setup>
+import { computed, defineProps } from "vue";
+
+const props = withDefaults(
+  defineProps<{
+    size?: "normal" | "small";
+  }>(),
+  {
+    size: "normal",
+  },
+);
+
+const spinnerClass = computed(() => ({
+  "lds-dual-ring": true,
+  [`lds-dual-ring-${props.size}`]: props.size,
+}));
+</script>
 
 <style lang="scss" scoped>
 .lds-dual-ring {
@@ -28,6 +46,19 @@
 
   100% {
     transform: rotate(360deg);
+  }
+}
+
+.lds-dual-ring-small {
+  width: 20px;
+  height: 20px;
+
+  &::after {
+    display: flex;
+    width: 16px;
+    height: 16px;
+    margin: 0px;
+    border-width: 2.5px;
   }
 }
 </style>

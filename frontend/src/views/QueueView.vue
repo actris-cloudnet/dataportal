@@ -13,7 +13,8 @@
         <thead>
           <tr>
             <th>Type</th>
-            <th>Status</th>
+            <th></th>
+            <th class="status">Status</th>
             <th>Site</th>
             <th>Date</th>
             <th>Product</th>
@@ -24,7 +25,12 @@
         <tbody>
           <tr v-for="item in sortedQueueData" :key="item.id" :class="getStatusClass(item.status)">
             <td>{{ item.type }}</td>
-            <td>{{ item.status }}</td>
+            <td class="spinner-cell">
+              <template v-if="item.status === 'running'">
+                <BaseSpinner size="small" />
+              </template>
+            </td>
+            <td class="status">{{ item.status }}</td>
             <td>{{ item.siteId }}</td>
             <td>{{ item.measurementDate }}</td>
             <td>{{ item.productId }}</td>
@@ -49,6 +55,7 @@ import { computed, ref, onMounted, onUnmounted } from "vue";
 import axios from "axios";
 import { backendUrl } from "@/lib";
 import { type Task } from "@shared/entity/Task";
+import BaseSpinner from "@/components/BaseSpinner.vue";
 
 const queueData = ref<Task[]>([]);
 
@@ -153,6 +160,7 @@ th {
   padding-right: 10px;
   padding-left: 20px;
   padding-bottom: 5px;
+  vertical-align: middle;
 }
 
 .status-pending {
@@ -173,5 +181,15 @@ th {
 
 table {
   margin-bottom: 100px;
+  border-collapse: collapse;
+}
+
+.status {
+  padding-left: 0;
+}
+
+.spinner-cell {
+  margin: 0px;
+  padding: 0px;
 }
 </style>
