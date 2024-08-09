@@ -106,4 +106,8 @@ export class QueueService {
   async clear() {
     await this.taskRepo.delete({});
   }
+
+  async getQueue() {
+    return await this.taskRepo.find({ relations: { instrumentInfo: true, model: true } });
+  }
 }

@@ -67,4 +67,13 @@ export class QueueRoutes {
       next({ status: 500, errors: err });
     }
   };
+
+  getQueue: RequestHandler = async (req, res, next) => {
+    try {
+      const queue = await this.queueService.getQueue();
+      res.send(queue);
+    } catch (err) {
+      next({ status: 500, errors: err });
+    }
+  };
 }

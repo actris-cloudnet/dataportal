@@ -328,6 +328,12 @@ async function createServer(): Promise<void> {
   app.post("/queue/receive", queueRoutes.receive);
   app.put("/queue/complete/:id", queueRoutes.complete);
   app.put("/queue/fail/:id", queueRoutes.fail);
+  app.get(
+    "/api/queue/",
+    authenticator.verifyCredentials("Show queue"),
+    authorizator.verifyPermission(PermissionType.canPublishTask),
+    queueRoutes.getQueue,
+  );
 
   app.use(errorHandler);
 
