@@ -14,10 +14,7 @@ const props = withDefaults(
   },
 );
 
-const spinnerClass = computed(() => ({
-  "lds-dual-ring": true,
-  [`lds-dual-ring-${props.size}`]: props.size,
-}));
+const spinnerClass = computed(() => ["lds-dual-ring", `lds-dual-ring-${props.size}`]);
 </script>
 
 <style lang="scss" scoped>
