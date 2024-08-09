@@ -121,6 +121,7 @@ const sortedQueueData = computed<Task[]>(() => {
     pending: 2,
     created: 3,
     failed: 4,
+    restart: 5,
   };
 
   if (!Array.isArray(queueData.value)) {
