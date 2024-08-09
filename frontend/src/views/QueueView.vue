@@ -9,7 +9,7 @@
         <p>Created: {{ createdTasks }}</p>
         <p>Failed: {{ failedTasks }}</p>
       </div>
-      <table>
+      <table v-if="totalTasks > 0">
         <thead>
           <tr>
             <th>Type</th>
