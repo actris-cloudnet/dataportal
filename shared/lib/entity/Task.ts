@@ -1,5 +1,5 @@
-import { InstrumentInfo } from "./Instrument";
-import { Model } from "./Model";
+import type { InstrumentInfo } from "./Instrument";
+import type { Model } from "./Model";
 
 export interface Task {
   id: number;
