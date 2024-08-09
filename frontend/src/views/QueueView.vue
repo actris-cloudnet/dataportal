@@ -60,8 +60,12 @@ import BaseSpinner from "@/components/BaseSpinner.vue";
 const queueData = ref<Task[]>([]);
 
 async function fetchQueueData() {
-  const response = await axios.get(`${backendUrl}queue`);
-  queueData.value = response.data;
+  try {
+    const response = await axios.get(`${backendUrl}queue`, { withCredentials: true });
+    queueData.value = response.data;
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 onMounted(() => {

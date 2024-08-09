@@ -330,8 +330,8 @@ async function createServer(): Promise<void> {
   app.put("/queue/fail/:id", queueRoutes.fail);
   app.get(
     "/api/queue/",
-    // authenticator.verifyCredentials("Show queue"),
-    // authorizator.verifyPermission(PermissionType.canPublishTask),
+    authenticator.verifyCredentials("Show queue"),
+    authorizator.verifyPermission(PermissionType.canPublishTask),
     queueRoutes.getQueue,
   );
 
