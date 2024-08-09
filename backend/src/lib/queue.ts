@@ -108,16 +108,6 @@ export class QueueService {
   }
 
   async getQueue() {
-    const now = new Date();
-    const tasks = await this.taskRepo.find({ relations: { instrumentInfo: true, model: true } });
-    return tasks.map((task) => ({
-      ...task,
-      calculatedPriority: this.calculatePriority(now, task.scheduledAt, task.priority),
-    }));
-  }
-
-  private calculatePriority(now: Date, scheduledAt: Date, priority: number): number {
-    const minutesDifference = (now.getTime() - scheduledAt.getTime()) / (1000 * 60);
-    return priority - 100 * (minutesDifference / 1440);
+    return await this.taskRepo.find({ relations: { instrumentInfo: true, model: true } });
   }
 }
