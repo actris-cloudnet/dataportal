@@ -54,8 +54,8 @@ import LandingHeader from "@/components/LandingHeader.vue";
 import { computed, ref, onMounted, onUnmounted } from "vue";
 import axios from "axios";
 import { backendUrl } from "@/lib";
-import { type Task } from "@shared/entity/Task";
 import BaseSpinner from "@/components/BaseSpinner.vue";
+import type { Task } from "@shared/entity/Task";
 
 const queueData = ref<Task[]>([]);
 
