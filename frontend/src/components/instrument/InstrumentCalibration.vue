@@ -7,15 +7,14 @@
         :instrumentInfo="props.instrumentInfo"
         :calibrationData="calibrationData"
       />
-      <div v-else-if="calibrationDataState === 'success' && !InstrumentComponent">
-        Calibration visualization is not yet available. You can view the calibration data directly through the
-        calibration API.
+      <div v-if="calibrationDataState === 'success' && InstrumentComponent">
+        <a :href="apiUrl">Data in calibration API</a>
       </div>
-      <div v-else-if="calibrationDataState === 'clientError'">Calibration data is not available.</div>
+      <div v-else-if="calibrationDataState === 'success' && !InstrumentComponent" class="no-visualization">
+        Calibration visualisation is unavailable. View calibration data via the <a :href="apiUrl">calibration API</a>
+      </div>
+      <div v-else-if="calibrationDataState === 'clientError'" class="no-data">No calibration data available</div>
       <div v-else-if="calibrationDataState === 'serverError'">There is a server-side error.</div>
-      <div>
-        <a :href="apiUrl">Data in Calibration API</a>
-      </div>
     </div>
   </main>
 </template>
@@ -91,5 +90,14 @@ onMounted(async () => {
 <style scoped>
 .calibration-container {
   margin-bottom: 20px;
+
+  .no-data,
+  .no-visualization {
+    margin-top: 2rem;
+  }
+
+  .no-data {
+    color: gray;
+  }
 }
 </style>

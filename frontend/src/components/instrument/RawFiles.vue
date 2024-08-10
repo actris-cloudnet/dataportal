@@ -35,7 +35,7 @@
       </div>
     </template>
     <template v-else>
-      <p class="no-data">No files found for this instrument on this date.</p>
+      <p class="no-data">No raw data available</p>
     </template>
   </main>
 </template>
