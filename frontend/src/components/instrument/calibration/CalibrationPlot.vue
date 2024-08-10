@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watch, defineProps, nextTick, onUnmounted } from "vue";
+import { ref, onMounted, watch, nextTick, onUnmounted } from "vue";
 import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
 
@@ -92,14 +92,14 @@ watch(
     if (plotInstance) {
       plotInstance.setData(newData);
     }
-  }
+  },
 );
 
 watch(
   () => props.config,
   () => {
     initializePlot();
-  }
+  },
 );
 
 onUnmounted(() => {
