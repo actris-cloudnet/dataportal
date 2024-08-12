@@ -925,6 +925,212 @@
       }
     ]
   },
+  "classification-voodoo": {
+    "description": "The classification product calculated using VOODOO (Schimmel et al. 2022).",
+    "references_html": [
+      "Schimmel et al. (2022). Identifying cloud droplets beyond lidar attenuation from vertically pointing cloud radar observations using artificial neural networks. <i>Atmos. Meas. Tech.</i>, <i>15</i>(18), 5343-5366. <a href=\"https://doi.org/10.5194/amt-15-5343-2022\">https://doi.org/10.5194/amt-15-5343-2022</a>"
+    ],
+    "dimensions": [
+      {
+        "name": "height",
+        "units": "m",
+        "standard_name": "height_above_mean_sea_level",
+        "long_name": "Height above mean sea level",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "time",
+        "units": "hours since 2024-01-01 00:00:00 +00:00",
+        "standard_name": "time",
+        "long_name": "Time UTC",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      }
+    ],
+    "common_variables": [
+      {
+        "name": "altitude",
+        "units": "m",
+        "standard_name": "altitude",
+        "long_name": "Altitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "cloud_base_height_agl",
+        "units": "m",
+        "standard_name": null,
+        "long_name": "Height of cloud base above ground level",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "cloud_base_height_amsl",
+        "units": "m",
+        "standard_name": null,
+        "long_name": "Height of cloud base above mean sea level",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "cloud_top_height_agl",
+        "units": "m",
+        "standard_name": null,
+        "long_name": "Height of cloud top above ground level",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "cloud_top_height_amsl",
+        "units": "m",
+        "standard_name": null,
+        "long_name": "Height of cloud top above mean sea level",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "detection_status",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Radar and lidar detection status",
+        "comment": "\nThis variable reports on the reliability of the radar and lidar data\nused to perform the classification.",
+        "definition": [
+          {
+            "label": "Value 0",
+            "description": "Clear sky."
+          },
+          {
+            "label": "Value 1",
+            "description": "Lidar echo only."
+          },
+          {
+            "label": "Value 2",
+            "description": "Radar echo but reflectivity may be unreliable as attenuation by rain, melting ice or liquid cloud has not been corrected."
+          },
+          {
+            "label": "Value 3",
+            "description": "Good radar and lidar echos."
+          },
+          {
+            "label": "Value 4",
+            "description": "No radar echo but rain or liquid cloud beneath mean that attenuation that would be experienced is unknown."
+          },
+          {
+            "label": "Value 5",
+            "description": "Good radar echo only."
+          },
+          {
+            "label": "Value 6",
+            "description": "No radar echo but known attenuation."
+          },
+          {
+            "label": "Value 7",
+            "description": "Radar echo corrected for liquid attenuation using microwave radiometer data."
+          },
+          {
+            "label": "Value 8",
+            "description": "Radar ground clutter."
+          },
+          {
+            "label": "Value 9",
+            "description": "Lidar clear-air molecular scattering."
+          }
+        ],
+        "dimensions": ["time", "height"],
+        "dtype": "int32"
+      },
+      {
+        "name": "latitude",
+        "units": "degree_north",
+        "standard_name": "latitude",
+        "long_name": "Latitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "longitude",
+        "units": "degree_east",
+        "standard_name": "longitude",
+        "long_name": "Longitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "target_classification",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Target classification",
+        "comment": "\nThis variable provides the main atmospheric target classifications\nthat can be distinguished by radar and lidar.",
+        "definition": [
+          {
+            "label": "Value 0",
+            "description": "Clear sky."
+          },
+          {
+            "label": "Value 1",
+            "description": "Cloud liquid droplets only."
+          },
+          {
+            "label": "Value 2",
+            "description": "Drizzle or rain."
+          },
+          {
+            "label": "Value 3",
+            "description": "Drizzle or rain coexisting with cloud liquid droplets."
+          },
+          {
+            "label": "Value 4",
+            "description": "Ice particles."
+          },
+          {
+            "label": "Value 5",
+            "description": "Ice coexisting with supercooled liquid droplets."
+          },
+          {
+            "label": "Value 6",
+            "description": "Melting ice particles."
+          },
+          {
+            "label": "Value 7",
+            "description": "Melting ice particles coexisting with cloud liquid droplets."
+          },
+          {
+            "label": "Value 8",
+            "description": "Aerosol particles, no cloud or precipitation."
+          },
+          {
+            "label": "Value 9",
+            "description": "Insects, no cloud or precipitation."
+          },
+          {
+            "label": "Value 10",
+            "description": "Aerosol coexisting with insects, no cloud or precipitation."
+          }
+        ],
+        "dimensions": ["time", "height"],
+        "dtype": "int32"
+      }
+    ]
+  },
   "iwc": {
     "description": "Ice water content calculated using the so-called Z-T method based on the attenuated-corrected radar reflectivity and model temperature.",
     "references_html": [
@@ -1268,6 +1474,127 @@
         "definition": null,
         "dimensions": [],
         "dtype": "float32"
+      }
+    ]
+  },
+  "disdrometer": {
+    "description": "An optical disdrometer measures the size and velocity of precipitation particles by analyzing the distortion they cause in a laser beam passing through them. These measurements can be used to derive parameters such as rainfall rate, drop size distribution, and precipitation type.",
+    "references_html": [],
+    "dimensions": [
+      {
+        "name": "diameter",
+        "units": "m",
+        "standard_name": null,
+        "long_name": "Center diameter of precipitation particles",
+        "comment": "Predefined diameter classes.",
+        "definition": null,
+        "dimensions": ["diameter"],
+        "dtype": "float32"
+      },
+      {
+        "name": "nv"
+      },
+      {
+        "name": "time",
+        "units": "hours since 2024-01-01 00:00:00 +00:00",
+        "standard_name": "time",
+        "long_name": "Time UTC",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "velocity",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Center fall velocity of precipitation particles",
+        "comment": "Predefined velocity classes.",
+        "definition": null,
+        "dimensions": ["velocity"],
+        "dtype": "float32"
+      }
+    ],
+    "common_variables": [
+      {
+        "name": "altitude",
+        "units": "m",
+        "standard_name": "altitude",
+        "long_name": "Altitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "diameter_spread",
+        "units": "m",
+        "standard_name": null,
+        "long_name": "Width of diameter interval",
+        "comment": "Bin size of each diameter interval.",
+        "definition": null,
+        "dimensions": ["diameter"],
+        "dtype": "float32"
+      },
+      {
+        "name": "latitude",
+        "units": "degree_north",
+        "standard_name": "latitude",
+        "long_name": "Latitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "longitude",
+        "units": "degree_east",
+        "standard_name": "longitude",
+        "long_name": "Longitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "radar_reflectivity",
+        "units": "dBZ",
+        "standard_name": "equivalent_reflectivity_factor",
+        "long_name": "Equivalent radar reflectivity factor",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "rainfall_rate",
+        "units": "m s-1",
+        "standard_name": "rainfall_rate",
+        "long_name": "Rainfall rate",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "velocity_spread",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Width of velocity interval",
+        "comment": "Bin size of each velocity interval.",
+        "definition": null,
+        "dimensions": ["velocity"],
+        "dtype": "float32"
+      },
+      {
+        "name": "visibility",
+        "units": "m",
+        "standard_name": "visibility_in_air",
+        "long_name": "Meteorological optical range (MOR) visibility",
+        "comment": "Visibility estimation by the disdrometer is valid\nonly during precipitation events.",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "int32"
       }
     ]
   },
@@ -1863,127 +2190,6 @@
       }
     ]
   },
-  "disdrometer": {
-    "description": "An optical disdrometer measures the size and velocity of precipitation particles by analyzing the distortion they cause in a laser beam passing through them. These measurements can be used to derive parameters such as rainfall rate, drop size distribution, and precipitation type.",
-    "references_html": [],
-    "dimensions": [
-      {
-        "name": "diameter",
-        "units": "m",
-        "standard_name": null,
-        "long_name": "Center diameter of precipitation particles",
-        "comment": "Predefined diameter classes.",
-        "definition": null,
-        "dimensions": ["diameter"],
-        "dtype": "float32"
-      },
-      {
-        "name": "nv"
-      },
-      {
-        "name": "time",
-        "units": "hours since 2024-01-01 00:00:00 +00:00",
-        "standard_name": "time",
-        "long_name": "Time UTC",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "velocity",
-        "units": "m s-1",
-        "standard_name": null,
-        "long_name": "Center fall velocity of precipitation particles",
-        "comment": "Predefined velocity classes.",
-        "definition": null,
-        "dimensions": ["velocity"],
-        "dtype": "float32"
-      }
-    ],
-    "common_variables": [
-      {
-        "name": "altitude",
-        "units": "m",
-        "standard_name": "altitude",
-        "long_name": "Altitude of site",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "diameter_spread",
-        "units": "m",
-        "standard_name": null,
-        "long_name": "Width of diameter interval",
-        "comment": "Bin size of each diameter interval.",
-        "definition": null,
-        "dimensions": ["diameter"],
-        "dtype": "float32"
-      },
-      {
-        "name": "latitude",
-        "units": "degree_north",
-        "standard_name": "latitude",
-        "long_name": "Latitude of site",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "longitude",
-        "units": "degree_east",
-        "standard_name": "longitude",
-        "long_name": "Longitude of site",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "radar_reflectivity",
-        "units": "dBZ",
-        "standard_name": "equivalent_reflectivity_factor",
-        "long_name": "Equivalent radar reflectivity factor",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "rainfall_rate",
-        "units": "m s-1",
-        "standard_name": "rainfall_rate",
-        "long_name": "Rainfall rate",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "velocity_spread",
-        "units": "m s-1",
-        "standard_name": null,
-        "long_name": "Width of velocity interval",
-        "comment": "Bin size of each velocity interval.",
-        "definition": null,
-        "dimensions": ["velocity"],
-        "dtype": "float32"
-      },
-      {
-        "name": "visibility",
-        "units": "m",
-        "standard_name": "visibility_in_air",
-        "long_name": "Visibility range in precipitation after MOR",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "int32"
-      }
-    ]
-  },
   "doppler-lidar-wind": {
     "description": "Wind speed and direction profiles derived from Doppler lidar scans.",
     "references_html": [],
@@ -2082,22 +2288,10 @@
       }
     ]
   },
-  "classification-voodoo": {
-    "description": "The classification product calculated using VOODOO (Schimmel et al. 2022).",
-    "references_html": [
-      "Schimmel et al. (2022). Identifying cloud droplets beyond lidar attenuation from vertically pointing cloud radar observations using artificial neural networks. <i>Atmos. Meas. Tech.</i>, <i>15</i>(18), 5343-5366. <a href=\"https://doi.org/10.5194/amt-15-5343-2022\">https://doi.org/10.5194/amt-15-5343-2022</a>"
-    ],
+  "weather-station": {
+    "description": "An automatic weather station collects real-time meteorological data, including temperature, humidity, wind speed, and precipitation.",
+    "references_html": [],
     "dimensions": [
-      {
-        "name": "height",
-        "units": "m",
-        "standard_name": "height_above_mean_sea_level",
-        "long_name": "Height above mean sea level",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["height"],
-        "dtype": "float32"
-      },
       {
         "name": "time",
         "units": "hours since 2024-01-01 00:00:00 +00:00",
@@ -2111,6 +2305,26 @@
     ],
     "common_variables": [
       {
+        "name": "air_pressure",
+        "units": "Pa",
+        "standard_name": "air_pressure",
+        "long_name": "Air pressure",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "air_temperature",
+        "units": "K",
+        "standard_name": "air_temperature",
+        "long_name": "Air temperature",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
         "name": "altitude",
         "units": "m",
         "standard_name": "altitude",
@@ -2119,97 +2333,6 @@
         "definition": null,
         "dimensions": [],
         "dtype": "float32"
-      },
-      {
-        "name": "cloud_base_height_agl",
-        "units": "m",
-        "standard_name": null,
-        "long_name": "Height of cloud base above ground level",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "cloud_base_height_amsl",
-        "units": "m",
-        "standard_name": null,
-        "long_name": "Height of cloud base above mean sea level",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "cloud_top_height_agl",
-        "units": "m",
-        "standard_name": null,
-        "long_name": "Height of cloud top above ground level",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "cloud_top_height_amsl",
-        "units": "m",
-        "standard_name": null,
-        "long_name": "Height of cloud top above mean sea level",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "detection_status",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Radar and lidar detection status",
-        "comment": "\nThis variable reports on the reliability of the radar and lidar data\nused to perform the classification.",
-        "definition": [
-          {
-            "label": "Value 0",
-            "description": "Clear sky."
-          },
-          {
-            "label": "Value 1",
-            "description": "Lidar echo only."
-          },
-          {
-            "label": "Value 2",
-            "description": "Radar echo but reflectivity may be unreliable as attenuation by rain, melting ice or liquid cloud has not been corrected."
-          },
-          {
-            "label": "Value 3",
-            "description": "Good radar and lidar echos."
-          },
-          {
-            "label": "Value 4",
-            "description": "No radar echo but rain or liquid cloud beneath mean that attenuation that would be experienced is unknown."
-          },
-          {
-            "label": "Value 5",
-            "description": "Good radar echo only."
-          },
-          {
-            "label": "Value 6",
-            "description": "No radar echo but known attenuation."
-          },
-          {
-            "label": "Value 7",
-            "description": "Radar echo corrected for liquid attenuation using microwave radiometer data."
-          },
-          {
-            "label": "Value 8",
-            "description": "Radar ground clutter."
-          },
-          {
-            "label": "Value 9",
-            "description": "Lidar clear-air molecular scattering."
-          }
-        ],
-        "dimensions": ["time", "height"],
-        "dtype": "int32"
       },
       {
         "name": "latitude",
@@ -2232,59 +2355,474 @@
         "dtype": "float32"
       },
       {
-        "name": "target_classification",
+        "name": "rainfall_amount",
+        "units": "m",
+        "standard_name": "thickness_of_rainfall_amount",
+        "long_name": "Rainfall amount",
+        "comment": "Cumulated precipitation since 00:00 UTC",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "rainfall_rate",
+        "units": "m s-1",
+        "standard_name": "rainfall_rate",
+        "long_name": "Rainfall rate",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "relative_humidity",
+        "units": "1",
+        "standard_name": "relative_humidity",
+        "long_name": "Relative humidity",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "wind_direction",
+        "units": "degree",
+        "standard_name": "wind_from_direction",
+        "long_name": "Wind direction",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "wind_speed",
+        "units": "m s-1",
+        "standard_name": "wind_speed",
+        "long_name": "Wind speed",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      }
+    ]
+  },
+  "categorize-voodoo": {
+    "description": "The categorize product calculated using VOODOO (Schimmel et al. 2022).",
+    "references_html": [
+      "Schimmel et al. (2022). Identifying cloud droplets beyond lidar attenuation from vertically pointing cloud radar observations using artificial neural networks. <i>Atmos. Meas. Tech.</i>, <i>15</i>(18), 5343-5366. <a href=\"https://doi.org/10.5194/amt-15-5343-2022\">https://doi.org/10.5194/amt-15-5343-2022</a>"
+    ],
+    "dimensions": [
+      {
+        "name": "height",
+        "units": "m",
+        "standard_name": "height_above_mean_sea_level",
+        "long_name": "Height above mean sea level",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "model_height",
+        "units": "m",
+        "standard_name": null,
+        "long_name": "Height of model variables above mean sea level",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["model_height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "model_time",
+        "units": "hours since 2024-01-01 00:00:00 +00:00",
+        "standard_name": null,
+        "long_name": "Model time UTC",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["model_time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "time",
+        "units": "hours since 2024-01-01 00:00:00 +00:00",
+        "standard_name": "time",
+        "long_name": "Time UTC",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      }
+    ],
+    "common_variables": [
+      {
+        "name": "Tw",
+        "units": "K",
+        "standard_name": null,
+        "long_name": "Wet-bulb temperature",
+        "comment": "This variable was derived from model temperature, pressure and relative\nhumidity.",
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "Z",
+        "units": "dBZ",
+        "standard_name": null,
+        "long_name": "Radar reflectivity factor",
+        "comment": "This variable has been corrected for attenuation by gaseous attenuation\n(using the thermodynamic variables from a forecast model; see the\nradar_gas_atten variable) and liquid attenuation (using liquid water path\nfrom a microwave radiometer; see the radar_liquid_atten variable) but rain\nand melting-layer attenuation has not been corrected.\nCalibration convention: in the absence of attenuation, a cloud at 273 K\ncontaining one million 100-micron droplets per cubic metre will have\na reflectivity of 0 dBZ at all frequencies.",
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "Z_bias",
+        "units": "dB",
+        "standard_name": null,
+        "long_name": "Bias in radar reflectivity factor",
+        "comment": "This variable is an estimate of the one-standard-deviation\ncalibration error.",
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "Z_error",
+        "units": "dB",
+        "standard_name": null,
+        "long_name": "Error in radar reflectivity factor",
+        "comment": "This variable is an estimate of the one-standard-deviation random error\nin radar reflectivity factor. It originates from the following independent\nsources of error:\n1) Precision in reflectivity estimate due to finite signal to noise and\n   finite number of pulses\n2) 10% uncertainty in gaseous attenuation correction (mainly due to error\n   in model humidity field)\n3) Error in liquid water path (given by the variable lwp_error) and its\n   partitioning with height).",
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "Z_sensitivity",
+        "units": "dBZ",
+        "standard_name": null,
+        "long_name": "Minimum detectable radar reflectivity",
+        "comment": "This variable is an estimate of the radar sensitivity, i.e. the minimum\ndetectable radar reflectivity, as a function of height. It includes the\neffect of ground clutter and gas attenuation but not liquid attenuation.",
+        "definition": null,
+        "dimensions": ["height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "altitude",
+        "units": "m",
+        "standard_name": "altitude",
+        "long_name": "Altitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "beta",
+        "units": "sr-1 m-1",
+        "standard_name": null,
+        "long_name": "Attenuated backscatter coefficient",
+        "comment": "SNR-screened attenuated backscatter coefficient.",
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "beta_bias",
+        "units": "dB",
+        "standard_name": null,
+        "long_name": "Bias in attenuated backscatter coefficient",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "beta_error",
+        "units": "dB",
+        "standard_name": null,
+        "long_name": "Error in attenuated backscatter coefficient",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "category_bits",
         "units": "1",
         "standard_name": null,
-        "long_name": "Target classification",
-        "comment": "\nThis variable provides the main atmospheric target classifications\nthat can be distinguished by radar and lidar.",
+        "long_name": "Target categorization bits",
+        "comment": "This variable contains information on the nature of the targets\nat each pixel, thereby facilitating the application of algorithms that work\nwith only one type of target. The information is in the form of an array of\nbits, each of which states either whether a certain type of particle is\npresent (e.g. aerosols), or the whether some of the target particles have\na particular property. The definitions of each bit are given in the\ndefinition attribute. Bit 0 is the least significant.",
         "definition": [
           {
-            "label": "Value 0",
-            "description": "Clear sky."
+            "label": "Bit 0",
+            "description": "Small liquid droplets are present."
           },
           {
-            "label": "Value 1",
-            "description": "Cloud liquid droplets only."
+            "label": "Bit 1",
+            "description": "Falling hydrometeors are present; if Bit 2 is set then these are most likely ice particles, otherwise they are drizzle or rain drops."
           },
           {
-            "label": "Value 2",
-            "description": "Drizzle or rain."
+            "label": "Bit 2",
+            "description": "Wet-bulb temperature is less than 0 degrees C, implying the phase of Bit-1 particles."
           },
           {
-            "label": "Value 3",
-            "description": "Drizzle or rain coexisting with cloud liquid droplets."
+            "label": "Bit 3",
+            "description": "Melting ice particles are present."
           },
           {
-            "label": "Value 4",
-            "description": "Ice particles."
+            "label": "Bit 4",
+            "description": "Aerosol particles are present and visible to the lidar."
           },
           {
-            "label": "Value 5",
-            "description": "Ice coexisting with supercooled liquid droplets."
-          },
-          {
-            "label": "Value 6",
-            "description": "Melting ice particles."
-          },
-          {
-            "label": "Value 7",
-            "description": "Melting ice particles coexisting with cloud liquid droplets."
-          },
-          {
-            "label": "Value 8",
-            "description": "Aerosol particles, no cloud or precipitation."
-          },
-          {
-            "label": "Value 9",
-            "description": "Insects, no cloud or precipitation."
-          },
-          {
-            "label": "Value 10",
-            "description": "Aerosol coexisting with insects, no cloud or precipitation."
+            "label": "Bit 5",
+            "description": "Insects are present and visible to the radar."
           }
         ],
         "dimensions": ["time", "height"],
         "dtype": "int32"
+      },
+      {
+        "name": "insect_prob",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Insect probability",
+        "comment": "Ad-hoc estimation of the probability that the pixel contains insects.",
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "latitude",
+        "units": "degree_north",
+        "standard_name": "latitude",
+        "long_name": "Latitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "lidar_wavelength",
+        "units": "nm",
+        "standard_name": null,
+        "long_name": "Laser wavelength",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "liquid_prob",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Liquid probability",
+        "comment": "Probability derived from the radar data that the pixel contains liquid.",
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "longitude",
+        "units": "degree_east",
+        "standard_name": "longitude",
+        "long_name": "Longitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "lwp",
+        "units": "kg m-2",
+        "standard_name": "atmosphere_cloud_liquid_water_content",
+        "long_name": "Liquid water path",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "lwp_error",
+        "units": "kg m-2",
+        "standard_name": null,
+        "long_name": "Error in liquid water path",
+        "comment": "This variable is a rough estimate of the one-standard-deviation\nerror in liquid water path, calculated as a combination of\na 20 g m-2 linear error and a 25 %\nfractional error.",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "nyquist_velocity",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Nyquist velocity",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "pressure",
+        "units": "Pa",
+        "standard_name": null,
+        "long_name": "Pressure",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["model_time", "model_height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "q",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Specific humidity",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["model_time", "model_height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "quality_bits",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Data quality bits",
+        "comment": "This variable contains information on the quality of the data at each pixel.\nThe information is in the form of an array of bits, and the definitions of\neach bit are given in the definition attribute. Bit 0 is the least\nsignificant.",
+        "definition": [
+          {
+            "label": "Bit 0",
+            "description": "An echo is detected by the radar."
+          },
+          {
+            "label": "Bit 1",
+            "description": "An echo is detected by the lidar."
+          },
+          {
+            "label": "Bit 2",
+            "description": "The apparent echo detected by the radar is ground clutter or some other non-atmospheric artifact."
+          },
+          {
+            "label": "Bit 3",
+            "description": "The lidar echo is due to clear-air molecular scattering."
+          },
+          {
+            "label": "Bit 4",
+            "description": "Liquid water cloud, rainfall or melting ice below this pixel will have caused radar and lidar attenuation; if bit 5 is set then a correction for the radar attenuation has been performed; otherwise do not trust the absolute values of reflectivity factor. No correction is performed for lidar attenuation."
+          },
+          {
+            "label": "Bit 5",
+            "description": "Radar reflectivity has been corrected for liquid-water attenuation using the microwave radiometer measurements of liquid water path and the lidar estimation of the location of liquid water cloud; be aware that errors in reflectivity may result."
+          }
+        ],
+        "dimensions": ["time", "height"],
+        "dtype": "int32"
+      },
+      {
+        "name": "radar_frequency",
+        "units": "GHz",
+        "standard_name": null,
+        "long_name": "Radar transmit frequency",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "radar_gas_atten",
+        "units": "dB",
+        "standard_name": null,
+        "long_name": "Two-way radar attenuation due to atmospheric gases",
+        "comment": "This variable was calculated from the model temperature, pressure and\nhumidity, but forcing pixels containing liquid cloud to saturation with\nrespect to liquid water. It has been used to correct Z.",
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "radar_liquid_atten",
+        "units": "dB",
+        "standard_name": null,
+        "long_name": "Two-way radar attenuation due to liquid water",
+        "comment": "This variable was calculated from the liquid water path measured by\nmicrowave radiometer using lidar and radar returns to perform an\napproximate partitioning of the liquid water content with height. Bit 5\nof the quality_bits variable indicates where a correction for liquid water\nattenuation has been performed.",
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "rain_detected",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Rain detected",
+        "comment": "1 = rain detected, 0 = no rain detected",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "int32"
+      },
+      {
+        "name": "rainfall_rate",
+        "units": "m s-1",
+        "standard_name": "rainfall_rate",
+        "long_name": "Rainfall rate",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "temperature",
+        "units": "K",
+        "standard_name": null,
+        "long_name": "Temperature",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["model_time", "model_height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "uwind",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Zonal wind",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["model_time", "model_height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "v",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Doppler velocity",
+        "comment": "This parameter is the radial component of the velocity, with positive\nvelocities are away from the radar.",
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "v_sigma",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Standard deviation of mean Doppler velocity",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "vwind",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Meridional wind",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["model_time", "model_height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "width",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Spectral width",
+        "comment": "This parameter is the standard deviation of the reflectivity-weighted\nvelocities in the radar pulse volume.",
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
       }
     ]
   },
@@ -2429,127 +2967,11 @@
       }
     ]
   },
-  "weather-station": {
-    "description": "An automatic weather station collects real-time meteorological data, including temperature, humidity, wind speed, and precipitation.",
-    "references_html": [],
-    "dimensions": [
-      {
-        "name": "time",
-        "units": "hours since 2024-01-01 00:00:00 +00:00",
-        "standard_name": "time",
-        "long_name": "Time UTC",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float64"
-      }
-    ],
-    "common_variables": [
-      {
-        "name": "air_pressure",
-        "units": "Pa",
-        "standard_name": "air_pressure",
-        "long_name": "Air pressure",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "air_temperature",
-        "units": "K",
-        "standard_name": "air_temperature",
-        "long_name": "Air temperature",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "altitude",
-        "units": "m",
-        "standard_name": "altitude",
-        "long_name": "Altitude of site",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "latitude",
-        "units": "degree_north",
-        "standard_name": "latitude",
-        "long_name": "Latitude of site",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "longitude",
-        "units": "degree_east",
-        "standard_name": "longitude",
-        "long_name": "Longitude of site",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "rainfall_amount",
-        "units": "m",
-        "standard_name": "thickness_of_rainfall_amount",
-        "long_name": "Rainfall amount",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "rainfall_rate",
-        "units": "m s-1",
-        "standard_name": "rainfall_rate",
-        "long_name": "Rainfall rate",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "relative_humidity",
-        "units": "1",
-        "standard_name": "relative_humidity",
-        "long_name": "Relative humidity",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "wind_direction",
-        "units": "degree",
-        "standard_name": "wind_from_direction",
-        "long_name": "Wind direction",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "wind_speed",
-        "units": "m s-1",
-        "standard_name": "wind_speed",
-        "long_name": "Wind speed",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      }
-    ]
-  },
   "mwr-single": {
     "description": "Microwave radiometer data processed with MWRpy providing temperature and humidity profiles with high temporal resolution.",
-    "references_html": [],
+    "references_html": [
+      "Marke et al. (2024). MWRpy: A Python package for processing microwave radiometer data. <i>JOSS</i>, <i>9</i>(98), 6733. <a href=\"https://doi.org/10.21105/joss.06733\">https://doi.org/10.21105/joss.06733</a>"
+    ],
     "dimensions": [
       {
         "name": "bnds"
@@ -3052,9 +3474,220 @@
       }
     ]
   },
+  "mwr-multi": {
+    "description": "Microwave radiometer data processed with MWRpy providing temperature and humidity profiles with high-quality profile information.",
+    "references_html": [
+      "Marke et al. (2024). MWRpy: A Python package for processing microwave radiometer data. <i>JOSS</i>, <i>9</i>(98), 6733. <a href=\"https://doi.org/10.21105/joss.06733\">https://doi.org/10.21105/joss.06733</a>"
+    ],
+    "dimensions": [
+      {
+        "name": "bnds"
+      },
+      {
+        "name": "height",
+        "units": "m",
+        "standard_name": "height_above_mean_sea_level",
+        "long_name": "Height above mean sea level",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "time",
+        "units": "hours since 2024-01-01 00:00:00 +00:00",
+        "standard_name": "time",
+        "long_name": "Time UTC",
+        "comment": "Time indication of samples is at end of integration-time",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      }
+    ],
+    "common_variables": [
+      {
+        "name": "altitude",
+        "units": "m",
+        "standard_name": "altitude",
+        "long_name": "Altitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "azimuth_angle",
+        "units": "degree",
+        "standard_name": "sensor_azimuth_angle",
+        "long_name": "Azimuth angle",
+        "comment": "0=North, 90=East, 180=South, 270=West",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "elevation_angle",
+        "units": "degree",
+        "standard_name": null,
+        "long_name": "Sensor elevation angle",
+        "comment": "0=horizon, 90=zenith",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "equivalent_potential_temperature",
+        "units": "K",
+        "standard_name": "air_equivalent_potential_temperature",
+        "long_name": "Equivalent potential temperature",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "latitude",
+        "units": "degree_north",
+        "standard_name": "latitude",
+        "long_name": "Latitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "longitude",
+        "units": "degree_east",
+        "standard_name": "longitude",
+        "long_name": "Longitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "potential_temperature",
+        "units": "K",
+        "standard_name": "air_potential_temperature",
+        "long_name": "Potential temperature",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "relative_humidity",
+        "units": "1",
+        "standard_name": "relative_humidity",
+        "long_name": "Relative humidity",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "temperature",
+        "units": "K",
+        "standard_name": "air_temperature",
+        "long_name": "Temperature",
+        "comment": "Retrieved temperature profile from multiple pointing measurements",
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "temperature_quality_flag",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Quality flag",
+        "comment": "0 indicates data with good quality according to applied tests.\nThe list of (not) applied tests is encoded in quality_flag_status",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_below_threshold"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_above_threshold"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_above_threshold"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_failed"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_detected"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_above_threshold"
+          }
+        ],
+        "dimensions": ["time"],
+        "dtype": "int32"
+      },
+      {
+        "name": "temperature_quality_flag_status",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Quality flag status",
+        "comment": "Checks not executed in determination of quality_flag.\n0 indicates quality check has been applied.",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb_not_checked"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_lower_threshold_not_checked"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_upper_threshold_not_checked"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_not_checked"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_not_checked"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_not_checked"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam_not_checked"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_not_checked"
+          }
+        ],
+        "dimensions": ["time"],
+        "dtype": "int32"
+      }
+    ]
+  },
   "mwr-l1c": {
     "description": "Microwave radiometer data processed with MWRpy providing brightness temperature and optionally with data from infrared sensor and integrated weather station.",
-    "references_html": [],
+    "references_html": [
+      "Marke et al. (2024). MWRpy: A Python package for processing microwave radiometer data. <i>JOSS</i>, <i>9</i>(98), 6733. <a href=\"https://doi.org/10.21105/joss.06733\">https://doi.org/10.21105/joss.06733</a>"
+    ],
     "dimensions": [
       {
         "name": "band"
@@ -3588,213 +4221,6 @@
       }
     ]
   },
-  "mwr-multi": {
-    "description": "Microwave radiometer data processed with MWRpy providing temperature and humidity profiles with high-quality profile information.",
-    "references_html": [],
-    "dimensions": [
-      {
-        "name": "bnds"
-      },
-      {
-        "name": "height",
-        "units": "m",
-        "standard_name": "height_above_mean_sea_level",
-        "long_name": "Height above mean sea level",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "time",
-        "units": "hours since 2024-01-01 00:00:00 +00:00",
-        "standard_name": "time",
-        "long_name": "Time UTC",
-        "comment": "Time indication of samples is at end of integration-time",
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      }
-    ],
-    "common_variables": [
-      {
-        "name": "altitude",
-        "units": "m",
-        "standard_name": "altitude",
-        "long_name": "Altitude of site",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "azimuth_angle",
-        "units": "degree",
-        "standard_name": "sensor_azimuth_angle",
-        "long_name": "Azimuth angle",
-        "comment": "0=North, 90=East, 180=South, 270=West",
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "elevation_angle",
-        "units": "degree",
-        "standard_name": null,
-        "long_name": "Sensor elevation angle",
-        "comment": "0=horizon, 90=zenith",
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "equivalent_potential_temperature",
-        "units": "K",
-        "standard_name": "air_equivalent_potential_temperature",
-        "long_name": "Equivalent potential temperature",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "latitude",
-        "units": "degree_north",
-        "standard_name": "latitude",
-        "long_name": "Latitude of site",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "longitude",
-        "units": "degree_east",
-        "standard_name": "longitude",
-        "long_name": "Longitude of site",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "potential_temperature",
-        "units": "K",
-        "standard_name": "air_potential_temperature",
-        "long_name": "Potential temperature",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "relative_humidity",
-        "units": "1",
-        "standard_name": "relative_humidity",
-        "long_name": "Relative humidity",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "temperature",
-        "units": "K",
-        "standard_name": "air_temperature",
-        "long_name": "Temperature",
-        "comment": "Retrieved temperature profile from multiple pointing measurements",
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "temperature_quality_flag",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Quality flag",
-        "comment": "0 indicates data with good quality according to applied tests.\nThe list of (not) applied tests is encoded in quality_flag_status",
-        "definition": [
-          {
-            "label": "Bit 1",
-            "description": "missing_tb"
-          },
-          {
-            "label": "Bit 2",
-            "description": "tb_below_threshold"
-          },
-          {
-            "label": "Bit 3",
-            "description": "tb_above_threshold"
-          },
-          {
-            "label": "Bit 4",
-            "description": "spectral_consistency_above_threshold"
-          },
-          {
-            "label": "Bit 5",
-            "description": "receiver_sanity_failed"
-          },
-          {
-            "label": "Bit 6",
-            "description": "rain_detected"
-          },
-          {
-            "label": "Bit 7",
-            "description": "sun_moon_in_beam"
-          },
-          {
-            "label": "Bit 8",
-            "description": "tb_offset_above_threshold"
-          }
-        ],
-        "dimensions": ["time"],
-        "dtype": "int32"
-      },
-      {
-        "name": "temperature_quality_flag_status",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Quality flag status",
-        "comment": "Checks not executed in determination of quality_flag.\n0 indicates quality check has been applied.",
-        "definition": [
-          {
-            "label": "Bit 1",
-            "description": "missing_tb_not_checked"
-          },
-          {
-            "label": "Bit 2",
-            "description": "tb_lower_threshold_not_checked"
-          },
-          {
-            "label": "Bit 3",
-            "description": "tb_upper_threshold_not_checked"
-          },
-          {
-            "label": "Bit 4",
-            "description": "spectral_consistency_not_checked"
-          },
-          {
-            "label": "Bit 5",
-            "description": "receiver_sanity_not_checked"
-          },
-          {
-            "label": "Bit 6",
-            "description": "rain_not_checked"
-          },
-          {
-            "label": "Bit 7",
-            "description": "sun_moon_in_beam_not_checked"
-          },
-          {
-            "label": "Bit 8",
-            "description": "tb_offset_not_checked"
-          }
-        ],
-        "dimensions": ["time"],
-        "dtype": "int32"
-      }
-    ]
-  },
   "rain-radar": {
     "description": "Micro Rain Radar (MRR) is a remote sensing instrument used for measuring the vertical profiles of precipitation intensity and particle size distribution in the atmosphere.",
     "references_html": [],
@@ -3939,426 +4365,6 @@
         "comment": "Angle to the local vertical. A value of zero is directly overhead.",
         "definition": null,
         "dimensions": ["time"],
-        "dtype": "float32"
-      }
-    ]
-  },
-  "categorize-voodoo": {
-    "description": "The categorize product calculated using VOODOO (Schimmel et al. 2022).",
-    "references_html": [
-      "Schimmel et al. (2022). Identifying cloud droplets beyond lidar attenuation from vertically pointing cloud radar observations using artificial neural networks. <i>Atmos. Meas. Tech.</i>, <i>15</i>(18), 5343-5366. <a href=\"https://doi.org/10.5194/amt-15-5343-2022\">https://doi.org/10.5194/amt-15-5343-2022</a>"
-    ],
-    "dimensions": [
-      {
-        "name": "height",
-        "units": "m",
-        "standard_name": "height_above_mean_sea_level",
-        "long_name": "Height above mean sea level",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "model_height",
-        "units": "m",
-        "standard_name": null,
-        "long_name": "Height of model variables above mean sea level",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["model_height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "model_time",
-        "units": "hours since 2024-01-01 00:00:00 +00:00",
-        "standard_name": null,
-        "long_name": "Model time UTC",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["model_time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "time",
-        "units": "hours since 2024-01-01 00:00:00 +00:00",
-        "standard_name": "time",
-        "long_name": "Time UTC",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      }
-    ],
-    "common_variables": [
-      {
-        "name": "Tw",
-        "units": "K",
-        "standard_name": null,
-        "long_name": "Wet-bulb temperature",
-        "comment": "This variable was derived from model temperature, pressure and relative\nhumidity.",
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "Z",
-        "units": "dBZ",
-        "standard_name": null,
-        "long_name": "Radar reflectivity factor",
-        "comment": "This variable has been corrected for attenuation by gaseous attenuation\n(using the thermodynamic variables from a forecast model; see the\nradar_gas_atten variable) and liquid attenuation (using liquid water path\nfrom a microwave radiometer; see the radar_liquid_atten variable) but rain\nand melting-layer attenuation has not been corrected.\nCalibration convention: in the absence of attenuation, a cloud at 273 K\ncontaining one million 100-micron droplets per cubic metre will have\na reflectivity of 0 dBZ at all frequencies.",
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "Z_bias",
-        "units": "dB",
-        "standard_name": null,
-        "long_name": "Bias in radar reflectivity factor",
-        "comment": "This variable is an estimate of the one-standard-deviation\ncalibration error.",
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "Z_error",
-        "units": "dB",
-        "standard_name": null,
-        "long_name": "Error in radar reflectivity factor",
-        "comment": "This variable is an estimate of the one-standard-deviation random error\nin radar reflectivity factor. It originates from the following independent\nsources of error:\n1) Precision in reflectivity estimate due to finite signal to noise and\n   finite number of pulses\n2) 10% uncertainty in gaseous attenuation correction (mainly due to error\n   in model humidity field)\n3) Error in liquid water path (given by the variable lwp_error) and its\n   partitioning with height).",
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "Z_sensitivity",
-        "units": "dBZ",
-        "standard_name": null,
-        "long_name": "Minimum detectable radar reflectivity",
-        "comment": "This variable is an estimate of the radar sensitivity, i.e. the minimum\ndetectable radar reflectivity, as a function of height. It includes the\neffect of ground clutter and gas attenuation but not liquid attenuation.",
-        "definition": null,
-        "dimensions": ["height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "altitude",
-        "units": "m",
-        "standard_name": "altitude",
-        "long_name": "Altitude of site",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "beta",
-        "units": "sr-1 m-1",
-        "standard_name": null,
-        "long_name": "Attenuated backscatter coefficient",
-        "comment": "SNR-screened attenuated backscatter coefficient.",
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "beta_bias",
-        "units": "dB",
-        "standard_name": null,
-        "long_name": "Bias in attenuated backscatter coefficient",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "beta_error",
-        "units": "dB",
-        "standard_name": null,
-        "long_name": "Error in attenuated backscatter coefficient",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "category_bits",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Target categorization bits",
-        "comment": "This variable contains information on the nature of the targets\nat each pixel, thereby facilitating the application of algorithms that work\nwith only one type of target. The information is in the form of an array of\nbits, each of which states either whether a certain type of particle is\npresent (e.g. aerosols), or the whether some of the target particles have\na particular property. The definitions of each bit are given in the\ndefinition attribute. Bit 0 is the least significant.",
-        "definition": [
-          {
-            "label": "Bit 0",
-            "description": "Small liquid droplets are present."
-          },
-          {
-            "label": "Bit 1",
-            "description": "Falling hydrometeors are present; if Bit 2 is set then these are most likely ice particles, otherwise they are drizzle or rain drops."
-          },
-          {
-            "label": "Bit 2",
-            "description": "Wet-bulb temperature is less than 0 degrees C, implying the phase of Bit-1 particles."
-          },
-          {
-            "label": "Bit 3",
-            "description": "Melting ice particles are present."
-          },
-          {
-            "label": "Bit 4",
-            "description": "Aerosol particles are present and visible to the lidar."
-          },
-          {
-            "label": "Bit 5",
-            "description": "Insects are present and visible to the radar."
-          }
-        ],
-        "dimensions": ["time", "height"],
-        "dtype": "int32"
-      },
-      {
-        "name": "insect_prob",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Insect probability",
-        "comment": "Ad-hoc estimation of the probability that the pixel contains insects.",
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "latitude",
-        "units": "degree_north",
-        "standard_name": "latitude",
-        "long_name": "Latitude of site",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "lidar_wavelength",
-        "units": "nm",
-        "standard_name": null,
-        "long_name": "Laser wavelength",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "liquid_prob",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Liquid probability",
-        "comment": "Probability derived from the radar data that the pixel contains liquid.",
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "longitude",
-        "units": "degree_east",
-        "standard_name": "longitude",
-        "long_name": "Longitude of site",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "lwp",
-        "units": "kg m-2",
-        "standard_name": "atmosphere_cloud_liquid_water_content",
-        "long_name": "Liquid water path",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "lwp_error",
-        "units": "kg m-2",
-        "standard_name": null,
-        "long_name": "Error in liquid water path",
-        "comment": "This variable is a rough estimate of the one-standard-deviation\nerror in liquid water path, calculated as a combination of\na 20 g m-2 linear error and a 25 %\nfractional error.",
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "nyquist_velocity",
-        "units": "m s-1",
-        "standard_name": null,
-        "long_name": "Nyquist velocity",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "pressure",
-        "units": "Pa",
-        "standard_name": null,
-        "long_name": "Pressure",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["model_time", "model_height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "q",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Specific humidity",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["model_time", "model_height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "quality_bits",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Data quality bits",
-        "comment": "This variable contains information on the quality of the data at each pixel.\nThe information is in the form of an array of bits, and the definitions of\neach bit are given in the definition attribute. Bit 0 is the least\nsignificant.",
-        "definition": [
-          {
-            "label": "Bit 0",
-            "description": "An echo is detected by the radar."
-          },
-          {
-            "label": "Bit 1",
-            "description": "An echo is detected by the lidar."
-          },
-          {
-            "label": "Bit 2",
-            "description": "The apparent echo detected by the radar is ground clutter or some other non-atmospheric artifact."
-          },
-          {
-            "label": "Bit 3",
-            "description": "The lidar echo is due to clear-air molecular scattering."
-          },
-          {
-            "label": "Bit 4",
-            "description": "Liquid water cloud, rainfall or melting ice below this pixel will have caused radar and lidar attenuation; if bit 5 is set then a correction for the radar attenuation has been performed; otherwise do not trust the absolute values of reflectivity factor. No correction is performed for lidar attenuation."
-          },
-          {
-            "label": "Bit 5",
-            "description": "Radar reflectivity has been corrected for liquid-water attenuation using the microwave radiometer measurements of liquid water path and the lidar estimation of the location of liquid water cloud; be aware that errors in reflectivity may result."
-          }
-        ],
-        "dimensions": ["time", "height"],
-        "dtype": "int32"
-      },
-      {
-        "name": "radar_frequency",
-        "units": "GHz",
-        "standard_name": null,
-        "long_name": "Radar transmit frequency",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "radar_gas_atten",
-        "units": "dB",
-        "standard_name": null,
-        "long_name": "Two-way radar attenuation due to atmospheric gases",
-        "comment": "This variable was calculated from the model temperature, pressure and\nhumidity, but forcing pixels containing liquid cloud to saturation with\nrespect to liquid water. It has been used to correct Z.",
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "radar_liquid_atten",
-        "units": "dB",
-        "standard_name": null,
-        "long_name": "Two-way radar attenuation due to liquid water",
-        "comment": "This variable was calculated from the liquid water path measured by\nmicrowave radiometer using lidar and radar returns to perform an\napproximate partitioning of the liquid water content with height. Bit 5\nof the quality_bits variable indicates where a correction for liquid water\nattenuation has been performed.",
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "rain_detected",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Rain detected",
-        "comment": "1 = rain detected, 0 = no rain detected",
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "int32"
-      },
-      {
-        "name": "rainfall_rate",
-        "units": "m s-1",
-        "standard_name": "rainfall_rate",
-        "long_name": "Rainfall rate",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "temperature",
-        "units": "K",
-        "standard_name": null,
-        "long_name": "Temperature",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["model_time", "model_height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "uwind",
-        "units": "m s-1",
-        "standard_name": null,
-        "long_name": "Zonal wind",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["model_time", "model_height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "v",
-        "units": "m s-1",
-        "standard_name": null,
-        "long_name": "Doppler velocity",
-        "comment": "This parameter is the radial component of the velocity, with positive\nvelocities are away from the radar.",
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "v_sigma",
-        "units": "m s-1",
-        "standard_name": null,
-        "long_name": "Standard deviation of mean Doppler velocity",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "vwind",
-        "units": "m s-1",
-        "standard_name": null,
-        "long_name": "Meridional wind",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["model_time", "model_height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "width",
-        "units": "m s-1",
-        "standard_name": null,
-        "long_name": "Spectral width",
-        "comment": "This parameter is the standard deviation of the reflectivity-weighted\nvelocities in the radar pulse volume.",
-        "definition": null,
-        "dimensions": ["time", "height"],
         "dtype": "float32"
       }
     ]
