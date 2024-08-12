@@ -42,7 +42,7 @@
 
 <script lang="ts" setup>
 import { type ColorClass, classColor } from "@/lib";
-import type { ProductLevels } from "@/lib/DataStatusParser";
+import type { ProductLevels, ProductType } from "@/lib/DataStatusParser";
 import { computed } from "vue";
 
 import {
@@ -73,7 +73,7 @@ const dates = computed(() =>
   })),
 );
 
-const allProdTypes = ["instrument", "geophysical"];
+const allProdTypes: ProductType[] = ["instrument", "geophysical"];
 
 function createColorClass(products: ProductLevels): ColorClass {
   if (noData(products)) return "no-data";

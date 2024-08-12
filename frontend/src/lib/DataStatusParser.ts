@@ -27,7 +27,9 @@ export interface ProductDate {
   products: ProductLevels;
 }
 
-export type LvlTranslate = Record<string, keyof ProductLevels>;
+export type ProductType = keyof ProductLevels;
+
+export type LvlTranslate = Record<string, ProductType>;
 
 export interface DataStatus {
   allProducts: Product[];
