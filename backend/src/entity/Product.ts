@@ -8,6 +8,7 @@ export enum ProductType {
   SYNERGETIC = "synergetic",
   EVALUATION = "evaluation",
   EXPERIMENTAL = "experimental",
+  GEOPHYSICAL = "geophysical",
 }
 
 @Entity()

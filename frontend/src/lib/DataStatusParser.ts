@@ -19,7 +19,7 @@ export interface ProductInfo {
 
 export interface ProductLevels {
   instrument: ProductInfo[];
-  synergetic: ProductInfo[];
+  geophysical: ProductInfo[];
 }
 
 export interface ProductDate {
@@ -34,7 +34,7 @@ export interface DataStatus {
   dates: ProductDate[];
   lvlTranslate: LvlTranslate;
   availableProducts: Product[];
-  synergeticProductCount: number;
+  geophysicalProductCount: number;
   years: number[];
   allPids: InstrumentPids;
 }
@@ -43,7 +43,7 @@ function createProductLevels(lvlTranslate: LvlTranslate, productInfo?: ProductIn
   if (!existingObj) {
     existingObj = {
       instrument: [],
-      synergetic: [],
+      geophysical: [],
     };
   }
   if (productInfo) {
@@ -89,11 +89,9 @@ export async function parseDataStatus(config: DataStatusConfig): Promise<DataSta
   ]);
   const searchResponse = searchRes.data;
 
-  const synergeticProductCount = prodRes.data.filter(
-    (product) => product.type.includes("synergetic") && !product.experimental,
+  const geophysicalProductCount = prodRes.data.filter(
+    (product) => product.type.includes("geophysical") && !product.experimental,
   ).length;
-
-  console.log(synergeticProductCount);
 
   const allProducts = prodRes.data.filter((prod) => prod.level !== "3");
   if (!searchResponse || !allProducts || searchResponse.length == 0) {
@@ -102,7 +100,7 @@ export async function parseDataStatus(config: DataStatusConfig): Promise<DataSta
       dates: [],
       lvlTranslate: {},
       availableProducts: [],
-      synergeticProductCount: 0,
+      geophysicalProductCount: 0,
       years: [],
       allPids: {},
     };
@@ -121,7 +119,7 @@ export async function parseDataStatus(config: DataStatusConfig): Promise<DataSta
   const lvlTranslate = allProducts.reduce(
     (acc, cur) => ({
       ...acc,
-      [cur.id]: cur.type.includes("instrument") || cur.type.includes("model") ? "instrument" : "synergetic",
+      [cur.id]: cur.type.includes("instrument") || cur.type.includes("model") ? "instrument" : "geophysical",
     }),
     {},
   );
@@ -171,7 +169,7 @@ export async function parseDataStatus(config: DataStatusConfig): Promise<DataSta
     dates: Object.values(dates),
     lvlTranslate,
     availableProducts,
-    synergeticProductCount,
+    geophysicalProductCount: geophysicalProductCount,
     years: [...years],
     allPids,
   };

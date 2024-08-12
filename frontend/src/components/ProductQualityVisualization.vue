@@ -2,9 +2,9 @@
   <DateVisualization
     :data="dates"
     :legend="{
-      'all-data': 'Synergetic (pass)',
-      'all-raw': 'Synergetic (warnings / info)',
-      'contains-errors': 'Synergetic (errors)',
+      'all-data': 'Geophysical (pass)',
+      'all-raw': 'Geophysical (warnings / info)',
+      'contains-errors': 'Geophysical (errors)',
       'only-legacy-data': 'Legacy',
       'only-model-data': 'Products / tests missing',
       'no-data': 'No data',
@@ -53,11 +53,11 @@ import {
   isFileWithWarning,
   getProductStatus,
   getReportExists,
-  allSynergeticPass,
-  hasSomeSynergeticTests,
-  synergeticContainsErrors,
-  synergeticContainsWarningsOrInfo,
-  onlyLegacySynergetic,
+  allGeophysicalPass,
+  hasSomeGeophysicalTests,
+  geophysicalContainsErrors,
+  geophysicalContainsWarningsOrInfo,
+  onlyLegacyGeophysical,
   findProducts,
   toolTipTitle,
   type Props,
@@ -73,14 +73,14 @@ const dates = computed(() =>
   })),
 );
 
-const allProdTypes = computed(() => Array.from(new Set(Object.values(props.dataStatus.lvlTranslate))).sort());
+const allProdTypes = ["instrument", "geophysical"];
 
 function createColorClass(products: ProductLevels): ColorClass {
   if (noData(products)) return "no-data";
-  if (hasSomeSynergeticTests(products) && onlyLegacySynergetic(products)) return "only-legacy-data";
-  if (allSynergeticPass(products, props.dataStatus.synergeticProductCount)) return "all-data";
-  if (synergeticContainsErrors(products)) return "contains-errors";
-  if (synergeticContainsWarningsOrInfo(products)) return "all-raw";
+  if (hasSomeGeophysicalTests(products) && onlyLegacyGeophysical(products)) return "only-legacy-data";
+  if (allGeophysicalPass(products, props.dataStatus.geophysicalProductCount)) return "all-data";
+  if (geophysicalContainsErrors(products)) return "contains-errors";
+  if (geophysicalContainsWarningsOrInfo(products)) return "all-raw";
   return "only-model-data";
 }
 </script>

@@ -15,7 +15,7 @@ export const isPass = (prod: ProductInfo): boolean => prod?.errorLevel === "pass
 export const qualityExists = (prod: ProductInfo): boolean => "errorLevel" in prod && prod.errorLevel !== null;
 
 export const noData = (products: ProductLevels): boolean =>
-  products.instrument.length == 0 && products.synergetic.length == 0;
+  products.instrument.length == 0 && products.geophysical.length == 0;
 
 export function isLegacyOrModel(prod: ProductInfo): boolean {
   return prod.legacy || prod.id == "model";
@@ -30,17 +30,17 @@ export function isNotExperimental(prod: ProductInfo): boolean {
 }
 
 export function onlyLegacy(products: ProductLevels) {
-  return products.synergetic.every(isLegacy) && products.instrument.every(isLegacyOrModel);
+  return products.geophysical.every(isLegacy) && products.instrument.every(isLegacyOrModel);
 }
 
-export function onlyLegacySynergetic(products: ProductLevels) {
-  return products.synergetic.length > 0 && products.synergetic.every(isLegacy);
+export function onlyLegacyGeophysical(products: ProductLevels) {
+  return products.geophysical.length > 0 && products.geophysical.every(isLegacy);
 }
 
 export function onlyModel(products: ProductLevels) {
   const level1bWithoutExperimental = products.instrument.filter(isNotExperimental);
   return (
-    products.synergetic.filter(isNotExperimental).length == 0 &&
+    products.geophysical.filter(isNotExperimental).length == 0 &&
     level1bWithoutExperimental.length == 1 &&
     level1bWithoutExperimental[0].id == "model"
   );
@@ -70,29 +70,29 @@ export function getReportExists(existingProducts: ProductInfo[], productId: Prod
   return existingProducts.some((prod) => prod.id === productId && qualityExists(prod));
 }
 
-export function hasSomeSynergeticTests(products: ProductLevels) {
-  return products.synergetic.filter((x) => isNotExperimental(x) && qualityExists(x)).length > 0;
+export function hasSomeGeophysicalTests(products: ProductLevels) {
+  return products.geophysical.filter((x) => isNotExperimental(x) && qualityExists(x)).length > 0;
 }
 
-export function synergeticContainsErrors(products: ProductLevels) {
-  return products.synergetic.filter((x) => isNotExperimental(x) && isError(x)).length > 0;
+export function geophysicalContainsErrors(products: ProductLevels) {
+  return products.geophysical.filter((x) => isNotExperimental(x) && isError(x)).length > 0;
 }
 
-export function synergeticContainsWarningsOrInfo(products: ProductLevels) {
-  return products.synergetic.filter((x) => isNotExperimental(x) && (isWarning(x) || isInfo(x))).length > 0;
+export function geophysicalContainsWarningsOrInfo(products: ProductLevels) {
+  return products.geophysical.filter((x) => isNotExperimental(x) && (isWarning(x) || isInfo(x))).length > 0;
 }
 
-export function allSynergeticPass(products: ProductLevels, synergeticCount: number): boolean {
-  return products.synergetic.filter((x) => isNotExperimental(x) && isPass(x)).length == synergeticCount;
+export function allGeophysicalPass(products: ProductLevels, geophysicalCount: number): boolean {
+  return products.geophysical.filter((x) => isNotExperimental(x) && isPass(x)).length == geophysicalCount;
 }
 
-export function allSynergetic(products: ProductLevels, synergeticCount: number): boolean {
-  return products.synergetic.filter((x) => isNotLegacy(x) && isNotExperimental(x)).length == synergeticCount;
+export function allGeophysical(products: ProductLevels, geophysicalCount: number): boolean {
+  return products.geophysical.filter((x) => isNotLegacy(x) && isNotExperimental(x)).length == geophysicalCount;
 }
 
 export function missingData(products: ProductLevels) {
   return (
-    products.synergetic.filter((x) => isNotLegacy(x) && isNotExperimental(x)).length ||
+    products.geophysical.filter((x) => isNotLegacy(x) && isNotExperimental(x)).length ||
     products.instrument.filter((x) => isNotLegacy(x) && isNotExperimental(x)).length
   );
 }

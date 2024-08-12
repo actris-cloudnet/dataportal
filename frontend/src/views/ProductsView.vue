@@ -19,7 +19,7 @@
           </router-link>
         </li>
       </ul>
-      <h2>Synergetic products</h2>
+      <h2>Geophysical products</h2>
       <p>Cloud properties derived from multiple instruments of different type.</p>
       <ul>
         <li v-for="product in derivedProducts" :key="product.id">
@@ -72,7 +72,7 @@ const instrumentProducts = computed(() =>
 const derivedProducts = computed(() =>
   products.value.status === "ready"
     ? products.value.value
-        .filter((product) => product.type.includes("synergetic") && product.experimental === false)
+        .filter((product) => product.type.includes("geophysical") && product.experimental === false)
         .sort(alphabeticalSort)
     : [],
 );

@@ -2,7 +2,7 @@
   <DateVisualization
     :data="dates"
     :legend="{
-      'all-data': 'All synergetic products',
+      'all-data': 'All geophysical products',
       'all-raw': 'Some instrument products',
       'only-legacy-data': 'Only legacy',
       'only-model-data': 'Only model',
@@ -26,7 +26,7 @@
               {{ product.humanReadableName }}
               <sup
                 class="legacy-label"
-                v-if="prodType === 'synergetic' && data && isLegacyFile(data.products[prodType], product.id)"
+                v-if="prodType === 'geophysical' && data && isLegacyFile(data.products[prodType], product.id)"
                 >L</sup
               >
             </li>
@@ -46,7 +46,7 @@ import {
   isLegacyFile,
   noData,
   onlyModel,
-  allSynergetic,
+  allGeophysical,
   getProductStatus,
   missingData,
   onlyLegacy,
@@ -68,13 +68,13 @@ const dates = computed(() =>
   })),
 );
 
-const allProdTypes = computed(() => Array.from(new Set(Object.values(props.dataStatus.lvlTranslate))).sort());
+const allProdTypes = ["instrument", "geophysical"];
 
 function createColorClass(products: ProductLevels): ColorClass {
   if (noData(products)) return "no-data";
   if (onlyModel(products)) return "only-model-data";
   if (onlyLegacy(products)) return "only-legacy-data";
-  if (allSynergetic(products, props.dataStatus.synergeticProductCount)) return "all-data";
+  if (allGeophysical(products, props.dataStatus.geophysicalProductCount)) return "all-data";
   if (missingData(products)) return "all-raw";
   return "contains-errors";
 }

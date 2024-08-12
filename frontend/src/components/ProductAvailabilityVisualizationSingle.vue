@@ -63,7 +63,7 @@ const getProduct = (date: ProductDate, productId: string, pid: string | undefine
     return date.products.instrument.find((p) => p.instrumentPid == pid);
   }
   return (
-    date.products.instrument.find((p) => p.id == productId) || date.products.synergetic.find((p) => p.id == productId)
+    date.products.instrument.find((p) => p.id == productId) || date.products.geophysical.find((p) => p.id == productId)
   );
 };
 
