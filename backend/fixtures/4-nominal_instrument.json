@@ -1,0 +1,14 @@
+[
+  {
+    "site": { "id": "bucharest" },
+    "product": { "id": "lidar" },
+    "instrumentInfo": { "uuid": "c43e9f54-c94d-45f7-8596-223b1c2b14c0" },
+    "measurementDate": "2024-01-01"
+  },
+  {
+    "site": { "id": "bucharest" },
+    "product": { "id": "lidar" },
+    "instrumentInfo": { "uuid": "eb4b39e5-6bc8-40f0-92d2-43d31f224de6" },
+    "measurementDate": "2024-06-01"
+  }
+]
