@@ -40,6 +40,8 @@ async function createServer(): Promise<void> {
   const authenticator = new Authenticator(AppDataSource);
   const authorizator = new Authorizator(AppDataSource);
   const queueService = new QueueService(AppDataSource);
+  await queueService.initializeLocks();
+  setInterval(() => queueService.breakLocks(), 5 * 60 * 1000);
 
   const fileRoutes = new FileRoutes(AppDataSource);
   const siteRoutes = new SiteRoutes(AppDataSource);

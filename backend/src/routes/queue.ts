@@ -44,6 +44,7 @@ export class QueueRoutes {
         res.sendStatus(204);
       }
     } catch (err) {
+      console.log(err);
       next({ status: 500, errors: err });
     }
   };
@@ -54,6 +55,7 @@ export class QueueRoutes {
       await this.queueService.fail(id);
       res.sendStatus(204);
     } catch (err) {
+      console.log(err);
       next({ status: 500, errors: err });
     }
   };
@@ -64,6 +66,7 @@ export class QueueRoutes {
       await this.queueService.complete(id);
       res.sendStatus(204);
     } catch (err) {
+      console.log(err);
       next({ status: 500, errors: err });
     }
   };
@@ -73,6 +76,7 @@ export class QueueRoutes {
       const queue = await this.queueService.getQueue();
       res.send(queue);
     } catch (err) {
+      console.log(err);
       next({ status: 500, errors: err });
     }
   };
