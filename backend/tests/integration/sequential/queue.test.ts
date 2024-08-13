@@ -316,4 +316,96 @@ describe("QueueService", () => {
     const taskRes2 = await queueService.receive({ now });
     expect(taskRes2).toMatchObject({ productId: "radar" });
   });
+
+  it("postpones task once", async () => {
+    // Add tasks.
+    await queueService.publish(
+      makeTask({
+        type: TaskType.PROCESS,
+        siteId: "hyytiala",
+        productId: "lidar",
+        instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+        measurementDate: "2024-01-10",
+        priority: 0,
+      }),
+    );
+    await queueService.publish(
+      makeTask({
+        type: TaskType.FREEZE,
+        siteId: "hyytiala",
+        productId: "lidar",
+        instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+        measurementDate: "2024-01-10",
+        priority: 1,
+      }),
+    );
+    expect(await queueService.count()).toBe(2);
+
+    // Start process task.
+    const taskRes = await queueService.receive({ now });
+    expect(taskRes).toMatchObject({ type: "process" });
+
+    // Freeze task is postponed.
+    const taskRes2 = await queueService.receive({ now });
+    expect(taskRes2).toBeNull();
+    expect(await queueService.count()).toBe(2);
+
+    // Finish process task.
+    await queueService.complete(taskRes!["id"]);
+    expect(await queueService.count()).toBe(1);
+
+    // Freeze task is not postponed anymore.
+    advanceMinutes(10);
+    const taskRes3 = await queueService.receive({ now });
+    expect(taskRes3).toMatchObject({ type: "freeze" });
+  });
+
+  it("postpones task multiple times", async () => {
+    // Add tasks.
+    await queueService.publish(
+      makeTask({
+        type: TaskType.PROCESS,
+        siteId: "hyytiala",
+        productId: "lidar",
+        instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+        measurementDate: "2024-01-10",
+        priority: 0,
+      }),
+    );
+    await queueService.publish(
+      makeTask({
+        type: TaskType.FREEZE,
+        siteId: "hyytiala",
+        productId: "lidar",
+        instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+        measurementDate: "2024-01-10",
+        priority: 1,
+      }),
+    );
+    expect(await queueService.count()).toBe(2);
+
+    // Start process task.
+    const taskRes = await queueService.receive({ now });
+    expect(taskRes).toMatchObject({ type: "process" });
+
+    // Freeze task is postponed.
+    const taskRes2 = await queueService.receive({ now });
+    expect(taskRes2).toBeNull();
+    expect(await queueService.count()).toBe(2);
+
+    // Freeze task is postponed again.
+    advanceMinutes(10);
+    const taskRes3 = await queueService.receive({ now });
+    expect(taskRes3).toBeNull();
+    expect(await queueService.count()).toBe(2);
+
+    // Finish process task.
+    await queueService.complete(taskRes!["id"]);
+    expect(await queueService.count()).toBe(1);
+
+    // Freeze task is not postponed anymore.
+    advanceMinutes(10);
+    const taskRes4 = await queueService.receive({ now });
+    expect(taskRes4).toMatchObject({ type: "freeze" });
+  });
 });
