@@ -1,7 +1,8 @@
 import { Request, RequestHandler, Response } from "express";
-import { DataSource, Repository } from "typeorm";
-import { Instrument, InstrumentInfo } from "../entity/Instrument";
+import { DataSource, LessThanOrEqual, Repository } from "typeorm";
+import { Instrument, InstrumentInfo, NominalInstrument } from "../entity/Instrument";
 import { InstrumentUpload } from "../entity/Upload";
+import { isValidDate } from "../lib";
 
 export class InstrumentRoutes {
   constructor(dataSource: DataSource) {
@@ -9,12 +10,14 @@ export class InstrumentRoutes {
     this.instrumentRepo = dataSource.getRepository(Instrument);
     this.instrumentInfoRepo = dataSource.getRepository(InstrumentInfo);
     this.instrumentUploadRepo = dataSource.getRepository(InstrumentUpload);
+    this.nominalInstrumentRepo = dataSource.getRepository(NominalInstrument);
   }
 
   readonly dataSource: DataSource;
   readonly instrumentRepo: Repository<Instrument>;
   readonly instrumentInfoRepo: Repository<InstrumentInfo>;
   readonly instrumentUploadRepo: Repository<InstrumentUpload>;
+  readonly nominalInstrumentRepo: Repository<NominalInstrument>;
 
   instruments: RequestHandler = async (req: Request, res: Response, next) => {
     try {
@@ -122,6 +125,41 @@ export class InstrumentRoutes {
       res.send({ ...pid, locations });
     } catch (error) {
       next({ status: 500, errors: error });
+    }
+  };
+
+  nominalInstrument: RequestHandler = async (req, res, next) => {
+    const query = req.query as unknown as { date: string; site: string; product: string };
+    if (!isValidDate(query.date)) {
+      return next({ status: 400, errors: "date is invalid" });
+    }
+    if (!query.site) {
+      return next({ status: 400, errors: "site is required" });
+    }
+    if (!query.product) {
+      return next({ status: 400, errors: "product is required" });
+    }
+    try {
+      const data = await this.nominalInstrumentRepo.findOne({
+        where: {
+          site: { id: query.site },
+          product: { id: query.product },
+          measurementDate: LessThanOrEqual(query.date),
+        },
+        relations: { instrumentInfo: true },
+        order: { measurementDate: "DESC" },
+      });
+      if (!data) {
+        return next({ status: 404, errors: "Nominal instrument not specified" });
+      }
+      res.send({
+        siteId: data.siteId,
+        productId: data.productId,
+        measurementDate: data.measurementDate,
+        nominalInstrument: data.instrumentInfo,
+      });
+    } catch (e) {
+      next({ status: 500, errors: e });
     }
   };
 }

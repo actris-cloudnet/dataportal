@@ -2,6 +2,7 @@ import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryCol
 import { InstrumentUpload } from "./Upload";
 import { RegularFile } from "./File";
 import { Product } from "./Product";
+import { Site } from "./Site";
 
 export enum InstrumentType {
   RADAR = "radar",
@@ -63,4 +64,25 @@ export class InstrumentInfo {
 
   @Column({ type: "text", nullable: true })
   serialNumber!: string | null;
+}
+
+@Entity()
+export class NominalInstrument {
+  @PrimaryColumn()
+  siteId!: string;
+
+  @PrimaryColumn()
+  productId!: string;
+
+  @ManyToOne((_) => Site)
+  site!: Site;
+
+  @ManyToOne((_) => Product)
+  product!: Product;
+
+  @Column({ type: "date", primary: true })
+  measurementDate!: string;
+
+  @ManyToOne((_) => InstrumentInfo)
+  instrumentInfo!: InstrumentInfo;
 }

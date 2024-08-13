@@ -166,8 +166,6 @@ async function createServer(): Promise<void> {
     middleware.checkParamsExistInDb,
     uploadRoutes.listMetadata(false),
   );
-  app.get("/api/instrument-pids", instrRoutes.listInstrumentPids);
-  app.get("/api/instrument-pids/:uuid", middleware.validateUuidParam, instrRoutes.instrumentPid);
 
   // public/internal
   app.get("/api/uploaded-metadata", uploadRoutes.listInstrumentsFromMetadata);
@@ -196,6 +194,9 @@ async function createServer(): Promise<void> {
   app.get("/api/product-availability", productAvailabilityRoutes.productAvailability);
   app.get("/api/upload-amount", productAvailabilityRoutes.uploadAmount);
   app.post("/api/feedback", rateLimit({ windowMs: 60 * 1000, limit: 10 }), express.json(), feedbackRoutes.postFeedback);
+  app.get("/api/instrument-pids", instrRoutes.listInstrumentPids);
+  app.get("/api/instrument-pids/:uuid", middleware.validateUuidParam, instrRoutes.instrumentPid);
+  app.get("/api/nominal-instrument", instrRoutes.nominalInstrument);
 
   // TODO: Depreciated. Needed for now, but in the future these should public
   // and properly documented.
