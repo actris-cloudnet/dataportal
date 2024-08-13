@@ -5,10 +5,9 @@ import { Instrument } from "./Instrument";
 export enum ProductType {
   INSTRUMENT = "instrument",
   MODEL = "model",
-  SYNERGETIC = "synergetic",
+  GEOPHYSICAL = "geophysical",
   EVALUATION = "evaluation",
   EXPERIMENTAL = "experimental",
-  GEOPHYSICAL = "geophysical",
 }
 
 @Entity()
