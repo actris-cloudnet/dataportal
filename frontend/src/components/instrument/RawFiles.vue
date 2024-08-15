@@ -14,6 +14,7 @@
           <thead class="table-header">
             <tr>
               <th>Filename</th>
+              <th v-if="showTags">Tags</th>
               <th>Size</th>
               <th>Status</th>
               <th>Created (UTC)</th>
@@ -25,6 +26,7 @@
               <td>
                 <a :href="file.downloadUrl" target="_blank">{{ file.filename }}</a>
               </td>
+              <td v-if="showTags">{{ file.tags.join(", ") }}</td>
               <td>{{ humanReadableSize(file.size) }}</td>
               <td :class="getStatusClass(file.status)">{{ file.status }}</td>
               <td>{{ formatTimestamp(file.createdAt) }}</td>
@@ -43,11 +45,11 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue";
 import axios from "axios";
-import { backendUrl, dateToString, humanReadableSize } from "@/lib";
+import { backendUrl, compareValues, dateToString, humanReadableSize } from "@/lib";
 import Donut from "@/components/DonutVisualization.vue";
 import DonutLegend from "@/components/DonutLegend.vue";
 import DatePicker from "@/components/DatePicker.vue";
-import type { Upload } from "@shared/entity/Upload";
+import type { Status, Upload } from "@shared/entity/Upload";
 import type { InstrumentInfo } from "@shared/entity/Instrument";
 import { useRouteQuery, queryString } from "@/lib/useRouteQuery";
 
@@ -60,6 +62,8 @@ const props = defineProps<Props>();
 const formatTimestamp = (date: string | Date) => date.toString().replace("T", " ").split(".")[0];
 
 const files = ref<Upload[]>([]);
+
+const showTags = computed(() => files.value.some((file) => file.tags.length > 0));
 
 const today = dateToString(new Date());
 
@@ -92,15 +96,26 @@ const stats = computed(() => {
   ];
 });
 
+const statusOrder: Record<Status, number> = {
+  processed: 1,
+  uploaded: 2,
+  created: 3,
+  invalid: 4,
+};
+
 async function fetchData() {
-  const fileResponse = await axios.get(`${backendUrl}raw-files`, {
+  const fileResponse = await axios.get<Upload[]>(`${backendUrl}raw-files`, {
     params: {
       instrumentPid: props.instrumentInfo.pid,
       date: selectedDate.value,
     },
   });
-  files.value = fileResponse.data;
-  files.value.sort((a, b) => a.status.localeCompare(b.status));
+  files.value = fileResponse.data.sort((a, b) => {
+    if (a.status === b.status) {
+      return compareValues(a.filename + a.tags.join(), b.filename + b.tags.join());
+    }
+    return compareValues(statusOrder[a.status], statusOrder[b.status]);
+  });
 }
 
 watch(

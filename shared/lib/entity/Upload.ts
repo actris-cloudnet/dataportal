@@ -28,6 +28,7 @@ export interface Upload {
   updatedAt: Date;
   site: Site;
   downloadUrl: string;
+  tags: string[];
 }
 
 export interface InstrumentUpload extends Upload {
