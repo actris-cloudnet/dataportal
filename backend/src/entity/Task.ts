@@ -21,6 +21,7 @@ export enum TaskType {
   PLOT = "plot",
   QC = "qc",
   DVAS = "dvas",
+  HKD = "hkd",
 }
 
 @Entity()
