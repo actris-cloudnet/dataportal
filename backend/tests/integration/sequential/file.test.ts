@@ -512,13 +512,13 @@ describe("DELETE /api/files/", () => {
   const privUrl = `${backendPrivateUrl}visualizations/`;
 
   it("missing mandatory parameter", async () => {
-    const file = await putDummyFile("radar", false);
+    const file = await putDummyFile({ product: "radar", volatile: false });
     await expect(deleteFile(file.uuid)).rejects.toMatchObject({ response: { status: 404 } });
     await expect(deleteFile(file.uuid, true)).rejects.toMatchObject({ response: { status: 404 } });
   });
 
   it("incorrect parameter value", async () => {
-    const file = await putDummyFile("radar", false);
+    const file = await putDummyFile({ product: "radar", volatile: false });
     await expect(deleteFile(file.uuid, "kissa", false)).rejects.toMatchObject({ response: { status: 400 } });
     await expect(deleteFile(file.uuid, "treu", false)).rejects.toMatchObject({ response: { status: 400 } });
     await expect(deleteFile(file.uuid, "fales", false)).rejects.toMatchObject({ response: { status: 400 } });
@@ -528,7 +528,7 @@ describe("DELETE /api/files/", () => {
   });
 
   it("refuses deleting a stable file", async () => {
-    const radarFile = await putDummyFile("radar", false);
+    const radarFile = await putDummyFile({ product: "radar", volatile: false });
     await expect(deleteFile(radarFile.uuid, false, false)).rejects.toMatchObject({ response: { status: 422 } });
     await fileRepo.findOneByOrFail({ uuid: radarFile.uuid });
   });
@@ -548,6 +548,14 @@ describe("DELETE /api/files/", () => {
     await expect(vizRepo.findOneBy({ s3key: "radar-ldr.png" })).resolves.toBeFalsy();
   });
 
+  it("deletes model file and images", async () => {
+    const modelFile = await putDummyFile({ product: "model" });
+    await putDummyImage("model-temperature.png", modelFile);
+    await expect(deleteFile(modelFile.uuid, false, false)).resolves.toMatchObject({ status: 200 });
+    await expect(modelFileRepo.findOneBy({ uuid: modelFile.uuid })).resolves.toBeFalsy();
+    await expect(modelVizRepo.findOneBy({ s3key: "model-temperature.png" })).resolves.toBeFalsy();
+  });
+
   it("deletes images", async () => {
     const radarFile = await putDummyFile();
     await putDummyImage("radar-v.png", radarFile);
@@ -563,7 +571,7 @@ describe("DELETE /api/files/", () => {
   it("deletes higher-level volatile products too", async () => {
     const radarFile = await putDummyFile();
     await putDummyImage("radar-v.png", radarFile);
-    const categorizeFile = await putDummyFile("categorize");
+    const categorizeFile = await putDummyFile({ product: "categorize", sourceFileIds: [radarFile.uuid] });
     await putDummyImage("categorize-ldr.png", categorizeFile);
     await expect(deleteFile(radarFile.uuid, true, false)).resolves.toMatchObject({ status: 200 });
     await expect(fileRepo.findOneBy({ uuid: radarFile.uuid })).resolves.toBeFalsy();
@@ -575,7 +583,7 @@ describe("DELETE /api/files/", () => {
   it("does not delete with dryRun parameter", async () => {
     const radarFile = await putDummyFile();
     await putDummyImage("radar-v.png", radarFile);
-    const categorizeFile = await putDummyFile("categorize");
+    const categorizeFile = await putDummyFile({ product: "categorize", sourceFileIds: [radarFile.uuid] });
     await putDummyImage("categorize-ldr.png", categorizeFile);
     await expect(deleteFile(radarFile.uuid, true, true)).resolves.toMatchObject({ status: 200 });
     await expect(fileRepo.findOneBy({ uuid: radarFile.uuid })).resolves.toBeTruthy();
@@ -587,26 +595,34 @@ describe("DELETE /api/files/", () => {
   it("returns filenames of deleted products and images", async () => {
     const radarFile = await putDummyFile();
     await putDummyImage("radar-v.png", radarFile);
-    const categorizeFile = await putDummyFile("categorize");
+    const categorizeFile = await putDummyFile({ product: "categorize", sourceFileIds: [radarFile.uuid] });
     await putDummyImage("categorize-ldr.png", categorizeFile);
     const res = await deleteFile(radarFile.uuid, true, true);
-    expect(res.data).toEqual([
-      "20181115_mace-head_categorize.nc",
-      "categorize-ldr.png",
-      "20181115_mace-head_radar.nc",
-      "radar-v.png",
-    ]);
+    expect(res.data.sort()).toEqual(
+      ["20181115_mace-head_categorize.nc", "categorize-ldr.png", "20181115_mace-head_radar.nc", "radar-v.png"].sort(),
+    );
   });
 
-  it("refuses deleting if higher-level products contain stable product", async () => {
+  it("refuses deleting if derived product is stable", async () => {
     const file = await putDummyFile();
-    await putDummyFile("categorize", false);
+    await putDummyFile({ product: "categorize", volatile: false, sourceFileIds: [file.uuid] });
     await expect(deleteFile(file.uuid, true, false)).rejects.toMatchObject({ response: { status: 422 } });
+  });
+
+  it("refuses deleting if any of derived products is stable", async () => {
+    const radarFile = await putDummyFile();
+    const categorizeFile = await putDummyFile({ product: "categorize", sourceFileIds: [radarFile.uuid] });
+    await putDummyFile({ product: "classification", volatile: false, sourceFileIds: [categorizeFile.uuid] });
+    await expect(deleteFile(radarFile.uuid, true, false)).rejects.toMatchObject({ response: { status: 422 } });
   });
 
   it("deleting using deleteHigherProducts parameter I", async () => {
     const radarFile = await putDummyFile();
-    const categorizeFile = await putDummyFile("categorize", false);
+    const categorizeFile = await putDummyFile({
+      product: "categorize",
+      volatile: false,
+      sourceFileIds: [radarFile.uuid],
+    });
     await expect(deleteFile(radarFile.uuid, false, false)).resolves.toMatchObject({ status: 200 });
     await expect(fileRepo.findOneBy({ uuid: radarFile.uuid })).resolves.toBeFalsy();
     await expect(fileRepo.findOneBy({ uuid: categorizeFile.uuid })).resolves.toBeTruthy();
@@ -614,28 +630,36 @@ describe("DELETE /api/files/", () => {
 
   it("deleting using deleteHigherProducts parameter II", async () => {
     const radarFile = await putDummyFile();
-    const categorizeFile = await putDummyFile("categorize");
+    const categorizeFile = await putDummyFile({ product: "categorize", sourceFileIds: [radarFile.uuid] });
     await expect(deleteFile(radarFile.uuid, false, false)).resolves.toMatchObject({ status: 200 });
     await expect(fileRepo.findOneBy({ uuid: radarFile.uuid })).resolves.toBeFalsy();
     await expect(fileRepo.findOneBy({ uuid: categorizeFile.uuid })).resolves.toBeTruthy();
   });
 
   it("deletes model file", async () => {
-    const file = await putDummyFile("model");
+    const file = await putDummyFile({ product: "model" });
     await expect(deleteFile(file.uuid, false, false)).resolves.toMatchObject({ status: 200 });
-    await expect(fileRepo.findOneBy({ uuid: file.uuid })).resolves.toBeFalsy();
+    await expect(modelFileRepo.findOneBy({ uuid: file.uuid })).resolves.toBeFalsy();
+  });
+
+  it("deletes model file and derived products", async () => {
+    const modelFile = await putDummyFile({ product: "model" });
+    const categorizeFile = await putDummyFile({ product: "categorize", sourceFileIds: [modelFile.uuid] });
+    await expect(deleteFile(modelFile.uuid, true, false)).resolves.toMatchObject({ status: 200 });
+    await expect(modelFileRepo.findOneBy({ uuid: modelFile.uuid })).resolves.toBeFalsy();
+    await expect(fileRepo.findOneBy({ uuid: categorizeFile.uuid })).resolves.toBeFalsy();
   });
 
   it("refuses deleting model file if higher-level products contain stable product", async () => {
-    const file = await putDummyFile("model");
-    await putDummyFile("categorize", false);
-    await expect(deleteFile(file.uuid, true, false)).rejects.toMatchObject({ response: { status: 422 } });
+    const modelFile = await putDummyFile({ product: "model" });
+    await putDummyFile({ product: "categorize", volatile: false, sourceFileIds: [modelFile.uuid] });
+    await expect(deleteFile(modelFile.uuid, true, false)).rejects.toMatchObject({ response: { status: 422 } });
   });
 
   it("deletes quality reports too", async () => {
     const resources = await readResources();
     const report = resources["quality-report-pass"];
-    const file = await putDummyFile("model");
+    const file = await putDummyFile({ product: "model" });
     const url = `${backendPrivateUrl}quality/`;
     await expect(axios.put(`${url}${file.uuid}`, report)).resolves.toMatchObject({
       status: 201,
@@ -650,7 +674,7 @@ describe("DELETE /api/files/", () => {
     expect(reports).toMatchObject([]);
   });
 
-  it("Patches file with tombstone and removes from search file", async () => {
+  it("patches file with tombstone and removes from search file", async () => {
     const radarFile = await putDummyFile();
     const headers = { authorization: `Basic ${str2base64("bob:bobs_pass")}` };
     const url = `${backendPrivateUrl}api/files/${radarFile.uuid}`;
@@ -662,7 +686,7 @@ describe("DELETE /api/files/", () => {
     return expect(searchFile).toBeNull();
   });
 
-  it("Rejects bad tombstone payload", async () => {
+  it("rejects bad tombstone payload", async () => {
     const radarFile = await putDummyFile();
     const headers = { authorization: `Basic ${str2base64("bob:bobs_pass")}` };
     const url = `${backendPrivateUrl}api/files/${radarFile.uuid}`;
@@ -675,18 +699,16 @@ describe("DELETE /api/files/", () => {
     }
   });
 
-  async function putDummyFile(fileType: string = "radar", volatile: boolean = true) {
+  async function putDummyFile(options: Partial<{ product: string; volatile: boolean; sourceFileIds: string[] }> = {}) {
+    const { product = "radar", volatile = true } = options;
     const file = {
       ...volatileFile,
-      ...{
-        product: fileType,
-        uuid: uuidGen.v4(),
-        volatile: volatile,
-      },
-      s3key: `20181115_mace-head_${fileType}.nc`,
+      ...options,
+      ...{ uuid: uuidGen.v4(), product, volatile },
+      s3key: `20181115_mace-head_${product}.nc`,
       checksum: generateHash(),
     };
-    if (fileType === "model") file.model = "ecmwf";
+    if (product === "model" && !file.model) file.model = "ecmwf";
     const bucketFix = volatile ? "-volatile" : "";
     await axios.put(`${storageServiceUrl}cloudnet-product${bucketFix}/${file.s3key}`, "content");
     await expect(putFile(file)).resolves.toMatchObject({ status: 201 });
@@ -700,7 +722,8 @@ describe("DELETE /api/files/", () => {
     };
     await axios.put(`${storageServiceUrl}cloudnet-img/${id}`, "content");
     await axios.put(`${privUrl}${id}`, payload);
-    await expect(vizRepo.findOneByOrFail({ s3key: id })).resolves.toBeTruthy();
+    const repo = file.product === "model" ? modelVizRepo : vizRepo;
+    await expect(repo.findOneByOrFail({ s3key: id })).resolves.toBeTruthy();
   }
 });
 

@@ -9,8 +9,10 @@ import {
   ObjectLiteral,
   Raw,
   QueryRunner,
+  FindOneOptions,
+  EntityTarget,
 } from "typeorm";
-import { isFile, RegularFile } from "../entity/File";
+import { File, isFile, RegularFile } from "../entity/File";
 import { FileQuality } from "../entity/FileQuality";
 import {
   checkFileExists,
@@ -317,12 +319,12 @@ export class FileRoutes {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const fileEntity = await this.determineFileEntityType(queryRunner, uuid);
-      if (!fileEntity) {
+      const file = await this.simpleFindAnyFile(queryRunner, { where: { uuid } });
+      if (!file) {
         await queryRunner.rollbackTransaction();
         return next({ status: 422, errors: ["No file matches the provided uuid"] });
       }
-      await queryRunner.manager.update(fileEntity, { uuid }, { tombstoneReason: reason.trim() });
+      await queryRunner.manager.update(file.constructor, { uuid }, { tombstoneReason: reason.trim() });
       const existingSearchFile = await queryRunner.manager.findOneBy(SearchFile, { uuid });
       if (existingSearchFile) {
         await queryRunner.manager.delete(SearchFile, { uuid });
@@ -336,18 +338,6 @@ export class FileRoutes {
       await queryRunner.release();
     }
   };
-
-  private async determineFileEntityType(
-    queryRunner: QueryRunner,
-    uuid: string,
-  ): Promise<typeof RegularFile | typeof ModelFile | null> {
-    let existingFile: RegularFile | ModelFile | null = await queryRunner.manager.findOneBy(RegularFile, { uuid });
-    if (existingFile) {
-      return RegularFile;
-    }
-    existingFile = await queryRunner.manager.findOneBy(ModelFile, { uuid });
-    return existingFile ? ModelFile : null;
-  }
 
   postFile: RequestHandler = async (req: Request, res: Response, next) => {
     const partialFile = req.body;
@@ -372,41 +362,46 @@ export class FileRoutes {
   };
 
   deleteFile: RequestHandler = async (req: Request, res: Response, next) => {
-    // TODO: use transaction
     const query: any = req.query;
     const dryRun = query.dryRun;
     const uuid = req.params.uuid;
     const filenames: string[] = [];
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
     try {
-      const existingFile = await this.findAnyFile((repo) =>
-        repo.findOne({ where: { uuid }, relations: { product: true, site: true } }),
-      );
-      if (!existingFile) return next({ status: 422, errors: ["No file matches the provided uuid"] });
-      if (!existingFile.volatile) return next({ status: 422, errors: ["Forbidden to delete a stable file"] });
-      const [fileRepo, visuRepo] =
-        existingFile instanceof RegularFile
-          ? [this.fileRepo, this.visualizationRepo]
-          : [this.modelFileRepo, this.modelVisualizationRepo];
-      const higherLevelProductNames = await this.getHigherLevelProducts(existingFile.product);
-      const products = await this.fileRepo.findBy({
-        site: { id: existingFile.site.id },
-        measurementDate: existingFile.measurementDate,
-        product: In(higherLevelProductNames),
+      const existingFile = await this.simpleFindAnyFile(queryRunner, {
+        where: { uuid },
+        relations: { product: true, site: true },
       });
+      if (!existingFile) {
+        await queryRunner.rollbackTransaction();
+        return next({ status: 422, errors: ["No file matches the provided uuid"] });
+      }
+      if (!existingFile.volatile) {
+        await queryRunner.rollbackTransaction();
+        return next({ status: 422, errors: ["Forbidden to delete a stable file"] });
+      }
+      const uuids = await this.getDerivedProducts(queryRunner, existingFile);
+      const products = await queryRunner.manager.findBy(RegularFile, { uuid: In(uuids) });
       if (query.deleteHigherProducts && products.length > 0) {
-        const onlyVolatileProducts = products.every((product) => product.volatile);
-        if (!onlyVolatileProducts)
+        if (products.some((product) => !product.volatile)) {
+          await queryRunner.rollbackTransaction();
           return next({ status: 422, errors: ["Forbidden to delete due to higher level stable files"] });
+        }
         for (const product of products) {
-          filenames.push(
-            ...(await this.deleteFileAndVisualizations(this.fileRepo, this.visualizationRepo, product.uuid, dryRun)),
-          );
+          filenames.push(...(await this.deleteFileAndVisualizations(queryRunner, product, dryRun)));
         }
       }
-      filenames.push(...(await this.deleteFileAndVisualizations(fileRepo, visuRepo, uuid, dryRun)));
+      filenames.push(...(await this.deleteFileAndVisualizations(queryRunner, existingFile, dryRun)));
+      await queryRunner.commitTransaction();
       res.send(filenames);
     } catch (e) {
+      await queryRunner.rollbackTransaction();
       return next({ status: 500, errors: e });
+    } finally {
+      await queryRunner.release();
     }
   };
 
@@ -551,6 +546,14 @@ export class FileRoutes {
     }
   }
 
+  private async simpleFindAnyFile(queryRunner: QueryRunner, options: FindOneOptions<File>) {
+    const [file, modelFile] = await Promise.all([
+      queryRunner.manager.findOne<RegularFile>(RegularFile, options),
+      queryRunner.manager.findOne<ModelFile>(ModelFile, options),
+    ]);
+    return file || modelFile;
+  }
+
   public async findAnyFile(
     searchFunc: (arg0: Repository<RegularFile | ModelFile>, arg1?: boolean) => Promise<RegularFile | ModelFile | null>,
   ): Promise<RegularFile | ModelFile | null> {
@@ -582,42 +585,43 @@ export class FileRoutes {
     );
   };
 
-  private async deleteFileAndVisualizations(
-    fileRepo: Repository<RegularFile | ModelFile>,
-    visualizationRepo: Repository<Visualization | ModelVisualization>,
-    uuid: string,
-    dryRun: boolean,
-  ) {
-    const filenames: string[] = [];
-    const file = await fileRepo.findOneByOrFail({ uuid });
-    filenames.push(file.s3key);
-    const images = await visualizationRepo.findBy({ sourceFile: { uuid } });
-    for (const image of images) filenames.push(image.s3key);
+  private async deleteFileAndVisualizations(queryRunner: QueryRunner, file: File, dryRun: boolean) {
+    const filenames = [file.s3key];
+    const VizEntity = file instanceof RegularFile ? Visualization : ModelVisualization;
+    const images = await queryRunner.manager.findBy(VizEntity, { sourceFile: { uuid: file.uuid } });
+    for (const image of images) {
+      filenames.push(image.s3key);
+    }
     if (!dryRun) {
-      await visualizationRepo.delete({ sourceFile: { uuid } });
-      await fileRepo.delete({ uuid });
-      await this.searchFileRepo.delete({ uuid });
-      await this.fileQualityRepo.delete({ uuid });
+      await queryRunner.manager.delete(VizEntity, { sourceFile: { uuid: file.uuid } });
+      await queryRunner.manager.delete(file.constructor, { uuid: file.uuid });
+      await queryRunner.manager.delete(SearchFile, { uuid: file.uuid });
+      await queryRunner.manager.delete(FileQuality, { uuid: file.uuid });
     }
     return filenames;
   }
 
-  private async getHigherLevelProducts(product: Product): Promise<string[]> {
-    // Returns Cloudnet products that are of higher level than the given product.
-    let uniqueLevels = await this.productRepo
-      .createQueryBuilder()
-      .select("DISTINCT level")
-      .orderBy("level")
-      .getRawMany();
-    uniqueLevels = uniqueLevels.map((level) => level.level);
-    const index = uniqueLevels.indexOf(product.level);
-    const levels = uniqueLevels.slice(index + 1);
-    const products = await this.productRepo
-      .createQueryBuilder()
-      .where({ level: In(levels) })
-      .select("id")
-      .getRawMany();
-    return products.map((prod) => prod.id);
+  private async getDerivedProducts(queryRunner: QueryRunner, file: ModelFile | RegularFile): Promise<string[]> {
+    const baseQuery =
+      file instanceof ModelFile
+        ? `SELECT "regularFileUuid" AS uuid
+           FROM regular_file_source_model_files_model_file
+           WHERE "modelFileUuid" = $1`
+        : `SELECT "regularFileUuid_1" as uuid
+           FROM regular_file_source_regular_files_regular_file
+           WHERE "regularFileUuid_2" = $1`;
+    const rows = await queryRunner.query(
+      `WITH RECURSIVE traverse AS (
+         ${baseQuery}
+         UNION ALL
+         SELECT "regularFileUuid_1" as uuid
+         FROM regular_file_source_regular_files_regular_file
+         JOIN traverse ON "regularFileUuid_2" = traverse.uuid
+       )
+       SELECT uuid FROM traverse`,
+      [file.uuid],
+    );
+    return rows.map((row: any) => row.uuid);
   }
 }
 
