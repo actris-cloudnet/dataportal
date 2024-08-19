@@ -1,4 +1,4 @@
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryColumn, RelationId } from "typeorm";
 import { InstrumentUpload } from "./Upload";
 import { RegularFile } from "./File";
 import { Product } from "./Product";
@@ -37,6 +37,9 @@ export class Instrument {
   @ManyToMany((_) => Product, (product) => product.sourceInstruments)
   @JoinTable()
   derivedProducts!: Product[];
+
+  @RelationId((instrument: Instrument) => instrument.derivedProducts)
+  derivedProductIds?: string[];
 }
 
 @Entity()
