@@ -28,6 +28,21 @@ export class InstrumentRoutes {
     }
   };
 
+  instrument: RequestHandler = async (req: Request, res: Response, next) => {
+    try {
+      const instrument = await this.instrumentRepo.findOne({
+        where: { id: req.params.instrumentId },
+        relations: { derivedProducts: true },
+      });
+      if (!instrument) {
+        return next({ status: 404, errors: ["No instrument match this id"] });
+      }
+      res.send(instrument);
+    } catch (err) {
+      next({ status: 500, errors: err });
+    }
+  };
+
   listInstrumentPids: RequestHandler = async (req, res, next) => {
     try {
       if ("includeSite" in req.query) {

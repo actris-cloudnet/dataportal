@@ -12,7 +12,6 @@ exports[`/api/files/:uuid request succeeds on instrument file 1`] = `
   "format": "HDF5 (NetCDF4)",
   "instrument": {
     "allowedTags": [],
-    "derivedProductIds": [],
     "humanReadableName": "METEK MIRA-35 cloud radar",
     "id": "mira-35",
     "shortName": "MIRA",

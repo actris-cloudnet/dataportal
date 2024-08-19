@@ -134,6 +134,7 @@ async function createServer(): Promise<void> {
   app.get("/api/sites/:siteId", siteRoutes.site);
   app.get("/api/products", prodRoutes.products);
   app.get("/api/instruments", instrRoutes.instruments);
+  app.get("/api/instruments/:instrumentId", instrRoutes.instrument);
   app.get("/api/models", modelRoutes.models);
   app.get("/api/products/variables", prodRoutes.productVariables);
   app.get("/api/products/:productId", prodRoutes.product);
