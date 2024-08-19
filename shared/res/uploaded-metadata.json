@@ -19,7 +19,7 @@
       "country": "Spain"
     },
     "instrument": {
-      "id": "mira",
+      "id": "mira-35",
       "type": "radar",
       "humanReadableName": "METEK MIRA-35 cloud radar"
     }
@@ -94,7 +94,7 @@
       "country": "Romania"
     },
     "instrument": {
-      "id": "mira",
+      "id": "mira-35",
       "type": "radar",
       "humanReadableName": "METEK MIRA-35 cloud radar"
     }

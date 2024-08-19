@@ -14,7 +14,7 @@ exports[`/api/files/:uuid request succeeds on instrument file 1`] = `
     "allowedTags": [],
     "derivedProductIds": [],
     "humanReadableName": "METEK MIRA-35 cloud radar",
-    "id": "mira",
+    "id": "mira-35",
     "shortName": "MIRA",
     "type": "radar",
   },

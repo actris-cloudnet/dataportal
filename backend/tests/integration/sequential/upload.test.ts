@@ -39,7 +39,7 @@ const validMetadata = {
   filename: "file1.LV1",
   measurementDate: "2020-08-11",
   checksum: "9a0364b9e99bb480dd25e1f0284c8555",
-  instrument: "mira",
+  instrument: "mira-35",
   instrumentPid: "https://hdl.handle.net/123/granada-mira",
   site: "granada",
 };
@@ -48,7 +48,7 @@ const validMetadataAndStableProduct = {
   filename: "file1.LV1",
   measurementDate: "2021-02-20",
   checksum: "3a0364b9e99bb480dd25e1f0284c8555",
-  instrument: "mira",
+  instrument: "mira-35",
   instrumentPid: "https://hdl.handle.net/123/bucharest-mira",
   site: "bucharest",
 };
@@ -57,7 +57,7 @@ const validMetadataAndVolatileProduct = {
   filename: "file1.LV1",
   measurementDate: "2018-11-15",
   checksum: "3a0364b9e99bb480dd25e1f0284c8555",
-  instrument: "mira",
+  instrument: "mira-35",
   instrumentPid: "https://hdl.handle.net/123/bucharest-mira",
   site: "mace-head",
 };

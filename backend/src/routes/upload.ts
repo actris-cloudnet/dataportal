@@ -15,7 +15,7 @@ import {
   uploadBucket,
   validateInstrumentPid,
   daysBetweenDates,
-  validateInstrument,
+  fixInstrument,
 } from "../lib";
 import { basename } from "path";
 import { ReducedMetadataResponse } from "../entity/ReducedMetadataResponse";
@@ -76,7 +76,8 @@ export class UploadRoutes {
         if (!dataSource) {
           return next({ status: 422, errors: "Unknown instrument PID" });
         }
-        if (!validateInstrument(body.instrument, dataSource)) {
+        body.instrument = fixInstrument(body.instrument, dataSource);
+        if (!body.instrument) {
           return next({ status: 422, errors: "Instrument doesn't match instrument PID" });
         }
         UploadEntity = InstrumentUpload;

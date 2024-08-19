@@ -276,12 +276,21 @@ export function daysBetweenDates(a: Date, b: Date): number {
   return Math.floor(Math.abs(a.getTime() - b.getTime()) / (24 * 60 * 60 * 1000));
 }
 
-export function validateInstrument(instrument: string, instrumentInfo: InstrumentInfo) {
+export function fixInstrument(instrument: string, instrumentInfo: InstrumentInfo) {
+  // "chm15k" and "chm15kx" are mixed up so consider them equal
   if (instrument == "chm15k" || instrument == "chm15kx") {
-    return instrumentInfo.instrument.id == "chm15k" || instrumentInfo.instrument.id == "chm15kx";
+    if (instrumentInfo.instrument.id == "chm15k" || instrumentInfo.instrument.id == "chm15kx") {
+      return instrument;
+    } else {
+      return null;
+    }
   }
-  if (instrument == "mira" || instrument == "mira-35") {
-    return instrumentInfo.instrument.id == "mira" || instrumentInfo.instrument.id == "mira-35";
+  // Convert "mira" to "mira-35"
+  if (instrument == "mira") {
+    instrument = "mira-35";
   }
-  return instrument == instrumentInfo.instrument.id;
+  if (instrument != instrumentInfo.instrument.id) {
+    return null;
+  }
+  return instrument;
 }

@@ -68,7 +68,7 @@ describe("GET /api/raw-files", () => {
 
   it("responds with correct object when filtering with instrument", async () => {
     return expect(
-      axios.get(`${rawFilesUrl}`, { params: { instrument: "mira", developer: true } }),
+      axios.get(`${rawFilesUrl}`, { params: { instrument: "mira-35", developer: true } }),
     ).resolves.toMatchObject({ status: 200, data: [instResp[0], instResp[3]] });
   });
 

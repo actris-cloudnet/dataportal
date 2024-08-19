@@ -7,7 +7,7 @@
     "model": "MIRA",
     "type": "cloud radar",
     "owners": ["University of Granada"],
-    "instrument": "mira"
+    "instrument": "mira-35"
   },
   {
     "pid": "https://hdl.handle.net/123/bucharest-chm15k",
@@ -27,7 +27,7 @@
     "model": "MIRA",
     "type": "cloud radar",
     "owners": ["University of Bucharest"],
-    "instrument": "mira"
+    "instrument": "mira-35"
   },
   {
     "pid": "https://hdl.handle.net/123/warsaw-halo",
