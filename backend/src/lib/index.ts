@@ -280,5 +280,8 @@ export function validateInstrument(instrument: string, instrumentInfo: Instrumen
   if (instrument == "chm15k" || instrument == "chm15kx") {
     return instrumentInfo.instrument.id == "chm15k" || instrumentInfo.instrument.id == "chm15kx";
   }
+  if (instrument == "mira" || instrument == "mira-35") {
+    return instrumentInfo.instrument.id == "mira" || instrumentInfo.instrument.id == "mira-35";
+  }
   return instrument == instrumentInfo.instrument.id;
 }
