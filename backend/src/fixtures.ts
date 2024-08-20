@@ -40,8 +40,8 @@ async function handleFile(dataSource: DataSource, filepath: string) {
 
   const fixtures = JSON.parse(await fsp.readFile(filepath, { encoding: "utf-8" }));
   if (action === "SYNC") {
-    let insertObjs = [];
-    let updateObjs = [];
+    const insertObjs = [];
+    const updateObjs = [];
     const existingIds = (await repo.find()).reduce((obj, row) => {
       const id = getId(row);
       obj[JSON.stringify(id)] = id;

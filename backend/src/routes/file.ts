@@ -10,7 +10,6 @@ import {
   Raw,
   QueryRunner,
   FindOneOptions,
-  EntityTarget,
 } from "typeorm";
 import { File, isFile, RegularFile } from "../entity/File";
 import { FileQuality } from "../entity/FileQuality";
