@@ -58,9 +58,9 @@ const dates = computed(() =>
   }),
 );
 
-const getProduct = (date: ProductDate, productId: string, pid: string | undefined) => {
-  if (pid) {
-    return date.products.instrument.find((p) => p.instrumentPid == pid);
+const getProduct = (date: ProductDate, productId: string, instrumentPid: string | undefined) => {
+  if (instrumentPid) {
+    return date.products.instrument.find((p) => p.instrumentPid === instrumentPid && p.id === productId);
   }
   return (
     date.products.instrument.find((p) => p.id == productId) || date.products.geophysical.find((p) => p.id == productId)
