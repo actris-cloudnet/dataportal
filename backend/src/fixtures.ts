@@ -84,7 +84,7 @@ async function handleFile(dataSource: DataSource, filepath: string) {
     for (const id of deleteIds) {
       await repo.delete(id);
     }
-    await repo.save([...insertObjs.map((a) => a[0]), ...updateObjs.map((a) => a[0])]);
+    await repo.save([...insertObjs.map((a) => a[1]), ...updateObjs.map((a) => a[1])]);
   } else {
     await repo.save(fixtures);
   }
