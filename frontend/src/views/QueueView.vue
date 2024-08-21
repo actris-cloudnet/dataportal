@@ -9,7 +9,7 @@
         <p>Created: {{ createdTasks }}</p>
         <p>Failed: {{ failedTasks }}</p>
       </div>
-      <table v-if="totalTasks > 0">
+      <table v-if="sortedQueueData.length > 0">
         <thead>
           <tr>
             <th>Type</th>
@@ -22,29 +22,32 @@
             <th>Due in</th>
           </tr>
         </thead>
-        <tbody>
-          <tr v-for="item in sortedQueueData" :key="item.id" :class="getStatusClass(item.status)">
-            <td>{{ item.type }}</td>
+        <tbody is="vue:transition-group" name="list" tag="tbody">
+          <tr v-for="task in sortedQueueData" :key="task.id" :class="`status-${task.status}`">
+            <td>{{ task.type }}</td>
             <td class="spinner-cell">
-              <template v-if="item.status === 'running'">
-                <BaseSpinner size="small" />
-              </template>
+              <img :src="testPassIcon" alt="" v-if="task.status === 'done'" />
+              <BaseSpinner size="small" v-else-if="task.status === 'running'" />
             </td>
-            <td class="status">{{ item.status }}</td>
-            <td>{{ item.siteId }}</td>
-            <td>{{ item.measurementDate }}</td>
-            <td>{{ item.productId }}</td>
-            <td>{{ item.instrumentInfo?.name || item.model?.id }}</td>
+            <td class="status">{{ task.status }}</td>
+            <td>{{ task.siteId }}</td>
+            <td>{{ task.measurementDate }}</td>
+            <td>{{ task.productId }}</td>
+            <td>{{ task.instrumentInfo?.name || task.model?.id }}</td>
             <td>
               {{
-                item.status === "failed" || item.status === "running" || item.status === "pending"
+                task.status === "pending" ||
+                task.status === "running" ||
+                task.status === "done" ||
+                task.status === "failed"
                   ? ""
-                  : timeDifference(item.scheduledAt)
+                  : timeDifference(task.scheduledAt)
               }}
             </td>
           </tr>
         </tbody>
       </table>
+      <CheckBox label="Show failed tasks" v-model="showFailed" />
     </main>
   </div>
 </template>
@@ -56,41 +59,51 @@ import axios from "axios";
 import { backendUrl } from "@/lib";
 import BaseSpinner from "@/components/BaseSpinner.vue";
 import type { Task } from "@shared/entity/Task";
+import testPassIcon from "@/assets/icons/test-pass.svg";
+import CheckBox from "@/components/CheckBox.vue";
 
-const queueData = ref<Task[]>([]);
+type AugmentedTask = Omit<Task, "status"> & { status: Task["status"] | "pending" | "done" };
+const statusOrder: Record<AugmentedTask["status"], number> = {
+  done: 0,
+  running: 1,
+  pending: 2,
+  created: 3,
+  failed: 4,
+  restart: 5,
+};
 
-async function fetchQueueData() {
+const queueData = ref<Record<AugmentedTask["id"], AugmentedTask>>({});
+
+const showFailed = ref(false);
+
+let updateTimeout: NodeJS.Timeout | null = null;
+
+async function updateQueueData() {
   try {
-    const response = await axios.get(`${backendUrl}queue`, { withCredentials: true });
-    queueData.value = response.data;
+    const response = await axios.get<Task[]>(`${backendUrl}queue`, { withCredentials: true });
+    for (const id in queueData.value) {
+      if (queueData.value[id].status === "done") {
+        delete queueData.value[id];
+      } else {
+        queueData.value[id].status = "done";
+      }
+    }
+    for (const newTask of response.data) {
+      queueData.value[newTask.id] = newTask;
+    }
   } catch (error) {
     console.error(error);
   }
+  updateTimeout = setTimeout(updateQueueData, 5000);
 }
 
 onMounted(() => {
-  fetchQueueData();
-  const interval = setInterval(fetchQueueData, 5000);
+  updateQueueData();
 
   onUnmounted(() => {
-    clearInterval(interval);
+    if (updateTimeout) clearTimeout(updateTimeout);
   });
 });
-
-function getStatusClass(status: string) {
-  switch (status) {
-    case "created":
-      return "status-created";
-    case "running":
-      return "status-running";
-    case "failed":
-      return "status-failed";
-    case "pending":
-      return "status-pending";
-    default:
-      return "";
-  }
-}
 
 function timeDifference(scheduledAt: string): string {
   const now = new Date();
@@ -108,40 +121,31 @@ function timeDifference(scheduledAt: string): string {
   }
 }
 
-const sortedQueueData = computed<Task[]>(() => {
+const sortedQueueData = computed(() => {
+  const queue = Object.values(queueData.value);
   const now = new Date();
-  queueData.value.forEach((element: Task) => {
-    if (element.status === "created" && new Date(element.scheduledAt) < now) {
-      element.status = "pending";
+  queue.forEach((task) => {
+    if (task.status === "created" && new Date(task.scheduledAt) < now) {
+      task.status = "pending";
     }
   });
 
-  const statusOrder: { [key: string]: number } = {
-    running: 1,
-    pending: 2,
-    created: 3,
-    failed: 4,
-    restart: 5,
-  };
-
-  if (!Array.isArray(queueData.value)) {
-    return [];
-  }
-
-  return queueData.value.slice().sort((a: Task, b: Task) => {
-    if (statusOrder[a.status] < statusOrder[b.status]) return -1;
-    if (statusOrder[a.status] > statusOrder[b.status]) return 1;
-    if (a.scheduledAt < b.scheduledAt) return -1;
-    if (a.scheduledAt > b.scheduledAt) return 1;
-    return 0;
-  });
+  return queue
+    .filter((task) => showFailed.value || task.status !== "failed")
+    .sort((a, b) => {
+      if (statusOrder[a.status] < statusOrder[b.status]) return -1;
+      if (statusOrder[a.status] > statusOrder[b.status]) return 1;
+      if (a.scheduledAt < b.scheduledAt) return -1;
+      if (a.scheduledAt > b.scheduledAt) return 1;
+      return 0;
+    });
 });
 
-const totalTasks = computed(() => queueData.value.length);
-const runningTasks = computed(() => queueData.value.filter((item) => item.status === "running").length);
-const pendingTasks = computed(() => queueData.value.filter((item) => item.status === "pending").length);
-const failedTasks = computed(() => queueData.value.filter((item) => item.status === "failed").length);
-const createdTasks = computed(() => queueData.value.filter((item) => item.status === "created").length);
+const totalTasks = computed(() => Object.values(queueData.value).length);
+const runningTasks = computed(() => Object.values(queueData.value).filter((task) => task.status === "running").length);
+const pendingTasks = computed(() => Object.values(queueData.value).filter((task) => task.status === "pending").length);
+const failedTasks = computed(() => Object.values(queueData.value).filter((task) => task.status === "failed").length);
+const createdTasks = computed(() => Object.values(queueData.value).filter((task) => task.status === "created").length);
 </script>
 
 <style scoped lang="scss">
@@ -155,10 +159,27 @@ td {
   padding-right: 20px;
   padding-left: 20px;
 }
+
 tr {
   border-bottom: 1px solid lightblue;
   margin-left: 10px;
+  opacity: 1;
 }
+
+.list-enter-active {
+  transition: all 500ms ease-out;
+}
+
+.list-leave-active {
+  transition: all 500ms ease-in;
+}
+
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(100px);
+}
+
 th {
   border-bottom: 1px solid lightblue;
   font-weight: bold;
@@ -181,11 +202,11 @@ th {
 }
 
 .status-created {
-  background-color: lightgray;
+  opacity: 0.75;
 }
 
 table {
-  margin-bottom: 100px;
+  margin-bottom: 1rem;
   border-collapse: collapse;
 }
 
@@ -196,5 +217,10 @@ table {
 .spinner-cell {
   margin: 0px;
   padding: 0px;
+}
+
+img {
+  height: 14px;
+  vertical-align: middle;
 }
 </style>

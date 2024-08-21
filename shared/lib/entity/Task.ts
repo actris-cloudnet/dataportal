@@ -4,7 +4,7 @@ import type { Model } from "./Model";
 export interface Task {
   id: number;
   type: string;
-  status: string;
+  status: "created" | "running" | "restart" | "failed";
   siteId: string;
   measurementDate: string;
   productId: string;
