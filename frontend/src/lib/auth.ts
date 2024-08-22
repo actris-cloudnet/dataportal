@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { computed, reactive } from "vue";
 import { backendUrl } from ".";
 import type { Permission, PermissionType } from "@shared/entity/Permission";
@@ -29,8 +29,8 @@ export async function login(username: string, password: string) {
     loginStore.username = localStorage.username = username;
     loginStore.password = localStorage.password = password;
     loginStore.permissions = res.data;
-  } catch (err: any) {
-    if (err.response && err.response.status == 401) {
+  } catch (err) {
+    if (axios.isAxiosError(err) && err.response?.status == 401) {
       throw new Error("Incorrect username or password");
     }
     throw err;
