@@ -261,7 +261,7 @@ function changePreview() {
 let requestController: AbortController | null = null;
 
 const isBusy = ref(true);
-const error = ref(null);
+const error = ref("");
 const apiResponse = ref<SearchFileResponse | null>(null);
 
 const payload = computed(() => ({
@@ -290,10 +290,10 @@ async function fetchData() {
     });
     apiResponse.value = res.data;
     isBusy.value = false;
-  } catch (err: any) {
+  } catch (err) {
     if (axios.isCancel(err)) return;
     console.error(err);
-    error.value = (err.response && err.response.statusText) || "unknown error";
+    error.value = (axios.isAxiosError(err) && err.response?.statusText) || "unknown error";
     isBusy.value = false;
   }
 }

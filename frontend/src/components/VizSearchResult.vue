@@ -87,7 +87,7 @@ const props = defineProps<Props>();
 
 let requestController: AbortController | null = null;
 const isBusy = ref(true);
-const error = ref(null);
+const error = ref("");
 const apiResponse = ref<VisualizationResponse[]>([]);
 
 const noSelectionsMade = computed(
@@ -127,10 +127,10 @@ async function fetchData() {
     const res = await axios.get(`${backendUrl}visualizations/`, { params: payload, signal: requestController!.signal });
     apiResponse.value = res.data;
     isBusy.value = false;
-  } catch (err: any) {
+  } catch (err) {
     if (axios.isCancel(err)) return;
     console.error(err);
-    error.value = (err.response && err.response.statusText) || "unknown error";
+    error.value = (axios.isAxiosError(err) && err.response?.statusText) || "unknown error";
     isBusy.value = false;
   }
 }

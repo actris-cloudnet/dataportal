@@ -2,7 +2,7 @@ import { Request, RequestHandler, Response } from "express";
 import { Collection } from "../entity/Collection";
 import { CollectionResponse } from "../entity/CollectionResponse";
 import { validate as validateUuid } from "uuid";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { DataSource, In, Repository } from "typeorm";
 import { File, ModelFile, RegularFile } from "../entity/File";
 import { getCollectionLandingPage, convertToSearchResponse } from "../lib";
@@ -86,7 +86,7 @@ export class CollectionRoutes {
       await this.collectionRepo.save(collection);
       res.send({ pid: collection.pid });
     } catch (e: any) {
-      if (e instanceof AxiosError) {
+      if (axios.isAxiosError(e)) {
         console.error(
           JSON.stringify({
             err: `AxiosError: ${e.message}`,
