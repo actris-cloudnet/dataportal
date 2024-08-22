@@ -122,3 +122,6 @@ public/css
 
 # Environment variables
 backend/dev.env
+
+# vite
+.vite
