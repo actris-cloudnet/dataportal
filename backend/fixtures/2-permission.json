@@ -30,5 +30,10 @@
   {
     "id": 8,
     "permission": "canPublishTask"
+  },
+  {
+    "id": 9,
+    "permission": "canUpload",
+    "site": { "id": "hyytiala" }
   }
 ]

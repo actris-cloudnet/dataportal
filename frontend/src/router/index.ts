@@ -1,11 +1,25 @@
+import { hasPermission } from "@/lib/auth";
+import type { PermissionType } from "@shared/entity/Permission";
 import { watch, computed, ref, type Ref } from "vue";
 import { createRouter, createWebHistory } from "vue-router";
+
+declare module "vue-router" {
+  interface RouteMeta {
+    title?: string | boolean;
+    permission?: PermissionType;
+  }
+}
 
 const routes = [
   {
     path: "/",
     name: "Frontpage",
     component: () => import("@/views/FrontpageView.vue"),
+  },
+  {
+    path: "/login",
+    name: "Login",
+    component: () => import("@/views/LoginView.vue"),
   },
   {
     path: "/privacy",
@@ -115,6 +129,7 @@ const routes = [
     name: "Statistics",
     meta: {
       title: "Statistics",
+      permission: "canGetStats" satisfies PermissionType as PermissionType,
     },
     component: () => import("@/views/StatsView.vue"),
     props: true,
@@ -133,6 +148,7 @@ const routes = [
     name: "Queue",
     meta: {
       title: "Queue",
+      permission: "canPublishTask" satisfies PermissionType as PermissionType,
     },
     component: () => import("@/views/QueueView.vue"),
     props: true,
@@ -212,6 +228,12 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+});
+
+router.beforeEach(async (to, _from) => {
+  if (!to.meta.permission) return;
+  const hasPerm = await hasPermission(to.meta.permission);
+  if (!hasPerm) return { name: "Login", query: { next: to.fullPath } };
 });
 
 const baseTitle = "Cloudnet data portal";
