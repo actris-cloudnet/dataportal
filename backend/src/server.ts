@@ -97,6 +97,7 @@ async function createServer(): Promise<void> {
       res.header("Access-Control-Allow-Origin", "http://localhost:8080");
       res.header("Access-Control-Allow-Credentials", "true");
       res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+      res.header("Access-Control-Allow-Methods", "*");
       next();
     });
 
@@ -298,7 +299,14 @@ async function createServer(): Promise<void> {
     "/api/publications/",
     authenticator.verifyCredentials(),
     authorizator.verifyPermission(PermissionType.canAddPublication),
+    express.json(),
     publicationRoutes.postPublication,
+  );
+  app.delete(
+    "/api/publications/",
+    authenticator.verifyCredentials(),
+    authorizator.verifyPermission(PermissionType.canAddPublication),
+    publicationRoutes.deletePublication,
   );
   app.get("/api/publications/", publicationRoutes.getPublications);
   app.get("/api/users/me", userAccountRoutes.userInfo);
