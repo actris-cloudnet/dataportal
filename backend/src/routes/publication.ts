@@ -19,14 +19,29 @@ export class PublicationRoutes {
   }
 
   postPublication: RequestHandler = async (req: Request, res: Response, next) => {
-    const uri: any = req.query.uri;
-    if (!uri) next({ status: 400, error: "uri query parameter is missing" });
+    const uri = req.body.uri;
+    if (typeof uri !== "string") {
+      return next({ status: 400, error: "uri is missing or invalid" });
+    }
     try {
       const pub = new Publication();
       pub.pid = uri;
       pub.year = (await this.fetchCitation(uri, "application/json")).data.year;
       pub.citation = (await this.fetchCitation(uri, "text/html")).data;
       await this.publicationRepo.save(pub);
+      res.sendStatus(200);
+    } catch (err) {
+      next({ status: 500, errors: err });
+    }
+  };
+
+  deletePublication: RequestHandler = async (req: Request, res: Response, next) => {
+    const uri = req.query.uri;
+    if (typeof uri !== "string") {
+      return next({ status: 400, error: "uri is missing or invalid" });
+    }
+    try {
+      await this.publicationRepo.delete({ pid: uri });
       res.sendStatus(200);
     } catch (err) {
       next({ status: 500, errors: err });
