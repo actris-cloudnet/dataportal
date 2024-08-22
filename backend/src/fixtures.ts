@@ -12,6 +12,9 @@ if (action != "SYNC" && action != "APPEND" && action != "TRUNCATE") {
   console.error("Action missing: SYNC, APPEND or TRUNCATE");
   process.exit(1);
 }
+if (action == "TRUNCATE") {
+  console.log("NOTE: Truncating all existing data");
+}
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -25,7 +28,6 @@ async function handleFile(dataSource: DataSource, filepath: string) {
   const repo = dataSource.getRepository(repoName);
   console.log(`Processing ${repoName}...`);
   if (action == "TRUNCATE") {
-    console.log("NOTE: Truncating all existing data");
     await repo.query(`TRUNCATE TABLE ${repoName} RESTART IDENTITY CASCADE`);
   }
 
