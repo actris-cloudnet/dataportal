@@ -1,5 +1,6 @@
 import { DataSource, Repository } from "typeorm";
 import { NextFunction, Request, RequestHandler, Response } from "express";
+import basicAuth = require("basic-auth");
 
 import { UserAccount } from "../entity/UserAccount";
 import { Permission, PermissionType, permissionTypeFromString } from "../entity/Permission";
@@ -246,6 +247,28 @@ export class UserAccountRoutes {
     }
     if (permissionTypeFromString(permission.permission) === undefined) {
       return next({ status: 422, errors: "Unexpected permission type" });
+    }
+  };
+
+  userInfo: RequestHandler = async (req: Request, res: Response, next) => {
+    try {
+      const credentials = basicAuth(req);
+      if (!credentials) {
+        return next({ status: 401, errors: "Unauthorized" });
+      }
+      const user = await this.userAccountRepository.findOne({
+        where: { username: credentials.name },
+        relations: { permissions: { site: true } },
+      });
+      if (!user) {
+        return next({ status: 401, errors: "Unauthorized" });
+      }
+      if (!user.comparePassword(credentials.pass)) {
+        return next({ status: 401, errors: "Unauthorized" });
+      }
+      res.send(user.permissions);
+    } catch (err) {
+      next({ status: 500, errors: `Internal server error: ${err}` });
     }
   };
 }

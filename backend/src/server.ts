@@ -96,7 +96,7 @@ async function createServer(): Promise<void> {
     app.use(function (_req, res, next) {
       res.header("Access-Control-Allow-Origin", "http://localhost:8080");
       res.header("Access-Control-Allow-Credentials", "true");
-      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
       next();
     });
 
@@ -267,7 +267,7 @@ async function createServer(): Promise<void> {
   app.put("/quality/:uuid", middleware.validateUuidParam, express.json(), qualityRoutes.putQualityReport);
   app.get(
     "/api/download/stats",
-    authenticator.verifyCredentials("View download statistics"),
+    authenticator.verifyCredentials(),
     authorizator.verifyPermission(PermissionType.canGetStats),
     dlRoutes.stats,
   );
@@ -301,6 +301,7 @@ async function createServer(): Promise<void> {
     publicationRoutes.postPublication,
   );
   app.get("/api/publications/", publicationRoutes.getPublications);
+  app.get("/api/users/me", userAccountRoutes.userInfo);
 
   // site contacts private
   app.post("/site-contacts", express.json(), siteContactRoutes.postSiteContact);
@@ -334,7 +335,7 @@ async function createServer(): Promise<void> {
   app.put("/queue/fail/:id", queueRoutes.fail);
   app.get(
     "/api/queue/",
-    authenticator.verifyCredentials("Show queue"),
+    authenticator.verifyCredentials(),
     authorizator.verifyPermission(PermissionType.canPublishTask),
     queueRoutes.getQueue,
   );

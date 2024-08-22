@@ -13,5 +13,11 @@
       { "id": 7 },
       { "id": 8 }
     ]
+  },
+  {
+    "id": 1,
+    "username": "submitter",
+    "passwordHash": "$apr1$H3voJmaV$ETE/KDz9AeIge9Q7IqMyh1",
+    "permissions": [{ "id": 9 }]
   }
 ]

@@ -4,7 +4,7 @@ import { UserAccount } from "../entity/UserAccount";
 import { InstrumentUpload, ModelUpload } from "../entity/Upload";
 import { PermissionType } from "../entity/Permission";
 import { Site } from "../entity/Site";
-const auth = require("basic-auth");
+import basicAuth = require("basic-auth");
 
 export class Authenticator {
   private userAccountRepository: Repository<UserAccount>;
@@ -13,11 +13,10 @@ export class Authenticator {
     this.userAccountRepository = dataSource.getRepository(UserAccount);
   }
 
-  verifyCredentials(realm: string | null = null): RequestHandler {
+  verifyCredentials(): RequestHandler {
     return async (req, res, next) => {
-      const credentials = auth(req);
+      const credentials = basicAuth(req);
       if (!credentials) {
-        if (realm) res.set("WWW-Authenticate", `Basic realm="${realm}"`);
         return next({ status: 401, errors: "Unauthorized" });
       }
       try {

@@ -6,9 +6,10 @@ export interface Props {
   href?: string;
   type: "primary" | "secondary" | "brand";
   disabled?: boolean;
+  htmlType?: HTMLButtonElement["type"];
 }
 
-withDefaults(defineProps<Props>(), { disabled: false });
+withDefaults(defineProps<Props>(), { disabled: false, htmlType: "button" });
 
 defineEmits<{
   (e: "click"): void;
@@ -22,7 +23,7 @@ defineEmits<{
   <a :href="href" class="button" :class="type" @click="$emit('click')" v-else-if="href && !disabled">
     <slot></slot>
   </a>
-  <button class="button" :class="type" @click="$emit('click')" :disabled="disabled" v-else>
+  <button class="button" :type="htmlType" :class="type" @click="$emit('click')" :disabled="disabled" v-else>
     <slot></slot>
   </button>
 </template>

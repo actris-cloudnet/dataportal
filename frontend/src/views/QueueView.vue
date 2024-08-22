@@ -61,6 +61,7 @@ import BaseSpinner from "@/components/BaseSpinner.vue";
 import type { Task } from "@shared/entity/Task";
 import testPassIcon from "@/assets/icons/test-pass.svg";
 import CheckBox from "@/components/CheckBox.vue";
+import { loginStore } from "@/lib/auth";
 
 type AugmentedTask = Omit<Task, "status"> & { status: Task["status"] | "pending" | "done" };
 const statusOrder: Record<AugmentedTask["status"], number> = {
@@ -80,7 +81,9 @@ let updateTimeout: NodeJS.Timeout | null = null;
 
 async function updateQueueData() {
   try {
-    const response = await axios.get<Task[]>(`${backendUrl}queue`, { withCredentials: true });
+    const response = await axios.get<Task[]>(`${backendUrl}queue`, {
+      auth: { username: loginStore.username, password: loginStore.password },
+    });
     for (const id in queueData.value) {
       if (queueData.value[id].status === "done") {
         delete queueData.value[id];

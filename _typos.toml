@@ -1,6 +1,6 @@
 [default]
 extend-ignore-re = ["\\.replace([^)]*)"]
-extend-ignore-identifiers-re = ["(PK|FK|IDX|UQ)_[a-z0-9]+", "ChageSizeToBigint", "MOR"]
+extend-ignore-identifiers-re = ["(PK|FK|IDX|UQ)_[a-z0-9]+", "ChageSizeToBigint", "MOR", "hax0r"]
 
 [files]
 extend-exclude = ["backend/tests/data/", "frontend/src/assets/country-io-names.json"]
