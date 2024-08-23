@@ -60,6 +60,8 @@ header {
 .actions {
   margin-left: 1rem;
   grid-row: 1 / 3;
+  display: flex;
+  gap: 0.5rem;
 }
 
 .tab-container {

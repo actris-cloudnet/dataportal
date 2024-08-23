@@ -19,6 +19,19 @@
         <FileTags :response="file" />
       </template>
       <template #actions>
+        <BaseButton
+          type="danger"
+          @click="openDeleteModal"
+          :disabled="deleteBusy"
+          v-if="hasDeletePerm && !response.tombstoneReason"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+            <path
+              d="M 10.806641 2 C 10.289641 2 9.7956875 2.2043125 9.4296875 2.5703125 L 9 3 L 4 3 A 1.0001 1.0001 0 1 0 4 5 L 20 5 A 1.0001 1.0001 0 1 0 20 3 L 15 3 L 14.570312 2.5703125 C 14.205312 2.2043125 13.710359 2 13.193359 2 L 10.806641 2 z M 4.3652344 7 L 5.8925781 20.263672 C 6.0245781 21.253672 6.877 22 7.875 22 L 16.123047 22 C 17.121047 22 17.974422 21.254859 18.107422 20.255859 L 19.634766 7 L 4.3652344 7 z"
+            />
+          </svg>
+          Delete
+        </BaseButton>
         <BaseButton type="primary" :href="file.downloadUrl">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
             <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
@@ -55,10 +68,33 @@
       />
     </div>
   </main>
+
+  <Teleport to="body">
+    <BaseModal :open="showDeleteModal" @submit="deleteFile">
+      <template #header> Delete files? </template>
+      <template #body>
+        The following files will be deleted:
+        <ul class="file-list">
+          <li v-for="file in filesToDelete" :key="file.uuid">
+            {{ file.s3key }}
+            ({{ file.volatile ? "volatile" : "stable" }})
+          </li>
+        </ul>
+        <label v-if="requireTombstoneReason">
+          Please provide a tombstone reason:
+          <input type="text" v-model="tombstoneReason" required placeholder="Tombstone reason..." />
+        </label>
+      </template>
+      <template #footer>
+        <BaseButton type="secondary" @click="showDeleteModal = false" :disabled="deleteBusy">Cancel</BaseButton>
+        <BaseButton type="danger" :disabled="deleteBusy" htmlType="submit">Delete</BaseButton>
+      </template>
+    </BaseModal>
+  </Teleport>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import axios from "axios";
 import { humanReadableDate, compareValues, backendUrl } from "@/lib";
 import type { RegularFile, ModelFile } from "@shared/entity/File";
@@ -67,9 +103,11 @@ import type { SiteType } from "@shared/entity/Site";
 import type { SiteLocation } from "@shared/entity/SiteLocation";
 import type { File } from "@shared/entity/File";
 import BaseButton from "@/components/BaseButton.vue";
+import BaseModal from "@/components/BaseModal.vue";
 import FileTags from "@/components/FileTags.vue";
 import { getProductIcon, getQcIcon } from "@/lib";
 import ApiError from "./ApiError.vue";
+import { hasPermission, loginStore } from "@/lib/auth";
 
 import PhotoGalleryIcon from "@/assets/icons/photo-gallery.png";
 import LandingHeader from "@/components/LandingHeader.vue";
@@ -91,6 +129,13 @@ const isBusy = ref(false);
 const loadingVisualizations = ref(true);
 const location = ref<SiteLocation | null>(null);
 
+const hasDeletePerm = ref(false);
+const deleteBusy = ref(false);
+const showDeleteModal = ref(false);
+const filesToDelete = ref<File[]>([]);
+const tombstoneReason = ref("");
+const requireTombstoneReason = computed(() => filesToDelete.value.some((file) => !file.volatile));
+
 const title = computed(() =>
   file.value ? `${file.value.product.humanReadableName} data from ${file.value.site.humanReadableName}` : "",
 );
@@ -104,6 +149,10 @@ const currentVersionIndex = computed(() => {
 const newestVersion = computed(() => {
   if (!currentVersionIndex.value) return null;
   return versions.value[0];
+});
+
+onMounted(async () => {
+  hasDeletePerm.value = await hasPermission("canDelete");
 });
 
 async function fetchVisualizations(file: FileResponse) {
@@ -166,6 +215,43 @@ async function fetchSourceFiles(file: FileResponse) {
     return compareValues(a.product.humanReadableName, b.product.humanReadableName);
   });
   sourceFiles.value = files;
+}
+
+async function openDeleteModal() {
+  try {
+    deleteBusy.value = true;
+    const res = await axios.delete<File[]>(`${backendUrl}files/${props.uuid}`, {
+      params: { dryRun: true, deleteHigherProducts: true },
+      auth: { username: loginStore.username, password: loginStore.password },
+    });
+    showDeleteModal.value = true;
+    filesToDelete.value = res.data;
+  } catch (err) {
+    const error = (axios.isAxiosError(err) && err.response?.data.errors) || "Unknown error";
+    alert("Can't delete file: " + error);
+  } finally {
+    deleteBusy.value = false;
+  }
+}
+
+async function deleteFile() {
+  try {
+    deleteBusy.value = true;
+    await axios.delete(`${backendUrl}files/${props.uuid}`, {
+      params: {
+        dryRun: false,
+        deleteHigherProducts: true,
+        tombstoneReason: requireTombstoneReason.value ? tombstoneReason.value : undefined,
+      },
+      auth: { username: loginStore.username, password: loginStore.password },
+    });
+    window.location.reload();
+  } catch (err) {
+    const error = (axios.isAxiosError(err) && err.response?.data.errors) || "Unknown error";
+    alert("Delete failed: " + error);
+  } finally {
+    deleteBusy.value = false;
+  }
 }
 
 watch(
@@ -286,5 +372,18 @@ main {
       }
     }
   }
+}
+
+.file-list {
+  list-style: disc;
+  padding: 0.5rem 0 0.5rem 1rem;
+}
+
+input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
 }
 </style>

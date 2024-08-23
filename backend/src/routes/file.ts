@@ -311,36 +311,6 @@ export class FileRoutes {
     }
   };
 
-  addTombstone: RequestHandler = async (req: Request, res: Response, next) => {
-    const uuid = req.params.uuid;
-    const reason = req.body.tombstoneReason;
-    if (!reason || typeof reason !== "string" || reason.trim().length === 0) {
-      return next({ status: 422, errors: ["Request query is missing valid tombstoneReason"] });
-    }
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    try {
-      const file = await this.simpleFindAnyFile(queryRunner, { where: { uuid } });
-      if (!file) {
-        await queryRunner.rollbackTransaction();
-        return next({ status: 422, errors: ["No file matches the provided uuid"] });
-      }
-      await queryRunner.manager.update(file.constructor, { uuid }, { tombstoneReason: reason.trim() });
-      const existingSearchFile = await queryRunner.manager.findOneBy(SearchFile, { uuid });
-      if (existingSearchFile) {
-        await queryRunner.manager.delete(SearchFile, { uuid });
-      }
-      await queryRunner.commitTransaction();
-      res.sendStatus(200);
-    } catch (e) {
-      await queryRunner.rollbackTransaction();
-      return next({ status: 500, errors: e });
-    } finally {
-      await queryRunner.release();
-    }
-  };
-
   postFile: RequestHandler = async (req: Request, res: Response, next) => {
     const partialFile = req.body;
     if (!partialFile.uuid) return next({ status: 422, errors: ["Request body is missing uuid"] });
@@ -367,38 +337,46 @@ export class FileRoutes {
     const query: any = req.query;
     const dryRun = query.dryRun;
     const uuid = req.params.uuid;
-    const filenames: string[] = [];
+    const tombstoneReason = query.tombstoneReason;
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const existingFile = await this.simpleFindAnyFile(queryRunner, {
+      const file = await this.simpleFindAnyFile(queryRunner, {
         where: { uuid },
         relations: { product: true, site: true },
       });
-      if (!existingFile) {
+      if (!file) {
         await queryRunner.rollbackTransaction();
         return next({ status: 422, errors: ["No file matches the provided uuid"] });
       }
-      if (!existingFile.volatile) {
+      if (!dryRun && !tombstoneReason && !file.volatile) {
         await queryRunner.rollbackTransaction();
-        return next({ status: 422, errors: ["Forbidden to delete a stable file"] });
+        return next({ status: 422, errors: ["Forbidden to delete a stable file without specifying tombstone reason"] });
       }
-      const uuids = await this.getDerivedProducts(queryRunner, existingFile);
-      const products = await queryRunner.manager.findBy(RegularFile, { uuid: In(uuids) });
-      if (query.deleteHigherProducts && products.length > 0) {
-        if (products.some((product) => !product.volatile)) {
-          await queryRunner.rollbackTransaction();
-          return next({ status: 422, errors: ["Forbidden to delete due to higher level stable files"] });
+      const uuids = await this.getDerivedProducts(queryRunner, file);
+      const derivedFiles = await queryRunner.manager.find(RegularFile, {
+        where: { uuid: In(uuids) },
+        relations: { product: true, site: true },
+      });
+      if (!dryRun) {
+        if (query.deleteHigherProducts && derivedFiles.length > 0) {
+          if (!tombstoneReason && derivedFiles.some((product) => !product.volatile)) {
+            await queryRunner.rollbackTransaction();
+            return next({
+              status: 422,
+              errors: ["Forbidden to delete derived stable files without specifying tombstone reason"],
+            });
+          }
+          for (const derivedFile of derivedFiles) {
+            await this.deleteFileEntity(queryRunner, derivedFile, tombstoneReason);
+          }
         }
-        for (const product of products) {
-          filenames.push(...(await this.deleteFileAndVisualizations(queryRunner, product, dryRun)));
-        }
+        await this.deleteFileEntity(queryRunner, file, tombstoneReason);
       }
-      filenames.push(...(await this.deleteFileAndVisualizations(queryRunner, existingFile, dryRun)));
       await queryRunner.commitTransaction();
-      res.send(filenames);
+      res.send([file, ...derivedFiles]);
     } catch (e) {
       await queryRunner.rollbackTransaction();
       return next({ status: 500, errors: e });
@@ -587,20 +565,21 @@ export class FileRoutes {
     );
   };
 
-  private async deleteFileAndVisualizations(queryRunner: QueryRunner, file: File, dryRun: boolean) {
-    const filenames = [file.s3key];
-    const VizEntity = file instanceof RegularFile ? Visualization : ModelVisualization;
-    const images = await queryRunner.manager.findBy(VizEntity, { sourceFile: { uuid: file.uuid } });
-    for (const image of images) {
-      filenames.push(image.s3key);
-    }
-    if (!dryRun) {
+  private async deleteFileEntity(queryRunner: QueryRunner, file: File, tombstoneReason?: string) {
+    if (file.volatile) {
+      const VizEntity = file instanceof RegularFile ? Visualization : ModelVisualization;
       await queryRunner.manager.delete(VizEntity, { sourceFile: { uuid: file.uuid } });
       await queryRunner.manager.delete(file.constructor, { uuid: file.uuid });
       await queryRunner.manager.delete(SearchFile, { uuid: file.uuid });
       await queryRunner.manager.delete(FileQuality, { uuid: file.uuid });
+    } else {
+      if (!tombstoneReason) {
+        throw new Error("tombstoneReason is required for stable file");
+      }
+      file.tombstoneReason = tombstoneReason;
+      await queryRunner.manager.save(file);
+      await queryRunner.manager.delete(SearchFile, { uuid: file.uuid });
     }
-    return filenames;
   }
 
   private async getDerivedProducts(queryRunner: QueryRunner, file: ModelFile | RegularFile): Promise<string[]> {

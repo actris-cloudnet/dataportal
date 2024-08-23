@@ -4,7 +4,7 @@ import type { RouteLocationRaw } from "vue-router";
 export interface Props {
   to?: RouteLocationRaw;
   href?: string;
-  type: "primary" | "secondary" | "brand";
+  type: "primary" | "secondary" | "brand" | "danger";
   disabled?: boolean;
   htmlType?: HTMLButtonElement["type"];
 }
@@ -41,6 +41,11 @@ defineEmits<{
   fill: white;
   border-radius: 4px;
   user-select: none;
+
+  :deep(svg) {
+    margin-right: 0.25rem;
+    margin-left: -0.1rem;
+  }
 
   &:hover {
     text-decoration: none;
@@ -87,6 +92,20 @@ defineEmits<{
 
     &:focus-visible {
       box-shadow: 0 0 0 3px rgba($gray1, 0.75);
+    }
+  }
+
+  &.danger {
+    background-color: $red1;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: none;
+      background-color: darken($red1, 10%);
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba($red1, 0.5);
     }
   }
 
