@@ -600,15 +600,14 @@ describe("DELETE /api/files/", () => {
     await expect(vizRepo.findOneBy({ s3key: "categorize-ldr.png" })).resolves.toBeTruthy();
   });
 
-  it("returns filenames of deleted products and images", async () => {
+  it("returns list of deleted products", async () => {
     const radarFile = await putDummyFile();
     await putDummyImage("radar-v.png", radarFile);
     const categorizeFile = await putDummyFile({ product: "categorize", sourceFileIds: [radarFile.uuid] });
     await putDummyImage("categorize-ldr.png", categorizeFile);
     const res = await deleteFile(radarFile.uuid, true, true);
-    expect(res.data.sort()).toEqual(
-      ["20181115_mace-head_categorize.nc", "categorize-ldr.png", "20181115_mace-head_radar.nc", "radar-v.png"].sort(),
-    );
+    expect(res.data).toHaveLength(2);
+    expect(res.data.map((file: any) => file.product.id).sort()).toEqual(["categorize", "radar"].sort());
   });
 
   it("refuses deleting if derived product is stable", async () => {
@@ -683,27 +682,38 @@ describe("DELETE /api/files/", () => {
   });
 
   it("patches file with tombstone and removes from search file", async () => {
-    const radarFile = await putDummyFile();
-    const headers = { authorization: `Basic ${str2base64("bob:bobs_pass")}` };
-    const url = `${backendPrivateUrl}api/files/${radarFile.uuid}`;
-    const body: any = { tombstoneReason: "Kaljaa" };
-    await expect(axios.patch(url, body, { headers: headers })).resolves.toMatchObject({ status: 200 });
+    const radarFile = await putDummyFile({ volatile: false });
+    await expect(deleteFile(radarFile.uuid, false, false, "Kaljaa")).resolves.toMatchObject({ status: 200 });
     const file = await fileRepo.findOneByOrFail({ uuid: radarFile.uuid });
     expect(file.tombstoneReason).toEqual("Kaljaa");
-    const searchFile = await searchFileRepo.findOneBy({ uuid: radarFile.uuid });
-    return expect(searchFile).toBeNull();
+    expect(await searchFileRepo.exist({ where: { uuid: radarFile.uuid } })).toBeFalsy();
+  });
+
+  it("removes volatile file and tombstones stable file", async () => {
+    const modelFile = await putDummyFile({ product: "model" });
+    const categorizeFile = await putDummyFile({
+      product: "categorize",
+      volatile: false,
+      sourceFileIds: [modelFile.uuid],
+    });
+    await expect(deleteFile(modelFile.uuid, true, false, "Viinaa")).resolves.toMatchObject({ status: 200 });
+
+    const file = await fileRepo.findOneByOrFail({ uuid: categorizeFile.uuid });
+    expect(file.tombstoneReason).toEqual("Viinaa");
+    expect(await searchFileRepo.exist({ where: { uuid: categorizeFile.uuid } })).toBeFalsy();
+
+    expect(await modelFileRepo.exist({ where: { uuid: modelFile.uuid } })).toBeFalsy();
+    expect(await searchFileRepo.exist({ where: { uuid: modelFile.uuid } })).toBeFalsy();
   });
 
   it("rejects bad tombstone payload", async () => {
     const radarFile = await putDummyFile();
-    const headers = { authorization: `Basic ${str2base64("bob:bobs_pass")}` };
-    const url = `${backendPrivateUrl}api/files/${radarFile.uuid}`;
-    const badPayloads = [" ", "", 123];
+    const badPayloads = [" ", ""];
     for (const badPayload of badPayloads) {
-      const body: any = { tombstoneReason: badPayload };
-      await expect(axios.patch(url, body, { headers: headers })).rejects.toMatchObject({ response: { status: 422 } });
-      const searchFile = await searchFileRepo.findOneBy({ uuid: radarFile.uuid });
-      expect(searchFile).not.toBeNull();
+      await expect(deleteFile(radarFile.uuid, false, false, badPayload)).rejects.toMatchObject({
+        response: { status: 400 },
+      });
+      expect(await searchFileRepo.exist({ where: { uuid: radarFile.uuid } })).toBeTruthy();
     }
   });
 
@@ -740,12 +750,24 @@ async function putFile(json: any) {
   return await axios.put(url, json);
 }
 
-async function deleteFile(uuid: string, deleteHigherProducts: any = null, dryRun: any = null) {
+async function deleteFile(
+  uuid: string,
+  deleteHigherProducts: any = null,
+  dryRun: any = null,
+  tombstoneReason: any = null,
+) {
   const headers = { authorization: `Basic ${str2base64("bob:bobs_pass")}` };
   const url = `${backendPrivateUrl}api/files/${uuid}`;
   const params: any = {};
-  if (!(deleteHigherProducts === null)) params["deleteHigherProducts"] = deleteHigherProducts;
-  if (!(dryRun === null)) params["dryRun"] = dryRun;
+  if (deleteHigherProducts !== null) {
+    params["deleteHigherProducts"] = deleteHigherProducts;
+  }
+  if (dryRun !== null) {
+    params["dryRun"] = dryRun;
+  }
+  if (tombstoneReason !== null) {
+    params["tombstoneReason"] = tombstoneReason;
+  }
   return await axios.delete(url, { params: params, headers: headers });
 }
 

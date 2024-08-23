@@ -198,7 +198,13 @@ export class Middleware {
       const value = query[key].toLowerCase();
       if (value === "true") query[key] = true;
       else if (value === "false") query[key] = false;
-      else next({ status: 400, errors: [`Invalid value for parameter ${key}: ${value}`] });
+      else return next({ status: 400, errors: [`Invalid value for parameter ${key}: ${value}`] });
+    }
+    if (
+      "tombstoneReason" in query &&
+      (typeof query.tombstoneReason !== "string" || query.tombstoneReason.trim() === "")
+    ) {
+      return next({ status: 400, errors: [`Invalid value for tombstoneReason: ${query.tombstoneReason}`] });
     }
     next();
   };
