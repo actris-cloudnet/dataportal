@@ -106,6 +106,7 @@ async function fetchData() {
   requestController = new AbortController();
 
   if (noSelectionsMade.value) {
+    isBusy.value = false;
     return;
   }
 

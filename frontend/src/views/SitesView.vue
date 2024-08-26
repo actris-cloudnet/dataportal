@@ -62,7 +62,7 @@
           </p>
         </div>
       </template>
-      <div v-else-if="sites.status == 'loading'">Loading...</div>
+      <BaseSpinner v-else-if="sites.status == 'loading'" />
       <div v-else-if="sites.status == 'error'">Failed to load sites.</div>
     </main>
   </div>
@@ -75,6 +75,7 @@ import { backendUrl, formatLatitude, formatLongitude } from "@/lib";
 import { ref, onMounted } from "vue";
 import LandingHeader from "@/components/LandingHeader.vue";
 import BaseTag from "@/components/BaseTag.vue";
+import BaseSpinner from "@/components/BaseSpinner.vue";
 
 type SitesState =
   | { status: "loading" }

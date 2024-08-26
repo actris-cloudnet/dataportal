@@ -2,7 +2,7 @@
   <div>
     <LandingHeader title="Statistics" />
     <main class="pagewidth">
-      <span v-if="loadingSites" class="placeholder">Loading...</span>
+      <BaseSpinner v-if="loadingSites" class="placeholder" />
       <template v-else>
         <MultiSelect
           class="field"
@@ -111,6 +111,7 @@ import COUNTRY_NAMES from "@/assets/country-io-names.json";
 import { backendUrl, compareValues, notEmpty } from "@/lib";
 import CheckBox from "@/components/CheckBox.vue";
 import BaseButton from "@/components/BaseButton.vue";
+import BaseSpinner from "@/components/BaseSpinner.vue";
 import MultiSelect, { type Option } from "@/components/MultiSelect.vue";
 import DatePicker from "@/components/DatePicker.vue";
 import LandingHeader from "@/components/LandingHeader.vue";
