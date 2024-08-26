@@ -6,16 +6,6 @@ figcaption {
   z-index: 1;
 }
 
-.visualization {
-  width: 100%;
-  height: auto;
-}
-
-// TODO: space between caption and image
-// figcaption + * {
-//   display: block;
-//   margin-top: -.35rem;
-// }
 .tag {
   background-color: #eee;
   font-size: 65%;
@@ -28,7 +18,13 @@ figcaption {
   }
 }
 
-img {
+.container {
+  display: block;
+}
+
+.visualization {
+  width: 100%;
+  height: auto;
   display: block;
 }
 </style>
@@ -46,41 +42,39 @@ img {
         definition
       </a>
     </figcaption>
-    <a v-if="expandable" :href="imageUrl" target="_blank">
+    <a v-if="expandable" :href="imageUrl" target="_blank" class="container" :style="imageStyle">
       <img
         :src="imageUrl"
         :width="currentData.dimensions?.width"
         :height="currentData.dimensions?.height"
         alt=""
         class="visualization"
-        :style="imageStyle"
         @load="onLoad"
         ref="imgElement"
       />
     </a>
-    <router-link :to="linkTo" v-else-if="linkTo">
+    <router-link :to="linkTo" v-else-if="linkTo" class="container" :style="imageStyle">
       <img
         :src="imageUrl"
         :width="currentData.dimensions?.width"
         :height="currentData.dimensions?.height"
         alt=""
         class="visualization"
-        :style="imageStyle"
         @load="onLoad"
         ref="imgElement"
       />
     </router-link>
-    <img
-      v-else
-      :src="imageUrl"
-      :width="currentData.dimensions?.width"
-      :height="currentData.dimensions?.height"
-      alt=""
-      class="visualization"
-      :style="imageStyle"
-      @load="onLoad"
-      ref="imgElement"
-    />
+    <div v-else class="container" :style="imageStyle">
+      <img
+        :src="imageUrl"
+        :width="currentData.dimensions?.width"
+        :height="currentData.dimensions?.height"
+        alt=""
+        class="visualization"
+        @load="onLoad"
+        ref="imgElement"
+      />
+    </div>
   </figure>
 </template>
 

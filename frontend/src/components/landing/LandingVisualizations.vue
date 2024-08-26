@@ -1,7 +1,8 @@
 <template>
   <div class="landing-visualizations-container pagewidth">
     <div class="summary-box" :class="{ obsolete: file.tombstoneReason }">
-      <template v-if="visualizations.length > 0">
+      <BaseSpinner v-if="loadingVisualizations" />
+      <template v-else-if="visualizations.length > 0">
         <div class="visualizations">
           <Visualization
             v-for="visualization in visualizations"
@@ -27,11 +28,13 @@ import { computed } from "vue";
 import type { FileResponse } from "@/views/FileView.vue";
 import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
 import Visualization from "@/components/ImageVisualization.vue";
+import BaseSpinner from "@/components/BaseSpinner.vue";
 import { useTitle } from "@/router";
 
 export interface Props {
   file: FileResponse;
   visualizations: VisualizationItem[];
+  loadingVisualizations: boolean;
   title: string;
 }
 
