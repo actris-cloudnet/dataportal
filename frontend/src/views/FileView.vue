@@ -1,10 +1,10 @@
 <template>
   <div v-if="isBusy"></div>
-  <ApiError v-else-if="error" :response="response as any" />
-  <main v-else-if="response" id="landing">
-    <div v-if="response.tombstoneReason" class="banner-container-obsolete">
+  <ApiError v-else-if="error" :response="file as any" />
+  <main v-else-if="file" id="landing">
+    <div v-if="file.tombstoneReason" class="banner-container-obsolete">
       <div class="banner pagewidth">
-        This data object is not suitable for use: {{ response.tombstoneReason.replace(/\.$/, "") }}.
+        This data object is not suitable for use: {{ file.tombstoneReason.replace(/\.$/, "") }}.
       </div>
     </div>
     <div v-if="newestVersion" class="banner-container">
@@ -14,12 +14,12 @@
         of this data available.
       </div>
     </div>
-    <LandingHeader :title="title" :subtitle="humanReadableDate(response.measurementDate)">
+    <LandingHeader :title="title" :subtitle="humanReadableDate(file.measurementDate)">
       <template #tags>
-        <FileTags :response="response" />
+        <FileTags :response="file" />
       </template>
       <template #actions>
-        <BaseButton type="primary" :href="response.downloadUrl">
+        <BaseButton type="primary" :href="file.downloadUrl">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
             <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
           </svg>
@@ -28,15 +28,15 @@
       </template>
       <template #tabs>
         <router-link class="tab" :to="{ name: 'File' }">
-          <img :src="getProductIcon(response.product.id)" alt="" />
+          <img :src="getProductIcon(file.product.id)" alt="" />
           Summary
         </router-link>
         <router-link class="tab" :to="{ name: 'FileVisualizations' }">
           <img :src="PhotoGalleryIcon" alt="" />
           Visualisations
         </router-link>
-        <router-link class="tab" :to="{ name: 'FileQualityReport' }" v-if="response.errorLevel">
-          <img :src="getQcIcon(response.errorLevel)" alt="" />
+        <router-link class="tab" :to="{ name: 'FileQualityReport' }" v-if="file.errorLevel">
+          <img :src="getQcIcon(file.errorLevel)" alt="" />
           Quality report
         </router-link>
       </template>
@@ -44,7 +44,7 @@
     <div class="landing-content-background">
       <router-view
         :uuid="uuid"
-        :response="response"
+        :file="file"
         :location="location"
         :isBusy="isBusy"
         :versions="versions"
@@ -82,7 +82,7 @@ export type FileResponse = ModelFile | RegularFile;
 
 const props = defineProps<Props>();
 
-const response = ref<FileResponse | null>(null);
+const file = ref<FileResponse | null>(null);
 const visualizations = ref<VisualizationItem[]>([]);
 const versions = ref<string[]>([]);
 const error = ref(false);
@@ -92,14 +92,12 @@ const loadingVisualizations = ref(true);
 const location = ref<SiteLocation | null>(null);
 
 const title = computed(() =>
-  response.value
-    ? `${response.value.product.humanReadableName} data from ${response.value.site.humanReadableName}`
-    : "",
+  file.value ? `${file.value.product.humanReadableName} data from ${file.value.site.humanReadableName}` : "",
 );
 
 const currentVersionIndex = computed(() => {
-  if (response.value == null) return null;
-  const fileUuid = response.value.uuid;
+  if (file.value == null) return null;
+  const fileUuid = file.value.uuid;
   return versions.value.findIndex((uuid) => uuid == fileUuid);
 });
 
@@ -108,9 +106,9 @@ const newestVersion = computed(() => {
   return versions.value[0];
 });
 
-async function fetchVisualizations() {
+async function fetchVisualizations(file: FileResponse) {
   try {
-    const response = await axios.get(`${backendUrl}visualizations/${props.uuid}`);
+    const response = await axios.get(`${backendUrl}visualizations/${file.uuid}`);
     visualizations.value = response.data.visualizations;
   } catch (error) {
     console.error(error);
@@ -121,13 +119,13 @@ async function fetchVisualizations() {
 async function fetchFileMetadata() {
   try {
     const res = await axios.get(`${backendUrl}files/${props.uuid}`);
-    response.value = res.data;
-    if (response.value) {
-      await fetchLocation(response.value);
+    file.value = res.data;
+    if (file.value) {
+      await fetchLocation(file.value);
     }
   } catch (err: any) {
     error.value = true;
-    response.value = err.response;
+    file.value = err.response;
   }
 }
 
@@ -144,22 +142,22 @@ async function fetchLocation(file: FileResponse) {
   }
 }
 
-function fetchVersions(file: File) {
+function fetchVersions(file: FileResponse) {
   // No need to reload versions
   if (versions.value.includes(file.uuid)) return;
-  return axios.get(`${backendUrl}files/${response.value?.uuid}/versions`).then((response) => {
+  return axios.get(`${backendUrl}files/${props.uuid}/versions`).then((response) => {
     const searchFiles = response.data as File[];
     versions.value = searchFiles.map((sf) => sf.uuid);
   });
 }
 
-async function fetchSourceFiles(response: FileResponse) {
-  if (!("sourceFileIds" in response) || !response.sourceFileIds) {
+async function fetchSourceFiles(file: FileResponse) {
+  if (!("sourceFileIds" in file) || !file.sourceFileIds) {
     sourceFiles.value = [];
     return;
   }
   const files = await Promise.all(
-    response.sourceFileIds.map(async (uuid) => {
+    file.sourceFileIds.map(async (uuid) => {
       const res = await axios.get<FileResponse>(`${backendUrl}files/${uuid}`);
       return res.data;
     }),
@@ -176,16 +174,16 @@ watch(
     try {
       isBusy.value = true;
       await fetchFileMetadata();
-      if (response.value == null || error.value) return;
+      if (file.value == null || error.value) return;
     } finally {
       isBusy.value = false;
     }
     visualizations.value = [];
     sourceFiles.value = [];
-    if (!versions.value.includes(response.value.uuid)) {
+    if (!versions.value.includes(file.value.uuid)) {
       versions.value = [];
     }
-    await Promise.all([fetchVisualizations(), fetchVersions(response.value), fetchSourceFiles(response.value)]);
+    await Promise.all([fetchVisualizations(file.value), fetchVersions(file.value), fetchSourceFiles(file.value)]);
   },
   { immediate: true },
 );

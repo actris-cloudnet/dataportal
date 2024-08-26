@@ -7,53 +7,52 @@
     <dl class="summary-section-table">
       <dt>Type</dt>
       <dd>
-        <router-link :to="{ name: 'Product', params: { product: response.product.id } }" class="product-container">
-          <img :alt="response.product.id" :src="productIconUrl" class="product-icon" />
-          {{ response.product.humanReadableName }}
+        <router-link :to="{ name: 'Product', params: { product: file.product.id } }" class="product-container">
+          <img :alt="file.product.id" :src="productIconUrl" class="product-icon" />
+          {{ file.product.humanReadableName }}
         </router-link>
       </dd>
-      <template v-if="'instrumentPid' in response && response.instrumentPid">
+      <template v-if="'instrumentPid' in file && file.instrumentPid">
         <dt>Instrument</dt>
         <dd>
           <router-link
-            v-if="response.instrumentInfo"
-            :to="{ name: 'Instrument', params: { uuid: response.instrumentInfo.uuid } }"
+            v-if="file.instrumentInfo"
+            :to="{ name: 'Instrument', params: { uuid: file.instrumentInfo.uuid } }"
           >
-            {{ response.instrumentInfo.name }}
-            {{ response.instrumentInfo.type }}
+            {{ file.instrumentInfo.name }}
+            {{ file.instrumentInfo.type }}
           </router-link>
-          <a v-else :href="response.instrumentPid">{{ response.instrumentPid }}</a>
+          <a v-else :href="file.instrumentPid">{{ file.instrumentPid }}</a>
         </dd>
       </template>
-      <template v-if="'model' in response">
+      <template v-if="'model' in file">
         <dt>Model</dt>
-        <dd>{{ response.model.humanReadableName }}</dd>
+        <dd>{{ file.model.humanReadableName }}</dd>
       </template>
       <dt>Timeliness</dt>
       <dd>
-        <a :href="timelinessDisplay[response.timeliness].url" target="_blank">
-          {{ timelinessDisplay[response.timeliness].label }}
+        <a :href="timelinessDisplay[file.timeliness].url" target="_blank">
+          {{ timelinessDisplay[file.timeliness].label }}
         </a>
       </dd>
       <dt>Start time</dt>
-      <dd v-if="response.startTime">{{ humanReadableTimestamp(response.startTime) }}</dd>
+      <dd v-if="file.startTime">{{ humanReadableTimestamp(file.startTime) }}</dd>
       <dd v-else>
         <span class="notAvailable" />
       </dd>
       <dt>Stop time</dt>
-      <dd v-if="response.stopTime">{{ humanReadableTimestamp(response.stopTime) }}</dd>
+      <dd v-if="file.stopTime">{{ humanReadableTimestamp(file.stopTime) }}</dd>
       <dd v-else>
         <span class="notAvailable" />
       </dd>
-      <template v-if="!response.startTime && !response.stopTime">
+      <template v-if="!file.startTime && !file.stopTime">
         <dt>Date</dt>
-        <dd>{{ response.measurementDate }}</dd>
+        <dd>{{ file.measurementDate }}</dd>
       </template>
       <dt>Location</dt>
       <dd>
-        <router-link :to="{ name: 'Site', params: { siteId: response.site.id } }">
-          {{ response.site.humanReadableName
-          }}<template v-if="response.site.country">, {{ response.site.country }}</template>
+        <router-link :to="{ name: 'Site', params: { siteId: file.site.id } }">
+          {{ file.site.humanReadableName }}<template v-if="file.site.country">, {{ file.site.country }}</template>
         </router-link>
         <span class="coordinates" v-if="location">
           ({{ formatCoordinates(location.latitude, location.longitude) }})
@@ -71,7 +70,7 @@ import { getProductIcon, formatCoordinates, backendUrl, humanReadableTimestamp }
 import type { Timeliness } from "@shared/entity/File";
 
 export interface Props {
-  response: FileResponse;
+  file: FileResponse;
   location: SiteLocation | null;
 }
 
@@ -83,9 +82,9 @@ const timelinessDisplay: Record<Timeliness, { label: string; url: string }> = {
   scheduled: { label: "Scheduled", url: "https://vocabulary.actris.nilu.no/actris_vocab/scheduled" },
 };
 
-const productIconUrl = computed(() => getProductIcon(props.response.product.id));
+const productIconUrl = computed(() => getProductIcon(props.file.product.id));
 
-const jsonUrl = computed(() => `${backendUrl}files/${props.response.uuid}`);
+const jsonUrl = computed(() => `${backendUrl}files/${props.file.uuid}`);
 </script>
 
 <style scoped lang="scss">

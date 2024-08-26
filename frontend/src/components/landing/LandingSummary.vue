@@ -1,19 +1,19 @@
 <template>
   <div class="landing-summary-container pagewidth">
-    <div class="summary-box summary-box-product-information" :class="{ obsolete: response.tombstoneReason }">
-      <ProductInformation :response="response" :location="location" />
-      <FileInformation :response="response" />
-      <FileProvenance :response="response" :isBusy="isBusy" :versions="versions" :sourceFiles="sourceFiles" />
+    <div class="summary-box summary-box-product-information" :class="{ obsolete: file.tombstoneReason }">
+      <ProductInformation :file="file" :location="location" />
+      <FileInformation :file="file" />
+      <FileProvenance :file="file" :isBusy="isBusy" :versions="versions" :sourceFiles="sourceFiles" />
     </div>
-    <div class="summary-box summary-box-visualization" :class="{ obsolete: response.tombstoneReason }">
+    <div class="summary-box summary-box-visualization" :class="{ obsolete: file.tombstoneReason }">
       <FilePreview :visualization="visualization" :loading="loadingVisualizations" />
     </div>
     <div
       class="summary-box summary-box-citation"
       id="citation"
-      :class="{ volatile: response.volatile, obsolete: response.tombstoneReason }"
+      :class="{ volatile: file.volatile, obsolete: file.tombstoneReason }"
     >
-      <FileCitation :uuid="uuid" :file="response" v-if="response" />
+      <FileCitation :uuid="uuid" :file="file" v-if="file" />
     </div>
   </div>
 </template>
@@ -32,7 +32,7 @@ import type { FileResponse } from "@/views/FileView.vue";
 import { useTitle } from "@/router";
 
 export interface Props {
-  response: FileResponse;
+  file: FileResponse;
   location: SiteLocation | null;
   uuid: string;
   isBusy: boolean;

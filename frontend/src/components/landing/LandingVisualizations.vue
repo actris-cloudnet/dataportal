@@ -1,6 +1,6 @@
 <template>
   <div class="landing-visualizations-container pagewidth">
-    <div class="summary-box" :class="{ obsolete: response.tombstoneReason }">
+    <div class="summary-box" :class="{ obsolete: file.tombstoneReason }">
       <template v-if="visualizations.length > 0">
         <div class="visualizations">
           <Visualization
@@ -13,7 +13,7 @@
             linkToVocabulary
           />
         </div>
-        <div class="link-to-viz" v-if="!response.tombstoneReason">
+        <div class="link-to-viz" v-if="!file.tombstoneReason">
           <router-link :to="linkToVisualizationSearch">View in visualisation search</router-link>
         </div>
       </template>
@@ -30,7 +30,7 @@ import Visualization from "@/components/ImageVisualization.vue";
 import { useTitle } from "@/router";
 
 export interface Props {
-  response: FileResponse;
+  file: FileResponse;
   visualizations: VisualizationItem[];
   title: string;
 }
@@ -60,7 +60,7 @@ const maxMarginRight = computed(() => {
 });
 
 const linkToVisualizationSearch = computed(() => {
-  const response = props.response;
+  const response = props.file;
   return {
     name: "Search",
     params: { mode: "visualizations" },

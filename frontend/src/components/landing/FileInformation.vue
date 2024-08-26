@@ -1,26 +1,26 @@
 <template>
-  <div v-if="response" class="summary-section" id="file-information">
+  <div v-if="file" class="summary-section" id="file-information">
     <div class="summary-section-header">File</div>
     <dl class="summary-section-table">
       <dt>PID</dt>
-      <dd v-if="response.pid.length > 2">
-        <a :href="response.pid">{{ response.pid }}</a>
+      <dd v-if="file.pid.length > 2">
+        <a :href="file.pid">{{ file.pid }}</a>
       </dd>
       <dd v-else class="notAvailable"></dd>
       <dt>Filename</dt>
-      <dd>{{ response.filename }}</dd>
+      <dd>{{ file.filename }}</dd>
       <dt>Format</dt>
-      <dd>{{ response.format }}</dd>
+      <dd>{{ file.format }}</dd>
       <dt>Size</dt>
-      <dd>{{ humanReadableSize(response.size) }}</dd>
+      <dd>{{ humanReadableSize(file.size) }}</dd>
       <dt>Hash (SHA-256)</dt>
       <dd>
-        <Copyable title="Copy the full hash" :value="response.checksum">
-          {{ response.checksum.slice(0, 7) }}
+        <Copyable title="Copy the full hash" :value="file.checksum">
+          {{ file.checksum.slice(0, 7) }}
         </Copyable>
       </dd>
       <dt>Last modified</dt>
-      <dd>{{ humanReadableTimestamp(response.updatedAt) }}</dd>
+      <dd>{{ humanReadableTimestamp(file.updatedAt) }}</dd>
     </dl>
   </div>
 </template>
@@ -31,7 +31,7 @@ import { humanReadableSize, humanReadableTimestamp } from "@/lib";
 import Copyable from "./CopyableText.vue";
 
 export interface Props {
-  response: FileResponse;
+  file: FileResponse;
 }
 
 defineProps<Props>();

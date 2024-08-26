@@ -1,6 +1,6 @@
 <template>
   <div class="landing-quality-report-container">
-    <div class="summary-box" :class="{ obsolete: response.tombstoneReason }">
+    <div class="summary-box" :class="{ obsolete: file.tombstoneReason }">
       <BaseSpinner v-if="report.status === 'loading'" />
       <div v-else-if="report.status === 'notFound'">No quality report available.</div>
       <div v-else-if="report.status === 'error'" style="color: red">Failed to load report.</div>
@@ -71,7 +71,7 @@ import type { FileResponse } from "@/views/FileView.vue";
 export interface Props {
   uuid: string;
   title: string;
-  response: FileResponse;
+  file: FileResponse;
 }
 
 const props = defineProps<Props>();

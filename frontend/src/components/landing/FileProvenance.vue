@@ -36,12 +36,12 @@
           </li>
         </ul>
       </dd>
-      <dd v-else-if="'instrumentInfo' in response && response.instrumentInfo">
+      <dd v-else-if="'instrumentInfo' in file && file.instrumentInfo">
         <router-link
           :to="{
             name: 'Raw Files',
-            params: { uuid: response.instrumentInfo.uuid },
-            query: { date: response.measurementDate },
+            params: { uuid: file.instrumentInfo.uuid },
+            query: { date: file.measurementDate },
           }"
         >
           List of raw files
@@ -60,9 +60,9 @@
         <span v-if="isBusy || (!previousVersion && !nextVersion)" class="notAvailable"></span>
       </dd>
       <dt>Software</dt>
-      <dd v-if="response.software.length > 0">
+      <dd v-if="file.software.length > 0">
         <ul class="software">
-          <li v-for="software in response.software" :key="software.title">
+          <li v-for="software in file.software" :key="software.title">
             <a :href="software.url" v-if="software.url">
               {{ software.title }}
             </a>
@@ -85,7 +85,7 @@ import { getProductIcon } from "@/lib";
 import type { FileResponse } from "@/views/FileView.vue";
 
 export interface Props {
-  response: FileResponse;
+  file: FileResponse;
   isBusy: boolean;
   versions: string[];
   sourceFiles: FileResponse[];
@@ -93,7 +93,7 @@ export interface Props {
 
 const props = defineProps<Props>();
 
-const currentVersionIndex = computed(() => props.versions.findIndex((uuid) => uuid == props.response.uuid));
+const currentVersionIndex = computed(() => props.versions.findIndex((uuid) => uuid == props.file.uuid));
 
 const previousVersion = computed(() => props.versions[currentVersionIndex.value + 1]);
 
