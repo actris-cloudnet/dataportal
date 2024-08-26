@@ -61,12 +61,11 @@ type PublicationState =
 
 const publications = ref<PublicationState>({ status: "loading" });
 
-const canEdit = ref(false);
+const canEdit = hasPermission("canAddPublication");
 const publicationUri = ref("");
 const addingPublication = ref(false);
 
 onMounted(async () => {
-  canEdit.value = await hasPermission("canAddPublication");
   await updatePublications();
 });
 

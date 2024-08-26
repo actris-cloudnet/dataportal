@@ -23,7 +23,7 @@
           type="danger"
           @click="openDeleteModal"
           :disabled="deleteBusy"
-          v-if="hasDeletePerm && !response.tombstoneReason"
+          v-if="hasPermission('canDelete').value && !file.tombstoneReason"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
             <path
@@ -94,7 +94,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, watch } from "vue";
 import axios from "axios";
 import { humanReadableDate, compareValues, backendUrl } from "@/lib";
 import type { RegularFile, ModelFile } from "@shared/entity/File";
@@ -129,7 +129,6 @@ const isBusy = ref(false);
 const loadingVisualizations = ref(true);
 const location = ref<SiteLocation | null>(null);
 
-const hasDeletePerm = ref(false);
 const deleteBusy = ref(false);
 const showDeleteModal = ref(false);
 const filesToDelete = ref<File[]>([]);
@@ -149,10 +148,6 @@ const currentVersionIndex = computed(() => {
 const newestVersion = computed(() => {
   if (!currentVersionIndex.value) return null;
   return versions.value[0];
-});
-
-onMounted(async () => {
-  hasDeletePerm.value = await hasPermission("canDelete");
 });
 
 async function fetchVisualizations(file: FileResponse) {
