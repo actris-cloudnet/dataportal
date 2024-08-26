@@ -230,19 +230,17 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach(async (to, _from) => {
-  if (!to.meta.permission) return;
-  const hasPerm = await hasPermission(to.meta.permission);
-  if (!hasPerm) return { name: "Login", query: { next: to.fullPath } };
-});
-
 const baseTitle = "Cloudnet data portal";
 
 function setTitle(parts: string[]) {
   document.title = [...parts, baseTitle].join(" – ");
 }
 
-router.beforeEach((to) => {
+router.beforeEach((to, _from) => {
+  if (!to.meta.permission) return;
+  const hasPerm = hasPermission(to.meta.permission).value;
+  if (!hasPerm) return { name: "Login", query: { next: to.fullPath } };
+
   if (typeof to.meta.title === "string") {
     setTitle([to.meta.title]);
   } else if (typeof to.meta.title === "undefined") {

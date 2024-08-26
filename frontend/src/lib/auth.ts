@@ -15,10 +15,8 @@ export const loginStore = reactive<State>({ username: "", password: "", permissi
 
 export const isAuthenticated = computed(() => loginStore.permissions.length > 0);
 
-export async function hasPermission(permission: PermissionType) {
-  await restoreLogin;
-  return loginStore.permissions.some((p) => p.permission === permission);
-}
+export const hasPermission = (permission: PermissionType) =>
+  computed(() => loginStore.permissions.some((p) => p.permission === permission));
 
 export async function login(username: string, password: string) {
   try {
@@ -43,7 +41,7 @@ export function logout() {
   loginStore.permissions = [];
 }
 
-const restoreLogin =
+export const initLogin = () =>
   localStorage.username && localStorage.password
     ? login(localStorage.username, localStorage.password).catch((err) => {
         console.error(err);
