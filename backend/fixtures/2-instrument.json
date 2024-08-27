@@ -3,49 +3,57 @@
     "id": "mira-35",
     "type": "radar",
     "shortName": "MIRA",
-    "humanReadableName": "METEK MIRA-35 cloud radar"
+    "humanReadableName": "METEK MIRA-35 cloud radar",
+    "derivedProducts": [{ "id": "radar" }]
   },
   {
     "id": "rpg-fmcw-94",
     "type": "radar",
     "shortName": "RPG FMCW-94",
-    "humanReadableName": "RPG FMCW-94 cloud radar"
+    "humanReadableName": "RPG FMCW-94 cloud radar",
+    "derivedProducts": [{ "id": "radar" }]
   },
   {
     "id": "ct25k",
     "type": "lidar",
     "shortName": "CT25K",
-    "humanReadableName": "Vaisala CT25K ceilometer"
+    "humanReadableName": "Vaisala CT25K ceilometer",
+    "derivedProducts": [{ "id": "lidar" }]
   },
   {
     "id": "cl31",
     "type": "lidar",
     "shortName": "CL31",
-    "humanReadableName": "Vaisala CL31 ceilometer"
+    "humanReadableName": "Vaisala CL31 ceilometer",
+    "derivedProducts": [{ "id": "lidar" }]
   },
   {
     "id": "cl51",
     "type": "lidar",
     "shortName": "CL51",
-    "humanReadableName": "Vaisala CL51 ceilometer"
+    "humanReadableName": "Vaisala CL51 ceilometer",
+    "derivedProducts": [{ "id": "lidar" }]
   },
   {
     "id": "chm15k",
     "type": "lidar",
     "shortName": "CHM15K",
-    "humanReadableName": "Lufft CHM15k ceilometer"
+    "humanReadableName": "Lufft CHM15k ceilometer",
+    "derivedProducts": [{ "id": "lidar" }]
   },
   {
     "id": "hatpro",
     "type": "mwr",
     "shortName": "HATPRO",
-    "humanReadableName": "RPG HATPRO microwave radiometer"
+    "humanReadableName": "RPG HATPRO microwave radiometer",
+    "derivedProducts": [{ "id": "mwr" }]
   },
   {
     "id": "halo-doppler-lidar",
     "type": "lidar",
     "shortName": "Halo Doppler Lidar",
     "humanReadableName": "Halo Photonics Doppler lidar",
-    "allowedTags": ["co", "cross"]
+    "allowedTags": ["co", "cross"],
+    "derivedProducts": [{ "id": "doppler-lidar" }, { "id": "doppler-lidar-wind" }]
   }
 ]

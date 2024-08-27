@@ -1,15 +1,50 @@
 <template>
   <div class="container">
-    <LandingHeader title="Processing queue" />
+    <LandingHeader title="Processing queue">
+      <template #actions>
+        <BaseButton
+          type="danger"
+          v-if="$route.query.batch"
+          @click="cancelBatch"
+          :disabled="isCancelled || totalTasks == 0"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+            <path
+              d="M 10.806641 2 C 10.289641 2 9.7956875 2.2043125 9.4296875 2.5703125 L 9 3 L 4 3 A 1.0001 1.0001 0 1 0 4 5 L 20 5 A 1.0001 1.0001 0 1 0 20 3 L 15 3 L 14.570312 2.5703125 C 14.205312 2.2043125 13.710359 2 13.193359 2 L 10.806641 2 z M 4.3652344 7 L 5.8925781 20.263672 C 6.0245781 21.253672 6.877 22 7.875 22 L 16.123047 22 C 17.121047 22 17.974422 21.254859 18.107422 20.255859 L 19.634766 7 L 4.3652344 7 z"
+            />
+          </svg>
+          Cancel
+        </BaseButton>
+      </template>
+    </LandingHeader>
     <main class="pagewidth">
-      <div class="statistics">
-        <p>Total Tasks: {{ totalTasks }}</p>
-        <p>Running: {{ runningTasks }}</p>
-        <p>Pending: {{ pendingTasks }}</p>
-        <p>Created: {{ createdTasks }}</p>
-        <p>Failed: {{ failedTasks }}</p>
-      </div>
-      <table v-if="sortedQueueData.length > 0">
+      <table class="statistics">
+        <tr v-if="$route.query.batch">
+          <th>Batch:</th>
+          <td>{{ $route.query.batch }}</td>
+        </tr>
+        <tr>
+          <th>Total tasks:</th>
+          <td>{{ totalTasks }}</td>
+        </tr>
+        <tr>
+          <th>Running:</th>
+          <td>{{ runningTasks }}</td>
+        </tr>
+        <tr>
+          <th>Pending:</th>
+          <td>{{ pendingTasks }}</td>
+        </tr>
+        <tr>
+          <th>Created:</th>
+          <td>{{ createdTasks }}</td>
+        </tr>
+        <tr>
+          <th>Failed:</th>
+          <td>{{ failedTasks }}</td>
+        </tr>
+      </table>
+      <table class="tasks" v-if="sortedQueueData.length > 0">
         <thead>
           <tr>
             <th>Type</th>
@@ -47,7 +82,7 @@
           </tr>
         </tbody>
       </table>
-      <CheckBox label="Show failed tasks" v-model="showFailed" />
+      <CheckBox label="Show failed tasks" v-model="showFailed" v-if="failedTasks > 0" />
     </main>
   </div>
 </template>
@@ -58,10 +93,12 @@ import { computed, ref, onMounted, onUnmounted } from "vue";
 import axios from "axios";
 import { backendUrl } from "@/lib";
 import BaseSpinner from "@/components/BaseSpinner.vue";
+import BaseButton from "@/components/BaseButton.vue";
 import type { Task } from "@shared/entity/Task";
 import testPassIcon from "@/assets/icons/test-pass.svg";
 import CheckBox from "@/components/CheckBox.vue";
 import { loginStore } from "@/lib/auth";
+import { useRoute } from "vue-router";
 
 type AugmentedTask = Omit<Task, "status"> & { status: Task["status"] | "pending" | "done" };
 const statusOrder: Record<AugmentedTask["status"], number> = {
@@ -73,15 +110,17 @@ const statusOrder: Record<AugmentedTask["status"], number> = {
   restart: 5,
 };
 
+const route = useRoute();
 const queueData = ref<Record<AugmentedTask["id"], AugmentedTask>>({});
-
 const showFailed = ref(false);
+const isCancelled = ref(false);
 
 let updateTimeout: NodeJS.Timeout | null = null;
 
 async function updateQueueData() {
   try {
     const response = await axios.get<Task[]>(`${backendUrl}queue`, {
+      params: { batch: route.query.batch },
       auth: { username: loginStore.username, password: loginStore.password },
     });
     for (const id in queueData.value) {
@@ -100,12 +139,28 @@ async function updateQueueData() {
   updateTimeout = setTimeout(updateQueueData, 5000);
 }
 
+async function cancelBatch() {
+  if (!confirm(`Cancel batch ${route.query.batch}?`)) return;
+  try {
+    isCancelled.value = true;
+    await axios.delete(`${backendUrl}queue/batch/${route.query.batch}`, {
+      params: { batch: route.query.batch },
+      auth: { username: loginStore.username, password: loginStore.password },
+    });
+    if (updateTimeout) clearTimeout(updateTimeout);
+    await updateQueueData();
+  } catch (err) {
+    alert(`Failed to cancel batch: ${err}`);
+    console.error(err);
+  }
+}
+
 onMounted(() => {
   updateQueueData();
+});
 
-  onUnmounted(() => {
-    if (updateTimeout) clearTimeout(updateTimeout);
-  });
+onUnmounted(() => {
+  if (updateTimeout) clearTimeout(updateTimeout);
 });
 
 function timeDifference(scheduledAt: string): string {
@@ -156,17 +211,33 @@ const createdTasks = computed(() => Object.values(queueData.value).filter((task)
 
 .statistics {
   margin-bottom: 20px;
+
+  th {
+    font-weight: 500;
+    padding-right: 10px;
+  }
 }
 
-td {
-  padding-right: 20px;
-  padding-left: 20px;
-}
+.tasks {
+  tr {
+    border-bottom: 1px solid lightblue;
+    margin-left: 10px;
+    opacity: 1;
+  }
 
-tr {
-  border-bottom: 1px solid lightblue;
-  margin-left: 10px;
-  opacity: 1;
+  th {
+    border-bottom: 1px solid lightblue;
+    font-weight: 500;
+    padding-right: 10px;
+    padding-left: 20px;
+    padding-bottom: 5px;
+    vertical-align: middle;
+  }
+
+  td {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
 }
 
 .list-enter-active {
@@ -181,15 +252,6 @@ tr {
 .list-leave-to {
   opacity: 0;
   transform: translateX(100px);
-}
-
-th {
-  border-bottom: 1px solid lightblue;
-  font-weight: bold;
-  padding-right: 10px;
-  padding-left: 20px;
-  padding-bottom: 5px;
-  vertical-align: middle;
 }
 
 .status-pending {

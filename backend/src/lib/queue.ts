@@ -11,7 +11,22 @@ export class QueueService {
   }
 
   async publish(task: Task) {
-    await this.taskRepo.query(
+    await this.publishSql("VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)", [
+      task.type,
+      task.site ? task.site.id : task.siteId,
+      task.measurementDate,
+      task.product ? task.product.id : task.productId,
+      task.instrumentInfo ? task.instrumentInfo.uuid : task.instrumentInfoUuid,
+      task.model ? task.model.id : task.modelId,
+      TaskStatus.CREATED,
+      task.priority,
+      task.scheduledAt.toISOString(),
+      task.batchId || null,
+    ]);
+  }
+
+  async publishSql(valuesSql: string, parameters?: any[]) {
+    return this.taskRepo.query(
       `INSERT INTO task (
          "type",
          "siteId",
@@ -21,9 +36,10 @@ export class QueueService {
          "modelId",
          "status",
          "priority",
-         "scheduledAt"
+         "scheduledAt",
+         "batchId"
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       ${valuesSql}
        ON CONFLICT (
          "type",
          "siteId",
@@ -39,19 +55,8 @@ export class QueueService {
            WHEN task.status = '${TaskStatus.RUNNING}' THEN '${TaskStatus.RESTART}'::task_status_enum
            WHEN task.status = '${TaskStatus.RESTART}' THEN '${TaskStatus.RESTART}'::task_status_enum
            WHEN task.status = '${TaskStatus.FAILED}'  THEN '${TaskStatus.CREATED}'::task_status_enum
-         END
-       RETURNING id`,
-      [
-        task.type,
-        task.site ? task.site.id : task.siteId,
-        task.measurementDate,
-        task.product ? task.product.id : task.productId,
-        task.instrumentInfo ? task.instrumentInfo.uuid : task.instrumentInfoUuid,
-        task.model ? task.model.id : task.modelId,
-        TaskStatus.CREATED,
-        task.priority,
-        task.scheduledAt.toISOString(),
-      ],
+         END`,
+      parameters,
     );
   }
 
@@ -117,13 +122,17 @@ export class QueueService {
     return this.taskRepo.count({ where: { status: Not(TaskStatus.FAILED) } });
   }
 
+  async cancelBatch(batchId: string) {
+    await this.taskRepo.delete({ status: TaskStatus.CREATED, batchId });
+  }
+
   async clear() {
     await this.taskRepo.delete({});
     this.locks.clear();
   }
 
-  async getQueue() {
-    return await this.taskRepo.find({ relations: { instrumentInfo: true, model: true } });
+  async getQueue(batchId?: string) {
+    return await this.taskRepo.find({ where: { batchId }, relations: { instrumentInfo: true, model: true } });
   }
 
   private taskToLock(task: Task) {

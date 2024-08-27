@@ -39,6 +39,7 @@ header {
 }
 
 .title {
+  grid-row: 1;
   grid-column: 1;
   font-size: 170%;
   font-weight: 300;
@@ -60,6 +61,7 @@ header {
 .actions {
   margin-left: 1rem;
   grid-row: 1 / 3;
+  grid-column: 3;
   display: flex;
   gap: 0.5rem;
 }

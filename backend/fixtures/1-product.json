@@ -25,7 +25,8 @@
     "humanReadableName": "Classification",
     "level": "2",
     "type": ["geophysical"],
-    "experimental": false
+    "experimental": false,
+    "sourceProducts": [{ "id": "categorize" }]
   },
   {
     "id": "classification-voodoo",
@@ -39,35 +40,40 @@
     "humanReadableName": "Droplet effective radius",
     "level": "2",
     "type": ["geophysical"],
-    "experimental": false
+    "experimental": false,
+    "sourceProducts": [{ "id": "categorize" }]
   },
   {
     "id": "drizzle",
     "humanReadableName": "Drizzle",
     "level": "2",
     "type": ["geophysical"],
-    "experimental": false
+    "experimental": false,
+    "sourceProducts": [{ "id": "categorize" }]
   },
   {
     "id": "ier",
     "humanReadableName": "Ice effective radius",
     "level": "2",
     "type": ["geophysical"],
-    "experimental": false
+    "experimental": false,
+    "sourceProducts": [{ "id": "categorize" }]
   },
   {
     "id": "iwc",
     "humanReadableName": "Ice water content",
     "level": "2",
     "type": ["geophysical"],
-    "experimental": false
+    "experimental": false,
+    "sourceProducts": [{ "id": "categorize" }]
   },
   {
     "id": "lwc",
     "humanReadableName": "Liquid water content",
     "level": "2",
     "type": ["geophysical"],
-    "experimental": false
+    "experimental": false,
+    "sourceProducts": [{ "id": "categorize" }]
   },
   {
     "id": "mwr-multi",
@@ -88,7 +94,8 @@
     "humanReadableName": "Categorize",
     "level": "1c",
     "type": ["geophysical"],
-    "experimental": false
+    "experimental": false,
+    "sourceProducts": [{ "id": "lidar" }, { "id": "radar" }, { "id": "mwr" }, { "id": "model" }]
   },
   {
     "id": "categorize-voodoo",
@@ -114,6 +121,13 @@
   {
     "id": "doppler-lidar",
     "humanReadableName": "Doppler lidar",
+    "level": "1b",
+    "type": ["instrument"],
+    "experimental": true
+  },
+  {
+    "id": "doppler-lidar-wind",
+    "humanReadableName": "Doppler lidar wind",
     "level": "1b",
     "type": ["instrument"],
     "experimental": true

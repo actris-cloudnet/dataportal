@@ -119,6 +119,13 @@
     "experimental": true
   },
   {
+    "id": "doppler-lidar-wind",
+    "humanReadableName": "Doppler lidar wind",
+    "level": "1b",
+    "type": ["instrument"],
+    "experimental": true
+  },
+  {
     "id": "lidar",
     "humanReadableName": "Lidar",
     "level": "1b",
