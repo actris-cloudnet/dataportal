@@ -23,11 +23,11 @@
               :key="product.id"
               class="qualityitem"
               :class="{
-                found: data && getProductStatus(data.products[prodType], product.id),
                 na: !data || !getReportExists(data.products[prodType], product.id),
-                info: data && isFileWithInfo(data.products[prodType], product.id),
-                warning: data && isFileWithWarning(data.products[prodType], product.id),
                 error: data && isFileWithError(data.products[prodType], product.id),
+                warning: data && isFileWithWarning(data.products[prodType], product.id),
+                info: data && isFileWithInfo(data.products[prodType], product.id),
+                found: data && isFileWithPass(data.products[prodType], product.id),
               }"
             >
               {{ product.humanReadableName }}
@@ -48,9 +48,10 @@ import { computed } from "vue";
 import {
   isLegacyFile,
   noData,
+  isFileWithPass,
   isFileWithInfo,
-  isFileWithError,
   isFileWithWarning,
+  isFileWithError,
   getProductStatus,
   getReportExists,
   allGeophysicalPass,

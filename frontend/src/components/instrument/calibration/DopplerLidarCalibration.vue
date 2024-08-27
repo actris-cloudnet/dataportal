@@ -41,7 +41,7 @@ const plotData = computed(() => {
   }
 
   const measurementDates = props.calibrationData.map((entry) =>
-    Math.floor(new Date(entry.measurementDate).getTime() / 1000)
+    Math.floor(new Date(entry.measurementDate).getTime() / 1000),
   );
   const azimuthOffsets = props.calibrationData.map((entry) => entry.data.azimuth_offset_deg);
 

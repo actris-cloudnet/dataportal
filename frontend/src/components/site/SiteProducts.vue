@@ -27,6 +27,7 @@
           :productId="selectedProductId"
           :year="selectedYear"
           :instrumentPid="selectedPid"
+          :modelId="selectedModel"
         />
         <BaseSpinner v-else />
       </section>
@@ -72,6 +73,15 @@
             clearable
           />
         </div>
+        <div class="viz-option" style="width: 320px" v-if="modelOptions.length > 1">
+          <custom-multiselect
+            v-model="selectedModelOption"
+            label="Model"
+            :options="modelOptions"
+            id="modelSelect"
+            clearable
+          />
+        </div>
       </div>
       <a @click="reset" id="reset">Reset filter</a>
     </div>
@@ -100,8 +110,10 @@ const dataStatus = ref<DataStatus | null>(null);
 
 const selectedYearOption = ref(null);
 const selectedPidOption = ref(null);
+const selectedModelOption = ref(null);
 const selectedYear = computed(() => (selectedYearOption.value ? parseInt(selectedYearOption.value) : undefined));
 const selectedPid = computed(() => (selectedPidOption.value ? selectedPidOption.value : undefined));
+const selectedModel = computed(() => (selectedModelOption.value ? selectedModelOption.value : undefined));
 
 const yearOptions = computed(() => {
   if (!dataStatus.value) return [];
@@ -117,6 +129,18 @@ const pidOptions = computed(() => {
   return dataStatusValue.allPids[selectedProductIdValue].map((pid) => ({
     id: pid.pid,
     humanReadableName: pid.humanReadableName,
+  }));
+});
+
+const modelOptions = computed(() => {
+  const { value: dataStatusValue } = dataStatus;
+  const { value: selectedProductIdValue } = selectedProductId;
+  if (!dataStatusValue || !selectedProductIdValue || selectedProductIdValue !== "model") {
+    return [];
+  }
+  return dataStatusValue.allModels.map((model) => ({
+    id: model.id,
+    humanReadableName: model.humanReadableName,
   }));
 });
 
@@ -151,10 +175,12 @@ function reset() {
   selectedProductId.value = null;
   selectedYearOption.value = null;
   selectedPidOption.value = null;
+  selectedModelOption.value = null;
 }
 
 watch(selectedProductId, () => {
   selectedPidOption.value = null;
+  selectedModelOption.value = null;
 });
 </script>
 

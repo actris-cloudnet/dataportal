@@ -67,7 +67,7 @@ export class CalibrationRoutes {
             updatedAt: c.updatedAt,
             measurementDate: c.measurementDate,
             data: c.data,
-          }))
+          })),
         );
       }
     } catch (e) {

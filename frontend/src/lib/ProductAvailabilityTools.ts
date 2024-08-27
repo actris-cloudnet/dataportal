@@ -54,12 +54,16 @@ export function isLegacyFile(existingProducts: ProductInfo[], productId: Product
   return existingProducts.some((prod) => prod.id === productId && prod.legacy);
 }
 
-export function isFileWithWarning(existingProducts: ProductInfo[], productId: ProductInfo["id"]) {
-  return existingProducts.some((prod) => prod.id === productId && isWarning(prod));
+export function isFileWithPass(existingProducts: ProductInfo[], productId: ProductInfo["id"]) {
+  return existingProducts.some((prod) => prod.id === productId && isPass(prod));
 }
 
 export function isFileWithInfo(existingProducts: ProductInfo[], productId: ProductInfo["id"]) {
   return existingProducts.some((prod) => prod.id === productId && isInfo(prod));
+}
+
+export function isFileWithWarning(existingProducts: ProductInfo[], productId: ProductInfo["id"]) {
+  return existingProducts.some((prod) => prod.id === productId && isWarning(prod));
 }
 
 export function isFileWithError(existingProducts: ProductInfo[], productId: ProductInfo["id"]) {
