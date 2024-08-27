@@ -169,6 +169,13 @@
     "variables": []
   },
   {
+    "id": "doppler-lidar-wind",
+    "humanReadableName": "Doppler lidar wind",
+    "level": "1b",
+    "experimental": true,
+    "variables": []
+  },
+  {
     "id": "lidar",
     "humanReadableName": "Lidar",
     "level": "1b",

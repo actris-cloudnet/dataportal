@@ -72,4 +72,7 @@ export class Task {
   /** Priority from 0 (highest) to 100 (lowest). */
   @Column("smallint")
   priority!: number;
+
+  @Column("text", { nullable: true })
+  batchId!: string | null;
 }

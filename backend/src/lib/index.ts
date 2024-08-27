@@ -294,3 +294,7 @@ export function fixInstrument(instrument: string, instrumentInfo: InstrumentInfo
   }
   return instrument;
 }
+
+export function isStringArray(value: any) {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
+}

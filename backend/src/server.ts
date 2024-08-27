@@ -58,7 +58,7 @@ async function createServer(): Promise<void> {
   const userAccountRoutes = new UserAccountRoutes(AppDataSource);
   const referenceRoutes = new ReferenceRoutes(AppDataSource);
   const feedbackRoutes = new FeedbackRoutes(AppDataSource);
-  const queueRoutes = new QueueRoutes(queueService);
+  const queueRoutes = new QueueRoutes(AppDataSource, queueService);
   const productAvailabilityRoutes = new ProductAvailabilityRoutes(AppDataSource);
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
@@ -323,6 +323,19 @@ async function createServer(): Promise<void> {
     authenticator.verifyCredentials(),
     authorizator.verifyPermission(PermissionType.canPublishTask),
     queueRoutes.getQueue,
+  );
+  app.post(
+    "/api/queue/batch",
+    authenticator.verifyCredentials(),
+    authorizator.verifyPermission(PermissionType.canPublishTask),
+    express.json(),
+    queueRoutes.submitBatch,
+  );
+  app.delete(
+    "/api/queue/batch/:batchId",
+    authenticator.verifyCredentials(),
+    authorizator.verifyPermission(PermissionType.canPublishTask),
+    queueRoutes.cancelBatch,
   );
 
   app.use(errorHandler);
