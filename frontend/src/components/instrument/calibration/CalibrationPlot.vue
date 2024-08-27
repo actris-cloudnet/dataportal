@@ -73,7 +73,7 @@ const createPlotOptions = (config: { title: string; label: string; color?: strin
               if (Math.abs(v) >= 1e6 || Math.abs(v) < 1e-3) {
                 return v.toExponential(2);
               } else {
-                return v.toFixed(2);
+                return v.toFixed(3);
               }
             }
           }
