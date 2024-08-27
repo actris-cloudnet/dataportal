@@ -237,9 +237,9 @@ function setTitle(parts: string[]) {
 }
 
 router.beforeEach((to, _from) => {
-  if (!to.meta.permission) return;
-  const hasPerm = hasPermission(to.meta.permission).value;
-  if (!hasPerm) return { name: "Login", query: { next: to.fullPath } };
+  if (to.meta.permission && !hasPermission(to.meta.permission).value) {
+    return { name: "Login", query: { next: to.fullPath } };
+  }
 
   if (typeof to.meta.title === "string") {
     setTitle([to.meta.title]);
