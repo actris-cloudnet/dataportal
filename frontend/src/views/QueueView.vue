@@ -62,7 +62,7 @@
             <td>{{ task.type }}</td>
             <td class="spinner-cell">
               <img :src="testPassIcon" alt="" v-if="task.status === 'done'" />
-              <BaseSpinner size="small" v-else-if="task.status === 'running'" />
+              <BaseSpinner size="small" v-else-if="task.status === 'running' || task.status === 'restart'" />
             </td>
             <td class="status">{{ task.status }}</td>
             <td>{{ task.siteId }}</td>
@@ -70,14 +70,7 @@
             <td>{{ task.productId }}</td>
             <td>{{ task.instrumentInfo?.name || task.model?.id }}</td>
             <td>
-              {{
-                task.status === "pending" ||
-                task.status === "running" ||
-                task.status === "done" ||
-                task.status === "failed"
-                  ? ""
-                  : timeDifference(task.scheduledAt)
-              }}
+              {{ task.status === "created" ? timeDifference(task.scheduledAt) : "" }}
             </td>
           </tr>
         </tbody>
@@ -104,10 +97,10 @@ type AugmentedTask = Omit<Task, "status"> & { status: Task["status"] | "pending"
 const statusOrder: Record<AugmentedTask["status"], number> = {
   done: 0,
   running: 1,
+  restart: 1,
   pending: 2,
   created: 3,
   failed: 4,
-  restart: 5,
 };
 
 const route = useRoute();
@@ -258,7 +251,8 @@ const createdTasks = computed(() => Object.values(queueData.value).filter((task)
   background-color: #e7f5e7;
 }
 
-.status-running {
+.status-running,
+.status-restart {
   background-color: #8bc34a;
 }
 
