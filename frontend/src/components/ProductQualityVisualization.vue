@@ -52,7 +52,6 @@ import {
   isFileWithInfo,
   isFileWithWarning,
   isFileWithError,
-  getProductStatus,
   getReportExists,
   allGeophysicalPass,
   hasSomeGeophysicalTests,
