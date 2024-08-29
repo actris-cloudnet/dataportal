@@ -2,7 +2,6 @@ import type { File } from "./File";
 import type { Upload } from "./Upload";
 import type { Calibration } from "./Calibration";
 import type { RegularCitation } from "./Citation";
-import type { SiteContact } from "./SiteContact";
 import type { Person } from "./Person";
 import type { SiteLocation } from "./SiteLocation";
 
@@ -34,7 +33,6 @@ export interface Site {
   calibrations: Calibration[];
   persons: Person[];
   citations: RegularCitation[];
-  contacts: SiteContact[];
   locations: SiteLocation[];
   status: "cloudnet" | "active" | "inactive";
 }

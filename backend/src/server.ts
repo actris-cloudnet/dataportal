@@ -14,7 +14,6 @@ import { ModelRoutes } from "./routes/model";
 import { DownloadRoutes } from "./routes/download";
 import { CalibrationRoutes } from "./routes/calibration";
 import { QualityReportRoutes } from "./routes/qualityreport";
-import { SiteContactRoutes } from "./routes/siteContact";
 import { UserAccountRoutes } from "./routes/userAccount";
 import { PublicationRoutes } from "./routes/publication";
 import { Authenticator, Authorizator } from "./lib/auth";
@@ -56,7 +55,6 @@ async function createServer(): Promise<void> {
   const qualityRoutes = new QualityReportRoutes(AppDataSource, fileRoutes);
   const publicationRoutes = new PublicationRoutes(AppDataSource);
   const userActivationRoutes = new UserActivationRoutes(AppDataSource);
-  const siteContactRoutes = new SiteContactRoutes(AppDataSource);
   const userAccountRoutes = new UserAccountRoutes(AppDataSource);
   const referenceRoutes = new ReferenceRoutes(AppDataSource);
   const feedbackRoutes = new FeedbackRoutes(AppDataSource);
@@ -302,19 +300,6 @@ async function createServer(): Promise<void> {
   );
   app.get("/api/publications/", publicationRoutes.getPublications);
   app.get("/api/users/me", userAccountRoutes.userInfo);
-
-  // site contacts private
-  app.post("/site-contacts", express.json(), siteContactRoutes.postSiteContact);
-  app.get("/site-contacts", siteContactRoutes.getSiteContacts);
-  app.put("/site-contacts/:id", express.json(), siteContactRoutes.putSiteContact);
-  app.delete("/site-contacts/:id", siteContactRoutes.deleteSiteContact);
-  // persons private
-  app.get("/persons", siteContactRoutes.getPersons);
-  app.put("/persons/:id", express.json(), siteContactRoutes.putPerson);
-  app.delete("/persons/:id", siteContactRoutes.deletePerson);
-  app.delete("/persons", siteContactRoutes.deletePersons);
-
-  app.get("/contacts", siteContactRoutes.getContacts);
 
   // Private UserAccount and Permission routes
   app.post("/user-accounts", express.json(), userAccountRoutes.validatePost, userAccountRoutes.postUserAccount);

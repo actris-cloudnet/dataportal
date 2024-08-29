@@ -57,7 +57,7 @@ The backend unit and integration tests are run with the commands:
 Individual tests can be run as:
 
     cd backend
-    ./run-test sh -c "npm run reset-db && npx jest tests/integration/sequential/siteContact.test.ts"
+    ./run-test sh -c "npm run reset-db && npx jest tests/integration/sequential/upload.test.ts"
 
 To run backend e2e-tests, issue
 

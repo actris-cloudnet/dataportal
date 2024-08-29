@@ -1,6 +1,5 @@
-import { Column, Entity, OneToMany, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
 
-import { SiteContact } from "./SiteContact";
 import { Site } from "./Site";
 import { RegularCitation } from "./Citation";
 
@@ -20,9 +19,6 @@ export class Person {
 
   @Column({ nullable: true, select: false })
   email?: string;
-
-  @OneToMany(() => SiteContact, (siteContact) => siteContact.person)
-  siteContactRoles?: SiteContact[];
 
   @ManyToMany((_) => Site, (site) => site.persons)
   sites?: Site[];

@@ -1,6 +1,5 @@
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn } from "typeorm";
 import { RegularCitation } from "./Citation";
-import { SiteContact } from "./SiteContact";
 import { Permission } from "./Permission";
 import { Person } from "./Person";
 import { SiteLocation } from "./SiteLocation";
@@ -63,9 +62,6 @@ export class Site {
   @ManyToMany((_) => RegularCitation)
   @JoinTable()
   citations!: RegularCitation[];
-
-  @OneToMany((_) => SiteContact, (siteContact) => siteContact.site)
-  contacts!: SiteContact[];
 
   @OneToMany((_) => Permission, (permission) => permission.site)
   permissions!: Permission[];
