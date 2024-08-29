@@ -1,20 +1,16 @@
-import { backendUrl, compareValues, notEmpty } from "@/lib/index";
-import type { InstrumentInfo } from "@shared/entity/Instrument";
+import { backendUrl, compareValues } from "@/lib/index";
 import type { Product } from "@shared/entity/Product";
 import axios from "axios";
-
-interface InstrumentPids {
-  [key: string]: { pid: string; humanReadableName: string }[];
-}
 
 export interface ProductInfo {
   id: string;
   legacy: boolean;
   uuid: string;
   experimental: boolean;
-  errorLevel?: string | null;
-  instrumentPid?: string | null;
   siteId: string;
+  errorLevel: string | null;
+  instrumentPid: string | null;
+  modelId: string | null;
 }
 
 export interface ProductLevels {
@@ -22,14 +18,23 @@ export interface ProductLevels {
   geophysical: ProductInfo[];
 }
 
+export type ProductType = keyof ProductLevels;
+
+type LvlTranslate = Record<string, ProductType>;
+
+interface InstrumentPids {
+  [key: string]: { pid: string; humanReadableName: string }[];
+}
+
+interface ModelInfo {
+  id: string;
+  humanReadableName: string;
+}
+
 export interface ProductDate {
   date: string;
   products: ProductLevels;
 }
-
-export type ProductType = keyof ProductLevels;
-
-export type LvlTranslate = Record<string, ProductType>;
 
 export interface DataStatus {
   allProducts: Product[];
@@ -39,141 +44,151 @@ export interface DataStatus {
   geophysicalProductCount: number;
   years: number[];
   allPids: InstrumentPids;
+  allModels: ModelInfo[];
 }
 
-function createProductLevels(lvlTranslate: LvlTranslate, productInfo?: ProductInfo, existingObj?: ProductLevels) {
-  if (!existingObj) {
-    existingObj = {
-      instrument: [],
-      geophysical: [],
-    };
-  }
-  if (productInfo) {
-    const { id, legacy, uuid, experimental, errorLevel, instrumentPid, siteId } = productInfo;
-    const lvl = lvlTranslate[id];
-    if (!lvl) return existingObj;
-    existingObj[lvl].push({
-      id,
-      legacy,
-      uuid,
-      experimental,
-      errorLevel,
-      instrumentPid,
-      siteId,
-    });
-  }
-  return existingObj;
+interface InstrumentInfo {
+  pid: string;
+  name: string;
 }
 
 interface ProductAvailability {
   uuid: string;
   measurementDate: string;
   productId: string;
-  errorLevel: string;
   legacy: boolean;
   experimental: boolean;
-  instrumentPid: string;
-  instrumentInfo: InstrumentInfo;
   siteId: string;
+  errorLevel: string | null;
+  instrumentInfo: InstrumentInfo | null;
+  modelInfo: ModelInfo | null;
 }
 
 interface DataStatusConfig {
   site?: string;
   instrumentPid?: string;
+  modelId?: string;
+}
+
+function createProductLevels(
+  lvlTranslate: LvlTranslate,
+  productInfo?: ProductInfo,
+  existingObj: ProductLevels = { instrument: [], geophysical: [] },
+): ProductLevels {
+  if (productInfo) {
+    const lvl = lvlTranslate[productInfo.id];
+    if (lvl) existingObj[lvl].push(productInfo);
+  }
+  return existingObj;
 }
 
 export async function parseDataStatus(config: DataStatusConfig): Promise<DataStatus> {
   const [searchRes, prodRes] = await Promise.all([
     axios.get<ProductAvailability[]>(`${backendUrl}product-availability/`, {
-      params: { site: config.site, instrumentPid: config.instrumentPid, includeExperimental: true },
+      params: {
+        site: config.site,
+        instrumentPid: config.instrumentPid,
+        model: config.modelId,
+        includeExperimental: true,
+      },
     }),
     axios.get<Product[]>(`${backendUrl}products/`),
   ]);
+
   const searchResponse = searchRes.data;
+  const prodResponse = prodRes.data;
 
-  const geophysicalProductCount = prodRes.data.filter(
-    (product) => product.type.includes("geophysical") && !product.experimental,
-  ).length;
+  const lvlTranslate: LvlTranslate = {};
+  let geophysicalProductCount = 0;
+  const allProducts = prodResponse.filter((prod) => {
+    if (prod.level !== "3") {
+      const productType =
+        prod.type.includes("instrument") || prod.type.includes("model") ? "instrument" : "geophysical";
+      lvlTranslate[prod.id] = productType;
+      if (productType === "geophysical" && !prod.experimental) geophysicalProductCount++;
+      return true;
+    }
+    return false;
+  });
 
-  const allProducts = prodRes.data.filter((prod) => prod.level !== "3");
-  if (!searchResponse || !allProducts || searchResponse.length == 0) {
+  if (!searchResponse.length || !allProducts.length) {
     return {
       allProducts,
       dates: [],
-      lvlTranslate: {},
+      lvlTranslate,
       availableProducts: [],
-      geophysicalProductCount: 0,
+      geophysicalProductCount,
       years: [],
       allPids: {},
+      allModels: [],
     };
   }
 
-  const productMap = allProducts.reduce((map: Record<string, Product>, product) => {
-    map[product.id] = product;
-    return map;
-  }, {});
-  const productIds = new Set(searchResponse.map((file) => file.productId));
-  const availableProducts = Array.from(productIds)
-    .map((productId) => productMap[productId])
-    .filter(notEmpty)
+  const availableProducts = allProducts
+    .filter((product) => searchResponse.some((file) => file.productId === product.id))
     .sort((a, b) => compareValues(a.humanReadableName, b.humanReadableName));
 
-  const lvlTranslate = allProducts.reduce(
-    (acc, cur) => ({
-      ...acc,
-      [cur.id]: cur.type.includes("instrument") || cur.type.includes("model") ? "instrument" : "geophysical",
-    }),
-    {},
-  );
+  const dates: Record<string, ProductDate> = {};
 
-  const dates = searchResponse.reduce(
-    (obj, cur) => {
-      const productInfo = {
-        id: cur.productId,
-        legacy: cur.legacy,
-        uuid: cur.uuid,
-        experimental: cur.experimental,
-        errorLevel: "errorLevel" in cur ? cur.errorLevel : undefined,
-        instrumentPid: "instrumentPid" in cur ? cur.instrumentPid : undefined,
-        siteId: cur.siteId,
-      };
-      if (!obj[cur.measurementDate]) {
-        obj[cur.measurementDate] = { date: cur.measurementDate, products: createProductLevels(lvlTranslate) };
-      }
-      createProductLevels(lvlTranslate, productInfo, obj[cur.measurementDate].products);
-      return obj;
-    },
-    {} as Record<string, ProductDate>,
-  );
+  searchResponse.forEach((cur) => {
+    const productInfo: ProductInfo = {
+      id: cur.productId,
+      legacy: cur.legacy,
+      uuid: cur.uuid,
+      siteId: cur.siteId,
+      experimental: cur.experimental,
+      errorLevel: cur.errorLevel,
+      instrumentPid: cur.instrumentInfo?.pid || null,
+      modelId: cur.modelInfo?.id || null,
+    };
 
-  const years = new Set(searchResponse.map((row) => parseInt(row.measurementDate.slice(0, 4))));
+    if (!dates[cur.measurementDate]) {
+      dates[cur.measurementDate] = { date: cur.measurementDate, products: { instrument: [], geophysical: [] } };
+    }
+    createProductLevels(lvlTranslate, productInfo, dates[cur.measurementDate].products);
+  });
+
+  const years = Array.from(new Set(searchResponse.map((row) => parseInt(row.measurementDate.slice(0, 4)))));
 
   const allPids: InstrumentPids = {};
-  const pidLookup: { [key: string]: { [pid: string]: boolean } } = {};
 
-  availableProducts.forEach((product) => {
-    allPids[product.id] = [];
-    pidLookup[product.id] = {};
-  });
+  const models: ModelInfo[] = [];
+
+  const modelIds = new Set<string>();
 
   searchResponse.forEach((item) => {
-    if (item.instrumentPid && pidLookup[item.productId] && !pidLookup[item.productId][item.instrumentPid]) {
-      allPids[item.productId].push({
-        pid: item.instrumentPid,
-        humanReadableName: item.instrumentInfo ? item.instrumentInfo.name : item.instrumentPid,
-      });
-      pidLookup[item.productId][item.instrumentPid] = true;
+    const instrumentInfo = item.instrumentInfo;
+    if (instrumentInfo?.pid) {
+      const productId = item.productId;
+      if (!allPids[productId]) {
+        allPids[productId] = [];
+      }
+      const existingPids = new Set(allPids[productId].map((pidInfo) => pidInfo.pid));
+      if (!existingPids.has(instrumentInfo.pid)) {
+        allPids[productId].push({
+          pid: instrumentInfo.pid,
+          humanReadableName: instrumentInfo.name,
+        });
+      }
+    }
+    const modelInfo = item.modelInfo;
+    if (modelInfo?.id && !modelIds.has(modelInfo.id)) {
+      models.push(modelInfo);
+      modelIds.add(modelInfo.id);
     }
   });
+
+  const allModels = models.sort((a, b) => compareValues(a.humanReadableName, b.humanReadableName));
 
   return {
     allProducts,
     dates: Object.values(dates),
     lvlTranslate,
     availableProducts,
-    geophysicalProductCount: geophysicalProductCount,
-    years: [...years],
+    geophysicalProductCount,
+    years,
     allPids,
+    allModels,
   };
 }
 
@@ -192,10 +207,11 @@ export interface UploadStatus {
 
 export async function parseUploadStatus(instrumentPid: string): Promise<UploadStatus> {
   const uploadRes = await axios.get<UploadDate[]>(`${backendUrl}upload-amount/`, {
-    params: { instrumentPid: instrumentPid },
+    params: { instrumentPid },
   });
   const uploadResponse = uploadRes.data;
-  if (!uploadResponse) {
+
+  if (!uploadResponse.length) {
     return {
       dates: [],
       years: [],
@@ -203,12 +219,14 @@ export async function parseUploadStatus(instrumentPid: string): Promise<UploadSt
       maxSize: 0,
     };
   }
-  const years = new Set(uploadResponse.map((row) => parseInt(row.date.slice(0, 4))));
+
+  const years = Array.from(new Set(uploadResponse.map((row) => parseInt(row.date.slice(0, 4)))));
   const maxCount = Math.max(...uploadResponse.map((row) => row.fileCount));
   const maxSize = Math.max(...uploadResponse.map((row) => row.totalSize));
+
   return {
     dates: uploadResponse,
-    years: [...years],
+    years,
     maxCount,
     maxSize,
   };

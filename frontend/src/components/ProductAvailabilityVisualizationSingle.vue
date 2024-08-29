@@ -37,18 +37,19 @@ import testInfoIcon from "@/assets/icons/test-info.svg";
 import legacyPassIcon from "@/assets/icons/legacy-pass.svg";
 import testMissingIcon from "@/assets/icons/test-missing.svg";
 
-export interface Props {
+interface Props {
   dataStatus: DataStatus;
   productId: string;
   year?: number;
   instrumentPid?: string;
+  modelId?: string;
 }
 
 const props = defineProps<Props>();
 
 const dates = computed(() =>
   props.dataStatus.dates.map((date) => {
-    const product = getProduct(date, props.productId, props.instrumentPid);
+    const product = getProduct(date, props.productId, props.instrumentPid, props.modelId);
     return {
       date: date.date,
       color: createColor(product!),
@@ -58,7 +59,10 @@ const dates = computed(() =>
   }),
 );
 
-const getProduct = (date: ProductDate, productId: string, instrumentPid: string | undefined) => {
+const getProduct = (date: ProductDate, productId: string, instrumentPid?: string, modelId?: string) => {
+  if (modelId) {
+    return date.products.instrument.find((p) => p.modelId === modelId);
+  }
   if (instrumentPid) {
     return date.products.instrument.find((p) => p.instrumentPid === instrumentPid && p.id === productId);
   }

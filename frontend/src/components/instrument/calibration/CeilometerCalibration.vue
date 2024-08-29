@@ -59,7 +59,7 @@ const plotError = ref<string | null>(null);
 
 const plotData = computed(() => {
   const measurementDates = props.calibrationData.map((entry) =>
-    Math.floor(new Date(entry.measurementDate).getTime() / 1000)
+    Math.floor(new Date(entry.measurementDate).getTime() / 1000),
   );
   const calibrationFactor = props.calibrationData.map((entry) => entry.data.calibration_factor);
   const rangeCorrected = props.calibrationData.map((entry) => (entry.data.range_corrected ? 1 : 0));

@@ -68,20 +68,20 @@
         background-image: url("@/assets/icons/test-fail.svg");
       }
 
-      li.qualityitem.found::before {
-        background-image: url("@/assets/icons/test-pass.svg");
-      }
-
-      li.qualityitem.info::before {
-        background-image: url("@/assets/icons/test-info.svg");
+      li.qualityitem.error::before {
+        background-image: url("@/assets/icons/test-fail.svg");
       }
 
       li.qualityitem.warning::before {
         background-image: url("@/assets/icons/test-warning.svg");
       }
 
-      li.qualityitem.error::before {
-        background-image: url("@/assets/icons/test-fail.svg");
+      li.qualityitem.info::before {
+        background-image: url("@/assets/icons/test-info.svg");
+      }
+
+      li.qualityitem.found::before {
+        background-image: url("@/assets/icons/test-pass.svg");
       }
     }
   }

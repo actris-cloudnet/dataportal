@@ -18,6 +18,7 @@
         Product quality
         <template v-if="selectedProductName">/ availability - {{ selectedProductName }} </template>
         <template v-if="instrumentName"> ({{ instrumentName }})</template>
+        <template v-if="modelName"> ({{ modelName }})</template>
       </h2>
 
       <section class="details" v-if="selectedProductId">
@@ -27,6 +28,7 @@
           :productId="selectedProductId"
           :year="selectedYear"
           :instrumentPid="selectedPid"
+          :modelId="selectedModel"
         />
         <BaseSpinner v-else />
       </section>
@@ -72,6 +74,15 @@
             clearable
           />
         </div>
+        <div class="viz-option" style="width: 320px" v-if="modelOptions.length > 1">
+          <custom-multiselect
+            v-model="selectedModelOption"
+            label="Model"
+            :options="modelOptions"
+            id="modelSelect"
+            clearable
+          />
+        </div>
       </div>
       <a @click="reset" id="reset">Reset filter</a>
     </div>
@@ -100,8 +111,10 @@ const dataStatus = ref<DataStatus | null>(null);
 
 const selectedYearOption = ref(null);
 const selectedPidOption = ref(null);
+const selectedModelOption = ref(null);
 const selectedYear = computed(() => (selectedYearOption.value ? parseInt(selectedYearOption.value) : undefined));
 const selectedPid = computed(() => (selectedPidOption.value ? selectedPidOption.value : undefined));
+const selectedModel = computed(() => (selectedModelOption.value ? selectedModelOption.value : undefined));
 
 const yearOptions = computed(() => {
   if (!dataStatus.value) return [];
@@ -109,14 +122,22 @@ const yearOptions = computed(() => {
 });
 
 const pidOptions = computed(() => {
-  const { value: dataStatusValue } = dataStatus;
-  const { value: selectedProductIdValue } = selectedProductId;
-  if (!dataStatusValue || !selectedProductIdValue || !dataStatusValue.allPids[selectedProductIdValue]) {
+  if (!dataStatus.value || !selectedProductId.value || !dataStatus.value.allPids[selectedProductId.value]) {
     return [];
   }
-  return dataStatusValue.allPids[selectedProductIdValue].map((pid) => ({
+  return dataStatus.value.allPids[selectedProductId.value].map((pid) => ({
     id: pid.pid,
     humanReadableName: pid.humanReadableName,
+  }));
+});
+
+const modelOptions = computed(() => {
+  if (!dataStatus.value || selectedProductId.value !== "model") {
+    return [];
+  }
+  return dataStatus.value.allModels.map((model) => ({
+    id: model.id,
+    humanReadableName: model.humanReadableName,
   }));
 });
 
@@ -126,6 +147,14 @@ const instrumentName = computed(() => {
   }
   const selectedPid = pidOptions.value.find((pid) => pid.id === selectedPidOption.value);
   return selectedPid ? selectedPid.humanReadableName : null;
+});
+
+const modelName = computed(() => {
+  if (!selectedModelOption.value && modelOptions.value.length === 1) {
+    return modelOptions.value[0].humanReadableName;
+  }
+  const selectedModel = modelOptions.value.find((model) => model.id === selectedModelOption.value);
+  return selectedModel ? selectedModel.humanReadableName : null;
 });
 
 onMounted(() => {
@@ -151,10 +180,12 @@ function reset() {
   selectedProductId.value = null;
   selectedYearOption.value = null;
   selectedPidOption.value = null;
+  selectedModelOption.value = null;
 }
 
 watch(selectedProductId, () => {
   selectedPidOption.value = null;
+  selectedModelOption.value = null;
 });
 </script>
 
