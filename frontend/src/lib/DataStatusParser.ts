@@ -148,7 +148,9 @@ export async function parseDataStatus(config: DataStatusConfig): Promise<DataSta
     createProductLevels(lvlTranslate, productInfo, dates[cur.measurementDate].products);
   });
 
-  const years = Array.from(new Set(searchResponse.map((row) => parseInt(row.measurementDate.slice(0, 4)))));
+  const years = Array.from(new Set(searchResponse.map((row) => parseInt(row.measurementDate.slice(0, 4))))).sort(
+    (a, b) => compareValues(b, a),
+  );
 
   const allPids: InstrumentPids = {};
 
@@ -220,7 +222,9 @@ export async function parseUploadStatus(instrumentPid: string): Promise<UploadSt
     };
   }
 
-  const years = Array.from(new Set(uploadResponse.map((row) => parseInt(row.date.slice(0, 4)))));
+  const years = Array.from(new Set(uploadResponse.map((row) => parseInt(row.date.slice(0, 4))))).sort((a, b) =>
+    compareValues(b, a),
+  );
   const maxCount = Math.max(...uploadResponse.map((row) => row.fileCount));
   const maxSize = Math.max(...uploadResponse.map((row) => row.totalSize));
 
