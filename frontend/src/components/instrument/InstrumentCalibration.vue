@@ -4,8 +4,9 @@
       <component
         v-if="calibrationDataState === 'success' && InstrumentComponent"
         :is="InstrumentComponent"
-        :instrumentInfo="props.instrumentInfo"
         :calibrationData="calibrationData"
+        :measurementDates="measurementDates"
+        :timestamps="timestamps"
       />
       <div v-if="calibrationDataState === 'success' && InstrumentComponent">
         <a :href="apiUrl">Data in calibration API</a>
@@ -27,6 +28,9 @@ import type { AxiosResponse } from "axios";
 import type { InstrumentInfo } from "@shared/entity/Instrument";
 import DopplerLidarCalibration from "@/components/instrument/calibration/DopplerLidarCalibration.vue";
 import CeilometerCalibration from "@/components/instrument/calibration/CeilometerCalibration.vue";
+import DisdrometerCalibration from "@/components/instrument/calibration/DisdrometerCalibration.vue";
+import HatproCalibration from "@/components/instrument/calibration/HatproCalibration.vue";
+import RadarCalibration from "@/components/instrument/calibration/RadarCalibration.vue";
 import { backendUrl } from "@/lib/index";
 
 async function fetchCalibrationData(instrumentPid: string): Promise<AxiosResponse<any> | undefined> {
@@ -43,17 +47,18 @@ async function fetchCalibrationData(instrumentPid: string): Promise<AxiosRespons
   }
 }
 
-export interface Props {
-  instrumentInfo: InstrumentInfo;
-}
-
-const props = defineProps<Props>();
+const props = defineProps<{ instrumentInfo: InstrumentInfo }>();
 
 const instrumentComponentsMap: { [key: string]: any } = {
   "halo-doppler-lidar": DopplerLidarCalibration,
   "chm15k": CeilometerCalibration,
   "chm15kx": CeilometerCalibration,
   "cl51": CeilometerCalibration,
+  "parsivel": DisdrometerCalibration,
+  "hatpro": HatproCalibration,
+  "cs135": CeilometerCalibration,
+  "copernicus": RadarCalibration,
+  "pollyxt": CeilometerCalibration,
 };
 
 const InstrumentComponent = computed(() => {
@@ -85,6 +90,15 @@ onMounted(async () => {
     calibrationDataState.value = "serverError";
   }
 });
+
+interface calibrationEvent {
+  updatedAt: string;
+  measurementDate: string;
+}
+
+const measurementDates = computed(() => calibrationData.value.map((entry: calibrationEvent) => entry.measurementDate));
+
+const timestamps = computed(() => calibrationData.value.map((entry: calibrationEvent) => entry.updatedAt));
 </script>
 
 <style scoped>

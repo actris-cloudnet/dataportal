@@ -211,3 +211,5 @@ export const classColor: Record<ColorClass, string> = {
   "green3": "rgb(48, 161, 78)",
   "green4": "rgb(33, 110, 57)",
 };
+
+export const nValidValues = (data: any[]) => data.filter((value) => value !== null && value !== undefined).length;

@@ -1,71 +1,102 @@
 <template>
-  <div ref="plotContainer" style="width: 100%"></div>
+  <div ref="plotContainer" class="plot-container"></div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watch, nextTick, onUnmounted } from "vue";
+import { ref, onMounted, nextTick, onUnmounted } from "vue";
 import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
 
 const props = defineProps<{
-  data: (Uint8Array | Float64Array)[];
+  measurementDates: string[];
+  data: (number | null)[];
   config: {
     title: string;
     label: string;
-    color: string;
+    color?: string;
   };
 }>();
+
+const plotHeight = 400;
 
 const plotContainer = ref<HTMLElement | null>(null);
 let plotInstance: uPlot | null = null;
 
-const createPlotOptions = (config: { title: string; label: string; color: string }, width: number): uPlot.Options => ({
-  title: config.title,
-  id: "calibration-plot",
-  class: "calibration-plot",
-  width: width,
-  height: 400,
-  tzDate: (ts) => uPlot.tzDate(new Date(ts * 1e3), "UTC"),
-  series: [
-    {
-      value: "{YYYY}-{MM}-{DD}",
+const createTypedData = (measurementDates: string[], data: (number | null)[]) => {
+  const timestamps = measurementDates.map((ts) => new Date(ts).getTime() / 1e3);
+  const filteredData = data.reduce<{ timestamps: number[]; values: number[] }>(
+    (acc, value, index) => {
+      if (value !== null) {
+        acc.timestamps.push(timestamps[index]);
+        acc.values.push(value);
+      }
+      return acc;
     },
-    {
-      label: config.label,
-      stroke: config.color,
-      width: 1,
-      paths: uPlot.paths && uPlot.paths.stepped ? uPlot.paths.stepped({ align: 1 }) : undefined,
-      points: {
-        size: 10,
+    { timestamps: [], values: [] },
+  );
+  filteredData.values = filteredData.values.map((value) => value);
+  return [new Float64Array(filteredData.timestamps), new Float64Array(filteredData.values)];
+};
+
+const typedData = createTypedData(props.measurementDates, props.data);
+
+const createPlotOptions = (config: { title: string; label: string; color?: string }, width: number): uPlot.Options => {
+  const minY = Math.min(...typedData[1]);
+  const maxY = Math.max(...typedData[1]);
+
+  return {
+    title: config.title,
+    id: "calibration-plot",
+    class: "calibration-plot",
+    width: width,
+    height: plotHeight,
+    tzDate: (ts) => uPlot.tzDate(new Date(ts * 1e3), "UTC"),
+    series: [
+      {
+        value: "{YYYY}-{MM}-{DD}",
       },
-      value: (self, v) => {
-        if (v === null || v === undefined) {
-          return "--";
-        } else {
-          if (Number.isInteger(v)) {
-            return v.toString();
+      {
+        label: config.label,
+        stroke: config.color || "#5F95DC",
+        width: 1,
+        paths: uPlot.paths && uPlot.paths.stepped ? uPlot.paths.stepped({ align: 1 }) : undefined,
+        points: {
+          size: 10,
+        },
+        value: (_self, v) => {
+          if (v === null || v === undefined) {
+            return "--";
           } else {
-            if (Math.abs(v) >= 1e6 || Math.abs(v) < 1e-3) {
-              return v.toExponential(2);
+            if (Number.isInteger(v)) {
+              return v.toString();
             } else {
-              return v.toFixed(2);
+              if (Math.abs(v) >= 1e6 || Math.abs(v) < 1e-3) {
+                return v.toExponential(2);
+              } else {
+                return v.toFixed(3);
+              }
             }
           }
-        }
+        },
+      },
+    ],
+    axes: [
+      {
+        grid: { show: false },
+        ticks: { show: true, stroke: "#eee", width: 1, dash: [], size: 5 },
+      },
+      {
+        grid: { show: true, stroke: "#eee", width: 1, dash: [] },
+        ticks: { show: false },
+      },
+    ],
+    scales: {
+      y: {
+        range: [minY * 0.9, maxY * 1.1],
       },
     },
-  ],
-  axes: [
-    {
-      grid: { show: false },
-      ticks: { show: true, stroke: "#eee", width: 1, dash: [], size: 5 },
-    },
-    {
-      grid: { show: true, stroke: "#eee", width: 1, dash: [] },
-      ticks: { show: false, stroke: "#eee", width: 1, dash: [], size: 10 },
-    },
-  ],
-});
+  };
+};
 
 const initializePlot = () => {
   if (!plotContainer.value) return;
@@ -73,9 +104,9 @@ const initializePlot = () => {
   const containerWidth = plotContainer.value.offsetWidth;
   const opts = createPlotOptions(props.config, containerWidth);
   if (plotInstance) {
-    plotInstance.setSize({ width: containerWidth, height: 400 });
+    plotInstance.setSize({ width: containerWidth, height: plotHeight });
   } else {
-    plotInstance = new uPlot(opts, props.data, plotContainer.value);
+    plotInstance = new uPlot(opts, typedData, plotContainer.value);
   }
 };
 
@@ -86,22 +117,6 @@ onMounted(() => {
   });
 });
 
-watch(
-  () => props.data,
-  (newData) => {
-    if (plotInstance) {
-      plotInstance.setData(newData);
-    }
-  },
-);
-
-watch(
-  () => props.config,
-  () => {
-    initializePlot();
-  },
-);
-
 onUnmounted(() => {
   window.removeEventListener("resize", initializePlot);
   plotInstance?.destroy();
@@ -109,7 +124,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.plotContainer {
+.plot-container {
   width: 100%;
   height: auto;
 }
