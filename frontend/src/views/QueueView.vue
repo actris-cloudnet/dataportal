@@ -4,7 +4,7 @@
       <template #actions>
         <BaseButton
           type="danger"
-          v-if="$route.query.batch"
+          v-if="!isLoading && $route.query.batch"
           @click="cancelBatch"
           :disabled="isCancelled || totalTasks == 0"
         >
@@ -18,64 +18,67 @@
       </template>
     </LandingHeader>
     <main class="pagewidth">
-      <table class="statistics">
-        <tr v-if="$route.query.batch">
-          <th>Batch:</th>
-          <td>{{ $route.query.batch }}</td>
-        </tr>
-        <tr>
-          <th>Total tasks:</th>
-          <td>{{ totalTasks }}</td>
-        </tr>
-        <tr>
-          <th>Running:</th>
-          <td>{{ runningTasks }}</td>
-        </tr>
-        <tr>
-          <th>Pending:</th>
-          <td>{{ pendingTasks }}</td>
-        </tr>
-        <tr>
-          <th>Created:</th>
-          <td>{{ createdTasks }}</td>
-        </tr>
-        <tr>
-          <th>Failed:</th>
-          <td>{{ failedTasks }}</td>
-        </tr>
-      </table>
-      <table class="tasks" v-if="sortedQueueData.length > 0">
-        <thead>
+      <BaseSpinner v-if="isLoading" />
+      <template v-else>
+        <table class="statistics">
+          <tr v-if="$route.query.batch">
+            <th>Batch:</th>
+            <td>{{ $route.query.batch }}</td>
+          </tr>
           <tr>
-            <th>Type</th>
-            <th></th>
-            <th class="status">Status</th>
-            <th>Site</th>
-            <th>Date</th>
-            <th>Product</th>
-            <th>Instrument / model</th>
-            <th>Due in</th>
+            <th>Total tasks:</th>
+            <td>{{ totalTasks }}</td>
           </tr>
-        </thead>
-        <tbody is="vue:transition-group" name="list" tag="tbody">
-          <tr v-for="task in sortedQueueData" :key="task.id" :class="`status-${task.status}`">
-            <td>{{ task.type }}</td>
-            <td class="spinner-cell">
-              <img :src="testPassIcon" alt="" v-if="task.status === 'done'" />
-              <BaseSpinner size="small" v-else-if="task.status === 'running' || task.status === 'restart'" />
-            </td>
-            <td class="status">{{ task.status }}</td>
-            <td>{{ task.siteId }}</td>
-            <td>{{ task.measurementDate }}</td>
-            <td>{{ task.productId }}</td>
-            <td>{{ task.instrumentInfo?.name || task.model?.id }}</td>
-            <td>
-              {{ task.status === "created" ? timeDifference(task.scheduledAt) : "" }}
-            </td>
+          <tr>
+            <th>Running:</th>
+            <td>{{ runningTasks }}</td>
           </tr>
-        </tbody>
-      </table>
-      <CheckBox label="Show failed tasks" v-model="showFailed" v-if="failedTasks > 0" />
+          <tr>
+            <th>Pending:</th>
+            <td>{{ pendingTasks }}</td>
+          </tr>
+          <tr>
+            <th>Created:</th>
+            <td>{{ createdTasks }}</td>
+          </tr>
+          <tr>
+            <th>Failed:</th>
+            <td>{{ failedTasks }}</td>
+          </tr>
+        </table>
+        <table class="tasks" v-if="sortedQueueData.length > 0">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th></th>
+              <th class="status">Status</th>
+              <th>Site</th>
+              <th>Date</th>
+              <th>Product</th>
+              <th>Instrument / model</th>
+              <th>Due in</th>
+            </tr>
+          </thead>
+          <tbody is="vue:transition-group" name="list" tag="tbody">
+            <tr v-for="task in sortedQueueData" :key="task.id" :class="`status-${task.status}`">
+              <td>{{ task.type }}</td>
+              <td class="spinner-cell">
+                <img :src="testPassIcon" alt="" v-if="task.status === 'done'" />
+                <BaseSpinner size="small" v-else-if="task.status === 'running' || task.status === 'restart'" />
+              </td>
+              <td class="status">{{ task.status }}</td>
+              <td>{{ task.siteId }}</td>
+              <td>{{ task.measurementDate }}</td>
+              <td>{{ task.productId }}</td>
+              <td>{{ task.instrumentInfo?.name || task.model?.id }}</td>
+              <td>
+                {{ task.status === "created" ? timeDifference(task.scheduledAt) : "" }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <CheckBox label="Show failed tasks" v-model="showFailed" v-if="failedTasks > 0" />
+      </template>
     </main>
   </div>
 </template>
@@ -106,6 +109,7 @@ const statusOrder: Record<AugmentedTask["status"], number> = {
 const route = useRoute();
 const queueData = ref<Record<AugmentedTask["id"], AugmentedTask>>({});
 const showFailed = ref(false);
+const isLoading = ref(true);
 const isCancelled = ref(false);
 
 let updateTimeout: NodeJS.Timeout | null = null;
@@ -128,6 +132,8 @@ async function updateQueueData() {
     }
   } catch (error) {
     console.error(error);
+  } finally {
+    isLoading.value = false;
   }
   updateTimeout = setTimeout(updateQueueData, 5000);
 }
