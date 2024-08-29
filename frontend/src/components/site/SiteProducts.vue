@@ -18,6 +18,7 @@
         Product quality
         <template v-if="selectedProductName">/ availability - {{ selectedProductName }} </template>
         <template v-if="instrumentName"> ({{ instrumentName }})</template>
+        <template v-if="modelName"> ({{ modelName }})</template>
       </h2>
 
       <section class="details" v-if="selectedProductId">
@@ -146,6 +147,14 @@ const instrumentName = computed(() => {
   }
   const selectedPid = pidOptions.value.find((pid) => pid.id === selectedPidOption.value);
   return selectedPid ? selectedPid.humanReadableName : null;
+});
+
+const modelName = computed(() => {
+  if (!selectedModelOption.value && modelOptions.value.length === 1) {
+    return modelOptions.value[0].humanReadableName;
+  }
+  const selectedModel = modelOptions.value.find((model) => model.id === selectedModelOption.value);
+  return selectedModel ? selectedModel.humanReadableName : null;
 });
 
 onMounted(() => {
