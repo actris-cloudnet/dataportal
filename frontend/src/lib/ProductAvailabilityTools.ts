@@ -41,8 +41,7 @@ export function onlyModel(products: ProductLevels) {
   const level1bWithoutExperimental = products.instrument.filter(isNotExperimental);
   return (
     products.geophysical.filter(isNotExperimental).length == 0 &&
-    level1bWithoutExperimental.length == 1 &&
-    level1bWithoutExperimental[0].id == "model"
+    level1bWithoutExperimental.every((product) => product.id === "model")
   );
 }
 
