@@ -167,7 +167,7 @@ export async function parseDataStatus(config: DataStatusConfig): Promise<DataSta
       if (!existingPids.has(instrumentInfo.pid)) {
         allPids[productId].push({
           pid: instrumentInfo.pid,
-          humanReadableName: instrumentInfo.name ?? instrumentInfo.pid,
+          humanReadableName: instrumentInfo.name,
         });
       }
     }

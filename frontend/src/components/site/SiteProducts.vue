@@ -121,24 +121,20 @@ const yearOptions = computed(() => {
 });
 
 const pidOptions = computed(() => {
-  const { value: dataStatusValue } = dataStatus;
-  const { value: selectedProductIdValue } = selectedProductId;
-  if (!dataStatusValue || !selectedProductIdValue || !dataStatusValue.allPids[selectedProductIdValue]) {
+  if (!dataStatus.value || !selectedProductId.value || !dataStatus.value.allPids[selectedProductId.value]) {
     return [];
   }
-  return dataStatusValue.allPids[selectedProductIdValue].map((pid) => ({
+  return dataStatus.value.allPids[selectedProductId.value].map((pid) => ({
     id: pid.pid,
     humanReadableName: pid.humanReadableName,
   }));
 });
 
 const modelOptions = computed(() => {
-  const { value: dataStatusValue } = dataStatus;
-  const { value: selectedProductIdValue } = selectedProductId;
-  if (!dataStatusValue || !selectedProductIdValue || selectedProductIdValue !== "model") {
+  if (!dataStatus.value || selectedProductId.value !== "model") {
     return [];
   }
-  return dataStatusValue.allModels.map((model) => ({
+  return dataStatus.value.allModels.map((model) => ({
     id: model.id,
     humanReadableName: model.humanReadableName,
   }));
