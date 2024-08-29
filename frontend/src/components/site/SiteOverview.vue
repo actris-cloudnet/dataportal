@@ -73,6 +73,19 @@
               <a :href="nfLink">{{ nfName }}</a>
             </dd>
             <dd class="notAvailable" v-else></dd>
+            <template v-if="site.persons.length > 0">
+              <dt>Contact</dt>
+              <dd>
+                <ul>
+                  <li v-for="person in site.persons" :key="person.id">
+                    {{ person.firstname }} {{ person.surname }}
+                    <a :href="'https://orcid.org/' + person.orcid" target="_blank" v-if="person.orcid">
+                      <img :src="orcidLogo" width="16" height="16" alt="ORCID" />
+                    </a>
+                  </li>
+                </ul>
+              </dd>
+            </template>
           </dl>
         </section>
       </aside>
@@ -90,6 +103,7 @@ import type { ReducedMetadataResponse } from "@shared/entity/ReducedMetadataResp
 import TrackMap, { type Point } from "@/components/TrackMap.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
 import type { RouteLocationRaw } from "vue-router";
+import orcidLogo from "@/assets/icons/orcid.png";
 
 interface Instrument {
   to: RouteLocationRaw | null;

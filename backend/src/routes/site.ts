@@ -25,7 +25,10 @@ export class SiteRoutes {
 
   site: RequestHandler = async (req: Request, res: Response, next) => {
     try {
-      const qb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteId", req.params);
+      const qb = this.siteRepo
+        .createQueryBuilder("site")
+        .leftJoinAndSelect("site.persons", "person")
+        .where("site.id = :siteId", req.params);
       const site = await hideTestDataFromNormalUsers<Site>(qb, req).getOne();
       if (!site) {
         return next({ status: 404, errors: ["No sites match this id"] });
