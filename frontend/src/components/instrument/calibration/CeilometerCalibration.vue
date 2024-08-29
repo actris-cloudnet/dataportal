@@ -1,99 +1,63 @@
 <template>
   <div>
-    <div v-if="plotError" class="error-message">{{ plotError }}</div>
-    <div v-else>
-      <CalibrationPlot
-        v-if="typedCalibrationFactorData"
-        class="calibration-plot"
-        :data="typedCalibrationFactorData"
-        :config="calibrationFactorConfig"
-      />
-      <CalibrationPlot
-        v-if="typedRangeCorrectedData"
-        class="calibration-plot"
-        :data="typedRangeCorrectedData"
-        :config="rangeCorrectedConfig"
-      />
-      <div v-if="!typedCalibrationFactorData && !typedRangeCorrectedData" class="error-message">
-        No valid plot data available.
-      </div>
-    </div>
+    <CalibrationTable
+      v-if="nValidValues(calibrationFactor) <= showPlotThreshold"
+      :data="calibrationFactor"
+      :measurementDates="measurementDates"
+      :timestamps="timestamps"
+      :config="{ title: 'Calibration factor', label: 'Calibration factor' }"
+    />
+    <CalibrationPlot
+      v-if="nValidValues(calibrationFactor) > showPlotThreshold"
+      :data="calibrationFactor"
+      :measurementDates="measurementDates"
+      :config="{ title: 'Calibration factor', label: 'Calibration factor' }"
+    />
+    <CalibrationTable
+      v-if="nValidValues(isRangeCorrected) <= showPlotThreshold"
+      :data="isRangeCorrected"
+      :measurementDates="measurementDates"
+      :timestamps="timestamps"
+      :config="{ title: 'Range Correction', label: 'Range Corrected' }"
+    />
+    <CalibrationPlot
+      v-if="nValidValues(isRangeCorrectedNumber) > showPlotThreshold"
+      :data="isRangeCorrectedNumber"
+      :measurementDates="measurementDates"
+      :timestamps="timestamps"
+      :config="{ title: 'Range Correction', label: 'Range Corrected' }"
+    />
+    <CalibrationTable
+      :data="snrLimit"
+      :measurementDates="measurementDates"
+      :timestamps="timestamps"
+      :config="{ title: 'SNR limit', label: 'SNR limit' }"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, watchEffect } from "vue";
-import type { InstrumentInfo } from "@shared/entity/Instrument";
+import { computed } from "vue";
+import CalibrationTable from "@/components/instrument/calibration/CalibrationTable.vue";
 import CalibrationPlot from "@/components/instrument/calibration/CalibrationPlot.vue";
+import { nValidValues } from "@/lib";
 
-interface CalibrationDataEntry {
-  createdAt: string;
-  updatedAt: string;
-  measurementDate: string;
-  data: {
-    range_corrected: boolean;
-    calibration_factor: number;
-  };
-}
+const props = defineProps<{
+  measurementDates: string[];
+  timestamps: string[];
+  calibrationData: {
+    data: {
+      calibration_factor?: number;
+      range_corrected?: boolean;
+      snr_limit?: number;
+    };
+  }[];
+}>();
 
-export interface Props {
-  instrumentInfo: InstrumentInfo;
-  calibrationData: CalibrationDataEntry[];
-}
+const showPlotThreshold = 100;
 
-const props = defineProps<Props>();
-
-const calibrationFactorConfig = ref({
-  title: "Calibration factor",
-  label: "Calibration factor",
-  color: "#5F95DC",
-});
-
-const rangeCorrectedConfig = ref({
-  title: "Range Corrected",
-  label: "Range Corrected",
-  color: "#FF6347",
-});
-
-const plotError = ref<string | null>(null);
-
-const plotData = computed(() => {
-  const measurementDates = props.calibrationData.map((entry) =>
-    Math.floor(new Date(entry.measurementDate).getTime() / 1000),
-  );
-  const calibrationFactor = props.calibrationData.map((entry) => entry.data.calibration_factor);
-  const rangeCorrected = props.calibrationData.map((entry) => (entry.data.range_corrected ? 1 : 0));
-
-  if (measurementDates.length === 0 || calibrationFactor.length === 0 || rangeCorrected.length === 0) {
-    return null;
-  }
-
-  return { measurementDates, calibrationFactor, rangeCorrected };
-});
-
-const typedCalibrationFactorData = computed(() => {
-  const data = plotData.value;
-  return data ? [new Float64Array(data.measurementDates), new Float64Array(data.calibrationFactor)] : null;
-});
-
-const typedRangeCorrectedData = computed(() => {
-  const data = plotData.value;
-  return data ? [new Float64Array(data.measurementDates), new Uint8Array(data.rangeCorrected)] : null;
-});
-
-watchEffect(() => {
-  if (plotData.value === null) {
-    plotError.value = "No valid plot data available";
-  } else {
-    plotError.value = null;
-  }
-});
-
-onMounted(async () => {});
+const calibrationFactor = computed(() => props.calibrationData.map((entry) => entry.data.calibration_factor ?? null));
+const isRangeCorrected = computed(() => props.calibrationData.map((entry) => entry.data.range_corrected ?? null));
+const snrLimit = computed(() => props.calibrationData.map((entry) => entry.data.snr_limit ?? null));
+const isRangeCorrectedNumber = computed(() => isRangeCorrected.value.map((value) => (value ? 1.0 : 0.0)));
 </script>
-
-<style scoped>
-.calibration-plot:not(:last-child) {
-  margin-bottom: 20px;
-}
-</style>

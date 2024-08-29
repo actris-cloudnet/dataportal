@@ -1,10 +1,10 @@
 <template>
   <div>
     <CalibrationTable
-      :data="azimuthOffset"
+      :data="rangeOffset"
       :measurementDates="measurementDates"
       :timestamps="timestamps"
-      :config="{ title: 'Azimuth offsets', label: 'Azimuth offset (deg)' }"
+      :config="{ title: 'Range offset', label: 'Offset (m)' }"
     />
   </div>
 </template>
@@ -18,10 +18,10 @@ const props = defineProps<{
   timestamps: string[];
   calibrationData: {
     data: {
-      azimuth_offset_deg?: number;
+      range_offset?: string[];
     };
   }[];
 }>();
 
-const azimuthOffset = computed(() => props.calibrationData.map((entry) => entry.data.azimuth_offset_deg ?? null));
+const rangeOffset = computed(() => props.calibrationData.map((entry) => entry.data.range_offset ?? null));
 </script>
