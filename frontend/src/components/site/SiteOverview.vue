@@ -297,14 +297,25 @@ aside {
   margin-top: 0.5rem;
 }
 
-:deep(h2) {
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-  font-size: 125%;
-}
+:deep {
+  h2 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 125%;
+  }
 
-:deep(em) {
-  font-style: italic;
+  .references {
+    margin-left: 2rem;
+    text-indent: -2rem;
+
+    li + li {
+      margin-top: 0.5rem;
+    }
+
+    em {
+      font-style: italic;
+    }
+  }
 }
 
 dt {

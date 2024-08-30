@@ -214,13 +214,14 @@ ul {
 .references {
   margin-left: 2rem;
   max-width: 800px;
-
-  li {
-    text-indent: -2rem;
-  }
+  text-indent: -2rem;
 
   li + li {
     margin-top: 0.5rem;
+  }
+
+  :deep(i) {
+    font-style: italic;
   }
 }
 
