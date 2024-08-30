@@ -93,6 +93,10 @@ export function allGeophysical(products: ProductLevels, geophysicalCount: number
   return products.geophysical.filter((x) => isNotLegacy(x) && isNotExperimental(x)).length == geophysicalCount;
 }
 
+export function someGeophysical(products: ProductLevels): boolean {
+  return products.geophysical.filter((x) => isNotLegacy(x) && isNotExperimental(x)).length > 0;
+}
+
 export function missingData(products: ProductLevels) {
   return (
     products.geophysical.filter((x) => isNotLegacy(x) && isNotExperimental(x)).length ||

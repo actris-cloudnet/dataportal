@@ -189,6 +189,7 @@ export type ColorClass =
   | "contains-errors"
   | "contains-warnings"
   | "only-model-data"
+  | "some-data"
   | "all-data"
   | "all-raw"
   | "contains-info"
@@ -201,6 +202,7 @@ export const classColor: Record<ColorClass, string> = {
   "no-data": "white",
   "all-data": "#5ac413",
   "all-raw": "#a0df7b",
+  "some-data": "#7dd247",
   "only-legacy-data": "#9fb4c4",
   "contains-warnings": "#f7e91b",
   "contains-errors": "#cd5c5c",

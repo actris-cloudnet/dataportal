@@ -2,8 +2,9 @@
   <DateVisualization
     :data="dates"
     :legend="{
-      'all-data': 'All geophysical products',
-      'all-raw': 'Some instrument products',
+      'all-data': 'All geophysical',
+      'some-data': 'Some geophysical',
+      'all-raw': 'Some instrument',
       'only-legacy-data': 'Only legacy',
       'only-model-data': 'Only model',
       'no-data': 'No data',
@@ -53,6 +54,7 @@ import {
   findProducts,
   toolTipTitle,
   type Props,
+  someGeophysical,
 } from "@/lib/ProductAvailabilityTools";
 import { useRouter } from "vue-router";
 import DateVisualization from "./DateVisualization.vue";
@@ -75,6 +77,7 @@ function createColorClass(products: ProductLevels): ColorClass {
   if (onlyModel(products)) return "only-model-data";
   if (onlyLegacy(products)) return "only-legacy-data";
   if (allGeophysical(products, props.dataStatus.geophysicalProductCount)) return "all-data";
+  if (someGeophysical(products)) return "some-data";
   if (missingData(products)) return "all-raw";
   return "contains-errors";
 }
