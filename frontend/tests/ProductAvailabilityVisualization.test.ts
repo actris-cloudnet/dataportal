@@ -48,6 +48,6 @@ describe("Product availability visualization", () => {
   });
 
   it("shows legend", async () => {
-    expect(wrapper.findAll(".legend-item")).toHaveLength(5);
+    expect(wrapper.findAll(".legend-item")).toHaveLength(6);
   });
 });
