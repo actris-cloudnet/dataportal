@@ -37,15 +37,7 @@
           </div>
         </section>
         <section id="sitemap" v-else-if="site.latitude != null && site.longitude != null">
-          <MyMap
-            v-if="!busy"
-            :sites="[site]"
-            :center="[site.latitude, site.longitude]"
-            :zoom="5"
-            :fullHeight="true"
-            :key="mapKey"
-          />
-          <BaseSpinner v-else />
+          <MyMap :sites="[site]" :center="[site.latitude, site.longitude]" :zoom="5" :fullHeight="true" :key="mapKey" />
         </section>
         <section class="details">
           <dl>
@@ -59,20 +51,23 @@
               <dt>Altitude</dt>
               <dd>{{ site.altitude }} <abbr title="meters above mean sea level">m a.s.l.</abbr></dd>
             </template>
-            <dt>GAW ID</dt>
-            <dd v-if="site.gaw">
-              <a
-                :href="`https://gawsis.meteoswiss.ch/GAWSIS/#/search/station/stationReportDetails/0-20008-0-${site.gaw}`"
-              >
-                {{ site.gaw }}
-              </a>
-            </dd>
-            <dd class="notAvailable" v-else></dd>
-            <dt>ACTRIS NF</dt>
-            <dd v-if="nfName" style="max-width: 300px">
-              <a :href="nfLink">{{ nfName }}</a>
-            </dd>
-            <dd class="notAvailable" v-else></dd>
+            <template v-if="site.gaw">
+              <dt>GAW ID</dt>
+              <dd>
+                <a
+                  :href="`https://gawsis.meteoswiss.ch/GAWSIS/#/search/station/stationReportDetails/0-20008-0-${site.gaw}`"
+                >
+                  {{ site.gaw }}
+                </a>
+              </dd>
+            </template>
+            <template v-if="site.actrisId">
+              <dt>ACTRIS NF</dt>
+              <dd>
+                <span v-if="nfLoading" style="color: gray">Loading...</span>
+                <a :href="nfLink" v-else>{{ nfName }}</a>
+              </dd>
+            </template>
             <template v-if="site.persons.length > 0">
               <dt>Contact</dt>
               <dd>
@@ -127,9 +122,9 @@ const instruments = ref<Instrument[]>([]);
 const instrumentsFromLastDays = 30;
 const instrumentsStatus = ref<"loading" | "error" | "ready">("loading");
 const mapKey = ref(0);
-const busy = ref(false);
 const nfName = ref<string>();
 const nfLink = ref<string>();
+const nfLoading = ref(true);
 const locations = ref<LocationsResult>({ status: "loading" });
 
 const description = computed(() => {
@@ -168,20 +163,20 @@ onMounted(() => {
 
 watch(
   () => props.site,
-  () => {
+  async () => {
     if (!props.site?.actrisId) {
       return;
     }
-    const apiUrl = `${actrisNfUrl}/api/facilities/${props.site.actrisId}`;
-    axios
-      .get(apiUrl)
-      .then(({ data }) => {
-        nfName.value = data.name;
-        nfLink.value = data.landing_page;
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    try {
+      const apiUrl = `${actrisNfUrl}/api/facilities/${props.site.actrisId}`;
+      const res = await axios.get(apiUrl);
+      nfName.value = res.data.name;
+      nfLink.value = res.data.landing_page;
+    } catch (err) {
+      console.error(err);
+    } finally {
+      nfLoading.value = false;
+    }
   },
   { immediate: true },
 );
