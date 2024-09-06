@@ -297,7 +297,7 @@ aside {
   margin-top: 0.5rem;
 }
 
-:deep {
+:deep() {
   h2 {
     margin-top: 2rem;
     margin-bottom: 1rem;

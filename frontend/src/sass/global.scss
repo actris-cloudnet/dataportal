@@ -1,9 +1,19 @@
+@use "inter-ui/default" with (
+  $inter-font-display: swap,
+  $inter-font-path: "inter-ui/web"
+);
+@use "inter-ui/variable" with (
+  $inter-font-display: swap,
+  $inter-font-path: "inter-ui/variable"
+);
 @import "the-new-css-reset/css/reset.css";
 @import "inter-ui/inter.css";
 @import "./variables.scss";
+@include default.all;
+@include variable.all;
 
 body {
-  font-family: "Inter", sans-serif;
+  font-family: "Inter", "system-ui";
   font-size: 16px;
   font-weight: 400;
   line-height: 1.4;
@@ -11,7 +21,7 @@ body {
 
 @supports (font-variation-settings: normal) {
   body {
-    font-family: "Inter var", sans-serif;
+    font-family: "InterVariable", "system-ui";
   }
 }
 

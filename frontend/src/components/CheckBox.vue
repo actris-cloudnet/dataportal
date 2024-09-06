@@ -1,9 +1,5 @@
-<script lang="ts">
-let idCounter = 0;
-</script>
-
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, useId } from "vue";
 
 export interface Props {
   modelValue: boolean | string | boolean[] | string[];
@@ -22,7 +18,7 @@ const emit = defineEmits<{
   (e: "update:modelValue", value: Props["modelValue"]): void;
 }>();
 
-const id = `checkbox-${idCounter++}`;
+const id = useId();
 </script>
 
 <template>
