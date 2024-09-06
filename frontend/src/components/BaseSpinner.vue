@@ -3,16 +3,13 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineProps } from "vue";
+import { computed } from "vue";
 
-const props = withDefaults(
-  defineProps<{
-    size?: "normal" | "small";
-  }>(),
-  {
-    size: "normal",
-  },
-);
+interface Props {
+  size?: "normal" | "small";
+}
+
+const props = withDefaults(defineProps<Props>(), { size: "normal" });
 
 const spinnerClass = computed(() => ["lds-dual-ring", `lds-dual-ring-${props.size}`]);
 </script>
