@@ -665,6 +665,10 @@ describe("/api/queue/batch", () => {
     expect(await taskRepo.exist({ where: { ...task, productId: "doppler-lidar-wind" } })).toBeTruthy();
   });
 
+  it("cannot cancel all tasks", async () => {
+    await expect(axios.delete(batchUrl, { auth })).rejects.toMatchObject({ response: { status: 404 } });
+  });
+
   it("cancels tasks", async () => {
     const res = await axios.post(batchUrl, { type: "process", productIds: ["categorize"], dryRun: false }, { auth });
     expect(await taskRepo.count()).toBe(4);
