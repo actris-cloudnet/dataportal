@@ -193,7 +193,7 @@
             :options="allInstrumentPids"
             :multiple="true"
             id="instrumentPidSelect"
-            :getIcon="getInstrumentIcon"
+            :getIcon="(option) => getProductIcon(option.type)"
           />
         </div>
 
@@ -322,7 +322,8 @@ const allInstruments = ref<Instrument[]>([]);
 const selectedInstrumentIds = useRouteQuery({ name: "instrument", defaultValue: [], type: queryStringArray });
 
 // instrument PIDs
-const allInstrumentPids = ref<Option[]>([]);
+type InstrumentPidOption = Option & { type: string };
+const allInstrumentPids = ref<InstrumentPidOption[]>([]);
 const selectedInstrumentPids = useRouteQuery({ name: "instrumentPid", defaultValue: [], type: queryStringArray });
 
 // other

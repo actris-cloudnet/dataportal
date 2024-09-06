@@ -49,11 +49,10 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script lang="ts" setup generic="T extends Option">
 import VueMultiselect from "vue-multiselect";
 import { compareValues, notEmpty } from "@/lib";
 import { computed, ref, watch } from "vue";
-import type { PropType } from "vue";
 
 export interface Option {
   id: string;
@@ -61,30 +60,19 @@ export interface Option {
   shortName?: string;
 }
 
-type OptionId = Option["id"];
+interface Props {
+  id: string;
+  label: string;
+  options: T[];
+  getIcon?: (option: T) => string;
+  multiple?: boolean;
+  disabled?: boolean;
+  clearable?: boolean;
+}
 
-type ModelValue = OptionId | OptionId[] | null;
+const props = defineProps<Props>();
 
-const props = defineProps({
-  id: { required: true, type: String },
-  label: { required: true, type: String },
-  options: { required: true, type: Array as PropType<Option[]> },
-  getIcon: { required: false, type: Function },
-  multiple: Boolean,
-  // Nullable workaround: https://github.com/vuejs/core/issues/3948
-  modelValue: {
-    required: true,
-    type: null as unknown as PropType<ModelValue>,
-    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-    validator: (v: any) => typeof v === "string" || Array.isArray(v) || v === null,
-  },
-  disabled: Boolean,
-  clearable: Boolean,
-});
-
-const emit = defineEmits<{
-  (e: "update:modelValue", value: ModelValue): void;
-}>();
+const model = defineModel<string | string[] | null>({ required: true });
 
 const searchQuery = ref("");
 
@@ -106,15 +94,15 @@ function searchChange(query: string) {
 
 const internalModel = computed({
   get() {
-    if (Array.isArray(props.modelValue)) {
-      return props.modelValue.map((v) => props.options.find((option) => option.id === v)).filter(notEmpty);
+    if (Array.isArray(model.value)) {
+      return model.value.map((v) => props.options.find((option) => option.id === v)).filter(notEmpty);
     } else {
-      const result = props.options.find((option) => option.id === props.modelValue);
+      const result = props.options.find((option) => option.id === model.value);
       return result !== undefined ? result : null;
     }
   },
   set(value) {
-    emit("update:modelValue", Array.isArray(value) ? value.map((v) => v.id) : value != null ? value.id : null);
+    model.value = Array.isArray(value) ? value.map((v) => v.id) : value != null ? value.id : null;
   },
 });
 
@@ -159,13 +147,10 @@ const filteredOptions = computed(() => {
 watch(
   () => props.options,
   (options) => {
-    if (Array.isArray(props.modelValue)) {
-      emit(
-        "update:modelValue",
-        props.modelValue.filter((selectedId) => options.find((product) => product.id === selectedId)),
-      );
-    } else if (!options.some((option) => option.id === props.modelValue)) {
-      emit("update:modelValue", null);
+    if (Array.isArray(model.value)) {
+      model.value = model.value.filter((selectedId) => options.find((product) => product.id === selectedId));
+    } else if (!options.some((option) => option.id === model.value)) {
+      model.value = null;
     }
   },
 );

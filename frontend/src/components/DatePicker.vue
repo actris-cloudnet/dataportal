@@ -43,7 +43,6 @@ import { DatePicker as VDatePicker } from "v-calendar";
 import "v-calendar/dist/style.css";
 
 export interface Props {
-  modelValue: string | null;
   name: string;
   label?: string;
   start?: string;
@@ -59,10 +58,11 @@ export interface DateErrors {
 
 const props = defineProps<Props>();
 
+const model = defineModel<string | null>({ required: true });
+
 const hasError = ref(false);
 
 const emit = defineEmits<{
-  (e: "update:modelValue", value: Props["modelValue"]): void;
   (e: "error", error: DateErrors): void;
 }>();
 
@@ -81,9 +81,9 @@ function validateDate(value: string) {
 const dateString = ref("");
 
 watchEffect(() => {
-  if (props.modelValue) {
-    validateDate(props.modelValue);
-    dateString.value = props.modelValue;
+  if (model.value) {
+    validateDate(model.value);
+    dateString.value = model.value;
   }
 });
 
@@ -93,19 +93,19 @@ watch(
     value = value.trim();
     if (value) {
       if (!validateDate(value).isValidDateString) return;
-      emit("update:modelValue", dateToString(new Date(value)));
+      model.value = dateToString(new Date(value));
     } else {
-      emit("update:modelValue", null);
+      model.value = null;
     }
   },
 );
 
 const dateValue = computed({
   get() {
-    return new Date(props.modelValue!);
+    return new Date(model.value!);
   },
   set(value) {
-    emit("update:modelValue", dateToString(value));
+    model.value = dateToString(value);
   },
 });
 </script>

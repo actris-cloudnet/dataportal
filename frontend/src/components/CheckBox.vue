@@ -1,29 +1,21 @@
 <script lang="ts" setup>
-import { computed, useId } from "vue";
+import { useId } from "vue";
 
 export interface Props {
-  modelValue: boolean | string | boolean[] | string[];
   label: string;
   value?: string;
 }
 
 const props = defineProps<Props>();
 
-const internalModel = computed({
-  get: () => props.modelValue,
-  set: (value) => emit("update:modelValue", value),
-});
-
-const emit = defineEmits<{
-  (e: "update:modelValue", value: Props["modelValue"]): void;
-}>();
+const model = defineModel<boolean | string[]>({ required: true });
 
 const id = useId();
 </script>
 
 <template>
   <div class="wrapper">
-    <input :id="id" type="checkbox" :value="value" v-model="internalModel" />
+    <input :id="id" type="checkbox" :value="value" v-model="model" />
     <label :for="id">{{ props.label }}</label>
   </div>
 </template>

@@ -2,20 +2,17 @@
 import { computed } from "vue";
 
 export interface Props {
-  modelValue: number;
   totalPages: number;
   disabled: boolean;
 }
 
 const props = defineProps<Props>();
 
-const emit = defineEmits<{
-  (e: "update:modelValue", value: Props["modelValue"]): void;
-}>();
+const currentPage = defineModel<number>({ required: true });
 
 const radius = 1;
 const visiblePages = computed(() => {
-  const middlePage = Math.min(Math.max(props.modelValue, radius + 1), props.totalPages - radius);
+  const middlePage = Math.min(Math.max(currentPage.value, radius + 1), props.totalPages - radius);
   const startPage = Math.max(1, middlePage - radius);
   const endPage = Math.min(middlePage + radius, props.totalPages);
   const output = [];
@@ -28,18 +25,18 @@ const visiblePages = computed(() => {
 
 <template>
   <div class="page">
-    <button @click="emit('update:modelValue', 1)" :disabled="modelValue === 1">«</button>
-    <button @click="emit('update:modelValue', modelValue - 1)" :disabled="modelValue === 1">‹</button>
+    <button @click="currentPage = 1" :disabled="modelValue === 1">«</button>
+    <button @click="currentPage -= 1" :disabled="modelValue === 1">‹</button>
     <button
       v-for="page in visiblePages"
       :key="page"
-      @click="emit('update:modelValue', page)"
+      @click="currentPage = page"
       :class="{ current: page === modelValue }"
     >
       {{ page }}
     </button>
-    <button @click="emit('update:modelValue', modelValue + 1)" :disabled="modelValue === totalPages">›</button>
-    <button @click="emit('update:modelValue', totalPages)" :disabled="modelValue === totalPages">»</button>
+    <button @click="currentPage += 1" :disabled="modelValue === totalPages">›</button>
+    <button @click="currentPage = totalPages" :disabled="modelValue === totalPages">»</button>
   </div>
 </template>
 
