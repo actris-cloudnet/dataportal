@@ -29,7 +29,7 @@ export class SiteRoutes {
         .createQueryBuilder("site")
         .leftJoinAndSelect("site.persons", "person")
         .where("site.id = :siteId", req.params);
-      const site = await hideTestDataFromNormalUsers<Site>(qb, req).getOne();
+      const site = await hideTestDataFromNormalUsers(qb, req).getOne();
       if (!site) {
         return next({ status: 404, errors: ["No sites match this id"] });
       }
@@ -53,7 +53,7 @@ export class SiteRoutes {
       const cloudnetStatuses = await this.queryCloudnetStatuses();
       const modelStatuses = await this.queryModelStatuses();
       res.send(
-        sites.map((site) => ({
+        sites.map((site: any) => ({
           ...site,
           status:
             (site.type.includes(SiteType.MODEL) ? modelStatuses[site.id] : cloudnetStatuses[site.id]) || "inactive",
@@ -114,7 +114,7 @@ export class SiteRoutes {
   location: RequestHandler = async (req, res, next) => {
     try {
       const qb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteId", req.params);
-      const site = await hideTestDataFromNormalUsers<Site>(qb, req).getOne();
+      const site = await hideTestDataFromNormalUsers(qb, req).getOne();
       if (!site) return next({ status: 404, errors: ["No sites match this id"] });
       const location = await this.siteLocationRepo.findOneBy({ siteId: site.id, date: new Date(req.params.date) });
       if (!location) return next({ status: 404, errors: ["No location match this date"] });
@@ -127,7 +127,7 @@ export class SiteRoutes {
   locations: RequestHandler = async (req, res, next) => {
     try {
       const qb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteId", req.params);
-      const site = await hideTestDataFromNormalUsers<Site>(qb, req).getOne();
+      const site = await hideTestDataFromNormalUsers(qb, req).getOne();
       if (!site) return next({ status: 404, errors: ["No sites match this id"] });
       const locations = await this.siteLocationRepo.find({ where: { siteId: site.id }, order: { date: "ASC" } });
       res.send(locations);

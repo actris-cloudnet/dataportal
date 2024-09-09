@@ -77,7 +77,7 @@ export class VisualizationRoutes {
 
   visualizationForSourceFile: RequestHandler = async (req: Request, res: Response, next) => {
     const params = req.params;
-    const fetchVisualizationsForSourceFile = (repo: Repository<RegularFile | ModelFile>) => {
+    const fetchVisualizationsForSourceFile = (repo: any) => {
       const qb = repo
         .createQueryBuilder("file")
         .leftJoinAndSelect("file.visualizations", "visualizations")
@@ -115,7 +115,7 @@ export class VisualizationRoutes {
   };
 
   private getManyVisualizations(query: any) {
-    const fetchVisualizations = (_repo: Repository<RegularFile | ModelFile>, mode: boolean | undefined) => {
+    const fetchVisualizations = (_repo: Repository<RegularFile> | Repository<ModelFile>, mode: boolean | undefined) => {
       let qb = this.fileController
         .filesQueryBuilder(query, mode ? "model" : "file")
         .innerJoinAndSelect("file.visualizations", "visualizations")

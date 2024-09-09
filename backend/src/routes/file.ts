@@ -65,7 +65,7 @@ export class FileRoutes {
   readonly softwareService: SoftwareService;
 
   file: RequestHandler = async (req: Request, res: Response, next) => {
-    const getFileByUuid = (repo: Repository<RegularFile | ModelFile>, isModel: boolean | undefined) => {
+    const getFileByUuid = (repo: any, isModel: boolean | undefined) => {
       const qb = repo
         .createQueryBuilder("file")
         .leftJoinAndSelect("file.site", "site")
@@ -81,7 +81,7 @@ export class FileRoutes {
         qb.leftJoinAndSelect("file.sourceModelFiles", "sourceModelFiles");
       }
       qb.where("file.uuid = :uuid", req.params);
-      return hideTestDataFromNormalUsers<RegularFile | ModelFile>(qb, req).getOne();
+      return hideTestDataFromNormalUsers(qb, req).getOne();
     };
 
     try {
@@ -96,7 +96,7 @@ export class FileRoutes {
   };
 
   fileVersions: RequestHandler = async (req: Request, res: Response, next) => {
-    const getFileByUuid = (repo: Repository<RegularFile | ModelFile>, _isModel: boolean | undefined) =>
+    const getFileByUuid = (repo: Repository<RegularFile> | Repository<ModelFile>, _isModel: boolean | undefined) =>
       repo.createQueryBuilder("file").where("file.uuid = :uuid", req.params).getOne();
 
     try {
@@ -401,7 +401,7 @@ export class FileRoutes {
 
   filesQueryBuilder(query: any, mode: "file" | "model") {
     const isModel = mode == "model";
-    let repo: Repository<RegularFile | ModelFile> = this.fileRepo;
+    let repo: Repository<RegularFile> | Repository<ModelFile> = this.fileRepo;
     if (isModel) {
       repo = this.modelFileRepo;
     }
@@ -535,7 +535,7 @@ export class FileRoutes {
   }
 
   public async findAnyFile(
-    searchFunc: (arg0: Repository<RegularFile | ModelFile>, arg1?: boolean) => Promise<RegularFile | ModelFile | null>,
+    searchFunc: (arg0: any, arg1?: boolean) => Promise<RegularFile | ModelFile | null>,
   ): Promise<RegularFile | ModelFile | null> {
     const [file, modelFile] = await Promise.all([
       searchFunc(this.fileRepo, false),
@@ -545,7 +545,10 @@ export class FileRoutes {
   }
 
   async findAllFiles(
-    searchFunc: (arg0: Repository<RegularFile | ModelFile>, arg1?: boolean) => Promise<(RegularFile | ModelFile)[]>,
+    searchFunc: (
+      arg0: Repository<RegularFile> | Repository<ModelFile>,
+      arg1?: boolean,
+    ) => Promise<(RegularFile | ModelFile)[]>,
   ): Promise<(RegularFile | ModelFile)[]> {
     const [files, modelFiles] = await Promise.all([
       searchFunc(this.fileRepo, false),
@@ -606,7 +609,7 @@ export class FileRoutes {
   }
 }
 
-function addCommonFilters<Entity extends ObjectLiteral>(qb: SelectQueryBuilder<Entity>, query: any) {
+function addCommonFilters(qb: any, query: any) {
   qb.andWhere("site.id IN (:...site)", query);
   if (query.product) qb.andWhere("product.id IN (:...product)", query);
   if (query.dateFrom) qb.andWhere("file.measurementDate >= :dateFrom", query);

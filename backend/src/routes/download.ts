@@ -422,6 +422,7 @@ export class DownloadRoutes {
   }
 
   private async trackDownload(req: Request, type: ObjectType, uuid: string) {
+    if (!req.ip) return;
     const result = this.ipLookup.get(req.ip);
     const dl = new Download(type, uuid, req.ip, result?.country?.iso_code);
     await this.downloadRepo.save(dl);

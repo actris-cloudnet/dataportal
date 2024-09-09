@@ -63,10 +63,7 @@ export const toArray = (obj: string | Array<string> | undefined): Array<string> 
   return obj;
 };
 
-export const hideTestDataFromNormalUsers = <Entity extends ObjectLiteral>(
-  dbQuery: SelectQueryBuilder<Entity>,
-  req: Request,
-): SelectQueryBuilder<Entity> =>
+export const hideTestDataFromNormalUsers = (dbQuery: any, req: Request) =>
   req.query.developer !== undefined ? dbQuery : dbQuery.andWhere("not :type = ANY(site.type)", { type: SiteType.TEST });
 
 export const convertToSearchResponse = (file: SearchFile) => new SearchFileResponse(file);
