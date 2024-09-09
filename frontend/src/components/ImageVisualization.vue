@@ -83,6 +83,7 @@ import type { RouteLocationRaw } from "vue-router";
 import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
 import { computed, nextTick, ref, watchEffect } from "vue";
 import { backendUrl, vocabularyUrl } from "@/lib";
+import { useTemplateRef } from "vue";
 
 export interface Props {
   data: VisualizationItem;
@@ -106,7 +107,7 @@ const emit = defineEmits<{
 
 const currentData = ref(props.data);
 const nextData = ref(props.data);
-const imgElement = ref<HTMLImageElement | null>(null);
+const imgElement = useTemplateRef("imgElement");
 
 const imageStyle = computed(() => {
   if (

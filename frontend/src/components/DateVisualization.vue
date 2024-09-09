@@ -50,7 +50,7 @@
 
 <script lang="ts" setup generic="T">
 import { compareValues, dateToString } from "@/lib";
-import { ref, computed, nextTick, watchEffect, type Ref } from "vue";
+import { ref, computed, nextTick, watchEffect, type Ref, useTemplateRef } from "vue";
 import { RouterLink } from "vue-router";
 
 export type DataItem<X> = X & {
@@ -82,8 +82,8 @@ const props = defineProps<Props<T>>();
 
 const currentDate = ref<DateItem<T> | null>(null) as Ref<DateItem<T> | null>;
 const tooltipStyle = ref<Record<string, string>>({});
-const $years = ref<HTMLDivElement | null>(null);
-const $tooltip = ref<HTMLDivElement | null>(null);
+const $years = useTemplateRef("$years");
+const $tooltip = useTemplateRef("$tooltip");
 
 /// Get day of the year in UTC.
 function dayOfYear(date: Date): number {

@@ -35,6 +35,7 @@
 </template>
 
 <script lang="ts" setup generic="T extends Record<string, any>">
+import { useTemplateRef } from "vue";
 import { ref, type Ref, nextTick, onUnmounted } from "vue";
 import { useRouter, type RouteLocationRaw } from "vue-router";
 
@@ -64,7 +65,7 @@ const emit = defineEmits<{
 
 const selectedRow: Ref<T | null> = ref(null);
 
-const tableElement = ref<HTMLDivElement | null>(null);
+const tableElement = useTemplateRef("tableElement");
 
 function handleClick(event: MouseEvent, handler: (item: T) => void, row: T) {
   if (!props.selectable || event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) return;

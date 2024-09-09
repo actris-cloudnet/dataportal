@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onBeforeUnmount, watch } from "vue";
+import { onMounted, onBeforeUnmount, watch, useTemplateRef } from "vue";
 import L from "leaflet";
 
 export interface Point {
@@ -19,7 +19,7 @@ export interface Props {
 
 const props = defineProps<Props>();
 
-const mapContainer = ref<HTMLElement | null>(null);
+const mapContainer = useTemplateRef("mapContainer");
 let leafletInstance: L.Map | null = null;
 
 onMounted(() => {

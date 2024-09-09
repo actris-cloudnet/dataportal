@@ -6,6 +6,7 @@
 import { ref, onMounted, nextTick, onUnmounted } from "vue";
 import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
+import { useTemplateRef } from "vue";
 
 const props = defineProps<{
   measurementDates: string[];
@@ -19,7 +20,7 @@ const props = defineProps<{
 
 const plotHeight = 400;
 
-const plotContainer = ref<HTMLElement | null>(null);
+const plotContainer = useTemplateRef("plotContainer");
 let plotInstance: uPlot | null = null;
 
 const createTypedData = (measurementDates: string[], data: (number | null)[]) => {

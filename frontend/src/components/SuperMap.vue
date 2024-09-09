@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onBeforeUnmount, onMounted, onActivated, watch, ref, nextTick } from "vue";
+import { onBeforeUnmount, onMounted, onActivated, watch, nextTick, useTemplateRef } from "vue";
 import L from "leaflet";
 import "leaflet-draw";
 import type { Site, SiteType } from "@shared/entity/Site";
@@ -27,7 +27,7 @@ let map: L.Map | null = null;
 let tileLayer: L.TileLayer | null = null;
 const allMarkers: { [key: string]: L.Marker } = {};
 const legend = new L.Control({ position: "topright" });
-const mapElement = ref(HTMLElement);
+const mapElement = useTemplateRef("mapElement");
 
 const myMarker = (site: Site, selected: boolean) =>
   L.Icon.extend({
@@ -80,8 +80,9 @@ function generateLegend() {
 }
 
 function initMap() {
+  if (!mapElement.value) return;
   legend.onAdd = generateLegend;
-  map = L.map(mapElement.value as unknown as HTMLElement, {
+  map = L.map(mapElement.value, {
     maxBounds: setMapBounds(),
     zoomSnap: 0.5,
   });
