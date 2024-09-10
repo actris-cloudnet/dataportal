@@ -54,8 +54,8 @@ const showMenu = ref(false);
           </a>
         </li>
         <li>
-          <a href="/products">
-            <span>Products</span>
+          <a href="/publications">
+            <span>Publications</span>
           </a>
         </li>
         <li>

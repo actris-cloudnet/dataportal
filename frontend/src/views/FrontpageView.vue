@@ -30,10 +30,10 @@
           Read documentation
         </BaseButton>
       </div>
+      <div style="display: flex; justify-content: center">
+        <BaseButton href="https://ccres.aeris-data.fr" type="secondary"> CCRES services &#8594; </BaseButton>
+      </div>
     </main>
-    <div class="publications">
-      <router-link to="/publications"> Cloudnet publications &#8594; </router-link>
-    </div>
   </main>
 </template>
 
