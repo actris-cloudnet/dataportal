@@ -75,6 +75,10 @@
       <dd v-else>
         <span class="notAvailable" />
       </dd>
+      <template v-if="file.dvasId">
+        <dt>External links</dt>
+        <dd><a :href="`https://data.actris.eu/${file.dvasId}`" target="_blank">ACTRIS data portal</a></dd>
+      </template>
     </dl>
   </div>
 </template>

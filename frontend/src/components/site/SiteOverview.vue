@@ -26,6 +26,28 @@
           No data received in the last {{ instrumentsFromLastDays }} days.
         </div>
         <div v-html="description[1]" v-if="description"></div>
+        <template v-if="links.length > 0 || site.dvasId || site.actrisId || site.gaw">
+          <h2>Links</h2>
+          <ul style="list-style: disc; padding-left: 1rem; margin-bottom: 2rem">
+            <li v-for="link in links" :key="link" v-html="link"></li>
+            <li v-if="site.dvasId">
+              <a :href="`https://data.actris.eu/facility/${site.dvasId}`">{{ site.humanReadableName }}</a> in ACTRIS
+              data portal
+            </li>
+            <li v-if="site.actrisId">
+              <span v-if="nfLoading" style="color: gray">Loading...</span>
+              <a :href="nfLink" v-else>{{ nfName }}</a> in ACTRIS labelling system
+            </li>
+            <li v-if="site.gaw">
+              <a
+                :href="`https://gawsis.meteoswiss.ch/GAWSIS/#/search/station/stationReportDetails/0-20008-0-${site.gaw}`"
+              >
+                {{ site.gaw }}
+              </a>
+              in GAW station information system
+            </li>
+          </ul>
+        </template>
       </section>
       <aside>
         <section id="sitemap" v-if="site.type.includes('mobile' as SiteType)">
@@ -50,23 +72,6 @@
             <template v-if="site.altitude != null">
               <dt>Altitude</dt>
               <dd>{{ site.altitude }} <abbr title="meters above mean sea level">m a.s.l.</abbr></dd>
-            </template>
-            <template v-if="site.gaw">
-              <dt>GAW ID</dt>
-              <dd>
-                <a
-                  :href="`https://gawsis.meteoswiss.ch/GAWSIS/#/search/station/stationReportDetails/0-20008-0-${site.gaw}`"
-                >
-                  {{ site.gaw }}
-                </a>
-              </dd>
-            </template>
-            <template v-if="site.actrisId">
-              <dt>ACTRIS NF</dt>
-              <dd>
-                <span v-if="nfLoading" style="color: gray">Loading...</span>
-                <a :href="nfLink" v-else>{{ nfName }}</a>
-              </dd>
             </template>
             <template v-if="site.persons.length > 0">
               <dt>Contact</dt>
@@ -130,7 +135,15 @@ const locations = ref<LocationsResult>({ status: "loading" });
 const description = computed(() => {
   if (!props.site.description) return null;
   const i = props.site.description.indexOf("<h2>");
-  return [props.site.description.slice(0, i), props.site.description.slice(i)];
+  const j = props.site.description.indexOf("<h2>Links</h2>");
+  return [props.site.description.slice(0, i), props.site.description.slice(i, j >= 0 ? j : undefined)];
+});
+
+const links = computed(() => {
+  if (!props.site.description) return [];
+  const i = props.site.description.indexOf("<h2>Links</h2>");
+  const m = props.site.description.slice(i).match(/<a href="[^"]+">[^<]+<\/a>/g);
+  return m || [];
 });
 
 onMounted(() => {
