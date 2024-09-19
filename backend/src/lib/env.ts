@@ -27,6 +27,8 @@ const requiredVars = [
   "TYPEORM_MIGRATIONS_RUN",
   "TYPEORM_LOGGING",
   "TYPEORM_ENTITIES",
+  "DVAS_URL",
+  "DC_URL",
 ] as const;
 
 type RequiredVar = (typeof requiredVars)[number];
@@ -74,6 +76,8 @@ interface Env {
   MATOMO_START_DATE?: string;
   SLACK_API_TOKEN?: string;
   SLACK_NOTIFICATION_CHANNEL?: string;
+  DVAS_URL: string;
+  DC_URL: string;
 }
 
 const env: Env = {
@@ -93,6 +97,8 @@ const env: Env = {
   MATOMO_SITE_ID: typeof rawEnv.MATOMO_SITE_ID !== "undefined" ? readInteger(rawEnv.MATOMO_SITE_ID) : undefined,
   MATOMO_START_DATE:
     typeof rawEnv.MATOMO_START_DATE !== "undefined" ? readIsoDate(rawEnv.MATOMO_START_DATE) : undefined,
+  DVAS_URL: readUrl(rawEnv.DVAS_URL),
+  DC_URL: readUrl(rawEnv.DC_URL),
 };
 
 export default env;
