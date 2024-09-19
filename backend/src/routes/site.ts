@@ -5,6 +5,8 @@ import { Site, SiteType } from "../entity/Site";
 import { SiteLocation } from "../entity/SiteLocation";
 import { ModelFile, RegularFile } from "../entity/File";
 import { SearchFile } from "../entity/SearchFile";
+import axios from "axios";
+import env from "../lib/env";
 
 export class SiteRoutes {
   constructor(dataSource: DataSource) {
@@ -14,6 +16,8 @@ export class SiteRoutes {
     this.modelFileRepo = dataSource.getRepository(ModelFile);
     this.siteLocationRepo = dataSource.getRepository(SiteLocation);
     this.searchFileRepo = dataSource.getRepository(SearchFile);
+    this.dvasCache = {};
+    this.actrisCache = {};
   }
 
   readonly dataSource: DataSource;
@@ -22,6 +26,8 @@ export class SiteRoutes {
   readonly modelFileRepo: Repository<ModelFile>;
   readonly siteLocationRepo: Repository<SiteLocation>;
   readonly searchFileRepo: Repository<SearchFile>;
+  readonly dvasCache: Record<string, any>;
+  readonly actrisCache: Record<string, any>;
 
   site: RequestHandler = async (req: Request, res: Response, next) => {
     try {
@@ -33,7 +39,11 @@ export class SiteRoutes {
       if (!site) {
         return next({ status: 404, errors: ["No sites match this id"] });
       }
-      res.send(site);
+      res.send({
+        ...site,
+        _actris: site.actrisId ? await this.fetchActrisFacility(site.actrisId) : null,
+        _dvas: site.dvasId ? await this.fetchDvasFacility(site.dvasId) : null,
+      });
     } catch (err) {
       return next({ status: 500, errors: err });
     }
@@ -135,4 +145,42 @@ export class SiteRoutes {
       return next({ status: 500, errors: err });
     }
   };
+
+  private async fetchDvasFacility(dvasId: string) {
+    const cached = this.dvasCache[dvasId];
+    if (cached) return cached;
+    try {
+      const res = await axios.get(`${env.DVAS_URL}/facilities/${dvasId}`);
+      const obj = res.data[0];
+      const result = {
+        id: obj.identifier,
+        name: obj.name,
+        uri: `${env.DC_URL}/facility/${obj.identifier}`,
+      };
+      this.dvasCache[dvasId] = result;
+      return result;
+    } catch (err) {
+      console.error("Failed to fetch DVAS facility", err);
+      return null;
+    }
+  }
+
+  private async fetchActrisFacility(actrisId: number) {
+    const cached = this.actrisCache[actrisId];
+    if (cached) return cached;
+    try {
+      const res = await axios.get(`${env.LABELLING_URL}/api/facilities/${actrisId}`);
+      const obj = res.data;
+      const result = {
+        id: obj.id,
+        name: obj.name,
+        uri: obj.landing_page,
+      };
+      this.actrisCache[actrisId] = result;
+      return result;
+    } catch (err) {
+      console.error("Failed to fetch ACTRIS facility", err);
+      return null;
+    }
+  }
 }

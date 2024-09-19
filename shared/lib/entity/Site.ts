@@ -15,6 +15,12 @@ export enum SiteType {
   HIDDEN = "hidden",
 }
 
+export interface SiteLink<T> {
+  id: T;
+  name: string;
+  uri: string;
+}
+
 export interface Site {
   id: string;
   humanReadableName: string;
@@ -36,4 +42,6 @@ export interface Site {
   citations: RegularCitation[];
   locations: SiteLocation[];
   status: "cloudnet" | "active" | "inactive";
+  _dvas: SiteLink<string> | null;
+  _actris: SiteLink<number> | null;
 }

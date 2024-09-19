@@ -30,13 +30,11 @@
           <h2>Links</h2>
           <ul style="list-style: disc; padding-left: 1rem; margin-bottom: 2rem">
             <li v-for="link in links" :key="link" v-html="link"></li>
-            <li v-if="site.dvasId">
-              <a :href="`https://data.actris.eu/facility/${site.dvasId}`">{{ site.humanReadableName }}</a> in ACTRIS
-              data portal
+            <li v-if="site._dvas">
+              <a :href="site._dvas.uri">{{ site._dvas.name }}</a> in ACTRIS data portal
             </li>
-            <li v-if="site.actrisId">
-              <span v-if="nfLoading" style="color: gray">Loading...</span>
-              <a :href="nfLink" v-else>{{ nfName }}</a> in ACTRIS labelling system
+            <li v-if="site._actris">
+              <a :href="site._actris.uri">{{ site._actris.name }}</a> in ACTRIS labelling database
             </li>
             <li v-if="site.gaw">
               <a
@@ -44,7 +42,7 @@
               >
                 {{ site.gaw }}
               </a>
-              in GAW station information system
+              in GAW Station Information System
             </li>
           </ul>
         </template>
@@ -98,7 +96,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import axios from "axios";
 import type { SiteType, Site } from "@shared/entity/Site";
 import MyMap from "@/components/SuperMap.vue";
-import { formatCoordinates, actrisNfUrl, getInstrumentIcon, backendUrl } from "@/lib";
+import { formatCoordinates, getInstrumentIcon, backendUrl } from "@/lib";
 import type { ReducedMetadataResponse } from "@shared/entity/ReducedMetadataResponse";
 import TrackMap, { type Point } from "@/components/TrackMap.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
@@ -127,9 +125,6 @@ const instruments = ref<Instrument[]>([]);
 const instrumentsFromLastDays = 30;
 const instrumentsStatus = ref<"loading" | "error" | "ready">("loading");
 const mapKey = ref(0);
-const nfName = ref<string>();
-const nfLink = ref<string>();
-const nfLoading = ref(true);
 const locations = ref<LocationsResult>({ status: "loading" });
 
 const description = computed(() => {
@@ -173,26 +168,6 @@ onMounted(() => {
     instrumentsStatus.value = "error";
   });
 });
-
-watch(
-  () => props.site,
-  async () => {
-    if (!props.site?.actrisId) {
-      return;
-    }
-    try {
-      const apiUrl = `${actrisNfUrl}/api/facilities/${props.site.actrisId}`;
-      const res = await axios.get(apiUrl);
-      nfName.value = res.data.name;
-      nfLink.value = res.data.landing_page;
-    } catch (err) {
-      console.error(err);
-    } finally {
-      nfLoading.value = false;
-    }
-  },
-  { immediate: true },
-);
 
 function handleInstrument(response: ReducedMetadataResponse): Instrument {
   // TODO: Should be always available...
