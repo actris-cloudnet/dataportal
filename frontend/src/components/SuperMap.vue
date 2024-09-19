@@ -43,7 +43,6 @@ const myMarker = (site: Site, selected: boolean) =>
   });
 
 function getMapCenter() {
-  // refactor me
   let center = props.center;
   if (props.showLegend) center = [34.0, 14.0];
   return center;
@@ -62,6 +61,7 @@ const markerColors: Record<SiteType | "selected", string | undefined> = {
   campaign: "orange",
   mobile: undefined,
   test: undefined,
+  model: undefined,
   hidden: undefined,
 };
 
@@ -103,24 +103,24 @@ function customPopup(site: Site) {
 
 function initLayers() {
   props.sites.map((site) => {
-    if (site.type.includes("hidden" as SiteType)) return;
-    if (site.latitude !== null && site.longitude !== null) {
-      const mark = L.marker([site.latitude, site.longitude]); // CHANGED THESE ARGUMENTS
-      mark.bindPopup(customPopup(site));
-      mark.on("mouseover", () => {
-        mark.openPopup();
-      });
-      mark.on("mouseout", () => {
-        mark.closePopup();
-      });
-      mark.on("click", () => {
-        if (props.onMapMarkerClick) props.onMapMarkerClick([site.id]);
-        mark.closePopup();
-      });
-      allMarkers[site.id] = mark;
-      if (!map) return;
-      mark.addTo(map);
+    if (site.latitude === null || site.longitude === null) {
+      return;
     }
+    const mark = L.marker([site.latitude, site.longitude]);
+    mark.bindPopup(customPopup(site));
+    mark.on("mouseover", () => {
+      mark.openPopup();
+    });
+    mark.on("mouseout", () => {
+      mark.closePopup();
+    });
+    mark.on("click", () => {
+      if (props.onMapMarkerClick) props.onMapMarkerClick([site.id]);
+      mark.closePopup();
+    });
+    allMarkers[site.id] = mark;
+    if (!map) return;
+    mark.addTo(map);
   });
 }
 

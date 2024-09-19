@@ -175,6 +175,7 @@ export const markerColors: Record<SiteType, string> = {
   campaign: markerIconOrange,
   mobile: markerIconGrey,
   test: markerIconGrey,
+  model: markerIconGrey,
   hidden: markerIconGrey,
 };
 
