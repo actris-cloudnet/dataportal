@@ -14,6 +14,12 @@ jobs:
     strategy:
       matrix:
         target: [frontend, backend]
+        include:
+          - target: frontend
+            build-args: |
+              BACKEND_URL=/api/
+              MATOMO_HOST=https://cloudnet-matomo.out.ocp.fmi.fi/
+              MATOMO_SITE_ID=1
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -43,6 +49,7 @@ jobs:
         with:
           context: .
           file: ${{ matrix.target }}/Dockerfile
+          build-args: ${{ matrix.build-args }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
