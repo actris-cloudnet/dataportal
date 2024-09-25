@@ -351,7 +351,7 @@ export class FileRoutes {
         await queryRunner.rollbackTransaction();
         return next({ status: 422, errors: ["No file matches the provided uuid"] });
       }
-      if (!dryRun && !tombstoneReason && !file.volatile) {
+      if (!dryRun && !tombstoneReason && file.pid) {
         await queryRunner.rollbackTransaction();
         return next({ status: 422, errors: ["Forbidden to delete a stable file without specifying tombstone reason"] });
       }
@@ -362,7 +362,7 @@ export class FileRoutes {
       });
       if (!dryRun) {
         if (query.deleteHigherProducts && derivedFiles.length > 0) {
-          if (!tombstoneReason && derivedFiles.some((product) => !product.volatile)) {
+          if (!tombstoneReason && derivedFiles.some((product) => product.pid)) {
             await queryRunner.rollbackTransaction();
             return next({
               status: 422,
@@ -569,7 +569,7 @@ export class FileRoutes {
   };
 
   private async deleteFileEntity(queryRunner: QueryRunner, file: File, tombstoneReason?: string) {
-    if (file.volatile) {
+    if (!file.pid) {
       const VizEntity = file instanceof RegularFile ? Visualization : ModelVisualization;
       await queryRunner.manager.delete(VizEntity, { sourceFile: { uuid: file.uuid } });
       await queryRunner.manager.delete(file.constructor, { uuid: file.uuid });
