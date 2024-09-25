@@ -133,7 +133,7 @@ const deleteBusy = ref(false);
 const showDeleteModal = ref(false);
 const filesToDelete = ref<File[]>([]);
 const tombstoneReason = ref("");
-const requireTombstoneReason = computed(() => filesToDelete.value.some((file) => !file.volatile));
+const requireTombstoneReason = computed(() => filesToDelete.value.some((file) => file.pid));
 
 const title = computed(() =>
   file.value ? `${file.value.product.humanReadableName} data from ${file.value.site.humanReadableName}` : "",
