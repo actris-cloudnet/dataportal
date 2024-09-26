@@ -353,7 +353,10 @@ export class FileRoutes {
       }
       if (!dryRun && !tombstoneReason && file.pid) {
         await queryRunner.rollbackTransaction();
-        return next({ status: 422, errors: ["Forbidden to delete a stable file without specifying tombstone reason"] });
+        return next({
+          status: 422,
+          errors: ["Forbidden to delete file with PID without specifying tombstone reason"],
+        });
       }
       const uuids = await this.getDerivedProducts(queryRunner, file);
       const derivedFiles = await queryRunner.manager.find(RegularFile, {
@@ -366,7 +369,7 @@ export class FileRoutes {
             await queryRunner.rollbackTransaction();
             return next({
               status: 422,
-              errors: ["Forbidden to delete derived stable files without specifying tombstone reason"],
+              errors: ["Forbidden to delete derived files having PID without specifying tombstone reason"],
             });
           }
           for (const derivedFile of derivedFiles) {
@@ -577,7 +580,7 @@ export class FileRoutes {
       await queryRunner.manager.delete(FileQuality, { uuid: file.uuid });
     } else {
       if (!tombstoneReason) {
-        throw new Error("tombstoneReason is required for stable file");
+        throw new Error("tombstoneReason is required for file with PID");
       }
       file.tombstoneReason = tombstoneReason;
       await queryRunner.manager.save(file);
