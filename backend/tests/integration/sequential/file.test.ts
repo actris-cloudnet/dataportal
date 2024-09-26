@@ -536,7 +536,11 @@ describe("DELETE /api/files/", () => {
   });
 
   it("refuses deleting a stable file", async () => {
-    const radarFile = await putDummyFile({ product: "radar", volatile: false });
+    const radarFile = await putDummyFile({
+      product: "radar",
+      volatile: false,
+      pid: "https://hdl.handle.net/123/stable-pid",
+    });
     await expect(deleteFile(radarFile.uuid, false, false)).rejects.toMatchObject({ response: { status: 422 } });
     await fileRepo.findOneByOrFail({ uuid: radarFile.uuid });
   });
@@ -612,13 +616,22 @@ describe("DELETE /api/files/", () => {
 
   it("refuses deleting if derived product is stable", async () => {
     const file = await putDummyFile();
-    await putDummyFile({ product: "categorize", volatile: false, sourceFileIds: [file.uuid] });
+    await putDummyFile({
+      product: "categorize",
+      volatile: false,
+      sourceFileIds: [file.uuid],
+      pid: "https://hdl.handle.net/123/stable-pid",
+    });
     await expect(deleteFile(file.uuid, true, false)).rejects.toMatchObject({ response: { status: 422 } });
   });
 
   it("refuses deleting if any of derived products is stable", async () => {
     const radarFile = await putDummyFile();
-    const categorizeFile = await putDummyFile({ product: "categorize", sourceFileIds: [radarFile.uuid] });
+    const categorizeFile = await putDummyFile({
+      product: "categorize",
+      sourceFileIds: [radarFile.uuid],
+      pid: "https://hdl.handle.net/123/stable-pid",
+    });
     await putDummyFile({ product: "classification", volatile: false, sourceFileIds: [categorizeFile.uuid] });
     await expect(deleteFile(radarFile.uuid, true, false)).rejects.toMatchObject({ response: { status: 422 } });
   });
@@ -659,7 +672,12 @@ describe("DELETE /api/files/", () => {
 
   it("refuses deleting model file if higher-level products contain stable product", async () => {
     const modelFile = await putDummyFile({ product: "model" });
-    await putDummyFile({ product: "categorize", volatile: false, sourceFileIds: [modelFile.uuid] });
+    await putDummyFile({
+      product: "categorize",
+      volatile: false,
+      sourceFileIds: [modelFile.uuid],
+      pid: "https://hdl.handle.net/123/stable-pid",
+    });
     await expect(deleteFile(modelFile.uuid, true, false)).rejects.toMatchObject({ response: { status: 422 } });
   });
 
@@ -682,7 +700,7 @@ describe("DELETE /api/files/", () => {
   });
 
   it("patches file with tombstone and removes from search file", async () => {
-    const radarFile = await putDummyFile({ volatile: false });
+    const radarFile = await putDummyFile({ volatile: false, pid: "https://hdl.handle.net/123/stable-pid" });
     await expect(deleteFile(radarFile.uuid, false, false, "Kaljaa")).resolves.toMatchObject({ status: 200 });
     const file = await fileRepo.findOneByOrFail({ uuid: radarFile.uuid });
     expect(file.tombstoneReason).toEqual("Kaljaa");
@@ -695,6 +713,7 @@ describe("DELETE /api/files/", () => {
       product: "categorize",
       volatile: false,
       sourceFileIds: [modelFile.uuid],
+      pid: "https://hdl.handle.net/123/stable-pid",
     });
     await expect(deleteFile(modelFile.uuid, true, false, "Viinaa")).resolves.toMatchObject({ status: 200 });
 
@@ -717,8 +736,10 @@ describe("DELETE /api/files/", () => {
     }
   });
 
-  async function putDummyFile(options: Partial<{ product: string; volatile: boolean; sourceFileIds: string[] }> = {}) {
-    const { product = "radar", volatile = true } = options;
+  async function putDummyFile(
+    options: Partial<{ product: string; volatile: boolean; sourceFileIds: string[]; pid: string }> = {},
+  ) {
+    const { product = "radar", volatile = true, pid = null } = options;
     const file = {
       ...volatileFile,
       ...options,
@@ -726,6 +747,7 @@ describe("DELETE /api/files/", () => {
       s3key: `20181115_mace-head_${product}.nc`,
       checksum: generateHash(),
     };
+    if (pid) file.pid = pid;
     if (product === "model" && !file.model) file.model = "ecmwf";
     const bucketFix = volatile ? "-volatile" : "";
     await axios.put(`${storageServiceUrl}cloudnet-product${bucketFix}/${file.s3key}`, "content");
