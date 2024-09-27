@@ -47,7 +47,7 @@
     "test": "npm run unit-test && npm run integration-test",
     "unit-test": "jest tests/unit",
     "integration-test": "npm run reset-db && jest tests/integration/parallel && jest --runInBand tests/integration/sequential",
-    "reset-db-prod": "npm run reset-db && npx ts-node -T src/fixtures.ts /dataportal-resources APPEND",
+    "reset-db-prod": "npm run reset-db && npx ts-node -T src/fixtures.ts /dataportal-fixtures APPEND",
     "e2e-test": "set -e; for f in tests/e2e/*; do npm run reset-db && jest $f; done",
     "selenium-test": "npm run reset-db && jest --runInBand",
     "start": "node build/server.js",
