@@ -28,6 +28,7 @@ import ReadableStream = NodeJS.ReadableStream;
 import env from "../lib/env";
 import { QueueService } from "../lib/queue";
 import { Task, TaskType } from "../entity/Task";
+import axios, { AxiosResponse } from "axios";
 
 export class UploadRoutes {
   constructor(dataSource: DataSource, queueService: QueueService) {
@@ -249,6 +250,10 @@ export class UploadRoutes {
       this.publishTask(upload).catch((err) => {
         console.error("Task publish failed:", err);
       });
+
+      if (upload instanceof InstrumentUpload) {
+        this.publishAdjoiningDayTask(upload);
+      }
     } catch (err: any) {
       if (err.status == 400 && err.errors == "Checksum does not match file contents") return next(err); // Client error
       if (err.errors) return next({ status: 500, errors: `Internal server error: ${err.errors}` }); // Our error
@@ -256,6 +261,19 @@ export class UploadRoutes {
       return next({ status: 500, errors: `Internal server error: ${err.code}` }); // Unknown error
     }
   };
+
+  private async publishAdjoiningDayTask(upload: InstrumentUpload) {
+    const calibrationData = await fetchCalibrationData(upload);
+    const timeOffset = calibrationData?.data?.data?.time_offset;
+    if (timeOffset && timeOffset !== 0) {
+      const dateOffset = timeOffset > 0 ? -1 : 1;
+      const adjustedDate = getAdjustedDate(upload.measurementDate, dateOffset);
+      const uploadMock = { ...upload, measurementDate: adjustedDate };
+      this.publishTask(uploadMock as InstrumentUpload).catch((err) => {
+        console.error("Task publish failed:", err);
+      });
+    }
+  }
 
   private async publishTask(upload: InstrumentUpload | ModelUpload) {
     if (upload instanceof ModelUpload) {
@@ -524,4 +542,27 @@ function addFilenameAffixClause(affixList: string[], qb: SelectQueryBuilder<any>
 
 function escapeLikeString(raw: string): string {
   return raw.replace(/[\\%_]/g, "\\$&");
+}
+
+async function fetchCalibrationData(upload: InstrumentUpload): Promise<AxiosResponse<any> | undefined> {
+  try {
+    const response = await axios.get(
+      `${env.DP_BACKEND_URL}/calibration?instrumentPid=${upload.instrumentPid}&date=${upload.measurementDate}`,
+    );
+    return response;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return error.response;
+    } else {
+      console.error("Unexpected error:", error);
+      throw error;
+    }
+  }
+}
+
+function getAdjustedDate(dateInput: string | Date, offsetDays: number): Date {
+  const date = new Date(dateInput);
+  date.setDate(date.getDate() + offsetDays);
+  const dateString = date.toISOString().split("T")[0];
+  return new Date(dateString);
 }
