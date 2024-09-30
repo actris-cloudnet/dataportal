@@ -15,7 +15,7 @@ export class CalibrationRoutes {
 
   private calibRepo: Repository<Calibration>;
 
-  validateParams: RequestHandler = async (req: Request, res: Response, next) => {
+  validateParams: RequestHandler = (req: Request, res: Response, next) => {
     if (!("instrumentPid" in req.query)) {
       return next({ status: 400, errors: "Parameter instrumentPid must be specified" });
     }
