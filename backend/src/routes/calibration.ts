@@ -33,13 +33,7 @@ export class CalibrationRoutes {
         if (!isValidDate(query.date)) {
           return next({ status: 400, errors: "date is invalid" });
         }
-        const calib = await this.calibRepo.findOne({
-          where: {
-            instrumentPid: query.instrumentPid,
-            measurementDate: LessThanOrEqual(query.date),
-          },
-          order: { measurementDate: "DESC" },
-        });
+        const calib = await fetchCalibration(this.calibRepo, query.instrumentPid, query.date);
         if (!calib) {
           return next({ status: 404, errors: "Calibration data not found" });
         }
@@ -88,4 +82,18 @@ export class CalibrationRoutes {
       return next({ status: 500, errors: err });
     }
   };
+}
+
+export async function fetchCalibration(
+  calibRepo: Repository<Calibration>,
+  instrumentPid: string,
+  date: string,
+): Promise<Calibration | null> {
+  return await calibRepo.findOne({
+    where: {
+      instrumentPid: instrumentPid,
+      measurementDate: LessThanOrEqual(date),
+    },
+    order: { measurementDate: "DESC" },
+  });
 }
