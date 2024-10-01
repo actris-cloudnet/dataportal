@@ -55,37 +55,39 @@
         <div class="variable" v-for="variable in productInfo.variables[section]" :key="variable.name">
           <code>{{ variable.name }}</code> – {{ variable.long_name }}<br />
           <table>
-            <tr v-if="variable.dimensions && variable.dimensions.length > 0">
-              <th>Dimensions</th>
-              <td>{{ variable.dimensions.join(", ") }}</td>
-            </tr>
-            <tr v-if="variable.units">
-              <th>Units</th>
-              <td v-html="unitsHtml(variable.units)"></td>
-            </tr>
-            <tr v-if="variable.dtype">
-              <th>Data type</th>
-              <td>{{ variable.dtype }}</td>
-            </tr>
-            <tr v-if="variable.standard_name">
-              <th>Standard name</th>
-              <td>{{ variable.standard_name }}</td>
-            </tr>
-            <tr v-if="variable.comment">
-              <th>Description</th>
-              <td>{{ variable.comment }}</td>
-            </tr>
-            <tr v-if="variable.definition">
-              <th>Definition</th>
-              <td>
-                <table class="definition">
-                  <tr v-for="definition in variable.definition" :key="definition.label">
-                    <th>{{ definition.label }}:</th>
-                    <td>{{ definition.description }}</td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
+            <tbody>
+              <tr v-if="variable.dimensions && variable.dimensions.length > 0">
+                <th>Dimensions</th>
+                <td>{{ variable.dimensions.join(", ") }}</td>
+              </tr>
+              <tr v-if="variable.units">
+                <th>Units</th>
+                <td v-html="unitsHtml(variable.units)"></td>
+              </tr>
+              <tr v-if="variable.dtype">
+                <th>Data type</th>
+                <td>{{ variable.dtype }}</td>
+              </tr>
+              <tr v-if="variable.standard_name">
+                <th>Standard name</th>
+                <td>{{ variable.standard_name }}</td>
+              </tr>
+              <tr v-if="variable.comment">
+                <th>Description</th>
+                <td>{{ variable.comment }}</td>
+              </tr>
+              <tr v-if="variable.definition">
+                <th>Definition</th>
+                <td>
+                  <table class="definition">
+                    <tr v-for="definition in variable.definition" :key="definition.label">
+                      <th>{{ definition.label }}:</th>
+                      <td>{{ definition.description }}</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </tbody>
           </table>
         </div>
       </template>

@@ -21,14 +21,16 @@
       <BaseSpinner v-if="isLoading" />
       <template v-else>
         <table class="statistics">
-          <tr v-if="$route.query.batch">
-            <th>Batch:</th>
-            <td>{{ $route.query.batch }}</td>
-          </tr>
-          <tr>
-            <th>Total tasks:</th>
-            <td>{{ totalTasks }}</td>
-          </tr>
+          <tbody>
+            <tr v-if="$route.query.batch">
+              <th>Batch:</th>
+              <td>{{ $route.query.batch }}</td>
+            </tr>
+            <tr>
+              <th>Total tasks:</th>
+              <td>{{ totalTasks }}</td>
+            </tr>
+          </tbody>
         </table>
         <CheckBox label="Show failed tasks" v-model="showFailed" />
         <table class="tasks" v-if="queueData.length > 0">
