@@ -272,8 +272,8 @@ export class UploadRoutes {
     if (timeOffset && timeOffset !== 0) {
       const dateOffset = timeOffset > 0 ? -1 : 1;
       const adjustedDate = getAdjustedDate(upload.measurementDate, dateOffset);
-      const adjustedUpload = { ...upload, measurementDate: adjustedDate };
-      this.publishTask(adjustedUpload as InstrumentUpload).catch((err) => {
+      const adjustedUpload = this.instrumentUploadRepo.create({ ...upload, measurementDate: adjustedDate });
+      this.publishTask(adjustedUpload).catch((err) => {
         console.error("Task publish failed:", err);
       });
     }
