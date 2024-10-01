@@ -107,13 +107,11 @@ describe("after PUTting metadata to API", () => {
         hash.update(response.data);
         expect(hash.digest("hex")).toEqual(expectedJson.checksum);
         return expect(
-          downloadRepo.exist({
-            where: {
-              objectUuid: expectedJson.uuid,
-              objectType: ObjectType.Product,
-              ip: "2.125.160.216",
-              country: "GB",
-            },
+          downloadRepo.existsBy({
+            objectUuid: expectedJson.uuid,
+            objectType: ObjectType.Product,
+            ip: "2.125.160.216",
+            country: "GB",
           }),
         ).resolves.toBe(true);
       });
@@ -166,13 +164,11 @@ describe("after PUTting metadata to API", () => {
       expect(shas.sort()).toMatchObject(expectedShas.sort());
 
       return expect(
-        downloadRepo.exist({
-          where: {
-            objectUuid: collectionUuid,
-            objectType: ObjectType.Collection,
-            ip: "2.125.160.216",
-            country: "GB",
-          },
+        downloadRepo.existsBy({
+          objectUuid: collectionUuid,
+          objectType: ObjectType.Collection,
+          ip: "2.125.160.216",
+          country: "GB",
         }),
       ).resolves.toBe(true);
     });
@@ -210,13 +206,11 @@ describe("after PUTting a raw instrument file", () => {
       hash.update(response.data);
       expect(hash.digest("hex")).toEqual(validMetadata.checksum);
       return expect(
-        downloadRepo.exist({
-          where: {
-            objectUuid: data.uuid,
-            objectType: ObjectType.Raw,
-            ip: "2.125.160.216",
-            country: "GB",
-          },
+        downloadRepo.existsBy({
+          objectUuid: data.uuid,
+          objectType: ObjectType.Raw,
+          ip: "2.125.160.216",
+          country: "GB",
         }),
       ).resolves.toBe(true);
     });

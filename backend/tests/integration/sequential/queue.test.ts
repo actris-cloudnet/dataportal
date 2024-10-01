@@ -544,13 +544,11 @@ describe("/api/queue/batch", () => {
     await axios.post(batchUrl, { type: "process", productIds: ["lidar"], dryRun: false }, { auth });
     expect(await taskRepo.count()).toBe(1);
     expect(
-      await taskRepo.exist({
-        where: {
-          measurementDate: new Date("2020-08-12"),
-          siteId: "bucharest",
-          productId: "lidar",
-          instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
-        },
+      await taskRepo.existsBy({
+        measurementDate: new Date("2020-08-12"),
+        siteId: "bucharest",
+        productId: "lidar",
+        instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
       }),
     ).toBeTruthy();
   });
@@ -559,23 +557,19 @@ describe("/api/queue/batch", () => {
     await axios.post(batchUrl, { type: "process", productIds: ["radar"], dryRun: false }, { auth });
     expect(await taskRepo.count()).toBe(2);
     expect(
-      await taskRepo.exist({
-        where: {
-          measurementDate: new Date("2020-08-11"),
-          siteId: "granada",
-          productId: "radar",
-          instrumentInfoUuid: "9e0f4b27-d5f3-40ad-8b73-2ae5dabbf81f",
-        },
+      await taskRepo.existsBy({
+        measurementDate: new Date("2020-08-11"),
+        siteId: "granada",
+        productId: "radar",
+        instrumentInfoUuid: "9e0f4b27-d5f3-40ad-8b73-2ae5dabbf81f",
       }),
     ).toBeTruthy();
     expect(
-      await taskRepo.exist({
-        where: {
-          measurementDate: new Date("2020-08-13"),
-          siteId: "bucharest",
-          productId: "radar",
-          instrumentInfoUuid: "0b3a7fa0-4812-4964-af23-1162e8b3a665",
-        },
+      await taskRepo.existsBy({
+        measurementDate: new Date("2020-08-13"),
+        siteId: "bucharest",
+        productId: "radar",
+        instrumentInfoUuid: "0b3a7fa0-4812-4964-af23-1162e8b3a665",
       }),
     ).toBeTruthy();
   });
@@ -588,8 +582,8 @@ describe("/api/queue/batch", () => {
       siteId: "warsaw",
       instrumentInfoUuid: "eb4b39e5-6bc8-40f0-92d2-43d31f224de6",
     };
-    expect(await taskRepo.exist({ where: { ...task, productId: "doppler-lidar" } })).toBeTruthy();
-    expect(await taskRepo.exist({ where: { ...task, productId: "doppler-lidar-wind" } })).toBeTruthy();
+    expect(await taskRepo.existsBy({ ...task, productId: "doppler-lidar" })).toBeTruthy();
+    expect(await taskRepo.existsBy({ ...task, productId: "doppler-lidar-wind" })).toBeTruthy();
   });
 
   it("creates model tasks", async () => {
@@ -619,13 +613,11 @@ describe("/api/queue/batch", () => {
     await axios.post(batchUrl, { type: "process", productIds: ["radar"], date: "2020-08-11", dryRun: false }, { auth });
     expect(await taskRepo.count()).toBe(1);
     expect(
-      await taskRepo.exist({
-        where: {
-          measurementDate: new Date("2020-08-11"),
-          siteId: "granada",
-          productId: "radar",
-          instrumentInfoUuid: "9e0f4b27-d5f3-40ad-8b73-2ae5dabbf81f",
-        },
+      await taskRepo.existsBy({
+        measurementDate: new Date("2020-08-11"),
+        siteId: "granada",
+        productId: "radar",
+        instrumentInfoUuid: "9e0f4b27-d5f3-40ad-8b73-2ae5dabbf81f",
       }),
     ).toBeTruthy();
   });
@@ -638,13 +630,11 @@ describe("/api/queue/batch", () => {
     );
     expect(await taskRepo.count()).toBe(1);
     expect(
-      await taskRepo.exist({
-        where: {
-          measurementDate: new Date("2020-08-13"),
-          siteId: "bucharest",
-          productId: "radar",
-          instrumentInfoUuid: "0b3a7fa0-4812-4964-af23-1162e8b3a665",
-        },
+      await taskRepo.existsBy({
+        measurementDate: new Date("2020-08-13"),
+        siteId: "bucharest",
+        productId: "radar",
+        instrumentInfoUuid: "0b3a7fa0-4812-4964-af23-1162e8b3a665",
       }),
     ).toBeTruthy();
   });
@@ -661,8 +651,8 @@ describe("/api/queue/batch", () => {
       siteId: "warsaw",
       instrumentInfoUuid: "eb4b39e5-6bc8-40f0-92d2-43d31f224de6",
     };
-    expect(await taskRepo.exist({ where: { ...task, productId: "doppler-lidar" } })).toBeTruthy();
-    expect(await taskRepo.exist({ where: { ...task, productId: "doppler-lidar-wind" } })).toBeTruthy();
+    expect(await taskRepo.existsBy({ ...task, productId: "doppler-lidar" })).toBeTruthy();
+    expect(await taskRepo.existsBy({ ...task, productId: "doppler-lidar-wind" })).toBeTruthy();
   });
 
   it("cannot cancel all tasks", async () => {

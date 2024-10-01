@@ -118,7 +118,7 @@ export class UserAccountRoutes {
   }
 
   async usernameAvailable(username: string): Promise<boolean> {
-    const usernameTaken = await this.userAccountRepository.exist({ where: { username } });
+    const usernameTaken = await this.userAccountRepository.existsBy({ username });
     return !usernameTaken;
   }
 
