@@ -18,20 +18,26 @@
       :data="isRangeCorrected"
       :measurementDates="measurementDates"
       :timestamps="timestamps"
-      :config="{ title: 'Range Correction', label: 'Range Corrected' }"
+      :config="{ title: 'Range correction', label: 'Range corrected' }"
     />
     <CalibrationPlot
       v-if="nValidValues(isRangeCorrectedNumber) > showPlotThreshold"
       :data="isRangeCorrectedNumber"
       :measurementDates="measurementDates"
       :timestamps="timestamps"
-      :config="{ title: 'Range Correction', label: 'Range Corrected' }"
+      :config="{ title: 'Range correction', label: 'Range corrected' }"
     />
     <CalibrationTable
       :data="snrLimit"
       :measurementDates="measurementDates"
       :timestamps="timestamps"
       :config="{ title: 'SNR limit', label: 'SNR limit' }"
+    />
+    <CalibrationTable
+      :data="timeOffset"
+      :measurementDates="measurementDates"
+      :timestamps="timestamps"
+      :config="{ title: 'Time offset', label: 'Time offset (min)' }"
     />
   </div>
 </template>
@@ -50,6 +56,7 @@ const props = defineProps<{
       calibration_factor?: number;
       range_corrected?: boolean;
       snr_limit?: number;
+      time_offset?: number;
     };
   }[];
 }>();
@@ -60,4 +67,5 @@ const calibrationFactor = computed(() => props.calibrationData.map((entry) => en
 const isRangeCorrected = computed(() => props.calibrationData.map((entry) => entry.data.range_corrected ?? null));
 const snrLimit = computed(() => props.calibrationData.map((entry) => entry.data.snr_limit ?? null));
 const isRangeCorrectedNumber = computed(() => isRangeCorrected.value.map((value) => (value ? 1.0 : 0.0)));
+const timeOffset = computed(() => props.calibrationData.map((entry) => entry.data.time_offset ?? null));
 </script>
