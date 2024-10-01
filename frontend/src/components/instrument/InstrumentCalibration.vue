@@ -31,6 +31,7 @@ import CeilometerCalibration from "@/components/instrument/calibration/Ceilomete
 import DisdrometerCalibration from "@/components/instrument/calibration/DisdrometerCalibration.vue";
 import HatproCalibration from "@/components/instrument/calibration/HatproCalibration.vue";
 import RadarCalibration from "@/components/instrument/calibration/RadarCalibration.vue";
+import WeatherStationCalibration from "./calibration/WeatherStationCalibration.vue";
 import { backendUrl } from "@/lib/index";
 
 async function fetchCalibrationData(instrumentPid: string): Promise<AxiosResponse<any> | undefined> {
@@ -59,6 +60,7 @@ const instrumentComponentsMap: { [key: string]: any } = {
   "cs135": CeilometerCalibration,
   "copernicus": RadarCalibration,
   "pollyxt": CeilometerCalibration,
+  "weather-station": WeatherStationCalibration,
 };
 
 const InstrumentComponent = computed(() => {

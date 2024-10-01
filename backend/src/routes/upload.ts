@@ -28,6 +28,8 @@ import ReadableStream = NodeJS.ReadableStream;
 import env from "../lib/env";
 import { QueueService } from "../lib/queue";
 import { Task, TaskType } from "../entity/Task";
+import { Calibration } from "../entity/Calibration";
+import { fetchCalibration } from "./calibration";
 
 export class UploadRoutes {
   constructor(dataSource: DataSource, queueService: QueueService) {
@@ -40,6 +42,7 @@ export class UploadRoutes {
     this.siteRepo = this.dataSource.getRepository(Site);
     this.modelFileRepo = this.dataSource.getRepository(ModelFile);
     this.regularFileRepo = this.dataSource.getRepository(RegularFile);
+    this.calibRepo = this.dataSource.getRepository(Calibration);
     this.queueService = queueService;
   }
 
@@ -52,6 +55,7 @@ export class UploadRoutes {
   readonly modelRepo: Repository<Model>;
   readonly modelFileRepo: Repository<ModelFile>;
   readonly regularFileRepo: Repository<RegularFile>;
+  readonly calibRepo: Repository<Calibration>;
   readonly queueService: QueueService;
 
   postMetadata: RequestHandler = async (req: Request, res: Response, next) => {
@@ -249,6 +253,10 @@ export class UploadRoutes {
       this.publishTask(upload).catch((err) => {
         console.error("Task publish failed:", err);
       });
+
+      if (upload instanceof InstrumentUpload) {
+        this.publishAdjoiningDayTask(upload);
+      }
     } catch (err: any) {
       if (err.status == 400 && err.errors == "Checksum does not match file contents") return next(err); // Client error
       if (err.errors) return next({ status: 500, errors: `Internal server error: ${err.errors}` }); // Our error
@@ -256,6 +264,20 @@ export class UploadRoutes {
       return next({ status: 500, errors: `Internal server error: ${err.code}` }); // Unknown error
     }
   };
+
+  private async publishAdjoiningDayTask(upload: InstrumentUpload) {
+    const date = upload.measurementDate.toString();
+    const calibration = await fetchCalibration(this.calibRepo, upload.instrumentPid, date);
+    const timeOffset = calibration?.data?.time_offset;
+    if (timeOffset && timeOffset !== 0) {
+      const dateOffset = timeOffset > 0 ? -1 : 1;
+      const adjustedDate = getAdjustedDate(upload.measurementDate, dateOffset);
+      const adjustedUpload = this.instrumentUploadRepo.create({ ...upload, measurementDate: adjustedDate });
+      this.publishTask(adjustedUpload).catch((err) => {
+        console.error("Task publish failed:", err);
+      });
+    }
+  }
 
   private async publishTask(upload: InstrumentUpload | ModelUpload) {
     if (upload instanceof ModelUpload) {
@@ -524,4 +546,11 @@ function addFilenameAffixClause(affixList: string[], qb: SelectQueryBuilder<any>
 
 function escapeLikeString(raw: string): string {
   return raw.replace(/[\\%_]/g, "\\$&");
+}
+
+function getAdjustedDate(dateInput: string | Date, offsetDays: number): Date {
+  const date = new Date(dateInput);
+  date.setDate(date.getDate() + offsetDays);
+  const dateString = date.toISOString().split("T")[0];
+  return new Date(dateString);
 }
