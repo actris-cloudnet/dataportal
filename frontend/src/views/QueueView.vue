@@ -29,24 +29,9 @@
             <th>Total tasks:</th>
             <td>{{ totalTasks }}</td>
           </tr>
-          <tr>
-            <th>Running:</th>
-            <td>{{ runningTasks }}</td>
-          </tr>
-          <tr>
-            <th>Pending:</th>
-            <td>{{ pendingTasks }}</td>
-          </tr>
-          <tr>
-            <th>Created:</th>
-            <td>{{ createdTasks }}</td>
-          </tr>
-          <tr>
-            <th>Failed:</th>
-            <td>{{ failedTasks }}</td>
-          </tr>
         </table>
-        <table class="tasks" v-if="sortedQueueData.length > 0">
+        <CheckBox label="Show failed tasks" v-model="showFailed" />
+        <table class="tasks" v-if="queueData.length > 0">
           <thead>
             <tr>
               <th>Type</th>
@@ -60,7 +45,7 @@
             </tr>
           </thead>
           <tbody is="vue:transition-group" name="list" tag="tbody">
-            <tr v-for="task in sortedQueueData" :key="task.id" :class="`status-${task.status}`">
+            <tr v-for="task in queueData" :key="task.id" :class="`status-${task.status}`">
               <td>{{ task.type }}</td>
               <td class="spinner-cell">
                 <img :src="testPassIcon" alt="" v-if="task.status === 'done'" />
@@ -77,7 +62,6 @@
             </tr>
           </tbody>
         </table>
-        <CheckBox label="Show failed tasks" v-model="showFailed" v-if="failedTasks > 0" />
       </template>
     </main>
   </div>
@@ -85,7 +69,7 @@
 
 <script lang="ts" setup>
 import LandingHeader from "@/components/LandingHeader.vue";
-import { computed, ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, watch } from "vue";
 import axios from "axios";
 import { backendUrl } from "@/lib";
 import BaseSpinner from "@/components/BaseSpinner.vue";
@@ -96,39 +80,50 @@ import CheckBox from "@/components/CheckBox.vue";
 import { loginStore } from "@/lib/auth";
 import { useRoute } from "vue-router";
 
-type AugmentedTask = Omit<Task, "status"> & { status: Task["status"] | "pending" | "done" };
-const statusOrder: Record<AugmentedTask["status"], number> = {
-  done: 0,
-  running: 1,
-  restart: 1,
-  pending: 2,
-  created: 3,
-  failed: 4,
-};
+type AugmentedTask = Omit<Task, "status"> & { status: Task["status"] | "pending" };
 
 const route = useRoute();
-const queueData = ref<Record<AugmentedTask["id"], AugmentedTask>>({});
+const queueData = ref<AugmentedTask[]>([]);
 const showFailed = ref(false);
 const isLoading = ref(true);
 const isCancelled = ref(false);
+const totalTasks = ref(0);
 
 let updateTimeout: NodeJS.Timeout | null = null;
+let lastUpdate = new Date();
+
+interface TaskResponse {
+  tasks: Task[];
+  totalTasks: number;
+}
 
 async function updateQueueData() {
   try {
-    const response = await axios.get<Task[]>(`${backendUrl}queue`, {
-      params: { batch: route.query.batch },
-      auth: { username: loginStore.username, password: loginStore.password },
-    });
-    for (const id in queueData.value) {
-      if (queueData.value[id].status === "done") {
-        delete queueData.value[id];
-      } else {
-        queueData.value[id].status = "done";
-      }
-    }
-    for (const newTask of response.data) {
-      queueData.value[newTask.id] = newTask;
+    if (showFailed.value) {
+      const failedRes = await axios.get<TaskResponse>(`${backendUrl}queue`, {
+        params: { batch: route.query.batch, status: ["failed"], limit: 1000 },
+        auth: { username: loginStore.username, password: loginStore.password },
+      });
+      totalTasks.value = failedRes.data.totalTasks;
+      queueData.value = failedRes.data.tasks;
+    } else {
+      const [doneRes, otherRes] = await Promise.all([
+        axios.get<TaskResponse>(`${backendUrl}queue`, {
+          params: { batch: route.query.batch, status: ["done"], doneAfter: lastUpdate.toISOString() },
+          auth: { username: loginStore.username, password: loginStore.password },
+        }),
+        axios.get<TaskResponse>(`${backendUrl}queue`, {
+          params: { batch: route.query.batch, status: ["created", "running", "restart"], limit: 100 },
+          auth: { username: loginStore.username, password: loginStore.password },
+        }),
+      ]);
+      totalTasks.value = otherRes.data.totalTasks;
+      const now = new Date();
+      queueData.value = doneRes.data.tasks
+        .concat(otherRes.data.tasks)
+        .map((task) =>
+          task.status === "created" && new Date(task.scheduledAt) < now ? { ...task, status: "pending" } : task,
+        );
     }
   } catch (error) {
     console.error(error);
@@ -136,6 +131,7 @@ async function updateQueueData() {
     isLoading.value = false;
   }
   updateTimeout = setTimeout(updateQueueData, 5000);
+  lastUpdate = new Date();
 }
 
 async function cancelBatch() {
@@ -158,6 +154,15 @@ onMounted(() => {
   updateQueueData();
 });
 
+watch(
+  () => showFailed.value,
+  async () => {
+    if (updateTimeout) clearTimeout(updateTimeout);
+    isLoading.value = true;
+    await updateQueueData();
+  },
+);
+
 onUnmounted(() => {
   if (updateTimeout) clearTimeout(updateTimeout);
 });
@@ -177,32 +182,6 @@ function timeDifference(scheduledAt: string): string {
     return `${diffMins} min`;
   }
 }
-
-const sortedQueueData = computed(() => {
-  const queue = Object.values(queueData.value);
-  const now = new Date();
-  queue.forEach((task) => {
-    if (task.status === "created" && new Date(task.scheduledAt) < now) {
-      task.status = "pending";
-    }
-  });
-
-  return queue
-    .filter((task) => showFailed.value || task.status !== "failed")
-    .sort((a, b) => {
-      if (statusOrder[a.status] < statusOrder[b.status]) return -1;
-      if (statusOrder[a.status] > statusOrder[b.status]) return 1;
-      if (a.scheduledAt < b.scheduledAt) return -1;
-      if (a.scheduledAt > b.scheduledAt) return 1;
-      return 0;
-    });
-});
-
-const totalTasks = computed(() => Object.values(queueData.value).length);
-const runningTasks = computed(() => Object.values(queueData.value).filter((task) => task.status === "running").length);
-const pendingTasks = computed(() => Object.values(queueData.value).filter((task) => task.status === "pending").length);
-const failedTasks = computed(() => Object.values(queueData.value).filter((task) => task.status === "failed").length);
-const createdTasks = computed(() => Object.values(queueData.value).filter((task) => task.status === "created").length);
 </script>
 
 <style scoped lang="scss">
