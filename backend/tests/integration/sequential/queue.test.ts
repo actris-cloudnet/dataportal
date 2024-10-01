@@ -98,7 +98,8 @@ describe("QueueService", () => {
     // No tasks left after completion.
     advanceMinutes(1);
     await queueService.complete(taskId, { now });
-    expect(await queueService.count()).toBe(0);
+    expect(await queueService.count()).toBe(1);
+    expect(await queueService.count(TaskStatus.DONE)).toBe(1);
   });
 
   it("schedules multiple tasks", async () => {
@@ -227,7 +228,8 @@ describe("QueueService", () => {
     // No tasks left after completion.
     advanceMinutes(1);
     await queueService.complete(taskId, { now });
-    expect(await queueService.count()).toBe(0);
+    expect(await queueService.count()).toBe(1);
+    expect(await queueService.count(TaskStatus.DONE)).toBe(1);
   });
 
   it("schedules, fails and reschedules a task", async () => {
@@ -256,11 +258,13 @@ describe("QueueService", () => {
 
     // No tasks left after fail.
     await queueService.fail(taskId, { now });
-    expect(await queueService.count()).toBe(0);
+    expect(await queueService.count()).toBe(1);
+    expect(await queueService.count(TaskStatus.FAILED)).toBe(1);
 
     // Try the same task again.
     await queueService.publish(task);
     expect(await queueService.count()).toBe(1);
+    expect(await queueService.count(TaskStatus.CREATED)).toBe(1);
   });
 
   it("schedules based on priority", async () => {
@@ -361,7 +365,8 @@ describe("QueueService", () => {
 
     // Finish process task.
     await queueService.complete(taskRes!["id"]);
-    expect(await queueService.count()).toBe(1);
+    expect(await queueService.count()).toBe(2);
+    expect(await queueService.count(TaskStatus.DONE)).toBe(1);
 
     // Freeze task is not postponed anymore.
     advanceMinutes(10);
@@ -410,7 +415,8 @@ describe("QueueService", () => {
 
     // Finish process task.
     await queueService.complete(taskRes!["id"]);
-    expect(await queueService.count()).toBe(1);
+    expect(await queueService.count()).toBe(2);
+    expect(await queueService.count(TaskStatus.DONE)).toBe(1);
 
     // Freeze task is not postponed anymore.
     advanceMinutes(10);
@@ -474,6 +480,38 @@ describe("QueueService", () => {
 
     // Finish task.
     await queueService.complete(taskRes!["id"]);
+    expect(await queueService.count()).toBe(1);
+    expect(await queueService.count(TaskStatus.DONE)).toBe(1);
+  });
+
+  it("cleans up old tasks", async () => {
+    // Upload task.
+    await queueService.publish(
+      makeTask({
+        siteId: "hyytiala",
+        productId: "lidar",
+        instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+        measurementDate: "2024-01-10",
+      }),
+    );
+    expect(await queueService.count()).toBe(1);
+    expect(await queueService.count(TaskStatus.DONE)).toBe(0);
+
+    // Process a task.
+    const taskRes = await queueService.receive({ now });
+    await queueService.complete(taskRes!["id"]);
+    expect(await queueService.count()).toBe(1);
+    expect(await queueService.count(TaskStatus.DONE)).toBe(1);
+
+    // Tasks remain after a while.
+    advanceMinutes(10);
+    await queueService.cleanOldTasks(now);
+    expect(await queueService.count()).toBe(1);
+    expect(await queueService.count(TaskStatus.DONE)).toBe(1);
+
+    // Tasks are now cleaned up in the future.
+    advanceMinutes(99999);
+    await queueService.cleanOldTasks(now);
     expect(await queueService.count()).toBe(0);
   });
 });

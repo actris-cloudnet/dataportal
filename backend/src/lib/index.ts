@@ -57,9 +57,9 @@ export const tomorrow = () => {
   return tomorrow;
 };
 
-export const toArray = (obj: string | Array<string> | undefined): Array<string> | null => {
+export const toArray = <T>(obj: T | T[] | undefined): T[] | null => {
   if (!obj) return null;
-  else if (typeof obj == "string") return [obj];
+  else if (!Array.isArray(obj)) return [obj];
   return obj;
 };
 
@@ -292,6 +292,6 @@ export function fixInstrument(instrument: string, instrumentInfo: InstrumentInfo
   return instrument;
 }
 
-export function isStringArray(value: any) {
+export function isStringArray(value: any): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === "string");
 }
