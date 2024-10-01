@@ -1,4 +1,4 @@
-import { DataSource, In, Not, Repository } from "typeorm";
+import { DataSource, FindOptionsWhere, In, Not, Repository, LessThan, MoreThanOrEqual } from "typeorm";
 import { Task, TaskStatus } from "../entity/Task";
 
 export class QueueService {
@@ -55,6 +55,7 @@ export class QueueService {
            WHEN task.status = '${TaskStatus.RUNNING}' THEN '${TaskStatus.RESTART}'::task_status_enum
            WHEN task.status = '${TaskStatus.RESTART}' THEN '${TaskStatus.RESTART}'::task_status_enum
            WHEN task.status = '${TaskStatus.FAILED}'  THEN '${TaskStatus.CREATED}'::task_status_enum
+           WHEN task.status = '${TaskStatus.DONE}'    THEN '${TaskStatus.CREATED}'::task_status_enum
          END`,
       parameters,
     );
@@ -101,7 +102,10 @@ export class QueueService {
   async complete(id: Task["id"], options?: { now?: Date }) {
     const now = (options && options.now) || new Date();
     const task = await this.taskRepo.findOneByOrFail({ id });
-    const result = await this.taskRepo.delete({ id, status: TaskStatus.RUNNING });
+    const result = await this.taskRepo.update(
+      { id, status: TaskStatus.RUNNING },
+      { status: TaskStatus.DONE, doneAt: now },
+    );
     if (result.affected === 0) {
       await this.taskRepo.update({ id }, { status: TaskStatus.CREATED, scheduledAt: now });
     }
@@ -118,8 +122,8 @@ export class QueueService {
     this.releaseLock(task);
   }
 
-  count() {
-    return this.taskRepo.count({ where: { status: Not(TaskStatus.FAILED) } });
+  count(status?: TaskStatus) {
+    return this.taskRepo.count({ where: { status } });
   }
 
   async cancelBatch(batchId: string) {
@@ -131,8 +135,28 @@ export class QueueService {
     this.locks.clear();
   }
 
-  async getQueue(batchId?: string) {
-    return await this.taskRepo.find({ where: { batchId }, relations: { instrumentInfo: true, model: true } });
+  async getQueue(options: { batchId?: string; status?: TaskStatus[]; limit?: number; doneAfter?: Date } = {}) {
+    const qb = this.taskRepo
+      .createQueryBuilder("task")
+      .leftJoinAndSelect("task.instrumentInfo", "instrumentInfo")
+      .leftJoinAndSelect("task.model", "model")
+      .orderBy("task.status", "DESC")
+      .addOrderBy("task.scheduledAt", "ASC");
+    if (typeof options.batchId !== "undefined") {
+      qb.andWhere("task.batchId = :batchId", options);
+    }
+    if (typeof options.status !== "undefined") {
+      qb.andWhere("task.status IN (:...status)", options);
+    }
+    if (typeof options.doneAfter !== "undefined") {
+      qb.andWhere("task.doneAt >= :doneAfter", options);
+    }
+    const total = qb.getCount();
+    if (typeof options.limit !== "undefined") {
+      qb.take(options.limit);
+    }
+    const tasks = qb.getMany();
+    return Promise.all([tasks, total]);
   }
 
   private taskToLock(task: Task) {
@@ -171,5 +195,12 @@ export class QueueService {
         this.locks.delete(lock);
       }
     });
+  }
+
+  /// Delete old done tasks.
+  async cleanOldTasks(now?: Date) {
+    const time = now || new Date();
+    const limit = new Date(time.getTime() - 60 * 60 * 1000);
+    await this.taskRepo.delete({ status: TaskStatus.DONE, doneAt: LessThan(limit) });
   }
 }

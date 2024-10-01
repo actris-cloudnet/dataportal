@@ -40,7 +40,17 @@ async function createServer(): Promise<void> {
   const authorizator = new Authorizator(AppDataSource);
   const queueService = new QueueService(AppDataSource);
   await queueService.initializeLocks();
-  setInterval(() => queueService.breakLocks(), 5 * 60 * 1000);
+  setInterval(
+    () => {
+      try {
+        queueService.breakLocks();
+      } catch (err) {
+        console.error("Failed to break locks:", err);
+      }
+      queueService.cleanOldTasks().catch((err) => console.error("Failed to clean up tasks:", err));
+    },
+    5 * 60 * 1000,
+  );
 
   const fileRoutes = new FileRoutes(AppDataSource);
   const siteRoutes = new SiteRoutes(AppDataSource);

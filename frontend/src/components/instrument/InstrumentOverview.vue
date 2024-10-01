@@ -24,16 +24,18 @@
     <template v-if="instrumentInfo.locations.length > 0">
       <h2>Locations</h2>
       <table class="locations">
-        <tr v-for="location in instrumentInfo.locations" :key="location.siteId">
-          <td>{{ location.startDate }}</td>
-          <td>–</td>
-          <td>{{ location.endDate >= yesterdayString ? "now" : location.endDate }}</td>
-          <td>
-            <router-link :to="{ name: 'Site', params: { siteId: location.siteId } }">
-              {{ location.humanReadableName }}
-            </router-link>
-          </td>
-        </tr>
+        <tbody>
+          <tr v-for="location in instrumentInfo.locations" :key="location.siteId">
+            <td>{{ location.startDate }}</td>
+            <td>–</td>
+            <td>{{ location.endDate >= yesterdayString ? "now" : location.endDate }}</td>
+            <td>
+              <router-link :to="{ name: 'Site', params: { siteId: location.siteId } }">
+                {{ location.humanReadableName }}
+              </router-link>
+            </td>
+          </tr>
+        </tbody>
       </table>
     </template>
 

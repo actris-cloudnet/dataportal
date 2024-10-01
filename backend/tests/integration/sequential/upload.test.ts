@@ -362,7 +362,7 @@ describe("POST /upload/metadata", () => {
     const initialTime = new Date(md.updatedAt).getTime();
     const payloadResub = { ...payload, checksum: "ac5c1f6c923cc8b259c2e22c7b258ee4" };
     await expect(axios.post(metadataUrl, payloadResub, { headers })).resolves.toMatchObject(expectedResponse);
-    await expect(instrumentRepo.exist({ where: { checksum: payload.checksum } })).resolves.toBe(false);
+    await expect(instrumentRepo.existsBy({ checksum: payload.checksum })).resolves.toBe(false);
     const mdResub = await instrumentRepo.findOneByOrFail({ uuid: md.uuid });
     expect(mdResub.checksum).toBe(payloadResub.checksum);
     const ResubTime = new Date(mdResub.updatedAt).getTime();
@@ -376,7 +376,7 @@ describe("POST /upload/metadata", () => {
     const payloadResub = { ...payload, checksum: "ac5c1f6c923cc8b259c2e22c7b258ee4" };
     await expect(axios.post(metadataUrl, payloadResub, { headers })).resolves.toMatchObject({ status: 200 });
     await instrumentRepo.findOneByOrFail({ checksum: payloadResub.checksum });
-    await expect(instrumentRepo.exist({ where: { checksum: payload.checksum } })).resolves.toBe(false);
+    await expect(instrumentRepo.existsBy({ checksum: payload.checksum })).resolves.toBe(false);
   });
 
   it("updates existing metadata if volatile product", async () => {
@@ -386,7 +386,7 @@ describe("POST /upload/metadata", () => {
     const payloadResub = { ...payload, checksum: "ac5c1f6c923cc8b259c2e22c7b258ee4" };
     await expect(axios.post(metadataUrl, payloadResub, { headers })).resolves.toMatchObject({ status: 200 });
     await instrumentRepo.findOneByOrFail({ checksum: payloadResub.checksum });
-    await expect(instrumentRepo.exist({ where: { checksum: payload.checksum } })).resolves.toBe(false);
+    await expect(instrumentRepo.existsBy({ checksum: payload.checksum })).resolves.toBe(false);
   });
 
   it("updates existing metadata with allowUpdate = true", async () => {
@@ -397,7 +397,7 @@ describe("POST /upload/metadata", () => {
     expect(md.checksum).toBe(validMetadata.checksum);
     const payloadResub = { ...payload, checksum: "ac5c1f6c923cc8b259c2e22c7b258ee4" };
     await expect(axios.post(metadataUrl, payloadResub, { headers })).resolves.toMatchObject(expectedResponse);
-    await expect(instrumentRepo.exist({ where: { checksum: payload.checksum } })).resolves.toBe(false);
+    await expect(instrumentRepo.existsBy({ checksum: payload.checksum })).resolves.toBe(false);
     const mdResub = await instrumentRepo.findOneByOrFail({ uuid: md.uuid });
     expect(mdResub.checksum).toBe(payloadResub.checksum);
   });
@@ -410,7 +410,7 @@ describe("POST /upload/metadata", () => {
     expect(md.checksum).toBe(validMetadata.checksum);
     const payloadResub = { ...payload, checksum: "ac5c1f6c923cc8b259c2e22c7b258ee4" };
     await expect(axios.post(metadataUrl, payloadResub, { headers })).resolves.toMatchObject(expectedResponse);
-    await expect(instrumentRepo.exist({ where: { checksum: payload.checksum } })).resolves.toBe(false);
+    await expect(instrumentRepo.existsBy({ checksum: payload.checksum })).resolves.toBe(false);
     const mdResub = await instrumentRepo.findOneByOrFail({ uuid: md.uuid });
     expect(mdResub.checksum).toBe(payloadResub.checksum);
   });
@@ -887,7 +887,7 @@ describe("tags: Test instrument upload metadata tag update", () => {
 
   it("tests that original co metadata has been removed", async () => {
     await expect(
-      instrumentRepo.exist({ where: { filename: payload_co.filename, checksum: payload_co.checksum } }),
+      instrumentRepo.existsBy({ filename: payload_co.filename, checksum: payload_co.checksum }),
     ).resolves.toBe(false);
   });
 });
@@ -1150,7 +1150,7 @@ async function expectFailedUploadInstrument(
   // PUT data
   const putDataUrl = dataUrl.concat(checksum);
   await expect(axios.put(putDataUrl, content, { headers })).rejects.toMatchObject({ response: { status: putStatus } });
-  await expect(instrumentRepo.exist({ where: { checksum } })).resolves.toBe(false);
+  await expect(instrumentRepo.existsBy({ checksum })).resolves.toBe(false);
 }
 
 async function expectSuccessfulUploadModel(username: string, password: string, siteId: string) {
@@ -1216,7 +1216,7 @@ async function expectFailedUploadModel(
   // PUT data
   const putDataUrl = modelDataUrl.concat(checksum);
   await expect(axios.put(putDataUrl, content, { headers })).rejects.toMatchObject({ response: { status: putStatus } });
-  await expect(modelRepo.exist({ where: { checksum } })).resolves.toBe(false);
+  await expect(modelRepo.existsBy({ checksum })).resolves.toBe(false);
 }
 
 function randomInt(min: number, max: number): number {

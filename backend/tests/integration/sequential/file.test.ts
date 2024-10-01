@@ -704,7 +704,7 @@ describe("DELETE /api/files/", () => {
     await expect(deleteFile(radarFile.uuid, false, false, "Kaljaa")).resolves.toMatchObject({ status: 200 });
     const file = await fileRepo.findOneByOrFail({ uuid: radarFile.uuid });
     expect(file.tombstoneReason).toEqual("Kaljaa");
-    expect(await searchFileRepo.exist({ where: { uuid: radarFile.uuid } })).toBeFalsy();
+    expect(await searchFileRepo.existsBy({ uuid: radarFile.uuid })).toBeFalsy();
   });
 
   it("removes volatile file and tombstones stable file", async () => {
@@ -719,10 +719,10 @@ describe("DELETE /api/files/", () => {
 
     const file = await fileRepo.findOneByOrFail({ uuid: categorizeFile.uuid });
     expect(file.tombstoneReason).toEqual("Viinaa");
-    expect(await searchFileRepo.exist({ where: { uuid: categorizeFile.uuid } })).toBeFalsy();
+    expect(await searchFileRepo.existsBy({ uuid: categorizeFile.uuid })).toBeFalsy();
 
-    expect(await modelFileRepo.exist({ where: { uuid: modelFile.uuid } })).toBeFalsy();
-    expect(await searchFileRepo.exist({ where: { uuid: modelFile.uuid } })).toBeFalsy();
+    expect(await modelFileRepo.existsBy({ uuid: modelFile.uuid })).toBeFalsy();
+    expect(await searchFileRepo.existsBy({ uuid: modelFile.uuid })).toBeFalsy();
   });
 
   it("rejects bad tombstone payload", async () => {
@@ -732,7 +732,7 @@ describe("DELETE /api/files/", () => {
       await expect(deleteFile(radarFile.uuid, false, false, badPayload)).rejects.toMatchObject({
         response: { status: 400 },
       });
-      expect(await searchFileRepo.exist({ where: { uuid: radarFile.uuid } })).toBeTruthy();
+      expect(await searchFileRepo.existsBy({ uuid: radarFile.uuid })).toBeTruthy();
     }
   });
 

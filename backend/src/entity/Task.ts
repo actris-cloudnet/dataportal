@@ -13,6 +13,8 @@ export enum TaskStatus {
   RESTART = "restart",
   /** Failed to process task. */
   FAILED = "failed",
+  /** Task processed successfully. */
+  DONE = "done",
 }
 
 export enum TaskType {
@@ -22,6 +24,10 @@ export enum TaskType {
   QC = "qc",
   DVAS = "dvas",
   HKD = "hkd",
+}
+
+export function isTaskStatus(x: any): x is TaskStatus {
+  return Object.values(TaskStatus).includes(x);
 }
 
 @Entity()
@@ -68,6 +74,9 @@ export class Task {
   /** Task will not run before this datetime. */
   @Column()
   scheduledAt!: Date;
+
+  @Column("timestamp", { nullable: true })
+  doneAt!: Date | null;
 
   /** Priority from 0 (highest) to 100 (lowest). */
   @Column("smallint")

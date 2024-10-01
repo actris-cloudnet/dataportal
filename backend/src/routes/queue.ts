@@ -1,13 +1,13 @@
 import { NextFunction, RequestHandler } from "express";
 import { QueueService } from "../lib/queue";
-import { Task, TaskStatus } from "../entity/Task";
+import { isTaskStatus, Task, TaskStatus } from "../entity/Task";
 import { DataSource, In, Repository } from "typeorm";
 import { randomName } from "../lib/random";
 import { Product } from "../entity/Product";
 import { Instrument, InstrumentInfo } from "../entity/Instrument";
 import { Model } from "../entity/Model";
 import { Site } from "../entity/Site";
-import { isStringArray } from "../lib";
+import { isStringArray, toArray } from "../lib";
 
 export class QueueRoutes {
   readonly queueService: QueueService;
@@ -148,8 +148,20 @@ export class QueueRoutes {
       if (typeof batchId !== "undefined" && typeof batchId !== "string") {
         return next({ status: 400, errors: ["Invalid batch parameter"] });
       }
-      const queue = await this.queueService.getQueue(batchId);
-      res.send(queue);
+      const status = toArray(req.query.status);
+      if (typeof status !== "undefined" && (!isStringArray(status) || !status.every(isTaskStatus))) {
+        return next({ status: 400, errors: ["Invalid status parameter"] });
+      }
+      const limit = typeof req.query.limit === "string" ? parseInt(req.query.limit, 10) : undefined;
+      if (typeof limit !== "undefined" && isNaN(limit)) {
+        return next({ status: 400, errors: ["Invalid limit parameter"] });
+      }
+      const doneAfter = typeof req.query.doneAfter === "string" ? new Date(req.query.doneAfter) : undefined;
+      if (typeof doneAfter !== "undefined" && isNaN(doneAfter.getTime())) {
+        return next({ status: 400, errors: ["Invalid doneAfter parameter"] });
+      }
+      const queue = await this.queueService.getQueue({ batchId, status: status as TaskStatus[], limit, doneAfter });
+      res.send({ tasks: queue[0], totalTasks: queue[1] });
     } catch (err) {
       console.log(err);
       next({ status: 500, errors: err });
