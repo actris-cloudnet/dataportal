@@ -181,7 +181,7 @@ h2 {
     margin-left: 2rem;
     max-width: 1000px;
 
-    > tr > th {
+    > tbody > tr > th {
       padding-right: 1rem;
       width: 150px;
     }
