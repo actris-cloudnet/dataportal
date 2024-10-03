@@ -33,7 +33,7 @@ export function isTaskStatus(x: any): x is TaskStatus {
 @Entity()
 // Added "NULLS NOT DISTINCT" manually to the migration, see
 // https://github.com/typeorm/typeorm/issues/9827
-@Unique(["type", "site", "measurementDate", "product", "instrumentInfo", "model"])
+@Unique(["type", "site", "measurementDate", "product", "instrumentInfo", "model", "options"])
 export class Task {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -84,4 +84,7 @@ export class Task {
 
   @Column("text", { nullable: true })
   batchId!: string | null;
+
+  @Column({ type: "jsonb", nullable: true })
+  options!: any | null;
 }

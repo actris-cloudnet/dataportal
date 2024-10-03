@@ -9,6 +9,7 @@ import axios from "axios";
 import { InstrumentUpload, ModelUpload } from "../../../src/entity/Upload";
 import { Permission } from "../../../src/entity/Permission";
 import { UserAccount } from "../../../src/entity/UserAccount";
+import { execPath } from "process";
 
 let dataSource: DataSource;
 let queueService: QueueService;
@@ -20,7 +21,7 @@ describe("QueueService", () => {
     now.setMinutes(now.getMinutes() + minutes);
   }
 
-  function makeTask(options: {
+  function makeTask(params: {
     type?: TaskType;
     siteId: string;
     productId: string;
@@ -29,20 +30,22 @@ describe("QueueService", () => {
     priority?: number;
     delayMinutes?: number;
     batchId?: string;
+    options?: object;
   }) {
-    const { type = TaskType.PROCESS, priority = 0, delayMinutes = 0 } = options;
+    const { type = TaskType.PROCESS, priority = 0, delayMinutes = 0 } = params;
     const task = new Task();
     task.type = type;
     task.status = TaskStatus.CREATED;
-    task.siteId = options.siteId;
-    task.productId = options.productId;
-    if (options.instrumentInfoUuid) {
-      task.instrumentInfoUuid = options.instrumentInfoUuid;
+    task.siteId = params.siteId;
+    task.productId = params.productId;
+    if (params.instrumentInfoUuid) {
+      task.instrumentInfoUuid = params.instrumentInfoUuid;
     }
-    task.measurementDate = new Date(options.measurementDate);
+    task.measurementDate = new Date(params.measurementDate);
     task.scheduledAt = new Date(now.getTime() + delayMinutes * 60 * 1000);
     task.priority = priority;
-    task.batchId = options.batchId || null;
+    task.batchId = params.batchId || null;
+    task.options = params.options;
     return task;
   }
 
@@ -514,6 +517,43 @@ describe("QueueService", () => {
     await queueService.cleanOldTasks(now);
     expect(await queueService.count()).toBe(0);
   });
+
+  it("defaults to derivedProducts: true", async () => {
+    await queueService.publish(
+      makeTask({
+        siteId: "hyytiala",
+        productId: "lidar",
+        instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+        measurementDate: "2024-01-10",
+      }),
+    );
+    expect(await queueService.count()).toBe(1);
+    const taskRes = await queueService.receive({ now });
+    expect(taskRes).not.toBeNull();
+    expect(taskRes!.options).toEqual({ derivedProducts: true });
+  });
+
+  it("published two tasks with different options", async () => {
+    await queueService.publish(
+      makeTask({
+        siteId: "hyytiala",
+        productId: "lidar",
+        instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+        measurementDate: "2024-01-10",
+        options: { derivedProducts: true },
+      }),
+    );
+    await queueService.publish(
+      makeTask({
+        siteId: "hyytiala",
+        productId: "lidar",
+        instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+        measurementDate: "2024-01-10",
+        options: { derivedProducts: false },
+      }),
+    );
+    expect(await queueService.count()).toBe(2);
+  });
 });
 
 describe("/api/queue/batch", () => {
@@ -587,6 +627,7 @@ describe("/api/queue/batch", () => {
         siteId: "bucharest",
         productId: "lidar",
         instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+        options: { derivedProducts: true },
       }),
     ).toBeTruthy();
   });
@@ -600,6 +641,7 @@ describe("/api/queue/batch", () => {
         siteId: "granada",
         productId: "radar",
         instrumentInfoUuid: "9e0f4b27-d5f3-40ad-8b73-2ae5dabbf81f",
+        options: { derivedProducts: true },
       }),
     ).toBeTruthy();
     expect(
@@ -608,6 +650,7 @@ describe("/api/queue/batch", () => {
         siteId: "bucharest",
         productId: "radar",
         instrumentInfoUuid: "0b3a7fa0-4812-4964-af23-1162e8b3a665",
+        options: { derivedProducts: true },
       }),
     ).toBeTruthy();
   });
@@ -702,5 +745,23 @@ describe("/api/queue/batch", () => {
     expect(await taskRepo.count()).toBe(4);
     await axios.delete(`${batchUrl}/${res.data.batchId}`, { auth });
     expect(await taskRepo.count()).toBe(0);
+  });
+
+  it("creates tasks with options", async () => {
+    await axios.post(
+      batchUrl,
+      { type: "process", productIds: ["lidar"], dryRun: false, options: { derivedProducts: false } },
+      { auth },
+    );
+    expect(await taskRepo.count()).toBe(1);
+    expect(
+      await taskRepo.existsBy({
+        measurementDate: new Date("2020-08-12"),
+        siteId: "bucharest",
+        productId: "lidar",
+        instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+        options: { derivedProducts: false },
+      }),
+    ).toBeTruthy();
   });
 });

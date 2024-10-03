@@ -1,5 +1,5 @@
-import { DataSource, FindOptionsWhere, In, Not, Repository, LessThan, MoreThanOrEqual } from "typeorm";
-import { Task, TaskStatus } from "../entity/Task";
+import { DataSource, In, Repository, LessThan } from "typeorm";
+import { Task, TaskStatus, TaskType } from "../entity/Task";
 
 export class QueueService {
   private taskRepo: Repository<Task>;
@@ -11,7 +11,8 @@ export class QueueService {
   }
 
   async publish(task: Task) {
-    await this.publishSql("VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)", [
+    task.options = this.validateTaskOptions(task.type, task.options);
+    await this.publishSql("VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)", [
       task.type,
       task.site ? task.site.id : task.siteId,
       task.measurementDate,
@@ -22,6 +23,7 @@ export class QueueService {
       task.priority,
       task.scheduledAt.toISOString(),
       task.batchId || null,
+      task.options,
     ]);
   }
 
@@ -37,7 +39,8 @@ export class QueueService {
          "status",
          "priority",
          "scheduledAt",
-         "batchId"
+         "batchId",
+         "options"
        )
        ${valuesSql}
        ON CONFLICT (
@@ -46,7 +49,8 @@ export class QueueService {
          "measurementDate",
          "productId",
          "instrumentInfoUuid",
-         "modelId"
+         "modelId",
+         "options"
        )
        DO UPDATE SET
          priority = LEAST(task.priority, EXCLUDED.priority),
@@ -202,5 +206,32 @@ export class QueueService {
     const time = now || new Date();
     const limit = new Date(time.getTime() - 60 * 60 * 1000);
     await this.taskRepo.delete({ status: TaskStatus.DONE, doneAt: LessThan(limit) });
+  }
+
+  validateTaskOptions(type: TaskType, options: any): any {
+    if (type != TaskType.PROCESS) {
+      if (options != null) {
+        throw new Error(`Options are not supported for ${type}`);
+      }
+      return;
+    }
+    if (options != null && options.constructor !== Object) {
+      throw new Error(`Options should be null or object`);
+    }
+    const output = options || {};
+    const allowedKeys = ["derivedProducts"];
+    for (const key in output) {
+      if (!allowedKeys.includes(key)) {
+        throw new Error(`Unknown key ${key}`);
+      }
+    }
+    if (typeof output.derivedProducts !== "undefined") {
+      if (typeof output.derivedProducts !== "boolean") {
+        throw new Error("derivedProducts should be boolean");
+      }
+    } else {
+      output.derivedProducts = true;
+    }
+    return output;
   }
 }

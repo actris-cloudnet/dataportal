@@ -46,6 +46,7 @@ export class QueueRoutes {
         }
       }
 
+      searchParams.options = this.queueService.validateTaskOptions(searchParams.type, searchParams.options);
       const batchId = randomName();
       const batches = [];
       batches.push(this.submitInstrumentBatch(searchParams, batchId));
@@ -97,6 +98,7 @@ export class QueueRoutes {
       }
       task.scheduledAt = "scheduledAt" in body ? new Date(body.scheduledAt) : new Date();
       task.priority = "priority" in body ? body.priority : 50;
+      task.options = body.options;
 
       await this.queueService.publish(task);
       res.send(task);
@@ -209,10 +211,10 @@ export class QueueRoutes {
 
   /// Submit batch for non-instrument products. Tasks are created only for days
   /// that contain instrument uploads.
-  private async submitProductBatch(filters: Record<string, any>, batchId: string, productId: string) {
+  private async submitProductBatch(searchParams: Record<string, any>, batchId: string, productId: string) {
     const where: string[] = [];
     const parameters = [productId];
-    return this.batchQuery(filters, where, parameters, {
+    return this.batchQuery(searchParams, where, parameters, {
       table: "instrument_upload",
       batchId,
       productId: `$${parameters.length}::text`,
@@ -220,7 +222,7 @@ export class QueueRoutes {
   }
 
   private async batchQuery(
-    filters: Record<string, any>,
+    searchParams: Record<string, any>,
     where: string[],
     parameters: string[],
     options: {
@@ -232,21 +234,21 @@ export class QueueRoutes {
       join?: string;
     },
   ) {
-    if (filters.siteIds) {
+    if (searchParams.siteIds) {
       where.push(`upload."siteId" = ANY ($${parameters.length + 1})`);
-      parameters.push(filters.siteIds);
+      parameters.push(searchParams.siteIds);
     }
-    if (filters.date) {
+    if (searchParams.date) {
       where.push(`upload."measurementDate" = $${parameters.length + 1}`);
-      parameters.push(filters.date);
+      parameters.push(searchParams.date);
     }
-    if (filters.dateFrom) {
+    if (searchParams.dateFrom) {
       where.push(`upload."measurementDate" >= $${parameters.length + 1}`);
-      parameters.push(filters.dateFrom);
+      parameters.push(searchParams.dateFrom);
     }
-    if (filters.dateTo) {
+    if (searchParams.dateTo) {
       where.push(`upload."measurementDate" <= $${parameters.length + 1}`);
-      parameters.push(filters.dateTo);
+      parameters.push(searchParams.dateTo);
     }
     const columns = [
       `$${parameters.length + 1}::task_type_enum`, // type
@@ -259,8 +261,9 @@ export class QueueRoutes {
       `50`, // priority
       `now() AT TIME ZONE 'utc'`, // scheduledAt
       `$${parameters.length + 2}::text`, // batchId
+      `$${parameters.length + 3}::jsonb`, // options
     ].join(", ");
-    const select = filters.dryRun ? `COUNT(DISTINCT (${columns})) AS "taskCount"` : `DISTINCT ${columns}`;
+    const select = searchParams.dryRun ? `COUNT(DISTINCT (${columns})) AS "taskCount"` : `DISTINCT ${columns}`;
     let query = `SELECT ${select} FROM ${options.table} upload`;
     if (options.join) {
       query += ` ${options.join}`;
@@ -268,8 +271,8 @@ export class QueueRoutes {
     if (where.length > 0) {
       query += " WHERE " + where.join(" AND ");
     }
-    parameters.push(filters.type, options.batchId);
-    if (filters.dryRun) {
+    parameters.push(searchParams.type, options.batchId, searchParams.options);
+    if (searchParams.dryRun) {
       const result = await this.dataSource.query(query, parameters);
       return parseInt(result[0].taskCount);
     } else {
