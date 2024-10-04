@@ -56,7 +56,10 @@
               <td class="status">{{ task.status }}</td>
               <td>{{ task.siteId }}</td>
               <td>{{ task.measurementDate }}</td>
-              <td>{{ task.productId }}</td>
+              <td>
+                <router-link v-if="task.status === 'done'" :to="generateLink(task)">{{ task.productId }}</router-link>
+                <span v-else>{{ task.productId }}</span>
+              </td>
               <td>{{ task.instrumentInfo?.name || task.model?.id }}</td>
               <td>
                 {{ task.status === "created" ? timeDifference(task.scheduledAt) : "" }}
@@ -183,6 +186,23 @@ function timeDifference(scheduledAt: string): string {
   } else {
     return `${diffMins} min`;
   }
+}
+
+function generateLink(task: AugmentedTask) {
+  const query: Record<string, string> = {
+    site: task.siteId,
+    product: task.productId,
+    dateFrom: task.measurementDate,
+    dateTo: task.measurementDate,
+  };
+  if (task.instrumentInfo?.pid) {
+    query.instrumentPid = task.instrumentInfo.pid;
+  }
+  return {
+    name: "Search",
+    params: { mode: "data" },
+    query: query,
+  };
 }
 </script>
 
