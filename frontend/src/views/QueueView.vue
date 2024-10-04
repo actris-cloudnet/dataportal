@@ -199,7 +199,8 @@ function generateLink(task: AugmentedTask) {
     query.instrumentPid = task.instrumentInfo.pid;
   }
   return {
-    path: "/search/data/",
+    name: "Search",
+    params: { mode: "data" },
     query: query,
   };
 }
