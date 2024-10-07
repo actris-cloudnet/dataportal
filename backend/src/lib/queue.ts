@@ -62,7 +62,8 @@ export class QueueService {
            WHEN task.status = '${TaskStatus.DONE}'    THEN '${TaskStatus.CREATED}'::task_status_enum
          END,
          "scheduledAt" = CASE
-           WHEN task.status = '${TaskStatus.DONE}' THEN EXCLUDED."scheduledAt"
+           WHEN task.status = '${TaskStatus.DONE}'   THEN EXCLUDED."scheduledAt"
+           WHEN task.status = '${TaskStatus.FAILED}' THEN EXCLUDED."scheduledAt"
            ELSE LEAST(task."scheduledAt", EXCLUDED."scheduledAt")
          END,
          "doneAt" = NULL`,

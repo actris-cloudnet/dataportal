@@ -326,9 +326,30 @@ describe("QueueService", () => {
     expect(await queueService.count(TaskStatus.FAILED)).toBe(1);
 
     // Try the same task again.
-    await queueService.publish(task);
+    const task2 = makeTask({
+      siteId: "hyytiala",
+      productId: "lidar",
+      instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+      measurementDate: "2024-01-10",
+      delayMinutes: 5,
+    });
+    await queueService.publish(task2);
     expect(await queueService.count()).toBe(1);
     expect(await queueService.count(TaskStatus.CREATED)).toBe(1);
+
+    // Not schuduled yet.
+    advanceMinutes(1);
+    expect(await queueService.receive({ now })).toBeNull();
+
+    // Now scheduled.
+    advanceMinutes(6);
+    const taskRes2 = await queueService.receive({ now });
+    expect(taskRes2).toMatchObject({
+      siteId: "hyytiala",
+      productId: "lidar",
+      instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+      measurementDate: "2024-01-10",
+    });
   });
 
   it("schedules based on priority", async () => {
