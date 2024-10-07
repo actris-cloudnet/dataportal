@@ -30,6 +30,10 @@ export class SoftwareService {
       githubRepository: "actris-cloudnet/voodoonet",
       zenodoConceptId: "8263093",
     },
+    "model-munger": {
+      humanReadableName: "Model munger",
+      githubRepository: "actris-cloudnet/model-munger",
+    },
   };
 
   constructor(dataSource: DataSource) {
