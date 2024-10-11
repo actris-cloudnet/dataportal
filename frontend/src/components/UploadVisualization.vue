@@ -3,12 +3,9 @@
     <template #tooltip="{ date, data }">
       <div class="mega-tooltip">
         <header>{{ date }}</header>
-        <section>
-          <ul>
-            <li v-if="props.type === 'size'">{{ data ? data.size : "No files" }}</li>
-            <li v-else>{{ data ? data.count : "No files" }}</li>
-          </ul>
-        </section>
+        <section v-if="type === 'size' && data?.size">{{ data.size }}</section>
+        <section v-else-if="type === 'count' && data?.count">{{ data.count }}</section>
+        <section v-else class="placeholder">No files</section>
       </div>
     </template>
   </DateVisualization>
@@ -78,5 +75,9 @@ function createColorClass(statistics: number, reference: number): ColorClass {
 <style scoped>
 .mega-tooltip {
   width: 150px;
+}
+
+.placeholder {
+  color: gray;
 }
 </style>
