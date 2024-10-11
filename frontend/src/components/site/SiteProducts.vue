@@ -4,16 +4,17 @@
       <h2>Product availability</h2>
       <section class="details">
         <ProductAvailabilityVisualization
-          v-if="dataStatus"
+          v-if="dataStatus && dataStatus.dates.length > 0"
           :dataStatus="dataStatus"
           :siteId="site.type.includes('hidden' as SiteType) ? '' : site.id"
           :year="selectedYear"
         />
+        <div v-else-if="dataStatus && dataStatus.dates.length == 0" class="placeholder">No products yet.</div>
         <BaseSpinner v-else />
       </section>
     </section>
 
-    <section id="product_quality" class="graph">
+    <section id="product_quality" class="graph" v-if="dataStatus && dataStatus.dates.length > 0">
       <h2>
         Product quality
         <template v-if="selectedProductName">/ availability - {{ selectedProductName }} </template>
@@ -44,7 +45,7 @@
       </section>
     </section>
 
-    <div v-if="dataStatus">
+    <div v-if="dataStatus && dataStatus.dates.length > 0">
       <div class="viz-options">
         <div class="viz-option" style="width: 370px">
           <custom-multiselect
@@ -213,5 +214,9 @@ h2 {
   margin-top: 20px;
   display: block;
   width: 100px;
+}
+
+.placeholder {
+  color: gray;
 }
 </style>
