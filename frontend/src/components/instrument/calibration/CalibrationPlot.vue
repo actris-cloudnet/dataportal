@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, nextTick, onUnmounted } from "vue";
+import { onMounted, nextTick, onUnmounted } from "vue";
 import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
 import { useTemplateRef } from "vue";

@@ -92,7 +92,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref } from "vue";
 import axios from "axios";
 import type { Site } from "@shared/entity/Site";
 import MyMap from "@/components/SuperMap.vue";

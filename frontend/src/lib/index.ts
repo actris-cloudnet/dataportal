@@ -1,7 +1,7 @@
 import type { Product } from "@shared/entity/Product";
 import type { CollectionFileResponse } from "@shared/entity/CollectionFileResponse";
 import type { Site, SiteType } from "@shared/entity/Site";
-import type { Instrument, InstrumentInfo } from "@shared/entity/Instrument";
+import type { Instrument } from "@shared/entity/Instrument";
 
 import categorizeIcon from "@/assets/icons/categorize.png";
 import categorizeVoodooIcon from "@/assets/icons/categorize-voodoo.png";
