@@ -7,11 +7,7 @@ import type { ErrorLevel } from "./QualityReport";
 import type { Software } from "./Software";
 import type { Instrument, InstrumentInfo } from "./Instrument";
 
-export enum Timeliness {
-  NRT = "nrt",
-  RRT = "rrt",
-  SCHEDULED = "scheduled",
-}
+export type Timeliness = "nrt" | "rrt" | "scheduled";
 
 export interface File {
   uuid: string;

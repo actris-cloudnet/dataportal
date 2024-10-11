@@ -46,7 +46,7 @@
                     >
                       ACTRIS
                     </BaseTag>
-                    <BaseTag v-if="site.type.includes('arm' as SiteType)" type="arm" size="small"> ARM </BaseTag>
+                    <BaseTag v-if="site.type.includes('arm')" type="arm" size="small"> ARM </BaseTag>
                   </td>
                 </tr>
               </tbody>
@@ -69,7 +69,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Site, SiteType } from "@shared/entity/Site";
+import type { Site } from "@shared/entity/Site";
 import axios from "axios";
 import { backendUrl, formatLatitude, formatLongitude } from "@/lib";
 import { ref, onMounted } from "vue";
@@ -98,32 +98,26 @@ onMounted(async () => {
           description:
             "Permanent sites with instrumentation required for the Cloudnet processing scheme. Most of the sites are part of the ACTRIS research infrastructure.",
           legend: ["Operational site", "Some data", "Inactive"],
-          sites: response.data.filter(
-            (site) => !site.type.includes("hidden" as SiteType) && site.type.includes("cloudnet" as SiteType),
-          ),
+          sites: response.data.filter((site) => !site.type.includes("hidden") && site.type.includes("cloudnet")),
         },
         {
           title: "Campaign sites",
           description:
             "Short-term sites compliant with the Cloudnet processing scheme. Most sites contain historical data processed using non-standard methods.",
           legend: ["Operational site", "Some data", "Inactive"],
-          sites: response.data.filter(
-            (site) => !site.type.includes("hidden" as SiteType) && site.type.includes("campaign" as SiteType),
-          ),
+          sites: response.data.filter((site) => !site.type.includes("hidden") && site.type.includes("campaign")),
         },
         {
           title: "ARM sites",
           description: "Sites part of ARM network with historical data processed using non-standard methods.",
           legend: ["Operational site", "Some data", "Inactive"],
-          sites: response.data.filter(
-            (site) => !site.type.includes("hidden" as SiteType) && site.type.includes("arm" as SiteType),
-          ),
+          sites: response.data.filter((site) => !site.type.includes("hidden") && site.type.includes("arm")),
         },
         {
           title: "Model sites",
           description: "Sites with only model data.",
           legend: ["Active", "", "Inactive"],
-          sites: response.data.filter((site) => site.type.includes("model" as SiteType)),
+          sites: response.data.filter((site) => site.type.includes("model")),
         },
       ],
     };

@@ -247,7 +247,7 @@ export default {
 <script lang="ts" setup>
 import { ref, computed, onMounted, watch, onUnmounted } from "vue";
 import axios from "axios";
-import type { Site, SiteType } from "@shared/entity/Site";
+import type { Site } from "@shared/entity/Site";
 import DatePicker, { type DateErrors } from "@/components/DatePicker.vue";
 import CustomMultiselect, { type Option } from "@/components/MultiSelect.vue";
 import DataSearchResult from "@/components/DataSearchResult.vue";
@@ -287,7 +287,7 @@ const allSites = ref<Site[]>([]);
 const selectedSiteIds = useRouteQuery({ name: "site", defaultValue: [], type: queryStringArray });
 const showAllSites = ref(false);
 const siteOptions = computed(() =>
-  showAllSites.value ? allSites.value : allSites.value.filter((site) => site.type.includes("cloudnet" as SiteType)),
+  showAllSites.value ? allSites.value : allSites.value.filter((site) => site.type.includes("cloudnet")),
 );
 
 // dates
@@ -377,13 +377,13 @@ async function initView() {
   }
   showAllSites.value = selectedSiteIds.value.some((siteId) => {
     const site = allSites.value.find((site) => site.id === siteId);
-    return site && !site.type.includes("cloudnet" as SiteType);
+    return site && !site.type.includes("cloudnet");
   });
 }
 
 async function initSites(): Promise<Site[]> {
   const res = await axios.get<Site[]>(`${backendUrl}sites/`, { params: { type: ["cloudnet", "campaign", "arm"] } });
-  return res.data.filter((site) => !site.type.includes("hidden" as SiteType));
+  return res.data.filter((site) => !site.type.includes("hidden"));
 }
 
 function setVizWideMode(wide: boolean) {

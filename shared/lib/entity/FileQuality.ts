@@ -1,11 +1,6 @@
 import type { QualityReport } from "./QualityReport";
 
-export enum ErrorLevel {
-  PASS = "pass",
-  INFO = "info",
-  WARNING = "warning",
-  ERROR = "error",
-}
+export type ErrorLevel = "pass" | "info" | "warning" | "error";
 
 export interface FileQuality {
   uuid: string;

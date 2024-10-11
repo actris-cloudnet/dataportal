@@ -6,7 +6,7 @@
         <ProductAvailabilityVisualization
           v-if="dataStatus && dataStatus.dates.length > 0"
           :dataStatus="dataStatus"
-          :siteId="site.type.includes('hidden' as SiteType) ? '' : site.id"
+          :siteId="site.type.includes('hidden') ? '' : site.id"
           :year="selectedYear"
         />
         <div v-else-if="dataStatus && dataStatus.dates.length == 0" class="placeholder">No products yet.</div>
@@ -38,7 +38,7 @@
         <ProductQualityVisualization
           v-if="dataStatus"
           :dataStatus="dataStatus"
-          :siteId="site.type.includes('hidden' as SiteType) ? '' : site.id"
+          :siteId="site.type.includes('hidden') ? '' : site.id"
           :year="selectedYear"
         />
         <BaseSpinner v-else />
@@ -92,7 +92,7 @@
 
 <script lang="ts" setup>
 import { onMounted, ref, watch, computed } from "vue";
-import type { Site, SiteType } from "@shared/entity/Site";
+import type { Site } from "@shared/entity/Site";
 import ProductAvailabilityVisualization from "@/components/ProductAvailabilityVisualization.vue";
 import ProductAvailabilityVisualizationSingle from "@/components/ProductAvailabilityVisualizationSingle.vue";
 import ProductQualityVisualization from "@/components/ProductQualityVisualization.vue";

@@ -10,16 +10,16 @@
           ACTRIS
         </BaseTag>
         <BaseTag
-          v-if="response.type.includes('cloudnet' as SiteType)"
+          v-if="response.type.includes('cloudnet')"
           type="cloudnet"
           title="Permanent station with Cloudnet instrumentation."
         >
           Cloudnet
         </BaseTag>
-        <BaseTag v-if="response.type.includes('campaign' as SiteType)" type="experimental">Campaign</BaseTag>
-        <BaseTag v-if="response.type.includes('arm' as SiteType)" type="arm">ARM</BaseTag>
-        <BaseTag v-if="response.type.includes('model' as SiteType)" type="volatile">Model</BaseTag>
-        <BaseTag v-else-if="response.type.includes('hidden' as SiteType)" type="experimental">Hidden</BaseTag>
+        <BaseTag v-if="response.type.includes('campaign')" type="experimental">Campaign</BaseTag>
+        <BaseTag v-if="response.type.includes('arm')" type="arm">ARM</BaseTag>
+        <BaseTag v-if="response.type.includes('model')" type="volatile">Model</BaseTag>
+        <BaseTag v-else-if="response.type.includes('hidden')" type="experimental">Hidden</BaseTag>
       </template>
       <template #tabs>
         <router-link class="tab" :to="{ name: 'Site' }">
@@ -41,7 +41,7 @@
 <script lang="ts" setup>
 import { onMounted, ref, computed } from "vue";
 import axios from "axios";
-import type { Site, SiteType } from "@shared/entity/Site";
+import type { Site } from "@shared/entity/Site";
 import { backendUrl } from "@/lib";
 import ApiError from "./ApiError.vue";
 import { useTitle } from "@/router";

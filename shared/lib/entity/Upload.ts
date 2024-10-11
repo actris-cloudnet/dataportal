@@ -2,12 +2,7 @@ import type { Site } from "./Site";
 import type { Instrument } from "./Instrument";
 import type { Model } from "./Model";
 
-export enum Status {
-  CREATED = "created",
-  UPLOADED = "uploaded",
-  PROCESSED = "processed",
-  INVALID = "invalid",
-}
+export type Status = "created" | "uploaded" | "processed" | "invalid";
 
 export type UploadOptions = {
   checksum: string;

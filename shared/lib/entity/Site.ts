@@ -5,15 +5,7 @@ import type { RegularCitation } from "./Citation";
 import type { Person } from "./Person";
 import type { SiteLocation } from "./SiteLocation";
 
-export enum SiteType {
-  CLOUDNET = "cloudnet",
-  ARM = "arm",
-  CAMPAIGN = "campaign",
-  MOBILE = "mobile",
-  TEST = "test",
-  MODEL = "model",
-  HIDDEN = "hidden",
-}
+export type SiteType = "cloudnet" | "arm" | "campaign" | "mobile" | "test" | "model" | "hidden";
 
 export interface SiteLink<T> {
   id: T;

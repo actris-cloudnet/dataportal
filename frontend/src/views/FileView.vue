@@ -99,7 +99,6 @@ import axios from "axios";
 import { humanReadableDate, compareValues, backendUrl } from "@/lib";
 import type { RegularFile, ModelFile } from "@shared/entity/File";
 import type { VisualizationItem } from "@shared/entity/VisualizationResponse";
-import type { SiteType } from "@shared/entity/Site";
 import type { SiteLocation } from "@shared/entity/SiteLocation";
 import type { File } from "@shared/entity/File";
 import BaseButton from "@/components/BaseButton.vue";
@@ -174,7 +173,7 @@ async function fetchFileMetadata() {
 }
 
 async function fetchLocation(file: FileResponse) {
-  if (!file.site.type.includes("mobile" as SiteType)) {
+  if (!file.site.type.includes("mobile")) {
     location.value = null;
     return;
   }

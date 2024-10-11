@@ -106,7 +106,7 @@
 import { ref, onMounted, computed } from "vue";
 import axios from "axios";
 
-import type { Site, SiteType } from "@shared/entity/Site";
+import type { Site } from "@shared/entity/Site";
 import COUNTRY_NAMES from "@/assets/country-io-names.json";
 import { backendUrl, compareValues, notEmpty } from "@/lib";
 import CheckBox from "@/components/CheckBox.vue";
@@ -182,7 +182,7 @@ onMounted(async () => {
       }))
       .sort((a, b) => compareValues(a.humanReadableName, b.humanReadableName));
     sites.value = data
-      .filter((site) => !site.type.includes("hidden" as SiteType))
+      .filter((site) => !site.type.includes("hidden"))
       .sort((a, b) => compareValues(a.humanReadableName, b.humanReadableName));
     loadingSites.value = false;
   } catch (e) {

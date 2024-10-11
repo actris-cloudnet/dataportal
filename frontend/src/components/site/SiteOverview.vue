@@ -48,7 +48,7 @@
         </template>
       </section>
       <aside>
-        <section id="sitemap" v-if="site.type.includes('mobile' as SiteType)">
+        <section id="sitemap" v-if="site.type.includes('mobile')">
           <BaseSpinner v-if="locations.status === 'loading'" />
           <TrackMap v-else-if="locations.status === 'ready'" :site="site.id" :track="locations.value" />
           <div v-else-if="locations.status === 'notFound'" style="padding: 10px; color: gray">No location history.</div>
@@ -94,7 +94,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from "vue";
 import axios from "axios";
-import type { SiteType, Site } from "@shared/entity/Site";
+import type { Site } from "@shared/entity/Site";
 import MyMap from "@/components/SuperMap.vue";
 import { formatCoordinates, getInstrumentIcon, backendUrl } from "@/lib";
 import type { ReducedMetadataResponse } from "@shared/entity/ReducedMetadataResponse";
@@ -142,7 +142,7 @@ const links = computed(() => {
 });
 
 onMounted(() => {
-  if (props.site.type.includes("mobile" as SiteType)) {
+  if (props.site.type.includes("mobile")) {
     axios
       .get(`${backendUrl}sites/${props.site.id}/locations`)
       .then((res) => {
