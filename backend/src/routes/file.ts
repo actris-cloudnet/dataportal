@@ -1,16 +1,6 @@
 import { Request, RequestHandler, Response } from "express";
 import { Collection } from "../entity/Collection";
-import {
-  EntityManager,
-  Repository,
-  SelectQueryBuilder,
-  In,
-  DataSource,
-  ObjectLiteral,
-  Raw,
-  QueryRunner,
-  FindOneOptions,
-} from "typeorm";
+import { EntityManager, Repository, In, DataSource, Raw, QueryRunner, FindOneOptions, IsNull } from "typeorm";
 import { File, isFile, RegularFile } from "../entity/File";
 import { FileQuality } from "../entity/FileQuality";
 import {
@@ -100,7 +90,7 @@ export class FileRoutes {
       repo.createQueryBuilder("file").where("file.uuid = :uuid", req.params).getOne();
 
     try {
-      const select: any = ["uuid", "createdAt"];
+      const select: any = ["uuid", "createdAt", "tombstoneReason"];
       const allowedProps = ["pid", "dvasId", "legacy", "checksum", "size", "format"];
       const extraProps = toArray(req.query.properties as any) || [];
       const unknownProps = [];
@@ -127,7 +117,7 @@ export class FileRoutes {
       const filename = Raw((alias) => `regexp_replace(${alias}, '.+/', '') = :filename`, { filename: file.filename });
       const versions = await repo.find({
         select,
-        where: { s3key: filename },
+        where: { s3key: filename, tombstoneReason: IsNull() },
         order: { createdAt: "DESC" },
       });
       res.send(versions);
@@ -277,7 +267,7 @@ export class FileRoutes {
           await transactionalEntityManager.save(FileClass, file);
         });
         res.sendStatus(201);
-      } else if (existingFile.site.isTestSite || existingFile.volatile || isModel) {
+      } else if (existingFile.site.isTestSite || existingFile.volatile || isModel || file.patch) {
         // Replace existing
         if (existingFile.uuid != file.uuid) {
           return next({ status: 501, errors: ["UUID should match the existing file"] });
@@ -373,10 +363,14 @@ export class FileRoutes {
             });
           }
           for (const derivedFile of derivedFiles) {
+            const allVersions = await this.fetchAllVersions(queryRunner, derivedFile);
             await this.deleteFileEntity(queryRunner, derivedFile, tombstoneReason);
+            await this.updateSearchFile(queryRunner, derivedFile, allVersions);
           }
         }
+        const allVersions = await this.fetchAllVersions(queryRunner, file);
         await this.deleteFileEntity(queryRunner, file, tombstoneReason);
+        await this.updateSearchFile(queryRunner, file, allVersions);
       }
       await queryRunner.commitTransaction();
       res.send([file, ...derivedFiles]);
@@ -558,6 +552,24 @@ export class FileRoutes {
       searchFunc(this.modelFileRepo, true),
     ]);
     return files.concat(modelFiles);
+  }
+
+  async fetchAllVersions(queryRunner: QueryRunner, derivedFile: File) {
+    return await queryRunner.manager.find(RegularFile, {
+      where: { s3key: derivedFile.s3key },
+      relations: { product: true, site: true },
+      order: { createdAt: "DESC" },
+    });
+  }
+
+  async updateSearchFile(queryRunner: QueryRunner, file: File, allVersions: RegularFile[]) {
+    if (allVersions.length > 1 && allVersions[0].uuid === file.uuid) {
+      const nextValidVersion = allVersions.slice(1).find((version) => !version.tombstoneReason);
+      if (nextValidVersion) {
+        const searchFile = new SearchFile(nextValidVersion);
+        await queryRunner.manager.insert(SearchFile, searchFile);
+      }
+    }
   }
 
   dateforsize: RequestHandler = async (req, res, next) => {
