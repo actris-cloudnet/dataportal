@@ -725,6 +725,123 @@ describe("DELETE /api/files/", () => {
     expect(await searchFileRepo.existsBy({ uuid: modelFile.uuid })).toBeFalsy();
   });
 
+  it("returns to latest version if older file is tombstoned", async () => {
+    const file1 = await putDummyFile({
+      product: "radar",
+      volatile: false,
+      pid: "https://hdl.handle.net/123/pid1",
+    });
+    const file2 = await putDummyFile({
+      product: "radar",
+      volatile: false,
+      pid: "https://hdl.handle.net/123/pid2",
+      version: true,
+    });
+    await expect(fileRepo.findOneBy({ uuid: file1.uuid })).resolves.toBeTruthy();
+    await expect(fileRepo.findOneBy({ uuid: file2.uuid })).resolves.toBeTruthy();
+    expect(await searchFileRepo.existsBy({ uuid: file1.uuid })).toBeFalsy();
+    expect(await searchFileRepo.existsBy({ uuid: file2.uuid })).toBeTruthy();
+    await expect(deleteFile(file2.uuid, false, false, "Blah")).resolves.toMatchObject({ status: 200 });
+    await expect(fileRepo.findOneBy({ uuid: file1.uuid })).resolves.toBeTruthy();
+    await expect(fileRepo.findOneBy({ uuid: file2.uuid })).resolves.toBeTruthy();
+    expect(await searchFileRepo.existsBy({ uuid: file1.uuid })).toBeTruthy();
+    expect(await searchFileRepo.existsBy({ uuid: file2.uuid })).toBeFalsy();
+  });
+
+  it("test returning to a legacy file in delete", async () => {
+    const file1 = await putDummyFile({
+      product: "radar",
+      volatile: false,
+      pid: "https://hdl.handle.net/123/pid1",
+      legacy: true,
+    });
+    const file2 = await putDummyFile({
+      product: "radar",
+      volatile: false,
+      pid: "https://hdl.handle.net/123/pid2",
+      version: true,
+    });
+    await expect(fileRepo.findOneBy({ uuid: file1.uuid })).resolves.toBeTruthy();
+    await expect(fileRepo.findOneBy({ uuid: file2.uuid })).resolves.toBeTruthy();
+    expect(await searchFileRepo.existsBy({ uuid: file1.uuid })).toBeFalsy();
+    expect(await searchFileRepo.existsBy({ uuid: file2.uuid })).toBeTruthy();
+    await expect(deleteFile(file2.uuid, false, false, "Blah")).resolves.toMatchObject({ status: 200 });
+    await expect(fileRepo.findOneBy({ uuid: file1.uuid })).resolves.toBeTruthy();
+    await expect(fileRepo.findOneBy({ uuid: file2.uuid })).resolves.toBeTruthy();
+    expect(await searchFileRepo.existsBy({ uuid: file1.uuid })).toBeTruthy();
+    expect(await searchFileRepo.existsBy({ uuid: file2.uuid })).toBeFalsy();
+  });
+
+  it("keeps the latest version if older file is tombstoned", async () => {
+    const file1 = await putDummyFile({
+      volatile: false,
+      pid: "https://hdl.handle.net/123/pid1",
+    });
+    const file2 = await putDummyFile({
+      volatile: false,
+      pid: "https://hdl.handle.net/123/pid2",
+      version: true,
+    });
+    await expect(deleteFile(file1.uuid, false, false, "Blah")).resolves.toMatchObject({ status: 200 });
+    expect(await searchFileRepo.existsBy({ uuid: file1.uuid })).toBeFalsy();
+    expect(await searchFileRepo.existsBy({ uuid: file2.uuid })).toBeTruthy();
+  });
+
+  it("adds latest good version to search file if newest file is tombstoned", async () => {
+    const file1 = await putDummyFile({
+      volatile: false,
+      pid: "https://hdl.handle.net/123/pid1",
+    });
+    const file2 = await putDummyFile({
+      volatile: false,
+      pid: "https://hdl.handle.net/123/pid2",
+      version: true,
+    });
+    const file3 = await putDummyFile({
+      volatile: false,
+      pid: "https://hdl.handle.net/123/pid3",
+      version: true,
+    });
+    await expect(deleteFile(file2.uuid, false, false, "Blah")).resolves.toMatchObject({ status: 200 });
+    await expect(deleteFile(file3.uuid, false, false, "Blah")).resolves.toMatchObject({ status: 200 });
+    expect(await searchFileRepo.existsBy({ uuid: file1.uuid })).toBeTruthy();
+    expect(await searchFileRepo.existsBy({ uuid: file2.uuid })).toBeFalsy();
+    expect(await searchFileRepo.existsBy({ uuid: file3.uuid })).toBeFalsy();
+  });
+
+  it("adds latest good version to search file if newest file is tombstoned and updates derived products too", async () => {
+    const file1 = await putDummyFile({
+      volatile: false,
+      pid: "https://hdl.handle.net/123/pid1",
+    });
+    const file2 = await putDummyFile({
+      volatile: false,
+      pid: "https://hdl.handle.net/123/pid2",
+      version: true,
+    });
+    const catFile1 = await putDummyFile({
+      product: "categorize",
+      volatile: false,
+      sourceFileIds: [file1.uuid],
+      pid: "https://hdl.handle.net/123/pid3",
+    });
+    const catFile2 = await putDummyFile({
+      product: "categorize",
+      volatile: false,
+      sourceFileIds: [file2.uuid],
+      pid: "https://hdl.handle.net/123/pid4",
+      version: true,
+    });
+
+    expect(await searchFileRepo.existsBy({ uuid: file2.uuid })).toBeTruthy();
+    expect(await searchFileRepo.existsBy({ uuid: catFile2.uuid })).toBeTruthy();
+    await expect(deleteFile(file2.uuid, true, false, "Blah")).resolves.toMatchObject({ status: 200 });
+    expect(await searchFileRepo.existsBy({ uuid: file1.uuid })).toBeTruthy();
+    expect(await searchFileRepo.existsBy({ uuid: catFile1.uuid })).toBeTruthy();
+    expect(await searchFileRepo.existsBy({ uuid: file2.uuid })).toBeFalsy();
+    expect(await searchFileRepo.existsBy({ uuid: catFile2.uuid })).toBeFalsy();
+  });
+
   it("rejects bad tombstone payload", async () => {
     const radarFile = await putDummyFile();
     const badPayloads = [" ", ""];
@@ -737,21 +854,31 @@ describe("DELETE /api/files/", () => {
   });
 
   async function putDummyFile(
-    options: Partial<{ product: string; volatile: boolean; sourceFileIds: string[]; pid: string }> = {},
+    options: Partial<{
+      product: string;
+      volatile: boolean;
+      sourceFileIds: string[];
+      pid: string;
+      version: boolean;
+      legacy: boolean;
+    }> = {},
   ) {
-    const { product = "radar", volatile = true, pid = null } = options;
+    const statusCode = options.version ? 200 : 201;
+    const { product = "radar", volatile = true, pid = null, legacy = false } = options;
+    const fileFix = legacy ? "legacy/" : "";
     const file = {
       ...volatileFile,
       ...options,
       ...{ uuid: uuidGen.v4(), product, volatile },
-      s3key: `20181115_mace-head_${product}.nc`,
+      s3key: `${fileFix}20181115_mace-head_${product}.nc`,
       checksum: generateHash(),
     };
     if (pid) file.pid = pid;
+    if (legacy) file.legacy = true;
     if (product === "model" && !file.model) file.model = "ecmwf";
     const bucketFix = volatile ? "-volatile" : "";
     await axios.put(`${storageServiceUrl}cloudnet-product${bucketFix}/${file.s3key}`, "content");
-    await expect(putFile(file)).resolves.toMatchObject({ status: 201 });
+    await expect(putFile(file)).resolves.toMatchObject({ status: statusCode });
     return file;
   }
 

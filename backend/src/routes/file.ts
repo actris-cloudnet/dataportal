@@ -1,16 +1,6 @@
 import { Request, RequestHandler, Response } from "express";
 import { Collection } from "../entity/Collection";
-import {
-  EntityManager,
-  Repository,
-  SelectQueryBuilder,
-  In,
-  DataSource,
-  ObjectLiteral,
-  Raw,
-  QueryRunner,
-  FindOneOptions,
-} from "typeorm";
+import { EntityManager, Repository, In, DataSource, Raw, QueryRunner, FindOneOptions, IsNull } from "typeorm";
 import { File, isFile, RegularFile } from "../entity/File";
 import { FileQuality } from "../entity/FileQuality";
 import {
@@ -123,11 +113,9 @@ export class FileRoutes {
         return next({ status: 404, errors: ["No files match this UUID"] });
       }
       const repo = file instanceof RegularFile ? this.fileRepo : this.modelFileRepo;
-      // Handle legacy filenames with 'legacy/' prefix.
-      const filename = Raw((alias) => `regexp_replace(${alias}, '.+/', '') = :filename`, { filename: file.filename });
       const versions = await repo.find({
         select,
-        where: { s3key: filename },
+        where: { s3key: s3Key(file), tombstoneReason: IsNull() },
         order: { createdAt: "DESC" },
       });
       res.send(versions);
@@ -277,7 +265,7 @@ export class FileRoutes {
           await transactionalEntityManager.save(FileClass, file);
         });
         res.sendStatus(201);
-      } else if (existingFile.site.isTestSite || existingFile.volatile || isModel) {
+      } else if (existingFile.site.isTestSite || existingFile.volatile || isModel || file.patch) {
         // Replace existing
         if (existingFile.uuid != file.uuid) {
           return next({ status: 501, errors: ["UUID should match the existing file"] });
@@ -373,10 +361,14 @@ export class FileRoutes {
             });
           }
           for (const derivedFile of derivedFiles) {
+            const allVersions = await this.fetchValidVersions(queryRunner, derivedFile);
             await this.deleteFileEntity(queryRunner, derivedFile, tombstoneReason);
+            await this.updateSearchFile(queryRunner, derivedFile, allVersions);
           }
         }
+        const allVersions = await this.fetchValidVersions(queryRunner, file);
         await this.deleteFileEntity(queryRunner, file, tombstoneReason);
+        await this.updateSearchFile(queryRunner, file, allVersions);
       }
       await queryRunner.commitTransaction();
       res.send([file, ...derivedFiles]);
@@ -560,6 +552,21 @@ export class FileRoutes {
     return files.concat(modelFiles);
   }
 
+  async fetchValidVersions(queryRunner: QueryRunner, file: File) {
+    return await queryRunner.manager.find(RegularFile, {
+      where: { s3key: s3Key(file), tombstoneReason: IsNull() },
+      relations: { product: true, site: true },
+      order: { createdAt: "DESC" },
+    });
+  }
+
+  async updateSearchFile(queryRunner: QueryRunner, file: File, validVersions: RegularFile[]) {
+    if (validVersions.length > 1 && validVersions[0].uuid === file.uuid) {
+      const searchFile = new SearchFile(validVersions[1]);
+      await queryRunner.manager.insert(SearchFile, searchFile);
+    }
+  }
+
   dateforsize: RequestHandler = async (req, res, next) => {
     const isModel = "model" in req.query;
     return dateforsize(
@@ -625,4 +632,9 @@ function addCommonFilters(qb: any, query: any) {
 function isValidFilename(file: any) {
   const [date, site] = basename(file.s3key).split(".")[0].split("_");
   return file.measurementDate.replace(/-/g, "") == date && (file.site == site || typeof file.site == "object");
+}
+
+function s3Key(file: File) {
+  // Handle legacy filenames with 'legacy/' prefix.
+  return Raw((alias) => `regexp_replace(${alias}, '.+/', '') = :filename`, { filename: file.filename });
 }
