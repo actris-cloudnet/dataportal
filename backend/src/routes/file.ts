@@ -90,7 +90,7 @@ export class FileRoutes {
       repo.createQueryBuilder("file").where("file.uuid = :uuid", req.params).getOne();
 
     try {
-      const select: any = ["uuid", "createdAt", "tombstoneReason"];
+      const select: any = ["uuid", "createdAt"];
       const allowedProps = ["pid", "dvasId", "legacy", "checksum", "size", "format"];
       const extraProps = toArray(req.query.properties as any) || [];
       const unknownProps = [];

@@ -140,27 +140,22 @@ exports[`/api/files/:uuid returns list of file versions 1`] = `
 [
   {
     "createdAt": "2020-02-20T10:59:58.449Z",
-    "tombstoneReason": null,
     "uuid": "8bb32746-faf0-4057-9076-ed2e698dcf36",
   },
   {
     "createdAt": "2020-02-20T10:49:58.449Z",
-    "tombstoneReason": null,
     "uuid": "6cb32746-faf0-4057-9076-ed2e698dcf36",
   },
   {
     "createdAt": "2020-02-20T10:39:58.449Z",
-    "tombstoneReason": null,
     "uuid": "22b32746-faf0-4057-9076-ed2e698dcc34",
   },
   {
     "createdAt": "2020-02-19T10:59:58.449Z",
-    "tombstoneReason": null,
     "uuid": "1bb32746-faf0-4057-9076-ed2e698dcf36",
   },
   {
     "createdAt": "2020-02-19T10:59:58.449Z",
-    "tombstoneReason": null,
     "uuid": "2bb32746-faf0-4057-9076-ed2e698dcf36",
   },
 ]
@@ -172,35 +167,30 @@ exports[`/api/files/:uuid returns list of file versions with PID and checksum 1`
     "checksum": "64d86b26f642a0befdcd7088ff38caab00ea3d95933f4ccc430179b4a29b74d3",
     "createdAt": "2020-02-20T10:59:58.449Z",
     "pid": "",
-    "tombstoneReason": null,
     "uuid": "8bb32746-faf0-4057-9076-ed2e698dcf36",
   },
   {
     "checksum": "43d86b26f642a0befdcd7088ff38caab00ea3d95933f4ccc430179b4a29b74d3",
     "createdAt": "2020-02-20T10:49:58.449Z",
     "pid": "",
-    "tombstoneReason": null,
     "uuid": "6cb32746-faf0-4057-9076-ed2e698dcf36",
   },
   {
     "checksum": "22d86b26f642a0befdcd7088ff38caab00ea3d95933f4ccc430179b4a29b74d3",
     "createdAt": "2020-02-20T10:39:58.449Z",
     "pid": "http://pidservice.example/pidhandle",
-    "tombstoneReason": null,
     "uuid": "22b32746-faf0-4057-9076-ed2e698dcc34",
   },
   {
     "checksum": "14d86b26f642a0befdcd7088ff38caab00ea3d95933f4ccc430179b4a29b74d3",
     "createdAt": "2020-02-19T10:59:58.449Z",
     "pid": "",
-    "tombstoneReason": null,
     "uuid": "1bb32746-faf0-4057-9076-ed2e698dcf36",
   },
   {
     "checksum": "24d86b26f642a0befdcd7088ff38caab00ea3d95933f4ccc430179b4a29b74d3",
     "createdAt": "2020-02-19T10:59:58.449Z",
     "pid": "",
-    "tombstoneReason": null,
     "uuid": "2bb32746-faf0-4057-9076-ed2e698dcf36",
   },
 ]
