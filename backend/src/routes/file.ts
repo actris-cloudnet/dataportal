@@ -113,11 +113,9 @@ export class FileRoutes {
         return next({ status: 404, errors: ["No files match this UUID"] });
       }
       const repo = file instanceof RegularFile ? this.fileRepo : this.modelFileRepo;
-      // Handle legacy filenames with 'legacy/' prefix.
-      const filename = Raw((alias) => `regexp_replace(${alias}, '.+/', '') = :filename`, { filename: file.filename });
       const versions = await repo.find({
         select,
-        where: { s3key: filename, tombstoneReason: IsNull() },
+        where: { s3key: s3Key(file), tombstoneReason: IsNull() },
         order: { createdAt: "DESC" },
       });
       res.send(versions);
@@ -554,9 +552,9 @@ export class FileRoutes {
     return files.concat(modelFiles);
   }
 
-  async fetchAllVersions(queryRunner: QueryRunner, derivedFile: File) {
+  async fetchAllVersions(queryRunner: QueryRunner, file: File) {
     return await queryRunner.manager.find(RegularFile, {
-      where: { s3key: derivedFile.s3key },
+      where: { s3key: s3Key(file) },
       relations: { product: true, site: true },
       order: { createdAt: "DESC" },
     });
@@ -637,4 +635,9 @@ function addCommonFilters(qb: any, query: any) {
 function isValidFilename(file: any) {
   const [date, site] = basename(file.s3key).split(".")[0].split("_");
   return file.measurementDate.replace(/-/g, "") == date && (file.site == site || typeof file.site == "object");
+}
+
+function s3Key(file: File) {
+  // Handle legacy filenames with 'legacy/' prefix.
+  return Raw((alias) => `regexp_replace(${alias}, '.+/', '') = :filename`, { filename: file.filename });
 }
