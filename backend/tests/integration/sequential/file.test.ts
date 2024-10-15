@@ -865,19 +865,19 @@ describe("DELETE /api/files/", () => {
   ) {
     const statusCode = options.version ? 200 : 201;
     const { product = "radar", volatile = true, pid = null, legacy = false } = options;
+    const fileFix = legacy ? "legacy/" : "";
     const file = {
       ...volatileFile,
       ...options,
       ...{ uuid: uuidGen.v4(), product, volatile },
-      s3key: `20181115_mace-head_${product}.nc`,
+      s3key: `${fileFix}20181115_mace-head_${product}.nc`,
       checksum: generateHash(),
     };
     if (pid) file.pid = pid;
     if (legacy) file.legacy = true;
     if (product === "model" && !file.model) file.model = "ecmwf";
     const bucketFix = volatile ? "-volatile" : "";
-    const fileFix = legacy ? "legacy/" : "";
-    await axios.put(`${storageServiceUrl}cloudnet-product${bucketFix}/${fileFix}${file.s3key}`, "content");
+    await axios.put(`${storageServiceUrl}cloudnet-product${bucketFix}/${file.s3key}`, "content");
     await expect(putFile(file)).resolves.toMatchObject({ status: statusCode });
     return file;
   }
