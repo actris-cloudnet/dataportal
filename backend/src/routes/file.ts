@@ -361,12 +361,12 @@ export class FileRoutes {
             });
           }
           for (const derivedFile of derivedFiles) {
-            const allVersions = await this.fetchAllVersions(queryRunner, derivedFile);
+            const allVersions = await this.fetchValidVersions(queryRunner, derivedFile);
             await this.deleteFileEntity(queryRunner, derivedFile, tombstoneReason);
             await this.updateSearchFile(queryRunner, derivedFile, allVersions);
           }
         }
-        const allVersions = await this.fetchAllVersions(queryRunner, file);
+        const allVersions = await this.fetchValidVersions(queryRunner, file);
         await this.deleteFileEntity(queryRunner, file, tombstoneReason);
         await this.updateSearchFile(queryRunner, file, allVersions);
       }
@@ -552,21 +552,18 @@ export class FileRoutes {
     return files.concat(modelFiles);
   }
 
-  async fetchAllVersions(queryRunner: QueryRunner, file: File) {
+  async fetchValidVersions(queryRunner: QueryRunner, file: File) {
     return await queryRunner.manager.find(RegularFile, {
-      where: { s3key: s3Key(file) },
+      where: { s3key: s3Key(file), tombstoneReason: IsNull() },
       relations: { product: true, site: true },
       order: { createdAt: "DESC" },
     });
   }
 
-  async updateSearchFile(queryRunner: QueryRunner, file: File, allVersions: RegularFile[]) {
-    if (allVersions.length > 1 && allVersions[0].uuid === file.uuid) {
-      const nextValidVersion = allVersions.slice(1).find((version) => !version.tombstoneReason);
-      if (nextValidVersion) {
-        const searchFile = new SearchFile(nextValidVersion);
-        await queryRunner.manager.insert(SearchFile, searchFile);
-      }
+  async updateSearchFile(queryRunner: QueryRunner, file: File, validVersions: RegularFile[]) {
+    if (validVersions.length > 1 && validVersions[0].uuid === file.uuid) {
+      const searchFile = new SearchFile(validVersions[1]);
+      await queryRunner.manager.insert(SearchFile, searchFile);
     }
   }
 
