@@ -27,6 +27,7 @@ import { rateLimit } from "express-rate-limit";
 import { QueueRoutes } from "./routes/queue";
 import { QueueService } from "./lib/queue";
 import { ProductAvailabilityRoutes } from "./routes/productAvailability";
+import { StatisticsRoutes } from "./routes/statistics";
 
 async function createServer(): Promise<void> {
   const port = 3000;
@@ -70,6 +71,7 @@ async function createServer(): Promise<void> {
   const feedbackRoutes = new FeedbackRoutes(AppDataSource);
   const queueRoutes = new QueueRoutes(AppDataSource, queueService);
   const productAvailabilityRoutes = new ProductAvailabilityRoutes(AppDataSource);
+  const statsRoutes = new StatisticsRoutes(AppDataSource);
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     console.error(
@@ -275,10 +277,10 @@ async function createServer(): Promise<void> {
   app.put("/visualizations/*", express.json(), vizRoutes.putVisualization);
   app.put("/quality/:uuid", middleware.validateUuidParam, express.json(), qualityRoutes.putQualityReport);
   app.get(
-    "/api/download/stats",
+    "/api/statistics",
     authenticator.verifyCredentials(),
     authorizator.verifyPermission(PermissionType.canGetStats),
-    dlRoutes.stats,
+    statsRoutes.getStatistics,
   );
   app.delete(
     "/api/files/:uuid",
