@@ -4,7 +4,7 @@ import { readFileSync } from "fs";
 
 import { Collection } from "../entity/Collection";
 import { DataSource, Not, Repository } from "typeorm";
-import { File, RegularFile } from "../entity/File";
+import { File } from "../entity/File";
 import { Status, Upload } from "../entity/Upload";
 import { Download, ObjectType } from "../entity/Download";
 import {
