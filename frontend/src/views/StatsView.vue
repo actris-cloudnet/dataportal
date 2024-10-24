@@ -201,7 +201,7 @@ async function onSearch() {
     downloadDateTo: dateTo.value ? dateTo.value : undefined,
   };
   try {
-    const response = await axios.get(`${backendUrl}download/stats`, {
+    const response = await axios.get(`${backendUrl}statistics`, {
       params,
       auth: { username: loginStore.username, password: loginStore.password },
     });

@@ -28,12 +28,12 @@ interface Params {
 }
 
 function doRequest(params: Params, headers: any = { authorization: `Basic ${str2base64("bob:bobs_pass")}` }) {
-  return axios.get(`${backendPublicUrl}download/stats`, { params, headers });
+  return axios.get(`${backendPublicUrl}statistics`, { params, headers });
 }
 
 const getStats = async (params: Params) => (await doRequest(params)).data;
 
-describe("GET /api/download/stats", () => {
+describe("GET /api/statistics", () => {
   beforeAll(async () => {
     dataSource = await AppDataSource.initialize();
     downloadRepo = dataSource.getRepository(Download);
