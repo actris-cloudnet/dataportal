@@ -16,6 +16,7 @@
             { id: 'country,downloads', humanReadableName: 'Downloads by country' },
             { id: 'yearMonth,visits', humanReadableName: 'Monthly visits' },
             { id: 'country,visits', humanReadableName: 'Visits by country' },
+            { id: 'yearMonth,curatedData', humanReadableName: 'Monthly curated data' },
           ]"
           style="width: 300px"
         />
@@ -46,11 +47,27 @@
           <CheckBox v-model="productTypes" value="model" label="Model" style="margin-left: 0.5rem" />
         </fieldset>
         <fieldset class="field">
-          <legend class="label">Date range</legend>
+          <legend class="label">Measurement date</legend>
           <div class="daterange">
-            <DatePicker v-model="dateFrom" :end="dateTo || undefined" name="dateFrom" />
+            <DatePicker
+              v-model="measurementDateFrom"
+              :end="measurementDateTo || undefined"
+              name="measurementDateFrom"
+            />
             <span>–</span>
-            <DatePicker v-model="dateTo" :start="dateFrom || undefined" name="dateTo" />
+            <DatePicker
+              v-model="measurementDateTo"
+              :start="measurementDateFrom || undefined"
+              name="measurementDateTo"
+            />
+          </div>
+        </fieldset>
+        <fieldset class="field" :disabled="curatedStatistics">
+          <legend class="label">Download date</legend>
+          <div class="daterange">
+            <DatePicker v-model="downloadDateFrom" :end="downloadDateTo || undefined" name="downloadDateFrom" />
+            <span>–</span>
+            <DatePicker v-model="downloadDateTo" :start="downloadDateFrom || undefined" name="downloadDateTo" />
           </div>
         </fieldset>
         <div></div>
@@ -117,7 +134,7 @@ import DatePicker from "@/components/DatePicker.vue";
 import LandingHeader from "@/components/LandingHeader.vue";
 import { loginStore } from "@/lib/auth";
 
-type Dimension = "year" | "yearMonth" | "country" | "downloads" | "uniqueIps" | "visits";
+type Dimension = "year" | "yearMonth" | "country" | "downloads" | "uniqueIps" | "visits" | "curatedData";
 
 const statistics = ref([]);
 const dimensions = ref<Dimension[]>([]);
@@ -129,9 +146,10 @@ const dimensionLabel: Record<Dimension, string> = {
   year: "Year",
   yearMonth: "Month",
   country: "Country",
-  downloads: "Downloads (in variable years)",
+  downloads: "Downloads (variable years)",
   uniqueIps: "Unique IPs",
   visits: "Visits",
+  curatedData: "Curated data (variable years)",
 };
 const numberFormat = (Intl && Intl.NumberFormat && new Intl.NumberFormat("en-GB")) || {
   format(number: number): string {
@@ -142,9 +160,12 @@ const loadingSites = ref(true);
 const countries = ref<Option[]>([]);
 const sites = ref<Site[]>([]);
 const productTypes = ref(["observation", "model"]);
-const dateFrom = ref<string | null>(null);
-const dateTo = ref<string | null>(null);
+const downloadDateFrom = ref<string | null>(null);
+const downloadDateTo = ref<string | null>(null);
+const measurementDateFrom = ref<string | null>(null);
+const measurementDateTo = ref<string | null>(null);
 const visitStatistics = computed(() => selectedDimensions.value.includes("visit"));
+const curatedStatistics = computed(() => selectedDimensions.value.includes("curatedData"));
 
 const currentCountry = ref<string | null>(null);
 const currentSite = ref<string | null>(null);
@@ -197,8 +218,10 @@ async function onSearch() {
     country: currentCountry.value || undefined,
     site: currentSite.value || undefined,
     productTypes: productTypes.value.join(","),
-    downloadDateFrom: dateFrom.value ? dateFrom.value : undefined,
-    downloadDateTo: dateTo.value ? dateTo.value : undefined,
+    downloadDateFrom: downloadDateFrom.value ? !curatedStatistics.value && downloadDateFrom.value : undefined,
+    downloadDateTo: downloadDateTo.value ? !curatedStatistics.value && downloadDateTo.value : undefined,
+    measurementDateFrom: measurementDateFrom.value ? measurementDateFrom.value : undefined,
+    measurementDateTo: measurementDateTo.value ? measurementDateTo.value : undefined,
   };
   try {
     const response = await axios.get(`${backendUrl}statistics`, {

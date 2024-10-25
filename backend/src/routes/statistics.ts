@@ -54,6 +54,8 @@ export class StatisticsRoutes {
         group = "GROUP BY country";
         order = "ORDER BY country";
         break;
+      case "yearMonth,curatedData":
+        return this.curatedDataStats(req, res, next);
       case "yearMonth,visits":
         return this.matomoStats(req, res, next, this.monthlyVisits.bind(this));
       case "country,visits":
@@ -98,7 +100,7 @@ export class StatisticsRoutes {
         return next({ status: 400, errors: "invalid downloadDateTo" });
       }
       params.push(req.query.downloadDateTo);
-      where += ` AND "createdAt" < ($${params.length}::date + '1 day'::interval)`;
+      where += ` AND "createdAt" <= $${params.length}::date`;
     }
 
     const productFileJoin = 'JOIN product_variable USING ("productId")';
@@ -116,6 +118,20 @@ export class StatisticsRoutes {
       params.push(req.query.country);
       fileJoin = 'JOIN site ON "siteId" = site.id';
       fileWhere = `AND "countryCode" = $${params.length}`;
+    }
+    if (req.query.measurementDateFrom) {
+      if (typeof req.query.measurementDateFrom !== "string" || !isValidDate(req.query.measurementDateFrom)) {
+        return next({ status: 400, errors: "invalid measurementDateFrom" });
+      }
+      params.push(req.query.measurementDateFrom);
+      fileWhere += ` AND "measurementDate" >= $${params.length}::date`;
+    }
+    if (req.query.measurementDateTo) {
+      if (typeof req.query.measurementDateTo !== "string" || !isValidDate(req.query.measurementDateTo)) {
+        return next({ status: 400, errors: "invalid measurementDateTo" });
+      }
+      params.push(req.query.measurementDateTo);
+      fileWhere += ` AND "measurementDate" <= $${params.length}::date`;
     }
     const fileSelects = [];
     const collectionFileSelects = [];
@@ -172,12 +188,109 @@ export class StatisticsRoutes {
     }
   };
 
-  private matomoStats = async (
+  curatedDataStats: RequestHandler = async (req, res, next) => {
+    const params = [];
+    const select = `SELECT to_char("measurementDate", 'YYYY-MM') AS "yearMonth"
+                         , SUM("variableDays") / 300.0 AS "curatedData"`;
+    const group = 'GROUP BY "yearMonth"';
+    const order = 'ORDER BY "yearMonth"';
+
+    let productTypes: Set<ProductType>;
+    if (typeof req.query.productTypes === "undefined") {
+      productTypes = new Set(allProductTypes);
+    } else {
+      if (typeof req.query.productTypes !== "string") {
+        return next({ status: 400, errors: "invalid products parameter" });
+      }
+      productTypes = new Set();
+      for (const productString of req.query.productTypes.split(",")) {
+        const product = productTypeFromString(productString);
+        if (!product) {
+          return next({ status: 400, errors: `invalid product: ${productString}` });
+        }
+        productTypes.add(product);
+      }
+    }
+    if (productTypes.size === 0) {
+      return next({ status: 400, errors: "invalid products parameter" });
+    }
+    if (productTypes.size === 1 && productTypes.has(ProductType.FundamentalParameter)) {
+      res.send([]);
+      return;
+    }
+
+    if (req.query.downloadDateFrom) {
+      return next({ status: 400, errors: "curatedData dimension doesn't support downloadDateFrom parameter" });
+    }
+    if (req.query.downloadDateTo) {
+      return next({ status: 400, errors: "curatedData dimension doesn't support downloadDateTo parameter" });
+    }
+
+    const productFileJoin = 'JOIN product_variable USING ("productId")';
+    const productFileWhere = 'WHERE product_variable."actrisName" IS NOT NULL';
+    let fileJoin = "";
+    let fileWhere = "";
+    if (req.query.site && req.query.country) {
+      return next({ status: 400, errors: "site and country parameters cannot be used at the same time" });
+    }
+    if (req.query.site) {
+      params.push(req.query.site);
+      fileWhere = `AND "siteId" = $${params.length}`;
+    }
+    if (req.query.country) {
+      params.push(req.query.country);
+      fileJoin = 'JOIN site ON "siteId" = site.id';
+      fileWhere = `AND "countryCode" = $${params.length}`;
+    }
+
+    if (productTypes.has(ProductType.Observation) && !productTypes.has(ProductType.Model)) {
+      fileWhere += " AND \"productId\" != 'model'";
+    } else if (productTypes.has(ProductType.Model) && !productTypes.has(ProductType.Observation)) {
+      fileWhere += " AND \"productId\" = 'model'";
+    }
+
+    if (req.query.measurementDateFrom) {
+      if (typeof req.query.measurementDateFrom !== "string" || !isValidDate(req.query.measurementDateFrom)) {
+        return next({ status: 400, errors: "invalid measurementDateFrom" });
+      }
+      params.push(req.query.measurementDateFrom);
+      fileWhere += ` AND "measurementDate" >= $${params.length}::date`;
+    }
+    if (req.query.measurementDateTo) {
+      if (typeof req.query.measurementDateTo !== "string" || !isValidDate(req.query.measurementDateTo)) {
+        return next({ status: 400, errors: "invalid measurementDateTo" });
+      }
+      params.push(req.query.measurementDateTo);
+      fileWhere += ` AND "measurementDate" <= $${params.length}::date`;
+    }
+
+    const fileSelect = `SELECT "measurementDate", 1.0 AS "variableDays"
+      FROM search_file AS file
+      ${productFileJoin} ${fileJoin}
+      ${productFileWhere} ${fileWhere}`;
+
+    const query = `${select}
+      FROM (${fileSelect}) file
+      ${group}
+      ${order}`;
+
+    try {
+      const rows = await this.dataSource.query(query, params);
+      rows.forEach((row: any) => {
+        row.curatedData = parseFloat(row.curatedData);
+      });
+      res.send(rows);
+    } catch (e) {
+      return next({ status: 500, errors: e });
+    }
+  };
+
+  private async matomoStats(
     req: Request,
     res: Response,
     next: NextFunction,
     getData: (startDate?: string, endDate?: string) => Promise<any>,
-  ) => {
+  ) {
     if (req.query.downloadDateFrom) {
       if (typeof req.query.downloadDateFrom !== "string" || !isValidDate(req.query.downloadDateFrom)) {
         return next({ status: 400, errors: "invalid downloadDateFrom" });
@@ -193,7 +306,7 @@ export class StatisticsRoutes {
     } catch (e) {
       return next({ status: 500, errors: e });
     }
-  };
+  }
 
   private async monthlyVisits(startDate?: string, endDate?: string) {
     const data = await this.makeMatomoRequest(
