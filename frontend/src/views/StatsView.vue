@@ -11,12 +11,15 @@
           v-model="selectedDimensions"
           :options="[
             { id: 'yearMonth,downloads', humanReadableName: 'Monthly downloads' },
+            { id: 'year,downloads', humanReadableName: 'Yearly downloads' },
             { id: 'yearMonth,uniqueIps', humanReadableName: 'Monthly unique IPs' },
             { id: 'year,uniqueIps', humanReadableName: 'Yearly unique IPs' },
             { id: 'country,downloads', humanReadableName: 'Downloads by country' },
             { id: 'yearMonth,visits', humanReadableName: 'Monthly visits' },
+            { id: 'year,visits', humanReadableName: 'Yearly visits' },
             { id: 'country,visits', humanReadableName: 'Visits by country' },
             { id: 'yearMonth,curatedData', humanReadableName: 'Monthly curated data' },
+            { id: 'year,curatedData', humanReadableName: 'Yearly curated data' },
           ]"
           style="width: 300px"
         />
