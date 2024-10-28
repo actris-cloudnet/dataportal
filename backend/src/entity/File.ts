@@ -15,7 +15,6 @@ import { Site } from "./Site";
 import { Product } from "./Product";
 import { Visualization } from "./Visualization";
 import { isValidDate } from "../lib";
-import { basename } from "path";
 import { Model } from "./Model";
 import { ModelVisualization } from "./ModelVisualization";
 import { ErrorLevel } from "./QualityReport";
@@ -30,6 +29,9 @@ export abstract class File {
 
   @Column()
   s3key!: string;
+
+  @Column({ nullable: true })
+  filename!: string;
 
   @Column()
   version!: string;
@@ -92,10 +94,6 @@ export abstract class File {
   @ManyToMany(() => Software)
   @JoinTable()
   software!: Software[];
-
-  get filename() {
-    return basename(this.s3key);
-  }
 
   @BeforeInsert()
   updateDateCreation() {
