@@ -13,7 +13,7 @@
         <input id="email" type="email" name="email" v-model="email" />
         <label id="message-label" for="message"><strong>Message</strong></label>
         <textarea id="message" name="message" required v-model="message"></textarea>
-        <BaseButton type="primary" :disabled="!isActive">Submit</BaseButton>
+        <BaseButton type="primary" :disabled="!isActive" htmlType="submit">Submit</BaseButton>
         <BaseAlert :type="isError ? 'error' : 'note'" v-if="!isActive">{{ msg }}</BaseAlert>
       </form>
     </main>
