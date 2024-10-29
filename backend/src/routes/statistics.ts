@@ -78,11 +78,18 @@ export class StatisticsRoutes {
         measurementDateTo: new Date(req.query.measurementDateTo),
       });
     }
-    if (req.query.site && req.query.country) {
-      return next({ status: 400, errors: "site and country parameters cannot be used at the same time" });
+    if ((req.query.site || req.query.dvasFacility) && req.query.country) {
+      return next({ status: 400, errors: "site/dvasFacility and country parameters cannot be used at the same time" });
     }
     if (req.query.site) {
       qb.andWhere('"siteId" = :site', { site: req.query.site });
+    }
+    if (typeof req.query.dvasFacility === "string") {
+      const sites = await this.dataSource.manager.find(Site, {
+        select: { id: true },
+        where: { dvasId: req.query.dvasFacility },
+      });
+      qb.andWhere('"siteId" IN (:...siteIds)', { siteIds: sites.map((site) => site.id) });
     }
     if (typeof req.query.country === "string") {
       const sites = await this.dataSource.manager.find(Site, {
@@ -158,19 +165,22 @@ export class StatisticsRoutes {
 
     const productFileJoin = 'JOIN product_variable USING ("productId")';
     const productFileWhere = 'WHERE product_variable."actrisName" IS NOT NULL';
-    let fileJoin = "";
+    const fileJoin = 'JOIN site ON "siteId" = site.id';
     let fileWhere = "";
-    if (req.query.site && req.query.country) {
-      return next({ status: 400, errors: "site and country parameters cannot be used at the same time" });
+    if ((req.query.site || req.query.dvasFacility) && req.query.country) {
+      return next({ status: 400, errors: "site/dvasFacility and country parameters cannot be used at the same time" });
     }
     if (req.query.site) {
       params.push(req.query.site);
       fileWhere = `AND "siteId" = $${params.length}`;
     }
+    if (req.query.dvasFacility) {
+      params.push(req.query.dvasFacility);
+      fileWhere = `AND site."dvasId" = $${params.length}`;
+    }
     if (req.query.country) {
       params.push(req.query.country);
-      fileJoin = 'JOIN site ON "siteId" = site.id';
-      fileWhere = `AND "countryCode" = $${params.length}`;
+      fileWhere = `AND site."countryCode" = $${params.length}`;
     }
 
     if (productTypes.includes("observation") && !productTypes.includes("model")) {

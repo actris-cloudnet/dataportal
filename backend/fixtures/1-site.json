@@ -22,6 +22,7 @@
     "altitude": 16,
     "type": ["cloudnet"],
     "gaw": "MHD",
+    "dvasId": "mchd",
     "country": "Ireland",
     "countryCode": "IE",
     "countrySubdivisionCode": null,

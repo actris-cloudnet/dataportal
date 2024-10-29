@@ -48,7 +48,7 @@ exports[`/api/files/:uuid request succeeds on instrument file 1`] = `
     "countryCode": "IE",
     "countrySubdivisionCode": null,
     "description": null,
-    "dvasId": null,
+    "dvasId": "mchd",
     "gaw": "MHD",
     "humanReadableName": "Mace Head",
     "id": "mace-head",

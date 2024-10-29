@@ -24,6 +24,7 @@ interface Params {
   dimensions: string;
   country?: string;
   site?: string;
+  dvasFacility?: string;
   productTypes?: string;
   downloadDateFrom?: string;
   downloadDateTo?: string;
@@ -189,6 +190,22 @@ describe("GET /api/statistics", () => {
       { yearMonth: "2022-12", downloads: expect.closeTo((1 * 31) / 300, 10) },
     ]));
 
+  it("can filter by DVAS facility", () =>
+    expect(getStats({ dimensions: "yearMonth,downloads", dvasFacility: "mchd" })).resolves.toMatchObject([
+      { yearMonth: "2022-01", downloads: expect.closeTo((2 * 31) / 300, 10) },
+      { yearMonth: "2022-02", downloads: expect.closeTo((2 * 28) / 300, 10) },
+      { yearMonth: "2022-03", downloads: expect.closeTo((2 * 31) / 300, 10) },
+      { yearMonth: "2022-04", downloads: expect.closeTo((2 * 30) / 300, 10) },
+      { yearMonth: "2022-05", downloads: expect.closeTo((2 * 31) / 300, 10) },
+      { yearMonth: "2022-06", downloads: expect.closeTo((2 * 30) / 300, 10) },
+      { yearMonth: "2022-07", downloads: expect.closeTo((1 * 31) / 300, 10) },
+      { yearMonth: "2022-08", downloads: expect.closeTo((1 * 31) / 300, 10) },
+      { yearMonth: "2022-09", downloads: expect.closeTo((1 * 30) / 300, 10) },
+      { yearMonth: "2022-10", downloads: expect.closeTo((1 * 31) / 300, 10) },
+      { yearMonth: "2022-11", downloads: expect.closeTo((1 * 30) / 300, 10) },
+      { yearMonth: "2022-12", downloads: expect.closeTo((1 * 31) / 300, 10) },
+    ]));
+
   it("fails to filter by invalid products", () =>
     expect(
       getStats({ dimensions: "yearMonth,downloads", country: "FI", site: "mace-head", productTypes: "invalid" }),
@@ -297,5 +314,19 @@ describe("GET /api/statistics", () => {
       { year: "2018", curatedData: expect.closeTo(2 / 300, 10) }, // radar
       { year: "2019", curatedData: expect.closeTo(2 / 300, 10) }, // radar
       { year: "2021", curatedData: expect.closeTo(2 / 300, 10) }, // radar
+    ]));
+
+  it("filters curated data by site", () =>
+    expect(
+      getStats({ dimensions: "year,curatedData", productTypes: "observation", site: "mace-head" }),
+    ).resolves.toMatchObject([
+      { year: "2018", curatedData: expect.closeTo(2 / 300, 10) }, // radar
+    ]));
+
+  it("filters curated data by DVAS facility", () =>
+    expect(
+      getStats({ dimensions: "year,curatedData", productTypes: "observation", dvasFacility: "mchd" }),
+    ).resolves.toMatchObject([
+      { year: "2018", curatedData: expect.closeTo(2 / 300, 10) }, // radar
     ]));
 });
