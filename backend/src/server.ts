@@ -41,17 +41,27 @@ async function createServer(): Promise<void> {
   const authorizator = new Authorizator(AppDataSource);
   const queueService = new QueueService(AppDataSource);
   await queueService.initializeLocks();
-  setInterval(
-    () => {
-      try {
-        queueService.breakLocks();
-      } catch (err) {
-        console.error("Failed to break locks:", err);
-      }
-      queueService.cleanOldTasks().catch((err) => console.error("Failed to clean up tasks:", err));
-    },
-    5 * 60 * 1000,
-  );
+  if (process.env.NODE_ENV === "production") {
+    setInterval(
+      () => {
+        try {
+          queueService.breakLocks();
+        } catch (err) {
+          console.error("Failed to break locks:", err);
+        }
+        queueService.cleanOldTasks().catch((err) => console.error("Failed to clean up tasks:", err));
+      },
+      5 * 60 * 1000,
+    );
+    setInterval(
+      () => {
+        AppDataSource.query("REFRESH MATERIALIZED VIEW download_stats").catch((err) =>
+          console.error("Failed to update materialized view:", err),
+        );
+      },
+      6 * 60 * 60 * 1000,
+    );
+  }
 
   const fileRoutes = new FileRoutes(AppDataSource);
   const siteRoutes = new SiteRoutes(AppDataSource);
@@ -102,7 +112,7 @@ async function createServer(): Promise<void> {
 
   app.set("trust proxy", true);
 
-  if (process.env.NODE_ENV != "production") {
+  if (process.env.NODE_ENV !== "production") {
     app.use(function (_req, res, next) {
       res.header("Access-Control-Allow-Origin", "http://localhost:8080");
       res.header("Access-Control-Allow-Credentials", "true");
