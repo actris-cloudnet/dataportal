@@ -24,7 +24,7 @@ interface Params {
   dimensions: string;
   country?: string;
   site?: string;
-  dvasFacility?: string;
+  facility?: string;
   productTypes?: string;
   downloadDateFrom?: string;
   downloadDateTo?: string;
@@ -191,7 +191,7 @@ describe("GET /api/statistics", () => {
     ]));
 
   it("can filter by DVAS facility", () =>
-    expect(getStats({ dimensions: "yearMonth,downloads", dvasFacility: "mchd" })).resolves.toMatchObject([
+    expect(getStats({ dimensions: "yearMonth,downloads", facility: "mchd" })).resolves.toMatchObject([
       { yearMonth: "2022-01", downloads: expect.closeTo((2 * 31) / 300, 10) },
       { yearMonth: "2022-02", downloads: expect.closeTo((2 * 28) / 300, 10) },
       { yearMonth: "2022-03", downloads: expect.closeTo((2 * 31) / 300, 10) },
@@ -325,7 +325,7 @@ describe("GET /api/statistics", () => {
 
   it("filters curated data by DVAS facility", () =>
     expect(
-      getStats({ dimensions: "year,curatedData", productTypes: "observation", dvasFacility: "mchd" }),
+      getStats({ dimensions: "year,curatedData", productTypes: "observation", facility: "mchd" }),
     ).resolves.toMatchObject([
       { year: "2018", curatedData: expect.closeTo(2 / 300, 10) }, // radar
     ]));

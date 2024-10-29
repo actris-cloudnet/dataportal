@@ -78,16 +78,16 @@ export class StatisticsRoutes {
         measurementDateTo: new Date(req.query.measurementDateTo),
       });
     }
-    if ((req.query.site || req.query.dvasFacility) && req.query.country) {
-      return next({ status: 400, errors: "site/dvasFacility and country parameters cannot be used at the same time" });
+    if ((req.query.site || req.query.facility) && req.query.country) {
+      return next({ status: 400, errors: "site/facility and country parameters cannot be used at the same time" });
     }
     if (req.query.site) {
       qb.andWhere('"siteId" = :site', { site: req.query.site });
     }
-    if (typeof req.query.dvasFacility === "string") {
+    if (typeof req.query.facility === "string") {
       const sites = await this.dataSource.manager.find(Site, {
         select: { id: true },
-        where: { dvasId: req.query.dvasFacility },
+        where: { dvasId: req.query.facility },
       });
       qb.andWhere('"siteId" IN (:...siteIds)', { siteIds: sites.map((site) => site.id) });
     }
@@ -167,15 +167,15 @@ export class StatisticsRoutes {
     const productFileWhere = 'WHERE product_variable."actrisName" IS NOT NULL';
     const fileJoin = 'JOIN site ON "siteId" = site.id';
     let fileWhere = "";
-    if ((req.query.site || req.query.dvasFacility) && req.query.country) {
-      return next({ status: 400, errors: "site/dvasFacility and country parameters cannot be used at the same time" });
+    if ((req.query.site || req.query.facility) && req.query.country) {
+      return next({ status: 400, errors: "site/facility and country parameters cannot be used at the same time" });
     }
     if (req.query.site) {
       params.push(req.query.site);
       fileWhere = `AND "siteId" = $${params.length}`;
     }
-    if (req.query.dvasFacility) {
-      params.push(req.query.dvasFacility);
+    if (req.query.facility) {
+      params.push(req.query.facility);
       fileWhere = `AND site."dvasId" = $${params.length}`;
     }
     if (req.query.country) {
