@@ -27,6 +27,7 @@ import { rateLimit } from "express-rate-limit";
 import { QueueRoutes } from "./routes/queue";
 import { QueueService } from "./lib/queue";
 import { ProductAvailabilityRoutes } from "./routes/productAvailability";
+import { StatisticsRoutes } from "./routes/statistics";
 
 async function createServer(): Promise<void> {
   const port = 3000;
@@ -40,17 +41,27 @@ async function createServer(): Promise<void> {
   const authorizator = new Authorizator(AppDataSource);
   const queueService = new QueueService(AppDataSource);
   await queueService.initializeLocks();
-  setInterval(
-    () => {
-      try {
-        queueService.breakLocks();
-      } catch (err) {
-        console.error("Failed to break locks:", err);
-      }
-      queueService.cleanOldTasks().catch((err) => console.error("Failed to clean up tasks:", err));
-    },
-    5 * 60 * 1000,
-  );
+  if (process.env.NODE_ENV === "production") {
+    setInterval(
+      () => {
+        try {
+          queueService.breakLocks();
+        } catch (err) {
+          console.error("Failed to break locks:", err);
+        }
+        queueService.cleanOldTasks().catch((err) => console.error("Failed to clean up tasks:", err));
+      },
+      5 * 60 * 1000,
+    );
+    setInterval(
+      () => {
+        AppDataSource.query("REFRESH MATERIALIZED VIEW download_stats").catch((err) =>
+          console.error("Failed to update materialized view:", err),
+        );
+      },
+      6 * 60 * 60 * 1000,
+    );
+  }
 
   const fileRoutes = new FileRoutes(AppDataSource);
   const siteRoutes = new SiteRoutes(AppDataSource);
@@ -70,6 +81,7 @@ async function createServer(): Promise<void> {
   const feedbackRoutes = new FeedbackRoutes(AppDataSource);
   const queueRoutes = new QueueRoutes(AppDataSource, queueService);
   const productAvailabilityRoutes = new ProductAvailabilityRoutes(AppDataSource);
+  const statsRoutes = new StatisticsRoutes(AppDataSource);
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     console.error(
@@ -100,7 +112,7 @@ async function createServer(): Promise<void> {
 
   app.set("trust proxy", true);
 
-  if (process.env.NODE_ENV != "production") {
+  if (process.env.NODE_ENV !== "production") {
     app.use(function (_req, res, next) {
       res.header("Access-Control-Allow-Origin", "http://localhost:8080");
       res.header("Access-Control-Allow-Credentials", "true");
@@ -275,10 +287,10 @@ async function createServer(): Promise<void> {
   app.put("/visualizations/*", express.json(), vizRoutes.putVisualization);
   app.put("/quality/:uuid", middleware.validateUuidParam, express.json(), qualityRoutes.putQualityReport);
   app.get(
-    "/api/download/stats",
+    "/api/statistics",
     authenticator.verifyCredentials(),
     authorizator.verifyPermission(PermissionType.canGetStats),
-    dlRoutes.stats,
+    statsRoutes.getStatistics,
   );
   app.delete(
     "/api/files/:uuid",
