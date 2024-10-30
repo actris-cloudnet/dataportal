@@ -221,8 +221,8 @@ async function onSearch() {
     country: currentCountry.value || undefined,
     site: currentSite.value || undefined,
     productTypes: productTypes.value.join(","),
-    downloadDateFrom: downloadDateFrom.value ? !curatedStatistics.value && downloadDateFrom.value : undefined,
-    downloadDateTo: downloadDateTo.value ? !curatedStatistics.value && downloadDateTo.value : undefined,
+    downloadDateFrom: !curatedStatistics.value && downloadDateFrom.value ? downloadDateFrom.value : undefined,
+    downloadDateTo: !curatedStatistics.value && downloadDateTo.value ? downloadDateTo.value : undefined,
     measurementDateFrom: measurementDateFrom.value ? measurementDateFrom.value : undefined,
     measurementDateTo: measurementDateTo.value ? measurementDateTo.value : undefined,
   };
