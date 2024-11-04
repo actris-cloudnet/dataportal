@@ -25,45 +25,36 @@ export class CollectionRoutes {
   readonly citationService: CitationService;
 
   postCollection: RequestHandler = async (req: Request, res: Response, next) => {
-    try {
-      if (
-        !("files" in req.body) ||
-        !req.body.files ||
-        !Array.isArray(req.body.files) ||
-        !req.body.files.every((file: any) => typeof file == "string")
-      ) {
-        return next({ status: 422, errors: ['Request is missing field "files"'] });
-      }
-      const fileUuids: string[] = req.body.files;
-      if (fileUuids.length > 10_000) {
-        return next({ status: 422, errors: ["Maximum of 10 000 files is supported"] });
-      }
-      const [files, modelFiles] = await Promise.all([
-        this.fileRepo.findBy({ uuid: In(fileUuids) }),
-        this.modelFileRepo.findBy({ uuid: In(fileUuids) }),
-      ]);
-      if ((files as unknown as File[]).concat(modelFiles).length != fileUuids.length) {
-        const existingUuids = files.map((file) => file.uuid);
-        const missingFiles = fileUuids.filter((uuid) => !existingUuids.includes(uuid));
-        return next({ status: 422, errors: [`Following files do not exist: ${missingFiles}`] });
-      }
-      const collection = await this.collectionRepo.save(new Collection(files, modelFiles));
-      res.send(collection.uuid);
-    } catch (e) {
-      return next({ status: 500, errors: e });
+    if (
+      !("files" in req.body) ||
+      !req.body.files ||
+      !Array.isArray(req.body.files) ||
+      !req.body.files.every((file: any) => typeof file == "string")
+    ) {
+      return next({ status: 422, errors: ['Request is missing field "files"'] });
     }
+    const fileUuids: string[] = req.body.files;
+    if (fileUuids.length > 10_000) {
+      return next({ status: 422, errors: ["Maximum of 10 000 files is supported"] });
+    }
+    const [files, modelFiles] = await Promise.all([
+      this.fileRepo.findBy({ uuid: In(fileUuids) }),
+      this.modelFileRepo.findBy({ uuid: In(fileUuids) }),
+    ]);
+    if ((files as unknown as File[]).concat(modelFiles).length != fileUuids.length) {
+      const existingUuids = files.map((file) => file.uuid);
+      const missingFiles = fileUuids.filter((uuid) => !existingUuids.includes(uuid));
+      return next({ status: 422, errors: [`Following files do not exist: ${missingFiles}`] });
+    }
+    const collection = await this.collectionRepo.save(new Collection(files, modelFiles));
+    res.send(collection.uuid);
   };
 
   collection: RequestHandler = async (req: Request, res: Response, next) => {
     const uuid: string = req.params.uuid;
-    try {
-      const collection = await this.findCollection(uuid);
-      if (!collection) return next({ status: 404, errors: ["Collection not found"] });
-
-      res.send(new CollectionResponse(collection));
-    } catch (e) {
-      return next({ status: 500, errors: e });
-    }
+    const collection = await this.findCollection(uuid);
+    if (!collection) return next({ status: 404, errors: ["Collection not found"] });
+    res.send(new CollectionResponse(collection));
   };
 
   generatePid: RequestHandler = async (req: Request, res: Response, next) => {
@@ -147,22 +138,19 @@ export class CollectionRoutes {
     };
   }
 
-  allcollections: RequestHandler = async (req: Request, res: Response, next) =>
-    this.collectionRepo
-      .find({
-        relations: {
-          regularFiles: { site: true, product: true },
-          modelFiles: { site: true, product: true },
-        },
-      })
-      .then((collections) => {
-        const response = collections.map((coll) => ({
-          ...coll,
-          ...{ files: coll.regularFiles.map(convertToSearchResponse) },
-        }));
-        res.send(response);
-      })
-      .catch((err) => next({ status: 500, errors: err }));
+  allcollections: RequestHandler = async (req: Request, res: Response, next) => {
+    const collections = await this.collectionRepo.find({
+      relations: {
+        regularFiles: { site: true, product: true },
+        modelFiles: { site: true, product: true },
+      },
+    });
+    const response = collections.map((coll) => ({
+      ...coll,
+      ...{ files: coll.regularFiles.map(convertToSearchResponse) },
+    }));
+    res.send(response);
+  };
 
   public async findCollection(uuid: string): Promise<Collection | null> {
     const collection = await this.collectionRepo.findOneBy({ uuid });

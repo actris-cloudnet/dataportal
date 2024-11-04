@@ -4,8 +4,8 @@ const express = require("express");
 let serverMemory = {};
 const storageApp = express();
 
-storageApp.put("/*", (req, res, _next) => {
-  const path = req.params[0];
+storageApp.put("/*path", (req, res, _next) => {
+  const path = req.params.path.join("/");
   console.log("PUT", path);
 
   const chunks = [];
@@ -24,8 +24,8 @@ storageApp.put("/*", (req, res, _next) => {
   });
 });
 
-storageApp.get("/*", (req, res, _next) => {
-  const path = req.params[0];
+storageApp.get("/*path", (req, res, _next) => {
+  const path = req.params.path.join("/");
   if (!(path in serverMemory)) return res.sendStatus(404);
   res.send(serverMemory[path]);
 });
@@ -92,5 +92,3 @@ instrumentdbApp.get("/instrument/:uuid/pi", (req, res, _next) => {
   res.send(pis);
 });
 instrumentdbApp.listen(5805, () => console.log("InstrumentDB mock running"));
-
-// TODO: citation-service?

@@ -19,20 +19,16 @@ export class Authenticator {
       if (!credentials) {
         return next({ status: 401, errors: "Unauthorized" });
       }
-      try {
-        const userAccount = await this.userAccountRepository.findOneBy({ username: credentials.name });
-        if (!userAccount) {
-          return next({ status: 401, errors: "Unauthorized" });
-        }
-        if (userAccount.comparePassword(credentials.pass)) {
-          res.locals.username = userAccount.username;
-          res.locals.authenticated = true;
-          return next();
-        } else {
-          return next({ status: 401, errors: "Unauthorized" });
-        }
-      } catch (err) {
-        next({ status: 500, errors: `Internal server error: ${err}` });
+      const userAccount = await this.userAccountRepository.findOneBy({ username: credentials.name });
+      if (!userAccount) {
+        return next({ status: 401, errors: "Unauthorized" });
+      }
+      if (userAccount.comparePassword(credentials.pass)) {
+        res.locals.username = userAccount.username;
+        res.locals.authenticated = true;
+        return next();
+      } else {
+        return next({ status: 401, errors: "Unauthorized" });
       }
     };
   }
@@ -52,36 +48,28 @@ export class Authorizator {
   }
 
   verifySite: RequestHandler = async (req, res, next) => {
-    try {
-      const siteName = "body" in req && "site" in req.body ? req.body.site : res.locals.username;
-      const site = await this.siteRepository.findOneBy({ id: siteName });
-      if (!site) {
-        return next({ status: 422, errors: "Site does not exist" });
-      }
-      res.locals.site = site;
-      return next();
-    } catch (err) {
-      return next({ status: 500, errors: `Internal server error: ${err}` });
+    const siteName = "body" in req && "site" in req.body ? req.body.site : res.locals.username;
+    const site = await this.siteRepository.findOneBy({ id: siteName });
+    if (!site) {
+      return next({ status: 422, errors: "Site does not exist" });
     }
+    res.locals.site = site;
+    return next();
   };
 
   findSiteFromChecksum: RequestHandler = async (req, res, next) => {
     const repos = [this.instrumentUploadRepository, this.modelUploadRepository];
-    try {
-      for (const repo of repos) {
-        const uploadMetadata = await repo.findOne({
-          where: { checksum: req.params.checksum },
-          relations: { site: true },
-        });
-        if (uploadMetadata) {
-          res.locals.site = uploadMetadata.site;
-          return next();
-        }
+    for (const repo of repos) {
+      const uploadMetadata = await repo.findOne({
+        where: { checksum: req.params.checksum },
+        relations: { site: true },
+      });
+      if (uploadMetadata) {
+        res.locals.site = uploadMetadata.site;
+        return next();
       }
-      return next({ status: 422, errors: "Checksum does not exist in the database" });
-    } catch (err) {
-      return next({ status: 500, errors: `Internal server error: ${err}` });
     }
+    return next({ status: 422, errors: "Checksum does not exist in the database" });
   };
 
   verifyPermission = (permission: PermissionType): RequestHandler => {
@@ -106,18 +94,14 @@ export class Authorizator {
         userQuery = userQuery.andWhere("(site IS NULL OR site.id = :siteId)");
       }
       userQuery = userQuery.andWhere("permission.permission = :permission").setParameters(params);
-      try {
-        const userWithProperPermission = await userQuery.getOne();
-        if (!userWithProperPermission) {
-          return next({ status: 401, errors: "Missing permission" });
-        }
-        if (isSite) {
-          req.params.site = res.locals.site.id;
-        }
-        return next();
-      } catch (err) {
-        return next({ status: 500, errors: `Internal server error: ${err}` });
+      const userWithProperPermission = await userQuery.getOne();
+      if (!userWithProperPermission) {
+        return next({ status: 401, errors: "Missing permission" });
       }
+      if (isSite) {
+        req.params.site = res.locals.site.id;
+      }
+      return next();
     };
   };
 }

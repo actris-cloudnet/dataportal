@@ -30,48 +30,39 @@ export class SiteRoutes {
   readonly actrisCache: Record<string, any>;
 
   site: RequestHandler = async (req: Request, res: Response, next) => {
-    try {
-      const qb = this.siteRepo
-        .createQueryBuilder("site")
-        .leftJoinAndSelect("site.persons", "person")
-        .where("site.id = :siteId", req.params);
-      const site = await hideTestDataFromNormalUsers(qb, req).getOne();
-      if (!site) {
-        return next({ status: 404, errors: ["No sites match this id"] });
-      }
-      res.send({
-        ...site,
-        _actris: site.actrisId ? await this.fetchActrisFacility(site.actrisId) : null,
-        _dvas: site.dvasId ? await this.fetchDvasFacility(site.dvasId) : null,
-      });
-    } catch (err) {
-      return next({ status: 500, errors: err });
+    const qb = this.siteRepo
+      .createQueryBuilder("site")
+      .leftJoinAndSelect("site.persons", "person")
+      .where("site.id = :siteId", req.params);
+    const site = await hideTestDataFromNormalUsers(qb, req).getOne();
+    if (!site) {
+      return next({ status: 404, errors: ["No sites match this id"] });
     }
+    res.send({
+      ...site,
+      _actris: site.actrisId ? await this.fetchActrisFacility(site.actrisId) : null,
+      _dvas: site.dvasId ? await this.fetchDvasFacility(site.dvasId) : null,
+    });
   };
 
   sites: RequestHandler = async (req: Request, res: Response, next) => {
-    try {
-      const query: any = req.query;
-      const qb = this.siteRepo.createQueryBuilder("site");
-      if (query.showCitations) {
-        qb.leftJoinAndSelect("site.citations", "citations");
-      }
-      if (query.type) {
-        qb.where("site.type && :types", { types: toArray(query.type) });
-      }
-      const sites = await hideTestDataFromNormalUsers(qb, req).addOrderBy("site.id", "ASC").getMany();
-      const cloudnetStatuses = await this.queryCloudnetStatuses();
-      const modelStatuses = await this.queryModelStatuses();
-      res.send(
-        sites.map((site: any) => ({
-          ...site,
-          status:
-            (site.type.includes(SiteType.MODEL) ? modelStatuses[site.id] : cloudnetStatuses[site.id]) || "inactive",
-        })),
-      );
-    } catch (err) {
-      return next({ status: 500, errors: err });
+    const query: any = req.query;
+    const qb = this.siteRepo.createQueryBuilder("site");
+    if (query.showCitations) {
+      qb.leftJoinAndSelect("site.citations", "citations");
     }
+    if (query.type) {
+      qb.where("site.type && :types", { types: toArray(query.type) });
+    }
+    const sites = await hideTestDataFromNormalUsers(qb, req).addOrderBy("site.id", "ASC").getMany();
+    const cloudnetStatuses = await this.queryCloudnetStatuses();
+    const modelStatuses = await this.queryModelStatuses();
+    res.send(
+      sites.map((site: any) => ({
+        ...site,
+        status: (site.type.includes(SiteType.MODEL) ? modelStatuses[site.id] : cloudnetStatuses[site.id]) || "inactive",
+      })),
+    );
   };
 
   private async queryCloudnetStatuses(): Promise<Record<string, string>> {
@@ -122,28 +113,20 @@ export class SiteRoutes {
   }
 
   location: RequestHandler = async (req, res, next) => {
-    try {
-      const qb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteId", req.params);
-      const site = await hideTestDataFromNormalUsers(qb, req).getOne();
-      if (!site) return next({ status: 404, errors: ["No sites match this id"] });
-      const location = await this.siteLocationRepo.findOneBy({ siteId: site.id, date: new Date(req.params.date) });
-      if (!location) return next({ status: 404, errors: ["No location match this date"] });
-      res.send(location);
-    } catch (err: any) {
-      return next({ status: 500, errors: err });
-    }
+    const qb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteId", req.params);
+    const site = await hideTestDataFromNormalUsers(qb, req).getOne();
+    if (!site) return next({ status: 404, errors: ["No sites match this id"] });
+    const location = await this.siteLocationRepo.findOneBy({ siteId: site.id, date: new Date(req.params.date) });
+    if (!location) return next({ status: 404, errors: ["No location match this date"] });
+    res.send(location);
   };
 
   locations: RequestHandler = async (req, res, next) => {
-    try {
-      const qb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteId", req.params);
-      const site = await hideTestDataFromNormalUsers(qb, req).getOne();
-      if (!site) return next({ status: 404, errors: ["No sites match this id"] });
-      const locations = await this.siteLocationRepo.find({ where: { siteId: site.id }, order: { date: "ASC" } });
-      res.send(locations);
-    } catch (err: any) {
-      return next({ status: 500, errors: err });
-    }
+    const qb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteId", req.params);
+    const site = await hideTestDataFromNormalUsers(qb, req).getOne();
+    if (!site) return next({ status: 404, errors: ["No sites match this id"] });
+    const locations = await this.siteLocationRepo.find({ where: { siteId: site.id }, order: { date: "ASC" } });
+    res.send(locations);
   };
 
   private async fetchDvasFacility(dvasId: string) {

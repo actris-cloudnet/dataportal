@@ -12,21 +12,16 @@ export class FeedbackRoutes {
   }
 
   postFeedback: RequestHandler = async (req: Request, res: Response, next) => {
-    try {
-      const feedback = this.feedbackRepo.create(req.body);
-      await this.feedbackRepo.insert(feedback);
-      const payload = createPayload(req);
-      const config = {
-        headers: {
-          Authorization: `Bearer ${env.SLACK_API_TOKEN}`,
-        },
-      };
-      await axios.post("https://slack.com/api/chat.postMessage", payload, config);
-      res.sendStatus(200);
-    } catch (err) {
-      console.error("Feedback sending failed", err);
-      next({ status: 500, errors: err });
-    }
+    const feedback = this.feedbackRepo.create(req.body);
+    await this.feedbackRepo.insert(feedback);
+    const payload = createPayload(req);
+    const config = {
+      headers: {
+        Authorization: `Bearer ${env.SLACK_API_TOKEN}`,
+      },
+    };
+    await axios.post("https://slack.com/api/chat.postMessage", payload, config);
+    res.sendStatus(200);
   };
 }
 

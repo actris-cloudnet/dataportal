@@ -23,16 +23,12 @@ export class PublicationRoutes {
     if (typeof uri !== "string") {
       return next({ status: 400, error: "uri is missing or invalid" });
     }
-    try {
-      const pub = new Publication();
-      pub.pid = uri;
-      pub.year = (await this.fetchCitation(uri, "application/json")).data.year;
-      pub.citation = (await this.fetchCitation(uri, "text/html")).data;
-      await this.publicationRepo.save(pub);
-      res.sendStatus(200);
-    } catch (err) {
-      next({ status: 500, errors: err });
-    }
+    const pub = new Publication();
+    pub.pid = uri;
+    pub.year = (await this.fetchCitation(uri, "application/json")).data.year;
+    pub.citation = (await this.fetchCitation(uri, "text/html")).data;
+    await this.publicationRepo.save(pub);
+    res.sendStatus(200);
   };
 
   deletePublication: RequestHandler = async (req: Request, res: Response, next) => {
@@ -40,20 +36,12 @@ export class PublicationRoutes {
     if (typeof uri !== "string") {
       return next({ status: 400, error: "uri is missing or invalid" });
     }
-    try {
-      await this.publicationRepo.delete({ pid: uri });
-      res.sendStatus(200);
-    } catch (err) {
-      next({ status: 500, errors: err });
-    }
+    await this.publicationRepo.delete({ pid: uri });
+    res.sendStatus(200);
   };
 
   getPublications: RequestHandler = async (req: Request, res: Response, next) => {
-    try {
-      const publications = await this.publicationRepo.find({ order: { year: "DESC" } });
-      res.send(publications);
-    } catch (err) {
-      next({ status: 500, errors: err });
-    }
+    const publications = await this.publicationRepo.find({ order: { year: "DESC" } });
+    res.send(publications);
   };
 }

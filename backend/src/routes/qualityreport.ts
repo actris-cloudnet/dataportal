@@ -92,46 +92,42 @@ export class QualityReportRoutes {
   putQualityReport: RequestHandler = async (req: Request, res: Response, next) => {
     const uuid = req.params.uuid;
     const fullReport: Report = req.body;
-    try {
-      // TODO: use transaction
-      const existingFile = await this.fileRoutes.findAnyFile((repo, _) =>
-        repo.findOne({ where: { uuid }, relations: { product: true } }),
-      );
-      if (!existingFile) {
-        return next({ status: 400, errors: ["No files match this UUID"] });
-      }
-      await this.fileQualityRepo.delete(uuid);
-      const testOutlines = this.parseTests(fullReport);
-      const nErrors = this.countTestResults(testOutlines, ErrorLevel.ERROR);
-      const nWarnings = this.countTestResults(testOutlines, ErrorLevel.WARNING);
-      const nInfo = this.countTestResults(testOutlines, ErrorLevel.INFO);
-      const maxErrorLevel = this.getMaxErrorLevel(nErrors, nWarnings, nInfo);
-      await this.fileQualityRepo.save({
-        uuid: uuid,
-        errorLevel: maxErrorLevel,
-        qcVersion: fullReport.qcVersion,
-        tests: testOutlines.length,
-        warnings: nWarnings,
-        errors: nErrors,
-        info: nInfo,
-        timestamp: fullReport.timestamp,
-      });
-      // TODO: Remove all QualityReports first? Needed if tests are removed.
-      for (const test of fullReport.tests) {
-        await this.qualityReportRepo.save({
-          result: testOutlines.find((ele) => ele.testId === test.testId)!.maxErrorLevel,
-          testId: test.testId,
-          exceptions: test.exceptions,
-          qualityUuid: uuid,
-        });
-      }
-      const fileRepo = existingFile instanceof RegularFile ? this.fileRepo : this.modelFileRepo;
-      await fileRepo.update(uuid, { errorLevel: maxErrorLevel });
-      await this.searchFileRepo.update(uuid, { errorLevel: maxErrorLevel });
-      res.sendStatus(201);
-    } catch (e) {
-      return next({ status: 500, errors: e });
+    // TODO: use transaction
+    const existingFile = await this.fileRoutes.findAnyFile((repo, _) =>
+      repo.findOne({ where: { uuid }, relations: { product: true } }),
+    );
+    if (!existingFile) {
+      return next({ status: 400, errors: ["No files match this UUID"] });
     }
+    await this.fileQualityRepo.delete(uuid);
+    const testOutlines = this.parseTests(fullReport);
+    const nErrors = this.countTestResults(testOutlines, ErrorLevel.ERROR);
+    const nWarnings = this.countTestResults(testOutlines, ErrorLevel.WARNING);
+    const nInfo = this.countTestResults(testOutlines, ErrorLevel.INFO);
+    const maxErrorLevel = this.getMaxErrorLevel(nErrors, nWarnings, nInfo);
+    await this.fileQualityRepo.save({
+      uuid: uuid,
+      errorLevel: maxErrorLevel,
+      qcVersion: fullReport.qcVersion,
+      tests: testOutlines.length,
+      warnings: nWarnings,
+      errors: nErrors,
+      info: nInfo,
+      timestamp: fullReport.timestamp,
+    });
+    // TODO: Remove all QualityReports first? Needed if tests are removed.
+    for (const test of fullReport.tests) {
+      await this.qualityReportRepo.save({
+        result: testOutlines.find((ele) => ele.testId === test.testId)!.maxErrorLevel,
+        testId: test.testId,
+        exceptions: test.exceptions,
+        qualityUuid: uuid,
+      });
+    }
+    const fileRepo = existingFile instanceof RegularFile ? this.fileRepo : this.modelFileRepo;
+    await fileRepo.update(uuid, { errorLevel: maxErrorLevel });
+    await this.searchFileRepo.update(uuid, { errorLevel: maxErrorLevel });
+    res.sendStatus(201);
   };
 
   private parseTests(fileReport: Report): TestSummary[] {
