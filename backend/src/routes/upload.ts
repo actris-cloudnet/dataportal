@@ -148,9 +148,9 @@ export class UploadRoutes {
     });
 
     if (result.status >= 200 && result.status < 300) {
-      return res.sendStatus(result.status);
+      res.sendStatus(result.status);
     } else {
-      return next(result);
+      next(result);
     }
   };
 
@@ -218,7 +218,10 @@ export class UploadRoutes {
         }),
       );
       if (!upload) return next({ status: 400, errors: "No metadata matches this hash" });
-      if (upload.status != Status.CREATED) return res.sendStatus(200); // Already uploaded
+      if (upload.status != Status.CREATED) {
+        res.sendStatus(200); // Already uploaded
+        return;
+      }
 
       const s3key = generateS3keyForUpload(upload);
       const s3path = `/${uploadBucket}/${s3key}`;
@@ -497,7 +500,7 @@ export class UploadRoutes {
 
   dateforsize: RequestHandler = async (req, res, next) => {
     const isModel = "model" in req.query;
-    return dateforsize(
+    dateforsize(
       isModel ? this.modelUploadRepo : this.instrumentUploadRepo,
       isModel ? "model_upload" : "instrument_upload",
       req,

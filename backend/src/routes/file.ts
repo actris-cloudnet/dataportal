@@ -537,13 +537,7 @@ export class FileRoutes {
 
   dateforsize: RequestHandler = async (req, res, next) => {
     const isModel = "model" in req.query;
-    return dateforsize(
-      isModel ? this.modelFileRepo : this.fileRepo,
-      isModel ? "model_file" : "regular_file",
-      req,
-      res,
-      next,
-    );
+    dateforsize(isModel ? this.modelFileRepo : this.fileRepo, isModel ? "model_file" : "regular_file", req, res, next);
   };
 
   private async deleteFileEntity(queryRunner: QueryRunner, file: File, tombstoneReason?: string) {
