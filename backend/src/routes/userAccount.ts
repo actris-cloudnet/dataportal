@@ -100,15 +100,10 @@ export class UserAccountRoutes {
           .getOne();
       }
       if (!permissionCandidate) {
-        try {
-          permission = await this.permissionRepository.save({
-            permission: permissionType,
-            site: site,
-          });
-        } catch (err) {
-          console.error(err);
-          return next({ status: 500, errors: err });
-        }
+        permission = await this.permissionRepository.save({
+          permission: permissionType,
+          site: site,
+        });
       } else {
         permission = permissionCandidate;
       }
@@ -251,24 +246,20 @@ export class UserAccountRoutes {
   };
 
   userInfo: RequestHandler = async (req: Request, res: Response, next) => {
-    try {
-      const credentials = basicAuth(req);
-      if (!credentials) {
-        return next({ status: 401, errors: "Unauthorized" });
-      }
-      const user = await this.userAccountRepository.findOne({
-        where: { username: credentials.name },
-        relations: { permissions: { site: true } },
-      });
-      if (!user) {
-        return next({ status: 401, errors: "Unauthorized" });
-      }
-      if (!user.comparePassword(credentials.pass)) {
-        return next({ status: 401, errors: "Unauthorized" });
-      }
-      res.send(user.permissions);
-    } catch (err) {
-      next({ status: 500, errors: `Internal server error: ${err}` });
+    const credentials = basicAuth(req);
+    if (!credentials) {
+      return next({ status: 401, errors: "Unauthorized" });
     }
+    const user = await this.userAccountRepository.findOne({
+      where: { username: credentials.name },
+      relations: { permissions: { site: true } },
+    });
+    if (!user) {
+      return next({ status: 401, errors: "Unauthorized" });
+    }
+    if (!user.comparePassword(credentials.pass)) {
+      return next({ status: 401, errors: "Unauthorized" });
+    }
+    res.send(user.permissions);
   };
 }

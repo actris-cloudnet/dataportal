@@ -43,30 +43,24 @@ export class UserActivationRoutes {
   }
 
   get: RequestHandler = async (req: Request, res: Response, next) => {
-    try {
-      const user = await this.userAccountRepository.findOneBy({ activationToken: req.params.token });
-      if (!user) {
-        return res.status(404).contentType("text/html; charset=utf-8").send(errorTemplate);
-      }
-      res.contentType("text/html; charset=utf-8").send(getTemplate);
-    } catch (err) {
-      next({ status: 500, errors: err });
+    const user = await this.userAccountRepository.findOneBy({ activationToken: req.params.token });
+    if (!user) {
+      res.status(404).contentType("text/html; charset=utf-8").send(errorTemplate);
+      return;
     }
+    res.contentType("text/html; charset=utf-8").send(getTemplate);
   };
 
   post: RequestHandler = async (req: Request, res: Response, next) => {
-    try {
-      const user = await this.userAccountRepository.findOneBy({ activationToken: req.params.token });
-      if (!user) {
-        return res.status(404).contentType("text/html; charset=utf-8").send(errorTemplate);
-      }
-      const password = randomString(32);
-      user.setPassword(password);
-      user.activationToken = null;
-      await this.userAccountRepository.save(user);
-      res.status(201).contentType("text/html; charset=utf-8").send(postTemplate(user.username, password));
-    } catch (err) {
-      next({ status: 500, errors: err });
+    const user = await this.userAccountRepository.findOneBy({ activationToken: req.params.token });
+    if (!user) {
+      res.status(404).contentType("text/html; charset=utf-8").send(errorTemplate);
+      return;
     }
+    const password = randomString(32);
+    user.setPassword(password);
+    user.activationToken = null;
+    await this.userAccountRepository.save(user);
+    res.status(201).contentType("text/html; charset=utf-8").send(postTemplate(user.username, password));
   };
 }

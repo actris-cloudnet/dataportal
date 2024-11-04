@@ -67,127 +67,111 @@ export class UploadRoutes {
     let uploadedMetadata;
     let sortedTags = [] as string[];
 
-    try {
-      const site = await this.siteRepo.findOneBy({ id: req.params.site });
-      if (!site) {
-        return next({ status: 422, errors: "Unknown site" });
-      }
-      if (instrumentUpload) {
-        dataSource = await this.instrumentInfoRepo.findOne({
-          where: { pid: body.instrumentPid },
-          relations: { instrument: true },
-        });
-        if (!dataSource) {
-          return next({ status: 422, errors: "Unknown instrument PID" });
-        }
-        body.instrument = fixInstrument(body.instrument, dataSource);
-        if (!body.instrument) {
-          return next({ status: 422, errors: "Instrument doesn't match instrument PID" });
-        }
-        UploadEntity = InstrumentUpload;
-
-        const allowedTags = new Set(dataSource.instrument.allowedTags);
-        const metadataTags = new Set(body.tags as string[]);
-        sortedTags = Array.from(metadataTags)
-          .filter((x) => allowedTags.has(x))
-          .sort();
-        if (metadataTags.size != sortedTags.length) {
-          return next({ status: 422, errors: "Unknown tag" });
-        }
-      } else {
-        dataSource = await this.modelRepo.findOneBy({ id: body.model });
-        if (!dataSource) {
-          return next({ status: 422, errors: "Unknown model" });
-        }
-        UploadEntity = ModelUpload;
-      }
-
-      const result = await this.dataSource.transaction(async (transactionalEntityManager) => {
-        // First search row by checksum.
-        const uploadByChecksum = await transactionalEntityManager.findOneBy(UploadEntity, { checksum: body.checksum });
-        if (uploadByChecksum) {
-          if (uploadByChecksum.status === Status.CREATED) {
-            // Remove the existing row so that we can insert or update a row
-            // with the same checksum.
-            await transactionalEntityManager.remove(UploadEntity, uploadByChecksum);
-          } else {
-            return { status: 409, errors: "File already uploaded" };
-          }
-        }
-
-        // Secondly search row by other unique columns.
-        const params = { site: { id: site.id }, measurementDate: body.measurementDate, filename: filename };
-        const payload = instrumentUpload
-          ? ({
-              ...params,
-              instrument: { id: body.instrument },
-              instrumentPid: body.instrumentPid,
-              tags: ArrayEqual(sortedTags),
-            } satisfies FindOptionsWhere<InstrumentUpload>)
-          : ({ ...params, model: { id: body.model } } satisfies FindOptionsWhere<ModelUpload>);
-
-        // If a matching row exists, update it.
-        const uploadByParams = await transactionalEntityManager.findOneBy(UploadEntity, payload);
-        if (uploadByParams) {
-          await transactionalEntityManager.update(UploadEntity, uploadByParams.uuid, {
-            checksum: body.checksum,
-            updatedAt: new Date(),
-            status: Status.CREATED,
-          });
-          return { status: 200 };
-        }
-
-        // If no matching row was found, insert a new one.
-        const args = { ...params, site, checksum: body.checksum, status: Status.CREATED };
-        if (instrumentUpload) {
-          uploadedMetadata = new InstrumentUpload(args, dataSource as InstrumentInfo, sortedTags);
-        } else {
-          uploadedMetadata = new ModelUpload(args, dataSource as Model);
-        }
-        await transactionalEntityManager.insert(UploadEntity, uploadedMetadata);
-        return { status: 200 };
+    const site = await this.siteRepo.findOneBy({ id: req.params.site });
+    if (!site) {
+      return next({ status: 422, errors: "Unknown site" });
+    }
+    if (instrumentUpload) {
+      dataSource = await this.instrumentInfoRepo.findOne({
+        where: { pid: body.instrumentPid },
+        relations: { instrument: true },
       });
-
-      if (result.status >= 200 && result.status < 300) {
-        return res.sendStatus(result.status);
-      } else {
-        return next(result);
+      if (!dataSource) {
+        return next({ status: 422, errors: "Unknown instrument PID" });
       }
-    } catch (err: any) {
-      console.error("Unknown error", err);
-      return next({ status: 500, errors: `Internal server error: ${err.code}` });
+      body.instrument = fixInstrument(body.instrument, dataSource);
+      if (!body.instrument) {
+        return next({ status: 422, errors: "Instrument doesn't match instrument PID" });
+      }
+      UploadEntity = InstrumentUpload;
+
+      const allowedTags = new Set(dataSource.instrument.allowedTags);
+      const metadataTags = new Set(body.tags as string[]);
+      sortedTags = Array.from(metadataTags)
+        .filter((x) => allowedTags.has(x))
+        .sort();
+      if (metadataTags.size != sortedTags.length) {
+        return next({ status: 422, errors: "Unknown tag" });
+      }
+    } else {
+      dataSource = await this.modelRepo.findOneBy({ id: body.model });
+      if (!dataSource) {
+        return next({ status: 422, errors: "Unknown model" });
+      }
+      UploadEntity = ModelUpload;
+    }
+
+    const result = await this.dataSource.transaction(async (transactionalEntityManager) => {
+      // First search row by checksum.
+      const uploadByChecksum = await transactionalEntityManager.findOneBy(UploadEntity, { checksum: body.checksum });
+      if (uploadByChecksum) {
+        if (uploadByChecksum.status === Status.CREATED) {
+          // Remove the existing row so that we can insert or update a row
+          // with the same checksum.
+          await transactionalEntityManager.remove(UploadEntity, uploadByChecksum);
+        } else {
+          return { status: 409, errors: "File already uploaded" };
+        }
+      }
+
+      // Secondly search row by other unique columns.
+      const params = { site: { id: site.id }, measurementDate: body.measurementDate, filename: filename };
+      const payload = instrumentUpload
+        ? ({
+            ...params,
+            instrument: { id: body.instrument },
+            instrumentPid: body.instrumentPid,
+            tags: ArrayEqual(sortedTags),
+          } satisfies FindOptionsWhere<InstrumentUpload>)
+        : ({ ...params, model: { id: body.model } } satisfies FindOptionsWhere<ModelUpload>);
+
+      // If a matching row exists, update it.
+      const uploadByParams = await transactionalEntityManager.findOneBy(UploadEntity, payload);
+      if (uploadByParams) {
+        await transactionalEntityManager.update(UploadEntity, uploadByParams.uuid, {
+          checksum: body.checksum,
+          updatedAt: new Date(),
+          status: Status.CREATED,
+        });
+        return { status: 200 };
+      }
+
+      // If no matching row was found, insert a new one.
+      const args = { ...params, site, checksum: body.checksum, status: Status.CREATED };
+      if (instrumentUpload) {
+        uploadedMetadata = new InstrumentUpload(args, dataSource as InstrumentInfo, sortedTags);
+      } else {
+        uploadedMetadata = new ModelUpload(args, dataSource as Model);
+      }
+      await transactionalEntityManager.insert(UploadEntity, uploadedMetadata);
+      return { status: 200 };
+    });
+
+    if (result.status >= 200 && result.status < 300) {
+      return res.sendStatus(result.status);
+    } else {
+      return next(result);
     }
   };
 
   updateMetadata: RequestHandler = async (req: Request, res: Response, next) => {
     const partialUpload = req.body;
     if (!partialUpload.uuid) return next({ status: 422, errors: "Request body is missing uuid" });
-    try {
-      const upload = await this.findAnyUpload((repo, model) =>
-        repo.findOne({ where: { uuid: partialUpload.uuid }, relations: ["site", model ? "model" : "instrument"] }),
-      );
-      if (!upload) return next({ status: 422, errors: "No file matches the provided uuid" });
-      await this.findRepoForUpload(upload).update({ uuid: partialUpload.uuid }, partialUpload);
-      res.sendStatus(200);
-    } catch (err: any) {
-      console.error("Unknown error", err);
-      return next({ status: 500, errors: `Internal server error: ${err.code}` });
-    }
+    const upload = await this.findAnyUpload((repo, model) =>
+      repo.findOne({ where: { uuid: partialUpload.uuid }, relations: ["site", model ? "model" : "instrument"] }),
+    );
+    if (!upload) return next({ status: 422, errors: "No file matches the provided uuid" });
+    await this.findRepoForUpload(upload).update({ uuid: partialUpload.uuid }, partialUpload);
+    res.sendStatus(200);
   };
 
   metadata: RequestHandler = async (req: Request, res: Response, next) => {
     const checksum = req.params.checksum;
-    this.findAnyUpload((repo, model) =>
+    const upload = await this.findAnyUpload((repo, model) =>
       repo.findOne({ where: { checksum: checksum }, relations: ["site", model ? "model" : "instrument"] }),
-    )
-      .then((upload) => {
-        if (!upload) return next({ status: 404, errors: "No metadata was found with provided id" });
-        res.send(this.augmentUploadResponse(true)(upload));
-      })
-      .catch((err: any) => {
-        console.error("Unknown error", err);
-        next({ status: 500, errors: `Internal server error: ${err.code}` });
-      });
+    );
+    if (!upload) return next({ status: 404, errors: "No metadata was found with provided id" });
+    res.send(this.augmentUploadResponse(true)(upload));
   };
 
   listMetadata = (includeS3path: boolean) => {
@@ -206,17 +190,13 @@ export class UploadRoutes {
   };
 
   listInstrumentsFromMetadata: RequestHandler = async (req: Request, res: Response, next) => {
-    try {
-      const instrumentUploads = (await this.metadataMany(
-        this.instrumentUploadRepo,
-        req.query,
-        true,
-      )) as InstrumentUpload[];
-      const reducedMetadataResponses = instrumentUploads.map((md) => new ReducedMetadataResponse(md));
-      res.send(reducedMetadataResponses);
-    } catch (error) {
-      next({ status: 500, errors: error });
-    }
+    const instrumentUploads = (await this.metadataMany(
+      this.instrumentUploadRepo,
+      req.query,
+      true,
+    )) as InstrumentUpload[];
+    const reducedMetadataResponses = instrumentUploads.map((md) => new ReducedMetadataResponse(md));
+    res.send(reducedMetadataResponses);
   };
 
   putData: RequestHandler = async (req: Request, res: Response, next) => {

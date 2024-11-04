@@ -201,10 +201,10 @@ async function createServer(): Promise<void> {
   );
   app.get("/api/collection/:uuid", middleware.validateUuidParam, collRoutes.collection);
   app.post("/api/generate-pid", rateLimit({ windowMs: 60 * 1000, limit: 10 }), express.json(), collRoutes.generatePid);
-  app.get("/api/download/product/:uuid/*", middleware.validateUuidParam, dlRoutes.product);
-  app.get("/api/download/raw/:uuid/*", middleware.validateUuidParam, dlRoutes.raw);
+  app.get("/api/download/product/:uuid/*filename", middleware.validateUuidParam, dlRoutes.product);
+  app.get("/api/download/raw/:uuid/*filename", middleware.validateUuidParam, dlRoutes.raw);
   app.get("/api/download/collection/:uuid", middleware.validateUuidParam, dlRoutes.collection);
-  app.get("/api/download/image/*", dlRoutes.image);
+  app.get("/api/download/image/*filename", dlRoutes.image);
   app.get("/api/quality/:uuid", middleware.validateUuidParam, qualityRoutes.qualityReport);
   app.get(
     "/api/reference/:uuid/:type",
@@ -279,12 +279,12 @@ async function createServer(): Promise<void> {
   app.post("/credentials/:token", userActivationRoutes.post);
 
   // private
-  app.put("/files/*", express.json(), fileRoutes.putFile);
+  app.put("/files/*filename", express.json(), fileRoutes.putFile);
   app.post("/files/", express.json(), fileRoutes.postFile);
   app.post("/upload-metadata", express.json(), uploadRoutes.updateMetadata);
   app.get("/upload-metadata", express.json(), uploadRoutes.listMetadata(true));
   app.get("/upload-model-metadata", express.json(), uploadRoutes.listMetadata(true));
-  app.put("/visualizations/*", express.json(), vizRoutes.putVisualization);
+  app.put("/visualizations/*filename", express.json(), vizRoutes.putVisualization);
   app.put("/quality/:uuid", middleware.validateUuidParam, express.json(), qualityRoutes.putQualityReport);
   app.get(
     "/api/statistics",

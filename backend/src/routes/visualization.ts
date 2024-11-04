@@ -27,9 +27,8 @@ export class VisualizationRoutes {
 
   putVisualization: RequestHandler = async (req: Request, res: Response, next) => {
     const body = req.body;
-    const s3key = req.params[0];
     try {
-      await checkFileExists(getS3pathForImage(s3key));
+      await checkFileExists(getS3pathForImage(req.params.filename));
     } catch (err) {
       return next({ status: 400, errors: err });
     }
@@ -39,40 +38,32 @@ export class VisualizationRoutes {
     if (!body.variableId) {
       return next({ status: 400, errors: "variableId is missing" });
     }
-    try {
-      const [file, productVariable] = await Promise.all([
-        this.fileController.findAnyFile((repo) => repo.findOne({ where: { uuid: body.sourceFileId } })),
-        this.productVariableRepo.findOneBy({ id: body.variableId }),
-      ]);
-      if (!file) {
-        return next({ status: 400, errors: "Source file not found" });
-      }
-      if (!productVariable) {
-        return next({ status: 400, errors: "Variable not found" });
-      }
-
-      if (file instanceof ModelFile) {
-        const viz = new ModelVisualization(req.params[0], file, productVariable, body.dimensions);
-        await this.modelVisualizationRepo.save(viz);
-      } else {
-        const viz = new Visualization(req.params[0], file, productVariable, body.dimensions);
-        await this.visualizationRepo.save(viz);
-      }
-
-      res.sendStatus(201);
-    } catch (err) {
-      next({ status: 500, errors: err });
+    const [file, productVariable] = await Promise.all([
+      this.fileController.findAnyFile((repo) => repo.findOne({ where: { uuid: body.sourceFileId } })),
+      this.productVariableRepo.findOneBy({ id: body.variableId }),
+    ]);
+    if (!file) {
+      return next({ status: 400, errors: "Source file not found" });
     }
+    if (!productVariable) {
+      return next({ status: 400, errors: "Variable not found" });
+    }
+
+    if (file instanceof ModelFile) {
+      const viz = new ModelVisualization(req.params[0], file, productVariable, body.dimensions);
+      await this.modelVisualizationRepo.save(viz);
+    } else {
+      const viz = new Visualization(req.params[0], file, productVariable, body.dimensions);
+      await this.visualizationRepo.save(viz);
+    }
+
+    res.sendStatus(201);
   };
 
   visualization: RequestHandler = async (req: Request, res: Response, next) => {
     const query = req.query;
-    try {
-      const visualizations = await this.getManyVisualizations(query);
-      res.send(visualizations.map((file) => new VisualizationResponse(file)));
-    } catch (err) {
-      next({ status: 500, errors: err });
-    }
+    const visualizations = await this.getManyVisualizations(query);
+    res.send(visualizations.map((file) => new VisualizationResponse(file)));
   };
 
   visualizationForSourceFile: RequestHandler = async (req: Request, res: Response, next) => {
@@ -89,29 +80,21 @@ export class VisualizationRoutes {
       return hideTestDataFromNormalUsers(qb, req).getOne();
     };
 
-    try {
-      const file = await this.fileController.findAnyFile(fetchVisualizationsForSourceFile);
-      if (!file) {
-        return next({ status: 404, errors: ["No files match the query"], params });
-      }
-      res.send(new VisualizationResponse(file));
-    } catch (err) {
-      next({ status: 500, errors: err });
+    const file = await this.fileController.findAnyFile(fetchVisualizationsForSourceFile);
+    if (!file) {
+      return next({ status: 404, errors: ["No files match the query"], params });
     }
+    res.send(new VisualizationResponse(file));
   };
 
   deleteVisualizations: RequestHandler = async (req: Request, res: Response, next) => {
     const uuid = req.params.uuid;
     const images = req.query.images as string[];
-    try {
-      const file = await this.fileController.findAnyFile((repo) => repo.findOne({ where: { uuid } }));
-      if (!file) return next({ status: 422, errors: ["No file matches the provided uuid"] });
-      const visuRepo = file instanceof RegularFile ? this.visualizationRepo : this.modelVisualizationRepo;
-      await visuRepo.delete({ sourceFile: { uuid }, productVariable: In(images) });
-      res.sendStatus(200);
-    } catch (e) {
-      return next({ status: 500, errors: e });
-    }
+    const file = await this.fileController.findAnyFile((repo) => repo.findOne({ where: { uuid } }));
+    if (!file) return next({ status: 422, errors: ["No file matches the provided uuid"] });
+    const visuRepo = file instanceof RegularFile ? this.visualizationRepo : this.modelVisualizationRepo;
+    await visuRepo.delete({ sourceFile: { uuid }, productVariable: In(images) });
+    res.sendStatus(200);
   };
 
   private getManyVisualizations(query: any) {
