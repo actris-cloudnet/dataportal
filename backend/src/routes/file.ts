@@ -74,114 +74,94 @@ export class FileRoutes {
       return hideTestDataFromNormalUsers(qb, req).getOne();
     };
 
-    try {
-      const file = await this.findAnyFile(getFileByUuid);
-      if (!file) {
-        return next({ status: 404, errors: ["No files match this UUID"] });
-      }
-      res.send(augmentFile(false)(file));
-    } catch (err) {
-      next({ status: 500, errors: err });
+    const file = await this.findAnyFile(getFileByUuid);
+    if (!file) {
+      return next({ status: 404, errors: ["No files match this UUID"] });
     }
+    res.send(augmentFile(false)(file));
   };
 
   fileVersions: RequestHandler = async (req: Request, res: Response, next) => {
     const getFileByUuid = (repo: Repository<RegularFile> | Repository<ModelFile>, _isModel: boolean | undefined) =>
       repo.createQueryBuilder("file").where("file.uuid = :uuid", req.params).getOne();
 
-    try {
-      const select: any = ["uuid", "createdAt"];
-      const allowedProps = ["pid", "dvasId", "legacy", "checksum", "size", "format"];
-      const extraProps = toArray(req.query.properties as any) || [];
-      const unknownProps = [];
-      for (const prop of extraProps) {
-        if (allowedProps.includes(prop)) {
-          select.push(prop);
-        } else {
-          unknownProps.push(prop);
-        }
+    const select: any = ["uuid", "createdAt"];
+    const allowedProps = ["pid", "dvasId", "legacy", "checksum", "size", "format"];
+    const extraProps = toArray(req.query.properties as any) || [];
+    const unknownProps = [];
+    for (const prop of extraProps) {
+      if (allowedProps.includes(prop)) {
+        select.push(prop);
+      } else {
+        unknownProps.push(prop);
       }
-      if (unknownProps.length > 0) {
-        return next({
-          status: 400,
-          errors: [`Unknown values in properties query parameter: ${unknownProps.join(", ")}`],
-        });
-      }
-
-      const file = await this.findAnyFile(getFileByUuid);
-      if (!file) {
-        return next({ status: 404, errors: ["No files match this UUID"] });
-      }
-      const repo = file instanceof RegularFile ? this.fileRepo : this.modelFileRepo;
-      const versions = await repo.find({
-        select,
-        where: { s3key: s3Key(file), tombstoneReason: IsNull() },
-        order: { createdAt: "DESC" },
-      });
-      res.send(versions);
-    } catch (err) {
-      next({ status: 500, errors: err });
     }
+    if (unknownProps.length > 0) {
+      return next({
+        status: 400,
+        errors: [`Unknown values in properties query parameter: ${unknownProps.join(", ")}`],
+      });
+    }
+
+    const file = await this.findAnyFile(getFileByUuid);
+    if (!file) {
+      return next({ status: 404, errors: ["No files match this UUID"] });
+    }
+    const repo = file instanceof RegularFile ? this.fileRepo : this.modelFileRepo;
+    const versions = await repo.find({
+      select,
+      where: { s3key: s3Key(file), tombstoneReason: IsNull() },
+      order: { createdAt: "DESC" },
+    });
+    res.send(versions);
   };
 
   files: RequestHandler = async (req: Request, res: Response, next) => {
-    const query = req.query as any;
-    try {
-      const stream = await this.filesQueryBuilder(query, "file").stream();
-      streamHandler(stream, res, "file", augmentFile(query.s3path));
-    } catch (err) {
-      next({ status: 500, errors: err });
-    }
+    const query = res.locals;
+    const stream = await this.filesQueryBuilder(query, "file").stream();
+    streamHandler(stream, res, "file", augmentFile(query.s3path));
   };
 
   modelFiles: RequestHandler = async (req: Request, res: Response, next) => {
-    const query = req.query as any;
-    try {
-      const stream = await this.filesQueryBuilder(query, "model").stream();
-      streamHandler(stream, res, "file", augmentFile(query.s3path));
-    } catch (err) {
-      next({ status: 500, errors: err });
-    }
+    const query = res.locals;
+    const stream = await this.filesQueryBuilder(query, "model").stream();
+    streamHandler(stream, res, "file", augmentFile(query.s3path));
   };
 
   search: RequestHandler = async (req: Request, res: Response, next) => {
-    const query = req.query as any;
+    const query = res.locals;
     const converterFunction = query.properties
       ? convertToReducedResponse(toArray(query.properties) as (keyof SearchFileResponse)[])
       : convertToSearchResponse;
 
-    try {
-      const qb = this.searchFilesQueryBuilder(query);
-      if ("page" in query) {
-        const currentPage = parseInt(query.page);
-        const pageSize = "pageSize" in query ? parseInt(query.pageSize) : 15;
-        const offset = (currentPage - 1) * pageSize;
-        const sizeQb = qb.clone().select("SUM(size)", "totalBytes").orderBy();
-        const pageQb = qb.clone().limit(pageSize).offset(offset);
-        const [totalItems, size, pageItems] = await Promise.all([qb.getCount(), sizeQb.getRawOne(), pageQb.getMany()]);
-        const totalPages = Math.ceil(totalItems / pageSize);
-        res.send({
-          results: pageItems,
-          pagination: {
-            totalItems,
-            totalPages,
-            totalBytes: parseInt(size.totalBytes),
-            currentPage,
-            pageSize,
-          },
-        });
-      } else {
-        const stream = await qb.stream();
-        streamHandler(stream, res, "file", converterFunction);
-      }
-    } catch (err) {
-      next({ status: 500, errors: err });
+    const qb = this.searchFilesQueryBuilder(query);
+    if ("page" in query) {
+      const currentPage = parseInt(query.page);
+      const pageSize = "pageSize" in query ? parseInt(query.pageSize) : 15;
+      const offset = (currentPage - 1) * pageSize;
+      const sizeQb = qb.clone().select("SUM(size)", "totalBytes").orderBy();
+      const pageQb = qb.clone().limit(pageSize).offset(offset);
+      const [totalItems, size, pageItems] = await Promise.all([qb.getCount(), sizeQb.getRawOne(), pageQb.getMany()]);
+      const totalPages = Math.ceil(totalItems / pageSize);
+      res.send({
+        results: pageItems,
+        pagination: {
+          totalItems,
+          totalPages,
+          totalBytes: parseInt(size.totalBytes),
+          currentPage,
+          pageSize,
+        },
+      });
+    } else {
+      const stream = await qb.stream();
+      streamHandler(stream, res, "file", converterFunction);
     }
   };
 
   putFile: RequestHandler = async (req: Request, res: Response, next) => {
     const file = req.body;
-    file.s3key = req.params[0];
+    file.s3key = (req.params.s3key as unknown as string[]).join("/");
     file.updatedAt = new Date();
     if (!isFile(file))
       return next({ status: 422, errors: ["Request body is missing fields or has invalid values in them"] });
@@ -235,164 +215,157 @@ export class FileRoutes {
       }
     }
 
-    try {
-      const findFileByName = (model: boolean) => {
-        const repo = model ? this.modelFileRepo : this.fileRepo;
-        const qb = repo.createQueryBuilder("file");
-        if (!model)
-          qb.innerJoin(
-            (sub_qb) => sub_qb.from("search_file", "searchfile"),
-            "best_version",
-            "file.uuid = best_version.uuid",
-          );
-        return qb
-          .leftJoinAndSelect("file.site", "site")
-          .where("regexp_replace(s3key, '.+/', '') = :filename", { filename: basename(file.s3key) }) // eslint-disable-line quotes
-          .getOne();
-      };
-      const existingFile = await findFileByName(isModel);
-      const searchFile = new SearchFile(file as RegularFile | ModelFile);
-      const FileClass = isModel ? ModelFile : RegularFile;
-      if (!existingFile) {
-        // New file
-        file.createdAt = file.updatedAt;
-        await this.dataSource.transaction(async (transactionalEntityManager) => {
-          if (isModel) {
-            await FileRoutes.updateModelSearchFile(transactionalEntityManager, file, searchFile);
-          } else {
-            await transactionalEntityManager.insert(SearchFile, searchFile);
-          }
-          await transactionalEntityManager.save(FileClass, file);
-        });
-        res.sendStatus(201);
-      } else if (existingFile.site.isTestSite || existingFile.volatile || isModel || file.patch) {
-        // Replace existing
-        if (existingFile.uuid != file.uuid) {
-          return next({ status: 501, errors: ["UUID should match the existing file"] });
+    const findFileByName = (model: boolean) => {
+      const repo = model ? this.modelFileRepo : this.fileRepo;
+      const qb = repo.createQueryBuilder("file");
+      if (!model)
+        qb.innerJoin(
+          (sub_qb) => sub_qb.from("search_file", "searchfile"),
+          "best_version",
+          "file.uuid = best_version.uuid",
+        );
+      return qb
+        .leftJoinAndSelect("file.site", "site")
+        .where("regexp_replace(s3key, '.+/', '') = :filename", { filename: basename(file.s3key) }) // eslint-disable-line quotes
+        .getOne();
+    };
+    const existingFile = await findFileByName(isModel);
+    const searchFile = new SearchFile(file as RegularFile | ModelFile);
+    const FileClass = isModel ? ModelFile : RegularFile;
+    if (!existingFile) {
+      // New file
+      file.createdAt = file.updatedAt;
+      await this.dataSource.transaction(async (transactionalEntityManager) => {
+        if (isModel) {
+          await FileRoutes.updateModelSearchFile(transactionalEntityManager, file, searchFile);
+        } else {
+          await transactionalEntityManager.insert(SearchFile, searchFile);
         }
-        file.createdAt = existingFile.createdAt;
-        await this.dataSource.transaction(async (transactionalEntityManager) => {
-          await transactionalEntityManager.save(FileClass, file);
-          await transactionalEntityManager.update(SearchFile, { uuid: file.uuid }, searchFile);
-        });
-        res.sendStatus(200);
-      } else if (existingFile.uuid != file.uuid) {
-        // New version
-        await this.dataSource.transaction(async (transactionalEntityManager) => {
-          file.createdAt = file.updatedAt;
-          await transactionalEntityManager.save(FileClass, file);
-          if (!file.legacy) {
-            // Don't display legacy files in search if cloudnet version is available
-            await transactionalEntityManager.delete(SearchFile, { uuid: existingFile.uuid });
-            await transactionalEntityManager.insert(SearchFile, searchFile);
-          }
-        });
-        res.sendStatus(200);
-      } else {
-        next({
-          status: 403,
-          errors: ["File exists and cannot be updated since it is freezed and not from a test site"],
-        });
+        await transactionalEntityManager.save(FileClass, file);
+      });
+      res.sendStatus(201);
+    } else if (existingFile.site.isTestSite || existingFile.volatile || isModel || file.patch) {
+      // Replace existing
+      if (existingFile.uuid != file.uuid) {
+        return next({ status: 501, errors: ["UUID should match the existing file"] });
       }
-    } catch (e) {
-      next({ status: 500, errors: e });
+      file.createdAt = existingFile.createdAt;
+      await this.dataSource.transaction(async (transactionalEntityManager) => {
+        await transactionalEntityManager.save(FileClass, file);
+        await transactionalEntityManager.update(SearchFile, { uuid: file.uuid }, searchFile);
+      });
+      res.sendStatus(200);
+    } else if (existingFile.uuid != file.uuid) {
+      // New version
+      await this.dataSource.transaction(async (transactionalEntityManager) => {
+        file.createdAt = file.updatedAt;
+        await transactionalEntityManager.save(FileClass, file);
+        if (!file.legacy) {
+          // Don't display legacy files in search if cloudnet version is available
+          await transactionalEntityManager.delete(SearchFile, { uuid: existingFile.uuid });
+          await transactionalEntityManager.insert(SearchFile, searchFile);
+        }
+      });
+      res.sendStatus(200);
+    } else {
+      next({
+        status: 403,
+        errors: ["File exists and cannot be updated since it is freezed and not from a test site"],
+      });
     }
   };
 
   postFile: RequestHandler = async (req: Request, res: Response, next) => {
     const partialFile = req.body;
     if (!partialFile.uuid) return next({ status: 422, errors: ["Request body is missing uuid"] });
-    try {
-      const existingFile = await this.findAnyFile((repo) => repo.findOne({ where: { uuid: partialFile.uuid } }));
-      if (!existingFile) return next({ status: 422, errors: ["No file matches the provided uuid"] });
-      const repo = existingFile instanceof RegularFile ? this.fileRepo : this.modelFileRepo;
-      await repo.update({ uuid: partialFile.uuid }, partialFile);
-      ["pid", "checksum", "version", "dvasUpdatedAt", "dvasId"].forEach((prop) => {
-        // Not in SearchFile
-        if (prop in partialFile) {
-          delete partialFile[prop];
-        }
-      });
-      if (await this.searchFileRepo.findOneBy({ uuid: partialFile.uuid }))
-        await this.searchFileRepo.update({ uuid: partialFile.uuid }, partialFile);
-      res.sendStatus(200);
-    } catch (e) {
-      return next({ status: 500, errors: e });
-    }
+    const existingFile = await this.findAnyFile((repo) => repo.findOne({ where: { uuid: partialFile.uuid } }));
+    if (!existingFile) return next({ status: 422, errors: ["No file matches the provided uuid"] });
+    const repo = existingFile instanceof RegularFile ? this.fileRepo : this.modelFileRepo;
+    await repo.update({ uuid: partialFile.uuid }, partialFile);
+    ["pid", "checksum", "version", "dvasUpdatedAt", "dvasId"].forEach((prop) => {
+      // Not in SearchFile
+      if (prop in partialFile) {
+        delete partialFile[prop];
+      }
+    });
+    if (await this.searchFileRepo.findOneBy({ uuid: partialFile.uuid }))
+      await this.searchFileRepo.update({ uuid: partialFile.uuid }, partialFile);
+    res.sendStatus(200);
   };
 
   deleteFile: RequestHandler = async (req: Request, res: Response, next) => {
-    const query: any = req.query;
-    const dryRun = query.dryRun;
-    const uuid = req.params.uuid;
-    const tombstoneReason = query.tombstoneReason;
-
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
     try {
-      const file = await this.simpleFindAnyFile(queryRunner, {
-        where: { uuid },
-        relations: { product: true, site: true },
-      });
-      if (!file) {
-        await queryRunner.rollbackTransaction();
-        return next({ status: 422, errors: ["No file matches the provided uuid"] });
-      }
-      if (!dryRun && !tombstoneReason && file.pid) {
-        await queryRunner.rollbackTransaction();
-        return next({
-          status: 422,
-          errors: ["Forbidden to delete file with PID without specifying tombstone reason"],
+      const query = res.locals;
+      const dryRun = query.dryRun;
+      const uuid = req.params.uuid;
+      const tombstoneReason = query.tombstoneReason;
+
+      const queryRunner = this.dataSource.createQueryRunner();
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      try {
+        const file = await this.simpleFindAnyFile(queryRunner, {
+          where: { uuid },
+          relations: { product: true, site: true },
         });
-      }
-      const uuids = await this.getDerivedProducts(queryRunner, file);
-      const derivedFiles = await queryRunner.manager.find(RegularFile, {
-        where: { uuid: In(uuids) },
-        relations: { product: true, site: true },
-      });
-      if (!dryRun) {
-        if (query.deleteHigherProducts && derivedFiles.length > 0) {
-          if (!tombstoneReason && derivedFiles.some((product) => product.pid)) {
-            await queryRunner.rollbackTransaction();
-            return next({
-              status: 422,
-              errors: ["Forbidden to delete derived files having PID without specifying tombstone reason"],
-            });
-          }
-          for (const derivedFile of derivedFiles) {
-            const allVersions = await this.fetchValidVersions(queryRunner, derivedFile);
-            await this.deleteFileEntity(queryRunner, derivedFile, tombstoneReason);
-            await this.updateSearchFile(queryRunner, derivedFile, allVersions);
-          }
+        if (!file) {
+          await queryRunner.rollbackTransaction();
+          return next({ status: 422, errors: ["No file matches the provided uuid"] });
         }
-        const allVersions = await this.fetchValidVersions(queryRunner, file);
-        await this.deleteFileEntity(queryRunner, file, tombstoneReason);
-        await this.updateSearchFile(queryRunner, file, allVersions);
+        if (!dryRun && !tombstoneReason && file.pid) {
+          await queryRunner.rollbackTransaction();
+          return next({
+            status: 422,
+            errors: ["Forbidden to delete file with PID without specifying tombstone reason"],
+          });
+        }
+        const uuids = await this.getDerivedProducts(queryRunner, file);
+        const derivedFiles = await queryRunner.manager.find(RegularFile, {
+          where: { uuid: In(uuids) },
+          relations: { product: true, site: true },
+        });
+        if (!dryRun) {
+          if (query.deleteHigherProducts && derivedFiles.length > 0) {
+            if (!tombstoneReason && derivedFiles.some((product) => product.pid)) {
+              await queryRunner.rollbackTransaction();
+              return next({
+                status: 422,
+                errors: ["Forbidden to delete derived files having PID without specifying tombstone reason"],
+              });
+            }
+            for (const derivedFile of derivedFiles) {
+              const allVersions = await this.fetchValidVersions(queryRunner, derivedFile);
+              await this.deleteFileEntity(queryRunner, derivedFile, tombstoneReason);
+              await this.updateSearchFile(queryRunner, derivedFile, allVersions);
+            }
+          }
+          const allVersions = await this.fetchValidVersions(queryRunner, file);
+          await this.deleteFileEntity(queryRunner, file, tombstoneReason);
+          await this.updateSearchFile(queryRunner, file, allVersions);
+        }
+        await queryRunner.commitTransaction();
+        res.send([file, ...derivedFiles]);
+      } catch (e) {
+        await queryRunner.rollbackTransaction();
+        return next({ status: 500, errors: e });
+      } finally {
+        await queryRunner.release();
       }
-      await queryRunner.commitTransaction();
-      res.send([file, ...derivedFiles]);
-    } catch (e) {
-      await queryRunner.rollbackTransaction();
-      return next({ status: 500, errors: e });
-    } finally {
-      await queryRunner.release();
+    } catch (err) {
+      console.error("FATAL", err);
+      throw err;
     }
   };
 
-  allfiles: RequestHandler = async (req: Request, res: Response, next) =>
-    this.fileRepo
-      .find({ relations: { site: true, product: true } })
-      .then((result) => res.send(sortByMeasurementDateAsc(result).map(augmentFile(false))))
-      .catch((err) => next({ status: 500, errors: err }));
+  allfiles: RequestHandler = async (req: Request, res: Response, next) => {
+    const result = await this.fileRepo.find({ relations: { site: true, product: true } });
+    res.send(sortByMeasurementDateAsc(result).map(augmentFile(false)));
+  };
 
-  allsearch: RequestHandler = async (req: Request, res: Response, next) =>
-    this.searchFileRepo
-      .find({ relations: { site: true, product: true } })
-      .then((result) => {
-        res.send(sortByMeasurementDateAsc(result).map(convertToSearchResponse));
-      })
-      .catch((err) => next({ status: 500, errors: err }));
+  allsearch: RequestHandler = async (req: Request, res: Response, next) => {
+    const result = await this.searchFileRepo.find({ relations: { site: true, product: true } });
+    res.send(sortByMeasurementDateAsc(result).map(convertToSearchResponse));
+  };
 
   filesQueryBuilder(query: any, mode: "file" | "model") {
     const isModel = mode == "model";
@@ -569,13 +542,7 @@ export class FileRoutes {
 
   dateforsize: RequestHandler = async (req, res, next) => {
     const isModel = "model" in req.query;
-    return dateforsize(
-      isModel ? this.modelFileRepo : this.fileRepo,
-      isModel ? "model_file" : "regular_file",
-      req,
-      res,
-      next,
-    );
+    dateforsize(isModel ? this.modelFileRepo : this.fileRepo, isModel ? "model_file" : "regular_file", req, res, next);
   };
 
   private async deleteFileEntity(queryRunner: QueryRunner, file: File, tombstoneReason?: string) {

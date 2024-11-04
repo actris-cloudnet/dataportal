@@ -15,28 +15,24 @@ export class StatisticsRoutes {
   readonly dataSource: DataSource;
 
   getStatistics: RequestHandler = async (req, res, next) => {
-    try {
-      switch (req.query.dimensions) {
-        case "yearMonth,downloads":
-        case "year,downloads":
-        case "yearMonth,uniqueIps":
-        case "year,uniqueIps":
-        case "country,downloads":
-          return this.downloadStats(req, res, next);
-        case "yearMonth,curatedData":
-        case "year,curatedData":
-          return this.curatedDataStats(req, res, next);
-        case "yearMonth,visits":
-          return this.matomoStats(req, res, next, this.visitsByPeriod.bind(this, "month"));
-        case "year,visits":
-          return this.matomoStats(req, res, next, this.visitsByPeriod.bind(this, "year"));
-        case "country,visits":
-          return this.matomoStats(req, res, next, this.visitsByCountry.bind(this));
-        default:
-          return next({ status: 400, errors: "invalid dimensions" });
-      }
-    } catch (e) {
-      return next({ status: 500, errors: e });
+    switch (req.query.dimensions) {
+      case "yearMonth,downloads":
+      case "year,downloads":
+      case "yearMonth,uniqueIps":
+      case "year,uniqueIps":
+      case "country,downloads":
+        return this.downloadStats(req, res, next);
+      case "yearMonth,curatedData":
+      case "year,curatedData":
+        return this.curatedDataStats(req, res, next);
+      case "yearMonth,visits":
+        return this.matomoStats(req, res, next, this.visitsByPeriod.bind(this, "month"));
+      case "year,visits":
+        return this.matomoStats(req, res, next, this.visitsByPeriod.bind(this, "year"));
+      case "country,visits":
+        return this.matomoStats(req, res, next, this.visitsByCountry.bind(this));
+      default:
+        return next({ status: 400, errors: "invalid dimensions" });
     }
   };
 

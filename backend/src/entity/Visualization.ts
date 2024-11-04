@@ -40,8 +40,8 @@ export class Visualization {
   @Column({ type: "smallint", nullable: true })
   marginLeft: number | null;
 
-  constructor(filename: string, sourceFile: RegularFile, productVariable: ProductVariable, dimensions?: Dimensions) {
-    this.s3key = filename;
+  constructor(s3key: string, sourceFile: RegularFile, productVariable: ProductVariable, dimensions?: Dimensions) {
+    this.s3key = s3key;
     this.sourceFile = sourceFile;
     this.productVariable = productVariable;
     this.width = dimensions ? dimensions.width : null;

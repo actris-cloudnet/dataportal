@@ -28,59 +28,51 @@ export class CalibrationRoutes {
 
   calibration: RequestHandler = async (req, res, next) => {
     const query = req.query as unknown as QueryParams;
-    try {
-      if (query.date) {
-        if (!isValidDate(query.date)) {
-          return next({ status: 400, errors: "date is invalid" });
-        }
-        const calib = await fetchCalibration(this.calibRepo, query.instrumentPid, query.date);
-        if (!calib) {
-          return next({ status: 404, errors: "Calibration data not found" });
-        }
-        res.send({
-          createdAt: calib.createdAt,
-          updatedAt: calib.updatedAt,
-          measurementDate: calib.measurementDate,
-          data: calib.data,
-        });
-      } else {
-        const calib = await this.calibRepo.find({
-          where: {
-            instrumentPid: query.instrumentPid,
-          },
-          order: { measurementDate: "ASC" },
-        });
-
-        if (!calib || calib.length === 0) {
-          return next({ status: 404, errors: "Calibration data not found" });
-        }
-
-        res.send(
-          calib.map((c) => ({
-            createdAt: c.createdAt,
-            updatedAt: c.updatedAt,
-            measurementDate: c.measurementDate,
-            data: c.data,
-          })),
-        );
+    if (query.date) {
+      if (!isValidDate(query.date)) {
+        return next({ status: 400, errors: "date is invalid" });
       }
-    } catch (e) {
-      next({ status: 500, errors: e });
+      const calib = await fetchCalibration(this.calibRepo, query.instrumentPid, query.date);
+      if (!calib) {
+        return next({ status: 404, errors: "Calibration data not found" });
+      }
+      res.send({
+        createdAt: calib.createdAt,
+        updatedAt: calib.updatedAt,
+        measurementDate: calib.measurementDate,
+        data: calib.data,
+      });
+    } else {
+      const calib = await this.calibRepo.find({
+        where: {
+          instrumentPid: query.instrumentPid,
+        },
+        order: { measurementDate: "ASC" },
+      });
+
+      if (!calib || calib.length === 0) {
+        return next({ status: 404, errors: "Calibration data not found" });
+      }
+
+      res.send(
+        calib.map((c) => ({
+          createdAt: c.createdAt,
+          updatedAt: c.updatedAt,
+          measurementDate: c.measurementDate,
+          data: c.data,
+        })),
+      );
     }
   };
 
   putCalibration: RequestHandler = async (req, res, next) => {
     const query = req.query as unknown as QueryParams;
-    try {
-      const calib = new Calibration();
-      calib.instrumentPid = query.instrumentPid;
-      calib.measurementDate = query.date;
-      calib.data = req.body;
-      await this.calibRepo.save(calib);
-      return res.sendStatus(200);
-    } catch (err) {
-      return next({ status: 500, errors: err });
-    }
+    const calib = new Calibration();
+    calib.instrumentPid = query.instrumentPid;
+    calib.measurementDate = query.date;
+    calib.data = req.body;
+    await this.calibRepo.save(calib);
+    res.sendStatus(200);
   };
 }
 

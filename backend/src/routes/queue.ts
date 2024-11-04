@@ -29,145 +29,110 @@ export class QueueRoutes {
   }
 
   submitBatch: RequestHandler = async (req, res, next) => {
-    try {
-      const searchParams = req.body;
-      await Promise.all([
-        this.checkParam(this.siteRepo, "id", searchParams, "siteIds", next),
-        this.checkParam(this.productRepo, "id", searchParams, "productIds", next),
-        this.checkParam(this.instrumentRepo, "id", searchParams, "instrumentIds", next),
-        this.checkParam(this.modelRepo, "id", searchParams, "modelIds", next),
-        this.checkParam(this.instrumentInfoRepo, "uuid", searchParams, "instrumentUuids", next),
-      ]);
-      if (searchParams.modelIds) {
-        if (!("productIds" in searchParams)) {
-          searchParams.productIds = ["model"];
-        } else if (searchParams.productIds.includes("model")) {
-          searchParams.productIds.push("model");
-        }
+    const searchParams = req.body;
+    await Promise.all([
+      this.checkParam(this.siteRepo, "id", searchParams, "siteIds", next),
+      this.checkParam(this.productRepo, "id", searchParams, "productIds", next),
+      this.checkParam(this.instrumentRepo, "id", searchParams, "instrumentIds", next),
+      this.checkParam(this.modelRepo, "id", searchParams, "modelIds", next),
+      this.checkParam(this.instrumentInfoRepo, "uuid", searchParams, "instrumentUuids", next),
+    ]);
+    if (searchParams.modelIds) {
+      if (!("productIds" in searchParams)) {
+        searchParams.productIds = ["model"];
+      } else if (searchParams.productIds.includes("model")) {
+        searchParams.productIds.push("model");
       }
-
-      searchParams.options = this.queueService.validateTaskOptions(searchParams.type, searchParams.options);
-      const batchId = randomName();
-      const batches = [];
-      batches.push(this.submitInstrumentBatch(searchParams, batchId));
-      if (searchParams.productIds) {
-        if (searchParams.productIds.includes("model")) {
-          batches.push(this.submitModelBatch(searchParams, batchId));
-        }
-        const products = await this.productRepo.find({
-          where: { id: In(searchParams.productIds) },
-          relations: { sourceProducts: true },
-        });
-        for (const product of products) {
-          if (product.sourceProducts.length === 0) continue;
-          batches.push(this.submitProductBatch(searchParams, batchId, product.id));
-        }
-      }
-      const counts = await Promise.all(batches);
-      res.send(searchParams.dryRun ? { taskCount: counts.reduce((total, count) => total + count, 0) } : { batchId });
-    } catch (err) {
-      console.log(err);
-      next({ status: 500, errors: err });
     }
+
+    searchParams.options = this.queueService.validateTaskOptions(searchParams.type, searchParams.options);
+    const batchId = randomName();
+    const batches = [];
+    batches.push(this.submitInstrumentBatch(searchParams, batchId));
+    if (searchParams.productIds) {
+      if (searchParams.productIds.includes("model")) {
+        batches.push(this.submitModelBatch(searchParams, batchId));
+      }
+      const products = await this.productRepo.find({
+        where: { id: In(searchParams.productIds) },
+        relations: { sourceProducts: true },
+      });
+      for (const product of products) {
+        if (product.sourceProducts.length === 0) continue;
+        batches.push(this.submitProductBatch(searchParams, batchId, product.id));
+      }
+    }
+    const counts = await Promise.all(batches);
+    res.send(searchParams.dryRun ? { taskCount: counts.reduce((total, count) => total + count, 0) } : { batchId });
   };
 
   cancelBatch: RequestHandler = async (req, res, next) => {
-    try {
-      await this.queueService.cancelBatch(req.params.batchId);
-      res.sendStatus(204);
-    } catch (err) {
-      console.log(err);
-      next({ status: 500, errors: err });
-    }
+    await this.queueService.cancelBatch(req.params.batchId);
+    res.sendStatus(204);
   };
 
   publish: RequestHandler = async (req, res, next) => {
-    try {
-      const body = req.body;
+    const body = req.body;
 
-      const task = new Task();
-      task.type = body.type;
-      task.siteId = body.siteId;
-      task.productId = body.productId;
-      task.measurementDate = body.measurementDate;
-      if (body.instrumentInfoUuid) {
-        task.instrumentInfoUuid = body.instrumentInfoUuid;
-      }
-      if (body.modelId) {
-        task.modelId = body.modelId;
-      }
-      task.scheduledAt = "scheduledAt" in body ? new Date(body.scheduledAt) : new Date();
-      task.priority = "priority" in body ? body.priority : 50;
-      task.options = body.options;
-
-      await this.queueService.publish(task);
-      res.send(task);
-    } catch (err) {
-      console.log(err);
-      next({ status: 500, errors: err });
+    const task = new Task();
+    task.type = body.type;
+    task.siteId = body.siteId;
+    task.productId = body.productId;
+    task.measurementDate = body.measurementDate;
+    if (body.instrumentInfoUuid) {
+      task.instrumentInfoUuid = body.instrumentInfoUuid;
     }
+    if (body.modelId) {
+      task.modelId = body.modelId;
+    }
+    task.scheduledAt = "scheduledAt" in body ? new Date(body.scheduledAt) : new Date();
+    task.priority = "priority" in body ? body.priority : 50;
+    task.options = body.options;
+
+    await this.queueService.publish(task);
+    res.send(task);
   };
 
   receive: RequestHandler = async (req, res, next) => {
-    try {
-      const task = await this.queueService.receive();
-      if (task) {
-        res.send(task);
-      } else {
-        res.sendStatus(204);
-      }
-    } catch (err) {
-      console.log(err);
-      next({ status: 500, errors: err });
+    const task = await this.queueService.receive();
+    if (task) {
+      res.send(task);
+    } else {
+      res.sendStatus(204);
     }
   };
 
   fail: RequestHandler = async (req, res, next) => {
-    try {
-      const id = parseInt(req.params.id);
-      await this.queueService.fail(id);
-      res.sendStatus(204);
-    } catch (err) {
-      console.log(err);
-      next({ status: 500, errors: err });
-    }
+    const id = parseInt(req.params.id);
+    await this.queueService.fail(id);
+    res.sendStatus(204);
   };
 
   complete: RequestHandler = async (req, res, next) => {
-    try {
-      const id = parseInt(req.params.id);
-      await this.queueService.complete(id);
-      res.sendStatus(204);
-    } catch (err) {
-      console.log(err);
-      next({ status: 500, errors: err });
-    }
+    const id = parseInt(req.params.id);
+    await this.queueService.complete(id);
+    res.sendStatus(204);
   };
 
   getQueue: RequestHandler = async (req, res, next) => {
-    try {
-      const batchId = req.query.batch;
-      if (typeof batchId !== "undefined" && typeof batchId !== "string") {
-        return next({ status: 400, errors: ["Invalid batch parameter"] });
-      }
-      const status = toArray(req.query.status);
-      if (typeof status !== "undefined" && (!isStringArray(status) || !status.every(isTaskStatus))) {
-        return next({ status: 400, errors: ["Invalid status parameter"] });
-      }
-      const limit = typeof req.query.limit === "string" ? parseInt(req.query.limit, 10) : undefined;
-      if (typeof limit !== "undefined" && isNaN(limit)) {
-        return next({ status: 400, errors: ["Invalid limit parameter"] });
-      }
-      const doneAfter = typeof req.query.doneAfter === "string" ? new Date(req.query.doneAfter) : undefined;
-      if (typeof doneAfter !== "undefined" && isNaN(doneAfter.getTime())) {
-        return next({ status: 400, errors: ["Invalid doneAfter parameter"] });
-      }
-      const queue = await this.queueService.getQueue({ batchId, status: status as TaskStatus[], limit, doneAfter });
-      res.send({ tasks: queue[0], totalTasks: queue[1] });
-    } catch (err) {
-      console.log(err);
-      next({ status: 500, errors: err });
+    const batchId = req.query.batch;
+    if (typeof batchId !== "undefined" && typeof batchId !== "string") {
+      return next({ status: 400, errors: ["Invalid batch parameter"] });
     }
+    const status = toArray(req.query.status);
+    if (typeof status !== "undefined" && (!isStringArray(status) || !status.every(isTaskStatus))) {
+      return next({ status: 400, errors: ["Invalid status parameter"] });
+    }
+    const limit = typeof req.query.limit === "string" ? parseInt(req.query.limit, 10) : undefined;
+    if (typeof limit !== "undefined" && isNaN(limit)) {
+      return next({ status: 400, errors: ["Invalid limit parameter"] });
+    }
+    const doneAfter = typeof req.query.doneAfter === "string" ? new Date(req.query.doneAfter) : undefined;
+    if (typeof doneAfter !== "undefined" && isNaN(doneAfter.getTime())) {
+      return next({ status: 400, errors: ["Invalid doneAfter parameter"] });
+    }
+    const queue = await this.queueService.getQueue({ batchId, status: status as TaskStatus[], limit, doneAfter });
+    res.send({ tasks: queue[0], totalTasks: queue[1] });
   };
 
   private async submitInstrumentBatch(filters: Record<string, any>, batchId: string) {

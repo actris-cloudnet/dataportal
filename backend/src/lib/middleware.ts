@@ -1,4 +1,4 @@
-import { RequestHandler } from "express";
+import { RequestHandler, Response, Request } from "express";
 import { RequestErrorArray } from "../entity/RequestError";
 import validator from "validator";
 import { Site } from "../entity/Site";
@@ -131,16 +131,17 @@ export class Middleware {
     return next();
   };
 
-  filesQueryAugmenter: RequestHandler = async (req, _res, next) => {
+  filesQueryAugmenter: RequestHandler = async (req, res, next) => {
     const query = req.query as any;
+    const path = req.path;
     const defaultSite = async () =>
       (await this.siteRepo.find())
-        .filter((site) => !(req.query.developer === undefined && site.isTestSite)) // Hide test sites
-        .filter((site) => (req.path.includes("search") ? !site.isHiddenSite : true)) // Hide hidden sites from /search
+        .filter((site) => !(query.developer === undefined && site.isTestSite)) // Hide test sites
+        .filter((site) => (path.includes("search") ? !site.isHiddenSite : true)) // Hide hidden sites from /search
         .map((site) => site.id);
     const defaultProduct = async () =>
       (await this.productRepo.find())
-        .filter((prod) => req.query.developer == "true" || prod.level != "3") // Hide experimental products
+        .filter((prod) => query.developer == "true" || prod.level != "3") // Hide experimental products
         .map((prod) => prod.id);
     const setLegacy = () => ("showLegacy" in query ? null : [false]); // Don't filter by "legacy" if showLegacy is enabled
     if (!("site" in query)) query.site = await defaultSite();
@@ -162,36 +163,33 @@ export class Middleware {
     if (query.updatedAtTo) query.updatedAtTo = new Date(query.updatedAtTo);
     if (query.updatedAtFrom) query.updatedAtFrom = new Date(query.updatedAtFrom);
     query.s3path = (query.s3path || "").toLowerCase() == "true";
+    Object.assign(res.locals, query);
     next();
   };
 
-  checkParamsExistInDb: RequestHandler = async (req: any, _res, next) => {
+  checkParamsExistInDb: RequestHandler = async (req, res, next) => {
     Promise.all([
-      this.checkSite(req),
-      this.checkParam("product", req),
-      this.checkParam("model", req),
-      this.checkParam("instrument", req),
+      this.checkSite(req, res),
+      this.checkParam("product", res),
+      this.checkParam("model", res),
+      this.checkParam("instrument", res),
     ])
       .then(() => next())
       .catch(next);
   };
 
-  private throw404Error = (param: string, req: any) => {
-    throw { status: 404, errors: [`One or more of the specified ${param}s were not found`], params: req.query };
+  private throw404Error = (param: string, res: Response) => {
+    throw { status: 404, errors: [`One or more of the specified ${param}s were not found`], params: res.locals };
   };
 
-  private checkParam = async (param: string, req: any) => {
-    if (!req.query[param]) return Promise.resolve();
-    await this.dataSource
-      .getRepository(param)
-      .findBy({ id: In(req.query[param]) })
-      .then((res) => {
-        if (res.length != req.query[param].length) this.throw404Error(param, req);
-      });
+  private checkParam = async (param: string, res: Response) => {
+    if (!res.locals[param]) return Promise.resolve();
+    const count = await this.dataSource.getRepository(param).countBy({ id: In(res.locals[param]) });
+    if (count != res.locals[param].length) this.throw404Error(param, res);
   };
 
-  checkDeleteParams: RequestHandler = async (req, _res, next) => {
-    const query: any = req.query;
+  checkDeleteParams: RequestHandler = async (req, res, next) => {
+    const query = req.query as any;
     const keys = ["deleteHigherProducts", "dryRun"];
     for (const key of keys) {
       if (!query[key]) return next({ status: 404, errors: [`Missing mandatory parameter: ${key}`] });
@@ -206,6 +204,7 @@ export class Middleware {
     ) {
       return next({ status: 400, errors: [`Invalid value for tombstoneReason: ${query.tombstoneReason}`] });
     }
+    Object.assign(res.locals, query);
     next();
   };
 
@@ -225,13 +224,12 @@ export class Middleware {
     next({ status: 404, errors: ["Invalid citation format"] });
   };
 
-  private checkSite = async (req: any) => {
-    if (!req.query["site"]) return Promise.resolve();
-    let qb = this.siteRepo.createQueryBuilder("site").select().where("site.id IN (:...site)", req.query);
+  private checkSite = async (req: Request, res: Response) => {
+    if (!res.locals.site) return Promise.resolve();
+    let qb = this.siteRepo.createQueryBuilder("site").select().where("site.id IN (:...site)", res.locals);
     qb = hideTestDataFromNormalUsers(qb, req);
-    await qb.getMany().then((res: any[]) => {
-      if (res.length != req.query.site.length) this.throw404Error("site", req);
-    });
+    const count = await qb.getCount();
+    if (count != res.locals.site.length) this.throw404Error("site", res);
   };
 
   private checkField = (key: string, query: any): string | void => {

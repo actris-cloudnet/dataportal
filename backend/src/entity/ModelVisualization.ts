@@ -32,8 +32,8 @@ export class ModelVisualization {
   @Column({ type: "smallint", nullable: true })
   marginLeft: number | null;
 
-  constructor(filename: string, sourceFile: ModelFile, productVariable: ProductVariable, dimensions?: Dimensions) {
-    this.s3key = filename;
+  constructor(s3key: string, sourceFile: ModelFile, productVariable: ProductVariable, dimensions?: Dimensions) {
+    this.s3key = s3key;
     this.sourceFile = sourceFile;
     this.productVariable = productVariable;
     this.width = dimensions ? dimensions.width : null;

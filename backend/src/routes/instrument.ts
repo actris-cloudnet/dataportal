@@ -20,127 +20,111 @@ export class InstrumentRoutes {
   readonly nominalInstrumentRepo: Repository<NominalInstrument>;
 
   instruments: RequestHandler = async (req: Request, res: Response, next) => {
-    try {
-      const instruments = await this.instrumentRepo.find({ order: { type: "ASC", id: "ASC" } });
-      res.send(instruments);
-    } catch (err) {
-      next({ status: 500, errors: err });
-    }
+    const instruments = await this.instrumentRepo.find({ order: { type: "ASC", id: "ASC" } });
+    res.send(instruments);
   };
 
   instrument: RequestHandler = async (req: Request, res: Response, next) => {
-    try {
-      const instrument = await this.instrumentRepo.findOne({
-        where: { id: req.params.instrumentId },
-        relations: { derivedProducts: true },
-      });
-      if (!instrument) {
-        return next({ status: 404, errors: ["No instrument match this id"] });
-      }
-      res.send(instrument);
-    } catch (err) {
-      next({ status: 500, errors: err });
+    const instrument = await this.instrumentRepo.findOne({
+      where: { id: req.params.instrumentId },
+      relations: { derivedProducts: true },
+    });
+    if (!instrument) {
+      return next({ status: 404, errors: ["No instrument match this id"] });
     }
+    res.send(instrument);
   };
 
   listInstrumentPids: RequestHandler = async (req, res, next) => {
-    try {
-      if ("includeSite" in req.query) {
-        const latestSite = this.instrumentUploadRepo
-          .createQueryBuilder("upload")
-          .distinctOn(["upload.instrumentInfoUuid"])
-          .select("upload.instrumentInfoUuid")
-          .addSelect("upload.siteId")
-          .addSelect("MAX(upload.measurementDate)", "latestDate")
-          .addSelect(
-            `CASE
-               WHEN MAX(upload.measurementDate) > CURRENT_DATE - 3 THEN 'active'
-               WHEN MAX(upload.measurementDate) > CURRENT_DATE - 7 THEN 'recent'
-               ELSE 'inactive'
-             END`,
-            "status",
-          )
-          .where("upload.measurementDate > CURRENT_DATE - 182")
-          .groupBy("upload.instrumentInfoUuid")
-          .addGroupBy("upload.siteId")
-          .orderBy("upload.instrumentInfoUuid")
-          .addOrderBy('"latestDate"', "DESC")
-          .getQuery();
-        const rawData = await this.instrumentInfoRepo
-          .createQueryBuilder("instrument_info")
-          .select("instrument_info.*")
-          .addSelect('latest_site."siteId"')
-          .addSelect("COALESCE(latest_site.status, 'inactive')", "status")
-          .leftJoin("(" + latestSite + ")", "latest_site", 'instrument_info.uuid = latest_site."instrumentInfoUuid"')
-          .leftJoinAndSelect(Instrument, "instrument", "instrument_info.instrumentId = instrument.id")
-          .getRawMany();
-        const data = rawData.map((row) => ({
-          uuid: row.uuid,
-          pid: row.pid,
-          name: row.name,
-          owners: row.owners,
-          model: row.model,
-          type: row.type,
-          serialNumber: row.serialNumber,
-          siteId: row.siteId,
-          status: row.status,
-          instrument: {
-            id: row.instrument_id,
-            type: row.instrument_type,
-            humanReadableName: row.instrument_humanReadableName,
-            shortName: row.instrument_shortName,
-            allowedTags: row.instrument_allowedTags,
-          },
-        }));
-        res.send(data);
-      } else {
-        const data = await this.instrumentInfoRepo.find({ relations: { instrument: true } });
-        res.send(data);
-      }
-    } catch (error) {
-      next({ status: 500, errors: error });
+    if ("includeSite" in req.query) {
+      const latestSite = this.instrumentUploadRepo
+        .createQueryBuilder("upload")
+        .distinctOn(["upload.instrumentInfoUuid"])
+        .select("upload.instrumentInfoUuid")
+        .addSelect("upload.siteId")
+        .addSelect("MAX(upload.measurementDate)", "latestDate")
+        .addSelect(
+          `CASE
+              WHEN MAX(upload.measurementDate) > CURRENT_DATE - 3 THEN 'active'
+              WHEN MAX(upload.measurementDate) > CURRENT_DATE - 7 THEN 'recent'
+              ELSE 'inactive'
+            END`,
+          "status",
+        )
+        .where("upload.measurementDate > CURRENT_DATE - 182")
+        .groupBy("upload.instrumentInfoUuid")
+        .addGroupBy("upload.siteId")
+        .orderBy("upload.instrumentInfoUuid")
+        .addOrderBy('"latestDate"', "DESC")
+        .getQuery();
+      const rawData = await this.instrumentInfoRepo
+        .createQueryBuilder("instrument_info")
+        .select("instrument_info.*")
+        .addSelect('latest_site."siteId"')
+        .addSelect("COALESCE(latest_site.status, 'inactive')", "status")
+        .leftJoin("(" + latestSite + ")", "latest_site", 'instrument_info.uuid = latest_site."instrumentInfoUuid"')
+        .leftJoinAndSelect(Instrument, "instrument", "instrument_info.instrumentId = instrument.id")
+        .getRawMany();
+      const data = rawData.map((row) => ({
+        uuid: row.uuid,
+        pid: row.pid,
+        name: row.name,
+        owners: row.owners,
+        model: row.model,
+        type: row.type,
+        serialNumber: row.serialNumber,
+        siteId: row.siteId,
+        status: row.status,
+        instrument: {
+          id: row.instrument_id,
+          type: row.instrument_type,
+          humanReadableName: row.instrument_humanReadableName,
+          shortName: row.instrument_shortName,
+          allowedTags: row.instrument_allowedTags,
+        },
+      }));
+      res.send(data);
+    } else {
+      const data = await this.instrumentInfoRepo.find({ relations: { instrument: true } });
+      res.send(data);
     }
   };
 
   instrumentPid: RequestHandler = async (req, res, next) => {
-    try {
-      const pid = await this.instrumentInfoRepo.findOne({
-        where: { uuid: req.params.uuid },
-        relations: { instrument: true },
-      });
-      if (!pid) {
-        return next({ status: 404, errors: ["No instrument PID match this id"] });
-      }
-      const locations = await this.dataSource.query(
-        `WITH gaps AS (
-          SELECT
-            "siteId",
-            "measurementDate",
-            COALESCE(CAST("siteId" != LAG("siteId") OVER (PARTITION BY "siteId" ORDER BY "measurementDate") AS INT), 1) AS "isNewPeriod"
-          FROM regular_file
-          WHERE "instrumentPid" = $1
-        ), periods AS (
-          SELECT
-            "siteId",
-            "measurementDate",
-            SUM("isNewPeriod") OVER (ORDER BY "measurementDate") AS "periodId"
-          FROM gaps
-        )
+    const pid = await this.instrumentInfoRepo.findOne({
+      where: { uuid: req.params.uuid },
+      relations: { instrument: true },
+    });
+    if (!pid) {
+      return next({ status: 404, errors: ["No instrument PID match this id"] });
+    }
+    const locations = await this.dataSource.query(
+      `WITH gaps AS (
         SELECT
           "siteId",
-          "humanReadableName",
-          MIN("measurementDate")::text AS "startDate",
-          MAX("measurementDate")::text AS "endDate"
-        FROM periods
-        JOIN site ON "siteId" = site.id
-        GROUP BY "siteId", "humanReadableName", "periodId"
-        ORDER BY "startDate" DESC`,
-        [pid.pid],
-      );
-      res.send({ ...pid, locations });
-    } catch (error) {
-      next({ status: 500, errors: error });
-    }
+          "measurementDate",
+          COALESCE(CAST("siteId" != LAG("siteId") OVER (PARTITION BY "siteId" ORDER BY "measurementDate") AS INT), 1) AS "isNewPeriod"
+        FROM regular_file
+        WHERE "instrumentPid" = $1
+      ), periods AS (
+        SELECT
+          "siteId",
+          "measurementDate",
+          SUM("isNewPeriod") OVER (ORDER BY "measurementDate") AS "periodId"
+        FROM gaps
+      )
+      SELECT
+        "siteId",
+        "humanReadableName",
+        MIN("measurementDate")::text AS "startDate",
+        MAX("measurementDate")::text AS "endDate"
+      FROM periods
+      JOIN site ON "siteId" = site.id
+      GROUP BY "siteId", "humanReadableName", "periodId"
+      ORDER BY "startDate" DESC`,
+      [pid.pid],
+    );
+    res.send({ ...pid, locations });
   };
 
   nominalInstrument: RequestHandler = async (req, res, next) => {
@@ -154,27 +138,23 @@ export class InstrumentRoutes {
     if (!query.product) {
       return next({ status: 400, errors: "product is required" });
     }
-    try {
-      const data = await this.nominalInstrumentRepo.findOne({
-        where: {
-          site: { id: query.site },
-          product: { id: query.product },
-          measurementDate: LessThanOrEqual(query.date),
-        },
-        relations: { instrumentInfo: true },
-        order: { measurementDate: "DESC" },
-      });
-      if (!data) {
-        return next({ status: 404, errors: "Nominal instrument not specified" });
-      }
-      res.send({
-        siteId: data.siteId,
-        productId: data.productId,
-        measurementDate: data.measurementDate,
-        nominalInstrument: data.instrumentInfo,
-      });
-    } catch (e) {
-      next({ status: 500, errors: e });
+    const data = await this.nominalInstrumentRepo.findOne({
+      where: {
+        site: { id: query.site },
+        product: { id: query.product },
+        measurementDate: LessThanOrEqual(query.date),
+      },
+      relations: { instrumentInfo: true },
+      order: { measurementDate: "DESC" },
+    });
+    if (!data) {
+      return next({ status: 404, errors: "Nominal instrument not specified" });
     }
+    res.send({
+      siteId: data.siteId,
+      productId: data.productId,
+      measurementDate: data.measurementDate,
+      nominalInstrument: data.instrumentInfo,
+    });
   };
 }
