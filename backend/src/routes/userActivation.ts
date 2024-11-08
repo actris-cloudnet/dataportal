@@ -1,5 +1,5 @@
 import { DataSource, Repository } from "typeorm";
-import { Request, RequestHandler, Response } from "express";
+import { RequestHandler } from "express";
 
 import { UserAccount } from "../entity/UserAccount";
 import { randomString } from "../lib";
@@ -42,7 +42,7 @@ export class UserActivationRoutes {
     this.userAccountRepository = dataSource.getRepository(UserAccount);
   }
 
-  get: RequestHandler = async (req: Request, res: Response, next) => {
+  get: RequestHandler = async (req, res) => {
     const user = await this.userAccountRepository.findOneBy({ activationToken: req.params.token });
     if (!user) {
       res.status(404).contentType("text/html; charset=utf-8").send(errorTemplate);
@@ -51,7 +51,7 @@ export class UserActivationRoutes {
     res.contentType("text/html; charset=utf-8").send(getTemplate);
   };
 
-  post: RequestHandler = async (req: Request, res: Response, next) => {
+  post: RequestHandler = async (req, res) => {
     const user = await this.userAccountRepository.findOneBy({ activationToken: req.params.token });
     if (!user) {
       res.status(404).contentType("text/html; charset=utf-8").send(errorTemplate);

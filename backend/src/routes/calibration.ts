@@ -1,5 +1,5 @@
 import { DataSource, LessThanOrEqual, Repository } from "typeorm";
-import { Request, RequestHandler, Response } from "express";
+import { RequestHandler } from "express";
 import { Calibration } from "../entity/Calibration";
 import { isValidDate, validateInstrumentPid } from "../lib";
 
@@ -15,7 +15,7 @@ export class CalibrationRoutes {
 
   private calibRepo: Repository<Calibration>;
 
-  validateParams: RequestHandler = (req: Request, res: Response, next) => {
+  validateParams: RequestHandler = (req, res, next) => {
     if (!("instrumentPid" in req.query)) {
       return next({ status: 400, errors: "Parameter instrumentPid must be specified" });
     }
@@ -65,7 +65,7 @@ export class CalibrationRoutes {
     }
   };
 
-  putCalibration: RequestHandler = async (req, res, next) => {
+  putCalibration: RequestHandler = async (req, res) => {
     const query = req.query as unknown as QueryParams;
     const calib = new Calibration();
     calib.instrumentPid = query.instrumentPid;

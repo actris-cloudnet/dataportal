@@ -66,12 +66,12 @@ export class QueueRoutes {
     res.send(searchParams.dryRun ? { taskCount: counts.reduce((total, count) => total + count, 0) } : { batchId });
   };
 
-  cancelBatch: RequestHandler = async (req, res, next) => {
+  cancelBatch: RequestHandler = async (req, res) => {
     await this.queueService.cancelBatch(req.params.batchId);
     res.sendStatus(204);
   };
 
-  publish: RequestHandler = async (req, res, next) => {
+  publish: RequestHandler = async (req, res) => {
     const body = req.body;
 
     const task = new Task();
@@ -93,7 +93,7 @@ export class QueueRoutes {
     res.send(task);
   };
 
-  receive: RequestHandler = async (req, res, next) => {
+  receive: RequestHandler = async (req, res) => {
     const task = await this.queueService.receive();
     if (task) {
       res.send(task);
@@ -102,13 +102,13 @@ export class QueueRoutes {
     }
   };
 
-  fail: RequestHandler = async (req, res, next) => {
+  fail: RequestHandler = async (req, res) => {
     const id = parseInt(req.params.id);
     await this.queueService.fail(id);
     res.sendStatus(204);
   };
 
-  complete: RequestHandler = async (req, res, next) => {
+  complete: RequestHandler = async (req, res) => {
     const id = parseInt(req.params.id);
     await this.queueService.complete(id);
     res.sendStatus(204);

@@ -1,4 +1,4 @@
-import { Request, RequestHandler, Response } from "express";
+import { RequestHandler } from "express";
 import { DataSource, Repository } from "typeorm";
 import { hideTestDataFromNormalUsers, toArray } from "../lib";
 import { Site, SiteType } from "../entity/Site";
@@ -29,7 +29,7 @@ export class SiteRoutes {
   readonly dvasCache: Record<string, any>;
   readonly actrisCache: Record<string, any>;
 
-  site: RequestHandler = async (req: Request, res: Response, next) => {
+  site: RequestHandler = async (req, res, next) => {
     const qb = this.siteRepo
       .createQueryBuilder("site")
       .leftJoinAndSelect("site.persons", "person")
@@ -45,7 +45,7 @@ export class SiteRoutes {
     });
   };
 
-  sites: RequestHandler = async (req: Request, res: Response, next) => {
+  sites: RequestHandler = async (req, res) => {
     const query: any = req.query;
     const qb = this.siteRepo.createQueryBuilder("site");
     if (query.showCitations) {

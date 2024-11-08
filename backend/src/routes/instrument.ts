@@ -1,4 +1,4 @@
-import { Request, RequestHandler, Response } from "express";
+import { RequestHandler } from "express";
 import { DataSource, LessThanOrEqual, Repository } from "typeorm";
 import { Instrument, InstrumentInfo, NominalInstrument } from "../entity/Instrument";
 import { InstrumentUpload } from "../entity/Upload";
@@ -19,12 +19,12 @@ export class InstrumentRoutes {
   readonly instrumentUploadRepo: Repository<InstrumentUpload>;
   readonly nominalInstrumentRepo: Repository<NominalInstrument>;
 
-  instruments: RequestHandler = async (req: Request, res: Response, next) => {
+  instruments: RequestHandler = async (req, res) => {
     const instruments = await this.instrumentRepo.find({ order: { type: "ASC", id: "ASC" } });
     res.send(instruments);
   };
 
-  instrument: RequestHandler = async (req: Request, res: Response, next) => {
+  instrument: RequestHandler = async (req, res, next) => {
     const instrument = await this.instrumentRepo.findOne({
       where: { id: req.params.instrumentId },
       relations: { derivedProducts: true },
@@ -35,7 +35,7 @@ export class InstrumentRoutes {
     res.send(instrument);
   };
 
-  listInstrumentPids: RequestHandler = async (req, res, next) => {
+  listInstrumentPids: RequestHandler = async (req, res) => {
     if ("includeSite" in req.query) {
       const latestSite = this.instrumentUploadRepo
         .createQueryBuilder("upload")

@@ -1,4 +1,4 @@
-import { Request, RequestHandler, Response } from "express";
+import { RequestHandler } from "express";
 import { DataSource, Repository } from "typeorm";
 import { SearchFile } from "../entity/SearchFile";
 import { InstrumentUpload } from "../entity/Upload";
@@ -15,7 +15,7 @@ export class ProductAvailabilityRoutes {
   readonly uploadRepo: Repository<InstrumentUpload>;
   readonly modelFileRepo: Repository<ModelFile>;
 
-  uploadAmount: RequestHandler = async (req: Request, res: Response, next) => {
+  uploadAmount: RequestHandler = async (req, res) => {
     const { instrumentPid } = req.query;
     const rawData = await this.uploadRepo
       .createQueryBuilder("file")
@@ -37,7 +37,7 @@ export class ProductAvailabilityRoutes {
     res.send(data);
   };
 
-  productAvailability: RequestHandler = async (req: Request, res: Response, next) => {
+  productAvailability: RequestHandler = async (req, res) => {
     // Search files (excluding model files)
     const fileQb = this.searchFileRepo
       .createQueryBuilder("file")

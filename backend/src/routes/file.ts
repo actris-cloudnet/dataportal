@@ -1,4 +1,4 @@
-import { Request, RequestHandler, Response } from "express";
+import { RequestHandler } from "express";
 import { Collection } from "../entity/Collection";
 import { EntityManager, Repository, In, DataSource, Raw, QueryRunner, FindOneOptions, IsNull } from "typeorm";
 import { File, isFile, RegularFile } from "../entity/File";
@@ -54,7 +54,7 @@ export class FileRoutes {
   readonly instrumentInfoRepo: Repository<InstrumentInfo>;
   readonly softwareService: SoftwareService;
 
-  file: RequestHandler = async (req: Request, res: Response, next) => {
+  file: RequestHandler = async (req, res, next) => {
     const getFileByUuid = (repo: any, isModel: boolean | undefined) => {
       const qb = repo
         .createQueryBuilder("file")
@@ -81,7 +81,7 @@ export class FileRoutes {
     res.send(augmentFile(false)(file));
   };
 
-  fileVersions: RequestHandler = async (req: Request, res: Response, next) => {
+  fileVersions: RequestHandler = async (req, res, next) => {
     const getFileByUuid = (repo: Repository<RegularFile> | Repository<ModelFile>, _isModel: boolean | undefined) =>
       repo.createQueryBuilder("file").where("file.uuid = :uuid", req.params).getOne();
 
@@ -116,19 +116,19 @@ export class FileRoutes {
     res.send(versions);
   };
 
-  files: RequestHandler = async (req: Request, res: Response, next) => {
+  files: RequestHandler = async (req, res) => {
     const query = res.locals;
     const stream = await this.filesQueryBuilder(query, "file").stream();
     streamHandler(stream, res, "file", augmentFile(query.s3path));
   };
 
-  modelFiles: RequestHandler = async (req: Request, res: Response, next) => {
+  modelFiles: RequestHandler = async (req, res) => {
     const query = res.locals;
     const stream = await this.filesQueryBuilder(query, "model").stream();
     streamHandler(stream, res, "file", augmentFile(query.s3path));
   };
 
-  search: RequestHandler = async (req: Request, res: Response, next) => {
+  search: RequestHandler = async (req, res) => {
     const query = res.locals;
     const converterFunction = query.properties
       ? convertToReducedResponse(toArray(query.properties) as (keyof SearchFileResponse)[])
@@ -159,7 +159,7 @@ export class FileRoutes {
     }
   };
 
-  putFile: RequestHandler = async (req: Request, res: Response, next) => {
+  putFile: RequestHandler = async (req, res, next) => {
     const file = req.body;
     file.s3key = (req.params.s3key as unknown as string[]).join("/");
     file.updatedAt = new Date();
@@ -275,7 +275,7 @@ export class FileRoutes {
     }
   };
 
-  postFile: RequestHandler = async (req: Request, res: Response, next) => {
+  postFile: RequestHandler = async (req, res, next) => {
     const partialFile = req.body;
     if (!partialFile.uuid) return next({ status: 422, errors: ["Request body is missing uuid"] });
     const existingFile = await this.findAnyFile((repo) => repo.findOne({ where: { uuid: partialFile.uuid } }));
@@ -293,7 +293,7 @@ export class FileRoutes {
     res.sendStatus(200);
   };
 
-  deleteFile: RequestHandler = async (req: Request, res: Response, next) => {
+  deleteFile: RequestHandler = async (req, res, next) => {
     try {
       const query = res.locals;
       const dryRun = query.dryRun;
@@ -357,12 +357,12 @@ export class FileRoutes {
     }
   };
 
-  allfiles: RequestHandler = async (req: Request, res: Response, next) => {
+  allfiles: RequestHandler = async (req, res) => {
     const result = await this.fileRepo.find({ relations: { site: true, product: true } });
     res.send(sortByMeasurementDateAsc(result).map(augmentFile(false)));
   };
 
-  allsearch: RequestHandler = async (req: Request, res: Response, next) => {
+  allsearch: RequestHandler = async (req, res) => {
     const result = await this.searchFileRepo.find({ relations: { site: true, product: true } });
     res.send(sortByMeasurementDateAsc(result).map(convertToSearchResponse));
   };

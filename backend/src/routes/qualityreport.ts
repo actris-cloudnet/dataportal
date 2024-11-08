@@ -1,6 +1,6 @@
 import { DataSource, Repository } from "typeorm";
 import { ErrorLevel, QualityReport } from "../entity/QualityReport";
-import { Request, RequestHandler, Response } from "express";
+import { RequestHandler } from "express";
 import { FileRoutes } from "./file";
 import { FileQuality } from "../entity/FileQuality";
 import { ModelFile, RegularFile } from "../entity/File";
@@ -57,7 +57,7 @@ export class QualityReportRoutes {
   readonly modelFileRepo: Repository<ModelFile>;
   readonly searchFileRepo: Repository<SearchFile>;
 
-  qualityReport: RequestHandler = async (req: Request, res: Response, next) => {
+  qualityReport: RequestHandler = async (req, res, next) => {
     const qualityReport = await this.dataSource
       .getRepository<FileQualityWithTestInfo>(FileQuality)
       .createQueryBuilder("fileQuality")
@@ -89,7 +89,7 @@ export class QualityReportRoutes {
     });
   };
 
-  putQualityReport: RequestHandler = async (req: Request, res: Response, next) => {
+  putQualityReport: RequestHandler = async (req, res, next) => {
     const uuid = req.params.uuid;
     const fullReport: Report = req.body;
     // TODO: use transaction

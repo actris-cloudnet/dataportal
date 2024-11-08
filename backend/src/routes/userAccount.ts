@@ -1,5 +1,5 @@
 import { DataSource, Repository } from "typeorm";
-import { NextFunction, Request, RequestHandler, Response } from "express";
+import { RequestHandler } from "express";
 import basicAuth = require("basic-auth");
 
 import { UserAccount } from "../entity/UserAccount";
@@ -48,7 +48,7 @@ export class UserAccountRoutes {
       })),
     };
   };
-  postUserAccount: RequestHandler = async (req: Request, res: Response, next) => {
+  postUserAccount: RequestHandler = async (req, res, next) => {
     let user = await this.userAccountRepository.findOne({
       where: { username: req.body.username },
       relations: { permissions: { site: true } },
@@ -74,7 +74,7 @@ export class UserAccountRoutes {
     res.json(this.userResponse(user));
   };
 
-  async createPermissions(req: Request, res: Response, next: NextFunction): Promise<void> {
+  createPermissions: RequestHandler = async (req, res) => {
     const permissions: Permission[] = [];
     for (const perm of req.body.permissions) {
       let permission: Permission;
@@ -110,14 +110,14 @@ export class UserAccountRoutes {
       permissions.push(permission);
     }
     res.locals.permissions = permissions;
-  }
+  };
 
   async usernameAvailable(username: string): Promise<boolean> {
     const usernameTaken = await this.userAccountRepository.existsBy({ username });
     return !usernameTaken;
   }
 
-  putUserAccount: RequestHandler = async (req: Request, res: Response, next) => {
+  putUserAccount: RequestHandler = async (req, res, next) => {
     const user = await this.userAccountRepository.findOne({
       where: { id: Number(req.params.id) },
       relations: { permissions: { site: true } },
@@ -145,7 +145,7 @@ export class UserAccountRoutes {
     res.json(this.userResponse(user));
   };
 
-  getUserAccount: RequestHandler = async (req: Request, res: Response, next) => {
+  getUserAccount: RequestHandler = async (req, res, next) => {
     const user = await this.userAccountRepository.findOne({
       where: { id: Number(req.params.id) },
       relations: { permissions: { site: true } },
@@ -154,19 +154,19 @@ export class UserAccountRoutes {
     res.json(this.userResponse(user));
   };
 
-  deleteUserAccount: RequestHandler = async (req: Request, res: Response, next) => {
+  deleteUserAccount: RequestHandler = async (req, res, next) => {
     const user = await this.userAccountRepository.findOneBy({ id: Number(req.params.id) });
     if (!user) return next({ status: 404, errors: "UserAccount not found" });
     await this.userAccountRepository.remove(user);
     res.sendStatus(200);
   };
 
-  getAllUserAccounts: RequestHandler = async (req: Request, res: Response) => {
+  getAllUserAccounts: RequestHandler = async (req, res) => {
     const users = await this.userAccountRepository.find({ relations: { permissions: { site: true } } });
     res.json(users.map((u) => this.userResponse(u)));
   };
 
-  validatePost: RequestHandler = async (req: Request, res: Response, next) => {
+  validatePost: RequestHandler = async (req, res, next) => {
     if (!hasProperty(req.body, "username")) {
       return next({ status: 401, errors: "Missing the username" });
     }
@@ -181,7 +181,7 @@ export class UserAccountRoutes {
     return next();
   };
 
-  validatePut = async (req: Request, res: Response, next: NextFunction) => {
+  validatePut: RequestHandler = async (req, res, next) => {
     if (hasProperty(req.body, "username")) {
       this.validateUsername(req, res, next);
     }
@@ -211,7 +211,7 @@ export class UserAccountRoutes {
     }
   };
 
-  validatePermissions = async (req: Request, res: Response, next: NextFunction) => {
+  validatePermissions: RequestHandler = async (req, res, next) => {
     if (Array.isArray(req.body.permissions)) {
       await this.validatePermissionList(req, res, next);
     } else {
@@ -219,14 +219,14 @@ export class UserAccountRoutes {
     }
   };
 
-  validatePermissionList = async (req: Request, res: Response, next: NextFunction) => {
+  validatePermissionList: RequestHandler = async (req, res, next) => {
     for (const permission of req.body.permissions) {
       res.locals.permission = permission;
       await this.validatePermission(req, res, next);
     }
   };
 
-  validatePermission = async (req: Request, res: Response, next: NextFunction) => {
+  validatePermission: RequestHandler = async (req, res, next) => {
     const permission = res.locals.permission;
     if (!hasProperty(permission, "siteId")) {
       return next({ status: 401, errors: "Missing the siteId from permission" });
@@ -245,7 +245,7 @@ export class UserAccountRoutes {
     }
   };
 
-  userInfo: RequestHandler = async (req: Request, res: Response, next) => {
+  userInfo: RequestHandler = async (req, res, next) => {
     const credentials = basicAuth(req);
     if (!credentials) {
       return next({ status: 401, errors: "Unauthorized" });
