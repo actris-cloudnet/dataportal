@@ -21,15 +21,15 @@ export class Middleware {
   validateUuidParam: RequestHandler = (req, _res, next) => {
     /* eslint-disable prefer-template */
     const addDashesToUuid = (uuid: string) =>
-      uuid.substr(0, 8) +
+      uuid.slice(0, 8) +
       "-" +
-      uuid.substr(8, 4) +
+      uuid.slice(8, 12) +
       "-" +
-      uuid.substr(12, 4) +
+      uuid.slice(12, 16) +
       "-" +
-      uuid.substr(16, 4) +
+      uuid.slice(16, 20) +
       "-" +
-      uuid.substr(20);
+      uuid.slice(20);
     /* eslint-enable prefer-template */
     const uuid = req.params.uuid.includes("-") ? req.params.uuid : addDashesToUuid(req.params.uuid);
     if (!validateUuid(uuid)) return next({ status: 404, errors: ["Not found: invalid UUID"] });
