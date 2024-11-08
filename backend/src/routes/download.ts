@@ -121,7 +121,7 @@ export class DownloadRoutes {
     }
   };
 
-  image: RequestHandler = async (req, res, next) => {
+  image: RequestHandler = async (req, res) => {
     const s3key = (req.params.s3key as unknown as string[]).join("/");
     const upstreamRes = await this.makeRequest(getS3pathForImage(s3key));
     if (upstreamRes.statusCode != 200) {

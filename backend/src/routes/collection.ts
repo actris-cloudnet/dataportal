@@ -1,4 +1,4 @@
-import { Request, RequestHandler, Response } from "express";
+import { RequestHandler } from "express";
 import { Collection } from "../entity/Collection";
 import { CollectionResponse } from "../entity/CollectionResponse";
 import { validate as validateUuid } from "uuid";
@@ -24,7 +24,7 @@ export class CollectionRoutes {
   readonly modelFileRepo: Repository<ModelFile>;
   readonly citationService: CitationService;
 
-  postCollection: RequestHandler = async (req: Request, res: Response, next) => {
+  postCollection: RequestHandler = async (req, res, next) => {
     if (
       !("files" in req.body) ||
       !req.body.files ||
@@ -50,14 +50,14 @@ export class CollectionRoutes {
     res.send(collection.uuid);
   };
 
-  collection: RequestHandler = async (req: Request, res: Response, next) => {
+  collection: RequestHandler = async (req, res, next) => {
     const uuid: string = req.params.uuid;
     const collection = await this.findCollection(uuid);
     if (!collection) return next({ status: 404, errors: ["Collection not found"] });
     res.send(new CollectionResponse(collection));
   };
 
-  generatePid: RequestHandler = async (req: Request, res: Response, next) => {
+  generatePid: RequestHandler = async (req, res, next) => {
     const body = req.body;
     if (!body.uuid || !body.type || !validateUuid(body.uuid)) {
       return next({ status: 422, errors: ["Missing or invalid uuid or type"] });
@@ -138,7 +138,7 @@ export class CollectionRoutes {
     };
   }
 
-  allcollections: RequestHandler = async (req: Request, res: Response, next) => {
+  allcollections: RequestHandler = async (req, res) => {
     const collections = await this.collectionRepo.find({
       relations: {
         regularFiles: { site: true, product: true },

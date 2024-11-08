@@ -1,4 +1,4 @@
-import { Request, RequestHandler, Response } from "express";
+import { RequestHandler } from "express";
 import { DataSource, In, Repository } from "typeorm";
 import { checkFileExists, getS3pathForImage, hideTestDataFromNormalUsers } from "../lib";
 import { Visualization } from "../entity/Visualization";
@@ -25,7 +25,7 @@ export class VisualizationRoutes {
   readonly productVariableRepo: Repository<ProductVariable>;
   readonly fileController: FileRoutes;
 
-  putVisualization: RequestHandler = async (req: Request, res: Response, next) => {
+  putVisualization: RequestHandler = async (req, res, next) => {
     const body = req.body;
     const s3key = (req.params.s3key as unknown as string[]).join("/");
     try {
@@ -61,13 +61,13 @@ export class VisualizationRoutes {
     res.sendStatus(201);
   };
 
-  visualization: RequestHandler = async (req: Request, res: Response, next) => {
+  visualization: RequestHandler = async (req, res) => {
     const query = res.locals;
     const visualizations = await this.getManyVisualizations(query);
     res.send(visualizations.map((file) => new VisualizationResponse(file)));
   };
 
-  visualizationForSourceFile: RequestHandler = async (req: Request, res: Response, next) => {
+  visualizationForSourceFile: RequestHandler = async (req, res, next) => {
     const params = req.params;
     const fetchVisualizationsForSourceFile = (repo: any) => {
       const qb = repo
@@ -88,7 +88,7 @@ export class VisualizationRoutes {
     res.send(new VisualizationResponse(file));
   };
 
-  deleteVisualizations: RequestHandler = async (req: Request, res: Response, next) => {
+  deleteVisualizations: RequestHandler = async (req, res, next) => {
     const uuid = req.params.uuid;
     const images = req.query.images as string[];
     const file = await this.fileController.findAnyFile((repo) => repo.findOne({ where: { uuid } }));

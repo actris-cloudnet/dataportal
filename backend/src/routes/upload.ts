@@ -1,7 +1,7 @@
 import { Site } from "../entity/Site";
 import { InstrumentUpload, ModelUpload, Status, Upload } from "../entity/Upload";
 import { DataSource, EntityTarget, FindOptionsWhere, Repository, Brackets, SelectQueryBuilder } from "typeorm";
-import { NextFunction, Request, RequestHandler, Response } from "express";
+import { RequestHandler } from "express";
 import {
   ArrayEqual,
   dateforsize,
@@ -58,7 +58,7 @@ export class UploadRoutes {
   readonly calibRepo: Repository<Calibration>;
   readonly queueService: QueueService;
 
-  postMetadata: RequestHandler = async (req: Request, res: Response, next) => {
+  postMetadata: RequestHandler = async (req, res, next) => {
     const body = req.body;
     const filename = basename(body.filename);
     let UploadEntity: EntityTarget<InstrumentUpload | ModelUpload>;
@@ -154,7 +154,7 @@ export class UploadRoutes {
     }
   };
 
-  updateMetadata: RequestHandler = async (req: Request, res: Response, next) => {
+  updateMetadata: RequestHandler = async (req, res, next) => {
     const partialUpload = req.body;
     if (!partialUpload.uuid) return next({ status: 422, errors: "Request body is missing uuid" });
     const upload = await this.findAnyUpload((repo, model) =>
@@ -165,7 +165,7 @@ export class UploadRoutes {
     res.sendStatus(200);
   };
 
-  metadata: RequestHandler = async (req: Request, res: Response, next) => {
+  metadata: RequestHandler = async (req, res, next) => {
     const checksum = req.params.checksum;
     const upload = await this.findAnyUpload((repo, model) =>
       repo.findOne({ where: { checksum: checksum }, relations: ["site", model ? "model" : "instrument"] }),
@@ -174,8 +174,8 @@ export class UploadRoutes {
     res.send(this.augmentUploadResponse(true)(upload));
   };
 
-  listMetadata = (includeS3path: boolean) => {
-    return async (req: Request, res: Response, next: NextFunction) => {
+  listMetadata = (includeS3path: boolean): RequestHandler => {
+    return async (req, res, next) => {
       const query = res.locals;
       const isModel = req.path.includes("model");
       const repo = isModel ? this.modelUploadRepo : this.instrumentUploadRepo;
@@ -190,7 +190,7 @@ export class UploadRoutes {
     };
   };
 
-  listInstrumentsFromMetadata: RequestHandler = async (req: Request, res: Response, next) => {
+  listInstrumentsFromMetadata: RequestHandler = async (req, res) => {
     const instrumentUploads = (await this.metadataMany(
       this.instrumentUploadRepo,
       req.query,
@@ -200,7 +200,7 @@ export class UploadRoutes {
     res.send(reducedMetadataResponses);
   };
 
-  putData: RequestHandler = async (req: Request, res: Response, next) => {
+  putData: RequestHandler = async (req, res, next) => {
     const checksum = req.params.checksum;
     const site = req.params.site;
     try {

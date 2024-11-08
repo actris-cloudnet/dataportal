@@ -1,5 +1,5 @@
 import { DataSource, Repository } from "typeorm";
-import { Request, RequestHandler, Response } from "express";
+import { RequestHandler } from "express";
 import { Model } from "../entity/Model";
 
 export class ModelRoutes {
@@ -9,7 +9,7 @@ export class ModelRoutes {
 
   private modelRepository: Repository<Model>;
 
-  models: RequestHandler = async (req: Request, res: Response, next) => {
+  models: RequestHandler = async (req, res) => {
     const models = await this.modelRepository.find({
       order: { optimumOrder: "ASC", id: "ASC" },
       relations: {

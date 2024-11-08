@@ -1,4 +1,4 @@
-import { Request, RequestHandler, Response } from "express";
+import { RequestHandler } from "express";
 import { DataSource, Repository } from "typeorm";
 import { Publication } from "../entity/Publication";
 import axios, { AxiosResponse } from "axios";
@@ -18,7 +18,7 @@ export class PublicationRoutes {
     });
   }
 
-  postPublication: RequestHandler = async (req: Request, res: Response, next) => {
+  postPublication: RequestHandler = async (req, res, next) => {
     const uri = req.body.uri;
     if (typeof uri !== "string") {
       return next({ status: 400, error: "uri is missing or invalid" });
@@ -31,7 +31,7 @@ export class PublicationRoutes {
     res.sendStatus(200);
   };
 
-  deletePublication: RequestHandler = async (req: Request, res: Response, next) => {
+  deletePublication: RequestHandler = async (req, res, next) => {
     const uri = req.query.uri;
     if (typeof uri !== "string") {
       return next({ status: 400, error: "uri is missing or invalid" });
@@ -40,7 +40,7 @@ export class PublicationRoutes {
     res.sendStatus(200);
   };
 
-  getPublications: RequestHandler = async (req: Request, res: Response, next) => {
+  getPublications: RequestHandler = async (req, res) => {
     const publications = await this.publicationRepo.find({ order: { year: "DESC" } });
     res.send(publications);
   };

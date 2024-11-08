@@ -1,5 +1,5 @@
 import { DataSource, Repository } from "typeorm";
-import { Request, RequestHandler, Response } from "express";
+import { Request, RequestHandler } from "express";
 import env from "../lib/env";
 import axios from "axios";
 import { Feedback } from "../entity/Feedback";
@@ -11,7 +11,7 @@ export class FeedbackRoutes {
     this.feedbackRepo = dataSource.getRepository(Feedback);
   }
 
-  postFeedback: RequestHandler = async (req: Request, res: Response, next) => {
+  postFeedback: RequestHandler = async (req, res) => {
     const feedback = this.feedbackRepo.create(req.body);
     await this.feedbackRepo.insert(feedback);
     const payload = createPayload(req);

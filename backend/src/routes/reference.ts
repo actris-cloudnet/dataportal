@@ -19,28 +19,24 @@ export class ReferenceRoutes {
     this.citationService = new CitationService(dataSource);
   }
 
-  getReference: RequestHandler = async (req, res, next) => {
-    try {
-      const object = await Promise.any([
-        this.collectionRepo.findOneByOrFail({ uuid: req.params.uuid }),
-        this.fileRepo.findOneOrFail({
-          where: { uuid: req.params.uuid },
-          relations: { site: { citations: { persons: true } }, product: true },
-        }),
-        this.modelRepo.findOneOrFail({
-          where: { uuid: req.params.uuid },
-          relations: { site: { citations: true }, product: true, model: { citations: true } },
-        }),
-      ]);
-      if (req.params.type === "acknowledgements") {
-        await this.getAcknowledgements(req, res, object);
-      } else if (req.params.type === "data-availability") {
-        await this.getDataAvailability(req, res, object);
-      } else if (req.params.type === "citation") {
-        await this.getCitation(req, res, object);
-      }
-    } catch (err) {
-      next(err);
+  getReference: RequestHandler = async (req, res) => {
+    const object = await Promise.any([
+      this.collectionRepo.findOneByOrFail({ uuid: req.params.uuid }),
+      this.fileRepo.findOneOrFail({
+        where: { uuid: req.params.uuid },
+        relations: { site: { citations: { persons: true } }, product: true },
+      }),
+      this.modelRepo.findOneOrFail({
+        where: { uuid: req.params.uuid },
+        relations: { site: { citations: true }, product: true, model: { citations: true } },
+      }),
+    ]);
+    if (req.params.type === "acknowledgements") {
+      await this.getAcknowledgements(req, res, object);
+    } else if (req.params.type === "data-availability") {
+      await this.getDataAvailability(req, res, object);
+    } else if (req.params.type === "citation") {
+      await this.getCitation(req, res, object);
     }
   };
 
