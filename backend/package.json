@@ -20,6 +20,7 @@
     "pg-query-stream": "^4.2.4",
     "typeorm": "^0.3.17",
     "uuid": "^10.0.0",
+    "valibot": "^1.0.0-beta.3",
     "validator": "^13.7.0"
   },
   "devDependencies": {

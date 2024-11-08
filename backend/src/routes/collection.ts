@@ -8,6 +8,20 @@ import { File, ModelFile, RegularFile } from "../entity/File";
 import { getCollectionLandingPage, convertToSearchResponse } from "../lib";
 import env from "../lib/env";
 import { CitationService } from "../lib/cite";
+import * as v from "valibot";
+
+const PostCollectionBody = v.object({
+  files: v.pipe(v.array(v.pipe(v.string(), v.uuid())), v.minLength(1), v.maxLength(10_000)),
+});
+
+enum PidType {
+  Collection = "collection",
+}
+
+const GeneratePidBody = v.object({
+  uuid: v.pipe(v.string(), v.uuid()),
+  type: v.enum(PidType),
+});
 
 export class CollectionRoutes {
   constructor(dataSource: DataSource) {
@@ -24,29 +38,20 @@ export class CollectionRoutes {
   readonly modelFileRepo: Repository<ModelFile>;
   readonly citationService: CitationService;
 
-  postCollection: RequestHandler = async (req: Request, res: Response, next) => {
-    if (
-      !("files" in req.body) ||
-      !req.body.files ||
-      !Array.isArray(req.body.files) ||
-      !req.body.files.every((file: any) => typeof file == "string")
-    ) {
-      return next({ status: 422, errors: ['Request is missing field "files"'] });
-    }
-    const fileUuids: string[] = req.body.files;
-    if (fileUuids.length > 10_000) {
-      return next({ status: 422, errors: ["Maximum of 10 000 files is supported"] });
-    }
+  postCollection: RequestHandler = async (req, res, next) => {
+    const body = v.parse(PostCollectionBody, req.body);
     const [files, modelFiles] = await Promise.all([
-      this.fileRepo.findBy({ uuid: In(fileUuids) }),
-      this.modelFileRepo.findBy({ uuid: In(fileUuids) }),
+      this.fileRepo.find({ select: { uuid: true }, where: { uuid: In(body.files) } }),
+      this.modelFileRepo.find({ select: { uuid: true }, where: { uuid: In(body.files) } }),
     ]);
-    if ((files as unknown as File[]).concat(modelFiles).length != fileUuids.length) {
-      const existingUuids = files.map((file) => file.uuid);
-      const missingFiles = fileUuids.filter((uuid) => !existingUuids.includes(uuid));
+    const allFiles = (files as File[]).concat(modelFiles);
+    if (allFiles.length != body.files.length) {
+      const existingUuids = new Set(allFiles.map((file) => file.uuid));
+      const missingFiles = body.files.filter((uuid) => !existingUuids.has(uuid));
       return next({ status: 422, errors: [`Following files do not exist: ${missingFiles}`] });
     }
-    const collection = await this.collectionRepo.save(new Collection(files, modelFiles));
+    const collection = new Collection(files, modelFiles);
+    await this.collectionRepo.save(collection);
     res.send(collection.uuid);
   };
 
@@ -58,13 +63,7 @@ export class CollectionRoutes {
   };
 
   generatePid: RequestHandler = async (req: Request, res: Response, next) => {
-    const body = req.body;
-    if (!body.uuid || !body.type || !validateUuid(body.uuid)) {
-      return next({ status: 422, errors: ["Missing or invalid uuid or type"] });
-    }
-    if (body.type != "collection") {
-      return next({ status: 422, errors: ["Type must be collection"] });
-    }
+    const body = v.parse(GeneratePidBody, req.body);
     try {
       const collection = await this.collectionRepo.findOneBy({ uuid: body.uuid });
       if (!collection) {
