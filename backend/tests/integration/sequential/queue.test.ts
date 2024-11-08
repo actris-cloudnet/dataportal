@@ -9,7 +9,6 @@ import axios from "axios";
 import { InstrumentUpload, ModelUpload } from "../../../src/entity/Upload";
 import { Permission } from "../../../src/entity/Permission";
 import { UserAccount } from "../../../src/entity/UserAccount";
-import { execPath } from "process";
 
 let dataSource: DataSource;
 let queueService: QueueService;
