@@ -58,7 +58,7 @@ export interface Option {
   id: string;
   humanReadableName: string;
   shortName?: string;
-  stationName?: string;
+  stationName?: string | null;
 }
 
 interface Props {
