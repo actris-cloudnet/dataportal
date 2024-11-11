@@ -18,6 +18,7 @@ exports[`GET /users/me return submitter permissions 1`] = `
       "id": "hyytiala",
       "latitude": 61.844,
       "longitude": 24.288,
+      "stationName": null,
       "type": [
         "cloudnet",
       ],

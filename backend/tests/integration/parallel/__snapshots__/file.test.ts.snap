@@ -54,6 +54,7 @@ exports[`/api/files/:uuid request succeeds on instrument file 1`] = `
     "id": "mace-head",
     "latitude": 53.326,
     "longitude": -9.9,
+    "stationName": null,
     "type": [
       "cloudnet",
     ],
@@ -119,6 +120,7 @@ exports[`/api/files/:uuid request succeeds on model file 1`] = `
     "id": "bucharest",
     "latitude": 44.348,
     "longitude": 26.029,
+    "stationName": null,
     "type": [
       "cloudnet",
     ],

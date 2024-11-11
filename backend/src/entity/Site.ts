@@ -23,6 +23,9 @@ export class Site {
   humanReadableName!: string;
 
   @Column({ type: "text", nullable: true })
+  stationName!: string | null;
+
+  @Column({ type: "text", nullable: true })
   description!: string | null;
 
   @Column("text", { array: true })

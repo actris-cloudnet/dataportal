@@ -11,8 +11,9 @@
               <thead>
                 <tr>
                   <th></th>
-                  <th>Site</th>
+                  <th>Location</th>
                   <th>Country</th>
+                  <th>Station</th>
                   <th>Latitude</th>
                   <th>Longitude</th>
                   <th>Altitude</th>
@@ -30,6 +31,9 @@
                     </router-link>
                   </td>
                   <td>{{ site.country || "-" }}</td>
+                  <td>
+                    {{ site.stationName || "" }}
+                  </td>
                   <td>
                     {{ site.latitude != null ? formatLatitude(site.latitude) : "-" }}
                   </td>

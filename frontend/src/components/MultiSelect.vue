@@ -58,6 +58,7 @@ export interface Option {
   id: string;
   humanReadableName: string;
   shortName?: string;
+  stationName?: string;
 }
 
 interface Props {
@@ -116,6 +117,10 @@ const optionIndex = computed<{ term: string; option: Option }[]>(() =>
     if (typeof option.shortName !== "undefined") {
       output.push({ term: normalizeGeneric(option.shortName), option });
       output.push({ term: normalizeGerman(option.shortName), option });
+    }
+    if (option.stationName) {
+      output.push({ term: normalizeGeneric(option.stationName), option });
+      output.push({ term: normalizeGerman(option.stationName), option });
     }
     return output;
   }),

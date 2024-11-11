@@ -16,6 +16,7 @@ export interface SiteLink<T> {
 export interface Site {
   id: string;
   humanReadableName: string;
+  stationName: string | null;
   description: string | null;
   type: SiteType[];
   latitude: number | null;
