@@ -285,6 +285,13 @@ aside {
   margin-top: 0.5rem;
 }
 
+.description:deep(ul) {
+  list-style: disc;
+  padding-left: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
 :deep() {
   h2 {
     margin-top: 2rem;
@@ -292,9 +299,11 @@ aside {
     font-size: 125%;
   }
 
-  .references {
+  ul.references {
     margin-left: 2rem;
     text-indent: -2rem;
+    padding: 0;
+    list-style: none;
 
     li + li {
       margin-top: 0.5rem;
