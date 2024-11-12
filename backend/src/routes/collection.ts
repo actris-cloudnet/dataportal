@@ -133,6 +133,32 @@ export class CollectionRoutes {
           types: { resourceTypeGeneral: "Dataset" },
           url: getCollectionLandingPage(collection),
           schemaVersion: "http://datacite.org/schema/kernel-4",
+          language: "en",
+          dates: [
+            { date: citation.createdAt, dateType: "Created" },
+            { date: `${citation.startDate}/${citation.endDate}`, dateType: "Collected" },
+          ],
+          formats: ["application/zip", "application/netcdf"],
+          rightsList: [
+            {
+              lang: "en",
+              schemeURI: "https://spdx.org/licenses/",
+              rightsIdentifierScheme: "SPDX",
+              rightsIdentifier: "CC-BY-4.0",
+              rightsURI: "https://creativecommons.org/licenses/by/4.0/",
+              rights: "Creative Commons Attribution 4.0 International",
+            },
+          ],
+          geoLocations: citation.locations.map((location) => ({
+            geoLocationPlace: location.name,
+            geoLocationPoint:
+              location.latitude && location.longitude
+                ? {
+                    pointLatitude: location.latitude,
+                    pointLongitude: location.longitude,
+                  }
+                : undefined,
+          })),
         },
       },
     };

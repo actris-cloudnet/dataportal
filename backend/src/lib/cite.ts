@@ -33,6 +33,12 @@ export interface Person {
   role: "instrumentPi" | "modelPi" | "nfPi";
 }
 
+export interface Location {
+  name: string;
+  latitude: number | null;
+  longitude: number | null;
+}
+
 export interface Citation {
   authors: Person[];
   publisher: string;
@@ -40,6 +46,11 @@ export interface Citation {
   year: number;
   url: string;
   note?: string;
+  startDate: string;
+  endDate: string;
+  createdAt: string;
+  updatedAt: string;
+  locations: Location[];
 }
 
 interface InstrumentPi {
@@ -67,12 +78,12 @@ export class CitationService {
   }
 
   async getCollectionCitation(collection: Collection): Promise<Citation> {
-    const [instrumentPis, usesModelData, nfPis, productNames, siteNames, dateRange] = await Promise.all([
+    const [instrumentPis, usesModelData, nfPis, productNames, sites, dateRange] = await Promise.all([
       this.queryInstrumentPids(collection).then((pids) => fetchInstrumentPis(pids)),
       this.usesModelData(collection),
       this.queryCollectionActrisIds(collection).then((ids) => fetchNfPis(ids)),
       this.queryCollectionProductNames(collection),
-      this.queryCollectionSiteNames(collection),
+      this.queryCollectionSites(collection),
       this.queryCollectionDateRange(collection),
     ]);
     if (usesModelData || productNames.includes("Model")) {
@@ -86,15 +97,21 @@ export class CitationService {
     if (allProducts.length === truncatedProducts.length) {
       products += " data";
     }
-    const sites = formatList(truncateList(siteNames, 5, "sites"), ", and ");
+    const siteNames = sites.map((site) => site.name);
+    const siteList = formatList(truncateList(siteNames, 5, "sites"), ", and ");
     const date = formatDateRange(dateRange.startDate, dateRange.endDate);
-    const title = `Custom collection of ${products} from ${sites} ${date}`;
+    const title = `Custom collection of ${products} from ${siteList} ${date}`;
     return {
       authors,
       publisher: PUBLISHER,
       title,
       year: collection.createdAt.getFullYear(),
       url: collection.pid || getCollectionLandingPage(collection),
+      startDate: dateToString(dateRange.startDate),
+      endDate: dateToString(dateRange.endDate),
+      createdAt: dateToString(collection.createdAt),
+      updatedAt: dateToString(collection.updatedAt),
+      locations: sites,
     };
   }
 
@@ -144,6 +161,11 @@ export class CitationService {
       year: file.updatedAt.getFullYear(),
       url: file.pid || getFileLandingPage(file),
       note: file.volatile ? "Data is volatile and may be updated in the future" : undefined,
+      startDate: dateToString(file.measurementDate),
+      endDate: dateToString(file.measurementDate),
+      createdAt: dateToString(file.createdAt),
+      updatedAt: dateToString(file.updatedAt),
+      locations: [],
     };
   }
 
@@ -217,22 +239,28 @@ export class CitationService {
     return rows.map((row) => row.humanReadableName).sort();
   }
 
-  private async queryCollectionSiteNames(collection: Collection): Promise<string[]> {
+  private async queryCollectionSites(collection: Collection): Promise<Location[]> {
     const rows: any[] = await this.dataSource.query(
-      `SELECT site."humanReadableName"
+      `SELECT site."humanReadableName", site."latitude", site."longitude"
        FROM regular_file
        JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
        JOIN site ON regular_file."siteId" = site.id
        WHERE "collectionUuid" = $1
        UNION
-       SELECT site."humanReadableName"
+       SELECT site."humanReadableName", site."latitude", site."longitude"
        FROM model_file
        JOIN collection_model_files_model_file ON model_file.uuid = "modelFileUuid"
        JOIN site ON model_file."siteId" = site.id
        WHERE "collectionUuid" = $1`,
       [collection.uuid],
     );
-    return rows.map((row) => row.humanReadableName).sort();
+    return rows
+      .map((row) => ({
+        name: row.humanReadableName,
+        latitude: row.latitude,
+        longitude: row.longitude,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
   }
 
   private async queryCollectionSitePersons(collection: Collection): Promise<Person[]> {
@@ -344,8 +372,7 @@ async function fetchInstrumentPi(pid: string, measurementDate?: Date): Promise<I
   const nameItem = values.find((ele) => ele.type === "URL");
   let apiUrl = nameItem.data.value + "/pi";
   if (measurementDate) {
-    const dateStr = new Date(measurementDate).toISOString().slice(0, 10);
-    apiUrl += "?date=" + dateStr;
+    apiUrl += "?date=" + dateToString(measurementDate);
   }
   const apiRes = await axios.get(apiUrl);
   return apiRes.data;
@@ -492,4 +519,8 @@ function formatProductName(product: string) {
     .split(" ")
     .map((word) => (capitalWords.includes(word) ? word : word.toLowerCase()))
     .join(" ");
+}
+
+function dateToString(date: Date | string) {
+  return new Date(date).toISOString().slice(0, 10);
 }
