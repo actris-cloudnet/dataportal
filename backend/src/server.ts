@@ -223,12 +223,26 @@ async function createServer(): Promise<void> {
   app.get("/api/instrument-pids/:uuid", middleware.validateUuidParam, instrRoutes.instrumentPid);
   app.get("/api/nominal-instrument", instrRoutes.nominalInstrument);
 
-  // TODO: Depreciated. Needed for now, but in the future these should public
-  // and properly documented.
+  // TODO: Deprecated. Needed for now, but in the future these should public and
+  // properly documented.
   app.get("/api/upload-dateforsize", uploadRoutes.dateforsize);
   app.get("/api/file-dateforsize", fileRoutes.dateforsize);
-  app.get("/api/upload-metadata", express.json(), uploadRoutes.listMetadata(true));
-  app.get("/api/upload-model-metadata", express.json(), uploadRoutes.listMetadata(true));
+  app.get(
+    "/api/upload-metadata",
+    express.json(),
+    middleware.filesValidator,
+    middleware.filesQueryAugmenter,
+    middleware.checkParamsExistInDb,
+    uploadRoutes.listMetadata(true),
+  );
+  app.get(
+    "/api/upload-model-metadata",
+    express.json(),
+    middleware.filesValidator,
+    middleware.filesQueryAugmenter,
+    middleware.checkParamsExistInDb,
+    uploadRoutes.listMetadata(true),
+  );
 
   app.get("/upload/metadata/:checksum", middleware.validateMD5Param, uploadRoutes.metadata, errorAsPlaintext);
 
@@ -283,8 +297,23 @@ async function createServer(): Promise<void> {
   app.put("/files/*s3key", express.json(), fileRoutes.putFile);
   app.post("/files/", express.json(), fileRoutes.postFile);
   app.post("/upload-metadata", express.json(), uploadRoutes.updateMetadata);
-  app.get("/upload-metadata", express.json(), uploadRoutes.listMetadata(true));
-  app.get("/upload-model-metadata", express.json(), uploadRoutes.listMetadata(true));
+  app.get(
+    "/upload-metadata",
+    express.json(),
+    middleware.filesValidator,
+    middleware.filesQueryAugmenter,
+    middleware.checkParamsExistInDb,
+    uploadRoutes.listMetadata(true),
+  );
+  app.get(
+    "/upload-model-metadata",
+    express.json(),
+    middleware.filesValidator,
+    middleware.filesQueryAugmenter,
+    middleware.checkParamsExistInDb,
+
+    uploadRoutes.listMetadata(true),
+  );
   app.put("/visualizations/*s3key", express.json(), vizRoutes.putVisualization);
   app.put("/quality/:uuid", middleware.validateUuidParam, express.json(), qualityRoutes.putQualityReport);
   app.get(
