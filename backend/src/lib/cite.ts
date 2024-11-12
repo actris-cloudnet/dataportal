@@ -80,7 +80,7 @@ export class CitationService {
     }
     const siteAuthors = await this.queryCollectionSitePersons(collection);
     const authors = removeDuplicateNames([...instrumentPis, ...nfPis, ...siteAuthors]);
-    const allProducts = productNames.map((x) => x.toLowerCase());
+    const allProducts = productNames.map(formatProductName);
     const truncatedProducts = truncateList(allProducts, 5, "products");
     let products = formatList(truncatedProducts, ", and ");
     if (allProducts.length === truncatedProducts.length) {
@@ -483,4 +483,13 @@ function humanReadableDate(date: Date): string {
     date = new Date(date);
   }
   return `${date.getDate()} ${MONTHS_FULL[date.getMonth()]} ${date.getFullYear()}`;
+}
+
+const capitalWords = ["Doppler", "MWR", "(Voodoo)", "L3"];
+
+function formatProductName(product: string) {
+  return product
+    .split(" ")
+    .map((word) => (capitalWords.includes(word) ? word : word.toLowerCase()))
+    .join(" ");
 }
