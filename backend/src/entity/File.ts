@@ -43,8 +43,8 @@ export abstract class File {
   @Column({ default: true })
   volatile!: boolean;
 
-  @Column({ nullable: true })
-  tombstoneReason!: string;
+  @Column({ type: "varchar", nullable: true })
+  tombstoneReason!: string | null;
 
   @Column({ default: false })
   legacy!: boolean;

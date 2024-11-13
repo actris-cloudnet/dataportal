@@ -49,6 +49,18 @@
           </section>
         </main>
         <div class="rightView">
+          <BaseAlert type="error" v-if="hasTombstonedFiles">
+            Some files in this collection has been deleted. They are still included in the download.
+          </BaseAlert>
+          <BaseAlert type="warning" v-if="false">
+            Some files in the this collection have newer versions available.
+          </BaseAlert>
+          <BaseAlert type="warning" v-if="hasExperimentalProducts">
+            This collection contains experimental products which are still under development.
+          </BaseAlert>
+          <BaseAlert type="note" v-if="hasVolatileFiles">
+            This collection contains volatile files which may be updated in the future.
+          </BaseAlert>
           <RouterView :collection="response" />
         </div>
       </div>
@@ -70,6 +82,7 @@ import ApiError from "./ApiError.vue";
 import folderIcon from "@/assets/icons/icons8-folder-48.png";
 import briefIcon from "@/assets/icons/icons8-brief-48.png";
 import LandingHeader from "@/components/LandingHeader.vue";
+import BaseAlert from "@/components/BaseAlert.vue";
 
 export interface Props {
   uuid: string;
@@ -86,8 +99,11 @@ const models = ref<Model[]>([]);
 const nonModelSiteIds = ref<string[]>([]);
 
 const startDate = computed(() => sortedFiles.value && sortedFiles.value[sortedFiles.value.length - 1].measurementDate);
-
 const endDate = computed(() => sortedFiles.value[0].measurementDate);
+
+const hasVolatileFiles = computed(() => response.value?.files.some((file) => file.volatile));
+const hasExperimentalProducts = computed(() => response.value?.files.some((file) => file.experimental));
+const hasTombstonedFiles = computed(() => response.value?.files.some((file) => file.tombstoned));
 
 function getUnique(arr: CollectionFileResponse[], field: keyof CollectionFileResponse) {
   return arr

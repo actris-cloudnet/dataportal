@@ -13,4 +13,5 @@ export interface CollectionFileResponse {
   legacy: boolean;
   experimental: boolean;
   errorLevel: ErrorLevel | null;
+  tombstoned: boolean;
 }

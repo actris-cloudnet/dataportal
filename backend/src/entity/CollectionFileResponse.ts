@@ -14,6 +14,7 @@ export class CollectionFileResponse {
   legacy: boolean;
   experimental: boolean;
   errorLevel: ErrorLevel | null;
+  tombstoned: boolean;
 
   constructor(file: RegularFile | ModelFile) {
     this.uuid = file.uuid;
@@ -28,5 +29,6 @@ export class CollectionFileResponse {
     this.legacy = file.legacy;
     this.experimental = file.product.experimental;
     this.errorLevel = file.errorLevel;
+    this.tombstoned = file.tombstoneReason != null;
   }
 }
