@@ -4,7 +4,7 @@
       <div class="item">
         <a href="mailto:actris-cloudnet@fmi.fi">actris-cloudnet@fmi.fi</a><br />
         <a href="https://github.com/actris-cloudnet/">GitHub organization</a><br />
-        <a href="/contact">Contact</a>
+        <a href="/publications">Publications</a>
       </div>
       <div class="item hidden-links">
         <span>&copy; <a href="https://en.ilmatieteenlaitos.fi/">Finnish Meteorological Institute</a></span>
