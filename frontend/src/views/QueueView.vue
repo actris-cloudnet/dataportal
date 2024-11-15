@@ -65,7 +65,9 @@
                 {{ task.status === "created" ? timeDifference(task.scheduledAt) : "" }}
               </td>
               <td v-if="showFailed" class="retry-button">
-                <BaseButton type="retry" @click="retryTask(task)"> Retry </BaseButton>
+                <BaseButton type="danger" size="small" style="display: block" @click="retryTask(task)">
+                  Retry
+                </BaseButton>
               </td>
             </tr>
           </tbody>
