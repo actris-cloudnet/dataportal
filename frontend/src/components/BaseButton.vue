@@ -4,7 +4,7 @@ import type { RouteLocationRaw } from "vue-router";
 export interface Props {
   to?: RouteLocationRaw;
   href?: string;
-  type: "primary" | "secondary" | "brand" | "danger";
+  type: "primary" | "secondary" | "brand" | "danger" | "retry";
   disabled?: boolean;
   htmlType?: HTMLButtonElement["type"];
 }
@@ -106,6 +106,21 @@ defineEmits<{
 
     &:focus-visible {
       box-shadow: 0 0 0 3px rgba($red1, 0.5);
+    }
+  }
+
+  &.retry {
+    background-color: $actris-violetlight;
+    margin: 0;
+    padding: 0 5px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: none;
+      background-color: darken($actris-violetlight, 10%);
     }
   }
 
