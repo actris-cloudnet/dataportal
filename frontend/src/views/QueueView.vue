@@ -151,6 +151,7 @@ interface TaskPayload {
   productId: string;
   instrumentInfoUuid?: string;
   modelId?: string;
+  options: object;
 }
 
 async function retryTask(task: AugmentedTask) {
@@ -159,6 +160,7 @@ async function retryTask(task: AugmentedTask) {
     siteId: task.siteId,
     productId: task.productId,
     measurementDate: task.measurementDate,
+    options: task.options,
   };
 
   if (task.instrumentInfo) {
