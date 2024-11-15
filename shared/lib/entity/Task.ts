@@ -12,4 +12,5 @@ export interface Task {
   model: Model;
   scheduledAt: string;
   priority: number;
+  options: object;
 }

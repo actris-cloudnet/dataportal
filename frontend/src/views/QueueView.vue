@@ -43,7 +43,7 @@
               <th>Date</th>
               <th>Product</th>
               <th>Instrument / model</th>
-              <th>Due in</th>
+              <th v-if="!showFailed">Due in</th>
             </tr>
           </thead>
           <tbody is="vue:transition-group" name="list" tag="tbody">
@@ -63,6 +63,11 @@
               <td>{{ task.instrumentInfo?.name || task.model?.id }}</td>
               <td>
                 {{ task.status === "created" ? timeDifference(task.scheduledAt) : "" }}
+              </td>
+              <td v-if="showFailed" class="retry-button">
+                <BaseButton type="danger" size="small" style="display: block" @click="retryTask(task)">
+                  Retry
+                </BaseButton>
               </td>
             </tr>
           </tbody>
@@ -137,6 +142,43 @@ async function updateQueueData() {
   }
   updateTimeout = setTimeout(updateQueueData, 5000);
   lastUpdate = new Date();
+}
+
+interface TaskPayload {
+  type: string;
+  siteId: string;
+  measurementDate: string;
+  productId: string;
+  instrumentInfoUuid?: string;
+  modelId?: string;
+  options: object;
+}
+
+async function retryTask(task: AugmentedTask) {
+  const newTask: TaskPayload = {
+    type: task.type,
+    siteId: task.siteId,
+    productId: task.productId,
+    measurementDate: task.measurementDate,
+    options: task.options,
+  };
+
+  if (task.instrumentInfo) {
+    newTask.instrumentInfoUuid = task.instrumentInfo.uuid;
+  } else if (task.model) {
+    newTask.modelId = task.model.id;
+  }
+
+  try {
+    await axios.post(`${backendUrl}queue/publish`, newTask, {
+      auth: { username: loginStore.username, password: loginStore.password },
+    });
+    if (updateTimeout) clearTimeout(updateTimeout);
+    await updateQueueData();
+  } catch (err) {
+    alert(`Failed to retry task: ${err}`);
+    console.error(err);
+  }
 }
 
 async function cancelBatch() {
@@ -237,6 +279,10 @@ function generateLink(task: AugmentedTask) {
   td {
     padding-right: 20px;
     padding-left: 20px;
+  }
+
+  .retry-button {
+    vertical-align: middle;
   }
 }
 

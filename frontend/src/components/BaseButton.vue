@@ -5,11 +5,12 @@ export interface Props {
   to?: RouteLocationRaw;
   href?: string;
   type: "primary" | "secondary" | "brand" | "danger";
+  size?: "normal" | "small";
   disabled?: boolean;
   htmlType?: HTMLButtonElement["type"];
 }
 
-withDefaults(defineProps<Props>(), { disabled: false, htmlType: "button" });
+withDefaults(defineProps<Props>(), { disabled: false, htmlType: "button", size: "normal" });
 
 defineEmits<{
   (e: "click"): void;
@@ -17,13 +18,13 @@ defineEmits<{
 </script>
 
 <template>
-  <router-link :to="to" class="button" :class="type" @click="$emit('click')" v-if="to && !disabled">
+  <router-link :to="to" class="button" :class="[type, size]" @click="$emit('click')" v-if="to && !disabled">
     <slot></slot>
   </router-link>
-  <a :href="href" class="button" :class="type" @click="$emit('click')" v-else-if="href && !disabled">
+  <a :href="href" class="button" :class="[type, size]" @click="$emit('click')" v-else-if="href && !disabled">
     <slot></slot>
   </a>
-  <button class="button" :type="htmlType" :class="type" @click="$emit('click')" :disabled="disabled" v-else>
+  <button class="button" :type="htmlType" :class="[type, size]" @click="$emit('click')" :disabled="disabled" v-else>
     <slot></slot>
   </button>
 </template>
@@ -107,6 +108,12 @@ defineEmits<{
     &:focus-visible {
       box-shadow: 0 0 0 3px rgba($red1, 0.5);
     }
+  }
+
+  &.small {
+    margin: 0;
+    padding: 0 5px;
+    font-size: 0.8rem;
   }
 
   &:disabled {
