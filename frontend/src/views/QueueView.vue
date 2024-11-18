@@ -265,6 +265,10 @@ function generateLink(task: AugmentedTask) {
     border-bottom: 1px solid lightblue;
     margin-left: 10px;
     opacity: 1;
+
+    &:has(button:hover) {
+      background-color: $gray1;
+    }
   }
 
   th {
