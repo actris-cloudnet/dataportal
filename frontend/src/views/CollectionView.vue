@@ -24,24 +24,24 @@
             <section class="details">
               <dl>
                 <dt>Date span</dt>
-                <dd>{{ startDate }} &ndash; {{ endDate }}</dd>
+                <dd>{{ response.startDate }} &ndash; {{ response.endDate }}</dd>
                 <dt>File count</dt>
-                <dd>{{ sortedFiles.length }}</dd>
+                <dd>{{ response.files }}</dd>
                 <dt>Total size</dt>
-                <dd>{{ humanReadableSize(totalSize) }}</dd>
+                <dd>{{ humanReadableSize(response.size) }}</dd>
               </dl>
             </section>
           </section>
-          <section id="sitemap" v-if="sites.length > 0">
+          <section id="sitemap" v-if="response.sites.length > 0">
             <header>Sites</header>
             <section class="details">
-              <SuperMap :sites="sites" :zoom="3" />
+              <SuperMap :sites="response.sites" :zoom="3" />
             </section>
           </section>
           <section id="products">
             <header>Products</header>
             <section class="details">
-              <div v-for="product in products" :key="product.id">
+              <div v-for="product in response.products" :key="product.id">
                 <img :src="getProductIcon(product.id)" class="product" />
                 {{ product.humanReadableName }}
               </div>
@@ -49,7 +49,7 @@
           </section>
         </main>
         <div class="rightView">
-          <BaseAlert type="error" v-if="hasTombstonedFiles">
+          <BaseAlert type="error" v-if="response.tombstonedFiles">
             Some files in this collection has been deleted. They are still included in the download.
           </BaseAlert>
           <BaseAlert type="warning" v-if="false">
@@ -58,7 +58,7 @@
           <BaseAlert type="warning" v-if="hasExperimentalProducts">
             This collection contains experimental products which are still under development.
           </BaseAlert>
-          <BaseAlert type="note" v-if="hasVolatileFiles">
+          <BaseAlert type="note" v-if="response.volatileFiles">
             This collection contains volatile files which may be updated in the future.
           </BaseAlert>
           <RouterView :collection="response" />
@@ -71,13 +71,9 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted } from "vue";
 import axios from "axios";
-import type { CollectionResponse } from "@shared/entity/CollectionResponse";
-import { backendUrl, combinedFileSize, constructTitle, getProductIcon, humanReadableSize } from "@/lib";
-import type { Site } from "@shared/entity/Site";
+import type { Collection } from "@shared/entity/Collection";
+import { backendUrl, getProductIcon, humanReadableSize } from "@/lib";
 import SuperMap from "@/components/SuperMap.vue";
-import type { Product } from "@shared/entity/Product";
-import type { CollectionFileResponse } from "@shared/entity/CollectionFileResponse";
-import type { Model } from "@shared/entity/Model";
 import ApiError from "./ApiError.vue";
 import folderIcon from "@/assets/icons/icons8-folder-48.png";
 import briefIcon from "@/assets/icons/icons8-brief-48.png";
@@ -91,55 +87,15 @@ export interface Props {
 const props = defineProps<Props>();
 
 const error = ref(false);
-const response = ref<CollectionResponse | null>(null);
-const sortedFiles = ref<CollectionFileResponse[]>([]);
-const sites = ref<Site[]>([]);
-const products = ref<Product[]>([]);
-const models = ref<Model[]>([]);
-const nonModelSiteIds = ref<string[]>([]);
+const response = ref<Collection | null>(null);
 
-const startDate = computed(() => sortedFiles.value && sortedFiles.value[sortedFiles.value.length - 1].measurementDate);
-const endDate = computed(() => sortedFiles.value[0].measurementDate);
-
-const hasVolatileFiles = computed(() => response.value?.files.some((file) => file.volatile));
-const hasExperimentalProducts = computed(() => response.value?.files.some((file) => file.experimental));
-const hasTombstonedFiles = computed(() => response.value?.files.some((file) => file.tombstoned));
-
-function getUnique(arr: CollectionFileResponse[], field: keyof CollectionFileResponse) {
-  return arr
-    .map((file) => file[field])
-    .reduce((acc: string[], cur) => (typeof cur == "string" && !acc.includes(cur) ? acc.concat([cur]) : acc), []);
-}
-
-const totalSize = computed(() => {
-  return combinedFileSize(sortedFiles.value);
-});
+const hasExperimentalProducts = computed(() => response.value?.products.some((product) => product.experimental));
 
 onMounted(async () => {
   try {
     const res = await axios.get(`${backendUrl}collection/${props.uuid}`);
     response.value = res.data;
     if (response.value == null) return;
-    sortedFiles.value = constructTitle(
-      response.value.files.sort(
-        (a, b) => new Date(b.measurementDate).getTime() - new Date(a.measurementDate).getTime(),
-      ),
-    );
-    nonModelSiteIds.value = getUnique(
-      sortedFiles.value.filter((file) => file.productId != "model"),
-      "siteId",
-    );
-    const siteIds = getUnique(sortedFiles.value, "siteId");
-    const productIds = getUnique(sortedFiles.value, "productId");
-    const modelIds = getUnique(sortedFiles.value, "modelId");
-    const [sitesRes, modelsRes, productsRes] = await Promise.all([
-      axios.get(`${backendUrl}sites/`),
-      axios.get(`${backendUrl}models/`),
-      axios.get(`${backendUrl}products/`),
-    ]);
-    sites.value = sitesRes.data.filter((site: Site) => siteIds.includes(site.id));
-    products.value = productsRes.data.filter((product: Product) => productIds.includes(product.id));
-    models.value = modelsRes.data.filter((model: Product) => modelIds.includes(model.id));
   } catch (err: any) {
     error.value = true;
     response.value = err.response;

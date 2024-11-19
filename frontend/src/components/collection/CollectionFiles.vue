@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import DataSearchResult from "@/components/DataSearchResult.vue";
-import type { CollectionResponse } from "@shared/entity/CollectionResponse";
+import type { Collection } from "@shared/entity/Collection";
 
 export interface Props {
-  collection: CollectionResponse;
+  collection: Collection;
 }
 
 defineProps<Props>();

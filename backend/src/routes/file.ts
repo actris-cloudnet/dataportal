@@ -1,5 +1,4 @@
 import { RequestHandler } from "express";
-import { Collection } from "../entity/Collection";
 import { EntityManager, Repository, In, DataSource, Raw, QueryRunner, FindOneOptions, IsNull } from "typeorm";
 import { File, isFile, RegularFile } from "../entity/File";
 import { FileQuality } from "../entity/FileQuality";
@@ -30,7 +29,6 @@ import { InstrumentInfo } from "../entity/Instrument";
 export class FileRoutes {
   constructor(dataSource: DataSource) {
     this.dataSource = dataSource;
-    this.collectionRepo = dataSource.getRepository(Collection);
     this.fileRepo = dataSource.getRepository(RegularFile);
     this.modelFileRepo = dataSource.getRepository(ModelFile);
     this.searchFileRepo = dataSource.getRepository(SearchFile);
@@ -43,7 +41,6 @@ export class FileRoutes {
   }
 
   readonly dataSource: DataSource;
-  readonly collectionRepo: Repository<Collection>;
   readonly fileRepo: Repository<RegularFile>;
   readonly modelFileRepo: Repository<ModelFile>;
   readonly searchFileRepo: Repository<SearchFile>;
@@ -450,13 +447,6 @@ export class FileRoutes {
     qb = addCommonFilters(qb, query);
     if (query.instrument) qb.andWhere("instrument.id IN (:...instrument)", query);
     if (query.instrumentPid) qb.andWhere("file.instrumentPid IN (:...instrumentPid)", query);
-    if (query.collection) {
-      qb.andWhere(
-        `(file.uuid IN (SELECT "regularFileUuid" FROM collection_regular_files_regular_file WHERE "collectionUuid" = :collection) OR
-          file.uuid IN (SELECT "modelFileUuid"   FROM collection_model_files_model_file     WHERE "collectionUuid" = :collection))`,
-        query,
-      );
-    }
     qb.orderBy("file.measurementDate", "DESC")
       .addOrderBy("file.siteId", "ASC")
       .addOrderBy("product.level", "ASC")

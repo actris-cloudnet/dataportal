@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted } from "vue";
 import axios from "axios";
-import type { CollectionResponse } from "@shared/entity/CollectionResponse";
+import type { Collection } from "@shared/entity/Collection";
 import HowToCite from "@/components/HowToCite.vue";
 import BaseButton from "@/components/BaseButton.vue";
 import BaseAlert from "@/components/BaseAlert.vue";
@@ -9,7 +9,7 @@ import { backendUrl } from "@/lib";
 import BaseSpinner from "../BaseSpinner.vue";
 
 export interface Props {
-  collection: CollectionResponse;
+  collection: Collection;
 }
 
 const props = defineProps<Props>();

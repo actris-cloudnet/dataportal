@@ -284,10 +284,15 @@ async function fetchData() {
   isBusy.value = true;
 
   try {
-    const res = await axios.get(`${backendUrl}search`, {
-      params: { ...payload.value, page: currentPage.value },
-      signal: requestController!.signal,
-    });
+    const res = props.collection
+      ? await axios.get(`${backendUrl}collection/${props.collection}/files`, {
+          params: { page: currentPage.value },
+          signal: requestController!.signal,
+        })
+      : await axios.get(`${backendUrl}search`, {
+          params: { ...payload.value, page: currentPage.value },
+          signal: requestController!.signal,
+        });
     apiResponse.value = res.data;
     isBusy.value = false;
   } catch (err) {

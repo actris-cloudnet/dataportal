@@ -1,11 +1,18 @@
-import type { ModelFile, RegularFile } from "./File";
+import type { Product } from "./Product";
+import type { Site } from "./Site";
 
 export interface Collection {
   uuid: string;
-  regularFiles: RegularFile[];
-  modelFiles: ModelFile[];
   title: string;
   pid: string;
-  createdAt: Date;
-  updatedAt: Date;
+  files: number;
+  tombstonedFiles: boolean;
+  volatileFiles: boolean;
+  size: number;
+  startDate: string;
+  endDate: string;
+  createdAt: string;
+  updatedAt: string;
+  sites: Site[];
+  products: Product[];
 }

@@ -1,21 +1,14 @@
 import axios from "axios";
 import { backendPublicUrl, genResponse } from "../../lib";
-import { readResources } from "../../../../shared/lib";
-import { describe, expect, it, beforeAll } from "@jest/globals";
+import { describe, expect, it } from "@jest/globals";
 
 const url = `${backendPublicUrl}collection/`;
 const validCollectionUuid = "48092c00-161d-4ca2-a29d-628cf8e960f6";
-let allCollections: any;
 
 describe("GET /api/collection/:uuid", () => {
-  beforeAll(async () => {
-    allCollections = (await readResources())["allcollections"];
-    delete allCollections[0].pid;
-  });
-
   it("returns a valid collection", async () => {
     const res = await axios.get(`${url}${validCollectionUuid}`);
-    expect(res.data).toMatchObject(allCollections[0]);
+    expect(res.data).toMatchSnapshot();
   });
 
   it("responds 404 if invalid uuid", async () => {
@@ -28,5 +21,12 @@ describe("GET /api/collection/:uuid", () => {
     return expect(axios.get(`${url}88092c00-161d-4ca2-a29d-628cf8e960f6`)).rejects.toMatchObject(
       genResponse(404, { errors: ["Collection not found"] }),
     );
+  });
+});
+
+describe("GET /api/collection/:uuid/files", () => {
+  it("returns collection files", async () => {
+    const res = await axios.get(`${url}${validCollectionUuid}/files`);
+    expect(res.data).toMatchSnapshot();
   });
 });
