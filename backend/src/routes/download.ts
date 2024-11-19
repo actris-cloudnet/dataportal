@@ -19,7 +19,6 @@ import { IncomingMessage } from "http";
 import archiver = require("archiver");
 import { FileRoutes } from "./file";
 import env from "../lib/env";
-import { CollectionRoutes } from "./collection";
 import { UploadRoutes } from "./upload";
 import { CitationService } from "../lib/cite";
 import { citation2txt } from "./reference";
@@ -30,22 +29,20 @@ export class DownloadRoutes {
   constructor(
     dataSource: DataSource,
     fileController: FileRoutes,
-    collController: CollectionRoutes,
     uploadController: UploadRoutes,
     ipLookup: Reader<CountryResponse>,
   ) {
     this.downloadRepo = dataSource.getRepository(Download);
+    this.collectionRepo = dataSource.getRepository(Collection);
     this.fileController = fileController;
-    this.collController = collController;
     this.uploadController = uploadController;
     this.ipLookup = ipLookup;
     this.citationService = new CitationService(dataSource);
   }
-
   readonly downloadRepo: Repository<Download>;
+  readonly collectionRepo: Repository<Collection>;
   readonly fileController: FileRoutes;
   readonly uploadController: UploadRoutes;
-  readonly collController: CollectionRoutes;
   readonly ipLookup: Reader<CountryResponse>;
   readonly citationService: CitationService;
 
@@ -76,13 +73,15 @@ export class DownloadRoutes {
   };
 
   collection: RequestHandler = async (req, res, next) => {
-    const collectionUuid: string = req.params.uuid;
-    const collection = await this.collController.findCollection(collectionUuid);
+    const collection = await this.collectionRepo.findOne({
+      where: { uuid: req.params.uuid },
+      relations: { regularFiles: true, modelFiles: true },
+    });
     if (!collection) {
       return next({ status: 404, errors: ["No collection matches this UUID."] });
     }
 
-    const allFiles = (collection.regularFiles as unknown as File[]).concat(collection.modelFiles);
+    const allFiles = (collection.regularFiles as File[]).concat(collection.modelFiles);
     await this.trackDownload(req, ObjectType.Collection, collection.uuid);
     try {
       const archive = archiver("zip", { store: true });

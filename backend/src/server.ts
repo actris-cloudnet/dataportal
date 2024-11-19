@@ -71,7 +71,7 @@ async function createServer(): Promise<void> {
   const uploadRoutes = new UploadRoutes(AppDataSource, queueService);
   const collRoutes = new CollectionRoutes(AppDataSource);
   const modelRoutes = new ModelRoutes(AppDataSource);
-  const dlRoutes = new DownloadRoutes(AppDataSource, fileRoutes, collRoutes, uploadRoutes, ipLookup);
+  const dlRoutes = new DownloadRoutes(AppDataSource, fileRoutes, uploadRoutes, ipLookup);
   const calibRoutes = new CalibrationRoutes(AppDataSource);
   const qualityRoutes = new QualityReportRoutes(AppDataSource, fileRoutes);
   const publicationRoutes = new PublicationRoutes(AppDataSource);
@@ -201,6 +201,7 @@ async function createServer(): Promise<void> {
     collRoutes.postCollection,
   );
   app.get("/api/collection/:uuid", middleware.validateUuidParam, collRoutes.collection);
+  app.get("/api/collection/:uuid/files", middleware.validateUuidParam, collRoutes.collectionFiles);
   app.post("/api/generate-pid", rateLimit({ windowMs: 60 * 1000, limit: 10 }), express.json(), collRoutes.generatePid);
   app.get("/api/download/product/:uuid/*s3key", middleware.validateUuidParam, dlRoutes.product);
   app.get("/api/download/raw/:uuid/:filename", middleware.validateUuidParam, dlRoutes.raw);

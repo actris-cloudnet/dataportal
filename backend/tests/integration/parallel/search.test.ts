@@ -385,10 +385,4 @@ describe("/api/search", () => {
       totalPages: 2,
     });
   });
-
-  it("filters by collection", async () => {
-    const res = await axios.get(url, { params: { collection: "48092c00-161d-4ca2-a29d-628cf8e960f6" } });
-    const fileUuids = res.data.map((file: any) => file.uuid).sort();
-    expect(fileUuids).toEqual(["a5d1d5af-3667-41bc-b952-e684f627d91c", "d21d6a9b-6804-4465-a026-74ec429fe17d"]);
-  });
 });

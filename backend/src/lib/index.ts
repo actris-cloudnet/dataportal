@@ -9,7 +9,6 @@ import { Upload } from "../entity/Upload";
 import axios from "axios";
 import { SiteType } from "../entity/Site";
 import env from "./env";
-import { CollectionFileResponse } from "../entity/CollectionFileResponse";
 import ReadableStream = NodeJS.ReadableStream;
 import maxmind, { CountryResponse, OpenOpts, Reader } from "maxmind";
 import { randomBytes } from "crypto";
@@ -70,8 +69,6 @@ export const convertToSearchResponse = (file: SearchFile) => new SearchFileRespo
 
 export const convertToReducedResponse = (parameters: (keyof SearchFileResponse)[]) => (file: SearchFile) =>
   parameters.reduce((acc, cur) => ({ ...acc, [cur]: convertToSearchResponse(file)[cur] }), {});
-
-export const convertToCollectionFileResponse = (file: RegularFile | ModelFile) => new CollectionFileResponse(file);
 
 export const sortByMeasurementDateAsc = <T extends File | SearchFile>(files: T[]): T[] =>
   files.sort((a, b) => new Date(a.measurementDate).getTime() - new Date(b.measurementDate).getTime());

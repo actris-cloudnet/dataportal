@@ -1,0 +1,124 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GET /api/collection/:uuid returns a valid collection 1`] = `
+{
+  "createdAt": "2020-09-28T12:45:21.916Z",
+  "endDate": "2014-12-05",
+  "files": 2,
+  "pid": "",
+  "products": [
+    {
+      "experimental": false,
+      "humanReadableName": "Radar",
+      "id": "radar",
+      "level": "1b",
+      "type": [
+        "instrument",
+      ],
+    },
+    {
+      "experimental": false,
+      "humanReadableName": "Model",
+      "id": "model",
+      "level": "1b",
+      "type": [
+        "model",
+      ],
+    },
+  ],
+  "sites": [
+    {
+      "actrisId": null,
+      "altitude": 16,
+      "country": "Ireland",
+      "countryCode": "IE",
+      "countrySubdivisionCode": null,
+      "description": null,
+      "dvasId": "mchd",
+      "gaw": "MHD",
+      "humanReadableName": "Mace Head",
+      "id": "mace-head",
+      "latitude": 53.326,
+      "longitude": -9.9,
+      "stationName": null,
+      "type": [
+        "cloudnet",
+      ],
+    },
+    {
+      "actrisId": null,
+      "altitude": 174,
+      "country": "Finland",
+      "countryCode": "FI",
+      "countrySubdivisionCode": null,
+      "description": null,
+      "dvasId": null,
+      "gaw": "SMR",
+      "humanReadableName": "Hyytiälä",
+      "id": "hyytiala",
+      "latitude": 61.844,
+      "longitude": 24.288,
+      "stationName": null,
+      "type": [
+        "cloudnet",
+      ],
+    },
+  ],
+  "size": 16527762,
+  "startDate": "2014-12-05",
+  "title": "",
+  "tombstonedFiles": false,
+  "updatedAt": "2020-09-28T12:45:21.916Z",
+  "uuid": "48092c00-161d-4ca2-a29d-628cf8e960f6",
+  "volatileFiles": true,
+}
+`;
+
+exports[`GET /api/collection/:uuid/files returns collection files 1`] = `
+{
+  "pagination": {
+    "currentPage": 1,
+    "pageSize": 15,
+    "totalItems": 2,
+    "totalPages": 1,
+  },
+  "results": [
+    {
+      "legacy": false,
+      "measurementDate": "2019-09-01",
+      "product": {
+        "experimental": false,
+        "humanReadableName": "Radar",
+        "id": "radar",
+        "level": "1b",
+      },
+      "site": {
+        "country": "Finland",
+        "humanReadableName": "Hyytiälä",
+        "id": "hyytiala",
+      },
+      "tombstoneReason": null,
+      "uuid": "d21d6a9b-6804-4465-a026-74ec429fe17d",
+      "volatile": true,
+    },
+    {
+      "legacy": false,
+      "measurementDate": "2014-12-05",
+      "product": {
+        "experimental": false,
+        "humanReadableName": "Model",
+        "id": "model",
+        "level": "1b",
+      },
+      "site": {
+        "country": "Ireland",
+        "humanReadableName": "Mace Head",
+        "id": "mace-head",
+      },
+      "tombstoneReason": null,
+      "uuid": "a5d1d5af-3667-41bc-b952-e684f627d91c",
+      "volatile": true,
+    },
+  ],
+}
+`;

@@ -1,5 +1,4 @@
 import type { Product } from "@shared/entity/Product";
-import type { CollectionFileResponse } from "@shared/entity/CollectionFileResponse";
 import type { Site, SiteType } from "@shared/entity/Site";
 import type { Instrument } from "@shared/entity/Instrument";
 
@@ -97,9 +96,6 @@ export const humanReadableTimestamp = (date: string | Date) => {
   return suffix.includes("Z") ? `${timestamp} UTC` : timestamp;
 };
 
-export const combinedFileSize = (files: CollectionFileResponse[]) =>
-  files.map((file) => file.size).reduce((prev, cur) => cur + prev, 0);
-
 /** Convert date to ISO 8601 date in UTC. */
 export const dateToString = (date: Date) => {
   return date.toISOString().slice(0, 10);
@@ -114,13 +110,6 @@ export function getDateFromBeginningOfYear(): Date {
 
 export function isSameDay(a: Date, b: Date) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-}
-
-export function constructTitle(files: CollectionFileResponse[]) {
-  return files.map((file) => ({
-    ...file,
-    title: `${file.product} from ${file.site}`,
-  }));
 }
 
 export function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {

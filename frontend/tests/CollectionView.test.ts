@@ -18,7 +18,9 @@ describe("CollectionView.vue", () => {
     resources = await readResources();
     mockAxios = () => {
       return (url: string): AxiosPromise => {
-        if (url.includes("/collection/testuuid")) {
+        if (url.includes("/collection/48092c00-161d-4ca2-a29d-628cf8e960f6/files")) {
+          return Promise.resolve(augmentAxiosResponse(resources["collectionfiles"]));
+        } else if (url.includes("/collection/48092c00-161d-4ca2-a29d-628cf8e960f6")) {
           return Promise.resolve(augmentAxiosResponse(resources["allcollections"][0]));
         } else if (url.includes("/search")) {
           const results = [resources["pagedsearch"].results[1], resources["pagedsearch"].results[9]];
@@ -38,8 +40,6 @@ describe("CollectionView.vue", () => {
           return Promise.resolve(augmentAxiosResponse(resources["sites"]));
         } else if (url.includes("/products")) {
           return Promise.resolve(augmentAxiosResponse(resources["products"]));
-        } else if (url.includes("/models")) {
-          return Promise.resolve(augmentAxiosResponse(resources["models"]));
         } else if (url.includes("/generate-pid")) {
           return Promise.resolve(augmentAxiosResponse({ pid: "testpid" }));
         } else if (url.includes("/reference/") && url.includes("/citation?format=html")) {
@@ -67,7 +67,7 @@ describe("CollectionView.vue", () => {
 
     beforeAll(async () => {
       wrapper = mount(App, { global: { plugins: [router] } });
-      router.push({ name: "Collection", params: { uuid: "testuuid" } });
+      router.push({ name: "Collection", params: { uuid: "48092c00-161d-4ca2-a29d-628cf8e960f6" } });
       await router.isReady();
     });
 
@@ -117,7 +117,7 @@ describe("CollectionView.vue", () => {
 
     beforeAll(async () => {
       wrapper = mount(App, { global: { plugins: [router] } });
-      router.push({ name: "CollectionFiles", params: { uuid: "testuuid" } });
+      router.push({ name: "CollectionFiles", params: { uuid: "48092c00-161d-4ca2-a29d-628cf8e960f6" } });
       await router.isReady();
     });
 

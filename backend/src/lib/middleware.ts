@@ -76,7 +76,6 @@ export class Middleware {
       "dvasUpdated",
       "page",
       "pageSize",
-      "collection",
     ];
 
     if (req.path.includes("visualization")) validKeys.push("variable");
