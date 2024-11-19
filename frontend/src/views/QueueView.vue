@@ -57,10 +57,15 @@
               <td>{{ task.siteId }}</td>
               <td>{{ task.measurementDate }}</td>
               <td>
-                <router-link v-if="task.status === 'done'" :to="generateLink(task)">{{ task.productId }}</router-link>
+                <router-link v-if="task.status === 'done'" :to="linkToSearch(task)">{{ task.productId }}</router-link>
                 <span v-else>{{ task.productId }}</span>
               </td>
-              <td>{{ task.instrumentInfo?.name || task.model?.id }}</td>
+              <td>
+                <router-link v-if="task.instrumentInfo?.name" :to="linkToRaw(task)">{{
+                  task.instrumentInfo.name
+                }}</router-link>
+                <span v-else-if="task.model?.id">{{ task.model.id }}</span>
+              </td>
               <td>
                 {{ task.status === "created" ? timeDifference(task.scheduledAt) : "" }}
               </td>
@@ -230,7 +235,7 @@ function timeDifference(scheduledAt: string): string {
   }
 }
 
-function generateLink(task: AugmentedTask) {
+function linkToSearch(task: AugmentedTask) {
   const query: Record<string, string> = {
     site: task.siteId,
     product: task.productId,
@@ -244,6 +249,14 @@ function generateLink(task: AugmentedTask) {
     name: "Search",
     params: { mode: "data" },
     query: query,
+  };
+}
+
+function linkToRaw(task: AugmentedTask) {
+  return {
+    name: "Raw Files",
+    params: { uuid: task.instrumentInfo.uuid },
+    query: { date: task.measurementDate },
   };
 }
 </script>
