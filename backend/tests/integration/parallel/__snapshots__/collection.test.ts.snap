@@ -3,7 +3,7 @@
 exports[`GET /api/collection/:uuid returns a valid collection 1`] = `
 {
   "createdAt": "2020-09-28T12:45:21.916Z",
-  "endDate": "2014-12-05",
+  "endDate": "2019-09-01",
   "files": 2,
   "pid": "",
   "products": [
