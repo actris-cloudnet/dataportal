@@ -8,7 +8,6 @@ import {
   convertToSearchResponse,
   getS3pathForFile,
   hideTestDataFromNormalUsers,
-  sortByMeasurementDateAsc,
   toArray,
   dateforsize,
   streamHandler,
@@ -352,16 +351,6 @@ export class FileRoutes {
       console.error("FATAL", err);
       throw err;
     }
-  };
-
-  allfiles: RequestHandler = async (req, res) => {
-    const result = await this.fileRepo.find({ relations: { site: true, product: true } });
-    res.send(sortByMeasurementDateAsc(result).map(augmentFile(false)));
-  };
-
-  allsearch: RequestHandler = async (req, res) => {
-    const result = await this.searchFileRepo.find({ relations: { site: true, product: true } });
-    res.send(sortByMeasurementDateAsc(result).map(convertToSearchResponse));
   };
 
   filesQueryBuilder(query: any, mode: "file" | "model") {
