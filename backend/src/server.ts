@@ -121,10 +121,6 @@ async function createServer(): Promise<void> {
       res.header("Access-Control-Allow-Methods", "*");
       next();
     });
-
-    app.get("/allfiles", fileRoutes.allfiles);
-    app.get("/allsearch", fileRoutes.allsearch);
-    app.get("/allcollections", collRoutes.allcollections);
   }
 
   // public (changes to these require changes to API docs)

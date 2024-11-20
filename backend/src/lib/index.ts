@@ -70,9 +70,6 @@ export const convertToSearchResponse = (file: SearchFile) => new SearchFileRespo
 export const convertToReducedResponse = (parameters: (keyof SearchFileResponse)[]) => (file: SearchFile) =>
   parameters.reduce((acc, cur) => ({ ...acc, [cur]: convertToSearchResponse(file)[cur] }), {});
 
-export const sortByMeasurementDateAsc = <T extends File | SearchFile>(files: T[]): T[] =>
-  files.sort((a, b) => new Date(a.measurementDate).getTime() - new Date(b.measurementDate).getTime());
-
 export const augmentFile = (includeS3path: boolean) => (file: RegularFile | ModelFile) => ({
   ...file,
   downloadUrl: `${env.DP_BACKEND_URL}/download/${getDownloadPathForFile(file)}`,

@@ -4,7 +4,7 @@ import { validate as validateUuid } from "uuid";
 import axios from "axios";
 import { DataSource, In, Raw, Repository } from "typeorm";
 import { File, ModelFile, RegularFile } from "../entity/File";
-import { getCollectionLandingPage, convertToSearchResponse, transformRawFile } from "../lib";
+import { getCollectionLandingPage, transformRawFile } from "../lib";
 import env from "../lib/env";
 import { CitationService } from "../lib/cite";
 import { Site } from "../entity/Site";
@@ -206,20 +206,6 @@ export class CollectionRoutes {
       },
     };
   }
-
-  allcollections: RequestHandler = async (req, res) => {
-    const collections = await this.collectionRepo.find({
-      relations: {
-        regularFiles: { site: true, product: true },
-        modelFiles: { site: true, product: true },
-      },
-    });
-    const response = collections.map((coll) => ({
-      ...coll,
-      ...{ files: coll.regularFiles.map(convertToSearchResponse) },
-    }));
-    res.send(response);
-  };
 
   private async countFiles(collection: Collection) {
     const [regularFiles, modelFiles] = await Promise.all([
