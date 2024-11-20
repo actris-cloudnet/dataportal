@@ -11,4 +11,5 @@ export interface SearchFile {
   volatile: boolean;
   legacy: boolean;
   errorLevel: ErrorLevel | null;
+  tombstoneReason?: string | null;
 }

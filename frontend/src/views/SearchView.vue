@@ -718,34 +718,6 @@ span.centerlabel {
   }
 }
 
-:deep(.rowtags) {
-  display: flex;
-  gap: 0.25em;
-  justify-content: center;
-}
-
-:deep(.rowtag) {
-  display: inline-block;
-  min-width: 1em;
-  min-height: 1em;
-  font-size: 0.9em;
-  text-align: center;
-  padding: 0.2em;
-  border-radius: 0.25rem;
-
-  &.volatile {
-    background: #cad7ff;
-  }
-
-  &.legacy {
-    background: #cecece;
-  }
-
-  &.experimental {
-    background-color: $experimental;
-  }
-}
-
 .smallmap {
   height: 300px;
 }
