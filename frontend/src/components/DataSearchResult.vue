@@ -11,7 +11,7 @@
       </div>
       <div class="results" v-else-if="apiResponse">
         <h3 class="results-title">Results</h3>
-        <div class="results-subtitle" v-if="!simplifiedView && apiResponse.pagination.totalItems > 0">
+        <div class="results-subtitle" v-if="apiResponse.pagination.totalItems > 0">
           <span v-if="isBusy">Searching...</span>
           <span v-else>
             Found {{ apiResponse.pagination.totalItems }}
@@ -21,6 +21,7 @@
             <li v-if="hasVolatile"><span class="rowtag volatile rounded"></span> volatile</li>
             <li v-if="hasLegacy"><span class="rowtag legacy rounded"></span> legacy</li>
             <li v-if="hasExperimental"><span class="rowtag experimental rounded"></span> experimental</li>
+            <li v-if="hasTombstoned"><span class="rowtag deleted rounded"></span> deleted</li>
           </ul>
         </div>
         <div v-if="apiResponse.pagination.totalItems === 0 && !isBusy" class="noresults results-content">
@@ -71,6 +72,12 @@
                 v-if="data.item.product.experimental"
                 class="rowtag experimental rounded"
                 title="This is experimental product."
+              >
+              </span>
+              <span
+                v-if="data.item.tombstoneReason != null"
+                class="rowtag deleted rounded"
+                title="This file is deleted."
               >
               </span>
             </span>
@@ -243,6 +250,7 @@ let visualizationController: AbortController | null = null;
 const hasVolatile = computed(() => apiResponse.value?.results.some((item) => item.volatile));
 const hasLegacy = computed(() => apiResponse.value?.results.some((item) => item.legacy));
 const hasExperimental = computed(() => apiResponse.value?.results.some((item) => item.product.experimental));
+const hasTombstoned = computed(() => apiResponse.value?.results.some((item) => item.tombstoneReason != null));
 
 const { innerWidth } = useInnerSize();
 // NOTE: Keep the breakpoint in sync with SASS below.
@@ -402,6 +410,8 @@ function iconCellStyle(item: any) {
 </script>
 
 <style scoped lang="scss">
+@import "@/sass/variables.scss";
+
 #fileTable {
   display: flex;
   width: 100%;
@@ -534,6 +544,38 @@ function iconCellStyle(item: any) {
   img {
     height: 1.15em;
     margin-right: 5px;
+  }
+}
+
+.rowtags {
+  display: flex;
+  gap: 0.25em;
+  justify-content: center;
+}
+
+.rowtag {
+  display: inline-block;
+  min-width: 1em;
+  min-height: 1em;
+  font-size: 0.9em;
+  text-align: center;
+  padding: 0.2em;
+  border-radius: 0.25rem;
+
+  &.volatile {
+    background: #cad7ff;
+  }
+
+  &.legacy {
+    background: #cecece;
+  }
+
+  &.experimental {
+    background-color: $experimental;
+  }
+
+  &.deleted {
+    background-color: $red4;
   }
 }
 </style>
