@@ -290,7 +290,7 @@ export class CollectionRoutes {
         [collection.uuid],
       ),
     ]);
-    return parseInt(regularFiles[0].size) + parseInt(modelFiles[0].size);
+    return parseInt(regularFiles[0].size || 0) + parseInt(modelFiles[0].size || 0);
   }
 
   private async getDateRange(collection: Collection) {
@@ -312,10 +312,11 @@ export class CollectionRoutes {
         [collection.uuid],
       ),
     ]);
+    const startDates = [regularFiles[0].startDate, modelFiles[0].startDate].filter((date) => date != null).sort();
+    const endDates = [regularFiles[0].endDate, modelFiles[0].endDate].filter((date) => date != null).sort();
     return {
-      startDate:
-        regularFiles[0].startDate < modelFiles[0].startDate ? regularFiles[0].startDate : modelFiles[0].startDate,
-      endDate: regularFiles[0].endDate < modelFiles[0].endDate ? regularFiles[0].endDate : modelFiles[0].endDate,
+      startDate: startDates[0],
+      endDate: endDates[endDates.length - 1],
     };
   }
 
