@@ -19,33 +19,25 @@
     <main id="collectionlanding" class="pagewidth">
       <div class="flex">
         <main class="infoBox column">
-          <section id="summary">
-            <header>Summary</header>
-            <section class="details">
-              <dl>
-                <dt>Date span</dt>
-                <dd>{{ response.startDate }} &ndash; {{ response.endDate }}</dd>
-                <dt>File count</dt>
-                <dd>{{ response.files }}</dd>
-                <dt>Total size</dt>
-                <dd>{{ humanReadableSize(response.size) }}</dd>
-              </dl>
-            </section>
-          </section>
           <section id="sitemap" v-if="response.sites.length > 0">
-            <header>Sites</header>
-            <section class="details">
-              <SuperMap :sites="response.sites" :zoom="3" />
-            </section>
+            <SuperMap :sites="response.sites" :zoom="3" />
           </section>
-          <section id="products">
-            <header>Products</header>
-            <section class="details">
-              <div v-for="product in response.products" :key="product.id">
-                <img :src="getProductIcon(product.id)" class="product" />
-                {{ product.humanReadableName }}
-              </div>
-            </section>
+          <section id="summary">
+            <dl>
+              <dt>Date span</dt>
+              <dd>{{ response.startDate }} &ndash; {{ response.endDate }}</dd>
+              <dt>File count</dt>
+              <dd>{{ response.files }}</dd>
+              <dt>Total size</dt>
+              <dd>{{ humanReadableSize(response.size) }}</dd>
+              <dt>Products</dt>
+              <dd id="products">
+                <div v-for="product in response.products" :key="product.id">
+                  <img :src="getProductIcon(product.id)" class="product" />
+                  {{ product.humanReadableName }}
+                </div>
+              </dd>
+            </dl>
           </section>
         </main>
         <div class="rightView">
@@ -105,7 +97,29 @@ onMounted(async () => {
 
 <style scoped lang="scss">
 @import "@/sass/variables.scss";
-@import "@/sass/landing.scss";
+
+dl {
+  display: grid;
+  grid-template-columns: auto 4fr;
+  column-gap: 2rem;
+  row-gap: 0.4rem;
+  margin-top: 1rem;
+}
+
+dt {
+  font-weight: 500;
+  max-width: 11em;
+}
+
+dd {
+  margin: 0;
+}
+
+img.product {
+  height: auto;
+  width: 1em;
+  margin-right: 0.3em;
+}
 
 div.flex {
   display: flex;
@@ -139,7 +153,7 @@ main.column {
   }
 }
 
-#sitemap .details {
+#sitemap {
   height: 300px;
   padding: 0;
 }

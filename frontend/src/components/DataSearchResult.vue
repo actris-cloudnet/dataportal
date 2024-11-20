@@ -1,6 +1,6 @@
 <template>
   <section id="fileTable">
-    <div class="column1">
+    <div class="column1" :style="{ paddingTop }">
       <div class="results" v-if="isBusy && !apiResponse">
         <h3 class="results-title">Results</h3>
         <div class="results-subtitle">Searching...</div>
@@ -105,7 +105,7 @@
         </div>
       </div>
     </div>
-    <div :class="{ column2: true, busy: previewBusy }">
+    <div :class="{ column2: true, busy: previewBusy }" :style="{ paddingTop }">
       <div v-if="previewResponse" class="file-preview-container">
         <h3 class="preview-title">
           {{ previewResponse.product.humanReadableName }} from {{ previewResponse.site.humanReadableName }}
@@ -221,6 +221,7 @@ export interface Props {
   instruments?: string[];
   instrumentPids?: string[];
   collection?: string;
+  paddingTop?: string;
 }
 
 const props = defineProps<Props>();
@@ -440,7 +441,7 @@ function iconCellStyle(item: any) {
 
 .column1 {
   flex-basis: 55%;
-  padding-top: 2rem;
+  padding: 0 0 2rem;
 }
 
 .results {
@@ -479,8 +480,7 @@ function iconCellStyle(item: any) {
 .column2 {
   flex-basis: 45%;
   border-left: 1px solid #ddd;
-  padding: 2rem;
-  padding-right: 0;
+  padding: 0 2rem 2rem;
   margin-left: 2rem;
 
   &.busy {

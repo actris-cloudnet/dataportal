@@ -231,6 +231,7 @@
           :products="selectedProductIds.length ? selectedProductIds : productOptions.map((prod) => prod.id)"
           :instruments="selectedInstrumentIds"
           :instrumentPids="selectedInstrumentPids"
+          padding-top="2rem"
         />
       </div>
     </div>
