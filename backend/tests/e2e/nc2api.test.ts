@@ -1,11 +1,11 @@
-import * as fs from "fs";
+import * as fs from "node:fs";
 import axios from "axios";
 import { backendPrivateUrl, backendPublicUrl, storageServiceUrl, str2base64 } from "../lib";
 import * as AdmZip from "adm-zip";
-import { createHash } from "crypto";
+import { createHash } from "node:crypto";
 import { DataSource, Repository } from "typeorm";
 import { Download, ObjectType } from "../../src/entity/Download";
-import { basename } from "path";
+import { basename } from "node:path";
 import { initUsersAndPermissions } from "../lib/userAccountAndPermissions";
 import { AppDataSource } from "../../src/data-source";
 import { RegularFile } from "../../src/entity/File";

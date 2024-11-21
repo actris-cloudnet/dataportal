@@ -1,5 +1,5 @@
-import * as fs from "fs";
-import { resolve } from "path";
+import * as fs from "node:fs";
+import { resolve } from "node:path";
 import axios from "axios";
 import { AppDataSource } from "../../src/data-source";
 

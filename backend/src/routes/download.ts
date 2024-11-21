@@ -1,6 +1,7 @@
 import { Request, RequestHandler } from "express";
 import { CountryResponse, Reader } from "maxmind";
-import { readFileSync } from "fs";
+import { readFileSync } from "node:fs";
+import * as http from "node:http";
 
 import { Collection } from "../entity/Collection";
 import { DataSource, Not, Repository } from "typeorm";
@@ -14,8 +15,6 @@ import {
   ssAuthString,
   getCollectionLandingPage,
 } from "../lib";
-import * as http from "http";
-import { IncomingMessage } from "http";
 import archiver = require("archiver");
 import { FileRoutes } from "./file";
 import env from "../lib/env";
@@ -133,15 +132,15 @@ export class DownloadRoutes {
     upstreamRes.pipe(res, { end: true });
   };
 
-  private makeFileRequest(file: File): Promise<IncomingMessage> {
+  private makeFileRequest(file: File): Promise<http.IncomingMessage> {
     return this.makeRequest(getS3pathForFile(file), file.version);
   }
 
-  private makeRawFileRequest(file: Upload): Promise<IncomingMessage> {
+  private makeRawFileRequest(file: Upload): Promise<http.IncomingMessage> {
     return this.makeRequest(getS3pathForUpload(file));
   }
 
-  private async makeRequest(s3path: string, version?: string): Promise<IncomingMessage> {
+  private async makeRequest(s3path: string, version?: string): Promise<http.IncomingMessage> {
     const headers = {
       Authorization: ssAuthString(),
     };

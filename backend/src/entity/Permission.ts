@@ -2,6 +2,7 @@ import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, ManyToMany, Unique }
 
 import { Site } from "./Site";
 import { UserAccount } from "./UserAccount";
+import { Model } from "./Model";
 
 export enum PermissionType {
   canUpload = "canUpload",
@@ -15,7 +16,7 @@ export enum PermissionType {
 }
 
 @Entity()
-@Unique(["permission", "site"])
+@Unique(["permission", "site", "model"])
 export class Permission {
   @PrimaryGeneratedColumn()
   id?: number;
@@ -25,6 +26,9 @@ export class Permission {
 
   @ManyToOne(() => Site, (site) => site.permissions, { nullable: true })
   site!: Site | null;
+
+  @ManyToOne(() => Model, { nullable: true })
+  model!: Model | null;
 
   @ManyToMany(() => UserAccount, (userAccount) => userAccount.permissions)
   userAccounts!: UserAccount[];

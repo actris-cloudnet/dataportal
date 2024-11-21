@@ -1,5 +1,5 @@
 import axios from "axios";
-import { readFileSync } from "fs";
+import { readFileSync } from "node:fs";
 import { backendPrivateUrl } from "../../lib";
 import { DataSource } from "typeorm/";
 import { AppDataSource } from "../../../src/data-source";
@@ -24,11 +24,13 @@ afterAll(async () => {
 
 describe("test user accounts and permissions", () => {
   let userData: any[];
+
   beforeAll(async () => {
     await userAccountRepository.delete({});
     userData = JSON.parse(readFileSync("tests/data/userAccountsAndPermissions.json", "utf8"));
     expect(userData).toHaveLength(8);
   });
+
   it("posts user accounts and permissions", async () => {
     for (const user of userData) {
       const postResp = await axios.post(USER_ACCOUNTS_URL, user);
@@ -112,8 +114,8 @@ describe("test user accounts and permissions", () => {
     await expect(
       axios.put(USER_ACCOUNTS_URL.concat("/", alice.id), {
         permissions: [
-          { siteId: "granada", permission: "canUpload" },
-          { siteId: null, permission: "canUploadModel" },
+          { siteId: "granada", modelId: null, permission: "canUpload" },
+          { siteId: null, modelId: null, permission: "canUploadModel" },
         ],
       }),
     ).resolves.toMatchObject({
@@ -121,8 +123,8 @@ describe("test user accounts and permissions", () => {
       data: {
         username: "alice",
         permissions: [
-          { siteId: "granada", permission: "canUpload" },
-          { siteId: null, permission: "canUploadModel" },
+          { siteId: "granada", modelId: null, permission: "canUpload" },
+          { siteId: null, modelId: null, permission: "canUploadModel" },
         ],
       },
     });
@@ -133,8 +135,8 @@ describe("test user accounts and permissions", () => {
     await expect(
       axios.put(USER_ACCOUNTS_URL.concat("/", bob.id), {
         permissions: [
-          { siteId: "granada", permission: "canUpload" },
-          { siteId: "mace-head", permission: "canUpload" },
+          { siteId: "granada", modelId: null, permission: "canUpload" },
+          { siteId: "mace-head", modelId: null, permission: "canUpload" },
         ],
       }),
     ).resolves.toMatchObject({
@@ -142,8 +144,8 @@ describe("test user accounts and permissions", () => {
       data: {
         username: "bob",
         permissions: [
-          { siteId: "granada", permission: "canUpload" },
-          { siteId: "mace-head", permission: "canUpload" },
+          { siteId: "granada", modelId: null, permission: "canUpload" },
+          { siteId: "mace-head", modelId: null, permission: "canUpload" },
         ],
       },
     });
@@ -154,8 +156,8 @@ describe("test user accounts and permissions", () => {
     await expect(
       axios.put(USER_ACCOUNTS_URL.concat("/", alice.id), {
         permissions: [
-          { siteId: "granadaTypo", permission: "canUpload" },
-          { siteId: null, permission: "canUploadModel" },
+          { siteId: "granadaTypo", modelId: null, permission: "canUpload" },
+          { siteId: null, modelId: null, permission: "canUploadModel" },
         ],
       }),
     ).rejects.toMatchObject({ response: { status: 422 } });
@@ -166,8 +168,8 @@ describe("test user accounts and permissions", () => {
     await expect(
       axios.put(USER_ACCOUNTS_URL.concat("/", alice.id), {
         permissions: [
-          { siteId: "granada", permission: "canUpload" },
-          { siteId: null, permission: "canUploadModelTYPO" },
+          { siteId: "granada", modelId: null, permission: "canUpload" },
+          { siteId: null, modelId: null, permission: "canUploadModelTYPO" },
         ],
       }),
     ).rejects.toMatchObject({ response: { status: 422 } });
@@ -189,6 +191,32 @@ describe("test user accounts and permissions", () => {
         username: "",
       }),
     ).rejects.toMatchObject({ response: { status: 401 } });
+  });
+
+  it("add model permissions", async () => {
+    const alice = await handlePerson("alice");
+    await expect(
+      axios.put(USER_ACCOUNTS_URL.concat("/", alice.id), {
+        permissions: [],
+      }),
+    ).resolves.toMatchObject({
+      status: 200,
+      data: {
+        username: "alice",
+        permissions: [],
+      },
+    });
+    await expect(
+      axios.put(USER_ACCOUNTS_URL.concat("/", alice.id), {
+        permissions: [{ siteId: "granada", modelId: "ecmwf", permission: "canUploadModel" }],
+      }),
+    ).resolves.toMatchObject({
+      status: 200,
+      data: {
+        username: "alice",
+        permissions: [{ siteId: "granada", modelId: "ecmwf", permission: "canUploadModel" }],
+      },
+    });
   });
 
   it("deletes alices account", async () => {

@@ -2,7 +2,7 @@ import { DataSource, Repository } from "typeorm";
 import { QualityReport } from "../../../src/entity/QualityReport";
 import axios from "axios";
 import { backendPrivateUrl, backendPublicUrl } from "../../lib";
-import { promises as fsp } from "fs";
+import { promises as fsp } from "node:fs";
 import { ErrorLevel, FileQuality } from "../../../src/entity/FileQuality";
 import { readResources } from "../../../../shared/lib";
 import { TestInfo } from "../../../src/entity/TestInfo";

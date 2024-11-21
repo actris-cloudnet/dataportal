@@ -1,5 +1,5 @@
-import { promises as fsp } from "fs";
-import { join } from "path";
+import { promises as fsp } from "node:fs";
+import { join } from "node:path";
 
 export const readResources = async () => {
   const baseDir = join(__dirname, "../res");
