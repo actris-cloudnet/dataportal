@@ -19,7 +19,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await userAccountRepository.delete({});
-  await await dataSource.destroy();
+  await dataSource.destroy();
 });
 
 describe("test user accounts and permissions", () => {
