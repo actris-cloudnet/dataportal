@@ -12,11 +12,11 @@ export class ReferenceRoutes {
   private collectionRepo: Repository<Collection>;
   private citationService: CitationService;
 
-  constructor(dataSource: DataSource) {
+  constructor(dataSource: DataSource, citationService: CitationService) {
     this.fileRepo = dataSource.getRepository(RegularFile);
     this.modelRepo = dataSource.getRepository(ModelFile);
     this.collectionRepo = dataSource.getRepository(Collection);
-    this.citationService = new CitationService(dataSource);
+    this.citationService = citationService;
   }
 
   getReference: RequestHandler = async (req, res) => {

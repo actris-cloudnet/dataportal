@@ -28,6 +28,8 @@ import { QueueRoutes } from "./routes/queue";
 import { QueueService } from "./lib/queue";
 import { ProductAvailabilityRoutes } from "./routes/productAvailability";
 import { StatisticsRoutes } from "./routes/statistics";
+import { DataCiteService } from "./lib/datacite";
+import { CitationService } from "./lib/cite";
 
 async function createServer(): Promise<void> {
   const port = 3000;
@@ -40,6 +42,9 @@ async function createServer(): Promise<void> {
   const authenticator = new Authenticator(AppDataSource);
   const authorizator = new Authorizator(AppDataSource);
   const queueService = new QueueService(AppDataSource);
+  const citationService = new CitationService(AppDataSource);
+  const dataCiteService = new DataCiteService(citationService);
+
   await queueService.initializeLocks();
   if (process.env.NODE_ENV === "production") {
     setInterval(
@@ -69,15 +74,15 @@ async function createServer(): Promise<void> {
   const instrRoutes = new InstrumentRoutes(AppDataSource);
   const vizRoutes = new VisualizationRoutes(AppDataSource, fileRoutes);
   const uploadRoutes = new UploadRoutes(AppDataSource, queueService);
-  const collRoutes = new CollectionRoutes(AppDataSource);
+  const collRoutes = new CollectionRoutes(AppDataSource, dataCiteService);
   const modelRoutes = new ModelRoutes(AppDataSource);
-  const dlRoutes = new DownloadRoutes(AppDataSource, fileRoutes, uploadRoutes, ipLookup);
+  const dlRoutes = new DownloadRoutes(AppDataSource, fileRoutes, uploadRoutes, ipLookup, citationService);
   const calibRoutes = new CalibrationRoutes(AppDataSource);
   const qualityRoutes = new QualityReportRoutes(AppDataSource, fileRoutes);
   const publicationRoutes = new PublicationRoutes(AppDataSource);
   const userActivationRoutes = new UserActivationRoutes(AppDataSource);
   const userAccountRoutes = new UserAccountRoutes(AppDataSource);
-  const referenceRoutes = new ReferenceRoutes(AppDataSource);
+  const referenceRoutes = new ReferenceRoutes(AppDataSource, citationService);
   const feedbackRoutes = new FeedbackRoutes(AppDataSource);
   const queueRoutes = new QueueRoutes(AppDataSource, queueService);
   const productAvailabilityRoutes = new ProductAvailabilityRoutes(AppDataSource);

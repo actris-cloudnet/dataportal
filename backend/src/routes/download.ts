@@ -31,13 +31,14 @@ export class DownloadRoutes {
     fileController: FileRoutes,
     uploadController: UploadRoutes,
     ipLookup: Reader<CountryResponse>,
+    citationService: CitationService,
   ) {
     this.downloadRepo = dataSource.getRepository(Download);
     this.collectionRepo = dataSource.getRepository(Collection);
     this.fileController = fileController;
     this.uploadController = uploadController;
     this.ipLookup = ipLookup;
-    this.citationService = new CitationService(dataSource);
+    this.citationService = citationService;
   }
   readonly downloadRepo: Repository<Download>;
   readonly collectionRepo: Repository<Collection>;
