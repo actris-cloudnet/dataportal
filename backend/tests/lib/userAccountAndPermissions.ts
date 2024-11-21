@@ -1,5 +1,5 @@
 import axios from "axios";
-import { readFileSync } from "fs";
+import { readFileSync } from "node:fs";
 import { backendPrivateUrl } from "../lib";
 import { expect } from "@jest/globals";
 

@@ -2,14 +2,13 @@ import axios from "axios";
 import { DataSource, Repository } from "typeorm";
 import { backendPrivateUrl, backendPublicUrl, genResponse, str2base64 } from "../../lib";
 import { InstrumentUpload, ModelUpload, Status } from "../../../src/entity/Upload";
-import { promises as fsp } from "fs";
+import { promises as fsp } from "node:fs";
 import { initUsersAndPermissions } from "../../lib/userAccountAndPermissions";
 import { AppDataSource } from "../../../src/data-source";
 import { ModelFile, RegularFile } from "../../../src/entity/File";
 import { ArrayEqual } from "../../../src/lib";
 import { beforeAll, beforeEach, afterAll, describe, it, expect, jest } from "@jest/globals";
-
-const crypto = require("crypto");
+import { randomBytes, createHash } from "node:crypto";
 
 jest.setTimeout(20000);
 
@@ -464,61 +463,69 @@ describe("POST /upload/metadata", () => {
   it("responds with 422 on missing filename", async () => {
     const payload = { ...validMetadata, filename: undefined };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject({
-      response: { status: 422 },
+      response: { status: 422, data: "Request is missing filename" },
     });
   });
 
   it("responds with 422 on missing measurementDate", async () => {
     const payload = { ...validMetadata, measurementDate: undefined };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject({
-      response: { status: 422 },
+      response: { status: 422, data: "Request is missing measurementDate or measurementDate is invalid" },
     });
   });
 
   it("responds with 422 on invalid measurementDate", async () => {
     const payload = { ...validMetadata, measurementDate: "July" };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject({
-      response: { status: 422 },
+      response: { status: 422, data: "Request is missing measurementDate or measurementDate is invalid" },
     });
   });
 
   it("responds with 422 on missing checksum", async () => {
     const payload = { ...validMetadata, checksum: undefined };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject({
-      response: { status: 422 },
+      response: { status: 422, data: "Request is missing checksum or checksum is invalid" },
     });
   });
 
   it("responds with 422 on invalid checksum", async () => {
     const payload = { ...validMetadata, checksum: "293948" };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject({
-      response: { status: 422 },
+      response: { status: 422, data: "Request is missing checksum or checksum is invalid" },
     });
   });
 
   it("responds with 422 on missing instrument", async () => {
     const payload = { ...validMetadata, instrument: undefined };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject({
-      response: { status: 422 },
+      response: { status: 422, data: "Request is missing instrument" },
     });
   });
 
   it("responds with 422 on invalid instrument", async () => {
     const payload = { ...validMetadata, instrument: "kukko" };
     await expect(axios.post(metadataUrl, payload, { headers })).rejects.toMatchObject({
-      response: { status: 422 },
+      response: { status: 422, data: "Instrument doesn't match instrument PID" },
+    });
+  });
+
+  it("responds with 422 on model metadata", async () => {
+    await expect(axios.post(metadataUrl, validModelMetadata, { headers })).rejects.toMatchObject({
+      response: { status: 422, data: "Request is missing instrument" },
     });
   });
 
   it("responds with 401 on missing authentication", async () => {
     const payload = { ...validMetadata, site: undefined };
-    await expect(axios.post(metadataUrl, payload)).rejects.toMatchObject({ response: { status: 401 } });
+    await expect(axios.post(metadataUrl, payload)).rejects.toMatchObject({
+      response: { status: 401, data: "Unauthorized" },
+    });
   });
 
   it("responds with 401 on non-existent username", async () => {
     const badHeaders = { authorization: `Basic ${str2base64("espoo:lol")}` };
     await expect(axios.post(metadataUrl, validMetadata, { headers: badHeaders })).rejects.toMatchObject({
-      response: { status: 401 },
+      response: { status: 401, data: "Unauthorized" },
     });
   });
 });
@@ -579,16 +586,16 @@ describe("PUT /upload/data/:checksum", () => {
     });
   });
 
+  it("responds with 400 on nonexistent hash", async () => {
+    const url = `${dataUrl}9a0364b9e99bb480dd25e1f0284c8554`;
+    await expect(axios.put(url, validFile, { headers })).rejects.toMatchObject({ response: { status: 400 } });
+  });
+
   it("responds with 500 on internal errors", async () => {
     const invalidFile = "servererr";
     await expect(axios.put(validUrl, invalidFile, { headers })).rejects.toMatchObject({
       response: { status: 500 },
     });
-  });
-
-  it("responds with 422 on nonexistent hash", async () => {
-    const url = `${dataUrl}9a0364b9e99bb480dd25e1f0284c8554`;
-    await expect(axios.put(url, validFile, { headers })).rejects.toMatchObject({ response: { status: 422 } });
   });
 
   it("responds with 401 when submitting data with wrong credentials", async () => {
@@ -597,6 +604,15 @@ describe("PUT /upload/data/:checksum", () => {
     await expect(axios.put(validUrl, validFile, { headers })).rejects.toMatchObject({ response: { status: 401 } });
     const md = await instrumentRepo.findOneByOrFail({ checksum: validMetadata.checksum });
     expect(new Date(md.updatedAt).getTime()).toBeLessThan(now.getTime());
+  });
+
+  it("responds with 400 on submitting model file", async () => {
+    const invalidUrl = `${modelDataUrl}${validMetadata.checksum}`;
+    await expect(axios.put(invalidUrl, validFile, { headers })).rejects.toMatchObject({
+      response: { status: 400, data: { status: 400, errors: "No metadata matches this hash" } },
+    });
+    const md = await instrumentRepo.findOneByOrFail({ checksum: validMetadata.checksum });
+    expect(md.status).toEqual(Status.CREATED);
   });
 });
 
@@ -614,6 +630,16 @@ describe("PUT /model-upload/data/:checksum", () => {
     await expect(axios.put(validModelUrl, validFile, { headers })).resolves.toMatchObject({ status: 201 });
     const md = await modelRepo.findOneByOrFail({ checksum: validModelMetadata.checksum });
     expect(md.status).toEqual(Status.UPLOADED);
+  });
+
+  it("responds with 400 on submitting instrument file", async () => {
+    const invalidUrl = `${dataUrl}${validModelMetadata.checksum}`;
+    const validFile = "content";
+    await expect(axios.put(invalidUrl, validFile, { headers })).rejects.toMatchObject({
+      response: { status: 400, data: "No metadata matches this hash" },
+    });
+    const md = await modelRepo.findOneByOrFail({ checksum: validModelMetadata.checksum });
+    expect(md.status).toEqual(Status.CREATED);
   });
 });
 
@@ -678,45 +704,51 @@ describe("POST /model-upload/metadata", () => {
     expect(new Date(md.updatedAt).getTime()).toEqual(now.getTime());
   });
 
+  it("responds with 422 on instrument metadata", async () => {
+    await expect(axios.post(modelMetadataUrl, validMetadata, { headers })).rejects.toMatchObject({
+      response: { status: 422, data: { status: 422, errors: "Request is missing model" } },
+    });
+  });
+
   it("responds with 422 on missing model", async () => {
     const payload = { ...validModelMetadata, model: undefined };
     await expect(axios.post(modelMetadataUrl, payload, { headers })).rejects.toMatchObject({
-      response: { status: 422 },
+      response: { status: 422, data: { status: 422, errors: "Request is missing model" } },
     });
   });
 
   it("responds with 422 on invalid model", async () => {
     const payload = { ...validModelMetadata, model: "kukko" };
     await expect(axios.post(modelMetadataUrl, payload, { headers })).rejects.toMatchObject({
-      response: { status: 422 },
+      response: { status: 422, data: { status: 422, errors: "Unknown model" } },
     });
   });
 
   it("responds with 422 on empty model", async () => {
     const payload = { ...validModelMetadata, model: "" };
     await expect(axios.post(modelMetadataUrl, payload, { headers })).rejects.toMatchObject({
-      response: { status: 422 },
+      response: { status: 422, data: { status: 422, errors: "Request is missing model" } },
     });
   });
 
   it("responds with 422 on missing site", async () => {
-    const payload = { ...validModelMetadata, site: undefined };
+    const payload = { ...validModelMetadata, site: undefined }; // site defaults to username
     await expect(axios.post(modelMetadataUrl, payload, { headers })).rejects.toMatchObject({
-      response: { status: 422 },
+      response: { status: 422, data: { status: 422, errors: "Unknown site" } },
     });
   });
 
   it("responds with 422 on empty site", async () => {
-    const payload = { ...validModelMetadata, site: "" };
+    const payload = { ...validModelMetadata, site: "" }; // site defaults to username
     await expect(axios.post(modelMetadataUrl, payload, { headers })).rejects.toMatchObject({
-      response: { status: 422 },
+      response: { status: 422, data: { status: 422, errors: "Unknown site" } },
     });
   });
 
   it("responds with 422 on invalid site", async () => {
     const payload = { ...validModelMetadata, site: "aksjdfksdf" };
     await expect(axios.post(modelMetadataUrl, payload, { headers })).rejects.toMatchObject({
-      response: { status: 422 },
+      response: { status: 422, data: { status: 422, errors: "Unknown site" } },
     });
   });
 });
@@ -950,14 +982,15 @@ describe("test user permissions", () => {
     const sites: any[] = (await axios.get(backendPublicUrl.concat("sites"))).data;
     for (const site of sites) {
       await expectSuccessfulUploadInstrument("alice", "alices_password", site.id);
-      await expectFailedUploadModel("alice", "alices_password", site.id);
+      await expectFailedUploadModel("alice", "alices_password", site.id, "ecmwf");
     }
   });
 
-  it("tests that bob can upload model to all sites", async () => {
+  it("tests that bob can upload all models to all sites", async () => {
     const sites: any[] = (await axios.get(backendPublicUrl.concat("sites"))).data;
     for (const site of sites) {
-      await expectSuccessfulUploadModel("bob", "bobs_pass", site.id);
+      await expectSuccessfulUploadModel("bob", "bobs_pass", site.id, "ecmwf");
+      await expectSuccessfulUploadModel("bob", "bobs_pass", site.id, "icon-iglo-12-23");
       await expectFailedUploadInstrument("bob", "bobs_pass", site.id);
     }
   });
@@ -973,18 +1006,21 @@ describe("test user permissions", () => {
     }
   });
 
-  it("tests that david can upload only model to granada and  instrument to mace-head", async () => {
+  it("tests that david can upload only ecmwf model to granada and instrument to mace-head", async () => {
     const sites: any[] = (await axios.get(backendPublicUrl.concat("sites"))).data;
     for (const site of sites) {
       if (site.id === "granada") {
-        await expectSuccessfulUploadModel("david", "davids^passphrase", site.id);
+        await expectSuccessfulUploadModel("david", "davids^passphrase", site.id, "ecmwf");
+        await expectFailedUploadModel("david", "davids^passphrase", site.id, "icon-iglo-12-23");
         await expectFailedUploadInstrument("david", "davids^passphrase", site.id);
       } else if (site.id === "mace-head") {
         await expectSuccessfulUploadInstrument("david", "davids^passphrase", site.id);
-        await expectFailedUploadModel("david", "davids^passphrase", site.id);
+        await expectFailedUploadModel("david", "davids^passphrase", site.id, "ecmwf");
+        await expectFailedUploadModel("david", "davids^passphrase", site.id, "icon-iglo-12-23");
       } else {
         await expectFailedUploadInstrument("david", "davids^passphrase", site.id);
-        await expectFailedUploadModel("david", "davids^passphrase", site.id);
+        await expectFailedUploadModel("david", "davids^passphrase", site.id, "ecmwf");
+        await expectFailedUploadModel("david", "davids^passphrase", site.id, "icon-iglo-12-23");
       }
     }
   });
@@ -994,10 +1030,10 @@ describe("test user permissions", () => {
     for (const site of sites) {
       if (site.id === "bucharest") {
         await expectSuccessfulUploadInstrument("bucharest", "passWordForBucharest", site.id);
-        await expectFailedUploadModel("bucharest", "passWordForBucharest", site.id);
+        await expectFailedUploadModel("bucharest", "passWordForBucharest", site.id, "ecmwf");
       } else {
         await expectFailedUploadInstrument("bucharest", "passWordForBucharest", site.id);
-        await expectFailedUploadModel("bucharest", "passWordForBucharest", site.id);
+        await expectFailedUploadModel("bucharest", "passWordForBucharest", site.id, "ecmwf");
       }
     }
   });
@@ -1007,10 +1043,10 @@ describe("test user permissions", () => {
     for (const site of sites) {
       if (site.id === "granada") {
         await expectSuccessfulUploadInstrument("granada", "PASSWORDFORgranada", site.id);
-        await expectFailedUploadModel("granada", "PASSWORDFORgranada", site.id);
+        await expectFailedUploadModel("granada", "PASSWORDFORgranada", site.id, "ecmwf");
       } else {
         await expectFailedUploadInstrument("granada", "PASSWORDFORgranada", site.id);
-        await expectFailedUploadModel("granada", "PASSWORDFORgranada", site.id);
+        await expectFailedUploadModel("granada", "PASSWORDFORgranada", site.id, "ecmwf");
       }
     }
   });
@@ -1020,10 +1056,10 @@ describe("test user permissions", () => {
     for (const site of sites) {
       if (site.id === "mace-head") {
         await expectSuccessfulUploadInstrument("mace-head", "SfSCHhnU5cjrMiLdgcW3ixkTQRo", site.id);
-        await expectFailedUploadModel("mace-head", "SfSCHhnU5cjrMiLdgcW3ixkTQRo", site.id);
+        await expectFailedUploadModel("mace-head", "SfSCHhnU5cjrMiLdgcW3ixkTQRo", site.id, "ecmwf");
       } else {
         await expectFailedUploadInstrument("mace-head", "SfSCHhnU5cjrMiLdgcW3ixkTQRo", site.id);
-        await expectFailedUploadModel("mace-head", "SfSCHhnU5cjrMiLdgcW3ixkTQRo", site.id);
+        await expectFailedUploadModel("mace-head", "SfSCHhnU5cjrMiLdgcW3ixkTQRo", site.id, "ecmwf");
       }
     }
   });
@@ -1032,7 +1068,7 @@ describe("test user permissions", () => {
     const sites: any[] = (await axios.get(backendPublicUrl.concat("sites"))).data;
     for (const site of sites) {
       await expectFailedUploadInstrument("eve", "eves_passphraase", site.id);
-      await expectFailedUploadModel("eve", "eves_passphraase", site.id);
+      await expectFailedUploadModel("eve", "eves_passphraase", site.id, "ecmwf");
     }
   });
 
@@ -1043,11 +1079,11 @@ describe("test user permissions", () => {
     for (const site of sites) {
       for (const user of users) {
         const length = randomInt(1, 512);
-        const randomPassword = crypto.randomBytes(length).toString("hex");
+        const randomPassword = randomBytes(length).toString("hex");
         await expectFailedUploadInstrument(user.username, randomPassword, site.id, false);
-        await expectFailedUploadModel(user.username, randomPassword, site.id, false);
+        await expectFailedUploadModel(user.username, randomPassword, site.id, "ecmwf", false);
         await expectFailedUploadInstrument(user.username, "", site.id, false);
-        await expectFailedUploadModel(user.username, "", site.id, false);
+        await expectFailedUploadModel(user.username, "", site.id, "ecmwf", false);
       }
     }
   });
@@ -1061,7 +1097,7 @@ describe("test user permissions", () => {
             continue;
           }
           await expectFailedUploadInstrument(usernameA, passwordB, site.id, false);
-          await expectFailedUploadModel(usernameA, passwordB, site.id, false);
+          await expectFailedUploadModel(usernameA, passwordB, site.id, "ecmwf", false);
         }
       }
     }
@@ -1070,25 +1106,25 @@ describe("test user permissions", () => {
   it("tests that nonexistent users cannot upload with correct or incorrect passwords", async () => {
     const sites: any[] = (await axios.get(backendPublicUrl.concat("sites"))).data;
     const usernameLength = randomInt(1, 512);
-    const randomUsername = crypto.randomBytes(usernameLength).toString("hex");
+    const randomUsername = randomBytes(usernameLength).toString("hex");
     for (const site of sites) {
       for (const password of Object.values(userCredentials)) {
         // Random username, some correct password
         await expectFailedUploadInstrument(randomUsername, password, site.id, false);
-        await expectFailedUploadModel(randomUsername, password, site.id, false);
+        await expectFailedUploadModel(randomUsername, password, site.id, "ecmwf", false);
         // Random username, some random password
         const passwordLength = randomInt(1, 512);
-        const randomPassword = crypto.randomBytes(passwordLength).toString("hex");
+        const randomPassword = randomBytes(passwordLength).toString("hex");
         await expectFailedUploadInstrument(randomUsername, randomPassword, site.id, false);
-        await expectFailedUploadModel(randomUsername, randomPassword, site.id, false);
+        await expectFailedUploadModel(randomUsername, randomPassword, site.id, "ecmwf", false);
         // Empty password
         await expectFailedUploadInstrument(randomUsername, "", site.id, false);
-        await expectFailedUploadModel(randomUsername, "", site.id, false);
+        await expectFailedUploadModel(randomUsername, "", site.id, "ecmwf", false);
         // empty username
         await expectFailedUploadInstrument("", password, site.id, false);
-        await expectFailedUploadModel("", password, site.id, false);
+        await expectFailedUploadModel("", password, site.id, "ecmwf", false);
         await expectFailedUploadInstrument("", "", site.id, false);
-        await expectFailedUploadModel("", "", site.id, false);
+        await expectFailedUploadModel("", "", site.id, "ecmwf", false);
       }
     }
   });
@@ -1096,7 +1132,7 @@ describe("test user permissions", () => {
 
 async function expectSuccessfulUploadInstrument(username: string, password: string, siteId: string) {
   const contentLength = randomInt(4, 128);
-  const content = crypto.randomBytes(contentLength).toString("hex");
+  const content = randomBytes(contentLength).toString("hex");
   const checksum = md5(content);
   const postMetadata = {
     filename: "file1.LV1",
@@ -1131,9 +1167,9 @@ async function expectFailedUploadInstrument(
   siteId: string,
   correctPassword: boolean = true,
 ) {
-  const putStatus: number = correctPassword ? 422 : 401;
+  const putStatus: number = correctPassword ? 400 : 401;
   const contentLength = randomInt(4, 128);
-  const content = crypto.randomBytes(contentLength).toString("hex");
+  const content = randomBytes(contentLength).toString("hex");
   const checksum = md5(content);
   const postMetadata = {
     filename: "file1.LV1",
@@ -1153,14 +1189,14 @@ async function expectFailedUploadInstrument(
   await expect(instrumentRepo.existsBy({ checksum })).resolves.toBe(false);
 }
 
-async function expectSuccessfulUploadModel(username: string, password: string, siteId: string) {
+async function expectSuccessfulUploadModel(username: string, password: string, siteId: string, modelId: string) {
   const contentLength = randomInt(4, 128);
-  const content = crypto.randomBytes(contentLength).toString("hex");
+  const content = randomBytes(contentLength).toString("hex");
   const checksum = md5(content);
   const postMetadata = {
-    filename: "20200122_".concat(siteId, "_icon-iglo-12-23.nc"),
+    filename: `20200122_${siteId}_${modelId}.nc`,
     measurementDate: "2020-08-11",
-    model: "icon-iglo-12-23",
+    model: modelId,
     checksum: checksum,
     site: siteId,
   };
@@ -1193,16 +1229,17 @@ async function expectFailedUploadModel(
   username: string,
   password: string,
   siteId: string,
+  modelId: string,
   correctPassword: boolean = true,
 ) {
-  const putStatus: number = correctPassword ? 422 : 401;
+  const putStatus: number = correctPassword ? 400 : 401;
   const contentLength = randomInt(4, 128);
-  const content = crypto.randomBytes(contentLength).toString("hex");
+  const content = randomBytes(contentLength).toString("hex");
   const checksum = md5(content);
   const postMetadata = {
-    filename: "20200122_".concat(siteId, "_icon-iglo-12-23.nc"),
+    filename: `20200122_${siteId}_${modelId}.nc`,
     measurementDate: "2020-08-11",
-    model: "icon-iglo-12-23",
+    model: modelId,
     checksum: checksum,
     site: siteId,
   };
@@ -1226,9 +1263,9 @@ function randomInt(min: number, max: number): number {
 }
 
 function md5(str: string) {
-  return crypto.createHash("md5").update(str).digest("hex");
+  return createHash("md5").update(str).digest("hex");
 }
 
 function randomMd5(): string {
-  return crypto.randomBytes(16).toString("hex");
+  return randomBytes(16).toString("hex");
 }

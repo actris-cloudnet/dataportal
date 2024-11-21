@@ -1,19 +1,19 @@
 import { DataSource, Repository } from "typeorm";
 import { ModelFile, RegularFile } from "../../../src/entity/File";
-import { readFileSync } from "fs";
+import { readFileSync } from "node:fs";
 import { backendPrivateUrl, storageServiceUrl, str2base64 } from "../../lib";
-import axios from "axios";
 import { Visualization } from "../../../src/entity/Visualization";
 import { SearchFile } from "../../../src/entity/SearchFile";
 import { ModelVisualization } from "../../../src/entity/ModelVisualization";
 import { FileQuality } from "../../../src/entity/FileQuality";
 import { QualityReport } from "../../../src/entity/QualityReport";
 import { initUsersAndPermissions } from "../../lib/userAccountAndPermissions";
-const uuidGen = require("uuid");
-const crypto = require("crypto");
 import { readResources } from "../../../../shared/lib";
 import { AppDataSource } from "../../../src/data-source";
 import { describe, expect, it, beforeAll, afterAll, beforeEach } from "@jest/globals";
+import axios from "axios";
+import { randomBytes } from "node:crypto";
+import * as uuid from "uuid";
 
 let dataSource: DataSource;
 let fileRepo: Repository<RegularFile>;
@@ -869,7 +869,7 @@ describe("DELETE /api/files/", () => {
     const file = {
       ...volatileFile,
       ...options,
-      ...{ uuid: uuidGen.v4(), product, volatile },
+      ...{ uuid: uuid.v4(), product, volatile },
       s3key: `${fileFix}20181115_mace-head_${product}.nc`,
       checksum: generateHash(),
     };
@@ -921,7 +921,7 @@ async function deleteFile(
 }
 
 function generateHash() {
-  return crypto.randomBytes(20).toString("hex");
+  return randomBytes(20).toString("hex");
 }
 
 async function cleanRepos() {

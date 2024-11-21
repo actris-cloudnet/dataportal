@@ -1,5 +1,5 @@
 import axios from "axios";
-import { promises as fsp } from "fs";
+import { promises as fsp } from "node:fs";
 
 import { backendPublicUrl, str2base64 } from "../../lib";
 import { DataSource, Repository } from "typeorm";

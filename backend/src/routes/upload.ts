@@ -30,9 +30,11 @@ import { QueueService } from "../lib/queue";
 import { Task, TaskType } from "../entity/Task";
 import { Calibration } from "../entity/Calibration";
 import { fetchCalibration } from "./calibration";
+import { PermissionType } from "../entity/Permission";
+import { Authenticator } from "../lib/auth";
 
 export class UploadRoutes {
-  constructor(dataSource: DataSource, queueService: QueueService) {
+  constructor(dataSource: DataSource, queueService: QueueService, authenticator: Authenticator) {
     this.dataSource = dataSource;
     this.instrumentUploadRepo = this.dataSource.getRepository(InstrumentUpload);
     this.modelUploadRepo = this.dataSource.getRepository(ModelUpload);
@@ -44,6 +46,7 @@ export class UploadRoutes {
     this.regularFileRepo = this.dataSource.getRepository(RegularFile);
     this.calibRepo = this.dataSource.getRepository(Calibration);
     this.queueService = queueService;
+    this.authenticator = authenticator;
   }
 
   readonly dataSource: DataSource;
@@ -57,35 +60,37 @@ export class UploadRoutes {
   readonly regularFileRepo: Repository<RegularFile>;
   readonly calibRepo: Repository<Calibration>;
   readonly queueService: QueueService;
+  readonly authenticator: Authenticator;
 
   postMetadata: RequestHandler = async (req, res, next) => {
     const body = req.body;
     const filename = basename(body.filename);
+    const siteId = "site" in body ? body.site : res.locals.username;
+    const isInstrument = !req.path.includes("model");
     let UploadEntity: EntityTarget<InstrumentUpload | ModelUpload>;
-    const instrumentUpload = "instrument" in body;
-    let dataSource: InstrumentInfo | Model | null = null;
+    let dataSource: InstrumentInfo | Model;
     let uploadedMetadata;
     let sortedTags = [] as string[];
 
-    const site = await this.siteRepo.findOneBy({ id: req.params.site });
+    const site = await this.siteRepo.findOneBy({ id: siteId });
     if (!site) {
       return next({ status: 422, errors: "Unknown site" });
     }
-    if (instrumentUpload) {
-      dataSource = await this.instrumentInfoRepo.findOne({
+    if (isInstrument) {
+      await this.authenticator.checkPermission(res, PermissionType.canUpload, { site });
+      const instrumentInfo = await this.instrumentInfoRepo.findOne({
         where: { pid: body.instrumentPid },
         relations: { instrument: true },
       });
-      if (!dataSource) {
+      if (!instrumentInfo) {
         return next({ status: 422, errors: "Unknown instrument PID" });
       }
-      body.instrument = fixInstrument(body.instrument, dataSource);
+      body.instrument = fixInstrument(body.instrument, instrumentInfo);
       if (!body.instrument) {
         return next({ status: 422, errors: "Instrument doesn't match instrument PID" });
       }
-      UploadEntity = InstrumentUpload;
 
-      const allowedTags = new Set(dataSource.instrument.allowedTags);
+      const allowedTags = new Set(instrumentInfo.instrument.allowedTags);
       const metadataTags = new Set(body.tags as string[]);
       sortedTags = Array.from(metadataTags)
         .filter((x) => allowedTags.has(x))
@@ -93,12 +98,17 @@ export class UploadRoutes {
       if (metadataTags.size != sortedTags.length) {
         return next({ status: 422, errors: "Unknown tag" });
       }
+
+      UploadEntity = InstrumentUpload;
+      dataSource = instrumentInfo;
     } else {
-      dataSource = await this.modelRepo.findOneBy({ id: body.model });
-      if (!dataSource) {
+      const model = await this.modelRepo.findOneBy({ id: body.model });
+      if (!model) {
         return next({ status: 422, errors: "Unknown model" });
       }
+      await this.authenticator.checkPermission(res, PermissionType.canUploadModel, { site, model });
       UploadEntity = ModelUpload;
+      dataSource = model;
     }
 
     const result = await this.dataSource.transaction(async (transactionalEntityManager) => {
@@ -116,7 +126,7 @@ export class UploadRoutes {
 
       // Secondly search row by other unique columns.
       const params = { site: { id: site.id }, measurementDate: body.measurementDate, filename: filename };
-      const payload = instrumentUpload
+      const payload = isInstrument
         ? ({
             ...params,
             instrument: { id: body.instrument },
@@ -138,7 +148,7 @@ export class UploadRoutes {
 
       // If no matching row was found, insert a new one.
       const args = { ...params, site, checksum: body.checksum, status: Status.CREATED };
-      if (instrumentUpload) {
+      if (isInstrument) {
         uploadedMetadata = new InstrumentUpload(args, dataSource as InstrumentInfo, sortedTags);
       } else {
         uploadedMetadata = new ModelUpload(args, dataSource as Model);
@@ -202,23 +212,32 @@ export class UploadRoutes {
 
   putData: RequestHandler = async (req, res, next) => {
     const checksum = req.params.checksum;
-    const site = req.params.site;
+    const isInstrument = !req.path.includes("model");
     try {
-      const upload = await this.findAnyUpload((repo, model) =>
-        repo.findOne({
-          where: { checksum: checksum, site: { id: site } },
-          relations: model
-            ? { site: true, model: true }
-            : {
-                site: true,
-                instrument: {
-                  derivedProducts: true,
-                },
-                instrumentInfo: true,
+      const upload = await (isInstrument
+        ? this.instrumentUploadRepo.findOne({
+            where: { checksum },
+            relations: {
+              site: true,
+              instrument: {
+                derivedProducts: true,
               },
-        }),
-      );
+              instrumentInfo: true,
+            },
+          })
+        : this.modelUploadRepo.findOne({
+            where: { checksum },
+            relations: { site: true, model: true },
+          }));
       if (!upload) return next({ status: 400, errors: "No metadata matches this hash" });
+      if (upload instanceof InstrumentUpload) {
+        await this.authenticator.checkPermission(res, PermissionType.canUpload, { site: upload.site });
+      } else {
+        await this.authenticator.checkPermission(res, PermissionType.canUploadModel, {
+          site: upload.site,
+          model: upload.model,
+        });
+      }
       if (upload.status != Status.CREATED) {
         res.sendStatus(200); // Already uploaded
         return;
@@ -242,6 +261,7 @@ export class UploadRoutes {
         this.publishAdjoiningDayTask(upload);
       }
     } catch (err: any) {
+      if (err.status == 401) return next(err); // Permission error
       if (err.status == 400 && err.errors == "Checksum does not match file contents") return next(err); // Client error
       if (err.errors) return next({ status: 500, errors: `Internal server error: ${err.errors}` }); // Our error
       console.error("Unknown error", err);
@@ -434,12 +454,6 @@ export class UploadRoutes {
       return next({
         status: 422,
         errors: 'Both "instrument" and "model" fields may not be specified',
-      });
-    }
-    if (!("instrument" in body || "model" in body)) {
-      return next({
-        status: 422,
-        errors: 'Metadata must have either "instrument" or "model" field',
       });
     }
     if ("instrument" in body) {

@@ -5,6 +5,7 @@
     "permissions": [
       {
         "siteId": null,
+        "modelId": null,
         "permission": "canUpload"
       }
     ]
@@ -15,14 +16,17 @@
     "permissions": [
       {
         "siteId": null,
+        "modelId": null,
         "permission": "canUploadModel"
       },
       {
         "siteId": null,
+        "modelId": null,
         "permission": "canDelete"
       },
       {
         "siteId": null,
+        "modelId": null,
         "permission": "canGetStats"
       }
     ]
@@ -33,10 +37,12 @@
     "permissions": [
       {
         "siteId": "bucharest",
+        "modelId": null,
         "permission": "canUpload"
       },
       {
         "siteId": "mace-head",
+        "modelId": null,
         "permission": "canUpload"
       }
     ]
@@ -47,10 +53,12 @@
     "permissions": [
       {
         "siteId": "granada",
+        "modelId": "ecmwf",
         "permission": "canUploadModel"
       },
       {
         "siteId": "mace-head",
+        "modelId": null,
         "permission": "canUpload"
       }
     ]
@@ -66,6 +74,7 @@
     "permissions": [
       {
         "siteId": "bucharest",
+        "modelId": null,
         "permission": "canUpload"
       }
     ]
@@ -76,6 +85,7 @@
     "permissions": [
       {
         "siteId": "granada",
+        "modelId": null,
         "permission": "canUpload"
       }
     ]
@@ -86,6 +96,7 @@
     "permissions": [
       {
         "siteId": "mace-head",
+        "modelId": null,
         "permission": "canUpload"
       }
     ]

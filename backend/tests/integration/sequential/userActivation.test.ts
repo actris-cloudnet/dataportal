@@ -28,6 +28,7 @@ describe("test user account activation", () => {
       permissions: [
         {
           siteId: "hyytiala",
+          modelId: null,
           permission: "canUpload",
         },
       ],
