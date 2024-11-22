@@ -865,12 +865,15 @@ describe("DELETE /api/files/", () => {
   ) {
     const statusCode = options.version ? 200 : 201;
     const { product = "radar", volatile = true, pid = null, legacy = false } = options;
-    const fileFix = legacy ? "legacy/" : "";
+    const uuid = uuidGen.v4();
+    const filename = `20181115_mace-head_${product}.nc`;
+    const filenameFix = legacy ? "legacy/" : "";
+    const s3key = `${uuid}/${filenameFix}${filename}`;
     const file = {
       ...volatileFile,
       ...options,
-      ...{ uuid: uuidGen.v4(), product, volatile },
-      s3key: `${fileFix}20181115_mace-head_${product}.nc`,
+      ...{ uuid, product, volatile, filename },
+      s3key: s3key,
       checksum: generateHash(),
     };
     if (pid) file.pid = pid;

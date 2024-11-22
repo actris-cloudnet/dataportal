@@ -506,7 +506,7 @@ export class FileRoutes {
 
   async fetchValidVersions(queryRunner: QueryRunner, file: File) {
     return await queryRunner.manager.find(RegularFile, {
-      where: { s3key: s3Key(file), tombstoneReason: IsNull() },
+      where: { filename: s3Key(file), tombstoneReason: IsNull() },
       relations: { product: true, site: true },
       order: { createdAt: "DESC" },
     });

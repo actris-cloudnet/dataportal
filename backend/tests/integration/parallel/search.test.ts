@@ -223,7 +223,7 @@ describe("/api/files", () => {
     };
     const res = await axios.get(url, payload);
     return expect(res.data[0]).toMatchObject({
-      s3path: "/cloudnet-product/legacy/20090716_bucharest_classification.nc",
+      s3path: "/cloudnet-product/3bb32746-faf0-4057-9076-ed2e698dcf36/legacy/20090716_bucharest_classification.nc",
     });
   });
 
