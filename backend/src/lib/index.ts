@@ -74,8 +74,7 @@ export const augmentFile = (includeS3path: boolean) => (file: RegularFile | Mode
   ...file,
   downloadUrl: `${env.DP_BACKEND_URL}/download/${getDownloadPathForFile(file)}`,
   filename: basename(file.s3key),
-  s3key: undefined,
-  s3path: includeS3path ? getS3pathForFile(file) : undefined,
+  s3path: includeS3path ? getS3pathForFile(file) : undefined, // TODO: not used anymore?
   model: "model" in file ? file.model : undefined,
   software: parseSoftware(file),
   timeliness: calcTimeliness(file),
