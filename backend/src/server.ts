@@ -204,7 +204,7 @@ async function createServer(): Promise<void> {
   app.get("/api/collection/:uuid", middleware.validateUuidParam, collRoutes.collection);
   app.get("/api/collection/:uuid/files", middleware.validateUuidParam, collRoutes.collectionFiles);
   app.post("/api/generate-pid", rateLimit({ windowMs: 60 * 1000, limit: 10 }), express.json(), collRoutes.generatePid);
-  app.get("/api/download/product/:uuid/*s3key", middleware.validateUuidParam, dlRoutes.product);
+  app.get("/api/download/product/:uuid/:filename", middleware.validateUuidParam, dlRoutes.product);
   app.get("/api/download/raw/:uuid/:filename", middleware.validateUuidParam, dlRoutes.raw);
   app.get("/api/download/collection/:uuid", middleware.validateUuidParam, dlRoutes.collection);
   app.get("/api/download/image/*s3key", dlRoutes.image);

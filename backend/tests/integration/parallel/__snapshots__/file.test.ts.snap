@@ -4,7 +4,7 @@ exports[`/api/files/:uuid request succeeds on instrument file 1`] = `
 {
   "checksum": "298688b011a511f8f0e9353371cf73ee86f60c89b0e02c6931d8c05542c64cdb",
   "createdAt": "2020-02-20T10:56:19.382Z",
-  "downloadUrl": "http://localhost:3000/api/download/product/38092c00-161d-4ca2-a29d-628cf8e960f6/38092c00-161d-4ca2-a29d-628cf8e960f6/20181115_mace-head_mira.nc",
+  "downloadUrl": "http://localhost:3000/api/download/product/38092c00-161d-4ca2-a29d-628cf8e960f6/20181115_mace-head_mira.nc",
   "dvasId": null,
   "dvasUpdatedAt": null,
   "errorLevel": null,
@@ -41,6 +41,7 @@ exports[`/api/files/:uuid request succeeds on instrument file 1`] = `
       "instrument",
     ],
   },
+  "s3key": "38092c00-161d-4ca2-a29d-628cf8e960f6/20181115_mace-head_mira.nc",
   "site": {
     "actrisId": null,
     "altitude": 16,
@@ -107,6 +108,7 @@ exports[`/api/files/:uuid request succeeds on model file 1`] = `
       "model",
     ],
   },
+  "s3key": "b5d1d5af-3667-41bc-b952-e684f627d91c/20141205_mace-head_ecmwf.nc",
   "site": {
     "actrisId": 1337,
     "altitude": 93,

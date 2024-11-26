@@ -127,7 +127,7 @@ export const getS3pathForFile = (file: File) => `/${getBucketForFile(file)}/${fi
 
 export const getS3pathForImage = (s3key: string) => `/cloudnet-img/${s3key}`;
 
-export const getDownloadPathForFile = (file: File) => `product/${file.uuid}/${file.s3key}`;
+export const getDownloadPathForFile = (file: File) => `product/${file.uuid}/${file.filename}`;
 
 export async function checkFileExists(s3path: string) {
   const headers = {
