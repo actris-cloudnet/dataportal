@@ -35,6 +35,7 @@ afterAll(async () => {
 const inputJson = {
   uuid: "15506ea8-d357-4c7b-af8c-95dfcc34fc7d",
   measurementDate: "2019-07-23",
+  s3key: "15506ea8-d357-4c7b-af8c-95dfcc34fc7d/20190723_bucharest_classification.nc",
   filename: "20190723_bucharest_classification.nc",
   checksum: "b77b731aaae54f403aae6765ad1d20e1603b4454e2bc0d461aab4985a4a82ca4",
   size: 139021,
@@ -48,6 +49,7 @@ const inputJson = {
 const inputJson2 = {
   uuid: "25506ea8-d357-4c7b-af8c-95dfcc34fc7d",
   measurementDate: "2019-07-24",
+  s3key: "25506ea8-d357-4c7b-af8c-95dfcc34fc7d/20190724_bucharest_classification.nc",
   filename: "20190724_bucharest_classification.nc",
   checksum: "6904509c9e03154d9c831aaa8595e01eb5339110e842a34e16f24ffb4456e061",
   size: 139021,
@@ -62,6 +64,7 @@ const expectedJson = {
   uuid: "15506ea8-d357-4c7b-af8c-95dfcc34fc7d",
   measurementDate: "2019-07-23",
   filename: "20190723_bucharest_classification.nc",
+  s3key: "15506ea8-d357-4c7b-af8c-95dfcc34fc7d/20190723_bucharest_classification.nc",
   checksum: "b77b731aaae54f403aae6765ad1d20e1603b4454e2bc0d461aab4985a4a82ca4",
   size: "139021",
   format: "HDF5 (NetCDF4)",
@@ -84,7 +87,7 @@ const expectedJson = {
 };
 
 const filepath = "tests/data/20190723_bucharest_classification.nc";
-const s3key = `something/${basename(filepath)}`;
+const s3key = inputJson.s3key;
 
 describe("after PUTting metadata to API", () => {
   beforeAll(async () => {
@@ -100,7 +103,9 @@ describe("after PUTting metadata to API", () => {
 
   it("serves the file and increases download count", async () => {
     return axios
-      .get(`${backendPublicUrl}download/product/${expectedJson.uuid}/${s3key}`, { responseType: "arraybuffer" })
+      .get(`${backendPublicUrl}download/product/${expectedJson.uuid}/${expectedJson.filename}`, {
+        responseType: "arraybuffer",
+      })
       .then((response) => {
         expect(response.status).toEqual(200);
         const hash = createHash("sha256");
@@ -127,7 +132,7 @@ describe("after PUTting metadata to API", () => {
     let collectionUuid = "";
     beforeAll(async () => {
       const filepath = "tests/data/20190724_bucharest_classification.nc";
-      const s3key = basename(filepath);
+      const s3key = inputJson2.s3key;
       await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${s3key}`, fs.createReadStream(filepath));
       await axios.put(`${backendPrivateUrl}files/${s3key}`, inputJson2);
       const res = await axios.post(`${backendPublicUrl}collection/`, { files: [expectedJson.uuid, inputJson2.uuid] });
