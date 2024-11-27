@@ -30,7 +30,7 @@ export abstract class File {
   @Column()
   s3key!: string;
 
-  @Column({ nullable: true })
+  @Column()
   filename!: string;
 
   @Column()
