@@ -6,11 +6,13 @@ import { UserAccount } from "../entity/UserAccount";
 import { Permission, PermissionType, permissionTypeFromString } from "../entity/Permission";
 import { Site } from "../entity/Site";
 import { randomString } from "../lib";
+import { Model } from "../entity/Model";
 
 interface PermissionInterface {
   id?: number;
   permission: PermissionType;
   siteId: string | null;
+  modelId: string | null;
 }
 
 interface UserAccountInterface {
@@ -30,12 +32,15 @@ export class UserAccountRoutes {
   private userAccountRepository: Repository<UserAccount>;
   private permissionRepository: Repository<Permission>;
   private siteRepository: Repository<Site>;
+  private modelRepository: Repository<Model>;
 
   constructor(dataSource: DataSource) {
     this.userAccountRepository = dataSource.getRepository(UserAccount);
     this.permissionRepository = dataSource.getRepository(Permission);
     this.siteRepository = dataSource.getRepository(Site);
+    this.modelRepository = dataSource.getRepository(Model);
   }
+
   userResponse = (user: UserAccount): UserAccountInterface => {
     return {
       id: user.id,
@@ -45,20 +50,20 @@ export class UserAccountRoutes {
         id: p.id,
         permission: p.permission,
         siteId: p.site ? p.site.id : null,
+        modelId: p.model ? p.model.id : null,
       })),
     };
   };
-  postUserAccount: RequestHandler = async (req, res, next) => {
+
+  postUserAccount: RequestHandler = async (req, res) => {
     let user = await this.userAccountRepository.findOne({
       where: { username: req.body.username },
-      relations: { permissions: { site: true } },
+      relations: { permissions: { site: true, model: true } },
     });
     if (user) {
-      res.status(200);
       res.json(this.userResponse(user));
       return;
     }
-    await this.createPermissions(req, res, next);
 
     user = new UserAccount();
     user.username = req.body.username;
@@ -67,50 +72,44 @@ export class UserAccountRoutes {
     } else {
       user.activationToken = randomString(32);
     }
-    user.permissions = res.locals.permissions;
+    user.permissions = await this.createPermissions(req.body.permissions);
 
     await this.userAccountRepository.save(user);
     res.status(201);
     res.json(this.userResponse(user));
   };
 
-  createPermissions: RequestHandler = async (req, res) => {
-    const permissions: Permission[] = [];
-    for (const perm of req.body.permissions) {
-      let permission: Permission;
+  async createPermissions(permissions: any) {
+    const result = [];
+    for (const perm of permissions) {
       const permissionType = permissionTypeFromString(perm.permission);
-      let permissionCandidate: Permission | null;
-      let site: Site | null = null;
+      const qb = this.permissionRepository
+        .createQueryBuilder("permission")
+        .leftJoinAndSelect("permission.site", "site")
+        .leftJoinAndSelect("permission.model", "model")
+        .where("permission.permission = :permissionType", { permissionType: permissionType });
       if (perm.siteId === null) {
-        permissionCandidate = await this.permissionRepository
-          .createQueryBuilder("permission")
-          .leftJoinAndSelect("permission.site", "site")
-          .where("permission.permission = :permissionType")
-          .andWhere("permission.site IS NULL")
-          .setParameters({ permissionType: permissionType })
-          .getOne();
+        qb.andWhere("permission.site IS NULL");
       } else {
-        site = await this.siteRepository.findOneBy({ id: perm.siteId })!;
-        permissionCandidate = await this.permissionRepository
-          .createQueryBuilder("permission")
-          .leftJoinAndSelect("permission.site", "site")
-          .where("permission.permission = :permissionType")
-          .andWhere("permission.site = :siteId")
-          .setParameters({ permissionType: permissionType, siteId: perm.siteId })
-          .getOne();
+        qb.andWhere("permission.site = :siteId", { siteId: perm.siteId });
       }
-      if (!permissionCandidate) {
+      if (perm.modelId === null) {
+        qb.andWhere("permission.model IS NULL");
+      } else {
+        qb.andWhere("permission.model = :modelId", { modelId: perm.modelId });
+      }
+      let permission = await qb.getOne();
+      if (!permission) {
         permission = await this.permissionRepository.save({
           permission: permissionType,
-          site: site,
+          site: { id: perm.siteId },
+          model: { id: perm.modelId },
         });
-      } else {
-        permission = permissionCandidate;
       }
-      permissions.push(permission);
+      result.push(permission);
     }
-    res.locals.permissions = permissions;
-  };
+    return result;
+  }
 
   async usernameAvailable(username: string): Promise<boolean> {
     const usernameTaken = await this.userAccountRepository.existsBy({ username });
@@ -138,8 +137,7 @@ export class UserAccountRoutes {
       user.setPassword(req.body.password);
     }
     if (hasProperty(req.body, "permissions")) {
-      await this.createPermissions(req, res, next);
-      user.permissions = res.locals.permissions;
+      user.permissions = await this.createPermissions(req.body.permissions);
     }
     await this.userAccountRepository.save(user);
     res.json(this.userResponse(user));
@@ -148,7 +146,7 @@ export class UserAccountRoutes {
   getUserAccount: RequestHandler = async (req, res, next) => {
     const user = await this.userAccountRepository.findOne({
       where: { id: Number(req.params.id) },
-      relations: { permissions: { site: true } },
+      relations: { permissions: { site: true, model: true } },
     });
     if (!user) return next({ status: 404, errors: "UserAccount not found" });
     res.json(this.userResponse(user));
@@ -162,7 +160,7 @@ export class UserAccountRoutes {
   };
 
   getAllUserAccounts: RequestHandler = async (req, res) => {
-    const users = await this.userAccountRepository.find({ relations: { permissions: { site: true } } });
+    const users = await this.userAccountRepository.find({ relations: { permissions: { site: true, model: true } } });
     res.json(users.map((u) => this.userResponse(u)));
   };
 
@@ -231,13 +229,22 @@ export class UserAccountRoutes {
     if (!hasProperty(permission, "siteId")) {
       return next({ status: 401, errors: "Missing the siteId from permission" });
     }
+    if (!hasProperty(permission, "modelId")) {
+      return next({ status: 401, errors: "Missing the modelId from permission" });
+    }
     if (!hasProperty(permission, "permission")) {
       return next({ status: 401, errors: "Missing the permission type from permission" });
     }
     if (permission.siteId !== null) {
       const site = await this.siteRepository.findOneBy({ id: permission.siteId });
       if (!site) {
-        return next({ status: 422, errors: "SiteId does not exist" });
+        return next({ status: 422, errors: "Given siteId does not exist" });
+      }
+    }
+    if (permission.modelId !== null) {
+      const model = await this.modelRepository.findOneBy({ id: permission.modelId });
+      if (!model) {
+        return next({ status: 422, errors: "Given modelId does not exist" });
       }
     }
     if (permissionTypeFromString(permission.permission) === undefined) {

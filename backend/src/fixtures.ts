@@ -1,13 +1,10 @@
 import { DataSource } from "typeorm";
-import { promises as fsp } from "fs";
-import { basename, join } from "path";
-import { argv } from "process";
+import { promises as fsp } from "node:fs";
+import { basename, join } from "node:path";
 import { AppDataSource } from "./data-source";
+import * as readline from "node:readline/promises";
 
-import readline = require("node:readline/promises");
-import process = require("node:process");
-
-const action = argv[3];
+const action = process.argv[3];
 if (action != "SYNC" && action != "APPEND" && action != "TRUNCATE") {
   console.error("Action missing: SYNC, APPEND or TRUNCATE");
   process.exit(1);
@@ -112,7 +109,7 @@ async function importFixture(path: string) {
   else throw "Unknown file type";
 }
 
-importFixture(argv[2])
+importFixture(process.argv[2])
   .then(() => {
     console.log("Success!");
     process.exit(0);

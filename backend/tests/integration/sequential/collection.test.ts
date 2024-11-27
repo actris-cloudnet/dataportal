@@ -2,7 +2,7 @@ import axios from "axios";
 import { backendPublicUrl, genResponse } from "../../lib";
 import { DataSource, Repository } from "typeorm";
 import { Collection } from "../../../src/entity/Collection";
-import { promises as fsp } from "fs";
+import { promises as fsp } from "node:fs";
 import { File, ModelFile, RegularFile } from "../../../src/entity/File";
 import { AppDataSource } from "../../../src/data-source";
 import { describe, expect, it, beforeAll, afterAll, beforeEach } from "@jest/globals";

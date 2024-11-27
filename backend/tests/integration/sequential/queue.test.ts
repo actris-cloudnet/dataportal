@@ -4,7 +4,7 @@ import { QueueService } from "../../../src/lib/queue";
 import { describe, expect, it, beforeAll, afterAll, beforeEach } from "@jest/globals";
 import { Task, TaskStatus, TaskType } from "../../../src/entity/Task";
 import { backendPublicUrl } from "../../lib";
-import { promises as fsp } from "fs";
+import { promises as fsp } from "node:fs";
 import axios from "axios";
 import { InstrumentUpload, ModelUpload } from "../../../src/entity/Upload";
 import { Permission } from "../../../src/entity/Permission";

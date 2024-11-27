@@ -4,9 +4,19 @@ import argparse
 import urllib.request
 import json
 import os
+import sys
 
 BASE_URL = os.environ.get("DP_BACKEND_URL", "http://localhost:3000")
-PERMISSIONS = ["canUpload", "canUploadModel", "canCalibrate", "canProcess", "canAddPublication", "canDelete", "canGetStats", "canPublishTask"]
+PERMISSIONS = [
+    "canUpload",
+    "canUploadModel",
+    "canCalibrate",
+    "canProcess",
+    "canAddPublication",
+    "canDelete",
+    "canGetStats",
+    "canPublishTask",
+]
 
 
 def get_all_users():
@@ -44,19 +54,23 @@ def post_user(user):
 
 
 def print_user(user):
-    print('Username: ' + user['username'])
-    if user['permissions']:
-        print('Permissions:')
-        for perm in user['permissions']:
-            if perm['siteId'] is None:
-                print(f"- {perm['permission']} to all sites")
+    print("Username: " + user["username"])
+    if user["permissions"]:
+        print("Permissions:")
+        for perm in user["permissions"]:
+            site = "site: " + perm["siteId"] if perm["siteId"] else "all sites"
+            model = "model: " + perm["modelId"] if perm["modelId"] else "all models"
+            if perm["permission"] == "canUpload":
+                print(f"- {perm['permission']} ({site})")
+            elif perm["permission"] == "canUploadModel":
+                print(f"- {perm['permission']} ({site}, {model})")
             else:
-                print(f"- {perm['permission']} to site {perm['siteId']}")
+                print(f"- {perm['permission']}")
     else:
-        print('No permissions')
+        print("No permissions")
 
 
-def list_users(username):
+def list_users(args):
     for user in get_all_users():
         print_user(user)
         print()
@@ -69,9 +83,9 @@ def user_info(args):
 def create_user(args):
     user = {"username": args.username, "permissions": []}
     if args.password:
-        user['password'] = args.password
+        user["password"] = args.password
     user = post_user(user)
-    token = user.get('activationToken')
+    token = user.get("activationToken")
     if token:
         link = f"https://cloudnet.fmi.fi/credentials/{token}"
         print(f"Activation link: {link}")
@@ -81,37 +95,69 @@ def create_user(args):
 
 def add_permission(args):
     user = get_user(args.username)
-    if args.all_sites:
-        user["permissions"].append({"siteId": None, "permission": args.permission})
-    else:
-        for site in args.site:
-            user["permissions"].append({"siteId": site, "permission": args.permission})
+    permissions_to_add = make_permissions(args)
+    user["permissions"].extend(permissions_to_add)
     put_user(user)
+    user = get_user(args.username)
     print_user(user)
 
 
 def remove_permission(args):
     user = get_user(args.username)
-    if args.all_sites:
-        user["permissions"] = [
-            perm
-            for perm in user["permissions"]
-            if perm["permission"] != args.permission
-        ]
-    else:
-        for site in args.site:
-            user["permissions"] = [
-                perm
-                for perm in user["permissions"]
-                if perm["siteId"] != site or perm["permission"] != args.permission
-            ]
+    permissions_to_remove = make_permissions(args)
+    user["permissions"] = [
+        perm
+        for perm in user["permissions"]
+        if not any(permission_equal(perm, p) for p in permissions_to_remove)
+    ]
     put_user(user)
+    user = get_user(args.username)
     print_user(user)
+
+
+def permission_equal(a, b):
+    return (
+        a["permission"] == b["permission"]
+        and a["siteId"] == b["siteId"]
+        and a["modelId"] == b["modelId"]
+    )
+
+
+def make_permissions(args):
+    if (
+        args.permission in ("canUpload", "canUploadModel")
+        and args.site is None
+        and not args.all_sites
+    ):
+        print("--site or --all-sites is required", file=sys.stderr)
+        sys.exit(1)
+    if (
+        args.permission == "canUploadModel"
+        and args.model is None
+        and not args.all_models
+    ):
+        print("--model or --all-models is required", file=sys.stderr)
+        sys.exit(1)
+    if (args.model or args.all_models) and args.permission != "canUploadModel":
+        print(
+            f"Cannot use --model or --all-models with permission {args.permission}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    sites = [None] if args.site is None or args.all_sites else args.site
+    models = [None] if args.model is None or args.all_models else args.model
+    permissions = []
+    for site in sites:
+        for model in models:
+            permissions.append(
+                {"siteId": site, "modelId": model, "permission": args.permission}
+            )
+    return permissions
 
 
 def main():
     parser = argparse.ArgumentParser(prog="cloudnet-admin")
-    subparsers = parser.add_subparsers(required=True, dest='command')
+    subparsers = parser.add_subparsers(required=True, dest="command")
 
     subparser = subparsers.add_parser("list-users")
     subparser.set_defaults(func=list_users)
@@ -128,9 +174,12 @@ def main():
     subparser = subparsers.add_parser("add-permission")
     subparser.add_argument("username")
     subparser.add_argument("permission", choices=PERMISSIONS)
-    group = subparser.add_mutually_exclusive_group(required=True)
+    group = subparser.add_mutually_exclusive_group()
     group.add_argument("--site", nargs="+")
     group.add_argument("--all-sites", action="store_true")
+    group = subparser.add_mutually_exclusive_group()
+    group.add_argument("--model", nargs="+")
+    group.add_argument("--all-models", action="store_true")
     subparser.set_defaults(func=add_permission)
 
     subparser = subparsers.add_parser("remove-permission")
@@ -139,10 +188,14 @@ def main():
     group = subparser.add_mutually_exclusive_group(required=True)
     group.add_argument("--site", nargs="+")
     group.add_argument("--all-sites", action="store_true")
+    group = subparser.add_mutually_exclusive_group()
+    group.add_argument("--model", nargs="+")
+    group.add_argument("--all-models", action="store_true")
     subparser.set_defaults(func=remove_permission)
 
     args = parser.parse_args()
     args.func(args)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

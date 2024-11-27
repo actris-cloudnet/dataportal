@@ -73,7 +73,7 @@ async function createServer(): Promise<void> {
   const prodRoutes = new ProductRoutes(AppDataSource);
   const instrRoutes = new InstrumentRoutes(AppDataSource);
   const vizRoutes = new VisualizationRoutes(AppDataSource, fileRoutes);
-  const uploadRoutes = new UploadRoutes(AppDataSource, queueService);
+  const uploadRoutes = new UploadRoutes(AppDataSource, queueService, authenticator);
   const collRoutes = new CollectionRoutes(AppDataSource, dataCiteService);
   const modelRoutes = new ModelRoutes(AppDataSource);
   const dlRoutes = new DownloadRoutes(AppDataSource, fileRoutes, uploadRoutes, ipLookup, citationService);
@@ -252,8 +252,6 @@ async function createServer(): Promise<void> {
     "/upload/metadata",
     authenticator.verifyCredentials(),
     express.json(),
-    authorizator.verifySite,
-    authorizator.verifyPermission(PermissionType.canUpload),
     uploadRoutes.validateMetadata,
     uploadRoutes.validateFilename,
     uploadRoutes.postMetadata,
@@ -263,20 +261,16 @@ async function createServer(): Promise<void> {
     "/upload/data/:checksum",
     middleware.validateMD5Param,
     authenticator.verifyCredentials(),
-    authorizator.findSiteFromChecksum,
-    authorizator.verifyPermission(PermissionType.canUpload),
     express.raw({ limit: "100gb" }),
     uploadRoutes.putData,
     errorAsPlaintext,
   );
 
-  // model data upload (for Ewan only)
+  // Model data upload
   app.post(
     "/model-upload/metadata",
     authenticator.verifyCredentials(),
     express.json(),
-    authorizator.verifySite,
-    authorizator.verifyPermission(PermissionType.canUploadModel),
     uploadRoutes.validateMetadata,
     uploadRoutes.validateFilename,
     uploadRoutes.postMetadata,
@@ -286,8 +280,6 @@ async function createServer(): Promise<void> {
     "/model-upload/data/:checksum",
     middleware.validateMD5Param,
     authenticator.verifyCredentials(),
-    authorizator.findSiteFromChecksum,
-    authorizator.verifyPermission(PermissionType.canUploadModel),
     express.raw({ limit: "1gb" }),
     uploadRoutes.putData,
   );

@@ -7,7 +7,7 @@ import { Visualization } from "../../../src/entity/Visualization";
 import { SearchFile } from "../../../src/entity/SearchFile";
 import { AppDataSource } from "../../../src/data-source";
 import { beforeAll, beforeEach, afterAll, describe, it, expect } from "@jest/globals";
-const crypto = require("crypto");
+const crypto = require("node:crypto");
 
 const url = `${backendPublicUrl}sites/`;
 let resources: any;
