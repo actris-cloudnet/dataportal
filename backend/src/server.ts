@@ -95,6 +95,7 @@ async function createServer(): Promise<void> {
         err,
       }),
     );
+    console.error(err);
     if (!res.headersSent) {
       delete err.params;
       const status = err.status || 500;

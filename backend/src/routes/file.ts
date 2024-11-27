@@ -106,7 +106,7 @@ export class FileRoutes {
     const repo = file instanceof RegularFile ? this.fileRepo : this.modelFileRepo;
     const versions = await repo.find({
       select,
-      where: { s3key: s3Key(file), tombstoneReason: IsNull() },
+      where: { filename: file.filename, tombstoneReason: IsNull() },
       order: { createdAt: "DESC" },
     });
     res.send(versions);
@@ -222,7 +222,7 @@ export class FileRoutes {
         );
       return qb
         .leftJoinAndSelect("file.site", "site")
-        .where("regexp_replace(s3key, '.+/', '') = :filename", { filename: basename(file.s3key) }) // eslint-disable-line quotes
+        .where("file.filename = :filename", { filename: file.filename })
         .getOne();
     };
     const existingFile = await findFileByName(isModel);
@@ -375,7 +375,7 @@ export class FileRoutes {
     // Hack to prevent loading of model files when instrument is selected without product
     if (isModel && (query.instrument || query.instrumentPid)) qb.andWhere("1 = 0");
 
-    if (query.filename) qb.andWhere("regexp_replace(s3key, '.+/', '') IN (:...filename)", query); // eslint-disable-line quotes
+    if (query.filename) qb.andWhere("filename IN (:...filename)", query);
     if (query.releasedBefore) qb.andWhere("file.updatedAt < :releasedBefore", query);
     if (query.updatedAtFrom) qb.andWhere("file.updatedAt >= :updatedAtFrom", query);
     if (query.updatedAtTo) qb.andWhere("file.updatedAt <= :updatedAtTo", query);
@@ -506,7 +506,7 @@ export class FileRoutes {
 
   async fetchValidVersions(queryRunner: QueryRunner, file: File) {
     return await queryRunner.manager.find(RegularFile, {
-      where: { filename: s3Key(file), tombstoneReason: IsNull() },
+      where: { filename: file.filename, tombstoneReason: IsNull() },
       relations: { product: true, site: true },
       order: { createdAt: "DESC" },
     });
@@ -576,11 +576,7 @@ function addCommonFilters(qb: any, query: any) {
 }
 
 function isValidFilename(file: any) {
-  const [date, site] = basename(file.s3key).split(".")[0].split("_");
-  return file.measurementDate.replace(/-/g, "") == date && (file.site == site || typeof file.site == "object");
-}
-
-function s3Key(file: File) {
-  // Handle legacy filenames with 'legacy/' prefix.
-  return Raw((alias) => `regexp_replace(${alias}, '.+/', '') = :filename`, { filename: file.filename });
+  if (!file.filename) return false;
+  const [date, site] = file.filename.split(".")[0].split("_");
+  return file.measurementDate.replace(/-/g, "") == date && file.site == site;
 }
