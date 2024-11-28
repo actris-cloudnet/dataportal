@@ -77,10 +77,6 @@ export class Download {
       ) AS collection_file
       GROUP BY "collectionUuid", "measurementDate", "productType", "siteId"
     ) object ON "objectUuid" = object.uuid
-    WHERE
-      ip NOT IN ('', '::ffff:127.0.0.1')
-      AND ip NOT LIKE '192.168.%'
-      AND ip NOT LIKE '193.166.223.%'
     GROUP BY "downloadDate", "ip", "country", "measurementDate", "productType", "siteId"
   `,
   materialized: true,

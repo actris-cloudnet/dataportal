@@ -1,4 +1,5 @@
-import { URL } from "url";
+import { URL } from "node:url";
+import * as ipaddr from "ipaddr.js";
 
 const requiredVars = [
   "NODE_ENV",
@@ -78,6 +79,7 @@ interface Env {
   SLACK_NOTIFICATION_CHANNEL?: string;
   DVAS_URL: string;
   DC_URL: string;
+  PRIVATE_IP_RANGES: [ipaddr.IPv4 | ipaddr.IPv6, number][];
 }
 
 const env: Env = {
@@ -99,6 +101,7 @@ const env: Env = {
     typeof rawEnv.MATOMO_START_DATE !== "undefined" ? readIsoDate(rawEnv.MATOMO_START_DATE) : undefined,
   DVAS_URL: readUrl(rawEnv.DVAS_URL),
   DC_URL: readUrl(rawEnv.DC_URL),
+  PRIVATE_IP_RANGES: rawEnv.PRIVATE_IP_RANGES ? readIpRanges(rawEnv.PRIVATE_IP_RANGES) : [],
 };
 
 export default env;
@@ -135,4 +138,8 @@ function readIsoDate(input: string): string {
     throw new Error(`Invalid URL: ${input}`);
   }
   return input;
+}
+
+function readIpRanges(input: string) {
+  return input.split(",").map((s) => ipaddr.parseCIDR(s.trim()));
 }

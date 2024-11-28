@@ -21,6 +21,7 @@ import env from "../lib/env";
 import { UploadRoutes } from "./upload";
 import { CitationService } from "../lib/cite";
 import { citation2txt } from "./reference";
+import * as ipaddr from "ipaddr.js";
 
 const LICENSE_TEXT = readFileSync("data/CC-BY-4.0.txt");
 
@@ -165,7 +166,12 @@ export class DownloadRoutes {
   }
 
   private async trackDownload(req: Request, type: ObjectType, uuid: string) {
-    if (!req.ip) return;
+    if (!req.ip || !ipaddr.isValid(req.ip)) return;
+    const ip = ipaddr.process(req.ip);
+    const ipRange = ip.range();
+    if (ipRange === "loopback" || ipRange === "private" || env.PRIVATE_IP_RANGES.some((range) => ip.match(range))) {
+      return;
+    }
     const result = this.ipLookup.get(req.ip);
     const dl = new Download(type, uuid, req.ip, result?.country?.iso_code);
     await this.downloadRepo.save(dl);
