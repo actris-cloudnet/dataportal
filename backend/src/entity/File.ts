@@ -22,6 +22,7 @@ import { Software } from "./Software";
 import { Instrument, InstrumentInfo } from "./Instrument";
 
 @Unique(["checksum"])
+@Unique(["s3key", "version"])
 @Index(["measurementDate", "site", "product"])
 export abstract class File {
   @PrimaryColumn("uuid")
