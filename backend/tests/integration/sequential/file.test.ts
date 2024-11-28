@@ -198,6 +198,7 @@ describe("PUT /files/:s3key", () => {
       model: "ecmwf",
       uuid: "87EB042E-B247-4AC1-BC03-074DD0D74BDB",
       s3key: "20181115_mace-head_ecmwf.nc",
+      filename: "20181115_mace-head_ecmwf.nc",
       checksum: "610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678",
     };
     await expect(putFile(tmpfile1)).resolves.toMatchObject({ status: 201 });
@@ -225,6 +226,7 @@ describe("PUT /files/:s3key", () => {
       model: "icon-iglo-24-35",
       uuid: "87EB042E-B247-4AC1-BC03-074DD0D74BDB",
       s3key: "20181115_mace-head_icon-iglo-24-35.nc",
+      filename: "20181115_mace-head_icon-iglo-24-35.nc",
       checksum: "610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678",
     };
     await expect(putFile(tmpfile1)).resolves.toMatchObject({ status: 201 });
@@ -242,6 +244,7 @@ describe("PUT /files/:s3key", () => {
       model: "icon-iglo-36-47",
       uuid: "87EB042E-B247-4AC1-BC03-074DD0D74BDB",
       s3key: "20181115_mace-head_icon-iglo-36-47.nc",
+      filename: "20181115_mace-head_icon-iglo-36-47.nc",
       checksum: "610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678",
     };
     const tmpfile3 = {
@@ -249,6 +252,7 @@ describe("PUT /files/:s3key", () => {
       model: "ecmwf",
       uuid: "abde0a2a-40e7-4463-9266-06f50153d974",
       s3key: "20181115_mace-head_ecmwf.nc",
+      filename: "20181115_mace-head_ecmwf.nc",
       checksum: "deb5a92691553bcac4cfb57f5917d7cbf9ccfae9592c40626d9615bd64ebeffe",
     };
     await expect(putFile(tmpfile1)).resolves.toMatchObject({ status: 201 });
@@ -287,6 +291,7 @@ describe("PUT /files/:s3key", () => {
       model: "gdas1",
       uuid: "abde0a2a-40e7-4463-9266-06f50153d974",
       s3key: "20181115_mace-head_gdas1.nc",
+      filename: "20181115_mace-head_gdas1.nc",
       checksum: "deb5a92691553bcac4cfb57f5917d7cbf9ccfae9592c40626d9615bd64ebeffe",
     };
     const tmpfile3 = {
@@ -294,6 +299,7 @@ describe("PUT /files/:s3key", () => {
       model: "icon-iglo-36-47",
       uuid: "87EB042E-B247-4AC1-BC03-074DD0D74BDB",
       s3key: "20181115_mace-head_icon-iglo-36-47.nc",
+      filename: "20181115_mace-head_icon-iglo-36-47.nc",
       checksum: "610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678",
     };
     await expect(putFile(tmpfile1)).resolves.toMatchObject({ status: 201 });
@@ -331,6 +337,7 @@ describe("PUT /files/:s3key", () => {
       model: "icon-iglo-36-47",
       uuid: "abde0a2a-40e7-4463-9266-06f50153d974",
       s3key: "20181115_mace-head_icon-iglo-36.nc",
+      filename: "20181115_mace-head_icon-iglo-36.nc",
       checksum: "deb5a92691553bcac4cfb57f5917d7cbf9ccfae9592c40626d9615bd64ebeffe",
     };
     const tmpfile3 = {
@@ -338,6 +345,7 @@ describe("PUT /files/:s3key", () => {
       model: "ecmwf",
       uuid: "abde0a2a-40e7-4463-9266-06f50153d972",
       s3key: "20181115_mace-head_ecmwf.nc",
+      filename: "20181115_mace-head_ecmwf.nc",
       checksum: "a3d5a47545c4cf41cca176799da13930389925dc5d04ee62a83a494ee0f04c57",
     };
     await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile1.s3key}`, "content");
@@ -365,9 +373,12 @@ describe("PUT /files/:s3key", () => {
   });
 
   it("overwrites existing freezed files on test site", async () => {
-    const tmpfile = { ...stableFile };
-    tmpfile.site = "granada";
-    tmpfile.s3key = "20181115_granada_mira.nc";
+    const tmpfile = {
+      ...stableFile,
+      site: "granada",
+      s3key: "20181115_granada_mira.nc",
+      filename: "20181115_granada_mira.nc",
+    };
     await axios.put(`${storageServiceUrl}cloudnet-product/${tmpfile.s3key}`, "content");
     await putFile(tmpfile);
     const dbRow1 = await fileRepo.findOneByOrFail({ uuid: stableFile.uuid });
@@ -379,12 +390,15 @@ describe("PUT /files/:s3key", () => {
   it("inserts new file with source files", async () => {
     await putFile(stableFile);
     await putFile(volatileModelFile);
-    const tmpfile = { ...stableFile };
-    tmpfile.sourceFileIds = [stableFile.uuid, volatileModelFile.uuid];
-    tmpfile.uuid = "62b32746-faf0-4057-9076-ed2e698dcc34";
-    tmpfile.checksum = "dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b5";
-    tmpfile.s3key = "20181115_mace-head_hatpro.nc";
-    tmpfile.product = "categorize";
+    const tmpfile = {
+      ...stableFile,
+      sourceFileIds: [stableFile.uuid, volatileModelFile.uuid],
+      uuid: "62b32746-faf0-4057-9076-ed2e698dcc34",
+      checksum: "dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b5",
+      s3key: "20181115_mace-head_hatpro.nc",
+      filename: "20181115_mace-head_hatpro.nc",
+      product: "categorize",
+    };
     await axios.put(`${storageServiceUrl}cloudnet-product/${tmpfile.s3key}`, "content");
     await expect(putFile(tmpfile)).resolves.toMatchObject({ status: 201 });
     const dbRow1 = await fileRepo.findOneOrFail({
