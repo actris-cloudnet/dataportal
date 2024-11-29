@@ -134,6 +134,7 @@ describe("PUT /files/:s3key", () => {
       ...{
         uuid: "3cf275bb-5b09-42ec-8784-943fe2a745f6",
         checksum: "510980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678",
+        version: "new-version-id",
       },
     };
     await expect(putFile(newVersion)).resolves.toMatchObject({ status: 200 });
@@ -143,8 +144,7 @@ describe("PUT /files/:s3key", () => {
   });
 
   it("inserting legacy file", async () => {
-    const tmpfile = { ...volatileFile };
-    tmpfile.legacy = true;
+    const tmpfile = { ...volatileFile, legacy: true };
     await expect(putFile(tmpfile)).resolves.toMatchObject({ status: 201 });
     await expect(fileRepo.findOneByOrFail({ uuid: volatileFile.uuid })).resolves.toMatchObject({ legacy: true });
     await expect(searchFileRepo.findOneByOrFail({ uuid: volatileFile.uuid })).resolves.toMatchObject({ legacy: true });
@@ -152,22 +152,26 @@ describe("PUT /files/:s3key", () => {
 
   it("inserting a normal file and a legacy file", async () => {
     await expect(putFile(stableFile)).resolves.toMatchObject({ status: 201 });
-    const tmpfile = { ...stableFile };
-    tmpfile.legacy = true;
-    tmpfile.uuid = "87EB042E-B247-4AC1-BC03-074DD0D74BDB";
-    tmpfile.s3key = `legacy/${stableFile.s3key}`;
-    tmpfile.checksum = "610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678";
+    const tmpfile = {
+      ...stableFile,
+      legacy: true,
+      uuid: "87EB042E-B247-4AC1-BC03-074DD0D74BDB",
+      s3key: `legacy/${stableFile.s3key}`,
+      checksum: "610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678",
+    };
     await expect(putFile(tmpfile)).resolves.toMatchObject({ status: 200 });
     await expect(searchFileRepo.findOneByOrFail({ uuid: stableFile.uuid })).resolves.toMatchObject({ legacy: false });
     await expect(searchFileRepo.findOneByOrFail({ uuid: tmpfile.uuid })).rejects.toBeTruthy();
   });
 
   it("inserting a legacy file and a normal file", async () => {
-    const tmpfile = { ...stableFile };
-    tmpfile.legacy = true;
-    tmpfile.uuid = "87EB042E-B247-4AC1-BC03-074DD0D74BDB";
-    tmpfile.s3key = `legacy/${stableFile.s3key}`;
-    tmpfile.checksum = "610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678";
+    const tmpfile = {
+      ...stableFile,
+      legacy: true,
+      uuid: "87EB042E-B247-4AC1-BC03-074DD0D74BDB",
+      s3key: `legacy/${stableFile.s3key}`,
+      checksum: "610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678",
+    };
     await expect(putFile(tmpfile)).resolves.toMatchObject({ status: 201 });
     await expect(putFile(stableFile)).resolves.toMatchObject({ status: 200 });
     await expect(searchFileRepo.findOneByOrFail({ uuid: stableFile.uuid })).resolves.toMatchObject({ legacy: false });
@@ -175,14 +179,20 @@ describe("PUT /files/:s3key", () => {
   });
 
   it("inserting a legacy file and two normal files", async () => {
-    const tmpfile = { ...stableFile };
-    tmpfile.legacy = true;
-    tmpfile.uuid = "87EB042E-B247-4AC1-BC03-074DD0D74BDB";
-    tmpfile.s3key = `legacy/${stableFile.s3key}`;
-    tmpfile.checksum = "610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678";
-    const tmpfile2 = { ...stableFile };
-    tmpfile2.uuid = "97EB042E-B247-4AC1-BC03-074DD0D74BDB";
-    tmpfile2.checksum = "010980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678";
+    const tmpfile = {
+      ...stableFile,
+      legacy: true,
+      uuid: "87EB042E-B247-4AC1-BC03-074DD0D74BDB",
+      s3key: `legacy/${stableFile.s3key}`,
+      checksum: "610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678",
+      version: "legacy-version-id",
+    };
+    const tmpfile2 = {
+      ...stableFile,
+      uuid: "97EB042E-B247-4AC1-BC03-074DD0D74BDB",
+      checksum: "010980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678",
+      version: "new-version-id",
+    };
     await expect(putFile(tmpfile)).resolves.toMatchObject({ status: 201 });
     await expect(putFile(stableFile)).resolves.toMatchObject({ status: 200 });
     await expect(putFile(tmpfile2)).resolves.toMatchObject({ status: 200 });
