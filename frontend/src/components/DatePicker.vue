@@ -10,6 +10,7 @@
         v-model.lazy="dateString"
         @focus="($event.target as HTMLInputElement).select()"
         placeholder="YYYY-MM-DD"
+        :disabled="disabled"
       />
       <v-date-picker
         locale="en-gb"
@@ -20,6 +21,7 @@
         :min-date="start"
         :max-date="end"
         :is-required="true"
+        :disable="disabled"
       >
         <template v-slot="{ togglePopover }">
           <button class="calendar" @click="togglePopover">
@@ -47,6 +49,7 @@ export interface Props {
   label?: string;
   start?: string;
   end?: string;
+  disabled?: boolean;
 }
 
 export interface DateErrors {
