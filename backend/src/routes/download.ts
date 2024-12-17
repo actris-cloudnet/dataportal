@@ -84,41 +84,40 @@ export class DownloadRoutes {
 
     const allFiles = (collection.regularFiles as File[]).concat(collection.modelFiles);
     await this.trackDownload(req, ObjectType.Collection, collection.uuid);
-    try {
-      const archive = archiver("zip", { store: true });
-      archive.on("warning", console.error);
-      archive.on("error", console.error);
-      req.on("close", () => archive.abort());
 
-      const shortUuid = collection.uuid.toLowerCase().replace(/-/g, "").slice(0, 16);
-      const receiverFilename = `cloudnet-collection-${shortUuid}.zip`;
-      res.set("Content-Type", "application/octet-stream");
-      res.set("Content-Disposition", `attachment; filename="${receiverFilename}"`);
-      archive.pipe(res);
+    const archive = archiver("zip", { store: true });
+    archive.on("warning", console.error);
+    archive.on("error", console.error);
+    req.on("close", () => archive.abort());
 
-      archive.append(await this.generateReadme(collection), { name: "README.md" });
-      archive.append(LICENSE_TEXT, { name: "LICENSE.txt" });
+    const shortUuid = collection.uuid.toLowerCase().replace(/-/g, "").slice(0, 16);
+    const receiverFilename = `cloudnet-collection-${shortUuid}.zip`;
+    res.set("Content-Type", "application/octet-stream");
+    res.set("Content-Disposition", `attachment; filename="${receiverFilename}"`);
+    archive.pipe(res);
 
-      const appendFile = async (idx: number) => {
-        const file = allFiles[idx];
-        const fileStream = await this.makeFileRequest(file);
-        archive.append(fileStream, { name: file.filename });
-        if (idx == allFiles.length - 1) {
-          await archive.finalize();
-        }
-      };
-      let i = -2;
-      archive.on("entry", (_entry) => {
-        i++;
-        if (i > 0 && i < allFiles.length) {
-          appendFile(i);
-        }
-      });
-      await appendFile(0);
-    } catch (err) {
-      res.sendStatus(500);
-      next(err);
-    }
+    archive.append(await this.generateReadme(collection), { name: "README.md" });
+    archive.append(LICENSE_TEXT, { name: "LICENSE.txt" });
+
+    const appendFile = async (idx: number) => {
+      const file = allFiles[idx];
+      const fileStream = await this.makeFileRequest(file);
+      archive.append(fileStream, { name: file.filename });
+      if (idx == allFiles.length - 1) {
+        await archive.finalize();
+      }
+    };
+    let i = -2;
+    archive.on("entry", (_entry) => {
+      i++;
+      if (i > 0 && i < allFiles.length) {
+        appendFile(i).catch((err) => {
+          archive.abort();
+          next(err);
+        });
+      }
+    });
+    await appendFile(0);
   };
 
   image: RequestHandler = async (req, res) => {

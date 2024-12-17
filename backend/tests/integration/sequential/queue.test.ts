@@ -676,13 +676,13 @@ describe("/api/queue/batch", () => {
   }
 
   it("requires authentication", async () => {
-    expect(axios.post(batchUrl, { type: "process", productIds: ["lidar"] })).rejects.toMatchObject({
+    await expect(axios.post(batchUrl, { type: "process", productIds: ["lidar"] })).rejects.toMatchObject({
       response: { status: 401 },
     });
   });
 
   it("requires admin permissions", async () => {
-    expect(
+    await expect(
       axios.post(batchUrl, { type: "process", productIds: ["lidar"] }, { auth: submitterAuth }),
     ).rejects.toMatchObject({ response: { status: 401 } });
   });

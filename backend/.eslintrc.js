@@ -20,5 +20,9 @@ module.exports = {
   },
   plugins: ["@typescript-eslint"],
   ignorePatterns: ["dist/", "node_modules/", "build/", "public/", "src/migration/", ".eslintrc.js"],
-  rules: { ...commonRules },
+  rules: {
+    ...commonRules,
+    "@typescript-eslint/no-floating-promises": "error",
+    "@typescript-eslint/no-misused-promises": "error",
+  },
 };

@@ -386,7 +386,10 @@ async function createServer(): Promise<void> {
 
   app.use(errorHandler);
 
+  // Skip errors related to Express 5: https://github.com/expressjs/express/issues/4892
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   const server = http.createServer(app);
+
   // Explicitly set timeout to default value of Node 15 because newer Node
   // versions use a different value. Using 0 (i.e. no timeout) shouldn't be a
   // problem because we're running behind a reverse proxy.
