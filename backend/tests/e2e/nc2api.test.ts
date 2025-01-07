@@ -124,12 +124,15 @@ describe("after PUTting metadata to API", () => {
 
   ["::ffff:127.0.0.1", "192.168.0.1", "193.169.0.1"].forEach((ip) =>
     it(`serves the file but doesn't increase download count from ${ip}`, async () => {
-      const response = await axios.get(`${backendPublicUrl}download/product/${expectedJson.uuid}/${s3key}`, {
-        responseType: "arraybuffer",
-        headers: {
-          "X-Forwarded-For": ip,
+      const response = await axios.get(
+        `${backendPublicUrl}download/product/${expectedJson.uuid}/${expectedJson.filename}`,
+        {
+          responseType: "arraybuffer",
+          headers: {
+            "X-Forwarded-For": ip,
+          },
         },
-      });
+      );
       expect(response.status).toEqual(200);
       const hash = createHash("sha256");
       hash.update(response.data);
