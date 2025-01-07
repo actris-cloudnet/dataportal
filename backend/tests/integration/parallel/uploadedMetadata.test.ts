@@ -135,14 +135,14 @@ describe("GET /api/raw-files", () => {
     });
   });
   it("responds with 400 if prefix empty", async () => {
-    expect(
+    await expect(
       axios.get(`${rawFilesUrl}`, {
         params: { filenamePrefix: "", developer: true },
       }),
     ).rejects.toMatchObject({ response: { status: 400 } });
   });
   it("responds with 400 if prefixes empty", async () => {
-    expect(
+    await expect(
       axios.get(`${rawFilesUrl}`, {
         params: { filenamePrefix: ["", ""], developer: true },
       }),

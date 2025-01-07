@@ -40,7 +40,15 @@
     </template>
 
     <template v-if="uploadStatus">
-      <template v-if="selectedViz == 'products' && dataStatus && dataStatus.availableProducts.length > 0">
+      <template v-if="selectedViz == 'products' && dataStatus && selectedProductId">
+        <h2>Product quality / availability &ndash; {{ selectedProductName }}</h2>
+        <ProductAvailabilityVisualizationSingle
+          :dataStatus="dataStatus"
+          :year="selectedYear"
+          :productId="selectedProductId"
+        />
+      </template>
+      <template v-else-if="selectedViz == 'products' && dataStatus">
         <h2>Product availability</h2>
         <InstrumentVisualization :dataStatus="dataStatus" :year="selectedYear" />
       </template>
@@ -60,6 +68,20 @@
               label="Visualisation"
               :options="visualisationOptions"
               id="instrumentVizSelect"
+            />
+          </div>
+          <div
+            class="viz-option"
+            style="width: 370px"
+            v-if="dataStatus && dataStatus.availableProducts.length > 1 && selectedViz === 'products'"
+          >
+            <custom-multiselect
+              v-model="selectedProductId"
+              label="Product"
+              :options="dataStatus.availableProducts"
+              id="singleProductSelect"
+              :getIcon="getProductIcon"
+              clearable
             />
           </div>
           <div class="viz-option year-select">
@@ -91,6 +113,8 @@ import InstrumentVisualization from "@/components/InstrumentVisualization.vue";
 import UploadVisualization from "@/components/UploadVisualization.vue";
 import CustomMultiselect from "@/components/MultiSelect.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
+import ProductAvailabilityVisualizationSingle from "../ProductAvailabilityVisualizationSingle.vue";
+import { getProductIcon } from "@/lib";
 
 export interface Props {
   instrumentInfo: InstrumentInfo;
@@ -104,10 +128,19 @@ const uploadStatus = ref<UploadStatus>();
 
 const selectedYearOption = ref<string | null>(null);
 const selectedYear = computed(() => (selectedYearOption.value ? parseInt(selectedYearOption.value) : undefined));
-
 const yearOptions = computed(() => {
   if (!uploadStatus.value) return [];
   return uploadStatus.value.years.map((year) => ({ id: year.toString(), humanReadableName: year.toString() }));
+});
+
+const selectedProductId = ref<string | null>(null);
+const selectedProductName = computed(() => {
+  if (!dataStatus.value || !selectedProductId.value || !dataStatus.value.availableProducts) {
+    return null;
+  }
+  const product = dataStatus.value.availableProducts.find((product) => product.id === selectedProductId.value);
+  if (!product) return null;
+  return product.humanReadableName;
 });
 
 const yesterday = new Date();
@@ -133,6 +166,9 @@ onMounted(async () => {
     selectedViz.value = "products";
   } else if (uploadStatus.value.dates.length > 0) {
     selectedViz.value = "count";
+  }
+  if (dataStatus.value.availableProducts.length === 1) {
+    selectedProductId.value = dataStatus.value.availableProducts[0].id;
   }
 });
 </script>

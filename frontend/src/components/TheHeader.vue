@@ -7,7 +7,7 @@ import { ref } from "vue";
 
 const isDev = import.meta.env.DEV;
 const today = new Date();
-const isXmas = !isDev && today.getMonth() === 11;
+const isXmas = !isDev && today.getMonth() === 11 && today.getDate() > 15;
 const isFool = !isDev && today.getMonth() === 3 && today.getDate() === 1;
 const logo = isXmas ? xmasLogo : isFool ? foolLogo : defaultLogo;
 const showMenu = ref(false);

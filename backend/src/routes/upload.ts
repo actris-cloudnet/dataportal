@@ -258,7 +258,7 @@ export class UploadRoutes {
       });
 
       if (upload instanceof InstrumentUpload) {
-        this.publishAdjoiningDayTask(upload);
+        await this.publishAdjoiningDayTask(upload);
       }
     } catch (err: any) {
       if (err.status == 401) return next(err); // Permission error
@@ -515,7 +515,7 @@ export class UploadRoutes {
 
   dateforsize: RequestHandler = async (req, res, next) => {
     const isModel = "model" in req.query;
-    dateforsize(
+    await dateforsize(
       isModel ? this.modelUploadRepo : this.instrumentUploadRepo,
       isModel ? "model_upload" : "instrument_upload",
       req,

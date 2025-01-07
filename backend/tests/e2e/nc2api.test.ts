@@ -102,25 +102,47 @@ describe("after PUTting metadata to API", () => {
   });
 
   it("serves the file and increases download count", async () => {
-    return axios
-      .get(`${backendPublicUrl}download/product/${expectedJson.uuid}/${expectedJson.filename}`, {
+    const response = await axios.get(
+      `${backendPublicUrl}download/product/${expectedJson.uuid}/${expectedJson.filename}`,
+      {
         responseType: "arraybuffer",
-      })
-      .then((response) => {
-        expect(response.status).toEqual(200);
-        const hash = createHash("sha256");
-        hash.update(response.data);
-        expect(hash.digest("hex")).toEqual(expectedJson.checksum);
-        return expect(
-          downloadRepo.existsBy({
-            objectUuid: expectedJson.uuid,
-            objectType: ObjectType.Product,
-            ip: "2.125.160.216",
-            country: "GB",
-          }),
-        ).resolves.toBe(true);
-      });
+      },
+    );
+    expect(response.status).toEqual(200);
+    const hash = createHash("sha256");
+    hash.update(response.data);
+    expect(hash.digest("hex")).toEqual(expectedJson.checksum);
+    await expect(
+      downloadRepo.existsBy({
+        objectUuid: expectedJson.uuid,
+        objectType: ObjectType.Product,
+        ip: "2.125.160.216",
+        country: "GB",
+      }),
+    ).resolves.toBe(true);
   });
+
+  ["::ffff:127.0.0.1", "192.168.0.1", "193.169.0.1"].forEach((ip) =>
+    it(`serves the file but doesn't increase download count from ${ip}`, async () => {
+      const response = await axios.get(`${backendPublicUrl}download/product/${expectedJson.uuid}/${s3key}`, {
+        responseType: "arraybuffer",
+        headers: {
+          "X-Forwarded-For": ip,
+        },
+      });
+      expect(response.status).toEqual(200);
+      const hash = createHash("sha256");
+      hash.update(response.data);
+      expect(hash.digest("hex")).toEqual(expectedJson.checksum);
+      await expect(
+        downloadRepo.existsBy({
+          objectUuid: expectedJson.uuid,
+          objectType: ObjectType.Product,
+          ip,
+        }),
+      ).resolves.toBe(false);
+    }),
+  );
 
   it("responds with 400 if file not uploaded", async () => {
     return expect(axios.put(`${backendPrivateUrl}files/notfound`, inputJson)).rejects.toMatchObject({

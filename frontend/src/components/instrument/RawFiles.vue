@@ -1,15 +1,17 @@
 <template>
   <main class="pagewidth">
     Date
-    <DatePicker class="date-picker" name="date" v-model="selectedDate" :end="today" />
-    <template v-if="files.length">
-      <div class="upload-stats-header">
+    <DatePicker class="date-picker" name="date" v-model="selectedDate" :end="today" :disabled="status === 'loading'" />
+    <BaseSpinner v-if="status === 'loading' && files.length === 0" />
+    <span v-else-if="status === 'error'"> Failed to load files... </span>
+    <template v-else-if="files.length">
+      <div class="upload-stats-header" :class="{ loading: status === 'loading' }">
         <div class="donut">
           <Donut :data="donutData" />
         </div>
         <DonutLegend :data="stats" fontSize="175%" />
       </div>
-      <div class="table-wrapper">
+      <div class="table-wrapper" :class="{ loading: status === 'loading' }">
         <table class="file-table">
           <thead class="table-header">
             <tr>
@@ -36,9 +38,7 @@
         </table>
       </div>
     </template>
-    <template v-else>
-      <p class="no-data">No raw data available</p>
-    </template>
+    <p v-else class="no-data">No raw data available</p>
   </main>
 </template>
 
@@ -49,6 +49,7 @@ import { backendUrl, compareValues, dateToString, humanReadableSize } from "@/li
 import Donut from "@/components/DonutVisualization.vue";
 import DonutLegend from "@/components/DonutLegend.vue";
 import DatePicker from "@/components/DatePicker.vue";
+import BaseSpinner from "@/components/BaseSpinner.vue";
 import type { Status, Upload } from "@shared/entity/Upload";
 import type { InstrumentInfo } from "@shared/entity/Instrument";
 import { useRouteQuery, queryString } from "@/lib/useRouteQuery";
@@ -60,6 +61,8 @@ export interface Props {
 const props = defineProps<Props>();
 
 const formatTimestamp = (date: string | Date) => date.toString().replace("T", " ").split(".")[0];
+
+const status = ref<"loading" | "error" | "ready">("loading");
 
 const files = ref<Upload[]>([]);
 
@@ -104,18 +107,25 @@ const statusOrder: Record<Status, number> = {
 };
 
 async function fetchData() {
-  const fileResponse = await axios.get<Upload[]>(`${backendUrl}raw-files`, {
-    params: {
-      instrumentPid: props.instrumentInfo.pid,
-      date: selectedDate.value,
-    },
-  });
-  files.value = fileResponse.data.sort((a, b) => {
-    if (a.status === b.status) {
-      return compareValues(a.filename + a.tags.join(), b.filename + b.tags.join());
-    }
-    return compareValues(statusOrder[a.status], statusOrder[b.status]);
-  });
+  try {
+    status.value = "loading";
+    const fileResponse = await axios.get<Upload[]>(`${backendUrl}raw-files`, {
+      params: {
+        instrumentPid: props.instrumentInfo.pid,
+        date: selectedDate.value,
+      },
+    });
+    files.value = fileResponse.data.sort((a, b) => {
+      if (a.status === b.status) {
+        return compareValues(a.filename + a.tags.join(), b.filename + b.tags.join());
+      }
+      return compareValues(statusOrder[a.status], statusOrder[b.status]);
+    });
+    status.value = "ready";
+  } catch (err) {
+    status.value = "error";
+    console.error(err);
+  }
 }
 
 watch(
@@ -206,6 +216,11 @@ tr {
 .no-data {
   margin-top: 2rem;
   color: gray;
+}
+
+.loading {
+  pointer-events: none;
+  opacity: 0.5;
 }
 
 @media screen and (max-width: $narrow-screen) {

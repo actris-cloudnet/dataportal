@@ -1,5 +1,5 @@
 import { DataSource, Repository } from "typeorm";
-import { RequestHandler } from "express";
+import { RequestHandler, Request } from "express";
 import basicAuth = require("basic-auth");
 
 import { UserAccount } from "../entity/UserAccount";
@@ -7,6 +7,7 @@ import { Permission, PermissionType, permissionTypeFromString } from "../entity/
 import { Site } from "../entity/Site";
 import { randomString } from "../lib";
 import { Model } from "../entity/Model";
+import { NextFunction } from "express-serve-static-core";
 
 interface PermissionInterface {
   id?: number;
@@ -168,9 +169,9 @@ export class UserAccountRoutes {
     if (!hasProperty(req.body, "username")) {
       return next({ status: 401, errors: "Missing the username" });
     }
-    this.validateUsername(req, res, next);
+    this.validateUsername(req, next);
     if (hasProperty(req.body, "password")) {
-      this.validatePassword(req, res, next);
+      this.validatePassword(req, next);
     }
 
     if (hasProperty(req.body, "permissions")) {
@@ -181,10 +182,10 @@ export class UserAccountRoutes {
 
   validatePut: RequestHandler = async (req, res, next) => {
     if (hasProperty(req.body, "username")) {
-      this.validateUsername(req, res, next);
+      this.validateUsername(req, next);
     }
     if (hasProperty(req.body, "password")) {
-      this.validatePassword(req, res, next);
+      this.validatePassword(req, next);
     }
 
     if (hasProperty(req.body, "permissions")) {
@@ -193,21 +194,21 @@ export class UserAccountRoutes {
     return next();
   };
 
-  validateUsername: RequestHandler = (req, res, next) => {
+  validateUsername(req: Request, next: NextFunction): void {
     if (typeof req.body.username !== "string") {
-      return next({ status: 401, errors: "username must be a string" });
+      next({ status: 401, errors: "username must be a string" });
     } else if (req.body.username.length === 0) {
-      return next({ status: 401, errors: "username must be nonempty" });
+      next({ status: 401, errors: "username must be nonempty" });
     }
-  };
+  }
 
-  validatePassword: RequestHandler = (req, res, next) => {
+  validatePassword(req: Request, next: NextFunction): void {
     if (typeof req.body.password !== "string") {
-      return next({ status: 401, errors: "password must be a string" });
+      next({ status: 401, errors: "password must be a string" });
     } else if (req.body.password.length === 0) {
-      return next({ status: 401, errors: "password must be nonempty" });
+      next({ status: 401, errors: "password must be nonempty" });
     }
-  };
+  }
 
   validatePermissions: RequestHandler = async (req, res, next) => {
     if (Array.isArray(req.body.permissions)) {

@@ -103,14 +103,14 @@ export class InstrumentRoutes {
         SELECT
           "siteId",
           "measurementDate",
-          COALESCE(CAST("siteId" != LAG("siteId") OVER (PARTITION BY "siteId" ORDER BY "measurementDate") AS INT), 1) AS "isNewPeriod"
+          COALESCE(CAST("siteId" != LAG("siteId") OVER (ORDER BY "measurementDate" DESC) AS INT), 1) AS "isNewPeriod"
         FROM regular_file
         WHERE "instrumentPid" = $1
       ), periods AS (
         SELECT
           "siteId",
           "measurementDate",
-          SUM("isNewPeriod") OVER (ORDER BY "measurementDate") AS "periodId"
+          SUM("isNewPeriod") OVER (ORDER BY "measurementDate" DESC) AS "periodId"
         FROM gaps
       )
       SELECT

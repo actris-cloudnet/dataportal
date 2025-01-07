@@ -16,9 +16,14 @@
             <li
               v-for="product in dataStatus.availableProducts"
               :key="product.id"
-              class="productitem"
+              class="qualityitem"
               :class="{
-                found: data && getProductStatus(data.products, product.id),
+                na: !data || !hasProduct(data.products, product.id),
+                error: data && isFileWithError(data.products.instrument.concat(data.products.geophysical), product.id),
+                warning:
+                  data && isFileWithWarning(data.products.instrument.concat(data.products.geophysical), product.id),
+                info: data && isFileWithInfo(data.products.instrument.concat(data.products.geophysical), product.id),
+                found: data && isFileWithPass(data.products.instrument.concat(data.products.geophysical), product.id),
               }"
             >
               {{ product.humanReadableName }}
@@ -35,7 +40,13 @@ import { classColor, type ColorClass } from "@/lib";
 import type { DataStatus, ProductInfo, ProductLevels } from "@/lib/DataStatusParser";
 import { computed } from "vue";
 
-import { noData } from "@/lib/ProductAvailabilityTools";
+import {
+  noData,
+  isFileWithError,
+  isFileWithInfo,
+  isFileWithWarning,
+  isFileWithPass,
+} from "@/lib/ProductAvailabilityTools";
 import { useRouter } from "vue-router";
 import DateVisualization from "./DateVisualization.vue";
 
@@ -65,7 +76,7 @@ function createColorClass(products: ProductLevels): ColorClass {
   return "all-raw";
 }
 
-function getProductStatus(products: ProductLevels, productId: string): boolean {
+function hasProduct(products: ProductLevels, productId: string): boolean {
   const isProduct = (p: ProductInfo) => p.id === productId;
   return products.instrument.some(isProduct) || products.geophysical.some(isProduct);
 }

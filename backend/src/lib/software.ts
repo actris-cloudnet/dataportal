@@ -43,7 +43,7 @@ export class SoftwareService {
 
   async getSoftware(code: string, version: string): Promise<Software> {
     const requestId = `${code} ${version}`;
-    if (!this.pendingRequests[requestId]) {
+    if (!(requestId in this.pendingRequests)) {
       this.pendingRequests[requestId] = this.getOrCreateSoftware(code, version).then((software) => {
         delete this.pendingRequests[requestId];
         return software;
