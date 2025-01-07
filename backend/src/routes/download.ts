@@ -48,8 +48,9 @@ export class DownloadRoutes {
   readonly citationService: CitationService;
 
   product: RequestHandler = async (req, res, next) => {
-    const s3key = (req.params.s3key as unknown as string[]).join("/");
-    const file = await this.fileController.findAnyFile((repo) => repo.findOneBy({ uuid: req.params.uuid, s3key }));
+    const file = await this.fileController.findAnyFile((repo) =>
+      repo.findOneBy({ uuid: req.params.uuid, filename: req.params.filename }),
+    );
     if (!file) return next({ status: 404, errors: ["File not found"] });
     const upstreamRes = await this.makeFileRequest(file);
     res.setHeader("Content-Type", "application/octet-stream");
