@@ -10,8 +10,22 @@ export class ProductRoutes {
   readonly productRepo: Repository<Product>;
 
   products: RequestHandler = async (req, res) => {
-    const products = await this.productRepo.find({ order: { level: "DESC", id: "ASC" } });
-    res.send(products);
+    const products = await this.productRepo.find({
+      select: { sourceInstruments: { id: true }, derivedProducts: { id: true }, sourceProducts: { id: true } },
+      relations: { sourceInstruments: true, derivedProducts: true, sourceProducts: true },
+      order: { level: "DESC", id: "ASC" },
+    });
+    res.send(
+      products.map((product) => ({
+        ...product,
+        sourceInstruments: undefined,
+        sourceInstrumentIds: product.sourceInstruments.map((instrument) => instrument.id),
+        derivedProducts: undefined,
+        derivedProductIds: product.derivedProducts.map((product) => product.id),
+        sourceProducts: undefined,
+        sourceProductIds: product.sourceProducts.map((product) => product.id),
+      })),
+    );
   };
 
   product: RequestHandler = async (req, res, next) => {
@@ -27,14 +41,21 @@ export class ProductRoutes {
 
   productVariables: RequestHandler = async (req, res) => {
     const products = await this.productRepo.find({
-      relations: { variables: true },
+      select: { sourceInstruments: { id: true } },
+      relations: { variables: true, sourceInstruments: true },
       order: {
         level: "DESC",
         id: "ASC",
         variables: { order: "ASC" },
       },
     });
-    res.send(products);
+    res.send(
+      products.map((product) => ({
+        ...product,
+        sourceInstruments: undefined,
+        sourceInstrumentIds: product.sourceInstruments.map((instrument) => instrument.id),
+      })),
+    );
   };
 
   productVariable: RequestHandler = async (req, res, next) => {

@@ -10,6 +10,7 @@ export interface Instrument {
   uploads: InstrumentUpload[];
   calibrations: Calibration[];
   shortName: string;
+  derivedProductIds: string[];
 }
 
 export interface InstrumentPidLocation {

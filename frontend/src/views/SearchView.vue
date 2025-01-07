@@ -190,7 +190,7 @@
           <CustomMultiselect
             label="Specific instrument"
             v-model="selectedInstrumentPids"
-            :options="allInstrumentPids"
+            :options="instrumentPidOptions"
             :multiple="true"
             id="instrumentPidSelect"
             :getIcon="(option) => getProductIcon(option.type)"
@@ -304,18 +304,24 @@ const showDateRange = ref(false);
 const allProducts = ref<Product[]>([]);
 const selectedProductIds = useRouteQuery({ name: "product", defaultValue: [], type: queryStringArray });
 const showExpProducts = useRouteQuery({ name: "experimental", defaultValue: false, type: queryBoolean });
-const productOptions = computed(() =>
-  allProducts.value.filter((product) => showExpProducts.value || !product.experimental),
-);
+const productOptions = computed(() => {
+  let products = allProducts.value.filter((product) => showExpProducts.value || !product.experimental);
+  if (selectedInstrumentIds.value.length > 0) {
+    products = products.filter((product) =>
+      product.sourceInstrumentIds.some((instrumentId) => selectedInstrumentIds.value.includes(instrumentId)),
+    );
+  }
+  return products;
+});
 
 // variables
 const selectedVariableIds = useRouteQuery({ name: "variable", defaultValue: [], type: queryStringArray });
 const variableOptions = computed(() => {
-  const formatProduct = (prod: Product) => prod.variables.map((variable) => ({ ...variable, product: prod }));
-  if (selectedProductIds.value.length == 0) {
-    return allProducts.value.flatMap(formatProduct);
+  let products = allProducts.value;
+  if (selectedProductIds.value.length > 0) {
+    products = products.filter((product) => selectedProductIds.value.includes(product.id));
   }
-  return allProducts.value.filter((prod) => selectedProductIds.value.includes(prod.id)).flatMap(formatProduct);
+  return products.flatMap((product) => product.variables.map((variable) => ({ ...variable, product: product })));
 });
 
 // instruments
@@ -324,8 +330,13 @@ const selectedInstrumentIds = useRouteQuery({ name: "instrument", defaultValue: 
 
 // instrument PIDs
 type InstrumentPidOption = Option & { type: string };
-const allInstrumentPids = ref<InstrumentPidOption[]>([]);
+const allInstrumentPids = ref<InstrumentInfo[]>([]);
 const selectedInstrumentPids = useRouteQuery({ name: "instrumentPid", defaultValue: [], type: queryStringArray });
+const instrumentPidOptions = computed<InstrumentPidOption[]>(() =>
+  allInstrumentPids.value
+    .map((obj) => ({ id: obj.pid, humanReadableName: obj.name, type: obj.instrument.type }))
+    .sort(alphabeticalSort),
+);
 
 // other
 const renderComplete = ref(false);
@@ -363,9 +374,7 @@ async function initView() {
   allSites.value = sites.sort(alphabeticalSort);
   allProducts.value = products.data.sort(alphabeticalSort);
   allInstruments.value = instruments.data.sort(instrumentSort);
-  allInstrumentPids.value = pids.data
-    .map((obj) => ({ id: obj.pid, humanReadableName: obj.name, type: obj.instrument.type }))
-    .sort(alphabeticalSort);
+  allInstrumentPids.value = pids.data;
 
   if (
     !showExpProducts.value &&
