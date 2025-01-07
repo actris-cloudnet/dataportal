@@ -137,7 +137,15 @@ export class FileRoutes {
       const offset = (currentPage - 1) * pageSize;
       const sizeQb = qb.clone().select("SUM(size)", "totalBytes").orderBy();
       const pageQb = qb.clone().limit(pageSize).offset(offset);
-      const [totalItems, size, pageItems] = await Promise.all([qb.getCount(), sizeQb.getRawOne(), pageQb.getMany()]);
+      const productsQb = qb.clone().select("file.productId").orderBy("file.productId").distinct(true);
+      const sitesQb = qb.clone().select("file.siteId").orderBy("file.siteId").distinct(true);
+      const [totalItems, size, pageItems, products, sites] = await Promise.all([
+        qb.getCount(),
+        sizeQb.getRawOne(),
+        pageQb.getMany(),
+        productsQb.getRawMany(),
+        sitesQb.getRawMany(),
+      ]);
       const totalPages = Math.ceil(totalItems / pageSize);
       res.send({
         results: pageItems,
@@ -147,6 +155,10 @@ export class FileRoutes {
           totalBytes: parseInt(size.totalBytes),
           currentPage,
           pageSize,
+        },
+        availability: {
+          products: products.map((row) => row.productId),
+          sites: sites.map((row) => row.siteId),
         },
       });
     } else {
