@@ -24,6 +24,7 @@ import weatherStationIcon from "@/assets/icons/weather-station.png";
 import dopplerLidarIcon from "@/assets/icons/doppler-lidar.svg";
 import dopplerLidarWindIcon from "@/assets/icons/doppler-lidar-wind.svg";
 import rainRadarIcon from "@/assets/icons/rain-radar.svg";
+import rainGaugerIcon from "@/assets/icons/rain-gauge.png";
 
 import markerIconRed from "@/assets/markers/marker-icon-red.png";
 import markerIconBlue from "@/assets/markers/marker-icon-blue.png";
@@ -68,6 +69,7 @@ const productIcons: Record<string, string> = {
   "doppler-lidar": dopplerLidarIcon,
   "doppler-lidar-wind": dopplerLidarWindIcon,
   "rain-radar": rainRadarIcon,
+  "rain-gauge": rainGaugerIcon,
 };
 
 export const getProductIcon = (product: Product | string) => {
