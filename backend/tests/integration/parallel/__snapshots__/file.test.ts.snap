@@ -93,9 +93,12 @@ exports[`/api/files/:uuid request succeeds on model file 1`] = `
   "legacy": false,
   "measurementDate": "2020-12-05",
   "model": {
+    "forecastEnd": null,
+    "forecastStart": null,
     "humanReadableName": "ECMWF forecast",
     "id": "ecmwf",
     "optimumOrder": 0,
+    "sourceModelId": null,
   },
   "pid": "",
   "product": {
