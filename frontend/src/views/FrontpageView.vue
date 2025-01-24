@@ -2,7 +2,7 @@
   <main id="frontpage">
     <header class="logos">
       <img alt="Actris logo" :src="actrisLogo" />
-      <img alt="Cloudnet logo" :src="cloudnetLogo" style="padding-top: 2em" />
+      <img alt="Cloudnet logo" :src="cloudnetLogo" />
     </header>
     <main>
       <h3>Welcome to ACTRIS Cloudnet data portal</h3>
@@ -57,7 +57,7 @@ main#frontpage {
 }
 
 header img {
-  max-height: 120px;
+  max-height: 110px;
   width: auto;
   margin-left: 1em;
   margin-right: 1em;

@@ -148,9 +148,8 @@ header.fool {
 }
 
 .actris-logo img {
-  height: 2.6rem;
+  height: 3rem;
   padding-right: 0.3rem;
-  margin-top: -0.12rem;
 }
 
 ul {
