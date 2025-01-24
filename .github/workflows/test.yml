@@ -15,8 +15,9 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build Docker images
-        uses: docker/bake-action@v4
+        uses: docker/bake-action@v6
         with:
+          source: .
           workdir: .github
           targets: backend
           set: |
@@ -60,8 +61,9 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build Docker images
-        uses: docker/bake-action@v4
+        uses: docker/bake-action@v6
         with:
+          source: .
           workdir: .github
           targets: frontend
           set: |
