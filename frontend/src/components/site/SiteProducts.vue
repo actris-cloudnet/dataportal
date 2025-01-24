@@ -17,9 +17,9 @@
     <section id="product_quality" class="graph" v-if="dataStatus && dataStatus.dates.length > 0">
       <h2>
         Product quality
-        <template v-if="selectedProductName">/ availability &ndash; {{ selectedProductName }} </template>
-        <template v-if="instrumentName"> ({{ instrumentName }})</template>
-        <template v-if="modelName"> ({{ modelName }})</template>
+        <template v-if="selectedProductName">
+          / availability &ndash; {{ instrumentName || modelName || selectedProductName }}
+        </template>
       </h2>
 
       <section class="details" v-if="selectedProductId">
