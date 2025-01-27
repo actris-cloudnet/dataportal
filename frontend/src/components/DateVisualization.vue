@@ -108,10 +108,12 @@ function initYear(year: number): YearItem<T> {
 }
 
 const dataByYear = computed(() => {
+  const today = dateToString(new Date());
   const sortedData = props.data.slice().sort((a, b) => compareValues(a.date, b.date));
   const output = [];
   while (sortedData.length > 0) {
     const data = sortedData.shift()!;
+    if (data.date > today) continue;
     const date = new Date(data.date);
     if (output.length == 0 || date.getUTCFullYear() != output[0].year) {
       output.unshift(initYear(date.getUTCFullYear()));
