@@ -61,6 +61,8 @@ const instrumentComponentsMap: { [key: string]: any } = {
   "copernicus": RadarCalibration,
   "pollyxt": CeilometerCalibration,
   "weather-station": WeatherStationCalibration,
+  "mira-10": RadarCalibration,
+  "mira-35": RadarCalibration,
 };
 
 const InstrumentComponent = computed(() => {
