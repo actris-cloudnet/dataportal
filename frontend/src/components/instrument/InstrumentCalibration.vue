@@ -55,6 +55,8 @@ const instrumentComponentsMap: { [key: string]: any } = {
   "chm15k": CeilometerCalibration,
   "chm15kx": CeilometerCalibration,
   "cl51": CeilometerCalibration,
+  "cl31": CeilometerCalibration,
+  "ct25k": CeilometerCalibration,
   "parsivel": DisdrometerCalibration,
   "hatpro": HatproCalibration,
   "cs135": CeilometerCalibration,
