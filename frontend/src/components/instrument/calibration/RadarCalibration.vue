@@ -18,6 +18,12 @@
       :timestamps="timestamps"
       :config="{ title: 'Zenith offset', label: 'Zenith offset (deg)' }"
     />
+    <CalibrationTable
+      :data="snrLimits"
+      :measurementDates="measurementDates"
+      :timestamps="timestamps"
+      :config="{ title: 'SNR limit', label: 'SNR limit' }"
+    />
   </div>
 </template>
 
@@ -33,6 +39,7 @@ const props = defineProps<{
       range_offset?: number;
       azimuth_offset?: number;
       zenith_offset?: number;
+      snr_limit?: number;
     };
   }[];
 }>();
@@ -40,4 +47,5 @@ const props = defineProps<{
 const rangeOffset = computed(() => props.calibrationData.map((entry) => entry.data.range_offset ?? null));
 const azimuthOffsets = computed(() => props.calibrationData.map((entry) => entry.data.azimuth_offset ?? null));
 const zenithOffsets = computed(() => props.calibrationData.map((entry) => entry.data.zenith_offset ?? null));
+const snrLimits = computed(() => props.calibrationData.map((entry) => entry.data.snr_limit ?? null));
 </script>
