@@ -160,13 +160,14 @@ export function getQcIcon(errorLevel: string) {
 }
 
 export const markerColors: Record<SiteType, string> = {
-  cloudnet: markerIconBlue,
-  arm: markerIconViolet,
-  campaign: markerIconOrange,
-  mobile: markerIconGrey,
-  test: markerIconGrey,
-  model: markerIconGrey,
-  hidden: markerIconGrey,
+  "cloudnet": markerIconBlue,
+  "arm": markerIconViolet,
+  "campaign": markerIconOrange,
+  "mobile": markerIconGrey,
+  "test": markerIconGrey,
+  "model": markerIconGrey,
+  "hidden": markerIconGrey,
+  "ri-urbans": markerIconGrey,
 };
 
 export function getMarkerIcon(site: Site, selected = false) {
