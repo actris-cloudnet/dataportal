@@ -55,14 +55,15 @@ function setMapBounds() {
 }
 
 const markerColors: Record<SiteType | "selected", string | undefined> = {
-  selected: "red",
-  cloudnet: "blue",
-  arm: "violet",
-  campaign: "orange",
-  mobile: undefined,
-  test: undefined,
-  model: undefined,
-  hidden: undefined,
+  "selected": "red",
+  "cloudnet": "blue",
+  "arm": "violet",
+  "campaign": "orange",
+  "ri-urbans": undefined,
+  "mobile": undefined,
+  "test": undefined,
+  "model": undefined,
+  "hidden": undefined,
 };
 
 function generateLegend() {
