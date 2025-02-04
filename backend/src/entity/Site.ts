@@ -8,6 +8,7 @@ export enum SiteType {
   CLOUDNET = "cloudnet",
   ARM = "arm",
   CAMPAIGN = "campaign",
+  RI_URBANS = "ri-urbans",
   MOBILE = "mobile",
   MODEL = "model",
   TEST = "test",

@@ -21,6 +21,9 @@ withDefaults(defineProps<Props>(), { size: "normal" });
     >
       ACTRIS
     </BaseTag>
+    <BaseTag v-if="'site' in response && response.site.type.includes('ri-urbans')" type="ri-urbans">
+      RI-URBANS
+    </BaseTag>
     <BaseTag v-if="response.volatile" type="volatile" :size="size" title="Data may change in future">
       Volatile
     </BaseTag>

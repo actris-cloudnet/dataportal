@@ -50,7 +50,8 @@
                     >
                       ACTRIS
                     </BaseTag>
-                    <BaseTag v-if="site.type.includes('arm')" type="arm" size="small"> ARM </BaseTag>
+                    <BaseTag v-if="site.type.includes('arm')" type="arm" size="small">ARM</BaseTag>
+                    <BaseTag v-if="site.type.includes('ri-urbans')" type="ri-urbans" size="small">RI-URBANS</BaseTag>
                   </td>
                 </tr>
               </tbody>
