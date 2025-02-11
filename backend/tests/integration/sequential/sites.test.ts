@@ -48,7 +48,7 @@ async function putFile(data: { site: string; product: string; measurementDate: s
     product: data.product,
     createdAt: "2020-02-20T10:56:19.382Z",
     updatedAt: "2020-02-20T10:56:19.382Z",
-    s3key: s3key,
+    filename: s3key,
     checksum: crypto.randomBytes(20).toString("hex"),
     size: 12200657,
     format: "HDF5 (NetCDF4)",

@@ -223,7 +223,7 @@ describe("/api/files", () => {
     };
     const res = await axios.get(url, payload);
     return expect(res.data[0]).toMatchObject({
-      s3path: "/cloudnet-product/legacy/20090716_bucharest_classification.nc",
+      s3path: "/cloudnet-product/3bb32746-faf0-4057-9076-ed2e698dcf36/legacy/20090716_bucharest_classification.nc",
     });
   });
 
@@ -294,7 +294,9 @@ describe("/api/model-files", () => {
   it("includes s3path when requests", async () => {
     const payload = { params: { site: "bucharest", dateFrom: "2020-12-05", dateTo: "2020-12-05", s3path: true } };
     const res = await axios.get(url, payload);
-    return expect(res.data[0]).toMatchObject({ s3path: "/cloudnet-product-volatile/20141205_mace-head_ecmwf.nc" });
+    return expect(res.data[0]).toMatchObject({
+      s3path: "/cloudnet-product-volatile/b5d1d5af-3667-41bc-b952-e684f627d91c/20141205_mace-head_ecmwf.nc",
+    });
   });
 
   it("responds with the specified model file", async () => {
