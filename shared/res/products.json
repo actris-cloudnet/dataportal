@@ -49,6 +49,13 @@
     "experimental": false
   },
   {
+    "id": "edr",
+    "humanReadableName": "Eddy dissipation rate",
+    "level": "2",
+    "type": ["instrument"],
+    "experimental": true
+  },
+  {
     "id": "ier",
     "humanReadableName": "Ice effective radius",
     "level": "2",

@@ -74,6 +74,12 @@
     "variables": []
   },
   {
+    "id": "edr",
+    "humanReadableName": "Eddy dissipation rate",
+    "level": "2",
+    "variables": []
+  },
+  {
     "id": "ier",
     "humanReadableName": "Ice effective radius",
     "level": "2",

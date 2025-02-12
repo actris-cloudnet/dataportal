@@ -1,4 +1,4 @@
-import { DataSource, Repository } from "typeorm";
+import { DataSource, IsNull, Repository } from "typeorm";
 import { AppDataSource } from "../../../src/data-source";
 import { QueueService } from "../../../src/lib/queue";
 import { describe, expect, it, beforeAll, afterAll, beforeEach } from "@jest/globals";
@@ -766,9 +766,34 @@ describe("/api/queue/batch", () => {
   it("creates categorize tasks", async () => {
     await axios.post(batchUrl, { type: "process", productIds: ["categorize"], dryRun: false }, { auth });
     expect(await taskRepo.count()).toBe(4);
-    expect(await taskRepo.countBy({ siteId: "granada" })).toBe(1);
-    expect(await taskRepo.countBy({ siteId: "bucharest" })).toBe(2);
-    expect(await taskRepo.countBy({ siteId: "warsaw" })).toBe(1);
+    expect(await taskRepo.countBy({ siteId: "granada", productId: "categorize", instrumentInfoUuid: IsNull() })).toBe(
+      1,
+    );
+    expect(await taskRepo.countBy({ siteId: "bucharest", productId: "categorize", instrumentInfoUuid: IsNull() })).toBe(
+      2,
+    );
+    expect(await taskRepo.countBy({ siteId: "warsaw", productId: "categorize", instrumentInfoUuid: IsNull() })).toBe(1);
+  });
+
+  it("creates edr tasks", async () => {
+    await axios.post(batchUrl, { type: "process", productIds: ["edr"], dryRun: false }, { auth });
+    expect(await taskRepo.count()).toBe(2);
+    expect(
+      await taskRepo.existsBy({
+        siteId: "granada",
+        productId: "edr",
+        measurementDate: new Date("2020-08-11"),
+        instrumentInfoUuid: "9e0f4b27-d5f3-40ad-8b73-2ae5dabbf81f",
+      }),
+    ).toBeTruthy();
+    expect(
+      await taskRepo.existsBy({
+        siteId: "bucharest",
+        productId: "edr",
+        measurementDate: new Date("2020-08-13"),
+        instrumentInfoUuid: "0b3a7fa0-4812-4964-af23-1162e8b3a665",
+      }),
+    ).toBeTruthy();
   });
 
   it("filters by date", async () => {

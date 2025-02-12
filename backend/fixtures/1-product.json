@@ -80,14 +80,16 @@
     "humanReadableName": "MWR multiple pointing",
     "level": "2",
     "type": ["instrument"],
-    "experimental": true
+    "experimental": true,
+    "sourceProducts": [{ "id": "mwr-l1c" }]
   },
   {
     "id": "mwr-single",
     "humanReadableName": "MWR single pointing",
     "level": "2",
     "type": ["instrument"],
-    "experimental": true
+    "experimental": true,
+    "sourceProducts": [{ "id": "mwr-l1c" }]
   },
   {
     "id": "categorize",
@@ -95,7 +97,13 @@
     "level": "1c",
     "type": ["geophysical"],
     "experimental": false,
-    "sourceProducts": [{ "id": "lidar" }, { "id": "radar" }, { "id": "mwr" }, { "id": "model" }]
+    "sourceProducts": [
+      { "id": "doppler-lidar" },
+      { "id": "lidar" },
+      { "id": "radar" },
+      { "id": "mwr" },
+      { "id": "model" }
+    ]
   },
   {
     "id": "categorize-voodoo",
@@ -173,5 +181,13 @@
     "level": "1b",
     "type": ["instrument"],
     "experimental": false
+  },
+  {
+    "id": "edr",
+    "humanReadableName": "Eddy dissipation rate",
+    "level": "2",
+    "type": ["instrument"],
+    "experimental": true,
+    "sourceProducts": [{ "id": "radar" }, { "id": "model" }]
   }
 ]

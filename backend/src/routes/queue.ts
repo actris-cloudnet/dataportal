@@ -3,7 +3,7 @@ import { QueueService } from "../lib/queue";
 import { isTaskStatus, Task, TaskStatus } from "../entity/Task";
 import { DataSource, In, Repository } from "typeorm";
 import { randomName } from "../lib/random";
-import { Product } from "../entity/Product";
+import { Product, ProductType } from "../entity/Product";
 import { Instrument, InstrumentInfo } from "../entity/Instrument";
 import { Model } from "../entity/Model";
 import { Site } from "../entity/Site";
@@ -59,7 +59,7 @@ export class QueueRoutes {
       });
       for (const product of products) {
         if (product.sourceProducts.length === 0) continue;
-        batches.push(this.submitProductBatch(searchParams, batchId, product.id));
+        batches.push(this.submitProductBatch(searchParams, batchId, product));
       }
     }
     const counts = await Promise.all(batches);
@@ -174,22 +174,31 @@ export class QueueRoutes {
     });
   }
 
-  /// Submit batch for non-instrument products. Tasks are created only for days
-  /// that contain instrument uploads.
-  private async submitProductBatch(searchParams: Record<string, any>, batchId: string, productId: string) {
-    const where: string[] = [];
-    const parameters = [productId];
-    return this.batchQuery(searchParams, where, parameters, {
+  /// Submit batch for a product derived from other products (e.g. categorize
+  /// and mwr-single). Tasks are created only for days that contain any uploads
+  /// from related instruments.
+  private async submitProductBatch(filters: Record<string, any>, batchId: string, product: Product) {
+    const where = [];
+    const parameters = [];
+
+    const productId = `$${parameters.length + 1}::text`;
+    parameters.push(product.id);
+
+    where.push(`upload."instrumentId" = ANY ($${parameters.length + 1})`);
+    parameters.push(await this.findSourceInstrumentIds(product));
+
+    return this.batchQuery(filters, where, parameters, {
       table: "instrument_upload",
       batchId,
-      productId: `$${parameters.length}::text`,
+      instrumentInfoUuid: product.type.includes(ProductType.INSTRUMENT) ? `upload."instrumentInfoUuid"` : undefined,
+      productId,
     });
   }
 
   private async batchQuery(
     searchParams: Record<string, any>,
     where: string[],
-    parameters: string[],
+    parameters: any[],
     options: {
       table: string;
       batchId: string;
@@ -257,5 +266,23 @@ export class QueueRoutes {
     if (invalidIds.length > 0) {
       return next({ status: 400, errors: `Invalid ${key}: ${invalidIds.join(", ")}` });
     }
+  }
+
+  /// Recursively find all possible source instruments for a given product.
+  private async findSourceInstrumentIds(product: Product): Promise<string[]> {
+    const result = await this.dataSource.query(
+      `WITH RECURSIVE source_products AS (
+           SELECT $1::text AS "productId"
+         UNION ALL
+           SELECT "productId_2" AS "productId"
+           FROM product_source_products_product
+           JOIN source_products ON product_source_products_product."productId_1" = source_products."productId"
+       )
+       SELECT "instrumentId"
+       FROM source_products
+       JOIN instrument_derived_products_product derived_product ON derived_product."productId" = source_products."productId"`,
+      [product.id],
+    );
+    return result.map((row: any) => row.instrumentId);
   }
 }
