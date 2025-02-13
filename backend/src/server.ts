@@ -161,6 +161,7 @@ async function createServer(): Promise<void> {
   app.get("/api/models", modelRoutes.models);
   app.get("/api/products/variables", prodRoutes.productVariables);
   app.get("/api/products/:productId", prodRoutes.product);
+  app.get("/api/products/:productId/variables", prodRoutes.productVariable);
   app.get(
     "/api/visualizations",
     middleware.filesValidator,
