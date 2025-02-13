@@ -1,0 +1,14 @@
+[
+  {
+    "id": "v",
+    "humanReadableName": "Radar velocity",
+    "order": 2,
+    "actrisName": "radar velocity"
+  },
+  {
+    "id": "ldr",
+    "humanReadableName": "Radar LDR",
+    "order": 3,
+    "actrisName": "radar linear depolarisation ratio"
+  }
+]

@@ -26,3 +26,15 @@ describe("/api/products/variables", () => {
     return expect(res.data).toMatchObject(responses["products-with-variables"]);
   });
 });
+
+describe("/api/products/:productId/variables", () => {
+  const url = `${backendPublicUrl}products/radar/variables`;
+  let responses: any;
+
+  beforeAll(async () => (responses = await readResources()));
+
+  it("responds with a json including variables of one product", async () => {
+    const res = await axios.get(url);
+    return expect(res.data).toMatchObject(responses["radar-variables"]);
+  });
+});
