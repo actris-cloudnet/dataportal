@@ -179,7 +179,7 @@
           <CustomMultiselect
             label="Instrument model"
             v-model="selectedInstrumentIds"
-            :options="allInstruments"
+            :options="instrumentOptions"
             id="instrumentSelect"
             :multiple="true"
             :getIcon="getInstrumentIcon"
@@ -307,9 +307,8 @@ const showExpProducts = useRouteQuery({ name: "experimental", defaultValue: fals
 const productOptions = computed(() => {
   let products = allProducts.value.filter((product) => showExpProducts.value || !product.experimental);
   if (selectedInstrumentIds.value.length > 0) {
-    products = products.filter((product) =>
-      product.sourceInstrumentIds.some((instrumentId) => selectedInstrumentIds.value.includes(instrumentId)),
-    );
+    const allowedProductIds = selectedInstrumentIds.value.flatMap((id) => instrumentIdToProductIds[id]);
+    products = products.filter((product) => allowedProductIds.includes(product.id));
   }
   return products;
 });
@@ -327,6 +326,10 @@ const variableOptions = computed(() => {
 // instruments
 const allInstruments = ref<Instrument[]>([]);
 const selectedInstrumentIds = useRouteQuery({ name: "instrument", defaultValue: [], type: queryStringArray });
+const instrumentOptions = computed(() => {
+  let instruments = allInstruments.value;
+  return instruments;
+});
 
 // instrument PIDs
 type InstrumentPidOption = Option & { type: string };
@@ -363,6 +366,14 @@ onUnmounted(() => {
   window.removeEventListener("keydown", onKeyDown);
 });
 
+function findDerivedProductIds(products: Product[], productId: string): string[] {
+  const product = products.find((product) => product.id === productId);
+  if (!product || !product.type.includes("instrument")) return [];
+  return [productId, ...product.derivedProductIds.flatMap((derivedId) => findDerivedProductIds(products, derivedId))];
+}
+
+let instrumentIdToProductIds: Record<string, string[]> = {};
+
 async function initView() {
   showDateRange.value = dateFrom.value !== dateTo.value;
   const [sites, products, instruments, pids] = await Promise.all([
@@ -375,6 +386,12 @@ async function initView() {
   allProducts.value = products.data.sort(alphabeticalSort);
   allInstruments.value = instruments.data.sort(instrumentSort);
   allInstrumentPids.value = pids.data;
+  instrumentIdToProductIds = instruments.data.reduce((obj: Record<string, string[]>, instrument) => {
+    obj[instrument.id] = instrument.derivedProductIds.flatMap((productId) =>
+      findDerivedProductIds(products.data, productId),
+    );
+    return obj;
+  }, {});
 
   if (
     !showExpProducts.value &&

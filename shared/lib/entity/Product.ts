@@ -10,8 +10,10 @@ export interface Product {
   experimental: boolean;
   type: ProductType[];
   variables: ProductVariable[];
-  sourceInstrumentIds: string[];
   sourceInstruments: Instrument[];
+  sourceInstrumentIds: Instrument["id"][];
   sourceProducts: Product[];
+  sourceProductIds: Product["id"][];
   derivedProducts: Product[];
+  derivedProductIds: Product["id"][];
 }

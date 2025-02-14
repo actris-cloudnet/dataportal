@@ -41,8 +41,8 @@ export class ProductRoutes {
 
   productVariables: RequestHandler = async (req, res) => {
     const products = await this.productRepo.find({
-      select: { sourceInstruments: { id: true } },
-      relations: { variables: true, sourceInstruments: true },
+      select: { sourceInstruments: { id: true }, derivedProducts: { id: true }, sourceProducts: { id: true } },
+      relations: { variables: true, sourceInstruments: true, derivedProducts: true, sourceProducts: true },
       order: {
         level: "DESC",
         id: "ASC",
@@ -54,6 +54,10 @@ export class ProductRoutes {
         ...product,
         sourceInstruments: undefined,
         sourceInstrumentIds: product.sourceInstruments.map((instrument) => instrument.id),
+        derivedProducts: undefined,
+        derivedProductIds: product.derivedProducts.map((product) => product.id),
+        sourceProducts: undefined,
+        sourceProductIds: product.sourceProducts.map((product) => product.id),
       })),
     );
   };
