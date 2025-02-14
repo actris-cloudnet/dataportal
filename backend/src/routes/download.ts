@@ -39,6 +39,11 @@ export class DownloadRoutes {
     this.uploadController = uploadController;
     this.ipLookup = ipLookup;
     this.citationService = citationService;
+    this.httpAgent = new http.Agent({
+      maxTotalSockets: 1024,
+      timeout: 10_000,
+      keepAlive: true,
+    });
   }
   readonly downloadRepo: Repository<Download>;
   readonly collectionRepo: Repository<Collection>;
@@ -46,6 +51,7 @@ export class DownloadRoutes {
   readonly uploadController: UploadRoutes;
   readonly ipLookup: Reader<CountryResponse>;
   readonly citationService: CitationService;
+  readonly httpAgent: http.Agent;
 
   product: RequestHandler = async (req, res, next) => {
     const s3key = (req.params.s3key as unknown as string[]).join("/");
@@ -55,7 +61,7 @@ export class DownloadRoutes {
     res.setHeader("Content-Type", "application/octet-stream");
     res.setHeader("Content-Length", file.size);
     await this.trackDownload(req, ObjectType.Product, file.uuid);
-    upstreamRes.pipe(res, { end: true });
+    upstreamRes.pipe(res);
   };
 
   raw: RequestHandler = async (req, res, next) => {
@@ -70,7 +76,7 @@ export class DownloadRoutes {
     res.setHeader("Content-Type", "application/octet-stream");
     res.setHeader("Content-Length", file.size);
     await this.trackDownload(req, ObjectType.Raw, file.uuid);
-    upstreamRes.pipe(res, { end: true });
+    upstreamRes.pipe(res);
   };
 
   collection: RequestHandler = async (req, res, next) => {
@@ -129,7 +135,7 @@ export class DownloadRoutes {
     } else {
       res.setHeader("Content-Type", "image/png");
     }
-    upstreamRes.pipe(res, { end: true });
+    upstreamRes.pipe(res);
   };
 
   private makeFileRequest(file: File): Promise<http.IncomingMessage> {
@@ -149,7 +155,8 @@ export class DownloadRoutes {
       s3path = `${s3path}?version=${version}`;
     }
 
-    const requestOptions = {
+    const requestOptions: http.RequestOptions = {
+      agent: this.httpAgent,
       host: env.DP_SS_HOST,
       port: env.DP_SS_PORT,
       path: s3path,
@@ -160,6 +167,7 @@ export class DownloadRoutes {
     return new Promise((resolve, reject) => {
       const req = http.request(requestOptions, resolve);
       req.on("error", (err) => reject({ status: 500, errors: err }));
+      req.on("timeout", () => req.destroy());
       req.end();
     });
   }

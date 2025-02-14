@@ -1,5 +1,7 @@
 import * as express from "express";
+import * as http from "node:http";
 import { ErrorRequestHandler } from "express";
+
 import { RequestError } from "./entity/RequestError";
 import { getIpLookup } from "./lib";
 import { Middleware } from "./lib/middleware";
@@ -21,7 +23,6 @@ import { PermissionType } from "./entity/Permission";
 import { UserActivationRoutes } from "./routes/userActivation";
 import { ReferenceRoutes } from "./routes/reference";
 import { FeedbackRoutes } from "./routes/feedback";
-import * as http from "http";
 import { AppDataSource } from "./data-source";
 import { rateLimit } from "express-rate-limit";
 import { QueueRoutes } from "./routes/queue";
@@ -391,10 +392,14 @@ async function createServer(): Promise<void> {
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   const server = http.createServer(app);
 
-  // Explicitly set timeout to default value of Node 15 because newer Node
-  // versions use a different value. Using 0 (i.e. no timeout) shouldn't be a
+  // Disable request timeout to handle large uploads. This shouldn't be a
   // problem because we're running behind a reverse proxy.
   server.requestTimeout = 0;
+
+  // Close sockets after some inactivity.
+  server.timeout = 10_000;
+  server.on("timeout", (socket) => socket.destroy());
+
   server.listen(port, () => console.log(`App listening on port ${port}!`));
 
   return new Promise((resolve, reject) => {
