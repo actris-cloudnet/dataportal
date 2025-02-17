@@ -26,6 +26,7 @@ describe("QueueService", () => {
     productId: string;
     measurementDate: Date | string;
     instrumentInfoUuid?: string;
+    modelId?: string;
     priority?: number;
     delayMinutes?: number;
     batchId?: string;
@@ -39,6 +40,9 @@ describe("QueueService", () => {
     task.productId = params.productId;
     if (params.instrumentInfoUuid) {
       task.instrumentInfoUuid = params.instrumentInfoUuid;
+    }
+    if (params.modelId) {
+      task.modelId = params.modelId;
     }
     task.measurementDate = new Date(params.measurementDate);
     task.scheduledAt = new Date(now.getTime() + delayMinutes * 60 * 1000);
@@ -506,6 +510,51 @@ describe("QueueService", () => {
     advanceMinutes(10);
     const taskRes4 = await queueService.receive({ now });
     expect(taskRes4).toMatchObject({ type: "freeze" });
+  });
+
+  it("doesn't allow simultaneous model tasks", async () => {
+    // Add tasks which cannot be safely processed at the same time because they
+    // both update search_file table.
+    await queueService.publish(
+      makeTask({
+        type: TaskType.PROCESS,
+        siteId: "hyytiala",
+        productId: "model",
+        modelId: "icon-iglo-12-23",
+        measurementDate: "2024-01-10",
+        priority: 0,
+      }),
+    );
+    await queueService.publish(
+      makeTask({
+        type: TaskType.PROCESS,
+        siteId: "hyytiala",
+        productId: "model",
+        modelId: "icon-iglo-24-35",
+        measurementDate: "2024-01-10",
+        priority: 1,
+      }),
+    );
+    expect(await queueService.count()).toBe(2);
+
+    // Start process task.
+    const taskRes = await queueService.receive({ now });
+    expect(taskRes).toMatchObject({ modelId: "icon-iglo-12-23" });
+
+    // Other task is postponed.
+    const taskRes2 = await queueService.receive({ now });
+    expect(taskRes2).toBeNull();
+    expect(await queueService.count()).toBe(2);
+
+    // Finish process task.
+    await queueService.complete(taskRes!["id"]);
+    expect(await queueService.count()).toBe(2);
+    expect(await queueService.count(TaskStatus.DONE)).toBe(1);
+
+    // Other task is not postponed anymore.
+    advanceMinutes(10);
+    const taskRes3 = await queueService.receive({ now });
+    expect(taskRes3).toMatchObject({ modelId: "icon-iglo-24-35" });
   });
 
   it("submits and cancels batches", async () => {

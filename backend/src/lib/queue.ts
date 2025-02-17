@@ -172,7 +172,7 @@ export class QueueService {
   private taskToLock(task: Task) {
     const date =
       task.measurementDate instanceof Date ? task.measurementDate.toISOString().slice(0, 10) : task.measurementDate;
-    return [task.siteId, date, task.productId, task.instrumentInfoUuid, task.modelId].join(":");
+    return [task.siteId, date, task.productId, task.instrumentInfoUuid].join(":");
   }
 
   private isLocked(task: Task) {
