@@ -397,7 +397,7 @@ async function createServer(): Promise<void> {
   server.requestTimeout = 0;
 
   // Close sockets after some inactivity.
-  server.timeout = 10_000;
+  server.timeout = 60_000;
   server.on("timeout", (socket) => socket.destroy());
 
   server.listen(port, () => console.log(`App listening on port ${port}!`));
