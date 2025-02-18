@@ -67,7 +67,7 @@ describe("SearchView.vue", () => {
 
     vi.mocked(axios.get).mockImplementation(defaultAxiosMock);
 
-    router.push("/search/data");
+    await router.push("/search/data");
     await router.isReady();
 
     wrapper = mount(SearchView, {

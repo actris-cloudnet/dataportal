@@ -13,7 +13,7 @@ import shadowIcon from "@/assets/markers/marker-shadow.png";
 export interface Props {
   sites: Site[];
   selectedSiteIds?: string[];
-  onMapMarkerClick?: Function;
+  onMapMarkerClick?: (ids: Site["id"][]) => void;
   zoom?: number;
   center?: [number, number];
   showLegend?: boolean;
@@ -133,25 +133,25 @@ function initBoundingBoxTool() {
   const editableLayers = new L.FeatureGroup();
 
   const drawPluginOptions = {
-    position: "bottomleft" as "bottomleft",
+    position: "bottomleft" as const,
     draw: {
-      polygon: false as false,
+      polygon: false as const,
       // disable toolbar item by setting it to false
-      polyline: false as false,
-      circle: false as false, // Turns off this drawing tool
+      polyline: false as const,
+      circle: false as const, // Turns off this drawing tool
       rectangle: {
         showArea: false,
         shapeOptions: {
           color: "#3c90ce",
         },
       },
-      marker: false as false,
-      circlemarker: false as false,
+      marker: false as const,
+      circlemarker: false as const,
     },
     edit: {
       featureGroup: editableLayers, //REQUIRED!!
-      remove: false as false,
-      edit: false as false,
+      remove: false as const,
+      edit: false as const,
     },
   };
 
@@ -173,8 +173,8 @@ function initBoundingBoxTool() {
 
   mappi.on(L.Draw.Event.DRAWSTART, () => {
     nextTick(() => {
-      if (props.onMapMarkerClick) props.onMapMarkerClick(props.selectedSiteIds);
-    });
+      if (props.onMapMarkerClick) props.onMapMarkerClick(props.selectedSiteIds || []);
+    }).catch(() => {});
   });
 }
 

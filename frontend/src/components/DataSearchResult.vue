@@ -381,8 +381,8 @@ async function loadVisualization(file: SearchFile) {
 }
 
 function rowSelected(item: SearchFile) {
-  loadPreview(item);
-  loadVisualization(item);
+  loadPreview(item).catch(() => {});
+  loadVisualization(item).catch(() => {});
 }
 
 async function createCollection() {
@@ -392,7 +392,7 @@ async function createCollection() {
     const collectionUuid = await axios.post<string>(`${backendUrl}collection`, {
       files: files.data.map((file) => file.uuid),
     });
-    router.push({ name: "Collection", params: { uuid: collectionUuid.data } });
+    await router.push({ name: "Collection", params: { uuid: collectionUuid.data } });
   } catch (err) {
     downloadFailed.value = true;
     console.error(err);

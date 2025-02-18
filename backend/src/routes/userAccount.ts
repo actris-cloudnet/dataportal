@@ -1,6 +1,6 @@
 import { DataSource, Repository } from "typeorm";
 import { RequestHandler, Request } from "express";
-import basicAuth = require("basic-auth");
+import * as basicAuth from "basic-auth";
 
 import { UserAccount } from "../entity/UserAccount";
 import { Permission, PermissionType, permissionTypeFromString } from "../entity/Permission";

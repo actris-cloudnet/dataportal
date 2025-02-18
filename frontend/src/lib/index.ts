@@ -132,13 +132,11 @@ export function formatCoordinates(latitude: number, longitude: number): string {
   return `${formatLatitude(latitude)}, ${formatLongitude(longitude)}`;
 }
 
-// eslint-disable-next-line  @typescript-eslint/no-explicit-any
 export const isValidDate = (obj: any) => {
   const date = new Date(obj);
   return !isNaN(date.getDate()) && date.getTime() > new Date("1970-01-01").getTime();
 };
 
-// eslint-disable-next-line  @typescript-eslint/no-explicit-any
 export function compareValues(a: any, b: any): number {
   if (a < b) return -1;
   if (a > b) return 1;

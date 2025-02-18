@@ -330,7 +330,7 @@ export class UploadRoutes {
     }
   }
 
-  private makeTask(upload: Upload, delayMinutes: number = 0) {
+  private makeTask(upload: Upload, delayMinutes = 0) {
     const now = new Date();
     const task = new Task();
     task.type = TaskType.PROCESS;

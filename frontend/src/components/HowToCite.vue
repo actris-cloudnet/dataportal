@@ -86,9 +86,9 @@ async function fetchReferenceStrings(uuid: string) {
   }
 }
 
-watchEffect(async () => {
+watchEffect(() => {
   citation.value = { status: "loading" };
-  await fetchReferenceStrings(props.uuid);
+  fetchReferenceStrings(props.uuid).catch(() => {});
 });
 </script>
 

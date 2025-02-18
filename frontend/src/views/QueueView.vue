@@ -202,8 +202,8 @@ async function cancelBatch() {
   }
 }
 
-onMounted(() => {
-  updateQueueData();
+onMounted(async () => {
+  await updateQueueData();
 });
 
 watch(

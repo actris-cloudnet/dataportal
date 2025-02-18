@@ -72,7 +72,7 @@ import FileTags from "./FileTags.vue";
 import axios from "axios";
 
 export interface Props {
-  setWideMode: Function;
+  setWideMode: (value: boolean) => void;
   date: string;
   sites?: string[];
   products?: string[];
@@ -174,7 +174,7 @@ const maxMarginLeft = computed(() =>
 const searchYieldedResults = computed(() => apiResponse.value.length > 0);
 
 watchEffect(() => {
-  props.setWideMode(comparisonView);
+  props.setWideMode(comparisonView.value);
 });
 </script>
 

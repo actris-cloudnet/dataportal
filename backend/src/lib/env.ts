@@ -127,7 +127,7 @@ function readBoolean(input: string): boolean {
 function readUrl(input: string): string {
   try {
     new URL(input);
-  } catch (e) {
+  } catch {
     throw new Error(`Invalid URL: ${input}`);
   }
   return input.replace(/\/$/, "");

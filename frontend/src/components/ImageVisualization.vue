@@ -151,12 +151,13 @@ const dvasVocabUri = computed(() => {
   return vocabularyUrl + name.replace(/\s/g, "");
 });
 
-watchEffect(async () => {
+watchEffect(() => {
   nextData.value = props.data;
-  await nextTick();
-  if (imgElement.value?.complete) {
-    onLoad();
-  }
+  nextTick(() => {
+    if (imgElement.value?.complete) {
+      onLoad();
+    }
+  }).catch(() => {});
 });
 
 function onLoad() {

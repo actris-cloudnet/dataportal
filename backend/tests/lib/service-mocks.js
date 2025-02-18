@@ -1,4 +1,4 @@
-const express = require("express");
+import express from "express";
 
 // Storage-service
 let serverMemory = {};

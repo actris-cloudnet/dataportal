@@ -73,12 +73,14 @@ export function useRouteQuery<T>(options: { name: string; defaultValue: T; type:
         trigger();
         nextTick(() => {
           const { params, query, hash } = route;
-          router.replace({
-            params,
-            query: { ...query, ...Object.fromEntries(_query.entries()) },
-            hash,
-          });
-        });
+          router
+            .replace({
+              params,
+              query: { ...query, ...Object.fromEntries(_query.entries()) },
+              hash,
+            })
+            .catch(() => {});
+        }).catch(() => {});
       },
     };
   });

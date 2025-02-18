@@ -37,9 +37,11 @@ async function generatePid(): Promise<void> {
 
 onMounted(() => {
   citationBusy.value = true;
-  generatePid().finally(() => {
-    citationBusy.value = false;
-  });
+  generatePid()
+    .catch(() => {})
+    .finally(() => {
+      citationBusy.value = false;
+    });
 });
 </script>
 

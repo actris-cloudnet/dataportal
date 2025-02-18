@@ -1,9 +1,8 @@
 import { Column, Entity, PrimaryGeneratedColumn, ManyToMany, JoinTable } from "typeorm";
-import { timingSafeEqual } from "crypto";
+import { timingSafeEqual } from "node:crypto";
+const md5 = require("apache-md5"); // eslint-disable-line @typescript-eslint/no-require-imports
 
 import { Permission } from "./Permission";
-
-const md5 = require("apache-md5");
 
 @Entity()
 export class UserAccount {

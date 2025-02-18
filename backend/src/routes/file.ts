@@ -176,7 +176,7 @@ export class FileRoutes {
       );
       file.sourceRegularFiles = sourceFiles.filter((file) => file instanceof RegularFile);
       file.sourceModelFiles = sourceFiles.filter((file) => file instanceof ModelFile);
-    } catch (e) {
+    } catch {
       return next({ status: 422, errors: ["One or more of the specified source files were not found"] });
     }
 
@@ -222,7 +222,7 @@ export class FileRoutes {
         );
       return qb
         .leftJoinAndSelect("file.site", "site")
-        .where("regexp_replace(s3key, '.+/', '') = :filename", { filename: basename(file.s3key) }) // eslint-disable-line quotes
+        .where("regexp_replace(s3key, '.+/', '') = :filename", { filename: basename(file.s3key) })
         .getOne();
     };
     const existingFile = await findFileByName(isModel);
@@ -375,7 +375,7 @@ export class FileRoutes {
     // Hack to prevent loading of model files when instrument is selected without product
     if (isModel && (query.instrument || query.instrumentPid)) qb.andWhere("1 = 0");
 
-    if (query.filename) qb.andWhere("regexp_replace(s3key, '.+/', '') IN (:...filename)", query); // eslint-disable-line quotes
+    if (query.filename) qb.andWhere("regexp_replace(s3key, '.+/', '') IN (:...filename)", query);
     if (query.releasedBefore) qb.andWhere("file.updatedAt < :releasedBefore", query);
     if (query.updatedAtFrom) qb.andWhere("file.updatedAt >= :updatedAtFrom", query);
     if (query.updatedAtTo) qb.andWhere("file.updatedAt <= :updatedAtTo", query);

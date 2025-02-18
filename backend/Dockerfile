@@ -9,7 +9,6 @@ RUN npm ci
 FROM base AS dev
 
 COPY backend /app
-COPY .eslintrc-common.js /
 COPY shared /shared
 
 FROM dev AS build

@@ -15,7 +15,7 @@ import {
   ssAuthString,
   getCollectionLandingPage,
 } from "../lib";
-import archiver = require("archiver");
+import * as archiver from "archiver";
 import { FileRoutes } from "./file";
 import env from "../lib/env";
 import { UploadRoutes } from "./upload";
@@ -189,7 +189,7 @@ export class DownloadRoutes {
     try {
       const citation = await this.citationService.getCollectionCitation(collection);
       citationText = citation2txt(citation);
-    } catch (e) {
+    } catch {
       citationText = "Failed to generate citation.";
     }
     const lines = [

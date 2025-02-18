@@ -19,7 +19,6 @@ export class Middleware {
   private productRepo: Repository<Product>;
 
   validateUuidParam: RequestHandler = (req, _res, next) => {
-    /* eslint-disable prefer-template */
     const addDashesToUuid = (uuid: string) =>
       uuid.slice(0, 8) +
       "-" +
@@ -30,7 +29,7 @@ export class Middleware {
       uuid.slice(16, 20) +
       "-" +
       uuid.slice(20);
-    /* eslint-enable prefer-template */
+
     const uuid = req.params.uuid.includes("-") ? req.params.uuid : addDashesToUuid(req.params.uuid);
     if (!validateUuid(uuid)) return next({ status: 404, errors: ["Not found: invalid UUID"] });
     return next();

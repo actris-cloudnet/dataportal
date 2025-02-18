@@ -79,12 +79,12 @@ function selectRow(row: T) {
   emit("rowSelected", row);
   nextTick(() => {
     tableElement.value?.querySelector<HTMLElement>(".selected")?.focus();
-  });
+  }).catch(() => {});
 }
 
 function navigateToRow(row: T) {
   if (!props.link) return;
-  router.push(props.link(row));
+  router.push(props.link(row)).catch(() => {});
 }
 
 function onKeyDown(event: KeyboardEvent) {
