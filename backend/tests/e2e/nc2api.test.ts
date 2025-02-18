@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import axios from "axios";
 import { backendPrivateUrl, backendPublicUrl, storageServiceUrl, str2base64 } from "../lib";
-import AdmZip from "adm-zip";
+import * as AdmZip from "adm-zip";
 import { createHash } from "node:crypto";
 import { DataSource, Repository } from "typeorm";
 import { Download, ObjectType } from "../../src/entity/Download";
