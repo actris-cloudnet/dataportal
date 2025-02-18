@@ -202,7 +202,7 @@ async function loadInstruments() {
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 img.product {
   height: auto;
@@ -324,7 +324,7 @@ dt {
   max-width: 1000px;
 }
 
-@media screen and (max-width: $narrow-screen) {
+@media screen and (max-width: variables.$narrow-screen) {
   .new-layout {
     display: block;
   }

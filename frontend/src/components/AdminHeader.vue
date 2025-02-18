@@ -15,10 +15,10 @@ import { hasPermission, loginStore, logout } from "@/lib/auth";
 </template>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 header {
-  background-color: $blue4;
+  background-color: variables.$blue4;
   color: white;
   font-size: 90%;
   padding: 0.25rem;

@@ -164,7 +164,7 @@ watch(
 <style src="vue-multiselect/dist/vue-multiselect.css"></style>
 
 <style lang="scss">
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 .multiselect__input {
   padding: 2px;
@@ -180,7 +180,7 @@ watch(
   .multiselect__tag,
   .multiselect__tag i:hover {
     color: black;
-    background-color: $steel-warrior;
+    background-color: variables.$steel-warrior;
   }
 }
 
@@ -190,10 +190,10 @@ watch(
 
   .multiselect__option--highlight {
     color: black;
-    background-color: $steel-warrior;
+    background-color: variables.$steel-warrior;
 
     .custom-option {
-      background-color: $steel-warrior;
+      background-color: variables.$steel-warrior;
     }
   }
 
@@ -214,7 +214,7 @@ watch(
         font-size: 75%;
         font-weight: bold;
         color: white;
-        background-color: rgba($experimental, 0.3);
+        background-color: rgba(variables.$experimental, 0.3);
       }
     }
   }
@@ -235,7 +235,7 @@ watch(
 
 .option__tag {
   border-radius: 4px;
-  background-color: $experimental;
+  background-color: variables.$experimental;
   margin-left: 0.4em;
   padding: 0.2em 0.4em;
   font-size: 75%;
@@ -245,7 +245,7 @@ watch(
 
 .multiselect__tag.experimental-background,
 .multiselect__tag.experimental-background i:hover {
-  background-color: rgba($experimental, 0.3);
+  background-color: rgba(variables.$experimental, 0.3);
 }
 
 .multiselect__clear {

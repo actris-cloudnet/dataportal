@@ -69,10 +69,11 @@ const showMenu = ref(false);
 </template>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
+@use "sass:color";
+@use "@/sass/variables.scss";
 
 $header-height: 4.5rem;
-$header-color: darken(#78c0e0, 25%);
+$header-color: color.adjust(variables.$cloudnet-blue, $lightness: -25%);
 
 header {
   z-index: 999;

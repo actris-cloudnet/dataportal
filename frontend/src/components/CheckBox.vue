@@ -21,7 +21,7 @@ const id = useId();
 </template>
 
 <style lang="scss" scoped>
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 .wrapper {
   display: inline-flex;
@@ -53,8 +53,8 @@ input {
 
   &:checked {
     color: white;
-    border-color: $actris-green;
-    background: $actris-green;
+    border-color: variables.$actris-green;
+    background: variables.$actris-green;
 
     &::before {
       opacity: 1;
@@ -62,8 +62,8 @@ input {
   }
 
   &:disabled {
-    background: $gray3;
-    border-color: $gray3;
+    background: variables.$gray3;
+    border-color: variables.$gray3;
   }
 }
 

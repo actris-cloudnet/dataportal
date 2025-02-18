@@ -88,7 +88,7 @@ const jsonUrl = computed(() => `${backendUrl}files/${props.file.uuid}`);
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 .summary-section-header-container {
   display: flex;
@@ -102,11 +102,11 @@ const jsonUrl = computed(() => `${backendUrl}files/${props.file.uuid}`);
 }
 
 .error {
-  color: $red4;
+  color: variables.$red4;
 }
 
 .loading {
-  color: $gray4;
+  color: variables.$gray4;
 }
 
 .coordinates {

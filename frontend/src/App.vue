@@ -19,7 +19,7 @@ import { isAuthenticated } from "@/lib/auth";
 </template>
 
 <style lang="scss">
-@import "./sass/global.scss";
+@use "./sass/global.scss";
 
 #app {
   display: flex;

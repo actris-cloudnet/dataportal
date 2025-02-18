@@ -120,7 +120,8 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@import "@/sass/variables.scss";
+@use "sass:color";
+@use "@/sass/variables.scss";
 
 $cell-padding: 9px;
 $header-padding: 5px;
@@ -165,15 +166,15 @@ $header-padding: 5px;
   cursor: pointer;
 
   &:nth-child(odd) {
-    background-color: $blue-dust;
+    background-color: variables.$blue-dust;
   }
 
   &:not(.selected):hover {
-    background-color: darken($blue-dust, 5%);
+    background-color: color.adjust(variables.$blue-dust, $lightness: -5%);
   }
 
   &.selected {
-    background: darken($blue-dust, 25%);
+    background: color.adjust(variables.$blue-dust, $lightness: -25%);
   }
 }
 </style>

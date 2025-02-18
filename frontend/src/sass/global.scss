@@ -6,9 +6,9 @@
   $inter-font-display: swap,
   $inter-font-path: "inter-ui/variable"
 );
-@import "the-new-css-reset/css/reset.css";
-@import "inter-ui/inter.css";
-@import "./variables.scss";
+@use "the-new-css-reset/css/reset.css";
+@use "inter-ui/inter.css";
+@use "./variables.scss";
 @include default.all;
 @include variable.all;
 
@@ -50,7 +50,7 @@ div.errormsg,
 }
 
 a {
-  color: $blue-sapphire;
+  color: variables.$blue-sapphire;
 
   &:hover {
     text-decoration: underline;
@@ -78,7 +78,7 @@ pre {
 }
 
 .pagewidth {
-  max-width: $page-width;
+  max-width: variables.$page-width;
   margin-left: auto;
   margin-right: auto;
   padding-left: 1rem;

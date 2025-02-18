@@ -96,7 +96,7 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 dl {
   display: grid;
@@ -134,7 +134,7 @@ main.column {
   margin-bottom: 40px;
 }
 
-@media screen and (max-width: $narrow-screen) {
+@media screen and (max-width: variables.$narrow-screen) {
   main.column {
     margin-right: 0;
   }

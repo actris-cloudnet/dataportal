@@ -30,7 +30,8 @@ defineEmits<{
 </template>
 
 <style lang="scss" scoped>
-@import "@/sass/variables.scss";
+@use "sass:color";
+@use "@/sass/variables.scss";
 
 .button {
   display: inline-flex;
@@ -53,60 +54,60 @@ defineEmits<{
   }
 
   &.primary {
-    background-color: $actris-green;
+    background-color: variables.$actris-green;
 
     &:hover,
     &:focus-visible {
       text-decoration: none;
-      background-color: darken($actris-green, 10%);
+      background-color: color.adjust(variables.$actris-green, $lightness: -10%);
     }
 
     &:focus-visible {
-      box-shadow: 0 0 0 3px rgba($actris-green, 0.5);
+      box-shadow: 0 0 0 3px rgba(variables.$actris-green, 0.5);
     }
   }
 
   &.brand {
-    background-color: $blue-sapphire;
+    background-color: variables.$blue-sapphire;
 
     &:hover,
     &:focus-visible {
       text-decoration: none;
-      background-color: darken($blue-sapphire, 10%);
+      background-color: color.adjust(variables.$blue-sapphire, $lightness: -10%);
     }
 
     &:focus-visible {
-      box-shadow: 0 0 0 3px rgba($blue-sapphire, 0.5);
+      box-shadow: 0 0 0 3px rgba(variables.$blue-sapphire, 0.5);
     }
   }
 
   &.secondary {
     color: #333;
     fill: #333;
-    background-color: $gray1;
+    background-color: variables.$gray1;
 
     &:hover,
     &:focus-visible {
       text-decoration: none;
-      background-color: darken($gray1, 10%);
+      background-color: color.adjust(variables.$gray1, $lightness: -10%);
     }
 
     &:focus-visible {
-      box-shadow: 0 0 0 3px rgba($gray1, 0.75);
+      box-shadow: 0 0 0 3px rgba(variables.$gray1, 0.75);
     }
   }
 
   &.danger {
-    background-color: $red1;
+    background-color: variables.$red1;
 
     &:hover,
     &:focus-visible {
       text-decoration: none;
-      background-color: darken($red1, 10%);
+      background-color: color.adjust(variables.$red1, $lightness: -10%);
     }
 
     &:focus-visible {
-      box-shadow: 0 0 0 3px rgba($red1, 0.5);
+      box-shadow: 0 0 0 3px rgba(variables.$red1, 0.5);
     }
   }
 

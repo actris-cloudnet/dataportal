@@ -71,7 +71,6 @@ function timeout(ms: number) {
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
 .container {
   margin-bottom: 2rem;
   margin: 0 auto;

@@ -410,7 +410,7 @@ function iconCellStyle(item: any) {
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 #fileTable {
   display: flex;
@@ -571,11 +571,11 @@ function iconCellStyle(item: any) {
   }
 
   &.experimental {
-    background-color: $experimental;
+    background-color: variables.$experimental;
   }
 
   &.deleted {
-    background-color: $red4;
+    background-color: variables.$red4;
   }
 }
 </style>

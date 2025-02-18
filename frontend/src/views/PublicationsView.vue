@@ -115,7 +115,7 @@ async function removePublication(pub: Publication) {
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 main {
   padding-bottom: 1rem;
@@ -144,7 +144,7 @@ li + li {
   margin-top: 0.5rem;
 }
 
-@media screen and (max-width: $narrow-screen) {
+@media screen and (max-width: variables.$narrow-screen) {
   h1 {
     margin-bottom: 2rem;
   }

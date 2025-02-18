@@ -149,7 +149,7 @@ function formatMessage(message: string): string {
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 .landing-quality-report-container {
   max-width: 900px;
@@ -180,7 +180,7 @@ function formatMessage(message: string): string {
 }
 
 .quality-test-description {
-  color: $gray4;
+  color: variables.$gray4;
 }
 
 .quality-test-list-header {
@@ -228,11 +228,11 @@ function formatMessage(message: string): string {
       }
 
       .quality-test-exception-error {
-        color: $red4;
+        color: variables.$red4;
       }
 
       .quality-test-exception-warning {
-        color: $yellow3;
+        color: variables.$yellow3;
       }
 
       .quality-test-exception-info {
@@ -242,7 +242,7 @@ function formatMessage(message: string): string {
   }
 }
 
-@media screen and (max-width: $narrow-screen) {
+@media screen and (max-width: variables.$narrow-screen) {
   .quality-report-header .donut {
     margin-left: auto;
     margin-right: auto;

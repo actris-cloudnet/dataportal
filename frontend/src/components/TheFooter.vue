@@ -36,7 +36,7 @@ const dataportalVersion = import.meta.env.DATAPORTAL_VERSION;
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 footer {
   background: #fdfdfd;
@@ -52,7 +52,7 @@ footer {
   justify-content: space-evenly;
 }
 
-@media screen and (max-width: $narrow-screen) {
+@media screen and (max-width: variables.$narrow-screen) {
   .container {
     flex-direction: column;
     height: auto;

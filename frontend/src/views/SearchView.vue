@@ -522,7 +522,7 @@ watch(
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 $lightpadding: 1rem;
 $heavypadding: 5rem;
@@ -560,14 +560,14 @@ section#sideBar {
   flex-shrink: 0;
 }
 
-@media screen and (max-width: $page-width) {
+@media screen and (max-width: variables.$page-width) {
   main#search.wideView {
     padding-left: $lightpadding;
     padding-right: $lightpadding;
   }
 }
 
-@media screen and (max-width: $narrow-screen) {
+@media screen and (max-width: variables.$narrow-screen) {
   #searchContainer {
     flex-direction: column;
     align-items: center;
@@ -644,14 +644,14 @@ div.date {
     font-size: 80%;
     line-height: 0;
     margin-right: 0;
-    border: 1px solid $steel-warrior;
+    border: 1px solid variables.$steel-warrior;
     border-radius: 3px;
-    background-color: $blue-dust;
+    background-color: variables.$blue-dust;
     flex-grow: 1;
     text-align: center;
 
     &:hover {
-      background-color: $steel-warrior;
+      background-color: variables.$steel-warrior;
     }
 
     &:focus {
@@ -664,7 +664,7 @@ div.date {
   }
 
   .activeBtn {
-    background-color: $steel-warrior;
+    background-color: variables.$steel-warrior;
     border: 1px solid darkgray;
 
     &:focus {
@@ -684,7 +684,7 @@ div.date {
   }
 
   .dateBtn:hover:enabled {
-    background-color: $steel-warrior;
+    background-color: variables.$steel-warrior;
   }
 }
 
@@ -706,13 +706,13 @@ span.centerlabel {
   margin-top: 450px;
 }
 
-@media screen and (max-width: $narrow-screen) {
+@media screen and (max-width: variables.$narrow-screen) {
   .widemapmarginright {
     margin-top: 0px;
   }
 }
 
-@media screen and (max-width: $medium-screen) {
+@media screen and (max-width: variables.$medium-screen) {
   .widemapmarginright {
     margin-top: 0px;
   }

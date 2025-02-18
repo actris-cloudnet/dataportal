@@ -93,7 +93,7 @@ watchEffect(async () => {
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 .error {
   color: red;
@@ -125,7 +125,7 @@ p {
 }
 
 .infocolor {
-  background: $blue-dust;
+  background: variables.$blue-dust;
   font-size: 0.9em;
 
   h4 {

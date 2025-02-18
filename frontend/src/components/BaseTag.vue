@@ -15,7 +15,7 @@ withDefaults(defineProps<Props>(), { size: "normal" });
 </template>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 .tag {
   color: white;
@@ -34,11 +34,11 @@ withDefaults(defineProps<Props>(), { size: "normal" });
 }
 
 .experimental {
-  background-color: $experimental;
+  background-color: variables.$experimental;
 }
 
 .actris {
-  background-color: $actris-turquoise;
+  background-color: variables.$actris-turquoise;
 }
 
 .arm {
@@ -46,15 +46,15 @@ withDefaults(defineProps<Props>(), { size: "normal" });
 }
 
 .volatile {
-  background-color: $blue3;
+  background-color: variables.$blue3;
 }
 
 .legacy {
-  background-color: $gray4;
+  background-color: variables.$gray4;
 }
 
 .cloudnet {
-  background-color: $cloudnet-blue;
+  background-color: variables.$cloudnet-blue;
 }
 
 .ri-urbans {

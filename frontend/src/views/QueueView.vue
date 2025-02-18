@@ -262,7 +262,7 @@ function linkToRaw(task: AugmentedTask) {
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 .statistics {
   margin-bottom: 20px;
@@ -280,7 +280,7 @@ function linkToRaw(task: AugmentedTask) {
     opacity: 1;
 
     &:has(button:hover) {
-      background-color: $gray1;
+      background-color: variables.$gray1;
     }
   }
 

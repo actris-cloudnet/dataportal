@@ -113,7 +113,10 @@ export class UploadRoutes {
 
     const result = await this.dataSource.transaction(async (transactionalEntityManager) => {
       // First search row by checksum.
-      const uploadByChecksum = await transactionalEntityManager.findOneBy(UploadEntity, { checksum: body.checksum });
+      const uploadByChecksum = await transactionalEntityManager.findOneBy<InstrumentUpload | ModelUpload>(
+        UploadEntity,
+        { checksum: body.checksum },
+      );
       if (uploadByChecksum) {
         if (uploadByChecksum.status === Status.CREATED) {
           // Remove the existing row so that we can insert or update a row
@@ -136,7 +139,10 @@ export class UploadRoutes {
         : ({ ...params, model: { id: body.model } } satisfies FindOptionsWhere<ModelUpload>);
 
       // If a matching row exists, update it.
-      const uploadByParams = await transactionalEntityManager.findOneBy(UploadEntity, payload);
+      const uploadByParams = await transactionalEntityManager.findOneBy<InstrumentUpload | ModelUpload>(
+        UploadEntity,
+        payload,
+      );
       if (uploadByParams) {
         await transactionalEntityManager.update(UploadEntity, uploadByParams.uuid, {
           checksum: body.checksum,

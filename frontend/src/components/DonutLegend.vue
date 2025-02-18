@@ -27,7 +27,7 @@ const props = defineProps<{
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 .legend {
   background-color: rgba(0, 0, 0, 0.01);
@@ -87,7 +87,7 @@ const props = defineProps<{
   }
 }
 
-@media screen and (max-width: $narrow-screen) {
+@media screen and (max-width: variables.$narrow-screen) {
   .legend {
     grid-template-rows: repeat(4, auto);
     grid-template-columns: repeat(2, 1fr);

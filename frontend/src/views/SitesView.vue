@@ -134,11 +134,11 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 main {
   box-sizing: content-box;
-  max-width: $page-width;
+  max-width: variables.$page-width;
   margin: 0 auto;
   padding: 1rem;
 }
@@ -176,7 +176,7 @@ p {
   }
 
   tr:nth-child(2n + 1) > td {
-    background-color: $blue-dust;
+    background-color: variables.$blue-dust;
   }
 }
 
