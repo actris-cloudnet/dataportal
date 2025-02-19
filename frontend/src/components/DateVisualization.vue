@@ -223,7 +223,9 @@ function showFullVizTooltip(year: YearItem<T>, event: MouseEvent) {
   const x = canvasRect.x + dateIndex * (canvasRect.width / year.dates.length);
   const y = canvasRect.bottom;
 
-  nextTick(() => showTooltipAt(x, y)).catch(() => {});
+  nextTick(() => showTooltipAt(x, y)).catch(() => {
+    /* skip */
+  });
 }
 
 function showYearVizTooltip(item: DateItem<T>, event: MouseEvent) {
@@ -234,7 +236,9 @@ function showYearVizTooltip(item: DateItem<T>, event: MouseEvent) {
   const x = targetRect.x + targetRect.width / 2;
   const y = targetRect.bottom;
 
-  nextTick(() => showTooltipAt(x, y)).catch(() => {});
+  nextTick(() => showTooltipAt(x, y)).catch(() => {
+    /* skip */
+  });
 }
 
 function showTooltipAt(x: number, y: number) {

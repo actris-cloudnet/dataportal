@@ -25,7 +25,7 @@ const props = defineProps<Props>();
 
 let map: L.Map | null = null;
 let tileLayer: L.TileLayer | null = null;
-const allMarkers: { [key: string]: L.Marker } = {};
+const allMarkers: Record<string, L.Marker> = {};
 const legend = new L.Control({ position: "topright" });
 const mapElement = useTemplateRef("mapElement");
 
@@ -174,7 +174,9 @@ function initBoundingBoxTool() {
   mappi.on(L.Draw.Event.DRAWSTART, () => {
     nextTick(() => {
       if (props.onMapMarkerClick) props.onMapMarkerClick(props.selectedSiteIds || []);
-    }).catch(() => {});
+    }).catch(() => {
+      /* skip */
+    });
   });
 }
 

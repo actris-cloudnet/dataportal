@@ -101,9 +101,7 @@ const props = withDefaults(defineProps<Props>(), {
   maxMarginRight: 0,
 });
 
-const emit = defineEmits<{
-  (e: "load"): void;
-}>();
+const emit = defineEmits<(e: "load") => void>();
 
 const currentData = ref(props.data);
 const nextData = ref(props.data);
@@ -157,7 +155,9 @@ watchEffect(() => {
     if (imgElement.value?.complete) {
       onLoad();
     }
-  }).catch(() => {});
+  }).catch(() => {
+    /* skip */
+  });
 });
 
 function onLoad() {

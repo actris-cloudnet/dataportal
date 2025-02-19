@@ -381,8 +381,12 @@ async function loadVisualization(file: SearchFile) {
 }
 
 function rowSelected(item: SearchFile) {
-  loadPreview(item).catch(() => {});
-  loadVisualization(item).catch(() => {});
+  loadPreview(item).catch(() => {
+    /* skip */
+  });
+  loadVisualization(item).catch(() => {
+    /* skip */
+  });
 }
 
 async function createCollection() {

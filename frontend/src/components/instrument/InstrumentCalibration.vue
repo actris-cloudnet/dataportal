@@ -50,7 +50,7 @@ async function fetchCalibrationData(instrumentPid: string): Promise<AxiosRespons
 
 const props = defineProps<{ instrumentInfo: InstrumentInfo }>();
 
-const instrumentComponentsMap: { [key: string]: any } = {
+const instrumentComponentsMap: Record<string, any> = {
   "halo-doppler-lidar": DopplerLidarCalibration,
   "chm15k": CeilometerCalibration,
   "chm15kx": CeilometerCalibration,

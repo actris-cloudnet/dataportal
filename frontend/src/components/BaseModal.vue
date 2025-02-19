@@ -5,9 +5,7 @@ export interface Props {
 
 defineProps<Props>();
 
-defineEmits<{
-  (e: "submit"): void;
-}>();
+defineEmits<(e: "submit") => void>();
 </script>
 
 <template>

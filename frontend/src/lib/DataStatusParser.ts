@@ -22,9 +22,7 @@ export type ProductType = keyof ProductLevels;
 
 type LvlTranslate = Record<string, ProductType>;
 
-interface InstrumentPids {
-  [key: string]: { pid: string; humanReadableName: string }[];
-}
+type InstrumentPids = Record<string, { pid: string; humanReadableName: string }[]>;
 
 interface ModelInfo {
   id: string;

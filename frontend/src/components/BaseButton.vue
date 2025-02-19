@@ -12,9 +12,7 @@ export interface Props {
 
 withDefaults(defineProps<Props>(), { disabled: false, htmlType: "button", size: "normal" });
 
-defineEmits<{
-  (e: "click"): void;
-}>();
+defineEmits<(e: "click") => void>();
 </script>
 
 <template>

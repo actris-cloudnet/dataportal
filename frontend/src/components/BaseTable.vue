@@ -59,9 +59,7 @@ const props = defineProps<Props<T>>();
 
 const router = useRouter();
 
-const emit = defineEmits<{
-  (e: "rowSelected", item: T): void;
-}>();
+const emit = defineEmits<(e: "rowSelected", item: T) => void>();
 
 const selectedRow: Ref<T | null> = ref(null);
 
@@ -79,12 +77,16 @@ function selectRow(row: T) {
   emit("rowSelected", row);
   nextTick(() => {
     tableElement.value?.querySelector<HTMLElement>(".selected")?.focus();
-  }).catch(() => {});
+  }).catch(() => {
+    /* skip */
+  });
 }
 
 function navigateToRow(row: T) {
   if (!props.link) return;
-  router.push(props.link(row)).catch(() => {});
+  router.push(props.link(row)).catch(() => {
+    /* skip */
+  });
 }
 
 function onKeyDown(event: KeyboardEvent) {

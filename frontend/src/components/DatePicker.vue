@@ -65,9 +65,7 @@ const model = defineModel<string | null>({ required: true });
 
 const hasError = ref(false);
 
-const emit = defineEmits<{
-  (e: "error", error: DateErrors): void;
-}>();
+const emit = defineEmits<(e: "error", error: DateErrors) => void>();
 
 function validateDate(value: string) {
   const result = {

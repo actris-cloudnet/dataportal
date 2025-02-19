@@ -21,9 +21,15 @@ let filesSortedByDate: any;
 
 // https://github.com/jsdom/jsdom/issues/3368
 global.ResizeObserver = class ResizeObserver {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
+  observe() {
+    /* empty */
+  }
+  unobserve() {
+    /* empty */
+  }
+  disconnect() {
+    /* empty */
+  }
 };
 
 describe("SearchView.vue", () => {

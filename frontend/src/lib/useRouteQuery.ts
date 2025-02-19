@@ -79,8 +79,12 @@ export function useRouteQuery<T>(options: { name: string; defaultValue: T; type:
               query: { ...query, ...Object.fromEntries(_query.entries()) },
               hash,
             })
-            .catch(() => {});
-        }).catch(() => {});
+            .catch(() => {
+              /* skip */
+            });
+        }).catch(() => {
+          /* skip */
+        });
       },
     };
   });
