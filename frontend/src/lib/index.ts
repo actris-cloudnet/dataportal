@@ -23,6 +23,7 @@ import unknownIcon from "@/assets/icons/unknown.png";
 import weatherStationIcon from "@/assets/icons/weather-station.png";
 import dopplerLidarIcon from "@/assets/icons/doppler-lidar.svg";
 import dopplerLidarWindIcon from "@/assets/icons/doppler-lidar-wind.svg";
+import epsilonLidarIcon from "@/assets/icons/epsilon.svg";
 import rainRadarIcon from "@/assets/icons/rain-radar.svg";
 import rainGaugerIcon from "@/assets/icons/rain-gauge.png";
 import cprSimulationIcon from "@/assets/icons/earthcare.png";
@@ -69,6 +70,7 @@ const productIcons: Record<string, string> = {
   "weather-station": weatherStationIcon,
   "doppler-lidar": dopplerLidarIcon,
   "doppler-lidar-wind": dopplerLidarWindIcon,
+  "epsilon-lidar": epsilonLidarIcon,
   "rain-radar": rainRadarIcon,
   "rain-gauge": rainGaugerIcon,
   "cpr-simulation": cprSimulationIcon,
