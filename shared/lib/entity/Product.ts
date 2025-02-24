@@ -8,7 +8,6 @@ export type ProductType = "instrument" | "model" | "evaluation" | "experimental"
 export interface Product {
   id: string;
   humanReadableName: string;
-  level: string;
   experimental: boolean;
   files: File[];
   type: ProductType[];

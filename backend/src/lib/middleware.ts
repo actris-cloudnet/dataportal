@@ -5,7 +5,7 @@ import { Site } from "../entity/Site";
 import { DataSource, In, Repository } from "typeorm";
 import { hideTestDataFromNormalUsers, isValidDate, toArray } from ".";
 import { validate as validateUuid } from "uuid";
-import { Product } from "../entity/Product";
+import { Product, ProductType } from "../entity/Product";
 
 export class Middleware {
   constructor(dataSource: DataSource) {
@@ -139,7 +139,7 @@ export class Middleware {
         .map((site) => site.id);
     const defaultProduct = async () =>
       (await this.productRepo.find())
-        .filter((prod) => query.developer == "true" || prod.level != "3") // Hide experimental products
+        .filter((prod) => query.developer == "true" || !prod.type.includes(ProductType.EVALUATION)) // Hide experimental products
         .map((prod) => prod.id);
     const setLegacy = () => ("showLegacy" in query ? null : [false]); // Don't filter by "legacy" if showLegacy is enabled
     if (!("site" in query)) query.site = await defaultSite();

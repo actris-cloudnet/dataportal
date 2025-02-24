@@ -10,7 +10,7 @@ export class ProductRoutes {
   readonly productRepo: Repository<Product>;
 
   products: RequestHandler = async (req, res) => {
-    const products = await this.productRepo.find({ order: { level: "DESC", id: "ASC" } });
+    const products = await this.productRepo.find({ order: { id: "ASC" } });
     res.send(products);
   };
 
@@ -29,7 +29,6 @@ export class ProductRoutes {
     const products = await this.productRepo.find({
       relations: { variables: true },
       order: {
-        level: "DESC",
         id: "ASC",
         variables: { order: "ASC" },
       },

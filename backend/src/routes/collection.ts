@@ -296,7 +296,6 @@ export class CollectionRoutes {
       site.country AS "site_country",
       product.id AS "product_id",
       product."humanReadableName" AS "product_humanReadableName",
-      product.level AS "product_level",
       product."experimental" AS "product_experimental"
     `;
     const join = `
@@ -317,7 +316,6 @@ export class CollectionRoutes {
        WHERE "collectionUuid" = $1
        ORDER BY "file_measurementDate" DESC,
                 site_id ASC,
-                product_level ASC,
                 product_id ASC
        LIMIT $2
        OFFSET $3`,

@@ -36,7 +36,6 @@ exports[`/api/files/:uuid request succeeds on instrument file 1`] = `
     "experimental": false,
     "humanReadableName": "Radar",
     "id": "radar",
-    "level": "1b",
     "type": [
       "instrument",
     ],
@@ -105,7 +104,6 @@ exports[`/api/files/:uuid request succeeds on model file 1`] = `
     "experimental": false,
     "humanReadableName": "Model",
     "id": "model",
-    "level": "1b",
     "type": [
       "model",
     ],

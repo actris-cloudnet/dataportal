@@ -99,14 +99,11 @@ export async function parseDataStatus(config: DataStatusConfig): Promise<DataSta
   const lvlTranslate: LvlTranslate = {};
   let geophysicalProductCount = 0;
   const allProducts = prodResponse.filter((prod) => {
-    if (prod.level !== "3") {
-      const productType =
-        prod.type.includes("instrument") || prod.type.includes("model") ? "instrument" : "geophysical";
-      lvlTranslate[prod.id] = productType;
-      if (productType === "geophysical" && !prod.experimental) geophysicalProductCount++;
-      return true;
-    }
-    return false;
+    if (prod.type.includes("evaluation")) return false;
+    const productType = prod.type.includes("instrument") || prod.type.includes("model") ? "instrument" : "geophysical";
+    lvlTranslate[prod.id] = productType;
+    if (productType === "geophysical" && !prod.experimental) geophysicalProductCount++;
+    return true;
   });
 
   if (!searchResponse.length || !allProducts.length) {
