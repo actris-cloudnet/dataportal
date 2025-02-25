@@ -121,7 +121,7 @@ type ProductResult =
 const productInfo = ref<ProductResult>({ status: "loading" });
 
 function unitsHtml(units: string): string {
-  return units.replace(/([a-z])(-?\d+)/g, "$1<sup>$2</sup>");
+  return units.replace(/([a-z])(-?\d+)/gi, "$1<sup>$2</sup>");
 }
 
 const sections = ["dimensions", "common_variables"];

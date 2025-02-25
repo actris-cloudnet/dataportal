@@ -270,6 +270,256 @@
       }
     ]
   },
+  "cpr-simulation": {
+    "description": "Ground-based radar measurements transformed for comparison with the 94 GHz cloud profiling radar (CPR) aboard the EarthCARE satellite.",
+    "references_html": [
+      "Pfitzenmaier et al. (2025). Orbital-Radar v1.0.0: a tool to transform suborbital radar observations to synthetic EarthCARE cloud radar data. <i>Geosci. Model Dev.</i>, <i>18</i>(1), 101-115. <a href=\"https://doi.org/10.5194/gmd-18-101-2025\">https://doi.org/10.5194/gmd-18-101-2025</a>"
+    ],
+    "dimensions": [
+      {
+        "name": "along_track",
+        "units": "m",
+        "standard_name": null,
+        "long_name": "Along-track distance",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track"],
+        "dtype": "float32"
+      },
+      {
+        "name": "along_track_sat",
+        "units": "m",
+        "standard_name": null,
+        "long_name": "Along-track distance at satellite resolution",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track_sat"],
+        "dtype": "float32"
+      },
+      {
+        "name": "height",
+        "units": "m",
+        "standard_name": "height_above_mean_sea_level",
+        "long_name": "Height above mean sea level",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "height_sat",
+        "units": "m",
+        "standard_name": null,
+        "long_name": "Height above mean sea level at satellite resolution",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["height_sat"],
+        "dtype": "float32"
+      }
+    ],
+    "common_variables": [
+      {
+        "name": "altitude",
+        "units": "m",
+        "standard_name": "altitude",
+        "long_name": "Altitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "folding_flag",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Folding flag",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track_sat", "height_sat"],
+        "dtype": "int32"
+      },
+      {
+        "name": "latitude",
+        "units": "degree_north",
+        "standard_name": "latitude",
+        "long_name": "Latitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "longitude",
+        "units": "degree_east",
+        "standard_name": "longitude",
+        "long_name": "Longitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "mean_wind",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Mean horizontal wind",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "ms_flag",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Multiple scattering flag",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track_sat", "height_sat"],
+        "dtype": "int32"
+      },
+      {
+        "name": "nubf",
+        "units": "dBZ",
+        "standard_name": null,
+        "long_name": "Non-uniform beam filling",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track_sat", "height_sat"],
+        "dtype": "float32"
+      },
+      {
+        "name": "nubf_flag",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Non-uniform beam filling flag",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track_sat", "height_sat"],
+        "dtype": "int32"
+      },
+      {
+        "name": "sat_along_track_resolution",
+        "units": "m",
+        "standard_name": null,
+        "long_name": "Satellite along-track resolution",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "sat_ifov",
+        "units": "m",
+        "standard_name": null,
+        "long_name": "Satellite instantaneous field of view",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "sat_range_resolution",
+        "units": "m",
+        "standard_name": null,
+        "long_name": "Satellite range resolution",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "time",
+        "units": "hours since 2025-01-01 00:00:00 +00:00",
+        "standard_name": "time",
+        "long_name": "Time UTC",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track"],
+        "dtype": "float64"
+      },
+      {
+        "name": "vm",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Mean Doppler velocity of input",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "vm_sat",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Convolved and integrated mean Doppler velocity",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track_sat", "height_sat"],
+        "dtype": "float32"
+      },
+      {
+        "name": "vm_sat_folded",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Doppler velocity with noise, satellite motion error, and folding",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track_sat", "height_sat"],
+        "dtype": "float32"
+      },
+      {
+        "name": "vm_sat_noise",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Convolved and integrated mean Doppler velocity with noise and satellite motion error",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track_sat", "height_sat"],
+        "dtype": "float32"
+      },
+      {
+        "name": "vm_sat_vel",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Convolved and integrated mean Doppler velocity with satellite motion error",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track_sat", "height_sat"],
+        "dtype": "float32"
+      },
+      {
+        "name": "ze",
+        "units": "dBZ",
+        "standard_name": null,
+        "long_name": "Radar reflectivity factor of input",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "ze_sat",
+        "units": "dBZ",
+        "standard_name": null,
+        "long_name": "Convolved and integrated radar reflectivity factor",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track_sat", "height_sat"],
+        "dtype": "float32"
+      },
+      {
+        "name": "ze_sat_noise",
+        "units": "dBZ",
+        "standard_name": null,
+        "long_name": "Convolved and integrated radar reflectivity factor with noise",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track_sat", "height_sat"],
+        "dtype": "float32"
+      }
+    ]
+  },
   "drizzle": {
     "description": "Drizzle parameters such as drizzle flux and mean particle size, derived from combined radar and lidar beneath cloud base.",
     "references_html": [
@@ -2421,16 +2671,6 @@
         "dtype": "float32"
       },
       {
-        "name": "diameter_spread",
-        "units": "m",
-        "standard_name": null,
-        "long_name": "Width of diameter interval",
-        "comment": "Bin size of each diameter interval.",
-        "definition": null,
-        "dimensions": ["diameter"],
-        "dtype": "float32"
-      },
-      {
         "name": "latitude",
         "units": "degree_north",
         "standard_name": "latitude",
@@ -2469,26 +2709,6 @@
         "definition": null,
         "dimensions": ["time"],
         "dtype": "float32"
-      },
-      {
-        "name": "velocity_spread",
-        "units": "m s-1",
-        "standard_name": null,
-        "long_name": "Width of velocity interval",
-        "comment": "Bin size of each velocity interval.",
-        "definition": null,
-        "dimensions": ["velocity"],
-        "dtype": "float32"
-      },
-      {
-        "name": "visibility",
-        "units": "m",
-        "standard_name": "visibility_in_air",
-        "long_name": "Meteorological optical range (MOR) visibility",
-        "comment": "Visibility estimation by the disdrometer is valid\nonly during precipitation events.",
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "int32"
       }
     ]
   },
@@ -3246,26 +3466,6 @@
         "comment": null,
         "definition": null,
         "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "rainfall_amount",
-        "units": "m",
-        "standard_name": "thickness_of_rainfall_amount",
-        "long_name": "Rainfall amount",
-        "comment": "Cumulated precipitation since 00:00 UTC",
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "rainfall_rate",
-        "units": "m s-1",
-        "standard_name": "rainfall_rate",
-        "long_name": "Rainfall rate",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
