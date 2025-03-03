@@ -50,17 +50,21 @@ async function fetchCalibrationData(instrumentPid: string): Promise<AxiosRespons
 
 const props = defineProps<{ instrumentInfo: InstrumentInfo }>();
 
-const instrumentComponentsMap: { [key: string]: any } = {
+const instrumentComponentsMap: Record<string, any> = {
   "halo-doppler-lidar": DopplerLidarCalibration,
   "chm15k": CeilometerCalibration,
   "chm15kx": CeilometerCalibration,
   "cl51": CeilometerCalibration,
+  "cl31": CeilometerCalibration,
+  "ct25k": CeilometerCalibration,
   "parsivel": DisdrometerCalibration,
   "hatpro": HatproCalibration,
   "cs135": CeilometerCalibration,
   "copernicus": RadarCalibration,
   "pollyxt": CeilometerCalibration,
   "weather-station": WeatherStationCalibration,
+  "mira-10": RadarCalibration,
+  "mira-35": RadarCalibration,
 };
 
 const InstrumentComponent = computed(() => {

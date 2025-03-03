@@ -176,7 +176,7 @@ export class FileRoutes {
       );
       file.sourceRegularFiles = sourceFiles.filter((file) => file instanceof RegularFile);
       file.sourceModelFiles = sourceFiles.filter((file) => file instanceof ModelFile);
-    } catch (e) {
+    } catch {
       return next({ status: 422, errors: ["One or more of the specified source files were not found"] });
     }
 
@@ -405,10 +405,7 @@ export class FileRoutes {
 
     // Ordering
     if (query.privateFrontendOrder) {
-      qb.orderBy("file.measurementDate", "DESC")
-        .addOrderBy("file.siteId", "ASC")
-        .addOrderBy("product.level", "ASC")
-        .addOrderBy("product.id", "ASC");
+      qb.orderBy("file.measurementDate", "DESC").addOrderBy("file.siteId", "ASC").addOrderBy("product.id", "ASC");
       if (isModel) {
         qb.addOrderBy("model.optimumOrder", "ASC");
       } else {
@@ -438,7 +435,6 @@ export class FileRoutes {
     if (query.instrumentPid) qb.andWhere("file.instrumentPid IN (:...instrumentPid)", query);
     qb.orderBy("file.measurementDate", "DESC")
       .addOrderBy("file.siteId", "ASC")
-      .addOrderBy("product.level", "ASC")
       .addOrderBy("product.id", "ASC")
       .addOrderBy("instrument.id", "ASC")
       .addOrderBy("file.instrumentPid", "ASC");

@@ -1,4 +1,4 @@
-import { DataSource, Repository } from "typeorm";
+import { DataSource, IsNull, Repository } from "typeorm";
 import { AppDataSource } from "../../../src/data-source";
 import { QueueService } from "../../../src/lib/queue";
 import { describe, expect, it, beforeAll, afterAll, beforeEach } from "@jest/globals";
@@ -26,6 +26,7 @@ describe("QueueService", () => {
     productId: string;
     measurementDate: Date | string;
     instrumentInfoUuid?: string;
+    modelId?: string;
     priority?: number;
     delayMinutes?: number;
     batchId?: string;
@@ -39,6 +40,9 @@ describe("QueueService", () => {
     task.productId = params.productId;
     if (params.instrumentInfoUuid) {
       task.instrumentInfoUuid = params.instrumentInfoUuid;
+    }
+    if (params.modelId) {
+      task.modelId = params.modelId;
     }
     task.measurementDate = new Date(params.measurementDate);
     task.scheduledAt = new Date(now.getTime() + delayMinutes * 60 * 1000);
@@ -508,6 +512,51 @@ describe("QueueService", () => {
     expect(taskRes4).toMatchObject({ type: "freeze" });
   });
 
+  it("doesn't allow simultaneous model tasks", async () => {
+    // Add tasks which cannot be safely processed at the same time because they
+    // both update search_file table.
+    await queueService.publish(
+      makeTask({
+        type: TaskType.PROCESS,
+        siteId: "hyytiala",
+        productId: "model",
+        modelId: "icon-iglo-12-23",
+        measurementDate: "2024-01-10",
+        priority: 0,
+      }),
+    );
+    await queueService.publish(
+      makeTask({
+        type: TaskType.PROCESS,
+        siteId: "hyytiala",
+        productId: "model",
+        modelId: "icon-iglo-24-35",
+        measurementDate: "2024-01-10",
+        priority: 1,
+      }),
+    );
+    expect(await queueService.count()).toBe(2);
+
+    // Start process task.
+    const taskRes = await queueService.receive({ now });
+    expect(taskRes).toMatchObject({ modelId: "icon-iglo-12-23" });
+
+    // Other task is postponed.
+    const taskRes2 = await queueService.receive({ now });
+    expect(taskRes2).toBeNull();
+    expect(await queueService.count()).toBe(2);
+
+    // Finish process task.
+    await queueService.complete(taskRes!["id"]);
+    expect(await queueService.count()).toBe(2);
+    expect(await queueService.count(TaskStatus.DONE)).toBe(1);
+
+    // Other task is not postponed anymore.
+    advanceMinutes(10);
+    const taskRes3 = await queueService.receive({ now });
+    expect(taskRes3).toMatchObject({ modelId: "icon-iglo-24-35" });
+  });
+
   it("submits and cancels batches", async () => {
     // Submit two batches.
     for (const measurementDate of ["2024-01-01", "2024-01-02", "2024-01-03"]) {
@@ -766,9 +815,34 @@ describe("/api/queue/batch", () => {
   it("creates categorize tasks", async () => {
     await axios.post(batchUrl, { type: "process", productIds: ["categorize"], dryRun: false }, { auth });
     expect(await taskRepo.count()).toBe(4);
-    expect(await taskRepo.countBy({ siteId: "granada" })).toBe(1);
-    expect(await taskRepo.countBy({ siteId: "bucharest" })).toBe(2);
-    expect(await taskRepo.countBy({ siteId: "warsaw" })).toBe(1);
+    expect(await taskRepo.countBy({ siteId: "granada", productId: "categorize", instrumentInfoUuid: IsNull() })).toBe(
+      1,
+    );
+    expect(await taskRepo.countBy({ siteId: "bucharest", productId: "categorize", instrumentInfoUuid: IsNull() })).toBe(
+      2,
+    );
+    expect(await taskRepo.countBy({ siteId: "warsaw", productId: "categorize", instrumentInfoUuid: IsNull() })).toBe(1);
+  });
+
+  it("creates edr tasks", async () => {
+    await axios.post(batchUrl, { type: "process", productIds: ["edr"], dryRun: false }, { auth });
+    expect(await taskRepo.count()).toBe(2);
+    expect(
+      await taskRepo.existsBy({
+        siteId: "granada",
+        productId: "edr",
+        measurementDate: new Date("2020-08-11"),
+        instrumentInfoUuid: "9e0f4b27-d5f3-40ad-8b73-2ae5dabbf81f",
+      }),
+    ).toBeTruthy();
+    expect(
+      await taskRepo.existsBy({
+        siteId: "bucharest",
+        productId: "edr",
+        measurementDate: new Date("2020-08-13"),
+        instrumentInfoUuid: "0b3a7fa0-4812-4964-af23-1162e8b3a665",
+      }),
+    ).toBeTruthy();
   });
 
   it("filters by date", async () => {

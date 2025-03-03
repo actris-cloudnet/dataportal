@@ -111,9 +111,7 @@ function getSourceFileIds(file: RegularFile | ModelFile) {
   return [...file.sourceRegularFiles.map((file) => file.uuid), ...file.sourceModelFiles.map((file) => file.uuid)];
 }
 
-export const ssAuthString = () =>
-  "Basic " + // eslint-disable-line prefer-template
-  Buffer.from(`${env.DP_SS_USER}:${env.DP_SS_PASSWORD}`).toString("base64");
+export const ssAuthString = () => "Basic " + Buffer.from(`${env.DP_SS_USER}:${env.DP_SS_PASSWORD}`).toString("base64");
 
 export const getBucketForFile = (file: File) => (file.volatile ? "cloudnet-product-volatile" : "cloudnet-product");
 
@@ -156,7 +154,7 @@ const translateKeyVal = (key: string, val: string | number | boolean | Date, acc
 
 export const transformRawFile = (obj: any, prefix: string): RegularFile | ModelFile | SearchFile => {
   return Object.keys(obj).reduce(
-    (acc: { [key: string]: any }, key) => ({
+    (acc: Record<string, any>, key) => ({
       ...acc,
       ...translateKeyVal(key, obj[key], acc, prefix),
     }),
@@ -187,7 +185,7 @@ export const dateforsize = async (
   return res.send(result[0].updatedAt);
 };
 
-export function streamHandler(stream: ReadableStream, res: Response, prefix: string, augmenter?: Function) {
+export function streamHandler(stream: ReadableStream, res: Response, prefix: string, augmenter?: (f: any) => any) {
   res.header("content-type", "application/json");
   res.write("[");
   let objectSent = false;

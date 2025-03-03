@@ -108,10 +108,12 @@ function initYear(year: number): YearItem<T> {
 }
 
 const dataByYear = computed(() => {
+  const today = dateToString(new Date());
   const sortedData = props.data.slice().sort((a, b) => compareValues(a.date, b.date));
   const output = [];
   while (sortedData.length > 0) {
     const data = sortedData.shift()!;
+    if (data.date > today) continue;
     const date = new Date(data.date);
     if (output.length == 0 || date.getUTCFullYear() != output[0].year) {
       output.unshift(initYear(date.getUTCFullYear()));
@@ -221,7 +223,9 @@ function showFullVizTooltip(year: YearItem<T>, event: MouseEvent) {
   const x = canvasRect.x + dateIndex * (canvasRect.width / year.dates.length);
   const y = canvasRect.bottom;
 
-  nextTick(() => showTooltipAt(x, y));
+  nextTick(() => showTooltipAt(x, y)).catch(() => {
+    /* skip */
+  });
 }
 
 function showYearVizTooltip(item: DateItem<T>, event: MouseEvent) {
@@ -232,7 +236,9 @@ function showYearVizTooltip(item: DateItem<T>, event: MouseEvent) {
   const x = targetRect.x + targetRect.width / 2;
   const y = targetRect.bottom;
 
-  nextTick(() => showTooltipAt(x, y));
+  nextTick(() => showTooltipAt(x, y)).catch(() => {
+    /* skip */
+  });
 }
 
 function showTooltipAt(x: number, y: number) {

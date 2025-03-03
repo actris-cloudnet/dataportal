@@ -18,9 +18,6 @@ export class Product {
   @Column()
   humanReadableName!: string;
 
-  @Column()
-  level!: string;
-
   @Column({ type: "enum", enum: ProductType, array: true, default: [] })
   type!: ProductType[];
 

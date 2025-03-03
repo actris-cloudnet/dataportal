@@ -10,7 +10,7 @@ export class ProductRoutes {
   readonly productRepo: Repository<Product>;
 
   products: RequestHandler = async (req, res) => {
-    const products = await this.productRepo.find({ order: { level: "DESC", id: "ASC" } });
+    const products = await this.productRepo.find({ order: { id: "ASC" } });
     res.send(products);
   };
 
@@ -29,11 +29,27 @@ export class ProductRoutes {
     const products = await this.productRepo.find({
       relations: { variables: true },
       order: {
-        level: "DESC",
         id: "ASC",
         variables: { order: "ASC" },
       },
     });
     res.send(products);
+  };
+
+  productVariable: RequestHandler = async (req, res, next) => {
+    const productId = req.params.productId;
+    const product = await this.productRepo.findOne({
+      where: { id: productId },
+      relations: { variables: true },
+      order: { variables: { order: "ASC" } },
+    });
+    if (!product) {
+      return next({ status: 404, errors: ["No product match this id"] });
+    }
+    // Remove "productId-" prefix from variable ids
+    product.variables.forEach((variable) => {
+      variable.id = variable.id.replace(productId + "-", "");
+    });
+    res.send(product.variables);
   };
 }

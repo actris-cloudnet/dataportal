@@ -1,9 +1,10 @@
 import { DataSource, Repository } from "typeorm";
 import { RequestHandler, Response } from "express";
+import * as basicAuth from "basic-auth";
+
 import { UserAccount } from "../entity/UserAccount";
 import { PermissionType } from "../entity/Permission";
 import { Site } from "../entity/Site";
-import basicAuth = require("basic-auth");
 import { Model } from "../entity/Model";
 
 export class Authenticator {

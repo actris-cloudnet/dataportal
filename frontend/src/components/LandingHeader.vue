@@ -28,7 +28,7 @@ defineProps<Props>();
 </template>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 header {
   display: grid;
@@ -96,8 +96,8 @@ header {
   }
 
   &.router-link-exact-active {
-    color: $blue4;
-    border-bottom: 2px solid $blue4;
+    color: variables.$blue4;
+    border-bottom: 2px solid variables.$blue4;
 
     img {
       opacity: 1;

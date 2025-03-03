@@ -1,117 +1,7 @@
 [
   {
-    "id": "l3-cf",
-    "humanReadableName": "L3 Cloud fraction",
-    "level": "3",
-    "experimental": true,
-    "variables": []
-  },
-  {
-    "id": "l3-iwc",
-    "humanReadableName": "L3 Ice water content",
-    "level": "3",
-    "experimental": true,
-    "variables": []
-  },
-  {
-    "id": "l3-lwc",
-    "humanReadableName": "L3 Liquid water content",
-    "level": "3",
-    "experimental": true,
-    "variables": []
-  },
-  {
-    "id": "classification",
-    "humanReadableName": "Classification",
-    "level": "2",
-    "experimental": false,
-    "variables": [
-      {
-        "actrisName": null,
-        "id": "classification-target_classification",
-        "humanReadableName": "Target classification",
-        "order": 0
-      },
-      {
-        "actrisName": null,
-        "id": "classification-detection_status",
-        "humanReadableName": "Classification detection status",
-        "order": 1
-      },
-      {
-        "actrisName": null,
-        "id": "classification-v",
-        "humanReadableName": "Classification velocity",
-        "order": 2
-      },
-      {
-        "actrisName": null,
-        "id": "classification-ldr",
-        "humanReadableName": "Classification LDR",
-        "order": 3
-      }
-    ]
-  },
-  {
-    "id": "classification-voodoo",
-    "humanReadableName": "Classification (Voodoo)",
-    "level": "2",
-    "experimental": true,
-    "variables": []
-  },
-  {
-    "id": "der",
-    "humanReadableName": "Droplet effective radius",
-    "level": "2",
-    "experimental": false,
-    "variables": []
-  },
-  {
-    "id": "drizzle",
-    "humanReadableName": "Drizzle",
-    "level": "2",
-    "experimental": false,
-    "variables": []
-  },
-  {
-    "id": "ier",
-    "humanReadableName": "Ice effective radius",
-    "level": "2",
-    "experimental": false,
-    "variables": []
-  },
-  {
-    "id": "iwc",
-    "humanReadableName": "Ice water content",
-    "level": "2",
-    "experimental": false,
-    "variables": []
-  },
-  {
-    "id": "lwc",
-    "humanReadableName": "Liquid water content",
-    "level": "2",
-    "experimental": false,
-    "variables": []
-  },
-  {
-    "id": "mwr-multi",
-    "humanReadableName": "MWR multiple pointing",
-    "level": "2",
-    "experimental": true,
-    "variables": []
-  },
-  {
-    "id": "mwr-single",
-    "humanReadableName": "MWR single pointing",
-    "level": "2",
-    "experimental": true,
-    "variables": []
-  },
-  {
     "id": "categorize",
     "humanReadableName": "Categorize",
-    "level": "1c",
     "experimental": false,
     "variables": [
       {
@@ -143,49 +33,126 @@
   {
     "id": "categorize-voodoo",
     "humanReadableName": "Categorize (Voodoo)",
-    "level": "1c",
     "experimental": true,
     "variables": []
   },
   {
-    "id": "mwr-l1c",
-    "humanReadableName": "MWR Level 1c",
-    "level": "1c",
+    "id": "classification",
+    "humanReadableName": "Classification",
+    "experimental": false,
+    "variables": [
+      {
+        "actrisName": null,
+        "id": "classification-target_classification",
+        "humanReadableName": "Target classification",
+        "order": 0
+      },
+      {
+        "actrisName": null,
+        "id": "classification-detection_status",
+        "humanReadableName": "Classification detection status",
+        "order": 1
+      },
+      {
+        "actrisName": null,
+        "id": "classification-v",
+        "humanReadableName": "Classification velocity",
+        "order": 2
+      },
+      {
+        "actrisName": null,
+        "id": "classification-ldr",
+        "humanReadableName": "Classification LDR",
+        "order": 3
+      }
+    ]
+  },
+  {
+    "id": "classification-voodoo",
+    "humanReadableName": "Classification (Voodoo)",
     "experimental": true,
+    "variables": []
+  },
+  {
+    "id": "der",
+    "humanReadableName": "Droplet effective radius",
+    "experimental": false,
     "variables": []
   },
   {
     "id": "disdrometer",
     "humanReadableName": "Disdrometer",
-    "level": "1b",
     "experimental": false,
     "variables": []
   },
   {
     "id": "doppler-lidar",
     "humanReadableName": "Doppler lidar",
-    "level": "1b",
     "experimental": true,
     "variables": []
   },
   {
     "id": "doppler-lidar-wind",
     "humanReadableName": "Doppler lidar wind",
-    "level": "1b",
+    "experimental": true,
+    "variables": []
+  },
+  {
+    "id": "drizzle",
+    "humanReadableName": "Drizzle",
+    "experimental": false,
+    "variables": []
+  },
+  {
+    "id": "edr",
+    "humanReadableName": "Eddy dissipation rate",
+    "variables": []
+  },
+  {
+    "id": "ier",
+    "humanReadableName": "Ice effective radius",
+    "experimental": false,
+    "variables": []
+  },
+  {
+    "id": "iwc",
+    "humanReadableName": "Ice water content",
+    "experimental": false,
+    "variables": []
+  },
+  {
+    "id": "l3-cf",
+    "humanReadableName": "L3 Cloud fraction",
+    "experimental": true,
+    "variables": []
+  },
+  {
+    "id": "l3-iwc",
+    "humanReadableName": "L3 Ice water content",
+    "experimental": true,
+    "variables": []
+  },
+  {
+    "id": "l3-lwc",
+    "humanReadableName": "L3 Liquid water content",
     "experimental": true,
     "variables": []
   },
   {
     "id": "lidar",
     "humanReadableName": "Lidar",
-    "level": "1b",
+    "experimental": false,
+    "variables": []
+  },
+  {
+    "id": "lwc",
+    "humanReadableName": "Liquid water content",
     "experimental": false,
     "variables": []
   },
   {
     "id": "model",
     "humanReadableName": "Model",
-    "level": "1b",
     "experimental": false,
     "variables": [
       {
@@ -199,14 +166,30 @@
   {
     "id": "mwr",
     "humanReadableName": "Microwave radiometer",
-    "level": "1b",
     "experimental": false,
+    "variables": []
+  },
+  {
+    "id": "mwr-l1c",
+    "humanReadableName": "MWR Level 1c",
+    "experimental": true,
+    "variables": []
+  },
+  {
+    "id": "mwr-multi",
+    "humanReadableName": "MWR multiple pointing",
+    "experimental": true,
+    "variables": []
+  },
+  {
+    "id": "mwr-single",
+    "humanReadableName": "MWR single pointing",
+    "experimental": true,
     "variables": []
   },
   {
     "id": "radar",
     "humanReadableName": "Radar",
-    "level": "1b",
     "experimental": false,
     "variables": [
       {
@@ -226,14 +209,12 @@
   {
     "id": "rain-radar",
     "humanReadableName": "Rain radar",
-    "level": "1b",
     "experimental": true,
     "variables": []
   },
   {
     "id": "weather-station",
     "humanReadableName": "Weather station",
-    "level": "1b",
     "experimental": true,
     "variables": []
   }

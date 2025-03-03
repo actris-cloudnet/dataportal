@@ -57,8 +57,6 @@ const visualization = computed(() => {
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
-
 .landing-summary-container {
   display: grid;
   grid-template-columns: 1fr 1fr;

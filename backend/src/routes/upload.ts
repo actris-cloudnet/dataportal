@@ -113,7 +113,10 @@ export class UploadRoutes {
 
     const result = await this.dataSource.transaction(async (transactionalEntityManager) => {
       // First search row by checksum.
-      const uploadByChecksum = await transactionalEntityManager.findOneBy(UploadEntity, { checksum: body.checksum });
+      const uploadByChecksum = await transactionalEntityManager.findOneBy<InstrumentUpload | ModelUpload>(
+        UploadEntity,
+        { checksum: body.checksum },
+      );
       if (uploadByChecksum) {
         if (uploadByChecksum.status === Status.CREATED) {
           // Remove the existing row so that we can insert or update a row
@@ -136,7 +139,10 @@ export class UploadRoutes {
         : ({ ...params, model: { id: body.model } } satisfies FindOptionsWhere<ModelUpload>);
 
       // If a matching row exists, update it.
-      const uploadByParams = await transactionalEntityManager.findOneBy(UploadEntity, payload);
+      const uploadByParams = await transactionalEntityManager.findOneBy<InstrumentUpload | ModelUpload>(
+        UploadEntity,
+        payload,
+      );
       if (uploadByParams) {
         await transactionalEntityManager.update(UploadEntity, uploadByParams.uuid, {
           checksum: body.checksum,
@@ -253,13 +259,13 @@ export class UploadRoutes {
       );
       res.sendStatus(status);
 
-      this.publishTask(upload).catch((err) => {
+      const taskPromises =
+        upload instanceof InstrumentUpload
+          ? [this.publishInstrumentTasks(upload), this.publishAdjoiningDayTasks(upload)]
+          : [this.publishModelTasks(upload)];
+      Promise.all(taskPromises).catch((err) => {
         console.error("Task publish failed:", err);
       });
-
-      if (upload instanceof InstrumentUpload) {
-        await this.publishAdjoiningDayTask(upload);
-      }
     } catch (err: any) {
       if (err.status == 401) return next(err); // Permission error
       if (err.status == 400 && err.errors == "Checksum does not match file contents") return next(err); // Client error
@@ -269,44 +275,62 @@ export class UploadRoutes {
     }
   };
 
-  private async publishAdjoiningDayTask(upload: InstrumentUpload) {
+  private async publishAdjoiningDayTasks(upload: InstrumentUpload) {
     const date = upload.measurementDate.toString();
     const calibration = await fetchCalibration(this.calibRepo, upload.instrumentPid, date);
     const timeOffset = calibration?.data?.time_offset;
-    if (timeOffset && timeOffset !== 0) {
-      const dateOffset = timeOffset > 0 ? -1 : 1;
-      const adjustedDate = getAdjustedDate(upload.measurementDate, dateOffset);
-      const adjustedUpload = this.instrumentUploadRepo.create({ ...upload, measurementDate: adjustedDate });
-      this.publishTask(adjustedUpload).catch((err) => {
-        console.error("Task publish failed:", err);
+    if (!timeOffset) return;
+    const dateOffset = timeOffset > 0 ? -1 : 1;
+    const adjustedDate = getAdjustedDate(upload.measurementDate, dateOffset);
+    const adjustedUpload = this.instrumentUploadRepo.create({ ...upload, measurementDate: adjustedDate });
+    await this.publishInstrumentTasks(adjustedUpload);
+  }
+
+  private async publishInstrumentTasks(upload: InstrumentUpload) {
+    for (const product of upload.instrument.derivedProducts) {
+      const existingFile = await this.regularFileRepo.findOneBy({
+        site: { id: upload.site.id },
+        measurementDate: upload.measurementDate,
+        product: { id: product.id },
+        instrumentInfo: { uuid: upload.instrumentInfo!.uuid },
       });
+      const stableFileExists = existingFile && !existingFile.volatile;
+      const task = this.makeTask(upload, stableFileExists ? 60 : 5);
+      task.product = product;
+      task.instrumentInfo = upload.instrumentInfo;
+      await this.queueService.publish(task);
     }
   }
 
-  private async publishTask(upload: InstrumentUpload | ModelUpload) {
-    if (upload instanceof ModelUpload) {
-      const task = this.makeTask(upload);
-      task.productId = "model";
-      task.model = upload.model;
-      await this.queueService.publish(task);
-    } else {
-      for (const product of upload.instrument.derivedProducts) {
-        const existingFile = await this.regularFileRepo.findOneBy({
-          site: { id: upload.site.id },
-          measurementDate: upload.measurementDate,
-          product: { id: product.id },
-          instrumentInfo: { uuid: upload.instrumentInfo!.uuid },
-        });
-        const stableFileExists = existingFile && !existingFile.volatile;
-        const task = this.makeTask(upload, stableFileExists ? 60 : 5);
-        task.product = product;
-        task.instrumentInfo = upload.instrumentInfo;
+  private async publishModelTasks(upload: ModelUpload) {
+    let models = await this.modelRepo.find({ where: { sourceModelId: upload.model.id } });
+    if (models.length === 0) {
+      models = [upload.model];
+    }
+    for (const model of models) {
+      let startDateOffset = 0;
+      let endDateOffset = 0;
+      if (model.forecastStart != null && model.forecastEnd != null) {
+        const startHour = model.forecastStart;
+        startDateOffset = Math.floor(startHour / 24);
+        if (startHour % 24 == 0) startDateOffset -= 1;
+
+        const endHour = 24 + model.forecastEnd;
+        endDateOffset = Math.floor(endHour / 24);
+        if (endHour % 24 === 0) endDateOffset -= 1;
+      }
+      for (let dateOffset = startDateOffset; dateOffset <= endDateOffset; dateOffset++) {
+        const adjustedDate = getAdjustedDate(upload.measurementDate, dateOffset);
+        const adjustedUpload = this.modelUploadRepo.create({ ...upload, measurementDate: adjustedDate });
+        const task = this.makeTask(adjustedUpload);
+        task.productId = "model";
+        task.model = model;
         await this.queueService.publish(task);
       }
     }
   }
 
-  private makeTask(upload: Upload, delayMinutes: number = 0) {
+  private makeTask(upload: Upload, delayMinutes = 0) {
     const now = new Date();
     const task = new Task();
     task.type = TaskType.PROCESS;

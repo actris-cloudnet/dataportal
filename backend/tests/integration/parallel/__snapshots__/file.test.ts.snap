@@ -36,7 +36,6 @@ exports[`/api/files/:uuid request succeeds on instrument file 1`] = `
     "experimental": false,
     "humanReadableName": "Radar",
     "id": "radar",
-    "level": "1b",
     "type": [
       "instrument",
     ],
@@ -94,16 +93,18 @@ exports[`/api/files/:uuid request succeeds on model file 1`] = `
   "legacy": false,
   "measurementDate": "2020-12-05",
   "model": {
+    "forecastEnd": null,
+    "forecastStart": null,
     "humanReadableName": "ECMWF forecast",
     "id": "ecmwf",
     "optimumOrder": 0,
+    "sourceModelId": null,
   },
   "pid": "",
   "product": {
     "experimental": false,
     "humanReadableName": "Model",
     "id": "model",
-    "level": "1b",
     "type": [
       "model",
     ],

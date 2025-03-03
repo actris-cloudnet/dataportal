@@ -10,49 +10,47 @@ import { createRouter, createWebHistory } from "vue-router";
 
 vi.mock("axios");
 
-let mockAxios: Function;
+let mockAxios: () => (url: string) => AxiosPromise;
 let resources: any;
 
 describe("CollectionView.vue", () => {
   beforeAll(async () => {
     resources = await readResources();
-    mockAxios = () => {
-      return (url: string): AxiosPromise => {
-        if (url.includes("/collection/48092c00-161d-4ca2-a29d-628cf8e960f6/files")) {
-          return Promise.resolve(augmentAxiosResponse(resources["collectionfiles"]));
-        } else if (url.includes("/collection/48092c00-161d-4ca2-a29d-628cf8e960f6")) {
-          return Promise.resolve(augmentAxiosResponse(resources["allcollections"][0]));
-        } else if (url.includes("/search")) {
-          const results = [resources["pagedsearch"].results[1], resources["pagedsearch"].results[9]];
-          return Promise.resolve(
-            augmentAxiosResponse({
-              results,
-              pagination: {
-                totalItems: 2,
-                totalPages: 1,
-                totalBytes: results.reduce((acc, result) => acc + result.size, 0),
-                currentPage: 1,
-                pageSize: 15,
-              },
-            }),
-          );
-        } else if (url.includes("/sites")) {
-          return Promise.resolve(augmentAxiosResponse(resources["sites"]));
-        } else if (url.includes("/products")) {
-          return Promise.resolve(augmentAxiosResponse(resources["products"]));
-        } else if (url.includes("/generate-pid")) {
-          return Promise.resolve(augmentAxiosResponse({ pid: "testpid" }));
-        } else if (url.includes("/reference/") && url.includes("/citation?format=html")) {
-          return Promise.resolve(
-            augmentAxiosResponse('Meikäläinen, M. (2023). Custom collection. <a href="">testpid</a>'),
-          );
-        } else if (url.includes("/reference/") && url.includes("/acknowledgements?format=html")) {
-          return Promise.resolve(augmentAxiosResponse("We acknowledge many people and organizations."));
-        } else if (url.includes("/reference/") && url.includes("/data-availability?format=html")) {
-          return Promise.resolve(augmentAxiosResponse("Only available in the amazing Cloudnet data portal."));
-        }
-        return Promise.reject(new Error(`Unmocked URL: ${url}`));
-      };
+    mockAxios = () => (url) => {
+      if (url.includes("/collection/48092c00-161d-4ca2-a29d-628cf8e960f6/files")) {
+        return Promise.resolve(augmentAxiosResponse(resources["collectionfiles"]));
+      } else if (url.includes("/collection/48092c00-161d-4ca2-a29d-628cf8e960f6")) {
+        return Promise.resolve(augmentAxiosResponse(resources["allcollections"][0]));
+      } else if (url.includes("/search")) {
+        const results = [resources["pagedsearch"].results[1], resources["pagedsearch"].results[9]];
+        return Promise.resolve(
+          augmentAxiosResponse({
+            results,
+            pagination: {
+              totalItems: 2,
+              totalPages: 1,
+              totalBytes: results.reduce((acc, result) => acc + result.size, 0),
+              currentPage: 1,
+              pageSize: 15,
+            },
+          }),
+        );
+      } else if (url.includes("/sites")) {
+        return Promise.resolve(augmentAxiosResponse(resources["sites"]));
+      } else if (url.includes("/products")) {
+        return Promise.resolve(augmentAxiosResponse(resources["products"]));
+      } else if (url.includes("/generate-pid")) {
+        return Promise.resolve(augmentAxiosResponse({ pid: "testpid" }));
+      } else if (url.includes("/reference/") && url.includes("/citation?format=html")) {
+        return Promise.resolve(
+          augmentAxiosResponse('Meikäläinen, M. (2023). Custom collection. <a href="">testpid</a>'),
+        );
+      } else if (url.includes("/reference/") && url.includes("/acknowledgements?format=html")) {
+        return Promise.resolve(augmentAxiosResponse("We acknowledge many people and organizations."));
+      } else if (url.includes("/reference/") && url.includes("/data-availability?format=html")) {
+        return Promise.resolve(augmentAxiosResponse("Only available in the amazing Cloudnet data portal."));
+      }
+      return Promise.reject(new Error(`Unmocked URL: ${url}`));
     };
     vi.mocked(axios.get).mockImplementation(mockAxios());
     vi.mocked(axios.post).mockImplementation(mockAxios());
@@ -67,7 +65,7 @@ describe("CollectionView.vue", () => {
 
     beforeAll(async () => {
       wrapper = mount(App, { global: { plugins: [router] } });
-      router.push({ name: "Collection", params: { uuid: "48092c00-161d-4ca2-a29d-628cf8e960f6" } });
+      await router.push({ name: "Collection", params: { uuid: "48092c00-161d-4ca2-a29d-628cf8e960f6" } });
       await router.isReady();
     });
 
@@ -81,11 +79,6 @@ describe("CollectionView.vue", () => {
 
     it("displays file number", () => {
       expect(wrapper.find("#summary").text()).toContain("2");
-    });
-
-    it("displays products", () => {
-      expect(wrapper.find("#products").text()).toContain("Radar");
-      expect(wrapper.find("#products").text()).toContain("Model");
     });
 
     it("displays products", () => {
@@ -117,7 +110,7 @@ describe("CollectionView.vue", () => {
 
     beforeAll(async () => {
       wrapper = mount(App, { global: { plugins: [router] } });
-      router.push({ name: "CollectionFiles", params: { uuid: "48092c00-161d-4ca2-a29d-628cf8e960f6" } });
+      await router.push({ name: "CollectionFiles", params: { uuid: "48092c00-161d-4ca2-a29d-628cf8e960f6" } });
       await router.isReady();
     });
 

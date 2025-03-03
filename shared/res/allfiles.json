@@ -27,8 +27,7 @@
     },
     "product": {
       "id": "classification",
-      "humanReadableName": "Classification",
-      "level": "2"
+      "humanReadableName": "Classification"
     },
     "downloadUrl": "http://localhost:3000/api/download/product/3bb32746-faf0-4057-9076-ed2e698dcf36/legacy/20090716_bucharest_classification.nc",
     "filename": "20090716_bucharest_classification.nc",
@@ -62,8 +61,7 @@
     },
     "product": {
       "id": "classification",
-      "humanReadableName": "Classification",
-      "level": "2"
+      "humanReadableName": "Classification"
     },
     "downloadUrl": "http://localhost:3000/api/download/product/bde7a35f-03aa-4bff-acfb-b4974ea9f217/20180609_mace-head_classification.nc",
     "filename": "20180609_mace-head_classification.nc",
@@ -97,8 +95,7 @@
     },
     "product": {
       "id": "radar",
-      "humanReadableName": "Radar",
-      "level": "1b"
+      "humanReadableName": "Radar"
     },
     "downloadUrl": "http://localhost:3000/api/download/product/38092c00-161d-4ca2-a29d-628cf8e960f6/20181115_mace-head_mira.nc",
     "filename": "20181115_mace-head_mira.nc",
@@ -132,8 +129,7 @@
     },
     "product": {
       "id": "categorize",
-      "humanReadableName": "Categorize",
-      "level": "1c"
+      "humanReadableName": "Categorize"
     },
     "downloadUrl": "http://localhost:3000/api/download/product/22b32746-faf0-4057-9076-ed2e698dcc34/20190715_bucharest_categorize.nc",
     "filename": "20190715_bucharest_categorize.nc",
@@ -167,8 +163,7 @@
     },
     "product": {
       "id": "categorize",
-      "humanReadableName": "Categorize",
-      "level": "1c"
+      "humanReadableName": "Categorize"
     },
     "downloadUrl": "http://localhost:3000/api/download/product/6cb32746-faf0-4057-9076-ed2e698dcf36/20190715_bucharest_categorize.nc",
     "filename": "20190715_bucharest_categorize.nc",
@@ -202,8 +197,7 @@
     },
     "product": {
       "id": "categorize",
-      "humanReadableName": "Categorize",
-      "level": "1c"
+      "humanReadableName": "Categorize"
     },
     "downloadUrl": "http://localhost:3000/api/download/product/8bb32746-faf0-4057-9076-ed2e698dcf36/20190715_bucharest_categorize.nc",
     "filename": "20190715_bucharest_categorize.nc",
@@ -237,8 +231,7 @@
     },
     "product": {
       "id": "categorize",
-      "humanReadableName": "Categorize",
-      "level": "1c"
+      "humanReadableName": "Categorize"
     },
     "downloadUrl": "http://localhost:3000/api/download/product/1bb32746-faf0-4057-9076-ed2e698dcf36/20190715_bucharest_categorize.nc",
     "filename": "20190715_bucharest_categorize.nc",
@@ -272,8 +265,7 @@
     },
     "product": {
       "id": "classification",
-      "humanReadableName": "Classification",
-      "level": "2"
+      "humanReadableName": "Classification"
     },
     "downloadUrl": "http://localhost:3000/api/download/product/2bb32746-faf0-4057-9076-ed2e698dcf36/20190715_bucharest_categorize.nc",
     "filename": "20190715_bucharest_categorize.nc",
@@ -307,8 +299,7 @@
     },
     "product": {
       "id": "radar",
-      "humanReadableName": "Radar",
-      "level": "1b"
+      "humanReadableName": "Radar"
     },
     "downloadUrl": "http://localhost:3000/api/download/product/d21d6a9b-6804-4465-a026-74ec429fe17d/20190901_hyytiala_rpg-fmcw-94.nc",
     "filename": "20190901_hyytiala_rpg-fmcw-94.nc",
@@ -342,8 +333,7 @@
     },
     "product": {
       "id": "categorize",
-      "humanReadableName": "Categorize",
-      "level": "1c"
+      "humanReadableName": "Categorize"
     },
     "downloadUrl": "http://localhost:3000/api/download/product/62b32746-faf0-4057-9076-ed2e698dcc34/20210126_bucharest_categorize.nc",
     "filename": "20210126_bucharest_categorize.nc",
@@ -377,8 +367,7 @@
     },
     "product": {
       "id": "categorize",
-      "humanReadableName": "Categorize",
-      "level": "1c"
+      "humanReadableName": "Categorize"
     },
     "downloadUrl": "http://localhost:3000/api/download/product/82b32746-faf0-4057-9076-ed2e698dcc34/20210126_bucharest_categorize.nc",
     "filename": "20210126_bucharest_categorize.nc",
@@ -412,8 +401,7 @@
     },
     "product": {
       "id": "categorize",
-      "humanReadableName": "Categorize",
-      "level": "1c"
+      "humanReadableName": "Categorize"
     },
     "downloadUrl": "http://localhost:3000/api/download/product/52b32746-faf0-4057-9076-ed2e698dcc34/20210126_bucharest_categorize.nc",
     "filename": "20210126_bucharest_categorize.nc",
@@ -447,8 +435,7 @@
     },
     "product": {
       "id": "categorize",
-      "humanReadableName": "Categorize",
-      "level": "1c"
+      "humanReadableName": "Categorize"
     },
     "downloadUrl": "http://localhost:3000/api/download/product/72b32746-faf0-4057-9076-ed2e698dcc34/20210126_bucharest_categorize.nc",
     "filename": "20210126_bucharest_categorize.nc",
@@ -482,8 +469,7 @@
     },
     "product": {
       "id": "radar",
-      "humanReadableName": "Radar",
-      "level": "1b"
+      "humanReadableName": "Radar"
     },
     "downloadUrl": "http://localhost:3000/api/download/product/acf78456-11b1-41a6-b2de-aa7590a75675/20210126_bucharest_radar.nc",
     "filename": "20210126_bucharest_radar.nc",

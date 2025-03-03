@@ -11,13 +11,13 @@ export enum Status {
   INVALID = "invalid",
 }
 
-export type UploadOptions = {
+export interface UploadOptions {
   checksum: string;
   filename: string;
   measurementDate: string;
   site: Site;
   status: Status;
-};
+}
 
 export abstract class Upload {
   @PrimaryColumn("uuid")
@@ -92,7 +92,7 @@ export class InstrumentUpload extends Upload {
   @Column({ type: "text", array: true, default: [], nullable: false })
   tags!: string[];
 
-  constructor(args: UploadOptions, instrumentInfo: InstrumentInfo, tags: Array<string>) {
+  constructor(args: UploadOptions, instrumentInfo: InstrumentInfo, tags: string[]) {
     super(args);
     if (instrumentInfo) {
       this.instrument = instrumentInfo.instrument;

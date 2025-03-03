@@ -16,7 +16,7 @@ defineProps<Props>();
 </template>
 
 <style lang="scss" scoped>
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 .alert {
   display: flex;
@@ -29,19 +29,19 @@ defineProps<Props>();
 }
 
 .info {
-  background-color: rgba($gray3, 0.4);
+  background-color: rgba(variables.$gray3, 0.4);
 }
 
 .note {
-  background-color: rgba($blue3, 0.4);
+  background-color: rgba(variables.$blue3, 0.4);
 }
 
 .warning {
-  background-color: rgba($yellow1, 0.4);
+  background-color: rgba(variables.$yellow1, 0.4);
 }
 
 .error {
-  background-color: rgba($red4, 0.4);
+  background-color: rgba(variables.$red4, 0.4);
 }
 
 .icon {

@@ -40,8 +40,8 @@ export abstract class File {
   @Column({ default: "" })
   pid!: string;
 
-  @Column({ type: "bigint", nullable: true })
-  dvasId!: number | null;
+  @Column({ type: "varchar", nullable: true })
+  dvasId!: string | null;
 
   @Column({ default: true })
   volatile!: boolean;

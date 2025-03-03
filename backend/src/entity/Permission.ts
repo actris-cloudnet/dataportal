@@ -35,5 +35,5 @@ export class Permission {
 }
 
 export function permissionTypeFromString(roleStr: string): PermissionType | undefined {
-  return (<any>PermissionType)[roleStr];
+  return (PermissionType as any)[roleStr];
 }

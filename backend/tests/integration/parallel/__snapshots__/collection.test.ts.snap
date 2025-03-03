@@ -11,7 +11,6 @@ exports[`GET /api/collection/:uuid returns a valid collection 1`] = `
       "experimental": false,
       "humanReadableName": "Radar",
       "id": "radar",
-      "level": "1b",
       "type": [
         "instrument",
       ],
@@ -20,7 +19,6 @@ exports[`GET /api/collection/:uuid returns a valid collection 1`] = `
       "experimental": false,
       "humanReadableName": "Model",
       "id": "model",
-      "level": "1b",
       "type": [
         "model",
       ],
@@ -90,7 +88,6 @@ exports[`GET /api/collection/:uuid/files returns collection files 1`] = `
         "experimental": false,
         "humanReadableName": "Radar",
         "id": "radar",
-        "level": "1b",
       },
       "site": {
         "country": "Finland",
@@ -108,7 +105,6 @@ exports[`GET /api/collection/:uuid/files returns collection files 1`] = `
         "experimental": false,
         "humanReadableName": "Model",
         "id": "model",
-        "level": "1b",
       },
       "site": {
         "country": "Ireland",

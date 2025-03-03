@@ -20,7 +20,7 @@ export class ProductAvailabilityRoutes {
     const rawData = await this.uploadRepo
       .createQueryBuilder("file")
       .select([
-        'file."measurementDate"::date AS "date"',
+        'file."measurementDate"::text AS "date"',
         'COUNT(file."uuid") AS "fileCount"',
         'SUM(file."size") AS "totalSize"',
       ])

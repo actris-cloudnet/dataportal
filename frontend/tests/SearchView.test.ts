@@ -21,9 +21,15 @@ let filesSortedByDate: any;
 
 // https://github.com/jsdom/jsdom/issues/3368
 global.ResizeObserver = class ResizeObserver {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
+  observe() {
+    /* empty */
+  }
+  unobserve() {
+    /* empty */
+  }
+  disconnect() {
+    /* empty */
+  }
 };
 
 describe("SearchView.vue", () => {
@@ -67,7 +73,7 @@ describe("SearchView.vue", () => {
 
     vi.mocked(axios.get).mockImplementation(defaultAxiosMock);
 
-    router.push("/search/data");
+    await router.push("/search/data");
     await router.isReady();
 
     wrapper = mount(SearchView, {

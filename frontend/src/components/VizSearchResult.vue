@@ -72,7 +72,7 @@ import FileTags from "./FileTags.vue";
 import axios from "axios";
 
 export interface Props {
-  setWideMode: Function;
+  setWideMode: (value: boolean) => void;
   date: string;
   sites?: string[];
   products?: string[];
@@ -174,12 +174,12 @@ const maxMarginLeft = computed(() =>
 const searchYieldedResults = computed(() => apiResponse.value.length > 0);
 
 watchEffect(() => {
-  props.setWideMode(comparisonView);
+  props.setWideMode(comparisonView.value);
 });
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 $filter-margin: 2rem;
 $column-spacing: 10px;
@@ -248,11 +248,11 @@ main#vizSearchResults {
 }
 
 input:checked + .slider {
-  background-color: $blue-sapphire-light;
+  background-color: variables.$blue-sapphire-light;
 }
 
 input:focus + .slider {
-  box-shadow: 0 0 1px $blue-sapphire-light;
+  box-shadow: 0 0 1px variables.$blue-sapphire-light;
 }
 
 input:checked + .slider:before {

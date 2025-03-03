@@ -381,8 +381,12 @@ async function loadVisualization(file: SearchFile) {
 }
 
 function rowSelected(item: SearchFile) {
-  loadPreview(item);
-  loadVisualization(item);
+  loadPreview(item).catch(() => {
+    /* skip */
+  });
+  loadVisualization(item).catch(() => {
+    /* skip */
+  });
 }
 
 async function createCollection() {
@@ -392,7 +396,7 @@ async function createCollection() {
     const collectionUuid = await axios.post<string>(`${backendUrl}collection`, {
       files: files.data.map((file) => file.uuid),
     });
-    router.push({ name: "Collection", params: { uuid: collectionUuid.data } });
+    await router.push({ name: "Collection", params: { uuid: collectionUuid.data } });
   } catch (err) {
     downloadFailed.value = true;
     console.error(err);
@@ -410,7 +414,7 @@ function iconCellStyle(item: any) {
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 #fileTable {
   display: flex;
@@ -571,11 +575,11 @@ function iconCellStyle(item: any) {
   }
 
   &.experimental {
-    background-color: $experimental;
+    background-color: variables.$experimental;
   }
 
   &.deleted {
-    background-color: $red4;
+    background-color: variables.$red4;
   }
 }
 </style>

@@ -41,7 +41,7 @@ const visiblePages = computed(() => {
 </template>
 
 <style lang="scss" scoped>
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 button {
   border: none;
@@ -65,17 +65,17 @@ button {
   }
 
   &:enabled {
-    color: $blue-sapphire;
+    color: variables.$blue-sapphire;
     cursor: pointer;
 
     &:hover {
-      background-color: $blue-dust;
+      background-color: variables.$blue-dust;
     }
   }
 
   &.current {
-    background-color: $steel-warrior;
-    border-color: $steel-warrior;
+    background-color: variables.$steel-warrior;
+    border-color: variables.$steel-warrior;
   }
 
   &:disabled {

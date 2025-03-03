@@ -24,6 +24,8 @@ import weatherStationIcon from "@/assets/icons/weather-station.png";
 import dopplerLidarIcon from "@/assets/icons/doppler-lidar.svg";
 import dopplerLidarWindIcon from "@/assets/icons/doppler-lidar-wind.svg";
 import rainRadarIcon from "@/assets/icons/rain-radar.svg";
+import rainGaugerIcon from "@/assets/icons/rain-gauge.png";
+import cprSimulationIcon from "@/assets/icons/earthcare.png";
 
 import markerIconRed from "@/assets/markers/marker-icon-red.png";
 import markerIconBlue from "@/assets/markers/marker-icon-blue.png";
@@ -68,6 +70,8 @@ const productIcons: Record<string, string> = {
   "doppler-lidar": dopplerLidarIcon,
   "doppler-lidar-wind": dopplerLidarWindIcon,
   "rain-radar": rainRadarIcon,
+  "rain-gauge": rainGaugerIcon,
+  "cpr-simulation": cprSimulationIcon,
 };
 
 export const getProductIcon = (product: Product | string) => {
@@ -128,13 +132,11 @@ export function formatCoordinates(latitude: number, longitude: number): string {
   return `${formatLatitude(latitude)}, ${formatLongitude(longitude)}`;
 }
 
-// eslint-disable-next-line  @typescript-eslint/no-explicit-any
 export const isValidDate = (obj: any) => {
   const date = new Date(obj);
   return !isNaN(date.getDate()) && date.getTime() > new Date("1970-01-01").getTime();
 };
 
-// eslint-disable-next-line  @typescript-eslint/no-explicit-any
 export function compareValues(a: any, b: any): number {
   if (a < b) return -1;
   if (a > b) return 1;
@@ -158,13 +160,14 @@ export function getQcIcon(errorLevel: string) {
 }
 
 export const markerColors: Record<SiteType, string> = {
-  cloudnet: markerIconBlue,
-  arm: markerIconViolet,
-  campaign: markerIconOrange,
-  mobile: markerIconGrey,
-  test: markerIconGrey,
-  model: markerIconGrey,
-  hidden: markerIconGrey,
+  "cloudnet": markerIconBlue,
+  "arm": markerIconViolet,
+  "campaign": markerIconOrange,
+  "mobile": markerIconGrey,
+  "test": markerIconGrey,
+  "model": markerIconGrey,
+  "hidden": markerIconGrey,
+  "ri-urbans": markerIconGrey,
 };
 
 export function getMarkerIcon(site: Site, selected = false) {

@@ -571,7 +571,7 @@ describe("PUT /upload/data/:checksum", () => {
   it("saves correct file size", async () => {
     await axios.put(validUrl, validFile, { headers });
     const md = await instrumentRepo.findOneByOrFail({ checksum: validMetadata.checksum });
-    expect(md.size).toBe(validFile.length + ""); // eslint-disable-line prefer-template
+    expect(md.size).toBe(validFile.length + "");
   });
 
   it("responds with 400 on invalid hash", async () => {
@@ -1165,7 +1165,7 @@ async function expectFailedUploadInstrument(
   username: string,
   password: string,
   siteId: string,
-  correctPassword: boolean = true,
+  correctPassword = true,
 ) {
   const putStatus: number = correctPassword ? 400 : 401;
   const contentLength = randomInt(4, 128);
@@ -1230,7 +1230,7 @@ async function expectFailedUploadModel(
   password: string,
   siteId: string,
   modelId: string,
-  correctPassword: boolean = true,
+  correctPassword = true,
 ) {
   const putStatus: number = correctPassword ? 400 : 401;
   const contentLength = randomInt(4, 128);

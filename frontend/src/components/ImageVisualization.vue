@@ -101,9 +101,7 @@ const props = withDefaults(defineProps<Props>(), {
   maxMarginRight: 0,
 });
 
-const emit = defineEmits<{
-  (e: "load"): void;
-}>();
+const emit = defineEmits<(e: "load") => void>();
 
 const currentData = ref(props.data);
 const nextData = ref(props.data);
@@ -151,12 +149,15 @@ const dvasVocabUri = computed(() => {
   return vocabularyUrl + name.replace(/\s/g, "");
 });
 
-watchEffect(async () => {
+watchEffect(() => {
   nextData.value = props.data;
-  await nextTick();
-  if (imgElement.value?.complete) {
-    onLoad();
-  }
+  nextTick(() => {
+    if (imgElement.value?.complete) {
+      onLoad();
+    }
+  }).catch(() => {
+    /* skip */
+  });
 });
 
 function onLoad() {

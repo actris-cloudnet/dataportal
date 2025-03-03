@@ -21,7 +21,7 @@
               {{ cell ? "Yes" : "No" }}
             </span>
             <span v-else>
-              {{ typeof cell === "number" && !Number.isInteger(cell) ? cell.toExponential(6) : cell }}
+              {{ cell }}
             </span>
           </td>
         </tr>

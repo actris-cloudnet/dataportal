@@ -31,8 +31,8 @@ import BaseButton from "@/components/BaseButton.vue";
 const name = ref("");
 const email = ref("");
 const message = ref("");
-let isActive = ref(true);
-let isError = ref(false);
+const isActive = ref(true);
+const isError = ref(false);
 
 async function sendFeedback() {
   const feedback = {
@@ -71,7 +71,6 @@ function timeout(ms: number) {
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
 .container {
   margin-bottom: 2rem;
   margin: 0 auto;

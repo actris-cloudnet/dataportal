@@ -115,6 +115,8 @@ onMounted(() => {
   nextTick(() => {
     initializePlot();
     window.addEventListener("resize", initializePlot);
+  }).catch(() => {
+    /* skip */
   });
 });
 

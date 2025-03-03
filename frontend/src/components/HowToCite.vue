@@ -86,14 +86,16 @@ async function fetchReferenceStrings(uuid: string) {
   }
 }
 
-watchEffect(async () => {
+watchEffect(() => {
   citation.value = { status: "loading" };
-  await fetchReferenceStrings(props.uuid);
+  fetchReferenceStrings(props.uuid).catch(() => {
+    /* skip */
+  });
 });
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 .error {
   color: red;
@@ -125,7 +127,7 @@ p {
 }
 
 .infocolor {
-  background: $blue-dust;
+  background: variables.$blue-dust;
   font-size: 0.9em;
 
   h4 {

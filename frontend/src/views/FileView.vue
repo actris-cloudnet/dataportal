@@ -181,6 +181,7 @@ async function fetchLocation(file: FileResponse) {
     const response = await axios.get(`${backendUrl}sites/${file.site.id}/locations/${file.measurementDate}`);
     location.value = response.data;
   } catch (err) {
+    console.error("Failed to fetch location:", err);
     location.value = null;
   }
 }
@@ -270,7 +271,7 @@ watch(
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 main {
   display: flex;
@@ -279,10 +280,10 @@ main {
 }
 
 .banner-container {
-  background-color: $actris-yellow;
+  background-color: variables.$actris-yellow;
 }
 .banner-container-obsolete {
-  background-color: $red6;
+  background-color: variables.$red6;
 }
 
 .banner {

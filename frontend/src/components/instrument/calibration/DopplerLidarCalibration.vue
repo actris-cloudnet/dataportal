@@ -18,10 +18,10 @@ const props = defineProps<{
   timestamps: string[];
   calibrationData: {
     data: {
-      azimuth_offset_deg?: number;
+      azimuth_offset?: number;
     };
   }[];
 }>();
 
-const azimuthOffset = computed(() => props.calibrationData.map((entry) => entry.data.azimuth_offset_deg ?? null));
+const azimuthOffset = computed(() => props.calibrationData.map((entry) => entry.data.azimuth_offset ?? null));
 </script>

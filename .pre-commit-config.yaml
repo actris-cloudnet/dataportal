@@ -29,3 +29,17 @@ repos:
       - id: ruff
         args: ["--fix"]
       - id: ruff-format
+  - repo: local
+    hooks:
+      - id: check-backend-types
+        name: check backend types
+        entry: ./backend/run-dev npm run type-check
+        language: system
+        pass_filenames: false
+        files: 'backend/.*\.ts$'
+      - id: check-frontend-types
+        name: check frontend types
+        entry: ./frontend/run npm run type-check
+        language: system
+        pass_filenames: false
+        files: 'frontend/.*\.(ts|vue)$'

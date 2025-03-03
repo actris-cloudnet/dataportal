@@ -1,6 +1,6 @@
 import { VueWrapper, mount } from "@vue/test-utils";
 import App from "../src/App.vue";
-import axios, { AxiosPromise, AxiosRequestConfig } from "axios";
+import axios, { AxiosPromise } from "axios";
 import { augmentAxiosResponse, nextTick } from "./lib";
 import { findByUuid, readResources } from "../../shared/lib";
 import { vi, describe, beforeAll, expect, it } from "vitest";
@@ -33,15 +33,15 @@ const visualizationResponse = {
   locationHumanReadable: "Bucharest",
 };
 
-let axiosMockWithFileUuid: Function;
+let axiosMockWithFileUuid: (uuid: string | string[]) => (url: string) => AxiosPromise;
 let resources: any;
 
 describe("FileView.vue", () => {
   beforeAll(async () => {
     resources = await readResources();
-    axiosMockWithFileUuid = (uuid: string | string[]) => {
+    axiosMockWithFileUuid = (uuid) => {
       let nreq = 0;
-      return (url: string, _req: AxiosRequestConfig | undefined): AxiosPromise => {
+      return (url: string): AxiosPromise => {
         if (url.includes("visualization")) {
           return Promise.resolve(augmentAxiosResponse(visualizationResponse));
         } else if (url.includes("/sites")) {
@@ -78,7 +78,7 @@ describe("FileView.vue", () => {
     beforeAll(async () => {
       vi.mocked(axios.get).mockImplementation(axiosMockWithFileUuid("bde"));
       wrapper = mount(App, { global: { plugins: [router] } });
-      router.push({ name: "File", params: { uuid: "bde" } });
+      await router.push({ name: "File", params: { uuid: "bde" } });
       await router.isReady();
     });
 
@@ -102,7 +102,7 @@ describe("FileView.vue", () => {
     beforeAll(async () => {
       vi.mocked(axios.get).mockImplementation(axiosMockWithFileUuid(["2bb", "1bb"]));
       wrapper = mount(App, { global: { plugins: [router] } });
-      router.push({ name: "File", params: { uuid: "6cb" } });
+      await router.push({ name: "File", params: { uuid: "6cb" } });
       await router.isReady();
     });
 
@@ -131,7 +131,7 @@ describe("FileView.vue", () => {
     beforeAll(async () => {
       vi.mocked(axios.get).mockImplementation(axiosMockWithFileUuid("3bb"));
       wrapper = mount(App, { global: { plugins: [router] } });
-      router.push({ name: "File", params: { uuid: "3bb" } });
+      await router.push({ name: "File", params: { uuid: "3bb" } });
       await router.isReady();
     });
 
@@ -159,7 +159,7 @@ describe("FileView.vue", () => {
     it("displays link to next and newest version in oldest version", async () => {
       vi.mocked(axios.get).mockImplementation(axiosMockWithFileUuid("22b"));
       wrapper = mount(App, { global: { plugins: [router] } });
-      router.push({ name: "File", params: { uuid: "22b" } });
+      await router.push({ name: "File", params: { uuid: "22b" } });
       await router.isReady();
       await nextTick(3);
 
@@ -174,7 +174,7 @@ describe("FileView.vue", () => {
     it("displays link to next, previous and newest version in second-to-newest version", async () => {
       vi.mocked(axios.get).mockImplementation(axiosMockWithFileUuid("6cb"));
       wrapper = mount(App, { global: { plugins: [router] } });
-      router.push({ name: "File", params: { uuid: "6cb" } });
+      await router.push({ name: "File", params: { uuid: "6cb" } });
       await router.isReady();
       await nextTick(3);
 
@@ -189,7 +189,7 @@ describe("FileView.vue", () => {
     it("displays link to previous version in the newest version", async () => {
       vi.mocked(axios.get).mockImplementation(axiosMockWithFileUuid("8bb"));
       wrapper = mount(App, { global: { plugins: [router] } });
-      router.push({ name: "File", params: { uuid: "8bb" } });
+      await router.push({ name: "File", params: { uuid: "8bb" } });
       await router.isReady();
       await nextTick(3);
       expect(wrapper.findAll(".banner").length).toEqual(0);

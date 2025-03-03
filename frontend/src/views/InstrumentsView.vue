@@ -43,7 +43,11 @@ import LandingHeader from "@/components/LandingHeader.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
 import ApiError from "@/views/ApiError.vue";
 
-type SiteWithInstruments = { id: string; humanReadableName: string; instruments: InstrumentInfo[] };
+interface SiteWithInstruments {
+  id: string;
+  humanReadableName: string;
+  instruments: InstrumentInfo[];
+}
 type ProductResult =
   | { status: "loading" }
   | { status: "ready"; value: SiteWithInstruments[] }

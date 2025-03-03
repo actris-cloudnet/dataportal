@@ -65,9 +65,7 @@ const model = defineModel<string | null>({ required: true });
 
 const hasError = ref(false);
 
-const emit = defineEmits<{
-  (e: "error", error: DateErrors): void;
-}>();
+const emit = defineEmits<(e: "error", error: DateErrors) => void>();
 
 function validateDate(value: string) {
   const result = {
@@ -114,7 +112,7 @@ const dateValue = computed({
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 .dateform {
   overflow: hidden;
@@ -146,25 +144,25 @@ button {
 
   width: 2em;
   height: 100%;
-  background-color: $blue-dust;
+  background-color: variables.$blue-dust;
   color: white;
-  border: 1px solid $steel-warrior;
+  border: 1px solid variables.$steel-warrior;
   border-radius: 0 2px 2px 0;
   font-size: 1em;
   cursor: pointer;
 
   &:focus {
-    background-color: $steel-warrior;
+    background-color: variables.$steel-warrior;
     outline: none;
   }
 
   &:hover {
-    background-color: $steel-warrior;
+    background-color: variables.$steel-warrior;
   }
 
   &:active {
-    background-color: $steel-warrior;
-    border-color: $blue-dust;
+    background-color: variables.$steel-warrior;
+    border-color: variables.$blue-dust;
   }
 
   & > svg {

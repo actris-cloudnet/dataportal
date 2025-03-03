@@ -13,7 +13,7 @@ const router = useRouter();
 async function submit() {
   try {
     await login(username.value, password.value);
-    router.push(typeof route.query.next === "string" ? route.query.next : { name: "Frontpage" });
+    await router.push(typeof route.query.next === "string" ? route.query.next : { name: "Frontpage" });
   } catch (err: any) {
     console.error(err);
     error.value = err;

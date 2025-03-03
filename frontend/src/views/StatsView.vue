@@ -210,7 +210,7 @@ onMounted(async () => {
       .sort((a, b) => compareValues(a.humanReadableName, b.humanReadableName));
     loadingSites.value = false;
   } catch (e) {
-    alert("Failed to download counties");
+    alert(`Failed to download counties: ${e}`);
   }
 });
 
@@ -246,7 +246,7 @@ async function onSearch() {
     statistics.value = data;
   } catch (e) {
     loading.value = false;
-    alert("Failed to download statistics");
+    alert(`Failed to download statistics: ${e}`);
   }
 }
 </script>

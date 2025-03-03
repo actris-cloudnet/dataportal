@@ -50,7 +50,8 @@
                     >
                       ACTRIS
                     </BaseTag>
-                    <BaseTag v-if="site.type.includes('arm')" type="arm" size="small"> ARM </BaseTag>
+                    <BaseTag v-if="site.type.includes('arm')" type="arm" size="small">ARM</BaseTag>
+                    <BaseTag v-if="site.type.includes('ri-urbans')" type="ri-urbans" size="small">RI-URBANS</BaseTag>
                   </td>
                 </tr>
               </tbody>
@@ -133,11 +134,11 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 main {
   box-sizing: content-box;
-  max-width: $page-width;
+  max-width: variables.$page-width;
   margin: 0 auto;
   padding: 1rem;
 }
@@ -175,7 +176,7 @@ p {
   }
 
   tr:nth-child(2n + 1) > td {
-    background-color: $blue-dust;
+    background-color: variables.$blue-dust;
   }
 }
 

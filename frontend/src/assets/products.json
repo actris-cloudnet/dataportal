@@ -270,6 +270,256 @@
       }
     ]
   },
+  "cpr-simulation": {
+    "description": "Ground-based radar measurements transformed for comparison with the 94 GHz cloud profiling radar (CPR) aboard the EarthCARE satellite.",
+    "references_html": [
+      "Pfitzenmaier et al. (2025). Orbital-Radar v1.0.0: a tool to transform suborbital radar observations to synthetic EarthCARE cloud radar data. <i>Geosci. Model Dev.</i>, <i>18</i>(1), 101-115. <a href=\"https://doi.org/10.5194/gmd-18-101-2025\">https://doi.org/10.5194/gmd-18-101-2025</a>"
+    ],
+    "dimensions": [
+      {
+        "name": "along_track",
+        "units": "m",
+        "standard_name": null,
+        "long_name": "Along-track distance",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track"],
+        "dtype": "float32"
+      },
+      {
+        "name": "along_track_sat",
+        "units": "m",
+        "standard_name": null,
+        "long_name": "Along-track distance at satellite resolution",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track_sat"],
+        "dtype": "float32"
+      },
+      {
+        "name": "height",
+        "units": "m",
+        "standard_name": "height_above_mean_sea_level",
+        "long_name": "Height above mean sea level",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "height_sat",
+        "units": "m",
+        "standard_name": null,
+        "long_name": "Height above mean sea level at satellite resolution",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["height_sat"],
+        "dtype": "float32"
+      }
+    ],
+    "common_variables": [
+      {
+        "name": "altitude",
+        "units": "m",
+        "standard_name": "altitude",
+        "long_name": "Altitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "folding_flag",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Folding flag",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track_sat", "height_sat"],
+        "dtype": "int32"
+      },
+      {
+        "name": "latitude",
+        "units": "degree_north",
+        "standard_name": "latitude",
+        "long_name": "Latitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "longitude",
+        "units": "degree_east",
+        "standard_name": "longitude",
+        "long_name": "Longitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "mean_wind",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Mean horizontal wind",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "ms_flag",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Multiple scattering flag",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track_sat", "height_sat"],
+        "dtype": "int32"
+      },
+      {
+        "name": "nubf",
+        "units": "dBZ",
+        "standard_name": null,
+        "long_name": "Non-uniform beam filling",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track_sat", "height_sat"],
+        "dtype": "float32"
+      },
+      {
+        "name": "nubf_flag",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Non-uniform beam filling flag",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track_sat", "height_sat"],
+        "dtype": "int32"
+      },
+      {
+        "name": "sat_along_track_resolution",
+        "units": "m",
+        "standard_name": null,
+        "long_name": "Satellite along-track resolution",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "sat_ifov",
+        "units": "m",
+        "standard_name": null,
+        "long_name": "Satellite instantaneous field of view",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "sat_range_resolution",
+        "units": "m",
+        "standard_name": null,
+        "long_name": "Satellite range resolution",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "time",
+        "units": "hours since 2025-01-01 00:00:00 +00:00",
+        "standard_name": "time",
+        "long_name": "Time UTC",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track"],
+        "dtype": "float64"
+      },
+      {
+        "name": "vm",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Mean Doppler velocity of input",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "vm_sat",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Convolved and integrated mean Doppler velocity",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track_sat", "height_sat"],
+        "dtype": "float32"
+      },
+      {
+        "name": "vm_sat_folded",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Doppler velocity with noise, satellite motion error, and folding",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track_sat", "height_sat"],
+        "dtype": "float32"
+      },
+      {
+        "name": "vm_sat_noise",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Convolved and integrated mean Doppler velocity with noise and satellite motion error",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track_sat", "height_sat"],
+        "dtype": "float32"
+      },
+      {
+        "name": "vm_sat_vel",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Convolved and integrated mean Doppler velocity with satellite motion error",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track_sat", "height_sat"],
+        "dtype": "float32"
+      },
+      {
+        "name": "ze",
+        "units": "dBZ",
+        "standard_name": null,
+        "long_name": "Radar reflectivity factor of input",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "ze_sat",
+        "units": "dBZ",
+        "standard_name": null,
+        "long_name": "Convolved and integrated radar reflectivity factor",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track_sat", "height_sat"],
+        "dtype": "float32"
+      },
+      {
+        "name": "ze_sat_noise",
+        "units": "dBZ",
+        "standard_name": null,
+        "long_name": "Convolved and integrated radar reflectivity factor with noise",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["along_track_sat", "height_sat"],
+        "dtype": "float32"
+      }
+    ]
+  },
   "drizzle": {
     "description": "Drizzle parameters such as drizzle flux and mean particle size, derived from combined radar and lidar beneath cloud base.",
     "references_html": [
@@ -1342,6 +1592,900 @@
       }
     ]
   },
+  "mwr-single": {
+    "description": "Microwave radiometer data processed with MWRpy providing temperature and humidity profiles with high temporal resolution.",
+    "references_html": [
+      "Marke et al. (2024). MWRpy: A Python package for processing microwave radiometer data. <i>JOSS</i>, <i>9</i>(98), 6733. <a href=\"https://doi.org/10.21105/joss.06733\">https://doi.org/10.21105/joss.06733</a>"
+    ],
+    "dimensions": [
+      {
+        "name": "bnds"
+      },
+      {
+        "name": "height",
+        "units": "m",
+        "standard_name": "height_above_mean_sea_level",
+        "long_name": "Height above mean sea level",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "time",
+        "units": "hours since 2024-01-01 00:00:00 +00:00",
+        "standard_name": "time",
+        "long_name": "Time UTC",
+        "comment": "Time indication of samples is at end of integration-time",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      }
+    ],
+    "common_variables": [
+      {
+        "name": "absolute_humidity",
+        "units": "kg m-3",
+        "standard_name": null,
+        "long_name": "Absolute humidity",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "absolute_humidity_quality_flag",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Quality flag",
+        "comment": "0 indicates data with good quality according to applied tests.\nThe list of (not) applied tests is encoded in quality_flag_status",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_below_threshold"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_above_threshold"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_above_threshold"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_failed"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_detected"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_above_threshold"
+          }
+        ],
+        "dimensions": ["time"],
+        "dtype": "int32"
+      },
+      {
+        "name": "absolute_humidity_quality_flag_status",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Quality flag status",
+        "comment": "Checks not executed in determination of quality_flag.\n0 indicates quality check has been applied.",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb_not_checked"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_lower_threshold_not_checked"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_upper_threshold_not_checked"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_not_checked"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_not_checked"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_not_checked"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam_not_checked"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_not_checked"
+          }
+        ],
+        "dimensions": ["time"],
+        "dtype": "int32"
+      },
+      {
+        "name": "altitude",
+        "units": "m",
+        "standard_name": "altitude",
+        "long_name": "Altitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "azimuth_angle",
+        "units": "degree",
+        "standard_name": "sensor_azimuth_angle",
+        "long_name": "Azimuth angle",
+        "comment": "0=North, 90=East, 180=South, 270=West",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "elevation_angle",
+        "units": "degree",
+        "standard_name": null,
+        "long_name": "Sensor elevation angle",
+        "comment": "0=horizon, 90=zenith",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "equivalent_potential_temperature",
+        "units": "K",
+        "standard_name": "air_equivalent_potential_temperature",
+        "long_name": "Equivalent potential temperature",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "iwv",
+        "units": "kg m-2",
+        "standard_name": "atmosphere_mass_content_of_water_vapor",
+        "long_name": "Integrated water vapour",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "iwv_quality_flag",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Quality flag",
+        "comment": "0 indicates data with good quality according to applied tests.\nThe list of (not) applied tests is encoded in quality_flag_status",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_below_threshold"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_above_threshold"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_above_threshold"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_failed"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_detected"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_above_threshold"
+          }
+        ],
+        "dimensions": ["time"],
+        "dtype": "int32"
+      },
+      {
+        "name": "iwv_quality_flag_status",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Quality flag status",
+        "comment": "Checks not executed in determination of quality_flag.\n0 indicates quality check has been applied.",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb_not_checked"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_lower_threshold_not_checked"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_upper_threshold_not_checked"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_not_checked"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_not_checked"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_not_checked"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam_not_checked"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_not_checked"
+          }
+        ],
+        "dimensions": ["time"],
+        "dtype": "int32"
+      },
+      {
+        "name": "latitude",
+        "units": "degree_north",
+        "standard_name": "latitude",
+        "long_name": "Latitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "longitude",
+        "units": "degree_east",
+        "standard_name": "longitude",
+        "long_name": "Longitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "lwp",
+        "units": "kg m-2",
+        "standard_name": "atmosphere_cloud_liquid_water_content",
+        "long_name": "Liquid water path",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "lwp_offset",
+        "units": "kg m-2",
+        "standard_name": null,
+        "long_name": "Subtracted offset correction of liquid water path",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "lwp_quality_flag",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Quality flag",
+        "comment": "0 indicates data with good quality according to applied tests.\nThe list of (not) applied tests is encoded in quality_flag_status",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_below_threshold"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_above_threshold"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_above_threshold"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_failed"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_detected"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_above_threshold"
+          }
+        ],
+        "dimensions": ["time"],
+        "dtype": "int32"
+      },
+      {
+        "name": "lwp_quality_flag_status",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Quality flag status",
+        "comment": "Checks not executed in determination of quality_flag.\n0 indicates quality check has been applied.",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb_not_checked"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_lower_threshold_not_checked"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_upper_threshold_not_checked"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_not_checked"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_not_checked"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_not_checked"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam_not_checked"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_not_checked"
+          }
+        ],
+        "dimensions": ["time"],
+        "dtype": "int32"
+      },
+      {
+        "name": "potential_temperature",
+        "units": "K",
+        "standard_name": "air_potential_temperature",
+        "long_name": "Potential temperature",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "relative_humidity",
+        "units": "1",
+        "standard_name": "relative_humidity",
+        "long_name": "Relative humidity",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "temperature",
+        "units": "K",
+        "standard_name": "air_temperature",
+        "long_name": "Temperature",
+        "comment": "Retrieved temperature profile from single pointing measurements",
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "temperature_quality_flag",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Quality flag",
+        "comment": "0 indicates data with good quality according to applied tests.\nThe list of (not) applied tests is encoded in quality_flag_status",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_below_threshold"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_above_threshold"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_above_threshold"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_failed"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_detected"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_above_threshold"
+          }
+        ],
+        "dimensions": ["time"],
+        "dtype": "int32"
+      },
+      {
+        "name": "temperature_quality_flag_status",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Quality flag status",
+        "comment": "Checks not executed in determination of quality_flag.\n0 indicates quality check has been applied.",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb_not_checked"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_lower_threshold_not_checked"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_upper_threshold_not_checked"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_not_checked"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_not_checked"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_not_checked"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam_not_checked"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_not_checked"
+          }
+        ],
+        "dimensions": ["time"],
+        "dtype": "int32"
+      }
+    ]
+  },
+  "mwr-l1c": {
+    "description": "Microwave radiometer data processed with MWRpy providing brightness temperature and optionally with data from infrared sensor and integrated weather station.",
+    "references_html": [
+      "Marke et al. (2024). MWRpy: A Python package for processing microwave radiometer data. <i>JOSS</i>, <i>9</i>(98), 6733. <a href=\"https://doi.org/10.21105/joss.06733\">https://doi.org/10.21105/joss.06733</a>"
+    ],
+    "dimensions": [
+      {
+        "name": "band"
+      },
+      {
+        "name": "frequency",
+        "units": "GHz",
+        "standard_name": "radiation_frequency",
+        "long_name": "Nominal centre frequency of microwave channels",
+        "comment": "1) For double-sideband receivers, frequency corresponds to the\nlocal oscillator frequency whereas the radio frequency of the upper/lower\nsideband is frequency+/-sideband_IF_separation. 2) In case of known\noffset between the real and the nominal frequency of some channels,\nfrequency+freq_shift gives more accurate values.",
+        "definition": null,
+        "dimensions": ["frequency"],
+        "dtype": "float32"
+      },
+      {
+        "name": "receiver_nb",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Microwave receiver number",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["receiver_nb"],
+        "dtype": "int32"
+      },
+      {
+        "name": "t_amb_nb"
+      },
+      {
+        "name": "time",
+        "units": "hours since 2024-01-01 00:00:00 +00:00",
+        "standard_name": "time",
+        "long_name": "Time UTC",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float64"
+      }
+    ],
+    "common_variables": [
+      {
+        "name": "air_pressure",
+        "units": "Pa",
+        "standard_name": "air_pressure",
+        "long_name": "Air pressure",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "air_temperature",
+        "units": "K",
+        "standard_name": "air_temperature",
+        "long_name": "Air temperature",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "altitude",
+        "units": "m",
+        "standard_name": "altitude",
+        "long_name": "Altitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "azimuth_angle",
+        "units": "degree",
+        "standard_name": "sensor_azimuth_angle",
+        "long_name": "Azimuth angle",
+        "comment": "0=North, 90=East, 180=South, 270=West",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "bandwidth",
+        "units": "GHz",
+        "standard_name": null,
+        "long_name": "Bandwidth of microwave channels",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["frequency"],
+        "dtype": "float32"
+      },
+      {
+        "name": "elevation_angle",
+        "units": "degree",
+        "standard_name": null,
+        "long_name": "Sensor elevation angle",
+        "comment": "0=horizon, 90=zenith",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "freq_shift",
+        "units": "GHz",
+        "standard_name": null,
+        "long_name": "Frequency shift of the microwave channels",
+        "comment": "For more accurate frequency values use frequency + freq_shift.",
+        "definition": null,
+        "dimensions": ["frequency"],
+        "dtype": "float32"
+      },
+      {
+        "name": "latitude",
+        "units": "degree_north",
+        "standard_name": "latitude",
+        "long_name": "Latitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "liquid_cloud_flag",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Liquid cloud flag",
+        "comment": "Flag meaning: no liquid cloud (0), liquid cloud present (1),\nundefined (2)",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "int32"
+      },
+      {
+        "name": "liquid_cloud_flag_status",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Liquid cloud flag status",
+        "comment": "Flag meaning: using mwr and ir (0), using mwr only (1), other (2)",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "int32"
+      },
+      {
+        "name": "longitude",
+        "units": "degree_east",
+        "standard_name": "longitude",
+        "long_name": "Longitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "met_quality_flag",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Meteorological data quality flag",
+        "comment": "0=ok, 1=problem. Note: should also be set to 1\nif corresponding sensor not available",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "low_quality_air_temperature"
+          },
+          {
+            "label": "Bit 2",
+            "description": "low_quality_relative_humidity"
+          },
+          {
+            "label": "Bit 3",
+            "description": "low_quality_air_pressure"
+          },
+          {
+            "label": "Bit 4",
+            "description": "low_quality_rainfall_rate"
+          },
+          {
+            "label": "Bit 5",
+            "description": "low_quality_wind_direction"
+          },
+          {
+            "label": "Bit 6",
+            "description": "low_quality_wind_speed"
+          }
+        ],
+        "dimensions": ["time"],
+        "dtype": "int32"
+      },
+      {
+        "name": "n_sidebands",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Number of sidebands",
+        "comment": "0: direct-detection receivers, 1: single-sideband,\n2: double-sideband. The frequency separation of sidebands\nis indicated in sideband_IF_separation.",
+        "definition": null,
+        "dimensions": ["receiver_nb"],
+        "dtype": "int32"
+      },
+      {
+        "name": "pointing_flag",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Pointing flag",
+        "comment": "Flag indicating a single pointing (staring = 0)\nor multiple pointing (scanning = 1) observation sequence",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "int32"
+      },
+      {
+        "name": "quality_flag",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Quality flag",
+        "comment": "0 indicates data with good quality according to applied tests.\nThe list of (not) applied tests is encoded in quality_flag_status",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_below_threshold"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_above_threshold"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_above_threshold"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_failed"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_detected"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_above_threshold"
+          }
+        ],
+        "dimensions": ["time", "frequency"],
+        "dtype": "int32"
+      },
+      {
+        "name": "quality_flag_status",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Quality flag status",
+        "comment": "Checks not executed in determination of quality_flag.\n0 indicates quality check has been applied.",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb_not_checked"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_lower_threshold_not_checked"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_upper_threshold_not_checked"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_not_checked"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_not_checked"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_not_checked"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam_not_checked"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_not_checked"
+          }
+        ],
+        "dimensions": ["time", "frequency"],
+        "dtype": "int32"
+      },
+      {
+        "name": "receiver",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Corresponding microwave receiver for each channel",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["frequency"],
+        "dtype": "int32"
+      },
+      {
+        "name": "relative_humidity",
+        "units": "1",
+        "standard_name": "relative_humidity",
+        "long_name": "Relative humidity",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "sideband_IF_separation",
+        "units": "GHz",
+        "standard_name": null,
+        "long_name": "Sideband IF separation",
+        "comment": "For double sideband channels, this is the positive and negative\nIF range distance of the two band passes around the centre frequency\n(which is the LO frqeuency)",
+        "definition": null,
+        "dimensions": ["frequency"],
+        "dtype": "float32"
+      },
+      {
+        "name": "t_amb",
+        "units": "K",
+        "standard_name": null,
+        "long_name": "Ambient target temperature",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time", "t_amb_nb"],
+        "dtype": "float32"
+      },
+      {
+        "name": "t_rec",
+        "units": "K",
+        "standard_name": null,
+        "long_name": "Receiver physical temperature",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time", "receiver_nb"],
+        "dtype": "float32"
+      },
+      {
+        "name": "t_sta",
+        "units": "K",
+        "standard_name": null,
+        "long_name": "Receiver temperature stability",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time", "receiver_nb"],
+        "dtype": "float32"
+      },
+      {
+        "name": "tb",
+        "units": "K",
+        "standard_name": "brightness_temperature",
+        "long_name": "Microwave brightness temperature",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time", "frequency"],
+        "dtype": "float32"
+      },
+      {
+        "name": "tb_spectrum",
+        "units": "K",
+        "standard_name": null,
+        "long_name": "Brightness temperature spectrum",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time", "frequency"],
+        "dtype": "float32"
+      },
+      {
+        "name": "zenith_angle",
+        "units": "degree",
+        "standard_name": "zenith_angle",
+        "long_name": "Zenith angle",
+        "comment": "Angle to the local vertical. A value of zero is directly overhead.",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      }
+    ]
+  },
   "ier": {
     "description": "Ice particle effective radius calculated using the Grieche et al. (2020) method which uses Hogan et al. (2006) to estimate ice water content and alpha from Delano\u00eb et al. (2007). In this method, effective radius of ice particles is calculated from attenuated-corrected radar reflectivity and model temperature.",
     "references_html": [
@@ -1527,16 +2671,6 @@
         "dtype": "float32"
       },
       {
-        "name": "diameter_spread",
-        "units": "m",
-        "standard_name": null,
-        "long_name": "Width of diameter interval",
-        "comment": "Bin size of each diameter interval.",
-        "definition": null,
-        "dimensions": ["diameter"],
-        "dtype": "float32"
-      },
-      {
         "name": "latitude",
         "units": "degree_north",
         "standard_name": "latitude",
@@ -1575,26 +2709,6 @@
         "definition": null,
         "dimensions": ["time"],
         "dtype": "float32"
-      },
-      {
-        "name": "velocity_spread",
-        "units": "m s-1",
-        "standard_name": null,
-        "long_name": "Width of velocity interval",
-        "comment": "Bin size of each velocity interval.",
-        "definition": null,
-        "dimensions": ["velocity"],
-        "dtype": "float32"
-      },
-      {
-        "name": "visibility",
-        "units": "m",
-        "standard_name": "visibility_in_air",
-        "long_name": "Meteorological optical range (MOR) visibility",
-        "comment": "Visibility estimation by the disdrometer is valid\nonly during precipitation events.",
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "int32"
       }
     ]
   },
@@ -2355,26 +3469,6 @@
         "dtype": "float32"
       },
       {
-        "name": "rainfall_amount",
-        "units": "m",
-        "standard_name": "thickness_of_rainfall_amount",
-        "long_name": "Rainfall amount",
-        "comment": "Cumulated precipitation since 00:00 UTC",
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "rainfall_rate",
-        "units": "m s-1",
-        "standard_name": "rainfall_rate",
-        "long_name": "Rainfall rate",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
         "name": "relative_humidity",
         "units": "1",
         "standard_name": "relative_humidity",
@@ -2403,6 +3497,215 @@
         "definition": null,
         "dimensions": ["time"],
         "dtype": "float32"
+      }
+    ]
+  },
+  "mwr-multi": {
+    "description": "Microwave radiometer data processed with MWRpy providing temperature and humidity profiles with high-quality profile information.",
+    "references_html": [
+      "Marke et al. (2024). MWRpy: A Python package for processing microwave radiometer data. <i>JOSS</i>, <i>9</i>(98), 6733. <a href=\"https://doi.org/10.21105/joss.06733\">https://doi.org/10.21105/joss.06733</a>"
+    ],
+    "dimensions": [
+      {
+        "name": "bnds"
+      },
+      {
+        "name": "height",
+        "units": "m",
+        "standard_name": "height_above_mean_sea_level",
+        "long_name": "Height above mean sea level",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "time",
+        "units": "hours since 2024-01-01 00:00:00 +00:00",
+        "standard_name": "time",
+        "long_name": "Time UTC",
+        "comment": "Time indication of samples is at end of integration-time",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      }
+    ],
+    "common_variables": [
+      {
+        "name": "altitude",
+        "units": "m",
+        "standard_name": "altitude",
+        "long_name": "Altitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "azimuth_angle",
+        "units": "degree",
+        "standard_name": "sensor_azimuth_angle",
+        "long_name": "Azimuth angle",
+        "comment": "0=North, 90=East, 180=South, 270=West",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "elevation_angle",
+        "units": "degree",
+        "standard_name": null,
+        "long_name": "Sensor elevation angle",
+        "comment": "0=horizon, 90=zenith",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "equivalent_potential_temperature",
+        "units": "K",
+        "standard_name": "air_equivalent_potential_temperature",
+        "long_name": "Equivalent potential temperature",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "latitude",
+        "units": "degree_north",
+        "standard_name": "latitude",
+        "long_name": "Latitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "longitude",
+        "units": "degree_east",
+        "standard_name": "longitude",
+        "long_name": "Longitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "potential_temperature",
+        "units": "K",
+        "standard_name": "air_potential_temperature",
+        "long_name": "Potential temperature",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "relative_humidity",
+        "units": "1",
+        "standard_name": "relative_humidity",
+        "long_name": "Relative humidity",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "temperature",
+        "units": "K",
+        "standard_name": "air_temperature",
+        "long_name": "Temperature",
+        "comment": "Retrieved temperature profile from multiple pointing measurements",
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "temperature_quality_flag",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Quality flag",
+        "comment": "0 indicates data with good quality according to applied tests.\nThe list of (not) applied tests is encoded in quality_flag_status",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_below_threshold"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_above_threshold"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_above_threshold"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_failed"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_detected"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_above_threshold"
+          }
+        ],
+        "dimensions": ["time"],
+        "dtype": "int32"
+      },
+      {
+        "name": "temperature_quality_flag_status",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Quality flag status",
+        "comment": "Checks not executed in determination of quality_flag.\n0 indicates quality check has been applied.",
+        "definition": [
+          {
+            "label": "Bit 1",
+            "description": "missing_tb_not_checked"
+          },
+          {
+            "label": "Bit 2",
+            "description": "tb_lower_threshold_not_checked"
+          },
+          {
+            "label": "Bit 3",
+            "description": "tb_upper_threshold_not_checked"
+          },
+          {
+            "label": "Bit 4",
+            "description": "spectral_consistency_not_checked"
+          },
+          {
+            "label": "Bit 5",
+            "description": "receiver_sanity_not_checked"
+          },
+          {
+            "label": "Bit 6",
+            "description": "rain_not_checked"
+          },
+          {
+            "label": "Bit 7",
+            "description": "sun_moon_in_beam_not_checked"
+          },
+          {
+            "label": "Bit 8",
+            "description": "tb_offset_not_checked"
+          }
+        ],
+        "dimensions": ["time"],
+        "dtype": "int32"
       }
     ]
   },
@@ -2967,1260 +4270,6 @@
       }
     ]
   },
-  "mwr-single": {
-    "description": "Microwave radiometer data processed with MWRpy providing temperature and humidity profiles with high temporal resolution.",
-    "references_html": [
-      "Marke et al. (2024). MWRpy: A Python package for processing microwave radiometer data. <i>JOSS</i>, <i>9</i>(98), 6733. <a href=\"https://doi.org/10.21105/joss.06733\">https://doi.org/10.21105/joss.06733</a>"
-    ],
-    "dimensions": [
-      {
-        "name": "bnds"
-      },
-      {
-        "name": "height",
-        "units": "m",
-        "standard_name": "height_above_mean_sea_level",
-        "long_name": "Height above mean sea level",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "time",
-        "units": "hours since 2024-01-01 00:00:00 +00:00",
-        "standard_name": "time",
-        "long_name": "Time UTC",
-        "comment": "Time indication of samples is at end of integration-time",
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      }
-    ],
-    "common_variables": [
-      {
-        "name": "absolute_humidity",
-        "units": "kg m-3",
-        "standard_name": null,
-        "long_name": "Absolute humidity",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "absolute_humidity_quality_flag",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Quality flag",
-        "comment": "0 indicates data with good quality according to applied tests.\nThe list of (not) applied tests is encoded in quality_flag_status",
-        "definition": [
-          {
-            "label": "Bit 1",
-            "description": "missing_tb"
-          },
-          {
-            "label": "Bit 2",
-            "description": "tb_below_threshold"
-          },
-          {
-            "label": "Bit 3",
-            "description": "tb_above_threshold"
-          },
-          {
-            "label": "Bit 4",
-            "description": "spectral_consistency_above_threshold"
-          },
-          {
-            "label": "Bit 5",
-            "description": "receiver_sanity_failed"
-          },
-          {
-            "label": "Bit 6",
-            "description": "rain_detected"
-          },
-          {
-            "label": "Bit 7",
-            "description": "sun_moon_in_beam"
-          },
-          {
-            "label": "Bit 8",
-            "description": "tb_offset_above_threshold"
-          }
-        ],
-        "dimensions": ["time"],
-        "dtype": "int32"
-      },
-      {
-        "name": "absolute_humidity_quality_flag_status",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Quality flag status",
-        "comment": "Checks not executed in determination of quality_flag.\n0 indicates quality check has been applied.",
-        "definition": [
-          {
-            "label": "Bit 1",
-            "description": "missing_tb_not_checked"
-          },
-          {
-            "label": "Bit 2",
-            "description": "tb_lower_threshold_not_checked"
-          },
-          {
-            "label": "Bit 3",
-            "description": "tb_upper_threshold_not_checked"
-          },
-          {
-            "label": "Bit 4",
-            "description": "spectral_consistency_not_checked"
-          },
-          {
-            "label": "Bit 5",
-            "description": "receiver_sanity_not_checked"
-          },
-          {
-            "label": "Bit 6",
-            "description": "rain_not_checked"
-          },
-          {
-            "label": "Bit 7",
-            "description": "sun_moon_in_beam_not_checked"
-          },
-          {
-            "label": "Bit 8",
-            "description": "tb_offset_not_checked"
-          }
-        ],
-        "dimensions": ["time"],
-        "dtype": "int32"
-      },
-      {
-        "name": "altitude",
-        "units": "m",
-        "standard_name": "altitude",
-        "long_name": "Altitude of site",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "azimuth_angle",
-        "units": "degree",
-        "standard_name": "sensor_azimuth_angle",
-        "long_name": "Azimuth angle",
-        "comment": "0=North, 90=East, 180=South, 270=West",
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "elevation_angle",
-        "units": "degree",
-        "standard_name": null,
-        "long_name": "Sensor elevation angle",
-        "comment": "0=horizon, 90=zenith",
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "equivalent_potential_temperature",
-        "units": "K",
-        "standard_name": "air_equivalent_potential_temperature",
-        "long_name": "Equivalent potential temperature",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "iwv",
-        "units": "kg m-2",
-        "standard_name": "atmosphere_mass_content_of_water_vapor",
-        "long_name": "Integrated water vapour",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "iwv_quality_flag",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Quality flag",
-        "comment": "0 indicates data with good quality according to applied tests.\nThe list of (not) applied tests is encoded in quality_flag_status",
-        "definition": [
-          {
-            "label": "Bit 1",
-            "description": "missing_tb"
-          },
-          {
-            "label": "Bit 2",
-            "description": "tb_below_threshold"
-          },
-          {
-            "label": "Bit 3",
-            "description": "tb_above_threshold"
-          },
-          {
-            "label": "Bit 4",
-            "description": "spectral_consistency_above_threshold"
-          },
-          {
-            "label": "Bit 5",
-            "description": "receiver_sanity_failed"
-          },
-          {
-            "label": "Bit 6",
-            "description": "rain_detected"
-          },
-          {
-            "label": "Bit 7",
-            "description": "sun_moon_in_beam"
-          },
-          {
-            "label": "Bit 8",
-            "description": "tb_offset_above_threshold"
-          }
-        ],
-        "dimensions": ["time"],
-        "dtype": "int32"
-      },
-      {
-        "name": "iwv_quality_flag_status",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Quality flag status",
-        "comment": "Checks not executed in determination of quality_flag.\n0 indicates quality check has been applied.",
-        "definition": [
-          {
-            "label": "Bit 1",
-            "description": "missing_tb_not_checked"
-          },
-          {
-            "label": "Bit 2",
-            "description": "tb_lower_threshold_not_checked"
-          },
-          {
-            "label": "Bit 3",
-            "description": "tb_upper_threshold_not_checked"
-          },
-          {
-            "label": "Bit 4",
-            "description": "spectral_consistency_not_checked"
-          },
-          {
-            "label": "Bit 5",
-            "description": "receiver_sanity_not_checked"
-          },
-          {
-            "label": "Bit 6",
-            "description": "rain_not_checked"
-          },
-          {
-            "label": "Bit 7",
-            "description": "sun_moon_in_beam_not_checked"
-          },
-          {
-            "label": "Bit 8",
-            "description": "tb_offset_not_checked"
-          }
-        ],
-        "dimensions": ["time"],
-        "dtype": "int32"
-      },
-      {
-        "name": "latitude",
-        "units": "degree_north",
-        "standard_name": "latitude",
-        "long_name": "Latitude of site",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "longitude",
-        "units": "degree_east",
-        "standard_name": "longitude",
-        "long_name": "Longitude of site",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "lwp",
-        "units": "kg m-2",
-        "standard_name": "atmosphere_cloud_liquid_water_content",
-        "long_name": "Liquid water path",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "lwp_offset",
-        "units": "kg m-2",
-        "standard_name": null,
-        "long_name": "Subtracted offset correction of liquid water path",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "lwp_quality_flag",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Quality flag",
-        "comment": "0 indicates data with good quality according to applied tests.\nThe list of (not) applied tests is encoded in quality_flag_status",
-        "definition": [
-          {
-            "label": "Bit 1",
-            "description": "missing_tb"
-          },
-          {
-            "label": "Bit 2",
-            "description": "tb_below_threshold"
-          },
-          {
-            "label": "Bit 3",
-            "description": "tb_above_threshold"
-          },
-          {
-            "label": "Bit 4",
-            "description": "spectral_consistency_above_threshold"
-          },
-          {
-            "label": "Bit 5",
-            "description": "receiver_sanity_failed"
-          },
-          {
-            "label": "Bit 6",
-            "description": "rain_detected"
-          },
-          {
-            "label": "Bit 7",
-            "description": "sun_moon_in_beam"
-          },
-          {
-            "label": "Bit 8",
-            "description": "tb_offset_above_threshold"
-          }
-        ],
-        "dimensions": ["time"],
-        "dtype": "int32"
-      },
-      {
-        "name": "lwp_quality_flag_status",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Quality flag status",
-        "comment": "Checks not executed in determination of quality_flag.\n0 indicates quality check has been applied.",
-        "definition": [
-          {
-            "label": "Bit 1",
-            "description": "missing_tb_not_checked"
-          },
-          {
-            "label": "Bit 2",
-            "description": "tb_lower_threshold_not_checked"
-          },
-          {
-            "label": "Bit 3",
-            "description": "tb_upper_threshold_not_checked"
-          },
-          {
-            "label": "Bit 4",
-            "description": "spectral_consistency_not_checked"
-          },
-          {
-            "label": "Bit 5",
-            "description": "receiver_sanity_not_checked"
-          },
-          {
-            "label": "Bit 6",
-            "description": "rain_not_checked"
-          },
-          {
-            "label": "Bit 7",
-            "description": "sun_moon_in_beam_not_checked"
-          },
-          {
-            "label": "Bit 8",
-            "description": "tb_offset_not_checked"
-          }
-        ],
-        "dimensions": ["time"],
-        "dtype": "int32"
-      },
-      {
-        "name": "potential_temperature",
-        "units": "K",
-        "standard_name": "air_potential_temperature",
-        "long_name": "Potential temperature",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "relative_humidity",
-        "units": "1",
-        "standard_name": "relative_humidity",
-        "long_name": "Relative humidity",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "temperature",
-        "units": "K",
-        "standard_name": "air_temperature",
-        "long_name": "Temperature",
-        "comment": "Retrieved temperature profile from single pointing measurements",
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "temperature_quality_flag",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Quality flag",
-        "comment": "0 indicates data with good quality according to applied tests.\nThe list of (not) applied tests is encoded in quality_flag_status",
-        "definition": [
-          {
-            "label": "Bit 1",
-            "description": "missing_tb"
-          },
-          {
-            "label": "Bit 2",
-            "description": "tb_below_threshold"
-          },
-          {
-            "label": "Bit 3",
-            "description": "tb_above_threshold"
-          },
-          {
-            "label": "Bit 4",
-            "description": "spectral_consistency_above_threshold"
-          },
-          {
-            "label": "Bit 5",
-            "description": "receiver_sanity_failed"
-          },
-          {
-            "label": "Bit 6",
-            "description": "rain_detected"
-          },
-          {
-            "label": "Bit 7",
-            "description": "sun_moon_in_beam"
-          },
-          {
-            "label": "Bit 8",
-            "description": "tb_offset_above_threshold"
-          }
-        ],
-        "dimensions": ["time"],
-        "dtype": "int32"
-      },
-      {
-        "name": "temperature_quality_flag_status",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Quality flag status",
-        "comment": "Checks not executed in determination of quality_flag.\n0 indicates quality check has been applied.",
-        "definition": [
-          {
-            "label": "Bit 1",
-            "description": "missing_tb_not_checked"
-          },
-          {
-            "label": "Bit 2",
-            "description": "tb_lower_threshold_not_checked"
-          },
-          {
-            "label": "Bit 3",
-            "description": "tb_upper_threshold_not_checked"
-          },
-          {
-            "label": "Bit 4",
-            "description": "spectral_consistency_not_checked"
-          },
-          {
-            "label": "Bit 5",
-            "description": "receiver_sanity_not_checked"
-          },
-          {
-            "label": "Bit 6",
-            "description": "rain_not_checked"
-          },
-          {
-            "label": "Bit 7",
-            "description": "sun_moon_in_beam_not_checked"
-          },
-          {
-            "label": "Bit 8",
-            "description": "tb_offset_not_checked"
-          }
-        ],
-        "dimensions": ["time"],
-        "dtype": "int32"
-      }
-    ]
-  },
-  "mwr-multi": {
-    "description": "Microwave radiometer data processed with MWRpy providing temperature and humidity profiles with high-quality profile information.",
-    "references_html": [
-      "Marke et al. (2024). MWRpy: A Python package for processing microwave radiometer data. <i>JOSS</i>, <i>9</i>(98), 6733. <a href=\"https://doi.org/10.21105/joss.06733\">https://doi.org/10.21105/joss.06733</a>"
-    ],
-    "dimensions": [
-      {
-        "name": "bnds"
-      },
-      {
-        "name": "height",
-        "units": "m",
-        "standard_name": "height_above_mean_sea_level",
-        "long_name": "Height above mean sea level",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "time",
-        "units": "hours since 2024-01-01 00:00:00 +00:00",
-        "standard_name": "time",
-        "long_name": "Time UTC",
-        "comment": "Time indication of samples is at end of integration-time",
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      }
-    ],
-    "common_variables": [
-      {
-        "name": "altitude",
-        "units": "m",
-        "standard_name": "altitude",
-        "long_name": "Altitude of site",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "azimuth_angle",
-        "units": "degree",
-        "standard_name": "sensor_azimuth_angle",
-        "long_name": "Azimuth angle",
-        "comment": "0=North, 90=East, 180=South, 270=West",
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "elevation_angle",
-        "units": "degree",
-        "standard_name": null,
-        "long_name": "Sensor elevation angle",
-        "comment": "0=horizon, 90=zenith",
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "equivalent_potential_temperature",
-        "units": "K",
-        "standard_name": "air_equivalent_potential_temperature",
-        "long_name": "Equivalent potential temperature",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "latitude",
-        "units": "degree_north",
-        "standard_name": "latitude",
-        "long_name": "Latitude of site",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "longitude",
-        "units": "degree_east",
-        "standard_name": "longitude",
-        "long_name": "Longitude of site",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "potential_temperature",
-        "units": "K",
-        "standard_name": "air_potential_temperature",
-        "long_name": "Potential temperature",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "relative_humidity",
-        "units": "1",
-        "standard_name": "relative_humidity",
-        "long_name": "Relative humidity",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "temperature",
-        "units": "K",
-        "standard_name": "air_temperature",
-        "long_name": "Temperature",
-        "comment": "Retrieved temperature profile from multiple pointing measurements",
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "temperature_quality_flag",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Quality flag",
-        "comment": "0 indicates data with good quality according to applied tests.\nThe list of (not) applied tests is encoded in quality_flag_status",
-        "definition": [
-          {
-            "label": "Bit 1",
-            "description": "missing_tb"
-          },
-          {
-            "label": "Bit 2",
-            "description": "tb_below_threshold"
-          },
-          {
-            "label": "Bit 3",
-            "description": "tb_above_threshold"
-          },
-          {
-            "label": "Bit 4",
-            "description": "spectral_consistency_above_threshold"
-          },
-          {
-            "label": "Bit 5",
-            "description": "receiver_sanity_failed"
-          },
-          {
-            "label": "Bit 6",
-            "description": "rain_detected"
-          },
-          {
-            "label": "Bit 7",
-            "description": "sun_moon_in_beam"
-          },
-          {
-            "label": "Bit 8",
-            "description": "tb_offset_above_threshold"
-          }
-        ],
-        "dimensions": ["time"],
-        "dtype": "int32"
-      },
-      {
-        "name": "temperature_quality_flag_status",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Quality flag status",
-        "comment": "Checks not executed in determination of quality_flag.\n0 indicates quality check has been applied.",
-        "definition": [
-          {
-            "label": "Bit 1",
-            "description": "missing_tb_not_checked"
-          },
-          {
-            "label": "Bit 2",
-            "description": "tb_lower_threshold_not_checked"
-          },
-          {
-            "label": "Bit 3",
-            "description": "tb_upper_threshold_not_checked"
-          },
-          {
-            "label": "Bit 4",
-            "description": "spectral_consistency_not_checked"
-          },
-          {
-            "label": "Bit 5",
-            "description": "receiver_sanity_not_checked"
-          },
-          {
-            "label": "Bit 6",
-            "description": "rain_not_checked"
-          },
-          {
-            "label": "Bit 7",
-            "description": "sun_moon_in_beam_not_checked"
-          },
-          {
-            "label": "Bit 8",
-            "description": "tb_offset_not_checked"
-          }
-        ],
-        "dimensions": ["time"],
-        "dtype": "int32"
-      }
-    ]
-  },
-  "mwr-l1c": {
-    "description": "Microwave radiometer data processed with MWRpy providing brightness temperature and optionally with data from infrared sensor and integrated weather station.",
-    "references_html": [
-      "Marke et al. (2024). MWRpy: A Python package for processing microwave radiometer data. <i>JOSS</i>, <i>9</i>(98), 6733. <a href=\"https://doi.org/10.21105/joss.06733\">https://doi.org/10.21105/joss.06733</a>"
-    ],
-    "dimensions": [
-      {
-        "name": "band"
-      },
-      {
-        "name": "frequency",
-        "units": "GHz",
-        "standard_name": "radiation_frequency",
-        "long_name": "Nominal centre frequency of microwave channels",
-        "comment": "1) For double-sideband receivers, frequency corresponds to the\nlocal oscillator frequency whereas the radio frequency of the upper/lower\nsideband is frequency+/-sideband_IF_separation. 2) In case of known\noffset between the real and the nominal frequency of some channels,\nfrequency+freq_shift gives more accurate values.",
-        "definition": null,
-        "dimensions": ["frequency"],
-        "dtype": "float32"
-      },
-      {
-        "name": "ir_channel"
-      },
-      {
-        "name": "receiver_nb",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Microwave receiver number",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["receiver_nb"],
-        "dtype": "int32"
-      },
-      {
-        "name": "t_amb_nb"
-      },
-      {
-        "name": "time",
-        "units": "hours since 2024-01-01 00:00:00 +00:00",
-        "standard_name": "time",
-        "long_name": "Time UTC",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float64"
-      }
-    ],
-    "common_variables": [
-      {
-        "name": "air_pressure",
-        "units": "Pa",
-        "standard_name": "air_pressure",
-        "long_name": "Air pressure",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "air_temperature",
-        "units": "K",
-        "standard_name": "air_temperature",
-        "long_name": "Air temperature",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "altitude",
-        "units": "m",
-        "standard_name": "altitude",
-        "long_name": "Altitude of site",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "azimuth_angle",
-        "units": "degree",
-        "standard_name": "sensor_azimuth_angle",
-        "long_name": "Azimuth angle",
-        "comment": "0=North, 90=East, 180=South, 270=West",
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "bandwidth",
-        "units": "GHz",
-        "standard_name": null,
-        "long_name": "Bandwidth of microwave channels",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["frequency"],
-        "dtype": "float32"
-      },
-      {
-        "name": "elevation_angle",
-        "units": "degree",
-        "standard_name": null,
-        "long_name": "Sensor elevation angle",
-        "comment": "0=horizon, 90=zenith",
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "freq_shift",
-        "units": "GHz",
-        "standard_name": null,
-        "long_name": "Frequency shift of the microwave channels",
-        "comment": "For more accurate frequency values use frequency + freq_shift.",
-        "definition": null,
-        "dimensions": ["frequency"],
-        "dtype": "float32"
-      },
-      {
-        "name": "latitude",
-        "units": "degree_north",
-        "standard_name": "latitude",
-        "long_name": "Latitude of site",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "liquid_cloud_flag",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Liquid cloud flag",
-        "comment": "Flag meaning: no liquid cloud (0), liquid cloud present (1),\nundefined (2)",
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "int32"
-      },
-      {
-        "name": "liquid_cloud_flag_status",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Liquid cloud flag status",
-        "comment": "Flag meaning: using mwr and ir (0), using mwr only (1), other (2)",
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "int32"
-      },
-      {
-        "name": "longitude",
-        "units": "degree_east",
-        "standard_name": "longitude",
-        "long_name": "Longitude of site",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "met_quality_flag",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Meterological data quality flag",
-        "comment": "0=ok, 1=problem. Note: should also be set to 1\nif corresponding sensor not available",
-        "definition": [
-          {
-            "label": "Bit 1",
-            "description": "low_quality_air_temperature"
-          },
-          {
-            "label": "Bit 2",
-            "description": "low_quality_relative_humidity"
-          },
-          {
-            "label": "Bit 3",
-            "description": "low_quality_air_pressure"
-          },
-          {
-            "label": "Bit 4",
-            "description": "low_quality_rainfall_rate"
-          },
-          {
-            "label": "Bit 5",
-            "description": "low_quality_wind_direction"
-          },
-          {
-            "label": "Bit 6",
-            "description": "low_quality_wind_speed"
-          }
-        ],
-        "dimensions": ["time"],
-        "dtype": "int32"
-      },
-      {
-        "name": "n_sidebands",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Number of sidebands",
-        "comment": "0: direct-detection receivers, 1: single-sideband,\n2: double-sideband. The frequency separation of sidebands\nis indicated in sideband_IF_separation.",
-        "definition": null,
-        "dimensions": ["receiver_nb"],
-        "dtype": "int32"
-      },
-      {
-        "name": "pointing_flag",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Pointing flag",
-        "comment": "Flag indicating a single pointing (staring = 0)\nor multiple pointing (scanning = 1) observation sequence",
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "int32"
-      },
-      {
-        "name": "quality_flag",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Quality flag",
-        "comment": "0 indicates data with good quality according to applied tests.\nThe list of (not) applied tests is encoded in quality_flag_status",
-        "definition": [
-          {
-            "label": "Bit 1",
-            "description": "missing_tb"
-          },
-          {
-            "label": "Bit 2",
-            "description": "tb_below_threshold"
-          },
-          {
-            "label": "Bit 3",
-            "description": "tb_above_threshold"
-          },
-          {
-            "label": "Bit 4",
-            "description": "spectral_consistency_above_threshold"
-          },
-          {
-            "label": "Bit 5",
-            "description": "receiver_sanity_failed"
-          },
-          {
-            "label": "Bit 6",
-            "description": "rain_detected"
-          },
-          {
-            "label": "Bit 7",
-            "description": "sun_moon_in_beam"
-          },
-          {
-            "label": "Bit 8",
-            "description": "tb_offset_above_threshold"
-          }
-        ],
-        "dimensions": ["time", "frequency"],
-        "dtype": "int32"
-      },
-      {
-        "name": "quality_flag_status",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Quality flag status",
-        "comment": "Checks not executed in determination of quality_flag.\n0 indicates quality check has been applied.",
-        "definition": [
-          {
-            "label": "Bit 1",
-            "description": "missing_tb_not_checked"
-          },
-          {
-            "label": "Bit 2",
-            "description": "tb_lower_threshold_not_checked"
-          },
-          {
-            "label": "Bit 3",
-            "description": "tb_upper_threshold_not_checked"
-          },
-          {
-            "label": "Bit 4",
-            "description": "spectral_consistency_not_checked"
-          },
-          {
-            "label": "Bit 5",
-            "description": "receiver_sanity_not_checked"
-          },
-          {
-            "label": "Bit 6",
-            "description": "rain_not_checked"
-          },
-          {
-            "label": "Bit 7",
-            "description": "sun_moon_in_beam_not_checked"
-          },
-          {
-            "label": "Bit 8",
-            "description": "tb_offset_not_checked"
-          }
-        ],
-        "dimensions": ["time", "frequency"],
-        "dtype": "int32"
-      },
-      {
-        "name": "rainfall_rate",
-        "units": "m s-1",
-        "standard_name": "rainfall_rate",
-        "long_name": "Rainfall rate",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "receiver",
-        "units": "1",
-        "standard_name": null,
-        "long_name": "Corresponding microwave receiver for each channel",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["frequency"],
-        "dtype": "int32"
-      },
-      {
-        "name": "relative_humidity",
-        "units": "1",
-        "standard_name": "relative_humidity",
-        "long_name": "Relative humidity",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "sideband_IF_separation",
-        "units": "GHz",
-        "standard_name": null,
-        "long_name": "Sideband IF separation",
-        "comment": "For double sideband channels, this is the positive and negative\nIF range distance of the two band passes around the centre frequency\n(which is the LO frqeuency)",
-        "definition": null,
-        "dimensions": ["frequency"],
-        "dtype": "float32"
-      },
-      {
-        "name": "t_amb",
-        "units": "K",
-        "standard_name": null,
-        "long_name": "Ambient target temperature",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time", "t_amb_nb"],
-        "dtype": "float32"
-      },
-      {
-        "name": "t_rec",
-        "units": "K",
-        "standard_name": null,
-        "long_name": "Receiver physical temperature",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time", "receiver_nb"],
-        "dtype": "float32"
-      },
-      {
-        "name": "t_sta",
-        "units": "K",
-        "standard_name": null,
-        "long_name": "Receiver temperature stability",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time", "receiver_nb"],
-        "dtype": "float32"
-      },
-      {
-        "name": "tb",
-        "units": "K",
-        "standard_name": "brightness_temperature",
-        "long_name": "Microwave brightness temperature",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time", "frequency"],
-        "dtype": "float32"
-      },
-      {
-        "name": "tb_spectrum",
-        "units": "K",
-        "standard_name": null,
-        "long_name": "Brightness temperature spectrum",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time", "frequency"],
-        "dtype": "float32"
-      },
-      {
-        "name": "wind_direction",
-        "units": "degree",
-        "standard_name": "wind_from_direction",
-        "long_name": "Wind direction",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "wind_speed",
-        "units": "m s-1",
-        "standard_name": "wind_speed",
-        "long_name": "Wind speed",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      },
-      {
-        "name": "zenith_angle",
-        "units": "degree",
-        "standard_name": "zenith_angle",
-        "long_name": "Zenith angle",
-        "comment": "Angle to the local vertical. A value of zero is directly overhead.",
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      }
-    ]
-  },
-  "doppler-lidar": {
-    "description": "Attenuatated backscatter coefficient and Doppler velocity profiles measured by a vertical-pointing Doppler lidar.",
-    "references_html": [],
-    "dimensions": [
-      {
-        "name": "range",
-        "units": "m",
-        "standard_name": null,
-        "long_name": "Range from instrument",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["range"],
-        "dtype": "float32"
-      },
-      {
-        "name": "time",
-        "units": "hours since 2024-01-01 00:00:00 +00:00",
-        "standard_name": "time",
-        "long_name": "Time UTC",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float64"
-      }
-    ],
-    "common_variables": [
-      {
-        "name": "altitude",
-        "units": "m",
-        "standard_name": "altitude",
-        "long_name": "Altitude of site",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "beta",
-        "units": "sr-1 m-1",
-        "standard_name": null,
-        "long_name": "Attenuated backscatter coefficient",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time", "range"],
-        "dtype": "float32"
-      },
-      {
-        "name": "beta_raw",
-        "units": "sr-1 m-1",
-        "standard_name": null,
-        "long_name": "Attenuated backscatter coefficient",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time", "range"],
-        "dtype": "float32"
-      },
-      {
-        "name": "height",
-        "units": "m",
-        "standard_name": "height_above_mean_sea_level",
-        "long_name": "Height above mean sea level",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["range"],
-        "dtype": "float32"
-      },
-      {
-        "name": "latitude",
-        "units": "degree_north",
-        "standard_name": "latitude",
-        "long_name": "Latitude of site",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "longitude",
-        "units": "degree_east",
-        "standard_name": "longitude",
-        "long_name": "Longitude of site",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "v",
-        "units": "m s-1",
-        "standard_name": null,
-        "long_name": "Doppler velocity",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time", "range"],
-        "dtype": "float32"
-      },
-      {
-        "name": "wavelength",
-        "units": "nm",
-        "standard_name": null,
-        "long_name": "Laser wavelength",
-        "comment": null,
-        "definition": null,
-        "dimensions": [],
-        "dtype": "float32"
-      },
-      {
-        "name": "zenith_angle",
-        "units": "degree",
-        "standard_name": "zenith_angle",
-        "long_name": "Zenith angle",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time"],
-        "dtype": "float32"
-      }
-    ]
-  },
   "rain-radar": {
     "description": "Micro Rain Radar (MRR) is a remote sensing instrument used for measuring the vertical profiles of precipitation intensity and particle size distribution in the atmosphere.",
     "references_html": [],
@@ -4363,6 +4412,192 @@
         "standard_name": "zenith_angle",
         "long_name": "Zenith angle",
         "comment": "Angle to the local vertical. A value of zero is directly overhead.",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      }
+    ]
+  },
+  "doppler-lidar": {
+    "description": "Attenuated backscatter coefficient and Doppler velocity profiles measured by a vertical-pointing Doppler lidar.",
+    "references_html": [],
+    "dimensions": [
+      {
+        "name": "range",
+        "units": "m",
+        "standard_name": null,
+        "long_name": "Range from instrument",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["range"],
+        "dtype": "float32"
+      },
+      {
+        "name": "time",
+        "units": "hours since 2024-01-01 00:00:00 +00:00",
+        "standard_name": "time",
+        "long_name": "Time UTC",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float64"
+      }
+    ],
+    "common_variables": [
+      {
+        "name": "altitude",
+        "units": "m",
+        "standard_name": "altitude",
+        "long_name": "Altitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "beta",
+        "units": "sr-1 m-1",
+        "standard_name": null,
+        "long_name": "Attenuated backscatter coefficient",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time", "range"],
+        "dtype": "float32"
+      },
+      {
+        "name": "beta_raw",
+        "units": "sr-1 m-1",
+        "standard_name": null,
+        "long_name": "Attenuated backscatter coefficient",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time", "range"],
+        "dtype": "float32"
+      },
+      {
+        "name": "height",
+        "units": "m",
+        "standard_name": "height_above_mean_sea_level",
+        "long_name": "Height above mean sea level",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["range"],
+        "dtype": "float32"
+      },
+      {
+        "name": "latitude",
+        "units": "degree_north",
+        "standard_name": "latitude",
+        "long_name": "Latitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "longitude",
+        "units": "degree_east",
+        "standard_name": "longitude",
+        "long_name": "Longitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "v",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Doppler velocity",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time", "range"],
+        "dtype": "float32"
+      },
+      {
+        "name": "wavelength",
+        "units": "nm",
+        "standard_name": null,
+        "long_name": "Laser wavelength",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "zenith_angle",
+        "units": "degree",
+        "standard_name": "zenith_angle",
+        "long_name": "Zenith angle",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      }
+    ]
+  },
+  "rain-gauge": {
+    "description": "A rain gauge is an instrument designed to measure accumulated rainfall.",
+    "references_html": [],
+    "dimensions": [
+      {
+        "name": "time",
+        "units": "hours since 2025-01-17 00:00:00 +00:00",
+        "standard_name": "time",
+        "long_name": "Time UTC",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float64"
+      }
+    ],
+    "common_variables": [
+      {
+        "name": "altitude",
+        "units": "m",
+        "standard_name": "altitude",
+        "long_name": "Altitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "latitude",
+        "units": "degree_north",
+        "standard_name": "latitude",
+        "long_name": "Latitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "longitude",
+        "units": "degree_east",
+        "standard_name": "longitude",
+        "long_name": "Longitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "rainfall_amount",
+        "units": "m",
+        "standard_name": "thickness_of_rainfall_amount",
+        "long_name": "Rainfall amount",
+        "comment": "Cumulated precipitation since 00:00 UTC",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "rainfall_rate",
+        "units": "m s-1",
+        "standard_name": "rainfall_rate",
+        "long_name": "Rainfall rate",
+        "comment": null,
         "definition": null,
         "dimensions": ["time"],
         "dtype": "float32"

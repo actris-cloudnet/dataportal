@@ -1,9 +1,8 @@
 {
   "compilerOptions": {
-    "lib": ["es2021"],
-    "target": "es5",
+    "lib": ["es2023"],
+    "target": "es2018",
     "module": "commonjs",
-    "moduleResolution": "node",
     "outDir": "./build",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,

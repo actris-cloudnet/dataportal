@@ -153,7 +153,7 @@ function getStatusClass(status: string) {
 </script>
 
 <style scoped lang="scss">
-@import "@/sass/variables.scss";
+@use "@/sass/variables.scss";
 
 .file-table {
   margin-bottom: 5rem;
@@ -223,7 +223,7 @@ tr {
   opacity: 0.5;
 }
 
-@media screen and (max-width: $narrow-screen) {
+@media screen and (max-width: variables.$narrow-screen) {
   .upload-stats-header .donut {
     margin-left: auto;
     margin-right: auto;

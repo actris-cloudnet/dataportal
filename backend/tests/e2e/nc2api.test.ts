@@ -71,7 +71,6 @@ const expectedJson = {
   product: {
     humanReadableName: "Classification",
     id: "classification",
-    level: "2",
   },
   site: {
     id: "bucharest",
