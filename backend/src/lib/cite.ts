@@ -460,7 +460,15 @@ function normalizeOrcid(orcid: string): string {
   return orcid.replace(/^(https?:\/\/)?(www\.)?orcid\.org\//, "");
 }
 
-function removeDuplicateNames(pis: Person[]): Person[] {
+function normalizeText(input: string): string {
+  return input
+    .trim()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036F]/g, "")
+    .toLowerCase();
+}
+
+export function removeDuplicateNames(pis: Person[]): Person[] {
   // Order
   const allPis = pis
     .sort((a, b) =>
@@ -476,7 +484,11 @@ function removeDuplicateNames(pis: Person[]): Person[] {
   for (const pi of allPis) {
     const nameExists = pi.orcid
       ? out.some((name) => name.orcid === pi.orcid)
-      : out.some((name) => name.firstName === pi.firstName && name.lastName === pi.lastName);
+      : out.some(
+          (name) =>
+            normalizeText(name.firstName) === normalizeText(pi.firstName) &&
+            normalizeText(name.lastName) === normalizeText(pi.lastName),
+        );
     if (!nameExists) {
       out.push(pi);
     }
