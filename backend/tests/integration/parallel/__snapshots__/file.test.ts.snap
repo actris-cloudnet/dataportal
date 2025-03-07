@@ -40,6 +40,7 @@ exports[`/api/files/:uuid request succeeds on instrument file 1`] = `
       "instrument",
     ],
   },
+  "s3key": "38092c00-161d-4ca2-a29d-628cf8e960f6/20181115_mace-head_mira.nc",
   "site": {
     "actrisId": null,
     "altitude": 16,
@@ -108,6 +109,7 @@ exports[`/api/files/:uuid request succeeds on model file 1`] = `
       "model",
     ],
   },
+  "s3key": "b5d1d5af-3667-41bc-b952-e684f627d91c/20141205_mace-head_ecmwf.nc",
   "site": {
     "actrisId": 1337,
     "altitude": 93,
