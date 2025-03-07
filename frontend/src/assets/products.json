@@ -1450,16 +1450,6 @@
         "dtype": "float32"
       },
       {
-        "name": "iwc_inc_rain",
-        "units": "kg m-3",
-        "standard_name": null,
-        "long_name": "Ice water content including rain",
-        "comment": "This variable is the same as iwc but it also contains iwc values\nabove rain. The iwc values above rain have been severely affected\nby attenuation and should be used when the effect of attenuation\nis being studied.",
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
         "name": "iwc_retrieval_status",
         "units": "1",
         "standard_name": null,
@@ -2531,7 +2521,7 @@
         "units": "m",
         "standard_name": null,
         "long_name": "Ice effective radius",
-        "comment": "This variable was calculated from the 35.5-GHz radar\nreflectivity factor after correction for gaseous attenuation,\nand temperature taken from a forecast model, using the following\nempirical formula: log10(ier[m]) = (-0.000205 * Z[dBZ] * T[degC]\n+ 0.0016 * Z[dBZ] + -0.0015 * T[degC] + -1.52)\n* 3 / (2 * 917[kg/m3]). In this formula Z is taken\nto be defined such that all frequencies of radar would measure the\nsame Z in Rayleigh scattering ice. However, the radar is more likely\nto have been calibrated such that all frequencies would measure\nthe same Z in Rayleigh scattering liquid cloud at 0 degrees C.\nThe measured Z is therefore multiplied by\n |K(liquid,0degC,35.5GHz)|^2/0.93 = 0.944 before applying\nthis formula. The formula has been used where the \"categorization\"\n\"data has diagnosed that the radar echo is due to ice, but note\nthat in some cases supercooled drizzle will erroneously be identified\nas ice. Missing data indicates either that ice cloud was present but it was\nonly detected by the lidar so its ice water content could not be estimated,\nor than there was rain below the ice associated with uncertain attenuation\nof the reflectivities in the ice.\n",
+        "comment": "This variable was calculated from the 35.5-GHz radar\nreflectivity factor after correction for gaseous attenuation,\nand temperature taken from a forecast model, using the following\nempirical formula: log10(ier[m]) = (-0.000205 * Z[dBZ] * T[degC]\n+ 0.0016 * Z[dBZ] + -0.0015 * T[degC] + -1.52)\n* 3 / (2 * 917[kg/m3]). In this formula Z is taken\nto be defined such that all frequencies of radar would measure the\nsame Z in Rayleigh scattering ice. However, the radar is more likely\nto have been calibrated such that all frequencies would measure\nthe same Z in Rayleigh scattering liquid cloud at 0 degrees C.\nThe measured Z is therefore multiplied by\n |K(liquid,0degC,35.5GHz)|^2/0.93 = 0.944 before applying\nthis formula. The formula has been used where the \"categorization\"\n\"data has diagnosed that the radar echo is due to ice, but note\nthat in some cases supercooled drizzle will erroneously be identified\nas ice. Missing data indicates either that ice cloud was present but it was\nonly detected by the lidar so its ice water content could not be estimated.",
         "definition": null,
         "dimensions": ["time", "height"],
         "dtype": "float32"
@@ -2542,16 +2532,6 @@
         "standard_name": null,
         "long_name": "Random error in ice effective radius",
         "comment": "Error in effective radius of ice particles due to error propagation,\nof ier = 3/(2 rho_i) IWC / alpha, using error for IWC and alpha as\ngiven in Hogan 2006.",
-        "definition": null,
-        "dimensions": ["time", "height"],
-        "dtype": "float32"
-      },
-      {
-        "name": "ier_inc_rain",
-        "units": "m",
-        "standard_name": null,
-        "long_name": "Ice effective radius including rain",
-        "comment": "This variable is the same as ier but it also contains ier values\nabove rain. The ier values above rain have been severely affected\nby attenuation and should be used when the effect of attenuation\nis being studied.",
         "definition": null,
         "dimensions": ["time", "height"],
         "dtype": "float32"
@@ -2573,11 +2553,11 @@
           },
           {
             "label": "Value 2",
-            "description": "Unreliable retrieval due to uncorrected attenuation from liquid water below the ice (no liquid water path measurement available)."
+            "description": "Unreliable retrieval due to uncorrected liquid, rain or melting attenuation."
           },
           {
             "label": "Value 3",
-            "description": "Retrieval performed but radar corrected for liquid attenuation using radiometer liquid water path which is not always accurate."
+            "description": "Retrieval performed with radar corrected for liquid, rain and melting attenuation."
           },
           {
             "label": "Value 4",
@@ -2585,11 +2565,11 @@
           },
           {
             "label": "Value 5",
-            "description": "Ice detected by radar but rain below so no retrieval performed due to very uncertain attenuation."
+            "description": "Uncorrected rain attenuation (deprecated)."
           },
           {
             "label": "Value 6",
-            "description": "Clear sky above rain wet-bulb temperature less than 0degC: if rain attenuation were strong then ice could be present but undetected."
+            "description": "Clear sky above rain and wet-bulb temperature less than 0degC: if rain attenuation is strong, ice could be present but undetected."
           },
           {
             "label": "Value 7",
@@ -3706,6 +3686,96 @@
         ],
         "dimensions": ["time"],
         "dtype": "int32"
+      }
+    ]
+  },
+  "epsilon-lidar": {
+    "description": "Turbulent kinetic energy dissipation rate estimated from Doppler velocity variance of vertically-pointing Doppler lidar measurements and horizontal wind speed from Doppler lidar scan measurements.",
+    "references_html": [
+      "O\u2019Connor et al. (2010). A Method for Estimating the Turbulent Kinetic Energy Dissipation Rate from a Vertically Pointing Doppler Lidar, and Independent Evaluation from Balloon-Borne In Situ Measurements. <i>Journal of Atmospheric and Oceanic Technology</i>, <i>27</i>(10), 1652-1664. <a href=\"https://doi.org/10.1175/2010JTECHA1455.1\">https://doi.org/10.1175/2010JTECHA1455.1</a>"
+    ],
+    "dimensions": [
+      {
+        "name": "height",
+        "units": "m",
+        "standard_name": "height_above_mean_sea_level",
+        "long_name": "Height above mean sea level",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "time",
+        "units": "hours since 2025-01-01 00:00:00 +00:00",
+        "standard_name": "time",
+        "long_name": "Time UTC",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float64"
+      }
+    ],
+    "common_variables": [
+      {
+        "name": "altitude",
+        "units": "m",
+        "standard_name": "altitude",
+        "long_name": "Altitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "epsilon",
+        "units": "m2 s-3",
+        "standard_name": null,
+        "long_name": "Dissipation rate of turbulent kinetic energy",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "latitude",
+        "units": "degree_north",
+        "standard_name": "latitude",
+        "long_name": "Latitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "longitude",
+        "units": "degree_east",
+        "standard_name": "longitude",
+        "long_name": "Longitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "ray_accumulation_time",
+        "units": "s",
+        "standard_name": null,
+        "long_name": "Ray accumulation time",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "rolling_window_period",
+        "units": "s",
+        "standard_name": null,
+        "long_name": "Rolling window period",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
       }
     ]
   },

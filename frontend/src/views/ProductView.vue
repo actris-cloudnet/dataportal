@@ -139,7 +139,7 @@ const descriptions: Record<Section, string> = {
 };
 
 const lowerCaseProductName = (product: Product) =>
-  product.humanReadableName.toLowerCase().replace("mwr", "MWR").replace("doppler", "Doppler");
+  product.humanReadableName.toLowerCase().replace("mwr", "MWR").replace("doppler", "Doppler").replace("tke", "TKE");
 
 watch(
   () => props.product,
