@@ -34,6 +34,10 @@ export class SoftwareService {
       humanReadableName: "Model munger",
       githubRepository: "actris-cloudnet/model-munger",
     },
+    "ceilopyter": {
+      humanReadableName: "Ceilopyter",
+      githubRepository: "actris-cloudnet/ceilopyter",
+    },
   };
 
   constructor(dataSource: DataSource) {
