@@ -41,7 +41,7 @@ export class DownloadRoutes {
     this.citationService = citationService;
     this.httpAgent = new http.Agent({
       maxTotalSockets: 1024,
-      timeout: 10_000,
+      timeout: 60_000,
       keepAlive: true,
     });
   }
