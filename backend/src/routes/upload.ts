@@ -560,7 +560,7 @@ function addFilenameAffixClause(affixList: string[], qb: SelectQueryBuilder<any>
         const affix = escapeLikeString(raw);
         const parameterName = `filenameAffixParameter${affixType}${index}`;
         const pattern = affixType === "prefix" ? `${affix}%` : `%${affix}`;
-        qb_or.orWhere(`um.filename LIKE :${parameterName}`, { [parameterName]: pattern });
+        qb_or.orWhere(`um.filename ILIKE :${parameterName}`, { [parameterName]: pattern });
       });
     }),
   );
