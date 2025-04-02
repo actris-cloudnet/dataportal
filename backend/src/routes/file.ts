@@ -24,6 +24,7 @@ import { ModelVisualization } from "../entity/ModelVisualization";
 import { Product } from "../entity/Product";
 import { SoftwareService } from "../lib/software";
 import { InstrumentInfo } from "../entity/Instrument";
+import axios from "axios";
 
 export class FileRoutes {
   constructor(dataSource: DataSource) {
@@ -182,9 +183,12 @@ export class FileRoutes {
 
     try {
       await checkFileExists(getS3pathForFile(file));
-    } catch (e) {
-      console.error(e);
-      return next({ status: 400, errors: ["The specified file was not found in storage service"] });
+    } catch (e: any) {
+      if (e.code && e.code == "ECONNABORTED") {
+        return next({ status: 504, errors: ["Storage service took too long to respond"] });
+      } else {
+        return next({ status: 400, errors: ["The specified file was not found in storage service"] });
+      }
     }
 
     if (file.software) {

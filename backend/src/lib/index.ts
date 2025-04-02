@@ -132,7 +132,7 @@ export async function checkFileExists(s3path: string) {
   const headers = {
     Authorization: ssAuthString(),
   };
-  return axios.head(`${env.DP_SS_URL}${s3path}`, { headers });
+  return axios.head(`${env.DP_SS_URL}${s3path}`, { headers, timeout: 5000 });
 }
 
 const translateKeyVal = (key: string, val: string | number | boolean | Date, acc: any, prefix: string) => {
