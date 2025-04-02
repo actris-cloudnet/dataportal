@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import defaultLogo from "@/assets/header-logo.svg";
-import foolLogo from "@/assets/header-logo-fool.svg";
 import xmasLogo from "@/assets/header-logo-xmas.svg";
 import actrisLogo from "@/assets/logos/actris-white.svg";
 import { ref } from "vue";
@@ -8,13 +7,12 @@ import { ref } from "vue";
 const isDev = import.meta.env.DEV;
 const today = new Date();
 const isXmas = !isDev && today.getMonth() === 11 && today.getDate() > 15;
-const isFool = !isDev && today.getMonth() === 3 && today.getDate() === 1;
-const logo = isXmas ? xmasLogo : isFool ? foolLogo : defaultLogo;
+const logo = isXmas ? xmasLogo : defaultLogo;
 const showMenu = ref(false);
 </script>
 
 <template>
-  <header :class="{ dev: isDev, xmas: isXmas, fool: isFool }">
+  <header :class="{ dev: isDev, xmas: isXmas }">
     <div class="container pagewidth">
       <a href="/" class="logo actris-logo">
         <img :src="actrisLogo" alt="ACTRIS" />
@@ -108,10 +106,6 @@ header {
     background-size: auto, auto, auto, cover;
     background-repeat: no-repeat, repeat, no-repeat, no-repeat;
   }
-
-  &.fool::before {
-    background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 1)), url("@/assets/clouds3.jpg");
-  }
 }
 
 .container {
@@ -138,14 +132,6 @@ img {
 header.xmas .cloudnet-logo img {
   transform: scale(1.8);
   padding: 0 2rem;
-}
-
-header.fool {
-  text-shadow: 1px 2px 2px rgba(255, 0, 0, 0.5);
-
-  .logo img {
-    filter: drop-shadow(1px 2px 2px rgba(255, 0, 0, 0.5));
-  }
 }
 
 .actris-logo img {
