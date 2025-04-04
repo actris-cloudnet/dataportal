@@ -178,7 +178,9 @@ async function fetchLocation(file: FileResponse) {
     return;
   }
   try {
-    const response = await axios.get(`${backendUrl}sites/${file.site.id}/locations/${file.measurementDate}`);
+    const response = await axios.get(`${backendUrl}sites/${file.site.id}/locations`, {
+      params: { date: file.measurementDate },
+    });
     location.value = response.data;
   } catch (err) {
     console.error("Failed to fetch location:", err);

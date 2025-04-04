@@ -155,16 +155,11 @@ describe("GET /api/sites/:siteId/locations", () => {
     expect(res.data).toMatchObject([
       {
         date: "2022-01-01",
-        latitude: 60.163,
-        longitude: 24.969,
+        latitude: 59.982,
+        longitude: 24.904,
       },
       {
         date: "2022-01-02",
-        latitude: 59.801,
-        longitude: 24.839,
-      },
-      {
-        date: "2022-01-03",
         latitude: 59.446,
         longitude: 24.772,
       },
@@ -177,30 +172,60 @@ describe("GET /api/sites/:siteId/locations", () => {
       genResponse(404, { status: 404, errors: ["No sites match this id"] }),
     );
   });
-});
 
-describe("GET /api/sites/:siteId/locations/:date", () => {
   it("responds with the correct json on valid date", async () => {
-    const validUrl = `${url}boaty/locations/2022-01-03`;
+    const validUrl = `${url}boaty/locations?date=2022-01-01`;
     const res = await axios.get(validUrl);
     expect(res.data).toMatchObject({
-      date: "2022-01-03",
-      latitude: 59.446,
-      longitude: 24.772,
+      date: "2022-01-01",
+      latitude: 59.982,
+      longitude: 24.904,
     });
   });
 
   it("responds with 404 on missing date", async () => {
-    const missingUrl = `${url}boaty/locations/2022-01-04`;
+    const missingUrl = `${url}boaty/locations?date=2022-01-03`;
     return expect(axios.get(missingUrl)).rejects.toMatchObject(
       genResponse(404, { status: 404, errors: ["No location match this date"] }),
     );
   });
 
-  it("responds with 404 if site is not found", async () => {
-    const invalidUrl = `${url}espoo/locations/2022-01-03`;
-    return expect(axios.get(invalidUrl)).rejects.toMatchObject(
-      genResponse(404, { status: 404, errors: ["No sites match this id"] }),
-    );
+  it("responds with all raw locations", async () => {
+    const validUrl = `${url}boaty/locations?raw=1`;
+    const res = await axios.get(validUrl);
+    expect(res.data).toMatchObject([
+      {
+        date: "2022-01-01T00:00:00Z",
+        latitude: 60.163,
+        longitude: 24.969,
+      },
+      {
+        date: "2022-01-01T12:00:00Z",
+        latitude: 59.801,
+        longitude: 24.839,
+      },
+      {
+        date: "2022-01-02T00:00:00Z",
+        latitude: 59.446,
+        longitude: 24.772,
+      },
+    ]);
+  });
+
+  it("responds with raw locations on date", async () => {
+    const validUrl = `${url}boaty/locations?date=2022-01-01&raw=1`;
+    const res = await axios.get(validUrl);
+    expect(res.data).toMatchObject([
+      {
+        date: "2022-01-01T00:00:00Z",
+        latitude: 60.163,
+        longitude: 24.969,
+      },
+      {
+        date: "2022-01-01T12:00:00Z",
+        latitude: 59.801,
+        longitude: 24.839,
+      },
+    ]);
   });
 });
