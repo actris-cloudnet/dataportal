@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { DataSource, Raw, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { hideTestDataFromNormalUsers, toArray } from "../lib";
 import { Site, SiteType } from "../entity/Site";
 import { SiteLocation } from "../entity/SiteLocation";
