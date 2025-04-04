@@ -123,9 +123,9 @@ export class SiteRoutes {
       params.push(req.query.date);
     }
     const query = req.query.raw
-      ? `SELECT to_char(date, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS date
-              , latitude
-              , longitude
+      ? `SELECT to_char(date, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS date,
+                latitude,
+                longitude
          FROM site_location
          WHERE ${where}
          ORDER BY date`
