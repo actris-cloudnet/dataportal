@@ -123,16 +123,19 @@ export class SiteRoutes {
       params.push(req.query.date);
     }
     const query = req.query.raw
-      ? `SELECT to_char(date, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS date, latitude, longitude
+      ? `SELECT to_char(date, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS date
+              , latitude
+              , longitude
          FROM site_location
-         WHERE ${where} ORDER BY date`
+         WHERE ${where}
+         ORDER BY date`
       : `SELECT date,
-              round(degrees(atan2(z, sqrt(x * x + y * y)))::numeric, 3)::float AS latitude,
-              round(degrees(atan2(y, x))::numeric, 3)::float AS longitude
+                round(degrees(atan2(z, sqrt(x * x + y * y)))::numeric, 3)::float AS latitude,
+                round(degrees(atan2(y, x))::numeric, 3)::float AS longitude
          FROM (SELECT date::date::text,
-                     avg(cos(radians(latitude)) * cos(radians(longitude))) as x,
-                     avg(cos(radians(latitude)) * sin(radians(longitude))) as y,
-                     avg(sin(radians(latitude))) as z
+                      avg(cos(radians(latitude)) * cos(radians(longitude))) AS x,
+                      avg(cos(radians(latitude)) * sin(radians(longitude))) AS y,
+                      avg(sin(radians(latitude))) AS z
                FROM site_location
                WHERE ${where}
                GROUP BY date::date
