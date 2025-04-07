@@ -9,7 +9,7 @@ export class SiteLocation {
   @ManyToOne((_) => Site, (site) => site.locations)
   site!: Site;
 
-  @Column({ type: "date", primary: true })
+  @Column({ type: "timestamp", primary: true })
   date!: Date;
 
   @Column({ type: "float" })

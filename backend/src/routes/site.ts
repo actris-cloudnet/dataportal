@@ -116,17 +116,39 @@ export class SiteRoutes {
     const qb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteId", req.params);
     const site = await hideTestDataFromNormalUsers(qb, req).getOne();
     if (!site) return next({ status: 404, errors: ["No sites match this id"] });
-    const location = await this.siteLocationRepo.findOneBy({ siteId: site.id, date: new Date(req.params.date) });
-    if (!location) return next({ status: 404, errors: ["No location match this date"] });
-    res.send(location);
-  };
-
-  locations: RequestHandler = async (req, res, next) => {
-    const qb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteId", req.params);
-    const site = await hideTestDataFromNormalUsers(qb, req).getOne();
-    if (!site) return next({ status: 404, errors: ["No sites match this id"] });
-    const locations = await this.siteLocationRepo.find({ where: { siteId: site.id }, order: { date: "ASC" } });
-    res.send(locations);
+    let where = `"siteId"=$1`;
+    const params = [site.id];
+    if (req.query.date) {
+      where += " AND date::date = $2";
+      params.push(req.query.date);
+    }
+    const query = req.query.raw
+      ? `SELECT to_char(date, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS date,
+                latitude,
+                longitude
+         FROM site_location
+         WHERE ${where}
+         ORDER BY date`
+      : `SELECT date,
+                round(degrees(atan2(z, sqrt(x * x + y * y)))::numeric, 3)::float AS latitude,
+                round(degrees(atan2(y, x))::numeric, 3)::float AS longitude
+         FROM (SELECT date::date::text,
+                      avg(cos(radians(latitude)) * cos(radians(longitude))) AS x,
+                      avg(cos(radians(latitude)) * sin(radians(longitude))) AS y,
+                      avg(sin(radians(latitude))) AS z
+               FROM site_location
+               WHERE ${where}
+               GROUP BY date::date
+               ORDER BY date::date)`;
+    const locations = await this.siteLocationRepo.query(query, params);
+    if (req.query.date && !req.query.raw) {
+      if (locations.length !== 1) {
+        return next({ status: 404, errors: ["No location match this date"] });
+      }
+      res.send(locations[0]);
+    } else {
+      res.send(locations);
+    }
   };
 
   private async fetchDvasFacility(dvasId: string) {
