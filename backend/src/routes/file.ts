@@ -24,7 +24,6 @@ import { ModelVisualization } from "../entity/ModelVisualization";
 import { Product } from "../entity/Product";
 import { SoftwareService } from "../lib/software";
 import { InstrumentInfo } from "../entity/Instrument";
-import axios from "axios";
 
 export class FileRoutes {
   constructor(dataSource: DataSource) {
@@ -51,11 +50,28 @@ export class FileRoutes {
   readonly instrumentInfoRepo: Repository<InstrumentInfo>;
   readonly softwareService: SoftwareService;
 
+  siteMetadataKeys = [
+    "site.id",
+    "site.humanReadableName",
+    "site.stationName",
+    "site.latitude",
+    "site.longitude",
+    "site.altitude",
+    "site.type",
+    "site.gaw",
+    "site.dvasId",
+    "site.actrisId",
+    "site.country",
+    "site.countryCode",
+    "site.countrySubdivisionCode",
+  ];
+
   file: RequestHandler = async (req, res, next) => {
     const getFileByUuid = (repo: any, isModel: boolean | undefined) => {
       const qb = repo
         .createQueryBuilder("file")
-        .leftJoinAndSelect("file.site", "site")
+        .leftJoin("file.site", "site")
+        .addSelect(this.siteMetadataKeys)
         .leftJoinAndSelect("file.product", "product")
         .leftJoinAndSelect("file.software", "software")
         .orderBy('COALESCE(software."humanReadableName", software.code)', "ASC");
@@ -365,7 +381,8 @@ export class FileRoutes {
     }
     let qb = repo
       .createQueryBuilder("file")
-      .leftJoinAndSelect("file.site", "site")
+      .leftJoin("file.site", "site")
+      .addSelect(this.siteMetadataKeys)
       .leftJoinAndSelect("file.product", "product");
     if (isModel) qb.leftJoinAndSelect("file.model", "model");
     if (!isModel) qb.leftJoinAndSelect("file.instrument", "instrument");
