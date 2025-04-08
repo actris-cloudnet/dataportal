@@ -61,6 +61,9 @@ export abstract class File {
   @Column({ type: "bigint" })
   size!: number;
 
+  @Column({ type: "real", nullable: true })
+  coverage!: number;
+
   @Column()
   format!: string;
 
