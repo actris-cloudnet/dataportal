@@ -126,9 +126,6 @@ export class RegularFile extends File {
   @OneToMany((_) => Visualization, (viz) => viz.sourceFile)
   visualizations!: Visualization[];
 
-  @Column({ nullable: true })
-  instrumentPid!: string;
-
   @ManyToOne((_) => Instrument, (instrument) => instrument.files, { nullable: true })
   instrument!: Instrument | null;
 
