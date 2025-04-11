@@ -105,7 +105,7 @@ export class InstrumentRoutes {
           "measurementDate",
           COALESCE(CAST("siteId" != LAG("siteId") OVER (ORDER BY "measurementDate" DESC) AS INT), 1) AS "isNewPeriod"
         FROM regular_file
-        WHERE regular_file."instrumentInfoUuid" = $1
+        WHERE regular_file."instrumentInfoUuid" = $1 AND "tombstoneReason" IS NULL
       ), periods AS (
         SELECT
           "siteId",
