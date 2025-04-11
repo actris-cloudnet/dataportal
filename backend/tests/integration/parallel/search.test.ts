@@ -52,8 +52,9 @@ describe("/api/files", () => {
     const payload = { params: { instrument: "mira-35" } };
     const res = await axios.get(url, payload);
     expect(res).toHaveProperty("data");
+    console.log(res.data);
     expect(res.data).toHaveLength(2);
-    return expect(res.data.map((d: any) => d.instrument.id)).toEqual(["mira-35", "mira-35"]);
+    return expect(res.data.map((d: any) => d.instrument.instrumentId)).toEqual(["mira-35", "mira-35"]);
   });
 
   it("responds with an array of 3 objects when searching for mace-head and hyytiala", async () => {
