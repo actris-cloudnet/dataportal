@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { DataSource, LessThanOrEqual, Repository } from "typeorm";
+import { DataSource, FindOneOptions, FindOptions, LessThanOrEqual, Repository } from "typeorm";
 import { Instrument, InstrumentInfo, NominalInstrument } from "../entity/Instrument";
 import { InstrumentUpload } from "../entity/Upload";
 import { isValidDate } from "../lib";
@@ -135,26 +135,36 @@ export class InstrumentRoutes {
     if (!query.site) {
       return next({ status: 400, errors: "site is required" });
     }
-    if (!query.product) {
-      return next({ status: 400, errors: "product is required" });
+
+    const qb = this.nominalInstrumentRepo
+      .createQueryBuilder("nominal")
+      .distinctOn(["nominal.product"])
+      .leftJoinAndSelect("nominal.instrumentInfo", "instrumentInfo")
+      .where("nominal.site = :site", { site: query.site })
+      .andWhere("nominal.measurementDate <= :date", { date: query.date })
+      .orderBy("nominal.product")
+      .addOrderBy("nominal.measurementDate", "DESC");
+
+    if (query.product) {
+      qb.andWhere("nominal.product = :product", { product: query.product }).limit(1);
     }
-    const data = await this.nominalInstrumentRepo.findOne({
-      where: {
-        site: { id: query.site },
-        product: { id: query.product },
-        measurementDate: LessThanOrEqual(query.date),
-      },
-      relations: { instrumentInfo: true },
-      order: { measurementDate: "DESC" },
-    });
-    if (!data) {
-      return next({ status: 404, errors: "Nominal instrument not specified" });
+
+    const rows = await qb.getMany();
+
+    let output: any = rows.map((row) => ({
+      siteId: row.siteId,
+      productId: row.productId,
+      measurementDate: row.measurementDate,
+      nominalInstrument: row.instrumentInfo,
+    }));
+
+    if (query.product) {
+      if (rows.length !== 1) {
+        return next({ status: 404, errors: "Nominal instrument not specified" });
+      }
+      output = output[0];
     }
-    res.send({
-      siteId: data.siteId,
-      productId: data.productId,
-      measurementDate: data.measurementDate,
-      nominalInstrument: data.instrumentInfo,
-    });
+
+    res.send(output);
   };
 }

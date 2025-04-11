@@ -20,6 +20,7 @@
               <router-link :to="instrument.to">{{ instrument.name }}</router-link>
             </span>
             <span v-else>{{ instrument.name }}</span>
+            <BaseTag v-if="nominalUuids.has(instrument.uuid)" type="actris" size="small">Nominal</BaseTag>
           </div>
         </div>
         <div v-else class="detailslistNotAvailable">
@@ -95,6 +96,7 @@
 import { computed, onMounted, ref } from "vue";
 import axios from "axios";
 import type { Site } from "@shared/entity/Site";
+import type { NominalInstrument } from "@shared/entity/Instrument";
 import MyMap from "@/components/SuperMap.vue";
 import { formatCoordinates, getInstrumentIcon, backendUrl } from "@/lib";
 import type { ReducedMetadataResponse } from "@shared/entity/ReducedMetadataResponse";
@@ -102,11 +104,13 @@ import TrackMap, { type Point } from "@/components/TrackMap.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
 import type { RouteLocationRaw } from "vue-router";
 import orcidLogo from "@/assets/icons/orcid.png";
+import BaseTag from "@/components/BaseTag.vue";
 
 interface Instrument {
   to: RouteLocationRaw | null;
   name: string;
   icon: string;
+  uuid: string;
 }
 
 type LocationsResult =
@@ -122,6 +126,7 @@ export interface Props {
 const props = defineProps<Props>();
 
 const instruments = ref<Instrument[]>([]);
+const nominalUuids = ref(new Set());
 const instrumentsFromLastDays = 30;
 const instrumentsStatus = ref<"loading" | "error" | "ready">("loading");
 const mapKey = ref(0);
@@ -163,10 +168,16 @@ onMounted(() => {
   } else {
     locations.value = { status: "notFound" };
   }
-  loadInstruments().catch((error) => {
-    console.error(error);
-    instrumentsStatus.value = "error";
-  });
+  Promise.all([loadInstruments(), loadNominalInstruments()])
+    .then(([inst, nominal]) => {
+      instruments.value = inst;
+      nominalUuids.value = nominal;
+      instrumentsStatus.value = "ready";
+    })
+    .catch((error) => {
+      console.error(error);
+      instrumentsStatus.value = "error";
+    });
 });
 
 function handleInstrument(response: ReducedMetadataResponse): Instrument {
@@ -176,12 +187,14 @@ function handleInstrument(response: ReducedMetadataResponse): Instrument {
       to: { name: "Instrument", params: { uuid: response.instrumentInfo.uuid } },
       name: `${response.instrumentInfo.name} ${response.instrumentInfo.type}`,
       icon: getInstrumentIcon(response.instrument),
+      uuid: response.instrumentInfo.uuid,
     };
   } else {
     return {
       to: null,
       name: `Unidentified ${response.instrument.humanReadableName}`,
       icon: getInstrumentIcon(response.instrument),
+      uuid: "",
     };
   }
 }
@@ -196,8 +209,18 @@ async function loadInstruments() {
       status: ["uploaded", "processed"],
     },
   });
-  instruments.value = res.data.map(handleInstrument);
-  instrumentsStatus.value = "ready";
+  return res.data.map(handleInstrument);
+}
+
+async function loadNominalInstruments() {
+  const now = new Date();
+  const res = await axios.get<NominalInstrument[]>(`${backendUrl}nominal-instrument/`, {
+    params: {
+      site: props.site.id,
+      date: now,
+    },
+  });
+  return new Set(res.data.flatMap((item) => item.nominalInstrument.uuid));
 }
 </script>
 
@@ -217,6 +240,10 @@ img.product {
     margin-top: 5px;
     margin-bottom: 0.5em;
     margin-left: 10px;
+
+    .tag {
+      margin-left: 0.25rem;
+    }
   }
 }
 
