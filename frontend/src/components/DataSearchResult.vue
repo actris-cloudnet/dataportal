@@ -145,11 +145,11 @@
           </BaseButton>
         </div>
         <dl class="inffff">
-          <template v-if="'instrumentInfo' in previewResponse && previewResponse.instrumentInfo">
+          <template v-if="'instrument' in previewResponse && previewResponse.instrument">
             <dt>Instrument</dt>
             <dd>
-              <router-link :to="{ name: 'Instrument', params: { uuid: previewResponse.instrumentInfo.uuid } }">
-                {{ previewResponse.instrumentInfo.name }}
+              <router-link :to="{ name: 'Instrument', params: { uuid: previewResponse.instrument.uuid } }">
+                {{ previewResponse.instrument.name }}
               </router-link>
             </dd>
           </template>

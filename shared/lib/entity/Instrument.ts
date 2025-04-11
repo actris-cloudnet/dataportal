@@ -5,6 +5,9 @@ export type InstrumentType = "radar" | "lidar" | "mwr" | "disdrometer";
 
 export interface Instrument {
   id: string;
+  name: string;
+  pid: string;
+  uuid: string;
   type: InstrumentType;
   humanReadableName: string;
   uploads: InstrumentUpload[];
