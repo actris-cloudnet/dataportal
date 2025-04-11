@@ -12,17 +12,13 @@
           {{ file.product.humanReadableName }}
         </router-link>
       </dd>
-      <template v-if="'instrumentPid' in file && file.instrumentPid">
+      <template v-if="'instrument' in file && file.instrument?.uuid">
         <dt>Instrument</dt>
         <dd>
-          <router-link
-            v-if="file.instrumentInfo"
-            :to="{ name: 'Instrument', params: { uuid: file.instrumentInfo.uuid } }"
-          >
-            {{ file.instrumentInfo.name }}
-            {{ file.instrumentInfo.type }}
+          <router-link :to="{ name: 'Instrument', params: { uuid: file.instrument.uuid } }">
+            {{ file.instrument.name }}
+            {{ file.instrument.type }}
           </router-link>
-          <a v-else :href="file.instrumentPid">{{ file.instrumentPid }}</a>
         </dd>
       </template>
       <template v-if="'model' in file">

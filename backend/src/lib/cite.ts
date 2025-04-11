@@ -190,11 +190,12 @@ export class CitationService {
   private queryInstrumentPids(object: RegularFile | Collection): Promise<{ instrumentPid: string; dates: string[] }[]> {
     return this.querySourceFiles(
       object,
-      `SELECT "instrumentPid", array_agg(regular_file."measurementDate"::text) AS dates
+      `SELECT instrument_info.pid AS "instrumentPid", array_agg(regular_file."measurementDate"::text) AS dates
        FROM traverse
        JOIN regular_file ON traverse.uuid = regular_file.uuid
-       WHERE "instrumentPid" IS NOT NULL
-       GROUP BY "instrumentPid"`,
+       JOIN instrument_info ON regular_file."instrumentInfoUuid" = instrument_info.uuid
+       WHERE instrument_info.pid IS NOT NULL
+       GROUP BY instrument_info.pid`,
     );
   }
 

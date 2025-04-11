@@ -59,8 +59,8 @@ export class SearchFile {
     if ("instrument" in file) {
       this.instrument = file.instrument;
     }
-    if ("instrumentPid" in file) {
-      this.instrumentPid = file.instrumentPid;
+    if ("instrumentInfo" in file && file.instrumentInfo) {
+      this.instrumentPid = file.instrumentInfo.pid;
     }
     if ("instrumentInfo" in file) {
       this.instrumentInfo = file.instrumentInfo;

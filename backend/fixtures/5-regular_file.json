@@ -18,7 +18,6 @@
     "errorLevel": null,
     "software": [{ "id": 1 }],
     "instrument": "mira-35",
-    "instrumentPid": "https://hdl.handle.net/123/bucharest-mira",
     "instrumentInfo": { "uuid": "0b3a7fa0-4812-4964-af23-1162e8b3a665" }
   },
   {
@@ -280,7 +279,8 @@
     "version": "123",
     "errorLevel": "error",
     "software": [{ "id": 1 }],
-    "instrument": "mira-35"
+    "instrument": "mira-35",
+    "instrumentInfo": { "uuid": "0b3a7fa0-4812-4964-af23-1162e8b3a665" }
   },
   {
     "uuid": "b6de8cf4-8825-47b0-aaa9-4fd413bbb0d7",
@@ -301,8 +301,7 @@
     "errorLevel": null,
     "software": [{ "id": 1 }],
     "instrument": "chm15k",
-    "instrumentPid": "https://hdl.handle.net/123/bucharest-chm15k",
-    "instrumentInfoUuid": "c43e9f54-c94d-45f7-8596-223b1c2b14c0"
+    "instrumentInfo": { "uuid": "c43e9f54-c94d-45f7-8596-223b1c2b14c0" }
   },
   {
     "uuid": "f036da43-c19c-4832-99f9-6cc88f3255c5",
@@ -323,8 +322,7 @@
     "errorLevel": null,
     "software": [{ "id": 1 }],
     "instrument": "mira-35",
-    "instrumentPid": "https://hdl.handle.net/123/bucharest-mira",
-    "instrumentInfoUuid": "0b3a7fa0-4812-4964-af23-1162e8b3a665"
+    "instrumentInfo": { "uuid": "0b3a7fa0-4812-4964-af23-1162e8b3a665" }
   },
   {
     "uuid": "0afca83a-7b6b-4288-82f6-a59685346617",

@@ -78,8 +78,7 @@ export class FileRoutes {
       if (isModel) {
         qb.leftJoinAndSelect("file.model", "model");
       } else {
-        qb.leftJoinAndSelect("file.instrument", "instrument");
-        qb.leftJoinAndSelect("file.instrumentInfo", "instrumentInfo");
+        qb.leftJoinAndMapOne("file.instrument", "file.instrumentInfo", "instrument");
         qb.leftJoinAndSelect("file.sourceRegularFiles", "sourceRegularFiles");
         qb.leftJoinAndSelect("file.sourceModelFiles", "sourceModelFiles");
       }
@@ -373,6 +372,28 @@ export class FileRoutes {
     }
   };
 
+  fileMetaKeys = [
+    "file.uuid",
+    "file.version",
+    "file.pid",
+    "file.dvasId",
+    "file.volatile",
+    "file.tombstoneReason",
+    "file.legacy",
+    "file.measurementDate",
+    "file.checksum",
+    "file.size",
+    "file.coverage",
+    "file.format",
+    "file.errorLevel",
+    "file.createdAt",
+    "file.updatedAt",
+    "file.dvasUpdatedAt",
+    "file.startTime",
+    "file.stopTime",
+    "file.s3key",
+  ];
+
   filesQueryBuilder(query: any, mode: "file" | "model") {
     const isModel = mode == "model";
     let repo: Repository<RegularFile> | Repository<ModelFile> = this.fileRepo;
@@ -381,11 +402,12 @@ export class FileRoutes {
     }
     let qb = repo
       .createQueryBuilder("file")
+      .select(this.fileMetaKeys)
       .leftJoin("file.site", "site")
       .addSelect(this.siteMetadataKeys)
       .leftJoinAndSelect("file.product", "product");
     if (isModel) qb.leftJoinAndSelect("file.model", "model");
-    if (!isModel) qb.leftJoinAndSelect("file.instrument", "instrument");
+    if (!isModel) qb.leftJoinAndMapOne("file.instrument", "file.instrumentInfo", "instrument");
 
     // Where clauses
     qb = addCommonFilters(qb, query);
@@ -400,7 +422,7 @@ export class FileRoutes {
     if (query.releasedBefore) qb.andWhere("file.updatedAt < :releasedBefore", query);
     if (query.updatedAtFrom) qb.andWhere("file.updatedAt >= :updatedAtFrom", query);
     if (query.updatedAtTo) qb.andWhere("file.updatedAt <= :updatedAtTo", query);
-    if (!isModel && query.instrumentPid) qb.andWhere("file.instrumentPid IN (:...instrumentPid)", query);
+    if (!isModel && query.instrumentPid) qb.andWhere("instrument.pid IN (:...instrumentPid)", query);
     if (query.dvasUpdated) {
       const value = query.dvasUpdated.toLowerCase();
       if (value == "true") qb.andWhere("file.dvasUpdatedAt IS NOT NULL");
@@ -430,7 +452,7 @@ export class FileRoutes {
       if (isModel) {
         qb.addOrderBy("model.optimumOrder", "ASC");
       } else {
-        qb.addOrderBy("instrument.id", "ASC").addOrderBy("file.instrumentPid", "ASC");
+        qb.addOrderBy("instrument.id", "ASC").addOrderBy("instrument.pid", "ASC");
       }
     } else {
       // Legacy order to show version in chronological order.
