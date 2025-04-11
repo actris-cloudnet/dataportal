@@ -32,3 +32,10 @@ export interface InstrumentInfo {
   siteId: string;
   status: "active" | "recent" | "inactive";
 }
+
+export interface NominalInstrument {
+  siteId: string;
+  productId: string;
+  measurementDate: string;
+  nominalInstrument: InstrumentInfo;
+}

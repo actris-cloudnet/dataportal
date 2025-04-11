@@ -18,6 +18,7 @@ withDefaults(defineProps<Props>(), { size: "normal" });
 @use "@/sass/variables.scss";
 
 .tag {
+  display: inline-block;
   color: white;
   font-weight: 600;
   border-radius: 999px;
