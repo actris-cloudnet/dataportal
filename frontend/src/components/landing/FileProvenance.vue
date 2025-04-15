@@ -27,11 +27,17 @@
           <li v-for="sourceFile in sourceFiles" :key="sourceFile.uuid">
             <router-link :to="{ name: 'File', params: { uuid: sourceFile.uuid } }">
               <img :alt="sourceFile.product.id" :src="getProductIcon(sourceFile.product.id)" class="product-icon" />
-              {{ sourceFile.product.humanReadableName }}
-              <template v-if="'instrumentInfo' in sourceFile && sourceFile.instrumentInfo">
-                ({{ sourceFile.instrumentInfo.model }})
+              <template v-if="'instrument' in sourceFile && sourceFile.instrument">
+                {{ sourceFile.product.humanReadableName }}:
+                {{ sourceFile.instrument.model }}
               </template>
-              <template v-else-if="'model' in sourceFile"> ({{ sourceFile.model.humanReadableName }}) </template>
+              <template v-else-if="'model' in sourceFile">
+                {{ sourceFile.product.humanReadableName }}:
+                {{ sourceFile.model.humanReadableName }}
+              </template>
+              <template v-else>
+                {{ sourceFile.product.humanReadableName }}
+              </template>
             </router-link>
           </li>
         </ul>

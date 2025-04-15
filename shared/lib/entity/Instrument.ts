@@ -21,6 +21,7 @@ export interface Instrument {
   uploads: InstrumentUpload[];
   calibrations: Calibration[];
   shortName: string;
+  model: string;
 }
 
 export interface InstrumentPidLocation {
