@@ -452,7 +452,7 @@ export class FileRoutes {
       if (isModel) {
         qb.addOrderBy("model.optimumOrder", "ASC");
       } else {
-        qb.addOrderBy("instrument.id", "ASC").addOrderBy("instrument.pid", "ASC");
+        qb.addOrderBy("instrument.instrumentId", "ASC").addOrderBy("instrument.pid", "ASC");
       }
     } else {
       // Legacy order to show version in chronological order.
