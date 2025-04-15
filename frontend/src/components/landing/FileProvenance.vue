@@ -42,11 +42,11 @@
           </li>
         </ul>
       </dd>
-      <dd v-else-if="'instrumentInfo' in file && file.instrumentInfo">
+      <dd v-else-if="'instrument' in file && file.instrument">
         <router-link
           :to="{
             name: 'Raw Files',
-            params: { uuid: file.instrumentInfo.uuid },
+            params: { uuid: file.instrument.uuid },
             query: { date: file.measurementDate },
           }"
         >
