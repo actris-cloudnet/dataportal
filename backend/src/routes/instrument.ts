@@ -105,8 +105,7 @@ export class InstrumentRoutes {
           "measurementDate",
           COALESCE(CAST("siteId" != LAG("siteId") OVER (ORDER BY "measurementDate" DESC) AS INT), 1) AS "isNewPeriod"
         FROM regular_file
-        JOIN instrument_info ON regular_file."instrumentInfoUuid" = instrument_info.uuid
-        WHERE instrument_info."pid" = $1
+        WHERE regular_file."instrumentInfoUuid" = $1
       ), periods AS (
         SELECT
           "siteId",
@@ -123,7 +122,7 @@ export class InstrumentRoutes {
       JOIN site ON "siteId" = site.id
       GROUP BY "siteId", "humanReadableName", "periodId"
       ORDER BY "startDate" DESC`,
-      [instrument.pid],
+      [instrument.uuid],
     );
     res.send({ ...instrument, locations });
   };
