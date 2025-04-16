@@ -1,4 +1,4 @@
-import type { File, RegularFile } from "./File";
+import type { File } from "./File";
 import type { ProductVariable } from "./ProductVariable";
 
 export interface Dimensions {

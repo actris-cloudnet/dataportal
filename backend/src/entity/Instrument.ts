@@ -9,6 +9,10 @@ export enum InstrumentType {
   LIDAR = "lidar",
   MWR = "mwr",
   DISDROMETER = "disdrometer",
+  RAIN_RADAR = "rain-radar",
+  RAIN_GAUGE = "rain-gauge",
+  WEATHER_STATION = "weather-station",
+  DOPPLER_LIDAR = "doppler-lidar",
 }
 
 @Entity()

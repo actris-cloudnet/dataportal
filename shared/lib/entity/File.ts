@@ -1,11 +1,9 @@
 import type { Site } from "./Site";
 import type { Product } from "./Product";
-import type { Visualization } from "./Visualization";
 import type { Model } from "./Model";
-import type { ModelVisualization } from "./ModelVisualization";
 import type { ErrorLevel } from "./QualityReport";
 import type { Software } from "./Software";
-import type { Instrument, InstrumentInfo } from "./Instrument";
+import type { Instrument } from "./Instrument";
 
 export type Timeliness = "nrt" | "rrt" | "scheduled";
 
@@ -37,13 +35,9 @@ export interface File {
 
 export interface RegularFile extends File {
   sourceFileIds: string[];
-  visualizations: Visualization[];
-  instrumentPid: string;
-  instrumentInfo: InstrumentInfo | null;
   instrument: Instrument;
 }
 
 export interface ModelFile extends File {
   model: Model;
-  visualizations: ModelVisualization[];
 }

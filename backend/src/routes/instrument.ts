@@ -91,11 +91,11 @@ export class InstrumentRoutes {
   };
 
   instrumentPid: RequestHandler = async (req, res, next) => {
-    const pid = await this.instrumentInfoRepo.findOne({
+    const instrument = await this.instrumentInfoRepo.findOne({
       where: { uuid: req.params.uuid },
       relations: { instrument: true },
     });
-    if (!pid) {
+    if (!instrument) {
       return next({ status: 404, errors: ["No instrument PID match this id"] });
     }
     const locations = await this.dataSource.query(
@@ -105,7 +105,7 @@ export class InstrumentRoutes {
           "measurementDate",
           COALESCE(CAST("siteId" != LAG("siteId") OVER (ORDER BY "measurementDate" DESC) AS INT), 1) AS "isNewPeriod"
         FROM regular_file
-        WHERE "instrumentPid" = $1
+        WHERE regular_file."instrumentInfoUuid" = $1
       ), periods AS (
         SELECT
           "siteId",
@@ -122,9 +122,9 @@ export class InstrumentRoutes {
       JOIN site ON "siteId" = site.id
       GROUP BY "siteId", "humanReadableName", "periodId"
       ORDER BY "startDate" DESC`,
-      [pid.pid],
+      [instrument.uuid],
     );
-    res.send({ ...pid, locations });
+    res.send({ ...instrument, locations });
   };
 
   nominalInstrument: RequestHandler = async (req, res, next) => {
