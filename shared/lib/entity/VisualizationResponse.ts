@@ -1,6 +1,6 @@
 import type { Dimensions } from "./Visualization";
 import type { ProductVariable } from "./ProductVariable";
-import type { Instrument } from "./Instrument";
+import type { InstrumentInfo } from "./Instrument";
 import type { Model } from "./Model";
 
 export interface VisualizationItem {
@@ -17,5 +17,5 @@ export interface VisualizationResponse {
   legacy: boolean;
   experimental: boolean;
   visualizations: VisualizationItem[];
-  source: Instrument | Model | null;
+  source: InstrumentInfo | Model | null;
 }
