@@ -1,6 +1,3 @@
-import type { InstrumentUpload } from "./Upload";
-import type { Calibration } from "./Calibration";
-
 export type InstrumentType =
   | "radar"
   | "lidar"
@@ -18,8 +15,6 @@ export interface Instrument {
   uuid: string;
   type: InstrumentType;
   humanReadableName: string;
-  uploads: InstrumentUpload[];
-  calibrations: Calibration[];
   shortName: string;
   model: string;
 }
