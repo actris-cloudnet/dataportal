@@ -35,7 +35,7 @@ export interface File {
 
 export interface RegularFile extends File {
   sourceFileIds: string[];
-  instrument: Instrument;
+  instrument: Instrument | null;
 }
 
 export interface ModelFile extends File {
