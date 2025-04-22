@@ -77,6 +77,8 @@ export const augmentFile = (includeS3path: boolean) => (file: RegularFile | Mode
   s3key: undefined,
   s3path: includeS3path ? getS3pathForFile(file) : undefined,
   model: "model" in file ? file.model : undefined,
+  // NOTE: instrumentInfo should be mapped to instrument
+  instrument: "instrument" in file ? ((file.instrument as any)?.uuid != null ? file.instrument : null) : undefined,
   software: parseSoftware(file),
   timeliness: calcTimeliness(file),
   sourceRegularFiles: undefined,
