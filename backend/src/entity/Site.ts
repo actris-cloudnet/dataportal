@@ -30,7 +30,7 @@ export class Site {
   description!: string | null;
 
   @Column("text", { array: true })
-  type!: string[];
+  type!: SiteType[];
 
   @Column({ type: "float", nullable: true })
   latitude!: number | null;

@@ -18,7 +18,7 @@ export class Product {
   @Column()
   humanReadableName!: string;
 
-  @Column({ type: "enum", enum: ProductType, array: true, default: [] })
+  @Column({ type: "text", array: true, default: [] })
   type!: ProductType[];
 
   @Column({ default: false })
