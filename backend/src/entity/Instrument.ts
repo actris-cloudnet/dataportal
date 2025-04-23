@@ -32,12 +32,6 @@ export class Instrument {
   @Column({ type: "text", array: true, default: [], nullable: false })
   allowedTags!: string[];
 
-  @OneToMany((_) => InstrumentUpload, (upload) => upload.instrument)
-  uploads!: InstrumentUpload[];
-
-  @OneToMany((_) => RegularFile, (regularFile) => regularFile.instrumentInfo)
-  files!: RegularFile[];
-
   @ManyToMany((_) => Product, (product) => product.sourceInstruments)
   @JoinTable()
   derivedProducts!: Product[];
