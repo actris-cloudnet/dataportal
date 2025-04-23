@@ -35,7 +35,7 @@ export class Instrument {
   @OneToMany((_) => InstrumentUpload, (upload) => upload.instrument)
   uploads!: InstrumentUpload[];
 
-  @OneToMany((_) => RegularFile, (regularFile) => regularFile.instrument)
+  @OneToMany((_) => RegularFile, (regularFile) => regularFile.instrumentInfo)
   files!: RegularFile[];
 
   @ManyToMany((_) => Product, (product) => product.sourceInstruments)

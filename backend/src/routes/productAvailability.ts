@@ -58,7 +58,7 @@ export class ProductAvailabilityRoutes {
       fileQb.andWhere("file.siteId = :siteId", { siteId: req.query.site });
     }
     if ("instrumentPid" in req.query) {
-      fileQb.andWhere("file.instrumentPid = :instrumentPid", { instrumentPid: req.query.instrumentPid });
+      fileQb.andWhere("instrumentInfo.pid = :instrumentPid", { instrumentPid: req.query.instrumentPid });
     }
     if (!("includeExperimental" in req.query)) {
       fileQb.andWhere("product.experimental = false");

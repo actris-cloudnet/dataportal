@@ -2,7 +2,7 @@ import { Visualization, Dimensions } from "./Visualization";
 import { ModelVisualization } from "./ModelVisualization";
 import { ModelFile, RegularFile } from "./File";
 import { ProductVariable } from "./ProductVariable";
-import { Instrument } from "./Instrument";
+import { InstrumentInfo } from "./Instrument";
 import { Model } from "./Model";
 
 export interface VisualizationItem {
@@ -19,7 +19,7 @@ export class VisualizationResponse {
   legacy: boolean;
   experimental: boolean;
   visualizations: VisualizationItem[];
-  source: Instrument | Model | null;
+  source: InstrumentInfo | Model | null;
 
   constructor(file: RegularFile | ModelFile) {
     this.sourceFileId = file.uuid;
@@ -43,8 +43,8 @@ export class VisualizationResponse {
             }
           : null,
     }));
-    if (file instanceof RegularFile && file.instrument !== null) {
-      this.source = file.instrument;
+    if ("instrument" in file && file.instrument !== null) {
+      this.source = file.instrument as InstrumentInfo;
     } else if (file instanceof ModelFile && file.model !== null) {
       this.source = file.model;
     } else {

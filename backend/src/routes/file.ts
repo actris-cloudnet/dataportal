@@ -413,7 +413,7 @@ export class FileRoutes {
     qb = addCommonFilters(qb, query);
 
     if (isModel && query.model) qb.andWhere("model.id IN (:...model)", query);
-    if (!isModel && query.instrument) qb.andWhere("file.instrument IN (:...instrument)", query);
+    if (!isModel && query.instrument) qb.andWhere("instrument.instrumentId IN (:...instrument)", query);
 
     // Hack to prevent loading of model files when instrument is selected without product
     if (isModel && (query.instrument || query.instrumentPid)) qb.andWhere("1 = 0");
@@ -472,15 +472,15 @@ export class FileRoutes {
       .createQueryBuilder("file")
       .leftJoinAndSelect("file.site", "site")
       .leftJoinAndSelect("file.product", "product")
-      .leftJoinAndSelect("file.instrument", "instrument");
+      .leftJoinAndSelect("file.instrumentInfo", "instrumentInfo");
     qb = addCommonFilters(qb, query);
-    if (query.instrument) qb.andWhere("instrument.id IN (:...instrument)", query);
-    if (query.instrumentPid) qb.andWhere("file.instrumentPid IN (:...instrumentPid)", query);
+    if (query.instrument) qb.andWhere("instrumentInfo.instrumentId IN (:...instrument)", query);
+    if (query.instrumentPid) qb.andWhere("instrumentInfo.pid IN (:...instrumentPid)", query);
     qb.orderBy("file.measurementDate", "DESC")
       .addOrderBy("file.siteId", "ASC")
       .addOrderBy("product.id", "ASC")
-      .addOrderBy("instrument.id", "ASC")
-      .addOrderBy("file.instrumentPid", "ASC");
+      .addOrderBy("instrumentInfo.uuid", "ASC")
+      .addOrderBy("instrumentInfo.pid", "ASC");
     if ("limit" in query) qb.limit(parseInt(query.limit));
     return qb;
   }
