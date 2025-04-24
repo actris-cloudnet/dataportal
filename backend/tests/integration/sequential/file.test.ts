@@ -92,18 +92,16 @@ describe("PUT /files/:s3key", () => {
     await expect(putFile(payload)).resolves.toMatchObject({ status: 201 });
     const searchFile = await searchFileRepo.findOneOrFail({
       where: { uuid: volatileFile.uuid },
-      relations: { instrument: true, instrumentInfo: true },
+      relations: { instrumentInfo: true },
     });
-    expect(searchFile.instrument).toMatchObject({ id: "mira-35" });
     expect(searchFile.instrumentInfo).toMatchObject({
       uuid: "9e0f4b27-d5f3-40ad-8b73-2ae5dabbf81f",
       pid: "https://hdl.handle.net/123/granada-mira",
     });
     const file = await fileRepo.findOneOrFail({
       where: { uuid: volatileFile.uuid },
-      relations: { instrument: true, instrumentInfo: true },
+      relations: { instrumentInfo: true },
     });
-    expect(file.instrument).toMatchObject({ id: "mira-35" });
     expect(file.instrumentInfo).toMatchObject({
       uuid: "9e0f4b27-d5f3-40ad-8b73-2ae5dabbf81f",
       pid: "https://hdl.handle.net/123/granada-mira",

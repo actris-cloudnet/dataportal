@@ -80,7 +80,7 @@ export abstract class Upload {
 @Unique(["site", "measurementDate", "filename", "instrument", "instrumentPid", "tags"])
 @Index(["instrumentInfo", "site", "measurementDate"])
 export class InstrumentUpload extends Upload {
-  @ManyToOne((_) => Instrument, (instrument) => instrument.uploads, { nullable: false })
+  @ManyToOne((_) => Instrument, { nullable: false })
   instrument!: Instrument;
 
   @Column({ type: "text" })

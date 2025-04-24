@@ -3,7 +3,7 @@ import { Site } from "./Site";
 import { Product } from "./Product";
 import { ModelFile, RegularFile } from "./File";
 import { ErrorLevel } from "./QualityReport";
-import { Instrument, InstrumentInfo } from "./Instrument";
+import { InstrumentInfo } from "./Instrument";
 
 @Entity()
 export class SearchFile {
@@ -35,12 +35,6 @@ export class SearchFile {
   })
   errorLevel!: ErrorLevel | null;
 
-  @ManyToOne((_) => Instrument, (instrument) => instrument.files, { nullable: true })
-  instrument!: Instrument | null;
-
-  @Column({ nullable: true })
-  instrumentPid!: string;
-
   @ManyToOne(() => InstrumentInfo, { nullable: true })
   instrumentInfo!: InstrumentInfo | null;
 
@@ -56,12 +50,6 @@ export class SearchFile {
     this.volatile = file.volatile;
     this.legacy = file.legacy || false;
     this.errorLevel = file.errorLevel;
-    if ("instrument" in file) {
-      this.instrument = file.instrument;
-    }
-    if ("instrumentInfo" in file && file.instrumentInfo) {
-      this.instrumentPid = file.instrumentInfo.pid;
-    }
     if ("instrumentInfo" in file) {
       this.instrumentInfo = file.instrumentInfo;
     }
