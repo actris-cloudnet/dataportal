@@ -479,7 +479,7 @@ export class FileRoutes {
     qb.orderBy("file.measurementDate", "DESC")
       .addOrderBy("file.siteId", "ASC")
       .addOrderBy("product.id", "ASC")
-      .addOrderBy("instrumentInfo.uuid", "ASC")
+      .addOrderBy("instrumentInfo.instrumentId", "ASC")
       .addOrderBy("instrumentInfo.pid", "ASC");
     if ("limit" in query) qb.limit(parseInt(query.limit));
     return qb;
