@@ -94,15 +94,6 @@ onMounted(async () => {
     calibrationDataState.value = "serverError";
   }
 });
-
-// interface calibrationEvent {
-//   updatedAt: string;
-//   measurementDate: string;
-// }
-
-// const measurementDates = computed(() => calibrationData.value.map((entry: calibrationEvent) => entry.measurementDate));
-
-// const timestamps = computed(() => calibrationData.value.map((entry: calibrationEvent) => entry.updatedAt));
 </script>
 
 <style scoped>
