@@ -34,7 +34,7 @@ describe("PUT /api/calibration", () => {
   it("requires correct credentials", async () => {
     const body = { calibration_factor: 0.5 };
     const config = {
-      params: { instrumentPid: "https://hdl.handle.net/123/hyytiala-chm15k", date: "2021-01-01" },
+      params: { instrumentPid: "https://hdl.handle.net/123/bucharest-chm15k", date: "2021-01-01" },
       auth: { username: "asdasd", password: "asdksad" },
     };
     return expect(axios.put(url, body, config)).rejects.toMatchObject({ response: { status: 401 } });
@@ -47,7 +47,7 @@ describe("PUT /api/calibration", () => {
         { calibration_factor: 0.5 },
         { params: { instrumentPid: "kissa", date: "2021-01-01" }, auth: credentials },
       ),
-    ).rejects.toMatchObject(genResponse(400, { status: 400, errors: "instrumentPid must be HTTPS" }));
+    ).rejects.toMatchObject(genResponse(400, { status: 400, errors: "Instrument not found" }));
   });
 
   it("inserts new calibration", async () => {
@@ -55,12 +55,12 @@ describe("PUT /api/calibration", () => {
       url,
       { calibration_factor: 0.5, time_offset: 120 },
       {
-        params: { instrumentPid: "https://hdl.handle.net/123/hyytiala-chm15k", date: "2021-01-01" },
+        params: { instrumentPid: "https://hdl.handle.net/123/bucharest-chm15k", date: "2021-01-01" },
         auth: credentials,
       },
     );
     const res = await axios.get(url, {
-      params: { instrumentPid: "https://hdl.handle.net/123/hyytiala-chm15k", date: "2021-01-01" },
+      params: { instrumentPid: "https://hdl.handle.net/123/bucharest-chm15k", date: "2021-01-01" },
     });
     expect(res.data.data).toEqual({ calibration_factor: 0.5, time_offset: 120 });
   });
@@ -70,7 +70,7 @@ describe("PUT /api/calibration", () => {
       url,
       { calibration_factor: 0.5, time_offset: 60 },
       {
-        params: { instrumentPid: "https://hdl.handle.net/123/hyytiala-chm15k", date: "2021-01-01" },
+        params: { instrumentPid: "https://hdl.handle.net/123/bucharest-chm15k", date: "2021-01-01" },
         auth: credentials,
       },
     );
@@ -78,12 +78,12 @@ describe("PUT /api/calibration", () => {
       url,
       { calibration_factor: 0.8 },
       {
-        params: { instrumentPid: "https://hdl.handle.net/123/hyytiala-chm15k", date: "2021-01-01" },
+        params: { instrumentPid: "https://hdl.handle.net/123/bucharest-chm15k", date: "2021-01-01" },
         auth: credentials,
       },
     );
     const res = await axios.get(url, {
-      params: { instrumentPid: "https://hdl.handle.net/123/hyytiala-chm15k", date: "2021-01-01" },
+      params: { instrumentPid: "https://hdl.handle.net/123/bucharest-chm15k", date: "2021-01-01" },
     });
     expect(res.data.data).toEqual({ calibration_factor: 0.8, time_offset: 60 });
   });

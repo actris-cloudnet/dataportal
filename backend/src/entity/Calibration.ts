@@ -1,9 +1,13 @@
-import { Column, Entity, BeforeInsert, BeforeUpdate } from "typeorm";
+import { Column, Entity, BeforeInsert, BeforeUpdate, ManyToOne, PrimaryColumn } from "typeorm";
+import { InstrumentInfo } from "./Instrument";
 
 @Entity()
 export class Calibration {
-  @Column({ primary: true })
-  instrumentPid!: string;
+  @ManyToOne(() => InstrumentInfo)
+  instrumentInfo!: InstrumentInfo;
+
+  @PrimaryColumn()
+  instrumentInfoUuid!: string;
 
   @Column({ type: "date", primary: true })
   measurementDate!: string;

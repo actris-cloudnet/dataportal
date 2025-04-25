@@ -277,7 +277,7 @@ export class UploadRoutes {
 
   private async publishAdjoiningDayTasks(upload: InstrumentUpload) {
     const date = upload.measurementDate.toString();
-    const calibration = await fetchCalibration(this.calibRepo, upload.instrumentPid, date);
+    const calibration = await fetchCalibration(this.calibRepo, upload.instrumentInfo!, date);
     const timeOffset = calibration?.data?.time_offset;
     if (!timeOffset) return;
     const dateOffset = timeOffset > 0 ? -1 : 1;

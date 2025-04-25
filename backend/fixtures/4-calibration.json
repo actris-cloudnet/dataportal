@@ -1,6 +1,6 @@
 [
   {
-    "instrumentPid": "https://hdl.handle.net/123/hyytiala-mira",
+    "instrumentInfo": { "uuid": "c43e9f54-c94d-45f7-8596-223b1c2b14c0" },
     "measurementDate": "2021-01-01",
     "key": "time_offset",
     "data": 120,
@@ -8,7 +8,7 @@
     "updatedAt": "2021-02-23T18:25:43.511Z"
   },
   {
-    "instrumentPid": "https://hdl.handle.net/123/hyytiala-mira",
+    "instrumentInfo": { "uuid": "c43e9f54-c94d-45f7-8596-223b1c2b14c0" },
     "measurementDate": "2021-01-02",
     "key": "calibration_factor",
     "data": 0.9,
@@ -16,7 +16,7 @@
     "updatedAt": "2021-02-23T18:25:43.511Z"
   },
   {
-    "instrumentPid": "https://hdl.handle.net/123/hyytiala-mira",
+    "instrumentInfo": { "uuid": "c43e9f54-c94d-45f7-8596-223b1c2b14c0" },
     "measurementDate": "2021-01-01",
     "key": "calibration_factor",
     "data": 0.5,
@@ -24,7 +24,7 @@
     "createdAt": "2021-02-23T17:25:43.511Z"
   },
   {
-    "instrumentPid": "https://hdl.handle.net/123/bucharest-mira",
+    "instrumentInfo": { "uuid": "0b3a7fa0-4812-4964-af23-1162e8b3a665" },
     "measurementDate": "2021-01-01",
     "key": "calibration_factor",
     "data": 0.2,

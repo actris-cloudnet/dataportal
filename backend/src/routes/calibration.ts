@@ -2,6 +2,7 @@ import { DataSource, LessThanOrEqual, Repository } from "typeorm";
 import { RequestHandler } from "express";
 import { Calibration } from "../entity/Calibration";
 import { isValidDate, validateInstrumentPid } from "../lib";
+import { InstrumentInfo } from "../entity/Instrument";
 
 interface QueryParams {
   date: string;
@@ -11,46 +12,41 @@ interface QueryParams {
 export class CalibrationRoutes {
   constructor(dataSource: DataSource) {
     this.calibRepo = dataSource.getRepository(Calibration);
+    this.instrumentInfoRepo = dataSource.getRepository(InstrumentInfo);
   }
 
   private calibRepo: Repository<Calibration>;
-
-  validateParams: RequestHandler = (req, res, next) => {
-    if (!("instrumentPid" in req.query)) {
-      return next({ status: 400, errors: "Parameter instrumentPid must be specified" });
-    }
-    const instrumentPidError = validateInstrumentPid(req.query.instrumentPid);
-    if (instrumentPidError) {
-      return next({ status: 400, errors: `instrumentPid ${instrumentPidError}` });
-    }
-    next();
-  };
+  private instrumentInfoRepo: Repository<InstrumentInfo>;
 
   calibration: RequestHandler = async (req, res, next) => {
     const query = req.query as unknown as QueryParams;
+
+    if (!query.instrumentPid) {
+      return next({ status: 400, errors: "instrumentPid is missing" });
+    }
+    const instrumentInfo = await this.instrumentInfoRepo.findOneBy({ pid: query.instrumentPid });
+    if (!instrumentInfo) {
+      return next({ status: 404, errors: "Instrument not found" });
+    }
+
     if (query.date) {
       if (!isValidDate(query.date)) {
         return next({ status: 400, errors: "date is invalid" });
       }
-      const calib = await fetchCalibration(this.calibRepo, query.instrumentPid, query.date);
+      const calib = await fetchCalibration(this.calibRepo, instrumentInfo, query.date);
       if (!calib) {
         return next({ status: 404, errors: "Calibration data not found" });
       }
       res.send(calib);
     } else {
       const calib = await this.calibRepo.find({
-        where: {
-          instrumentPid: query.instrumentPid,
-        },
+        where: { instrumentInfo: { pid: query.instrumentPid } },
         order: { measurementDate: "ASC" },
       });
-
       if (!calib || calib.length === 0) {
         return next({ status: 404, errors: "Calibration data not found" });
       }
-
       const output: any = {};
-
       for (const c of calib) {
         if (!(c.key in output)) {
           output[c.key] = [];
@@ -62,37 +58,42 @@ export class CalibrationRoutes {
           data: c.data,
         });
       }
-
       res.send(output);
-      // res.send(Object.entries(output).map(([key, data]) => ({ key, data })));
     }
   };
 
-  putCalibration: RequestHandler = async (req, res) => {
+  putCalibration: RequestHandler = async (req, res, next) => {
     const query = req.query as any;
-    for (const [key, data] of Object.entries(req.body)) {
-      const calib = new Calibration();
-      calib.instrumentPid = query.instrumentPid;
-      calib.measurementDate = query.date;
-      calib.key = key;
-      calib.data = data;
-      await this.calibRepo.save(calib);
+    if (!query.instrumentPid) {
+      return next({ status: 400, errors: "instrumentPid is missing" });
     }
+    const instrumentInfo = await this.instrumentInfoRepo.findOneBy({ pid: query.instrumentPid });
+    if (!instrumentInfo) {
+      return next({ status: 400, errors: "Instrument not found" });
+    }
+    await this.calibRepo.save(
+      Object.entries(req.body).map(([key, data]) => ({
+        instrumentInfo,
+        measurementDate: query.date,
+        key,
+        data,
+      })),
+    );
     res.sendStatus(200);
   };
 }
 
 export async function fetchCalibration(
   calibRepo: Repository<Calibration>,
-  instrumentPid: string,
+  instrumentInfo: InstrumentInfo,
   date: string,
 ): Promise<Record<string, any> | null> {
   const rows = await calibRepo
     .createQueryBuilder("calib")
-    .distinctOn(["calib.instrumentPid", "calib.key"])
-    .where("calib.instrumentPid = :instrumentPid", { instrumentPid })
+    .distinctOn(["calib.instrumentInfoUuid", "calib.key"])
+    .where("calib.instrumentInfoUuid = :uuid", { uuid: instrumentInfo.uuid })
     .andWhere("calib.measurementDate <= :date", { date })
-    .orderBy("calib.instrumentPid")
+    .orderBy("calib.instrumentInfoUuid")
     .addOrderBy("calib.key")
     .addOrderBy("calib.measurementDate", "DESC")
     .getMany();
