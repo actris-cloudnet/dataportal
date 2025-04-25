@@ -8,6 +8,9 @@ export class Calibration {
   @Column({ type: "date", primary: true })
   measurementDate!: string;
 
+  @Column({ primary: true })
+  key!: string;
+
   @Column({ type: "jsonb" })
   data!: any;
 

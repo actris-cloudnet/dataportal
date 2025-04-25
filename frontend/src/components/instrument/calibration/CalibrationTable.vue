@@ -35,9 +35,7 @@ import { ref, watch } from "vue";
 import { humanReadableTimestamp } from "@/lib";
 
 const props = defineProps<{
-  data: (string[] | number | boolean | null)[];
-  measurementDates: string[];
-  timestamps: string[];
+  data: any;
   config: {
     title: string;
     label: string;
@@ -51,15 +49,17 @@ function extractFileName(url: string): string {
 const formattedTableData = ref<(string | string[] | number | boolean | null)[][]>([]);
 
 watch(
-  () => [props.data, props.measurementDates, props.timestamps],
-  ([textData, dates, updatedAts]) => {
+  () => [props.data],
+  ([textData]) => {
     const formattedData: (string | string[] | number | boolean | null)[][] = [];
 
-    for (let i = 0; i < textData.length; i++) {
+    if (!textData) return;
+
+    for (const entry of textData) {
       const row = [];
-      row.push(dates[i]);
-      row.push(textData[i]);
-      row.push(humanReadableTimestamp(updatedAts[i] as string));
+      row.push(entry.measurementDate);
+      row.push(entry.data);
+      row.push(humanReadableTimestamp(entry.updatedAt));
       if (!row.some((cell) => cell === null)) {
         formattedData.push(row);
       }

@@ -1,51 +1,22 @@
 <template>
   <div>
+    <CalibrationTable :data="calibrationData.range_offset" :config="{ title: 'Range offset', label: 'Offset (m)' }" />
     <CalibrationTable
-      :data="rangeOffset"
-      :measurementDates="measurementDates"
-      :timestamps="timestamps"
-      :config="{ title: 'Range offset', label: 'Offset (m)' }"
-    />
-    <CalibrationTable
-      :data="azimuthOffsets"
-      :measurementDates="measurementDates"
-      :timestamps="timestamps"
+      :data="calibrationData.azimuth_offset"
       :config="{ title: 'Azimuth offset', label: 'Azimuth offset (deg)' }"
     />
     <CalibrationTable
-      :data="zenithOffsets"
-      :measurementDates="measurementDates"
-      :timestamps="timestamps"
+      :data="calibrationData.zenith_offset"
       :config="{ title: 'Zenith offset', label: 'Zenith offset (deg)' }"
     />
-    <CalibrationTable
-      :data="snrLimits"
-      :measurementDates="measurementDates"
-      :timestamps="timestamps"
-      :config="{ title: 'SNR limit', label: 'SNR limit' }"
-    />
+    <CalibrationTable :data="calibrationData.snr_limit" :config="{ title: 'SNR limit', label: 'SNR limit' }" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
 import CalibrationTable from "@/components/instrument/calibration/CalibrationTable.vue";
 
-const props = defineProps<{
-  measurementDates: string[];
-  timestamps: string[];
-  calibrationData: {
-    data: {
-      range_offset?: number;
-      azimuth_offset?: number;
-      zenith_offset?: number;
-      snr_limit?: number;
-    };
-  }[];
+defineProps<{
+  calibrationData: any;
 }>();
-
-const rangeOffset = computed(() => props.calibrationData.map((entry) => entry.data.range_offset ?? null));
-const azimuthOffsets = computed(() => props.calibrationData.map((entry) => entry.data.azimuth_offset ?? null));
-const zenithOffsets = computed(() => props.calibrationData.map((entry) => entry.data.zenith_offset ?? null));
-const snrLimits = computed(() => props.calibrationData.map((entry) => entry.data.snr_limit ?? null));
 </script>

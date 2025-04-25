@@ -9,18 +9,14 @@ describe("GET /api/calibration", () => {
     const res = await axios.get(url, {
       params: { instrumentPid: "https://hdl.handle.net/123/hyytiala-mira", date: "2021-01-01" },
     });
-    expect(res.data.data).toEqual({ calibrationFactor: 0.5 });
-    expect(res.data).toHaveProperty("createdAt");
-    expect(res.data).toHaveProperty("updatedAt");
+    expect(res.data.data).toEqual({ time_offset: 120, calibration_factor: 0.5 });
   });
 
   it("responds with the latest calibration", async () => {
     const res = await axios.get(url, {
       params: { instrumentPid: "https://hdl.handle.net/123/hyytiala-mira", date: "2021-01-05" },
     });
-    expect(res.data.data).toEqual({ calibrationFactor: 0.9 });
-    expect(res.data).toHaveProperty("createdAt");
-    expect(res.data).toHaveProperty("updatedAt");
+    expect(res.data.data).toEqual({ time_offset: 120, calibration_factor: 0.9 });
   });
 
   it("responds with 404 if instrument has no calibration set", async () => {

@@ -5,8 +5,6 @@
         v-if="calibrationDataState === 'success' && InstrumentComponent"
         :is="InstrumentComponent"
         :calibrationData="calibrationData"
-        :measurementDates="measurementDates"
-        :timestamps="timestamps"
       />
       <div v-if="calibrationDataState === 'success' && InstrumentComponent">
         <a :href="apiUrl">Data in calibration API</a>
@@ -97,14 +95,14 @@ onMounted(async () => {
   }
 });
 
-interface calibrationEvent {
-  updatedAt: string;
-  measurementDate: string;
-}
+// interface calibrationEvent {
+//   updatedAt: string;
+//   measurementDate: string;
+// }
 
-const measurementDates = computed(() => calibrationData.value.map((entry: calibrationEvent) => entry.measurementDate));
+// const measurementDates = computed(() => calibrationData.value.map((entry: calibrationEvent) => entry.measurementDate));
 
-const timestamps = computed(() => calibrationData.value.map((entry: calibrationEvent) => entry.updatedAt));
+// const timestamps = computed(() => calibrationData.value.map((entry: calibrationEvent) => entry.updatedAt));
 </script>
 
 <style scoped>

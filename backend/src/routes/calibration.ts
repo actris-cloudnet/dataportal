@@ -36,12 +36,7 @@ export class CalibrationRoutes {
       if (!calib) {
         return next({ status: 404, errors: "Calibration data not found" });
       }
-      res.send({
-        createdAt: calib.createdAt,
-        updatedAt: calib.updatedAt,
-        measurementDate: calib.measurementDate,
-        data: calib.data,
-      });
+      res.send(calib);
     } else {
       const calib = await this.calibRepo.find({
         where: {
@@ -54,24 +49,35 @@ export class CalibrationRoutes {
         return next({ status: 404, errors: "Calibration data not found" });
       }
 
-      res.send(
-        calib.map((c) => ({
+      const output: any = {};
+
+      for (const c of calib) {
+        if (!(c.key in output)) {
+          output[c.key] = [];
+        }
+        output[c.key].push({
           createdAt: c.createdAt,
           updatedAt: c.updatedAt,
           measurementDate: c.measurementDate,
           data: c.data,
-        })),
-      );
+        });
+      }
+
+      res.send(output);
+      // res.send(Object.entries(output).map(([key, data]) => ({ key, data })));
     }
   };
 
   putCalibration: RequestHandler = async (req, res) => {
-    const query = req.query as unknown as QueryParams;
-    const calib = new Calibration();
-    calib.instrumentPid = query.instrumentPid;
-    calib.measurementDate = query.date;
-    calib.data = req.body;
-    await this.calibRepo.save(calib);
+    const query = req.query as any;
+    for (const [key, data] of Object.entries(req.body)) {
+      const calib = new Calibration();
+      calib.instrumentPid = query.instrumentPid;
+      calib.measurementDate = query.date;
+      calib.key = key;
+      calib.data = data;
+      await this.calibRepo.save(calib);
+    }
     res.sendStatus(200);
   };
 }
@@ -80,12 +86,18 @@ export async function fetchCalibration(
   calibRepo: Repository<Calibration>,
   instrumentPid: string,
   date: string,
-): Promise<Calibration | null> {
-  return await calibRepo.findOne({
-    where: {
-      instrumentPid: instrumentPid,
-      measurementDate: LessThanOrEqual(date),
-    },
-    order: { measurementDate: "DESC" },
-  });
+): Promise<Record<string, any> | null> {
+  const rows = await calibRepo
+    .createQueryBuilder("calib")
+    .distinctOn(["calib.instrumentPid", "calib.key"])
+    .where("calib.instrumentPid = :instrumentPid", { instrumentPid })
+    .andWhere("calib.measurementDate <= :date", { date })
+    .orderBy("calib.instrumentPid")
+    .addOrderBy("calib.key")
+    .addOrderBy("calib.measurementDate", "DESC")
+    .getMany();
+  if (rows.length === 0) {
+    return null;
+  }
+  return { data: Object.fromEntries(rows.map((row) => [row.key, row.data])) };
 }

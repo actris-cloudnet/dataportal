@@ -1,6 +1,6 @@
 import axios from "axios";
 import { DataSource } from "typeorm";
-import { backendPublicUrl, genResponse, wait } from "../../lib";
+import { backendPublicUrl, genResponse } from "../../lib";
 import { UserAccount } from "../../../src/entity/UserAccount";
 import { Permission, PermissionType } from "../../../src/entity/Permission";
 import { AppDataSource } from "../../../src/data-source";
@@ -32,7 +32,7 @@ describe("PUT /api/calibration", () => {
   afterAll(async () => await dataSource.destroy());
 
   it("requires correct credentials", async () => {
-    const body = { calibrationFactor: 0.5 };
+    const body = { calibration_factor: 0.5 };
     const config = {
       params: { instrumentPid: "https://hdl.handle.net/123/hyytiala-chm15k", date: "2021-01-01" },
       auth: { username: "asdasd", password: "asdksad" },
@@ -44,7 +44,7 @@ describe("PUT /api/calibration", () => {
     return expect(
       axios.put(
         url,
-        { calibrationFactor: 0.5 },
+        { calibration_factor: 0.5 },
         { params: { instrumentPid: "kissa", date: "2021-01-01" }, auth: credentials },
       ),
     ).rejects.toMatchObject(genResponse(400, { status: 400, errors: "instrumentPid must be HTTPS" }));
@@ -53,7 +53,7 @@ describe("PUT /api/calibration", () => {
   it("inserts new calibration", async () => {
     await axios.put(
       url,
-      { calibrationFactor: 0.5 },
+      { calibration_factor: 0.5, time_offset: 120 },
       {
         params: { instrumentPid: "https://hdl.handle.net/123/hyytiala-chm15k", date: "2021-01-01" },
         auth: credentials,
@@ -62,23 +62,21 @@ describe("PUT /api/calibration", () => {
     const res = await axios.get(url, {
       params: { instrumentPid: "https://hdl.handle.net/123/hyytiala-chm15k", date: "2021-01-01" },
     });
-    expect(res.data.data).toEqual({ calibrationFactor: 0.5 });
-    expect(res.data.updatedAt).toEqual(res.data.createdAt);
+    expect(res.data.data).toEqual({ calibration_factor: 0.5, time_offset: 120 });
   });
 
   it("replaces previous calibration for same date", async () => {
     await axios.put(
       url,
-      { calibrationFactor: 0.5 },
+      { calibration_factor: 0.5, time_offset: 60 },
       {
         params: { instrumentPid: "https://hdl.handle.net/123/hyytiala-chm15k", date: "2021-01-01" },
         auth: credentials,
       },
     );
-    await wait(1000);
     await axios.put(
       url,
-      { calibrationFactor: 0.8 },
+      { calibration_factor: 0.8 },
       {
         params: { instrumentPid: "https://hdl.handle.net/123/hyytiala-chm15k", date: "2021-01-01" },
         auth: credentials,
@@ -87,7 +85,6 @@ describe("PUT /api/calibration", () => {
     const res = await axios.get(url, {
       params: { instrumentPid: "https://hdl.handle.net/123/hyytiala-chm15k", date: "2021-01-01" },
     });
-    expect(res.data.data).toEqual({ calibrationFactor: 0.8 });
-    expect(res.data.updatedAt).not.toEqual(res.data.createdAt);
+    expect(res.data.data).toEqual({ calibration_factor: 0.8, time_offset: 60 });
   });
 });

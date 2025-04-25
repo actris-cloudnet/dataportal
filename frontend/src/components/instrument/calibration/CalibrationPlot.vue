@@ -9,8 +9,7 @@ import "uplot/dist/uPlot.min.css";
 import { useTemplateRef } from "vue";
 
 const props = defineProps<{
-  measurementDates: string[];
-  data: (number | null)[];
+  data: any[];
   config: {
     title: string;
     label: string;
@@ -23,23 +22,21 @@ const plotHeight = 400;
 const plotContainer = useTemplateRef("plotContainer");
 let plotInstance: uPlot | null = null;
 
-const createTypedData = (measurementDates: string[], data: (number | null)[]) => {
-  const timestamps = measurementDates.map((ts) => new Date(ts).getTime() / 1e3);
+const createTypedData = (data: any[]) => {
   const filteredData = data.reduce<{ timestamps: number[]; values: number[] }>(
-    (acc, value, index) => {
-      if (value !== null) {
-        acc.timestamps.push(timestamps[index]);
-        acc.values.push(value);
+    (acc, item) => {
+      if (item !== null) {
+        acc.timestamps.push(new Date(item.measurementDate).getTime() / 1e3);
+        acc.values.push(item.data);
       }
       return acc;
     },
     { timestamps: [], values: [] },
   );
-  filteredData.values = filteredData.values.map((value) => value);
   return [new Float64Array(filteredData.timestamps), new Float64Array(filteredData.values)];
 };
 
-const typedData = createTypedData(props.measurementDates, props.data);
+const typedData = createTypedData(props.data);
 
 const createPlotOptions = (config: { title: string; label: string; color?: string }, width: number): uPlot.Options => {
   const minY = Math.min(...typedData[1]);
