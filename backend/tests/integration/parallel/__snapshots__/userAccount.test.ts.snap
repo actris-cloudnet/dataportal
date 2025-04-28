@@ -22,6 +22,7 @@ exports[`GET /users/me return submitter permissions 1`] = `
       "type": [
         "cloudnet",
       ],
+      "wigosId": null,
     },
   },
 ]

@@ -42,6 +42,7 @@ exports[`GET /api/collection/:uuid returns a valid collection 1`] = `
       "type": [
         "cloudnet",
       ],
+      "wigosId": null,
     },
     {
       "actrisId": null,
@@ -60,6 +61,7 @@ exports[`GET /api/collection/:uuid returns a valid collection 1`] = `
       "type": [
         "cloudnet",
       ],
+      "wigosId": null,
     },
   ],
   "size": 16527762,

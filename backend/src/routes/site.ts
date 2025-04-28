@@ -18,6 +18,7 @@ export class SiteRoutes {
     this.searchFileRepo = dataSource.getRepository(SearchFile);
     this.dvasCache = {};
     this.actrisCache = {};
+    this.wigosCache = {};
   }
 
   readonly dataSource: DataSource;
@@ -28,20 +29,29 @@ export class SiteRoutes {
   readonly searchFileRepo: Repository<SearchFile>;
   readonly dvasCache: Record<string, any>;
   readonly actrisCache: Record<string, any>;
+  readonly wigosCache: Record<string, any>;
 
   site: RequestHandler = async (req, res, next) => {
     const qb = this.siteRepo
       .createQueryBuilder("site")
       .leftJoinAndSelect("site.persons", "person")
-      .where("site.id = :siteId", req.params);
+      .where("site.id = :siteId", { siteId: req.params.siteId });
     const site = await hideTestDataFromNormalUsers(qb, req).getOne();
     if (!site) {
       return next({ status: 404, errors: ["No sites match this id"] });
     }
+    res.send(site);
+  };
+
+  links: RequestHandler = async (req, res, next) => {
+    const site = await this.siteRepo.findOneBy({ id: req.params.siteId });
+    if (!site) {
+      return next({ status: 404, errors: ["No sites match this id"] });
+    }
     res.send({
-      ...site,
-      _actris: site.actrisId ? await this.fetchActrisFacility(site.actrisId) : null,
-      _dvas: site.dvasId ? await this.fetchDvasFacility(site.dvasId) : null,
+      actris: site.actrisId ? await this.fetchActrisFacility(site.actrisId) : null,
+      dvas: site.dvasId ? await this.fetchDvasFacility(site.dvasId) : null,
+      wigos: site.wigosId ? await this.fetchWigosStation(site.wigosId) : null,
     });
   };
 
@@ -152,8 +162,9 @@ export class SiteRoutes {
   };
 
   private async fetchDvasFacility(dvasId: string) {
-    const cached = this.dvasCache[dvasId];
-    if (cached) return cached;
+    if (dvasId in this.dvasCache) {
+      return this.dvasCache[dvasId];
+    }
     try {
       const res = await axios.get(`${env.DVAS_URL}/facilities/${dvasId}`);
       const obj = res.data[0];
@@ -171,8 +182,9 @@ export class SiteRoutes {
   }
 
   private async fetchActrisFacility(actrisId: number) {
-    const cached = this.actrisCache[actrisId];
-    if (cached) return cached;
+    if (actrisId in this.actrisCache) {
+      return this.actrisCache[actrisId];
+    }
     try {
       const res = await axios.get(`${env.LABELLING_URL}/api/facilities/${actrisId}`);
       const obj = res.data;
@@ -185,6 +197,29 @@ export class SiteRoutes {
       return result;
     } catch (err) {
       console.error("Failed to fetch ACTRIS facility", err);
+      return null;
+    }
+  }
+
+  private async fetchWigosStation(wigosId: string) {
+    if (wigosId in this.wigosCache) {
+      return this.wigosCache[wigosId];
+    }
+    try {
+      const res = await axios.get("https://oscar.wmo.int/surface/rest/api/search/station", { params: { wigosId } });
+      const obj = res.data;
+      const result =
+        obj.stationSearchResults.length == 1
+          ? {
+              id: wigosId,
+              name: obj.stationSearchResults[0].name,
+              uri: `https://oscar.wmo.int/surface/#/search/station/stationReportDetails/${wigosId}`,
+            }
+          : null;
+      this.wigosCache[wigosId] = result;
+      return result;
+    } catch (err) {
+      console.error("Failed to fetch WIGOS facility", err);
       return null;
     }
   }

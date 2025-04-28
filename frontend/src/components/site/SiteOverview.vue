@@ -27,25 +27,28 @@
           No data received in the last {{ instrumentsFromLastDays }} days.
         </div>
         <div v-html="description[1]" v-if="description"></div>
-        <template v-if="links.length > 0 || site.dvasId || site.actrisId || site.gaw">
+        <BaseSpinner v-if="siteLinks.status === 'loading'" />
+        <template v-else-if="siteLinks.status == 'ready'">
+          <template v-if="links.length > 0 || siteLinks.value.actris || siteLinks.value.dvas || siteLinks.value.wigos">
+            <h2>Links</h2>
+            <ul style="list-style: disc; padding-left: 1rem; margin-bottom: 2rem">
+              <li v-for="link in links" :key="link" v-html="link"></li>
+              <li v-if="siteLinks.value.dvas">
+                <a :href="siteLinks.value.dvas.uri">{{ siteLinks.value.dvas.name }}</a> in ACTRIS data portal
+              </li>
+              <li v-if="siteLinks.value.actris">
+                <a :href="siteLinks.value.actris.uri">{{ siteLinks.value.actris.name }}</a> in ACTRIS labelling database
+              </li>
+              <li v-if="siteLinks.value.wigos">
+                <a :href="siteLinks.value.wigos.uri">{{ siteLinks.value.wigos.name }}</a> in WMO Integrated Global
+                Observing System (WIGOS)
+              </li>
+            </ul>
+          </template>
+        </template>
+        <template v-else-if="siteLinks.status === 'error'">
           <h2>Links</h2>
-          <ul style="list-style: disc; padding-left: 1rem; margin-bottom: 2rem">
-            <li v-for="link in links" :key="link" v-html="link"></li>
-            <li v-if="site._dvas">
-              <a :href="site._dvas.uri">{{ site._dvas.name }}</a> in ACTRIS data portal
-            </li>
-            <li v-if="site._actris">
-              <a :href="site._actris.uri">{{ site._actris.name }}</a> in ACTRIS labelling database
-            </li>
-            <li v-if="site.gaw">
-              <a
-                :href="`https://gawsis.meteoswiss.ch/GAWSIS/#/search/station/stationReportDetails/0-20008-0-${site.gaw}`"
-              >
-                {{ site.gaw }}
-              </a>
-              in GAW Station Information System
-            </li>
-          </ul>
+          <p style="color: red">Failed to load links.</p>
         </template>
       </section>
       <aside>
@@ -95,7 +98,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref } from "vue";
 import axios from "axios";
-import type { Site } from "@shared/entity/Site";
+import type { Site, SiteLinks } from "@shared/entity/Site";
 import type { NominalInstrument } from "@shared/entity/Instrument";
 import MyMap from "@/components/SuperMap.vue";
 import { formatCoordinates, getInstrumentIcon, backendUrl } from "@/lib";
@@ -119,6 +122,11 @@ type LocationsResult =
   | { status: "notFound" }
   | { status: "error"; error: Error };
 
+type SiteLinksResult =
+  | { status: "loading" }
+  | { status: "ready"; value: SiteLinks }
+  | { status: "error"; error: Error };
+
 export interface Props {
   site: Site;
 }
@@ -131,6 +139,7 @@ const instrumentsFromLastDays = 30;
 const instrumentsStatus = ref<"loading" | "error" | "ready">("loading");
 const mapKey = ref(0);
 const locations = ref<LocationsResult>({ status: "loading" });
+const siteLinks = ref<SiteLinksResult>({ status: "loading" });
 
 const description = computed(() => {
   if (!props.site.description) return null;
@@ -168,6 +177,15 @@ onMounted(() => {
   } else {
     locations.value = { status: "notFound" };
   }
+  axios
+    .get<SiteLinks>(`${backendUrl}sites/${props.site.id}/links`)
+    .then((res) => {
+      siteLinks.value = { status: "ready", value: res.data };
+    })
+    .catch((error) => {
+      siteLinks.value = { status: "error", error };
+      console.error("Failed to load links", error);
+    });
   Promise.all([loadInstruments(), loadNominalInstruments()])
     .then(([inst, nominal]) => {
       instruments.value = inst;

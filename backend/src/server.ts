@@ -218,6 +218,7 @@ async function createServer(): Promise<void> {
     referenceRoutes.getReference,
   );
   app.get("/api/sites/:siteId/locations", siteRoutes.location);
+  app.get("/api/sites/:siteId/links", siteRoutes.links);
   app.get("/api/product-availability", productAvailabilityRoutes.productAvailability);
   app.get("/api/upload-amount", productAvailabilityRoutes.uploadAmount);
   app.post("/api/feedback", rateLimit({ windowMs: 60 * 1000, limit: 10 }), express.json(), feedbackRoutes.postFeedback);

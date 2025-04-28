@@ -45,6 +45,9 @@ export class Site {
   gaw!: string | null;
 
   @Column({ type: "text", nullable: true })
+  wigosId!: string | null;
+
+  @Column({ type: "text", nullable: true })
   dvasId!: string | null;
 
   @Column({ type: "smallint", nullable: true })

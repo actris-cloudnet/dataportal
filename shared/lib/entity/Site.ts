@@ -18,6 +18,7 @@ export interface Site {
   longitude: number | null;
   altitude: number | null;
   gaw: string | null;
+  wigosId: string | null;
   dvasId: string | null;
   actrisId: number | null;
   country: string | null;
@@ -25,6 +26,10 @@ export interface Site {
   countrySubdivisionCode: string | null;
   persons: Person[];
   status: "cloudnet" | "active" | "inactive";
-  _dvas: SiteLink<string> | null;
-  _actris: SiteLink<number> | null;
+}
+
+export interface SiteLinks {
+  actris: SiteLink<number> | null;
+  dvas: SiteLink<string> | null;
+  wigos: SiteLink<string> | null;
 }
