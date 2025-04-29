@@ -3,6 +3,7 @@ import { RequestHandler } from "express";
 import { Calibration } from "../entity/Calibration";
 import { isValidDate, validateInstrumentPid } from "../lib";
 import { InstrumentInfo } from "../entity/Instrument";
+import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 
 interface QueryParams {
   date: string;
@@ -71,14 +72,24 @@ export class CalibrationRoutes {
     if (!instrumentInfo) {
       return next({ status: 400, errors: "Instrument not found" });
     }
-    await this.calibRepo.save(
-      Object.entries(req.body).map(([key, data]) => ({
-        instrumentInfo,
-        measurementDate: query.date,
-        key,
-        data,
-      })),
-    );
+    const now = new Date();
+    await this.calibRepo
+      .createQueryBuilder("calib")
+      .insert()
+      .values(
+        Object.entries(req.body).map(
+          ([key, data]): QueryDeepPartialEntity<Calibration> => ({
+            instrumentInfo,
+            measurementDate: query.date,
+            key,
+            data: data as any,
+            createdAt: now,
+            updatedAt: now,
+          }),
+        ),
+      )
+      .orUpdate(["data", "updatedAt"], ["instrumentInfoUuid", "measurementDate", "key"])
+      .execute();
     res.sendStatus(200);
   };
 }
