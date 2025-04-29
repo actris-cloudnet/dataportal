@@ -275,6 +275,10 @@ export function fixInstrument(instrument: string, instrumentInfo: InstrumentInfo
       return null;
     }
   }
+  // Allow "hatpro" for "lhatpro"
+  if (instrument == "hatpro" && instrumentInfo.instrument.id == "lhatpro") {
+    return "lhatpro";
+  }
   // Convert "mira" to "mira-35"
   if (instrument == "mira") {
     instrument = "mira-35";
