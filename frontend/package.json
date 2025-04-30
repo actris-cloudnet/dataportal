@@ -1,6 +1,6 @@
 {
   "name": "dataportal-frontend",
-  "version": "2.113.9",
+  "version": "2.113.10",
   "private": true,
   "type": "module",
   "scripts": {
