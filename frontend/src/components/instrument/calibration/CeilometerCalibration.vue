@@ -1,22 +1,22 @@
 <template>
   <div>
     <CalibrationTable
-      v-if="nValidValues(calibrationData.calibration_factor) <= showPlotThreshold"
+      v-if="calibrationData.calibration_factor?.length <= showPlotThreshold"
       :data="calibrationData.calibration_factor"
       :config="{ title: 'Calibration factor', label: 'Calibration factor' }"
     />
     <CalibrationPlot
-      v-if="nValidValues(calibrationData.calibration_factor) > showPlotThreshold"
+      v-if="calibrationData.calibration_factor?.length > showPlotThreshold"
       :data="calibrationData.calibration_factor"
       :config="{ title: 'Calibration factor', label: 'Calibration factor' }"
     />
     <CalibrationTable
-      v-if="nValidValues(calibrationData.range_corrected) <= showPlotThreshold"
+      v-if="calibrationData.range_corrected?.length <= showPlotThreshold"
       :data="calibrationData.range_corrected"
       :config="{ title: 'Range correction', label: 'Range corrected' }"
     />
     <CalibrationPlot
-      v-if="nValidValues(calibrationData.range_corrected) > showPlotThreshold"
+      v-if="calibrationData.range_corrected?.length > showPlotThreshold"
       :data="calibrationData.range_corrected"
       :config="{ title: 'Range correction', label: 'Range corrected' }"
     />
@@ -29,12 +29,12 @@
 </template>
 
 <script lang="ts" setup>
+import type { CalibrationList } from "@shared/entity/Calibration";
 import CalibrationTable from "@/components/instrument/calibration/CalibrationTable.vue";
 import CalibrationPlot from "@/components/instrument/calibration/CalibrationPlot.vue";
-import { nValidValues } from "@/lib";
 
 defineProps<{
-  calibrationData: any;
+  calibrationData: CalibrationList;
 }>();
 
 const showPlotThreshold = 100;

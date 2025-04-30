@@ -31,11 +31,12 @@
 </template>
 
 <script lang="ts" setup>
+import type { Calibration } from "@shared/entity/Calibration";
 import { ref, watch } from "vue";
 import { humanReadableTimestamp } from "@/lib";
 
 const props = defineProps<{
-  data: any;
+  data?: Calibration[];
   config: {
     title: string;
     label: string;

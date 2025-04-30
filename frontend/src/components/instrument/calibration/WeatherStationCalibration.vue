@@ -5,9 +5,10 @@
 </template>
 
 <script lang="ts" setup>
+import type { CalibrationList } from "@shared/entity/Calibration";
 import CalibrationTable from "@/components/instrument/calibration/CalibrationTable.vue";
 
 defineProps<{
-  calibrationData: any;
+  calibrationData: CalibrationList;
 }>();
 </script>

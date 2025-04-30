@@ -19,11 +19,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, type Component } from "vue";
 import axios from "axios";
 import type { AxiosResponse } from "axios";
 
 import type { InstrumentInfo } from "@shared/entity/Instrument";
+import type { CalibrationList } from "@shared/entity/Calibration";
 import DopplerLidarCalibration from "@/components/instrument/calibration/DopplerLidarCalibration.vue";
 import CeilometerCalibration from "@/components/instrument/calibration/CeilometerCalibration.vue";
 import DisdrometerCalibration from "@/components/instrument/calibration/DisdrometerCalibration.vue";
@@ -32,10 +33,9 @@ import RadarCalibration from "@/components/instrument/calibration/RadarCalibrati
 import WeatherStationCalibration from "./calibration/WeatherStationCalibration.vue";
 import { backendUrl } from "@/lib/index";
 
-async function fetchCalibrationData(instrumentPid: string): Promise<AxiosResponse<any> | undefined> {
+async function fetchCalibrationData(instrumentPid: string): Promise<AxiosResponse<CalibrationList>> {
   try {
-    const response = await axios.get(`${backendUrl}calibration?instrumentPid=${instrumentPid}`);
-    return response;
+    return await axios.get(`${backendUrl}calibration`, { params: { instrumentPid } });
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       return error.response;
@@ -48,7 +48,7 @@ async function fetchCalibrationData(instrumentPid: string): Promise<AxiosRespons
 
 const props = defineProps<{ instrumentInfo: InstrumentInfo }>();
 
-const instrumentComponentsMap: Record<string, any> = {
+const instrumentComponentsMap: Record<string, Component> = {
   "halo-doppler-lidar": DopplerLidarCalibration,
   "chm15k": CeilometerCalibration,
   "chm15kx": CeilometerCalibration,
@@ -75,7 +75,7 @@ const apiUrl = computed(() => `${backendUrl}calibration?instrumentPid=${props.in
 type DataState = "loading" | "success" | "clientError" | "serverError";
 const calibrationDataState = ref<DataState>("loading");
 
-const calibrationData = ref<any | null>(null);
+const calibrationData = ref<CalibrationList | null>(null);
 
 onMounted(async () => {
   try {

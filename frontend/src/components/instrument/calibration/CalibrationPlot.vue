@@ -3,13 +3,14 @@
 </template>
 
 <script lang="ts" setup>
+import type { Calibration } from "@shared/entity/Calibration";
 import { onMounted, nextTick, onUnmounted } from "vue";
 import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
 import { useTemplateRef } from "vue";
 
 const props = defineProps<{
-  data: any[];
+  data?: Calibration[];
   config: {
     title: string;
     label: string;
@@ -22,7 +23,8 @@ const plotHeight = 400;
 const plotContainer = useTemplateRef("plotContainer");
 let plotInstance: uPlot | null = null;
 
-const createTypedData = (data: any[]) => {
+const createTypedData = (data?: Calibration[]) => {
+  if (!data) return [];
   const filteredData = data.reduce<{ timestamps: number[]; values: number[] }>(
     (acc, item) => {
       if (item !== null) {
