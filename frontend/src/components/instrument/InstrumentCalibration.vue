@@ -57,6 +57,8 @@ const instrumentComponentsMap: Record<string, Component> = {
   "ct25k": CeilometerCalibration,
   "parsivel": DisdrometerCalibration,
   "hatpro": HatproCalibration,
+  "lhatpro": HatproCalibration,
+  "lhumpro": HatproCalibration,
   "cs135": CeilometerCalibration,
   "copernicus": RadarCalibration,
   "pollyxt": CeilometerCalibration,
