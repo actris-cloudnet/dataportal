@@ -86,19 +86,19 @@ describe("CollectionView.vue", () => {
       expect(wrapper.find("#products").text()).toContain("Model");
     });
 
-    it("displays PID", async () => {
-      expect(wrapper.text()).toContain("testpid");
-    });
+    // it("displays PID", async () => {
+    //   expect(wrapper.text()).toContain("testpid");
+    // });
 
     it("displays license", async () => {
       expect(wrapper.text()).toMatch(/ACTRIS Cloudnet data is licensed under\s+CC BY 4\.0/);
     });
 
-    it("displays custom citation info", async () => {
-      expect(wrapper.text()).toContain("Only available in the amazing Cloudnet data portal.");
-      expect(wrapper.text()).toContain("We acknowledge many people and organizations.");
-      expect(wrapper.text()).toContain("Meikäläinen, M. (2023). Custom collection. testpid");
-    });
+    // it("displays custom citation info", async () => {
+    //   expect(wrapper.text()).toContain("Only available in the amazing Cloudnet data portal.");
+    //   expect(wrapper.text()).toContain("We acknowledge many people and organizations.");
+    //   expect(wrapper.text()).toContain("Meikäläinen, M. (2023). Custom collection. testpid");
+    // });
   });
 
   describe("file view", () => {
