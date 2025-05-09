@@ -77,6 +77,9 @@
             </tr>
           </tbody>
         </table>
+        <div v-if="queueData.length < totalTasks">
+          and {{ totalTasks - queueData.length }} other {{ totalTasks - queueData.length === 1 ? "task" : "tasks" }}...
+        </div>
       </template>
     </main>
   </div>
