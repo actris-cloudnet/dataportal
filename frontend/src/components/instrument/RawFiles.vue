@@ -19,6 +19,7 @@
               <th v-if="showTags">Tags</th>
               <th>Size</th>
               <th>Status</th>
+              <th>Site</th>
               <th>Created (UTC)</th>
               <th>Updated (UTC)</th>
             </tr>
@@ -31,6 +32,7 @@
               <td v-if="showTags">{{ file.tags.join(", ") }}</td>
               <td>{{ humanReadableSize(file.size) }}</td>
               <td :class="getStatusClass(file.status)">{{ file.status }}</td>
+              <td>{{ file.site.humanReadableName }}</td>
               <td>{{ formatTimestamp(file.createdAt) }}</td>
               <td>{{ formatTimestamp(file.updatedAt) }}</td>
             </tr>
