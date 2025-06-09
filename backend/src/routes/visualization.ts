@@ -90,10 +90,10 @@ export class VisualizationRoutes {
 
   deleteVisualizations: RequestHandler = async (req, res, next) => {
     const uuid = req.params.uuid;
-    const images = req.query.images as string[];
     const file = await this.fileController.findAnyFile((repo) => repo.findOne({ where: { uuid } }));
     if (!file) return next({ status: 422, errors: ["No file matches the provided uuid"] });
     const visuRepo = file instanceof RegularFile ? this.visualizationRepo : this.modelVisualizationRepo;
+    const images = Array.isArray(req.query.images) ? req.query.images : [req.query.images];
     await visuRepo.delete({ sourceFile: { uuid }, productVariable: In(images) });
     res.sendStatus(200);
   };
