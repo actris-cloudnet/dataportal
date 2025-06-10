@@ -104,8 +104,8 @@
     "variables": []
   },
   {
-    "id": "edr",
-    "humanReadableName": "Eddy dissipation rate",
+    "id": "epsilon-lidar",
+    "humanReadableName": "Dissipation rate of TKE (lidar)",
     "variables": []
   },
   {

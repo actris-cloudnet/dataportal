@@ -159,8 +159,8 @@
     "experimental": false
   },
   {
-    "id": "edr",
-    "humanReadableName": "Eddy dissipation rate",
+    "id": "epsilon-lidar",
+    "humanReadableName": "Dissipation rate of TKE (lidar)",
     "type": ["instrument"],
     "experimental": true,
     "sourceProducts": [{ "id": "radar" }, { "id": "model" }]

@@ -824,13 +824,13 @@ describe("/api/queue/batch", () => {
     expect(await taskRepo.countBy({ siteId: "warsaw", productId: "categorize", instrumentInfoUuid: IsNull() })).toBe(1);
   });
 
-  it("creates edr tasks", async () => {
-    await axios.post(batchUrl, { type: "process", productIds: ["edr"], dryRun: false }, { auth });
+  it("creates epsilon-lidar tasks", async () => {
+    await axios.post(batchUrl, { type: "process", productIds: ["epsilon-lidar"], dryRun: false }, { auth });
     expect(await taskRepo.count()).toBe(2);
     expect(
       await taskRepo.existsBy({
         siteId: "granada",
-        productId: "edr",
+        productId: "epsilon-lidar",
         measurementDate: new Date("2020-08-11"),
         instrumentInfoUuid: "9e0f4b27-d5f3-40ad-8b73-2ae5dabbf81f",
       }),
@@ -838,7 +838,7 @@ describe("/api/queue/batch", () => {
     expect(
       await taskRepo.existsBy({
         siteId: "bucharest",
-        productId: "edr",
+        productId: "epsilon-lidar",
         measurementDate: new Date("2020-08-13"),
         instrumentInfoUuid: "0b3a7fa0-4812-4964-af23-1162e8b3a665",
       }),
