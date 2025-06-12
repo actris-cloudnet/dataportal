@@ -1,9 +1,15 @@
 <template>
   <main class="pagewidth">
-    Date
-    <DatePicker class="date-picker" name="date" v-model="selectedDate" :end="today" :disabled="status === 'loading'" />
+    <DatePicker
+      class="date-picker"
+      name="date"
+      v-model="selectedDate"
+      :end="today"
+      :disabled="status === 'loading'"
+      label="Date"
+    />
     <BaseSpinner v-if="status === 'loading' && files.length === 0" />
-    <span v-else-if="status === 'error'"> Failed to load files... </span>
+    <span v-else-if="status === 'error'">Failed to load files...</span>
     <template v-else-if="files.length">
       <div class="upload-stats-header" :class="{ loading: status === 'loading' }">
         <div class="donut">
@@ -39,6 +45,15 @@
           </tbody>
         </table>
       </div>
+      <router-link
+        :to="{
+          name: 'Search',
+          params: { mode: 'data' },
+          query: { dateFrom: selectedDate, dateTo: selectedDate, instrumentPid: instrumentInfo.pid },
+        }"
+      >
+        Search products
+      </router-link>
     </template>
     <p v-else class="no-data">No raw data available</p>
   </main>
@@ -157,8 +172,12 @@ function getStatusClass(status: string) {
 <style scoped lang="scss">
 @use "@/sass/variables.scss";
 
+.pagewidth {
+  margin-bottom: 2rem;
+}
+
 .file-table {
-  margin-bottom: 5rem;
+  margin-bottom: 2rem;
 }
 
 .status-processed {
