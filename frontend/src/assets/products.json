@@ -1,6 +1,6 @@
 {
   "categorize": {
-    "description": "The categorize product facilitates the application of multi-sensor algorithms by performing much of the required preprocessing. It includes radar, lidar, microwave radiometer, disdrometer and model data with regridding, correction for attenuation, reporting of measurement errors, data quality flags and categorization of targets.",
+    "description": "The categorize product combines measurements from radar,\n        lidar, microwave radiometer and disdrometer, as well as model data, all\n        regridded to a common time and height resolution. Radar measurements\n        are corrected for attenuation caused by atmospheric gases and liquid\n        droplets, with experimental corrections for rain and melting layer\n        attenuation applied when disdrometer measurements are available. The\n        product also includes measurement error estimates, data quality flags\n        and categorization of atmospheric targets.",
     "references_html": [
       "Hogan & O\u2019Connor (2004). Facilitating cloud radar and lidar algorithms: the Cloudnet Instrument Synergy/Target Categorization product. <a href=\"https://www.met.reading.ac.uk/~swrhgnrj/publications/categorization.pdf\">https://www.met.reading.ac.uk/~swrhgnrj/publications/categorization.pdf</a>"
     ],
@@ -806,7 +806,7 @@
     ]
   },
   "classification": {
-    "description": "Initial classification masks from a categorize file and creates a more comprehensive classification for different atmospheric targets.",
+    "description": "The classification product provides classification for\n        different atmospheric targets. It is derived from the category bits of\n        the categorize product. While multiple classes may be present in a\n        single pixel in the categorize product, the classification product\n        assigns each pixel to a single class.",
     "references_html": [
       "Hogan & O\u2019Connor (2004). Facilitating cloud radar and lidar algorithms: the Cloudnet Instrument Synergy/Target Categorization product. <a href=\"https://www.met.reading.ac.uk/~swrhgnrj/publications/categorization.pdf\">https://www.met.reading.ac.uk/~swrhgnrj/publications/categorization.pdf</a>"
     ],
@@ -1218,7 +1218,7 @@
     ]
   },
   "cpr-simulation": {
-    "description": "Ground-based radar measurements transformed for comparison with the 94 GHz cloud profiling radar (CPR) aboard the EarthCARE satellite.",
+    "description": "Ground-based radar measurements transformed for\n        comparison with the 94 GHz cloud profiling radar (CPR) aboard the\n        EarthCARE satellite.",
     "references_html": [
       "Pfitzenmaier et al. (2025). Orbital-Radar v1.0.0: a tool to transform suborbital radar observations to synthetic EarthCARE cloud radar data. <i>Geosci. Model Dev.</i>, <i>18</i>(1), 101-115. <a href=\"https://doi.org/10.5194/gmd-18-101-2025\">https://doi.org/10.5194/gmd-18-101-2025</a>"
     ],
@@ -1468,7 +1468,7 @@
     ]
   },
   "der": {
-    "description": "Liquid droplet effective radius using the Frisch et al. (2002) method based on radar reflectivity factor and microwave radiometer liquid water path.",
+    "description": "Liquid droplet effective radius is derived using the\n        method of Frisch et al. (2002), based on the attenuation-corrected\n        radar reflectivity and liquid water path.",
     "references_html": [
       "Frisch et al. (2002). The Retrieval of Stratus Cloud Droplet Effective Radius with Cloud Radars. <i>J. Atmos. Oceanic Technol.</i>, <i>19</i>(6), 835-842. <a href=\"https://doi.org/10.1175/1520-0426(2002)019%3C0835:TROSCD%3E2.0.CO;2\">https://doi.org/10.1175/1520-0426(2002)019%3C0835:TROSCD%3E2.0.CO;2</a>"
     ],
@@ -1609,7 +1609,7 @@
     ]
   },
   "disdrometer": {
-    "description": "An optical disdrometer measures the size and velocity of precipitation particles by analyzing the distortion they cause in a laser beam passing through them. These measurements can be used to derive parameters such as rainfall rate, drop size distribution, and precipitation type.",
+    "description": "The disdrometer product provides size and velocity\n        distributions of precipitation particles measured by a laser\n        disdrometer (DD).",
     "references_html": [],
     "dimensions": [
       {
@@ -1700,8 +1700,11 @@
     ]
   },
   "doppler-lidar": {
-    "description": "Attenuated backscatter coefficient and Doppler velocity profiles measured by a vertical-pointing Doppler lidar.",
-    "references_html": [],
+    "description": "The Doppler lidar product provides attenuated\n        backscatter coefficient and Doppler velocity profiles measured by a\n        vertical-pointing Doppler wind lidar (DWL).",
+    "references_html": [
+      "Manninen et al. (2016). A generalised background correction algorithm for a Halo Doppler lidar and its application to data from Finland. <i>Atmos. Meas. Tech.</i>, <i>9</i>(2), 817-827. <a href=\"https://doi.org/10.5194/amt-9-817-2016\">https://doi.org/10.5194/amt-9-817-2016</a>",
+      "Vakkari et al. (2019). A novel post-processing algorithm for Halo Doppler lidars. <i>Atmos. Meas. Tech.</i>, <i>12</i>(2), 839-852. <a href=\"https://doi.org/10.5194/amt-12-839-2019\">https://doi.org/10.5194/amt-12-839-2019</a>"
+    ],
     "dimensions": [
       {
         "name": "range",
@@ -1818,8 +1821,10 @@
     ]
   },
   "doppler-lidar-wind": {
-    "description": "Wind speed and direction profiles derived from Doppler lidar scans.",
-    "references_html": [],
+    "description": "The Doppler lidar wind product provides wind profiles\n        derived from Doppler wind lidar (DWL) scans.",
+    "references_html": [
+      "P\u00e4schke et al. (2015). An assessment of the performance of a 1.5 \u03bcm Doppler lidar for operational vertical wind profiling based on a 1-year trial. <i>Atmos. Meas. Tech.</i>, <i>8</i>(6), 2251-2266. <a href=\"https://doi.org/10.5194/amt-8-2251-2015\">https://doi.org/10.5194/amt-8-2251-2015</a>"
+    ],
     "dimensions": [
       {
         "name": "height",
@@ -1916,7 +1921,7 @@
     ]
   },
   "drizzle": {
-    "description": "Drizzle parameters such as drizzle flux and mean particle size, derived from combined radar and lidar beneath cloud base.",
+    "description": "The drizzle product provides parameters such as drizzle flux and\n        median particle size, derived from combined radar and lidar\n        measurements below the cloud base.",
     "references_html": [
       "O\u2019Connor et al. (2005). Retrieving Stratocumulus Drizzle Parameters Using Doppler Radar and Lidar. <i>Journal of Applied Meteorology</i>, <i>44</i>(1), 14-27. <a href=\"https://doi.org/10.1175/JAM-2181.1\">https://doi.org/10.1175/JAM-2181.1</a>"
     ],
@@ -2196,7 +2201,7 @@
     ]
   },
   "epsilon-lidar": {
-    "description": "Turbulent kinetic energy dissipation rate estimated from Doppler velocity variance of vertically-pointing Doppler lidar measurements and horizontal wind speed from Doppler lidar scan measurements.",
+    "description": "Turbulent kinetic energy (TKE) dissipation rate is\n        estimated using the variance of vertical Doppler velocity and\n        horizontal wind speed measured by a Doppler wind lidar (DWL).",
     "references_html": [
       "O\u2019Connor et al. (2010). A Method for Estimating the Turbulent Kinetic Energy Dissipation Rate from a Vertically Pointing Doppler Lidar, and Independent Evaluation from Balloon-Borne In Situ Measurements. <i>Journal of Atmospheric and Oceanic Technology</i>, <i>27</i>(10), 1652-1664. <a href=\"https://doi.org/10.1175/2010JTECHA1455.1\">https://doi.org/10.1175/2010JTECHA1455.1</a>"
     ],
@@ -2286,7 +2291,7 @@
     ]
   },
   "ier": {
-    "description": "Ice particle effective radius calculated using the Grieche et al. (2020) method which uses Hogan et al. (2006) to estimate ice water content and alpha from Delano\u00eb et al. (2007). In this method, effective radius of ice particles is calculated from attenuated-corrected radar reflectivity and model temperature.",
+    "description": "The ice particle effective radius is derived from\n        attenuation-corrected radar reflectivity and model temperature using\n        the method of Grieche et al. (2020), which incorporates the approach of\n        Hogan et al. (2006) to estimate ice water content and uses the\n        parameterization of alpha from Delano\u00eb et al. (2007).",
     "references_html": [
       "Hogan et al. (2006). The Retrieval of Ice Water Content from Radar Reflectivity Factor and Temperature and Its Use in Evaluating a Mesoscale Model. <i>Journal of Applied Meteorology and Climatology</i>, <i>45</i>(2), 301-317. <a href=\"https://doi.org/10.1175/JAM2340.1\">https://doi.org/10.1175/JAM2340.1</a>",
       "Delano\u00eb et al. (2007). The Characterization of Ice Cloud Properties from Doppler Radar Measurements. <i>Journal of Applied Meteorology and Climatology</i>, <i>46</i>(10), 1682-1698. <a href=\"https://doi.org/10.1175/JAM2543.1\">https://doi.org/10.1175/JAM2543.1</a>",
@@ -2411,7 +2416,7 @@
     ]
   },
   "iwc": {
-    "description": "Ice water content calculated using the so-called Z-T method based on the attenuated-corrected radar reflectivity and model temperature.",
+    "description": "Ice water content is calculated using the so-called Z-T\n        method based on the attenuated-corrected radar reflectivity and model\n        temperature.",
     "references_html": [
       "Hogan et al. (2006). The Retrieval of Ice Water Content from Radar Reflectivity Factor and Temperature and Its Use in Evaluating a Mesoscale Model. <i>Journal of Applied Meteorology and Climatology</i>, <i>45</i>(2), 301-317. <a href=\"https://doi.org/10.1175/JAM2340.1\">https://doi.org/10.1175/JAM2340.1</a>"
     ],
@@ -2554,7 +2559,7 @@
     ]
   },
   "lidar": {
-    "description": "Lidars, such as ceilometers, are remote sensing devices that use laser pulses to measure the height of clouds and aerosol layers in the atmosphere.",
+    "description": "The lidar product provides attenuated backscatter\n        coefficient profiles from automatic low-power lidars and ceilometers\n        (ALC). The data are corrected for tilt angle and screened for\n        background noise and saturation caused by conditions like fog. However,\n        absolute calibration of the instruments is not performed, so the data\n        should not be used to derive quantitative aerosol properties.",
     "references_html": [],
     "dimensions": [
       {
@@ -2672,7 +2677,7 @@
     ]
   },
   "lwc": {
-    "description": "Liquid water content calculated using the so-called adiabatic-scaled method where microwave radiometer is used to constrain the theoretical liquid water content of observed liquid clouds.",
+    "description": "Liquid water content is calculated using the so-called\n        adiabatic-scaled method where microwave radiometer is used to constrain\n        the theoretical liquid water content of observed liquid clouds.",
     "references_html": [
       "Illingworth et al. (2007). Cloudnet. <i>Bulletin of the American Meteorological Society</i>, <i>88</i>(6), 883-898. <a href=\"https://doi.org/10.1175/BAMS-88-6-883\">https://doi.org/10.1175/BAMS-88-6-883</a>"
     ],
@@ -2811,7 +2816,7 @@
     ]
   },
   "model": {
-    "description": "Vertical profile from a numerical weather prediction model including radar propagation parameters calculated from the model variables.",
+    "description": "The model product provides surface data and vertical\n        profiles of meteorological variables extracted from a numerical weather\n        prediction (NWP) model. It also includes radar propagation parameters\n        calculated from these model variables.",
     "references_html": [],
     "dimensions": [
       {
@@ -3069,7 +3074,7 @@
     ]
   },
   "mwr": {
-    "description": "Microwave radiometers are instruments that measure the intensity of microwave radiation emitted or scattered by atmospheric gases and particles, providing insights into temperature, humidity, and precipitation patterns in the atmosphere.",
+    "description": "Microwave radiometers are instruments that measure the\n        intensity of microwave radiation emitted or scattered by atmospheric\n        gases and particles, providing insights into temperature, humidity, and\n        precipitation patterns in the atmosphere.",
     "references_html": [],
     "dimensions": [
       {
@@ -3127,7 +3132,7 @@
     ]
   },
   "mwr-l1c": {
-    "description": "Microwave radiometer data processed with MWRpy providing brightness temperature and optionally with data from infrared sensor and integrated weather station.",
+    "description": "Microwave radiometer data processed with MWRpy providing\n        brightness temperature and optionally with data from infrared sensor\n        and integrated weather station.",
     "references_html": [
       "Marke et al. (2024). MWRpy: A Python package for processing microwave radiometer data. <i>JOSS</i>, <i>9</i>(98), 6733. <a href=\"https://doi.org/10.21105/joss.06733\">https://doi.org/10.21105/joss.06733</a>"
     ],
@@ -3517,7 +3522,7 @@
     ]
   },
   "mwr-multi": {
-    "description": "Microwave radiometer data processed with MWRpy providing temperature and humidity profiles with high-quality profile information.",
+    "description": "Microwave radiometer data processed with MWRpy providing\n        temperature and humidity profiles with high-quality profile\n        information.",
     "references_html": [
       "Marke et al. (2024). MWRpy: A Python package for processing microwave radiometer data. <i>JOSS</i>, <i>9</i>(98), 6733. <a href=\"https://doi.org/10.21105/joss.06733\">https://doi.org/10.21105/joss.06733</a>"
     ],
@@ -3726,7 +3731,7 @@
     ]
   },
   "mwr-single": {
-    "description": "Microwave radiometer data processed with MWRpy providing temperature and humidity profiles with high temporal resolution.",
+    "description": "Microwave radiometer data processed with MWRpy providing\n        temperature and humidity profiles with high temporal resolution.",
     "references_html": [
       "Marke et al. (2024). MWRpy: A Python package for processing microwave radiometer data. <i>JOSS</i>, <i>9</i>(98), 6733. <a href=\"https://doi.org/10.21105/joss.06733\">https://doi.org/10.21105/joss.06733</a>"
     ],
@@ -4233,7 +4238,7 @@
     ]
   },
   "radar": {
-    "description": "Cloud radar is a remote sensing instrument that utilizes radio waves to measure the characteristics and properties of clouds, such as their size, shape, altitude, and composition.",
+    "description": "The radar product provides Doppler spectral moments\n        (reflectivity, mean velocity, etc.) calculated from the measurements by\n        a vertical-pointing Doppler cloud radar (DCR). The data are not\n        corrected for atmospheric attenuation, velocity aliasing, or instrument\n        mispointing.",
     "references_html": [],
     "dimensions": [
       {
@@ -4422,7 +4427,7 @@
     ]
   },
   "rain-radar": {
-    "description": "Micro Rain Radar (MRR) is a remote sensing instrument used for measuring the vertical profiles of precipitation intensity and particle size distribution in the atmosphere.",
+    "description": "Micro Rain Radar (MRR) is a remote sensing instrument\n        used for measuring the vertical profiles of precipitation intensity and\n        particle size distribution in the atmosphere.",
     "references_html": [],
     "dimensions": [
       {
@@ -4570,7 +4575,7 @@
     ]
   },
   "weather-station": {
-    "description": "An automatic weather station collects real-time meteorological data, including temperature, humidity, wind speed, and precipitation.",
+    "description": "The weather station product provides meteorological data\n        collected by an automatic weather station (AWS).",
     "references_html": [],
     "dimensions": [
       {
