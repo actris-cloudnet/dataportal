@@ -2816,7 +2816,7 @@
     ]
   },
   "model": {
-    "description": "The model product provides surface data and vertical\n        profiles of meteorological variables extracted from a numerical weather\n        prediction (NWP) model. It also includes radar propagation parameters\n        calculated from these model variables.",
+    "description": "The model product provides vertical profiles and surface\n        data of meteorological variables extracted from a numerical weather\n        prediction (NWP) model. Some products also includes radar propagation\n        parameters, but these are expected to be removed in the future.",
     "references_html": [],
     "dimensions": [
       {
@@ -3074,7 +3074,7 @@
     ]
   },
   "mwr": {
-    "description": "Microwave radiometers are instruments that measure the\n        intensity of microwave radiation emitted or scattered by atmospheric\n        gases and particles, providing insights into temperature, humidity, and\n        precipitation patterns in the atmosphere.",
+    "description": "The microwave radiometer product provides liquid water\n        path (LWP) and integrated water vapour (IWV) values retrieved using the\n        instrument's built-in software. This product will be deprecated in the\n        future in favour of products processed using MWRpy.",
     "references_html": [],
     "dimensions": [
       {
@@ -3132,7 +3132,7 @@
     ]
   },
   "mwr-l1c": {
-    "description": "Microwave radiometer data processed with MWRpy providing\n        brightness temperature and optionally with data from infrared sensor\n        and integrated weather station.",
+    "description": "The MWR brightness temperature product includes\n        microwave radiometer data processed using MWRpy (Marke et al., 2024),\n        providing brightness temperature measurements and optionally\n        measurements from an infrared sensor and an integrated weather\n        station.",
     "references_html": [
       "Marke et al. (2024). MWRpy: A Python package for processing microwave radiometer data. <i>JOSS</i>, <i>9</i>(98), 6733. <a href=\"https://doi.org/10.21105/joss.06733\">https://doi.org/10.21105/joss.06733</a>"
     ],
@@ -3522,7 +3522,7 @@
     ]
   },
   "mwr-multi": {
-    "description": "Microwave radiometer data processed with MWRpy providing\n        temperature and humidity profiles with high-quality profile\n        information.",
+    "description": "The MWR multiple pointing product provides microwave\n        radiometer data processed with MWRpy (Marke et al., 2024), providing\n        temperature and humidity profiles with high-quality profile\n        information.",
     "references_html": [
       "Marke et al. (2024). MWRpy: A Python package for processing microwave radiometer data. <i>JOSS</i>, <i>9</i>(98), 6733. <a href=\"https://doi.org/10.21105/joss.06733\">https://doi.org/10.21105/joss.06733</a>"
     ],
@@ -3731,7 +3731,7 @@
     ]
   },
   "mwr-single": {
-    "description": "Microwave radiometer data processed with MWRpy providing\n        temperature and humidity profiles with high temporal resolution.",
+    "description": "The MWR single pointing product provides microwave\n        radiometer data processed with MWRpy (Marke et al., 2024), providing\n        temperature and humidity profiles with high temporal resolution.",
     "references_html": [
       "Marke et al. (2024). MWRpy: A Python package for processing microwave radiometer data. <i>JOSS</i>, <i>9</i>(98), 6733. <a href=\"https://doi.org/10.21105/joss.06733\">https://doi.org/10.21105/joss.06733</a>"
     ],
@@ -4238,7 +4238,7 @@
     ]
   },
   "radar": {
-    "description": "The radar product provides Doppler spectral moments\n        (reflectivity, mean velocity, etc.) calculated from the measurements by\n        a vertical-pointing Doppler cloud radar (DCR). The data are not\n        corrected for atmospheric attenuation, velocity aliasing, or instrument\n        mispointing.",
+    "description": "The radar product provides Doppler spectral moments\n        (reflectivity, mean velocity, etc.) calculated from the measurements by\n        a vertical-pointing Doppler cloud radar (DCR). The data are not\n        corrected for atmospheric attenuation, velocity aliasing/folding, or\n        instrument mispointing.",
     "references_html": [],
     "dimensions": [
       {
