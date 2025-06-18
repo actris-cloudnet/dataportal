@@ -1,6 +1,6 @@
 {
   "name": "dataportal",
-  "version": "2.114.3",
+  "version": "2.114.4",
   "description": "Actris cloud remote sensing data portal",
   "main": "build/server.js",
   "directories": {
