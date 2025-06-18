@@ -412,16 +412,17 @@ async function fetchInstrumentPis(data: { instrumentPid: string; dates: string[]
 }
 
 async function fetchNfPi(actrisId: number, measurementDate?: string): Promise<NfContact[]> {
-  const response = await axios.get(`${env.LABELLING_URL}/api/facilities/${actrisId}/contacts`, {
-    params: {
-      date: measurementDate,
-      role: "pi",
-    },
-  });
-  if (!Array.isArray(response.data)) {
-    return [];
-  }
-  return response.data;
+  return []; // TODO: Labelling down as of 2025-06-18
+  // const response = await axios.get(`${env.LABELLING_URL}/api/facilities/${actrisId}/contacts`, {
+  //   params: {
+  //     date: measurementDate,
+  //     role: "pi",
+  //   },
+  // });
+  // if (!Array.isArray(response.data)) {
+  //   return [];
+  // }
+  // return response.data;
 }
 
 async function fetchNfPis(data: { actrisId: number; dates: string[] }[]): Promise<Person[]> {
