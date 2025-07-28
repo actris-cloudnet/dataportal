@@ -36,6 +36,9 @@ import { ProductAvailabilityRoutes } from "./routes/productAvailability";
 import { StatisticsRoutes } from "./routes/statistics";
 import { DataCiteService } from "./lib/datacite";
 import { CitationService } from "./lib/cite";
+import { MonitoringFileRoutes } from "./routes/monitoringFile";
+import { MonitoringVisualizationRoutes } from "./routes/monitoringVisualization";
+import { MonitoringProductRoutes } from "./routes/monitoringProduct";
 import env from "./lib/env";
 
 async function createServer(): Promise<void> {
@@ -95,6 +98,9 @@ async function createServer(): Promise<void> {
   const queueRoutes = new QueueRoutes(AppDataSource, queueService);
   const productAvailabilityRoutes = new ProductAvailabilityRoutes(AppDataSource);
   const statsRoutes = new StatisticsRoutes(AppDataSource);
+  const monitoringFileRoutes = new MonitoringFileRoutes(AppDataSource);
+  const monitoringVisualizationRoutes = new MonitoringVisualizationRoutes(AppDataSource);
+  const monitoringProductRoutes = new MonitoringProductRoutes(AppDataSource);
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     console.error(
@@ -401,6 +407,38 @@ async function createServer(): Promise<void> {
     publicationRoutes.deletePublication,
   );
   app.get("/api/publications/", publicationRoutes.getPublications);
+
+  app.get(
+    "/api/monitoring-files/available-periods",
+    express.json(),
+    monitoringFileRoutes.getDistinctStartDatesByPeriodType,
+  );
+  app.get(
+    "/api/monitoring-files/available-instruments",
+    express.json(),
+    monitoringFileRoutes.getInstrumentsWithMonitoringFiles,
+  );
+  app.get("/api/monitoring-files/available-sites", express.json(), monitoringFileRoutes.getSitesWithMonitoringFiles);
+  app.get(
+    "/api/monitoring-visualizations",
+    express.json(),
+    middleware.validateMonitoringVisQuery,
+    monitoringVisualizationRoutes.monitoringVisualization,
+  );
+  app.get("/api/monitoring-products", monitoringProductRoutes.allMonitoringProducts);
+  app.get("/api/monitoring-products/variables", monitoringProductRoutes.allMonitoringProductsWithVariables);
+  app.post(
+    "/monitoring-files",
+    express.json(),
+    middleware.validatePutMonitoringFile,
+    monitoringFileRoutes.putMonitoringFile,
+  );
+  app.post(
+    "/monitoring-visualizations",
+    express.json(),
+    middleware.validatePutMonitoringVisualization,
+    monitoringVisualizationRoutes.putMonitoringVisualization,
+  );
 
   // Private UserAccount and Permission routes
   app.post("/user-accounts", express.json(), userAccountRoutes.validatePost, userAccountRoutes.postUserAccount);

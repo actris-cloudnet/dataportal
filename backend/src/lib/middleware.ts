@@ -6,17 +6,23 @@ import { DataSource, In, Repository } from "typeorm";
 import { hideTestDataFromNormalUsers, isValidDate, toArray } from ".";
 import { validate as validateUuid } from "uuid";
 import { Product, ProductType } from "../entity/Product";
+import { MonitoringFile, PeriodType } from "../entity/MonitoringFile";
+import { MonitoringProductVariable } from "../entity/MonitoringProductVariable";
 
 export class Middleware {
   constructor(dataSource: DataSource) {
     this.dataSource = dataSource;
     this.siteRepo = dataSource.getRepository(Site);
     this.productRepo = dataSource.getRepository(Product);
+    this.monitoringFileRepo = dataSource.getRepository(MonitoringFile);
+    this.monitoringProductVariableRepo = dataSource.getRepository(MonitoringProductVariable);
   }
 
   private dataSource: DataSource;
   private siteRepo: Repository<Site>;
   private productRepo: Repository<Product>;
+  private monitoringFileRepo: Repository<MonitoringFile>;
+  private monitoringProductVariableRepo: Repository<MonitoringProductVariable>;
 
   validateUuidParam: RequestHandler = (req, _res, next) => {
     const addDashesToUuid = (uuid: string) =>
@@ -240,6 +246,160 @@ export class Middleware {
       if (["html", "txt"].includes(query.format)) return next();
     }
     next({ status: 404, errors: ["Invalid citation format"] });
+  };
+
+  validateMonitoringVisQuery: RequestHandler = async (req, res, next) => {
+    const query = req.query as any;
+    const validKeys = new Set(["productId", "variableId", "siteId", "instrumentUuid", "period", "startDate"]);
+    const requestError: RequestErrorArray = { status: 400, errors: [] };
+    if (Object.keys(req.query).length == 0) {
+      requestError.errors.push("No search parameters given");
+      return next(requestError);
+    }
+
+    const invalidKeys = Object.keys(query).filter((key) => !validKeys.has(key));
+    if (invalidKeys.length > 0) {
+      requestError.errors.push(`Invalid query paramters: ${invalidKeys.join(", ")}`);
+      return next(requestError);
+    }
+    query.productId = toArray(query.productId);
+    query.variableId = toArray(query.variableId);
+    query.siteId = toArray(query.siteId);
+    query.instrumentUuid = toArray(query.instrumentUuid);
+    query.period = toArray(query.period);
+    query.startDate = toArray(query.startDate);
+    Object.assign(res.locals, query);
+    next();
+  };
+
+  validatePutMonitoringFile: RequestHandler = async (req, res, next) => {
+    const { uuid, startDate, periodType, siteId, productId: monitoringProductId, instrumentUuid } = req.body;
+    const errors: string[] = [];
+
+    if (uuid && !validateUuid(uuid)) {
+      errors.push("Invalid UUID");
+    }
+
+    if (!siteId || typeof siteId !== "string") {
+      errors.push("Missing or invalid 'siteId' (must be string).");
+    }
+
+    if (!monitoringProductId || typeof monitoringProductId !== "string") {
+      errors.push("Missing or invalid 'monitoringProductId' (must be string).");
+    }
+
+    if (!instrumentUuid || !validateUuid(instrumentUuid)) {
+      errors.push("Missing or invalid 'instrumentUuid' (must be UUID).");
+    }
+
+    if (!periodType || !Object.values(PeriodType).includes(periodType)) {
+      errors.push(`Invalid or missing 'periodType'. Must be one of: ${Object.values(PeriodType).join(", ")}`);
+    }
+
+    if (periodType !== PeriodType.ALL && !isValidDate(startDate)) {
+      errors.push("Missing or invalid 'startDate' (must be valid YYYY-MM-DD if periodType is not 'all').");
+    }
+
+    if (errors.length > 0) {
+      return next({ status: 400, errors } as RequestErrorArray);
+    }
+    res.locals.fileData = {
+      ...(uuid ? { uuid } : {}),
+      siteId,
+      monitoringProductId,
+      instrumentUuid,
+      periodType,
+      startDate: periodType === PeriodType.ALL ? null : startDate,
+    };
+    return next();
+  };
+
+  validatePutMonitoringVisualization: RequestHandler = async (req, res, next) => {
+    const {
+      s3key,
+      sourceFileUuid,
+      variableId: monitoringProductVariableId,
+      width,
+      height,
+      marginTop,
+      marginRight,
+      marginBottom,
+      marginLeft,
+    } = req.body;
+
+    const errors: string[] = [];
+
+    // s3key
+    if (typeof s3key !== "string" || s3key.trim() === "") {
+      errors.push("Missing or invalid 's3key'. Must be a non-empty string.");
+    } else {
+      const pattern = /^monitoring\/(.+)/;
+      const match = s3key.match(pattern);
+      if (!match || !match[1].trim()) {
+        errors.push("'s3key' must start with 'monitoring/' followed by a non-empty path.");
+      }
+    }
+
+    // sourceFileUuid
+    if (!validateUuid(sourceFileUuid)) {
+      errors.push("Missing or invalid 'sourceFileUuid'. Must be a valid UUID.");
+    }
+
+    // monitoringProductVariableId
+    if (typeof monitoringProductVariableId !== "string" || monitoringProductVariableId.trim() === "") {
+      errors.push("Missing or invalid 'monitoringProductVariableId'. Must be a non-empty string.");
+    }
+
+    // Optional smallint fields
+    const optionalFields: Record<string, any> = {
+      width,
+      height,
+      marginTop,
+      marginRight,
+      marginBottom,
+      marginLeft,
+    };
+
+    for (const [field, value] of Object.entries(optionalFields)) {
+      if (value !== undefined && value !== null) {
+        if (!Number.isInteger(value) || value < 0 || value > 32767) {
+          errors.push(`Field '${field}' must be a non-negative integer under 32768 (smallint).`);
+        }
+      }
+    }
+
+    // Skip db checks if UUID or ID format are already invalid
+    if (!errors.length) {
+      try {
+        const file = await this.monitoringFileRepo.findOneBy({ uuid: sourceFileUuid });
+        if (!file) errors.push(`MonitoringFile with UUID ${sourceFileUuid} does not exist.`);
+
+        const variable = await this.monitoringProductVariableRepo.findOneBy({ id: monitoringProductVariableId });
+        if (!variable) {
+          errors.push(`MonitoringProductVariable with ID ${monitoringProductVariableId} does not exist.`);
+        }
+      } catch (err) {
+        console.error(err);
+        return next({ status: 500, errors: ["Failed to validate related entities."] });
+      }
+    }
+
+    if (errors.length > 0) {
+      return next({ status: 400, errors } as RequestErrorArray);
+    }
+
+    res.locals.visualisationData = {
+      s3key,
+      sourceFileUuid,
+      monitoringProductVariableId,
+      width,
+      height,
+      marginTop,
+      marginRight,
+      marginBottom,
+      marginLeft,
+    };
+    return next();
   };
 
   private checkSite = async (req: Request, res: Response) => {

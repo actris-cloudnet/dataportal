@@ -66,6 +66,15 @@ const routes = [
     redirect: { name: "File" },
   },
   {
+    path: "/monitoring",
+    name: "Monitoring",
+    meta: {
+      title: "",
+    },
+    component: () => import("@/views/MonitoringView.vue"),
+    props: true,
+  },
+  {
     path: "/search/:mode",
     name: "Search",
     meta: {
