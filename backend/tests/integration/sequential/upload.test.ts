@@ -83,20 +83,20 @@ beforeAll(async () => {
     .getRepository(RegularFile)
     .save(JSON.parse((await fsp.readFile("fixtures/5-regular_file.json")).toString()));
 
-  await instrumentRepo.delete({});
-  await modelRepo.delete({});
+  await instrumentRepo.createQueryBuilder().delete().execute();
+  await modelRepo.createQueryBuilder().delete().execute();
   await initUsersAndPermissions();
 });
 
 afterAll(async () => {
-  await instrumentRepo.delete({});
-  await modelRepo.delete({});
+  await instrumentRepo.createQueryBuilder().delete().execute();
+  await modelRepo.createQueryBuilder().delete().execute();
   await dataSource.destroy();
 });
 
 describe("POST /upload/metadata", () => {
   beforeEach(async () => {
-    await instrumentRepo.delete({});
+    await instrumentRepo.createQueryBuilder().delete().execute();
   });
 
   it("accepts valid filenames", async () => {
@@ -535,7 +535,7 @@ describe("PUT /upload/data/:checksum", () => {
   const validFile = "content";
 
   beforeEach(async () => {
-    await instrumentRepo.delete({});
+    await instrumentRepo.createQueryBuilder().delete().execute();
     await expect(axios.post(metadataUrl, validMetadata, { headers })).resolves.toMatchObject({ status: 200 });
   });
 
@@ -620,7 +620,7 @@ describe("PUT /model-upload/data/:checksum", () => {
   const headers = { authorization: `Basic ${str2base64("bob:bobs_pass")}` };
 
   beforeEach(async () => {
-    await modelRepo.delete({});
+    await modelRepo.createQueryBuilder().delete().execute();
     await axios.post(modelMetadataUrl, validModelMetadata, { headers });
   });
 
@@ -654,7 +654,7 @@ describe("POST /model-upload/metadata", () => {
   };
 
   beforeEach(async () => {
-    await modelRepo.delete({});
+    await modelRepo.createQueryBuilder().delete().execute();
   });
 
   it("inserts metadata if volatile model file exists", async () => {
@@ -792,11 +792,11 @@ describe("test content upload", () => {
   });
 
   afterAll(async () => {
-    await Promise.all([instrumentRepo.delete({})]);
+    await Promise.all([instrumentRepo.createQueryBuilder().delete().execute()]);
   });
 
   beforeEach(async () => {
-    await instrumentRepo.delete({});
+    await instrumentRepo.createQueryBuilder().delete().execute();
   });
 
   it("tests content upload", async () => {
@@ -811,7 +811,7 @@ describe("test content upload", () => {
 
 describe("Test instrument upload with tags", () => {
   beforeAll(async () => {
-    await instrumentRepo.delete({});
+    await instrumentRepo.createQueryBuilder().delete().execute();
   });
   const headers = { authorization: `Basic ${str2base64("alice:alices_password")}` };
   const payload_co = {
@@ -874,7 +874,7 @@ describe("Test instrument upload with tags", () => {
 
 describe("tags: Test instrument upload metadata tag update", () => {
   beforeAll(async () => {
-    await instrumentRepo.delete({});
+    await instrumentRepo.createQueryBuilder().delete().execute();
   });
   const headers = { authorization: `Basic ${str2base64("alice:alices_password")}` };
   const payload_co = {
@@ -926,7 +926,7 @@ describe("tags: Test instrument upload metadata tag update", () => {
 
 describe("Test instrument upload with various tags", () => {
   beforeAll(async () => {
-    await instrumentRepo.delete({});
+    await instrumentRepo.createQueryBuilder().delete().execute();
   });
   const headers = { authorization: `Basic ${str2base64("alice:alices_password")}` };
   const payload_co = {
@@ -970,12 +970,12 @@ describe("test user permissions", () => {
   });
 
   afterAll(async () => {
-    await instrumentRepo.delete({});
+    await instrumentRepo.createQueryBuilder().delete().execute();
   });
 
   beforeEach(async () => {
-    await instrumentRepo.delete({});
-    await modelRepo.delete({});
+    await instrumentRepo.createQueryBuilder().delete().execute();
+    await modelRepo.createQueryBuilder().delete().execute();
   });
 
   it("tests that alice can upload to all sites", async () => {

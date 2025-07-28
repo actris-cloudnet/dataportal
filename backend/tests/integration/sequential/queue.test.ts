@@ -705,7 +705,7 @@ describe("/api/queue/batch", () => {
     modelUploadRepo = dataSource.getRepository(ModelUpload);
     taskRepo = dataSource.getRepository(Task);
     await permissionRepo.save(JSON.parse((await fsp.readFile("fixtures/2-permission.json")).toString()));
-    await userAccountRepo.delete({});
+    await userAccountRepo.createQueryBuilder().delete().execute();
     await userAccountRepo.save(JSON.parse((await fsp.readFile("fixtures/5-user_account.json")).toString()));
     await instrumentUploadRepo.save(JSON.parse((await fsp.readFile("fixtures/4-instrument_upload.json")).toString()));
     await modelUploadRepo.save(JSON.parse((await fsp.readFile("fixtures/4-model_upload.json")).toString()));
@@ -721,7 +721,7 @@ describe("/api/queue/batch", () => {
   });
 
   async function cleanRepos() {
-    await taskRepo.delete({});
+    await taskRepo.createQueryBuilder().delete().execute();
   }
 
   it("requires authentication", async () => {

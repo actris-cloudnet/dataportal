@@ -20,15 +20,15 @@ axios.defaults.headers.common["X-Forwarded-For"] = "2.125.160.216, 2.125.160.216
 beforeAll(async () => {
   dataSource = await AppDataSource.initialize();
   downloadRepo = dataSource.getRepository(Download);
-  await downloadRepo.delete({});
-  await dataSource.getRepository(Visualization).delete({});
-  await dataSource.getRepository(RegularFile).delete({});
+  await downloadRepo.createQueryBuilder().delete().execute();
+  await dataSource.getRepository(Visualization).createQueryBuilder().delete().execute();
+  await dataSource.getRepository(RegularFile).createQueryBuilder().delete().execute();
 });
 
 afterAll(async () => {
-  await downloadRepo.delete({});
-  await dataSource.getRepository(Visualization).delete({});
-  await dataSource.getRepository(RegularFile).delete({});
+  await downloadRepo.createQueryBuilder().delete().execute();
+  await dataSource.getRepository(Visualization).createQueryBuilder().delete().execute();
+  await dataSource.getRepository(RegularFile).createQueryBuilder().delete().execute();
   await dataSource.destroy();
 });
 
@@ -212,8 +212,8 @@ describe("after PUTting a raw instrument file", () => {
 
   beforeAll(async () => {
     await initUsersAndPermissions();
-    await dataSource.getRepository(InstrumentUpload).delete({});
-    await downloadRepo.delete({});
+    await dataSource.getRepository(InstrumentUpload).createQueryBuilder().delete().execute();
+    await downloadRepo.createQueryBuilder().delete().execute();
     await axios.post(metadataUrl, validMetadata, { headers });
     return axios.put(uploadUrl, rawFile, { headers });
   });

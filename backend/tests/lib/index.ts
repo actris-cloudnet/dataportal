@@ -9,7 +9,7 @@ if (!process.env.DP_SS_TEST_URL) throw new Error("DP_SS_TEST_URL must be set");
 
 export async function clearRepo(repo: string) {
   const dataSource = await AppDataSource.initialize();
-  await dataSource.getRepository(repo).delete({});
+  await dataSource.getRepository(repo).createQueryBuilder().delete().execute();
   await dataSource.destroy();
 }
 

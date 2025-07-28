@@ -923,11 +923,11 @@ function generateHash() {
 }
 
 async function cleanRepos() {
-  await vizRepo.delete({});
-  await modelVizRepo.delete({});
-  await modelFileRepo.delete({});
-  await fileRepo.delete({});
-  await searchFileRepo.delete({});
-  await fileQualityRepo.delete({});
-  await qualityReportRepo.delete({});
+  await vizRepo.createQueryBuilder().delete().execute();
+  await modelVizRepo.createQueryBuilder().delete().execute();
+  await modelFileRepo.createQueryBuilder().delete().execute();
+  await fileRepo.createQueryBuilder().delete().execute();
+  await searchFileRepo.createQueryBuilder().delete().execute();
+  await fileQualityRepo.createQueryBuilder().delete().execute();
+  await qualityReportRepo.createQueryBuilder().delete().execute();
 }

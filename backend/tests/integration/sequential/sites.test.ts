@@ -27,9 +27,9 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  await vizRepo.delete({});
-  await regularFileRepo.delete({});
-  await searchFileRepo.delete({});
+  await vizRepo.createQueryBuilder().delete().execute();
+  await regularFileRepo.createQueryBuilder().delete().execute();
+  await searchFileRepo.createQueryBuilder().delete().execute();
 });
 
 afterAll(async () => {

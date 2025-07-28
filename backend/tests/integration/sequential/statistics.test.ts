@@ -45,7 +45,7 @@ describe("GET /api/statistics", () => {
     searchFileRepo = dataSource.getRepository(SearchFile);
     collectionRepo = dataSource.getRepository(Collection);
     instrumentUploadRepo = dataSource.getRepository(InstrumentUpload);
-    await downloadRepo.delete({});
+    await downloadRepo.createQueryBuilder().delete().execute();
     await initUsersAndPermissions();
     await modelFileRepo.save(JSON.parse((await fsp.readFile("fixtures/5-model_file.json")).toString()));
     await regularFileRepo.save(JSON.parse((await fsp.readFile("fixtures/5-regular_file.json")).toString()));
@@ -97,12 +97,12 @@ describe("GET /api/statistics", () => {
   });
 
   afterAll(async () => {
-    await regularFileRepo.delete({});
-    await modelFileRepo.delete({});
-    await searchFileRepo.delete({});
-    await collectionRepo.delete({});
-    await instrumentUploadRepo.delete({});
-    await downloadRepo.delete({});
+    await regularFileRepo.createQueryBuilder().delete().execute();
+    await modelFileRepo.createQueryBuilder().delete().execute();
+    await searchFileRepo.createQueryBuilder().delete().execute();
+    await collectionRepo.createQueryBuilder().delete().execute();
+    await instrumentUploadRepo.createQueryBuilder().delete().execute();
+    await downloadRepo.createQueryBuilder().delete().execute();
     await dataSource.destroy();
   });
 

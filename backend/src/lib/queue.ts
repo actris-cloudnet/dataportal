@@ -141,7 +141,7 @@ export class QueueService {
   }
 
   async clear() {
-    await this.taskRepo.delete({});
+    await this.taskRepo.createQueryBuilder().delete().execute();
     this.locks.clear();
   }
 

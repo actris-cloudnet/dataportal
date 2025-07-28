@@ -127,11 +127,11 @@ async function putReportWithPasses(uuid: string) {
 }
 
 async function cleanRepos() {
-  await qualityReportRepo.delete({});
-  await fileQualityRepo.delete({});
-  await dataSource.getRepository(Visualization).delete({});
-  await dataSource.getRepository(ModelVisualization).delete({});
-  await dataSource.getRepository(RegularFile).delete({});
-  await dataSource.getRepository(ModelFile).delete({});
-  await dataSource.getRepository(SearchFile).delete({});
+  await qualityReportRepo.createQueryBuilder().delete().execute();
+  await fileQualityRepo.createQueryBuilder().delete().execute();
+  await dataSource.getRepository(Visualization).createQueryBuilder().delete().execute();
+  await dataSource.getRepository(ModelVisualization).createQueryBuilder().delete().execute();
+  await dataSource.getRepository(RegularFile).createQueryBuilder().delete().execute();
+  await dataSource.getRepository(ModelFile).createQueryBuilder().delete().execute();
+  await dataSource.getRepository(SearchFile).createQueryBuilder().delete().execute();
 }

@@ -17,9 +17,9 @@ describe("PUT /api/calibration", () => {
     const userRepo = dataSource.getRepository(UserAccount);
     const permRepo = dataSource.getRepository(Permission);
     const calibRepo = dataSource.getRepository(Calibration);
-    await userRepo.delete({});
-    await permRepo.delete({});
-    await calibRepo.delete({});
+    await userRepo.createQueryBuilder().delete().execute();
+    await permRepo.createQueryBuilder().delete().execute();
+    await calibRepo.createQueryBuilder().delete().execute();
 
     const user = new UserAccount();
     user.username = credentials.username;

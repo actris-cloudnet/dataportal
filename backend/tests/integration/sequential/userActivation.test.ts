@@ -11,11 +11,11 @@ let userAccountRepository: any;
 beforeAll(async () => {
   dataSource = await AppDataSource.initialize();
   userAccountRepository = dataSource.getRepository(UserAccount);
-  await userAccountRepository.delete({});
+  await userAccountRepository.createQueryBuilder().delete().execute();
 });
 
 afterAll(async () => {
-  await userAccountRepository.delete({});
+  await userAccountRepository.createQueryBuilder().delete().execute();
   await dataSource.destroy();
 });
 

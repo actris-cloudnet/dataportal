@@ -14,11 +14,11 @@ let userAccountRepository: any;
 beforeAll(async () => {
   dataSource = await AppDataSource.initialize();
   userAccountRepository = dataSource.getRepository(UserAccount);
-  await userAccountRepository.delete({});
+  await userAccountRepository.createQueryBuilder().delete().execute();
 });
 
 afterAll(async () => {
-  await userAccountRepository.delete({});
+  await userAccountRepository.createQueryBuilder().delete().execute();
   await dataSource.destroy();
 });
 
@@ -26,7 +26,7 @@ describe("test user accounts and permissions", () => {
   let userData: any[];
 
   beforeAll(async () => {
-    await userAccountRepository.delete({});
+    await userAccountRepository.createQueryBuilder().delete().execute();
     userData = JSON.parse(readFileSync("tests/data/userAccountsAndPermissions.json", "utf8"));
     expect(userData).toHaveLength(8);
   });

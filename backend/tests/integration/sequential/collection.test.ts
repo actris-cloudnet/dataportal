@@ -26,7 +26,7 @@ describe("POST /api/collection", () => {
   });
 
   beforeEach(async () => {
-    await repo.delete({});
+    await repo.createQueryBuilder().delete().execute();
   });
 
   afterAll(async () => await dataSource.destroy());
