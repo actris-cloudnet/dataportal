@@ -2,6 +2,7 @@ import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryCol
 import { InstrumentUpload } from "./Upload";
 import { RegularFile } from "./File";
 import { Product } from "./Product";
+import { MonitoringProduct } from "./MonitoringProduct";
 import { Site } from "./Site";
 
 export enum InstrumentType {
@@ -35,6 +36,10 @@ export class Instrument {
   @ManyToMany((_) => Product, (product) => product.sourceInstruments)
   @JoinTable()
   derivedProducts!: Product[];
+
+  @ManyToMany((_) => MonitoringProduct, (monitoringProduct) => monitoringProduct.sourceInstruments)
+  @JoinTable()
+  derivedMonitoringProducts!: MonitoringProduct[];
 }
 
 @Entity()
