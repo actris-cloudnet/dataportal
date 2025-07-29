@@ -1,6 +1,4 @@
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
-import { InstrumentUpload } from "./Upload";
-import { RegularFile } from "./File";
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryColumn } from "typeorm";
 import { Product } from "./Product";
 import { Site } from "./Site";
 

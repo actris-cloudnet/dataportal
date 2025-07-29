@@ -1,5 +1,5 @@
 import type { Site } from "./Site";
-import type { Instrument } from "./Instrument";
+import type { InstrumentInfo } from "./Instrument";
 import type { Model } from "./Model";
 
 export type Status = "created" | "uploaded" | "processed" | "invalid";
@@ -27,8 +27,7 @@ export interface Upload {
 }
 
 export interface InstrumentUpload extends Upload {
-  instrument: Instrument;
-  instrumentPid: string | null;
+  instrument: InstrumentInfo;
 }
 
 export interface ModelUpload extends Upload {

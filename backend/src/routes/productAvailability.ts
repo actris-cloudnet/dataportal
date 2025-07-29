@@ -19,12 +19,13 @@ export class ProductAvailabilityRoutes {
     const { instrumentPid } = req.query;
     const rawData = await this.uploadRepo
       .createQueryBuilder("file")
+      .leftJoin("file.instrumentInfo", "instrumentInfo")
       .select([
         'file."measurementDate"::text AS "date"',
         'COUNT(file."uuid") AS "fileCount"',
         'SUM(file."size") AS "totalSize"',
       ])
-      .where("file.instrumentPid = :instrumentPid", { instrumentPid })
+      .where("instrumentInfo.pid = :instrumentPid", { instrumentPid })
       .andWhere("file.status IN ('uploaded', 'processed')")
       .groupBy('file."measurementDate"')
       .orderBy('file."measurementDate"', "ASC")

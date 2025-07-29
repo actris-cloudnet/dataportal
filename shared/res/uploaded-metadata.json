@@ -19,9 +19,7 @@
       "country": "Spain"
     },
     "instrument": {
-      "id": "mira-35",
-      "type": "radar",
-      "humanReadableName": "METEK MIRA-35 cloud radar"
+      "type": "cloud radar"
     }
   },
   {
@@ -44,9 +42,7 @@
       "country": "Romania"
     },
     "instrument": {
-      "id": "chm15k",
-      "type": "lidar",
-      "humanReadableName": "Lufft CHM15k ceilometer"
+      "type": "ceilometer"
     }
   },
   {
@@ -69,9 +65,7 @@
       "country": "Romania"
     },
     "instrument": {
-      "id": "chm15k",
-      "type": "lidar",
-      "humanReadableName": "Lufft CHM15k ceilometer"
+      "type": "ceilometer"
     }
   },
   {
@@ -94,9 +88,7 @@
       "country": "Romania"
     },
     "instrument": {
-      "id": "mira-35",
-      "type": "radar",
-      "humanReadableName": "METEK MIRA-35 cloud radar"
+      "type": "cloud radar"
     }
   },
   {
@@ -108,9 +100,6 @@
     "status": "uploaded",
     "createdAt": "2022-12-06T00:31:17.507Z",
     "updatedAt": "2022-12-06T00:31:22.497Z",
-    "instrumentPid": "https://hdl.handle.net/123/warsaw-halo",
-    "siteId": "warsaw",
-    "instrumentId": "halo-doppler-lidar",
     "site": {
       "id": "warsaw",
       "humanReadableName": "Warsaw",
@@ -126,9 +115,8 @@
       "countrySubdivisionCode": null
     },
     "instrument": {
-      "id": "halo-doppler-lidar",
-      "type": "lidar",
-      "humanReadableName": "Halo Photonics Doppler lidar"
+      "type": "Doppler lidar",
+      "pid": "https://hdl.handle.net/123/warsaw-halo"
     }
   }
 ]
