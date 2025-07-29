@@ -12,6 +12,7 @@ import {
   dateforsize,
   streamHandler,
   fixInstrument,
+  siteMetadataKeys,
 } from "../lib";
 import { augmentFile } from "../lib/";
 import { SearchFile } from "../entity/SearchFile";
@@ -50,28 +51,12 @@ export class FileRoutes {
   readonly instrumentInfoRepo: Repository<InstrumentInfo>;
   readonly softwareService: SoftwareService;
 
-  siteMetadataKeys = [
-    "site.id",
-    "site.humanReadableName",
-    "site.stationName",
-    "site.latitude",
-    "site.longitude",
-    "site.altitude",
-    "site.type",
-    "site.gaw",
-    "site.dvasId",
-    "site.actrisId",
-    "site.country",
-    "site.countryCode",
-    "site.countrySubdivisionCode",
-  ];
-
   file: RequestHandler = async (req, res, next) => {
     const getFileByUuid = (repo: any, isModel: boolean | undefined) => {
       const qb = repo
         .createQueryBuilder("file")
         .leftJoin("file.site", "site")
-        .addSelect(this.siteMetadataKeys)
+        .addSelect(siteMetadataKeys)
         .leftJoinAndSelect("file.product", "product")
         .leftJoinAndSelect("file.software", "software")
         .orderBy('COALESCE(software."humanReadableName", software.code)', "ASC");
@@ -404,7 +389,7 @@ export class FileRoutes {
       .createQueryBuilder("file")
       .select(this.fileMetaKeys)
       .leftJoin("file.site", "site")
-      .addSelect(this.siteMetadataKeys)
+      .addSelect(siteMetadataKeys)
       .leftJoinAndSelect("file.product", "product");
     if (isModel) qb.leftJoinAndSelect("file.model", "model");
     if (!isModel) qb.leftJoinAndMapOne("file.instrument", "file.instrumentInfo", "instrument");
