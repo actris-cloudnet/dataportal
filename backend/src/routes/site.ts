@@ -17,7 +17,6 @@ export class SiteRoutes {
     this.siteLocationRepo = dataSource.getRepository(SiteLocation);
     this.searchFileRepo = dataSource.getRepository(SearchFile);
     this.dvasCache = {};
-    this.actrisCache = {};
     this.wigosCache = {};
   }
 
@@ -28,7 +27,7 @@ export class SiteRoutes {
   readonly siteLocationRepo: Repository<SiteLocation>;
   readonly searchFileRepo: Repository<SearchFile>;
   readonly dvasCache: Record<string, any>;
-  readonly actrisCache: Record<string, any>;
+  private actrisCache?: Record<string, any>;
   readonly wigosCache: Record<string, any>;
 
   site: RequestHandler = async (req, res, next) => {
@@ -182,23 +181,25 @@ export class SiteRoutes {
   }
 
   private async fetchActrisFacility(actrisId: number) {
-    if (actrisId in this.actrisCache) {
-      return this.actrisCache[actrisId];
+    if (!this.actrisCache) {
+      try {
+        const res = await axios.get(`${env.LABELLING_URL}/api/facilities.geojson`);
+        this.actrisCache = Object.fromEntries(
+          res.data.features.map((feat: any) => [
+            feat.properties.id,
+            {
+              id: feat.properties.id,
+              name: feat.properties.name,
+              uri: feat.properties.url,
+            },
+          ]),
+        );
+      } catch (err) {
+        console.error("Failed to fetch ACTRIS facilities", err);
+        return null;
+      }
     }
-    try {
-      const res = await axios.get(`${env.LABELLING_URL}/api/facilities/${actrisId}`);
-      const obj = res.data;
-      const result = {
-        id: obj.id,
-        name: obj.name,
-        uri: obj.landing_page,
-      };
-      this.actrisCache[actrisId] = result;
-      return result;
-    } catch (err) {
-      console.error("Failed to fetch ACTRIS facility", err);
-      return null;
-    }
+    return this.actrisCache[actrisId];
   }
 
   private async fetchWigosStation(wigosId: string) {
