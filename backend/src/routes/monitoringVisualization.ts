@@ -1,3 +1,4 @@
+import { RequestHandler } from "express";
 import { DataSource, In, Repository } from "typeorm";
 import { MonitoringVisualization } from "../entity/MonitoringVisualization";
 
