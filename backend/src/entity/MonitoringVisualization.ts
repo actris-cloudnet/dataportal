@@ -1,7 +1,6 @@
 import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
 import { MonitoringFile } from "./MonitoringFile";
 import { MonitoringProductVariable } from "./MonitoringProductVariable";
-import {Dimensions} from "./Visualization"
 
 @Entity()
 export class MonitoringVisualization {
