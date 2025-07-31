@@ -1,6 +1,6 @@
 import { BeforeInsert, BeforeUpdate, Column, Entity, Index, ManyToOne, PrimaryColumn, Unique } from "typeorm";
 import { Site } from "./Site";
-import { Instrument, InstrumentInfo } from "./Instrument";
+import { InstrumentInfo } from "./Instrument";
 import { Model } from "./Model";
 import { v4 as generateUuidV4 } from "uuid";
 
@@ -77,27 +77,17 @@ export abstract class Upload {
 }
 
 @Entity()
-@Unique(["site", "measurementDate", "filename", "instrument", "instrumentPid", "tags"])
+@Unique(["site", "measurementDate", "filename", "instrumentInfo", "tags"])
 @Index(["instrumentInfo", "site", "measurementDate"])
 export class InstrumentUpload extends Upload {
-  @ManyToOne((_) => Instrument, { nullable: false })
-  instrument!: Instrument;
-
-  @Column({ type: "text" })
-  instrumentPid!: string;
-
-  @ManyToOne(() => InstrumentInfo, { nullable: true })
-  instrumentInfo!: InstrumentInfo | null;
+  @ManyToOne(() => InstrumentInfo, { nullable: false })
+  instrumentInfo!: InstrumentInfo;
 
   @Column({ type: "text", array: true, default: [], nullable: false })
   tags!: string[];
 
   constructor(args: UploadOptions, instrumentInfo: InstrumentInfo, tags: string[]) {
     super(args);
-    if (instrumentInfo) {
-      this.instrument = instrumentInfo.instrument;
-      this.instrumentPid = instrumentInfo.pid;
-    }
     this.instrumentInfo = instrumentInfo;
     this.tags = tags;
   }

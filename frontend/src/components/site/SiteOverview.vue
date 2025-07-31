@@ -199,22 +199,12 @@ onMounted(() => {
 });
 
 function handleInstrument(response: ReducedMetadataResponse): Instrument {
-  // TODO: Should be always available...
-  if (response.instrumentInfo) {
-    return {
-      to: { name: "Instrument", params: { uuid: response.instrumentInfo.uuid } },
-      name: `${response.instrumentInfo.name} ${response.instrumentInfo.type}`,
-      icon: getInstrumentIcon(response.instrument),
-      uuid: response.instrumentInfo.uuid,
-    };
-  } else {
-    return {
-      to: null,
-      name: `Unidentified ${response.instrument.humanReadableName}`,
-      icon: getInstrumentIcon(response.instrument),
-      uuid: "",
-    };
-  }
+  return {
+    to: { name: "Instrument", params: { uuid: response.instrument.uuid } },
+    name: `${response.instrument.name} ${response.instrument.type}`,
+    icon: getInstrumentIcon(response.instrument.instrument),
+    uuid: response.instrument.uuid,
+  };
 }
 
 async function loadInstruments() {

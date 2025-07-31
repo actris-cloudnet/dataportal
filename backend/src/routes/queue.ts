@@ -139,7 +139,7 @@ export class QueueRoutes {
     const where = [];
     const parameters = [];
     if (filters.instrumentIds) {
-      where.push(`upload."instrumentId" = ANY ($${parameters.length + 1})`);
+      where.push(`instrument_info."instrumentId" = ANY ($${parameters.length + 1})`);
       parameters.push(filters.instrumentIds);
     }
     if (filters.instrumentUuids) {
@@ -155,7 +155,8 @@ export class QueueRoutes {
       batchId,
       productId: `derived_product."productId"`,
       instrumentInfoUuid: `upload."instrumentInfoUuid"`,
-      join: `JOIN instrument_derived_products_product derived_product ON derived_product."instrumentId" = upload."instrumentId"`,
+      join: `JOIN instrument_info ON instrument_info.uuid = upload."instrumentInfoUuid"
+           JOIN instrument_derived_products_product derived_product ON derived_product."instrumentId" = instrument_info."instrumentId"`,
     });
   }
 
@@ -184,12 +185,13 @@ export class QueueRoutes {
     const productId = `$${parameters.length + 1}::text`;
     parameters.push(product.id);
 
-    where.push(`upload."instrumentId" = ANY ($${parameters.length + 1})`);
+    where.push(`instrument_info."instrumentId" = ANY ($${parameters.length + 1})`);
     parameters.push(await this.findSourceInstrumentIds(product));
 
     return this.batchQuery(filters, where, parameters, {
       table: "instrument_upload",
       batchId,
+      join: `JOIN instrument_info ON instrument_info.uuid = upload."instrumentInfoUuid"`,
       instrumentInfoUuid: product.type.includes(ProductType.INSTRUMENT) ? `upload."instrumentInfoUuid"` : undefined,
       productId,
     });

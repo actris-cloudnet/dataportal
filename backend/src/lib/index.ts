@@ -292,3 +292,19 @@ export function fixInstrument(instrument: string, instrumentInfo: InstrumentInfo
 export function isStringArray(value: any): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === "string");
 }
+
+export const siteMetadataKeys = [
+  "site.id",
+  "site.humanReadableName",
+  "site.stationName",
+  "site.latitude",
+  "site.longitude",
+  "site.altitude",
+  "site.type",
+  "site.gaw",
+  "site.dvasId",
+  "site.actrisId",
+  "site.country",
+  "site.countryCode",
+  "site.countrySubdivisionCode",
+];

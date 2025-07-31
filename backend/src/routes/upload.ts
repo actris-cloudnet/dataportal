@@ -16,6 +16,7 @@ import {
   validateInstrumentPid,
   daysBetweenDates,
   fixInstrument,
+  siteMetadataKeys,
 } from "../lib";
 import { basename } from "path";
 import { ReducedMetadataResponse } from "../entity/ReducedMetadataResponse";
@@ -132,8 +133,7 @@ export class UploadRoutes {
       const payload = isInstrument
         ? ({
             ...params,
-            instrument: { id: body.instrument },
-            instrumentPid: body.instrumentPid,
+            instrumentInfo: { uuid: (dataSource as InstrumentInfo).uuid },
             tags: ArrayEqual(sortedTags),
           } satisfies FindOptionsWhere<InstrumentUpload>)
         : ({ ...params, model: { id: body.model } } satisfies FindOptionsWhere<ModelUpload>);
@@ -174,7 +174,7 @@ export class UploadRoutes {
     const partialUpload = req.body;
     if (!partialUpload.uuid) return next({ status: 422, errors: "Request body is missing uuid" });
     const upload = await this.findAnyUpload((repo, model) =>
-      repo.findOne({ where: { uuid: partialUpload.uuid }, relations: ["site", model ? "model" : "instrument"] }),
+      repo.findOne({ where: { uuid: partialUpload.uuid }, relations: ["site", model ? "model" : "instrumentInfo"] }),
     );
     if (!upload) return next({ status: 422, errors: "No file matches the provided uuid" });
     await this.findRepoForUpload(upload).update({ uuid: partialUpload.uuid }, partialUpload);
@@ -184,10 +184,17 @@ export class UploadRoutes {
   metadata: RequestHandler = async (req, res, next) => {
     const checksum = req.params.checksum;
     const upload = await this.findAnyUpload((repo, model) =>
-      repo.findOne({ where: { checksum: checksum }, relations: ["site", model ? "model" : "instrument"] }),
+      repo.findOne({ where: { checksum }, relations: ["site", model ? "model" : "instrumentInfo"] }),
     );
     if (!upload) return next({ status: 404, errors: "No metadata was found with provided id" });
-    res.send(this.augmentUploadResponse(true)(upload));
+    const responseData = this.augmentUploadResponse(true)(upload);
+    // Rename instrumentInfo to instrument in the response
+    if ("instrumentInfo" in responseData) {
+      const { instrumentInfo, ...rest } = responseData;
+      res.send({ ...rest, instrument: instrumentInfo });
+    } else {
+      res.send(responseData);
+    }
   };
 
   listMetadata = (includeS3path: boolean): RequestHandler => {
@@ -212,8 +219,12 @@ export class UploadRoutes {
       req.query,
       true,
     )) as InstrumentUpload[];
-    const reducedMetadataResponses = instrumentUploads.map((md) => new ReducedMetadataResponse(md));
-    res.send(reducedMetadataResponses);
+    // Rename instrumentInfo to instrument in the response
+    const responseData = instrumentUploads.map((md) => {
+      const { instrumentInfo, ...rest } = new ReducedMetadataResponse(md);
+      return { ...rest, instrument: instrumentInfo };
+    });
+    res.send(responseData);
   };
 
   putData: RequestHandler = async (req, res, next) => {
@@ -225,10 +236,7 @@ export class UploadRoutes {
             where: { checksum },
             relations: {
               site: true,
-              instrument: {
-                derivedProducts: true,
-              },
-              instrumentInfo: true,
+              instrumentInfo: { instrument: { derivedProducts: true } },
             },
           })
         : this.modelUploadRepo.findOne({
@@ -277,11 +285,7 @@ export class UploadRoutes {
 
   private async publishAdjoiningDayTasks(upload: InstrumentUpload) {
     const date = upload.measurementDate.toString();
-    const calibration = await fetchCalibration(
-      this.calibRepo,
-      upload.instrumentInfo!, // TODO: remove me once cannot be null!
-      date,
-    );
+    const calibration = await fetchCalibration(this.calibRepo, upload.instrumentInfo, date);
     const timeOffset = calibration?.data?.time_offset;
     if (!timeOffset) return;
     const dateOffset = timeOffset > 0 ? -1 : 1;
@@ -291,7 +295,7 @@ export class UploadRoutes {
   }
 
   private async publishInstrumentTasks(upload: InstrumentUpload) {
-    for (const product of upload.instrument.derivedProducts) {
+    for (const product of upload.instrumentInfo.instrument.derivedProducts) {
       const existingFile = await this.regularFileRepo.findOneBy({
         site: { id: upload.site.id },
         measurementDate: upload.measurementDate,
@@ -401,12 +405,26 @@ export class UploadRoutes {
     const fieldsToArray = ["site", "status", "instrument", "model", "instrumentPid"];
     fieldsToArray.forEach((element) => (augmentedQuery[element] = toArray(augmentedQuery[element])));
 
-    const qb = repo.createQueryBuilder("um");
-    qb.leftJoinAndSelect("um.site", "site");
+    const qb = repo
+      .createQueryBuilder("um")
+      .select([
+        "um.uuid",
+        "um.checksum",
+        "um.filename",
+        "um.measurementDate",
+        "um.size",
+        "um.status",
+        "um.createdAt",
+        "um.updatedAt",
+      ]);
+
+    qb.leftJoin("um.site", "site").addSelect(siteMetadataKeys);
+
     if (!model) {
-      qb.leftJoinAndSelect("um.instrument", "instrument");
-      qb.leftJoinAndSelect("um.instrumentInfo", "instrumentInfo");
-      if (onlyDistinctInstruments) qb.distinctOn(["instrument.id", "um.instrumentPid", "instrumentInfo.uuid"]);
+      qb.addSelect("um.tags");
+      qb.leftJoinAndSelect("um.instrumentInfo", "instrument");
+      qb.leftJoin("instrument.instrument", "instrument_").addSelect("instrument_.type");
+      if (onlyDistinctInstruments) qb.distinctOn(["instrument.instrumentId", "instrument.pid", "instrument.uuid"]);
     } else {
       qb.leftJoinAndSelect("um.model", "model");
     }
@@ -414,8 +432,8 @@ export class UploadRoutes {
       .andWhere("um.updatedAt >= :updatedAtFrom AND um.updatedAt <= :updatedAtTo", augmentedQuery)
       .andWhere("site.id IN (:...site)", augmentedQuery)
       .andWhere("um.status IN (:...status)", augmentedQuery);
-    if (query.instrument) qb.andWhere("instrument.id IN (:...instrument)", augmentedQuery);
-    if (query.instrumentPid) qb.andWhere("um.instrumentPid IN (:...instrumentPid)", augmentedQuery);
+    if (query.instrument) qb.andWhere("instrument.instrumentId IN (:...instrument)", augmentedQuery);
+    if (query.instrumentPid) qb.andWhere("instrument.pid IN (:...instrumentPid)", augmentedQuery);
     if (query.model) qb.andWhere("model.id IN (:...model)", augmentedQuery);
 
     if (query.filename) qb.andWhere("um.filename IN (:...filename)", augmentedQuery);
@@ -553,7 +571,7 @@ export class UploadRoutes {
   };
 
   findRepoForUpload(upload: InstrumentUpload | ModelUpload) {
-    return "instrument" in upload ? this.instrumentUploadRepo : this.modelUploadRepo;
+    return "instrumentInfo" in upload ? this.instrumentUploadRepo : this.modelUploadRepo;
   }
 }
 

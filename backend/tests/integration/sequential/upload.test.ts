@@ -180,8 +180,6 @@ describe("POST /upload/metadata", () => {
     const mds = await instrumentRepo.findBy({
       filename: validMetadata.filename,
       measurementDate: new Date(validMetadata.measurementDate),
-      instrument: { id: validMetadata.instrument },
-      instrumentPid: validMetadata.instrumentPid,
       site: { id: validMetadata.site },
     });
     expect(mds).toHaveLength(1);
@@ -254,7 +252,7 @@ describe("POST /upload/metadata", () => {
     const payload = validMetadata;
     await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
     const file = await instrumentRepo.findOneOrFail({
-      where: { instrumentPid: payload.instrumentPid },
+      where: { instrumentInfo: { pid: payload.instrumentPid } },
       relations: { instrumentInfo: true },
     });
     expect(file.instrumentInfo).toMatchObject({
@@ -276,12 +274,18 @@ describe("POST /upload/metadata", () => {
     };
     await expect(axios.post(metadataUrl, metadata1, { headers })).resolves.toMatchObject({ status: 200 });
     await expect(axios.post(metadataUrl, metadata2, { headers })).resolves.toMatchObject({ status: 200 });
-    const md1 = await instrumentRepo.findOneByOrFail({ checksum: metadata1.checksum });
+    const md1 = await instrumentRepo.findOneOrFail({
+      where: { checksum: metadata1.checksum },
+      relations: { instrumentInfo: true },
+    });
     expect(md1.status).toEqual(Status.CREATED);
-    expect(md1.instrumentPid).toEqual(metadata1.instrumentPid);
-    const md2 = await instrumentRepo.findOneByOrFail({ checksum: metadata2.checksum });
+    expect(md1.instrumentInfo.pid).toEqual(metadata1.instrumentPid);
+    const md2 = await instrumentRepo.findOneOrFail({
+      where: { checksum: metadata2.checksum },
+      relations: { instrumentInfo: true },
+    });
     expect(md2.status).toEqual(Status.CREATED);
-    expect(md2.instrumentPid).toEqual(metadata2.instrumentPid);
+    expect(md2.instrumentInfo.pid).toEqual(metadata2.instrumentPid);
   });
 
   it("inserts new metadata with the current date as measurementDate", async () => {
@@ -302,7 +306,7 @@ describe("POST /upload/metadata", () => {
       instrumentPid: "https://hdl.handle.net/123/warsaw-halo",
     };
     await expect(axios.post(metadataUrl, payload, { headers })).resolves.toMatchObject({ status: 200 });
-    await instrumentRepo.findOneByOrFail({ instrumentPid: payload.instrumentPid });
+    await instrumentRepo.findOneByOrFail({ instrumentInfo: { pid: payload.instrumentPid } });
   });
 
   it("inserts new metadata if different date", async () => {
@@ -434,6 +438,7 @@ describe("POST /upload/metadata", () => {
       uuid: "ca2b8ff0-c7e4-427f-894a-e6cf1ff2b8d1",
       createdAt: now,
       updatedAt: now,
+      instrumentInfo: "9e0f4b27-d5f3-40ad-8b73-2ae5dabbf81f",
     };
     await instrumentRepo.save(uploadedMetadata as any);
     await expect(axios.post(metadataUrl, validMetadata, { headers })).rejects.toMatchObject({
@@ -452,6 +457,7 @@ describe("POST /upload/metadata", () => {
       allowUpdate: true,
       createdAt: now,
       updatedAt: now,
+      instrumentInfo: "9e0f4b27-d5f3-40ad-8b73-2ae5dabbf81f",
     };
     const newUpload = { ...validMetadata, allowUpdate: true };
     await instrumentRepo.save(uploadedMetadata as any);
