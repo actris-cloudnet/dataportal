@@ -32,6 +32,7 @@ import { StatisticsRoutes } from "./routes/statistics";
 import { DataCiteService } from "./lib/datacite";
 import { CitationService } from "./lib/cite";
 import { MonitoringFileRoutes } from "./routes/monitoringFile"
+import { MonitoringVisualizationRoutes } from "./routes/monitoringVisualization"
 
 async function createServer(): Promise<void> {
   const port = 3000;
@@ -90,6 +91,7 @@ async function createServer(): Promise<void> {
   const productAvailabilityRoutes = new ProductAvailabilityRoutes(AppDataSource);
   const statsRoutes = new StatisticsRoutes(AppDataSource);
   const monitoringFileRoutes = new MonitoringFileRoutes(AppDataSource);
+  const monitoringVisualizationRoutes = new MonitoringVisualizationRoutes(AppDataSource);
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     console.error(
@@ -351,7 +353,8 @@ async function createServer(): Promise<void> {
   app.get("/api/publications/", publicationRoutes.getPublications);
   app.get("/api/users/me", userAccountRoutes.userInfo);
 
-  app.put("/api/monitoring-file",express.json(), monitoringFileRoutes.putMonitoringFile)
+  app.put("/api/monitoring-files",express.json(), monitoringFileRoutes.putMonitoringFile)
+  app.put("/api/monitoring-visualizations",express.json(), monitoringVisualizationRoutes.putMonitoringVisualization)
 
   // Private UserAccount and Permission routes
   app.post("/user-accounts", express.json(), userAccountRoutes.validatePost, userAccountRoutes.postUserAccount);
