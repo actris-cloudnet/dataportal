@@ -31,8 +31,9 @@ import { ProductAvailabilityRoutes } from "./routes/productAvailability";
 import { StatisticsRoutes } from "./routes/statistics";
 import { DataCiteService } from "./lib/datacite";
 import { CitationService } from "./lib/cite";
-import { MonitoringFileRoutes } from "./routes/monitoringFile"
-import { MonitoringVisualizationRoutes } from "./routes/monitoringVisualization"
+import { MonitoringFileRoutes } from "./routes/monitoringFile";
+import { MonitoringVisualizationRoutes } from "./routes/monitoringVisualization";
+import { MonitoringProductRoutes } from "./routes/monitoringProduct";
 
 async function createServer(): Promise<void> {
   const port = 3000;
@@ -92,6 +93,7 @@ async function createServer(): Promise<void> {
   const statsRoutes = new StatisticsRoutes(AppDataSource);
   const monitoringFileRoutes = new MonitoringFileRoutes(AppDataSource);
   const monitoringVisualizationRoutes = new MonitoringVisualizationRoutes(AppDataSource);
+  const monitoringProductRoutes = new MonitoringProductRoutes(AppDataSource);
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     console.error(
@@ -292,7 +294,6 @@ async function createServer(): Promise<void> {
   app.get("/credentials/:token", userActivationRoutes.get);
   app.post("/credentials/:token", userActivationRoutes.post);
 
-
   // private
   app.put("/files/*s3key", express.json(), fileRoutes.putFile);
   app.post("/files/", express.json(), fileRoutes.postFile);
@@ -353,8 +354,11 @@ async function createServer(): Promise<void> {
   app.get("/api/publications/", publicationRoutes.getPublications);
   app.get("/api/users/me", userAccountRoutes.userInfo);
 
-  app.put("/api/monitoring-files",express.json(), monitoringFileRoutes.putMonitoringFile)
-  app.put("/api/monitoring-visualizations",express.json(), monitoringVisualizationRoutes.putMonitoringVisualization)
+  app.put("/api/monitoring-files", express.json(), monitoringFileRoutes.putMonitoringFile);
+  app.put("/api/monitoring-visualizations", express.json(), monitoringVisualizationRoutes.putMonitoringVisualization);
+  app.get("/api/monitoring-visualizations", monitoringVisualizationRoutes.monitoringVisualization);
+  app.get("/api/monitoring-products", monitoringProductRoutes.allMonitoringProducts);
+  app.get("/api/monitoring-products/variables", monitoringProductRoutes.allMonitoringProductsWithVariables);
 
   // Private UserAccount and Permission routes
   app.post("/user-accounts", express.json(), userAccountRoutes.validatePost, userAccountRoutes.postUserAccount);
