@@ -1,16 +1,12 @@
 import {
-  CreateDateColumn, 
+  CreateDateColumn,
   UpdateDateColumn,
-  BeforeInsert,
-  BeforeUpdate,
   Column,
   Entity,
-  Index,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryColumn,
+  Check,
   Unique,
 } from "typeorm";
 import { Site } from "./Site";
@@ -26,11 +22,13 @@ export enum PeriodType {
 }
 
 @Entity()
+@Check(`("periodType" = 'all' AND "startDate" IS NULL) OR ("periodType" != 'all' AND "startDate" IS NOT NULL)`)
+@Unique(["startDate", "periodType", "site", "monitoringProduct", "instrumentInfo"])
 export class MonitoringFile {
   @PrimaryColumn("uuid")
   uuid!: string;
 
-  @Column({ type: "date" })
+  @Column({ type: "date", nullable: true })
   startDate!: Date;
 
   @Column({ type: "enum", enum: PeriodType })
@@ -54,4 +52,3 @@ export class MonitoringFile {
   @UpdateDateColumn()
   updatedAt!: Date;
 }
-
