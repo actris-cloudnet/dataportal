@@ -1,6 +1,10 @@
 import { DataSource, Repository } from "typeorm";
 import { RequestHandler } from "express";
 import { MonitoringFile } from "../entity/MonitoringFile";
+import { MonitoringProduct } from "../entity/MonitoringProduct";
+import { Site } from "../entity/Site";
+import { InstrumentInfo } from "../entity/Instrument";
+import { MonitoringVisualization } from "../entity/MonitoringVisualization";
 
 export class MonitoringFileRoutes {
   constructor(dataSource: DataSource) {
@@ -12,9 +16,53 @@ export class MonitoringFileRoutes {
   readonly monitoringFileRepo: Repository<MonitoringFile>;
 
   putMonitoringFile: RequestHandler = async (req, res) => {
-    const file = req.body;
-    await this.monitoringFileRepo.save(file);
-    res.sendStatus(201);
+    const fileData = req.body;
+
+    const {
+      startDate,
+      periodType,
+      site: siteId,
+      monitoringProduct: productId,
+      instrumentInfo: instrumentUuid,
+    } = fileData;
+
+    const site = await this.dataSource.getRepository(Site).findOneByOrFail({ id: siteId });
+    const product = await this.dataSource.getRepository(MonitoringProduct).findOneByOrFail({ id: productId });
+    const instrument = await this.dataSource.getRepository(InstrumentInfo).findOneByOrFail({ uuid: instrumentUuid });
+
+    let newFile: MonitoringFile | null = null;
+    await this.dataSource.transaction(async (manager) => {
+      const existing = await manager.findOne(MonitoringFile, {
+        where: {
+          startDate,
+          periodType,
+          site,
+          monitoringProduct: product,
+          instrumentInfo: instrument,
+        },
+        relations: ["monitoringVisualizations"],
+      });
+
+      if (existing) {
+        if (existing.monitoringVisualizations.length > 0) {
+          await manager.getRepository(MonitoringVisualization).remove(existing.monitoringVisualizations);
+        }
+        await manager.remove(existing);
+      }
+
+      newFile = manager.create(MonitoringFile, {
+        ...fileData,
+        site,
+        monitoringProduct: product,
+        instrumentInfo: instrument,
+      });
+
+      await manager.save(newFile);
+    });
+
+    if (!newFile) {
+      return res.status(500).json({ error: "Failed to create new MonitoringFile" });
+    }
+    res.status(201).json(newFile);
   };
 }
-
