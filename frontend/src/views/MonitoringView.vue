@@ -6,7 +6,7 @@
       v-model:selectedMonitoringProductIds="selectedMonitoringProductIds"
       v-model:selectedMonitoringVariableIds="selectedMonitoringVariableIds"
     />
-    <MonitoringSearchResult />
+    <MonitoringSearchResult :productIds="selectedMonitoringProductIds"/>
   </div>
 </template>
 
@@ -16,7 +16,7 @@ import axios from "axios";
 import { backendUrl } from "@/lib";
 import MonitoringSearchResult from "@/components/MonitoringSearchResult.vue";
 import MonitoringSearchFilters from "@/components/MonitoringSearchFilters.vue";
-import type { MonitoringProduct } from "@shared/entity/MonitoringProduct";
+import type { MonitoringProduct } from "@shared/entity/Monitoring";
 
 const monitoringProducts = ref<MonitoringProduct[]>([]);
 

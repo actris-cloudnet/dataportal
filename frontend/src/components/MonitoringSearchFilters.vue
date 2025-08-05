@@ -29,7 +29,7 @@ import axios from "axios";
 import { ref, watch, computed, toRef } from "vue";
 import { backendUrl } from "@/lib";
 import CustomMultiselect, { type Option } from "@/components/MultiSelect.vue";
-import type { MonitoringProduct, MonitoringProductVariable } from "@shared/entity/MonitoringProduct";
+import type { MonitoringProduct, MonitoringProductVariable } from "@shared/entity/Monitoring";
 const trigger = ref(null);
 
 const props = defineProps<{
