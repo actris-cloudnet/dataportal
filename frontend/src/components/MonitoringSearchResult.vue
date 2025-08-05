@@ -1,5 +1,4 @@
 <template>
-  <div>Monitoring search results</div>
   <MonitoringVisualization v-for="(item, index) in monitoringVisualisations" :key="index" :data="item" />
 </template>
 
@@ -17,9 +16,16 @@ const props = defineProps<{
 const monitoringVisualisations = ref([]);
 
 async function fetchData() {
-  console.log("props:", props.productIds);
+  console.log("props in search result", props.productIds);
   try {
-    const res = await axios.get(`${backendUrl}monitoring-visualizations/`);
+    const params: Record<string, string | undefined> = {};
+    if (props.productIds.length > 0) {
+      params.productId = props.productIds.join(",");
+    }
+
+    const res = await axios.get(`${backendUrl}monitoring-visualizations/`, {
+      params,
+    });
     console.log(res.data);
     monitoringVisualisations.value = res.data;
   } catch (err) {
@@ -28,11 +34,13 @@ async function fetchData() {
 }
 
 watch(
-  trigger,
-  async () => {
-    await fetchData();
+  () => props.productIds,
+  async (newIds, oldIds) => {
+    if (JSON.stringify(newIds) !== JSON.stringify(oldIds)) {
+      await fetchData();
+    }
   },
-  { immediate: true },
+  { immediate: true, deep: true },
 );
 </script>
 

@@ -16,26 +16,31 @@ export class MonitoringVisualizationRoutes {
     res.sendStatus(201);
   };
   monitoringVisualization: RequestHandler = async (req, res, next) => {
+    console.log(req.query);
     try {
-      const visualizations = await this.monitoringVisualizationRepo.find({
-        relations: {
-          sourceFile: {
-            site: true,
-            monitoringProduct: {
-              monitoringVariables: true,
-            },
-            instrumentInfo: true,
-          },
-          monitoringProductVariable: {
-            monitoringProduct: true,
-          },
-        },
-        order: {
-          monitoringProductVariable: {
-            order: "ASC",
-          },
-        },
-      });
+      let productIds: string[] | undefined;
+      if (typeof req.query.productId === "string") {
+        productIds = req.query.productId.split(",").map((s) => s.trim());
+      }
+      const qb = this.monitoringVisualizationRepo
+        .createQueryBuilder("viz")
+        .leftJoinAndSelect("viz.sourceFile", "file")
+        .leftJoinAndSelect("file.site", "site")
+        .leftJoinAndSelect("file.monitoringProduct", "product")
+        .leftJoinAndSelect("file.instrumentInfo", "instrumentInfo")
+        .leftJoinAndSelect("viz.monitoringProductVariable", "var")
+        .leftJoinAndSelect("var.monitoringProduct", "varProduct");
+
+      if (productIds) {
+        qb.andWhere("varProduct.id IN (:...productIds)", { productIds });
+      }
+
+      qb.orderBy("file.startDate", "DESC")
+        .addOrderBy("site.id", "ASC")
+        .addOrderBy("product.id", "ASC")
+        .addOrderBy("var.order", "ASC");
+
+      const visualizations = await qb.getMany();
       res.json(visualizations);
     } catch (error) {
       next(error);
