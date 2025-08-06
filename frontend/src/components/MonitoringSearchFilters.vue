@@ -6,8 +6,8 @@
       <CustomMultiselect
         id="monitoring-product-select"
         label="Monitoring Product"
-        v-model="selectedMonitoringProductIds"
-        :options="monitoringProductOptions"
+        v-model="selectedProductIds"
+        :options="productOptions"
         :multiple="true"
       />
     </div>
@@ -16,8 +16,8 @@
       <CustomMultiselect
         id="monitoring-variable-select"
         label="Monitoring Variable"
-        v-model="selectedMonitoringVariableIds"
-        :options="monitoringVariableOptions"
+        v-model="selectedVariableIds"
+        :options="variableOptions"
         :multiple="true"
       />
     </div>
@@ -36,20 +36,20 @@ const props = defineProps<{
   monitoringProducts: MonitoringProduct[];
 }>();
 
-const selectedMonitoringProductIds = defineModel<string[]>("selectedMonitoringProductIds", { default: [] });
-const selectedMonitoringVariableIds = defineModel<string[]>("selectedMonitoringVariableIds", { default: [] });
+const selectedProductIds = defineModel<string[]>("selectedProductIds", { default: [] });
+const selectedVariableIds = defineModel<string[]>("selectedVariableIds", { default: [] });
 
-const monitoringProductOptions = computed<Option[]>(() =>
+const productOptions = computed<Option[]>(() =>
   props.monitoringProducts.map((product) => ({
     id: product.id,
     humanReadableName: product.humanReadableName,
   })),
 );
 
-const monitoringVariableOptions = computed<Option[]>(() =>
+const variableOptions = computed<Option[]>(() =>
   props.monitoringProducts.flatMap((product) =>
     product.variables.map((v) => ({
-      id: v.id,
+      id: `${product.id}::${v.id}`,
       humanReadableName: v.humanReadableName,
     })),
   ),

@@ -12,6 +12,7 @@
     <img
       v-if="imageUrl"
       :src="imageUrl"
+      loading="lazy"
       :alt="`Visualization for ${props.data.monitoringProductVariable.humanReadableName}`"
       :width="props.data.width"
       :height="props.data.height"
@@ -32,7 +33,6 @@ const props = defineProps<{ data: VisualizationData }>();
 
 const imageUrl = computed(() => (props.data?.s3key ? `${backendUrl}download/image/${props.data.s3key}` : null));
 
-console.log(toRaw(props.data));
 </script>
 
 <style scoped lang="scss">
@@ -40,6 +40,7 @@ console.log(toRaw(props.data));
   max-width: 1000px;
   display: flex;
   flex-direction: column;
+  margin-bottom: 2rem;
 }
 
 .header {
@@ -70,6 +71,7 @@ console.log(toRaw(props.data));
 img {
   max-width: 100%;
   height: auto;
-  display: block; // optional: removes bottom whitespace
+  display: block; 
+  padding: 0 2rem;
 }
 </style>

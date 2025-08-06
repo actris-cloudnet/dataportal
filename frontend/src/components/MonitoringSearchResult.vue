@@ -1,5 +1,7 @@
 <template>
-  <MonitoringVisualization v-for="(item, index) in monitoringVisualisations" :key="index" :data="item" />
+  <div class="results">
+      <MonitoringVisualization v-for="(item, index) in monitoringVisualisations" :key="index" :data="item" />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -11,22 +13,24 @@ const trigger = ref(null);
 
 const props = defineProps<{
   productIds: string[];
+  variableIds: string[];
 }>();
 
 const monitoringVisualisations = ref([]);
 
 async function fetchData() {
-  console.log("props in search result", props.productIds);
   try {
     const params: Record<string, string | undefined> = {};
     if (props.productIds.length > 0) {
       params.productId = props.productIds.join(",");
     }
+    if (props.variableIds.length > 0) {
+      params.variableId = props.variableIds.join(",");
+    }
 
     const res = await axios.get(`${backendUrl}monitoring-visualizations/`, {
       params,
     });
-    console.log(res.data);
     monitoringVisualisations.value = res.data;
   } catch (err) {
     console.error(err);
@@ -34,7 +38,7 @@ async function fetchData() {
 }
 
 watch(
-  () => props.productIds,
+  () => [props.productIds, props.variableIds],
   async (newIds, oldIds) => {
     if (JSON.stringify(newIds) !== JSON.stringify(oldIds)) {
       await fetchData();
@@ -44,4 +48,13 @@ watch(
 );
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.results {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+.result {
+  width: 400px;
+}
+
+</style>

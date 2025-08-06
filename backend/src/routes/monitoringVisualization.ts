@@ -18,10 +18,6 @@ export class MonitoringVisualizationRoutes {
   monitoringVisualization: RequestHandler = async (req, res, next) => {
     console.log(req.query);
     try {
-      let productIds: string[] | undefined;
-      if (typeof req.query.productId === "string") {
-        productIds = req.query.productId.split(",").map((s) => s.trim());
-      }
       const qb = this.monitoringVisualizationRepo
         .createQueryBuilder("viz")
         .leftJoinAndSelect("viz.sourceFile", "file")
@@ -31,8 +27,41 @@ export class MonitoringVisualizationRoutes {
         .leftJoinAndSelect("viz.monitoringProductVariable", "var")
         .leftJoinAndSelect("var.monitoringProduct", "varProduct");
 
+      let productIds: string[] | undefined;
+      if (typeof req.query.productId === "string") {
+        productIds = req.query.productId.split(",").map((s) => s.trim());
+      }
       if (productIds) {
         qb.andWhere("varProduct.id IN (:...productIds)", { productIds });
+      }
+
+      let variablePairs: { productId: string; variableId: string }[] = [];
+
+      if (typeof req.query.variableId === "string") {
+        const entries = req.query.variableId.split(",").map((s) => s.trim());
+        for (const entry of entries) {
+          const parts = entry.split("::");
+          if (parts.length === 2) {
+            variablePairs.push({ productId: parts[0], variableId: parts[1] });
+          }
+        }
+
+        console.log("variable pairs: ", variablePairs);
+        if (variablePairs.length > 0) {
+          qb.andWhere(
+            "(" +
+              variablePairs.map((_, idx) => `(varProduct.id = :prod${idx} AND var.id = :var${idx})`).join(" OR ") +
+              ")",
+            variablePairs.reduce(
+              (params, pair, idx) => {
+                params[`prod${idx}`] = pair.productId;
+                params[`var${idx}`] = pair.variableId;
+                return params;
+              },
+              {} as Record<string, string>,
+            ),
+          );
+        }
       }
 
       qb.orderBy("file.startDate", "DESC")

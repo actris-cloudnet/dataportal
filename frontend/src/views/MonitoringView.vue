@@ -3,10 +3,10 @@
     <h1>Monitoring Search</h1>
     <MonitoringSearchFilters
       :monitoring-products="monitoringProducts"
-      v-model:selectedMonitoringProductIds="selectedMonitoringProductIds"
-      v-model:selectedMonitoringVariableIds="selectedMonitoringVariableIds"
+      v-model:selectedProductIds="selectedProductIds"
+      v-model:selectedVariableIds="selectedVariableIds"
     />
-    <MonitoringSearchResult :productIds="selectedMonitoringProductIds"/>
+    <MonitoringSearchResult :productIds="selectedProductIds" :variableIds="selectedVariableIds" />
   </div>
 </template>
 
@@ -20,8 +20,8 @@ import type { MonitoringProduct } from "@shared/entity/Monitoring";
 
 const monitoringProducts = ref<MonitoringProduct[]>([]);
 
-const selectedMonitoringProductIds = ref<string[]>([]);
-const selectedMonitoringVariableIds = ref<string[]>([]);
+const selectedProductIds = ref<string[]>([]);
+const selectedVariableIds = ref<string[]>([]);
 
 onMounted(async () => {
   try {
@@ -32,8 +32,13 @@ onMounted(async () => {
   }
 });
 
-watch(selectedMonitoringProductIds, (newValue, oldValue) => {
-  console.log("selectedMonitoringProductIds changed:");
+watch(selectedProductIds, (newValue, oldValue) => {
+  console.log("selectedProductIds changed in MonitoringView:");
+  console.log("Old value:", oldValue);
+  console.log("New value:", newValue);
+});
+watch(selectedVariableIds, (newValue, oldValue) => {
+  console.log("selectedVariableIds changed in MonitoringView:");
   console.log("Old value:", oldValue);
   console.log("New value:", newValue);
 });
