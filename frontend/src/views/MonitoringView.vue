@@ -17,11 +17,13 @@ import { backendUrl } from "@/lib";
 import MonitoringSearchResult from "@/components/MonitoringSearchResult.vue";
 import MonitoringSearchFilters from "@/components/MonitoringSearchFilters.vue";
 import type { MonitoringProduct } from "@shared/entity/Monitoring";
+import { useRouteQuery, queryBoolean, queryString, queryStringArray } from "@/lib/useRouteQuery";
+import SuperMap from "@/components/SuperMap.vue";
 
 const monitoringProducts = ref<MonitoringProduct[]>([]);
 
-const selectedProductIds = ref<string[]>([]);
-const selectedVariableIds = ref<string[]>([]);
+const selectedProductIds = useRouteQuery({ name: "productId", defaultValue: [], type: queryStringArray });
+const selectedVariableIds = useRouteQuery({ name: "variableId", defaultValue: [], type: queryStringArray });
 
 onMounted(async () => {
   try {
