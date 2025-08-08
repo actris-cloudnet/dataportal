@@ -37,8 +37,13 @@ const showMenu = ref(false);
           </a>
         </li>
         <li>
-          <a href="/monitoring">
+          <a href="/search/monitoring">
             <span>Monitoring</span>
+          </a>
+        </li>
+        <li>
+          <a href="/monitoring">
+            <span>Monitoring 2</span>
           </a>
         </li>
         <li style="margin-left: auto">
