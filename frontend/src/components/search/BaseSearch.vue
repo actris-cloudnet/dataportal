@@ -12,7 +12,17 @@
       />
     </div>
     <div id="searchContainer">
-      <section class="sideBar">
+      <section id="sideBar">
+        <div v-if="allSites && allSites.length > 0 && !showAllSites" class="smallmap">
+          <SuperMap
+            :sites="siteOptions"
+            :selectedSiteIds="selectedSiteIds"
+            :onMapMarkerClick="onMapMarkerClick"
+            :center="[58.0, 14.0]"
+            :zoom="2.5"
+            enableBoundingBox
+          />
+        </div>
         <slot name="filters" />
       </section>
       <div class="results">
@@ -27,10 +37,7 @@ import { ref, computed, onMounted, watch, onUnmounted } from "vue";
 import axios from "axios";
 import type { Site } from "@shared/entity/Site";
 import { type Option } from "@/components/MultiSelect.vue";
-import {
-  backendUrl,
-  compareValues,
-} from "@/lib";
+import { backendUrl, compareValues } from "@/lib";
 import SuperMap from "@/components/SuperMap.vue";
 import { useRouteQuery, queryBoolean, queryString, queryStringArray } from "@/lib/useRouteQuery";
 
