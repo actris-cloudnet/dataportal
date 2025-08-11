@@ -46,14 +46,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, onUnmounted } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import axios from "axios";
 import type { Site } from "@shared/entity/Site";
-import CustomMultiselect, { type Option } from "@/components/MultiSelect.vue";
+import CustomMultiselect from "@/components/MultiSelect.vue";
 import CheckBox from "@/components/CheckBox.vue";
-import { backendUrl, compareValues, getMarkerIcon } from "@/lib";
+import { backendUrl, getMarkerIcon } from "@/lib";
 import SuperMap from "@/components/SuperMap.vue";
-import { useRouteQuery, queryBoolean, queryString, queryStringArray } from "@/lib/useRouteQuery";
+import { useRouteQuery, queryStringArray } from "@/lib/useRouteQuery";
+import { alphabeticalSort } from "@/lib/SearchUtils";
 
 type MainWidth = "wideView" | "pagewidth";
 
@@ -71,14 +72,11 @@ const siteOptions = computed(() =>
 const renderComplete = ref(false);
 
 onMounted(async () => {
-  window.addEventListener("keydown", onKeyDown);
   await initView();
   renderComplete.value = true;
 });
 
-onUnmounted(() => {
-  window.removeEventListener("keydown", onKeyDown);
-});
+onUnmounted(() => {});
 
 async function initView() {
   const [sites] = await Promise.all([initSites()]);
@@ -94,19 +92,11 @@ async function initSites(): Promise<Site[]> {
   const res = await axios.get<Site[]>(`${backendUrl}sites/`, { params: { type: ["cloudnet", "campaign", "arm"] } });
   return res.data.filter((site) => !site.type.includes("hidden"));
 }
-const alphabeticalSort = (a: Option, b: Option) => compareValues(a.humanReadableName, b.humanReadableName);
 
 function onMapMarkerClick(ids: string[]) {
   const union = selectedSiteIds.value.concat(ids);
   const intersection = selectedSiteIds.value.filter((id) => ids.includes(id));
   selectedSiteIds.value = union.filter((id) => !intersection.includes(id));
-}
-
-function onKeyDown(event: KeyboardEvent) {
-  if (!document.activeElement || document.activeElement.tagName != "INPUT") {
-    //if (event.code == "ArrowLeft") setPreviousDate();
-    //else if (event.code == "ArrowRight") setNextDate();
-  }
 }
 </script>
 
