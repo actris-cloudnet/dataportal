@@ -75,12 +75,30 @@ const routes = [
     props: true,
   },
   {
-    path: "/search/:mode",
-    name: "Search",
+    path: "/search/data",
+    name: "SearchData",
     meta: {
       title: "Search",
     },
-    component: () => import("@/views/SearchView.vue"),
+    component: () => import("@/views/search/SearchData.vue"),
+    props: true,
+  },
+  {
+    path: "/search/visualizations",
+    name: "SearchVisualizations",
+    meta: {
+      title: "Search visualizations",
+    },
+    component: () => import("@/views/search/SearchVisualization.vue"),
+    props: true,
+  },
+  {
+    path: "/search/monitoring",
+    name: "SearchMonitoring",
+    meta: {
+      title: "Search monitoring",
+    },
+    component: () => import("@/views/search/SearchMonitoring.vue"),
     props: true,
   },
   {
