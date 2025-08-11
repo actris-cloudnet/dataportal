@@ -23,7 +23,20 @@
             enableBoundingBox
           />
         </div>
-        <slot name="filters" />
+        <div class="filterbox">
+          <CustomMultiselect
+            label="Location"
+            v-model="selectedSiteIds"
+            :options="siteOptions"
+            id="siteSelect"
+            class="nobottommargin"
+            :class="{ widemapmarginleft: showAllSites }"
+            :multiple="true"
+            :getIcon="getMarkerIcon"
+          />
+          <CheckBox class="checkbox" v-model="showAllSites" label="Show all sites" />
+          <slot name="filters" />
+        </div>
       </section>
       <div class="results">
         <slot name="results" />
@@ -36,8 +49,9 @@
 import { ref, computed, onMounted, watch, onUnmounted } from "vue";
 import axios from "axios";
 import type { Site } from "@shared/entity/Site";
-import { type Option } from "@/components/MultiSelect.vue";
-import { backendUrl, compareValues } from "@/lib";
+import CustomMultiselect, { type Option } from "@/components/MultiSelect.vue";
+import CheckBox from "@/components/CheckBox.vue";
+import { backendUrl, compareValues, getMarkerIcon } from "@/lib";
 import SuperMap from "@/components/SuperMap.vue";
 import { useRouteQuery, queryBoolean, queryString, queryStringArray } from "@/lib/useRouteQuery";
 
@@ -157,7 +171,7 @@ section#sideBar {
   }
 }
 
-div.date {
+:deep(div.date) {
   display: grid;
   grid-template-columns: 42.5% 15% 42.5%;
   justify-items: center;
@@ -205,7 +219,7 @@ div.date {
   padding: 0;
 }
 
-.quickselectors {
+:deep(.quickselectors) {
   width: 100%;
   height: 27px;
   display: flex;
@@ -248,7 +262,7 @@ div.date {
   }
 }
 
-.dateButtons {
+:deep(.dateButtons) {
   width: 80%;
   height: 32px;
   display: flex;
@@ -302,11 +316,11 @@ span.centerlabel {
   margin-top: 1rem;
 }
 
-.filterbox {
+:deep(.filterbox) {
   margin-top: 1rem;
 }
 
-.checkbox {
+:deep(.checkbox) {
   margin-top: 0.25rem;
 }
 

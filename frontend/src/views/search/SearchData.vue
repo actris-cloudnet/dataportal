@@ -1,11 +1,14 @@
 <template>
   <BaseSearch mainWidth="pagewidth">
-    <template #filters>Search filters</template>
-    <template #results>Search results</template>
+    <template #filters>
+      <DateFilter /> 
+    </template>
+    <template #results></template>
   </BaseSearch>
 </template>
 
 <script setup lang="ts">
 import BaseSearch from '@/components/search/BaseSearch.vue';
+import DateFilter from '@/components/search/DateFilter.vue';
 
 </script>
