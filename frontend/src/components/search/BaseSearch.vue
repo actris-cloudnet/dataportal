@@ -267,7 +267,7 @@ section#sideBar {
   }
 }
 
-span.centerlabel {
+:deep(span.centerlabel) {
   line-height: 30px;
   font-size: 80%;
 }
