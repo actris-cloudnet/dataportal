@@ -1,5 +1,5 @@
 [default]
-extend-ignore-re = ["\\.replace([^)]*)"]
+extend-ignore-re = ["\\.replace([^)]*)", "\"tke\""]
 extend-ignore-identifiers-re = ["(PK|FK|IDX|UQ)_[a-z0-9]+", "ChageSizeToBigint", "MOR", "hax0r", "TKE"]
 
 [files]

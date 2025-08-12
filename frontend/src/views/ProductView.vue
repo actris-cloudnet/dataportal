@@ -9,7 +9,7 @@
     </LandingHeader>
     <main class="pagewidth">
       <h2>Description</h2>
-      <p>{{ productInfo.variables.description }}</p>
+      <p>{{ productInfo.docs.description }}</p>
       <template v-if="productInfo.value.sourceInstruments.length > 0">
         <p>Cloudnet supports the following instruments:</p>
         <ul>
@@ -41,18 +41,16 @@
           </li>
         </ul>
       </template>
-      <template v-if="productInfo.variables.references_html.length > 0">
+      <template v-if="productInfo.docs.references_html.length > 0">
         <h2>References</h2>
         <ul class="references">
-          <li v-for="reference in productInfo.variables.references_html" :key="reference" v-html="reference"></li>
+          <li v-for="reference in productInfo.docs.references_html" :key="reference" v-html="reference"></li>
         </ul>
       </template>
-      <template v-for="section in sections" :key="section">
-        <h2>{{ titles[section] }}</h2>
-        <p v-if="section in descriptions">
-          {{ descriptions[section] }}
-        </p>
-        <div class="variable" v-for="variable in productInfo.variables[section]" :key="variable.name">
+      <template v-for="section in productInfo.variables" :key="section.id">
+        <h2>{{ section.title }}</h2>
+        <p v-if="section.description">{{ section.description }}</p>
+        <div class="variable" v-for="variable in section.variables" :key="variable.name">
           <code>{{ variable.name }}</code> – {{ variable.long_name }}<br />
           <table>
             <tbody>
@@ -106,6 +104,7 @@ import LandingHeader from "@/components/LandingHeader.vue";
 import BaseTag from "@/components/BaseTag.vue";
 import ApiError from "@/views/ApiError.vue";
 import productData from "@/assets/products.json";
+import type { Instrument } from "@shared/entity/Instrument";
 
 export interface Props {
   product: string;
@@ -113,9 +112,16 @@ export interface Props {
 
 const props = defineProps<Props>();
 
+interface Section {
+  id: string;
+  title: string;
+  description?: string;
+  variables: any[];
+}
+
 type ProductResult =
   | { status: "loading" }
-  | { status: "ready"; value: Product; variables: any }
+  | { status: "ready"; value: Product; docs: any; variables: Section[] }
   | { status: "error"; error: Error };
 
 const productInfo = ref<ProductResult>({ status: "loading" });
@@ -124,20 +130,6 @@ function unitsHtml(units: string): string {
   return units.replace(/([a-z])(-?\d+)/gi, "$1<sup>$2</sup>");
 }
 
-const sections = ["dimensions", "common_variables"];
-
-type Section = (typeof sections)[number];
-
-const titles: Record<Section, string> = {
-  dimensions: "Dimensions",
-  common_variables: "Variables",
-};
-
-const descriptions: Record<Section, string> = {
-  common_variables:
-    "The following variables are available in all products of this type but additional variables may be present depending on the source instrument.",
-};
-
 const lowerCaseProductName = (product: Product) =>
   product.humanReadableName.toLowerCase().replace("mwr", "MWR").replace("doppler", "Doppler").replace("tke", "TKE");
 
@@ -145,14 +137,50 @@ watch(
   () => props.product,
   async () => {
     try {
-      const res = await axios.get<Product>(`${backendUrl}products/${props.product}`);
-      const variables = (productData as any)[props.product];
-      if (variables) {
-        productInfo.value = { status: "ready", value: res.data, variables };
-      } else {
+      const product = await axios.get<Product>(`${backendUrl}products/${props.product}`);
+      const instruments = await axios.get<Instrument[]>(`${backendUrl}instruments`);
+      const docs = (productData as any)[props.product];
+      if (!docs) {
         const error = new Error();
         (error as any).response = { status: 404, data: "Not found" };
         productInfo.value = { status: "error", error };
+      } else {
+        const variables = [
+          {
+            id: "dimensions",
+            title: "Coordinate variables",
+            description: `The following one-dimensional variables define the
+            coordinate system for other variables.`,
+            variables: docs.dimensions,
+          },
+          {
+            id: "common",
+            title: "Common variables",
+            description: `The following variables are available in all products
+            of this type but additional variables may be present depending on
+            the source instrument.`,
+            variables: docs.common_variables,
+          },
+          ...docs.specific_variables.map((item: any) => {
+            let instrumentId = item.type;
+            if (instrumentId.endsWith("-l1c")) {
+              instrumentId = instrumentId.slice(0, -4);
+            } else if (instrumentId.endsWith("-single")) {
+              instrumentId = instrumentId.slice(0, -7);
+            }
+            const instrument = instruments.data.find((instrument) => instrument.id === instrumentId);
+            return {
+              id: `specific-${item.type}`,
+              title: `${instrument?.shortName || instrument?.humanReadableName || item.type.toUpperCase()} variables`,
+              description: `The following variables are available from ${
+                instrument?.humanReadableName || item.type.toUpperCase()
+              }.`,
+              variables: item.variables,
+            };
+          }),
+        ];
+        productInfo.value = { status: "ready", value: product.data, docs, variables };
+        console.log(productInfo.value);
       }
     } catch (error) {
       productInfo.value = { status: "error", error: error as Error };
