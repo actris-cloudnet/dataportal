@@ -1,4 +1,5 @@
 import { createApp } from "vue";
+import { createPinia } from 'pinia'
 import VueMatomo from "vue-matomo";
 
 import App from "./App.vue";
@@ -9,6 +10,8 @@ initLogin()
   .then(() => {
     const app = createApp(App);
 
+    const pinia = createPinia()
+    app.use(pinia)
     app.use(router);
 
     if (import.meta.env.VITE_MATOMO_HOST && import.meta.env.VITE_MATOMO_SITE_ID) {

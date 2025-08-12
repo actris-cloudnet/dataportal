@@ -86,18 +86,21 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from "vue";
+import { storeToRefs } from "pinia";
+import { useSearchStore } from "@/stores/search";
 import DatePicker, { type DateErrors } from "@/components/DatePicker.vue";
 import CheckBox from "@/components/CheckBox.vue";
 import BaseButton from "@/components/BaseButton.vue";
 import { dateToString, getDateFromBeginningOfYear, isSameDay } from "@/lib";
-import { useRouteQuery, queryString } from "@/lib/useRouteQuery";
 
-// dates
+// Use the search store as the source of truth for date filters
+const searchStore = useSearchStore();
+const { dateFrom, dateTo } = storeToRefs(searchStore);
+
+// Local component state for UI logic
 const beginningOfHistory = ref("1970-01-01");
 const today = ref(dateToString(new Date()));
-const dateFrom = useRouteQuery({ name: "dateFrom", defaultValue: today.value, type: queryString });
 const dateFromError = ref<DateErrors>();
-const dateTo = useRouteQuery({ name: "dateTo", defaultValue: today.value, type: queryString });
 const dateToError = ref<DateErrors>();
 const showDateRange = ref(false);
 
@@ -106,7 +109,9 @@ const dateFromUpdate = ref(10000);
 const dateToUpdate = ref(20000);
 const vizDateUpdate = ref(30000);
 
-onMounted(async () => {
+onMounted(() => {
+  // Initialize UI state based on dates from the store
+  showDateRange.value = dateFrom.value !== dateTo.value;
   window.addEventListener("keydown", onKeyDown);
 });
 
@@ -168,9 +173,7 @@ function setNextDate() {
 
 const activeBtn = computed(() => {
   const oneDay = 24 * 60 * 60 * 1000;
-  const diffDays = Math.round(
-    Math.abs((new Date(dateTo.value).valueOf() - new Date(dateFrom.value).valueOf()) / oneDay),
-  );
+  const diffDays = Math.round(Math.abs((new Date(dateTo.value).valueOf() - new Date(dateFrom.value).valueOf()) / oneDay));
   const isDateToToday = isSameDay(new Date(dateTo.value), new Date());
   const isDateFromBeginningOfYear = isSameDay(new Date(dateFrom.value), getDateFromBeginningOfYear());
   if (isDateToToday && isDateFromBeginningOfYear) return "btn1";
