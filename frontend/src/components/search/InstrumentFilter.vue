@@ -2,7 +2,7 @@
   <div class="filterbox">
     <CustomMultiselect
       label="Instrument model"
-      v-model="selectedInstrumentIds"
+      v-model="instruments"
       :options="allInstruments"
       id="instrumentSelect"
       :multiple="true"
@@ -13,7 +13,7 @@
   <div class="filterbox">
     <CustomMultiselect
       label="Specific instrument"
-      v-model="selectedInstrumentPids"
+      v-model="instrumentPids"
       :options="allInstrumentPids"
       :multiple="true"
       id="instrumentPidSelect"
@@ -23,13 +23,20 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from "vue";
+import { storeToRefs } from "pinia";
+import { useSearchStore } from "@/stores/search";
 import CustomMultiselect from "@/components/MultiSelect.vue";
-import { useRouteQuery, queryStringArray } from "@/lib/useRouteQuery";
 import { getInstrumentIcon, getProductIcon } from "@/lib";
-import { useInstruments } from "@/composables/useInstruments";
 
-const { allInstruments, allInstrumentPids } = useInstruments();
+const searchStore = useSearchStore();
 
-const selectedInstrumentIds = useRouteQuery({ name: "instrument", defaultValue: [], type: queryStringArray });
-const selectedInstrumentPids = useRouteQuery({ name: "instrumentPid", defaultValue: [], type: queryStringArray });
+const { instruments, instrumentPids, allInstruments, allInstrumentPids } = storeToRefs(searchStore);
+const { fetchInstruments } = searchStore;
+
+onMounted(() => {
+  if (allInstruments.value.length === 0) {
+    fetchInstruments();
+  }
+});
 </script>

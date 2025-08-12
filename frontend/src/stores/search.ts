@@ -1,13 +1,16 @@
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
 import axios from "axios";
-import { backendUrl, dateToString } from "@/lib";
-
+import { backendUrl, dateToString, compareValues } from "@/lib";
 import { useRouteQuery, queryString, queryStringArray } from "@/lib/useRouteQuery";
 
 import type { Site } from "@shared/entity/Site";
+import type { Instrument, InstrumentInfo } from "@shared/entity/Instrument";
 import type { SearchFile } from "@shared/entity/SearchFile";
 import type { SearchFileResponse } from "@shared/entity/SearchFileResponse";
+import type { Option } from "@/components/MultiSelect.vue";
+
+type InstrumentPidOption = Option & { type: string };
 
 export const useSearchStore = defineStore("search", () => {
   // --- STATE ---
@@ -20,6 +23,11 @@ export const useSearchStore = defineStore("search", () => {
   // All available sites for the filter
   const allSites = ref<Site[]>([]);
   const sitesError = ref<string | null>(null);
+
+  // All available instruments for the filter
+  const allInstruments = ref<Instrument[]>([]);
+  const allInstrumentPids = ref<InstrumentPidOption[]>([]);
+  const instrumentsError = ref<string | null>(null);
 
   // --- FILTERS ---
   const sites = useRouteQuery({ name: "site", defaultValue: [], type: queryStringArray });
@@ -47,6 +55,13 @@ export const useSearchStore = defineStore("search", () => {
   // --- ACTIONS ---
   let requestController: AbortController | null = null;
 
+  // Helper sort functions
+  const alphabeticalSort = (a: Option, b: Option) => compareValues(a.humanReadableName, b.humanReadableName);
+  const instrumentSort = (a: Instrument, b: Instrument) =>
+    a.type == b.type
+      ? compareValues(a.shortName || a.humanReadableName, b.shortName || b.humanReadableName)
+      : compareValues(a.type, b.type);
+
   async function fetchSites() {
     sitesError.value = null;
     try {
@@ -57,6 +72,24 @@ export const useSearchStore = defineStore("search", () => {
     } catch (err) {
       console.error(err);
       sitesError.value = "Failed to fetch sites";
+    }
+  }
+
+  async function fetchInstruments() {
+    instrumentsError.value = null;
+    try {
+      const [instrumentsRes, pidsRes] = await Promise.all([
+        axios.get<Instrument[]>(`${backendUrl}instruments`),
+        axios.get<InstrumentInfo[]>(`${backendUrl}instrument-pids`),
+      ]);
+
+      allInstruments.value = instrumentsRes.data.sort(instrumentSort);
+      allInstrumentPids.value = pidsRes.data
+        .map((obj) => ({ id: obj.pid, humanReadableName: obj.name, type: obj.instrument.type }))
+        .sort(alphabeticalSort);
+    } catch (err) {
+      console.error(err);
+      instrumentsError.value = "Failed to fetch instrument data";
     }
   }
 
@@ -99,6 +132,9 @@ export const useSearchStore = defineStore("search", () => {
     error,
     allSites,
     sitesError,
+    allInstruments,
+    allInstrumentPids,
+    instrumentsError,
     // Filters
     sites,
     dateFrom,
@@ -112,5 +148,6 @@ export const useSearchStore = defineStore("search", () => {
     // Actions
     performSearch,
     fetchSites,
+    fetchInstruments,
   };
 });
