@@ -1,14 +1,15 @@
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { defineStore } from "pinia";
 import axios from "axios";
 import { backendUrl, dateToString, compareValues } from "@/lib";
-import { useRouteQuery, queryString, queryStringArray } from "@/lib/useRouteQuery";
+import { useRouteQuery, queryString, queryStringArray, queryBoolean } from "@/lib/useRouteQuery";
 
 import type { Site } from "@shared/entity/Site";
 import type { Instrument, InstrumentInfo } from "@shared/entity/Instrument";
 import type { SearchFile } from "@shared/entity/SearchFile";
 import type { SearchFileResponse } from "@shared/entity/SearchFileResponse";
 import type { Option } from "@/components/MultiSelect.vue";
+import type { Product } from "@shared/entity/Product";
 
 type InstrumentPidOption = Option & { type: string };
 
@@ -29,11 +30,15 @@ export const useSearchStore = defineStore("search", () => {
   const allInstrumentPids = ref<InstrumentPidOption[]>([]);
   const instrumentsError = ref<string | null>(null);
 
+  const allProducts = ref<Product[]>([]);
+  const productsError = ref<string | null>(null);
+
   // --- FILTERS ---
   const sites = useRouteQuery({ name: "site", defaultValue: [], type: queryStringArray });
   const dateFrom = useRouteQuery({ name: "dateFrom", defaultValue: today, type: queryString });
   const dateTo = useRouteQuery({ name: "dateTo", defaultValue: today, type: queryString });
   const products = useRouteQuery({ name: "product", defaultValue: [], type: queryStringArray });
+  const showExpProducts = useRouteQuery({ name: "experimental", defaultValue: false, type: queryBoolean });
   const instruments = useRouteQuery({ name: "instrument", defaultValue: [], type: queryStringArray });
   const instrumentPids = useRouteQuery({ name: "instrumentPid", defaultValue: [], type: queryStringArray });
   const currentPage = useRouteQuery({
@@ -43,6 +48,10 @@ export const useSearchStore = defineStore("search", () => {
   });
 
   // --- GETTERS ---
+  const productOptions = computed(() =>
+    allProducts.value.filter((product) => showExpProducts.value || !product.experimental),
+  );
+
   const searchFilters = computed(() => ({
     sites: sites.value,
     dateFrom: dateFrom.value,
@@ -55,7 +64,6 @@ export const useSearchStore = defineStore("search", () => {
   // --- ACTIONS ---
   let requestController: AbortController | null = null;
 
-  // Helper sort functions
   const alphabeticalSort = (a: Option, b: Option) => compareValues(a.humanReadableName, b.humanReadableName);
   const instrumentSort = (a: Instrument, b: Instrument) =>
     a.type == b.type
@@ -72,6 +80,17 @@ export const useSearchStore = defineStore("search", () => {
     } catch (err) {
       console.error(err);
       sitesError.value = "Failed to fetch sites";
+    }
+  }
+
+  async function fetchProducts() {
+    productsError.value = null;
+    try {
+      const res = await axios.get<Product[]>(`${backendUrl}products/variables`);
+      allProducts.value = res.data.sort(alphabeticalSort);
+    } catch (err) {
+      console.error(err);
+      productsError.value = "Failed to fetch products";
     }
   }
 
@@ -124,6 +143,17 @@ export const useSearchStore = defineStore("search", () => {
     }
   }
 
+  watch(
+    [products, allProducts],
+    ([selectedIds, all]) => {
+      if (showExpProducts.value || all.length === 0) return;
+      if (selectedIds.some((id) => all.find((p) => p.id === id)?.experimental)) {
+        showExpProducts.value = true;
+      }
+    },
+    { deep: true },
+  );
+
   return {
     // State
     results,
@@ -135,19 +165,24 @@ export const useSearchStore = defineStore("search", () => {
     allInstruments,
     allInstrumentPids,
     instrumentsError,
+    allProducts,
+    productsError,
     // Filters
     sites,
     dateFrom,
     dateTo,
     products,
+    showExpProducts,
     instruments,
     instrumentPids,
     currentPage,
     // Getters
     searchFilters,
+    productOptions,
     // Actions
     performSearch,
     fetchSites,
     fetchInstruments,
+    fetchProducts,
   };
 });

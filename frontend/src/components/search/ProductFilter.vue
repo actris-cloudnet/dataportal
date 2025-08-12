@@ -2,7 +2,7 @@
   <div class="filterbox">
     <CustomMultiselect
       label="Product"
-      v-model="selectedProductIds"
+      v-model="products"
       :options="productOptions"
       id="productSelect"
       :multiple="true"
@@ -17,31 +17,21 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { onMounted } from "vue";
+import { storeToRefs } from "pinia";
+import { useSearchStore } from "@/stores/search";
 import CustomMultiselect from "@/components/MultiSelect.vue";
 import CheckBox from "@/components/CheckBox.vue";
-import { useRouteQuery, queryBoolean, queryStringArray } from "@/lib/useRouteQuery";
 import { getProductIcon } from "@/lib";
-import { useProducts } from "@/composables/useProduct";
 
-const { allProducts } = useProducts();
+const searchStore = useSearchStore();
 
-const selectedProductIds = useRouteQuery({ name: "product", defaultValue: [], type: queryStringArray });
-const showExpProducts = useRouteQuery({ name: "experimental", defaultValue: false, type: queryBoolean });
+const { products, showExpProducts, productOptions, allProducts } = storeToRefs(searchStore);
+const { fetchProducts } = searchStore;
 
-const productOptions = computed(() =>
-  allProducts.value.filter((product) => showExpProducts.value || !product.experimental),
-);
-
-onMounted(async () => {
-  if (
-    !showExpProducts.value &&
-    selectedProductIds.value.some((productId) => {
-      const product = allProducts.value.find((product) => product.id === productId);
-      return product && product.experimental;
-    })
-  ) {
-    showExpProducts.value = true;
+onMounted(() => {
+  if (allProducts.value.length === 0) {
+    fetchProducts();
   }
 });
 </script>
