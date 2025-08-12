@@ -47,14 +47,12 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from "vue";
-import axios from "axios";
-import type { Site } from "@shared/entity/Site";
 import CustomMultiselect from "@/components/MultiSelect.vue";
 import CheckBox from "@/components/CheckBox.vue";
-import { backendUrl, getMarkerIcon } from "@/lib";
+import { getMarkerIcon } from "@/lib";
 import SuperMap from "@/components/SuperMap.vue";
 import { useRouteQuery, queryStringArray } from "@/lib/useRouteQuery";
-import { alphabeticalSort } from "@/lib/SearchUtils";
+import { useSites } from "@/composables/useSite";
 
 type MainWidth = "wideView" | "pagewidth";
 
@@ -63,35 +61,21 @@ const props = defineProps<{
 }>();
 
 // site selector
-const allSites = ref<Site[]>([]);
+const { allSites, error: fetchError } = useSites();
 const selectedSiteIds = useRouteQuery({ name: "site", defaultValue: [], type: queryStringArray });
 const showAllSites = ref(false);
 const siteOptions = computed(() =>
   showAllSites.value ? allSites.value : allSites.value.filter((site) => site.type.includes("cloudnet")),
 );
-const renderComplete = ref(false);
 
 onMounted(async () => {
-  await initView();
-  renderComplete.value = true;
-});
-
-onUnmounted(() => {});
-
-async function initView() {
-  const [sites] = await Promise.all([initSites()]);
-  allSites.value = sites.sort(alphabeticalSort);
-
   showAllSites.value = selectedSiteIds.value.some((siteId) => {
     const site = allSites.value.find((site) => site.id === siteId);
     return site && !site.type.includes("cloudnet");
   });
-}
+});
 
-async function initSites(): Promise<Site[]> {
-  const res = await axios.get<Site[]>(`${backendUrl}sites/`, { params: { type: ["cloudnet", "campaign", "arm"] } });
-  return res.data.filter((site) => !site.type.includes("hidden"));
-}
+onUnmounted(() => {});
 
 function onMapMarkerClick(ids: string[]) {
   const union = selectedSiteIds.value.concat(ids);
