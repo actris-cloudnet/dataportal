@@ -24,8 +24,7 @@ import { useRouteQuery, queryBoolean, queryStringArray } from "@/lib/useRouteQue
 import { getProductIcon } from "@/lib";
 import { useProducts } from "@/composables/useProduct";
 
-// products
-const { allProducts, error: fetchError } = useProducts();
+const { allProducts } = useProducts();
 
 const selectedProductIds = useRouteQuery({ name: "product", defaultValue: [], type: queryStringArray });
 const showExpProducts = useRouteQuery({ name: "experimental", defaultValue: false, type: queryBoolean });
