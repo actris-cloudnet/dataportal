@@ -53,12 +53,12 @@ export const useSearchStore = defineStore("search", () => {
   );
 
   const searchFilters = computed(() => ({
-    sites: sites.value,
+    site: sites.value,
     dateFrom: dateFrom.value,
     dateTo: dateTo.value,
-    products: products.value,
-    instruments: instruments.value,
-    instrumentPids: instrumentPids.value,
+    product: products.value,
+    instrument: instruments.value,
+    instrumentPid: instrumentPids.value,
   }));
 
   // --- ACTIONS ---
