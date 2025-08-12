@@ -3,7 +3,7 @@
     <div v-if="allSites && allSites.length > 0 && showAllSites" class="widemap">
       <SuperMap
         :sites="siteOptions"
-        :selectedSiteIds="selectedSiteIds"
+        :selectedSiteIds="sites"
         :onMapMarkerClick="onMapMarkerClick"
         :center="[54.0, 14.0]"
         :zoom="2"
@@ -16,7 +16,7 @@
         <div v-if="allSites && allSites.length > 0 && !showAllSites" class="smallmap">
           <SuperMap
             :sites="siteOptions"
-            :selectedSiteIds="selectedSiteIds"
+            :selectedSiteIds="sites"
             :onMapMarkerClick="onMapMarkerClick"
             :center="[58.0, 14.0]"
             :zoom="2.5"
@@ -26,7 +26,7 @@
         <div class="filterbox">
           <CustomMultiselect
             label="Location"
-            v-model="selectedSiteIds"
+            v-model="sites"
             :options="siteOptions"
             id="siteSelect"
             class="nobottommargin"
@@ -46,13 +46,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
+import { storeToRefs } from "pinia";
+import { useSearchStore } from "@/stores/search";
 import CustomMultiselect from "@/components/MultiSelect.vue";
 import CheckBox from "@/components/CheckBox.vue";
 import { getMarkerIcon } from "@/lib";
 import SuperMap from "@/components/SuperMap.vue";
-import { useRouteQuery, queryStringArray } from "@/lib/useRouteQuery";
-import { useSites } from "@/composables/useSite";
 
 type MainWidth = "wideView" | "pagewidth";
 
@@ -60,27 +60,44 @@ const props = defineProps<{
   mainWidth: MainWidth;
 }>();
 
-// site selector
-const { allSites, error: fetchError } = useSites();
-const selectedSiteIds = useRouteQuery({ name: "site", defaultValue: [], type: queryStringArray });
+// Connect to the search store
+const searchStore = useSearchStore();
+const { sites, allSites } = storeToRefs(searchStore);
+const { fetchSites } = searchStore;
+
+// Local UI state
 const showAllSites = ref(false);
+
 const siteOptions = computed(() =>
   showAllSites.value ? allSites.value : allSites.value.filter((site) => site.type.includes("cloudnet")),
 );
 
-onMounted(async () => {
-  showAllSites.value = selectedSiteIds.value.some((siteId) => {
-    const site = allSites.value.find((site) => site.id === siteId);
-    return site && !site.type.includes("cloudnet");
-  });
+onMounted(() => {
+  // Fetch site data if not already present
+  if (allSites.value.length === 0) {
+    fetchSites();
+  }
 });
 
-onUnmounted(() => {});
+// Watch for changes in selected sites or the full sites list to update the UI
+watch(
+  [sites, allSites],
+  ([selected, all]) => {
+    if (all.length > 0) {
+      showAllSites.value = selected.some((siteId) => {
+        const site = all.find((s) => s.id === siteId);
+        return site && !site.type.includes("cloudnet");
+      });
+    }
+  },
+  { immediate: true },
+);
 
 function onMapMarkerClick(ids: string[]) {
-  const union = selectedSiteIds.value.concat(ids);
-  const intersection = selectedSiteIds.value.filter((id) => ids.includes(id));
-  selectedSiteIds.value = union.filter((id) => !intersection.includes(id));
+  const union = sites.value.concat(ids);
+  const intersection = sites.value.filter((id) => ids.includes(id));
+  // Update the store's state
+  sites.value = union.filter((id) => !intersection.includes(id));
 }
 </script>
 

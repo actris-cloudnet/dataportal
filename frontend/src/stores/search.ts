@@ -5,6 +5,7 @@ import { backendUrl, dateToString } from "@/lib";
 
 import { useRouteQuery, queryString, queryStringArray } from "@/lib/useRouteQuery";
 
+import type { Site } from "@shared/entity/Site";
 import type { SearchFile } from "@shared/entity/SearchFile";
 import type { SearchFileResponse } from "@shared/entity/SearchFileResponse";
 
@@ -15,6 +16,10 @@ export const useSearchStore = defineStore("search", () => {
   const isLoading = ref(false);
   const error = ref<string | null>(null);
   const today = dateToString(new Date());
+
+  // All available sites for the filter
+  const allSites = ref<Site[]>([]);
+  const sitesError = ref<string | null>(null);
 
   // --- FILTERS ---
   const sites = useRouteQuery({ name: "site", defaultValue: [], type: queryStringArray });
@@ -41,6 +46,19 @@ export const useSearchStore = defineStore("search", () => {
 
   // --- ACTIONS ---
   let requestController: AbortController | null = null;
+
+  async function fetchSites() {
+    sitesError.value = null;
+    try {
+      const res = await axios.get<Site[]>(`${backendUrl}sites/`, {
+        params: { type: ["cloudnet", "campaign", "arm"] },
+      });
+      allSites.value = res.data.filter((site) => !site.type.includes("hidden"));
+    } catch (err) {
+      console.error(err);
+      sitesError.value = "Failed to fetch sites";
+    }
+  }
 
   async function performSearch() {
     if (requestController) {
@@ -79,6 +97,8 @@ export const useSearchStore = defineStore("search", () => {
     pagination,
     isLoading,
     error,
+    allSites,
+    sitesError,
     // Filters
     sites,
     dateFrom,
@@ -91,5 +111,6 @@ export const useSearchStore = defineStore("search", () => {
     searchFilters,
     // Actions
     performSearch,
+    fetchSites,
   };
 });
