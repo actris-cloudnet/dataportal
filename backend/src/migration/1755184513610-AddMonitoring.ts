@@ -1,11 +1,11 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class AddMonitoring1753709944156 implements MigrationInterface {
-    name = 'AddMonitoring1753709944156'
+export class AddMonitoring1755184513610 implements MigrationInterface {
+    name = 'AddMonitoring1755184513610'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`CREATE TYPE "public"."monitoring_file_periodtype_enum" AS ENUM('all', 'year', 'month', 'day')`);
-        await queryRunner.query(`CREATE TABLE "monitoring_file" ("uuid" uuid NOT NULL, "startDate" date NOT NULL, "periodType" "public"."monitoring_file_periodtype_enum" NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "siteId" character varying NOT NULL, "monitoringProductId" character varying NOT NULL, "instrumentInfoUuid" uuid NOT NULL, CONSTRAINT "PK_a1986021aaa7458dd07a1e60388" PRIMARY KEY ("uuid"))`);
+        await queryRunner.query(`CREATE TYPE "public"."monitoring_file_periodtype_enum" AS ENUM('all', 'year', 'month', 'week', 'day')`);
+        await queryRunner.query(`CREATE TABLE "monitoring_file" ("uuid" uuid NOT NULL, "startDate" date, "periodType" "public"."monitoring_file_periodtype_enum" NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "siteId" character varying NOT NULL, "monitoringProductId" character varying NOT NULL, "instrumentInfoUuid" uuid NOT NULL, CONSTRAINT "UQ_ab6ee42578592dd25f9c1e93c3f" UNIQUE ("startDate", "periodType", "siteId", "monitoringProductId", "instrumentInfoUuid"), CONSTRAINT "CHK_06158137a1c07e40f676cfb297" CHECK (("periodType" = 'all' AND "startDate" IS NULL) OR ("periodType" != 'all' AND "startDate" IS NOT NULL)), CONSTRAINT "PK_a1986021aaa7458dd07a1e60388" PRIMARY KEY ("uuid"))`);
         await queryRunner.query(`CREATE TABLE "monitoring_visualization" ("s3key" character varying NOT NULL, "width" smallint, "height" smallint, "marginTop" smallint, "marginRight" smallint, "marginBottom" smallint, "marginLeft" smallint, "sourceFileUuid" uuid NOT NULL, "monitoringProductVariableId" character varying NOT NULL, CONSTRAINT "PK_147cc187b8d663649c5ad816928" PRIMARY KEY ("s3key"))`);
         await queryRunner.query(`CREATE TABLE "monitoring_product_variable" ("id" character varying NOT NULL, "humanReadableName" character varying NOT NULL, "order" smallint NOT NULL, "monitoringProductId" character varying NOT NULL, CONSTRAINT "PK_fc90be54901ad74dd366e9fd2c6" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "monitoring_product" ("id" character varying NOT NULL, "humanReadableName" character varying NOT NULL, CONSTRAINT "PK_71b31885a83ae3b655720731995" PRIMARY KEY ("id"))`);
