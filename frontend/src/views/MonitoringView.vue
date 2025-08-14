@@ -19,21 +19,21 @@
         />
       </aside>
       <main id="results">
-        Results
-        <MonitoringSearchResult :productIds="selectedProductIds" :variableIds="selectedVariableIds" />
+        <MonitoringSearchResults :results="results" :isLoading="isLoading" :error="error" />
       </main>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
-import MonitoringSearchResult from "@/components/MonitoringSearchResult.vue";
+import { ref, computed, watch } from "vue";
 import MonitoringSearchFilters from "@/components/MonitoringSearchFilters.vue";
-import { useRouteQuery, queryBoolean, queryString, queryStringArray } from "@/lib/useRouteQuery";
+import { useRouteQuery, queryStringArray } from "@/lib/useRouteQuery";
 import SuperMap from "@/components/SuperMap.vue";
 import { useMonitoringProducts } from "@/composables/useMonitoringProducts";
 import { useSites } from "@/composables/useSites";
+import { useMonitoringQuery } from "@/composables/useMonitoringQuery";
+import MonitoringSearchResults from "@/components/MonitoringSearchResults.vue";
 
 const { monitoringProducts } = useMonitoringProducts();
 const selectedProductIds = useRouteQuery({ name: "productId", defaultValue: [], type: queryStringArray });
@@ -43,6 +43,14 @@ const { sites } = useSites();
 const selectedSiteIds = useRouteQuery({ name: "site", defaultValue: [], type: queryStringArray });
 const siteOptions = computed(() => sites.value.filter((site) => site.type.includes("cloudnet")));
 const mapKey = ref(0); // Supermap does not update if the props update. This forces the update
+
+const searchFilters = computed(() => ({
+  productIds: selectedProductIds.value,
+  variableIds: selectedVariableIds.value,
+  siteIds: selectedSiteIds.value,
+}));
+
+const { results, isLoading, error } = useMonitoringQuery(searchFilters);
 
 function onMapMarkerClick(ids: string[]) {
   const union = selectedSiteIds.value.concat(ids);

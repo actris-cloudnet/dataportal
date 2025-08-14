@@ -22,17 +22,13 @@
 </template>
 
 <script setup lang="ts">
-import axios from "axios";
-import { ref, watch, toRaw, computed } from "vue";
+import { computed } from "vue";
 import { backendUrl } from "@/lib";
 import type { MonitoringVisualization as VisualizationData } from "@shared/entity/Monitoring";
-
-const trigger = ref(null);
 
 const props = defineProps<{ data: VisualizationData }>();
 
 const imageUrl = computed(() => (props.data?.s3key ? `${backendUrl}download/image/${props.data.s3key}` : null));
-
 </script>
 
 <style scoped lang="scss">
@@ -71,7 +67,7 @@ const imageUrl = computed(() => (props.data?.s3key ? `${backendUrl}download/imag
 img {
   max-width: 100%;
   height: auto;
-  display: block; 
+  display: block;
   padding: 0 2rem;
 }
 </style>

@@ -46,7 +46,6 @@ export class MonitoringVisualizationRoutes {
           }
         }
 
-        console.log("variable pairs: ", variablePairs);
         if (variablePairs.length > 0) {
           qb.andWhere(
             "(" +
@@ -62,6 +61,14 @@ export class MonitoringVisualizationRoutes {
             ),
           );
         }
+      }
+
+      let siteIds: string[] = [];
+      if (typeof req.query.siteId === "string") {
+        siteIds = req.query.siteId.split(",").map((s) => s.trim());
+      }
+      if (siteIds.length > 0) {
+        qb.andWhere("site.id IN (:...siteIds)", { siteIds });
       }
 
       qb.orderBy("file.startDate", "DESC")

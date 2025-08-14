@@ -25,11 +25,9 @@
 </template>
 
 <script setup lang="ts">
-import axios from "axios";
-import { ref, watch, computed, toRef } from "vue";
-import { backendUrl } from "@/lib";
+import { ref, watch, computed } from "vue";
 import CustomMultiselect, { type Option } from "@/components/MultiSelect.vue";
-import type { MonitoringProduct, MonitoringProductVariable } from "@shared/entity/Monitoring";
+import type { MonitoringProduct } from "@shared/entity/Monitoring";
 const trigger = ref(null);
 
 const props = defineProps<{
