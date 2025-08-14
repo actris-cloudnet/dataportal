@@ -1,6 +1,25 @@
 <template>
   <div>
-    <h2>Search Filters</h2>
+    <div class="filterbox">
+      <SuperMap
+        :key="mapKey"
+        :sites="siteOptions"
+        :selectedSiteIds="selectedSiteIds"
+        :onMapMarkerClick="onMapMarkerClick"
+        :center="[55, 12.0]"
+        :zoom="3.5"
+        enableBoundingBox
+        class="map"
+      />
+      <CustomMultiselect
+            label="Location"
+            v-model="selectedSiteIds"
+            :options="siteOptions"
+            id="siteSelect"
+            :multiple="true"
+            :getIcon="getMarkerIcon"
+          />
+    </div>
 
     <div class="filterbox">
       <CustomMultiselect
@@ -27,15 +46,20 @@
 <script setup lang="ts">
 import { ref, watch, computed } from "vue";
 import CustomMultiselect, { type Option } from "@/components/MultiSelect.vue";
+import SuperMap from "@/components/SuperMap.vue";
 import type { MonitoringProduct } from "@shared/entity/Monitoring";
-const trigger = ref(null);
+import type { Site } from "@shared/entity/Site";
+import { getMarkerIcon } from "@/lib";
+const mapKey = ref(0); // Supermap does not update if the props update. This forces the update
 
 const props = defineProps<{
   monitoringProducts: MonitoringProduct[];
+  siteOptions: Site[];
 }>();
 
 const selectedProductIds = defineModel<string[]>("selectedProductIds", { default: [] });
 const selectedVariableIds = defineModel<string[]>("selectedVariableIds", { default: [] });
+const selectedSiteIds = defineModel<string[]>("selectedSiteIds", { default: [] });
 
 const productOptions = computed<Option[]>(() =>
   props.monitoringProducts.map((product) => ({
@@ -53,7 +77,23 @@ const variableOptions = computed<Option[]>(() =>
   ),
 );
 
-watch(trigger, async () => {}, { immediate: true });
+function onMapMarkerClick(ids: string[]) {
+  const union = selectedSiteIds.value.concat(ids);
+  const intersection = selectedSiteIds.value.filter((id) => ids.includes(id));
+  selectedSiteIds.value = union.filter((id) => !intersection.includes(id));
+}
+
+watch(
+  () => props.siteOptions,
+  () => {
+    mapKey.value = Math.random();
+  },
+  { immediate: true },
+);
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.map {
+  height: 550px;
+}
+</style>

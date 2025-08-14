@@ -2,20 +2,12 @@
   <div id="monitoringSearch">
     <div id="searchContainer">
       <aside id="sideBar">
-        <SuperMap
-          :key="mapKey"
-          :sites="siteOptions"
-          :selectedSiteIds="selectedSiteIds"
-          :onMapMarkerClick="onMapMarkerClick"
-          :center="[55, 12.0]"
-          :zoom="3.5"
-          enableBoundingBox
-          class="map"
-        />
         <MonitoringSearchFilters
-          :monitoring-products="monitoringProducts"
+          :monitoringProducts="monitoringProducts"
+          :siteOptions="siteOptions"
           v-model:selectedProductIds="selectedProductIds"
           v-model:selectedVariableIds="selectedVariableIds"
+          v-model:selectedSiteIds="selectedSiteIds"
         />
       </aside>
       <main id="results">
@@ -29,7 +21,6 @@
 import { ref, computed, watch } from "vue";
 import MonitoringSearchFilters from "@/components/MonitoringSearchFilters.vue";
 import { useRouteQuery, queryStringArray } from "@/lib/useRouteQuery";
-import SuperMap from "@/components/SuperMap.vue";
 import { useMonitoringProducts } from "@/composables/useMonitoringProducts";
 import { useSites } from "@/composables/useSites";
 import { useMonitoringQuery } from "@/composables/useMonitoringQuery";
@@ -41,8 +32,11 @@ const selectedVariableIds = useRouteQuery({ name: "variableId", defaultValue: []
 
 const { sites } = useSites();
 const selectedSiteIds = useRouteQuery({ name: "site", defaultValue: [], type: queryStringArray });
-const siteOptions = computed(() => sites.value.filter((site) => site.type.includes("cloudnet")));
-const mapKey = ref(0); // Supermap does not update if the props update. This forces the update
+const siteOptions = computed(() => {
+  const filtered = sites.value.filter((site) => site.type.includes("cloudnet"));
+  console.log("Filtered siteOptions:", filtered);
+  return filtered;
+});
 
 const searchFilters = computed(() => ({
   productIds: selectedProductIds.value,
@@ -52,11 +46,13 @@ const searchFilters = computed(() => ({
 
 const { results, isLoading, error } = useMonitoringQuery(searchFilters);
 
-function onMapMarkerClick(ids: string[]) {
-  const union = selectedSiteIds.value.concat(ids);
-  const intersection = selectedSiteIds.value.filter((id) => ids.includes(id));
-  selectedSiteIds.value = union.filter((id) => !intersection.includes(id));
-}
+watch(
+  sites,
+  (n) => {
+    console.log("Sites loaded:", n.length);
+  },
+  { immediate: true },
+);
 
 watch(selectedProductIds, (newValue, oldValue) => {
   console.log("selectedProductIds changed in MonitoringView:");
@@ -71,7 +67,6 @@ watch(selectedVariableIds, (newValue, oldValue) => {
 watch(siteOptions, (n, o) => {
   console.log("Old sites", o);
   console.log("New sites", n);
-  mapKey.value = Math.random();
 });
 </script>
 
@@ -102,8 +97,5 @@ $filter-margin: 2em;
 main#results {
   display: inline-flex;
   flex-grow: 1;
-}
-.map {
-  height: 550px;
 }
 </style>
