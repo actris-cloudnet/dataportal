@@ -20,6 +20,9 @@
         :getIcon="getMarkerIcon"
       />
     </div>
+    <div class="filterbox">
+      <MonitoringPeriodSelect v-model:period="period" />
+    </div>
 
     <div class="filterbox">
       <CustomMultiselect
@@ -50,6 +53,7 @@ import SuperMap from "@/components/SuperMap.vue";
 import type { MonitoringProduct } from "@shared/entity/Monitoring";
 import type { Site } from "@shared/entity/Site";
 import { getMarkerIcon } from "@/lib";
+import MonitoringPeriodSelect from "./MonitoringPeriodSelect.vue";
 const mapKey = ref(0); // Supermap does not update if the props update. This forces the update
 
 const props = defineProps<{
@@ -60,6 +64,7 @@ const props = defineProps<{
 const selectedProductIds = defineModel<string[]>("selectedProductIds", { default: [] });
 const selectedVariableIds = defineModel<string[]>("selectedVariableIds", { default: [] });
 const selectedSiteIds = defineModel<string[]>("selectedSiteIds", { default: [] });
+const period = defineModel<string>("period", { default: "month" });
 
 const productOptions = computed<Option[]>(() =>
   props.monitoringProducts.map((product) => ({

@@ -19,5 +19,10 @@ const props = defineProps<{
   display: grid;
   grid-template-columns: 1fr 1fr;
 }
+@media (max-width: 1400px) {
+  .results {
+    grid-template-columns: 1fr;
+  }
+}
 
 </style>

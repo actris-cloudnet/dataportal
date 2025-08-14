@@ -70,6 +70,9 @@ export class MonitoringVisualizationRoutes {
       if (siteIds.length > 0) {
         qb.andWhere("site.id IN (:...siteIds)", { siteIds });
       }
+      if (typeof req.query.period === "string" && req.query.period.length > 0 ) {
+        qb.andWhere("file.periodType = :period", { period: req.query.period });
+      }
 
       qb.orderBy("file.startDate", "DESC")
         .addOrderBy("site.id", "ASC")

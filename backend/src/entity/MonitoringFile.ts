@@ -18,6 +18,7 @@ export enum PeriodType {
   ALL = "all",
   YEAR = "year",
   MONTH = "month",
+  WEEK = "week",
   DAY = "day",
 }
 

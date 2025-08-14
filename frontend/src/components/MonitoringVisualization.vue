@@ -43,7 +43,7 @@ const imageUrl = computed(() => (props.data?.s3key ? `${backendUrl}download/imag
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   text-align: center;
-  margin:1rem 4rem 0;
+  margin: 1rem 4rem 0;
   font-size: small;
   font-weight: 300;
 }
@@ -74,6 +74,6 @@ img {
   max-width: 100%;
   height: auto;
   display: block;
-  padding: 0 2rem;
+  padding: 0 1rem;
 }
 </style>

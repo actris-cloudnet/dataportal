@@ -7,6 +7,7 @@ export interface MonitoringFilters {
   productIds: string[];
   variableIds: string[];
   siteIds: string[];
+  period: string;
 }
 
 function filters_to_query_params(filters: MonitoringFilters) {
@@ -20,6 +21,7 @@ function filters_to_query_params(filters: MonitoringFilters) {
   if (filters.siteIds.length > 0) {
     params.siteId = filters.siteIds.join(",");
   }
+  params.period = filters.period;
   return params;
 }
 

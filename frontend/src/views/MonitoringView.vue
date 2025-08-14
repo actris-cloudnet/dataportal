@@ -8,6 +8,7 @@
           v-model:selectedProductIds="selectedProductIds"
           v-model:selectedVariableIds="selectedVariableIds"
           v-model:selectedSiteIds="selectedSiteIds"
+          v-model:period="period"
         />
       </aside>
       <main id="results">
@@ -18,9 +19,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { computed, watch } from "vue";
 import MonitoringSearchFilters from "@/components/MonitoringSearchFilters.vue";
-import { useRouteQuery, queryStringArray } from "@/lib/useRouteQuery";
+import { useRouteQuery, queryStringArray, queryString } from "@/lib/useRouteQuery";
 import { useMonitoringProducts } from "@/composables/useMonitoringProducts";
 import { useSites } from "@/composables/useSites";
 import { useMonitoringQuery } from "@/composables/useMonitoringQuery";
@@ -34,17 +35,24 @@ const { sites } = useSites();
 const selectedSiteIds = useRouteQuery({ name: "site", defaultValue: [], type: queryStringArray });
 const siteOptions = computed(() => {
   const filtered = sites.value.filter((site) => site.type.includes("cloudnet"));
-  console.log("Filtered siteOptions:", filtered);
   return filtered;
 });
+const period = useRouteQuery({ name: "period", defaultValue: "month", type: queryString });
 
 const searchFilters = computed(() => ({
   productIds: selectedProductIds.value,
   variableIds: selectedVariableIds.value,
   siteIds: selectedSiteIds.value,
+  period: period.value,
 }));
 
 const { results, isLoading, error } = useMonitoringQuery(searchFilters);
+
+watch(period, (newValue, oldValue) => {
+  console.log("period changed in MonitoringView:");
+  console.log("Old value:", oldValue);
+  console.log("New value:", newValue);
+});
 
 watch(selectedProductIds, (newValue, oldValue) => {
   console.log("selectedProductIds changed in MonitoringView:");
@@ -70,7 +78,6 @@ $heavypadding: 5rem;
 $filter-margin: 2em;
 
 #monitoringSearch {
-  max-width: none;
   padding-left: $heavypadding;
   padding-right: $heavypadding;
 }
@@ -81,13 +88,36 @@ $filter-margin: 2em;
 }
 
 #sideBar {
-  margin-right: 80px;
-  padding: 2rem 0;
   flex-basis: 400px;
   flex-shrink: 0;
+  margin-right: 80px;
+  padding: 2rem 0;
+  max-width: 400px;
 }
 main#results {
-  display: inline-flex;
   flex-grow: 1;
+  min-width: 300px;
+}
+@media (max-width: 1024px) {
+  #monitoringSearch {
+    padding-left: $lightpadding;
+    padding-right: $lightpadding;
+  }
+
+  #searchContainer {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  #sideBar {
+    margin-right: 0;
+    margin-bottom: 2rem;
+    width: 100%;
+    max-width: 700px;
+  }
+  main#results {
+    width: 100%;
+    max-width: 700px;
+  }
 }
 </style>
