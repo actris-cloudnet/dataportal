@@ -46,14 +46,6 @@ const searchFilters = computed(() => ({
 
 const { results, isLoading, error } = useMonitoringQuery(searchFilters);
 
-watch(
-  sites,
-  (n) => {
-    console.log("Sites loaded:", n.length);
-  },
-  { immediate: true },
-);
-
 watch(selectedProductIds, (newValue, oldValue) => {
   console.log("selectedProductIds changed in MonitoringView:");
   console.log("Old value:", oldValue);

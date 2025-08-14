@@ -12,13 +12,13 @@
         class="map"
       />
       <CustomMultiselect
-            label="Location"
-            v-model="selectedSiteIds"
-            :options="siteOptions"
-            id="siteSelect"
-            :multiple="true"
-            :getIcon="getMarkerIcon"
-          />
+        label="Location"
+        v-model="selectedSiteIds"
+        :options="siteOptions"
+        id="siteSelect"
+        :multiple="true"
+        :getIcon="getMarkerIcon"
+      />
     </div>
 
     <div class="filterbox">
@@ -68,8 +68,15 @@ const productOptions = computed<Option[]>(() =>
   })),
 );
 
+const productsForVariableOptions = computed(() => {
+  if (selectedProductIds.value.length === 0) {
+    return props.monitoringProducts;
+  }
+  return props.monitoringProducts.filter((product) => selectedProductIds.value.includes(product.id));
+});
+
 const variableOptions = computed<Option[]>(() =>
-  props.monitoringProducts.flatMap((product) =>
+  productsForVariableOptions.value.flatMap((product) =>
     product.variables.map((v) => ({
       id: `${product.id}::${v.id}`,
       humanReadableName: v.humanReadableName,
