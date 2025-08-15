@@ -1,6 +1,6 @@
-import { DataSource, Repository } from "typeorm";
+import { DataSource, Repository, IsNull } from "typeorm";
 import { RequestHandler } from "express";
-import { MonitoringFile } from "../entity/MonitoringFile";
+import { MonitoringFile, PeriodType } from "../entity/MonitoringFile";
 import { MonitoringProduct } from "../entity/MonitoringProduct";
 import { Site } from "../entity/Site";
 import { InstrumentInfo } from "../entity/Instrument";
@@ -34,11 +34,17 @@ export class MonitoringFileRoutes {
     await this.dataSource.transaction(async (manager) => {
       const existing = await manager.findOne(MonitoringFile, {
         where: {
-          startDate,
+          startDate: periodType === PeriodType.ALL ? IsNull() : startDate,
           periodType,
-          site,
-          monitoringProduct: product,
-          instrumentInfo: instrument,
+          site: {
+            id: siteId,
+          },
+          monitoringProduct: {
+            id: productId,
+          },
+          instrumentInfo: {
+            uuid: instrumentUuid,
+          },
         },
         relations: ["monitoringVisualizations"],
       });
