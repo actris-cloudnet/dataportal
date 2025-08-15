@@ -43,10 +43,10 @@ export class InstrumentInfo {
   @Column({ unique: true })
   pid!: string;
 
-  @ManyToOne((_) => Instrument)
+  @ManyToOne((_) => Instrument, { nullable: false })
   instrument!: Instrument;
 
-  @Column({ nullable: true })
+  @Column()
   instrumentId!: Instrument["id"];
 
   @Column()
