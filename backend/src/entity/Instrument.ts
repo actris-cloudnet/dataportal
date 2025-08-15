@@ -46,9 +46,6 @@ export class InstrumentInfo {
   @ManyToOne((_) => Instrument)
   instrument!: Instrument;
 
-  @Column({ nullable: true })
-  instrumentId!: Instrument["id"];
-
   @Column()
   name!: string;
 
