@@ -20,7 +20,10 @@ export class InstrumentRoutes {
   readonly nominalInstrumentRepo: Repository<NominalInstrument>;
 
   instruments: RequestHandler = async (req, res) => {
-    const instruments = await this.instrumentRepo.find({ order: { type: "ASC", id: "ASC" } });
+    const instruments = await this.instrumentRepo.find({
+      order: { type: "ASC", id: "ASC" },
+      relations: { derivedProducts: true },
+    });
     res.send(instruments);
   };
 
