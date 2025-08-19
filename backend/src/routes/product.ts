@@ -10,7 +10,10 @@ export class ProductRoutes {
   readonly productRepo: Repository<Product>;
 
   products: RequestHandler = async (req, res) => {
-    const products = await this.productRepo.find({ order: { id: "ASC" } });
+    const products = await this.productRepo.find({
+      order: { id: "ASC" },
+      relations: { sourceInstruments: true, sourceProducts: true, derivedProducts: true },
+    });
     res.send(products);
   };
 
