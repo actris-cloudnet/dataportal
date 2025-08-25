@@ -176,14 +176,29 @@ export class Middleware {
       .catch(next);
   };
 
-  private throw404Error = (param: string, res: Response) => {
-    throw { status: 404, errors: [`One or more of the specified ${param}s were not found`], params: res.locals };
+  private throwBadRequestError = (param: string, res: Response, invalidIds: string[]) => {
+    const paramSuffix = invalidIds.length === 1 ? "" : "s";
+    throw {
+      status: 400,
+      errors: [`Invalid ${param}${paramSuffix}: ${invalidIds.join(", ")}`],
+      params: res.locals,
+    };
   };
 
   private checkParam = async (param: string, res: Response) => {
-    if (!res.locals[param]) return Promise.resolve();
-    const count = await this.dataSource.getRepository(param).countBy({ id: In(res.locals[param]) });
-    if (count != res.locals[param].length) this.throw404Error(param, res);
+    const requestedIds: string[] | undefined = res.locals[param];
+    if (!requestedIds || requestedIds.length === 0) {
+      return Promise.resolve();
+    }
+    const entities = await this.dataSource.getRepository(param).find({
+      select: { id: true },
+      where: { id: In(requestedIds) },
+    });
+    const validIds = entities.map((entity) => entity.id);
+    const invalidIds = requestedIds.filter((id) => !validIds.includes(id));
+    if (invalidIds.length > 0) {
+      this.throwBadRequestError(param, res, invalidIds);
+    }
   };
 
   checkDeleteParams: RequestHandler = async (req, res, next) => {
@@ -223,11 +238,18 @@ export class Middleware {
   };
 
   private checkSite = async (req: Request, res: Response) => {
-    if (!res.locals.site) return Promise.resolve();
-    let qb = this.siteRepo.createQueryBuilder("site").select().where("site.id IN (:...site)", res.locals);
+    const requestedIds: string[] | undefined = res.locals.site;
+    if (!requestedIds || requestedIds.length === 0) {
+      return Promise.resolve();
+    }
+    let qb = this.siteRepo.createQueryBuilder("site").select("site.id").where("site.id IN (:...site)", res.locals);
     qb = hideTestDataFromNormalUsers(qb, req);
-    const count = await qb.getCount();
-    if (count != res.locals.site.length) this.throw404Error("site", res);
+    const entities = await qb.getMany();
+    const validIds = entities.map((entity) => entity.id);
+    const invalidIds = requestedIds.filter((id) => !validIds.includes(id));
+    if (invalidIds.length > 0) {
+      this.throwBadRequestError("site", res, invalidIds);
+    }
   };
 
   private checkField = (key: string, query: any): string | void => {

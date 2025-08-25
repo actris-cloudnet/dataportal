@@ -11,9 +11,9 @@ beforeAll(async () => {
   responses = await readResources();
 });
 
-const expectedBody404: RequestError = {
-  status: 404,
-  errors: "Not found",
+const expectedBody400: RequestError = {
+  status: 400,
+  errors: "Bad request",
 };
 
 describe("/api/files", () => {
@@ -66,16 +66,22 @@ describe("/api/files", () => {
     );
   });
 
-  it("responds with 404 if site was not found", () => {
+  it("responds with 400 if site was not found", () => {
     const payload = { params: { site: ["kilpikonna"] } };
-    expectedBody404.errors = ["One or more of the specified sites were not found"];
-    return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody404.status, expectedBody404));
+    expectedBody400.errors = ["Invalid site: kilpikonna"];
+    return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody400.status, expectedBody400));
   });
 
-  it("responds 404 if one of many sites was not found", () => {
+  it("responds 400 if one of many sites was not found", () => {
     const payload = { params: { site: ["mace-head", "kilpikonna"] } };
-    expectedBody404.errors = ["One or more of the specified sites were not found"];
-    return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody404.status, expectedBody404));
+    expectedBody400.errors = ["Invalid site: kilpikonna"];
+    return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody400.status, expectedBody400));
+  });
+
+  it("responds 400 if many sites were not found", () => {
+    const payload = { params: { site: ["mace-head", "sammakko", "kilpikonna"] } };
+    expectedBody400.errors = ["Invalid sites: sammakko, kilpikonna"];
+    return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody400.status, expectedBody400));
   });
 
   it("responds with an array of objects with dates between [ dateFrom, dateTo ], in descending order", async () => {
@@ -143,8 +149,8 @@ describe("/api/files", () => {
 
   it("does not show test files in normal mode", async () => {
     const payload = { params: { site: "granada" } };
-    expectedBody404.errors = ["One or more of the specified sites were not found"];
-    return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody404.status, expectedBody404));
+    expectedBody400.errors = ["Invalid site: granada"];
+    return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody400.status, expectedBody400));
   });
 
   it("shows test files in developer mode", async () => {
@@ -335,11 +341,11 @@ describe("/api/model-files", () => {
     });
   });
 
-  it("responds with 404 if a specified model is not found", async () => {
+  it("responds with 400 if a specified model is not found", async () => {
     const payload = { params: { model: "sammakko" } };
     const expectedBody: RequestError = {
-      status: 404,
-      errors: ["One or more of the specified models were not found"],
+      status: 400,
+      errors: ["Invalid model: sammakko"],
     };
     return expect(axios.get(url, payload)).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody));
   });
