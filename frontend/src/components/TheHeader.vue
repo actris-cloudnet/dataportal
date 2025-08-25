@@ -36,6 +36,11 @@ const showMenu = ref(false);
             <span>Visualise data</span>
           </a>
         </li>
+        <li>
+          <a href="/monitoring">
+            <span>Monitoring</span>
+          </a>
+        </li>
         <li style="margin-left: auto">
           <a href="https://docs.cloudnet.fmi.fi">
             <span>Documentation</span>
