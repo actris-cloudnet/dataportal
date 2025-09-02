@@ -52,7 +52,7 @@
           :selectable="selectable"
         >
           <template #cell(title)="data">
-            {{ data.item.product.humanReadableName }} from {{ data.item.site.humanReadableName }}
+            {{ generateTitle(data.item) }}
           </template>
           <template #cell(volatile)="data">
             <span class="rowtags">
@@ -208,6 +208,7 @@ import {
   getQcLink,
   humanReadableDate,
   backendUrl,
+  getLowerCaseProductName,
 } from "@/lib";
 import type { SearchFileResponse } from "@shared/entity/SearchFileResponse";
 import BaseTable from "./BaseTable.vue";
@@ -410,6 +411,17 @@ function iconCellStyle(item: any) {
     backgroundImage: `url("${getProductIcon(item.product)}")`,
     width: "40px",
   };
+}
+
+function generateTitle(item: SearchFile) {
+  const parts = [];
+  if (item.instrumentInfo) {
+    parts.push(item.instrumentInfo.model, getLowerCaseProductName(item.product).replace("MWR ", ""));
+  } else {
+    parts.push(item.product.humanReadableName);
+  }
+  parts.push("from", item.site.humanReadableName);
+  return parts.join(" ");
 }
 </script>
 
