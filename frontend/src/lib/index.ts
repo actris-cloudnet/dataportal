@@ -83,6 +83,9 @@ export const getProductIcon = (product: Product | string) => {
 
 export const getInstrumentIcon = (instrument: Instrument) => getProductIcon(instrument.type);
 
+export const getLowerCaseProductName = (product: Product) =>
+  product.humanReadableName.toLowerCase().replace("mwr", "MWR").replace("doppler", "Doppler").replace("tke", "TKE");
+
 export const humanReadableSize = (size: number) => {
   if (size == 0) return "0 B";
   const i = Math.floor(Math.log(size) / Math.log(1024));

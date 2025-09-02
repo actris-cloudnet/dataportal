@@ -20,7 +20,7 @@
         </ul>
       </template>
       <template v-if="productInfo.value.sourceProducts.length > 0">
-        <p>The {{ lowerCaseProductName(productInfo.value) }} product is based on these products:</p>
+        <p>The {{ getLowerCaseProductName(productInfo.value) }} product is based on these products:</p>
         <ul>
           <li v-for="sourceProduct in productInfo.value.sourceProducts" :key="sourceProduct.id">
             <router-link :to="{ name: 'Product', params: { product: sourceProduct.id } }">
@@ -31,7 +31,7 @@
         </ul>
       </template>
       <template v-if="productInfo.value.derivedProducts.length > 0">
-        <p>The {{ lowerCaseProductName(productInfo.value) }} product is used for generating these products:</p>
+        <p>The {{ getLowerCaseProductName(productInfo.value) }} product is used for generating these products:</p>
         <ul>
           <li v-for="derivedProduct in productInfo.value.derivedProducts" :key="derivedProduct.id">
             <router-link :to="{ name: 'Product', params: { product: derivedProduct.id } }">
@@ -99,7 +99,7 @@ import { ref, watch } from "vue";
 import axios from "axios";
 
 import type { Product } from "@shared/entity/Product";
-import { backendUrl, getProductIcon } from "@/lib";
+import { backendUrl, getProductIcon, getLowerCaseProductName } from "@/lib";
 import LandingHeader from "@/components/LandingHeader.vue";
 import BaseTag from "@/components/BaseTag.vue";
 import ApiError from "@/views/ApiError.vue";
@@ -129,9 +129,6 @@ const productInfo = ref<ProductResult>({ status: "loading" });
 function unitsHtml(units: string): string {
   return units.replace(/([a-z])(-?\d+)/gi, "$1<sup>$2</sup>");
 }
-
-const lowerCaseProductName = (product: Product) =>
-  product.humanReadableName.toLowerCase().replace("mwr", "MWR").replace("doppler", "Doppler").replace("tke", "TKE");
 
 watch(
   () => props.product,
