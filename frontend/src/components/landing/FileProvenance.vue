@@ -1,11 +1,11 @@
 <style scoped lang="scss">
-.data-sources {
+.provenance {
   a {
     display: inline-flex;
     align-items: center;
   }
 
-  img {
+  .icon {
     width: 1.1rem;
     height: 1.1rem;
     line-height: 1.1rem;
@@ -20,13 +20,13 @@
 <template>
   <div class="summary-section" id="data-origin">
     <div class="summary-section-header">Provenance</div>
-    <dl class="summary-section-table">
+    <dl class="summary-section-table provenance">
       <dt>Data sources</dt>
       <dd>
-        <ul v-if="sourceFiles.length > 0" class="data-sources">
+        <ul v-if="sourceFiles.length > 0">
           <li v-for="sourceFile in sourceFiles" :key="sourceFile.uuid">
             <router-link :to="{ name: 'File', params: { uuid: sourceFile.uuid } }">
-              <img :alt="sourceFile.product.id" :src="getProductIcon(sourceFile.product.id)" class="product-icon" />
+              <img :alt="sourceFile.product.id" :src="getProductIcon(sourceFile.product.id)" class="icon" />
               <template v-if="'instrument' in sourceFile && sourceFile.instrument">
                 {{ sourceFile.product.humanReadableName }}:
                 {{ sourceFile.instrument.model }}
@@ -49,6 +49,7 @@
             query: { date: file.measurementDate },
           }"
         >
+          <img :alt="`Raw files for ${file.instrument.id}`" :src="folderIcon" class="icon" />
           Raw files
         </router-link>
         <span v-if="!sourceFiles.length && !('instrument' in file && file.instrument)" class="notAvailable"></span>
@@ -92,6 +93,7 @@
 import { computed } from "vue";
 import { getProductIcon } from "@/lib";
 import type { FileResponse } from "@/views/FileView.vue";
+import folderIcon from "@/assets/icons/icons8-folder-48.png";
 
 export interface Props {
   file: FileResponse;
