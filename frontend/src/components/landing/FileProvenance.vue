@@ -22,8 +22,8 @@
     <div class="summary-section-header">Provenance</div>
     <dl class="summary-section-table">
       <dt>Data sources</dt>
-      <dd v-if="sourceFiles.length > 0">
-        <ul class="data-sources">
+      <dd>
+        <ul v-if="sourceFiles.length > 0" class="data-sources">
           <li v-for="sourceFile in sourceFiles" :key="sourceFile.uuid">
             <router-link :to="{ name: 'File', params: { uuid: sourceFile.uuid } }">
               <img :alt="sourceFile.product.id" :src="getProductIcon(sourceFile.product.id)" class="product-icon" />
@@ -41,19 +41,18 @@
             </router-link>
           </li>
         </ul>
-      </dd>
-      <dd v-else-if="'instrument' in file && file.instrument">
         <router-link
+          v-if="'instrument' in file && file.instrument"
           :to="{
             name: 'Raw Files',
             params: { uuid: file.instrument.uuid },
             query: { date: file.measurementDate },
           }"
         >
-          List of raw files
+          Raw files
         </router-link>
+        <span v-if="!sourceFiles.length && !('instrument' in file && file.instrument)" class="notAvailable"></span>
       </dd>
-      <dd class="notAvailable" v-else></dd>
       <dt>Versions</dt>
       <dd>
         <router-link v-if="!isBusy && previousVersion" id="previousVersion" :to="`/file/${previousVersion}`" replace>
