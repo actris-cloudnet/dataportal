@@ -1,4 +1,5 @@
 <template>
+  <h2>{{ props.config.title }}</h2>
   <div ref="plotContainer" class="plot-container"></div>
 </template>
 
@@ -13,7 +14,7 @@ const props = defineProps<{
   data?: Calibration[];
   config: {
     title: string;
-    label: string;
+    ylabel?: string;
     color?: string;
   };
 }>();
@@ -40,12 +41,14 @@ const createTypedData = (data?: Calibration[]) => {
 
 const typedData = createTypedData(props.data);
 
-const createPlotOptions = (config: { title: string; label: string; color?: string }, width: number): uPlot.Options => {
+const createPlotOptions = (
+  config: { title: string; color?: string; ylabel?: string },
+  width: number,
+): uPlot.Options => {
   const minY = Math.min(...typedData[1]);
   const maxY = Math.max(...typedData[1]);
 
   return {
-    title: config.title,
     id: "calibration-plot",
     class: "calibration-plot",
     width: width,
@@ -56,7 +59,7 @@ const createPlotOptions = (config: { title: string; label: string; color?: strin
         value: "{YYYY}-{MM}-{DD}",
       },
       {
-        label: config.label,
+        label: config.title,
         stroke: config.color || "#5F95DC",
         width: 1,
         paths: uPlot.paths && uPlot.paths.stepped ? uPlot.paths.stepped({ align: 1 }) : undefined,
@@ -88,11 +91,12 @@ const createPlotOptions = (config: { title: string; label: string; color?: strin
       {
         grid: { show: true, stroke: "#eee", width: 1, dash: [] },
         ticks: { show: false },
+        label: config.ylabel,
       },
     ],
     scales: {
       y: {
-        range: [minY * 0.9, maxY * 1.1],
+        range: [minY - 0.1 * Math.abs(minY), maxY + 0.1 * Math.abs(maxY)],
       },
     },
   };
@@ -129,6 +133,7 @@ onUnmounted(() => {
 .plot-container {
   width: 100%;
   height: auto;
+  margin-bottom: 2rem;
 }
 :deep(.u-title) {
   font-family: inherit;

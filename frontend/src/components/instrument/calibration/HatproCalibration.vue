@@ -1,5 +1,6 @@
 <template>
   <div>
+    <CalibrationPlot v-if="lwpOffset?.length" :data="lwpOffset" :config="{ title: 'LWP offset', ylabel: 'g m-2' }" />
     <CalibrationTable
       :data="calibrationData.coefficientLinks"
       :config="{ title: 'Retrieval coefficients', label: 'Coefficient files' }"
@@ -11,8 +12,14 @@
 <script lang="ts" setup>
 import type { CalibrationList } from "@shared/entity/Calibration";
 import CalibrationTable from "@/components/instrument/calibration/CalibrationTable.vue";
+import CalibrationPlot from "@/components/instrument/calibration/CalibrationPlot.vue";
+import { computed } from "vue";
 
-defineProps<{
+const props = defineProps<{
   calibrationData: CalibrationList;
 }>();
+
+const lwpOffset = computed(
+  () => props.calibrationData.lwpOffset?.map((entry: any) => ({ ...entry, data: entry.data[0] * 1000 })),
+);
 </script>

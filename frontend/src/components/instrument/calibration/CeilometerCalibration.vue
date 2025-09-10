@@ -8,7 +8,7 @@
     <CalibrationPlot
       v-if="calibrationData.calibration_factor?.length > showPlotThreshold"
       :data="calibrationData.calibration_factor"
-      :config="{ title: 'Calibration factor', label: 'Calibration factor' }"
+      :config="{ title: 'Calibration factor' }"
     />
     <CalibrationTable
       v-if="calibrationData.range_corrected?.length <= showPlotThreshold"
@@ -18,7 +18,7 @@
     <CalibrationPlot
       v-if="calibrationData.range_corrected?.length > showPlotThreshold"
       :data="calibrationData.range_corrected"
-      :config="{ title: 'Range correction', label: 'Range corrected' }"
+      :config="{ title: 'Range correction' }"
     />
     <CalibrationTable :data="calibrationData.snr_limit" :config="{ title: 'SNR limit', label: 'SNR limit' }" />
     <CalibrationTable
