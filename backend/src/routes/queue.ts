@@ -88,13 +88,20 @@ export class QueueRoutes {
     task.scheduledAt = "scheduledAt" in body ? new Date(body.scheduledAt) : new Date();
     task.priority = "priority" in body ? body.priority : 50;
     task.options = body.options;
+    if (body.queue) {
+      task.queueId = body.queue;
+    }
 
     await this.queueService.publish(task);
     res.send(task);
   };
 
-  receive: RequestHandler = async (req, res) => {
-    const task = await this.queueService.receive();
+  receive: RequestHandler = async (req, res, next) => {
+    const queueId = req.query.queue;
+    if (typeof queueId !== "undefined" && typeof queueId !== "string") {
+      return next({ status: 400, errors: ["Invalid queue parameter"] });
+    }
+    const task = await this.queueService.receive({ queueId });
     if (task) {
       res.send(task);
     } else {
@@ -115,6 +122,10 @@ export class QueueRoutes {
   };
 
   getQueue: RequestHandler = async (req, res, next) => {
+    const queueId = req.query.queue;
+    if (typeof queueId !== "undefined" && typeof queueId !== "string") {
+      return next({ status: 400, errors: ["Invalid queue parameter"] });
+    }
     const batchId = req.query.batch;
     if (typeof batchId !== "undefined" && typeof batchId !== "string") {
       return next({ status: 400, errors: ["Invalid batch parameter"] });
@@ -131,7 +142,13 @@ export class QueueRoutes {
     if (typeof doneAfter !== "undefined" && isNaN(doneAfter.getTime())) {
       return next({ status: 400, errors: ["Invalid doneAfter parameter"] });
     }
-    const queue = await this.queueService.getQueue({ batchId, status: status as TaskStatus[], limit, doneAfter });
+    const queue = await this.queueService.getQueue({
+      queueId,
+      batchId,
+      status: status as TaskStatus[],
+      limit,
+      doneAfter,
+    });
     res.send({ tasks: queue[0], totalTasks: queue[1] });
   };
 
@@ -238,6 +255,7 @@ export class QueueRoutes {
       `now() AT TIME ZONE 'utc'`, // scheduledAt
       `$${parameters.length + 2}::text`, // batchId
       `$${parameters.length + 3}::jsonb`, // options
+      `$${parameters.length + 4}::text`, // queueId
     ].join(", ");
     const select = searchParams.dryRun ? `COUNT(DISTINCT (${columns})) AS "taskCount"` : `DISTINCT ${columns}`;
     let query = `SELECT ${select} FROM ${options.table} upload`;
@@ -247,7 +265,7 @@ export class QueueRoutes {
     if (where.length > 0) {
       query += " WHERE " + where.join(" AND ");
     }
-    parameters.push(searchParams.type, options.batchId, searchParams.options);
+    parameters.push(searchParams.type, options.batchId, searchParams.options, searchParams.queueId || null);
     if (searchParams.dryRun) {
       const result = await this.dataSource.query(query, parameters);
       return parseInt(result[0].taskCount);

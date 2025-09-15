@@ -87,4 +87,7 @@ export class Task {
 
   @Column({ type: "jsonb", nullable: true })
   options!: any | null;
+
+  @Column("text", { nullable: true })
+  queueId!: string | null;
 }

@@ -31,6 +31,7 @@ describe("QueueService", () => {
     delayMinutes?: number;
     batchId?: string;
     options?: object;
+    queueId?: string;
   }) {
     const { type = TaskType.PROCESS, priority = 0, delayMinutes = 0 } = params;
     const task = new Task();
@@ -49,6 +50,7 @@ describe("QueueService", () => {
     task.priority = priority;
     task.batchId = params.batchId || null;
     task.options = params.options;
+    task.queueId = params.queueId || null;
     return task;
   }
 
@@ -105,7 +107,7 @@ describe("QueueService", () => {
     advanceMinutes(1);
     await queueService.complete(taskId, { now });
     expect(await queueService.count()).toBe(1);
-    expect(await queueService.count(TaskStatus.DONE)).toBe(1);
+    expect(await queueService.count({ status: TaskStatus.DONE })).toBe(1);
   });
 
   it("schedules multiple tasks", async () => {
@@ -235,7 +237,7 @@ describe("QueueService", () => {
     advanceMinutes(1);
     await queueService.complete(taskId, { now });
     expect(await queueService.count()).toBe(1);
-    expect(await queueService.count(TaskStatus.DONE)).toBe(1);
+    expect(await queueService.count({ status: TaskStatus.DONE })).toBe(1);
   });
 
   it("schedules, completes and reschedules a task", async () => {
@@ -269,7 +271,7 @@ describe("QueueService", () => {
     // No tasks left after completion.
     await queueService.complete(taskId, { now });
     expect(await queueService.count()).toBe(1);
-    expect(await queueService.count(TaskStatus.DONE)).toBe(1);
+    expect(await queueService.count({ status: TaskStatus.DONE })).toBe(1);
 
     // Try the same task again.
     const task2 = makeTask({
@@ -281,7 +283,7 @@ describe("QueueService", () => {
     });
     await queueService.publish(task2);
     expect(await queueService.count()).toBe(1);
-    expect(await queueService.count(TaskStatus.CREATED)).toBe(1);
+    expect(await queueService.count({ status: TaskStatus.CREATED })).toBe(1);
 
     // Not schuduled yet.
     advanceMinutes(1);
@@ -326,7 +328,7 @@ describe("QueueService", () => {
     // No tasks left after fail.
     await queueService.fail(taskId, { now });
     expect(await queueService.count()).toBe(1);
-    expect(await queueService.count(TaskStatus.FAILED)).toBe(1);
+    expect(await queueService.count({ status: TaskStatus.FAILED })).toBe(1);
 
     // Try the same task again.
     const task2 = makeTask({
@@ -338,7 +340,7 @@ describe("QueueService", () => {
     });
     await queueService.publish(task2);
     expect(await queueService.count()).toBe(1);
-    expect(await queueService.count(TaskStatus.CREATED)).toBe(1);
+    expect(await queueService.count({ status: TaskStatus.CREATED })).toBe(1);
 
     // Not schuduled yet.
     advanceMinutes(1);
@@ -454,7 +456,7 @@ describe("QueueService", () => {
     // Finish process task.
     await queueService.complete(taskRes!["id"]);
     expect(await queueService.count()).toBe(2);
-    expect(await queueService.count(TaskStatus.DONE)).toBe(1);
+    expect(await queueService.count({ status: TaskStatus.DONE })).toBe(1);
 
     // Freeze task is not postponed anymore.
     advanceMinutes(10);
@@ -504,7 +506,7 @@ describe("QueueService", () => {
     // Finish process task.
     await queueService.complete(taskRes!["id"]);
     expect(await queueService.count()).toBe(2);
-    expect(await queueService.count(TaskStatus.DONE)).toBe(1);
+    expect(await queueService.count({ status: TaskStatus.DONE })).toBe(1);
 
     // Freeze task is not postponed anymore.
     advanceMinutes(10);
@@ -549,7 +551,7 @@ describe("QueueService", () => {
     // Finish process task.
     await queueService.complete(taskRes!["id"]);
     expect(await queueService.count()).toBe(2);
-    expect(await queueService.count(TaskStatus.DONE)).toBe(1);
+    expect(await queueService.count({ status: TaskStatus.DONE })).toBe(1);
 
     // Other task is not postponed anymore.
     advanceMinutes(10);
@@ -614,7 +616,7 @@ describe("QueueService", () => {
     // Finish task.
     await queueService.complete(taskRes!["id"]);
     expect(await queueService.count()).toBe(1);
-    expect(await queueService.count(TaskStatus.DONE)).toBe(1);
+    expect(await queueService.count({ status: TaskStatus.DONE })).toBe(1);
   });
 
   it("cleans up old tasks", async () => {
@@ -628,19 +630,19 @@ describe("QueueService", () => {
       }),
     );
     expect(await queueService.count()).toBe(1);
-    expect(await queueService.count(TaskStatus.DONE)).toBe(0);
+    expect(await queueService.count({ status: TaskStatus.DONE })).toBe(0);
 
     // Process a task.
     const taskRes = await queueService.receive({ now });
     await queueService.complete(taskRes!["id"]);
     expect(await queueService.count()).toBe(1);
-    expect(await queueService.count(TaskStatus.DONE)).toBe(1);
+    expect(await queueService.count({ status: TaskStatus.DONE })).toBe(1);
 
     // Tasks remain after a while.
     advanceMinutes(10);
     await queueService.cleanOldTasks(now);
     expect(await queueService.count()).toBe(1);
-    expect(await queueService.count(TaskStatus.DONE)).toBe(1);
+    expect(await queueService.count({ status: TaskStatus.DONE })).toBe(1);
 
     // Tasks are now cleaned up in the future.
     advanceMinutes(99999);
@@ -683,6 +685,28 @@ describe("QueueService", () => {
       }),
     );
     expect(await queueService.count()).toBe(2);
+  });
+
+  it("schedules task in queue", async () => {
+    // Add task.
+    const task = makeTask({
+      siteId: "hyytiala",
+      productId: "lidar",
+      instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+      measurementDate: "2024-01-10",
+      queueId: "tortoise",
+    });
+    await queueService.publish(task);
+
+    // Check task counts in different queues.
+    expect(await queueService.count()).toBe(0);
+    expect(await queueService.count({ queueId: "hare" })).toBe(0);
+    expect(await queueService.count({ queueId: "tortoise" })).toBe(1);
+
+    // Try to receive task from different queues.
+    expect(await queueService.receive({ now })).toBeNull();
+    expect(await queueService.receive({ now, queueId: "hare" })).toBeNull();
+    expect(await queueService.receive({ now, queueId: "tortoise" })).toBeDefined();
   });
 });
 
@@ -918,5 +942,22 @@ describe("/api/queue/batch", () => {
         options: { derivedProducts: false },
       }),
     ).toBeTruthy();
+  });
+
+  it("creates tasks in queue", async () => {
+    await axios.post(
+      batchUrl,
+      {
+        type: "process",
+        productIds: ["lidar"],
+        dryRun: false,
+        options: { derivedProducts: false },
+        queueId: "tortoise",
+      },
+      { auth },
+    );
+    expect(await taskRepo.count()).toBe(1);
+    expect(await taskRepo.countBy({ queueId: "hare" })).toBe(0);
+    expect(await taskRepo.countBy({ queueId: "tortoise" })).toBe(1);
   });
 });

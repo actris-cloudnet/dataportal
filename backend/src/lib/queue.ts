@@ -1,4 +1,4 @@
-import { DataSource, In, Repository, LessThan } from "typeorm";
+import { DataSource, In, Repository, LessThan, IsNull } from "typeorm";
 import { Task, TaskStatus, TaskType } from "../entity/Task";
 
 export class QueueService {
@@ -12,7 +12,7 @@ export class QueueService {
 
   async publish(task: Task) {
     task.options = this.validateTaskOptions(task.type, task.options);
-    await this.publishSql("VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)", [
+    await this.publishSql("VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)", [
       task.type,
       task.site ? task.site.id : task.siteId,
       task.measurementDate,
@@ -24,6 +24,7 @@ export class QueueService {
       task.scheduledAt.toISOString(),
       task.batchId || null,
       task.options,
+      task.queueId || null,
     ]);
   }
 
@@ -40,7 +41,8 @@ export class QueueService {
          "priority",
          "scheduledAt",
          "batchId",
-         "options"
+         "options",
+         "queueId"
        )
        ${valuesSql}
        ON CONFLICT (
@@ -71,7 +73,7 @@ export class QueueService {
     );
   }
 
-  async receive(options?: { now?: Date }): Promise<Task | null> {
+  async receive(options?: { queueId?: string; now?: Date }): Promise<Task | null> {
     const now = (options && options.now) || new Date();
     const entity = this.taskRepo.metadata.target;
     const query = this.taskRepo
@@ -89,11 +91,16 @@ export class QueueService {
           .orderBy("t.priority - 100 * EXTRACT(MINUTE FROM :now - t.scheduledAt) / 1440", "ASC")
           .limit(1)
           .setLock("pessimistic_write")
-          .setOnLocked("skip_locked")
-          .getQuery();
-        return `task.id = ${subQuery}`;
+          .setOnLocked("skip_locked");
+        if (options?.queueId) {
+          subQuery.andWhere("t.queueId = :queueId");
+        } else {
+          subQuery.andWhere("t.queueId IS NULL");
+        }
+        return `task.id = ${subQuery.getQuery()}`;
       })
       .setParameter("now", now.toISOString())
+      .setParameter("queueId", options?.queueId)
       .returning(`task.*`);
     const result = await query.execute();
     if (result.raw.length === 0) {
@@ -132,8 +139,8 @@ export class QueueService {
     this.releaseLock(task);
   }
 
-  count(status?: TaskStatus) {
-    return this.taskRepo.count({ where: { status } });
+  count(filter?: { queueId?: string; status?: TaskStatus }) {
+    return this.taskRepo.count({ where: { queueId: filter?.queueId || IsNull(), status: filter?.status } });
   }
 
   async cancelBatch(batchId: string) {
@@ -145,13 +152,18 @@ export class QueueService {
     this.locks.clear();
   }
 
-  async getQueue(options: { batchId?: string; status?: TaskStatus[]; limit?: number; doneAfter?: Date } = {}) {
+  async getQueue(
+    options: { queueId?: string; batchId?: string; status?: TaskStatus[]; limit?: number; doneAfter?: Date } = {},
+  ) {
     const qb = this.taskRepo
       .createQueryBuilder("task")
       .leftJoinAndSelect("task.instrumentInfo", "instrumentInfo")
       .leftJoinAndSelect("task.model", "model")
       .orderBy("task.status", "DESC")
       .addOrderBy("task.scheduledAt", "ASC");
+    if (typeof options.queueId !== "undefined") {
+      qb.andWhere("task.queueId = :queueId", options);
+    }
     if (typeof options.batchId !== "undefined") {
       qb.andWhere("task.batchId = :batchId", options);
     }
