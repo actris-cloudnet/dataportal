@@ -68,6 +68,7 @@
               </td>
               <td>
                 {{ task.status === "created" ? timeDifference(task.scheduledAt) : "" }}
+                <img :src="turtleIcon" v-if="task.queueId == 'tortoise'" title="Task in slow queue" />
               </td>
               <td v-if="showFailed" class="retry-button">
                 <BaseButton type="danger" size="small" style="display: block" @click="retryTask(task)">
@@ -94,6 +95,7 @@ import BaseSpinner from "@/components/BaseSpinner.vue";
 import BaseButton from "@/components/BaseButton.vue";
 import type { Task } from "@shared/entity/Task";
 import testPassIcon from "@/assets/icons/test-pass.svg";
+import turtleIcon from "@/assets/icons/icons8-turtle-24.png";
 import CheckBox from "@/components/CheckBox.vue";
 import { loginStore } from "@/lib/auth";
 import { useRoute } from "vue-router";

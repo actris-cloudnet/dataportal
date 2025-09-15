@@ -13,4 +13,6 @@ export interface Task {
   scheduledAt: string;
   priority: number;
   options: object;
+  queueId: string | null;
+  batchId: string | null;
 }
