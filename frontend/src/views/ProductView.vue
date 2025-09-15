@@ -180,7 +180,6 @@ watch(
           }),
         ];
         productInfo.value = { status: "ready", value: product.data, docs, variables };
-        console.log(productInfo.value);
       }
     } catch (error) {
       productInfo.value = { status: "error", error: error as Error };
