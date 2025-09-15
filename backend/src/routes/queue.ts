@@ -49,6 +49,10 @@ export class QueueRoutes {
     const batchId = randomName();
     const batches = [];
     batches.push(this.submitInstrumentBatch(searchParams, batchId));
+    // Remove mwr-l1c, should be handled in instrument batch already...
+    if (searchParams.productIds) {
+      searchParams.productIds = searchParams.productIds.filter((id: any) => id !== "mwr-l1c");
+    }
     if (searchParams.productIds) {
       if (searchParams.productIds.includes("model")) {
         batches.push(this.submitModelBatch(searchParams, batchId));
@@ -297,6 +301,7 @@ export class QueueRoutes {
            SELECT "productId_2" AS "productId"
            FROM product_source_products_product
            JOIN source_products ON product_source_products_product."productId_1" = source_products."productId"
+           WHERE NOT ("productId_1" = 'mwr-l1c' AND "productId_2" = 'lidar')
        )
        SELECT "instrumentId"
        FROM source_products
