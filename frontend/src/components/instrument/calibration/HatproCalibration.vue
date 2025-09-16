@@ -20,6 +20,10 @@ const props = defineProps<{
 }>();
 
 const lwpOffset = computed(
-  () => props.calibrationData.lwpOffset?.map((entry: any) => ({ ...entry, data: entry.data[0] * 1000 })),
+  () =>
+    props.calibrationData.lwpOffset?.flatMap((entry) => [
+      { ...entry, data: entry.data[0] * 1000 },
+      { ...entry, measurementDate: entry.measurementDate + "T12:00:00Z", data: entry.data[1] * 1000 },
+    ]),
 );
 </script>
