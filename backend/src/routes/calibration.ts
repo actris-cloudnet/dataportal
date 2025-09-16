@@ -1,13 +1,14 @@
-import { DataSource, LessThanOrEqual, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { RequestHandler } from "express";
 import { Calibration } from "../entity/Calibration";
-import { isValidDate, validateInstrumentPid } from "../lib";
+import { isValidDate } from "../lib";
 import { InstrumentInfo } from "../entity/Instrument";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 
 interface QueryParams {
   date: string;
   instrumentPid: string;
+  strictDate?: boolean;
 }
 
 export class CalibrationRoutes {
@@ -34,7 +35,8 @@ export class CalibrationRoutes {
       if (!isValidDate(query.date)) {
         return next({ status: 400, errors: "date is invalid" });
       }
-      const calib = await fetchCalibration(this.calibRepo, instrumentInfo, query.date);
+      const strictDate = req.query.strictDate !== undefined;
+      const calib = await fetchCalibration(this.calibRepo, instrumentInfo, query.date, strictDate);
       if (!calib) {
         return next({ status: 404, errors: "Calibration data not found" });
       }
@@ -98,12 +100,14 @@ export async function fetchCalibration(
   calibRepo: Repository<Calibration>,
   instrumentInfo: InstrumentInfo,
   date: string,
+  strictDate = false,
 ): Promise<Record<string, any> | null> {
+  const condition = strictDate ? "=" : "<=";
   const rows = await calibRepo
     .createQueryBuilder("calib")
     .distinctOn(["calib.instrumentInfoUuid", "calib.key"])
     .where("calib.instrumentInfoUuid = :uuid", { uuid: instrumentInfo.uuid })
-    .andWhere("calib.measurementDate <= :date", { date })
+    .andWhere(`calib.measurementDate ${condition} :date`, { date })
     .orderBy("calib.instrumentInfoUuid")
     .addOrderBy("calib.key")
     .addOrderBy("calib.measurementDate", "DESC")

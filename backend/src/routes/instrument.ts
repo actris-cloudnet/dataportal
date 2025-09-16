@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { DataSource, FindOneOptions, FindOptions, LessThanOrEqual, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { Instrument, InstrumentInfo, NominalInstrument } from "../entity/Instrument";
 import { InstrumentUpload } from "../entity/Upload";
 import { isValidDate } from "../lib";
