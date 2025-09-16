@@ -43,7 +43,7 @@
               <th>Date</th>
               <th>Product</th>
               <th>Instrument / model</th>
-              <th v-if="!showFailed">Schedule</th>
+              <th>Schedule</th>
             </tr>
           </thead>
           <tbody is="vue:transition-group" name="list" tag="tbody">
@@ -67,8 +67,8 @@
                 <span v-else-if="task.model?.id">{{ task.model.id }}</span>
               </td>
               <td>
-                {{ timeDifference(task.scheduledAt) }}
-                <img :src="turtleIcon" v-if="task.queueId == 'tortoise'" title="Task in slow queue" />
+                <span :title="humanReadableTimestamp(task.scheduledAt)">{{ timeDifference(task.scheduledAt) }}</span>
+                <img :src="turtleIcon" v-if="task.queueId == 'tortoise'" title="Task in slow queue" class="tortoise" />
               </td>
               <td v-if="showFailed" class="retry-button">
                 <BaseButton type="danger" size="small" style="display: block" @click="retryTask(task)">
@@ -90,7 +90,7 @@
 import LandingHeader from "@/components/LandingHeader.vue";
 import { ref, onMounted, onUnmounted, watch } from "vue";
 import axios from "axios";
-import { backendUrl } from "@/lib";
+import { backendUrl, humanReadableTimestamp } from "@/lib";
 import BaseSpinner from "@/components/BaseSpinner.vue";
 import BaseButton from "@/components/BaseButton.vue";
 import type { Task } from "@shared/entity/Task";
@@ -233,13 +233,13 @@ function timeDifference(scheduledAt: string): string {
   }
   const diffMsAbs = Math.abs(diffMs);
   const diffMins = Math.round(diffMsAbs / (1000 * 60));
-  const diffHours = Math.round(diffMins / 60);
-  const diffDays = Math.round(diffHours / 24);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
   let time;
   if (diffDays > 0) {
-    time = `${diffDays} d ${diffHours % 24} h ${diffMins % 60} min`;
+    time = `${diffDays} d`;
   } else if (diffHours > 0) {
-    time = `${diffHours} h ${diffMins % 60} min`;
+    time = `${diffHours} h`;
   } else {
     time = `${diffMins} min`;
   }
@@ -362,5 +362,10 @@ table {
 img {
   height: 14px;
   vertical-align: middle;
+}
+
+.tortoise {
+  margin-left: 0.25rem;
+  opacity: 0.75;
 }
 </style>
