@@ -43,7 +43,7 @@
               <th>Date</th>
               <th>Product</th>
               <th>Instrument / model</th>
-              <th v-if="!showFailed">Due in</th>
+              <th v-if="!showFailed">Schedule</th>
             </tr>
           </thead>
           <tbody is="vue:transition-group" name="list" tag="tbody">
@@ -67,7 +67,7 @@
                 <span v-else-if="task.model?.id">{{ task.model.id }}</span>
               </td>
               <td>
-                {{ task.status === "created" ? timeDifference(task.scheduledAt) : "" }}
+                {{ timeDifference(task.scheduledAt) }}
                 <img :src="turtleIcon" v-if="task.queueId == 'tortoise'" title="Task in slow queue" />
               </td>
               <td v-if="showFailed" class="retry-button">
@@ -225,19 +225,25 @@ onUnmounted(() => {
 });
 
 function timeDifference(scheduledAt: string): string {
-  const now = new Date();
-  const diffMs = Math.abs(now.getTime() - new Date(scheduledAt).getTime());
-  const diffMins = Math.round(diffMs / (1000 * 60));
+  const nowTime = new Date().getTime();
+  const scheduledTime = new Date(scheduledAt).getTime();
+  const diffMs = nowTime - scheduledTime;
+  if (diffMs >= 0 && diffMs < 5 * 60 * 1000) {
+    return "";
+  }
+  const diffMsAbs = Math.abs(diffMs);
+  const diffMins = Math.round(diffMsAbs / (1000 * 60));
   const diffHours = Math.round(diffMins / 60);
   const diffDays = Math.round(diffHours / 24);
-
+  let time;
   if (diffDays > 0) {
-    return `${diffDays} d ${diffHours % 24} h ${diffMins % 60} min`;
+    time = `${diffDays} d ${diffHours % 24} h ${diffMins % 60} min`;
   } else if (diffHours > 0) {
-    return `${diffHours} h ${diffMins % 60} min`;
+    time = `${diffHours} h ${diffMins % 60} min`;
   } else {
-    return `${diffMins} min`;
+    time = `${diffMins} min`;
   }
+  return diffMs > 0 ? `${time} ago` : `in ${time}`;
 }
 
 function linkToSearch(task: AugmentedTask) {
