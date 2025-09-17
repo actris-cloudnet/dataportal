@@ -46,7 +46,7 @@
     "type": "mwr",
     "shortName": "HATPRO",
     "humanReadableName": "RPG HATPRO microwave radiometer",
-    "derivedProducts": [{ "id": "mwr" }]
+    "derivedProducts": [{ "id": "mwr" }, { "id": "mwr-l1c" }]
   },
   {
     "id": "halo-doppler-lidar",

@@ -115,7 +115,7 @@ describe("FileView.vue", () => {
     });
 
     it("displays links to source files", async () => {
-      const html = wrapper.find(".data-sources").html();
+      const html = wrapper.find(".provenance").html();
       expect(html).toContain("Categorize");
       expect(html).toContain("/file/1bb32746-faf0-4057-9076-ed2e698dcf36");
     });
