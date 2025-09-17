@@ -762,7 +762,7 @@ describe("/api/queue/batch", () => {
 
   it("returns task count on dry run", async () => {
     const res = await axios.post(batchUrl, { type: "process", productIds: ["lidar"], dryRun: true }, { auth });
-    expect(res.data).toEqual({ taskCount: 1 });
+    expect(res.data).toEqual({ taskCount: 2 });
   });
 
   it("returns batch identifier on non-dry run", async () => {
@@ -774,13 +774,22 @@ describe("/api/queue/batch", () => {
 
   it("creates lidar tasks", async () => {
     await axios.post(batchUrl, { type: "process", productIds: ["lidar"], dryRun: false }, { auth });
-    expect(await taskRepo.count()).toBe(1);
+    expect(await taskRepo.count()).toBe(2);
     expect(
       await taskRepo.existsBy({
         measurementDate: new Date("2020-08-12"),
         siteId: "bucharest",
         productId: "lidar",
         instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+        options: { derivedProducts: true },
+      }),
+    ).toBeTruthy();
+    expect(
+      await taskRepo.existsBy({
+        measurementDate: new Date("2025-05-01"),
+        siteId: "bucharest",
+        productId: "lidar",
+        instrumentInfoUuid: "d6bf209b-c48b-48a4-bbfb-fed713b27832",
         options: { derivedProducts: true },
       }),
     ).toBeTruthy();
@@ -821,29 +830,35 @@ describe("/api/queue/batch", () => {
     expect(await taskRepo.existsBy({ ...task, productId: "doppler-lidar-wind" })).toBeTruthy();
   });
 
-  it("creates model tasks", async () => {
+  it("creates default tasks", async () => {
     await axios.post(batchUrl, { type: "process", dryRun: false }, { auth });
-    expect(await taskRepo.count()).toBe(5);
+    expect(await taskRepo.count()).toBe(8);
+    expect(await taskRepo.countBy({ productId: "model" })).toBe(0);
+    expect(await taskRepo.countBy({ productId: "mwr-l1c" })).toBe(1);
+    expect(await taskRepo.countBy({ productId: "mwr" })).toBe(1);
+    expect(await taskRepo.countBy({ productId: "lidar" })).toBe(2);
   });
 
   it("creates ECMWF model tasks", async () => {
     await axios.post(batchUrl, { type: "process", modelIds: ["ecmwf"], dryRun: false }, { auth });
     expect(await taskRepo.count()).toBe(3);
+    expect(await taskRepo.countBy({ modelId: "ecmwf" })).toBe(3);
   });
 
   it("creates ICON model tasks", async () => {
     await axios.post(batchUrl, { type: "process", modelIds: ["icon-iglo-12-23"], dryRun: false }, { auth });
     expect(await taskRepo.count()).toBe(2);
+    expect(await taskRepo.countBy({ modelId: "icon-iglo-12-23" })).toBe(2);
   });
 
   it("creates categorize tasks", async () => {
     await axios.post(batchUrl, { type: "process", productIds: ["categorize"], dryRun: false }, { auth });
-    expect(await taskRepo.count()).toBe(4);
+    expect(await taskRepo.count()).toBe(5);
     expect(await taskRepo.countBy({ siteId: "granada", productId: "categorize", instrumentInfoUuid: IsNull() })).toBe(
       1,
     );
     expect(await taskRepo.countBy({ siteId: "bucharest", productId: "categorize", instrumentInfoUuid: IsNull() })).toBe(
-      2,
+      3,
     );
     expect(await taskRepo.countBy({ siteId: "warsaw", productId: "categorize", instrumentInfoUuid: IsNull() })).toBe(1);
   });
@@ -865,6 +880,20 @@ describe("/api/queue/batch", () => {
         productId: "epsilon-lidar",
         measurementDate: new Date("2020-08-13"),
         instrumentInfoUuid: "0b3a7fa0-4812-4964-af23-1162e8b3a665",
+      }),
+    ).toBeTruthy();
+  });
+
+  it("creates mwr-l1c tasks", async () => {
+    await axios.post(batchUrl, { type: "process", productIds: ["mwr-l1c"], dryRun: false }, { auth });
+    expect(await taskRepo.count()).toBe(1);
+    expect(
+      await taskRepo.existsBy({
+        measurementDate: new Date("2025-05-01"),
+        siteId: "bucharest",
+        productId: "mwr-l1c",
+        instrumentInfoUuid: "028adedd-35a4-4733-ad7b-78fdf9555a02",
+        options: { derivedProducts: true },
       }),
     ).toBeTruthy();
   });
@@ -921,7 +950,7 @@ describe("/api/queue/batch", () => {
 
   it("cancels tasks", async () => {
     const res = await axios.post(batchUrl, { type: "process", productIds: ["categorize"], dryRun: false }, { auth });
-    expect(await taskRepo.count()).toBe(4);
+    expect(await taskRepo.count()).toBe(5);
     await axios.delete(`${batchUrl}/${res.data.batchId}`, { auth });
     expect(await taskRepo.count()).toBe(0);
   });
@@ -932,13 +961,22 @@ describe("/api/queue/batch", () => {
       { type: "process", productIds: ["lidar"], dryRun: false, options: { derivedProducts: false } },
       { auth },
     );
-    expect(await taskRepo.count()).toBe(1);
+    expect(await taskRepo.count()).toBe(2);
     expect(
       await taskRepo.existsBy({
         measurementDate: new Date("2020-08-12"),
         siteId: "bucharest",
         productId: "lidar",
         instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+        options: { derivedProducts: false },
+      }),
+    ).toBeTruthy();
+    expect(
+      await taskRepo.existsBy({
+        measurementDate: new Date("2025-05-01"),
+        siteId: "bucharest",
+        productId: "lidar",
+        instrumentInfoUuid: "d6bf209b-c48b-48a4-bbfb-fed713b27832",
         options: { derivedProducts: false },
       }),
     ).toBeTruthy();
@@ -956,8 +994,8 @@ describe("/api/queue/batch", () => {
       },
       { auth },
     );
-    expect(await taskRepo.count()).toBe(1);
+    expect(await taskRepo.count()).toBe(2);
     expect(await taskRepo.countBy({ queueId: "hare" })).toBe(0);
-    expect(await taskRepo.countBy({ queueId: "tortoise" })).toBe(1);
+    expect(await taskRepo.countBy({ queueId: "tortoise" })).toBe(2);
   });
 });

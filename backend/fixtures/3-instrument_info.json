@@ -38,5 +38,25 @@
     "type": "Doppler lidar",
     "owners": ["University of Warsaw"],
     "instrument": "halo-doppler-lidar"
+  },
+  {
+    "uuid": "028adedd-35a4-4733-ad7b-78fdf9555a02",
+    "pid": "https://hdl.handle.net/123/bucharest-hatpro",
+    "name": "UBB HATPRO-G5",
+    "serialNumber": null,
+    "model": "RPG-HATPRO-G5",
+    "type": "scanning microwave radiometer",
+    "owners": ["Babeș-Bolyai University (UBB)"],
+    "instrument": "hatpro"
+  },
+  {
+    "uuid": "d6bf209b-c48b-48a4-bbfb-fed713b27832",
+    "pid": "https://hdl.handle.net/123/bucharest-chm15k-II",
+    "name": "UBB CHM 15k",
+    "serialNumber": null,
+    "model": "CHM 15k",
+    "type": "lidar ceilometer",
+    "owners": ["Babeș-Bolyai University (UBB)"],
+    "instrument": "chm15k"
   }
 ]

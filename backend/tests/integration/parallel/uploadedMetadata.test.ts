@@ -190,10 +190,15 @@ describe("GET /upload-model-metadata", () => {
 describe("GET /api/uploaded-metadata", () => {
   const publicUrl = `${backendPublicUrl}uploaded-metadata/`;
   it("responds with correct object when filtering with site", async () => {
-    return expect(axios.get(`${publicUrl}`, { params: { site: "bucharest" } })).resolves.toMatchObject({
-      status: 200,
-      data: [{ instrument: instResp[2]["instrument"] }, { instrument: instResp[3]["instrument"] }],
-    });
+    const res = await axios.get(`${publicUrl}`, { params: { site: "bucharest" } });
+    const expectedPids = [
+      "https://hdl.handle.net/123/bucharest-chm15k",
+      "https://hdl.handle.net/123/bucharest-chm15k-II",
+      "https://hdl.handle.net/123/bucharest-hatpro",
+      "https://hdl.handle.net/123/bucharest-mira",
+    ];
+    const receivedPids = res.data.map((item: any) => item.instrument.pid);
+    expect(receivedPids.sort()).toEqual(expectedPids.sort());
   });
 });
 

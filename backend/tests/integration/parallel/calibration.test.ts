@@ -19,6 +19,22 @@ describe("GET /api/calibration", () => {
     expect(res.data.data).toEqual({ time_offset: 120, calibration_factor: 0.9 });
   });
 
+  it("responds with the correct calibration using strict date", async () => {
+    const res = await axios.get(url, {
+      params: { instrumentPid: "https://hdl.handle.net/123/bucharest-chm15k", date: "2021-01-01", strictDate: "true" },
+    });
+    expect(res.data.data).toEqual({ time_offset: 120, calibration_factor: 0.5 });
+  });
+
+  it("responds with 404 if no calibration is found for the given date using strict date", async () => {
+    const params = {
+      instrumentPid: "https://hdl.handle.net/123/bucharest-chm15k",
+      date: "2022-01-05",
+      strictDate: "true",
+    };
+    return expect(axios.get(url, { params })).rejects.toMatchObject({ response: { status: 404 } });
+  });
+
   it("responds with 404 if instrument has no calibration set", async () => {
     const params = { instrumentPid: "https://hdl.handle.net/123/hyytiala-chm15k", date: "2021-01-01" };
     return expect(axios.get(url, { params })).rejects.toMatchObject({ response: { status: 404 } });
