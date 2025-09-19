@@ -42,7 +42,7 @@
     "experimental": false,
     "variables": [
       {
-        "actrisName": null,
+        "actrisName": "hydrometeor type classification",
         "id": "classification-target_classification",
         "humanReadableName": "Target classification",
         "order": 0

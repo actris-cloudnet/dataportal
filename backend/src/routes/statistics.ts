@@ -44,7 +44,15 @@ export class StatisticsRoutes {
       if (!productTypes.every((type) => ["observation", "model", "fundamentalParameter"].includes(type))) {
         return next({ status: 400, errors: "invalid productType" });
       }
-      qb.andWhere('"productType" IN (:...productTypes)', { productTypes });
+      if (productTypes.length === 0 || (productTypes.length === 1 && productTypes[0] === "fundamentalParameter")) {
+        res.send([]);
+        return;
+      }
+      if (productTypes.includes("model") && !productTypes.includes("observation")) {
+        qb.andWhere("stats.\"productId\" = 'model'");
+      } else if (!productTypes.includes("model") && productTypes.includes("observation")) {
+        qb.andWhere("stats.\"productId\" != 'model'");
+      }
     }
     if (req.query.downloadDateFrom) {
       if (typeof req.query.downloadDateFrom !== "string" || !isValidDate(req.query.downloadDateFrom)) {
@@ -94,29 +102,38 @@ export class StatisticsRoutes {
       });
       qb.andWhere('"siteId" IN (:...siteIds)', { siteIds: sites.map((site) => site.id) });
     }
+    const units = typeof req.query.cluUnits === "string" ? req.query.cluUnits : "variableYear";
+    if (typeof req.query.cluProduct === "string") {
+      const productIds = req.query.cluProduct.split(",");
+      qb.andWhere('stats."productId" IN (:...productIds)', { productIds });
+    }
 
-    if (req.query.dimensions === "yearMonth,downloads") {
-      qb.select("to_char(\"downloadDate\", 'YYYY-MM')", "yearMonth")
-        .addSelect("SUM(downloads) / 300", "downloads")
-        .groupBy('"yearMonth"')
-        .orderBy('"yearMonth"');
-    } else if (req.query.dimensions === "year,downloads") {
-      qb.select("to_char(\"downloadDate\", 'YYYY')", "year")
-        .addSelect("SUM(downloads) / 300", "downloads")
-        .groupBy("year")
-        .orderBy("year");
-    } else if (req.query.dimensions === "yearMonth,uniqueIps") {
+    const dimensions = req.query.dimensions as string;
+    if (dimensions.includes("downloads")) {
+      if (units === "variableYear") {
+        qb.select("SUM(downloads) / 300", "downloads")
+          .innerJoin("product_variable", "prodvar", "stats.productId = prodvar.productId")
+          .andWhere("prodvar.actrisName IS NOT NULL");
+      } else {
+        qb.select("SUM(downloads)", "downloads");
+      }
+      if (dimensions === "yearMonth,downloads") {
+        qb.addSelect("to_char(\"downloadDate\", 'YYYY-MM')", "yearMonth").groupBy('"yearMonth"').orderBy('"yearMonth"');
+      } else if (dimensions === "year,downloads") {
+        qb.addSelect("to_char(\"downloadDate\", 'YYYY')", "year").groupBy("year").orderBy("year");
+      } else if (dimensions === "country,downloads") {
+        qb.addSelect("country").groupBy("country").orderBy("country");
+      }
+    } else if (dimensions === "yearMonth,uniqueIps") {
       qb.select("to_char(\"downloadDate\", 'YYYY-MM')", "yearMonth")
         .addSelect("COUNT(DISTINCT ip)", "uniqueIps")
         .groupBy('"yearMonth"')
         .orderBy('"yearMonth"');
-    } else if (req.query.dimensions === "year,uniqueIps") {
+    } else if (dimensions === "year,uniqueIps") {
       qb.select("to_char(\"downloadDate\", 'YYYY')", "year")
         .addSelect("COUNT(DISTINCT ip)", "uniqueIps")
         .groupBy("year")
         .orderBy("year");
-    } else if (req.query.dimensions === "country,downloads") {
-      qb.select("country").addSelect("SUM(downloads) / 300", "downloads").groupBy("country").orderBy("country");
     }
 
     const rows = await qb.getRawMany();
@@ -130,15 +147,17 @@ export class StatisticsRoutes {
   curatedDataStats: RequestHandler = async (req, res, next) => {
     const params = [];
 
+    const units = typeof req.query.cluUnits === "string" ? req.query.cluUnits : "variableYear";
+    const selectData =
+      units === "variableYear" ? 'SUM("coverage") / 300.0 AS "curatedData"' : 'SUM("coverage") AS "curatedData"';
+
     let select, group, order;
     if (req.query.dimensions === "yearMonth,curatedData") {
-      select = `SELECT to_char("measurementDate", 'YYYY-MM') AS "yearMonth"
-                     , SUM("variableDays") / 300.0 AS "curatedData"`;
+      select = `SELECT to_char("measurementDate", 'YYYY-MM') AS "yearMonth", ${selectData}`;
       group = 'GROUP BY "yearMonth"';
       order = 'ORDER BY "yearMonth"';
     } else {
-      select = `SELECT to_char("measurementDate", 'YYYY') AS year
-                     , SUM("variableDays") / 300.0 AS "curatedData"`;
+      select = `SELECT to_char("measurementDate", 'YYYY') AS year, ${selectData}`;
       group = "GROUP BY year";
       order = "ORDER BY year";
     }
@@ -159,30 +178,42 @@ export class StatisticsRoutes {
       return next({ status: 400, errors: "curatedData dimension doesn't support downloadDateTo parameter" });
     }
 
-    const productFileJoin = 'JOIN product_variable USING ("productId")';
-    const productFileWhere = 'WHERE product_variable."actrisName" IS NOT NULL';
-    const fileJoin = 'JOIN site ON "siteId" = site.id';
-    let fileWhere = "";
+    const fileJoins = [];
+    const fileWhereAnd = [];
+
+    if (units === "variableYear") {
+      fileJoins.push('JOIN product_variable USING ("productId")');
+      fileWhereAnd.push('product_variable."actrisName" IS NOT NULL');
+    }
+
     if ((req.query.site || req.query.facility) && req.query.country) {
       return next({ status: 400, errors: "site/facility and country parameters cannot be used at the same time" });
     }
     if (req.query.site) {
       params.push(req.query.site);
-      fileWhere = `AND "siteId" = $${params.length}`;
+      fileWhereAnd.push(`"siteId" = $${params.length}`);
     }
-    if (req.query.facility) {
-      params.push(req.query.facility);
-      fileWhere = `AND site."dvasId" = $${params.length}`;
-    }
-    if (req.query.country) {
-      params.push(req.query.country);
-      fileWhere = `AND site."countryCode" = $${params.length}`;
+    if (req.query.facility || req.query.country) {
+      fileJoins.push('JOIN site ON "siteId" = site.id');
+      if (req.query.facility) {
+        params.push(req.query.facility);
+        fileWhereAnd.push(`site."dvasId" = $${params.length}`);
+      }
+      if (req.query.country) {
+        params.push(req.query.country);
+        fileWhereAnd.push(`site."countryCode" = $${params.length}`);
+      }
     }
 
-    if (productTypes.includes("observation") && !productTypes.includes("model")) {
-      fileWhere += " AND \"productId\" != 'model'";
-    } else if (productTypes.includes("model") && !productTypes.includes("observation")) {
-      fileWhere += " AND \"productId\" = 'model'";
+    if (productTypes.includes("model") && !productTypes.includes("observation")) {
+      fileWhereAnd.push(`"productId" = 'model'`);
+    } else if (!productTypes.includes("model") && productTypes.includes("observation")) {
+      fileWhereAnd.push(`"productId" != 'model'`);
+    }
+    if (typeof req.query.cluProduct === "string" && req.query.cluProduct) {
+      const ids = req.query.cluProduct.split(",");
+      params.push(ids);
+      fileWhereAnd.push(`"productId" = ANY($${params.length})`);
     }
 
     if (req.query.measurementDateFrom) {
@@ -190,22 +221,20 @@ export class StatisticsRoutes {
         return next({ status: 400, errors: "invalid measurementDateFrom" });
       }
       params.push(req.query.measurementDateFrom);
-      fileWhere += ` AND "measurementDate" >= $${params.length}::date`;
+      fileWhereAnd.push(`"measurementDate" >= $${params.length}::date`);
     }
     if (req.query.measurementDateTo) {
       if (typeof req.query.measurementDateTo !== "string" || !isValidDate(req.query.measurementDateTo)) {
         return next({ status: 400, errors: "invalid measurementDateTo" });
       }
       params.push(req.query.measurementDateTo);
-      fileWhere += ` AND "measurementDate" <= $${params.length}::date`;
+      fileWhereAnd.push(`"measurementDate" <= $${params.length}::date`);
     }
 
-    const fileSelect = `SELECT "measurementDate", 1.0 AS "variableDays"
-      FROM search_file AS file
-      ${productFileJoin} ${fileJoin}
-      ${productFileWhere} ${fileWhere}`;
-
-    const query = `${select} FROM (${fileSelect}) file ${group} ${order}`;
+    const fileJoin = fileJoins.join(" ");
+    const fileWhere = fileWhereAnd.length > 0 ? "WHERE " + fileWhereAnd.join(" AND ") : "";
+    const fileQuery = `SELECT "measurementDate", 1 AS "coverage" FROM search_file AS file ${fileJoin} ${fileWhere}`;
+    const query = `${select} FROM (${fileQuery}) file ${group} ${order}`;
 
     const rows = await this.dataSource.query(query, params);
     rows.forEach((row: any) => {

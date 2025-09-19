@@ -9,7 +9,8 @@
     "id": "classification-target_classification",
     "humanReadableName": "Target classification",
     "product": "classification",
-    "order": "0"
+    "order": "0",
+    "actrisName": "hydrometeor type classification"
   },
   {
     "id": "test1",
