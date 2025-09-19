@@ -44,6 +44,17 @@
             clearable
           />
         </div>
+        <MultiSelect
+          class="field"
+          id="product"
+          label="Products"
+          :options="products"
+          multiple
+          style="width: 300px"
+          :disabled="visitStatistics"
+          :getIcon="getProductIcon"
+          v-model="currentProduct"
+        />
         <fieldset class="field" :disabled="visitStatistics">
           <legend class="label">Product type</legend>
           <CheckBox v-model="productTypes" value="observation" label="Observation" />
@@ -73,6 +84,18 @@
             <DatePicker v-model="downloadDateTo" :start="downloadDateFrom || undefined" name="downloadDateTo" />
           </div>
         </fieldset>
+        <MultiSelect
+          class="field"
+          id="dl-units"
+          label="Download units"
+          v-model="units"
+          :options="[
+            { id: 'variableYear', humanReadableName: 'Years of ACTRIS variables' },
+            { id: 'files', humanReadableName: 'Number of files' },
+          ]"
+          style="width: 300px"
+          :disabled="visitStatistics"
+        />
         <div></div>
         <div style="display: flex; gap: 1rem; margin-top: 1rem">
           <BaseButton type="primary" @click="onSearch" :disabled="loading">
@@ -128,7 +151,7 @@ import axios from "axios";
 
 import type { Site } from "@shared/entity/Site";
 import COUNTRY_NAMES from "@/assets/country-io-names.json";
-import { backendUrl, compareValues, notEmpty } from "@/lib";
+import { backendUrl, compareValues, notEmpty, getProductIcon } from "@/lib";
 import CheckBox from "@/components/CheckBox.vue";
 import BaseButton from "@/components/BaseButton.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
@@ -136,8 +159,10 @@ import MultiSelect, { type Option } from "@/components/MultiSelect.vue";
 import DatePicker from "@/components/DatePicker.vue";
 import LandingHeader from "@/components/LandingHeader.vue";
 import { loginStore } from "@/lib/auth";
+import type { Product } from "@shared/entity/Product";
 
 type Dimension = "year" | "yearMonth" | "country" | "downloads" | "uniqueIps" | "visits" | "curatedData";
+type Units = "variableYear" | "files";
 
 const statistics = ref([]);
 const dimensions = ref<Dimension[]>([]);
@@ -149,10 +174,10 @@ const dimensionLabel: Record<Dimension, string> = {
   year: "Year",
   yearMonth: "Month",
   country: "Country",
-  downloads: "Downloads (variable years)",
+  downloads: "Downloads",
   uniqueIps: "Unique IPs",
   visits: "Visits",
-  curatedData: "Curated data (variable years)",
+  curatedData: "Curated data",
 };
 const numberFormat = (Intl && Intl.NumberFormat && new Intl.NumberFormat("en-GB")) || {
   format(number: number): string {
@@ -169,6 +194,9 @@ const measurementDateFrom = ref<string | null>(null);
 const measurementDateTo = ref<string | null>(null);
 const visitStatistics = computed(() => selectedDimensions.value.includes("visit"));
 const curatedStatistics = computed(() => selectedDimensions.value.includes("curatedData"));
+const products = ref<Product[]>([]);
+const currentProduct = ref<string[]>([]);
+const units = ref<Units>("files");
 
 const currentCountry = ref<string | null>(null);
 const currentSite = ref<string | null>(null);
@@ -197,17 +225,20 @@ function getCountryName(countryCode: string): string {
 
 onMounted(async () => {
   try {
-    const response = await axios.get(`${backendUrl}sites`);
-    const data: Site[] = response.data;
-    countries.value = Array.from(new Set(data.map((site) => site.countryCode).filter(notEmpty)))
+    const [siteRes, productRes] = await Promise.all([
+      axios.get<Site[]>(`${backendUrl}sites`),
+      axios.get<Product[]>(`${backendUrl}products`),
+    ]);
+    countries.value = Array.from(new Set(siteRes.data.map((site) => site.countryCode).filter(notEmpty)))
       .map((countryCode) => ({
         id: countryCode,
         humanReadableName: getCountryName(countryCode),
       }))
       .sort((a, b) => compareValues(a.humanReadableName, b.humanReadableName));
-    sites.value = data
+    sites.value = siteRes.data
       .filter((site) => !site.type.includes("hidden"))
       .sort((a, b) => compareValues(a.humanReadableName, b.humanReadableName));
+    products.value = productRes.data.sort((a, b) => compareValues(a.humanReadableName, b.humanReadableName));
     loadingSites.value = false;
   } catch (e) {
     alert(`Failed to download counties: ${e}`);
@@ -225,6 +256,8 @@ async function onSearch() {
     downloadDateTo: !curatedStatistics.value && downloadDateTo.value ? downloadDateTo.value : undefined,
     measurementDateFrom: measurementDateFrom.value ? measurementDateFrom.value : undefined,
     measurementDateTo: measurementDateTo.value ? measurementDateTo.value : undefined,
+    cluProduct: currentProduct.value?.length ? currentProduct.value.join(",") : undefined,
+    cluUnits: units.value,
   };
   try {
     const response = await axios.get(`${backendUrl}statistics`, {

@@ -28,6 +28,8 @@ interface Params {
   productTypes?: string;
   downloadDateFrom?: string;
   downloadDateTo?: string;
+  cluUnits?: string;
+  cluProduct?: string;
 }
 
 function doRequest(params: Params, headers: any = { authorization: `Basic ${str2base64("bob:bobs_pass")}` }) {
@@ -51,21 +53,23 @@ describe("GET /api/statistics", () => {
     await regularFileRepo.save(JSON.parse((await fsp.readFile("fixtures/5-regular_file.json")).toString()));
     await searchFileRepo.save(JSON.parse((await fsp.readFile("fixtures/5-search_file.json")).toString()));
     await collectionRepo.save(JSON.parse((await fsp.readFile("fixtures/6-collection.json")).toString()));
-    // Download half year of Mace Head data with two variables ≈ 1 variable year.
+    // Download half year of Mace Head classification data with one variable
+    // (0.5 variable year).
     await downloadRepo.save(
       Array.from(
         { length: 181 },
         (_, day) =>
           new Download(
             ObjectType.Product,
-            "38092c00-161d-4ca2-a29d-628cf8e960f6",
+            "bde7a35f-03aa-4bff-acfb-b4974ea9f217",
             "1.1.1.1",
             "FI",
             new Date(2022, 0, day + 1),
           ),
       ),
     );
-    // Download half year of Hyytiälä data with two variables ≈ 1 variable year.
+    // Download half year of Hyytiälä radar data with two variables (1 variable
+    // year).
     await downloadRepo.save(
       Array.from(
         { length: 181 },
@@ -79,7 +83,9 @@ describe("GET /api/statistics", () => {
           ),
       ),
     );
-    // Download half year of collection with one observation and model files with three variables ≈ 1.5 variable year.
+    // Download half year of collection with one Hyytiälä radar file with two
+    // variables (1 variable years) and one Mace Head model file with one
+    // variable (0.5 variable years).
     await downloadRepo.save(
       Array.from(
         { length: 184 },
@@ -113,12 +119,12 @@ describe("GET /api/statistics", () => {
 
   it("calculates file downloads by date", () =>
     expect(getStats({ dimensions: "yearMonth,downloads" })).resolves.toMatchObject([
-      { yearMonth: "2022-01", downloads: expect.closeTo((2 * 2 * 31) / 300, 10) },
-      { yearMonth: "2022-02", downloads: expect.closeTo((2 * 2 * 28) / 300, 10) },
-      { yearMonth: "2022-03", downloads: expect.closeTo((2 * 2 * 31) / 300, 10) },
-      { yearMonth: "2022-04", downloads: expect.closeTo((2 * 2 * 30) / 300, 10) },
-      { yearMonth: "2022-05", downloads: expect.closeTo((2 * 2 * 31) / 300, 10) },
-      { yearMonth: "2022-06", downloads: expect.closeTo((2 * 2 * 30) / 300, 10) },
+      { yearMonth: "2022-01", downloads: expect.closeTo(((1 + 2) * 31) / 300, 10) },
+      { yearMonth: "2022-02", downloads: expect.closeTo(((1 + 2) * 28) / 300, 10) },
+      { yearMonth: "2022-03", downloads: expect.closeTo(((1 + 2) * 31) / 300, 10) },
+      { yearMonth: "2022-04", downloads: expect.closeTo(((1 + 2) * 30) / 300, 10) },
+      { yearMonth: "2022-05", downloads: expect.closeTo(((1 + 2) * 31) / 300, 10) },
+      { yearMonth: "2022-06", downloads: expect.closeTo(((1 + 2) * 30) / 300, 10) },
       { yearMonth: "2022-07", downloads: expect.closeTo(((2 + 1) * 31) / 300, 10) },
       { yearMonth: "2022-08", downloads: expect.closeTo(((2 + 1) * 31) / 300, 10) },
       { yearMonth: "2022-09", downloads: expect.closeTo(((2 + 1) * 30) / 300, 10) },
@@ -148,7 +154,7 @@ describe("GET /api/statistics", () => {
 
   it("calculates file downloads by country", () =>
     expect(getStats({ dimensions: "country,downloads" })).resolves.toMatchObject([
-      { country: "FI", downloads: expect.closeTo((2 * 181) / 300, 10) },
+      { country: "FI", downloads: expect.closeTo(181 / 300, 10) },
       { country: "NO", downloads: expect.closeTo((2 * 181) / 300, 10) },
       { country: "SE", downloads: expect.closeTo(((1 + 2) * 184) / 300, 10) },
     ]));
@@ -174,14 +180,30 @@ describe("GET /api/statistics", () => {
       { yearMonth: "2022-12", downloads: expect.closeTo((2 * 31) / 300, 10) },
     ]));
 
+  it("can filter by country of files in files units", () =>
+    expect(getStats({ dimensions: "yearMonth,downloads", country: "FI", cluUnits: "files" })).resolves.toMatchObject([
+      { yearMonth: "2022-01", downloads: 31 },
+      { yearMonth: "2022-02", downloads: 28 },
+      { yearMonth: "2022-03", downloads: 31 },
+      { yearMonth: "2022-04", downloads: 30 },
+      { yearMonth: "2022-05", downloads: 31 },
+      { yearMonth: "2022-06", downloads: 30 },
+      { yearMonth: "2022-07", downloads: 31 },
+      { yearMonth: "2022-08", downloads: 31 },
+      { yearMonth: "2022-09", downloads: 30 },
+      { yearMonth: "2022-10", downloads: 31 },
+      { yearMonth: "2022-11", downloads: 30 },
+      { yearMonth: "2022-12", downloads: 31 },
+    ]));
+
   it("can filter by site", () =>
     expect(getStats({ dimensions: "yearMonth,downloads", site: "mace-head" })).resolves.toMatchObject([
-      { yearMonth: "2022-01", downloads: expect.closeTo((2 * 31) / 300, 10) },
-      { yearMonth: "2022-02", downloads: expect.closeTo((2 * 28) / 300, 10) },
-      { yearMonth: "2022-03", downloads: expect.closeTo((2 * 31) / 300, 10) },
-      { yearMonth: "2022-04", downloads: expect.closeTo((2 * 30) / 300, 10) },
-      { yearMonth: "2022-05", downloads: expect.closeTo((2 * 31) / 300, 10) },
-      { yearMonth: "2022-06", downloads: expect.closeTo((2 * 30) / 300, 10) },
+      { yearMonth: "2022-01", downloads: expect.closeTo((1 * 31) / 300, 10) },
+      { yearMonth: "2022-02", downloads: expect.closeTo((1 * 28) / 300, 10) },
+      { yearMonth: "2022-03", downloads: expect.closeTo((1 * 31) / 300, 10) },
+      { yearMonth: "2022-04", downloads: expect.closeTo((1 * 30) / 300, 10) },
+      { yearMonth: "2022-05", downloads: expect.closeTo((1 * 31) / 300, 10) },
+      { yearMonth: "2022-06", downloads: expect.closeTo((1 * 30) / 300, 10) },
       { yearMonth: "2022-07", downloads: expect.closeTo((1 * 31) / 300, 10) },
       { yearMonth: "2022-08", downloads: expect.closeTo((1 * 31) / 300, 10) },
       { yearMonth: "2022-09", downloads: expect.closeTo((1 * 30) / 300, 10) },
@@ -192,12 +214,12 @@ describe("GET /api/statistics", () => {
 
   it("can filter by DVAS facility", () =>
     expect(getStats({ dimensions: "yearMonth,downloads", facility: "mchd" })).resolves.toMatchObject([
-      { yearMonth: "2022-01", downloads: expect.closeTo((2 * 31) / 300, 10) },
-      { yearMonth: "2022-02", downloads: expect.closeTo((2 * 28) / 300, 10) },
-      { yearMonth: "2022-03", downloads: expect.closeTo((2 * 31) / 300, 10) },
-      { yearMonth: "2022-04", downloads: expect.closeTo((2 * 30) / 300, 10) },
-      { yearMonth: "2022-05", downloads: expect.closeTo((2 * 31) / 300, 10) },
-      { yearMonth: "2022-06", downloads: expect.closeTo((2 * 30) / 300, 10) },
+      { yearMonth: "2022-01", downloads: expect.closeTo((1 * 31) / 300, 10) },
+      { yearMonth: "2022-02", downloads: expect.closeTo((1 * 28) / 300, 10) },
+      { yearMonth: "2022-03", downloads: expect.closeTo((1 * 31) / 300, 10) },
+      { yearMonth: "2022-04", downloads: expect.closeTo((1 * 30) / 300, 10) },
+      { yearMonth: "2022-05", downloads: expect.closeTo((1 * 31) / 300, 10) },
+      { yearMonth: "2022-06", downloads: expect.closeTo((1 * 30) / 300, 10) },
       { yearMonth: "2022-07", downloads: expect.closeTo((1 * 31) / 300, 10) },
       { yearMonth: "2022-08", downloads: expect.closeTo((1 * 31) / 300, 10) },
       { yearMonth: "2022-09", downloads: expect.closeTo((1 * 30) / 300, 10) },
@@ -215,12 +237,12 @@ describe("GET /api/statistics", () => {
 
   it("calculates file downloads of observation products", () =>
     expect(getStats({ dimensions: "yearMonth,downloads", productTypes: "observation" })).resolves.toMatchObject([
-      { yearMonth: "2022-01", downloads: expect.closeTo((2 * 2 * 31) / 300, 10) },
-      { yearMonth: "2022-02", downloads: expect.closeTo((2 * 2 * 28) / 300, 10) },
-      { yearMonth: "2022-03", downloads: expect.closeTo((2 * 2 * 31) / 300, 10) },
-      { yearMonth: "2022-04", downloads: expect.closeTo((2 * 2 * 30) / 300, 10) },
-      { yearMonth: "2022-05", downloads: expect.closeTo((2 * 2 * 31) / 300, 10) },
-      { yearMonth: "2022-06", downloads: expect.closeTo((2 * 2 * 30) / 300, 10) },
+      { yearMonth: "2022-01", downloads: expect.closeTo(((1 + 2) * 31) / 300, 10) },
+      { yearMonth: "2022-02", downloads: expect.closeTo(((1 + 2) * 28) / 300, 10) },
+      { yearMonth: "2022-03", downloads: expect.closeTo(((1 + 2) * 31) / 300, 10) },
+      { yearMonth: "2022-04", downloads: expect.closeTo(((1 + 2) * 30) / 300, 10) },
+      { yearMonth: "2022-05", downloads: expect.closeTo(((1 + 2) * 31) / 300, 10) },
+      { yearMonth: "2022-06", downloads: expect.closeTo(((1 + 2) * 30) / 300, 10) },
       { yearMonth: "2022-07", downloads: expect.closeTo((2 * 31) / 300, 10) },
       { yearMonth: "2022-08", downloads: expect.closeTo((2 * 31) / 300, 10) },
       { yearMonth: "2022-09", downloads: expect.closeTo((2 * 30) / 300, 10) },
@@ -239,10 +261,26 @@ describe("GET /api/statistics", () => {
       { yearMonth: "2022-12", downloads: expect.closeTo((1 * 31) / 300, 10) },
     ]));
 
+  it("can filter by product type", () =>
+    expect(getStats({ dimensions: "yearMonth,downloads", cluProduct: "radar" })).resolves.toMatchObject([
+      { yearMonth: "2022-01", downloads: expect.closeTo((2 * 31) / 300, 10) },
+      { yearMonth: "2022-02", downloads: expect.closeTo((2 * 28) / 300, 10) },
+      { yearMonth: "2022-03", downloads: expect.closeTo((2 * 31) / 300, 10) },
+      { yearMonth: "2022-04", downloads: expect.closeTo((2 * 30) / 300, 10) },
+      { yearMonth: "2022-05", downloads: expect.closeTo((2 * 31) / 300, 10) },
+      { yearMonth: "2022-06", downloads: expect.closeTo((2 * 30) / 300, 10) },
+      { yearMonth: "2022-07", downloads: expect.closeTo((2 * 31) / 300, 10) },
+      { yearMonth: "2022-08", downloads: expect.closeTo((2 * 31) / 300, 10) },
+      { yearMonth: "2022-09", downloads: expect.closeTo((2 * 30) / 300, 10) },
+      { yearMonth: "2022-10", downloads: expect.closeTo((2 * 31) / 300, 10) },
+      { yearMonth: "2022-11", downloads: expect.closeTo((2 * 30) / 300, 10) },
+      { yearMonth: "2022-12", downloads: expect.closeTo((2 * 31) / 300, 10) },
+    ]));
+
   it("filters until download date", () =>
     expect(getStats({ dimensions: "yearMonth,downloads", downloadDateTo: "2022-02-20" })).resolves.toMatchObject([
-      { yearMonth: "2022-01", downloads: expect.closeTo((2 * 2 * 31) / 300, 10) },
-      { yearMonth: "2022-02", downloads: expect.closeTo((2 * 2 * 20) / 300, 10) },
+      { yearMonth: "2022-01", downloads: expect.closeTo(((1 + 2) * 31) / 300, 10) },
+      { yearMonth: "2022-02", downloads: expect.closeTo(((1 + 2) * 20) / 300, 10) },
     ]));
 
   it("filters from download date", () =>
@@ -255,10 +293,10 @@ describe("GET /api/statistics", () => {
     expect(
       getStats({ dimensions: "yearMonth,downloads", downloadDateFrom: "2022-03-02", downloadDateTo: "2022-10-15" }),
     ).resolves.toMatchObject([
-      { yearMonth: "2022-03", downloads: expect.closeTo((2 * 2 * 30) / 300, 10) },
-      { yearMonth: "2022-04", downloads: expect.closeTo((2 * 2 * 30) / 300, 10) },
-      { yearMonth: "2022-05", downloads: expect.closeTo((2 * 2 * 31) / 300, 10) },
-      { yearMonth: "2022-06", downloads: expect.closeTo((2 * 2 * 30) / 300, 10) },
+      { yearMonth: "2022-03", downloads: expect.closeTo(((1 + 2) * 30) / 300, 10) },
+      { yearMonth: "2022-04", downloads: expect.closeTo(((1 + 2) * 30) / 300, 10) },
+      { yearMonth: "2022-05", downloads: expect.closeTo(((1 + 2) * 31) / 300, 10) },
+      { yearMonth: "2022-06", downloads: expect.closeTo(((1 + 2) * 30) / 300, 10) },
       { yearMonth: "2022-07", downloads: expect.closeTo(((2 + 1) * 31) / 300, 10) },
       { yearMonth: "2022-08", downloads: expect.closeTo(((2 + 1) * 31) / 300, 10) },
       { yearMonth: "2022-09", downloads: expect.closeTo(((2 + 1) * 30) / 300, 10) },
@@ -268,8 +306,11 @@ describe("GET /api/statistics", () => {
   it("returns monthly curated total data", () =>
     expect(getStats({ dimensions: "yearMonth,curatedData", productTypes: "observation,model" })).resolves.toMatchObject(
       [
+        { yearMonth: "2009-07", curatedData: expect.closeTo(1 / 300, 10) }, // classification
         { yearMonth: "2014-12", curatedData: expect.closeTo(1 / 300, 10) }, // model
+        { yearMonth: "2018-06", curatedData: expect.closeTo(1 / 300, 10) }, // classification
         { yearMonth: "2018-11", curatedData: expect.closeTo(2 / 300, 10) }, // radar
+        { yearMonth: "2019-07", curatedData: expect.closeTo(1 / 300, 10) }, // classification
         { yearMonth: "2019-09", curatedData: expect.closeTo(2 / 300, 10) }, // radar
         { yearMonth: "2020-01", curatedData: expect.closeTo(1 / 300, 10) }, // model
         { yearMonth: "2020-12", curatedData: expect.closeTo(1 / 300, 10) }, // model
@@ -277,6 +318,22 @@ describe("GET /api/statistics", () => {
         { yearMonth: "2021-02", curatedData: expect.closeTo(2 / 300, 10) }, // radar
       ],
     ));
+
+  it("returns monthly curated total data in files", () =>
+    expect(
+      getStats({ dimensions: "yearMonth,curatedData", productTypes: "observation,model", cluUnits: "files" }),
+    ).resolves.toMatchObject([
+      { yearMonth: "2009-07", curatedData: 1 }, // classification
+      { yearMonth: "2014-12", curatedData: 1 }, // model
+      { yearMonth: "2018-06", curatedData: 1 }, // classification
+      { yearMonth: "2018-11", curatedData: 1 }, // radar
+      { yearMonth: "2019-07", curatedData: 3 }, // categorize + classification
+      { yearMonth: "2019-09", curatedData: 1 }, // radar
+      { yearMonth: "2020-01", curatedData: 1 }, // model
+      { yearMonth: "2020-12", curatedData: 1 }, // model
+      { yearMonth: "2021-01", curatedData: 1 }, // model
+      { yearMonth: "2021-02", curatedData: 1 }, // radar
+    ]));
 
   it("returns monthly curated model data", () =>
     expect(getStats({ dimensions: "yearMonth,curatedData", productTypes: "model" })).resolves.toMatchObject([
@@ -288,18 +345,34 @@ describe("GET /api/statistics", () => {
 
   it("returns monthly curated observation data", () =>
     expect(getStats({ dimensions: "yearMonth,curatedData", productTypes: "observation" })).resolves.toMatchObject([
+      { yearMonth: "2009-07", curatedData: expect.closeTo(1 / 300, 10) }, // classification
+      { yearMonth: "2018-06", curatedData: expect.closeTo(1 / 300, 10) }, // classification
       { yearMonth: "2018-11", curatedData: expect.closeTo(2 / 300, 10) }, // radar
+      { yearMonth: "2019-07", curatedData: expect.closeTo(1 / 300, 10) }, // classification
       { yearMonth: "2019-09", curatedData: expect.closeTo(2 / 300, 10) }, // radar
       { yearMonth: "2021-02", curatedData: expect.closeTo(2 / 300, 10) }, // radar
     ]));
 
   it("returns yearly curated total data", () =>
     expect(getStats({ dimensions: "year,curatedData", productTypes: "observation,model" })).resolves.toMatchObject([
+      { year: "2009", curatedData: expect.closeTo(1 / 300, 10) }, // classification
       { year: "2014", curatedData: expect.closeTo(1 / 300, 10) }, // model
-      { year: "2018", curatedData: expect.closeTo(2 / 300, 10) }, // radar
-      { year: "2019", curatedData: expect.closeTo(2 / 300, 10) }, // radar
+      { year: "2018", curatedData: expect.closeTo(3 / 300, 10) }, // radar + classification
+      { year: "2019", curatedData: expect.closeTo(3 / 300, 10) }, // radar + classification
       { year: "2020", curatedData: expect.closeTo(2 / 300, 10) }, // model + model
       { year: "2021", curatedData: expect.closeTo(3 / 300, 10) }, // model + radar
+    ]));
+
+  it("returns yearly curated total data in files", () =>
+    expect(
+      getStats({ dimensions: "year,curatedData", productTypes: "observation,model", cluUnits: "files" }),
+    ).resolves.toMatchObject([
+      { year: "2009", curatedData: 1 }, // classification
+      { year: "2014", curatedData: 1 }, // model
+      { year: "2018", curatedData: 2 }, // radar + classification
+      { year: "2019", curatedData: 4 }, // radar + classification
+      { year: "2020", curatedData: 2 }, // model + model
+      { year: "2021", curatedData: 2 }, // model + radar
     ]));
 
   it("returns yearly curated model data", () =>
@@ -311,8 +384,9 @@ describe("GET /api/statistics", () => {
 
   it("returns yearly curated observation data", () =>
     expect(getStats({ dimensions: "year,curatedData", productTypes: "observation" })).resolves.toMatchObject([
-      { year: "2018", curatedData: expect.closeTo(2 / 300, 10) }, // radar
-      { year: "2019", curatedData: expect.closeTo(2 / 300, 10) }, // radar
+      { year: "2009", curatedData: expect.closeTo(1 / 300, 10) }, // classification
+      { year: "2018", curatedData: expect.closeTo(3 / 300, 10) }, // radar + classification
+      { year: "2019", curatedData: expect.closeTo(3 / 300, 10) }, // radar + classification
       { year: "2021", curatedData: expect.closeTo(2 / 300, 10) }, // radar
     ]));
 
@@ -320,13 +394,13 @@ describe("GET /api/statistics", () => {
     expect(
       getStats({ dimensions: "year,curatedData", productTypes: "observation", site: "mace-head" }),
     ).resolves.toMatchObject([
-      { year: "2018", curatedData: expect.closeTo(2 / 300, 10) }, // radar
+      { year: "2018", curatedData: expect.closeTo(3 / 300, 10) }, // radar + classification
     ]));
 
   it("filters curated data by DVAS facility", () =>
     expect(
       getStats({ dimensions: "year,curatedData", productTypes: "observation", facility: "mchd" }),
     ).resolves.toMatchObject([
-      { year: "2018", curatedData: expect.closeTo(2 / 300, 10) }, // radar
+      { year: "2018", curatedData: expect.closeTo(3 / 300, 10) }, // radar + classification
     ]));
 });

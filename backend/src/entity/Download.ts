@@ -42,42 +42,34 @@ export class Download {
       "ip",
       "country",
       "measurementDate",
-      "productType",
+      "productId",
       "siteId",
       SUM("downloads") AS "downloads"
     FROM download
     JOIN (
-      SELECT uuid, "measurementDate", "productType", "siteId", COUNT(*) AS "downloads"
+      SELECT uuid, "measurementDate", "productId", "siteId", COUNT(*) AS "downloads"
       FROM (
-        SELECT uuid, "measurementDate", 'observation' AS "productType", "siteId"
+        SELECT uuid, "measurementDate", "productId", "siteId"
         FROM regular_file
-        JOIN product_variable USING ("productId")
-        WHERE product_variable."actrisName" IS NOT NULL
         UNION ALL
-        SELECT uuid, "measurementDate", 'model' AS "productType", "siteId"
+        SELECT uuid, "measurementDate", "productId", "siteId"
         FROM model_file
-        JOIN product_variable USING ("productId")
-        WHERE product_variable."actrisName" IS NOT NULL
       ) AS file
-      GROUP BY uuid, "measurementDate", "productType", "siteId"
+      GROUP BY uuid, "measurementDate", "productId", "siteId"
       UNION ALL
-      SELECT "collectionUuid" AS uuid, "measurementDate", "productType", "siteId", COUNT(*) AS "downloads"
+      SELECT "collectionUuid" AS uuid, "measurementDate", "productId", "siteId", COUNT(*) AS "downloads"
       FROM (
-        SELECT "collectionUuid", "measurementDate", 'observation' AS "productType", "siteId"
+        SELECT "collectionUuid", "measurementDate", "productId", "siteId"
         FROM collection_regular_files_regular_file
         JOIN regular_file ON "regularFileUuid" = regular_file.uuid
-        JOIN product_variable USING ("productId")
-        WHERE product_variable."actrisName" IS NOT NULL
         UNION ALL
-        SELECT "collectionUuid", "measurementDate", 'model' AS "productType", "siteId"
+        SELECT "collectionUuid", "measurementDate", "productId", "siteId"
         FROM collection_model_files_model_file
         JOIN model_file ON "modelFileUuid" = model_file.uuid
-        JOIN product_variable USING ("productId")
-        WHERE product_variable."actrisName" IS NOT NULL
       ) AS collection_file
-      GROUP BY "collectionUuid", "measurementDate", "productType", "siteId"
+      GROUP BY "collectionUuid", "measurementDate", "productId", "siteId"
     ) object ON "objectUuid" = object.uuid
-    GROUP BY "downloadDate", "ip", "country", "measurementDate", "productType", "siteId"
+    GROUP BY "downloadDate", "ip", "country", "measurementDate", "productId", "siteId"
   `,
   materialized: true,
 })
@@ -89,7 +81,7 @@ export class DownloadStats {
   measurementDate!: Date;
 
   @ViewColumn()
-  productType!: string;
+  productId!: string;
 
   @ViewColumn()
   siteId!: string;
