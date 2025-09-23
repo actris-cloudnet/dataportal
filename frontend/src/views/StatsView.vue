@@ -15,6 +15,10 @@
             { id: 'yearMonth,uniqueIps', humanReadableName: 'Monthly unique IPs' },
             { id: 'year,uniqueIps', humanReadableName: 'Yearly unique IPs' },
             { id: 'country,downloads', humanReadableName: 'Downloads by country' },
+            { id: 'product,downloads', humanReadableName: 'Downloads by product' },
+            { id: 'product,uniqueIps', humanReadableName: 'Unique IPs by product' },
+            { id: 'site,downloads', humanReadableName: 'Downloads by site' },
+            { id: 'site,uniqueIps', humanReadableName: 'Unique IPs by site' },
             { id: 'yearMonth,visits', humanReadableName: 'Monthly visits' },
             { id: 'year,visits', humanReadableName: 'Yearly visits' },
             { id: 'country,visits', humanReadableName: 'Visits by country' },
@@ -161,7 +165,16 @@ import LandingHeader from "@/components/LandingHeader.vue";
 import { loginStore } from "@/lib/auth";
 import type { Product } from "@shared/entity/Product";
 
-type Dimension = "year" | "yearMonth" | "country" | "downloads" | "uniqueIps" | "visits" | "curatedData";
+type Dimension =
+  | "year"
+  | "yearMonth"
+  | "country"
+  | "downloads"
+  | "uniqueIps"
+  | "visits"
+  | "curatedData"
+  | "product"
+  | "site";
 type Units = "variableYear" | "files";
 
 const statistics = ref([]);
@@ -178,6 +191,8 @@ const dimensionLabel: Record<Dimension, string> = {
   uniqueIps: "Unique IPs",
   visits: "Visits",
   curatedData: "Curated data",
+  product: "Product",
+  site: "Site",
 };
 const numberFormat = (Intl && Intl.NumberFormat && new Intl.NumberFormat("en-GB")) || {
   format(number: number): string {
@@ -269,12 +284,14 @@ async function onSearch() {
     dimensions.value = selectedDimensions.value.split(",") as Dimension[];
     const data = response.data;
     maxValue.value = Math.max(...data.map((d: any) => d[dimensions.value[1]]));
-    if (selectedDimensions.value === "country,downloads") {
-      data.sort((a: any, b: any) => compareValues(b.downloads, a.downloads));
-    } else if (selectedDimensions.value.includes("yearMonth")) {
+    if (selectedDimensions.value.includes("yearMonth")) {
       data.sort((a: any, b: any) => compareValues(b.yearMonth, a.yearMonth));
     } else if (selectedDimensions.value.includes("year")) {
       data.sort((a: any, b: any) => compareValues(b.year, a.year));
+    } else if (selectedDimensions.value.includes("downloads")) {
+      data.sort((a: any, b: any) => compareValues(b.downloads, a.downloads));
+    } else if (selectedDimensions.value.includes("uniqueIps")) {
+      data.sort((a: any, b: any) => compareValues(b.uniqueIps, a.uniqueIps));
     }
     statistics.value = data;
   } catch (e) {

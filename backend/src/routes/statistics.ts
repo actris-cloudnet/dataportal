@@ -21,6 +21,10 @@ export class StatisticsRoutes {
       case "yearMonth,uniqueIps":
       case "year,uniqueIps":
       case "country,downloads":
+      case "product,downloads":
+      case "product,uniqueIps":
+      case "site,downloads":
+      case "site,uniqueIps":
         return this.downloadStats(req, res, next);
       case "yearMonth,curatedData":
       case "year,curatedData":
@@ -123,6 +127,10 @@ export class StatisticsRoutes {
         qb.addSelect("to_char(\"downloadDate\", 'YYYY')", "year").groupBy("year").orderBy("year");
       } else if (dimensions === "country,downloads") {
         qb.addSelect("country").groupBy("country").orderBy("country");
+      } else if (dimensions === "product,downloads") {
+        qb.addSelect('"productId"', "product").groupBy('"productId"').orderBy('"productId"');
+      } else if (dimensions === "site,downloads") {
+        qb.addSelect('"siteId"', "site").groupBy('"siteId"').orderBy('"siteId"');
       }
     } else if (dimensions === "yearMonth,uniqueIps") {
       qb.select("to_char(\"downloadDate\", 'YYYY-MM')", "yearMonth")
@@ -134,6 +142,16 @@ export class StatisticsRoutes {
         .addSelect("COUNT(DISTINCT ip)", "uniqueIps")
         .groupBy("year")
         .orderBy("year");
+    } else if (dimensions === "product,uniqueIps") {
+      qb.select('"productId"', "product")
+        .addSelect("COUNT(DISTINCT ip)", "uniqueIps")
+        .groupBy('"productId"')
+        .orderBy('"productId"');
+    } else if (dimensions === "site,uniqueIps") {
+      qb.select('"siteId"', "site")
+        .addSelect("COUNT(DISTINCT ip)", "uniqueIps")
+        .groupBy('"siteId"')
+        .orderBy('"siteId"');
     }
 
     const rows = await qb.getRawMany();
