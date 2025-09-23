@@ -403,4 +403,60 @@ describe("GET /api/statistics", () => {
     ).resolves.toMatchObject([
       { year: "2018", curatedData: expect.closeTo(3 / 300, 10) }, // radar + classification
     ]));
+
+  it("returns downloads by product", () =>
+    expect(getStats({ dimensions: "product,downloads", cluUnits: "files" })).resolves.toMatchObject([
+      {
+        downloads: 181,
+        product: "classification",
+      },
+      {
+        downloads: 184,
+        product: "model",
+      },
+      {
+        downloads: 365,
+        product: "radar",
+      },
+    ]));
+
+  it("returns unique IPs by product", () =>
+    expect(getStats({ dimensions: "product,uniqueIps", cluUnits: "files" })).resolves.toMatchObject([
+      {
+        product: "classification",
+        uniqueIps: 1,
+      },
+      {
+        product: "model",
+        uniqueIps: 1,
+      },
+      {
+        product: "radar",
+        uniqueIps: 2,
+      },
+    ]));
+
+  it("returns downloads by site", () =>
+    expect(getStats({ dimensions: "site,downloads", cluUnits: "files" })).resolves.toMatchObject([
+      {
+        downloads: 365,
+        site: "hyytiala",
+      },
+      {
+        downloads: 365,
+        site: "mace-head",
+      },
+    ]));
+
+  it("returns unique IPs by site", () =>
+    expect(getStats({ dimensions: "site,uniqueIps", cluUnits: "files" })).resolves.toMatchObject([
+      {
+        site: "hyytiala",
+        uniqueIps: 2,
+      },
+      {
+        site: "mace-head",
+        uniqueIps: 2,
+      },
+    ]));
 });
