@@ -121,6 +121,12 @@
                 <td v-if="dimensions[0] == 'country'">
                   {{ item[dimensions[0]] ? getCountryName(item[dimensions[0]]) : "Unknown" }}
                 </td>
+                <td v-else-if="dimensions[0] == 'site'">
+                  {{ getSiteName(item[dimensions[0]]) }}
+                </td>
+                <td v-else-if="dimensions[0] == 'product'">
+                  {{ getProductName(item[dimensions[0]]) }}
+                </td>
                 <td v-else>
                   {{ item[dimensions[0]] || "Unknown" }}
                 </td>
@@ -201,6 +207,7 @@ const numberFormat = (Intl && Intl.NumberFormat && new Intl.NumberFormat("en-GB"
 };
 const loadingSites = ref(true);
 const countries = ref<Option[]>([]);
+const allSites = ref<Site[]>([]);
 const sites = ref<Site[]>([]);
 const productTypes = ref(["observation", "model"]);
 const downloadDateFrom = ref<string | null>(null);
@@ -238,6 +245,14 @@ function getCountryName(countryCode: string): string {
   return (COUNTRY_NAMES as any)[countryCode] || `Unknown (${countryCode})`;
 }
 
+function getSiteName(siteId: string): string {
+  return allSites.value.find((site) => site.id === siteId)?.humanReadableName || siteId;
+}
+
+function getProductName(productId: string): string {
+  return products.value.find((prod) => prod.id === productId)?.humanReadableName || productId;
+}
+
 onMounted(async () => {
   try {
     const [siteRes, productRes] = await Promise.all([
@@ -250,9 +265,8 @@ onMounted(async () => {
         humanReadableName: getCountryName(countryCode),
       }))
       .sort((a, b) => compareValues(a.humanReadableName, b.humanReadableName));
-    sites.value = siteRes.data
-      .filter((site) => !site.type.includes("hidden"))
-      .sort((a, b) => compareValues(a.humanReadableName, b.humanReadableName));
+    allSites.value = siteRes.data.sort((a, b) => compareValues(a.humanReadableName, b.humanReadableName));
+    sites.value = allSites.value.filter((site) => !site.type.includes("hidden"));
     products.value = productRes.data.sort((a, b) => compareValues(a.humanReadableName, b.humanReadableName));
     loadingSites.value = false;
   } catch (e) {
