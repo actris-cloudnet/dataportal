@@ -330,7 +330,9 @@ table {
 
 td,
 th {
-  padding: 0.25rem 1rem 0 0;
+  padding: 0.5rem 0.5rem 0 0;
+  vertical-align: middle;
+  line-height: 1;
 
   &:first-child {
     text-align: right;
