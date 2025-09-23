@@ -387,8 +387,6 @@ async function createServer(): Promise<void> {
 
   app.use(errorHandler);
 
-  // Skip errors related to Express 5: https://github.com/expressjs/express/issues/4892
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   const server = http.createServer(app);
 
   // Disable request timeout to handle large uploads. This shouldn't be a
