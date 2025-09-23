@@ -128,7 +128,7 @@ export class StatisticsRoutes {
       } else if (dimensions === "country,downloads") {
         qb.addSelect("country").groupBy("country").orderBy("country");
       } else if (dimensions === "product,downloads") {
-        qb.addSelect('"productId"', "product").groupBy('"productId"').orderBy('"productId"');
+        qb.addSelect('stats."productId"', "product").groupBy('stats."productId"').orderBy('stats."productId"');
       } else if (dimensions === "site,downloads") {
         qb.addSelect('"siteId"', "site").groupBy('"siteId"').orderBy('"siteId"');
       }
@@ -143,10 +143,10 @@ export class StatisticsRoutes {
         .groupBy("year")
         .orderBy("year");
     } else if (dimensions === "product,uniqueIps") {
-      qb.select('"productId"', "product")
+      qb.select('stats."productId"', "product")
         .addSelect("COUNT(DISTINCT ip)", "uniqueIps")
-        .groupBy('"productId"')
-        .orderBy('"productId"');
+        .groupBy('stats."productId"')
+        .orderBy('stats."productId"');
     } else if (dimensions === "site,uniqueIps") {
       qb.select('"siteId"', "site")
         .addSelect("COUNT(DISTINCT ip)", "uniqueIps")
