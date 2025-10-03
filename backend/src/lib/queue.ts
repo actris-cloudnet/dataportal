@@ -153,14 +153,22 @@ export class QueueService {
   }
 
   async getQueue(
-    options: { queueId?: string; batchId?: string; status?: TaskStatus[]; limit?: number; doneAfter?: Date } = {},
+    options: {
+      queueId?: string;
+      batchId?: string;
+      status?: TaskStatus[];
+      offset?: number;
+      limit?: number;
+      doneAfter?: Date;
+      reverse?: boolean;
+    } = {},
   ) {
     const qb = this.taskRepo
       .createQueryBuilder("task")
       .leftJoinAndSelect("task.instrumentInfo", "instrumentInfo")
       .leftJoinAndSelect("task.model", "model")
       .orderBy("task.status", "DESC")
-      .addOrderBy("task.scheduledAt", "ASC");
+      .addOrderBy("task.scheduledAt", options.reverse ? "DESC" : "ASC");
     if (typeof options.queueId !== "undefined") {
       qb.andWhere("task.queueId = :queueId", options);
     }
@@ -174,6 +182,9 @@ export class QueueService {
       qb.andWhere("task.doneAt >= :doneAfter", options);
     }
     const total = qb.getCount();
+    if (typeof options.offset !== "undefined") {
+      qb.skip(options.offset);
+    }
     if (typeof options.limit !== "undefined") {
       qb.take(options.limit);
     }

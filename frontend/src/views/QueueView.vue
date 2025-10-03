@@ -33,7 +33,13 @@
           </tbody>
         </table>
         <CheckBox label="Show failed tasks" v-model="showFailed" />
-        <table class="tasks" v-if="queueData.length > 0">
+        <BaseButton type="secondary" :disabled="!hasPreviousPage" @click="previousPage" style="margin-left: 4rem">
+          Previous
+        </BaseButton>
+        <BaseButton type="secondary" :disabled="!hasNextPage" @click="nextPage" style="margin-left: 1rem">
+          Next
+        </BaseButton>
+        <table class="tasks" v-if="queueData.length > 0" style="margin-top: 1rem">
           <thead>
             <tr>
               <th>Type</th>
@@ -78,9 +84,6 @@
             </tr>
           </tbody>
         </table>
-        <div v-if="queueData.length < totalTasks">
-          and {{ totalTasks - queueData.length }} other {{ totalTasks - queueData.length === 1 ? "task" : "tasks" }}...
-        </div>
       </template>
     </main>
   </div>
@@ -88,7 +91,7 @@
 
 <script lang="ts" setup>
 import LandingHeader from "@/components/LandingHeader.vue";
-import { ref, onMounted, onUnmounted, watch } from "vue";
+import { ref, onMounted, onUnmounted, watch, computed } from "vue";
 import axios from "axios";
 import { backendUrl, humanReadableTimestamp } from "@/lib";
 import BaseSpinner from "@/components/BaseSpinner.vue";
@@ -108,6 +111,8 @@ const showFailed = ref(false);
 const isLoading = ref(true);
 const isCancelled = ref(false);
 const totalTasks = ref(0);
+const limit = 100;
+const offset = ref(0);
 
 let updateTimeout: NodeJS.Timeout | null = null;
 let lastUpdate = new Date();
@@ -121,7 +126,7 @@ async function updateQueueData() {
   try {
     if (showFailed.value) {
       const failedRes = await axios.get<TaskResponse>(`${backendUrl}queue`, {
-        params: { batch: route.query.batch, status: ["failed"], limit: 1000 },
+        params: { batch: route.query.batch, status: ["failed"], reverse: true, limit, offset: offset.value },
         auth: { username: loginStore.username, password: loginStore.password },
       });
       totalTasks.value = failedRes.data.totalTasks;
@@ -133,7 +138,7 @@ async function updateQueueData() {
           auth: { username: loginStore.username, password: loginStore.password },
         }),
         axios.get<TaskResponse>(`${backendUrl}queue`, {
-          params: { batch: route.query.batch, status: ["created", "running", "restart"], limit: 100 },
+          params: { batch: route.query.batch, status: ["created", "running", "restart"], limit, offset: offset.value },
           auth: { username: loginStore.username, password: loginStore.password },
         }),
       ]);
@@ -207,6 +212,23 @@ async function cancelBatch() {
   }
 }
 
+const hasNextPage = computed(() => offset.value + limit < totalTasks.value);
+const hasPreviousPage = computed(() => offset.value > 0);
+
+function nextPage() {
+  offset.value += limit;
+}
+
+function previousPage() {
+  offset.value -= limit;
+}
+
+async function reloadData() {
+  if (updateTimeout) clearTimeout(updateTimeout);
+  isLoading.value = true;
+  await updateQueueData();
+}
+
 onMounted(async () => {
   await updateQueueData();
 });
@@ -214,11 +236,12 @@ onMounted(async () => {
 watch(
   () => showFailed.value,
   async () => {
-    if (updateTimeout) clearTimeout(updateTimeout);
-    isLoading.value = true;
-    await updateQueueData();
+    offset.value = 0;
+    await reloadData();
   },
 );
+
+watch(() => offset.value, reloadData);
 
 onUnmounted(() => {
   if (updateTimeout) clearTimeout(updateTimeout);

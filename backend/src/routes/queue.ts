@@ -138,20 +138,27 @@ export class QueueRoutes {
     if (typeof status !== "undefined" && (!isStringArray(status) || !status.every(isTaskStatus))) {
       return next({ status: 400, errors: ["Invalid status parameter"] });
     }
+    const offset = typeof req.query.offset === "string" ? parseInt(req.query.offset, 10) : undefined;
+    if (typeof offset !== "undefined" && !isFinite(offset)) {
+      return next({ status: 400, errors: ["Invalid offset parameter"] });
+    }
     const limit = typeof req.query.limit === "string" ? parseInt(req.query.limit, 10) : undefined;
-    if (typeof limit !== "undefined" && isNaN(limit)) {
+    if (typeof limit !== "undefined" && !isFinite(limit)) {
       return next({ status: 400, errors: ["Invalid limit parameter"] });
     }
     const doneAfter = typeof req.query.doneAfter === "string" ? new Date(req.query.doneAfter) : undefined;
     if (typeof doneAfter !== "undefined" && isNaN(doneAfter.getTime())) {
       return next({ status: 400, errors: ["Invalid doneAfter parameter"] });
     }
+    const reverse = !!req.query.reverse;
     const queue = await this.queueService.getQueue({
       queueId,
       batchId,
       status: status as TaskStatus[],
+      offset,
       limit,
       doneAfter,
+      reverse,
     });
     res.send({ tasks: queue[0], totalTasks: queue[1] });
   };
