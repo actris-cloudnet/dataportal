@@ -8,7 +8,7 @@ import { hasPermission, loginStore, logout } from "@/lib/auth";
       <span class="title">Secret pages:</span>
       <router-link v-if="hasPermission('canPublishTask').value" :to="{ name: 'Queue' }">Queue</router-link>
       <router-link v-if="hasPermission('canGetStats').value" :to="{ name: 'Statistics' }">Statistics</router-link>
-      <span class="title" style="margin-left: auto">{{ loginStore.username }}:</span>
+      <span class="title" style="margin-left: auto">{{ loginStore.name }}:</span>
       <a href="#" class="logout" @click="logout">Log out</a>
     </div>
   </header>

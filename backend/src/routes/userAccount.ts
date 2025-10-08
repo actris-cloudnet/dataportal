@@ -252,22 +252,4 @@ export class UserAccountRoutes {
       return next({ status: 422, errors: "Unexpected permission type" });
     }
   };
-
-  userInfo: RequestHandler = async (req, res, next) => {
-    const credentials = basicAuth(req);
-    if (!credentials) {
-      return next({ status: 401, errors: "Unauthorized" });
-    }
-    const user = await this.userAccountRepository.findOne({
-      where: { username: credentials.name },
-      relations: { permissions: { site: true } },
-    });
-    if (!user) {
-      return next({ status: 401, errors: "Unauthorized" });
-    }
-    if (!user.comparePassword(credentials.pass)) {
-      return next({ status: 401, errors: "Unauthorized" });
-    }
-    res.send(user.permissions);
-  };
 }

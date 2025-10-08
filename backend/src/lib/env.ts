@@ -80,6 +80,8 @@ interface Env {
   DVAS_URL: string;
   DC_URL: string;
   PRIVATE_IP_RANGES: [ipaddr.IPv4 | ipaddr.IPv6, number][];
+  ORCID_CLIENT_ID?: string;
+  ORCID_CLIENT_SECRET?: string;
 }
 
 const env: Env = {

@@ -8,7 +8,7 @@ import { isAuthenticated } from "@/lib/auth";
 
 <template>
   <div id="app">
-    <AdminHeader v-if="isAuthenticated" />
+    <!-- <AdminHeader v-if="isAuthenticated" /> -->
     <TheHeader />
     <div id="content">
       <router-view></router-view>

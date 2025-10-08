@@ -2,6 +2,8 @@
 import defaultLogo from "@/assets/header-logo.svg";
 import xmasLogo from "@/assets/header-logo-xmas.svg";
 import actrisLogo from "@/assets/logos/actris-white.svg";
+import userIcon from "@/assets/icons/user-solid-full.svg";
+import { loginStore, isAuthenticated } from "@/lib/auth";
 import { ref } from "vue";
 
 const isDev = import.meta.env.DEV;
@@ -61,6 +63,20 @@ const showMenu = ref(false);
             <span>Contact</span>
           </a>
         </li>
+        <li>
+          <router-link v-if="!isAuthenticated" :to="{ name: 'Login' }" class="secret" tabindex="-1">
+            Login
+          </router-link>
+          <a v-else>
+            <svg class="user-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+              <!--!Font Awesome Pro v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2025 Fonticons, Inc.-->
+              <path
+                d="M320 312C386.3 312 440 258.3 440 192C440 125.7 386.3 72 320 72C253.7 72 200 125.7 200 192C200 258.3 253.7 312 320 312zM290.3 368C191.8 368 112 447.8 112 546.3C112 562.7 125.3 576 141.7 576L498.3 576C514.7 576 528 562.7 528 546.3C528 447.8 448.2 368 349.7 368L290.3 368z"
+              />
+            </svg>
+            {{ loginStore.name }}
+          </a>
+        </li>
       </ul>
     </div>
   </header>
@@ -94,6 +110,7 @@ header {
     z-index: -1;
   }
 
+  /*
   &.dev::before {
     background-image: linear-gradient(to bottom, transparent 75%, rgba(0, 0, 0, 0.05)),
       repeating-linear-gradient(-45deg, #ff6dbc55, #ff6dbc55 15px, #ff529855 15px, #ff529855 30px),
@@ -106,6 +123,7 @@ header {
     background-size: auto, auto, auto, cover;
     background-repeat: no-repeat, repeat, no-repeat, no-repeat;
   }
+    */
 }
 
 .container {
@@ -153,16 +171,15 @@ li a {
   padding: 0.5rem;
   margin-left: 1rem;
   display: flex;
+  align-items: center;
 
   span {
-    padding: 0.25rem 0;
-    border-top: 2px solid transparent;
-    border-bottom: 2px solid transparent;
   }
 
   &:hover {
     text-decoration: none;
-    opacity: 0.9;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
   }
 }
 
@@ -194,6 +211,13 @@ li a {
       transform: translate(0, -11px) rotate(45deg);
     }
   }
+}
+
+.user-icon {
+  width: 24px;
+  height: 24px;
+  fill: white;
+  margin-right: 0.25rem;
 }
 
 @media screen and (max-width: 1000px) {
