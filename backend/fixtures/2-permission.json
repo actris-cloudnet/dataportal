@@ -35,5 +35,9 @@
     "id": 9,
     "permission": "canUpload",
     "site": { "id": "hyytiala" }
+  },
+  {
+    "id": 10,
+    "permission": "canLogin"
   }
 ]

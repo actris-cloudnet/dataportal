@@ -1,17 +1,22 @@
 <script lang="ts" setup>
 import TheHeader from "@/components/TheHeader.vue";
-import AdminHeader from "@/components/AdminHeader.vue";
 import TheFooter from "@/components/TheFooter.vue";
 import ConsentPopup from "@/components/ConsentPopup.vue";
-import { isAuthenticated } from "@/lib/auth";
+import { hasPermission, loginStore } from "@/lib/auth";
 </script>
 
 <template>
   <div id="app">
-    <AdminHeader v-if="isAuthenticated" />
     <TheHeader />
     <div id="content">
-      <router-view></router-view>
+      <div
+        v-if="loginStore.isAuthenticated && $route.meta.permission && !hasPermission($route.meta.permission).value"
+        id="unauthorized"
+      >
+        <h1>Unauthorized</h1>
+        <p>You don't have the permission to view this page.</p>
+      </div>
+      <router-view v-else></router-view>
     </div>
     <TheFooter />
     <ConsentPopup />
@@ -29,5 +34,15 @@ import { isAuthenticated } from "@/lib/auth";
 
 #content {
   flex: 1 1 0;
+}
+
+#unauthorized {
+  text-align: center;
+  margin: 1rem;
+
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
 }
 </style>

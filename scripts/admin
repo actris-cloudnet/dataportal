@@ -16,6 +16,7 @@ PERMISSIONS = [
     "canDelete",
     "canGetStats",
     "canPublishTask",
+    "canLogin",
 ]
 
 
@@ -29,6 +30,7 @@ def get_user(username):
     for user in get_all_users():
         if user["username"] == username:
             return user
+    raise ValueError(f"User {username} not found")
 
 
 def put_user(user):

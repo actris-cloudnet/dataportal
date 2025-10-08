@@ -66,7 +66,7 @@ export class UploadRoutes {
   postMetadata: RequestHandler = async (req, res, next) => {
     const body = req.body;
     const filename = basename(body.filename);
-    const siteId = "site" in body ? body.site : res.locals.username;
+    const siteId = "site" in body ? body.site : req.user!.username;
     const isInstrument = !req.path.includes("model");
     let UploadEntity: EntityTarget<InstrumentUpload | ModelUpload>;
     let dataSource: InstrumentInfo | Model;
@@ -78,7 +78,7 @@ export class UploadRoutes {
       return next({ status: 422, errors: "Unknown site" });
     }
     if (isInstrument) {
-      await this.authenticator.checkPermission(res, PermissionType.canUpload, { site });
+      await this.authenticator.checkPermission(req, PermissionType.canUpload, { site });
       const instrumentInfo = await this.instrumentInfoRepo.findOne({
         where: { pid: body.instrumentPid },
         relations: { instrument: true },
@@ -107,7 +107,7 @@ export class UploadRoutes {
       if (!model) {
         return next({ status: 422, errors: "Unknown model" });
       }
-      await this.authenticator.checkPermission(res, PermissionType.canUploadModel, { site, model });
+      await this.authenticator.checkPermission(req, PermissionType.canUploadModel, { site, model });
       UploadEntity = ModelUpload;
       dataSource = model;
     }
@@ -245,9 +245,9 @@ export class UploadRoutes {
           }));
       if (!upload) return next({ status: 400, errors: "No metadata matches this hash" });
       if (upload instanceof InstrumentUpload) {
-        await this.authenticator.checkPermission(res, PermissionType.canUpload, { site: upload.site });
+        await this.authenticator.checkPermission(req, PermissionType.canUpload, { site: upload.site });
       } else {
-        await this.authenticator.checkPermission(res, PermissionType.canUploadModel, {
+        await this.authenticator.checkPermission(req, PermissionType.canUploadModel, {
           site: upload.site,
           model: upload.model,
         });

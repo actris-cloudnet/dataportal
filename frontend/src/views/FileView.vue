@@ -106,7 +106,7 @@ import BaseModal from "@/components/BaseModal.vue";
 import FileTags from "@/components/FileTags.vue";
 import { getProductIcon, getQcIcon } from "@/lib";
 import ApiError from "./ApiError.vue";
-import { hasPermission, loginStore } from "@/lib/auth";
+import { hasPermission } from "@/lib/auth";
 
 import PhotoGalleryIcon from "@/assets/icons/photo-gallery.png";
 import LandingHeader from "@/components/LandingHeader.vue";
@@ -219,7 +219,6 @@ async function openDeleteModal() {
     deleteBusy.value = true;
     const res = await axios.delete<File[]>(`${backendUrl}files/${props.uuid}`, {
       params: { dryRun: true, deleteHigherProducts: true },
-      auth: { username: loginStore.username, password: loginStore.password },
     });
     showDeleteModal.value = true;
     filesToDelete.value = res.data;
@@ -240,7 +239,6 @@ async function deleteFile() {
         deleteHigherProducts: true,
         tombstoneReason: requireTombstoneReason.value ? tombstoneReason.value : undefined,
       },
-      auth: { username: loginStore.username, password: loginStore.password },
     });
     window.location.reload();
   } catch (err) {

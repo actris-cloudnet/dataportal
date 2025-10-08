@@ -11,11 +11,12 @@
       { "id": 5 },
       { "id": 6 },
       { "id": 7 },
-      { "id": 8 }
+      { "id": 8 },
+      { "id": 10 }
     ]
   },
   {
-    "id": 1,
+    "id": 2,
     "username": "submitter",
     "passwordHash": "$apr1$H3voJmaV$ETE/KDz9AeIge9Q7IqMyh1",
     "permissions": [{ "id": 9 }]
