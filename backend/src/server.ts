@@ -1,6 +1,11 @@
 import * as express from "express";
 import * as http from "node:http";
 import { ErrorRequestHandler } from "express";
+import * as passport from "passport";
+import { Strategy as OrcidStrategy } from "passport-orcid";
+import { Strategy as CookieStrategy } from "passport-cookie";
+import { BasicStrategy } from "passport-http";
+import * as cookieParser from "cookie-parser";
 
 import { RequestError } from "./entity/RequestError";
 import { getIpLookup } from "./lib";
@@ -31,10 +36,12 @@ import { ProductAvailabilityRoutes } from "./routes/productAvailability";
 import { StatisticsRoutes } from "./routes/statistics";
 import { DataCiteService } from "./lib/datacite";
 import { CitationService } from "./lib/cite";
+import env from "./lib/env";
 
 async function createServer(): Promise<void> {
   const port = 3000;
   const app = express();
+  app.use(cookieParser());
 
   await AppDataSource.initialize();
   const ipLookup = await getIpLookup({ watchForUpdates: true });
@@ -121,13 +128,61 @@ async function createServer(): Promise<void> {
 
   if (process.env.NODE_ENV !== "production") {
     app.use(function (_req, res, next) {
-      res.header("Access-Control-Allow-Origin", "http://localhost:8080");
+      res.header("Access-Control-Allow-Origin", "http://127.0.0.1:8080");
       res.header("Access-Control-Allow-Credentials", "true");
       res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
       res.header("Access-Control-Allow-Methods", "*");
       next();
     });
   }
+
+  // Auth
+  if (env.ORCID_CLIENT_ID && env.ORCID_CLIENT_SECRET) {
+    passport.use(
+      new OrcidStrategy(
+        {
+          sandbox: process.env.NODE_ENV !== "production",
+          clientID: env.ORCID_CLIENT_ID,
+          clientSecret: env.ORCID_CLIENT_SECRET,
+          callbackURL: `${env.DP_BACKEND_URL}/auth/orcid/callback`,
+        },
+        (accessToken, refreshToken, params, profile, done) => {
+          authenticator
+            .orcidLogin(params)
+            .then((user) => done(null, user))
+            .catch((err) => done(err));
+        },
+      ),
+    );
+    app.get("/api/auth/orcid", passport.authenticate("orcid", { session: false }));
+    app.get(
+      "/api/auth/orcid/callback",
+      passport.authenticate("orcid", {
+        session: false,
+        failureRedirect: `${env.DP_FRONTEND_URL}/login`,
+      }),
+      authenticator.orcidCallback,
+    );
+  }
+  passport.use(
+    new CookieStrategy((token: string, done: (error: any, user?: any) => void) => {
+      authenticator
+        .cookieLogin(token)
+        .then((user) => done(null, user))
+        .catch((err) => done(err));
+    }),
+  );
+  passport.use(
+    new BasicStrategy((username, password, done) => {
+      authenticator
+        .basicLogin(username, password)
+        .then((user) => done(null, user))
+        .catch((err) => done(err));
+    }),
+  );
+  app.post("/api/auth/login", express.json(), authenticator.logIn);
+  app.get("/api/auth/me", passport.authenticate("cookie", { session: false }), authenticator.userInfo);
+  app.post("/api/auth/logout", passport.authenticate("cookie", { session: false }), authenticator.logOut);
 
   // public (changes to these require changes to API docs)
   app.get(
@@ -174,7 +229,7 @@ async function createServer(): Promise<void> {
   app.get("/api/calibration", calibRoutes.calibration);
   app.put(
     "/api/calibration",
-    authenticator.verifyCredentials(),
+    passport.authenticate("basic", { session: false }),
     authorizator.verifyPermission(PermissionType.canCalibrate),
     express.json(),
     calibRoutes.putCalibration,
@@ -251,7 +306,7 @@ async function createServer(): Promise<void> {
 
   app.post(
     "/upload/metadata",
-    authenticator.verifyCredentials(),
+    passport.authenticate("basic", { session: false }),
     express.json(),
     uploadRoutes.validateMetadata,
     uploadRoutes.validateFilename,
@@ -261,7 +316,7 @@ async function createServer(): Promise<void> {
   app.put(
     "/upload/data/:checksum",
     middleware.validateMD5Param,
-    authenticator.verifyCredentials(),
+    passport.authenticate("basic", { session: false }),
     express.raw({ limit: "100gb" }),
     uploadRoutes.putData,
     errorAsPlaintext,
@@ -270,7 +325,7 @@ async function createServer(): Promise<void> {
   // Model data upload
   app.post(
     "/model-upload/metadata",
-    authenticator.verifyCredentials(),
+    passport.authenticate("basic", { session: false }),
     express.json(),
     uploadRoutes.validateMetadata,
     uploadRoutes.validateFilename,
@@ -280,7 +335,7 @@ async function createServer(): Promise<void> {
   app.put(
     "/model-upload/data/:checksum",
     middleware.validateMD5Param,
-    authenticator.verifyCredentials(),
+    passport.authenticate("basic", { session: false }),
     express.raw({ limit: "1gb" }),
     uploadRoutes.putData,
   );
@@ -313,14 +368,14 @@ async function createServer(): Promise<void> {
   app.put("/quality/:uuid", middleware.validateUuidParam, express.json(), qualityRoutes.putQualityReport);
   app.get(
     "/api/statistics",
-    authenticator.verifyCredentials(),
+    passport.authenticate(["basic", "cookie"], { session: false }),
     authorizator.verifyPermission(PermissionType.canGetStats),
     statsRoutes.getStatistics,
   );
   app.delete(
     "/api/files/:uuid",
     middleware.validateUuidParam,
-    authenticator.verifyCredentials(),
+    passport.authenticate(["basic", "cookie"], { session: false }),
     authorizator.verifyPermission(PermissionType.canDelete),
     middleware.checkDeleteParams,
     fileRoutes.deleteFile,
@@ -328,25 +383,24 @@ async function createServer(): Promise<void> {
   app.delete(
     "/api/visualizations/:uuid",
     middleware.validateUuidParam,
-    authenticator.verifyCredentials(),
+    passport.authenticate(["basic", "cookie"], { session: false }),
     authorizator.verifyPermission(PermissionType.canDelete),
     vizRoutes.deleteVisualizations,
   );
   app.post(
     "/api/publications/",
-    authenticator.verifyCredentials(),
+    passport.authenticate(["basic", "cookie"], { session: false }),
     authorizator.verifyPermission(PermissionType.canAddPublication),
     express.json(),
     publicationRoutes.postPublication,
   );
   app.delete(
     "/api/publications/",
-    authenticator.verifyCredentials(),
+    passport.authenticate(["basic", "cookie"], { session: false }),
     authorizator.verifyPermission(PermissionType.canAddPublication),
     publicationRoutes.deletePublication,
   );
   app.get("/api/publications/", publicationRoutes.getPublications);
-  app.get("/api/users/me", userAccountRoutes.userInfo);
 
   // Private UserAccount and Permission routes
   app.post("/user-accounts", express.json(), userAccountRoutes.validatePost, userAccountRoutes.postUserAccount);
@@ -357,7 +411,7 @@ async function createServer(): Promise<void> {
 
   app.post(
     "/api/queue/publish",
-    authenticator.verifyCredentials(),
+    passport.authenticate(["basic", "cookie"], { session: false }),
     authorizator.verifyPermission(PermissionType.canPublishTask),
     express.json(),
     queueRoutes.publish,
@@ -367,20 +421,20 @@ async function createServer(): Promise<void> {
   app.put("/queue/fail/:id", queueRoutes.fail);
   app.get(
     "/api/queue/",
-    authenticator.verifyCredentials(),
+    passport.authenticate(["basic", "cookie"], { session: false }),
     authorizator.verifyPermission(PermissionType.canPublishTask),
     queueRoutes.getQueue,
   );
   app.post(
     "/api/queue/batch",
-    authenticator.verifyCredentials(),
+    passport.authenticate(["basic", "cookie"], { session: false }),
     authorizator.verifyPermission(PermissionType.canPublishTask),
     express.json(),
     queueRoutes.submitBatch,
   );
   app.delete(
     "/api/queue/batch/:batchId",
-    authenticator.verifyCredentials(),
+    passport.authenticate(["basic", "cookie"], { session: false }),
     authorizator.verifyPermission(PermissionType.canPublishTask),
     queueRoutes.cancelBatch,
   );

@@ -25,13 +25,11 @@
           </a>
         </span>
       </div>
-      <router-link v-if="!isAuthenticated" :to="{ name: 'Login' }" class="secret" tabindex="-1">&pi;</router-link>
     </div>
   </footer>
 </template>
 
 <script setup lang="ts">
-import { isAuthenticated } from "@/lib/auth";
 const dataportalVersion = import.meta.env.DATAPORTAL_VERSION;
 </script>
 
@@ -74,15 +72,5 @@ footer {
 
 .small {
   font-size: 60%;
-}
-
-.secret {
-  position: absolute;
-  right: 0.5rem;
-  bottom: 0.5rem;
-  text-decoration: none;
-  font-size: 75%;
-  line-height: 1;
-  opacity: 0.5;
 }
 </style>

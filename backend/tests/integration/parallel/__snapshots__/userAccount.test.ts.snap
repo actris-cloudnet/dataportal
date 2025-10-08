@@ -1,74 +1,59 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`GET /users/me return submitter permissions 1`] = `
-[
-  {
-    "id": 9,
-    "permission": "canUpload",
-    "site": {
-      "actrisId": null,
-      "altitude": 174,
-      "country": "Finland",
-      "countryCode": "FI",
-      "countrySubdivisionCode": null,
-      "description": null,
-      "dvasId": null,
-      "gaw": "SMR",
-      "humanReadableName": "Hyytiälä",
-      "id": "hyytiala",
-      "latitude": 61.844,
-      "longitude": 24.288,
-      "stationName": null,
-      "type": [
-        "cloudnet",
-      ],
-      "wigosId": null,
+exports[`GET /auth/login return submitter permissions 1`] = `
+{
+  "fullName": null,
+  "id": 2,
+  "orcidId": null,
+  "permissions": [
+    {
+      "id": 9,
+      "permission": "canUpload",
     },
-  },
-]
+  ],
+  "username": "submitter",
+}
 `;
 
-exports[`GET /users/me returns admin permissions 1`] = `
-[
-  {
-    "id": 1,
-    "permission": "canUpload",
-    "site": null,
-  },
-  {
-    "id": 2,
-    "permission": "canUploadModel",
-    "site": null,
-  },
-  {
-    "id": 3,
-    "permission": "canDelete",
-    "site": null,
-  },
-  {
-    "id": 4,
-    "permission": "canProcess",
-    "site": null,
-  },
-  {
-    "id": 5,
-    "permission": "canCalibrate",
-    "site": null,
-  },
-  {
-    "id": 6,
-    "permission": "canGetStats",
-    "site": null,
-  },
-  {
-    "id": 7,
-    "permission": "canAddPublication",
-    "site": null,
-  },
-  {
-    "id": 8,
-    "permission": "canPublishTask",
-    "site": null,
-  },
-]
+exports[`GET /auth/login returns admin permissions 1`] = `
+{
+  "fullName": null,
+  "id": 1,
+  "orcidId": null,
+  "permissions": [
+    {
+      "id": 1,
+      "permission": "canUpload",
+    },
+    {
+      "id": 2,
+      "permission": "canUploadModel",
+    },
+    {
+      "id": 3,
+      "permission": "canDelete",
+    },
+    {
+      "id": 4,
+      "permission": "canProcess",
+    },
+    {
+      "id": 5,
+      "permission": "canCalibrate",
+    },
+    {
+      "id": 6,
+      "permission": "canGetStats",
+    },
+    {
+      "id": 7,
+      "permission": "canAddPublication",
+    },
+    {
+      "id": 8,
+      "permission": "canPublishTask",
+    },
+  ],
+  "username": "admin",
+}
 `;

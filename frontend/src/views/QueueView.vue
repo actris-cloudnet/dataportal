@@ -100,7 +100,6 @@ import type { Task } from "@shared/entity/Task";
 import testPassIcon from "@/assets/icons/test-pass.svg";
 import turtleIcon from "@/assets/icons/icons8-turtle-24.png";
 import CheckBox from "@/components/CheckBox.vue";
-import { loginStore } from "@/lib/auth";
 import { useRoute } from "vue-router";
 
 type AugmentedTask = Omit<Task, "status"> & { status: Task["status"] | "pending" };
@@ -127,7 +126,6 @@ async function updateQueueData() {
     if (showFailed.value) {
       const failedRes = await axios.get<TaskResponse>(`${backendUrl}queue`, {
         params: { batch: route.query.batch, status: ["failed"], reverse: true, limit, offset: offset.value },
-        auth: { username: loginStore.username, password: loginStore.password },
       });
       totalTasks.value = failedRes.data.totalTasks;
       queueData.value = failedRes.data.tasks;
@@ -135,11 +133,9 @@ async function updateQueueData() {
       const [doneRes, otherRes] = await Promise.all([
         axios.get<TaskResponse>(`${backendUrl}queue`, {
           params: { batch: route.query.batch, status: ["done"], doneAfter: lastUpdate.toISOString() },
-          auth: { username: loginStore.username, password: loginStore.password },
         }),
         axios.get<TaskResponse>(`${backendUrl}queue`, {
           params: { batch: route.query.batch, status: ["created", "running", "restart"], limit, offset: offset.value },
-          auth: { username: loginStore.username, password: loginStore.password },
         }),
       ]);
       totalTasks.value = otherRes.data.totalTasks;
@@ -185,9 +181,7 @@ async function retryTask(task: AugmentedTask) {
   }
 
   try {
-    await axios.post(`${backendUrl}queue/publish`, newTask, {
-      auth: { username: loginStore.username, password: loginStore.password },
-    });
+    await axios.post(`${backendUrl}queue/publish`, newTask);
     if (updateTimeout) clearTimeout(updateTimeout);
     await updateQueueData();
   } catch (err) {
@@ -202,7 +196,6 @@ async function cancelBatch() {
     isCancelled.value = true;
     await axios.delete(`${backendUrl}queue/batch/${route.query.batch}`, {
       params: { batch: route.query.batch },
-      auth: { username: loginStore.username, password: loginStore.password },
     });
     if (updateTimeout) clearTimeout(updateTimeout);
     await updateQueueData();

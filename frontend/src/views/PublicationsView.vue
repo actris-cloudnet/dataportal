@@ -35,7 +35,7 @@ import LandingHeader from "@/components/LandingHeader.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
 import BaseButton from "@/components/BaseButton.vue";
 import { backendUrl } from "@/lib";
-import { hasPermission, loginStore } from "@/lib/auth";
+import { hasPermission } from "@/lib/auth";
 
 function groupBySorted<T, K extends keyof T>(items: T[], key: K, order: "asc" | "desc"): [T[K], T[]][] {
   const grouped = items.reduce((result, item) => {
@@ -86,11 +86,7 @@ async function updatePublications() {
 async function submitPublication() {
   try {
     addingPublication.value = true;
-    await axios.post(
-      `${backendUrl}publications`,
-      { uri: publicationUri.value },
-      { auth: { username: loginStore.username, password: loginStore.password } },
-    );
+    await axios.post(`${backendUrl}publications`, { uri: publicationUri.value });
     await updatePublications();
     publicationUri.value = "";
   } catch (err) {
@@ -105,7 +101,6 @@ async function removePublication(pub: Publication) {
     if (!confirm(`Remove ${pub.pid}?`)) return;
     await axios.delete(`${backendUrl}publications`, {
       params: { uri: pub.pid },
-      auth: { username: loginStore.username, password: loginStore.password },
     });
     await updatePublications();
   } catch (err) {

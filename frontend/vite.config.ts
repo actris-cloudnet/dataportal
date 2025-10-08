@@ -17,4 +17,13 @@ export default defineConfig({
       process.env.NODE_ENV === "production" ? "/cloudnet.png" : "/cloudnet-dev.png",
     ),
   },
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://dataportal-backend:3000",
+        // changeOrigin: true,
+        // rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+  },
 });

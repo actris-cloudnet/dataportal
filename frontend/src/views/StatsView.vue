@@ -168,7 +168,6 @@ import BaseSpinner from "@/components/BaseSpinner.vue";
 import MultiSelect, { type Option } from "@/components/MultiSelect.vue";
 import DatePicker from "@/components/DatePicker.vue";
 import LandingHeader from "@/components/LandingHeader.vue";
-import { loginStore } from "@/lib/auth";
 import type { Product } from "@shared/entity/Product";
 
 type Dimension =
@@ -291,7 +290,6 @@ async function onSearch() {
   try {
     const response = await axios.get(`${backendUrl}statistics`, {
       params,
-      auth: { username: loginStore.username, password: loginStore.password },
     });
     loading.value = false;
     initial.value = false;
