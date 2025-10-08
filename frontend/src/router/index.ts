@@ -1,4 +1,4 @@
-import { hasPermission } from "@/lib/auth";
+import { hasPermission, loginStore } from "@/lib/auth";
 import type { PermissionType } from "@shared/entity/Permission";
 import { watch, computed, ref, type Ref } from "vue";
 import { createRouter, createWebHistory } from "vue-router";
@@ -237,7 +237,7 @@ function setTitle(parts: string[]) {
 }
 
 router.beforeEach((to, _from) => {
-  if (to.meta.permission && !hasPermission(to.meta.permission).value) {
+  if (!loginStore.isAuthenticated && to.meta.permission && !hasPermission(to.meta.permission).value) {
     return { name: "Login", query: { next: to.fullPath } };
   }
 

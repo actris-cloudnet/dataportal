@@ -1,6 +1,5 @@
 import { DataSource, Repository } from "typeorm";
 import { RequestHandler, Request } from "express";
-import * as basicAuth from "basic-auth";
 
 import { UserAccount } from "../entity/UserAccount";
 import { Permission, PermissionType, permissionTypeFromString } from "../entity/Permission";
@@ -8,6 +7,7 @@ import { Site } from "../entity/Site";
 import { randomString } from "../lib";
 import { Model } from "../entity/Model";
 import { NextFunction } from "express-serve-static-core";
+import { Token } from "../entity/Token";
 
 interface PermissionInterface {
   id?: number;
@@ -18,7 +18,7 @@ interface PermissionInterface {
 
 interface UserAccountInterface {
   id?: number;
-  username: string;
+  username: string | null;
   password?: string;
   passwordHash?: string;
   activationToken?: string;
@@ -30,16 +30,18 @@ function hasProperty(obj: object, prop: string) {
 }
 
 export class UserAccountRoutes {
-  private userAccountRepository: Repository<UserAccount>;
-  private permissionRepository: Repository<Permission>;
-  private siteRepository: Repository<Site>;
-  private modelRepository: Repository<Model>;
+  private userRepo: Repository<UserAccount>;
+  private permissionRepo: Repository<Permission>;
+  private tokenRepo: Repository<Token>;
+  private siteRepo: Repository<Site>;
+  private modelRepo: Repository<Model>;
 
   constructor(dataSource: DataSource) {
-    this.userAccountRepository = dataSource.getRepository(UserAccount);
-    this.permissionRepository = dataSource.getRepository(Permission);
-    this.siteRepository = dataSource.getRepository(Site);
-    this.modelRepository = dataSource.getRepository(Model);
+    this.userRepo = dataSource.getRepository(UserAccount);
+    this.permissionRepo = dataSource.getRepository(Permission);
+    this.tokenRepo = dataSource.getRepository(Token);
+    this.siteRepo = dataSource.getRepository(Site);
+    this.modelRepo = dataSource.getRepository(Model);
   }
 
   userResponse = (user: UserAccount): UserAccountInterface => {
@@ -57,7 +59,7 @@ export class UserAccountRoutes {
   };
 
   postUserAccount: RequestHandler = async (req, res) => {
-    let user = await this.userAccountRepository.findOne({
+    let user = await this.userRepo.findOne({
       where: { username: req.body.username },
       relations: { permissions: { site: true, model: true } },
     });
@@ -75,7 +77,7 @@ export class UserAccountRoutes {
     }
     user.permissions = await this.createPermissions(req.body.permissions);
 
-    await this.userAccountRepository.save(user);
+    await this.userRepo.save(user);
     res.status(201);
     res.json(this.userResponse(user));
   };
@@ -84,7 +86,7 @@ export class UserAccountRoutes {
     const result = [];
     for (const perm of permissions) {
       const permissionType = permissionTypeFromString(perm.permission);
-      const qb = this.permissionRepository
+      const qb = this.permissionRepo
         .createQueryBuilder("permission")
         .leftJoinAndSelect("permission.site", "site")
         .leftJoinAndSelect("permission.model", "model")
@@ -101,7 +103,7 @@ export class UserAccountRoutes {
       }
       let permission = await qb.getOne();
       if (!permission) {
-        permission = await this.permissionRepository.save({
+        permission = await this.permissionRepo.save({
           permission: permissionType,
           site: { id: perm.siteId },
           model: { id: perm.modelId },
@@ -113,12 +115,12 @@ export class UserAccountRoutes {
   }
 
   async usernameAvailable(username: string): Promise<boolean> {
-    const usernameTaken = await this.userAccountRepository.existsBy({ username });
+    const usernameTaken = await this.userRepo.existsBy({ username });
     return !usernameTaken;
   }
 
   putUserAccount: RequestHandler = async (req, res, next) => {
-    const user = await this.userAccountRepository.findOne({
+    const user = await this.userRepo.findOne({
       where: { id: Number(req.params.id) },
       relations: { permissions: { site: true } },
     });
@@ -140,12 +142,12 @@ export class UserAccountRoutes {
     if (hasProperty(req.body, "permissions")) {
       user.permissions = await this.createPermissions(req.body.permissions);
     }
-    await this.userAccountRepository.save(user);
+    await this.userRepo.save(user);
     res.json(this.userResponse(user));
   };
 
   getUserAccount: RequestHandler = async (req, res, next) => {
-    const user = await this.userAccountRepository.findOne({
+    const user = await this.userRepo.findOne({
       where: { id: Number(req.params.id) },
       relations: { permissions: { site: true, model: true } },
     });
@@ -154,14 +156,16 @@ export class UserAccountRoutes {
   };
 
   deleteUserAccount: RequestHandler = async (req, res, next) => {
-    const user = await this.userAccountRepository.findOneBy({ id: Number(req.params.id) });
+    const userId = Number(req.params.id);
+    await this.tokenRepo.delete({ userAccount: { id: userId } });
+    const user = await this.userRepo.findOneBy({ id: userId });
     if (!user) return next({ status: 404, errors: "UserAccount not found" });
-    await this.userAccountRepository.remove(user);
+    await this.userRepo.remove(user);
     res.sendStatus(200);
   };
 
   getAllUserAccounts: RequestHandler = async (req, res) => {
-    const users = await this.userAccountRepository.find({ relations: { permissions: { site: true, model: true } } });
+    const users = await this.userRepo.find({ relations: { permissions: { site: true, model: true } } });
     res.json(users.map((u) => this.userResponse(u)));
   };
 
@@ -237,13 +241,13 @@ export class UserAccountRoutes {
       return next({ status: 401, errors: "Missing the permission type from permission" });
     }
     if (permission.siteId !== null) {
-      const site = await this.siteRepository.findOneBy({ id: permission.siteId });
+      const site = await this.siteRepo.findOneBy({ id: permission.siteId });
       if (!site) {
         return next({ status: 422, errors: "Given siteId does not exist" });
       }
     }
     if (permission.modelId !== null) {
-      const model = await this.modelRepository.findOneBy({ id: permission.modelId });
+      const model = await this.modelRepo.findOneBy({ id: permission.modelId });
       if (!model) {
         return next({ status: 422, errors: "Given modelId does not exist" });
       }
@@ -251,23 +255,5 @@ export class UserAccountRoutes {
     if (permissionTypeFromString(permission.permission) === undefined) {
       return next({ status: 422, errors: "Unexpected permission type" });
     }
-  };
-
-  userInfo: RequestHandler = async (req, res, next) => {
-    const credentials = basicAuth(req);
-    if (!credentials) {
-      return next({ status: 401, errors: "Unauthorized" });
-    }
-    const user = await this.userAccountRepository.findOne({
-      where: { username: credentials.name },
-      relations: { permissions: { site: true } },
-    });
-    if (!user) {
-      return next({ status: 401, errors: "Unauthorized" });
-    }
-    if (!user.comparePassword(credentials.pass)) {
-      return next({ status: 401, errors: "Unauthorized" });
-    }
-    res.send(user.permissions);
   };
 }

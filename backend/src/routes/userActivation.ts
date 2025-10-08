@@ -44,7 +44,7 @@ export class UserActivationRoutes {
 
   get: RequestHandler = async (req, res) => {
     const user = await this.userAccountRepository.findOneBy({ activationToken: req.params.token });
-    if (!user) {
+    if (!user || !user.username) {
       res.status(404).contentType("text/html; charset=utf-8").send(errorTemplate);
       return;
     }
@@ -53,7 +53,7 @@ export class UserActivationRoutes {
 
   post: RequestHandler = async (req, res) => {
     const user = await this.userAccountRepository.findOneBy({ activationToken: req.params.token });
-    if (!user) {
+    if (!user || !user.username) {
       res.status(404).contentType("text/html; charset=utf-8").send(errorTemplate);
       return;
     }

@@ -32,6 +32,12 @@ export default tseslint.config(
           argsIgnorePattern: "^_",
         },
       ],
+      "@typescript-eslint/no-empty-object-type": [
+        "error",
+        {
+          allowInterfaces: "with-single-extends",
+        },
+      ],
     },
   },
   {
