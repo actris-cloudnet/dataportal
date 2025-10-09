@@ -31,7 +31,7 @@ export class Authenticator {
     const selector = Buffer.from(token.slice(0, 32), "hex");
     const verifier = Buffer.from(token.slice(32), "hex");
     const tokenObj = await this.tokenRepo.findOneOrFail({
-      where: { selector },
+      where: { selector }, // TODO: check expired
       relations: { userAccount: true },
     });
     if (!tokenObj.compareVerifier(verifier)) {
