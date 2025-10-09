@@ -2,7 +2,7 @@
 import defaultLogo from "@/assets/header-logo.svg";
 import xmasLogo from "@/assets/header-logo-xmas.svg";
 import actrisLogo from "@/assets/logos/actris-white.svg";
-import { loginStore, logout, isAuthenticated } from "@/lib/auth";
+import { loginStore, logout, isAuthenticated, hasPermission } from "@/lib/auth";
 import { ref } from "vue";
 
 const isDev = import.meta.env.DEV;
@@ -27,7 +27,7 @@ const showProfileMenu = ref(false);
         <div class="bar2"></div>
         <div class="bar3"></div>
       </div>
-      <ul :class="{ show: showMenu }">
+      <ul class="nav" :class="{ show: showMenu }">
         <li>
           <a href="/search">
             <span>Search data</span>
@@ -69,11 +69,27 @@ const showProfileMenu = ref(false);
           </router-link>
           <div v-else class="dropdown">
             <a @click="showProfileMenu = !showProfileMenu">
-              <svg class="user-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M320 312C386.3 312 440 258.3 440 192C440 125.7 386.3 72 320 72C253.7 72 200 125.7 200 192C200 258.3 253.7 312 320 312zM290.3 368C191.8 368 112 447.8 112 546.3C112 562.7 125.3 576 141.7 576L498.3 576C514.7 576 528 562.7 528 546.3C528 447.8 448.2 368 349.7 368L290.3 368z"/></svg>
+              <svg class="user-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                <!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                <path
+                  d="M320 312C386.3 312 440 258.3 440 192C440 125.7 386.3 72 320 72C253.7 72 200 125.7 200 192C200 258.3 253.7 312 320 312zM290.3 368C191.8 368 112 447.8 112 546.3C112 562.7 125.3 576 141.7 576L498.3 576C514.7 576 528 562.7 528 546.3C528 447.8 448.2 368 349.7 368L290.3 368z"
+                />
+              </svg>
               {{ loginStore.name }}
-              <svg class="caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M300.3 440.8C312.9 451 331.4 450.3 343.1 438.6L471.1 310.6C480.3 301.4 483 287.7 478 275.7C473 263.7 461.4 256 448.5 256L192.5 256C179.6 256 167.9 263.8 162.9 275.8C157.9 287.8 160.7 301.5 169.9 310.6L297.9 438.6L300.3 440.8z"/></svg>
+              <svg class="caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                <!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                <path
+                  d="M300.3 440.8C312.9 451 331.4 450.3 343.1 438.6L471.1 310.6C480.3 301.4 483 287.7 478 275.7C473 263.7 461.4 256 448.5 256L192.5 256C179.6 256 167.9 263.8 162.9 275.8C157.9 287.8 160.7 301.5 169.9 310.6L297.9 438.6L300.3 440.8z"
+                />
+              </svg>
             </a>
             <ul v-if="showProfileMenu" class="dropdown-items">
+              <li v-if="hasPermission('canPublishTask').value">
+                <router-link :to="{ name: 'Queue' }">Queue</router-link>
+              </li>
+              <li v-if="hasPermission('canGetStats').value">
+                <router-link :to="{ name: 'Statistics' }">Statistics</router-link>
+              </li>
               <li><a @click="logout">Log out</a></li>
             </ul>
           </div>
@@ -111,7 +127,6 @@ header {
     z-index: -1;
   }
 
-  /*
   &.dev::before {
     background-image: linear-gradient(to bottom, transparent 75%, rgba(0, 0, 0, 0.05)),
       repeating-linear-gradient(-45deg, #ff6dbc55, #ff6dbc55 15px, #ff529855 15px, #ff529855 30px),
@@ -124,7 +139,6 @@ header {
     background-size: auto, auto, auto, cover;
     background-repeat: no-repeat, repeat, no-repeat, no-repeat;
   }
-  */
 }
 
 .container {
@@ -158,7 +172,7 @@ header.xmas .cloudnet-logo img {
   padding-right: 0.3rem;
 }
 
-ul {
+.nav {
   display: flex;
   align-items: center;
   margin-left: 1rem;
@@ -167,7 +181,7 @@ ul {
   width: 100%;
 }
 
-li a {
+.nav li a {
   color: white;
   padding: 0.5rem;
   margin-left: 1rem;
@@ -238,7 +252,7 @@ li a {
   border-radius: 4px;
   box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.1);
 
-  a {
+  li a {
     color: black;
   }
 }
