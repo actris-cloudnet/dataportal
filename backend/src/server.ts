@@ -172,8 +172,8 @@ async function createServer(): Promise<void> {
         .catch((err) => done(err));
     }),
   );
-  app.get("/api/auth/me", passport.authenticate(["cookie"], { session: false }), authenticator.userInfo);
-  app.post("/api/auth/logout", passport.authenticate(["cookie"], { session: false }), authenticator.logOut);
+  app.get("/api/auth/me", passport.authenticate("cookie", { session: false }), authenticator.userInfo);
+  app.post("/api/auth/logout", passport.authenticate("cookie", { session: false }), authenticator.logOut);
 
   // public (changes to these require changes to API docs)
   app.get(
@@ -220,7 +220,7 @@ async function createServer(): Promise<void> {
   app.get("/api/calibration", calibRoutes.calibration);
   app.put(
     "/api/calibration",
-    passport.authenticate(["basic"], { session: false }),
+    passport.authenticate("basic", { session: false }),
     authorizator.verifyPermission(PermissionType.canCalibrate),
     express.json(),
     calibRoutes.putCalibration,
@@ -297,7 +297,7 @@ async function createServer(): Promise<void> {
 
   app.post(
     "/upload/metadata",
-    passport.authenticate(["basic"], { session: false }),
+    passport.authenticate("basic", { session: false }),
     express.json(),
     uploadRoutes.validateMetadata,
     uploadRoutes.validateFilename,
@@ -307,7 +307,7 @@ async function createServer(): Promise<void> {
   app.put(
     "/upload/data/:checksum",
     middleware.validateMD5Param,
-    passport.authenticate(["basic"], { session: false }),
+    passport.authenticate("basic", { session: false }),
     express.raw({ limit: "100gb" }),
     uploadRoutes.putData,
     errorAsPlaintext,
@@ -316,7 +316,7 @@ async function createServer(): Promise<void> {
   // Model data upload
   app.post(
     "/model-upload/metadata",
-    passport.authenticate(["basic"], { session: false }),
+    passport.authenticate("basic", { session: false }),
     express.json(),
     uploadRoutes.validateMetadata,
     uploadRoutes.validateFilename,
@@ -326,7 +326,7 @@ async function createServer(): Promise<void> {
   app.put(
     "/model-upload/data/:checksum",
     middleware.validateMD5Param,
-    passport.authenticate(["basic"], { session: false }),
+    passport.authenticate("basic", { session: false }),
     express.raw({ limit: "1gb" }),
     uploadRoutes.putData,
   );
