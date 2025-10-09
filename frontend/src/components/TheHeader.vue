@@ -2,8 +2,7 @@
 import defaultLogo from "@/assets/header-logo.svg";
 import xmasLogo from "@/assets/header-logo-xmas.svg";
 import actrisLogo from "@/assets/logos/actris-white.svg";
-import userIcon from "@/assets/icons/user-solid-full.svg";
-import { loginStore, isAuthenticated } from "@/lib/auth";
+import { loginStore, logout, isAuthenticated } from "@/lib/auth";
 import { ref } from "vue";
 
 const isDev = import.meta.env.DEV;
@@ -11,6 +10,7 @@ const today = new Date();
 const isXmas = !isDev && today.getMonth() === 11 && today.getDate() > 15;
 const logo = isXmas ? xmasLogo : defaultLogo;
 const showMenu = ref(false);
+const showProfileMenu = ref(false);
 </script>
 
 <template>
@@ -67,15 +67,16 @@ const showMenu = ref(false);
           <router-link v-if="!isAuthenticated" :to="{ name: 'Login' }" class="secret" tabindex="-1">
             Login
           </router-link>
-          <a v-else>
-            <svg class="user-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
-              <!--!Font Awesome Pro v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2025 Fonticons, Inc.-->
-              <path
-                d="M320 312C386.3 312 440 258.3 440 192C440 125.7 386.3 72 320 72C253.7 72 200 125.7 200 192C200 258.3 253.7 312 320 312zM290.3 368C191.8 368 112 447.8 112 546.3C112 562.7 125.3 576 141.7 576L498.3 576C514.7 576 528 562.7 528 546.3C528 447.8 448.2 368 349.7 368L290.3 368z"
-              />
-            </svg>
-            {{ loginStore.name }}
-          </a>
+          <div v-else class="dropdown">
+            <a @click="showProfileMenu = !showProfileMenu">
+              <svg class="user-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M320 312C386.3 312 440 258.3 440 192C440 125.7 386.3 72 320 72C253.7 72 200 125.7 200 192C200 258.3 253.7 312 320 312zM290.3 368C191.8 368 112 447.8 112 546.3C112 562.7 125.3 576 141.7 576L498.3 576C514.7 576 528 562.7 528 546.3C528 447.8 448.2 368 349.7 368L290.3 368z"/></svg>
+              {{ loginStore.name }}
+              <svg class="caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M300.3 440.8C312.9 451 331.4 450.3 343.1 438.6L471.1 310.6C480.3 301.4 483 287.7 478 275.7C473 263.7 461.4 256 448.5 256L192.5 256C179.6 256 167.9 263.8 162.9 275.8C157.9 287.8 160.7 301.5 169.9 310.6L297.9 438.6L300.3 440.8z"/></svg>
+            </a>
+            <ul v-if="showProfileMenu" class="dropdown-items">
+              <li><a @click="logout">Log out</a></li>
+            </ul>
+          </div>
         </li>
       </ul>
     </div>
@@ -123,7 +124,7 @@ header {
     background-size: auto, auto, auto, cover;
     background-repeat: no-repeat, repeat, no-repeat, no-repeat;
   }
-    */
+  */
 }
 
 .container {
@@ -173,9 +174,6 @@ li a {
   display: flex;
   align-items: center;
 
-  span {
-  }
-
   &:hover {
     text-decoration: none;
     background-color: rgba(255, 255, 255, 0.1);
@@ -218,6 +216,31 @@ li a {
   height: 24px;
   fill: white;
   margin-right: 0.25rem;
+}
+
+.caret {
+  width: 16px;
+  height: 16px;
+  fill: white;
+  margin-left: 0.25rem;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown-items {
+  position: absolute;
+  top: 2.5rem;
+  right: 0;
+  left: 0;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.1);
+
+  a {
+    color: black;
+  }
 }
 
 @media screen and (max-width: 1000px) {
