@@ -23,7 +23,7 @@ const routes = [
   },
   {
     path: "/privacy",
-    name: "Privacy Policy",
+    name: "PrivacyPolicy",
     meta: {
       title: "Privacy policy",
     },
@@ -155,7 +155,7 @@ const routes = [
   },
   {
     path: "/publications",
-    name: "Cloudnet Publications",
+    name: "Publications",
     meta: {
       title: "Publications",
     },
@@ -197,7 +197,7 @@ const routes = [
       },
       {
         path: "raw-files",
-        name: "Raw Files",
+        name: "RawFiles",
         meta: { title: false },
         component: () => import("@/components/instrument/RawFiles.vue"),
       },

@@ -38,7 +38,7 @@ const dates = computed(() => {
 
 function createLink(date: string): string {
   return router.resolve({
-    name: "Raw Files",
+    name: "RawFiles",
     query: {
       date: date.substring(0, 10),
     },
