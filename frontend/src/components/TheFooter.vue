@@ -4,7 +4,7 @@
       <div class="item">
         <a href="mailto:actris-cloudnet@fmi.fi">actris-cloudnet@fmi.fi</a><br />
         <a href="https://github.com/actris-cloudnet/">GitHub organization</a><br />
-        <a href="/publications">Publications</a>
+        <router-link :to="{ name: 'Publications' }">Publications</router-link>
       </div>
       <div class="item hidden-links">
         <span>&copy; <a href="https://en.ilmatieteenlaitos.fi/">Finnish Meteorological Institute</a></span>
@@ -16,7 +16,7 @@
         </div>
       </div>
       <div class="item">
-        <router-link to="/privacy">Privacy policy</router-link><br />
+        <router-link :to="{ name: 'PrivacyPolicy' }">Privacy policy</router-link><br />
         <a href="https://stats.uptimerobot.com/4jBrVtYm47">Service status</a><br />
         <span class="hidden-links">
           Version:

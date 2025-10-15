@@ -281,7 +281,7 @@ function linkToSearch(task: AugmentedTask) {
 
 function linkToRaw(task: AugmentedTask) {
   return {
-    name: "Raw Files",
+    name: "RawFiles",
     params: { uuid: task.instrumentInfo.uuid },
     query: { date: task.measurementDate },
   };
