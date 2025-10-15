@@ -44,7 +44,7 @@
         <router-link
           v-if="'instrument' in file && file.instrument"
           :to="{
-            name: 'Raw Files',
+            name: 'RawFiles',
             params: { uuid: file.instrument.uuid },
             query: { date: file.measurementDate },
           }"

@@ -6,7 +6,7 @@
           <img :src="getInstrumentIcon(instrumentInfo.value.instrument)" alt="" />
           Overview
         </router-link>
-        <router-link class="tab" :to="{ name: 'Raw Files' }">
+        <router-link class="tab" :to="{ name: 'RawFiles' }">
           <img :src="folderIcon" alt="" />
           Raw files
         </router-link>
