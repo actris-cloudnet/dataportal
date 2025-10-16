@@ -104,7 +104,7 @@
         "long_name": "Altitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -189,7 +189,7 @@
         "long_name": "Latitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -209,7 +209,7 @@
         "long_name": "Longitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -908,7 +908,7 @@
         "long_name": "Altitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -1009,7 +1009,7 @@
         "long_name": "Latitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -1019,7 +1019,7 @@
         "long_name": "Longitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -1342,7 +1342,7 @@
         "long_name": "Altitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["along_track"],
         "dtype": "float32"
       },
       {
@@ -1362,7 +1362,7 @@
         "long_name": "Latitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["along_track"],
         "dtype": "float32"
       },
       {
@@ -1372,7 +1372,7 @@
         "long_name": "Longitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["along_track"],
         "dtype": "float32"
       },
       {
@@ -1583,7 +1583,7 @@
         "long_name": "Altitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -1664,7 +1664,7 @@
         "long_name": "Latitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -1674,7 +1674,7 @@
         "long_name": "Longitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       }
     ],
@@ -1712,6 +1712,16 @@
         "standard_name": null,
         "long_name": "Center diameter of precipitation particles",
         "comment": "Predefined diameter classes.",
+        "definition": null,
+        "dimensions": ["diameter"],
+        "dtype": "float32"
+      },
+      {
+        "name": "diameter_spread",
+        "units": "m",
+        "standard_name": null,
+        "long_name": "Width of diameter interval",
+        "comment": "Bin size of each diameter interval.",
         "definition": null,
         "dimensions": ["diameter"],
         "dtype": "float32"
@@ -1765,12 +1775,42 @@
         "definition": null,
         "dimensions": ["velocity"],
         "dtype": "float32"
+      },
+      {
+        "name": "velocity_spread",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Width of velocity interval",
+        "comment": "Bin size of each velocity interval.",
+        "definition": null,
+        "dimensions": ["velocity"],
+        "dtype": "float32"
       }
     ],
     "specific_variables": [
       {
         "type": "parsivel",
         "variables": [
+          {
+            "name": "I_heating",
+            "units": "A",
+            "standard_name": null,
+            "long_name": "Heating current",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "V_power_supply",
+            "units": "V",
+            "standard_name": null,
+            "long_name": "Power supply voltage",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
           {
             "name": "data_raw",
             "units": "1",
@@ -1790,6 +1830,26 @@
             "definition": null,
             "dimensions": ["time"],
             "dtype": "int32"
+          },
+          {
+            "name": "sig_laser",
+            "units": "1",
+            "standard_name": null,
+            "long_name": "Signal amplitude of the laser strip",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "int32"
+          },
+          {
+            "name": "state_sensor",
+            "units": "1",
+            "standard_name": null,
+            "long_name": "State of the sensor",
+            "comment": "0 = OK, 1 = Dirty, 2 = No measurement possible.",
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "int32"
           }
         ]
       },
@@ -1804,16 +1864,6 @@
             "comment": "Upper and lower bounds of diameter interval.",
             "definition": null,
             "dimensions": ["diameter", "nv"],
-            "dtype": "float32"
-          },
-          {
-            "name": "diameter_spread",
-            "units": "m",
-            "standard_name": null,
-            "long_name": "Width of diameter interval",
-            "comment": "Bin size of each diameter interval.",
-            "definition": null,
-            "dimensions": ["diameter"],
             "dtype": "float32"
           },
           {
@@ -1904,16 +1954,6 @@
             "comment": "Upper and lower bounds of velocity interval.",
             "definition": null,
             "dimensions": ["velocity", "nv"],
-            "dtype": "float32"
-          },
-          {
-            "name": "velocity_spread",
-            "units": "m s-1",
-            "standard_name": null,
-            "long_name": "Width of velocity interval",
-            "comment": "Bin size of each velocity interval.",
-            "definition": null,
-            "dimensions": ["velocity"],
             "dtype": "float32"
           },
           {
@@ -2229,7 +2269,7 @@
         "long_name": "Possible bias in drizzle median diameter",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time", "height"],
         "dtype": "float32"
       },
       {
@@ -2269,7 +2309,7 @@
         "long_name": "Altitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -2299,7 +2339,7 @@
         "long_name": "Possible bias in drizzle number concentration",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time", "height"],
         "dtype": "float32"
       },
       {
@@ -2329,7 +2369,7 @@
         "long_name": "Possible bias in drizzle liquid water content",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time", "height"],
         "dtype": "float32"
       },
       {
@@ -2359,7 +2399,7 @@
         "long_name": "Possible bias in drizzle liquid water flux",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time", "height"],
         "dtype": "float32"
       },
       {
@@ -2389,7 +2429,7 @@
         "long_name": "Latitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -2399,7 +2439,7 @@
         "long_name": "Longitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -2419,7 +2459,7 @@
         "long_name": "Random error in drizzle droplet size distribution shape parameter",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time", "height"],
         "dtype": "float32"
       },
       {
@@ -2449,7 +2489,7 @@
         "long_name": "Possible bias in drizzle droplet fall velocity",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time", "height"],
         "dtype": "float32"
       },
       {
@@ -2593,7 +2633,7 @@
         "long_name": "Altitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -2666,7 +2706,7 @@
         "long_name": "Latitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -2676,7 +2716,7 @@
         "long_name": "Longitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       }
     ],
@@ -2717,7 +2757,7 @@
         "long_name": "Altitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -2737,7 +2777,7 @@
         "long_name": "Possible bias in ice water content",
         "comment": "This variable is an estimate of the possible systematic error in \nice water content due to the calibration error of the radar \nreflectivity factor from which it was calculated.",
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time", "height"],
         "dtype": "float32"
       },
       {
@@ -2800,7 +2840,7 @@
         "long_name": "Minimum detectable ice water content",
         "comment": "This variable is an estimate of the minimum detectable ice water\ncontent as a function of height.",
         "definition": null,
-        "dimensions": ["height"],
+        "dimensions": ["time", "height"],
         "dtype": "float32"
       },
       {
@@ -2810,7 +2850,7 @@
         "long_name": "Latitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -2820,7 +2860,7 @@
         "long_name": "Longitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       }
     ],
@@ -3040,6 +3080,21 @@
         ]
       },
       {
+        "type": "da10",
+        "variables": [
+          {
+            "name": "beta_smooth",
+            "units": "sr-1 m-1",
+            "standard_name": null,
+            "long_name": "Attenuated backscatter coefficient",
+            "comment": "SNR-screened attenuated backscatter coefficient.\nWeak background smoothed using Gaussian 2D-kernel. SNR threshold applied: 5.",
+            "definition": null,
+            "dimensions": ["time", "range"],
+            "dtype": "float32"
+          }
+        ]
+      },
+      {
         "type": "pollyxt",
         "variables": [
           {
@@ -3101,7 +3156,7 @@
         "long_name": "Altitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -3111,7 +3166,7 @@
         "long_name": "Latitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -3121,7 +3176,7 @@
         "long_name": "Longitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -3797,6 +3852,641 @@
             "units": "kg m-2",
             "standard_name": null,
             "long_name": "Total column water vapour",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "wwind",
+            "units": "m s-1",
+            "standard_name": "upward_air_velocity",
+            "long_name": "Vertical wind",
+            "comment": "The vertical wind has been calculated from omega (Pa s-1), height and pressure using: w=omega*dz/dp",
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          }
+        ]
+      },
+      {
+        "type": "era5",
+        "variables": [
+          {
+            "name": "K2",
+            "units": "dB km-1",
+            "standard_name": null,
+            "long_name": "Dielectric parameter (|K|^2) of liquid water",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["frequency", "time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "cloud_fraction",
+            "units": "1",
+            "standard_name": "cloud_area_fraction",
+            "long_name": "Cloud fraction",
+            "comment": "This is the total cloud fraction, calculated from the large_scale_cloud_fraction and convective_cloud_fraction held in the model using: cloud_fraction=convective_cloud_fraction+(1-convective_cloud_fraction)*large_scale_cloud_fraction.",
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "conv_cloud_fraction",
+            "units": "1",
+            "standard_name": "convective_cloud_area_fraction",
+            "long_name": "Convective cloud fraction",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "flux_level",
+            "units": null,
+            "standard_name": null,
+            "long_name": "Model flux level",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["flux_level"],
+            "dtype": "int16"
+          },
+          {
+            "name": "flx_height",
+            "units": "m",
+            "standard_name": null,
+            "long_name": "Height above ground",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "flux_level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "frequency",
+            "units": "GHz",
+            "standard_name": null,
+            "long_name": "Microwave frequency",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["frequency"],
+            "dtype": "float32"
+          },
+          {
+            "name": "gas_atten",
+            "units": "dB",
+            "standard_name": null,
+            "long_name": "Two-way attenuation from the ground due to atmospheric gases",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["frequency", "time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "horizontal_resolution",
+            "units": "km",
+            "standard_name": null,
+            "long_name": "Horizontal resolution of model",
+            "comment": null,
+            "definition": null,
+            "dimensions": [],
+            "dtype": "float32"
+          },
+          {
+            "name": "level",
+            "units": null,
+            "standard_name": "model_level_number",
+            "long_name": "Model level",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["level"],
+            "dtype": "int16"
+          },
+          {
+            "name": "ls_cloud_fraction",
+            "units": "1",
+            "standard_name": "large_scale_cloud_area_fraction",
+            "long_name": "Large scale cloud fraction",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "ozone",
+            "units": "1",
+            "standard_name": null,
+            "long_name": "Gridbox-mean ozone mixing ratio",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "qi",
+            "units": "1",
+            "standard_name": "mass_fraction_of_cloud_ice_in_air",
+            "long_name": "Gridbox-mean ice water mixing ratio",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "ql",
+            "units": "1",
+            "standard_name": "mass_fraction_of_cloud_liquid_water_in_air",
+            "long_name": "Gridbox-mean liquid water mixing ratio",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "qr",
+            "units": "1",
+            "standard_name": "mass_fraction_of_rain_in_air",
+            "long_name": "Gridbox-mean rain mixing ratio",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "qs",
+            "units": "1",
+            "standard_name": "mass_fraction_of_snow_in_air",
+            "long_name": "Gridbox-mean snow mixing ratio",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_albedo_lw_diffuse",
+            "units": "1",
+            "standard_name": null,
+            "long_name": "Surface albedo (longwave diffuse)",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_albedo_lw_direct",
+            "units": "1",
+            "standard_name": null,
+            "long_name": "Surface albedo (longwave direct)",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_albedo_sw_diffuse",
+            "units": "1",
+            "standard_name": null,
+            "long_name": "Surface albedo (shortwave diffuse)",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_albedo_sw_direct",
+            "units": "1",
+            "standard_name": null,
+            "long_name": "Surface albedo (shortwave direct)",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_bl_dissipation",
+            "units": "J m-2",
+            "standard_name": null,
+            "long_name": "Boundary layer dissipation",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_bl_height",
+            "units": "m",
+            "standard_name": null,
+            "long_name": "Boundary layer height",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_cloud_base_height",
+            "units": "m",
+            "standard_name": null,
+            "long_name": "Cloud base height",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_cloud_fraction",
+            "units": "1",
+            "standard_name": null,
+            "long_name": "Surface total cloud fraction",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_cloud_fraction_high",
+            "units": "1",
+            "standard_name": null,
+            "long_name": "Surface cloud fraction (high clouds)",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_cloud_fraction_low",
+            "units": "1",
+            "standard_name": null,
+            "long_name": "Surface cloud fraction (low clouds)",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_cloud_fraction_medium",
+            "units": "1",
+            "standard_name": null,
+            "long_name": "Surface cloud fraction (mid-level clouds)",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_conv_rain",
+            "units": "kg m-2",
+            "standard_name": "convective_rainfall_amount",
+            "long_name": "Convective rainfall amount",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_conv_snow",
+            "units": "kg m-2",
+            "standard_name": "convective_snowfall_amount",
+            "long_name": "Convective snowfall amount",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_dewpoint_temp_2m",
+            "units": "K",
+            "standard_name": null,
+            "long_name": "Dew point temperature at 2m",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_down_lat_heat_flx",
+            "units": "W m-2",
+            "standard_name": "surface_downward_latent_heat_flux",
+            "long_name": "Latent heat flux",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_down_lw_cs",
+            "units": "W m-2",
+            "standard_name": "surface_downwelling_longwave_flux_in_air_assuming_clear_sky",
+            "long_name": "Clear sky downwelling longwave flux",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_down_sens_heat_flx",
+            "units": "W m-2",
+            "standard_name": "surface_downward_sensible_heat_flux",
+            "long_name": "Sensible heat flux",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_down_sw",
+            "units": "W m-2",
+            "standard_name": "surface_downwelling_shortwave_flux",
+            "long_name": "Surface downwelling shortwave flux",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_down_sw_cs",
+            "units": "W m-2",
+            "standard_name": "surface_downwelling_shortwave_flux_in_air_assuming_clear_sky",
+            "long_name": "Clear sky downwelling shortwave flux",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_down_sw_direct",
+            "units": "W m-2",
+            "standard_name": "surface_direct_downwelling_shortwave_flux_in_air",
+            "long_name": "Direct downwelling shortwave flux",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_eastward_stress",
+            "units": "Pa",
+            "standard_name": "surface_downward_eastward_stress",
+            "long_name": "Surface zonal stress",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_geopotential",
+            "units": "m2 s-2",
+            "standard_name": "geopotential",
+            "long_name": "Geopotential",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_land_cover",
+            "units": "1",
+            "standard_name": null,
+            "long_name": "Land cover",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_ls_precip_fraction",
+            "units": "1",
+            "standard_name": null,
+            "long_name": "Large-scale precipitation fraction",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_ls_rain",
+            "units": "kg m-2",
+            "standard_name": "large_scale_rainfall_amount",
+            "long_name": "Large-scale rainfall amount",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_ls_snow",
+            "units": "kg m-2",
+            "standard_name": "large_scale_snowfall_amount",
+            "long_name": "Large-scale snowfall amount",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_net_lw",
+            "units": "W m-2",
+            "standard_name": "surface_net_downward_longwave_flux",
+            "long_name": "Surface net downward longwave flux",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_net_lw_cs",
+            "units": "W m-2",
+            "standard_name": null,
+            "long_name": "Clear sky net longwave flux",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_net_sw",
+            "units": "W m-2",
+            "standard_name": "surface_net_downward_shortwave_flux",
+            "long_name": "Surface net downward shortwave flux",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_net_sw_cs",
+            "units": "W m-2",
+            "standard_name": null,
+            "long_name": "Surface net clear sky downward shortwave flux",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_northward_stress",
+            "units": "Pa",
+            "standard_name": "surface_downward_northward_stress",
+            "long_name": "Surface meridionnal stress",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_pressure_amsl",
+            "units": "Pa",
+            "standard_name": null,
+            "long_name": "Surface pressure at mean sea level",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_roughness_length",
+            "units": "m",
+            "standard_name": null,
+            "long_name": "Surface roughness length",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_temp_2m",
+            "units": "K",
+            "standard_name": null,
+            "long_name": "Temperature at 2m",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_wind_gust_10m",
+            "units": "m s-1",
+            "standard_name": null,
+            "long_name": "Wind gust at 10 m",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "soil_depth",
+            "units": "m",
+            "standard_name": null,
+            "long_name": "Depth below ground",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "soil_level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "soil_moisture",
+            "units": "m3 m-3",
+            "standard_name": null,
+            "long_name": "Soil moisture content",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "soil_level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "soil_temperature",
+            "units": "K",
+            "standard_name": null,
+            "long_name": "Soil temperature",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "soil_level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "specific_dry_gas_atten",
+            "units": "dB km-1",
+            "standard_name": null,
+            "long_name": "Specific one-way attenuation due to atmospheric gases for dry air (no water vapour)",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["frequency", "time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "specific_gas_atten",
+            "units": "dB km-1",
+            "standard_name": null,
+            "long_name": "Specific one-way attenuation due to atmospheric gases",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["frequency", "time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "specific_liquid_atten",
+            "units": "(dB km-1)/(g m-3)",
+            "standard_name": null,
+            "long_name": "Specific one-way attenuation due to liquid water, per unit liquid water content",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["frequency", "time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "specific_saturated_gas_atten",
+            "units": "dB km-1",
+            "standard_name": null,
+            "long_name": "Specific one-way attenuation due to atmospheric gases for saturated air (saturated with respect to ice below 0 degrees C)",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["frequency", "time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "toa_down_sw",
+            "units": "W m-2",
+            "standard_name": null,
+            "long_name": "Top of atmosphere downwelling shortwave flux",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "toa_net_lw",
+            "units": "W m-2",
+            "standard_name": null,
+            "long_name": "Top of atmosphere net downward longwave flux",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "toa_net_lw_cs",
+            "units": "W m-2",
+            "standard_name": null,
+            "long_name": "Top of atmosphere net clear sky downward longwave flux",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "toa_net_sw",
+            "units": "W m-2",
+            "standard_name": null,
+            "long_name": "Top of atmosphere net downward shortwave flux",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "toa_net_sw_cs",
+            "units": "W m-2",
+            "standard_name": null,
+            "long_name": "Top of atmosphere net clear sky downward shortwave flux",
             "comment": null,
             "definition": null,
             "dimensions": ["time"],
@@ -4802,7 +5492,7 @@
         "long_name": "Altitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -4852,7 +5542,7 @@
         "long_name": "Latitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -4870,7 +5560,7 @@
         "units": "1",
         "standard_name": null,
         "long_name": "Liquid cloud flag status",
-        "comment": "Flag meaning: using mwr and ir (0), using mwr only (1), other (2)",
+        "comment": "Flag meaning: using mwr only (0), using mwr and lidar (1), other (2)",
         "definition": null,
         "dimensions": ["time"],
         "dtype": "int32"
@@ -4882,7 +5572,7 @@
         "long_name": "Longitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -5156,7 +5846,7 @@
     ]
   },
   "mwr-multi": {
-    "description": "The MWR multiple pointing product provides microwave\n        radiometer data processed with MWRpy (Marke et al., 2024), providing\n        temperature and humidity profiles with high-quality profile\n        information.",
+    "description": "The MWR multiple pointing product provides microwave\n        radiometer data processed with MWRpy (Marke et al., 2024), providing\n        temperature and humidity profiles with high-quality profile\n        information. This product is only available for HATPRO and LHATPRO\n        instruments.",
     "references_html": [
       "Marke et al. (2024). MWRpy: A Python package for processing microwave radiometer data. <i>JOSS</i>, <i>9</i>(98), 6733. <a href=\"https://doi.org/10.21105/joss.06733\">https://doi.org/10.21105/joss.06733</a>"
     ],
@@ -5193,7 +5883,7 @@
         "long_name": "Altitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -5233,7 +5923,7 @@
         "long_name": "Latitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -5243,7 +5933,7 @@
         "long_name": "Longitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -5366,7 +6056,7 @@
     "specific_variables": []
   },
   "mwr-single": {
-    "description": "The MWR single pointing product provides microwave\n        radiometer data processed with MWRpy (Marke et al., 2024), providing\n        temperature and humidity profiles with high temporal resolution.",
+    "description": "The MWR single pointing product provides microwave\n        radiometer data processed with MWRpy (Marke et al., 2024), providing\n        temperature/humidity profiles and integrated quantities with high\n        temporal resolution. This product is available for HATPRO, LHATPRO and\n        LHUMPRO instruments.",
     "references_html": [
       "Marke et al. (2024). MWRpy: A Python package for processing microwave radiometer data. <i>JOSS</i>, <i>9</i>(98), 6733. <a href=\"https://doi.org/10.21105/joss.06733\">https://doi.org/10.21105/joss.06733</a>"
     ],
@@ -5499,7 +6189,7 @@
         "long_name": "Altitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -5625,7 +6315,7 @@
         "long_name": "Latitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -5635,7 +6325,7 @@
         "long_name": "Longitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -7296,7 +7986,7 @@
         "long_name": "Altitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -7316,7 +8006,7 @@
         "long_name": "Latitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
@@ -7326,7 +8016,7 @@
         "long_name": "Longitude of site",
         "comment": null,
         "definition": null,
-        "dimensions": [],
+        "dimensions": ["time"],
         "dtype": "float32"
       },
       {
