@@ -8,7 +8,6 @@
         :name="name"
         type="text"
         v-model.lazy="dateString"
-        @focus="($event.target as HTMLInputElement).select()"
         placeholder="YYYY-MM-DD"
         :disabled="disabled"
       />
@@ -121,20 +120,27 @@ const dateValue = computed({
 
 .container {
   display: flex;
-  height: 2em;
 }
 
 input.date {
   box-sizing: content-box;
-  width: 6.3em;
+  width: 90px;
   font-size: 0.9em;
-  border: 1px solid #e8e8e8;
+  border: 1px solid #ddd;
   border-right: none;
-  border-radius: 2px 0 0 2px;
+  border-radius: 4px 0 0 4px;
+  padding: 0.5rem;
+  padding-right: 0;
 
   &::placeholder {
     font-size: 85%; // No condensed variant of Inter font
+    color: gray;
   }
+}
+
+input.date:focus-visible,
+input.date:focus-visible + button {
+  border-color: red;
 }
 
 button {
@@ -142,12 +148,11 @@ button {
   align-items: center;
   justify-content: center;
 
-  width: 2em;
-  height: 100%;
-  background-color: variables.$blue-dust;
+  width: 2rem;
   color: white;
-  border: 1px solid variables.$steel-warrior;
-  border-radius: 0 2px 2px 0;
+  border: 1px solid #ddd;
+  border-left: none;
+  border-radius: 0 4px 4px 0;
   font-size: 1em;
   cursor: pointer;
 

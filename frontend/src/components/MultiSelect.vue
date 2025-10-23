@@ -161,67 +161,144 @@ watch(
 );
 </script>
 
-<style src="vue-multiselect/dist/vue-multiselect.css"></style>
+<!-- <style src="vue-multiselect/dist/vue-multiselect.css"></style> -->
 
 <style lang="scss">
 @use "@/sass/variables.scss";
 
-.multiselect__input {
-  padding: 2px;
-  padding-left: 0;
+.multiselect {
+  position: relative;
+  width: 100%;
+}
 
-  &::placeholder {
-    font-size: 88%;
-    color: gray;
+.multiselect__tags {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.5rem;
+
+  .multiselect--active & {
+    // border: 1px solid transparent;
+    // box-shadow: 0 0 0 2px slateblue;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
   }
 }
 
-.multiselect__tags-wrap {
-  .multiselect__tag,
-  .multiselect__tag i:hover {
-    color: black;
-    background-color: variables.$steel-warrior;
-  }
-}
-
-.multiselect__element {
-  font-size: 90%;
-  color: black;
-
-  .multiselect__option--highlight {
-    color: black;
-    background-color: variables.$steel-warrior;
-
-    .custom-option {
-      background-color: variables.$steel-warrior;
-    }
-  }
-
-  .multiselect__option--selected {
-    background-color: white;
-    pointer-events: none;
-
-    .custom-option {
-      background-color: white;
-      font-weight: normal;
-      color: #bbbbbb;
-
-      img {
-        opacity: 0.5;
-      }
-
-      .option__tag {
-        font-size: 75%;
-        font-weight: bold;
-        color: white;
-        background-color: rgba(variables.$experimental, 0.3);
-      }
-    }
-  }
-}
-
-.multiselect__tag-icon::after {
+.multiselect__placeholder,
+.multiselect__input::placeholder {
   color: gray;
+}
+
+.multiselect__content-wrapper {
+  position: absolute;
+  display: block;
+  background: white;
+  width: 100%;
+  max-height: 240px;
+  overflow: auto;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  z-index: 50;
+}
+
+.multiselect__content {
+  width: 100%;
+}
+
+.multiselect__option {
+  display: block;
+  padding: 0.5rem;
+
+  &--highlight {
+    color: black;
+    background-color: variables.$steel-warrior;
+  }
+}
+
+// .multiselect__input {
+//   padding: 2px;
+//   padding-left: 5px;
+
+//   &::placeholder {
+//     color: gray;
+//   }
+// }
+
+// .multiselect__placeholder {
+//   padding-left: 5px;
+//   color: gray;
+//   line-height: 20px;
+//   font-size: 16px;
+// }
+
+// .multiselect__tags-wrap {
+//   .multiselect__tag,
+//   .multiselect__tag i:hover {
+//     color: black;
+//     background-color: variables.$steel-warrior;
+//   }
+// }
+
+// .multiselect__element {
+//   font-size: 90%;
+//   color: black;
+
+//   .multiselect__option--highlight {
+//     color: black;
+//     background-color: variables.$steel-warrior;
+
+//     .custom-option {
+//       background-color: variables.$steel-warrior;
+//     }
+//   }
+
+//   .multiselect__option--selected {
+//     background-color: white;
+//     pointer-events: none;
+
+//     .custom-option {
+//       background-color: white;
+//       font-weight: normal;
+//       color: #bbbbbb;
+
+//       img {
+//         opacity: 0.5;
+//       }
+
+//       .option__tag {
+//         font-size: 75%;
+//         font-weight: bold;
+//         color: white;
+//         background-color: rgba(variables.$experimental, 0.3);
+//       }
+//     }
+//   }
+// }
+
+// .multiselect__tag-icon::after {
+//   color: gray;
+// }
+
+.multiselect__tag {
+  position: relative;
+  display: inline-block;
+  padding: 4px 26px 4px 10px;
+  border-radius: 4px;
+  margin-right: 10px;
+  line-height: 1;
+  background-color: variables.$steel-warrior;
+  margin-bottom: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+}
+
+.multiselect__tag.experimental-background,
+.multiselect__tag.experimental-background i:hover {
+  background-color: rgba(variables.$experimental, 0.3);
 }
 
 .option__image {
@@ -243,42 +320,37 @@ watch(
   color: white;
 }
 
-.multiselect__tag.experimental-background,
-.multiselect__tag.experimental-background i:hover {
-  background-color: rgba(variables.$experimental, 0.3);
-}
+// .multiselect__clear {
+//   position: absolute;
+//   right: 41px;
+//   height: 40px;
+//   width: 20px;
+//   display: block;
+//   cursor: pointer;
+//   z-index: 3;
 
-.multiselect__clear {
-  position: absolute;
-  right: 41px;
-  height: 40px;
-  width: 20px;
-  display: block;
-  cursor: pointer;
-  z-index: 3;
+//   &:hover {
+//     opacity: 0.75;
+//   }
 
-  &:hover {
-    opacity: 0.75;
-  }
+//   &::before,
+//   &::after {
+//     content: "";
+//     display: block;
+//     position: absolute;
+//     width: 3px;
+//     height: 16px;
+//     background: #aaa;
+//     top: 12px;
+//     right: 4px;
+//   }
 
-  &::before,
-  &::after {
-    content: "";
-    display: block;
-    position: absolute;
-    width: 3px;
-    height: 16px;
-    background: #aaa;
-    top: 12px;
-    right: 4px;
-  }
+//   &::before {
+//     transform: rotate(45deg);
+//   }
 
-  &::before {
-    transform: rotate(45deg);
-  }
-
-  &::after {
-    transform: rotate(-45deg);
-  }
-}
+//   &::after {
+//     transform: rotate(-45deg);
+//   }
+// }
 </style>

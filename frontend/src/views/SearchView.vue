@@ -121,13 +121,7 @@
               <BaseButton type="secondary" id="previousBtn" @click="setPreviousDate()" :disabled="!hasPreviousDate()">
                 &larr;
               </BaseButton>
-              <BaseButton
-                type="secondary"
-                id="nextBtn"
-                @click="setNextDate()"
-                :disabled="!hasNextDate()"
-                style="margin-left: 0.5rem"
-              >
+              <BaseButton type="secondary" id="nextBtn" @click="setNextDate()" :disabled="!hasNextDate()">
                 &rarr;
               </BaseButton>
             </div>
@@ -583,10 +577,13 @@ section#sideBar {
 }
 
 div.date {
-  display: grid;
-  grid-template-columns: 42.5% 15% 42.5%;
-  justify-items: center;
-  row-gap: 0.5em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  // display: grid;
+  // grid-template-columns: 42.5% 15% 42.5%;
+  // justify-items: center;
+  // row-gap: 0.5em;
 
   .date {
     outline: none;
@@ -632,10 +629,12 @@ div.date {
 
 .quickselectors {
   width: 100%;
-  height: 27px;
   display: flex;
-  margin-bottom: 0.6em;
-  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+  padding: 4px;
+  background: #eee;
+  border-radius: 4px;
+  gap: 4px;
 
   .quickBtn {
     color: black;
@@ -644,48 +643,36 @@ div.date {
     font-size: 80%;
     line-height: 0;
     margin-right: 0;
-    border: 1px solid variables.$steel-warrior;
-    border-radius: 3px;
-    background-color: variables.$blue-dust;
     flex-grow: 1;
     text-align: center;
+    border-radius: 4px;
+
+    // &:first-child {
+    //   border-top-left-radius: 4px;
+    //   border-bottom-left-radius: 4px;
+    // }
+
+    // &:last-child {
+    //   border-top-right-radius: 4px;
+    //   border-bottom-right-radius: 4px;
+    //   border-right: none;
+    // }
 
     &:hover {
-      background-color: variables.$steel-warrior;
+      background-color: rgba(0, 0, 0, 0.05);
     }
 
-    &:focus {
-      outline: thin dotted;
-    }
-
-    &:active {
-      outline: none;
-    }
-  }
-
-  .activeBtn {
-    background-color: variables.$steel-warrior;
-    border: 1px solid darkgray;
-
-    &:focus {
-      outline: none;
+    &.activeBtn {
+      background-color: white;
     }
   }
 }
 
 .dateButtons {
-  width: 80%;
-  height: 32px;
   display: flex;
-  margin-left: 8em;
-
-  .dateBtn:disabled {
-    opacity: 0.5;
-  }
-
-  .dateBtn:hover:enabled {
-    background-color: variables.$steel-warrior;
-  }
+  height: 2rem;
+  margin-left: auto;
+  gap: 0.5rem;
 }
 
 span.centerlabel {
