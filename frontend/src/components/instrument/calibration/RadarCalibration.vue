@@ -10,6 +10,10 @@
       :config="{ title: 'Zenith offset', label: 'Zenith offset (deg)' }"
     />
     <CalibrationTable :data="calibrationData.snr_limit" :config="{ title: 'SNR limit', label: 'SNR limit' }" />
+    <CalibrationTable
+      :data="calibrationData.Zh_offset"
+      :config="{ title: 'Reflectivity offset', label: 'Reflectivity offset (dBZ)' }"
+    />
   </div>
 </template>
 
