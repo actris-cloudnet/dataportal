@@ -14,70 +14,53 @@ export class FeedbackRoutes {
   postFeedback: RequestHandler = async (req, res) => {
     const feedback = this.feedbackRepo.create(req.body);
     await this.feedbackRepo.insert(feedback);
-    const payload = createPayload(req);
-    const config = {
-      headers: {
-        Authorization: `Bearer ${env.SLACK_API_TOKEN}`,
-      },
-    };
-    await axios.post("https://slack.com/api/chat.postMessage", payload, config);
     res.sendStatus(200);
+    const comment = createComment(req);
+    if (env.SLACK_API_TOKEN && env.SLACK_NOTIFICATION_CHANNEL) {
+      sendSlackAlert(env.SLACK_API_TOKEN, env.SLACK_NOTIFICATION_CHANNEL, comment, req.body.message).catch((err) => {
+        console.error(`Failed to send Slack alert: ${err}`);
+      });
+    }
   };
 }
 
-function createPayload(req: Request): SlackPayload {
-  const blocks: SlackBlock[] = [
-    {
-      type: "header",
-      text: {
-        type: "plain_text",
-        text: ":mailbox_with_mail: Feedback from data portal",
-      },
-    },
-  ];
-
-  if (req.body.name || req.body.email) {
-    let nameEmailText = "";
-    if (req.body.name) {
-      nameEmailText += `*Name:* ${req.body.name}\n`;
-    }
-    if (req.body.email) {
-      nameEmailText += `*Email:* ${req.body.email}`;
-    }
-    blocks.push({
-      type: "section",
-      text: {
-        type: "mrkdwn",
-        text: nameEmailText,
-      },
-    });
-    blocks.push({ type: "divider" });
+function createComment(req: Request): string {
+  let output = "*:mailbox_with_mail: Feedback from data portal*";
+  if (req.body.name) {
+    output += `\n\n*Name:* ${req.body.name}`;
   }
-  blocks.push({
-    type: "section",
-    text: {
-      type: "mrkdwn",
-      text: req.body.message,
+  if (req.body.email) {
+    output += `\n\n*Email:* ${req.body.email}`;
+  }
+  return output;
+}
+
+async function sendSlackAlert(token: string, channelId: string, comment: string, message: string) {
+  const res1 = await axios.post(
+    "https://slack.com/api/files.getUploadURLExternal",
+    { length: message.length, filename: "message.txt" },
+    {
+      headers: {
+        "content-type": "application/x-www-form-urlencoded",
+        "authorization": `Bearer ${token}`,
+      },
     },
-  });
-
-  return {
-    channel: env.SLACK_NOTIFICATION_CHANNEL!,
-    blocks: blocks,
-  };
-}
-
-interface SlackPayload {
-  channel: string;
-  blocks: SlackBlock[];
-}
-
-interface SlackBlock {
-  type: string;
-  text?: SlackText;
-}
-
-interface SlackText {
-  type: string;
-  text: string;
+  );
+  if (!res1.data.ok) {
+    throw new Error(JSON.stringify(res1.data));
+  }
+  const { upload_url: uploadUrl, file_id: fileId } = res1.data;
+  await axios.post(uploadUrl, message);
+  const res2 = await axios.post(
+    "https://slack.com/api/files.completeUploadExternal",
+    {
+      files: [{ id: fileId, title: "Message" }],
+      channel_id: channelId,
+      initial_comment: comment,
+    },
+    { headers: { authorization: `Bearer ${token}` } },
+  );
+  if (!res2.data.ok) {
+    throw new Error(JSON.stringify(res2.data));
+  }
 }
