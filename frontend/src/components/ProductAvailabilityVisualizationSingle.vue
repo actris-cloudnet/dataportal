@@ -15,8 +15,9 @@
   >
     <template #tooltip="{ date, data }">
       <div class="dataviz-tooltip">
-        <img :src="data ? createIcon(data.product) : testMissingIcon" alt="" />
-        {{ date }}
+        <img class="tooltip-icon" :src="data ? createIcon(data.product) : testMissingIcon" alt="" />
+        <div class="tooltip-date">{{ date }}</div>
+        <div class="tooltip-site" v-if="sites">{{ data?.product ? getSite(data.product) : "No products" }}</div>
       </div>
     </template>
   </DateVisualization>
@@ -29,6 +30,7 @@ import DateVisualization from "./DateVisualization.vue";
 import { isLegacy, isError, isWarning, isInfo, qualityExists, isPass } from "@/lib/ProductAvailabilityTools";
 import { computed } from "vue";
 import type { DataStatus } from "@/lib/DataStatusParser";
+import type { Site } from "@shared/entity/Site";
 
 import testPassIcon from "@/assets/icons/test-pass.svg";
 import testWarningIcon from "@/assets/icons/test-warning.svg";
@@ -43,6 +45,7 @@ interface Props {
   year?: number;
   instrumentPid?: string;
   modelId?: string;
+  sites?: Site[];
 }
 
 const props = defineProps<Props>();
@@ -70,6 +73,13 @@ const getProduct = (date: ProductDate, productId: string, instrumentPid?: string
     date.products.instrument.find((p) => p.id == productId) || date.products.geophysical.find((p) => p.id == productId)
   );
 };
+
+function getSite(product: ProductInfo) {
+  if (!props.sites) return undefined;
+  const site = props.sites.find((site) => site.id === product.siteId);
+  if (!site) return product.siteId;
+  return site.humanReadableName;
+}
 
 function createLink(product?: ProductInfo): string | undefined {
   if (product) {
@@ -109,16 +119,23 @@ function createIcon(product?: ProductInfo): string {
 <style scoped lang="scss">
 .dataviz-tooltip {
   background: white;
-  padding: 0.1em 0.2em;
+  padding: 0.2em 0.4em;
   box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.2);
-  border-radius: 2px;
-  display: flex;
+  border-radius: 4px;
+  display: grid;
+  grid-template-columns: auto auto;
   align-items: center;
-  gap: 2px;
+  column-gap: 2px;
+}
 
-  img {
-    display: block;
-    height: 1em;
-  }
+.tooltip-icon {
+  display: block;
+  height: 1em;
+}
+
+.tooltip-site {
+  font-size: 0.8rem;
+  color: #333;
+  grid-column: 2;
 }
 </style>

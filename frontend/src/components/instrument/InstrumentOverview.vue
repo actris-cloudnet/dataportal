@@ -46,11 +46,12 @@
           :dataStatus="dataStatus"
           :year="selectedYear"
           :productId="selectedProductId"
+          :sites="sites"
         />
       </template>
       <template v-else-if="selectedViz == 'products' && dataStatus">
         <h2>Product availability</h2>
-        <InstrumentVisualization :dataStatus="dataStatus" :year="selectedYear" />
+        <InstrumentVisualization :dataStatus="dataStatus" :year="selectedYear" :sites="sites" />
       </template>
       <template v-else-if="selectedViz == 'count' && uploadStatus && uploadStatus.dates.length > 0">
         <h2>Number of uploaded raw files</h2>
@@ -115,6 +116,7 @@ import CustomMultiselect from "@/components/MultiSelect.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
 import ProductAvailabilityVisualizationSingle from "../ProductAvailabilityVisualizationSingle.vue";
 import { getProductIcon } from "@/lib";
+import type { Site } from "@shared/entity/Site";
 
 export interface Props {
   instrumentInfo: InstrumentInfo;
@@ -132,6 +134,15 @@ const yearOptions = computed(() => {
   if (!uploadStatus.value) return [];
   return uploadStatus.value.years.map((year) => ({ id: year.toString(), humanReadableName: year.toString() }));
 });
+const sites = computed(() =>
+  props.instrumentInfo.locations.map(
+    (location) =>
+      ({
+        id: location.siteId,
+        humanReadableName: location.humanReadableName,
+      }) as Site,
+  ),
+);
 
 const selectedProductId = ref<string | null>(null);
 const selectedProductName = computed(() => {

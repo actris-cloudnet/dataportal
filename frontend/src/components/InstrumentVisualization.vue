@@ -10,7 +10,10 @@
   >
     <template #tooltip="{ date, data }">
       <div class="mega-tooltip" style="width: 280px">
-        <header>{{ date }}</header>
+        <header>
+          <span class="header-date">{{ date }}</span>
+          <span class="header-site" v-if="data">{{ getSites(data.products).join(", ") }}</span>
+        </header>
         <section>
           <ul>
             <li
@@ -49,9 +52,11 @@ import {
 } from "@/lib/ProductAvailabilityTools";
 import { useRouter } from "vue-router";
 import DateVisualization from "./DateVisualization.vue";
+import type { Site } from "@shared/entity/Site";
 
 export interface Props {
   dataStatus: DataStatus;
+  sites: Site[];
 }
 
 const props = defineProps<Props>();
@@ -64,6 +69,18 @@ const dates = computed(() =>
     products: date.products,
   })),
 );
+
+function getSites(product: ProductLevels) {
+  const siteIds = new Set([
+    ...product.geophysical.map((product) => product.siteId),
+    ...product.instrument.map((product) => product.siteId),
+  ]);
+  return [...siteIds].map((siteId) => {
+    const site = props.sites.find((site) => site.id === siteId);
+    if (!site) return siteId;
+    return site.humanReadableName;
+  });
+}
 
 function createColorClass(products: ProductLevels): ColorClass {
   if (noData(products)) {
@@ -103,3 +120,17 @@ function createLinkToSearchPage(date: string, products: ProductLevels): string |
 </script>
 
 <style src="@/sass/tooltip.scss" />
+
+<style scoped lang="scss">
+header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.header-site {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: #333;
+}
+</style>
