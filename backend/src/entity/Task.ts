@@ -35,8 +35,8 @@ export function isTaskStatus(x: any): x is TaskStatus {
 // https://github.com/typeorm/typeorm/issues/9827
 @Unique(["type", "site", "measurementDate", "product", "instrumentInfo", "model", "options"])
 export class Task {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn({ type: "bigint" })
+  id!: string;
 
   @Column({ type: "enum", enum: TaskType })
   type!: TaskType;

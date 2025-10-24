@@ -114,14 +114,12 @@ export class QueueRoutes {
   };
 
   fail: RequestHandler = async (req, res) => {
-    const id = parseInt(req.params.id);
-    await this.queueService.fail(id);
+    await this.queueService.fail(req.params.id);
     res.sendStatus(204);
   };
 
   complete: RequestHandler = async (req, res) => {
-    const id = parseInt(req.params.id);
-    await this.queueService.complete(id);
+    await this.queueService.complete(req.params.id);
     res.sendStatus(204);
   };
 
