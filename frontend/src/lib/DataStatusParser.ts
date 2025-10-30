@@ -22,7 +22,7 @@ export type ProductType = keyof ProductLevels;
 
 type LvlTranslate = Record<string, ProductType>;
 
-type InstrumentPids = Record<string, { pid: string; humanReadableName: string }[]>;
+type InstrumentPids = Record<string, InstrumentInfo[]>;
 
 interface ModelInfo {
   id: string;
@@ -46,6 +46,7 @@ export interface DataStatus {
 }
 
 interface InstrumentInfo {
+  uuid: string;
   pid: string;
   name: string;
 }
@@ -162,10 +163,7 @@ export async function parseDataStatus(config: DataStatusConfig): Promise<DataSta
       }
       const existingPids = new Set(allPids[productId].map((pidInfo) => pidInfo.pid));
       if (!existingPids.has(instrumentInfo.pid)) {
-        allPids[productId].push({
-          pid: instrumentInfo.pid,
-          humanReadableName: instrumentInfo.name,
-        });
+        allPids[productId].push(instrumentInfo);
       }
     }
     const modelInfo = item.modelInfo;

@@ -106,6 +106,7 @@ export class ProductAvailabilityRoutes {
       errorLevel: data.errorLevel,
       instrumentInfo: data.instrumentInfo_uuid
         ? {
+            uuid: data.instrumentInfo_uuid,
             pid: data.instrumentInfo_pid,
             name: data.instrumentInfo_name,
           }
