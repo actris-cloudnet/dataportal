@@ -3,7 +3,7 @@ import defaultLogo from "@/assets/header-logo.svg";
 import xmasLogo from "@/assets/header-logo-xmas.svg";
 import actrisLogo from "@/assets/logos/actris-white.svg";
 import { loginStore, logout, hasPermission } from "@/lib/auth";
-import { ref } from "vue";
+import { ref, useTemplateRef } from "vue";
 import { useRouter } from "vue-router";
 
 const isDev = import.meta.env.DEV;
@@ -13,12 +13,37 @@ const logo = isXmas ? xmasLogo : defaultLogo;
 const showMenu = ref(false);
 const showProfileMenu = ref(false);
 const router = useRouter();
+const $profileMenu = useTemplateRef<HTMLDivElement>("$profileMenu");
 
 async function clickLogout() {
   await logout();
   await router.push({ name: "Frontpage" });
   showMenu.value = false;
   showProfileMenu.value = false;
+}
+
+function toggleProfileMenu() {
+  if (showProfileMenu.value) {
+    hideProfileMenu();
+  } else {
+    openProfileMenu();
+  }
+}
+
+function openProfileMenu() {
+  showProfileMenu.value = true;
+  document.body.addEventListener("click", clickEvent);
+}
+
+function hideProfileMenu() {
+  showProfileMenu.value = false;
+  document.body.removeEventListener("click", clickEvent);
+}
+
+function clickEvent(event: MouseEvent) {
+  if ($profileMenu.value && event.target instanceof Node && !$profileMenu.value.contains(event.target)) {
+    hideProfileMenu();
+  }
 }
 </script>
 
@@ -80,15 +105,15 @@ async function clickLogout() {
           </router-link>
           <div v-else class="dropdown">
           -->
-          <div v-if="loginStore.isAuthenticated" class="nav-item dropdown">
-            <a @click="showProfileMenu = !showProfileMenu">
+          <div v-if="loginStore.isAuthenticated" class="nav-item dropdown" ref="$profileMenu">
+            <a @click="toggleProfileMenu">
               <svg class="user-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
                 <!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
                 <path
                   d="M320 312C386.3 312 440 258.3 440 192C440 125.7 386.3 72 320 72C253.7 72 200 125.7 200 192C200 258.3 253.7 312 320 312zM290.3 368C191.8 368 112 447.8 112 546.3C112 562.7 125.3 576 141.7 576L498.3 576C514.7 576 528 562.7 528 546.3C528 447.8 448.2 368 349.7 368L290.3 368z"
                 />
               </svg>
-              {{ loginStore.name }}
+              <span class="dropdown-title">{{ loginStore.name }}</span>
               <svg class="caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
                 <!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
                 <path
@@ -105,6 +130,7 @@ async function clickLogout() {
                   Statistics
                 </router-link>
               </li>
+              <li class="name">{{ loginStore.name }}</li>
               <li><a @click="clickLogout">Log out</a></li>
             </ul>
           </div>
@@ -192,7 +218,6 @@ header.xmas .cloudnet-logo img {
   align-items: center;
   margin-left: 1rem;
   font-size: 1.1rem;
-  text-align: center;
   width: 100%;
 }
 
@@ -253,14 +278,12 @@ header.xmas .cloudnet-logo img {
   width: 24px;
   height: 24px;
   fill: white;
-  margin-right: 0.25rem;
 }
 
 .caret {
   width: 16px;
   height: 16px;
   fill: white;
-  margin-left: 0.25rem;
 }
 
 .dropdown {
@@ -271,10 +294,11 @@ header.xmas .cloudnet-logo img {
   position: absolute;
   top: 2.5rem;
   right: 0;
-  left: 0;
+  width: 150px;
   background: white;
   border-radius: 4px;
   box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 
   li a {
     display: block;
@@ -287,9 +311,21 @@ header.xmas .cloudnet-logo img {
       background: #eee;
     }
   }
+
+  .name {
+    color: gray;
+    font-weight: 400;
+    font-size: 80%;
+    padding: 0.5rem;
+    padding-bottom: 0;
+  }
 }
 
-@media screen and (max-width: 1000px) {
+.dropdown-title {
+  display: none;
+}
+
+@media screen and (max-width: 1200px) {
   .menu-toggle {
     display: block;
     margin-left: auto;
@@ -323,6 +359,23 @@ header.xmas .cloudnet-logo img {
     border-top: 1px solid #eee;
   }
 
+  .dropdown-items {
+    position: relative;
+    top: 0;
+    width: 100%;
+    background: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .dropdown-title {
+    display: block;
+  }
+
+  .user-icon {
+    margin-right: 0.25rem;
+  }
+
   .user-icon,
   .caret {
     fill: black;
@@ -330,6 +383,10 @@ header.xmas .cloudnet-logo img {
 
   .caret {
     margin-left: auto;
+  }
+
+  .name {
+    display: none;
   }
 }
 </style>
