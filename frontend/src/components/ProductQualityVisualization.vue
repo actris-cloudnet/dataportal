@@ -44,6 +44,7 @@
 import { type ColorClass, classColor } from "@/lib";
 import type { ProductLevels, ProductType } from "@/lib/DataStatusParser";
 import { computed } from "vue";
+import { useRouter } from "vue-router";
 
 import {
   isLegacyFile,
@@ -65,10 +66,12 @@ import {
 import DateVisualization from "./DateVisualization.vue";
 
 const props = defineProps<Props>();
+const router = useRouter();
 const dates = computed(() =>
   props.dataStatus.dates.map((date) => ({
     date: date.date,
     color: createColorClass(date.products),
+    link: createLinkToSearchPage(date.date, date.products),
     products: date.products,
   })),
 );
@@ -82,6 +85,15 @@ function createColorClass(products: ProductLevels): ColorClass {
   if (geophysicalContainsErrors(products)) return "contains-errors";
   if (geophysicalContainsWarningsOrInfo(products)) return "all-raw";
   return "only-model-data";
+}
+
+function createLinkToSearchPage(date: string, products: ProductLevels): string | undefined {
+  if (noData(products) || !props.siteId) return;
+  return router.resolve({
+    name: "Search",
+    params: { mode: "data" },
+    query: { site: props.siteId, dateFrom: date, dateTo: date },
+  }).href;
 }
 </script>
 
