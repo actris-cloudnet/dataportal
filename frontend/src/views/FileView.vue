@@ -71,7 +71,7 @@
 
   <Teleport to="body">
     <BaseModal :open="showDeleteModal" @submit="deleteFile">
-      <template #header> Delete files? </template>
+      <template #header>Delete files?</template>
       <template #body>
         The following files will be deleted:
         <ul class="file-list">
