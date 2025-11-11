@@ -42,13 +42,21 @@ export class CollectionRoutes {
       return next({ status: 422, errors: ["Maximum of 10 000 files is supported"] });
     }
     const [files, modelFiles] = await Promise.all([
-      this.fileRepo.findBy({ uuid: In(fileUuids) }),
-      this.modelFileRepo.findBy({ uuid: In(fileUuids) }),
+      this.fileRepo.find({ where: { uuid: In(fileUuids) }, relations: { product: true } }),
+      this.modelFileRepo.find({ where: { uuid: In(fileUuids) }, relations: { product: true } }),
     ]);
-    if ((files as unknown as File[]).concat(modelFiles).length != fileUuids.length) {
+    const allFiles = (files as File[]).concat(modelFiles);
+    if (allFiles.length != fileUuids.length) {
       const existingUuids = files.map((file) => file.uuid);
       const missingFiles = fileUuids.filter((uuid) => !existingUuids.includes(uuid));
       return next({ status: 422, errors: [`Following files do not exist: ${missingFiles}`] });
+    }
+    const nondownlodableFiles = allFiles.filter((file) => !file.product.downloadable);
+    if (nondownlodableFiles.length > 0) {
+      return next({
+        status: 422,
+        errors: [`Following files are not downloadable: ${nondownlodableFiles.map((file) => file.uuid)}`],
+      });
     }
     const collection = await this.collectionRepo.save(new Collection(files, modelFiles));
     res.send(collection.uuid);

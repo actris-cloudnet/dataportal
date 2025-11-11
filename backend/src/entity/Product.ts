@@ -24,6 +24,9 @@ export class Product {
   @Column({ default: false })
   experimental!: boolean;
 
+  @Column({ default: true })
+  downloadable!: boolean;
+
   @OneToMany(() => ProductVariable, (prodVar) => prodVar.product)
   variables!: ProductVariable[];
 

@@ -48,4 +48,11 @@ describe("POST /api/collection", () => {
       genResponse(422, { errors: ["Following files do not exist: 48092c00-161d-4ca2-a29d-628cf8e960f6"] }),
     );
   });
+
+  it("on non-downloadable files responds with 422", async () => {
+    const missingUuid = validFileUuids.concat(["592a73d0-92a0-41d4-97c5-9f3e99ce33cb"]);
+    await expect(axios.post(url, { files: missingUuid })).rejects.toMatchObject(
+      genResponse(422, { errors: ["Following files are not downloadable: 592a73d0-92a0-41d4-97c5-9f3e99ce33cb"] }),
+    );
+  });
 });

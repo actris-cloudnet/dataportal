@@ -3,6 +3,7 @@
     "id": "categorize",
     "humanReadableName": "Categorize",
     "experimental": false,
+    "downloadable": true,
     "variables": [
       {
         "actrisName": null,
@@ -34,12 +35,14 @@
     "id": "categorize-voodoo",
     "humanReadableName": "Categorize (Voodoo)",
     "experimental": true,
+    "downloadable": true,
     "variables": []
   },
   {
     "id": "classification",
     "humanReadableName": "Classification",
     "experimental": false,
+    "downloadable": true,
     "variables": [
       {
         "actrisName": "hydrometeor type classification",
@@ -71,89 +74,105 @@
     "id": "classification-voodoo",
     "humanReadableName": "Classification (Voodoo)",
     "experimental": true,
+    "downloadable": true,
     "variables": []
   },
   {
     "id": "der",
     "humanReadableName": "Droplet effective radius",
     "experimental": false,
+    "downloadable": true,
     "variables": []
   },
   {
     "id": "disdrometer",
     "humanReadableName": "Disdrometer",
     "experimental": false,
+    "downloadable": true,
     "variables": []
   },
   {
     "id": "doppler-lidar",
     "humanReadableName": "Doppler lidar",
     "experimental": true,
+    "downloadable": true,
     "variables": []
   },
   {
     "id": "doppler-lidar-wind",
     "humanReadableName": "Doppler lidar wind",
     "experimental": true,
+    "downloadable": true,
     "variables": []
   },
   {
     "id": "drizzle",
     "humanReadableName": "Drizzle",
     "experimental": false,
+    "downloadable": true,
     "variables": []
   },
   {
     "id": "epsilon-lidar",
     "humanReadableName": "Dissipation rate of TKE (lidar)",
+    "experimental": true,
+    "downloadable": true,
     "variables": []
   },
   {
     "id": "ier",
     "humanReadableName": "Ice effective radius",
     "experimental": false,
+    "downloadable": true,
     "variables": []
   },
   {
     "id": "iwc",
     "humanReadableName": "Ice water content",
     "experimental": false,
+    "downloadable": true,
     "variables": []
   },
   {
     "id": "l3-cf",
     "humanReadableName": "L3 Cloud fraction",
     "experimental": true,
+    "downloadable": true,
     "variables": []
   },
   {
     "id": "l3-iwc",
     "humanReadableName": "L3 Ice water content",
     "experimental": true,
+    "downloadable": true,
     "variables": []
   },
   {
     "id": "l3-lwc",
     "humanReadableName": "L3 Liquid water content",
     "experimental": true,
+    "downloadable": true,
     "variables": []
   },
   {
     "id": "lidar",
     "humanReadableName": "Lidar",
     "experimental": false,
+    "downloadable": true,
     "variables": []
   },
   {
     "id": "lwc",
     "humanReadableName": "Liquid water content",
     "experimental": false,
+    "downloadable": true,
     "variables": []
   },
   {
     "id": "model",
     "humanReadableName": "Model",
     "experimental": false,
+    "downloadable": true,
     "variables": [
       {
         "id": "model-temperature",
@@ -167,30 +186,35 @@
     "id": "mwr",
     "humanReadableName": "Microwave radiometer",
     "experimental": false,
+    "downloadable": true,
     "variables": []
   },
   {
     "id": "mwr-l1c",
     "humanReadableName": "MWR Level 1c",
     "experimental": true,
+    "downloadable": true,
     "variables": []
   },
   {
     "id": "mwr-multi",
     "humanReadableName": "MWR multiple pointing",
     "experimental": true,
+    "downloadable": true,
     "variables": []
   },
   {
     "id": "mwr-single",
     "humanReadableName": "MWR single pointing",
     "experimental": true,
+    "downloadable": true,
     "variables": []
   },
   {
     "id": "radar",
     "humanReadableName": "Radar",
     "experimental": false,
+    "downloadable": true,
     "variables": [
       {
         "id": "radar-v",
@@ -210,12 +234,21 @@
     "id": "rain-radar",
     "humanReadableName": "Rain radar",
     "experimental": true,
+    "downloadable": true,
+    "variables": []
+  },
+  {
+    "id": "secret-lidar",
+    "humanReadableName": "Secret lidar",
+    "experimental": true,
+    "downloadable": false,
     "variables": []
   },
   {
     "id": "weather-station",
     "humanReadableName": "Weather station",
     "experimental": true,
+    "downloadable": true,
     "variables": []
   }
 ]
