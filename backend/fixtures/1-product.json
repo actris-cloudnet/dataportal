@@ -164,5 +164,12 @@
     "type": ["instrument"],
     "experimental": true,
     "sourceProducts": [{ "id": "radar" }, { "id": "model" }]
+  },
+  {
+    "id": "secret-lidar",
+    "humanReadableName": "Secret lidar",
+    "type": ["instrument"],
+    "experimental": true,
+    "downloadable": false
   }
 ]

@@ -7,6 +7,7 @@ export interface Product {
   id: string;
   humanReadableName: string;
   experimental: boolean;
+  downloadable: boolean;
   type: ProductType[];
   variables: ProductVariable[];
   sourceInstruments: Instrument[];

@@ -343,5 +343,26 @@
     "version": "123",
     "errorLevel": null,
     "software": [{ "id": 1 }]
+  },
+  {
+    "uuid": "592a73d0-92a0-41d4-97c5-9f3e99ce33cb",
+    "pid": "",
+    "volatile": false,
+    "measurementDate": "2019-07-16",
+    "product": "secret-lidar",
+    "createdAt": "2020-02-19T10:59:58.449Z",
+    "updatedAt": "2020-02-19T10:59:58.449Z",
+    "startTime": "2018-11-15T10:56:19.382Z",
+    "stopTime": "2018-11-15T11:56:19.382Z",
+    "s3key": "20190715_bucharest_secret-lidar.nc",
+    "checksum": "ff0c8cee091b72c5b189f16067ca683a592e7f5896b47e25e4f50312db0a430e",
+    "size": 7127282,
+    "format": "HDF5 (NetCDF4)",
+    "site": "bucharest",
+    "version": "123",
+    "errorLevel": null,
+    "software": [{ "id": 1 }],
+    "instrument": "chm15k",
+    "instrumentInfo": { "uuid": "c43e9f54-c94d-45f7-8596-223b1c2b14c0" }
   }
 ]

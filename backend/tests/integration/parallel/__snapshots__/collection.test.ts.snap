@@ -8,6 +8,7 @@ exports[`GET /api/collection/:uuid returns a valid collection 1`] = `
   "pid": "",
   "products": [
     {
+      "downloadable": true,
       "experimental": false,
       "humanReadableName": "Radar",
       "id": "radar",
@@ -16,6 +17,7 @@ exports[`GET /api/collection/:uuid returns a valid collection 1`] = `
       ],
     },
     {
+      "downloadable": true,
       "experimental": false,
       "humanReadableName": "Model",
       "id": "model",

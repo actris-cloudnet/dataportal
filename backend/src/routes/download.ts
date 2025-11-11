@@ -55,8 +55,13 @@ export class DownloadRoutes {
 
   product: RequestHandler = async (req, res, next) => {
     const s3key = (req.params.s3key as unknown as string[]).join("/");
-    const file = await this.fileController.findAnyFile((repo) => repo.findOneBy({ uuid: req.params.uuid, s3key }));
+    const file = await this.fileController.findAnyFile((repo) =>
+      repo.findOne({ where: { uuid: req.params.uuid, s3key }, relations: { product: true } }),
+    );
     if (!file) return next({ status: 404, errors: ["File not found"] });
+    if (!file.product.downloadable && req.ips.length > 0) {
+      return next({ status: 503, errors: ["File is not downloadable"] });
+    }
     const upstreamRes = await this.makeFileRequest(file);
     res.setHeader("Content-Type", "application/octet-stream");
     res.setHeader("Content-Length", file.size);

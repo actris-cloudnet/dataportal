@@ -3,150 +3,182 @@
     "id": "categorize",
     "humanReadableName": "Categorize",
     "type": ["geophysical"],
-    "experimental": false
+    "experimental": false,
+    "downloadable": true
   },
   {
     "id": "categorize-voodoo",
     "humanReadableName": "Categorize (Voodoo)",
     "type": ["geophysical"],
-    "experimental": true
+    "experimental": true,
+    "downloadable": true
   },
   {
     "id": "classification",
     "humanReadableName": "Classification",
     "type": ["geophysical"],
-    "experimental": false
+    "experimental": false,
+    "downloadable": true
   },
   {
     "id": "classification-voodoo",
     "humanReadableName": "Classification (Voodoo)",
     "type": ["geophysical"],
-    "experimental": true
+    "experimental": true,
+    "downloadable": true
   },
   {
     "id": "der",
     "humanReadableName": "Droplet effective radius",
     "type": ["geophysical"],
-    "experimental": false
+    "experimental": false,
+    "downloadable": true
   },
   {
     "id": "disdrometer",
     "humanReadableName": "Disdrometer",
     "type": ["instrument"],
-    "experimental": false
+    "experimental": false,
+    "downloadable": true
   },
   {
     "id": "doppler-lidar",
     "humanReadableName": "Doppler lidar",
     "type": ["instrument"],
-    "experimental": true
+    "experimental": true,
+    "downloadable": true
   },
   {
     "id": "doppler-lidar-wind",
     "humanReadableName": "Doppler lidar wind",
     "type": ["instrument"],
-    "experimental": true
+    "experimental": true,
+    "downloadable": true
   },
   {
     "id": "drizzle",
     "humanReadableName": "Drizzle",
     "type": ["geophysical"],
-    "experimental": false
+    "experimental": false,
+    "downloadable": true
   },
   {
     "id": "epsilon-lidar",
     "humanReadableName": "Dissipation rate of TKE (lidar)",
     "type": ["instrument"],
-    "experimental": true
+    "experimental": true,
+    "downloadable": true
   },
   {
     "id": "ier",
     "humanReadableName": "Ice effective radius",
     "type": ["geophysical"],
-    "experimental": false
+    "experimental": false,
+    "downloadable": true
   },
   {
     "id": "iwc",
     "humanReadableName": "Ice water content",
     "type": ["geophysical"],
-    "experimental": false
+    "experimental": false,
+    "downloadable": true
   },
   {
     "id": "l3-cf",
     "humanReadableName": "L3 Cloud fraction",
     "type": ["evaluation"],
-    "experimental": true
+    "experimental": true,
+    "downloadable": true
   },
   {
     "id": "l3-iwc",
     "humanReadableName": "L3 Ice water content",
     "type": ["evaluation"],
-    "experimental": true
+    "experimental": true,
+    "downloadable": true
   },
   {
     "id": "l3-lwc",
     "humanReadableName": "L3 Liquid water content",
     "type": ["evaluation"],
-    "experimental": true
+    "experimental": true,
+    "downloadable": true
   },
   {
     "id": "lidar",
     "humanReadableName": "Lidar",
     "type": ["instrument"],
-    "experimental": false
+    "experimental": false,
+    "downloadable": true
   },
   {
     "id": "lwc",
     "humanReadableName": "Liquid water content",
     "type": ["geophysical"],
-    "experimental": false
+    "experimental": false,
+    "downloadable": true
   },
   {
     "id": "model",
     "humanReadableName": "Model",
     "type": ["model"],
-    "experimental": false
+    "experimental": false,
+    "downloadable": true
   },
   {
     "id": "mwr",
     "humanReadableName": "Microwave radiometer",
     "type": ["instrument"],
-    "experimental": false
+    "experimental": false,
+    "downloadable": true
   },
   {
     "id": "mwr-l1c",
     "humanReadableName": "MWR Level 1c",
     "type": ["instrument"],
-    "experimental": true
+    "experimental": true,
+    "downloadable": true
   },
   {
     "id": "mwr-multi",
     "humanReadableName": "MWR multiple pointing",
     "type": ["instrument"],
-    "experimental": true
+    "experimental": true,
+    "downloadable": true
   },
   {
     "id": "mwr-single",
     "humanReadableName": "MWR single pointing",
     "type": ["instrument"],
-    "experimental": true
+    "experimental": true,
+    "downloadable": true
   },
   {
     "id": "radar",
     "humanReadableName": "Radar",
     "type": ["instrument"],
-    "experimental": false
+    "experimental": false,
+    "downloadable": true
   },
   {
     "id": "rain-radar",
     "humanReadableName": "Rain radar",
     "type": ["instrument"],
-    "experimental": true
+    "experimental": true,
+    "downloadable": true
+  },
+  {
+    "id": "secret-lidar",
+    "humanReadableName": "Secret lidar",
+    "type": ["instrument"],
+    "experimental": true,
+    "downloadable": false
   },
   {
     "id": "weather-station",
     "humanReadableName": "Weather station",
     "type": ["instrument"],
-    "experimental": true
+    "experimental": true,
+    "downloadable": true
   }
 ]

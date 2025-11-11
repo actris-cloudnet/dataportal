@@ -26,6 +26,7 @@ exports[`/api/files/:uuid request succeeds on instrument file 1`] = `
   "measurementDate": "2018-11-15",
   "pid": "",
   "product": {
+    "downloadable": true,
     "experimental": false,
     "humanReadableName": "Radar",
     "id": "radar",
@@ -94,6 +95,7 @@ exports[`/api/files/:uuid request succeeds on model file 1`] = `
   },
   "pid": "",
   "product": {
+    "downloadable": true,
     "experimental": false,
     "humanReadableName": "Model",
     "id": "model",

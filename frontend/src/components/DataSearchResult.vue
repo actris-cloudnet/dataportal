@@ -130,7 +130,12 @@
           <span v-else>Preview not available.</span>
         </div>
         <div class="download" style="width: 100%; display: flex; gap: 1rem; margin-bottom: 2rem">
-          <BaseButton type="primary" :href="previewResponse.downloadUrl" style="flex-basis: 50%">
+          <BaseButton
+            type="primary"
+            :href="previewResponse.downloadUrl"
+            :disabled="!previewResponse.product.downloadable"
+            style="flex-basis: 50%"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
               <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
             </svg>
