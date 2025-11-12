@@ -74,6 +74,7 @@ const productIcons: Record<string, string> = {
   "rain-radar": rainRadarIcon,
   "rain-gauge": rainGaugerIcon,
   "cpr-simulation": cprSimulationIcon,
+  "cpr-validation": cprSimulationIcon,
 };
 
 export const getProductIcon = (product: Product | string) => {

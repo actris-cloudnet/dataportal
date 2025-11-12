@@ -20,11 +20,22 @@ defineProps<Props>();
     <BaseAlert type="info" v-if="file.legacy">This data object was produced using nonstandard processing.</BaseAlert>
     <HowToCite :uuid="file.uuid" titleClass="summary-section-header" />
     <p xmlns:cc="http://creativecommons.org/ns#" class="license">
-      ACTRIS Cloudnet data is licensed under
+      ACTRIS Cloudnet data are licensed under
       <a href="http://creativecommons.org/licenses/by/4.0/" target="_blank" rel="license noopener noreferrer">
         CC BY 4.0
         <img :src="ccIcon" /><img :src="byIcon" />
       </a>
+      <template v-if="file.product.id === 'cpr-validation'">
+        <br />
+        EarthCARE data are subject to
+        <a
+          href="https://earth.esa.int/eogateway/documents/20142/1564626/Terms-and-Conditions-for-the-use-of-ESA-Data.pdf"
+          target="_blank"
+          rel="license noopener noreferrer"
+        >
+          ESA's Earth Observation Terms and Conditions
+        </a>
+      </template>
     </p>
   </div>
 </template>
