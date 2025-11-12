@@ -38,6 +38,10 @@ export class SoftwareService {
       humanReadableName: "Ceilopyter",
       githubRepository: "actris-cloudnet/ceilopyter",
     },
+    "earthcare-downloader": {
+      humanReadableName: "EarthCARE downloader",
+      githubRepository: "actris-cloudnet/earthcare-downloader",
+    },
   };
 
   constructor(dataSource: DataSource) {
