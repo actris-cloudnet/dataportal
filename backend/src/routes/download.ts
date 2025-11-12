@@ -59,7 +59,7 @@ export class DownloadRoutes {
       repo.findOne({ where: { uuid: req.params.uuid, s3key }, relations: { product: true } }),
     );
     if (!file) return next({ status: 404, errors: ["File not found"] });
-    if (!file.product.downloadable && req.ips.length > 0) {
+    if (!file.product.downloadable && !this.isPrivate(req)) {
       return next({ status: 503, errors: ["File is not downloadable"] });
     }
     const upstreamRes = await this.makeFileRequest(file);
@@ -178,15 +178,17 @@ export class DownloadRoutes {
   }
 
   private async trackDownload(req: Request, type: ObjectType, uuid: string) {
-    if (!req.ip || !ipaddr.isValid(req.ip)) return;
-    const ip = ipaddr.process(req.ip);
-    const ipRange = ip.range();
-    if (ipRange === "loopback" || ipRange === "private" || env.PRIVATE_IP_RANGES.some((range) => ip.match(range))) {
-      return;
-    }
+    if (!req.ip || this.isPrivate(req)) return;
     const result = this.ipLookup.get(req.ip);
     const dl = new Download(type, uuid, req.ip, result?.country?.iso_code);
     await this.downloadRepo.save(dl);
+  }
+
+  private isPrivate(req: Request) {
+    if (!req.ip || !ipaddr.isValid(req.ip)) return false;
+    const ip = ipaddr.process(req.ip);
+    const ipRange = ip.range();
+    return ipRange === "loopback" || ipRange === "private" || env.PRIVATE_IP_RANGES.some((range) => ip.match(range));
   }
 
   private async generateReadme(collection: Collection): Promise<string> {
