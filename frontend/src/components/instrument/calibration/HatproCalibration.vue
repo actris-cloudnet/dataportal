@@ -6,7 +6,7 @@
       :config="{ title: 'Retrieval coefficients', label: 'Coefficient files' }"
       v-slot="slotProps: any"
     >
-      <div v-for="coeff in slotProps.data" class="coeff">
+      <div v-for="coeff in slotProps.data" :key="coeff" class="coeff">
         {{ coeff.sites.join(", ") }}:
         <ul>
           <li v-for="url in coeff.links" :key="url">
