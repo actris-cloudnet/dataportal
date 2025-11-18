@@ -12,17 +12,17 @@
       <tbody>
         <tr v-for="(row, rowIndex) in formattedTableData" :key="rowIndex">
           <td v-for="(cell, cellIndex) in row" :key="cellIndex">
-            <div v-if="Array.isArray(cell)" class="multiline-cell">
-              <a v-for="(url, urlIndex) in cell" :key="urlIndex" :href="url" target="_blank" rel="noopener noreferrer">
-                {{ extractFileName(url) }}
-              </a>
-            </div>
-            <span v-else-if="typeof cell === 'boolean'">
-              {{ cell ? "Yes" : "No" }}
-            </span>
-            <span v-else>
+            <template v-if="cellIndex != 1">
               {{ cell }}
-            </span>
+            </template>
+            <slot :data="cell" v-else>
+              <template v-if="typeof cell === 'boolean'">
+                {{ cell ? "Yes" : "No" }}
+              </template>
+              <template v-else>
+                {{ cell }}
+              </template>
+            </slot>
           </td>
         </tr>
       </tbody>
@@ -42,10 +42,6 @@ const props = defineProps<{
     label: string;
   };
 }>();
-
-function extractFileName(url: string): string {
-  return url.split("/").pop()?.substring(17) || url;
-}
 
 const formattedTableData = ref<(string | string[] | number | boolean | null)[][]>([]);
 
