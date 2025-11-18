@@ -79,7 +79,7 @@ export class CitationService {
 
   async getCollectionCitation(collection: Collection): Promise<Citation> {
     const [instrumentPis, usesModelData, nfPis, productNames, sites, dateRange] = await Promise.all([
-      this.queryInstrumentPids(collection).then((pids) => fetchInstrumentPis(pids)),
+      this.queryInstrumentUuids(collection).then((uuids) => fetchInstrumentPis(uuids)),
       this.usesModelData(collection),
       this.queryCollectionActrisIds(collection).then((ids) => fetchNfPis(ids)),
       this.queryCollectionProductNames(collection),
@@ -119,7 +119,7 @@ export class CitationService {
     let people: Person[];
     if (file instanceof RegularFile) {
       const [instrumentPis, nfPi, usesModelData] = await Promise.all([
-        this.queryInstrumentPids(file).then((pids) => fetchInstrumentPis(pids)),
+        this.queryInstrumentUuids(file).then((uuids) => fetchInstrumentPis(uuids)),
         file.site.actrisId
           ? fetchNfPi(file.site.actrisId, file.measurementDate as unknown as string)
           : Promise.resolve([]),
@@ -190,15 +190,16 @@ export class CitationService {
     return output;
   }
 
-  private queryInstrumentPids(object: RegularFile | Collection): Promise<{ instrumentPid: string; dates: string[] }[]> {
+  private queryInstrumentUuids(
+    object: RegularFile | Collection,
+  ): Promise<{ instrumentInfoUuid: string; dates: string[] }[]> {
     return this.querySourceFiles(
       object,
-      `SELECT instrument_info.pid AS "instrumentPid", array_agg(regular_file."measurementDate"::text) AS dates
+      `SELECT regular_file."instrumentInfoUuid", array_agg(regular_file."measurementDate"::text) AS dates
        FROM traverse
        JOIN regular_file ON traverse.uuid = regular_file.uuid
-       JOIN instrument_info ON regular_file."instrumentInfoUuid" = instrument_info.uuid
-       WHERE instrument_info.pid IS NOT NULL
-       GROUP BY instrument_info.pid`,
+       WHERE regular_file."instrumentInfoUuid" IS NOT NULL
+       GROUP BY regular_file."instrumentInfoUuid"`,
     );
   }
 
@@ -362,31 +363,17 @@ export class CitationService {
   }
 }
 
-async function fetchInstrumentPi(pid: string, measurementDate?: Date): Promise<InstrumentPi[]> {
-  const match = pid.match("^https?://hdl\\.handle\\.net/(.+)");
-  if (!match) {
-    throw new Error("Invalid PID format");
-  }
-  const url = `${env.HANDLE_API_URL}/handles/${match[1]}`;
-  const response = await axios.get(url);
-  const values = response.data.values;
-  if (!Array.isArray(values)) {
-    throw new Error("Invalid PID response");
-  }
-  const nameItem = values.find((ele) => ele.type === "URL");
-  let apiUrl = nameItem.data.value + "/pi";
-  if (measurementDate) {
-    apiUrl += "?date=" + dateToString(measurementDate);
-  }
-  const apiRes = await axios.get(apiUrl);
-  return apiRes.data;
+async function fetchInstrumentPi(instrumentUuid: string, measurementDate?: Date): Promise<InstrumentPi[]> {
+  const url = `${env.INSTRUMENTDB_URL}/instrument/${instrumentUuid}/pi`;
+  const res = await axios.get(url, { params: measurementDate ? dateToString(measurementDate) : undefined });
+  return res.data;
 }
 
-async function fetchInstrumentPis(data: { instrumentPid: string; dates: string[] }[]): Promise<Person[]> {
+async function fetchInstrumentPis(data: { instrumentInfoUuid: string; dates: string[] }[]): Promise<Person[]> {
   return (
     await Promise.all(
       data.map((item) =>
-        fetchInstrumentPi(item.instrumentPid).then((pis) => {
+        fetchInstrumentPi(item.instrumentInfoUuid).then((pis) => {
           const output = new Set<InstrumentPi>();
           for (const date of item.dates) {
             pis
