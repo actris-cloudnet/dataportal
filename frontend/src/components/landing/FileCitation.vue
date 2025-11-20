@@ -25,7 +25,7 @@ defineProps<Props>();
         CC BY 4.0
         <img :src="ccIcon" /><img :src="byIcon" />
       </a>
-      <template v-if="file.product.id === 'cpr-validation'">
+      <template v-if="file.product.id.startsWith('cpr-')">
         <br />
         EarthCARE data are subject to
         <a

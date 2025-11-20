@@ -184,7 +184,7 @@ export class CitationService {
       );
       output += ".";
     }
-    if (object instanceof RegularFile && object.product.id === "cpr-validation") {
+    if (object instanceof RegularFile && object.product.id.startsWith("cpr-")) {
       output += " We acknowledge the European Space Agency (ESA) for providing the EarthCARE data.";
     }
     return output;

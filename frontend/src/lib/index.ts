@@ -75,6 +75,7 @@ const productIcons: Record<string, string> = {
   "rain-gauge": rainGaugerIcon,
   "cpr-simulation": cprSimulationIcon,
   "cpr-validation": cprSimulationIcon,
+  "cpr-tc-validation": cprSimulationIcon,
 };
 
 export const getProductIcon = (product: Product | string) => {
