@@ -40,7 +40,7 @@ const lwpOffset = computed(
 );
 
 function extractFileName(url: string): string {
-  return url.split("/").pop()?.substring(17) || url;
+  return url.split("/").pop() || url;
 }
 </script>
 
