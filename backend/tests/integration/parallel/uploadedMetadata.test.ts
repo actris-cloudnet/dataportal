@@ -176,14 +176,17 @@ describe("GET /upload-metadata", () => {
     const res = await axios.get(`${privateUrl}`, {
       params: { dateFrom: "2020-08-11", dateTo: "2020-08-11", developer: true },
     });
-    expect(res.data[0]).toHaveProperty("s3path");
+    expect(res.data.map((row: any) => row.s3path)).toEqual(["/cloudnet-upload/granada/file1-dc460da4ad72c48223.LV1"]);
   });
 });
 
 describe("GET /upload-model-metadata", () => {
   it("response has s3path", async () => {
     const res = await axios.get(`${privateModelUrl}`, { params: { model: "icon-iglo-12-23", developer: true } });
-    expect(res.data[0]).toHaveProperty("s3path");
+    expect(res.data.map((row: any) => row.s3path)).toEqual([
+      "/cloudnet-upload/granada/20180126_granada_icon-iglo-12-23.nc",
+      "/cloudnet-upload/bucharest/20200122_bucharest_icon-iglo-12-23.nc",
+    ]);
   });
 });
 

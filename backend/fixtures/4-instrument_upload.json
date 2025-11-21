@@ -2,6 +2,7 @@
   {
     "uuid": "b8e96ee1-d3e1-49ba-a557-c131d56beeab",
     "filename": "file1-dc460da4ad72c48223.LV1",
+    "s3key": "granada/file1-dc460da4ad72c48223.LV1",
     "measurementDate": "2020-08-11",
     "checksum": "dc460da4ad72c482231e28e688e01f27",
     "site": "granada",
@@ -14,6 +15,7 @@
   {
     "uuid": "5bc638ba-d38f-4b98-b771-3f16ec59570b",
     "filename": "file3-ab460da4ad72c48223.LV1",
+    "s3key": "bucharest/file3-ab460da4ad72c48223.LV1",
     "measurementDate": "2020-08-12",
     "checksum": "ab460da4ad72c482231e28e688e01f27",
     "site": "bucharest",
@@ -26,6 +28,7 @@
   {
     "uuid": "e763601c-a24e-44ca-96db-6f769b4c150e",
     "filename": "25050116.BRT",
+    "s3key": "bucharest/25050116.BRT",
     "measurementDate": "2025-05-01",
     "checksum": "c823a987cd094f5be1e2f7947c62e2ad",
     "site": "bucharest",
@@ -39,6 +42,7 @@
     "uuid": "c8981856-8e3b-40be-b993-702ba166f145",
     "checksum": "9394e6a0501907ce7f4435dba4855d50",
     "filename": "20250501_Cluj_CHM230128_000.nc",
+    "s3key": "bucharest/20250501_Cluj_CHM230128_000.nc",
     "measurementDate": "2025-05-01",
     "size": "24535964",
     "status": "uploaded",
@@ -50,6 +54,7 @@
   {
     "uuid": "b4633e6b-a3fc-4d55-b9f4-8033b4896117",
     "filename": "file4-ab460da4ad72c48223.LV1",
+    "s3key": "bucharest/file4-ab460da4ad72c48223.LV1",
     "measurementDate": "2020-08-12",
     "checksum": "bb460da4ad72c482231e28e688e01f27",
     "site": "bucharest",
@@ -61,7 +66,8 @@
   },
   {
     "uuid": "1fa2b98c-e415-4e5e-b73d-87d050e2c61c",
-    "filename": "file4-ab460da4ad72c48223.LV1",
+    "filename": "file5-ab460da4ad72c48223.LV1",
+    "s3key": "bucharest/file5-ab460da4ad72c48223.LV1",
     "measurementDate": "2020-08-13",
     "checksum": "cb460da4ad72c482231e28e688e01f27",
     "site": "bucharest",
@@ -74,6 +80,7 @@
   {
     "uuid": "6f109227-d497-4423-9953-e54854c9ea4b",
     "filename": "Stare_213_20221205_04.hpl",
+    "s3key": "warsaw/Stare_213_20221205_04.hpl",
     "measurementDate": "2022-12-05",
     "checksum": "a32f626ec8d26a128ac27605b9eb6e05",
     "site": "warsaw",

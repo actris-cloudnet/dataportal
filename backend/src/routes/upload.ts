@@ -416,6 +416,7 @@ export class UploadRoutes {
         "um.status",
         "um.createdAt",
         "um.updatedAt",
+        "um.s3key",
       ]);
 
     qb.leftJoin("um.site", "site").addSelect(siteMetadataKeys);
@@ -473,6 +474,7 @@ export class UploadRoutes {
     ...{
       downloadUrl: `${env.DP_BACKEND_URL}/download/${this.getDownloadPathForUpload(upload)}`,
       s3path: includeS3Path ? getS3pathForUpload(upload) : undefined,
+      s3key: undefined,
     },
   });
 
