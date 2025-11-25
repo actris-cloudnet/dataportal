@@ -14,10 +14,19 @@
     :year="year"
   >
     <template #tooltip="{ date, data }">
-      <div class="dataviz-tooltip">
-        <img class="tooltip-icon" :src="data ? createIcon(data.product) : testMissingIcon" alt="" />
+      <div class="dataviz-tooltip" v-if="instrumentPid || modelId || sites || !dataStatus.allPids[productId]">
+        <img class="tooltip-icon" :src="data?.products[0] ? createIcon(data.products[0]) : testMissingIcon" alt="" />
         <div class="tooltip-date">{{ date }}</div>
-        <div class="tooltip-site" v-if="sites">{{ data?.product ? getSite(data.product) : "No products" }}</div>
+        <div class="tooltip-site" v-if="sites">{{ data?.products[0] ? getSite(data.products[0]) : "No products" }}</div>
+      </div>
+      <div class="dataviz-tooltip" v-else>
+        <div class="tooltip-date">{{ date }}</div>
+        <ul class="tooltip-products">
+          <li class="tooltip-product" v-for="instrument in dataStatus.allPids[props.productId]" :key="instrument.pid">
+            <img class="tooltip-icon" :src="data ? findIcon(data.products, instrument.pid) : testMissingIcon" alt="" />
+            {{ instrument.name }}
+          </li>
+        </ul>
       </div>
     </template>
   </DateVisualization>
@@ -27,7 +36,7 @@
 import type { ProductDate, ProductInfo } from "@/lib/DataStatusParser";
 import { classColor, type ColorClass } from "@/lib";
 import DateVisualization from "./DateVisualization.vue";
-import { isLegacy, isError, isWarning, isInfo, qualityExists, isPass } from "@/lib/ProductAvailabilityTools";
+import { isLegacy, isError, isWarning, isInfo, isPass } from "@/lib/ProductAvailabilityTools";
 import { computed } from "vue";
 import type { DataStatus } from "@/lib/DataStatusParser";
 import type { Site } from "@shared/entity/Site";
@@ -38,6 +47,7 @@ import testFailIcon from "@/assets/icons/test-fail.svg";
 import testInfoIcon from "@/assets/icons/test-info.svg";
 import legacyPassIcon from "@/assets/icons/legacy-pass.svg";
 import testMissingIcon from "@/assets/icons/test-missing.svg";
+import { useRouter } from "vue-router";
 
 interface Props {
   dataStatus: DataStatus;
@@ -49,15 +59,22 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const router = useRouter();
 
 const dates = computed(() =>
   props.dataStatus.dates.map((date) => {
-    const product = getProduct(date, props.productId, props.instrumentPid, props.modelId);
+    const allProducts =
+      props.instrumentPid || props.modelId || !props.dataStatus.allPids[props.productId]
+        ? [getProduct(date, props.productId, props.instrumentPid, props.modelId)]
+        : props.dataStatus.allPids[props.productId].map((instrument) =>
+            getProduct(date, props.productId, instrument.pid),
+          );
+    const validProducts = allProducts.filter((product) => !!product);
     return {
       date: date.date,
-      color: createColor(product!),
-      link: createLink(product!),
-      product,
+      color: createColor(allProducts),
+      link: createLink(date.date, validProducts),
+      products: allProducts,
     };
   }),
 );
@@ -81,38 +98,47 @@ function getSite(product: ProductInfo) {
   return site.humanReadableName;
 }
 
-function createLink(product?: ProductInfo): string | undefined {
-  if (product) {
-    const uuid = product.uuid;
-    return `/file/${uuid}`;
+function createLink(date: string, products: ProductInfo[]) {
+  if (products.length === 0) return;
+  if (products.length === 1) {
+    return router.resolve({
+      name: "File",
+      params: { uuid: products[0].uuid },
+    }).href;
   }
+  return router.resolve({
+    name: "Search",
+    params: { mode: "data" },
+    query: {
+      site: [...new Set(products.map((product) => product.siteId))],
+      product: props.productId,
+      dateFrom: date,
+      dateTo: date,
+    },
+  }).href;
 }
 
-function createColor(product?: ProductInfo): ColorClass {
-  if (!product) return "no-data";
-  if (qualityExists(product) && isLegacy(product)) return "only-legacy-data";
-  if (isPass(product)) return "all-data";
-  if (isError(product)) return "contains-errors";
-  if (isWarning(product)) return "contains-warnings";
-  if (isInfo(product)) return "contains-info";
-  return "only-model-data";
+function createColor(products: (ProductInfo | undefined)[]): ColorClass {
+  if (products.every((product) => !product)) return "no-data";
+  if (products.every((product) => product && isPass(product))) return "all-data";
+  if (products.some((product) => product && isError(product))) return "contains-errors";
+  if (products.some((product) => product && isWarning(product))) return "contains-warnings";
+  if (products.some((product) => !product || isInfo(product))) return "contains-info";
+  return "only-legacy-data";
 }
 
-function createIcon(product?: ProductInfo): string {
-  switch (createColor(product)) {
-    case "all-data":
-      return testPassIcon;
-    case "contains-warnings":
-      return testWarningIcon;
-    case "contains-errors":
-      return testFailIcon;
-    case "contains-info":
-      return testInfoIcon;
-    case "only-legacy-data":
-      return legacyPassIcon;
-    default:
-      return testMissingIcon;
-  }
+function createIcon(product: ProductInfo): string {
+  if (isError(product)) return testFailIcon;
+  if (isWarning(product)) return testWarningIcon;
+  if (isInfo(product)) return testInfoIcon;
+  if (isPass(product)) return testPassIcon;
+  if (isLegacy(product)) return legacyPassIcon;
+  return testMissingIcon;
+}
+
+function findIcon(products: (ProductInfo | undefined)[], instrumentPid: string) {
+  const product = products.find((product) => product && product.instrumentPid == instrumentPid);
+  return product ? createIcon(product) : testMissingIcon;
 }
 </script>
 
@@ -137,5 +163,16 @@ function createIcon(product?: ProductInfo): string {
   font-size: 0.8rem;
   color: #333;
   grid-column: 2;
+}
+
+.tooltip-products {
+  grid-row: 2;
+  font-size: 0.8rem;
+}
+
+.tooltip-product {
+  display: flex;
+  align-items: center;
+  gap: 2px;
 }
 </style>
