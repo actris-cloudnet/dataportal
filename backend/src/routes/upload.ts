@@ -204,7 +204,7 @@ export class UploadRoutes {
       const repo = isModel ? this.modelUploadRepo : this.instrumentUploadRepo;
       this.metadataStream(repo, query, false, isModel)
         .then((uploadedMetadata) => {
-          streamHandler(uploadedMetadata, res, "um", this.augmentUploadResponse(includeS3path));
+          streamHandler(uploadedMetadata, res, next, "um", this.augmentUploadResponse(includeS3path));
         })
         .catch((err: any) => {
           console.error("Unknown error", err);

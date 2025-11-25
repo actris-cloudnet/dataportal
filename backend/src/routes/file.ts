@@ -113,19 +113,19 @@ export class FileRoutes {
     res.send(versions);
   };
 
-  files: RequestHandler = async (req, res) => {
+  files: RequestHandler = async (req, res, next) => {
     const query = res.locals;
     const stream = await this.filesQueryBuilder(query, "file").stream();
-    streamHandler(stream, res, "file", augmentFile(query.s3path));
+    streamHandler(stream, res, next, "file", augmentFile(query.s3path));
   };
 
-  modelFiles: RequestHandler = async (req, res) => {
+  modelFiles: RequestHandler = async (req, res, next) => {
     const query = res.locals;
     const stream = await this.filesQueryBuilder(query, "model").stream();
-    streamHandler(stream, res, "file", augmentFile(query.s3path));
+    streamHandler(stream, res, next, "file", augmentFile(query.s3path));
   };
 
-  search: RequestHandler = async (req, res) => {
+  search: RequestHandler = async (req, res, next) => {
     const query = res.locals;
     const converterFunction = query.properties
       ? convertToReducedResponse(toArray(query.properties) as (keyof SearchFileResponse)[])
@@ -152,7 +152,7 @@ export class FileRoutes {
       });
     } else {
       const stream = await qb.stream();
-      streamHandler(stream, res, "file", converterFunction);
+      streamHandler(stream, res, next, "file", converterFunction);
     }
   };
 

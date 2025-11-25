@@ -187,7 +187,13 @@ export const dateforsize = async (
   return res.send(result[0].updatedAt);
 };
 
-export function streamHandler(stream: ReadableStream, res: Response, prefix: string, augmenter?: (f: any) => any) {
+export function streamHandler(
+  stream: ReadableStream,
+  res: Response,
+  next: NextFunction,
+  prefix: string,
+  augmenter?: (f: any) => any,
+) {
   res.header("content-type", "application/json");
   res.write("[");
   let objectSent = false;
@@ -197,6 +203,9 @@ export function streamHandler(stream: ReadableStream, res: Response, prefix: str
     const transformedFile = transformRawFile(data, prefix);
     const augmentedFile = augmenter ? augmenter(transformedFile) : transformedFile;
     res.write(JSON.stringify(augmentedFile));
+  });
+  stream.on("error", (err) => {
+    next({ status: 500, errors: err });
   });
   stream.on("end", () => {
     res.write("]");
