@@ -166,7 +166,7 @@ export class SiteRoutes {
     }
     try {
       const res = await axios.get(`${env.DVAS_URL}/facilities/${dvasId}`);
-      const obj = res.data[0];
+      const obj = res.data;
       const result = {
         id: obj.identifier,
         name: obj.name,
