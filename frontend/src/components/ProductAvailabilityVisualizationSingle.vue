@@ -14,7 +14,7 @@
     :year="year"
   >
     <template #tooltip="{ date, data }">
-      <div class="dataviz-tooltip" v-if="instrumentPid || modelId || sites || !dataStatus.allPids[productId]">
+      <div class="dataviz-tooltip" v-if="isSingle">
         <img class="tooltip-icon" :src="data?.products[0] ? createIcon(data.products[0]) : testMissingIcon" alt="" />
         <div class="tooltip-date">{{ date }}</div>
         <div class="tooltip-site" v-if="sites">{{ data?.products[0] ? getSite(data.products[0]) : "No products" }}</div>
@@ -36,7 +36,7 @@
 import type { ProductDate, ProductInfo } from "@/lib/DataStatusParser";
 import { classColor, type ColorClass } from "@/lib";
 import DateVisualization from "./DateVisualization.vue";
-import { isLegacy, isError, isWarning, isInfo, isPass } from "@/lib/ProductAvailabilityTools";
+import { isLegacy, isError, isWarning, isInfo, isPass, qualityExists } from "@/lib/ProductAvailabilityTools";
 import { computed } from "vue";
 import type { DataStatus } from "@/lib/DataStatusParser";
 import type { Site } from "@shared/entity/Site";
@@ -61,20 +61,28 @@ interface Props {
 const props = defineProps<Props>();
 const router = useRouter();
 
+const isSingle = computed(
+  () =>
+    props.instrumentPid ||
+    props.modelId ||
+    props.sites ||
+    !props.dataStatus.allPids[props.productId] ||
+    props.dataStatus.allPids[props.productId].length === 1,
+);
+
 const dates = computed(() =>
   props.dataStatus.dates.map((date) => {
-    const allProducts =
-      props.instrumentPid || props.modelId || !props.dataStatus.allPids[props.productId]
-        ? [getProduct(date, props.productId, props.instrumentPid, props.modelId)]
-        : props.dataStatus.allPids[props.productId].map((instrument) =>
-            getProduct(date, props.productId, instrument.pid),
-          );
+    const allProducts = isSingle.value
+      ? [getProduct(date, props.productId, props.instrumentPid, props.modelId)]
+      : props.dataStatus.allPids[props.productId].map((instrument) =>
+          getProduct(date, props.productId, instrument.pid),
+        );
     const validProducts = allProducts.filter((product) => !!product);
     return {
       date: date.date,
-      color: createColor(allProducts),
+      color: createColor(validProducts),
       link: createLink(date.date, validProducts),
-      products: allProducts,
+      products: validProducts,
     };
   }),
 );
@@ -118,26 +126,27 @@ function createLink(date: string, products: ProductInfo[]) {
   }).href;
 }
 
-function createColor(products: (ProductInfo | undefined)[]): ColorClass {
-  if (products.every((product) => !product)) return "no-data";
-  if (products.every((product) => product && isPass(product))) return "all-data";
-  if (products.some((product) => product && isError(product))) return "contains-errors";
-  if (products.some((product) => product && isWarning(product))) return "contains-warnings";
-  if (products.some((product) => !product || isInfo(product))) return "contains-info";
-  return "only-legacy-data";
+function createColor(products: ProductInfo[]): ColorClass {
+  if (products.length === 0) return "no-data";
+  if (products.every(isPass)) return "all-data";
+  if (products.every((product) => qualityExists(product) && isLegacy(product))) return "only-legacy-data";
+  if (products.some(isError)) return "contains-errors";
+  if (products.some(isWarning)) return "contains-warnings";
+  if (products.some(isInfo)) return "contains-info";
+  return "only-model-data";
 }
 
 function createIcon(product: ProductInfo): string {
+  if (qualityExists(product) && isLegacy(product)) return legacyPassIcon;
   if (isError(product)) return testFailIcon;
   if (isWarning(product)) return testWarningIcon;
   if (isInfo(product)) return testInfoIcon;
   if (isPass(product)) return testPassIcon;
-  if (isLegacy(product)) return legacyPassIcon;
   return testMissingIcon;
 }
 
-function findIcon(products: (ProductInfo | undefined)[], instrumentPid: string) {
-  const product = products.find((product) => product && product.instrumentPid == instrumentPid);
+function findIcon(products: ProductInfo[], instrumentPid: string) {
+  const product = products.find((product) => product.instrumentPid == instrumentPid);
   return product ? createIcon(product) : testMissingIcon;
 }
 </script>
