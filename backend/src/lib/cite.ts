@@ -185,7 +185,8 @@ export class CitationService {
       output += ".";
     }
     if (object instanceof RegularFile && object.product.id.startsWith("cpr-")) {
-      output += " We acknowledge the European Space Agency (ESA) for providing the EarthCARE data.";
+      output +=
+        " We acknowledge the European Space Agency (ESA) and the Japan Aerospace Exploration Agency (JAXA) for providing the EarthCARE data.";
     }
     return output;
   }
