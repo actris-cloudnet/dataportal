@@ -57,6 +57,7 @@ export class Middleware {
       "dateTo",
       "developer",
       "releasedBefore",
+      "releasedAfter",
       "allVersions",
       "limit",
       "showLegacy",
@@ -93,6 +94,8 @@ export class Middleware {
       "dateTo",
       "updatedAtFrom",
       "updatedAtTo",
+      "releasedBefore",
+      "releasedAfter",
       "volatile",
       "limit",
       "date",
@@ -160,6 +163,8 @@ export class Middleware {
     }
     if (query.updatedAtTo) query.updatedAtTo = new Date(query.updatedAtTo);
     if (query.updatedAtFrom) query.updatedAtFrom = new Date(query.updatedAtFrom);
+    if (query.releasedBefore) query.releasedBefore = new Date(query.releasedBefore);
+    if (query.releasedAfter) query.releasedAfter = new Date(query.releasedAfter);
     query.s3path = (query.s3path || "").toLowerCase() == "true";
     Object.assign(res.locals, query);
     next();
@@ -271,6 +276,8 @@ export class Middleware {
         break;
       case "updatedAtFrom":
       case "updatedAtTo":
+      case "releasedBefore":
+      case "releasedAfter":
       case "date":
       case "dateTo":
       case "dateFrom":

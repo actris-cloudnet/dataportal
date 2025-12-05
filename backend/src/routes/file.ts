@@ -405,6 +405,7 @@ export class FileRoutes {
 
     if (query.filename) qb.andWhere("regexp_replace(s3key, '.+/', '') IN (:...filename)", query);
     if (query.releasedBefore) qb.andWhere("file.updatedAt < :releasedBefore", query);
+    if (query.releasedAfter) qb.andWhere("file.updatedAt > :releasedAfter", query);
     if (query.updatedAtFrom) qb.andWhere("file.updatedAt >= :updatedAtFrom", query);
     if (query.updatedAtTo) qb.andWhere("file.updatedAt <= :updatedAtTo", query);
     if (!isModel && query.instrumentPid) qb.andWhere("instrument.pid IN (:...instrumentPid)", query);

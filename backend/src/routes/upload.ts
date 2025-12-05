@@ -392,13 +392,13 @@ export class UploadRoutes {
     const augmentedQuery: any = {
       site: query.site || (await this.siteRepo.find()).map((site) => site.id),
       status: query.status || [Status.UPLOADED, Status.CREATED, Status.PROCESSED, Status.INVALID],
-      dateFrom: query.dateFrom || "1970-01-01",
-      dateTo: query.dateTo || tomorrow(),
       instrument: model ? undefined : query.instrument,
       instrumentPid: model ? undefined : query.instrumentPid,
       model: model ? query.model : undefined,
-      updatedAtFrom: query.updatedAtFrom ? new Date(query.updatedAtFrom) : "1970-01-01T00:00:00.000Z",
-      updatedAtTo: query.updatedAtTo ? new Date(query.updatedAtTo) : tomorrow(),
+      updatedAtFrom: query.updatedAtFrom ? new Date(query.updatedAtFrom) : undefined,
+      updatedAtTo: query.updatedAtTo ? new Date(query.updatedAtTo) : undefined,
+      releasedBefore: query.releasedBefore ? new Date(query.releasedBefore) : undefined,
+      releasedAfter: query.releasedAfter ? new Date(query.releasedAfter) : undefined,
       filename: query.filename,
     };
 
@@ -429,16 +429,17 @@ export class UploadRoutes {
     } else {
       qb.leftJoinAndSelect("um.model", "model");
     }
-    qb.where("um.measurementDate >= :dateFrom AND um.measurementDate <= :dateTo", augmentedQuery)
-      .andWhere("um.updatedAt >= :updatedAtFrom AND um.updatedAt <= :updatedAtTo", augmentedQuery)
-      .andWhere("site.id IN (:...site)", augmentedQuery)
-      .andWhere("um.status IN (:...status)", augmentedQuery);
+    qb.where("site.id IN (:...site)", augmentedQuery).andWhere("um.status IN (:...status)", augmentedQuery);
+    if (query.dateFrom) qb.andWhere("um.measurementDate >= :dateFrom", query);
+    if (query.dateTo) qb.andWhere("um.measurementDate <= :dateTo", query);
+    if (query.updatedAtFrom) qb.andWhere("um.updatedAt >= :updatedAtFrom", augmentedQuery);
+    if (query.updatedAtTo) qb.andWhere("um.updatedAt <= :updatedAtTo", augmentedQuery);
+    if (query.releasedBefore) qb.andWhere("um.updatedAt < :releasedBefore", augmentedQuery);
+    if (query.releasedAfter) qb.andWhere("um.updatedAt > :releasedAfter", augmentedQuery);
     if (query.instrument) qb.andWhere("instrument.instrumentId IN (:...instrument)", augmentedQuery);
     if (query.instrumentPid) qb.andWhere("instrument.pid IN (:...instrumentPid)", augmentedQuery);
     if (query.model) qb.andWhere("model.id IN (:...model)", augmentedQuery);
-
     if (query.filename) qb.andWhere("um.filename IN (:...filename)", augmentedQuery);
-
     if (query.filenamePrefix) addFilenameAffixClause(query.filenamePrefix, qb, "prefix");
     if (query.filenameSuffix) addFilenameAffixClause(query.filenameSuffix, qb, "suffix");
 
