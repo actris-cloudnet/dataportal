@@ -65,6 +65,10 @@ describe("Monitoring file creation and visualization upload", () => {
       variableId: monitoringVariable.id,
       width: 800,
       height: 400,
+      marginTop: 10,
+      marginRight: 8,
+      marginBottom: 102,
+      marginLeft: 115,
     };
 
     const res = await axios.post(`${backendPrivateUrl}monitoring-visualizations`, payload, {
@@ -99,6 +103,10 @@ describe("Monitoring file creation and visualization upload", () => {
       variableId: monitoringVariable.id,
       width: 600,
       height: 300,
+      marginTop: 10,
+      marginRight: 8,
+      marginBottom: 102,
+      marginLeft: 115,
     };
 
     const res = await axios.post(`${backendPrivateUrl}monitoring-visualizations`, payload, {
@@ -116,6 +124,10 @@ describe("Negative tests for monitoring visualizations", () => {
       variableId: monitoringVariable.id,
       width: 400,
       height: 200,
+      marginTop: 10,
+      marginRight: 8,
+      marginBottom: 102,
+      marginLeft: 115,
     };
 
     await expect(
@@ -132,6 +144,10 @@ describe("Negative tests for monitoring visualizations", () => {
       variableId: monitoringVariable.id,
       width: 400,
       height: 200,
+      marginTop: 10,
+      marginRight: 8,
+      marginBottom: 102,
+      marginLeft: 115,
     };
 
     await expect(
@@ -149,6 +165,10 @@ describe("Negative tests for monitoring visualizations", () => {
       variableId: monitoringVariable.id,
       width: 400,
       height: 200,
+      marginTop: 10,
+      marginRight: 8,
+      marginBottom: 102,
+      marginLeft: 115,
     };
 
     await expect(

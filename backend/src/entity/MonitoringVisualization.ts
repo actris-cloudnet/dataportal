@@ -13,21 +13,21 @@ export class MonitoringVisualization {
   @ManyToOne((_) => MonitoringProductVariable, (prodVar) => prodVar.monitoringVisualizations, { nullable: false })
   monitoringProductVariable!: MonitoringProductVariable;
 
-  @Column({ type: "smallint", nullable: true })
-  width!: number | null;
+  @Column({ type: "smallint", nullable: false })
+  width!: number;
 
-  @Column({ type: "smallint", nullable: true })
-  height!: number | null;
+  @Column({ type: "smallint", nullable: false })
+  height!: number;
 
-  @Column({ type: "smallint", nullable: true })
-  marginTop!: number | null;
+  @Column({ type: "smallint", nullable: false })
+  marginTop!: number;
 
-  @Column({ type: "smallint", nullable: true })
-  marginRight!: number | null;
+  @Column({ type: "smallint", nullable: false })
+  marginRight!: number;
 
-  @Column({ type: "smallint", nullable: true })
-  marginBottom!: number | null;
+  @Column({ type: "smallint", nullable: false })
+  marginBottom!: number;
 
-  @Column({ type: "smallint", nullable: true })
-  marginLeft!: number | null;
+  @Column({ type: "smallint", nullable: false })
+  marginLeft!: number;
 }
