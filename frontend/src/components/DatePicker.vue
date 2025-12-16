@@ -126,11 +126,13 @@ const dateValue = computed({
 
 input.date {
   box-sizing: content-box;
-  width: 6.3em;
+  width: 6em;
   font-size: 0.9em;
   border: 1px solid #e8e8e8;
   border-right: none;
   border-radius: 2px 0 0 2px;
+  padding: 0.3rem;
+  text-align: center;
 
   &::placeholder {
     font-size: 85%; // No condensed variant of Inter font

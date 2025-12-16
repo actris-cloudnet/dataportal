@@ -1,0 +1,17 @@
+[
+  {
+    "id": "halo-doppler-lidar_housekeeping",
+    "humanReadableName": "Housekeeping",
+    "sourceInstruments": [{ "id": "halo-doppler-lidar" }]
+  },
+  {
+    "id": "halo-doppler-lidar_background",
+    "humanReadableName": "Background",
+    "sourceInstruments": [{ "id": "halo-doppler-lidar" }]
+  },
+  {
+    "id": "halo-doppler-lidar_signal",
+    "humanReadableName": "Signal",
+    "sourceInstruments": [{ "id": "halo-doppler-lidar" }]
+  }
+]

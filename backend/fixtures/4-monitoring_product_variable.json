@@ -1,0 +1,68 @@
+[
+  {
+    "id": "internal-temperature",
+    "humanReadableName": "Internal temperature",
+    "order": 0,
+    "monitoringProduct": "halo-doppler-lidar_housekeeping"
+  },
+  {
+    "id": "internal-relative-humidity",
+    "humanReadableName": "Internal relative humidity",
+    "order": 1,
+    "monitoringProduct": "halo-doppler-lidar_housekeeping"
+  },
+  {
+    "id": "supply-voltage",
+    "humanReadableName": "Supply voltage",
+    "order": 2,
+    "monitoringProduct": "halo-doppler-lidar_housekeeping"
+  },
+  {
+    "id": "acquisition-card-temperature",
+    "humanReadableName": "Acquisition Card Temperature",
+    "order": 3,
+    "monitoringProduct": "halo-doppler-lidar_housekeeping"
+  },
+  {
+    "id": "platform-pitch-angle",
+    "humanReadableName": "Platform pitch angle",
+    "order": 4,
+    "monitoringProduct": "halo-doppler-lidar_housekeeping"
+  },
+  {
+    "id": "platform-roll-angle",
+    "humanReadableName": "Platform roll angle",
+    "order": 5,
+    "monitoringProduct": "halo-doppler-lidar_housekeeping"
+  },
+  {
+    "id": "background-profile",
+    "humanReadableName": "Background profiles over time",
+    "order": 0,
+    "monitoringProduct": "halo-doppler-lidar_background"
+  },
+  {
+    "id": "background-profile-variance",
+    "humanReadableName": "Background variance over time",
+    "order": 1,
+    "monitoringProduct": "halo-doppler-lidar_background"
+  },
+  {
+    "id": "time-averaged-background-profile-range",
+    "humanReadableName": "Time averaged background profile vs range",
+    "order": 2,
+    "monitoringProduct": "halo-doppler-lidar_background"
+  },
+  {
+    "id": "radial-velocity-histogram",
+    "humanReadableName": "Radial velocity histrogram",
+    "order": 0,
+    "monitoringProduct": "halo-doppler-lidar_signal"
+  },
+  {
+    "id": "signal-radial-velocity",
+    "humanReadableName": "Signal vs radial velocity",
+    "order": 1,
+    "monitoringProduct": "halo-doppler-lidar_signal"
+  }
+]
