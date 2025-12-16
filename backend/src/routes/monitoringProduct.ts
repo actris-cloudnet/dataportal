@@ -10,44 +10,36 @@ export class MonitoringProductRoutes {
   }
 
   allMonitoringProducts: RequestHandler = async (_req, res, next) => {
-    try {
-      const products = await this.monitoringProductRepo.find();
-      res.json(
-        products.map((product) => ({
-          id: product.id,
-          humanReadableName: product.humanReadableName,
-        })),
-      );
-    } catch (error) {
-      next(error);
-    }
+    const products = await this.monitoringProductRepo.find();
+    res.json(
+      products.map((product) => ({
+        id: product.id,
+        humanReadableName: product.humanReadableName,
+      })),
+    );
   };
 
   allMonitoringProductsWithVariables: RequestHandler = async (_req, res, next) => {
-    try {
-      const productsWithVars = await this.monitoringProductRepo.find({
-        relations: ["monitoringVariables"],
-        order: {
-          id: "ASC",
-          monitoringVariables: {
-            order: "ASC",
-          },
+    const productsWithVars = await this.monitoringProductRepo.find({
+      relations: { monitoringVariables: true },
+      order: {
+        id: "ASC",
+        monitoringVariables: {
+          order: "ASC",
         },
-      });
+      },
+    });
 
-      const result = productsWithVars.map((product) => ({
-        id: product.id,
-        humanReadableName: product.humanReadableName,
-        variables: product.monitoringVariables.map((v) => ({
-          id: v.id,
-          humanReadableName: v.humanReadableName,
-          order: v.order,
-        })),
-      }));
+    const result = productsWithVars.map((product) => ({
+      id: product.id,
+      humanReadableName: product.humanReadableName,
+      variables: product.monitoringVariables.map((v) => ({
+        id: v.id,
+        humanReadableName: v.humanReadableName,
+        order: v.order,
+      })),
+    }));
 
-      res.json(result);
-    } catch (error) {
-      next(error);
-    }
+    res.json(result);
   };
 }

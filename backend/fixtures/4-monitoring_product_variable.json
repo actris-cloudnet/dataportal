@@ -48,7 +48,7 @@
     "monitoringProduct": "halo-doppler-lidar_background"
   },
   {
-    "id": "time-averaged-background-profile_range",
+    "id": "time-averaged-background-profile-range",
     "humanReadableName": "Time averaged background profile vs range",
     "order": 2,
     "monitoringProduct": "halo-doppler-lidar_background"
@@ -60,7 +60,7 @@
     "monitoringProduct": "halo-doppler-lidar_signal"
   },
   {
-    "id": "signal_radial-velocity",
+    "id": "signal-radial-velocity",
     "humanReadableName": "Signal vs radial velocity",
     "order": 1,
     "monitoringProduct": "halo-doppler-lidar_signal"

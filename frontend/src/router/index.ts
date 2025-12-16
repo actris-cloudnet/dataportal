@@ -69,7 +69,7 @@ const routes = [
     path: "/monitoring",
     name: "Monitoring",
     meta: {
-      title: "",
+      title: "Monitoring",
     },
     component: () => import("@/views/MonitoringView.vue"),
     props: true,

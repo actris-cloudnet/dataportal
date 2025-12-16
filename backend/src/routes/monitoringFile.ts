@@ -61,8 +61,7 @@ export class MonitoringFileRoutes {
         await manager.save(newFile);
       });
     } catch (error) {
-      console.error("Failed to save MonitoringFile:", error);
-      return res.status(500).json({ error: "Failed to create or replace MonitoringFile" });
+      return next({ status: 500, errors: "Failed to create or replace MonitoringFile" });
     }
 
     res.status(201).json(newFile);
@@ -93,8 +92,7 @@ export class MonitoringFileRoutes {
 
       res.json(instruments);
     } catch (err) {
-      console.error("Error fetching instruments with monitoring files:", err);
-      res.status(500).json({ error: "Internal server error" });
+      return next({status: 500, errors: "Error fetching instruments with monitoring files" }});
     }
   };
 
@@ -109,8 +107,7 @@ export class MonitoringFileRoutes {
 
       res.json(sites);
     } catch (err) {
-      console.error("Error fetching sites with monitoring files:", err);
-      res.status(500).json({ error: "Internal server error" });
+      next({status: 500, errors: "Error fetching sites with monitoring files"});
     }
   };
 }
