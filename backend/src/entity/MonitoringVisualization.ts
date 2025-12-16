@@ -30,5 +30,4 @@ export class MonitoringVisualization {
 
   @Column({ type: "smallint", nullable: true })
   marginLeft!: number | null;
-
 }

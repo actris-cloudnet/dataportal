@@ -158,4 +158,3 @@ describe("Negative tests for monitoring visualizations", () => {
     ).rejects.toThrow("Request failed with status code 400");
   });
 });
-

@@ -131,7 +131,7 @@ input.date {
   border: 1px solid #e8e8e8;
   border-right: none;
   border-radius: 2px 0 0 2px;
-  padding: 0.3rem ;
+  padding: 0.3rem;
   text-align: center;
 
   &::placeholder {

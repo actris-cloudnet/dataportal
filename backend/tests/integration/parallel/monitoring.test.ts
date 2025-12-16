@@ -48,7 +48,7 @@ describe("GET /api/monitoring-products/variables", () => {
 
     const signalProduct = res.data.find((p: any) => p.id === "halo-doppler-lidar_signal");
     expect(signalProduct).toBeDefined();
-    const expectedIds = ["radial-velocity-histogram", "signal_radial-velocity"];
+    const expectedIds = ["radial-velocity-histogram", "signal-radial-velocity"];
     const actualIds = signalProduct.variables.map((v: any) => v.id);
     expect(actualIds).toEqual(expect.arrayContaining(expectedIds));
   });

@@ -3,8 +3,7 @@
     <div class="header">
       {{ props.data.sourceFile.monitoringProduct.humanReadableName }} -
       {{ props.data.monitoringProductVariable.humanReadableName }},&nbsp;
-      <a :href="`/site/${props.data.sourceFile.site.id}`">
-        {{ props.data.sourceFile.site.humanReadableName }} </a
+      <a :href="`/site/${props.data.sourceFile.site.id}`"> {{ props.data.sourceFile.site.humanReadableName }} </a
       >,&nbsp;
       <a :href="`/instrument/${props.data.sourceFile.instrumentInfo.uuid}`">
         {{ props.data.sourceFile.instrumentInfo.name }}

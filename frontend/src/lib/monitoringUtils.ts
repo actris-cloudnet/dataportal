@@ -1,4 +1,4 @@
-type MonthFormat = 'short' | 'long';
+type MonthFormat = "short" | "long";
 
 export function formatMonth(date: string): string {
   const d = new Date(date);

@@ -112,7 +112,6 @@ function onKeyDown(event: KeyboardEvent) {
   }
 }
 
-
 function setNextStartDate() {
   const options = currentAvailable.value;
   if (options.length == 0) {

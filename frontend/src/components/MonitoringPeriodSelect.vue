@@ -51,7 +51,6 @@ button {
   padding: 4px 12px;
   font-size: 14px;
   color: vars.$gray5;
-
 }
 button.active {
   border-color: vars.$gray5;

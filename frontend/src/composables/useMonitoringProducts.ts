@@ -1,12 +1,12 @@
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
-import { backendUrl } from '@/lib';
+import { ref, onMounted } from "vue";
+import axios from "axios";
+import { backendUrl } from "@/lib";
 import type { MonitoringProduct } from "@shared/entity/Monitoring";
 
 export function useMonitoringProducts() {
   const monitoringProducts = ref<MonitoringProduct[]>([]);
-  const isLoading = ref(true); 
-  const error = ref<Error | null>(null); 
+  const isLoading = ref(true);
+  const error = ref<Error | null>(null);
 
   const fetchMonitoringProducts = async () => {
     isLoading.value = true;
@@ -30,4 +30,3 @@ export function useMonitoringProducts() {
     error,
   };
 }
-

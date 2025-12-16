@@ -259,7 +259,7 @@ export class Middleware {
 
     const invalidKeys = Object.keys(query).filter((key) => !validKeys.has(key));
     if (invalidKeys.length > 0) {
-      requestError.errors.push(`Invalid query paramters: ${invalidKeys.join(", ")}`);
+      requestError.errors.push(`Invalid query parameters: ${invalidKeys.join(", ")}`);
       return next(requestError);
     }
     query.productId = toArray(query.productId);

@@ -40,7 +40,6 @@ const formattedDate = computed(() => {
       return "";
   }
 });
-
 </script>
 
 <style scoped lang="scss">

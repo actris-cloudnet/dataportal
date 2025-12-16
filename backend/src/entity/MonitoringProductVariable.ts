@@ -18,5 +18,4 @@ export class MonitoringProductVariable {
 
   @ManyToOne((_) => MonitoringProduct, (prod) => prod.monitoringVariables, { nullable: false })
   monitoringProduct!: MonitoringProduct;
-
 }

@@ -15,7 +15,7 @@ export class MonitoringFileRoutes {
   readonly dataSource: DataSource;
   readonly monitoringFileRepo: Repository<MonitoringFile>;
 
-  putMonitoringFile: RequestHandler = async (_req, res) => {
+  putMonitoringFile: RequestHandler = async (_req, res, next) => {
     const { startDate, periodType, siteId, monitoringProductId, instrumentUuid } = res.locals.fileData;
 
     const [site, product, instrument] = await Promise.all([
@@ -80,7 +80,7 @@ export class MonitoringFileRoutes {
     res.json(grouped);
   };
 
-  getInstrumentsWithMonitoringFiles: RequestHandler = async (_req, res) => {
+  getInstrumentsWithMonitoringFiles: RequestHandler = async (_req, res, next) => {
     try {
       const instruments = await this.dataSource
         .getRepository(InstrumentInfo)
@@ -92,11 +92,11 @@ export class MonitoringFileRoutes {
 
       res.json(instruments);
     } catch (err) {
-      return next({status: 500, errors: "Error fetching instruments with monitoring files" }});
+      return next({ status: 500, errors: "Error fetching instruments with monitoring files" });
     }
   };
 
-  getSitesWithMonitoringFiles: RequestHandler = async (_req, res) => {
+  getSitesWithMonitoringFiles: RequestHandler = async (_req, res, next) => {
     try {
       const sites = await this.dataSource
         .getRepository(Site)
@@ -107,7 +107,7 @@ export class MonitoringFileRoutes {
 
       res.json(sites);
     } catch (err) {
-      next({status: 500, errors: "Error fetching sites with monitoring files"});
+      next({ status: 500, errors: "Error fetching sites with monitoring files" });
     }
   };
 }
