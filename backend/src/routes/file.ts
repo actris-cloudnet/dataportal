@@ -282,7 +282,7 @@ export class FileRoutes {
     if (!existingFile) return next({ status: 422, errors: ["No file matches the provided uuid"] });
     const repo = existingFile instanceof RegularFile ? this.fileRepo : this.modelFileRepo;
     await repo.update({ uuid: partialFile.uuid }, partialFile);
-    ["pid", "checksum", "version", "dvasUpdatedAt", "dvasId", "coverage"].forEach((prop) => {
+    ["pid", "checksum", "version", "dvasUpdatedAt", "dvasId", "coverage", "newBucket"].forEach((prop) => {
       // Not in SearchFile
       if (prop in partialFile) {
         delete partialFile[prop];
@@ -377,6 +377,7 @@ export class FileRoutes {
     "file.startTime",
     "file.stopTime",
     "file.s3key",
+    "file.newBucket",
   ];
 
   filesQueryBuilder(query: any, mode: "file" | "model") {

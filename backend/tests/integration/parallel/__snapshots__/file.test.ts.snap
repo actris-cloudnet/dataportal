@@ -24,6 +24,7 @@ exports[`/api/files/:uuid request succeeds on instrument file 1`] = `
   },
   "legacy": false,
   "measurementDate": "2018-11-15",
+  "newBucket": false,
   "pid": "",
   "product": {
     "downloadable": true,
@@ -93,6 +94,7 @@ exports[`/api/files/:uuid request succeeds on model file 1`] = `
     "optimumOrder": 0,
     "sourceModelId": null,
   },
+  "newBucket": false,
   "pid": "",
   "product": {
     "downloadable": true,

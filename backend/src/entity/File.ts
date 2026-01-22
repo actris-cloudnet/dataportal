@@ -34,6 +34,9 @@ export abstract class File {
   @Column()
   version!: string;
 
+  @Column({ default: false })
+  newBucket!: boolean;
+
   @Column({ default: "" })
   pid!: string;
 

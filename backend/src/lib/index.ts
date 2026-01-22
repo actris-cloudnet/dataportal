@@ -124,7 +124,8 @@ export const generateS3keyForUpload = (upload: Upload) => `${upload.site.id}/${u
 
 export const getS3pathForUpload = (upload: Upload) => `/${uploadBucket}/${upload.s3key}`;
 
-export const getS3pathForFile = (file: File) => `/${getBucketForFile(file)}/${file.s3key}`;
+export const getS3pathForFile = (file: File) =>
+  file.newBucket ? `/cloudnet-product-new/${file.uuid}/${file.s3key}` : `/${getBucketForFile(file)}/${file.s3key}`;
 
 export const getS3pathForImage = (s3key: string) => `/cloudnet-img/${s3key}`;
 
