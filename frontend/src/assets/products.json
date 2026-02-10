@@ -952,6 +952,37 @@
         "dtype": "float32"
       },
       {
+        "name": "cloud_top_height_status",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Cloud top height quality status",
+        "comment": null,
+        "definition": [
+          {
+            "label": "Value 0",
+            "description": "Reliable."
+          },
+          {
+            "label": "Value 1",
+            "description": "Uncertain due to moderate radar attenuation."
+          },
+          {
+            "label": "Value 2",
+            "description": "Uncertain due to incomplete radar attenuation correction."
+          },
+          {
+            "label": "Value 3",
+            "description": "Likely erroneous due to severe radar attenuation."
+          },
+          {
+            "label": "Value 4",
+            "description": "Cloud top above radar measurement range."
+          }
+        ],
+        "dimensions": ["time"],
+        "dtype": "int32"
+      },
+      {
         "name": "detection_status",
         "units": "1",
         "standard_name": null,
@@ -1021,6 +1052,82 @@
         "definition": null,
         "dimensions": ["time"],
         "dtype": "float32"
+      },
+      {
+        "name": "radar_attenuation_status",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Radar attenuation status",
+        "comment": null,
+        "definition": [
+          {
+            "label": "Value 0",
+            "description": "No radar signal."
+          },
+          {
+            "label": "Value 1",
+            "description": "Radar signal, negligible attenuation (corrected)."
+          },
+          {
+            "label": "Value 2",
+            "description": "Radar signal, small attenuation (corrected)."
+          },
+          {
+            "label": "Value 3",
+            "description": "Radar signal, moderate attenuation (corrected)."
+          },
+          {
+            "label": "Value 4",
+            "description": "Radar signal, severe attenuation (corrected)."
+          },
+          {
+            "label": "Value 5",
+            "description": "Radar signal, attenuation present but not corrected."
+          },
+          {
+            "label": "Value 6",
+            "description": "No radar signal, cloud may be undetected due to severe attenuation beneath."
+          }
+        ],
+        "dimensions": ["time", "height"],
+        "dtype": "int32"
+      },
+      {
+        "name": "rain_detected",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Rain detected",
+        "comment": "1 = rain detected, 0 = no rain detected",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "int32"
+      },
+      {
+        "name": "signal_source_status",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Signal source status",
+        "comment": null,
+        "definition": [
+          {
+            "label": "Value 0",
+            "description": "No signal from radar or lidar."
+          },
+          {
+            "label": "Value 1",
+            "description": "Signal from both radar and lidar."
+          },
+          {
+            "label": "Value 2",
+            "description": "Signal from radar only."
+          },
+          {
+            "label": "Value 3",
+            "description": "Signal from lidar only."
+          }
+        ],
+        "dimensions": ["time", "height"],
+        "dtype": "int32"
       },
       {
         "name": "target_classification",
@@ -2269,7 +2376,7 @@
         "long_name": "Possible bias in drizzle median diameter",
         "comment": null,
         "definition": null,
-        "dimensions": ["time", "height"],
+        "dimensions": [],
         "dtype": "float32"
       },
       {
@@ -2339,7 +2446,7 @@
         "long_name": "Possible bias in drizzle number concentration",
         "comment": null,
         "definition": null,
-        "dimensions": ["time", "height"],
+        "dimensions": [],
         "dtype": "float32"
       },
       {
@@ -2369,7 +2476,7 @@
         "long_name": "Possible bias in drizzle liquid water content",
         "comment": null,
         "definition": null,
-        "dimensions": ["time", "height"],
+        "dimensions": [],
         "dtype": "float32"
       },
       {
@@ -2399,7 +2506,7 @@
         "long_name": "Possible bias in drizzle liquid water flux",
         "comment": null,
         "definition": null,
-        "dimensions": ["time", "height"],
+        "dimensions": [],
         "dtype": "float32"
       },
       {
@@ -2489,7 +2596,7 @@
         "long_name": "Possible bias in drizzle droplet fall velocity",
         "comment": null,
         "definition": null,
-        "dimensions": ["time", "height"],
+        "dimensions": [],
         "dtype": "float32"
       },
       {
@@ -2777,7 +2884,7 @@
         "long_name": "Possible bias in ice water content",
         "comment": "This variable is an estimate of the possible systematic error in \nice water content due to the calibration error of the radar \nreflectivity factor from which it was calculated.",
         "definition": null,
-        "dimensions": ["time", "height"],
+        "dimensions": [],
         "dtype": "float32"
       },
       {
@@ -2840,7 +2947,7 @@
         "long_name": "Minimum detectable ice water content",
         "comment": "This variable is an estimate of the minimum detectable ice water\ncontent as a function of height.",
         "definition": null,
-        "dimensions": ["time", "height"],
+        "dimensions": ["height"],
         "dtype": "float32"
       },
       {
@@ -3124,7 +3231,9 @@
   "lwc": {
     "description": "Liquid water content is calculated using the so-called\n        adiabatic-scaled method where microwave radiometer is used to constrain\n        the theoretical liquid water content of observed liquid clouds.",
     "references_html": [
-      "Illingworth et al. (2007). Cloudnet. <i>Bulletin of the American Meteorological Society</i>, <i>88</i>(6), 883-898. <a href=\"https://doi.org/10.1175/BAMS-88-6-883\">https://doi.org/10.1175/BAMS-88-6-883</a>"
+      "Albrecht et al. (1990). Surface\u2010based remote sensing of the observed and the Adiabatic liquid water content of stratocumulus clouds. <i>Geophysical Research Letters</i>, <i>17</i>(1), 89-92. <a href=\"https://doi.org/10.1029/GL017i001p00089\">https://doi.org/10.1029/GL017i001p00089</a>",
+      "Boers et al. (2000). Ground-Based Remote Sensing of Stratocumulus Properties during CLARA, 1996. <i>J. Appl. Meteor.</i>, <i>39</i>(2), 169-181. <a href=\"https://doi.org/10.1175/1520-0450(2000)039&lt;0169:GBRSOS&gt;2.0.CO;2\">https://doi.org/10.1175/1520-0450(2000)039&lt;0169:GBRSOS&gt;2.0.CO;2</a>",
+      "Brenguier (1991). Parameterization of the Condensation Process: A Theoretical Approach. <i>J. Atmos. Sci.</i>, <i>48</i>(2), 264-282. <a href=\"https://doi.org/10.1175/1520-0469(1991)048&lt;0264:POTCPA&gt;2.0.CO;2\">https://doi.org/10.1175/1520-0469(1991)048&lt;0264:POTCPA&gt;2.0.CO;2</a>"
     ],
     "dimensions": [
       {
@@ -3429,6 +3538,316 @@
       }
     ],
     "specific_variables": [
+      {
+        "type": "arome",
+        "variables": [
+          {
+            "name": "cloud_fraction",
+            "units": "1",
+            "standard_name": "cloud_area_fraction",
+            "long_name": "Cloud fraction",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "model_level",
+            "units": "1",
+            "standard_name": "model_level_number",
+            "long_name": "Model level",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["level"],
+            "dtype": "int32"
+          },
+          {
+            "name": "qi",
+            "units": "1",
+            "standard_name": "mass_fraction_of_cloud_ice_in_air",
+            "long_name": "Gridbox-mean ice water mixing ratio",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "ql",
+            "units": "1",
+            "standard_name": "mass_fraction_of_cloud_liquid_water_in_air",
+            "long_name": "Gridbox-mean liquid water mixing ratio",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_geopotential",
+            "units": "m2 s-2",
+            "standard_name": "geopotential",
+            "long_name": "Geopotential",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "int32"
+          },
+          {
+            "name": "sfc_height",
+            "units": "m",
+            "standard_name": "height_above_mean_sea_level",
+            "long_name": "Surface height",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_land_cover",
+            "units": "1",
+            "standard_name": "land_area_fraction",
+            "long_name": "Land cover",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_q_2m",
+            "units": "1",
+            "standard_name": null,
+            "long_name": "Specific humidity at 2m",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_rh_2m",
+            "units": "1",
+            "standard_name": null,
+            "long_name": "Relative humidity at 2m",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_temp_2m",
+            "units": "K",
+            "standard_name": null,
+            "long_name": "Temperature at 2m",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_weg_snow",
+            "units": "m",
+            "standard_name": null,
+            "long_name": "Surface water equivalent snow depth",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "soil_depth",
+            "units": "m",
+            "standard_name": "depth",
+            "long_name": "Depth below ground",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "soil_level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "soil_moisture",
+            "units": "m3 m-3",
+            "standard_name": null,
+            "long_name": "Soil moisture content",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "soil_level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "soil_temperature",
+            "units": "K",
+            "standard_name": null,
+            "long_name": "Soil temperature",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "soil_level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "wwind",
+            "units": "m s-1",
+            "standard_name": "upward_air_velocity",
+            "long_name": "Vertical wind",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          }
+        ]
+      },
+      {
+        "type": "arpege",
+        "variables": [
+          {
+            "name": "cloud_fraction",
+            "units": "1",
+            "standard_name": "cloud_area_fraction",
+            "long_name": "Cloud fraction",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "model_level",
+            "units": "1",
+            "standard_name": "model_level_number",
+            "long_name": "Model level",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["level"],
+            "dtype": "int32"
+          },
+          {
+            "name": "qi",
+            "units": "1",
+            "standard_name": "mass_fraction_of_cloud_ice_in_air",
+            "long_name": "Gridbox-mean ice water mixing ratio",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "ql",
+            "units": "1",
+            "standard_name": "mass_fraction_of_cloud_liquid_water_in_air",
+            "long_name": "Gridbox-mean liquid water mixing ratio",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_geopotential",
+            "units": "m2 s-2",
+            "standard_name": "geopotential",
+            "long_name": "Geopotential",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "int32"
+          },
+          {
+            "name": "sfc_height",
+            "units": "m",
+            "standard_name": "height_above_mean_sea_level",
+            "long_name": "Surface height",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_land_cover",
+            "units": "1",
+            "standard_name": "land_area_fraction",
+            "long_name": "Land cover",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_q_2m",
+            "units": "1",
+            "standard_name": null,
+            "long_name": "Specific humidity at 2m",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_rh_2m",
+            "units": "1",
+            "standard_name": null,
+            "long_name": "Relative humidity at 2m",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_temp_2m",
+            "units": "K",
+            "standard_name": null,
+            "long_name": "Temperature at 2m",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_weg_snow",
+            "units": "m",
+            "standard_name": null,
+            "long_name": "Surface water equivalent snow depth",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "soil_depth",
+            "units": "m",
+            "standard_name": "depth",
+            "long_name": "Depth below ground",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "soil_level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "soil_moisture",
+            "units": "m3 m-3",
+            "standard_name": null,
+            "long_name": "Soil moisture content",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "soil_level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "soil_temperature",
+            "units": "K",
+            "standard_name": null,
+            "long_name": "Soil temperature",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "soil_level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "wwind",
+            "units": "m s-1",
+            "standard_name": "upward_air_velocity",
+            "long_name": "Vertical wind",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          }
+        ]
+      },
       {
         "type": "ecmwf",
         "variables": [
