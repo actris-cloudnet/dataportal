@@ -106,6 +106,9 @@ export class StatisticsRoutes {
       });
       qb.andWhere('"siteId" IN (:...siteIds)', { siteIds: sites.map((site) => site.id) });
     }
+    if (typeof req.query.instrument === "string") {
+      qb.andWhere('stats."instrumentPid" = :instrumentPid', { instrumentPid: req.query.instrument });
+    }
     const units = typeof req.query.cluUnits === "string" ? req.query.cluUnits : "variableYear";
     if (typeof req.query.cluProduct === "string") {
       const productIds = req.query.cluProduct.split(",");
@@ -221,6 +224,11 @@ export class StatisticsRoutes {
         params.push(req.query.country);
         fileWhereAnd.push(`site."countryCode" = $${params.length}`);
       }
+    }
+    if (typeof req.query.instrument === "string") {
+      fileJoins.push('LEFT JOIN instrument_info ON file."instrumentInfoUuid" = instrument_info.uuid');
+      params.push(req.query.instrument);
+      fileWhereAnd.push(`instrument_info.pid = $${params.length}`);
     }
 
     if (productTypes.includes("model") && !productTypes.includes("observation")) {

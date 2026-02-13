@@ -44,32 +44,35 @@ export class Download {
       "measurementDate",
       "productId",
       "siteId",
+      "instrumentPid",
       SUM("downloads") AS "downloads"
     FROM download
     JOIN (
-      SELECT uuid, "measurementDate", "productId", "siteId", COUNT(*) AS "downloads"
+      SELECT uuid, "measurementDate", "productId", "siteId", "instrumentPid", COUNT(*) AS "downloads"
       FROM (
-        SELECT uuid, "measurementDate", "productId", "siteId"
-        FROM regular_file
+        SELECT rf.uuid, rf."measurementDate", rf."productId", rf."siteId", ii.pid AS "instrumentPid"
+        FROM regular_file rf
+        LEFT JOIN instrument_info ii ON rf."instrumentInfoUuid" = ii.uuid
         UNION ALL
-        SELECT uuid, "measurementDate", "productId", "siteId"
+        SELECT uuid, "measurementDate", "productId", "siteId", NULL AS "instrumentPid"
         FROM model_file
       ) AS file
-      GROUP BY uuid, "measurementDate", "productId", "siteId"
+      GROUP BY uuid, "measurementDate", "productId", "siteId", "instrumentPid"
       UNION ALL
-      SELECT "collectionUuid" AS uuid, "measurementDate", "productId", "siteId", COUNT(*) AS "downloads"
+      SELECT "collectionUuid" AS uuid, "measurementDate", "productId", "siteId", "instrumentPid", COUNT(*) AS "downloads"
       FROM (
-        SELECT "collectionUuid", "measurementDate", "productId", "siteId"
+        SELECT "collectionUuid", rf."measurementDate", rf."productId", rf."siteId", ii.pid AS "instrumentPid"
         FROM collection_regular_files_regular_file
-        JOIN regular_file ON "regularFileUuid" = regular_file.uuid
+        JOIN regular_file rf ON "regularFileUuid" = rf.uuid
+        LEFT JOIN instrument_info ii ON rf."instrumentInfoUuid" = ii.uuid
         UNION ALL
-        SELECT "collectionUuid", "measurementDate", "productId", "siteId"
+        SELECT "collectionUuid", "measurementDate", "productId", "siteId", NULL AS "instrumentPid"
         FROM collection_model_files_model_file
         JOIN model_file ON "modelFileUuid" = model_file.uuid
       ) AS collection_file
-      GROUP BY "collectionUuid", "measurementDate", "productId", "siteId"
+      GROUP BY "collectionUuid", "measurementDate", "productId", "siteId", "instrumentPid"
     ) object ON "objectUuid" = object.uuid
-    GROUP BY "downloadDate", "ip", "country", "measurementDate", "productId", "siteId"
+    GROUP BY "downloadDate", "ip", "country", "measurementDate", "productId", "siteId", "instrumentPid"
   `,
   materialized: true,
 })
@@ -85,6 +88,9 @@ export class DownloadStats {
 
   @ViewColumn()
   siteId!: string;
+
+  @ViewColumn()
+  instrumentPid!: string | null;
 
   @ViewColumn()
   downloads!: number;

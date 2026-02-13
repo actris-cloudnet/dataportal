@@ -30,6 +30,7 @@ interface Params {
   downloadDateTo?: string;
   cluUnits?: string;
   cluProduct?: string;
+  instrument?: string;
 }
 
 function doRequest(params: Params, headers: any = { authorization: `Basic ${str2base64("bob:bobs_pass")}` }) {
@@ -99,10 +100,27 @@ describe("GET /api/statistics", () => {
           ),
       ),
     );
+    // Download Mace Head radar file with instrument info (has 2 variables)
+    // This file has instrumentInfo with PID "https://hdl.handle.net/123/bucharest-mira"
+    await downloadRepo.save(
+      Array.from(
+        { length: 100 },
+        (_, day) =>
+          new Download(
+            ObjectType.Product,
+            "38092c00-161d-4ca2-a29d-628cf8e960f6",
+            "1.1.1.4",
+            "IE",
+            new Date(2024, 0, day + 1),
+          ),
+      ),
+    );
     await dataSource.query("REFRESH MATERIALIZED VIEW download_stats");
   });
 
   afterAll(async () => {
+    await dataSource.query("DELETE FROM visualization");
+    await dataSource.query("DELETE FROM model_visualization");
     await regularFileRepo.createQueryBuilder().delete().execute();
     await modelFileRepo.createQueryBuilder().delete().execute();
     await searchFileRepo.createQueryBuilder().delete().execute();
@@ -118,7 +136,9 @@ describe("GET /api/statistics", () => {
     }));
 
   it("calculates file downloads by date", () =>
-    expect(getStats({ dimensions: "yearMonth,downloads" })).resolves.toMatchObject([
+    expect(
+      getStats({ dimensions: "yearMonth,downloads", downloadDateFrom: "2022-01-01", downloadDateTo: "2022-12-31" }),
+    ).resolves.toMatchObject([
       { yearMonth: "2022-01", downloads: expect.closeTo(((1 + 2) * 31) / 300, 10) },
       { yearMonth: "2022-02", downloads: expect.closeTo(((1 + 2) * 28) / 300, 10) },
       { yearMonth: "2022-03", downloads: expect.closeTo(((1 + 2) * 31) / 300, 10) },
@@ -134,7 +154,9 @@ describe("GET /api/statistics", () => {
     ]));
 
   it("calculates unique IPs by month year", () =>
-    expect(getStats({ dimensions: "yearMonth,uniqueIps" })).resolves.toMatchObject([
+    expect(
+      getStats({ dimensions: "yearMonth,uniqueIps", downloadDateFrom: "2022-01-01", downloadDateTo: "2022-12-31" }),
+    ).resolves.toMatchObject([
       { yearMonth: "2022-01", uniqueIps: 2 },
       { yearMonth: "2022-02", uniqueIps: 2 },
       { yearMonth: "2022-03", uniqueIps: 2 },
@@ -150,10 +172,14 @@ describe("GET /api/statistics", () => {
     ]));
 
   it("calculates unique IPs by year", () =>
-    expect(getStats({ dimensions: "year,uniqueIps" })).resolves.toMatchObject([{ year: "2022", uniqueIps: 3 }]));
+    expect(
+      getStats({ dimensions: "year,uniqueIps", downloadDateFrom: "2022-01-01", downloadDateTo: "2022-12-31" }),
+    ).resolves.toMatchObject([{ year: "2022", uniqueIps: 3 }]));
 
   it("calculates file downloads by country", () =>
-    expect(getStats({ dimensions: "country,downloads" })).resolves.toMatchObject([
+    expect(
+      getStats({ dimensions: "country,downloads", downloadDateFrom: "2022-01-01", downloadDateTo: "2022-12-31" }),
+    ).resolves.toMatchObject([
       { country: "FI", downloads: expect.closeTo(181 / 300, 10) },
       { country: "NO", downloads: expect.closeTo((2 * 181) / 300, 10) },
       { country: "SE", downloads: expect.closeTo(((1 + 2) * 184) / 300, 10) },
@@ -197,7 +223,14 @@ describe("GET /api/statistics", () => {
     ]));
 
   it("can filter by site", () =>
-    expect(getStats({ dimensions: "yearMonth,downloads", site: "mace-head" })).resolves.toMatchObject([
+    expect(
+      getStats({
+        dimensions: "yearMonth,downloads",
+        site: "mace-head",
+        downloadDateFrom: "2022-01-01",
+        downloadDateTo: "2022-12-31",
+      }),
+    ).resolves.toMatchObject([
       { yearMonth: "2022-01", downloads: expect.closeTo((1 * 31) / 300, 10) },
       { yearMonth: "2022-02", downloads: expect.closeTo((1 * 28) / 300, 10) },
       { yearMonth: "2022-03", downloads: expect.closeTo((1 * 31) / 300, 10) },
@@ -213,7 +246,14 @@ describe("GET /api/statistics", () => {
     ]));
 
   it("can filter by DVAS facility", () =>
-    expect(getStats({ dimensions: "yearMonth,downloads", facility: "mchd" })).resolves.toMatchObject([
+    expect(
+      getStats({
+        dimensions: "yearMonth,downloads",
+        facility: "mchd",
+        downloadDateFrom: "2022-01-01",
+        downloadDateTo: "2022-12-31",
+      }),
+    ).resolves.toMatchObject([
       { yearMonth: "2022-01", downloads: expect.closeTo((1 * 31) / 300, 10) },
       { yearMonth: "2022-02", downloads: expect.closeTo((1 * 28) / 300, 10) },
       { yearMonth: "2022-03", downloads: expect.closeTo((1 * 31) / 300, 10) },
@@ -236,7 +276,14 @@ describe("GET /api/statistics", () => {
     }));
 
   it("calculates file downloads of observation products", () =>
-    expect(getStats({ dimensions: "yearMonth,downloads", productTypes: "observation" })).resolves.toMatchObject([
+    expect(
+      getStats({
+        dimensions: "yearMonth,downloads",
+        productTypes: "observation",
+        downloadDateFrom: "2022-01-01",
+        downloadDateTo: "2022-12-31",
+      }),
+    ).resolves.toMatchObject([
       { yearMonth: "2022-01", downloads: expect.closeTo(((1 + 2) * 31) / 300, 10) },
       { yearMonth: "2022-02", downloads: expect.closeTo(((1 + 2) * 28) / 300, 10) },
       { yearMonth: "2022-03", downloads: expect.closeTo(((1 + 2) * 31) / 300, 10) },
@@ -262,7 +309,14 @@ describe("GET /api/statistics", () => {
     ]));
 
   it("can filter by product type", () =>
-    expect(getStats({ dimensions: "yearMonth,downloads", cluProduct: "radar" })).resolves.toMatchObject([
+    expect(
+      getStats({
+        dimensions: "yearMonth,downloads",
+        cluProduct: "radar",
+        downloadDateFrom: "2022-01-01",
+        downloadDateTo: "2022-12-31",
+      }),
+    ).resolves.toMatchObject([
       { yearMonth: "2022-01", downloads: expect.closeTo((2 * 31) / 300, 10) },
       { yearMonth: "2022-02", downloads: expect.closeTo((2 * 28) / 300, 10) },
       { yearMonth: "2022-03", downloads: expect.closeTo((2 * 31) / 300, 10) },
@@ -284,7 +338,13 @@ describe("GET /api/statistics", () => {
     ]));
 
   it("filters from download date", () =>
-    expect(getStats({ dimensions: "yearMonth,downloads", downloadDateFrom: "2022-11-21" })).resolves.toMatchObject([
+    expect(
+      getStats({
+        dimensions: "yearMonth,downloads",
+        downloadDateFrom: "2022-11-21",
+        downloadDateTo: "2022-12-31",
+      }),
+    ).resolves.toMatchObject([
       { yearMonth: "2022-11", downloads: expect.closeTo(((2 + 1) * 10) / 300, 10) },
       { yearMonth: "2022-12", downloads: expect.closeTo(((2 + 1) * 31) / 300, 10) },
     ]));
@@ -405,7 +465,14 @@ describe("GET /api/statistics", () => {
     ]));
 
   it("returns downloads by product", () =>
-    expect(getStats({ dimensions: "product,downloads", cluUnits: "files" })).resolves.toMatchObject([
+    expect(
+      getStats({
+        dimensions: "product,downloads",
+        cluUnits: "files",
+        downloadDateFrom: "2022-01-01",
+        downloadDateTo: "2022-12-31",
+      }),
+    ).resolves.toMatchObject([
       {
         downloads: 181,
         product: "classification",
@@ -421,7 +488,14 @@ describe("GET /api/statistics", () => {
     ]));
 
   it("returns unique IPs by product", () =>
-    expect(getStats({ dimensions: "product,uniqueIps", cluUnits: "files" })).resolves.toMatchObject([
+    expect(
+      getStats({
+        dimensions: "product,uniqueIps",
+        cluUnits: "files",
+        downloadDateFrom: "2022-01-01",
+        downloadDateTo: "2022-12-31",
+      }),
+    ).resolves.toMatchObject([
       {
         product: "classification",
         uniqueIps: 1,
@@ -437,7 +511,14 @@ describe("GET /api/statistics", () => {
     ]));
 
   it("returns downloads by site", () =>
-    expect(getStats({ dimensions: "site,downloads", cluUnits: "files" })).resolves.toMatchObject([
+    expect(
+      getStats({
+        dimensions: "site,downloads",
+        cluUnits: "files",
+        downloadDateFrom: "2022-01-01",
+        downloadDateTo: "2022-12-31",
+      }),
+    ).resolves.toMatchObject([
       {
         downloads: 365,
         site: "hyytiala",
@@ -449,7 +530,14 @@ describe("GET /api/statistics", () => {
     ]));
 
   it("returns unique IPs by site", () =>
-    expect(getStats({ dimensions: "site,uniqueIps", cluUnits: "files" })).resolves.toMatchObject([
+    expect(
+      getStats({
+        dimensions: "site,uniqueIps",
+        cluUnits: "files",
+        downloadDateFrom: "2022-01-01",
+        downloadDateTo: "2022-12-31",
+      }),
+    ).resolves.toMatchObject([
       {
         site: "hyytiala",
         uniqueIps: 2,
@@ -459,4 +547,58 @@ describe("GET /api/statistics", () => {
         uniqueIps: 2,
       },
     ]));
+
+  it("can filter by instrument PID", () =>
+    expect(
+      getStats({
+        dimensions: "yearMonth,downloads",
+        instrument: "https://hdl.handle.net/123/bucharest-mira",
+        downloadDateFrom: "2024-01-01",
+        downloadDateTo: "2024-04-30",
+        cluUnits: "files",
+      }),
+    ).resolves.toMatchObject([
+      { yearMonth: "2024-01", downloads: 31 },
+      { yearMonth: "2024-02", downloads: 29 },
+      { yearMonth: "2024-03", downloads: 31 },
+      { yearMonth: "2024-04", downloads: 9 },
+    ]));
+
+  it("can filter by instrument PID with variable year units", () =>
+    expect(
+      getStats({
+        dimensions: "year,downloads",
+        instrument: "https://hdl.handle.net/123/bucharest-mira",
+        downloadDateFrom: "2024-01-01",
+      }),
+    ).resolves.toMatchObject([{ year: "2024", downloads: expect.closeTo((2 * 100) / 300, 10) }]));
+
+  it("can filter by instrument PID for unique IPs", () =>
+    expect(
+      getStats({
+        dimensions: "year,uniqueIps",
+        instrument: "https://hdl.handle.net/123/bucharest-mira",
+        downloadDateFrom: "2024-01-01",
+      }),
+    ).resolves.toMatchObject([{ year: "2024", uniqueIps: 1 }]));
+
+  it("returns empty result when filtering by non-existent instrument", () =>
+    expect(
+      getStats({
+        dimensions: "yearMonth,downloads",
+        instrument: "https://hdl.handle.net/123/nonexistent",
+        downloadDateFrom: "2024-01-01",
+        cluUnits: "files",
+      }),
+    ).resolves.toMatchObject([]));
+
+  it("can filter curated data by instrument PID", () =>
+    expect(
+      getStats({
+        dimensions: "yearMonth,curatedData",
+        instrument: "https://hdl.handle.net/123/bucharest-mira",
+        productTypes: "observation",
+        cluUnits: "files",
+      }),
+    ).resolves.toMatchObject([{ yearMonth: "2018-11", curatedData: 1 }]));
 });

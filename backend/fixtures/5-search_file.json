@@ -6,7 +6,8 @@
     "product": "radar",
     "size": 12200657,
     "site": "mace-head",
-    "errorLevel": null
+    "errorLevel": null,
+    "instrumentInfo": { "uuid": "0b3a7fa0-4812-4964-af23-1162e8b3a665" }
   },
   {
     "uuid": "bde7a35f-03aa-4bff-acfb-b4974ea9f217",
