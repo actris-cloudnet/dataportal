@@ -1,4 +1,4 @@
-export type InstrumentLogEventType = "calibration" | "maintenance" | "malfunction";
+export type InstrumentLogEventType = "calibration" | "maintenance" | "malfunction" | "firmware-update";
 
 export interface InstrumentLog {
   id: number;

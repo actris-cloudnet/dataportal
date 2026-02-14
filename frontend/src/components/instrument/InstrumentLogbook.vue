@@ -42,6 +42,7 @@
           <label for="event-type">Event type</label>
           <select id="event-type" v-model="form.eventType" required>
             <option value="calibration">Calibration</option>
+            <option value="firmware-update">Firmware update</option>
             <option value="maintenance">Maintenance</option>
             <option value="malfunction">Malfunction</option>
           </select>

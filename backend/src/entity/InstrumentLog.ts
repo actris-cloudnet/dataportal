@@ -6,6 +6,7 @@ export enum InstrumentLogEventType {
   CALIBRATION = "calibration",
   MAINTENANCE = "maintenance",
   MALFUNCTION = "malfunction",
+  FIRMWARE_UPDATE = "firmware-update",
 }
 
 @Entity()
