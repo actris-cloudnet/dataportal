@@ -20,7 +20,7 @@
         </thead>
         <tbody>
           <tr v-for="entry in entries" :key="entry.id">
-            <td>{{ entry.date }}</td>
+            <td>{{ formatDate(entry.date) }}</td>
             <td>{{ entry.eventType }}</td>
             <td>{{ entry.notes ?? "–" }}</td>
             <td>{{ entry.createdBy?.fullName ?? entry.createdBy?.username ?? "–" }}</td>
@@ -49,6 +49,10 @@
         <div class="form-group">
           <label for="event-date">Date</label>
           <input id="event-date" type="date" v-model="form.date" :max="today" required />
+        </div>
+        <div class="form-group">
+          <label for="event-time">Time (optional)</label>
+          <input id="event-time" type="time" v-model="form.time" />
         </div>
         <div class="form-group">
           <label for="event-notes">Notes (optional)</label>
@@ -86,7 +90,19 @@ const submitError = ref<string | null>(null);
 
 const today = new Date().toISOString().slice(0, 10);
 
-const defaultForm = () => ({ eventType: "calibration" as InstrumentLogEventType, date: "", notes: "" });
+const defaultForm = () => ({
+  eventType: "calibration" as InstrumentLogEventType,
+  date: "",
+  time: "",
+  notes: "",
+});
+
+function formatDate(dateStr: string): string {
+  if (dateStr.includes("T")) {
+    return dateStr.slice(0, 16).replace("T", " ");
+  }
+  return dateStr.slice(0, 10);
+}
 const form = ref(defaultForm());
 
 async function fetchEntries() {
@@ -108,7 +124,7 @@ async function submitEntry() {
     await axios.post(`${backendUrl}instrument-logs`, {
       instrumentInfoUuid: props.instrumentInfo.uuid,
       eventType: form.value.eventType,
-      date: form.value.date,
+      date: form.value.time ? `${form.value.date}T${form.value.time}` : form.value.date,
       notes: form.value.notes || null,
     });
     showModal.value = false;

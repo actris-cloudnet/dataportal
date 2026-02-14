@@ -46,10 +46,12 @@ export class InstrumentLogRoutes {
     if (!eventType || !VALID_EVENT_TYPES.includes(eventType)) {
       return next({ status: 400, errors: `eventType must be one of: ${VALID_EVENT_TYPES.join(", ")}` });
     }
-    if (!date || !isValidDate(date)) {
-      return next({ status: 400, errors: "date must be a valid ISO date (YYYY-MM-DD)" });
+    const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(date);
+    const dateTime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(date);
+    if (!date || (!dateOnly && !dateTime)) {
+      return next({ status: 400, errors: "date must be YYYY-MM-DD or YYYY-MM-DDTHH:mm" });
     }
-    if (date > new Date().toISOString().slice(0, 10)) {
+    if (new Date(date) > new Date()) {
       return next({ status: 400, errors: "date cannot be in the future" });
     }
     const instrumentInfo = await this.instrumentInfoRepo.findOneBy({ uuid: instrumentInfoUuid });

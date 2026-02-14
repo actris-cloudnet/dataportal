@@ -23,7 +23,7 @@ export class InstrumentLog {
   @Column({ type: "enum", enum: InstrumentLogEventType })
   eventType!: InstrumentLogEventType;
 
-  @Column({ type: "date" })
+  @Column({ type: "timestamp without time zone" })
   date!: string;
 
   @Column({ type: "text", nullable: true })
