@@ -20,6 +20,7 @@ import { ProductRoutes } from "./routes/product";
 import { ModelRoutes } from "./routes/model";
 import { DownloadRoutes } from "./routes/download";
 import { CalibrationRoutes } from "./routes/calibration";
+import { InstrumentLogRoutes } from "./routes/instrumentLog";
 import { QualityReportRoutes } from "./routes/qualityreport";
 import { UserAccountRoutes } from "./routes/userAccount";
 import { PublicationRoutes } from "./routes/publication";
@@ -89,6 +90,7 @@ async function createServer(): Promise<void> {
   const modelRoutes = new ModelRoutes(AppDataSource);
   const dlRoutes = new DownloadRoutes(AppDataSource, fileRoutes, uploadRoutes, ipLookup, citationService);
   const calibRoutes = new CalibrationRoutes(AppDataSource);
+  const instrumentLogRoutes = new InstrumentLogRoutes(AppDataSource);
   const qualityRoutes = new QualityReportRoutes(AppDataSource, fileRoutes);
   const publicationRoutes = new PublicationRoutes(AppDataSource);
   const userActivationRoutes = new UserActivationRoutes(AppDataSource);
@@ -239,6 +241,20 @@ async function createServer(): Promise<void> {
     authorizator.verifyPermission(PermissionType.canCalibrate),
     express.json(),
     calibRoutes.putCalibration,
+  );
+  app.get("/api/instrument-logs", instrumentLogRoutes.getLogs);
+  app.post(
+    "/api/instrument-logs",
+    passport.authenticate(["cookie", "basic"], { session: false }),
+    authorizator.verifyPermission(PermissionType.canCalibrate),
+    express.json(),
+    instrumentLogRoutes.postLog,
+  );
+  app.delete(
+    "/api/instrument-logs/:id",
+    passport.authenticate(["cookie", "basic"], { session: false }),
+    authorizator.verifyPermission(PermissionType.canCalibrate),
+    instrumentLogRoutes.deleteLog,
   );
   app.get(
     "/api/raw-files",

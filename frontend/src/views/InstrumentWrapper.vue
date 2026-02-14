@@ -14,6 +14,10 @@
           <img :src="CalibrationIcon" alt="" />
           Calibration
         </router-link>
+        <router-link class="tab" :to="{ name: 'InstrumentLogbook' }">
+          <img :src="logbookIcon" alt="" />
+          Logbook
+        </router-link>
       </template>
     </LandingHeader>
     <router-view :instrumentInfo="instrumentInfo.value" />
@@ -28,6 +32,7 @@ import { useRoute } from "vue-router";
 import LandingHeader from "@/components/LandingHeader.vue";
 import folderIcon from "@/assets/icons/icons8-folder-48.png";
 import CalibrationIcon from "@/assets/icons/calibration.svg";
+import logbookIcon from "@/assets/icons/icons8-brief-48.png";
 import { backendUrl, getInstrumentIcon } from "@/lib";
 import { useTitle } from "@/router";
 import type { InstrumentInfo } from "@shared/entity/Instrument";

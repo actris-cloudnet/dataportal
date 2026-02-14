@@ -216,6 +216,12 @@ const routes = [
         meta: { title: false },
         component: () => import("@/components/instrument/InstrumentCalibration.vue"),
       },
+      {
+        path: "logbook",
+        name: "InstrumentLogbook",
+        meta: { title: false },
+        component: () => import("@/components/instrument/InstrumentLogbook.vue"),
+      },
     ],
   },
   {

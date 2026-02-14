@@ -1,0 +1,72 @@
+import { DataSource, Repository } from "typeorm";
+import { RequestHandler } from "express";
+import { InstrumentLog, InstrumentLogEventType } from "../entity/InstrumentLog";
+import { InstrumentInfo } from "../entity/Instrument";
+import { isValidDate } from "../lib";
+
+const VALID_EVENT_TYPES = Object.values(InstrumentLogEventType) as string[];
+
+export class InstrumentLogRoutes {
+  private logRepo: Repository<InstrumentLog>;
+  private instrumentInfoRepo: Repository<InstrumentInfo>;
+
+  constructor(dataSource: DataSource) {
+    this.logRepo = dataSource.getRepository(InstrumentLog);
+    this.instrumentInfoRepo = dataSource.getRepository(InstrumentInfo);
+  }
+
+  getLogs: RequestHandler = async (req, res, next) => {
+    const { instrumentInfoUuid } = req.query as { instrumentInfoUuid?: string };
+    if (!instrumentInfoUuid) {
+      return next({ status: 400, errors: "instrumentInfoUuid is required" });
+    }
+    const instrumentInfo = await this.instrumentInfoRepo.findOneBy({ uuid: instrumentInfoUuid });
+    if (!instrumentInfo) {
+      return next({ status: 404, errors: "Instrument not found" });
+    }
+    const logs = await this.logRepo.find({
+      where: { instrumentInfoUuid },
+      order: { date: "DESC", createdAt: "DESC" },
+    });
+    res.json(logs);
+  };
+
+  postLog: RequestHandler = async (req, res, next) => {
+    const { instrumentInfoUuid, eventType, date, notes } = req.body;
+    if (!instrumentInfoUuid) {
+      return next({ status: 400, errors: "instrumentInfoUuid is required" });
+    }
+    if (!eventType || !VALID_EVENT_TYPES.includes(eventType)) {
+      return next({ status: 400, errors: `eventType must be one of: ${VALID_EVENT_TYPES.join(", ")}` });
+    }
+    if (!date || !isValidDate(date)) {
+      return next({ status: 400, errors: "date must be a valid ISO date (YYYY-MM-DD)" });
+    }
+    const instrumentInfo = await this.instrumentInfoRepo.findOneBy({ uuid: instrumentInfoUuid });
+    if (!instrumentInfo) {
+      return next({ status: 404, errors: "Instrument not found" });
+    }
+    const log = this.logRepo.create({
+      instrumentInfo,
+      instrumentInfoUuid,
+      eventType,
+      date,
+      notes: notes ?? null,
+    });
+    const saved = await this.logRepo.save(log);
+    res.status(201).json(saved);
+  };
+
+  deleteLog: RequestHandler = async (req, res, next) => {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      return next({ status: 400, errors: "Invalid log entry id" });
+    }
+    const log = await this.logRepo.findOneBy({ id });
+    if (!log) {
+      return next({ status: 404, errors: "Log entry not found" });
+    }
+    await this.logRepo.delete({ id });
+    res.sendStatus(204);
+  };
+}
