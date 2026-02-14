@@ -48,7 +48,7 @@
         </div>
         <div class="form-group">
           <label for="event-date">Date</label>
-          <input id="event-date" type="date" v-model="form.date" required />
+          <input id="event-date" type="date" v-model="form.date" :max="today" required />
         </div>
         <div class="form-group">
           <label for="event-notes">Notes (optional)</label>
@@ -83,6 +83,8 @@ const state = ref<PageState>("loading");
 const entries = ref<InstrumentLog[]>([]);
 const showModal = ref(false);
 const submitError = ref<string | null>(null);
+
+const today = new Date().toISOString().slice(0, 10);
 
 const defaultForm = () => ({ eventType: "calibration" as InstrumentLogEventType, date: "", notes: "" });
 const form = ref(defaultForm());

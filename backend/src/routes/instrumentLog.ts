@@ -49,6 +49,9 @@ export class InstrumentLogRoutes {
     if (!date || !isValidDate(date)) {
       return next({ status: 400, errors: "date must be a valid ISO date (YYYY-MM-DD)" });
     }
+    if (date > new Date().toISOString().slice(0, 10)) {
+      return next({ status: 400, errors: "date cannot be in the future" });
+    }
     const instrumentInfo = await this.instrumentInfoRepo.findOneBy({ uuid: instrumentInfoUuid });
     if (!instrumentInfo) {
       return next({ status: 404, errors: "Instrument not found" });
