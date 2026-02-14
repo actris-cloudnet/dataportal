@@ -1,5 +1,6 @@
 import { BeforeInsert, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { InstrumentInfo } from "./Instrument";
+import { UserAccount } from "./UserAccount";
 
 export enum InstrumentLogEventType {
   CALIBRATION = "calibration",
@@ -27,6 +28,13 @@ export class InstrumentLog {
 
   @Column({ type: "text", nullable: true })
   notes!: string | null;
+
+  @Column({ nullable: true })
+  userAccountId!: number | null;
+
+  @ManyToOne(() => UserAccount, { nullable: true, onDelete: "SET NULL" })
+  @JoinColumn({ name: "userAccountId" })
+  userAccount!: UserAccount | null;
 
   @Column()
   createdAt!: Date;

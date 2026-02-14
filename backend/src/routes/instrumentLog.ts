@@ -26,9 +26,16 @@ export class InstrumentLogRoutes {
     }
     const logs = await this.logRepo.find({
       where: { instrumentInfoUuid },
+      relations: { userAccount: true },
       order: { date: "DESC", createdAt: "DESC" },
     });
-    res.json(logs);
+    const safeEntries = logs.map(({ userAccount, ...rest }) => ({
+      ...rest,
+      createdBy: userAccount
+        ? { id: userAccount.id, username: userAccount.username, fullName: userAccount.fullName }
+        : null,
+    }));
+    res.json(safeEntries);
   };
 
   postLog: RequestHandler = async (req, res, next) => {
@@ -52,6 +59,7 @@ export class InstrumentLogRoutes {
       eventType,
       date,
       notes: notes ?? null,
+      userAccount: req.user ?? null,
     });
     const saved = await this.logRepo.save(log);
     res.status(201).json(saved);

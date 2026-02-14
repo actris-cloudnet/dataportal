@@ -14,6 +14,7 @@
             <th>Date</th>
             <th>Event type</th>
             <th>Notes</th>
+            <th>Added by</th>
             <th v-if="canEdit"></th>
           </tr>
         </thead>
@@ -22,6 +23,7 @@
             <td>{{ entry.date }}</td>
             <td>{{ entry.eventType }}</td>
             <td>{{ entry.notes ?? "–" }}</td>
+            <td>{{ entry.createdBy?.fullName ?? entry.createdBy?.username ?? "–" }}</td>
             <td v-if="canEdit">
               <BaseButton type="danger" size="small" @click="deleteEntry(entry.id)">Delete</BaseButton>
             </td>
