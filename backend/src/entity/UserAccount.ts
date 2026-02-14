@@ -3,6 +3,7 @@ import { timingSafeEqual } from "node:crypto";
 const md5 = require("apache-md5"); // eslint-disable-line @typescript-eslint/no-require-imports
 
 import { Permission } from "./Permission";
+import { InstrumentLogPermission } from "./InstrumentLogPermission";
 
 @Entity()
 export class UserAccount {
@@ -27,6 +28,10 @@ export class UserAccount {
   @ManyToMany(() => Permission, (permission) => permission.userAccounts)
   @JoinTable()
   permissions!: Permission[];
+
+  @ManyToMany(() => InstrumentLogPermission, (p) => p.userAccounts)
+  @JoinTable()
+  instrumentLogPermissions!: InstrumentLogPermission[];
 
   setPassword(password: string) {
     this.passwordHash = md5(password);

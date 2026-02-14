@@ -12,7 +12,8 @@
           <a href="https://www.flickr.com/photos/theaucitron/5810163712/">Header photo</a>
           by <a href="https://www.flickr.com/photos/theaucitron/">theaucitron</a>,
           <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a>.<br />
-          Icons from <a href="https://icons8.com/">icons8.com</a>.
+          Icons from <a href="https://icons8.com/">icons8.com</a>.<br />
+          <router-link :to="{ name: 'Login' }">Log in</router-link>
         </div>
       </div>
       <div class="item">

@@ -1,0 +1,23 @@
+[
+  {
+    "instrumentInfoUuid": "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+    "eventType": "calibration",
+    "date": "2021-03-15",
+    "notes": "Annual calibration check.",
+    "createdAt": "2021-03-15T10:00:00.000Z"
+  },
+  {
+    "instrumentInfoUuid": "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+    "eventType": "maintenance",
+    "date": "2021-06-01",
+    "notes": null,
+    "createdAt": "2021-06-01T09:30:00.000Z"
+  },
+  {
+    "instrumentInfoUuid": "0b3a7fa0-4812-4964-af23-1162e8b3a665",
+    "eventType": "malfunction",
+    "date": "2021-08-20",
+    "notes": "Detector unit hardware fault.",
+    "createdAt": "2021-08-20T14:45:00.000Z"
+  }
+]

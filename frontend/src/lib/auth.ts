@@ -2,18 +2,33 @@ import axios from "axios";
 import { computed, reactive } from "vue";
 import { backendUrl } from ".";
 import type { Permission, PermissionType } from "@shared/entity/Permission";
+import type { InstrumentLogPermission, InstrumentLogPermissionType } from "@shared/entity/InstrumentLogPermission";
 import type { UserAccount } from "@shared/entity/UserAccount";
 
 interface State {
   isAuthenticated: boolean;
   name: string;
   permissions: Permission[];
+  instrumentLogPermissions: InstrumentLogPermission[];
 }
 
-export const loginStore = reactive<State>({ isAuthenticated: false, name: "", permissions: [] });
+export const loginStore = reactive<State>({
+  isAuthenticated: false,
+  name: "",
+  permissions: [],
+  instrumentLogPermissions: [],
+});
 
 export const hasPermission = (permission: PermissionType) =>
   computed(() => loginStore.permissions.some((p) => p.permission === permission));
+
+export const hasInstrumentLogPermission = (permission: InstrumentLogPermissionType, instrumentInfoUuid: string) =>
+  computed(() =>
+    loginStore.instrumentLogPermissions.some(
+      (p) =>
+        p.permission === permission && (p.instrumentInfoUuid === null || p.instrumentInfoUuid === instrumentInfoUuid),
+    ),
+  );
 
 export async function login(username: string, password: string) {
   const res = await axios.post<UserAccount>(`${backendUrl}auth/login`, { username, password });
@@ -37,12 +52,14 @@ export async function logout() {
   loginStore.isAuthenticated = false;
   loginStore.name = "";
   loginStore.permissions = [];
+  loginStore.instrumentLogPermissions = [];
 }
 
 function setUserState(user: UserAccount) {
   loginStore.isAuthenticated = true;
   loginStore.name = user.fullName || user.username || `User ${user.id}`;
   loginStore.permissions = user.permissions;
+  loginStore.instrumentLogPermissions = user.instrumentLogPermissions ?? [];
 }
 
 export const initLogin = () =>

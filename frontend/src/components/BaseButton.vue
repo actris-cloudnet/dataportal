@@ -41,6 +41,7 @@ defineEmits<(e: "click") => void>();
   fill: white;
   border-radius: 4px;
   user-select: none;
+  cursor: pointer;
 
   :deep(svg) {
     margin-right: 0.25rem;

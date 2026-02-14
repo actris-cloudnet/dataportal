@@ -67,7 +67,7 @@ export class Authenticator {
     }
     const user = await this.userRepo.findOne({
       where: { username: req.body.username, passwordHash: Not(IsNull()) },
-      relations: { permissions: true },
+      relations: { permissions: true, instrumentLogPermissions: { instrumentInfo: true } },
     });
     if (!user || !(await this.hasPermission(user, PermissionType.canLogin))) {
       return next({ status: 401, errors: "Invalid username" });
@@ -85,12 +85,21 @@ export class Authenticator {
     }
     const user = await this.userRepo.findOneOrFail({
       where: { id: req.user.id },
-      relations: { permissions: true },
+      relations: { permissions: true, instrumentLogPermissions: { instrumentInfo: true } },
     });
     res.send(this.serializeUser(user));
   };
 
-  private serializeUser = (user: UserAccount) => ({ ...user, passwordHash: undefined, activationToken: undefined });
+  private serializeUser = (user: UserAccount) => ({
+    ...user,
+    passwordHash: undefined,
+    activationToken: undefined,
+    instrumentLogPermissions: (user.instrumentLogPermissions ?? []).map((p) => ({
+      id: p.id,
+      permission: p.permission,
+      instrumentInfoUuid: p.instrumentInfo ? p.instrumentInfo.uuid : null,
+    })),
+  });
 
   logOut: RequestHandler = async (req, res) => {
     const token = req.cookies.token;

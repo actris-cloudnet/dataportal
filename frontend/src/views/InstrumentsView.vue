@@ -4,6 +4,22 @@
     <LandingHeader title="Instruments" />
     <main class="pagewidth">
       <template v-if="instruments.status === 'ready'">
+        <section v-if="myInstruments.length > 0" class="my-instruments">
+          <h2>My instrument logs</h2>
+          <div class="my-instruments-grid">
+            <div v-for="site in myInstruments" :key="'my-' + site.id">
+              <h3>{{ site.humanReadableName }}</h3>
+              <ul class="my-instruments-list">
+                <li v-for="instr in site.instruments" :key="instr.uuid">
+                  <span :class="{ status: true, [instr.status]: true }"></span>
+                  <router-link :to="{ name: 'InstrumentLogbook', params: { uuid: instr.uuid } }">
+                    {{ instr.name }}
+                  </router-link>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
         <div class="site" v-for="site in instruments.value" :key="site.id">
           <h2>{{ site.humanReadableName }}</h2>
           <ul>
@@ -33,12 +49,13 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import axios from "axios";
 
 import type { InstrumentInfo } from "@shared/entity/Instrument";
 import type { Site } from "@shared/entity/Site";
 import { backendUrl, compareValues } from "@/lib";
+import { loginStore } from "@/lib/auth";
 import LandingHeader from "@/components/LandingHeader.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
 import ApiError from "@/views/ApiError.vue";
@@ -54,6 +71,21 @@ type ProductResult =
   | { status: "error"; error: Error };
 
 const instruments = ref<ProductResult>({ status: "loading" });
+
+const myInstruments = computed(() => {
+  if (instruments.value.status !== "ready") return [];
+  const logPerms = loginStore.instrumentLogPermissions;
+  if (logPerms.length === 0) return [];
+  const isGlobal = logPerms.some((p) => p.instrumentInfoUuid === null);
+  if (isGlobal) return instruments.value.value;
+  const uuids = new Set(logPerms.map((p) => p.instrumentInfoUuid));
+  return instruments.value.value
+    .map((site) => ({
+      ...site,
+      instruments: site.instruments.filter((instr) => uuids.has(instr.uuid)),
+    }))
+    .filter((site) => site.instruments.length > 0);
+});
 
 function sortInstrument(a: InstrumentInfo, b: InstrumentInfo) {
   if (a.status == b.status) {
@@ -139,6 +171,41 @@ ul {
 
   &.inactive {
     background: #ddd;
+  }
+}
+
+.my-instruments {
+  margin-bottom: 2rem;
+  padding: 1rem 1.5rem;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+
+  h2 {
+    margin-top: 0;
+  }
+
+  h3 {
+    font-size: 110%;
+    margin: 0.5rem 0;
+  }
+}
+
+.my-instruments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr));
+  gap: 1rem;
+}
+
+.my-instruments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
   }
 }
 
