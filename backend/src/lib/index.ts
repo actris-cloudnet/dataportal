@@ -18,7 +18,7 @@ import { InstrumentInfo } from "../entity/Instrument";
 export const stringify = (obj: any): string => JSON.stringify(obj, null, 2);
 
 const DATETIME_FORMAT =
-  /^(?<year>\d\d\d\d)-(?<month>\d\d)-(?<day>\d\d)(T(?<hours>\d\d):(?<minutes>\d\d):(?<seconds>\d\d)(\.(?<fraction>\d+))?(Z|\+00:00)?)?$/;
+  /^(?<year>\d\d\d\d)-(?<month>\d\d)-(?<day>\d\d)(T(?<hours>\d\d):(?<minutes>\d\d)(:(?<seconds>\d\d)(\.(?<fraction>\d+))?)?(Z|\+00:00)?)?$/;
 
 export function isValidDate(obj: any): boolean {
   if (obj instanceof Date) {
