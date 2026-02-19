@@ -36,6 +36,23 @@ def get_user(username: str) -> dict:
     raise ValueError(f"User {username} not found")
 
 
+def get_user_by_orcid(orcid: str) -> dict:
+    for user in get_all_users():
+        if user.get("orcidId") == orcid:
+            return user
+    raise ValueError(f"User with ORCID {orcid} not found")
+
+
+def resolve_user(args: argparse.Namespace) -> dict:
+    if getattr(args, "orcid", None):
+        return get_user_by_orcid(args.orcid)
+    elif getattr(args, "username", None):
+        return get_user(args.username)
+    else:
+        print("Either username or --orcid is required", file=sys.stderr)
+        sys.exit(1)
+
+
 def put_user(user: dict) -> dict:
     req = urllib.request.Request(
         method="PUT",
@@ -59,7 +76,12 @@ def post_user(user: dict) -> dict:
 
 
 def print_user(user: dict) -> None:
-    print("Username: " + user["username"])
+    if user["username"]:
+        print("Username: " + user["username"])
+    elif user.get("orcidId"):
+        print("ORCID: " + user["orcidId"])
+    else:
+        print("User ID: " + str(user["id"]))
     permissions = user.get("permissions", [])
     log_perms = user.get("instrumentLogPermissions", [])
 
@@ -91,7 +113,7 @@ def list_users(args: argparse.Namespace) -> None:
 
 
 def user_info(args: argparse.Namespace) -> None:
-    print_user(get_user(args.username))
+    print_user(resolve_user(args))
 
 
 def create_user(args: argparse.Namespace) -> None:
@@ -144,7 +166,7 @@ def _validate_regular_args(args: argparse.Namespace) -> None:
 
 
 def add_permission(args: argparse.Namespace) -> None:
-    user = get_user(args.username)
+    user = resolve_user(args)
     if _is_log_permission(args):
         _validate_log_args(args)
         perms_to_add = make_log_permissions(args)
@@ -166,12 +188,12 @@ def add_permission(args: argparse.Namespace) -> None:
         permissions_to_add = make_permissions(args)
         user["permissions"].extend(permissions_to_add)
     put_user(user)
-    user = get_user(args.username)
+    user = resolve_user(args)
     print_user(user)
 
 
 def remove_permission(args: argparse.Namespace) -> None:
-    user = get_user(args.username)
+    user = resolve_user(args)
     if _is_log_permission(args):
         _validate_log_args(args)
         perms_to_remove = make_log_permissions(args)
@@ -190,7 +212,7 @@ def remove_permission(args: argparse.Namespace) -> None:
             if not any(permission_equal(perm, p) for p in permissions_to_remove)
         ]
     put_user(user)
-    user = get_user(args.username)
+    user = resolve_user(args)
     print_user(user)
 
 
@@ -256,7 +278,8 @@ def main():
     subparser.set_defaults(func=list_users)
 
     subparser = subparsers.add_parser("user-info")
-    subparser.add_argument("username")
+    subparser.add_argument("username", nargs="?")
+    subparser.add_argument("--orcid")
     subparser.set_defaults(func=user_info)
 
     subparser = subparsers.add_parser("create-user")
@@ -265,7 +288,8 @@ def main():
     subparser.set_defaults(func=create_user)
 
     subparser = subparsers.add_parser("add-permission")
-    subparser.add_argument("username")
+    subparser.add_argument("username", nargs="?")
+    subparser.add_argument("--orcid")
     subparser.add_argument("permission", choices=PERMISSIONS)
     group = subparser.add_mutually_exclusive_group()
     group.add_argument("--site", nargs="+")
@@ -279,7 +303,8 @@ def main():
     subparser.set_defaults(func=add_permission)
 
     subparser = subparsers.add_parser("remove-permission")
-    subparser.add_argument("username")
+    subparser.add_argument("username", nargs="?")
+    subparser.add_argument("--orcid")
     subparser.add_argument("permission", choices=PERMISSIONS)
     group = subparser.add_mutually_exclusive_group()
     group.add_argument("--site", nargs="+")

@@ -31,6 +31,7 @@ interface InstrumentLogPermissionInterface {
 interface UserAccountInterface {
   id?: number;
   username: string | null;
+  orcidId?: string | null;
   password?: string;
   passwordHash?: string;
   activationToken?: string;
@@ -65,6 +66,7 @@ export class UserAccountRoutes {
     return {
       id: user.id,
       username: user.username,
+      orcidId: user.orcidId,
       activationToken: user.activationToken || undefined,
       permissions: user.permissions.map((p) => ({
         id: p.id,
@@ -256,7 +258,7 @@ export class UserAccountRoutes {
   };
 
   validatePut: RequestHandler = async (req, res, next) => {
-    if (hasProperty(req.body, "username")) {
+    if (hasProperty(req.body, "username") && req.body.username !== null) {
       this.validateUsername(req, next);
     }
     if (hasProperty(req.body, "password")) {
