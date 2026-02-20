@@ -47,6 +47,8 @@ defineEmits<(e: "submit") => void>();
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
   transition: all 0.3s ease;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
 }
 
 .modal-header h3 {
