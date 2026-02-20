@@ -18,7 +18,7 @@ import { InstrumentInfo } from "../entity/Instrument";
 export const stringify = (obj: any): string => JSON.stringify(obj, null, 2);
 
 const DATETIME_FORMAT =
-  /^(?<year>\d\d\d\d)-(?<month>\d\d)-(?<day>\d\d)(T(?<hours>\d\d):(?<minutes>\d\d):(?<seconds>\d\d)(\.(?<fraction>\d+))?(Z|\+00:00)?)?$/;
+  /^(?<year>\d\d\d\d)-(?<month>\d\d)-(?<day>\d\d)(T(?<hours>\d\d):(?<minutes>\d\d)(:(?<seconds>\d\d)(\.(?<fraction>\d+))?)?(Z|\+00:00)?)?$/;
 
 export function isValidDate(obj: any): boolean {
   if (obj instanceof Date) {
@@ -128,6 +128,9 @@ export const getS3pathForFile = (file: File) =>
   file.newBucket ? `/cloudnet-product-new/${file.uuid}/${file.s3key}` : `/${getBucketForFile(file)}/${file.s3key}`;
 
 export const getS3pathForImage = (s3key: string) => `/cloudnet-img/${s3key}`;
+
+export const getS3pathForLogImage = (s3key: string) =>
+  `/cloudnet-img/logbook/${s3key.split("/").map(encodeURIComponent).join("/")}`;
 
 export const getDownloadPathForFile = (file: File) => `product/${file.uuid}/${file.s3key}`;
 

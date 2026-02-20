@@ -4,7 +4,9 @@
     <dl>
       <dt>PID</dt>
       <dd>
-        <a :href="instrumentInfo.pid">{{ instrumentInfo.pid }}</a>
+        <CopyableText :value="instrumentInfo.pid">
+          <a :href="instrumentInfo.pid">{{ instrumentInfo.pid }}</a>
+        </CopyableText>
       </dd>
       <dt>{{ instrumentInfo.owners.length === 1 ? "Owner" : "Owners" }}</dt>
       <dd>
@@ -115,6 +117,7 @@ import UploadVisualization from "@/components/UploadVisualization.vue";
 import CustomMultiselect from "@/components/MultiSelect.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
 import ProductAvailabilityVisualizationSingle from "../ProductAvailabilityVisualizationSingle.vue";
+import CopyableText from "@/components/landing/CopyableText.vue";
 import { getProductIcon } from "@/lib";
 import type { Site } from "@shared/entity/Site";
 

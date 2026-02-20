@@ -24,7 +24,7 @@
         :disable="disabled"
       >
         <template v-slot="{ togglePopover }">
-          <button class="calendar" @click="togglePopover">
+          <button type="button" class="calendar" @click="togglePopover">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="w-4 h-4 fill-current">
               <!-- eslint-disable-next-line max-len -->
               <path
@@ -41,8 +41,8 @@
 <script lang="ts" setup>
 import { computed, watchEffect, ref, watch } from "vue";
 import { dateToString } from "@/lib";
-import { DatePicker as VDatePicker } from "v-calendar";
-import "v-calendar/dist/style.css";
+import { DatePicker as VDatePicker } from "@angelblanco/v-calendar";
+import "@angelblanco/v-calendar/dist/style.css";
 
 export interface Props {
   name: string;

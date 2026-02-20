@@ -41,7 +41,7 @@ describe("isValidDate", () => {
     expect(isValidDate("2023-01-01T12")).toBe(false);
     expect(isValidDate("2023-01-01T12:")).toBe(false);
     expect(isValidDate("2023-01-01T12:1")).toBe(false);
-    expect(isValidDate("2023-01-01T12:12")).toBe(false);
+    expect(isValidDate("2023-01-01T12:12")).toBe(true);
     expect(isValidDate("2023-01-01T12:12:")).toBe(false);
     expect(isValidDate("2023-01-01T12:12:1")).toBe(false);
     expect(isValidDate("2023-01-01T12:12:12.")).toBe(false);

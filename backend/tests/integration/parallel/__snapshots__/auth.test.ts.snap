@@ -4,6 +4,7 @@ exports[`GET /auth/login returns admin permissions 1`] = `
 {
   "fullName": null,
   "id": 1,
+  "instrumentLogPermissions": [],
   "orcidId": null,
   "permissions": [
     {
@@ -51,6 +52,7 @@ exports[`GET /auth/me returns current user with cookie from login 1`] = `
 {
   "fullName": null,
   "id": 1,
+  "instrumentLogPermissions": [],
   "orcidId": null,
   "permissions": [
     {
@@ -98,6 +100,7 @@ exports[`GET /auth/me returns current user with new cookie 1`] = `
 {
   "fullName": null,
   "id": 1,
+  "instrumentLogPermissions": [],
   "orcidId": null,
   "permissions": [
     {

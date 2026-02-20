@@ -20,6 +20,7 @@ import { ProductRoutes } from "./routes/product";
 import { ModelRoutes } from "./routes/model";
 import { DownloadRoutes } from "./routes/download";
 import { CalibrationRoutes } from "./routes/calibration";
+import { InstrumentLogRoutes } from "./routes/instrumentLog";
 import { QualityReportRoutes } from "./routes/qualityreport";
 import { UserAccountRoutes } from "./routes/userAccount";
 import { PublicationRoutes } from "./routes/publication";
@@ -89,6 +90,7 @@ async function createServer(): Promise<void> {
   const modelRoutes = new ModelRoutes(AppDataSource);
   const dlRoutes = new DownloadRoutes(AppDataSource, fileRoutes, uploadRoutes, ipLookup, citationService);
   const calibRoutes = new CalibrationRoutes(AppDataSource);
+  const instrumentLogRoutes = new InstrumentLogRoutes(AppDataSource);
   const qualityRoutes = new QualityReportRoutes(AppDataSource, fileRoutes);
   const publicationRoutes = new PublicationRoutes(AppDataSource);
   const userActivationRoutes = new UserActivationRoutes(AppDataSource);
@@ -239,6 +241,43 @@ async function createServer(): Promise<void> {
     authorizator.verifyPermission(PermissionType.canCalibrate),
     express.json(),
     calibRoutes.putCalibration,
+  );
+  app.get(
+    "/api/instrument-logs",
+    passport.authenticate(["cookie", "basic"], { session: false }),
+    instrumentLogRoutes.getLogs,
+  );
+  app.post(
+    "/api/instrument-logs",
+    passport.authenticate(["cookie", "basic"], { session: false }),
+    express.json(),
+    instrumentLogRoutes.postLog,
+  );
+  app.put(
+    "/api/instrument-logs/:id",
+    passport.authenticate(["cookie", "basic"], { session: false }),
+    express.json(),
+    instrumentLogRoutes.putLog,
+  );
+  app.delete(
+    "/api/instrument-logs/:id",
+    passport.authenticate(["cookie", "basic"], { session: false }),
+    instrumentLogRoutes.deleteLog,
+  );
+  app.post(
+    "/api/instrument-logs/:id/images",
+    passport.authenticate(["cookie", "basic"], { session: false }),
+    instrumentLogRoutes.postImage,
+  );
+  app.get(
+    "/api/instrument-logs/:id/images/:imageId",
+    passport.authenticate(["cookie", "basic"], { session: false }),
+    instrumentLogRoutes.getImage,
+  );
+  app.delete(
+    "/api/instrument-logs/:id/images/:imageId",
+    passport.authenticate(["cookie", "basic"], { session: false }),
+    instrumentLogRoutes.deleteImage,
   );
   app.get(
     "/api/raw-files",

@@ -3,6 +3,12 @@ import { RequestHandler, Request } from "express";
 
 import { UserAccount } from "../entity/UserAccount";
 import { Permission, PermissionType, permissionTypeFromString } from "../entity/Permission";
+import {
+  InstrumentLogPermission,
+  InstrumentLogPermissionType,
+  instrumentLogPermissionTypeFromString,
+} from "../entity/InstrumentLogPermission";
+import { InstrumentInfo } from "../entity/Instrument";
 import { Site } from "../entity/Site";
 import { randomString } from "../lib";
 import { Model } from "../entity/Model";
@@ -16,13 +22,22 @@ interface PermissionInterface {
   modelId: string | null;
 }
 
+interface InstrumentLogPermissionInterface {
+  id?: number;
+  permission: InstrumentLogPermissionType;
+  instrumentInfoUuid: string | null;
+}
+
 interface UserAccountInterface {
   id?: number;
   username: string | null;
+  fullName?: string | null;
+  orcidId?: string | null;
   password?: string;
   passwordHash?: string;
   activationToken?: string;
   permissions: PermissionInterface[];
+  instrumentLogPermissions: InstrumentLogPermissionInterface[];
 }
 
 function hasProperty(obj: object, prop: string) {
@@ -32,6 +47,8 @@ function hasProperty(obj: object, prop: string) {
 export class UserAccountRoutes {
   private userRepo: Repository<UserAccount>;
   private permissionRepo: Repository<Permission>;
+  private instrumentLogPermissionRepo: Repository<InstrumentLogPermission>;
+  private instrumentInfoRepo: Repository<InstrumentInfo>;
   private tokenRepo: Repository<Token>;
   private siteRepo: Repository<Site>;
   private modelRepo: Repository<Model>;
@@ -39,6 +56,8 @@ export class UserAccountRoutes {
   constructor(dataSource: DataSource) {
     this.userRepo = dataSource.getRepository(UserAccount);
     this.permissionRepo = dataSource.getRepository(Permission);
+    this.instrumentLogPermissionRepo = dataSource.getRepository(InstrumentLogPermission);
+    this.instrumentInfoRepo = dataSource.getRepository(InstrumentInfo);
     this.tokenRepo = dataSource.getRepository(Token);
     this.siteRepo = dataSource.getRepository(Site);
     this.modelRepo = dataSource.getRepository(Model);
@@ -48,6 +67,8 @@ export class UserAccountRoutes {
     return {
       id: user.id,
       username: user.username,
+      fullName: user.fullName,
+      orcidId: user.orcidId,
       activationToken: user.activationToken || undefined,
       permissions: user.permissions.map((p) => ({
         id: p.id,
@@ -55,13 +76,19 @@ export class UserAccountRoutes {
         siteId: p.site ? p.site.id : null,
         modelId: p.model ? p.model.id : null,
       })),
+      instrumentLogPermissions: (user.instrumentLogPermissions ?? []).map((p) => ({
+        id: p.id,
+        permission: p.permission,
+        instrumentInfoUuid: p.instrumentInfo ? p.instrumentInfo.uuid : null,
+      })),
     };
   };
 
   postUserAccount: RequestHandler = async (req, res) => {
+    const where = req.body.orcidId ? { orcidId: req.body.orcidId } : { username: req.body.username };
     let user = await this.userRepo.findOne({
-      where: { username: req.body.username },
-      relations: { permissions: { site: true, model: true } },
+      where,
+      relations: { permissions: { site: true, model: true }, instrumentLogPermissions: { instrumentInfo: true } },
     });
     if (user) {
       res.json(this.userResponse(user));
@@ -69,13 +96,17 @@ export class UserAccountRoutes {
     }
 
     user = new UserAccount();
-    user.username = req.body.username;
+    user.username = req.body.username ?? null;
+    if (req.body.orcidId) {
+      user.orcidId = req.body.orcidId;
+    }
     if (req.body.password) {
       user.setPassword(req.body.password);
-    } else {
+    } else if (!req.body.orcidId) {
       user.activationToken = randomString(32);
     }
     user.permissions = await this.createPermissions(req.body.permissions);
+    user.instrumentLogPermissions = await this.createInstrumentLogPermissions(req.body.instrumentLogPermissions ?? []);
 
     await this.userRepo.save(user);
     res.status(201);
@@ -114,6 +145,46 @@ export class UserAccountRoutes {
     return result;
   }
 
+  async createInstrumentLogPermissions(permissions: any[]) {
+    const result = [];
+    for (const perm of permissions) {
+      const permissionType = instrumentLogPermissionTypeFromString(perm.permission);
+      const qb = this.instrumentLogPermissionRepo
+        .createQueryBuilder("ilp")
+        .leftJoinAndSelect("ilp.instrumentInfo", "instrumentInfo")
+        .where("ilp.permission = :permissionType", { permissionType });
+      if (perm.instrumentInfoUuid === null) {
+        qb.andWhere("ilp.instrumentInfo IS NULL");
+      } else {
+        qb.andWhere("instrumentInfo.uuid = :uuid", { uuid: perm.instrumentInfoUuid });
+      }
+      let permission = await qb.getOne();
+      if (!permission) {
+        permission = await this.instrumentLogPermissionRepo.save({
+          permission: permissionType,
+          instrumentInfo: perm.instrumentInfoUuid ? { uuid: perm.instrumentInfoUuid } : null,
+        });
+      }
+      result.push(permission);
+    }
+    // canWriteLogs implies canReadLogs, so remove redundant canReadLogs entries
+    const writeScopes = new Set(
+      result
+        .filter((p) => p.permission === InstrumentLogPermissionType.canWriteLogs)
+        .map((p) => (p.instrumentInfo ? p.instrumentInfo.uuid : null)),
+    );
+    const hasGlobalWrite = writeScopes.has(null);
+    if (writeScopes.size > 0) {
+      return result.filter((p) => {
+        if (p.permission !== InstrumentLogPermissionType.canReadLogs) return true;
+        if (hasGlobalWrite) return false;
+        const uuid = p.instrumentInfo ? p.instrumentInfo.uuid : null;
+        return !writeScopes.has(uuid);
+      });
+    }
+    return result;
+  }
+
   async usernameAvailable(username: string): Promise<boolean> {
     const usernameTaken = await this.userRepo.existsBy({ username });
     return !usernameTaken;
@@ -122,7 +193,7 @@ export class UserAccountRoutes {
   putUserAccount: RequestHandler = async (req, res, next) => {
     const user = await this.userRepo.findOne({
       where: { id: Number(req.params.id) },
-      relations: { permissions: { site: true } },
+      relations: { permissions: { site: true }, instrumentLogPermissions: { instrumentInfo: true } },
     });
     if (!user) {
       return next({ status: 404, errors: "UserAccount not found" });
@@ -136,11 +207,17 @@ export class UserAccountRoutes {
         }
       }
     }
+    if (hasProperty(req.body, "orcidId")) {
+      user.orcidId = req.body.orcidId;
+    }
     if (hasProperty(req.body, "password")) {
       user.setPassword(req.body.password);
     }
     if (hasProperty(req.body, "permissions")) {
       user.permissions = await this.createPermissions(req.body.permissions);
+    }
+    if (hasProperty(req.body, "instrumentLogPermissions")) {
+      user.instrumentLogPermissions = await this.createInstrumentLogPermissions(req.body.instrumentLogPermissions);
     }
     await this.userRepo.save(user);
     res.json(this.userResponse(user));
@@ -149,7 +226,7 @@ export class UserAccountRoutes {
   getUserAccount: RequestHandler = async (req, res, next) => {
     const user = await this.userRepo.findOne({
       where: { id: Number(req.params.id) },
-      relations: { permissions: { site: true, model: true } },
+      relations: { permissions: { site: true, model: true }, instrumentLogPermissions: { instrumentInfo: true } },
     });
     if (!user) return next({ status: 404, errors: "UserAccount not found" });
     res.json(this.userResponse(user));
@@ -165,28 +242,45 @@ export class UserAccountRoutes {
   };
 
   getAllUserAccounts: RequestHandler = async (req, res) => {
-    const users = await this.userRepo.find({ relations: { permissions: { site: true, model: true } } });
+    const users = await this.userRepo.find({
+      relations: { permissions: { site: true, model: true }, instrumentLogPermissions: { instrumentInfo: true } },
+    });
     res.json(users.map((u) => this.userResponse(u)));
   };
 
   validatePost: RequestHandler = async (req, res, next) => {
-    if (!hasProperty(req.body, "username")) {
-      return next({ status: 401, errors: "Missing the username" });
+    if (!hasProperty(req.body, "username") && !hasProperty(req.body, "orcidId")) {
+      return next({ status: 401, errors: "Missing the username or orcidId" });
     }
-    this.validateUsername(req, next);
+    if (hasProperty(req.body, "username")) {
+      this.validateUsername(req, next);
+    }
+    if (hasProperty(req.body, "orcidId")) {
+      if (!this.isValidOrcidId(req.body.orcidId)) {
+        return next({ status: 422, errors: "Invalid ORCID iD format" });
+      }
+    }
     if (hasProperty(req.body, "password")) {
       this.validatePassword(req, next);
     }
 
     if (hasProperty(req.body, "permissions")) {
       await this.validatePermissions(req, res, next);
+    }
+    if (hasProperty(req.body, "instrumentLogPermissions")) {
+      await this.validateInstrumentLogPermissions(req, next);
     }
     return next();
   };
 
   validatePut: RequestHandler = async (req, res, next) => {
-    if (hasProperty(req.body, "username")) {
+    if (hasProperty(req.body, "username") && req.body.username !== null) {
       this.validateUsername(req, next);
+    }
+    if (hasProperty(req.body, "orcidId") && req.body.orcidId !== null) {
+      if (!this.isValidOrcidId(req.body.orcidId)) {
+        return next({ status: 422, errors: "Invalid ORCID iD format" });
+      }
     }
     if (hasProperty(req.body, "password")) {
       this.validatePassword(req, next);
@@ -194,6 +288,9 @@ export class UserAccountRoutes {
 
     if (hasProperty(req.body, "permissions")) {
       await this.validatePermissions(req, res, next);
+    }
+    if (hasProperty(req.body, "instrumentLogPermissions")) {
+      await this.validateInstrumentLogPermissions(req, next);
     }
     return next();
   };
@@ -212,6 +309,10 @@ export class UserAccountRoutes {
     } else if (req.body.password.length === 0) {
       next({ status: 401, errors: "password must be nonempty" });
     }
+  }
+
+  isValidOrcidId(orcidId: unknown): boolean {
+    return typeof orcidId === "string" && /^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/.test(orcidId);
   }
 
   validatePermissions: RequestHandler = async (req, res, next) => {
@@ -254,6 +355,29 @@ export class UserAccountRoutes {
     }
     if (permissionTypeFromString(permission.permission) === undefined) {
       return next({ status: 422, errors: "Unexpected permission type" });
+    }
+  };
+
+  validateInstrumentLogPermissions = async (req: Request, next: NextFunction) => {
+    if (!Array.isArray(req.body.instrumentLogPermissions)) {
+      return next({ status: 401, errors: "Give instrumentLogPermissions as a list" });
+    }
+    for (const perm of req.body.instrumentLogPermissions) {
+      if (!hasProperty(perm, "permission")) {
+        return next({ status: 401, errors: "Missing the permission type from instrumentLogPermission" });
+      }
+      if (!hasProperty(perm, "instrumentInfoUuid")) {
+        return next({ status: 401, errors: "Missing instrumentInfoUuid from instrumentLogPermission" });
+      }
+      if (instrumentLogPermissionTypeFromString(perm.permission) === undefined) {
+        return next({ status: 422, errors: "Unexpected instrumentLogPermission type" });
+      }
+      if (perm.instrumentInfoUuid !== null) {
+        const info = await this.instrumentInfoRepo.findOneBy({ uuid: perm.instrumentInfoUuid });
+        if (!info) {
+          return next({ status: 422, errors: "Given instrumentInfoUuid does not exist" });
+        }
+      }
     }
   };
 }

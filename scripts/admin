@@ -5,6 +5,8 @@ import urllib.request
 import json
 import os
 import sys
+import re
+
 
 BASE_URL = os.environ.get("DP_BACKEND_URL", "http://localhost:3000")
 PERMISSIONS = [
@@ -17,23 +19,43 @@ PERMISSIONS = [
     "canGetStats",
     "canPublishTask",
     "canLogin",
+    "canReadLogs",
+    "canWriteLogs",
 ]
+LOG_PERMISSIONS = ["canReadLogs", "canWriteLogs"]
 
 
-def get_all_users():
+def get_all_users() -> list[dict]:
     req = urllib.request.Request(url=f"{BASE_URL}/user-accounts")
     with urllib.request.urlopen(req) as f:
         return json.load(f)
 
 
-def get_user(username):
+def get_user(username: str) -> dict:
     for user in get_all_users():
         if user["username"] == username:
             return user
     raise ValueError(f"User {username} not found")
 
 
-def put_user(user):
+def get_user_by_orcid(orcid: str) -> dict:
+    for user in get_all_users():
+        if user.get("orcidId") == orcid:
+            return user
+    raise ValueError(f"User with ORCID {orcid} not found")
+
+
+def resolve_user(args: argparse.Namespace) -> dict:
+    if getattr(args, "orcid", None):
+        return get_user_by_orcid(args.orcid)
+    elif getattr(args, "username", None):
+        return get_user(args.username)
+    else:
+        print("Either username or --orcid is required", file=sys.stderr)
+        sys.exit(1)
+
+
+def put_user(user: dict) -> dict:
     req = urllib.request.Request(
         method="PUT",
         url=f"{BASE_URL}/user-accounts/{user['id']}",
@@ -44,7 +66,7 @@ def put_user(user):
         return json.load(f)
 
 
-def post_user(user):
+def post_user(user: dict) -> dict:
     req = urllib.request.Request(
         method="POST",
         url=f"{BASE_URL}/user-accounts",
@@ -55,35 +77,69 @@ def post_user(user):
         return json.load(f)
 
 
-def print_user(user):
-    print("Username: " + user["username"])
-    if user["permissions"]:
-        print("Permissions:")
-        for perm in user["permissions"]:
-            site = "site: " + perm["siteId"] if perm["siteId"] else "all sites"
-            model = "model: " + perm["modelId"] if perm["modelId"] else "all models"
-            if perm["permission"] == "canUpload":
-                print(f"- {perm['permission']} ({site})")
-            elif perm["permission"] == "canUploadModel":
-                print(f"- {perm['permission']} ({site}, {model})")
-            else:
-                print(f"- {perm['permission']}")
+def print_user(user: dict) -> None:
+    full_name = user.get("fullName", "")
+    if user["username"]:
+        print("Username: " + user["username"], end="")
+    elif user.get("orcidId"):
+        print("ORCID: " + user["orcidId"], end="")
     else:
+        print("User ID: " + str(user["id"]), end="")
+    if full_name:
+        print(f" ({full_name})")
+    else:
+        print()
+    permissions = user.get("permissions", [])
+    log_perms = user.get("instrumentLogPermissions", [])
+
+    if not permissions and not log_perms:
         print("No permissions")
+        return
+
+    print("Permissions:")
+    for perm in permissions:
+        site = "site: " + perm["siteId"] if perm["siteId"] else "all sites"
+        model = "model: " + perm["modelId"] if perm["modelId"] else "all models"
+        if perm["permission"] == "canUpload":
+            scope = f"({site})"
+        elif perm["permission"] == "canUploadModel":
+            scope = f"({site}, {model})"
+        else:
+            scope = ""
+        print(f"- {perm['permission']} {scope}".rstrip())
+    for perm in log_perms:
+        uuid = perm["instrumentInfoUuid"]
+        scope = f"({('instrument: ' + uuid) if uuid else 'all instruments'})"
+        print(f"- {perm['permission']} {scope}")
 
 
-def list_users(args):
+def list_users(args: argparse.Namespace) -> None:
     for user in get_all_users():
         print_user(user)
         print()
 
 
-def user_info(args):
-    print_user(get_user(args.username))
+def user_info(args: argparse.Namespace) -> None:
+    print_user(resolve_user(args))
 
 
-def create_user(args):
-    user = {"username": args.username, "permissions": []}
+def validate_orcid(orcid: str) -> None:
+    if not re.fullmatch(r"\d{4}-\d{4}-\d{4}-\d{3}[\dX]", orcid):
+        print(f"Invalid ORCID iD format: {orcid}", file=sys.stderr)
+        sys.exit(1)
+
+
+def create_user(args: argparse.Namespace) -> None:
+    if not args.username and not args.orcid:
+        print("Either username or --orcid is required", file=sys.stderr)
+        sys.exit(1)
+    if args.orcid:
+        validate_orcid(args.orcid)
+    user: dict = {"permissions": []}
+    if args.username:
+        user["username"] = args.username
+    if args.orcid:
+        user["orcidId"] = args.orcid
     if args.password:
         user["password"] = args.password
     user = post_user(user)
@@ -95,29 +151,94 @@ def create_user(args):
         print_user(user)
 
 
-def add_permission(args):
-    user = get_user(args.username)
-    permissions_to_add = make_permissions(args)
-    user["permissions"].extend(permissions_to_add)
+def _is_log_permission(args: argparse.Namespace) -> bool:
+    return args.permission in LOG_PERMISSIONS
+
+
+def _validate_log_args(args: argparse.Namespace) -> None:
+    if getattr(args, "site", None) or getattr(args, "all_sites", False):
+        print(
+            f"Cannot use --site or --all-sites with permission {args.permission}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    if getattr(args, "model", None) or getattr(args, "all_models", False):
+        print(
+            f"Cannot use --model or --all-models with permission {args.permission}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    if args.instrument_uuid is None and not args.all_instruments:
+        print(
+            "--instrument-uuid or --all-instruments is required",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+
+def _validate_regular_args(args: argparse.Namespace) -> None:
+    if getattr(args, "instrument_uuid", None) or getattr(
+        args, "all_instruments", False
+    ):
+        print(
+            f"Cannot use --instrument-uuid or --all-instruments with permission {args.permission}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+
+def add_permission(args: argparse.Namespace) -> None:
+    user = resolve_user(args)
+    if _is_log_permission(args):
+        _validate_log_args(args)
+        perms_to_add = make_log_permissions(args)
+        log_perms = user.get("instrumentLogPermissions", [])
+        opposite = "canWriteLogs" if args.permission == "canReadLogs" else "canReadLogs"
+        uuids_to_add = {p["instrumentInfoUuid"] for p in perms_to_add}
+        log_perms = [
+            perm
+            for perm in log_perms
+            if not (
+                perm["permission"] == opposite
+                and perm["instrumentInfoUuid"] in uuids_to_add
+            )
+        ]
+        log_perms.extend(perms_to_add)
+        user["instrumentLogPermissions"] = log_perms
+    else:
+        _validate_regular_args(args)
+        permissions_to_add = make_permissions(args)
+        user["permissions"].extend(permissions_to_add)
     put_user(user)
-    user = get_user(args.username)
+    user = resolve_user(args)
     print_user(user)
 
 
-def remove_permission(args):
-    user = get_user(args.username)
-    permissions_to_remove = make_permissions(args)
-    user["permissions"] = [
-        perm
-        for perm in user["permissions"]
-        if not any(permission_equal(perm, p) for p in permissions_to_remove)
-    ]
+def remove_permission(args: argparse.Namespace) -> None:
+    user = resolve_user(args)
+    if _is_log_permission(args):
+        _validate_log_args(args)
+        perms_to_remove = make_log_permissions(args)
+        log_perms = user.get("instrumentLogPermissions", [])
+        user["instrumentLogPermissions"] = [
+            perm
+            for perm in log_perms
+            if not any(log_permission_equal(perm, p) for p in perms_to_remove)
+        ]
+    else:
+        _validate_regular_args(args)
+        permissions_to_remove = make_permissions(args)
+        user["permissions"] = [
+            perm
+            for perm in user["permissions"]
+            if not any(permission_equal(perm, p) for p in permissions_to_remove)
+        ]
     put_user(user)
-    user = get_user(args.username)
+    user = resolve_user(args)
     print_user(user)
 
 
-def permission_equal(a, b):
+def permission_equal(a: dict, b: dict) -> bool:
     return (
         a["permission"] == b["permission"]
         and a["siteId"] == b["siteId"]
@@ -125,7 +246,7 @@ def permission_equal(a, b):
     )
 
 
-def make_permissions(args):
+def make_permissions(args: argparse.Namespace) -> list[dict]:
     if (
         args.permission in ("canUpload", "canUploadModel")
         and args.site is None
@@ -157,6 +278,20 @@ def make_permissions(args):
     return permissions
 
 
+def log_permission_equal(a: dict, b: dict) -> bool:
+    return (
+        a["permission"] == b["permission"]
+        and a["instrumentInfoUuid"] == b["instrumentInfoUuid"]
+    )
+
+
+def make_log_permissions(args: argparse.Namespace) -> list[dict]:
+    uuids = [None] if args.all_instruments else args.instrument_uuid
+    return [
+        {"instrumentInfoUuid": uuid, "permission": args.permission} for uuid in uuids
+    ]
+
+
 def main():
     parser = argparse.ArgumentParser(prog="cloudnet-admin")
     subparsers = parser.add_subparsers(required=True, dest="command")
@@ -165,16 +300,19 @@ def main():
     subparser.set_defaults(func=list_users)
 
     subparser = subparsers.add_parser("user-info")
-    subparser.add_argument("username")
+    subparser.add_argument("username", nargs="?")
+    subparser.add_argument("--orcid")
     subparser.set_defaults(func=user_info)
 
     subparser = subparsers.add_parser("create-user")
-    subparser.add_argument("username")
+    subparser.add_argument("username", nargs="?")
+    subparser.add_argument("--orcid")
     subparser.add_argument("--password")
     subparser.set_defaults(func=create_user)
 
     subparser = subparsers.add_parser("add-permission")
-    subparser.add_argument("username")
+    subparser.add_argument("username", nargs="?")
+    subparser.add_argument("--orcid")
     subparser.add_argument("permission", choices=PERMISSIONS)
     group = subparser.add_mutually_exclusive_group()
     group.add_argument("--site", nargs="+")
@@ -182,17 +320,24 @@ def main():
     group = subparser.add_mutually_exclusive_group()
     group.add_argument("--model", nargs="+")
     group.add_argument("--all-models", action="store_true")
+    group = subparser.add_mutually_exclusive_group()
+    group.add_argument("--instrument-uuid", nargs="+")
+    group.add_argument("--all-instruments", action="store_true")
     subparser.set_defaults(func=add_permission)
 
     subparser = subparsers.add_parser("remove-permission")
-    subparser.add_argument("username")
+    subparser.add_argument("username", nargs="?")
+    subparser.add_argument("--orcid")
     subparser.add_argument("permission", choices=PERMISSIONS)
-    group = subparser.add_mutually_exclusive_group(required=True)
+    group = subparser.add_mutually_exclusive_group()
     group.add_argument("--site", nargs="+")
     group.add_argument("--all-sites", action="store_true")
     group = subparser.add_mutually_exclusive_group()
     group.add_argument("--model", nargs="+")
     group.add_argument("--all-models", action="store_true")
+    group = subparser.add_mutually_exclusive_group()
+    group.add_argument("--instrument-uuid", nargs="+")
+    group.add_argument("--all-instruments", action="store_true")
     subparser.set_defaults(func=remove_permission)
 
     args = parser.parse_args()
