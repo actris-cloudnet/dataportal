@@ -31,6 +31,7 @@ interface InstrumentLogPermissionInterface {
 interface UserAccountInterface {
   id?: number;
   username: string | null;
+  fullName?: string | null;
   orcidId?: string | null;
   password?: string;
   passwordHash?: string;
@@ -66,6 +67,7 @@ export class UserAccountRoutes {
     return {
       id: user.id,
       username: user.username,
+      fullName: user.fullName,
       orcidId: user.orcidId,
       activationToken: user.activationToken || undefined,
       permissions: user.permissions.map((p) => ({

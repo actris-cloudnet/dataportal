@@ -76,12 +76,17 @@ def post_user(user: dict) -> dict:
 
 
 def print_user(user: dict) -> None:
+    full_name = user.get("fullName", "")
     if user["username"]:
-        print("Username: " + user["username"])
+        print("Username: " + user["username"], end="")
     elif user.get("orcidId"):
-        print("ORCID: " + user["orcidId"])
+        print("ORCID: " + user["orcidId"], end="")
     else:
-        print("User ID: " + str(user["id"]))
+        print("User ID: " + str(user["id"]), end="")
+    if full_name:
+        print(f" ({full_name})")
+    else:
+        print()
     permissions = user.get("permissions", [])
     log_perms = user.get("instrumentLogPermissions", [])
 
