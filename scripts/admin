@@ -5,6 +5,8 @@ import urllib.request
 import json
 import os
 import sys
+import re
+
 
 BASE_URL = os.environ.get("DP_BACKEND_URL", "http://localhost:3000")
 PERMISSIONS = [
@@ -121,8 +123,23 @@ def user_info(args: argparse.Namespace) -> None:
     print_user(resolve_user(args))
 
 
+def validate_orcid(orcid: str) -> None:
+    if not re.fullmatch(r"\d{4}-\d{4}-\d{4}-\d{3}[\dX]", orcid):
+        print(f"Invalid ORCID iD format: {orcid}", file=sys.stderr)
+        sys.exit(1)
+
+
 def create_user(args: argparse.Namespace) -> None:
-    user = {"username": args.username, "permissions": []}
+    if not args.username and not args.orcid:
+        print("Either username or --orcid is required", file=sys.stderr)
+        sys.exit(1)
+    if args.orcid:
+        validate_orcid(args.orcid)
+    user: dict = {"permissions": []}
+    if args.username:
+        user["username"] = args.username
+    if args.orcid:
+        user["orcidId"] = args.orcid
     if args.password:
         user["password"] = args.password
     user = post_user(user)
@@ -288,7 +305,8 @@ def main():
     subparser.set_defaults(func=user_info)
 
     subparser = subparsers.add_parser("create-user")
-    subparser.add_argument("username")
+    subparser.add_argument("username", nargs="?")
+    subparser.add_argument("--orcid")
     subparser.add_argument("--password")
     subparser.set_defaults(func=create_user)
 

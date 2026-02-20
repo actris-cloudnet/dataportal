@@ -85,8 +85,9 @@ export class UserAccountRoutes {
   };
 
   postUserAccount: RequestHandler = async (req, res) => {
+    const where = req.body.orcidId ? { orcidId: req.body.orcidId } : { username: req.body.username };
     let user = await this.userRepo.findOne({
-      where: { username: req.body.username },
+      where,
       relations: { permissions: { site: true, model: true }, instrumentLogPermissions: { instrumentInfo: true } },
     });
     if (user) {
@@ -95,10 +96,13 @@ export class UserAccountRoutes {
     }
 
     user = new UserAccount();
-    user.username = req.body.username;
+    user.username = req.body.username ?? null;
+    if (req.body.orcidId) {
+      user.orcidId = req.body.orcidId;
+    }
     if (req.body.password) {
       user.setPassword(req.body.password);
-    } else {
+    } else if (!req.body.orcidId) {
       user.activationToken = randomString(32);
     }
     user.permissions = await this.createPermissions(req.body.permissions);
@@ -203,6 +207,9 @@ export class UserAccountRoutes {
         }
       }
     }
+    if (hasProperty(req.body, "orcidId")) {
+      user.orcidId = req.body.orcidId;
+    }
     if (hasProperty(req.body, "password")) {
       user.setPassword(req.body.password);
     }
@@ -242,10 +249,17 @@ export class UserAccountRoutes {
   };
 
   validatePost: RequestHandler = async (req, res, next) => {
-    if (!hasProperty(req.body, "username")) {
-      return next({ status: 401, errors: "Missing the username" });
+    if (!hasProperty(req.body, "username") && !hasProperty(req.body, "orcidId")) {
+      return next({ status: 401, errors: "Missing the username or orcidId" });
     }
-    this.validateUsername(req, next);
+    if (hasProperty(req.body, "username")) {
+      this.validateUsername(req, next);
+    }
+    if (hasProperty(req.body, "orcidId")) {
+      if (!this.isValidOrcidId(req.body.orcidId)) {
+        return next({ status: 422, errors: "Invalid ORCID iD format" });
+      }
+    }
     if (hasProperty(req.body, "password")) {
       this.validatePassword(req, next);
     }
@@ -262,6 +276,11 @@ export class UserAccountRoutes {
   validatePut: RequestHandler = async (req, res, next) => {
     if (hasProperty(req.body, "username") && req.body.username !== null) {
       this.validateUsername(req, next);
+    }
+    if (hasProperty(req.body, "orcidId") && req.body.orcidId !== null) {
+      if (!this.isValidOrcidId(req.body.orcidId)) {
+        return next({ status: 422, errors: "Invalid ORCID iD format" });
+      }
     }
     if (hasProperty(req.body, "password")) {
       this.validatePassword(req, next);
@@ -290,6 +309,10 @@ export class UserAccountRoutes {
     } else if (req.body.password.length === 0) {
       next({ status: 401, errors: "password must be nonempty" });
     }
+  }
+
+  isValidOrcidId(orcidId: unknown): boolean {
+    return typeof orcidId === "string" && /^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/.test(orcidId);
   }
 
   validatePermissions: RequestHandler = async (req, res, next) => {
