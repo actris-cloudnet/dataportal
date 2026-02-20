@@ -14,6 +14,10 @@
           <img :src="CalibrationIcon" alt="" />
           Calibration
         </router-link>
+        <router-link class="tab" :to="{ name: 'InstrumentContacts' }">
+          <img :src="contactsIcon" alt="" />
+          Contacts
+        </router-link>
         <router-link v-if="showLogbook" class="tab" :to="{ name: 'InstrumentLogbook' }">
           <img :src="logbookIcon" alt="" />
           Logbook
@@ -33,6 +37,7 @@ import LandingHeader from "@/components/LandingHeader.vue";
 import folderIcon from "@/assets/icons/icons8-folder-48.png";
 import CalibrationIcon from "@/assets/icons/calibration.svg";
 import logbookIcon from "@/assets/icons/icons8-brief-48.png";
+import contactsIcon from "@/assets/icons/contacts.png";
 import { backendUrl, getInstrumentIcon } from "@/lib";
 import { hasInstrumentLogPermission } from "@/lib/auth";
 import { useTitle } from "@/router";

@@ -31,6 +31,10 @@
           <img :src="folderIcon" alt="" />
           Products
         </router-link>
+        <router-link class="tab" :to="{ name: 'SiteContacts' }">
+          <img :src="contactsIcon" alt="" />
+          Contacts
+        </router-link>
       </template>
     </LandingHeader>
     <router-view :site="response" />
@@ -50,6 +54,7 @@ import BaseTag from "@/components/BaseTag.vue";
 import LandingHeader from "@/components/LandingHeader.vue";
 import folderIcon from "@/assets/icons/icons8-folder-48.png";
 import radarIcon from "@/assets/icons/radar.png";
+import contactsIcon from "@/assets/icons/contacts.png";
 
 export interface Props {
   siteId: string;

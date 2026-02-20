@@ -1,8 +1,10 @@
 import { RequestHandler } from "express";
 import { DataSource, Repository } from "typeorm";
 import { Instrument, InstrumentInfo, NominalInstrument } from "../entity/Instrument";
+import { InstrumentContact } from "../entity/InstrumentContact";
+import { Person } from "../entity/Person";
 import { InstrumentUpload } from "../entity/Upload";
-import { isValidDate } from "../lib";
+import { isValidDate, validateDateRange, toContactResponse, resolveOrCreatePerson } from "../lib";
 
 export class InstrumentRoutes {
   constructor(dataSource: DataSource) {
@@ -11,6 +13,8 @@ export class InstrumentRoutes {
     this.instrumentInfoRepo = dataSource.getRepository(InstrumentInfo);
     this.instrumentUploadRepo = dataSource.getRepository(InstrumentUpload);
     this.nominalInstrumentRepo = dataSource.getRepository(NominalInstrument);
+    this.contactRepo = dataSource.getRepository(InstrumentContact);
+    this.personRepo = dataSource.getRepository(Person);
   }
 
   readonly dataSource: DataSource;
@@ -18,6 +22,8 @@ export class InstrumentRoutes {
   readonly instrumentInfoRepo: Repository<InstrumentInfo>;
   readonly instrumentUploadRepo: Repository<InstrumentUpload>;
   readonly nominalInstrumentRepo: Repository<NominalInstrument>;
+  readonly contactRepo: Repository<InstrumentContact>;
+  readonly personRepo: Repository<Person>;
 
   instruments: RequestHandler = async (req, res) => {
     const instruments = await this.instrumentRepo.find({ order: { type: "ASC", id: "ASC" } });
@@ -166,5 +172,80 @@ export class InstrumentRoutes {
     }
 
     res.send(output);
+  };
+
+  listContacts: RequestHandler = async (req, res, next) => {
+    const instrumentInfo = await this.instrumentInfoRepo.findOneBy({ uuid: req.params.uuid });
+    if (!instrumentInfo) {
+      return next({ status: 404, errors: "No instrument PID match this id" });
+    }
+    const contacts = await this.contactRepo
+      .createQueryBuilder("c")
+      .innerJoinAndSelect("c.person", "p")
+      .where("c.instrumentInfoUuid = :uuid", { uuid: instrumentInfo.uuid })
+      .orderBy("c.startDate", "DESC", "NULLS FIRST")
+      .getMany();
+    res.send(contacts.map((c) => toContactResponse(c, c.person)));
+  };
+
+  postContact: RequestHandler = async (req, res, next) => {
+    const instrumentInfo = await this.instrumentInfoRepo.findOneBy({ uuid: req.params.uuid });
+    if (!instrumentInfo) {
+      return next({ status: 404, errors: "No instrument PID match this id" });
+    }
+    const { firstName, lastName, orcid, startDate, endDate, personId } = req.body;
+    const dateError = validateDateRange(startDate, endDate);
+    if (dateError) return next({ status: 400, errors: dateError });
+
+    const personResult = await resolveOrCreatePerson(this.personRepo, { personId, firstName, lastName, orcid });
+    if ("error" in personResult) return next({ status: personResult.status, errors: personResult.error });
+    const person = personResult;
+
+    const contact = this.contactRepo.create({
+      instrumentInfoUuid: instrumentInfo.uuid,
+      personId: person.id,
+      startDate: startDate || null,
+      endDate: endDate || null,
+    });
+    try {
+      const saved = await this.contactRepo.save(contact);
+      res.status(201).json(toContactResponse(saved, person));
+    } catch (err: any) {
+      if (err.code === "23505") {
+        return next({ status: 409, errors: "This person is already a contact for this instrument" });
+      }
+      throw err;
+    }
+  };
+
+  putContact: RequestHandler = async (req, res, next) => {
+    const id = parseInt(req.params.contactId, 10);
+    if (isNaN(id)) {
+      return next({ status: 400, errors: "Invalid contact id" });
+    }
+    const contact = await this.contactRepo.findOne({ where: { id }, relations: { person: true } });
+    if (!contact || contact.instrumentInfoUuid !== req.params.uuid) {
+      return next({ status: 404, errors: "Contact not found" });
+    }
+    const { startDate, endDate } = req.body;
+    const dateError = validateDateRange(startDate, endDate);
+    if (dateError) return next({ status: 400, errors: dateError });
+    contact.startDate = startDate || null;
+    contact.endDate = endDate || null;
+    const saved = await this.contactRepo.save(contact);
+    res.json(toContactResponse(saved, contact.person));
+  };
+
+  deleteContact: RequestHandler = async (req, res, next) => {
+    const id = parseInt(req.params.contactId, 10);
+    if (isNaN(id)) {
+      return next({ status: 400, errors: "Invalid contact id" });
+    }
+    const contact = await this.contactRepo.findOneBy({ id });
+    if (!contact || contact.instrumentInfoUuid !== req.params.uuid) {
+      return next({ status: 404, errors: "Contact not found" });
+    }
+    await this.contactRepo.delete({ id });
+    res.sendStatus(204);
   };
 }

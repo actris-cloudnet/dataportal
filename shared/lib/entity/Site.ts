@@ -28,6 +28,8 @@ export interface Site {
   status: "cloudnet" | "active" | "inactive";
 }
 
+export type { Contact as SiteContact } from "./Contact";
+
 export interface SiteLinks {
   actris: SiteLink<number> | null;
   dvas: SiteLink<string> | null;

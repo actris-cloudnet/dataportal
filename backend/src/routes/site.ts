@@ -1,10 +1,18 @@
 import { RequestHandler } from "express";
 import { DataSource, Repository } from "typeorm";
-import { hideTestDataFromNormalUsers, toArray } from "../lib";
+import {
+  hideTestDataFromNormalUsers,
+  toArray,
+  validateDateRange,
+  toContactResponse,
+  resolveOrCreatePerson,
+} from "../lib";
 import { Site, SiteType } from "../entity/Site";
+import { SiteContact } from "../entity/SiteContact";
 import { SiteLocation } from "../entity/SiteLocation";
 import { ModelFile, RegularFile } from "../entity/File";
 import { SearchFile } from "../entity/SearchFile";
+import { Person } from "../entity/Person";
 import axios from "axios";
 import env from "../lib/env";
 
@@ -12,6 +20,8 @@ export class SiteRoutes {
   constructor(dataSource: DataSource) {
     this.dataSource = dataSource;
     this.siteRepo = dataSource.getRepository(Site);
+    this.contactRepo = dataSource.getRepository(SiteContact);
+    this.personRepo = dataSource.getRepository(Person);
     this.regularFileRepo = dataSource.getRepository(RegularFile);
     this.modelFileRepo = dataSource.getRepository(ModelFile);
     this.siteLocationRepo = dataSource.getRepository(SiteLocation);
@@ -22,6 +32,8 @@ export class SiteRoutes {
 
   readonly dataSource: DataSource;
   readonly siteRepo: Repository<Site>;
+  readonly contactRepo: Repository<SiteContact>;
+  readonly personRepo: Repository<Person>;
   readonly regularFileRepo: Repository<RegularFile>;
   readonly modelFileRepo: Repository<ModelFile>;
   readonly siteLocationRepo: Repository<SiteLocation>;
@@ -224,4 +236,79 @@ export class SiteRoutes {
       return null;
     }
   }
+
+  listContacts: RequestHandler = async (req, res, next) => {
+    const site = await this.siteRepo.findOneBy({ id: req.params.siteId });
+    if (!site) {
+      return next({ status: 404, errors: "No sites match this id" });
+    }
+    const contacts = await this.contactRepo
+      .createQueryBuilder("c")
+      .innerJoinAndSelect("c.person", "p")
+      .where("c.siteId = :siteId", { siteId: site.id })
+      .orderBy("c.startDate", "DESC", "NULLS FIRST")
+      .getMany();
+    res.send(contacts.map((c) => toContactResponse(c, c.person)));
+  };
+
+  postContact: RequestHandler = async (req, res, next) => {
+    const site = await this.siteRepo.findOneBy({ id: req.params.siteId });
+    if (!site) {
+      return next({ status: 404, errors: "No sites match this id" });
+    }
+    const { firstName, lastName, orcid, startDate, endDate, personId } = req.body;
+    const dateError = validateDateRange(startDate, endDate);
+    if (dateError) return next({ status: 400, errors: dateError });
+
+    const personResult = await resolveOrCreatePerson(this.personRepo, { personId, firstName, lastName, orcid });
+    if ("error" in personResult) return next({ status: personResult.status, errors: personResult.error });
+    const person = personResult;
+
+    const contact = this.contactRepo.create({
+      siteId: site.id,
+      personId: person.id,
+      startDate: startDate || null,
+      endDate: endDate || null,
+    });
+    try {
+      const saved = await this.contactRepo.save(contact);
+      res.status(201).json(toContactResponse(saved, person));
+    } catch (err: any) {
+      if (err.code === "23505") {
+        return next({ status: 409, errors: "This person is already a contact for this site" });
+      }
+      throw err;
+    }
+  };
+
+  putContact: RequestHandler = async (req, res, next) => {
+    const id = parseInt(req.params.contactId, 10);
+    if (isNaN(id)) {
+      return next({ status: 400, errors: "Invalid contact id" });
+    }
+    const contact = await this.contactRepo.findOne({ where: { id }, relations: { person: true } });
+    if (!contact || contact.siteId !== req.params.siteId) {
+      return next({ status: 404, errors: "Contact not found" });
+    }
+    const { startDate, endDate } = req.body;
+    const dateError = validateDateRange(startDate, endDate);
+    if (dateError) return next({ status: 400, errors: dateError });
+    contact.startDate = startDate || null;
+    contact.endDate = endDate || null;
+    const saved = await this.contactRepo.save(contact);
+    res.json(toContactResponse(saved, contact.person));
+  };
+
+  deleteContact: RequestHandler = async (req, res, next) => {
+    const id = parseInt(req.params.contactId, 10);
+    if (isNaN(id)) {
+      return next({ status: 400, errors: "Invalid contact id" });
+    }
+    const contact = await this.contactRepo.findOneBy({ id });
+    if (!contact || contact.siteId !== req.params.siteId) {
+      return next({ status: 404, errors: "Contact not found" });
+    }
+    await this.contactRepo.delete({ id });
+    res.sendStatus(204);
+  };
 }

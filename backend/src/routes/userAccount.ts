@@ -14,6 +14,7 @@ import { randomString } from "../lib";
 import { Model } from "../entity/Model";
 import { NextFunction } from "express-serve-static-core";
 import { Token } from "../entity/Token";
+import { Person } from "../entity/Person";
 
 interface PermissionInterface {
   id?: number;
@@ -52,6 +53,7 @@ export class UserAccountRoutes {
   private tokenRepo: Repository<Token>;
   private siteRepo: Repository<Site>;
   private modelRepo: Repository<Model>;
+  private personRepo: Repository<Person>;
 
   constructor(dataSource: DataSource) {
     this.userRepo = dataSource.getRepository(UserAccount);
@@ -61,6 +63,7 @@ export class UserAccountRoutes {
     this.tokenRepo = dataSource.getRepository(Token);
     this.siteRepo = dataSource.getRepository(Site);
     this.modelRepo = dataSource.getRepository(Model);
+    this.personRepo = dataSource.getRepository(Person);
   }
 
   userResponse = (user: UserAccount): UserAccountInterface => {
@@ -99,6 +102,10 @@ export class UserAccountRoutes {
     user.username = req.body.username ?? null;
     if (req.body.orcidId) {
       user.orcidId = req.body.orcidId;
+      const person = await this.personRepo.findOneBy({ orcid: req.body.orcidId });
+      if (person) {
+        user.person = person;
+      }
     }
     if (req.body.password) {
       user.setPassword(req.body.password);

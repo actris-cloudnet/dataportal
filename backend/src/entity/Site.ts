@@ -2,6 +2,7 @@ import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn } from 
 import { RegularCitation } from "./Citation";
 import { Permission } from "./Permission";
 import { Person } from "./Person";
+import { SiteContact } from "./SiteContact";
 import { SiteLocation } from "./SiteLocation";
 
 export enum SiteType {
@@ -72,6 +73,9 @@ export class Site {
 
   @OneToMany((_) => Permission, (permission) => permission.site)
   permissions!: Permission[];
+
+  @OneToMany((_) => SiteContact, (contact) => contact.site)
+  contacts!: SiteContact[];
 
   @OneToMany((_) => SiteLocation, (location) => location.site)
   locations!: SiteLocation[];

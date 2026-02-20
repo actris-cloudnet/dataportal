@@ -14,6 +14,7 @@ import maxmind, { CountryResponse, OpenOpts, Reader } from "maxmind";
 import { randomBytes } from "crypto";
 import { Collection } from "../entity/Collection";
 import { InstrumentInfo } from "../entity/Instrument";
+import { Person } from "../entity/Person";
 
 export const stringify = (obj: any): string => JSON.stringify(obj, null, 2);
 
@@ -55,6 +56,64 @@ export const tomorrow = () => {
   tomorrow.setDate(tomorrow.getDate() + 1);
   return tomorrow;
 };
+
+export function validateDateRange(startDate: unknown, endDate: unknown): string | null {
+  if (startDate && !isValidDate(startDate)) return "startDate must be YYYY-MM-DD";
+  if (endDate && !isValidDate(endDate)) return "endDate must be YYYY-MM-DD";
+  if (startDate && endDate && (endDate as string) < (startDate as string))
+    return "endDate must not be before startDate";
+  return null;
+}
+
+export function toContactResponse(
+  contact: { id: number; startDate: string | null; endDate: string | null },
+  person: Person,
+): {
+  id: number;
+  person: { firstName: string; lastName: string; orcid: string | null };
+  startDate: string | null;
+  endDate: string | null;
+} {
+  return {
+    id: contact.id,
+    person: { firstName: person.firstname, lastName: person.surname, orcid: person.orcid ?? null },
+    startDate: contact.startDate,
+    endDate: contact.endDate,
+  };
+}
+
+export async function resolveOrCreatePerson(
+  personRepo: Repository<Person>,
+  body: { personId?: number; firstName?: string; lastName?: string; orcid?: string },
+): Promise<Person | { error: string; status: number }> {
+  if (body.personId) {
+    const person = await personRepo.findOneBy({ id: body.personId });
+    if (!person) return { error: "Person not found", status: 404 };
+    return person;
+  }
+  if (!body.firstName?.trim() || !body.lastName?.trim()) {
+    return { error: "firstName and lastName are required when personId is not provided", status: 400 };
+  }
+  if (body.orcid) {
+    const existing = await personRepo.findOneBy({ orcid: body.orcid });
+    if (existing) {
+      const namesDiffer = existing.firstname !== body.firstName.trim() || existing.surname !== body.lastName.trim();
+      if (namesDiffer) {
+        return {
+          error: `A person with this ORCID already exists as "${existing.firstname} ${existing.surname}". Use that name or omit firstName/lastName.`,
+          status: 409,
+        };
+      }
+      return existing;
+    }
+  }
+  const person = personRepo.create({
+    firstname: body.firstName.trim(),
+    surname: body.lastName.trim(),
+    orcid: body.orcid || undefined,
+  });
+  return personRepo.save(person);
+}
 
 export const toArray = <T>(obj: T | T[] | undefined): T[] | null => {
   if (!obj) return null;

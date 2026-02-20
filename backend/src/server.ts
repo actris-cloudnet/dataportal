@@ -319,11 +319,56 @@ async function createServer(): Promise<void> {
   );
   app.get("/api/sites/:siteId/locations", siteRoutes.location);
   app.get("/api/sites/:siteId/links", siteRoutes.links);
+  app.get("/api/sites/:siteId/contacts", siteRoutes.listContacts);
+  app.post(
+    "/api/sites/:siteId/contacts",
+    passport.authenticate(["cookie", "basic"], { session: false }),
+    authorizator.verifyPermission(PermissionType.canManageSites),
+    express.json(),
+    siteRoutes.postContact,
+  );
+  app.put(
+    "/api/sites/:siteId/contacts/:contactId",
+    passport.authenticate(["cookie", "basic"], { session: false }),
+    authorizator.verifyPermission(PermissionType.canManageSites),
+    express.json(),
+    siteRoutes.putContact,
+  );
+  app.delete(
+    "/api/sites/:siteId/contacts/:contactId",
+    passport.authenticate(["cookie", "basic"], { session: false }),
+    authorizator.verifyPermission(PermissionType.canManageSites),
+    siteRoutes.deleteContact,
+  );
   app.get("/api/product-availability", productAvailabilityRoutes.productAvailability);
   app.get("/api/upload-amount", productAvailabilityRoutes.uploadAmount);
   app.post("/api/feedback", rateLimit({ windowMs: 60 * 1000, limit: 10 }), express.json(), feedbackRoutes.postFeedback);
   app.get("/api/instrument-pids", instrRoutes.listInstrumentPids);
   app.get("/api/instrument-pids/:uuid", middleware.validateUuidParam, instrRoutes.instrumentPid);
+  app.get("/api/instrument-pids/:uuid/contacts", middleware.validateUuidParam, instrRoutes.listContacts);
+  app.post(
+    "/api/instrument-pids/:uuid/contacts",
+    middleware.validateUuidParam,
+    passport.authenticate(["cookie", "basic"], { session: false }),
+    authorizator.verifyPermission(PermissionType.canManageInstruments),
+    express.json(),
+    instrRoutes.postContact,
+  );
+  app.put(
+    "/api/instrument-pids/:uuid/contacts/:contactId",
+    middleware.validateUuidParam,
+    passport.authenticate(["cookie", "basic"], { session: false }),
+    authorizator.verifyPermission(PermissionType.canManageInstruments),
+    express.json(),
+    instrRoutes.putContact,
+  );
+  app.delete(
+    "/api/instrument-pids/:uuid/contacts/:contactId",
+    middleware.validateUuidParam,
+    passport.authenticate(["cookie", "basic"], { session: false }),
+    authorizator.verifyPermission(PermissionType.canManageInstruments),
+    instrRoutes.deleteContact,
+  );
   app.get("/api/nominal-instrument", instrRoutes.nominalInstrument);
 
   // TODO: Deprecated. Needed for now, but in the future these should public and

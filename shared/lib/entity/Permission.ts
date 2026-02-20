@@ -8,7 +8,9 @@ export type PermissionType =
   | "canDelete"
   | "canGetStats"
   | "canAddPublication"
-  | "canPublishTask";
+  | "canPublishTask"
+  | "canManageInstruments"
+  | "canManageSites";
 
 export interface Permission {
   id: number;
