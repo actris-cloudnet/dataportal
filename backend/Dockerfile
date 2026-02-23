@@ -28,4 +28,4 @@ COPY --from=build /app/data /app/data
 COPY --from=build /app/tests/lib/service-mocks.js /app/tests/lib/service-mocks.js
 COPY --from=build /app/tests/data/GeoLite2-Country-Test.mmdb /app/tests/data/GeoLite2-Country-Test.mmdb
 
-CMD ["node", "build/server.js"]
+CMD ["node", "build/app/src/server.js"]
