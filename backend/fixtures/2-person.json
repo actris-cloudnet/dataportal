@@ -3,5 +3,13 @@
     "firstname": "Benjamin",
     "surname": "Bucharinen",
     "citations": [{ "id": "bucharest_test" }]
+  },
+  {
+    "firstname": "James Tiberius",
+    "surname": "Kirk"
+  },
+  {
+    "firstname": "Jean-Luc",
+    "surname": "Picard"
   }
 ]
