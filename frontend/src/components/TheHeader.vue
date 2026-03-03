@@ -2,9 +2,13 @@
 import defaultLogo from "@/assets/header-logo.svg";
 import xmasLogo from "@/assets/header-logo-xmas.svg";
 import actrisLogo from "@/assets/logos/actris-white.svg";
+import axios from "axios";
+import { backendUrl } from "@/lib";
 import { loginStore, logout, hasPermission } from "@/lib/auth";
 import { ref, useTemplateRef } from "vue";
 import { useRouter } from "vue-router";
+import BaseModal from "@/components/BaseModal.vue";
+import BaseButton from "@/components/BaseButton.vue";
 
 const isDev = import.meta.env.DEV;
 const today = new Date();
@@ -12,14 +16,57 @@ const isXmas = !isDev && today.getMonth() === 11 && today.getDate() > 15;
 const logo = isXmas ? xmasLogo : defaultLogo;
 const showMenu = ref(false);
 const showProfileMenu = ref(false);
+const showTokenModal = ref(false);
+const apiToken = ref("");
+const tokenError = ref("");
+const copied = ref(false);
+const generating = ref(false);
 const router = useRouter();
 const $profileMenu = useTemplateRef<HTMLDivElement>("$profileMenu");
+const $tokenInput = useTemplateRef<HTMLInputElement>("$tokenInput");
 
 async function clickLogout() {
   await logout();
   await router.push({ name: "Frontpage" });
   showMenu.value = false;
   showProfileMenu.value = false;
+}
+
+function clickApiToken() {
+  apiToken.value = "";
+  tokenError.value = "";
+  copied.value = false;
+  generating.value = false;
+  showTokenModal.value = true;
+}
+
+async function generateToken() {
+  generating.value = true;
+  tokenError.value = "";
+  try {
+    const res = await axios.post<{ token: string }>(`${backendUrl}auth/token`);
+    apiToken.value = res.data.token;
+  } catch {
+    tokenError.value = "Failed to generate API token.";
+  } finally {
+    generating.value = false;
+  }
+}
+
+async function copyToken() {
+  $tokenInput.value?.select();
+  try {
+    await navigator.clipboard.writeText(apiToken.value);
+    copied.value = true;
+    setTimeout(() => (copied.value = false), 2000);
+  } catch {
+    tokenError.value = "Failed to copy token.";
+  }
+}
+
+function closeTokenModal() {
+  showTokenModal.value = false;
+  apiToken.value = "";
 }
 
 function toggleProfileMenu() {
@@ -131,6 +178,7 @@ function clickEvent(event: MouseEvent) {
                 </router-link>
               </li>
               <li class="name">{{ loginStore.name }}</li>
+              <li><a @click="clickApiToken">API token</a></li>
               <li><a @click="clickLogout">Log out</a></li>
             </ul>
           </div>
@@ -138,6 +186,41 @@ function clickEvent(event: MouseEvent) {
       </ul>
     </div>
   </header>
+
+  <Teleport to="body">
+    <BaseModal :open="showTokenModal" @submit="closeTokenModal">
+      <template #header>
+        <h3>API token</h3>
+      </template>
+      <template #body>
+        <p v-if="tokenError" class="error">{{ tokenError }}</p>
+        <template v-else-if="apiToken">
+          <p class="token-hint">
+            Use this token with the <code>X-Auth-Token</code> header. It is valid for 1 year. Copy it now — it won't be
+            shown again.
+          </p>
+          <input
+            ref="$tokenInput"
+            class="token-input"
+            :value="apiToken"
+            readonly
+            @focus="($event.target as HTMLInputElement).select()"
+          />
+        </template>
+        <template v-else-if="generating">
+          <p>Generating token...</p>
+        </template>
+        <template v-else>
+          <p class="token-hint">Generate an API token for programmatic access to the instrument log API.</p>
+        </template>
+      </template>
+      <template #footer>
+        <BaseButton v-if="!apiToken && !generating" type="primary" @click="generateToken">Generate</BaseButton>
+        <BaseButton v-if="apiToken" type="primary" @click="copyToken">{{ copied ? "Copied!" : "Copy" }}</BaseButton>
+        <BaseButton type="secondary" @click="closeTokenModal">Close</BaseButton>
+      </template>
+    </BaseModal>
+  </Teleport>
 </template>
 
 <style scoped lang="scss">
@@ -388,5 +471,29 @@ header.xmas .cloudnet-logo img {
   .name {
     display: none;
   }
+}
+
+.token-hint {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  color: #555;
+
+  code {
+    background: #f0f0f0;
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    font-size: 0.85rem;
+  }
+}
+
+.token-input {
+  width: 100%;
+  padding: 0.5rem;
+  font-family: monospace;
+  font-size: 0.85rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #f8f8f8;
+  box-sizing: border-box;
 }
 </style>

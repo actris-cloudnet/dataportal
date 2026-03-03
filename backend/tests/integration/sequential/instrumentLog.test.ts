@@ -1,4 +1,5 @@
 import axios from "axios";
+import { randomBytes } from "node:crypto";
 import { DataSource, Repository } from "typeorm";
 import { backendPublicUrl, genResponse } from "../../lib";
 import { UserAccount } from "../../../src/entity/UserAccount";
@@ -6,6 +7,7 @@ import { InstrumentLog } from "../../../src/entity/InstrumentLog";
 import { InstrumentLogImage } from "../../../src/entity/InstrumentLogImage";
 import { InstrumentLogPermission, InstrumentLogPermissionType } from "../../../src/entity/InstrumentLogPermission";
 import { InstrumentInfo } from "../../../src/entity/Instrument";
+import { hashVerifier, Token } from "../../../src/entity/Token";
 import { AppDataSource } from "../../../src/data-source";
 import { describe, expect, it, beforeAll, afterAll } from "@jest/globals";
 
@@ -15,8 +17,21 @@ let imageRepo: Repository<InstrumentLogImage>;
 
 const url = `${backendPublicUrl}instrument-logs`;
 const instrumentInfoUuid = "c43e9f54-c94d-45f7-8596-223b1c2b14c0";
-const otherInstrumentInfoUuid = "0b3a7fa0-4812-4964-af23-1162e8b3a665";
 let instrumentPid: string;
+async function createTestToken(user: UserAccount, expiresAt?: Date): Promise<string> {
+  const tokenRepo = dataSource.getRepository(Token);
+  const selector = randomBytes(16);
+  const verifier = randomBytes(16);
+  const expiry = expiresAt ?? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+  await tokenRepo.insert({
+    selector,
+    verifierHash: hashVerifier(verifier),
+    userAccount: user,
+    expiresAt: expiry,
+  });
+  return selector.toString("hex") + verifier.toString("hex");
+}
+
 const writerCreds = { username: "logwriter", password: "hunter2" };
 const readerCreds = { username: "logreader", password: "hunter2" };
 const nopermCreds = { username: "lognoperm", password: "hunter2" };
@@ -546,5 +561,90 @@ describe("cascade delete: deleting log entry removes images", () => {
     await axios.delete(`${url}/${logId}`, { auth: writerCreds });
     const image = await imageRepo.findOneBy({ id: imageId });
     expect(image).toBeNull();
+  });
+});
+
+describe("POST /api/auth/token", () => {
+  const authTokenUrl = `${backendPublicUrl}auth/token`;
+  let cookieHeader: string;
+
+  beforeAll(async () => {
+    const userRepo = dataSource.getRepository(UserAccount);
+    const writer = await userRepo.findOneByOrFail({ username: writerCreds.username });
+    const token = await createTestToken(writer);
+    cookieHeader = `token=${token}`;
+  });
+
+  it("rejects unauthenticated request", async () => {
+    return expect(axios.post(authTokenUrl)).rejects.toMatchObject({ response: { status: 401 } });
+  });
+
+  it("generates a token via cookie auth and uses it with X-Auth-Token", async () => {
+    const tokenRes = await axios.post(authTokenUrl, null, { headers: { Cookie: cookieHeader } });
+    expect(tokenRes.status).toBe(200);
+    expect(tokenRes.data.token).toEqual(expect.any(String));
+    expect(tokenRes.data.expiresAt).toEqual(expect.any(String));
+
+    // Use the generated token with X-Auth-Token header
+    const res = await axios.get(url, {
+      params: { instrumentInfoUuid },
+      headers: { "X-Auth-Token": tokenRes.data.token },
+    });
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.data)).toBe(true);
+  });
+});
+
+describe("X-Auth-Token header authentication", () => {
+  let writerToken: string;
+
+  beforeAll(async () => {
+    const userRepo = dataSource.getRepository(UserAccount);
+    const writer = await userRepo.findOneByOrFail({ username: writerCreds.username });
+    writerToken = await createTestToken(writer);
+  });
+
+  it("authenticates GET via X-Auth-Token header", async () => {
+    const res = await axios.get(url, {
+      params: { instrumentInfoUuid },
+      headers: { "X-Auth-Token": writerToken },
+    });
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.data)).toBe(true);
+  });
+
+  it("authenticates POST via X-Auth-Token header", async () => {
+    const body = {
+      instrumentInfoUuid,
+      eventType: "maintenance",
+      date: "2021-05-01",
+      notes: "Token auth test",
+    };
+    const res = await axios.post(url, body, {
+      headers: { "X-Auth-Token": writerToken },
+    });
+    expect(res.status).toBe(201);
+  });
+
+  it("rejects invalid token", async () => {
+    return expect(
+      axios.get(url, {
+        params: { instrumentInfoUuid },
+        headers: { "X-Auth-Token": "0".repeat(64) },
+      }),
+    ).rejects.toMatchObject({ response: { status: 401 } });
+  });
+
+  it("rejects expired token", async () => {
+    const userRepo = dataSource.getRepository(UserAccount);
+    const writer = await userRepo.findOneByOrFail({ username: writerCreds.username });
+    const expiredToken = await createTestToken(writer, new Date(Date.now() - 1000));
+
+    return expect(
+      axios.get(url, {
+        params: { instrumentInfoUuid },
+        headers: { "X-Auth-Token": expiredToken },
+      }),
+    ).rejects.toMatchObject({ response: { status: 401 } });
   });
 });
