@@ -38,6 +38,8 @@ export interface InstrumentInfo {
   type: string;
   siteId: string;
   status: "active" | "recent" | "inactive";
+  modelUrl: string | null;
+  typeUrl: string | null;
 }
 
 export interface NominalInstrument {

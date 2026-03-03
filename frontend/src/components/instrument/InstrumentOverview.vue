@@ -15,9 +15,15 @@
         </ul>
       </dd>
       <dt>Model</dt>
-      <dd>{{ instrumentInfo.model }}</dd>
+      <dd>
+        <a :href="instrumentInfo.modelUrl" target="_blank" v-if="instrumentInfo.modelUrl">{{ instrumentInfo.model }}</a>
+        <span v-else>{{ instrumentInfo.model }}</span>
+      </dd>
       <dt>Type</dt>
-      <dd>{{ instrumentInfo.type }}</dd>
+      <dd>
+        <a :href="instrumentInfo.typeUrl" target="_blank" v-if="instrumentInfo.typeUrl">{{ instrumentInfo.type }}</a>
+        <span v-else>{{ instrumentInfo.type }}</span>
+      </dd>
       <template v-if="instrumentInfo.serialNumber">
         <dt>Serial number</dt>
         <dd>{{ instrumentInfo.serialNumber }}</dd>

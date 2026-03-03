@@ -60,8 +60,14 @@ export class InstrumentInfo {
   @Column()
   model!: string;
 
+  @Column({ type: "text", nullable: true })
+  modelUrl!: string | null;
+
   @Column()
   type!: string;
+
+  @Column({ type: "text", nullable: true })
+  typeUrl!: string | null;
 
   @Column({ type: "text", nullable: true })
   serialNumber!: string | null;
