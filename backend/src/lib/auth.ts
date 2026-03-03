@@ -26,7 +26,7 @@ export class Authenticator {
     return user;
   }
 
-  async cookieLogin(token: string) {
+  async tokenLogin(token: string) {
     const now = new Date();
     const selector = Buffer.from(token.slice(0, 32), "hex");
     const verifier = Buffer.from(token.slice(32), "hex");
@@ -75,7 +75,7 @@ export class Authenticator {
     if (!user.comparePassword(req.body.password)) {
       return next({ status: 401, errors: "Invalid password" });
     }
-    await this.createToken(res, user);
+    await this.createSessionToken(res, user);
     res.send(this.serializeUser(user));
   };
 
@@ -120,7 +120,7 @@ export class Authenticator {
   };
 
   orcidCallback: RequestHandler = async (req, res) => {
-    await this.createToken(res, req.user!);
+    await this.createSessionToken(res, req.user!);
     let url = env.DP_FRONTEND_URL;
     if (req.cookies.next) {
       url += req.cookies.next;
@@ -129,7 +129,15 @@ export class Authenticator {
     res.redirect(url);
   };
 
-  private async createToken(res: Response, user: UserAccount) {
+  generateToken: RequestHandler = async (req, res, next) => {
+    if (!req.user) {
+      return next({ status: 401, errors: "Unauthorized" });
+    }
+    const { token, expiresAt } = await this.insertToken(req.user);
+    res.json({ token, expiresAt: expiresAt.toISOString() });
+  };
+
+  private async insertToken(user: UserAccount) {
     const selector = randomBytes(16);
     const verifier = randomBytes(16);
     const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
@@ -140,6 +148,11 @@ export class Authenticator {
       expiresAt,
     });
     const token = selector.toString("hex") + verifier.toString("hex");
+    return { token, expiresAt };
+  }
+
+  private async createSessionToken(res: Response, user: UserAccount) {
+    const { token, expiresAt } = await this.insertToken(user);
     res.cookie("token", token, {
       httpOnly: true,
       sameSite: "strict",
