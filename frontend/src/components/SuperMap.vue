@@ -60,6 +60,7 @@ const markerColors: Record<SiteType | "selected", string | undefined> = {
   "arm": "violet",
   "campaign": "orange",
   "ri-urbans": undefined,
+  "polarin": undefined,
   "mobile": undefined,
   "test": undefined,
   "model": undefined,

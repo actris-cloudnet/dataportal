@@ -9,6 +9,7 @@
         >
           ACTRIS
         </BaseTag>
+        <BaseTag v-if="response.type.includes('arm')" type="arm">ARM</BaseTag>
         <BaseTag
           v-if="response.type.includes('cloudnet')"
           type="cloudnet"
@@ -16,10 +17,16 @@
         >
           Cloudnet
         </BaseTag>
-        <BaseTag v-if="response.type.includes('campaign')" type="experimental">Campaign</BaseTag>
-        <BaseTag v-if="response.type.includes('arm')" type="arm">ARM</BaseTag>
-        <BaseTag v-if="response.type.includes('model')" type="volatile">Model</BaseTag>
+        <BaseTag
+          v-if="response.type.includes('polarin')"
+          type="polarin"
+          title="This station is a part of the Polar Research Infrastructure Network."
+        >
+          POLARIN
+        </BaseTag>
         <BaseTag v-if="response.type.includes('ri-urbans')" type="ri-urbans">RI-URBANS</BaseTag>
+        <BaseTag v-if="response.type.includes('campaign')" type="experimental">Campaign</BaseTag>
+        <BaseTag v-if="response.type.includes('model')" type="volatile">Model</BaseTag>
         <BaseTag v-else-if="response.type.includes('hidden')" type="experimental">Hidden</BaseTag>
       </template>
       <template #tabs>

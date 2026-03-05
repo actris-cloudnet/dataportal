@@ -1,6 +1,15 @@
 import type { Person } from "./Person";
 
-export type SiteType = "cloudnet" | "arm" | "campaign" | "mobile" | "test" | "model" | "hidden" | "ri-urbans";
+export type SiteType =
+  | "cloudnet"
+  | "arm"
+  | "campaign"
+  | "mobile"
+  | "test"
+  | "model"
+  | "hidden"
+  | "ri-urbans"
+  | "polarin";
 
 export interface SiteLink<T> {
   id: T;

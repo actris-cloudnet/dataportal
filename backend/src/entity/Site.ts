@@ -9,6 +9,7 @@ export enum SiteType {
   ARM = "arm",
   CAMPAIGN = "campaign",
   RI_URBANS = "ri-urbans",
+  POLARIN = "polarin",
   MOBILE = "mobile",
   MODEL = "model",
   TEST = "test",

@@ -172,6 +172,7 @@ export const markerColors: Record<SiteType, string> = {
   "model": markerIconGrey,
   "hidden": markerIconGrey,
   "ri-urbans": markerIconGrey,
+  "polarin": markerIconGrey,
 };
 
 export function getMarkerIcon(site: Site, selected = false) {

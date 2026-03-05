@@ -42,16 +42,12 @@
                   </td>
                   <td>{{ site.altitude != null ? `${site.altitude} m` : "-" }}</td>
                   <td>
-                    <BaseTag
-                      v-if="site.actrisId"
-                      type="actris"
-                      size="small"
-                      title="This station is a component of an ACTRIS National Facility."
-                    >
-                      ACTRIS
-                    </BaseTag>
-                    <BaseTag v-if="site.type.includes('arm')" type="arm" size="small">ARM</BaseTag>
-                    <BaseTag v-if="site.type.includes('ri-urbans')" type="ri-urbans" size="small">RI-URBANS</BaseTag>
+                    <div class="tags">
+                      <BaseTag v-if="site.actrisId" type="actris" size="small">ACTRIS</BaseTag>
+                      <BaseTag v-if="site.type.includes('arm')" type="arm" size="small">ARM</BaseTag>
+                      <BaseTag v-if="site.type.includes('polarin')" type="polarin" size="small">POLARIN</BaseTag>
+                      <BaseTag v-if="site.type.includes('ri-urbans')" type="ri-urbans" size="small">RI-URBANS</BaseTag>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -227,5 +223,10 @@ p {
   .status {
     margin-left: 8px;
   }
+}
+
+.tags {
+  display: flex;
+  gap: 0.25rem;
 }
 </style>

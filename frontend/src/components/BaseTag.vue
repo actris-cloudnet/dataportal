@@ -2,7 +2,7 @@
 export type TagSize = "normal" | "small";
 
 export interface Props {
-  type: "actris" | "arm" | "volatile" | "legacy" | "experimental" | "cloudnet" | "ri-urbans";
+  type: "actris" | "arm" | "volatile" | "legacy" | "experimental" | "cloudnet" | "ri-urbans" | "polarin";
   title?: string;
   size?: TagSize;
 }
@@ -60,5 +60,9 @@ withDefaults(defineProps<Props>(), { size: "normal" });
 
 .ri-urbans {
   background-color: #99ba5f;
+}
+
+.polarin {
+  background-color: #0078ff;
 }
 </style>
