@@ -196,7 +196,7 @@ function clickEvent(event: MouseEvent) {
         <p v-if="tokenError" class="error">{{ tokenError }}</p>
         <template v-else-if="apiToken">
           <p class="token-hint">
-            Use this token with the <code>X-Auth-Token</code> header. It is valid for 1 year. Copy it now — it won't be
+            Use this token with the <code>X-Auth-Token</code> header. It is valid for 30 days. Copy it now — it won't be
             shown again.
           </p>
           <input
