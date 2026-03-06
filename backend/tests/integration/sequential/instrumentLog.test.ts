@@ -259,12 +259,35 @@ describe("POST /api/instrument-logs", () => {
     expect(res.data.eventType).toBe("note");
     expect(res.data.notes).toBe("Important observation");
   });
+
+  it("rejects duplicate log entry", async () => {
+    const body = {
+      instrumentInfoUuid,
+      eventType: "maintenance",
+      date: "2021-06-01",
+      notes: "Routine maintenance",
+    };
+    return expect(axios.post(url, body, { auth: writerCreds })).rejects.toMatchObject(
+      genResponse(409, { status: 409, errors: "Duplicate log entry" }),
+    );
+  });
+
+  it("allows entry with different notes on same date", async () => {
+    const body = {
+      instrumentInfoUuid,
+      eventType: "maintenance",
+      date: "2021-06-01",
+      notes: "Different maintenance task",
+    };
+    const res = await axios.post(url, body, { auth: writerCreds });
+    expect(res.status).toBe(201);
+  });
 });
 
 describe("GET /api/instrument-logs (with data)", () => {
   it("returns created log entries sorted by date DESC", async () => {
     const res = await axios.get(url, { params: { instrumentInfoUuid }, auth: writerCreds });
-    expect(res.data.length).toBe(5);
+    expect(res.data.length).toBe(6);
     expect(res.data[0].eventType).toBe("note");
     expect(res.data[1].eventType).toBe("check");
     const dates = res.data.map((entry: any) => entry.date);
