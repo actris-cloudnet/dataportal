@@ -133,14 +133,14 @@ export class Authenticator {
     if (!req.user) {
       return next({ status: 401, errors: "Unauthorized" });
     }
-    const { token, expiresAt } = await this.insertToken(req.user);
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const { token } = await this.insertToken(req.user, expiresAt);
     res.json({ token, expiresAt: expiresAt.toISOString() });
   };
 
-  private async insertToken(user: UserAccount) {
+  private async insertToken(user: UserAccount, expiresAt: Date) {
     const selector = randomBytes(16);
     const verifier = randomBytes(16);
-    const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
     await this.tokenRepo.insert({
       selector,
       verifierHash: hashVerifier(verifier),
@@ -152,7 +152,8 @@ export class Authenticator {
   }
 
   private async createSessionToken(res: Response, user: UserAccount) {
-    const { token, expiresAt } = await this.insertToken(user);
+    const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+    const { token } = await this.insertToken(user, expiresAt);
     res.cookie("token", token, {
       httpOnly: true,
       sameSite: "strict",
