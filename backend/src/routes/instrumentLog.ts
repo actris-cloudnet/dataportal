@@ -224,7 +224,7 @@ export class InstrumentLogRoutes {
     const log = this.logRepo.create({
       ...fields,
       instrumentInfo,
-      userAccount: req.user ?? null,
+      userAccount: req.user,
     });
     const saved = await this.logRepo.save(log);
     res.status(201).json({

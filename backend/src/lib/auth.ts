@@ -9,6 +9,9 @@ import { Model } from "../entity/Model";
 import env from "./env";
 import { hashVerifier, Token } from "../entity/Token";
 
+const API_TOKEN_LIFETIME_MS = 30 * 24 * 60 * 60 * 1000;
+const SESSION_TOKEN_LIFETIME_MS = 365 * 24 * 60 * 60 * 1000;
+
 export class Authenticator {
   private userRepo: Repository<UserAccount>;
   private tokenRepo: Repository<Token>;
@@ -133,7 +136,7 @@ export class Authenticator {
     if (!req.user) {
       return next({ status: 401, errors: "Unauthorized" });
     }
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + API_TOKEN_LIFETIME_MS);
     const { token } = await this.insertToken(req.user, expiresAt);
     res.json({ token, expiresAt: expiresAt.toISOString() });
   };
@@ -152,7 +155,7 @@ export class Authenticator {
   }
 
   private async createSessionToken(res: Response, user: UserAccount) {
-    const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + SESSION_TOKEN_LIFETIME_MS);
     const { token } = await this.insertToken(user, expiresAt);
     res.cookie("token", token, {
       httpOnly: true,
