@@ -7,6 +7,7 @@ declare module "vue-router" {
   interface RouteMeta {
     title?: string | boolean;
     permission?: PermissionType;
+    requiresAuth?: boolean;
   }
 }
 
@@ -219,7 +220,7 @@ const routes = [
       {
         path: "logbook",
         name: "InstrumentLogbook",
-        meta: { title: false },
+        meta: { title: false, requiresAuth: true },
         component: () => import("@/components/instrument/InstrumentLogbook.vue"),
       },
     ],
@@ -252,7 +253,10 @@ function setTitle(parts: string[]) {
 }
 
 router.beforeEach((to, _from) => {
-  if (!loginStore.isAuthenticated && to.meta.permission && !hasPermission(to.meta.permission).value) {
+  if (
+    !loginStore.isAuthenticated &&
+    (to.meta.requiresAuth || (to.meta.permission && !hasPermission(to.meta.permission).value))
+  ) {
     return { name: "Login", query: { next: to.fullPath } };
   }
 

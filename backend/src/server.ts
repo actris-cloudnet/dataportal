@@ -5,6 +5,8 @@ import * as passport from "passport";
 import { Strategy as OrcidStrategy } from "passport-orcid";
 import { Strategy as CookieStrategy } from "passport-cookie";
 import { BasicStrategy } from "passport-http";
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+import AuthTokenStrategy = require("passport-auth-token");
 import * as cookieParser from "cookie-parser";
 
 import { RequestError } from "./entity/RequestError";
@@ -138,7 +140,10 @@ async function createServer(): Promise<void> {
     app.use(function (_req, res, next) {
       res.header("Access-Control-Allow-Origin", "http://127.0.0.1:8080");
       res.header("Access-Control-Allow-Credentials", "true");
-      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+      res.header(
+        "Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Auth-Token",
+      );
       res.header("Access-Control-Allow-Methods", "*");
       next();
     });
@@ -172,14 +177,13 @@ async function createServer(): Promise<void> {
       authenticator.orcidCallback,
     );
   }
-  passport.use(
-    new CookieStrategy((token: string, done: (error: any, user?: any) => void) => {
-      authenticator
-        .cookieLogin(token)
-        .then((user) => done(null, user))
-        .catch((err) => done(err));
-    }),
-  );
+  const tokenVerifyCallback = (token: string, done: (error: any, user?: any) => void) => {
+    authenticator
+      .tokenLogin(token)
+      .then((user) => done(null, user))
+      .catch((err) => done(err));
+  };
+  passport.use(new CookieStrategy(tokenVerifyCallback));
   passport.use(
     new BasicStrategy((username, password, done) => {
       authenticator
@@ -188,9 +192,19 @@ async function createServer(): Promise<void> {
         .catch((err) => done(err));
     }),
   );
+  passport.use(
+    "authtoken",
+    new AuthTokenStrategy({ headerFields: ["x-auth-token"], tokenFields: [] }, tokenVerifyCallback),
+  );
   app.post("/api/auth/login", express.json(), authenticator.logIn);
   app.get("/api/auth/me", passport.authenticate("cookie", { session: false }), authenticator.userInfo);
   app.post("/api/auth/logout", passport.authenticate("cookie", { session: false }), authenticator.logOut);
+  app.post(
+    "/api/auth/token",
+    rateLimit({ windowMs: 60 * 60 * 1000, limit: 10 }),
+    passport.authenticate("cookie", { session: false }),
+    authenticator.generateToken,
+  );
 
   // public (changes to these require changes to API docs)
   app.get(
@@ -244,39 +258,39 @@ async function createServer(): Promise<void> {
   );
   app.get(
     "/api/instrument-logs",
-    passport.authenticate(["cookie", "basic"], { session: false }),
+    passport.authenticate(["cookie", "basic", "authtoken"], { session: false }),
     instrumentLogRoutes.getLogs,
   );
   app.post(
     "/api/instrument-logs",
-    passport.authenticate(["cookie", "basic"], { session: false }),
+    passport.authenticate(["cookie", "basic", "authtoken"], { session: false }),
     express.json(),
     instrumentLogRoutes.postLog,
   );
   app.put(
     "/api/instrument-logs/:id",
-    passport.authenticate(["cookie", "basic"], { session: false }),
+    passport.authenticate(["cookie", "basic", "authtoken"], { session: false }),
     express.json(),
     instrumentLogRoutes.putLog,
   );
   app.delete(
     "/api/instrument-logs/:id",
-    passport.authenticate(["cookie", "basic"], { session: false }),
+    passport.authenticate(["cookie", "basic", "authtoken"], { session: false }),
     instrumentLogRoutes.deleteLog,
   );
   app.post(
     "/api/instrument-logs/:id/images",
-    passport.authenticate(["cookie", "basic"], { session: false }),
+    passport.authenticate(["cookie", "basic", "authtoken"], { session: false }),
     instrumentLogRoutes.postImage,
   );
   app.get(
     "/api/instrument-logs/:id/images/:imageId",
-    passport.authenticate(["cookie", "basic"], { session: false }),
+    passport.authenticate(["cookie", "basic", "authtoken"], { session: false }),
     instrumentLogRoutes.getImage,
   );
   app.delete(
     "/api/instrument-logs/:id/images/:imageId",
-    passport.authenticate(["cookie", "basic"], { session: false }),
+    passport.authenticate(["cookie", "basic", "authtoken"], { session: false }),
     instrumentLogRoutes.deleteImage,
   );
   app.get(

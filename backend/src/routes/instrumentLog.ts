@@ -208,8 +208,7 @@ export class InstrumentLogRoutes {
       return next({ status: 400, errors: validation.error });
     }
     const { allowedResults } = validation;
-    const log = this.logRepo.create({
-      instrumentInfo,
+    const fields = {
       instrumentInfoUuid: instrumentInfo.uuid,
       eventType,
       detail: detail ?? null,
@@ -217,7 +216,15 @@ export class InstrumentLogRoutes {
       date,
       endDate: endDate ?? null,
       notes: notes ?? null,
-      userAccount: req.user ?? null,
+    };
+    const existing = await this.logRepo.findOneBy(fields);
+    if (existing) {
+      return next({ status: 409, errors: "Duplicate log entry" });
+    }
+    const log = this.logRepo.create({
+      ...fields,
+      instrumentInfo,
+      userAccount: req.user,
     });
     const saved = await this.logRepo.save(log);
     res.status(201).json({
