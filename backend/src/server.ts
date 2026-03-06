@@ -199,7 +199,12 @@ async function createServer(): Promise<void> {
   app.post("/api/auth/login", express.json(), authenticator.logIn);
   app.get("/api/auth/me", passport.authenticate("cookie", { session: false }), authenticator.userInfo);
   app.post("/api/auth/logout", passport.authenticate("cookie", { session: false }), authenticator.logOut);
-  app.post("/api/auth/token", passport.authenticate("cookie", { session: false }), authenticator.generateToken);
+  app.post(
+    "/api/auth/token",
+    rateLimit({ windowMs: 60 * 60 * 1000, limit: 10 }),
+    passport.authenticate("cookie", { session: false }),
+    authenticator.generateToken,
+  );
 
   // public (changes to these require changes to API docs)
   app.get(
