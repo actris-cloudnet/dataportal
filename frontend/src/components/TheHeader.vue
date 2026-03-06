@@ -67,6 +67,8 @@ async function copyToken() {
 function closeTokenModal() {
   showTokenModal.value = false;
   apiToken.value = "";
+  tokenError.value = "";
+  copied.value = false;
 }
 
 function toggleProfileMenu() {
