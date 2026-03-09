@@ -358,7 +358,7 @@ async function fetchEntries() {
   state.value = "loading";
   try {
     const res = await axios.get<InstrumentLog[]>(`${backendUrl}instrument-logs`, {
-      params: { instrumentInfoUuid: props.instrumentInfo.uuid },
+      params: { instrumentUuid: props.instrumentInfo.uuid },
     });
     entries.value = res.data;
     state.value = "ready";
@@ -410,7 +410,7 @@ async function submitEntry() {
   submitting.value = true;
   try {
     const payload = {
-      instrumentInfoUuid: props.instrumentInfo.uuid,
+      instrumentUuid: props.instrumentInfo.uuid,
       eventType: form.value.eventType,
       detail: form.value.detail || null,
       result: form.value.result || null,

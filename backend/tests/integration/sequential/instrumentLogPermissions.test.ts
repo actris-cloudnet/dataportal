@@ -49,12 +49,12 @@ beforeAll(async () => {
   // Seed one log entry per instrument via the API so GET returns data
   await axios.post(
     url,
-    { instrumentInfoUuid, eventType: "maintenance", date: "2020-01-01" },
+    { instrumentUuid: instrumentInfoUuid, eventType: "maintenance", date: "2020-01-01" },
     { auth: globalWriterCreds },
   );
   await axios.post(
     url,
-    { instrumentInfoUuid: otherInstrumentInfoUuid, eventType: "maintenance", date: "2020-01-01" },
+    { instrumentUuid: otherInstrumentInfoUuid, eventType: "maintenance", date: "2020-01-01" },
     { auth: globalWriterCreds },
   );
 });
@@ -63,14 +63,14 @@ afterAll(async () => await dataSource.destroy());
 
 describe("Global canReadLogs", () => {
   it("can read logs for the primary instrument", async () => {
-    const res = await axios.get(url, { params: { instrumentInfoUuid }, auth: globalReaderCreds });
+    const res = await axios.get(url, { params: { instrumentUuid: instrumentInfoUuid }, auth: globalReaderCreds });
     expect(res.status).toBe(200);
     expect(res.data.length).toBeGreaterThan(0);
   });
 
   it("can read logs for a different instrument", async () => {
     const res = await axios.get(url, {
-      params: { instrumentInfoUuid: otherInstrumentInfoUuid },
+      params: { instrumentUuid: otherInstrumentInfoUuid },
       auth: globalReaderCreds,
     });
     expect(res.status).toBe(200);
@@ -81,7 +81,7 @@ describe("Global canReadLogs", () => {
     return expect(
       axios.post(
         url,
-        { instrumentInfoUuid, eventType: "maintenance", date: "2020-06-01" },
+        { instrumentUuid: instrumentInfoUuid, eventType: "maintenance", date: "2020-06-01" },
         { auth: globalReaderCreds },
       ),
     ).rejects.toMatchObject(genResponse(403, { status: 403, errors: "Missing permission" }));
@@ -92,14 +92,14 @@ describe("Global canWriteLogs", () => {
   it("can write logs for the primary instrument", async () => {
     const res = await axios.post(
       url,
-      { instrumentInfoUuid, eventType: "maintenance", date: "2020-06-01" },
+      { instrumentUuid: instrumentInfoUuid, eventType: "maintenance", date: "2020-06-01" },
       { auth: globalWriterCreds },
     );
     expect(res.status).toBe(201);
   });
 
   it("can read logs for the primary instrument", async () => {
-    const res = await axios.get(url, { params: { instrumentInfoUuid }, auth: globalWriterCreds });
+    const res = await axios.get(url, { params: { instrumentUuid: instrumentInfoUuid }, auth: globalWriterCreds });
     expect(res.status).toBe(200);
     expect(res.data.length).toBeGreaterThan(0);
   });
@@ -107,7 +107,7 @@ describe("Global canWriteLogs", () => {
   it("can write logs for a different instrument", async () => {
     const res = await axios.post(
       url,
-      { instrumentInfoUuid: otherInstrumentInfoUuid, eventType: "maintenance", date: "2020-06-01" },
+      { instrumentUuid: otherInstrumentInfoUuid, eventType: "maintenance", date: "2020-06-01" },
       { auth: globalWriterCreds },
     );
     expect(res.status).toBe(201);
@@ -115,7 +115,7 @@ describe("Global canWriteLogs", () => {
 
   it("can read logs for a different instrument", async () => {
     const res = await axios.get(url, {
-      params: { instrumentInfoUuid: otherInstrumentInfoUuid },
+      params: { instrumentUuid: otherInstrumentInfoUuid },
       auth: globalWriterCreds,
     });
     expect(res.status).toBe(200);
@@ -125,13 +125,13 @@ describe("Global canWriteLogs", () => {
 
 describe("Instrument-specific canReadLogs isolation", () => {
   it("can read logs for the permitted instrument", async () => {
-    const res = await axios.get(url, { params: { instrumentInfoUuid }, auth: specificReaderCreds });
+    const res = await axios.get(url, { params: { instrumentUuid: instrumentInfoUuid }, auth: specificReaderCreds });
     expect(res.status).toBe(200);
   });
 
   it("cannot read logs for a different instrument", async () => {
     return expect(
-      axios.get(url, { params: { instrumentInfoUuid: otherInstrumentInfoUuid }, auth: specificReaderCreds }),
+      axios.get(url, { params: { instrumentUuid: otherInstrumentInfoUuid }, auth: specificReaderCreds }),
     ).rejects.toMatchObject(genResponse(403, { status: 403, errors: "Missing permission" }));
   });
 });
@@ -190,7 +190,7 @@ describe("Permission deduplication", () => {
 
   it("user with only canWriteLogs (after dedup) can still read logs", async () => {
     const creds = { username: "perm_dedup_globalwrite", password: "hunter2" };
-    const res = await axios.get(url, { params: { instrumentInfoUuid }, auth: creds });
+    const res = await axios.get(url, { params: { instrumentUuid: instrumentInfoUuid }, auth: creds });
     expect(res.status).toBe(200);
   });
 });

@@ -141,11 +141,11 @@ export class InstrumentLogRoutes {
   }
 
   getLogs: RequestHandler = async (req, res, next) => {
-    const { instrumentInfoUuid, instrumentPid } = req.query as { instrumentInfoUuid?: string; instrumentPid?: string };
-    if (!instrumentInfoUuid && !instrumentPid) {
-      return next({ status: 400, errors: "instrumentInfoUuid or instrumentPid is required" });
+    const { instrumentUuid, instrumentPid } = req.query as { instrumentUuid?: string; instrumentPid?: string };
+    if (!instrumentUuid && !instrumentPid) {
+      return next({ status: 400, errors: "instrumentUuid or instrumentPid is required" });
     }
-    const instrumentInfo = await this.resolveInstrumentInfo(instrumentInfoUuid, instrumentPid);
+    const instrumentInfo = await this.resolveInstrumentInfo(instrumentUuid, instrumentPid);
     if (!instrumentInfo) {
       return next({ status: 404, errors: "Instrument not found" });
     }
@@ -189,14 +189,14 @@ export class InstrumentLogRoutes {
   };
 
   postLog: RequestHandler = async (req, res, next) => {
-    const { instrumentInfoUuid, instrumentPid, eventType, detail, result, date, endDate, notes } = req.body;
-    if (!instrumentInfoUuid && !instrumentPid) {
-      return next({ status: 400, errors: "instrumentInfoUuid or instrumentPid is required" });
+    const { instrumentUuid, instrumentPid, eventType, detail, result, date, endDate, notes } = req.body;
+    if (!instrumentUuid && !instrumentPid) {
+      return next({ status: 400, errors: "instrumentUuid or instrumentPid is required" });
     }
     if (!req.user) {
       return next({ status: 401, errors: "Unauthorized" });
     }
-    const instrumentInfo = await this.resolveInstrumentInfo(instrumentInfoUuid, instrumentPid);
+    const instrumentInfo = await this.resolveInstrumentInfo(instrumentUuid, instrumentPid);
     if (!instrumentInfo) {
       return next({ status: 404, errors: "Instrument not found" });
     }

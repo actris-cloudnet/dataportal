@@ -83,31 +83,31 @@ beforeAll(async () => {
 afterAll(async () => await dataSource.destroy());
 
 describe("GET /api/instrument-logs", () => {
-  it("requires instrumentInfoUuid or instrumentPid parameter", async () => {
+  it("requires instrumentUuid or instrumentPid parameter", async () => {
     return expect(axios.get(url, { auth: writerCreds })).rejects.toMatchObject(
-      genResponse(400, { status: 400, errors: "instrumentInfoUuid or instrumentPid is required" }),
+      genResponse(400, { status: 400, errors: "instrumentUuid or instrumentPid is required" }),
     );
   });
 
   it("rejects unknown instrument", async () => {
     return expect(
-      axios.get(url, { params: { instrumentInfoUuid: "00000000-0000-0000-0000-000000000000" }, auth: writerCreds }),
+      axios.get(url, { params: { instrumentUuid: "00000000-0000-0000-0000-000000000000" }, auth: writerCreds }),
     ).rejects.toMatchObject(genResponse(404, { status: 404, errors: "Instrument not found" }));
   });
 
   it("rejects user without permission", async () => {
-    return expect(axios.get(url, { params: { instrumentInfoUuid }, auth: nopermCreds })).rejects.toMatchObject(
-      genResponse(403, { status: 403, errors: "Missing permission" }),
-    );
+    return expect(
+      axios.get(url, { params: { instrumentUuid: instrumentInfoUuid }, auth: nopermCreds }),
+    ).rejects.toMatchObject(genResponse(403, { status: 403, errors: "Missing permission" }));
   });
 
   it("returns empty list initially", async () => {
-    const res = await axios.get(url, { params: { instrumentInfoUuid }, auth: writerCreds });
+    const res = await axios.get(url, { params: { instrumentUuid: instrumentInfoUuid }, auth: writerCreds });
     expect(res.data).toEqual([]);
   });
 
   it("allows reader to get logs", async () => {
-    const res = await axios.get(url, { params: { instrumentInfoUuid }, auth: readerCreds });
+    const res = await axios.get(url, { params: { instrumentUuid: instrumentInfoUuid }, auth: readerCreds });
     expect(res.data).toEqual([]);
   });
 
@@ -126,7 +126,7 @@ describe("GET /api/instrument-logs", () => {
 describe("POST /api/instrument-logs", () => {
   it("rejects unauthenticated request", async () => {
     return expect(
-      axios.post(url, { instrumentInfoUuid, eventType: "maintenance", date: "2021-01-01" }),
+      axios.post(url, { instrumentUuid: instrumentInfoUuid, eventType: "maintenance", date: "2021-01-01" }),
     ).rejects.toMatchObject({
       response: { status: 401 },
     });
@@ -134,16 +134,18 @@ describe("POST /api/instrument-logs", () => {
 
   it("rejects user without write permission", async () => {
     return expect(
-      axios.post(url, { instrumentInfoUuid, eventType: "maintenance", date: "2021-01-01" }, { auth: readerCreds }),
+      axios.post(
+        url,
+        { instrumentUuid: instrumentInfoUuid, eventType: "maintenance", date: "2021-01-01" },
+        { auth: readerCreds },
+      ),
     ).rejects.toMatchObject(genResponse(403, { status: 403, errors: "Missing permission" }));
   });
 
-  it("rejects missing instrumentInfoUuid and instrumentPid", async () => {
+  it("rejects missing instrumentUuid and instrumentPid", async () => {
     return expect(
       axios.post(url, { eventType: "maintenance", date: "2021-01-01" }, { auth: writerCreds }),
-    ).rejects.toMatchObject(
-      genResponse(400, { status: 400, errors: "instrumentInfoUuid or instrumentPid is required" }),
-    );
+    ).rejects.toMatchObject(genResponse(400, { status: 400, errors: "instrumentUuid or instrumentPid is required" }));
   });
 
   it("accepts instrumentPid in body", async () => {
@@ -158,19 +160,31 @@ describe("POST /api/instrument-logs", () => {
 
   it("rejects invalid eventType", async () => {
     return expect(
-      axios.post(url, { instrumentInfoUuid, eventType: "invalid", date: "2021-01-01" }, { auth: writerCreds }),
+      axios.post(
+        url,
+        { instrumentUuid: instrumentInfoUuid, eventType: "invalid", date: "2021-01-01" },
+        { auth: writerCreds },
+      ),
     ).rejects.toMatchObject(genResponse(400, { status: 400 }));
   });
 
   it("rejects invalid date", async () => {
     return expect(
-      axios.post(url, { instrumentInfoUuid, eventType: "maintenance", date: "not-a-date" }, { auth: writerCreds }),
+      axios.post(
+        url,
+        { instrumentUuid: instrumentInfoUuid, eventType: "maintenance", date: "not-a-date" },
+        { auth: writerCreds },
+      ),
     ).rejects.toMatchObject(genResponse(400, { status: 400 }));
   });
 
   it("rejects future date", async () => {
     return expect(
-      axios.post(url, { instrumentInfoUuid, eventType: "maintenance", date: "2099-01-01" }, { auth: writerCreds }),
+      axios.post(
+        url,
+        { instrumentUuid: instrumentInfoUuid, eventType: "maintenance", date: "2099-01-01" },
+        { auth: writerCreds },
+      ),
     ).rejects.toMatchObject(genResponse(400, { status: 400, errors: "date cannot be in the future" }));
   });
 
@@ -178,7 +192,7 @@ describe("POST /api/instrument-logs", () => {
     return expect(
       axios.post(
         url,
-        { instrumentInfoUuid, eventType: "maintenance", date: "2021-06-01", endDate: "2099-01-01" },
+        { instrumentUuid: instrumentInfoUuid, eventType: "maintenance", date: "2021-06-01", endDate: "2099-01-01" },
         { auth: writerCreds },
       ),
     ).rejects.toMatchObject(genResponse(400, { status: 400, errors: "endDate cannot be in the future" }));
@@ -188,7 +202,7 @@ describe("POST /api/instrument-logs", () => {
     return expect(
       axios.post(
         url,
-        { instrumentInfoUuid, eventType: "maintenance", date: "2021-06-01", endDate: "2021-05-01" },
+        { instrumentUuid: instrumentInfoUuid, eventType: "maintenance", date: "2021-06-01", endDate: "2021-05-01" },
         { auth: writerCreds },
       ),
     ).rejects.toMatchObject(genResponse(400, { status: 400, errors: "endDate cannot be before date" }));
@@ -196,19 +210,27 @@ describe("POST /api/instrument-logs", () => {
 
   it("requires notes for 'note' eventType", async () => {
     return expect(
-      axios.post(url, { instrumentInfoUuid, eventType: "note", date: "2021-01-01" }, { auth: writerCreds }),
+      axios.post(
+        url,
+        { instrumentUuid: instrumentInfoUuid, eventType: "note", date: "2021-01-01" },
+        { auth: writerCreds },
+      ),
     ).rejects.toMatchObject(genResponse(400, { status: 400, errors: "notes are required for this event type" }));
   });
 
   it("requires valid result for 'check' eventType", async () => {
     return expect(
-      axios.post(url, { instrumentInfoUuid, eventType: "check", date: "2021-01-01" }, { auth: writerCreds }),
+      axios.post(
+        url,
+        { instrumentUuid: instrumentInfoUuid, eventType: "check", date: "2021-01-01" },
+        { auth: writerCreds },
+      ),
     ).rejects.toMatchObject(genResponse(400, { status: 400 }));
   });
 
   it("creates a log entry", async () => {
     const body = {
-      instrumentInfoUuid,
+      instrumentUuid: instrumentInfoUuid,
       eventType: "maintenance",
       date: "2021-06-01",
       notes: "Routine maintenance",
@@ -226,7 +248,7 @@ describe("POST /api/instrument-logs", () => {
 
   it("creates a log entry with endDate", async () => {
     const body = {
-      instrumentInfoUuid,
+      instrumentUuid: instrumentInfoUuid,
       eventType: "maintenance",
       date: "2021-07-01",
       endDate: "2021-07-02",
@@ -238,7 +260,7 @@ describe("POST /api/instrument-logs", () => {
 
   it("creates a check entry with result", async () => {
     const body = {
-      instrumentInfoUuid,
+      instrumentUuid: instrumentInfoUuid,
       eventType: "check",
       date: "2021-08-01",
       result: "OK",
@@ -250,7 +272,7 @@ describe("POST /api/instrument-logs", () => {
 
   it("creates a note entry with required notes", async () => {
     const body = {
-      instrumentInfoUuid,
+      instrumentUuid: instrumentInfoUuid,
       eventType: "note",
       date: "2021-09-01",
       notes: "Important observation",
@@ -263,7 +285,7 @@ describe("POST /api/instrument-logs", () => {
 
   it("rejects duplicate log entry", async () => {
     const body = {
-      instrumentInfoUuid,
+      instrumentUuid: instrumentInfoUuid,
       eventType: "maintenance",
       date: "2021-06-01",
       notes: "Routine maintenance",
@@ -275,7 +297,7 @@ describe("POST /api/instrument-logs", () => {
 
   it("allows entry with different notes on same date", async () => {
     const body = {
-      instrumentInfoUuid,
+      instrumentUuid: instrumentInfoUuid,
       eventType: "maintenance",
       date: "2021-06-01",
       notes: "Different maintenance task",
@@ -287,7 +309,7 @@ describe("POST /api/instrument-logs", () => {
 
 describe("GET /api/instrument-logs (with data)", () => {
   it("returns created log entries sorted by date DESC", async () => {
-    const res = await axios.get(url, { params: { instrumentInfoUuid }, auth: writerCreds });
+    const res = await axios.get(url, { params: { instrumentUuid: instrumentInfoUuid }, auth: writerCreds });
     expect(res.data.length).toBe(6);
     expect(res.data[0].eventType).toBe("note");
     expect(res.data[1].eventType).toBe("check");
@@ -298,7 +320,7 @@ describe("GET /api/instrument-logs (with data)", () => {
   });
 
   it("includes createdBy info", async () => {
-    const res = await axios.get(url, { params: { instrumentInfoUuid }, auth: writerCreds });
+    const res = await axios.get(url, { params: { instrumentUuid: instrumentInfoUuid }, auth: writerCreds });
     expect(res.data[0].createdBy).toMatchObject({
       id: expect.any(Number),
       username: writerCreds.username,
@@ -310,7 +332,7 @@ describe("PUT /api/instrument-logs/:id", () => {
   let logId: number;
 
   beforeAll(async () => {
-    const res = await axios.get(url, { params: { instrumentInfoUuid }, auth: writerCreds });
+    const res = await axios.get(url, { params: { instrumentUuid: instrumentInfoUuid }, auth: writerCreds });
     logId = res.data[0].id;
   });
 
@@ -360,7 +382,7 @@ describe("DELETE /api/instrument-logs/:id", () => {
 
   beforeAll(async () => {
     const body = {
-      instrumentInfoUuid,
+      instrumentUuid: instrumentInfoUuid,
       eventType: "maintenance",
       date: "2021-10-01",
       notes: "To be deleted",
@@ -399,7 +421,7 @@ describe("POST /api/instrument-logs/:id/images", () => {
 
   beforeAll(async () => {
     const body = {
-      instrumentInfoUuid,
+      instrumentUuid: instrumentInfoUuid,
       eventType: "maintenance",
       date: "2021-11-01",
       notes: "Entry for image tests",
@@ -468,7 +490,7 @@ describe("POST /api/instrument-logs/:id/images", () => {
   });
 
   it("includes images in log listing", async () => {
-    const res = await axios.get(url, { params: { instrumentInfoUuid }, auth: writerCreds });
+    const res = await axios.get(url, { params: { instrumentUuid: instrumentInfoUuid }, auth: writerCreds });
     const entry = res.data.find((e: any) => e.id === logId);
     expect(entry.images).toHaveLength(2);
     expect(entry.images[0]).toMatchObject({
@@ -484,7 +506,7 @@ describe("GET /api/instrument-logs/:id/images/:imageId", () => {
   let imageId: number;
 
   beforeAll(async () => {
-    const res = await axios.get(url, { params: { instrumentInfoUuid }, auth: writerCreds });
+    const res = await axios.get(url, { params: { instrumentUuid: instrumentInfoUuid }, auth: writerCreds });
     const entry = res.data.find((e: any) => e.images.length > 0);
     logId = entry.id;
     imageId = entry.images[0].id;
@@ -532,7 +554,7 @@ describe("DELETE /api/instrument-logs/:id/images/:imageId", () => {
   let imageId: number;
 
   beforeAll(async () => {
-    const res = await axios.get(url, { params: { instrumentInfoUuid }, auth: writerCreds });
+    const res = await axios.get(url, { params: { instrumentUuid: instrumentInfoUuid }, auth: writerCreds });
     const entry = res.data.find((e: any) => e.images.length > 0);
     logId = entry.id;
     imageId = entry.images[0].id;
@@ -561,7 +583,7 @@ describe("DELETE /api/instrument-logs/:id/images/:imageId", () => {
   });
 
   it("confirms image is removed from listing", async () => {
-    const res = await axios.get(url, { params: { instrumentInfoUuid }, auth: writerCreds });
+    const res = await axios.get(url, { params: { instrumentUuid: instrumentInfoUuid }, auth: writerCreds });
     const entry = res.data.find((e: any) => e.id === logId);
     const ids = entry.images.map((img: any) => img.id);
     expect(ids).not.toContain(imageId);
@@ -571,7 +593,7 @@ describe("DELETE /api/instrument-logs/:id/images/:imageId", () => {
 describe("cascade delete: deleting log entry removes images", () => {
   it("deletes log entry with images and confirms images are removed", async () => {
     const body = {
-      instrumentInfoUuid,
+      instrumentUuid: instrumentInfoUuid,
       eventType: "maintenance",
       date: "2021-12-01",
     };
@@ -611,7 +633,7 @@ describe("POST /api/auth/token", () => {
 
     // Use the generated token with X-Auth-Token header
     const res = await axios.get(url, {
-      params: { instrumentInfoUuid },
+      params: { instrumentUuid: instrumentInfoUuid },
       headers: { "X-Auth-Token": tokenRes.data.token },
     });
     expect(res.status).toBe(200);
@@ -630,7 +652,7 @@ describe("X-Auth-Token header authentication", () => {
 
   it("authenticates GET via X-Auth-Token header", async () => {
     const res = await axios.get(url, {
-      params: { instrumentInfoUuid },
+      params: { instrumentUuid: instrumentInfoUuid },
       headers: { "X-Auth-Token": writerToken },
     });
     expect(res.status).toBe(200);
@@ -639,7 +661,7 @@ describe("X-Auth-Token header authentication", () => {
 
   it("authenticates POST via X-Auth-Token header", async () => {
     const body = {
-      instrumentInfoUuid,
+      instrumentUuid: instrumentInfoUuid,
       eventType: "maintenance",
       date: "2021-05-01",
       notes: "Token auth test",
@@ -653,7 +675,7 @@ describe("X-Auth-Token header authentication", () => {
   it("rejects invalid token", async () => {
     return expect(
       axios.get(url, {
-        params: { instrumentInfoUuid },
+        params: { instrumentUuid: instrumentInfoUuid },
         headers: { "X-Auth-Token": "0".repeat(64) },
       }),
     ).rejects.toMatchObject({ response: { status: 401 } });
@@ -666,7 +688,7 @@ describe("X-Auth-Token header authentication", () => {
 
     return expect(
       axios.get(url, {
-        params: { instrumentInfoUuid },
+        params: { instrumentUuid: instrumentInfoUuid },
         headers: { "X-Auth-Token": expiredToken },
       }),
     ).rejects.toMatchObject({ response: { status: 401 } });
