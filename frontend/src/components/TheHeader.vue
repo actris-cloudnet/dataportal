@@ -195,6 +195,7 @@ function clickEvent(event: MouseEvent) {
         <h3>API token</h3>
       </template>
       <template #body>
+        <p class="token-hint">Generate an API token for programmatic access to the instrument log API.</p>
         <p v-if="tokenError" class="error">{{ tokenError }}</p>
         <template v-else-if="apiToken">
           <p class="token-hint">
@@ -211,9 +212,6 @@ function clickEvent(event: MouseEvent) {
         </template>
         <template v-else-if="generating">
           <p>Generating token...</p>
-        </template>
-        <template v-else>
-          <p class="token-hint">Generate an API token for programmatic access to the instrument log API.</p>
         </template>
       </template>
       <template #footer>
