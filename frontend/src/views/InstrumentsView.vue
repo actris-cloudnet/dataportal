@@ -77,7 +77,7 @@ const myInstruments = computed(() => {
   const logPerms = loginStore.instrumentLogPermissions;
   if (logPerms.length === 0) return [];
   const isGlobal = logPerms.some((p) => p.instrumentInfoUuid === null);
-  if (isGlobal) return instruments.value.value;
+  if (isGlobal) return [];
   const uuids = new Set(logPerms.map((p) => p.instrumentInfoUuid));
   return instruments.value.value
     .map((site) => ({
