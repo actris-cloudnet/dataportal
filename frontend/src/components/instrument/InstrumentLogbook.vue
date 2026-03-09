@@ -159,6 +159,22 @@
         <BaseButton type="secondary" @click="cancelModal">Cancel</BaseButton>
       </template>
     </BaseModal>
+
+    <BaseModal :open="showDeleteModal" @submit="confirmDelete">
+      <template #header>
+        <h3>Delete logbook entry</h3>
+      </template>
+      <template #body>
+        <p>Are you sure you want to delete this logbook entry? This action cannot be undone.</p>
+        <p v-if="deleteError" class="error">{{ deleteError }}</p>
+      </template>
+      <template #footer>
+        <BaseButton type="danger" html-type="submit" :disabled="deleting">{{
+          deleting ? "Deleting…" : "Delete"
+        }}</BaseButton>
+        <BaseButton type="secondary" @click="cancelDelete">Cancel</BaseButton>
+      </template>
+    </BaseModal>
   </main>
 </template>
 
@@ -203,6 +219,10 @@ const pendingPreviews = ref<string[]>([]);
 const existingImages = ref<InstrumentLogImage[]>([]);
 const deletedImageIds = ref<number[]>([]);
 const uploadProgress = ref<string | null>(null);
+const showDeleteModal = ref(false);
+const deletingEntryId = ref<number | null>(null);
+const deleteError = ref<string | null>(null);
+const deleting = ref(false);
 
 const today = new Date().toISOString().slice(0, 10);
 
@@ -473,14 +493,31 @@ async function modifyEntry(entry: InstrumentLog) {
   showModal.value = true;
 }
 
-async function deleteEntry(id: number) {
-  if (!confirm("Delete this logbook entry?")) return;
+function deleteEntry(id: number) {
+  deletingEntryId.value = id;
+  deleteError.value = null;
+  showDeleteModal.value = true;
+}
+
+async function confirmDelete() {
+  if (!deletingEntryId.value || deleting.value) return;
+  deleting.value = true;
   try {
-    await axios.delete(`${backendUrl}instrument-logs/${id}`);
+    await axios.delete(`${backendUrl}instrument-logs/${deletingEntryId.value}`);
+    showDeleteModal.value = false;
+    deletingEntryId.value = null;
     await fetchEntries();
   } catch {
-    alert("Failed to delete entry.");
+    deleteError.value = "Failed to delete entry.";
+  } finally {
+    deleting.value = false;
   }
+}
+
+function cancelDelete() {
+  showDeleteModal.value = false;
+  deletingEntryId.value = null;
+  deleteError.value = null;
 }
 
 function openImage(logId: number, imageId: number) {
