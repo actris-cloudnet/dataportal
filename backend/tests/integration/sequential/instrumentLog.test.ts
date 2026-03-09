@@ -18,6 +18,11 @@ let imageRepo: Repository<InstrumentLogImage>;
 const url = `${backendPublicUrl}instrument-logs`;
 const instrumentInfoUuid = "c43e9f54-c94d-45f7-8596-223b1c2b14c0";
 let instrumentPid: string;
+
+const writerCreds = { username: "logwriter", password: "hunter2" };
+const readerCreds = { username: "logreader", password: "hunter2" };
+const nopermCreds = { username: "lognoperm", password: "hunter2" };
+
 async function createTestToken(user: UserAccount, expiresAt?: Date): Promise<string> {
   const tokenRepo = dataSource.getRepository(Token);
   const selector = randomBytes(16);
@@ -31,10 +36,6 @@ async function createTestToken(user: UserAccount, expiresAt?: Date): Promise<str
   });
   return selector.toString("hex") + verifier.toString("hex");
 }
-
-const writerCreds = { username: "logwriter", password: "hunter2" };
-const readerCreds = { username: "logreader", password: "hunter2" };
-const nopermCreds = { username: "lognoperm", password: "hunter2" };
 
 beforeAll(async () => {
   dataSource = await AppDataSource.initialize();
