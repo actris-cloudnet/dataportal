@@ -164,7 +164,7 @@ export class InstrumentLogRoutes {
     }
     const logs = await this.logRepo.find({
       where: { instrumentInfoUuid: uuid },
-      relations: { userAccount: true },
+      relations: { createdBy: true, updatedBy: true },
       order: { date: "DESC", createdAt: "DESC" },
     });
     if (logs.length === 0) return res.json([]);
@@ -178,13 +178,18 @@ export class InstrumentLogRoutes {
       list.push({ id: img.id, filename: img.filename, size: img.size });
       imagesByLogId.set(img.instrumentLogId, list);
     }
-    const safeEntries = logs.map(({ userAccount, ...rest }) => ({
-      ...rest,
-      images: imagesByLogId.get(rest.id) ?? [],
-      createdBy: userAccount
-        ? { id: userAccount.id, username: userAccount.username, fullName: userAccount.fullName }
-        : null,
-    }));
+    const formatUser = (user: UserAccount | null) =>
+      user ? { id: user.id, username: user.username, fullName: user.fullName } : null;
+    const safeEntries = logs.map(
+      ({ createdBy, updatedBy, createdById: _, updatedById: _u, instrumentInfoUuid, ...rest }) => ({
+        ...rest,
+        instrumentUuid: instrumentInfoUuid,
+        instrumentPid: instrumentInfo.pid,
+        images: imagesByLogId.get(rest.id) ?? [],
+        createdBy: formatUser(createdBy),
+        updatedBy: formatUser(updatedBy),
+      }),
+    );
     res.json(safeEntries);
   };
 
@@ -224,23 +229,25 @@ export class InstrumentLogRoutes {
     const log = this.logRepo.create({
       ...fields,
       instrumentInfo,
-      userAccount: req.user,
+      createdBy: req.user,
     });
     const saved = await this.logRepo.save(log);
+    const userInfo = req.user ? { id: req.user.id!, username: req.user.username, fullName: req.user.fullName } : null;
     res.status(201).json({
       id: saved.id,
-      instrumentInfoUuid: saved.instrumentInfoUuid,
+      instrumentUuid: saved.instrumentInfoUuid,
+      instrumentPid: instrumentInfo.pid,
       eventType: saved.eventType,
       date: saved.date,
       detail: saved.detail,
       result: saved.result,
       endDate: saved.endDate,
       notes: saved.notes,
-      userAccountId: saved.userAccountId,
       createdAt: saved.createdAt,
       updatedAt: saved.updatedAt,
       images: [],
-      createdBy: req.user ? { id: req.user.id!, username: req.user.username, fullName: req.user.fullName } : null,
+      createdBy: userInfo,
+      updatedBy: null,
     });
   };
 
@@ -259,6 +266,7 @@ export class InstrumentLogRoutes {
     log.date = date;
     log.endDate = endDate ?? null;
     log.notes = notes ?? null;
+    log.updatedBy = req.user ?? null;
     const saved = await this.logRepo.save(log);
     res.json(saved);
   };

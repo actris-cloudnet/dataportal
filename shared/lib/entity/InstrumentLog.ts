@@ -15,7 +15,7 @@ export interface InstrumentLogImage {
 
 export interface InstrumentLog {
   id: number;
-  instrumentInfoUuid: string;
+  instrumentUuid: string;
   eventType: InstrumentLogEventType;
   detail: string | null;
   result: string | null;
@@ -26,4 +26,5 @@ export interface InstrumentLog {
   createdAt: string; // ISO datetime
   updatedAt: string | null; // ISO datetime
   createdBy: { id: number; username: string | null; fullName: string | null } | null;
+  updatedBy: { id: number; username: string | null; fullName: string | null } | null;
 }

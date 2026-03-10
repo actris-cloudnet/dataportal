@@ -53,11 +53,18 @@ export class InstrumentLog {
   notes!: string | null;
 
   @Column({ nullable: true })
-  userAccountId!: number | null;
+  createdById!: number | null;
 
   @ManyToOne(() => UserAccount, { nullable: true, onDelete: "SET NULL" })
-  @JoinColumn({ name: "userAccountId" })
-  userAccount!: UserAccount | null;
+  @JoinColumn({ name: "createdById" })
+  createdBy!: UserAccount | null;
+
+  @Column({ nullable: true })
+  updatedById!: number | null;
+
+  @ManyToOne(() => UserAccount, { nullable: true, onDelete: "SET NULL" })
+  @JoinColumn({ name: "updatedById" })
+  updatedBy!: UserAccount | null;
 
   @Column()
   createdAt!: Date;

@@ -155,7 +155,7 @@ describe("POST /api/instrument-logs", () => {
       { auth: writerCreds },
     );
     expect(res.status).toBe(201);
-    expect(res.data.instrumentInfoUuid).toBe(instrumentInfoUuid);
+    expect(res.data.instrumentUuid).toBe(instrumentInfoUuid);
   });
 
   it("rejects invalid eventType", async () => {
@@ -239,7 +239,7 @@ describe("POST /api/instrument-logs", () => {
     expect(res.status).toBe(201);
     expect(res.data).toMatchObject({
       id: expect.any(Number),
-      instrumentInfoUuid,
+      instrumentUuid: instrumentInfoUuid,
       eventType: "maintenance",
       date: expect.stringContaining("2021-06-01"),
       notes: "Routine maintenance",
