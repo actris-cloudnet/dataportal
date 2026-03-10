@@ -318,10 +318,13 @@ function setEndNow() {
 }
 
 function formatTimestamp(entry: InstrumentLog): string {
+  let text = `Added on ${entry.createdAt.slice(0, 10)} ${entry.createdAt.slice(11, 16)} UTC`;
   if (entry.updatedAt) {
-    return `Updated on ${entry.updatedAt.slice(0, 10)} ${entry.updatedAt.slice(11, 16)} UTC`;
+    const updater = entry.updatedBy?.fullName ?? entry.updatedBy?.username;
+    text += `\nUpdated on ${entry.updatedAt.slice(0, 10)} ${entry.updatedAt.slice(11, 16)} UTC`;
+    if (updater) text += ` by ${updater}`;
   }
-  return `Added on ${entry.createdAt.slice(0, 10)} ${entry.createdAt.slice(11, 16)} UTC`;
+  return text;
 }
 
 function isInFuture(dateStr: string): boolean {
