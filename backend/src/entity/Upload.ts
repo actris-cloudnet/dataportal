@@ -96,7 +96,7 @@ export class InstrumentUpload extends Upload {
 @Entity()
 @Unique(["site", "measurementDate", "filename", "model"])
 export class ModelUpload extends Upload {
-  @ManyToOne((_) => Model, (model) => model.uploads, { nullable: false })
+  @ManyToOne((_) => Model, { nullable: false })
   model!: Model;
 
   constructor(args: UploadOptions, model: Model) {

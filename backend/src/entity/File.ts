@@ -135,7 +135,7 @@ export class RegularFile extends File {
 
 @Entity()
 export class ModelFile extends File {
-  @ManyToOne((_) => Model, (model) => model.files, { nullable: false })
+  @ManyToOne((_) => Model, { nullable: false })
   model!: Model;
 
   @OneToMany((_) => ModelVisualization, (viz) => viz.sourceFile)
