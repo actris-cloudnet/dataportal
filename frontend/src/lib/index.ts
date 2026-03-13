@@ -18,6 +18,9 @@ import lidarIcon from "@/assets/icons/lidar.png";
 import lwcIcon from "@/assets/icons/lwc.png";
 import modelIcon from "@/assets/icons/model.png";
 import mwrIcon from "@/assets/icons/mwr.png";
+import mwrL1cIcon from "@/assets/icons/mwr-l1c.png";
+import mwrSingleIcon from "@/assets/icons/mwr-single.png";
+import mwrMultiIcon from "@/assets/icons/mwr-multi.png";
 import radarIcon from "@/assets/icons/radar.png";
 import unknownIcon from "@/assets/icons/unknown.png";
 import weatherStationIcon from "@/assets/icons/weather-station.png";
@@ -27,6 +30,10 @@ import epsilonLidarIcon from "@/assets/icons/epsilon.svg";
 import rainRadarIcon from "@/assets/icons/rain-radar.svg";
 import rainGaugerIcon from "@/assets/icons/rain-gauge.png";
 import cprSimulationIcon from "@/assets/icons/earthcare.png";
+import testFailIcon from "@/assets/icons/test-fail.svg";
+import testWarningIcon from "@/assets/icons/test-warning.svg";
+import testInfoIcon from "@/assets/icons/test-info.svg";
+import testPassIcon from "@/assets/icons/test-pass.svg";
 
 import markerIconRed from "@/assets/markers/marker-icon-red.png";
 import markerIconBlue from "@/assets/markers/marker-icon-blue.png";
@@ -63,9 +70,9 @@ const productIcons: Record<string, string> = {
   "lwc": lwcIcon,
   "model": modelIcon,
   "mwr": mwrIcon,
-  "mwr-l1c": mwrIcon,
-  "mwr-single": mwrIcon,
-  "mwr-multi": mwrIcon,
+  "mwr-l1c": mwrL1cIcon,
+  "mwr-single": mwrSingleIcon,
+  "mwr-multi": mwrMultiIcon,
   "radar": radarIcon,
   "weather-station": weatherStationIcon,
   "doppler-lidar": dopplerLidarIcon,
@@ -146,11 +153,6 @@ export function compareValues(a: any, b: any): number {
   if (a > b) return 1;
   return 0;
 }
-
-import testFailIcon from "@/assets/icons/test-fail.svg";
-import testWarningIcon from "@/assets/icons/test-warning.svg";
-import testInfoIcon from "@/assets/icons/test-info.svg";
-import testPassIcon from "@/assets/icons/test-pass.svg";
 
 export function getQcIcon(errorLevel: string) {
   if (errorLevel === "error") {
