@@ -1,6 +1,6 @@
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryColumn } from "typeorm";
-import { ModelFile } from "./File";
 import { ModelCitation } from "./Citation";
+import { Site } from "./Site";
 
 @Entity()
 export class Model {
@@ -28,4 +28,8 @@ export class Model {
   @ManyToMany((_) => ModelCitation)
   @JoinTable()
   citations!: ModelCitation[];
+
+  @ManyToMany((_) => Site)
+  @JoinTable()
+  sites!: Site[];
 }

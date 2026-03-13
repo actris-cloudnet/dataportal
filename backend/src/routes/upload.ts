@@ -240,7 +240,7 @@ export class UploadRoutes {
           })
         : this.modelUploadRepo.findOne({
             where: { checksum },
-            relations: { site: true, model: true },
+            relations: { site: true, model: { sites: true } },
           }));
       if (!upload) return next({ status: 400, errors: "No metadata matches this hash" });
       if (upload instanceof InstrumentUpload) {
@@ -310,29 +310,32 @@ export class UploadRoutes {
   }
 
   private async publishModelTasks(upload: ModelUpload) {
-    let models = await this.modelRepo.find({ where: { sourceModelId: upload.model.id } });
+    let models = await this.modelRepo.findBy({ sourceModelId: upload.model.id });
     if (models.length === 0) {
       models = [upload.model];
     }
-    for (const model of models) {
-      let startDateOffset = 0;
-      let endDateOffset = 0;
-      if (model.forecastStart != null && model.forecastEnd != null) {
-        const startHour = model.forecastStart;
-        startDateOffset = Math.floor(startHour / 24);
-        if (startHour % 24 == 0) startDateOffset -= 1;
+    const sites = upload.model.sites.length === 0 ? [upload.site] : upload.model.sites;
+    for (const site of sites) {
+      for (const model of models) {
+        let startDateOffset = 0;
+        let endDateOffset = 0;
+        if (model.forecastStart != null && model.forecastEnd != null) {
+          const startHour = model.forecastStart;
+          startDateOffset = Math.floor(startHour / 24);
+          if (startHour % 24 == 0) startDateOffset -= 1;
 
-        const endHour = 24 + model.forecastEnd;
-        endDateOffset = Math.floor(endHour / 24);
-        if (endHour % 24 === 0) endDateOffset -= 1;
-      }
-      for (let dateOffset = startDateOffset; dateOffset <= endDateOffset; dateOffset++) {
-        const adjustedDate = getAdjustedDate(upload.measurementDate, dateOffset);
-        const adjustedUpload = this.modelUploadRepo.create({ ...upload, measurementDate: adjustedDate });
-        const task = this.makeTask(adjustedUpload);
-        task.productId = "model";
-        task.model = model;
-        await this.queueService.publish(task);
+          const endHour = 24 + model.forecastEnd;
+          endDateOffset = Math.floor(endHour / 24);
+          if (endHour % 24 === 0) endDateOffset -= 1;
+        }
+        for (let dateOffset = startDateOffset; dateOffset <= endDateOffset; dateOffset++) {
+          const adjustedDate = getAdjustedDate(upload.measurementDate, dateOffset);
+          const adjustedUpload = this.modelUploadRepo.create({ ...upload, site, measurementDate: adjustedDate });
+          const task = this.makeTask(adjustedUpload);
+          task.productId = "model";
+          task.model = model;
+          await this.queueService.publish(task);
+        }
       }
     }
   }
