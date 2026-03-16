@@ -1,4 +1,5 @@
 import { RequestHandler, Response, Request } from "express";
+import * as passport from "passport";
 import { RequestErrorArray } from "../entity/RequestError";
 import validator from "validator";
 import { Site } from "../entity/Site";
@@ -23,6 +24,13 @@ export class Middleware {
   private productRepo: Repository<Product>;
   private monitoringFileRepo: Repository<MonitoringFile>;
   private monitoringProductVariableRepo: Repository<MonitoringProductVariable>;
+
+  optionalAuth: RequestHandler = (req, res, next) => {
+    passport.authenticate(["cookie", "basic"], { session: false }, (_err: any, user: any) => {
+      if (user) req.user = user;
+      next();
+    })(req, res, next);
+  };
 
   validateUuidParam: RequestHandler = (req, _res, next) => {
     const addDashesToUuid = (uuid: string) =>

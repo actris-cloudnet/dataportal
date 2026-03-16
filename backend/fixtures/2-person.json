@@ -1,7 +1,14 @@
 [
   {
-    "firstname": "Benjamin",
-    "surname": "Bucharinen",
-    "citations": [{ "id": "bucharest_test" }]
+    "firstName": "Benjamin",
+    "lastName": "Bucharinen"
+  },
+  {
+    "firstName": "James Tiberius",
+    "lastName": "Kirk"
+  },
+  {
+    "firstName": "Jean-Luc",
+    "lastName": "Picard"
   }
 ]

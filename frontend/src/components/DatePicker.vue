@@ -13,6 +13,7 @@
         :disabled="disabled"
       />
       <v-date-picker
+        :key="pickerKey"
         locale="en-gb"
         v-model="dateValue"
         timezone="UTC"
@@ -22,6 +23,7 @@
         :max-date="end"
         :is-required="true"
         :disable="disabled"
+        :from-page="fromPage"
       >
         <template v-slot="{ togglePopover }">
           <button type="button" class="calendar" @click="togglePopover">
@@ -80,11 +82,16 @@ function validateDate(value: string) {
 }
 
 const dateString = ref("");
+const pickerKey = ref(0);
 
 watchEffect(() => {
   if (model.value) {
     validateDate(model.value);
     dateString.value = model.value;
+  } else {
+    hasError.value = false;
+    dateString.value = "";
+    pickerKey.value++;
   }
 });
 
@@ -103,11 +110,18 @@ watch(
 
 const dateValue = computed({
   get() {
-    return new Date(model.value!);
+    return model.value ? new Date(model.value) : null;
   },
   set(value) {
-    model.value = dateToString(value);
+    if (value) {
+      model.value = dateToString(value);
+    }
   },
+});
+
+const fromPage = computed(() => {
+  const d = model.value ? new Date(model.value) : new Date();
+  return { month: d.getMonth() + 1, year: d.getFullYear() };
 });
 </script>
 

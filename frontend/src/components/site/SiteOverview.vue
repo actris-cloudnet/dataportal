@@ -75,13 +75,13 @@
               <dt>Altitude</dt>
               <dd>{{ site.altitude }} <abbr title="meters above mean sea level">m a.s.l.</abbr></dd>
             </template>
-            <template v-if="site.persons.length > 0">
+            <template v-if="site.contacts.length > 0">
               <dt>Contact</dt>
               <dd>
                 <ul>
-                  <li v-for="person in site.persons" :key="person.id">
-                    {{ person.firstname }} {{ person.surname }}
-                    <a :href="'https://orcid.org/' + person.orcid" target="_blank" v-if="person.orcid">
+                  <li v-for="contact in site.contacts" :key="contact.id">
+                    {{ contact.person.firstName }} {{ contact.person.lastName }}
+                    <a :href="'https://orcid.org/' + contact.person.orcid" target="_blank" v-if="contact.person.orcid">
                       <img :src="orcidLogo" width="16" height="16" alt="ORCID" />
                     </a>
                   </li>

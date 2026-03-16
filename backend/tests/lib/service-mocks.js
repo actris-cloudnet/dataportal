@@ -71,20 +71,3 @@ labellingApp.get("/api/facilities/:id/contacts", (req, res, _next) => {
   ]);
 });
 labellingApp.listen(5803, () => console.log("Labelling mock running"));
-
-const instrumentdbApp = express();
-instrumentdbApp.get("/instrument/:uuid/pi", (req, res, _next) => {
-  let pis = [];
-  if (req.params.uuid === "c43e9f54-c94d-45f7-8596-223b1c2b14c0") {
-    // bucharest-chm15k
-    pis = [{ first_name: "Jean-Luc", last_name: "Picard", orcid_id: null, start_date: "2019-01-01", end_date: null }];
-  } else if (req.params.uuid === "0b3a7fa0-4812-4964-af23-1162e8b3a665") {
-    // bucharest-mira
-    pis = [
-      { first_name: "Christopher", last_name: "Pike", orcid_id: null, start_date: null, end_date: "2018-12-31" },
-      { first_name: "James Tiberius", last_name: "Kirk", orcid_id: null, start_date: "2019-01-01", end_date: null },
-    ];
-  }
-  res.send(pis);
-});
-instrumentdbApp.listen(5805, () => console.log("InstrumentDB mock running"));

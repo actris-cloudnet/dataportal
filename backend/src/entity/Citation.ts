@@ -1,7 +1,6 @@
-import { Column, Entity, ManyToMany, PrimaryColumn, JoinTable } from "typeorm";
+import { Column, Entity, ManyToMany, PrimaryColumn } from "typeorm";
 import { Site } from "./Site";
 import { Model } from "./Model";
-import { Person } from "./Person";
 
 @Entity()
 export class Citation {
@@ -16,10 +15,6 @@ export class Citation {
 export class RegularCitation extends Citation {
   @ManyToMany((_) => Site)
   sites!: Site[];
-
-  @ManyToMany((_) => Person, (person) => person.citations)
-  @JoinTable()
-  persons!: Person[];
 }
 
 @Entity()

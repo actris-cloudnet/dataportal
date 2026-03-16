@@ -21,6 +21,7 @@ PERMISSIONS = [
     "canLogin",
     "canReadLogs",
     "canWriteLogs",
+    "canManageContacts",
 ]
 LOG_PERMISSIONS = ["canReadLogs", "canWriteLogs"]
 

@@ -1,10 +1,20 @@
 import { RequestHandler } from "express";
 import { DataSource, Repository } from "typeorm";
-import { hideTestDataFromNormalUsers, toArray } from "../lib";
+import {
+  hideTestDataFromNormalUsers,
+  toArray,
+  validateDateRange,
+  toContactResponse,
+  resolveOrCreatePerson,
+  userHasPermission,
+} from "../lib";
 import { Site, SiteType } from "../entity/Site";
+import { SiteContact } from "../entity/SiteContact";
 import { SiteLocation } from "../entity/SiteLocation";
 import { ModelFile, RegularFile } from "../entity/File";
 import { SearchFile } from "../entity/SearchFile";
+import { Person } from "../entity/Person";
+import { PermissionType } from "../entity/Permission";
 import axios from "axios";
 import env from "../lib/env";
 
@@ -12,6 +22,8 @@ export class SiteRoutes {
   constructor(dataSource: DataSource) {
     this.dataSource = dataSource;
     this.siteRepo = dataSource.getRepository(Site);
+    this.contactRepo = dataSource.getRepository(SiteContact);
+    this.personRepo = dataSource.getRepository(Person);
     this.regularFileRepo = dataSource.getRepository(RegularFile);
     this.modelFileRepo = dataSource.getRepository(ModelFile);
     this.siteLocationRepo = dataSource.getRepository(SiteLocation);
@@ -22,6 +34,8 @@ export class SiteRoutes {
 
   readonly dataSource: DataSource;
   readonly siteRepo: Repository<Site>;
+  readonly contactRepo: Repository<SiteContact>;
+  readonly personRepo: Repository<Person>;
   readonly regularFileRepo: Repository<RegularFile>;
   readonly modelFileRepo: Repository<ModelFile>;
   readonly siteLocationRepo: Repository<SiteLocation>;
@@ -31,15 +45,23 @@ export class SiteRoutes {
   readonly wigosCache: Record<string, any>;
 
   site: RequestHandler = async (req, res, next) => {
-    const qb = this.siteRepo
-      .createQueryBuilder("site")
-      .leftJoinAndSelect("site.persons", "person")
-      .where("site.id = :siteId", { siteId: req.params.siteId });
+    const qb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteId", { siteId: req.params.siteId });
     const site = await hideTestDataFromNormalUsers(qb, req).getOne();
     if (!site) {
       return next({ status: 404, errors: ["No sites match this id"] });
     }
-    res.send(site);
+    const today = new Date().toISOString().slice(0, 10);
+    const includeEmail =
+      !!req.user && (await userHasPermission(this.dataSource, req.user.id!, PermissionType.canManageContacts));
+    const contactQb = this.contactRepo
+      .createQueryBuilder("c")
+      .innerJoinAndSelect("c.person", "p")
+      .where("c.siteId = :siteId", { siteId: site.id })
+      .andWhere("(c.startDate IS NULL OR c.startDate <= :today)", { today })
+      .andWhere("(c.endDate IS NULL OR c.endDate >= :today)", { today });
+    if (includeEmail) contactQb.addSelect("p.email");
+    const contacts = await contactQb.getMany();
+    res.send({ ...site, contacts: contacts.map((c) => toContactResponse(c, c.person, includeEmail)) });
   };
 
   links: RequestHandler = async (req, res, next) => {
@@ -224,4 +246,83 @@ export class SiteRoutes {
       return null;
     }
   }
+
+  listContacts: RequestHandler = async (req, res, next) => {
+    const site = await this.siteRepo.findOneBy({ id: req.params.siteId });
+    if (!site) {
+      return next({ status: 404, errors: ["No sites match this id"] });
+    }
+    const includeEmail =
+      !!req.user && (await userHasPermission(this.dataSource, req.user.id!, PermissionType.canManageContacts));
+    const contactQb = this.contactRepo
+      .createQueryBuilder("c")
+      .innerJoinAndSelect("c.person", "p")
+      .where("c.siteId = :siteId", { siteId: site.id })
+      .orderBy("c.startDate", "DESC", "NULLS FIRST");
+    if (includeEmail) contactQb.addSelect("p.email");
+    const contacts = await contactQb.getMany();
+    res.send(contacts.map((c) => toContactResponse(c, c.person, includeEmail)));
+  };
+
+  postContact: RequestHandler = async (req, res, next) => {
+    const site = await this.siteRepo.findOneBy({ id: req.params.siteId });
+    if (!site) {
+      return next({ status: 404, errors: ["No sites match this id"] });
+    }
+    const { firstName, lastName, orcid, email, startDate, endDate, personId } = req.body;
+    const dateError = validateDateRange(startDate, endDate);
+    if (dateError) return next({ status: 400, errors: [dateError] });
+
+    const personResult = await resolveOrCreatePerson(this.personRepo, { personId, firstName, lastName, orcid, email });
+    if ("error" in personResult) return next({ status: personResult.status, errors: [personResult.error] });
+    const person = personResult;
+
+    const contact = this.contactRepo.create({
+      siteId: site.id,
+      personId: person.id,
+      startDate: startDate || null,
+      endDate: endDate || null,
+    });
+    const saved = await this.contactRepo.save(contact);
+    res.status(201).json(toContactResponse(saved, person, true));
+  };
+
+  putContact: RequestHandler = async (req, res, next) => {
+    const id = parseInt(req.params.contactId, 10);
+    if (isNaN(id)) {
+      return next({ status: 400, errors: ["Invalid contact id"] });
+    }
+    const contact = await this.contactRepo
+      .createQueryBuilder("c")
+      .innerJoinAndSelect("c.person", "p")
+      .addSelect("p.email")
+      .where("c.id = :id", { id })
+      .getOne();
+    if (!contact || contact.siteId !== req.params.siteId) {
+      return next({ status: 404, errors: ["Contact not found"] });
+    }
+    const { startDate, endDate, email } = req.body;
+    const dateError = validateDateRange(startDate, endDate);
+    if (dateError) return next({ status: 400, errors: [dateError] });
+    contact.startDate = startDate || null;
+    contact.endDate = endDate || null;
+    if (email !== undefined) {
+      contact.person.email = email?.trim() || undefined;
+      await this.personRepo.save(contact.person);
+    }
+    const saved = await this.contactRepo.save(contact);
+    res.json(toContactResponse(saved, contact.person, true));
+  };
+
+  deleteContact: RequestHandler = async (req, res, next) => {
+    const id = parseInt(req.params.contactId, 10);
+    if (isNaN(id)) {
+      return next({ status: 400, errors: ["Invalid contact id"] });
+    }
+    const result = await this.contactRepo.delete({ id, siteId: req.params.siteId });
+    if (!result.affected) {
+      return next({ status: 404, errors: ["Contact not found"] });
+    }
+    res.sendStatus(204);
+  };
 }

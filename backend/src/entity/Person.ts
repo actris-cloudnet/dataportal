@@ -1,7 +1,4 @@
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
-
-import { Site } from "./Site";
-import { RegularCitation } from "./Citation";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Person {
@@ -9,20 +6,14 @@ export class Person {
   id?: number;
 
   @Column()
-  firstname!: string;
+  firstName!: string;
 
   @Column()
-  surname!: string;
+  lastName!: string;
 
   @Column({ unique: true, nullable: true })
   orcid?: string;
 
   @Column({ nullable: true, select: false })
   email?: string;
-
-  @ManyToMany((_) => Site, (site) => site.persons)
-  sites?: Site[];
-
-  @ManyToMany((_) => RegularCitation, (regularCitation) => regularCitation.persons)
-  citations?: RegularCitation[];
 }

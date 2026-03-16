@@ -1,9 +1,19 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToMany, JoinTable } from "typeorm";
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToMany,
+  JoinTable,
+  ManyToOne,
+  JoinColumn,
+  RelationId,
+} from "typeorm";
 import { timingSafeEqual } from "node:crypto";
 const md5 = require("apache-md5"); // eslint-disable-line @typescript-eslint/no-require-imports
 
 import { Permission } from "./Permission";
 import { InstrumentLogPermission } from "./InstrumentLogPermission";
+import { Person } from "./Person";
 
 @Entity()
 export class UserAccount {
@@ -24,6 +34,13 @@ export class UserAccount {
 
   @Column({ type: "varchar", nullable: true, unique: true })
   orcidId!: string | null;
+
+  @ManyToOne(() => Person, { nullable: true, onDelete: "SET NULL" })
+  @JoinColumn({ name: "person_id" })
+  person!: Person | null;
+
+  @RelationId((user: UserAccount) => user.person)
+  personId!: number | null;
 
   @ManyToMany(() => Permission, (permission) => permission.userAccounts)
   @JoinTable()
