@@ -8,7 +8,7 @@
     </div>
 
     <div v-if="state === 'loading'">Loading...</div>
-    <div v-else-if="state === 'error'" class="error">Failed to load contacts.</div>
+    <div v-else-if="state === 'error'" class="load-error">Failed to load contacts.</div>
     <template v-else>
       <table v-if="contacts.length > 0" class="contacts-table">
         <thead>
@@ -98,20 +98,40 @@
         <div class="form-group">
           <label>Start date (optional)</label>
           <div class="date-with-clear">
-            <DatePicker name="start-date" v-model="form.startDate" :end="today" />
-            <BaseButton v-if="form.startDate" type="secondary" size="small" @click="form.startDate = null"
+            <DatePicker name="start-date" v-model="form.startDate" :end="today" @error="startDateError = $event" />
+            <BaseButton
+              v-if="form.startDate || (startDateError && !startDateError.isValidDateString)"
+              type="secondary"
+              size="small"
+              @click="clearStartDate"
               >Clear</BaseButton
             >
           </div>
+          <span v-if="startDateError && !startDateError.isValidDateString" class="date-error"
+            >Invalid date. Use format <i>YYYY-MM-DD</i>.</span
+          >
+          <span v-else-if="startDateError && !startDateError.isNotInFuture" class="date-error"
+            >Date cannot be in the future.</span
+          >
         </div>
         <div class="form-group">
           <label>End date (optional)</label>
           <div class="date-with-clear">
-            <DatePicker name="end-date" v-model="form.endDate" :end="today" />
-            <BaseButton v-if="form.endDate" type="secondary" size="small" @click="form.endDate = null"
+            <DatePicker name="end-date" v-model="form.endDate" :end="today" @error="endDateError = $event" />
+            <BaseButton
+              v-if="form.endDate || (endDateError && !endDateError.isValidDateString)"
+              type="secondary"
+              size="small"
+              @click="clearEndDate"
               >Clear</BaseButton
             >
           </div>
+          <span v-if="endDateError && !endDateError.isValidDateString" class="date-error"
+            >Invalid date. Use format <i>YYYY-MM-DD</i>.</span
+          >
+          <span v-else-if="endDateError && !endDateError.isNotInFuture" class="date-error"
+            >Date cannot be in the future.</span
+          >
         </div>
         <div v-if="formError" class="form-error">{{ formError }}</div>
       </template>
@@ -132,7 +152,7 @@ import type { Contact } from "@shared/entity/Contact";
 import type { PermissionType } from "@shared/entity/Permission";
 import BaseButton from "@/components/BaseButton.vue";
 import BaseModal from "@/components/BaseModal.vue";
-import DatePicker from "@/components/DatePicker.vue";
+import DatePicker, { type DateErrors } from "@/components/DatePicker.vue";
 
 const props = defineProps<{
   apiPath: string;
@@ -157,6 +177,9 @@ const form = ref({
 });
 
 const canManage = computed(() => hasPermission(props.permissionKey).value);
+
+const startDateError = ref<DateErrors | null>(null);
+const endDateError = ref<DateErrors | null>(null);
 
 const orcidStatus = ref<"idle" | "loading" | "found" | "not-found">("idle");
 const ORCID_RE = /^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/;
@@ -215,10 +238,22 @@ async function fetchContacts() {
   }
 }
 
+function clearStartDate() {
+  form.value.startDate = null;
+  startDateError.value = null;
+}
+
+function clearEndDate() {
+  form.value.endDate = null;
+  endDateError.value = null;
+}
+
 function openAddModal() {
   editingContactId.value = null;
   form.value = { firstName: "", lastName: "", orcid: "", email: "", startDate: null, endDate: null };
   formError.value = null;
+  startDateError.value = null;
+  endDateError.value = null;
   orcidStatus.value = "idle";
   showModal.value = true;
 }
@@ -234,6 +269,8 @@ function openEditModal(contact: Contact) {
     endDate: contact.endDate ?? null,
   };
   formError.value = null;
+  startDateError.value = null;
+  endDateError.value = null;
   showModal.value = true;
 }
 
@@ -353,7 +390,7 @@ function cancelDelete() {
   margin-top: 2rem;
 }
 
-.error {
+.load-error {
   color: #c00;
   margin-top: 1rem;
 }
@@ -384,6 +421,11 @@ function cancelDelete() {
 
 .form-group input::placeholder {
   color: #999;
+}
+
+.date-error {
+  color: #c00;
+  font-size: 0.85rem;
 }
 
 .form-error {
