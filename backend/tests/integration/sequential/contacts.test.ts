@@ -158,6 +158,47 @@ describe("POST /api/sites/:siteId/contacts", () => {
     await contactRepo.delete({ id: res.data.id });
   });
 
+  it("reuses existing person when firstName, lastName and email match (no orcid)", async () => {
+    const res1 = await axios.post(
+      siteUrl,
+      { firstName: "Dedup", lastName: "Test", email: "dedup@example.com", startDate: "2024-01-01" },
+      { auth: managerCreds },
+    );
+    expect(res1.status).toBe(201);
+    const personId1 = res1.data.person.id;
+
+    const res2 = await axios.post(
+      siteUrl,
+      { firstName: "Dedup", lastName: "Test", email: "dedup@example.com", startDate: "2025-01-01" },
+      { auth: managerCreds },
+    );
+    expect(res2.status).toBe(201);
+    expect(res2.data.person.id).toBe(personId1);
+
+    await contactRepo.delete({ id: res1.data.id });
+    await contactRepo.delete({ id: res2.data.id });
+    await personRepo.delete({ id: personId1 });
+  });
+
+  it("creates separate persons when names match but emails differ", async () => {
+    const res1 = await axios.post(
+      siteUrl,
+      { firstName: "Same", lastName: "Name", email: "email1@example.com" },
+      { auth: managerCreds },
+    );
+    const res2 = await axios.post(
+      siteUrl,
+      { firstName: "Same", lastName: "Name", email: "email2@example.com" },
+      { auth: managerCreds },
+    );
+    const persons = await personRepo.findBy({ firstName: "Same", lastName: "Name" });
+    expect(persons).toHaveLength(2);
+
+    await contactRepo.delete({ id: res1.data.id });
+    await contactRepo.delete({ id: res2.data.id });
+    for (const p of persons) await personRepo.delete({ id: p.id! });
+  });
+
   it("rejects invalid date range", async () => {
     await expect(
       axios.post(
