@@ -112,6 +112,19 @@ export async function resolveOrCreatePerson(
       }
       return existing;
     }
+  } else if (body.email?.trim()) {
+    const existing = await personRepo
+      .createQueryBuilder("person")
+      .addSelect("person.email")
+      .where("person.firstName = :firstName AND person.lastName = :lastName AND person.email = :email", {
+        firstName: body.firstName.trim(),
+        lastName: body.lastName.trim(),
+        email: body.email.trim(),
+      })
+      .getOne();
+    if (existing) {
+      return existing;
+    }
   }
   const person = personRepo.create({
     firstName: body.firstName.trim(),
