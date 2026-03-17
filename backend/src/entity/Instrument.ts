@@ -1,7 +1,8 @@
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 import { Product } from "./Product";
 import { MonitoringProduct } from "./MonitoringProduct";
 import { Site } from "./Site";
+import { InstrumentContact } from "./InstrumentContact";
 
 export enum InstrumentType {
   RADAR = "radar",
@@ -71,6 +72,9 @@ export class InstrumentInfo {
 
   @Column({ type: "text", nullable: true })
   serialNumber!: string | null;
+
+  @OneToMany(() => InstrumentContact, (contact) => contact.instrumentInfo)
+  contacts!: InstrumentContact[];
 }
 
 @Entity()

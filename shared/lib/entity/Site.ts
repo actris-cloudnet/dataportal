@@ -1,4 +1,4 @@
-import type { Person } from "./Person";
+import type { Contact } from "./Contact";
 
 export type SiteType =
   | "cloudnet"
@@ -33,9 +33,11 @@ export interface Site {
   country: string | null;
   countryCode: string | null;
   countrySubdivisionCode: string | null;
-  persons: Person[];
+  contacts: Contact[];
   status: "cloudnet" | "active" | "inactive";
 }
+
+export type { Contact as SiteContact } from "./Contact";
 
 export interface SiteLinks {
   actris: SiteLink<number> | null;

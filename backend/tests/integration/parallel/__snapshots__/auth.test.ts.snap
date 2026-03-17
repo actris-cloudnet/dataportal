@@ -43,7 +43,12 @@ exports[`GET /auth/login returns admin permissions 1`] = `
       "id": 10,
       "permission": "canLogin",
     },
+    {
+      "id": 11,
+      "permission": "canManageContacts",
+    },
   ],
+  "personId": null,
   "username": "admin",
 }
 `;
@@ -91,7 +96,12 @@ exports[`GET /auth/me returns current user with cookie from login 1`] = `
       "id": 10,
       "permission": "canLogin",
     },
+    {
+      "id": 11,
+      "permission": "canManageContacts",
+    },
   ],
+  "personId": null,
   "username": "admin",
 }
 `;
@@ -139,7 +149,12 @@ exports[`GET /auth/me returns current user with new cookie 1`] = `
       "id": 10,
       "permission": "canLogin",
     },
+    {
+      "id": 11,
+      "permission": "canManageContacts",
+    },
   ],
+  "personId": null,
   "username": "admin",
 }
 `;

@@ -6,6 +6,7 @@ import { UserAccount } from "../entity/UserAccount";
 import { PermissionType } from "../entity/Permission";
 import { Site } from "../entity/Site";
 import { Model } from "../entity/Model";
+import { Person } from "../entity/Person";
 import env from "./env";
 import { hashVerifier, Token } from "../entity/Token";
 
@@ -15,10 +16,12 @@ const SESSION_TOKEN_LIFETIME_MS = 365 * 24 * 60 * 60 * 1000;
 export class Authenticator {
   private userRepo: Repository<UserAccount>;
   private tokenRepo: Repository<Token>;
+  private personRepo: Repository<Person>;
 
   constructor(dataSource: DataSource) {
     this.userRepo = dataSource.getRepository(UserAccount);
     this.tokenRepo = dataSource.getRepository(Token);
+    this.personRepo = dataSource.getRepository(Person);
   }
 
   async basicLogin(username: string, password: string) {
@@ -52,6 +55,12 @@ export class Authenticator {
     const user = await this.userRepo.findOneBy({ orcidId });
     if (user) {
       user.fullName = fullName;
+      if (!user.personId) {
+        const person = await this.personRepo.findOneBy({ orcid: orcidId });
+        if (person) {
+          user.person = person;
+        }
+      }
       await this.userRepo.save(user);
     } else {
       // Allow only existing users for now.

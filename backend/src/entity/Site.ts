@@ -1,7 +1,7 @@
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn } from "typeorm";
 import { RegularCitation } from "./Citation";
 import { Permission } from "./Permission";
-import { Person } from "./Person";
+import { SiteContact } from "./SiteContact";
 import { SiteLocation } from "./SiteLocation";
 
 export enum SiteType {
@@ -63,16 +63,15 @@ export class Site {
   @Column({ type: "varchar", length: 6, nullable: true })
   countrySubdivisionCode!: string | null;
 
-  @ManyToMany((_) => Person, (person) => person.sites)
-  @JoinTable()
-  persons!: Person[];
-
   @ManyToMany((_) => RegularCitation)
   @JoinTable()
   citations!: RegularCitation[];
 
   @OneToMany((_) => Permission, (permission) => permission.site)
   permissions!: Permission[];
+
+  @OneToMany((_) => SiteContact, (contact) => contact.site)
+  contacts!: SiteContact[];
 
   @OneToMany((_) => SiteLocation, (location) => location.site)
   locations!: SiteLocation[];

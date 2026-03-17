@@ -24,7 +24,7 @@ export class ReferenceRoutes {
       this.collectionRepo.findOneByOrFail({ uuid: req.params.uuid }),
       this.fileRepo.findOneOrFail({
         where: { uuid: req.params.uuid },
-        relations: { site: { citations: { persons: true } }, product: true },
+        relations: { site: { citations: true }, product: true },
       }),
       this.modelRepo.findOneOrFail({
         where: { uuid: req.params.uuid },

@@ -1,4 +1,4 @@
-import { FindOperator, Repository } from "typeorm";
+import { DataSource, FindOperator, Repository } from "typeorm";
 import { basename } from "path";
 import { NextFunction, Request, Response } from "express";
 import { ModelFile, RegularFile } from "../entity/File";
@@ -14,6 +14,9 @@ import maxmind, { CountryResponse, OpenOpts, Reader } from "maxmind";
 import { randomBytes } from "crypto";
 import { Collection } from "../entity/Collection";
 import { InstrumentInfo } from "../entity/Instrument";
+import { Person } from "../entity/Person";
+import { UserAccount } from "../entity/UserAccount";
+import { PermissionType } from "../entity/Permission";
 
 export const stringify = (obj: any): string => JSON.stringify(obj, null, 2);
 
@@ -55,6 +58,83 @@ export const tomorrow = () => {
   tomorrow.setDate(tomorrow.getDate() + 1);
   return tomorrow;
 };
+
+export function validateDateRange(startDate: unknown, endDate: unknown): string | null {
+  if (startDate && !isValidDate(startDate)) return "Start date must be YYYY-MM-DD";
+  if (endDate && !isValidDate(endDate)) return "End date must be YYYY-MM-DD";
+  if (startDate && endDate && (endDate as string) < (startDate as string))
+    return "End date must not be before start date";
+  return null;
+}
+
+export function toContactResponse(
+  contact: { id: number; startDate: string | null; endDate: string | null },
+  person: Person,
+  includeEmail = false,
+) {
+  const personData: { firstName: string; lastName: string; orcid: string | null; email?: string | null } = {
+    firstName: person.firstName,
+    lastName: person.lastName,
+    orcid: person.orcid ?? null,
+  };
+  if (includeEmail) {
+    personData.email = person.email ?? null;
+  }
+  return {
+    id: contact.id,
+    person: personData,
+    startDate: contact.startDate,
+    endDate: contact.endDate,
+  };
+}
+
+export async function resolveOrCreatePerson(
+  personRepo: Repository<Person>,
+  body: { personId?: number; firstName?: string; lastName?: string; orcid?: string; email?: string },
+): Promise<Person | { error: string; status: number }> {
+  if (body.personId) {
+    const person = await personRepo.findOneBy({ id: body.personId });
+    if (!person) return { error: "Person not found", status: 404 };
+    return person;
+  }
+  if (!body.firstName?.trim() || !body.lastName?.trim()) {
+    return { error: "firstName and lastName are required when personId is not provided", status: 400 };
+  }
+  if (body.orcid) {
+    const existing = await personRepo.findOneBy({ orcid: body.orcid });
+    if (existing) {
+      const namesDiffer = existing.firstName !== body.firstName.trim() || existing.lastName !== body.lastName.trim();
+      if (namesDiffer) {
+        return {
+          error: `A person with this ORCID already exists as "${existing.firstName} ${existing.lastName}". Use that name or omit firstName/lastName.`,
+          status: 409,
+        };
+      }
+      return existing;
+    }
+  }
+  const person = personRepo.create({
+    firstName: body.firstName.trim(),
+    lastName: body.lastName.trim(),
+    orcid: body.orcid || undefined,
+    email: body.email?.trim() || undefined,
+  });
+  return personRepo.save(person);
+}
+
+export async function userHasPermission(
+  dataSource: DataSource,
+  userId: number,
+  permission: PermissionType,
+): Promise<boolean> {
+  return dataSource
+    .getRepository(UserAccount)
+    .createQueryBuilder("u")
+    .innerJoin("u.permissions", "p")
+    .where("u.id = :userId", { userId })
+    .andWhere("p.permission = :permission", { permission })
+    .getExists();
+}
 
 export const toArray = <T>(obj: T | T[] | undefined): T[] | null => {
   if (!obj) return null;

@@ -5,6 +5,7 @@ export interface UserAccount {
   id: number;
   username: string | null;
   fullName: string | null;
+  personId: number | null;
   permissions: Permission[];
   instrumentLogPermissions: InstrumentLogPermission[];
 }

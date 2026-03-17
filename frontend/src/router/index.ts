@@ -109,6 +109,12 @@ const routes = [
         name: "SiteProducts",
         component: () => import("@/components/site/SiteProducts.vue"),
       },
+      {
+        path: "contacts",
+        name: "SiteContacts",
+        meta: { title: false },
+        component: () => import("@/components/site/SiteContacts.vue"),
+      },
     ],
   },
   {
@@ -216,6 +222,12 @@ const routes = [
         name: "InstrumentCalibration",
         meta: { title: false },
         component: () => import("@/components/instrument/InstrumentCalibration.vue"),
+      },
+      {
+        path: "contacts",
+        name: "InstrumentContacts",
+        meta: { title: false },
+        component: () => import("@/components/instrument/InstrumentContacts.vue"),
       },
       {
         path: "logbook",

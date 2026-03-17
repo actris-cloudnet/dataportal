@@ -39,5 +39,9 @@
   {
     "id": 10,
     "permission": "canLogin"
+  },
+  {
+    "id": 11,
+    "permission": "canManageContacts"
   }
 ]

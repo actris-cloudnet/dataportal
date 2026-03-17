@@ -48,3 +48,5 @@ export interface NominalInstrument {
   measurementDate: string;
   nominalInstrument: InstrumentInfo;
 }
+
+export type { ContactPerson as InstrumentContactPerson, Contact as InstrumentContact } from "./Contact";

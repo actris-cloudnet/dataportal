@@ -1,8 +1,7 @@
 <template>
   <main v-if="canRead" class="pagewidth">
-    <div class="logbook-header">
-      <h2>Logbook</h2>
-      <BaseButton v-if="canEdit" type="primary" @click="showModal = true">Add entry</BaseButton>
+    <div v-if="canEdit" class="logbook-header">
+      <BaseButton type="primary" @click="showModal = true">Add entry</BaseButton>
     </div>
 
     <div v-if="state === 'loading'">Loading...</div>
@@ -64,7 +63,7 @@
         :totalPages="totalPages"
         :disabled="false"
       />
-      <div v-if="entries.length === 0" class="no-data">No logbook entries for this instrument.</div>
+      <div v-if="entries.length === 0" class="no-data">No logbook entries for this instrument</div>
     </template>
 
     <BaseModal :open="showModal" @submit="submitEntry">
@@ -584,13 +583,8 @@ onMounted(fetchEntries);
 <style lang="scss" scoped>
 .logbook-header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   margin-bottom: 1rem;
-
-  h2 {
-    margin: 0;
-  }
 }
 
 .table-scroll {
@@ -692,8 +686,8 @@ onMounted(fetchEntries);
 }
 
 .no-data {
-  color: #666;
-  margin-top: 1rem;
+  color: gray;
+  margin-top: 2rem;
 }
 
 .notes {
