@@ -14,10 +14,8 @@ export class AddContacts1773672812914 implements MigrationInterface {
       `CREATE TABLE "site_contact" ("id" SERIAL NOT NULL, "siteId" character varying NOT NULL, "personId" integer NOT NULL, "startDate" date, "endDate" date, "createdAt" TIMESTAMP NOT NULL, CONSTRAINT "PK_4d49e51b25416eb387e1fe6edff" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(`CREATE INDEX "IDX_2b7f71d52177cbca38c6212ad6" ON "site_contact" ("siteId") `);
-    await queryRunner.query(`ALTER TABLE "person" DROP COLUMN "firstname"`);
-    await queryRunner.query(`ALTER TABLE "person" DROP COLUMN "surname"`);
-    await queryRunner.query(`ALTER TABLE "person" ADD "firstName" character varying NOT NULL`);
-    await queryRunner.query(`ALTER TABLE "person" ADD "lastName" character varying NOT NULL`);
+    await queryRunner.query(`ALTER TABLE "person" RENAME COLUMN "firstname" TO "firstName"`);
+    await queryRunner.query(`ALTER TABLE "person" RENAME COLUMN "surname" TO "lastName"`);
     await queryRunner.query(`ALTER TABLE "user_account" ADD "person_id" integer`);
     await queryRunner.query(
       `ALTER TABLE "instrument_contact" ADD CONSTRAINT "FK_e9adacf239b5db59b259afc652a" FOREIGN KEY ("instrumentInfoUuid") REFERENCES "instrument_info"("uuid") ON DELETE CASCADE ON UPDATE NO ACTION`,
