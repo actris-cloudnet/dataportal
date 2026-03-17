@@ -4,7 +4,14 @@ import { Instrument, InstrumentInfo, NominalInstrument } from "../entity/Instrum
 import { InstrumentContact } from "../entity/InstrumentContact";
 import { Person } from "../entity/Person";
 import { InstrumentUpload } from "../entity/Upload";
-import { isValidDate, validateDateRange, toContactResponse, resolveOrCreatePerson, userHasPermission } from "../lib";
+import {
+  isValidDate,
+  validateDateRange,
+  toContactResponse,
+  resolveOrCreatePerson,
+  updateContactPerson,
+  userHasPermission,
+} from "../lib";
 import { PermissionType } from "../entity/Permission";
 
 export class InstrumentRoutes {
@@ -231,15 +238,13 @@ export class InstrumentRoutes {
     if (!contact || contact.instrumentInfoUuid !== req.params.uuid) {
       return next({ status: 404, errors: ["Contact not found"] });
     }
-    const { startDate, endDate, email } = req.body;
+    const { startDate, endDate, email, orcid } = req.body;
     const dateError = validateDateRange(startDate, endDate);
     if (dateError) return next({ status: 400, errors: [dateError] });
+    const { error } = await updateContactPerson(contact.person, { email, orcid }, this.personRepo);
+    if (error) return next({ status: 409, errors: [error] });
     contact.startDate = startDate || null;
     contact.endDate = endDate || null;
-    if (email !== undefined) {
-      contact.person.email = email?.trim() || undefined;
-      await this.personRepo.save(contact.person);
-    }
     const saved = await this.contactRepo.save(contact);
     res.json(toContactResponse(saved, contact.person, true));
   };

@@ -199,6 +199,52 @@ describe("POST /api/sites/:siteId/contacts", () => {
     for (const p of persons) await personRepo.delete({ id: p.id! });
   });
 
+  it("sets email on existing person matched by orcid when email was null", async () => {
+    const person = personRepo.create({ firstName: "Orcid", lastName: "NoEmail", orcid: "0000-0000-0000-9999" });
+    const saved = await personRepo.save(person);
+
+    const res = await axios.post(
+      siteUrl,
+      { firstName: "Orcid", lastName: "NoEmail", orcid: "0000-0000-0000-9999", email: "new@example.com" },
+      { auth: managerCreds },
+    );
+    expect(res.status).toBe(201);
+
+    const updated = await personRepo
+      .createQueryBuilder("person")
+      .addSelect("person.email")
+      .where("person.id = :id", { id: saved.id })
+      .getOne();
+    expect(updated!.email).toBe("new@example.com");
+
+    await contactRepo.delete({ id: res.data.id });
+    await personRepo.delete({ id: saved.id! });
+  });
+
+  it("accepts null email in payload", async () => {
+    const res = await axios.post(
+      siteUrl,
+      { firstName: "NullEmail", lastName: "Test", email: null },
+      { auth: managerCreds },
+    );
+    expect(res.status).toBe(201);
+    expect(res.data.person.email).toBeNull();
+
+    await contactRepo.delete({ id: res.data.id });
+    await personRepo.delete({ firstName: "NullEmail", lastName: "Test" });
+  });
+
+  it("accepts null email when using personId", async () => {
+    const person = personRepo.create({ firstName: "NullEmail2", lastName: "Test" });
+    const saved = await personRepo.save(person);
+
+    const res = await axios.post(siteUrl, { personId: saved.id, email: null }, { auth: managerCreds });
+    expect(res.status).toBe(201);
+
+    await contactRepo.delete({ id: res.data.id });
+    await personRepo.delete({ id: saved.id! });
+  });
+
   it("rejects invalid date range", async () => {
     await expect(
       axios.post(
@@ -242,6 +288,22 @@ describe("PUT /api/sites/:siteId/contacts/:contactId", () => {
       startDate: "2024-01-01",
       endDate: "2024-12-31",
     });
+  });
+
+  it("accepts null email in payload", async () => {
+    const res = await axios.put(`${siteUrl}/${contactId}`, { email: null }, { auth: managerCreds });
+    expect(res.status).toBe(200);
+    expect(res.data.person.email).toBeNull();
+  });
+
+  it("adds orcid to name-only person with null email", async () => {
+    const res = await axios.put(
+      `${siteUrl}/${contactId}`,
+      { orcid: "0000-0000-0000-7777", email: null },
+      { auth: managerCreds },
+    );
+    expect(res.status).toBe(200);
+    expect(res.data.person.orcid).toBe("0000-0000-0000-7777");
   });
 
   it("returns 404 for contact belonging to another site", async () => {

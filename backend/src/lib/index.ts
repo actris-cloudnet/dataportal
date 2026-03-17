@@ -88,20 +88,77 @@ export function toContactResponse(
   };
 }
 
+export function findPersonByOrcid(personRepo: Repository<Person>, orcid: string): Promise<Person | null> {
+  return personRepo
+    .createQueryBuilder("person")
+    .addSelect("person.email")
+    .where("person.orcid = :orcid", { orcid })
+    .getOne();
+}
+
+export async function updatePersonEmail(
+  person: Person,
+  email: string | null | undefined,
+  personRepo: Repository<Person>,
+): Promise<boolean> {
+  if (email === undefined) return false;
+  const newEmail = email?.trim() || null;
+  if (newEmail === (person.email ?? null)) return false;
+  person.email = newEmail;
+  await personRepo.save(person);
+  return true;
+}
+
+export async function updateContactPerson(
+  person: Person,
+  body: { email?: string | null; orcid?: string | null },
+  personRepo: Repository<Person>,
+): Promise<{ error?: string }> {
+  const trimmedOrcid = body.orcid?.trim();
+  if (trimmedOrcid && !person.orcid) {
+    const existing = await findPersonByOrcid(personRepo, trimmedOrcid);
+    if (existing) {
+      return { error: `ORCID already in use by ${existing.firstName} ${existing.lastName}` };
+    }
+  }
+  let changed = false;
+  if (body.email !== undefined) {
+    const newEmail = body.email?.trim() || null;
+    if (newEmail !== (person.email ?? null)) {
+      person.email = newEmail;
+      changed = true;
+    }
+  }
+  if (trimmedOrcid && !person.orcid) {
+    person.orcid = trimmedOrcid;
+    changed = true;
+  }
+  if (changed) {
+    await personRepo.save(person);
+  }
+  return {};
+}
+
 export async function resolveOrCreatePerson(
   personRepo: Repository<Person>,
   body: { personId?: number; firstName?: string; lastName?: string; orcid?: string; email?: string },
 ): Promise<Person | { error: string; status: number }> {
   if (body.personId) {
-    const person = await personRepo.findOneBy({ id: body.personId });
+    const person = await personRepo
+      .createQueryBuilder("person")
+      .addSelect("person.email")
+      .where("person.id = :id", { id: body.personId })
+      .getOne();
     if (!person) return { error: "Person not found", status: 404 };
+    await updatePersonEmail(person, body.email, personRepo);
     return person;
   }
   if (!body.firstName?.trim() || !body.lastName?.trim()) {
     return { error: "firstName and lastName are required when personId is not provided", status: 400 };
   }
-  if (body.orcid) {
-    const existing = await personRepo.findOneBy({ orcid: body.orcid });
+  const orcid = body.orcid?.trim();
+  if (orcid) {
+    const existing = await findPersonByOrcid(personRepo, orcid);
     if (existing) {
       const namesDiffer = existing.firstName !== body.firstName.trim() || existing.lastName !== body.lastName.trim();
       if (namesDiffer) {
@@ -110,6 +167,7 @@ export async function resolveOrCreatePerson(
           status: 409,
         };
       }
+      await updatePersonEmail(existing, body.email, personRepo);
       return existing;
     }
   } else if (body.email?.trim()) {
@@ -129,8 +187,8 @@ export async function resolveOrCreatePerson(
   const person = personRepo.create({
     firstName: body.firstName.trim(),
     lastName: body.lastName.trim(),
-    orcid: body.orcid || undefined,
-    email: body.email?.trim() || undefined,
+    orcid: orcid || undefined,
+    email: body.email?.trim() || null,
   });
   return personRepo.save(person);
 }

@@ -354,6 +354,18 @@ async function createServer(): Promise<void> {
     authorizator.verifyPermission(PermissionType.canManageContacts),
     siteRoutes.deleteContact,
   );
+  app.get(
+    "/api/persons/orcid/:orcid",
+    passport.authenticate(["cookie", "basic"], { session: false }),
+    authorizator.verifyPermission(PermissionType.canManageContacts),
+    siteRoutes.personByOrcid,
+  );
+  app.get(
+    "/api/persons/search",
+    passport.authenticate(["cookie", "basic"], { session: false }),
+    authorizator.verifyPermission(PermissionType.canManageContacts),
+    siteRoutes.searchPersons,
+  );
   app.get("/api/product-availability", productAvailabilityRoutes.productAvailability);
   app.get("/api/upload-amount", productAvailabilityRoutes.uploadAmount);
   app.post("/api/feedback", rateLimit({ windowMs: 60 * 1000, limit: 10 }), express.json(), feedbackRoutes.postFeedback);

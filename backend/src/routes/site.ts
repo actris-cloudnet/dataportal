@@ -6,6 +6,8 @@ import {
   validateDateRange,
   toContactResponse,
   resolveOrCreatePerson,
+  findPersonByOrcid,
+  updateContactPerson,
   userHasPermission,
 } from "../lib";
 import { Site, SiteType } from "../entity/Site";
@@ -303,15 +305,13 @@ export class SiteRoutes {
     if (!contact || contact.siteId !== req.params.siteId) {
       return next({ status: 404, errors: ["Contact not found"] });
     }
-    const { startDate, endDate, email } = req.body;
+    const { startDate, endDate, email, orcid } = req.body;
     const dateError = validateDateRange(startDate, endDate);
     if (dateError) return next({ status: 400, errors: [dateError] });
+    const { error } = await updateContactPerson(contact.person, { email, orcid }, this.personRepo);
+    if (error) return next({ status: 409, errors: [error] });
     contact.startDate = startDate || null;
     contact.endDate = endDate || null;
-    if (email !== undefined) {
-      contact.person.email = email?.trim() || undefined;
-      await this.personRepo.save(contact.person);
-    }
     const saved = await this.contactRepo.save(contact);
     res.json(toContactResponse(saved, contact.person, true));
   };
@@ -326,5 +326,41 @@ export class SiteRoutes {
       return next({ status: 404, errors: ["Contact not found"] });
     }
     res.sendStatus(204);
+  };
+
+  personByOrcid: RequestHandler = async (req, res) => {
+    const person = await findPersonByOrcid(this.personRepo, req.params.orcid);
+    if (!person) {
+      res.json(null);
+      return;
+    }
+    res.json({ firstName: person.firstName, lastName: person.lastName, email: person.email ?? null });
+  };
+
+  searchPersons: RequestHandler = async (req, res) => {
+    const query = (req.query.search as string)?.trim();
+    if (!query || query.length < 2) {
+      res.json([]);
+      return;
+    }
+    const persons = await this.personRepo
+      .createQueryBuilder("person")
+      .addSelect("person.email")
+      .where("LOWER(person.firstName) LIKE :query OR LOWER(person.lastName) LIKE :query", {
+        query: `%${query.toLowerCase().replace(/[%_]/g, "\\$&")}%`,
+      })
+      .orderBy("person.lastName", "ASC")
+      .addOrderBy("person.firstName", "ASC")
+      .limit(10)
+      .getMany();
+    res.json(
+      persons.map((p) => ({
+        id: p.id,
+        firstName: p.firstName,
+        lastName: p.lastName,
+        orcid: p.orcid ?? null,
+        email: p.email ?? null,
+      })),
+    );
   };
 }

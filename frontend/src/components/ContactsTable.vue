@@ -67,30 +67,40 @@
 
     <BaseModal :open="showModal" @submit="submitContact" @close="closeModal">
       <template #header>
-        <h3>{{ editingContactId ? "Edit contact" : "Add contact" }}</h3>
+        <h3>{{ editingContactId ? `Edit contact: ${form.firstName} ${form.lastName}` : "Add contact" }}</h3>
       </template>
       <template #body>
         <template v-if="!editingContactId">
-          <div class="form-group">
-            <label for="orcid">ORCID iD (optional)</label>
-            <input id="orcid" v-model="form.orcid" type="text" placeholder="0000-0000-0000-0000" />
-            <span v-if="orcidStatus === 'loading'" class="orcid-status orcid-loading">Looking up…</span>
-            <span v-else-if="orcidStatus === 'found'" class="orcid-status orcid-found"
-              >Name auto-filled from ORCID</span
-            >
-            <span v-else-if="orcidStatus === 'not-found'" class="orcid-status orcid-not-found"
-              >ORCID not found in registry</span
-            >
-          </div>
-          <div class="form-group">
-            <label for="first-name">First name</label>
-            <input id="first-name" v-model="form.firstName" type="text" required />
-          </div>
-          <div class="form-group">
-            <label for="last-name">Last name</label>
-            <input id="last-name" v-model="form.lastName" type="text" required />
-          </div>
+          <PersonAutocomplete
+            ref="personAutocomplete"
+            v-model:first-name="form.firstName"
+            v-model:last-name="form.lastName"
+            :disabled="nameIsLocked"
+            @select="onPersonSelected"
+          />
         </template>
+        <div class="form-group">
+          <label for="orcid">ORCID iD (optional)</label>
+          <input
+            id="orcid"
+            :value="form.orcid"
+            type="text"
+            placeholder="0000-0000-0000-0000"
+            :disabled="editingContactId ? !!editingOrcidLocked : personIsAutoFilled"
+            @input="form.orcid = ($event.target as HTMLInputElement).value.trim()"
+          />
+          <span v-if="orcidStatus === 'loading'" class="orcid-status orcid-loading">Looking up…</span>
+          <span v-else-if="orcidStatus === 'found-db'" class="orcid-status orcid-found">{{
+            editingContactId ? `${orcidVerifiedName} (database)` : "Auto-filled from database"
+          }}</span>
+          <span v-else-if="orcidStatus === 'found-orcid'" class="orcid-status orcid-found">{{
+            editingContactId ? `${orcidVerifiedName} (ORCID registry)` : "Auto-filled from ORCID registry"
+          }}</span>
+          <span v-else-if="orcidStatus === 'not-found'" class="orcid-status orcid-not-found"
+            >ORCID not found in registry</span
+          >
+          <span v-else-if="orcidStatus === 'invalid'" class="orcid-status orcid-not-found">Invalid ORCID format</span>
+        </div>
         <div class="form-group">
           <label for="email">Email (optional)</label>
           <input id="email" v-model="form.email" type="email" placeholder="name@example.com" />
@@ -136,7 +146,17 @@
         <div v-if="formError" class="form-error">{{ formError }}</div>
       </template>
       <template #footer>
-        <BaseButton type="primary" html-type="submit">Save</BaseButton>
+        <BaseButton
+          type="primary"
+          html-type="submit"
+          :disabled="
+            submitting || orcidStatus === 'loading' || orcidStatus === 'not-found' || orcidStatus === 'invalid'
+          "
+          >{{ submitting ? "Saving…" : "Save" }}</BaseButton
+        >
+        <BaseButton v-if="personIsAutoFilled && !editingContactId" type="secondary" @click="clearSelectedPerson"
+          >Clear</BaseButton
+        >
         <BaseButton type="secondary" @click="closeModal">Cancel</BaseButton>
       </template>
     </BaseModal>
@@ -153,6 +173,7 @@ import type { PermissionType } from "@shared/entity/Permission";
 import BaseButton from "@/components/BaseButton.vue";
 import BaseModal from "@/components/BaseModal.vue";
 import DatePicker, { type DateErrors } from "@/components/DatePicker.vue";
+import PersonAutocomplete, { type PersonSuggestion } from "@/components/PersonAutocomplete.vue";
 
 const props = defineProps<{
   apiPath: string;
@@ -164,7 +185,9 @@ const state = ref<"loading" | "ready" | "error">("loading");
 const contacts = ref<Contact[]>([]);
 const showModal = ref(false);
 const editingContactId = ref<number | null>(null);
+const editingOrcidLocked = ref(false);
 const formError = ref<string | null>(null);
+const submitting = ref(false);
 const today = new Date().toISOString().slice(0, 10);
 
 const form = ref({
@@ -181,7 +204,38 @@ const canManage = computed(() => hasPermission(props.permissionKey).value);
 const startDateError = ref<DateErrors | null>(null);
 const endDateError = ref<DateErrors | null>(null);
 
-const orcidStatus = ref<"idle" | "loading" | "found" | "not-found">("idle");
+const personAutocomplete = ref<InstanceType<typeof PersonAutocomplete> | null>(null);
+const selectedPersonId = ref<number | null>(null);
+
+function onPersonSelected(person: PersonSuggestion) {
+  selectedPersonId.value = person.id;
+  form.value.firstName = person.firstName;
+  form.value.lastName = person.lastName;
+  form.value.orcid = person.orcid ?? "";
+  form.value.email = person.email ?? "";
+}
+
+const personIsAutoFilled = computed(
+  () => !!selectedPersonId.value || orcidStatus.value === "found-db" || orcidStatus.value === "found-orcid",
+);
+const nameIsLocked = computed(() => !!selectedPersonId.value || orcidStatus.value === "found-db");
+
+function clearSelectedPerson() {
+  selectedPersonId.value = null;
+  form.value = {
+    firstName: "",
+    lastName: "",
+    orcid: "",
+    email: "",
+    startDate: form.value.startDate,
+    endDate: form.value.endDate,
+  };
+  orcidStatus.value = "idle";
+  personAutocomplete.value?.reset();
+}
+
+const orcidStatus = ref<"idle" | "loading" | "found-orcid" | "found-db" | "not-found" | "invalid">("idle");
+const orcidVerifiedName = ref("");
 const ORCID_RE = /^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/;
 let orcidLookupTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -189,15 +243,37 @@ watch(
   () => form.value.orcid,
   (orcid) => {
     if (orcidLookupTimer) clearTimeout(orcidLookupTimer);
+    if (selectedPersonId.value) return;
     orcidStatus.value = "idle";
     const normalized = orcid.trim();
-    if (!ORCID_RE.test(normalized)) return;
+    if (!normalized) return;
+    if (!ORCID_RE.test(normalized)) {
+      orcidStatus.value = "invalid";
+      return;
+    }
     orcidStatus.value = "loading";
     orcidLookupTimer = setTimeout(() => lookupOrcid(normalized), 500);
   },
 );
 
 async function lookupOrcid(orcid: string) {
+  const isEditing = !!editingContactId.value;
+  if (!isEditing) {
+    try {
+      const dbRes = await axios.get(`${backendUrl}persons/orcid/${orcid}`);
+      if (form.value.orcid.trim() !== orcid) return;
+      if (dbRes.data) {
+        form.value.firstName = dbRes.data.firstName;
+        form.value.lastName = dbRes.data.lastName;
+        if (dbRes.data.email) form.value.email = dbRes.data.email;
+        orcidVerifiedName.value = `${dbRes.data.firstName} ${dbRes.data.lastName}`;
+        orcidStatus.value = "found-db";
+        return;
+      }
+    } catch (err) {
+      console.warn("DB person lookup failed:", err);
+    }
+  }
   try {
     const res = await axios.get(`https://pub.orcid.org/v3.0/${orcid}/person`, {
       headers: { Accept: "application/json" },
@@ -207,9 +283,13 @@ async function lookupOrcid(orcid: string) {
     const firstName: string = name?.["given-names"]?.value ?? "";
     const lastName: string = name?.["family-name"]?.value ?? "";
     if (firstName || lastName) {
-      form.value.firstName = firstName;
-      form.value.lastName = lastName;
-      orcidStatus.value = "found";
+      if (!isEditing) {
+        form.value.firstName = firstName;
+        form.value.lastName = lastName;
+        form.value.email = "";
+      }
+      orcidVerifiedName.value = `${firstName} ${lastName}`.trim();
+      orcidStatus.value = "found-orcid";
     } else {
       orcidStatus.value = "not-found";
     }
@@ -255,6 +335,8 @@ function openAddModal() {
   startDateError.value = null;
   endDateError.value = null;
   orcidStatus.value = "idle";
+  selectedPersonId.value = null;
+  personAutocomplete.value?.reset();
   showModal.value = true;
 }
 
@@ -268,6 +350,7 @@ function openEditModal(contact: Contact) {
     startDate: contact.startDate ?? null,
     endDate: contact.endDate ?? null,
   };
+  editingOrcidLocked.value = !!contact.person.orcid;
   formError.value = null;
   startDateError.value = null;
   endDateError.value = null;
@@ -279,24 +362,36 @@ function closeModal() {
 }
 
 async function submitContact() {
+  if (submitting.value) return;
+  submitting.value = true;
   formError.value = null;
   try {
     if (editingContactId.value) {
-      const payload = {
+      const payload: Record<string, any> = {
         startDate: form.value.startDate || null,
         endDate: form.value.endDate || null,
         email: form.value.email || null,
       };
+      if (!editingOrcidLocked.value && form.value.orcid.trim()) {
+        payload.orcid = form.value.orcid.trim();
+      }
       await axios.put(`${backendUrl}${props.apiPath}/contacts/${editingContactId.value}`, payload);
     } else {
-      const payload = {
-        firstName: form.value.firstName,
-        lastName: form.value.lastName,
-        orcid: form.value.orcid || undefined,
-        email: form.value.email || undefined,
-        startDate: form.value.startDate || null,
-        endDate: form.value.endDate || null,
-      };
+      const payload = selectedPersonId.value
+        ? {
+            personId: selectedPersonId.value,
+            email: form.value.email || null,
+            startDate: form.value.startDate || null,
+            endDate: form.value.endDate || null,
+          }
+        : {
+            firstName: form.value.firstName,
+            lastName: form.value.lastName,
+            orcid: form.value.orcid || undefined,
+            email: form.value.email || null,
+            startDate: form.value.startDate || null,
+            endDate: form.value.endDate || null,
+          };
       await axios.post(`${backendUrl}${props.apiPath}/contacts`, payload);
     }
     showModal.value = false;
@@ -304,6 +399,8 @@ async function submitContact() {
   } catch (err: any) {
     const errors = err.response?.data?.errors;
     formError.value = Array.isArray(errors) ? errors.join(". ") : errors ?? "Failed to save contact.";
+  } finally {
+    submitting.value = false;
   }
 }
 
@@ -417,6 +514,11 @@ function cancelDelete() {
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 1rem;
+}
+
+.form-group input:disabled {
+  background-color: #f0f0f0;
+  color: #666;
 }
 
 .form-group input::placeholder {
