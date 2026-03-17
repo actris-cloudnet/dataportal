@@ -43,10 +43,8 @@ export class AddContacts1773672812914 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "instrument_contact" DROP CONSTRAINT "FK_2595ea03903c354e16e7def48d3"`);
     await queryRunner.query(`ALTER TABLE "instrument_contact" DROP CONSTRAINT "FK_e9adacf239b5db59b259afc652a"`);
     await queryRunner.query(`ALTER TABLE "user_account" DROP COLUMN "person_id"`);
-    await queryRunner.query(`ALTER TABLE "person" DROP COLUMN "lastName"`);
-    await queryRunner.query(`ALTER TABLE "person" DROP COLUMN "firstName"`);
-    await queryRunner.query(`ALTER TABLE "person" ADD "surname" character varying NOT NULL`);
-    await queryRunner.query(`ALTER TABLE "person" ADD "firstname" character varying NOT NULL`);
+    await queryRunner.query(`ALTER TABLE "person" RENAME COLUMN "lastName" TO "surname"`);
+    await queryRunner.query(`ALTER TABLE "person" RENAME COLUMN "firstName" TO "firstname"`);
     await queryRunner.query(`DROP INDEX "public"."IDX_2b7f71d52177cbca38c6212ad6"`);
     await queryRunner.query(`DROP TABLE "site_contact"`);
     await queryRunner.query(`DROP INDEX "public"."IDX_e9adacf239b5db59b259afc652"`);
