@@ -16,6 +16,7 @@ import {
   daysBetweenDates,
   fixInstrument,
   siteMetadataKeys,
+  escapeLikeString,
 } from "../lib";
 import { basename } from "path";
 import { ReducedMetadataResponse } from "../entity/ReducedMetadataResponse";
@@ -591,10 +592,6 @@ function addFilenameAffixClause(affixList: string[], qb: SelectQueryBuilder<any>
       });
     }),
   );
-}
-
-function escapeLikeString(raw: string): string {
-  return raw.replace(/[\\%_]/g, "\\$&");
 }
 
 function getAdjustedDate(dateInput: string | Date, offsetDays: number): Date {

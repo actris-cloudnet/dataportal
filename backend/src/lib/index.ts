@@ -21,6 +21,10 @@ import { normalizeOrcid } from "../../../shared/lib/entity/Person";
 
 export const stringify = (obj: any): string => JSON.stringify(obj, null, 2);
 
+export function escapeLikeString(raw: string): string {
+  return raw.replace(/[\\%_]/g, "\\$&");
+}
+
 const DATETIME_FORMAT =
   /^(?<year>\d\d\d\d)-(?<month>\d\d)-(?<day>\d\d)(T(?<hours>\d\d):(?<minutes>\d\d)(:(?<seconds>\d\d)(\.(?<fraction>\d+))?)?(Z|\+00:00)?)?$/;
 

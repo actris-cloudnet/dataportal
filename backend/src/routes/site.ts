@@ -9,6 +9,7 @@ import {
   findPersonByOrcid,
   updateContactPerson,
   userHasPermission,
+  escapeLikeString,
 } from "../lib";
 import { Site, SiteType } from "../entity/Site";
 import { SiteContact } from "../entity/SiteContact";
@@ -347,7 +348,7 @@ export class SiteRoutes {
       .createQueryBuilder("person")
       .addSelect("person.email")
       .where("LOWER(person.firstName) LIKE :query OR LOWER(person.lastName) LIKE :query", {
-        query: `%${query.toLowerCase().replace(/[%_]/g, "\\$&")}%`,
+        query: `%${escapeLikeString(query.toLowerCase())}%`,
       })
       .orderBy("person.lastName", "ASC")
       .addOrderBy("person.firstName", "ASC")
