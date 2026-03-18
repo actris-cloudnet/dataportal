@@ -17,6 +17,7 @@ import { InstrumentInfo } from "../entity/Instrument";
 import { Person } from "../entity/Person";
 import { UserAccount } from "../entity/UserAccount";
 import { PermissionType } from "../entity/Permission";
+import { normalizeOrcid } from "../../../shared/lib/entity/Person";
 
 export const stringify = (obj: any): string => JSON.stringify(obj, null, 2);
 
@@ -114,9 +115,9 @@ export async function updateContactPerson(
   body: { email?: string | null; orcid?: string | null },
   personRepo: Repository<Person>,
 ): Promise<{ error?: string }> {
-  const trimmedOrcid = body.orcid?.trim();
-  if (trimmedOrcid && !person.orcid) {
-    const existing = await findPersonByOrcid(personRepo, trimmedOrcid);
+  const orcid = body.orcid ? normalizeOrcid(body.orcid) : null;
+  if (orcid && !person.orcid) {
+    const existing = await findPersonByOrcid(personRepo, orcid);
     if (existing) {
       return { error: `ORCID already in use by ${existing.firstName} ${existing.lastName}` };
     }
@@ -129,8 +130,8 @@ export async function updateContactPerson(
       changed = true;
     }
   }
-  if (trimmedOrcid && !person.orcid) {
-    person.orcid = trimmedOrcid;
+  if (orcid && !person.orcid) {
+    person.orcid = orcid;
     changed = true;
   }
   if (changed) {
@@ -156,7 +157,7 @@ export async function resolveOrCreatePerson(
   if (!body.firstName?.trim() || !body.lastName?.trim()) {
     return { error: "firstName and lastName are required when personId is not provided", status: 400 };
   }
-  const orcid = body.orcid?.trim();
+  const orcid = body.orcid ? normalizeOrcid(body.orcid) : null;
   if (orcid) {
     const existing = await findPersonByOrcid(personRepo, orcid);
     if (existing) {

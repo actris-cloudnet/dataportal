@@ -174,6 +174,7 @@ import BaseButton from "@/components/BaseButton.vue";
 import BaseModal from "@/components/BaseModal.vue";
 import DatePicker, { type DateErrors } from "@/components/DatePicker.vue";
 import PersonAutocomplete, { type PersonSuggestion } from "@/components/PersonAutocomplete.vue";
+import { normalizeOrcid } from "@shared/entity/Person";
 
 const props = defineProps<{
   apiPath: string;
@@ -236,18 +237,17 @@ function clearSelectedPerson() {
 
 const orcidStatus = ref<"idle" | "loading" | "found-orcid" | "found-db" | "not-found" | "invalid">("idle");
 const orcidVerifiedName = ref("");
-const ORCID_RE = /^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/;
 let orcidLookupTimer: ReturnType<typeof setTimeout> | null = null;
 
 watch(
   () => form.value.orcid,
-  (orcid) => {
+  (raw) => {
     if (orcidLookupTimer) clearTimeout(orcidLookupTimer);
     if (selectedPersonId.value) return;
     orcidStatus.value = "idle";
-    const normalized = orcid.trim();
-    if (!normalized) return;
-    if (!ORCID_RE.test(normalized)) {
+    if (!raw.trim()) return;
+    const normalized = normalizeOrcid(raw);
+    if (!normalized) {
       orcidStatus.value = "invalid";
       return;
     }
@@ -256,12 +256,16 @@ watch(
   },
 );
 
+function isStale(orcid: string): boolean {
+  return normalizeOrcid(form.value.orcid) !== orcid;
+}
+
 async function lookupOrcid(orcid: string) {
   const isEditing = !!editingContactId.value;
   if (!isEditing) {
     try {
       const dbRes = await axios.get(`${backendUrl}persons/orcid/${orcid}`);
-      if (form.value.orcid.trim() !== orcid) return;
+      if (isStale(orcid)) return;
       if (dbRes.data) {
         form.value.firstName = dbRes.data.firstName;
         form.value.lastName = dbRes.data.lastName;
@@ -278,7 +282,7 @@ async function lookupOrcid(orcid: string) {
     const res = await axios.get(`https://pub.orcid.org/v3.0/${orcid}/person`, {
       headers: { Accept: "application/json" },
     });
-    if (form.value.orcid.trim() !== orcid) return;
+    if (isStale(orcid)) return;
     const name = res.data?.name;
     const firstName: string = name?.["given-names"]?.value ?? "";
     const lastName: string = name?.["family-name"]?.value ?? "";
@@ -294,7 +298,7 @@ async function lookupOrcid(orcid: string) {
       orcidStatus.value = "not-found";
     }
   } catch {
-    if (form.value.orcid.trim() !== orcid) return;
+    if (isStale(orcid)) return;
     orcidStatus.value = "not-found";
   }
 }
@@ -372,8 +376,9 @@ async function submitContact() {
         endDate: form.value.endDate || null,
         email: form.value.email || null,
       };
-      if (!editingOrcidLocked.value && form.value.orcid.trim()) {
-        payload.orcid = form.value.orcid.trim();
+      if (!editingOrcidLocked.value) {
+        const orcid = normalizeOrcid(form.value.orcid);
+        if (orcid) payload.orcid = orcid;
       }
       await axios.put(`${backendUrl}${props.apiPath}/contacts/${editingContactId.value}`, payload);
     } else {
@@ -387,7 +392,7 @@ async function submitContact() {
         : {
             firstName: form.value.firstName,
             lastName: form.value.lastName,
-            orcid: form.value.orcid || undefined,
+            orcid: normalizeOrcid(form.value.orcid) || undefined,
             email: form.value.email || null,
             startDate: form.value.startDate || null,
             endDate: form.value.endDate || null,
