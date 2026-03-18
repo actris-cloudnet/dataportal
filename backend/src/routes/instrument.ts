@@ -186,7 +186,9 @@ export class InstrumentRoutes {
       .createQueryBuilder("c")
       .innerJoinAndSelect("c.person", "p")
       .where("c.instrumentInfoUuid = :uuid", { uuid: instrumentInfo.uuid })
-      .orderBy("c.startDate", "DESC", "NULLS FIRST");
+      .orderBy("c.startDate", "DESC", "NULLS FIRST")
+      .addOrderBy("p.lastName", "ASC")
+      .addOrderBy("p.firstName", "ASC");
     if (includeEmail) contactQb.addSelect("p.email");
     const contacts = await contactQb.getMany();
     res.send(contacts.map((c) => toContactResponse(c, c.person, includeEmail)));

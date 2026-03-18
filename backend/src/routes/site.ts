@@ -258,7 +258,9 @@ export class SiteRoutes {
       .createQueryBuilder("c")
       .innerJoinAndSelect("c.person", "p")
       .where("c.siteId = :siteId", { siteId: site.id })
-      .orderBy("c.startDate", "DESC", "NULLS FIRST");
+      .orderBy("c.startDate", "DESC", "NULLS FIRST")
+      .addOrderBy("p.lastName", "ASC")
+      .addOrderBy("p.firstName", "ASC");
     if (includeEmail) contactQb.addSelect("p.email");
     const contacts = await contactQb.getMany();
     res.send(contacts.map((c) => toContactResponse(c, c.person, includeEmail)));
