@@ -90,11 +90,10 @@ export function toContactResponse(
 }
 
 export function findPersonByOrcid(personRepo: Repository<Person>, orcid: string): Promise<Person | null> {
-  return personRepo
-    .createQueryBuilder("person")
-    .addSelect("person.email")
-    .where("person.orcid = :orcid", { orcid })
-    .getOne();
+  return personRepo.findOne({
+    select: { id: true, firstName: true, lastName: true, orcid: true, email: true },
+    where: { orcid },
+  });
 }
 
 export async function updatePersonEmail(
@@ -145,11 +144,10 @@ export async function resolveOrCreatePerson(
   body: { personId?: number; firstName?: string; lastName?: string; orcid?: string; email?: string },
 ): Promise<Person | { error: string; status: number }> {
   if (body.personId) {
-    const person = await personRepo
-      .createQueryBuilder("person")
-      .addSelect("person.email")
-      .where("person.id = :id", { id: body.personId })
-      .getOne();
+    const person = await personRepo.findOne({
+      select: { id: true, firstName: true, lastName: true, orcid: true, email: true },
+      where: { id: body.personId },
+    });
     if (!person) return { error: "Person not found", status: 404 };
     await updatePersonEmail(person, body.email, personRepo);
     return person;
