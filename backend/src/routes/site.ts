@@ -347,8 +347,8 @@ export class SiteRoutes {
     const persons = await this.personRepo
       .createQueryBuilder("person")
       .addSelect("person.email")
-      .where("LOWER(person.firstName) LIKE :query OR LOWER(person.lastName) LIKE :query", {
-        query: `%${escapeLikeString(query.toLowerCase())}%`,
+      .where("person.firstName ILIKE :query OR person.lastName ILIKE :query", {
+        query: `%${escapeLikeString(query)}%`,
       })
       .orderBy("person.lastName", "ASC")
       .addOrderBy("person.firstName", "ASC")
