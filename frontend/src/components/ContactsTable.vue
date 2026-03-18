@@ -219,7 +219,7 @@ function onPersonSelected(person: PersonSuggestion) {
 const personIsAutoFilled = computed(
   () => !!selectedPersonId.value || orcidStatus.value === "found-db" || orcidStatus.value === "found-orcid",
 );
-const nameIsLocked = computed(() => !!selectedPersonId.value || orcidStatus.value === "found-db");
+const nameIsLocked = computed(() => personIsAutoFilled.value);
 
 function clearSelectedPerson() {
   selectedPersonId.value = null;
