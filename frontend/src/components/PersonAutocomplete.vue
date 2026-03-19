@@ -65,6 +65,7 @@ const props = defineProps<{
   firstName: string;
   lastName: string;
   disabled: boolean;
+  suppressSuggestions?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -88,7 +89,7 @@ watch(searchQuery, (query) => {
   if (searchTimer) clearTimeout(searchTimer);
   suggestions.value = [];
   highlightedIndex.value = -1;
-  if (props.disabled || !query || query.length < 2) return;
+  if (props.disabled || props.suppressSuggestions || !query || query.length < 2) return;
   searchTimer = setTimeout(() => search(query), 300);
 });
 

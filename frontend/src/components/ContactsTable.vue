@@ -76,6 +76,7 @@
             v-model:first-name="form.firstName"
             v-model:last-name="form.lastName"
             :disabled="nameIsLocked"
+            :suppress-suggestions="orcidStatus === 'found-orcid'"
             @select="onPersonSelected"
           />
         </template>
@@ -219,7 +220,7 @@ function onPersonSelected(person: PersonSuggestion) {
 const personIsAutoFilled = computed(
   () => !!selectedPersonId.value || orcidStatus.value === "found-db" || orcidStatus.value === "found-orcid",
 );
-const nameIsLocked = computed(() => personIsAutoFilled.value);
+const nameIsLocked = computed(() => !!selectedPersonId.value || orcidStatus.value === "found-db");
 
 function clearSelectedPerson() {
   selectedPersonId.value = null;
