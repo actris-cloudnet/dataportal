@@ -6,7 +6,10 @@ import {
   validateDateRange,
   toContactResponse,
   resolveOrCreatePerson,
+  findPersonByOrcid,
+  updateContactPerson,
   userHasPermission,
+  escapeLikeString,
 } from "../lib";
 import { Site, SiteType } from "../entity/Site";
 import { SiteContact } from "../entity/SiteContact";
@@ -258,7 +261,9 @@ export class SiteRoutes {
       .createQueryBuilder("c")
       .innerJoinAndSelect("c.person", "p")
       .where("c.siteId = :siteId", { siteId: site.id })
-      .orderBy("c.startDate", "DESC", "NULLS FIRST");
+      .orderBy("c.startDate", "DESC", "NULLS FIRST")
+      .addOrderBy("p.lastName", "ASC")
+      .addOrderBy("p.firstName", "ASC");
     if (includeEmail) contactQb.addSelect("p.email");
     const contacts = await contactQb.getMany();
     res.send(contacts.map((c) => toContactResponse(c, c.person, includeEmail)));
@@ -301,15 +306,13 @@ export class SiteRoutes {
     if (!contact || contact.siteId !== req.params.siteId) {
       return next({ status: 404, errors: ["Contact not found"] });
     }
-    const { startDate, endDate, email } = req.body;
+    const { startDate, endDate, email, orcid } = req.body;
     const dateError = validateDateRange(startDate, endDate);
     if (dateError) return next({ status: 400, errors: [dateError] });
+    const { error } = await updateContactPerson(contact.person, { email, orcid }, this.personRepo);
+    if (error) return next({ status: 409, errors: [error] });
     contact.startDate = startDate || null;
     contact.endDate = endDate || null;
-    if (email !== undefined) {
-      contact.person.email = email?.trim() || undefined;
-      await this.personRepo.save(contact.person);
-    }
     const saved = await this.contactRepo.save(contact);
     res.json(toContactResponse(saved, contact.person, true));
   };
@@ -324,5 +327,41 @@ export class SiteRoutes {
       return next({ status: 404, errors: ["Contact not found"] });
     }
     res.sendStatus(204);
+  };
+
+  personByOrcid: RequestHandler = async (req, res) => {
+    const person = await findPersonByOrcid(this.personRepo, req.params.orcid);
+    if (!person) {
+      res.json(null);
+      return;
+    }
+    res.json({ firstName: person.firstName, lastName: person.lastName, email: person.email ?? null });
+  };
+
+  searchPersons: RequestHandler = async (req, res) => {
+    const query = (req.query.search as string)?.trim();
+    if (!query || query.length < 2) {
+      res.json([]);
+      return;
+    }
+    const persons = await this.personRepo
+      .createQueryBuilder("person")
+      .addSelect("person.email")
+      .where("person.firstName ILIKE :query OR person.lastName ILIKE :query", {
+        query: `%${escapeLikeString(query)}%`,
+      })
+      .orderBy("person.lastName", "ASC")
+      .addOrderBy("person.firstName", "ASC")
+      .limit(10)
+      .getMany();
+    res.json(
+      persons.map((p) => ({
+        id: p.id,
+        firstName: p.firstName,
+        lastName: p.lastName,
+        orcid: p.orcid ?? null,
+        email: p.email ?? null,
+      })),
+    );
   };
 }

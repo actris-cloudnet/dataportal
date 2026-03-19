@@ -1,4 +1,5 @@
 import { isValidDate, truncateList } from "../../src/lib";
+import { normalizeOrcid } from "../../../shared/lib/entity/Person";
 import { describe, it, expect } from "@jest/globals";
 
 describe("isValidDate", () => {
@@ -71,6 +72,56 @@ describe("isValidDate", () => {
     expect(isValidDate(100)).toBe(false);
     expect(isValidDate(false)).toBe(false);
     expect(isValidDate({ asdf: "asdf" })).toBe(false);
+  });
+});
+
+describe("normalizeOrcid", () => {
+  it("accepts bare ORCID with dashes", () => {
+    expect(normalizeOrcid("0000-0002-0651-4622")).toBe("0000-0002-0651-4622");
+  });
+
+  it("accepts ORCID with X check digit", () => {
+    expect(normalizeOrcid("0000-0002-1825-009X")).toBe("0000-0002-1825-009X");
+  });
+
+  it("strips https://orcid.org/ prefix", () => {
+    expect(normalizeOrcid("https://orcid.org/0000-0002-0651-4622")).toBe("0000-0002-0651-4622");
+  });
+
+  it("strips http://orcid.org/ prefix", () => {
+    expect(normalizeOrcid("http://orcid.org/0000-0002-0651-4622")).toBe("0000-0002-0651-4622");
+  });
+
+  it("strips www.orcid.org/ prefix", () => {
+    expect(normalizeOrcid("www.orcid.org/0000-0002-0651-4622")).toBe("0000-0002-0651-4622");
+  });
+
+  it("strips orcid.org/ prefix", () => {
+    expect(normalizeOrcid("orcid.org/0000-0002-0651-4622")).toBe("0000-0002-0651-4622");
+  });
+
+  it("accepts ORCID without dashes", () => {
+    expect(normalizeOrcid("0000000206514622")).toBe("0000-0002-0651-4622");
+  });
+
+  it("accepts full URL without dashes", () => {
+    expect(normalizeOrcid("https://orcid.org/0000000206514622")).toBe("0000-0002-0651-4622");
+  });
+
+  it("handles surrounding whitespace", () => {
+    expect(normalizeOrcid("  0000-0002-0651-4622  ")).toBe("0000-0002-0651-4622");
+  });
+
+  it("returns null for empty string", () => {
+    expect(normalizeOrcid("")).toBeNull();
+  });
+
+  it("returns null for random text", () => {
+    expect(normalizeOrcid("not-an-orcid")).toBeNull();
+  });
+
+  it("returns null for too few digits", () => {
+    expect(normalizeOrcid("0000-0002-0651")).toBeNull();
   });
 });
 

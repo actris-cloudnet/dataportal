@@ -14,6 +14,6 @@ export class Person {
   @Column({ unique: true, nullable: true })
   orcid?: string;
 
-  @Column({ nullable: true, select: false })
-  email?: string;
+  @Column({ type: "varchar", nullable: true, select: false })
+  email?: string | null;
 }

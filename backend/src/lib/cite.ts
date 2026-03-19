@@ -5,6 +5,7 @@ import { Collection } from "../entity/Collection";
 import { InstrumentContact } from "../entity/InstrumentContact";
 import { SiteContact } from "../entity/SiteContact";
 import { formatList, getCollectionLandingPage, getFileLandingPage, truncateList } from ".";
+import { normalizeOrcid } from "../../../shared/lib/entity/Person";
 import env from "../lib/env";
 
 const MODEL_AUTHOR: Person = { firstName: "Ewan", lastName: "O'Connor", orcid: "0000-0001-9834-5100", role: "modelPi" };
@@ -463,10 +464,6 @@ async function fetchNfPis(data: { actrisId: number; dates: string[] }[]): Promis
       ),
     )
   ).flat();
-}
-
-export function normalizeOrcid(orcid: string): string {
-  return orcid.replace(/^(https?:\/\/)?(www\.)?orcid\.org\//, "");
 }
 
 function normalizeText(input: string): string {
