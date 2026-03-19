@@ -33,9 +33,15 @@ import { Calibration } from "../entity/Calibration";
 import { fetchCalibration } from "./calibration";
 import { PermissionType } from "../entity/Permission";
 import { Authenticator } from "../lib/auth";
+import { MetricsService } from "../lib/metrics";
 
 export class UploadRoutes {
-  constructor(dataSource: DataSource, queueService: QueueService, authenticator: Authenticator) {
+  constructor(
+    dataSource: DataSource,
+    queueService: QueueService,
+    authenticator: Authenticator,
+    metricsService: MetricsService,
+  ) {
     this.dataSource = dataSource;
     this.instrumentUploadRepo = this.dataSource.getRepository(InstrumentUpload);
     this.modelUploadRepo = this.dataSource.getRepository(ModelUpload);
@@ -48,6 +54,7 @@ export class UploadRoutes {
     this.calibRepo = this.dataSource.getRepository(Calibration);
     this.queueService = queueService;
     this.authenticator = authenticator;
+    this.metricsService = metricsService;
   }
 
   readonly dataSource: DataSource;
@@ -62,6 +69,7 @@ export class UploadRoutes {
   readonly calibRepo: Repository<Calibration>;
   readonly queueService: QueueService;
   readonly authenticator: Authenticator;
+  readonly metricsService: MetricsService;
 
   postMetadata: RequestHandler = async (req, res, next) => {
     const body = req.body;
@@ -274,6 +282,8 @@ export class UploadRoutes {
       Promise.all(taskPromises).catch((err) => {
         console.error("Task publish failed:", err);
       });
+      this.metricsService.accumulateMetric("uploads", "count", 1);
+      this.metricsService.accumulateMetric("uploads", "size", body.size);
     } catch (err: any) {
       if (err.status == 401) return next(err); // Permission error
       if (err.status == 400 && err.errors == "Checksum does not match file contents") return next(err); // Client error

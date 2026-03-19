@@ -43,6 +43,8 @@ import { MonitoringFileRoutes } from "./routes/monitoringFile";
 import { MonitoringVisualizationRoutes } from "./routes/monitoringVisualization";
 import { MonitoringProductRoutes } from "./routes/monitoringProduct";
 import env from "./lib/env";
+import { MetricsService } from "./lib/metrics";
+import { TaskStatus } from "./entity/Task";
 
 async function createServer(): Promise<void> {
   const port = 3000;
@@ -58,6 +60,10 @@ async function createServer(): Promise<void> {
   const queueService = new QueueService(AppDataSource);
   const citationService = new CitationService(AppDataSource);
   const dataCiteService = new DataCiteService(citationService);
+  const metricsService = new MetricsService();
+  metricsService.addInstantMetric("queue", "created", () => queueService.count({ status: TaskStatus.CREATED }));
+  metricsService.addInstantMetric("queue", "failed", () => queueService.count({ status: TaskStatus.FAILED }));
+  metricsService.start();
 
   await queueService.initializeLocks();
   if (process.env.NODE_ENV === "production") {
@@ -87,7 +93,7 @@ async function createServer(): Promise<void> {
   const prodRoutes = new ProductRoutes(AppDataSource);
   const instrRoutes = new InstrumentRoutes(AppDataSource);
   const vizRoutes = new VisualizationRoutes(AppDataSource, fileRoutes);
-  const uploadRoutes = new UploadRoutes(AppDataSource, queueService, authenticator);
+  const uploadRoutes = new UploadRoutes(AppDataSource, queueService, authenticator, metricsService);
   const collRoutes = new CollectionRoutes(AppDataSource, dataCiteService);
   const modelRoutes = new ModelRoutes(AppDataSource);
   const dlRoutes = new DownloadRoutes(AppDataSource, fileRoutes, uploadRoutes, ipLookup, citationService);
@@ -610,14 +616,23 @@ async function createServer(): Promise<void> {
     process.on("SIGTERM", () => {
       console.log("SIGTERM signal received: closing HTTP server...");
       server.close(() => {
-        console.log("HTTP server closed. Now closing database connection...");
-        AppDataSource.destroy().then(
+        console.log("HTTP server closed. Now closing InfluxDB connection...");
+        metricsService.destroy().then(
           () => {
-            console.log("Database connection closed.");
-            resolve();
+            console.log("InfluxDB connection closed. Now closing PostgreSQL connection...");
+            AppDataSource.destroy().then(
+              () => {
+                console.log("PostgreSQL connection closed.");
+                resolve();
+              },
+              (err) => {
+                console.error("Failed to close PostgreSQL connection:", err);
+                reject(err);
+              },
+            );
           },
           (err) => {
-            console.error("Failed to close database connection:", err);
+            console.error("Failed to close InfluxDB connection:", err);
             reject(err);
           },
         );

@@ -80,6 +80,10 @@ interface Env {
   PRIVATE_IP_RANGES: [ipaddr.IPv4 | ipaddr.IPv6, number][];
   ORCID_CLIENT_ID?: string;
   ORCID_CLIENT_SECRET?: string;
+  INFLUXDB_URL?: string;
+  INFLUXDB_TOKEN?: string;
+  INFLUXDB_ORG?: string;
+  INFLUXDB_BUCKET?: string;
 }
 
 const env: Env = {
@@ -101,6 +105,7 @@ const env: Env = {
   DVAS_URL: readUrl(rawEnv.DVAS_URL),
   DC_URL: readUrl(rawEnv.DC_URL),
   PRIVATE_IP_RANGES: rawEnv.PRIVATE_IP_RANGES ? readIpRanges(rawEnv.PRIVATE_IP_RANGES) : [],
+  INFLUXDB_URL: typeof rawEnv.INFLUXDB_URL !== "undefined" ? readUrl(rawEnv.INFLUXDB_URL) : undefined,
 };
 
 export default env;
