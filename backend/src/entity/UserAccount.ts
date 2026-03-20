@@ -36,7 +36,6 @@ export class UserAccount {
   orcidId!: string | null;
 
   @ManyToOne(() => Person, { nullable: true, onDelete: "SET NULL" })
-  @JoinColumn({ name: "person_id" })
   person!: Person | null;
 
   @RelationId((user: UserAccount) => user.person)
