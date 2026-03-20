@@ -109,7 +109,7 @@ function citation2bibtex(c: Citation, citekey: string) {
 }
 
 function getInitials(name: string): string {
-  return name.replace(/\p{L}+/gu, (part) => part.slice(0, 1) + ".");
+  return name.replace(/([^-\s])[^-\s]+/g, "$1.");
 }
 
 function citation2html(c: Citation) {

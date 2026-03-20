@@ -10,6 +10,7 @@ const uuids = [
   "1bb32746-faf0-4057-9076-ed2e698dcf36",
   "b6de8cf4-8825-47b0-aaa9-4fd413bbb0d7",
   "f036da43-c19c-4832-99f9-6cc88f3255c5",
+  "d21d6a9b-6804-4465-a026-74ec429fe17d",
   // Model files
   "a45a2e9a-e39d-4af2-9798-5ea0fadf041e",
   // Legacy files

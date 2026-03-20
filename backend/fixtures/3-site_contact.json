@@ -5,5 +5,19 @@
     "startDate": null,
     "endDate": null,
     "createdAt": "2020-01-01T00:00:00.000Z"
+  },
+  {
+    "siteId": "hyytiala",
+    "personId": 4,
+    "startDate": null,
+    "endDate": null,
+    "createdAt": "2020-01-01T00:00:00.000Z"
+  },
+  {
+    "siteId": "hyytiala",
+    "personId": 5,
+    "startDate": null,
+    "endDate": null,
+    "createdAt": "2020-01-01T00:00:00.000Z"
   }
 ]

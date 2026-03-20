@@ -1,14 +1,27 @@
 [
   {
+    "id": 1,
     "firstName": "Benjamin",
     "lastName": "Bucharinen"
   },
   {
+    "id": 2,
     "firstName": "James Tiberius",
     "lastName": "Kirk"
   },
   {
+    "id": 3,
     "firstName": "Jean-Luc",
     "lastName": "Picard"
+  },
+  {
+    "id": 4,
+    "firstName": "Johnny B.",
+    "lastName": "Goode"
+  },
+  {
+    "id": 5,
+    "firstName": "Örkki Ääliö",
+    "lastName": "Öylätti"
   }
 ]
