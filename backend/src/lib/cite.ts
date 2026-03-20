@@ -8,7 +8,12 @@ import { formatList, getCollectionLandingPage, getFileLandingPage, truncateList 
 import { normalizeOrcid } from "../../../shared/lib/entity/Person";
 import env from "../lib/env";
 
-const MODEL_AUTHOR: Person = { firstName: "Ewan", lastName: "O'Connor", orcid: "0000-0001-9834-5100", role: "modelPi" };
+const MODEL_AUTHOR: Person = {
+  firstName: "E. J.",
+  lastName: "O'Connor",
+  orcid: "0000-0001-9834-5100",
+  role: "modelPi",
+};
 const UNKNOWN_AUTHOR: Person = { firstName: "", lastName: "CLU", orcid: null, role: "instrumentPi" };
 const PUBLISHER = "ACTRIS Cloud remote sensing data centre unit (CLU)";
 const MONTHS_FULL = [
