@@ -91,15 +91,15 @@
             @input="form.orcid = ($event.target as HTMLInputElement).value.trim()"
           />
           <span v-if="orcidStatus === 'loading'" class="orcid-status orcid-loading">Looking up…</span>
-          <span v-else-if="orcidStatus === 'found-db'" class="orcid-status orcid-found">{{
-            editingContactId ? `${orcidVerifiedName} (database)` : "Auto-filled from database"
-          }}</span>
-          <span v-else-if="orcidStatus === 'found-orcid'" class="orcid-status orcid-found">{{
-            editingContactId ? `${orcidVerifiedName} (ORCID registry)` : "Auto-filled from ORCID registry"
-          }}</span>
-          <span v-else-if="orcidStatus === 'not-found'" class="orcid-status orcid-not-found"
-            >ORCID not found in registry</span
-          >
+          <span v-else-if="orcidStatus === 'found-db'" class="orcid-status orcid-found">
+            {{ editingContactId ? `${orcidVerifiedName} (database)` : "Auto-filled from database" }}
+          </span>
+          <span v-else-if="orcidStatus === 'found-orcid'" class="orcid-status orcid-found">
+            {{ editingContactId ? `${orcidVerifiedName} (ORCID registry)` : "Auto-filled from ORCID registry" }}
+          </span>
+          <span v-else-if="orcidStatus === 'not-found'" class="orcid-status orcid-not-found">
+            ORCID not found in registry
+          </span>
           <span v-else-if="orcidStatus === 'invalid'" class="orcid-status orcid-not-found">Invalid ORCID format</span>
         </div>
         <div class="form-group">
@@ -115,15 +115,16 @@
               type="secondary"
               size="small"
               @click="clearStartDate"
-              >Clear</BaseButton
             >
+              Clear
+            </BaseButton>
           </div>
-          <span v-if="startDateError && !startDateError.isValidDateString" class="date-error"
-            >Invalid date. Use format <i>YYYY-MM-DD</i>.</span
-          >
-          <span v-else-if="startDateError && !startDateError.isNotInFuture" class="date-error"
-            >Date cannot be in the future.</span
-          >
+          <span v-if="startDateError && !startDateError.isValidDateString" class="date-error">
+            Invalid date. Use format <i>YYYY-MM-DD</i>.
+          </span>
+          <span v-else-if="startDateError && !startDateError.isNotInFuture" class="date-error">
+            Date cannot be in the future.
+          </span>
         </div>
         <div class="form-group">
           <label>End date (optional)</label>
@@ -134,15 +135,16 @@
               type="secondary"
               size="small"
               @click="clearEndDate"
-              >Clear</BaseButton
             >
+              Clear
+            </BaseButton>
           </div>
-          <span v-if="endDateError && !endDateError.isValidDateString" class="date-error"
-            >Invalid date. Use format <i>YYYY-MM-DD</i>.</span
-          >
-          <span v-else-if="endDateError && !endDateError.isNotInFuture" class="date-error"
-            >Date cannot be in the future.</span
-          >
+          <span v-if="endDateError && !endDateError.isValidDateString" class="date-error">
+            Invalid date. Use format <i>YYYY-MM-DD</i>.
+          </span>
+          <span v-else-if="endDateError && !endDateError.isNotInFuture" class="date-error">
+            Date cannot be in the future.
+          </span>
         </div>
         <div v-if="formError" class="form-error">{{ formError }}</div>
       </template>
@@ -153,11 +155,12 @@
           :disabled="
             submitting || orcidStatus === 'loading' || orcidStatus === 'not-found' || orcidStatus === 'invalid'
           "
-          >{{ submitting ? "Saving…" : "Save" }}</BaseButton
         >
-        <BaseButton v-if="personIsAutoFilled && !editingContactId" type="secondary" @click="clearSelectedPerson"
-          >Clear</BaseButton
-        >
+          {{ submitting ? "Saving…" : "Save" }}
+        </BaseButton>
+        <BaseButton v-if="personIsAutoFilled && !editingContactId" type="secondary" @click="clearSelectedPerson">
+          Clear
+        </BaseButton>
         <BaseButton type="secondary" @click="closeModal">Cancel</BaseButton>
       </template>
     </BaseModal>
