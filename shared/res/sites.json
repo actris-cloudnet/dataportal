@@ -72,7 +72,7 @@
     "country": "Italy"
   },
   {
-    "id": "newyork",
+    "id": "new-york",
     "humanReadableName": "New York",
     "type": ["campaign"],
     "latitude": 43,

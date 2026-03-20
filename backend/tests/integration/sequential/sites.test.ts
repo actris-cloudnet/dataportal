@@ -77,7 +77,7 @@ describe("GET /api/sites", () => {
     const params = { params: { type: ["campaign", "arm"] } };
     const res = await axios.get(url, params);
     expect(res.data).toHaveLength(2);
-    expect(res.data[0].id).toEqual("newyork");
+    expect(res.data[0].id).toEqual("new-york");
     expect(res.data[1].id).toEqual("shanghai");
   });
 

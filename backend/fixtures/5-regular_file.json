@@ -335,11 +335,11 @@
     "updatedAt": "2020-02-19T10:59:58.449Z",
     "startTime": "2018-11-15T10:56:19.382Z",
     "stopTime": "2018-11-15T11:56:19.382Z",
-    "s3key": "legacy/20090716_newyork_classification.nc",
+    "s3key": "legacy/20090716_new-york_classification.nc",
     "checksum": "65d29c507d0ebeec46a6c93deb8ebe3b86dfd678fc73e1a70816cca2fe279025",
     "size": 7127282,
     "format": "HDF5 (NetCDF4)",
-    "site": "newyork",
+    "site": "new-york",
     "version": "123",
     "errorLevel": null,
     "software": [{ "id": 1 }]
