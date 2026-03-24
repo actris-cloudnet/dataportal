@@ -15,6 +15,7 @@ export enum PermissionType {
   canPublishTask = "canPublishTask",
   canLogin = "canLogin",
   canManageContacts = "canManageContacts",
+  canManageNews = "canManageNews",
 }
 
 @Entity()

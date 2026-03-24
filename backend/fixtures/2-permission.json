@@ -43,5 +43,9 @@
   {
     "id": 11,
     "permission": "canManageContacts"
+  },
+  {
+    "id": 12,
+    "permission": "canManageNews"
   }
 ]

@@ -45,6 +45,7 @@ import { MonitoringProductRoutes } from "./routes/monitoringProduct";
 import env from "./lib/env";
 import { MetricsService } from "./lib/metrics";
 import { TaskStatus } from "./entity/Task";
+import { NewsRoutes } from "./routes/news";
 
 async function createServer(): Promise<void> {
   const port = 3000;
@@ -111,6 +112,7 @@ async function createServer(): Promise<void> {
   const monitoringFileRoutes = new MonitoringFileRoutes(AppDataSource);
   const monitoringVisualizationRoutes = new MonitoringVisualizationRoutes(AppDataSource);
   const monitoringProductRoutes = new MonitoringProductRoutes(AppDataSource);
+  const newsRoutes = new NewsRoutes(AppDataSource);
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     console.error(
@@ -528,6 +530,30 @@ async function createServer(): Promise<void> {
     publicationRoutes.deletePublication,
   );
   app.get("/api/publications/", publicationRoutes.getPublications);
+
+  // News routes
+  app.post(
+    "/api/news/",
+    passport.authenticate(["basic", "cookie"], { session: false }),
+    authorizator.verifyPermission(PermissionType.canManageNews),
+    express.json(),
+    newsRoutes.postNews,
+  );
+  app.get("/api/news/", newsRoutes.getNews);
+  app.get("/api/news/:slug", newsRoutes.getNewsItemBySlug);
+  app.delete(
+    "/api/news/:slug",
+    passport.authenticate(["basic", "cookie"], { session: false }),
+    authorizator.verifyPermission(PermissionType.canManageNews),
+    newsRoutes.deleteNewsItemBySlug,
+  );
+  app.put(
+    "/api/news/:slug",
+    passport.authenticate(["basic", "cookie"], { session: false }),
+    authorizator.verifyPermission(PermissionType.canManageNews),
+    express.json(),
+    newsRoutes.updateNewsItemBySlug,
+  );
 
   app.get(
     "/api/monitoring-files/available-periods",

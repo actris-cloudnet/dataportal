@@ -179,6 +179,25 @@ const routes = [
     props: true,
   },
   {
+    path: "/news",
+    name: "NewsList",
+    meta: {
+      title: "News",
+    },
+    component: () => import("@/views/NewsListView.vue"),
+    props: true,
+  },
+  {
+    path: "/news/:slug",
+    name: "NewsItem",
+    meta: {
+      title: "News",
+    },
+    component: () => import("@/views/NewsView.vue"),
+    props: true,
+  },
+
+  {
     path: "/:pathMatch(.*)*",
     name: "ApiError",
     meta: {
