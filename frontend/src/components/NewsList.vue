@@ -1,6 +1,6 @@
 <template>
   <div class="news-list" v-if="news.length > 0">
-    <h2>Latest News</h2>
+    <h2>Latest news</h2>
     <div v-if="loading" class="loading">Loading news...</div>
     <div v-else-if="error" class="error">Failed to load news</div>
     <div class="news-items" v-else>
@@ -73,6 +73,7 @@ h2 {
   display: grid;
   grid-template-columns: min-content 1fr;
   gap: 0.5rem;
+  align-items: center;
 }
 
 .news-date {
