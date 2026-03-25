@@ -43,8 +43,8 @@
           :dataStatus="dataStatus"
           :productId="selectedProductId"
           :year="selectedYear"
-          :instrumentPid="selectedPid"
-          :modelId="selectedModel"
+          :instrumentPid="selectedInstPid"
+          :modelId="selectedModelId"
         />
         <BaseSpinner v-else />
       </section>
@@ -73,17 +73,11 @@
           />
         </div>
         <div class="viz-option" style="width: 130px">
-          <custom-multiselect
-            v-model="selectedYearOption"
-            label="Year"
-            :options="yearOptions"
-            id="yearSelect"
-            clearable
-          />
+          <custom-multiselect v-model="selectedYear" label="Year" :options="yearOptions" id="yearSelect" clearable />
         </div>
         <div class="viz-option" style="width: 300px" v-if="pidOptions.length > 1">
           <custom-multiselect
-            v-model="selectedPidOption"
+            v-model="selectedInstPid"
             label="Instrument"
             :options="pidOptions"
             id="pidSelect"
@@ -92,7 +86,7 @@
         </div>
         <div class="viz-option" style="width: 320px" v-if="modelOptions.length > 1">
           <custom-multiselect
-            v-model="selectedModelOption"
+            v-model="selectedModelId"
             label="Model"
             :options="modelOptions"
             id="modelSelect"
@@ -115,6 +109,7 @@ import { getProductIcon } from "@/lib";
 import { parseDataStatus, type DataStatus } from "@/lib/DataStatusParser";
 import CustomMultiselect from "@/components/MultiSelect.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
+import { queryInteger, queryString, useRouteQuery } from "@/lib/useRouteQuery";
 
 export interface Props {
   site: Site;
@@ -122,19 +117,16 @@ export interface Props {
 
 const props = defineProps<Props>();
 
-const selectedProductId = ref<string | null>(null);
 const dataStatus = ref<DataStatus | null>(null);
 
-const selectedYearOption = ref(null);
-const selectedPidOption = ref(null);
-const selectedModelOption = ref(null);
-const selectedYear = computed(() => (selectedYearOption.value ? parseInt(selectedYearOption.value) : undefined));
-const selectedPid = computed(() => (selectedPidOption.value ? selectedPidOption.value : undefined));
-const selectedModel = computed(() => (selectedModelOption.value ? selectedModelOption.value : undefined));
+const selectedProductId = useRouteQuery({ name: "product", type: queryString, defaultValue: null });
+const selectedYear = useRouteQuery({ name: "year", type: queryInteger, defaultValue: null });
+const selectedInstPid = useRouteQuery({ name: "instrumentPid", type: queryString, defaultValue: null });
+const selectedModelId = useRouteQuery({ name: "model", type: queryString, defaultValue: null });
 
 const yearOptions = computed(() => {
   if (!dataStatus.value) return [];
-  return dataStatus.value.years.map((year) => ({ id: year.toString(), humanReadableName: year.toString() }));
+  return dataStatus.value.years.map((year) => ({ id: year, humanReadableName: year.toString() }));
 });
 
 const pidOptions = computed(() => {
@@ -161,19 +153,18 @@ const currentInstrument = computed(() => {
   if (!dataStatus.value || !selectedProductId.value || !dataStatus.value.allPids[selectedProductId.value]) {
     return null;
   }
-  const selectedPid =
-    !selectedPidOption.value && pidOptions.value.length === 1 ? pidOptions.value[0].id : selectedPidOption.value;
-  if (!selectedPid) {
+  const pid = !selectedInstPid.value && pidOptions.value.length === 1 ? pidOptions.value[0].id : selectedInstPid.value;
+  if (!pid) {
     return null;
   }
-  return dataStatus.value.allPids[selectedProductId.value].find((inst) => inst.pid === selectedPid);
+  return dataStatus.value.allPids[selectedProductId.value].find((inst) => inst.pid === pid);
 });
 
 const modelName = computed(() => {
-  if (!selectedModelOption.value && modelOptions.value.length === 1) {
+  if (!selectedModelId.value && modelOptions.value.length === 1) {
     return modelOptions.value[0].humanReadableName;
   }
-  const selectedModel = modelOptions.value.find((model) => model.id === selectedModelOption.value);
+  const selectedModel = modelOptions.value.find((model) => model.id === selectedModelId.value);
   return selectedModel ? selectedModel.humanReadableName : null;
 });
 
@@ -198,14 +189,14 @@ const selectedProductName = computed(() => {
 
 function reset() {
   selectedProductId.value = null;
-  selectedYearOption.value = null;
-  selectedPidOption.value = null;
-  selectedModelOption.value = null;
+  selectedYear.value = null;
+  selectedInstPid.value = null;
+  selectedModelId.value = null;
 }
 
 watch(selectedProductId, () => {
-  selectedPidOption.value = null;
-  selectedModelOption.value = null;
+  selectedInstPid.value = null;
+  selectedModelId.value = null;
 });
 </script>
 

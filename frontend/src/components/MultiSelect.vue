@@ -55,7 +55,7 @@ import { compareValues, notEmpty } from "@/lib";
 import { computed, ref, watch } from "vue";
 
 export interface Option {
-  id: string;
+  id: string | number;
   humanReadableName: string;
   shortName?: string;
   stationName?: string | null;
@@ -73,7 +73,7 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const model = defineModel<string | string[] | null>({ required: true });
+const model = defineModel<Option["id"] | Option["id"][] | null>({ required: true });
 
 const searchQuery = ref("");
 
@@ -110,7 +110,7 @@ const internalModel = computed({
 const optionIndex = computed<{ term: string; option: Option }[]>(() =>
   props.options.flatMap((option) => {
     const output = [
-      { term: option.id, option },
+      { term: option.id.toString(), option },
       { term: normalizeGeneric(option.humanReadableName), option },
       { term: normalizeGerman(option.humanReadableName), option },
     ];
