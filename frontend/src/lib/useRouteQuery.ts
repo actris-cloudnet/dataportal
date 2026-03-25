@@ -104,12 +104,17 @@ export function useRouteQuery<T>(options: { name: string; defaultValue: T; type:
 
 export const queryString: QueryType<string> = {
   parse: (x) => x,
-  format: (x) => x,
+  format: (x) => x || undefined,
 };
 
 export const queryStringArray: QueryType<string[]> = {
   parse: (x) => x.split(","),
   format: (x) => x.join(",") || undefined,
+};
+
+export const queryInteger: QueryType<number> = {
+  parse: (x) => parseInt(x, 10),
+  format: (x) => (x != null ? x.toString() : undefined),
 };
 
 export const queryBoolean: QueryType<boolean> = {

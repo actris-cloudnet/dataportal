@@ -64,7 +64,7 @@ export interface Props<X> {
   scale?: string[];
   colors: Record<string, string>;
   data: DataItem<X>[];
-  year?: number;
+  year?: number | null;
 }
 
 interface DateItem<X> {

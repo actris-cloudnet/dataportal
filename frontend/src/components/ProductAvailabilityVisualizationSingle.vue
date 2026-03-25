@@ -52,9 +52,9 @@ import { useRouter } from "vue-router";
 interface Props {
   dataStatus: DataStatus;
   productId: string;
-  year?: number;
-  instrumentPid?: string;
-  modelId?: string;
+  year?: number | null;
+  instrumentPid?: string | null;
+  modelId?: string | null;
   sites?: Site[];
 }
 
@@ -87,7 +87,7 @@ const dates = computed(() =>
   }),
 );
 
-const getProduct = (date: ProductDate, productId: string, instrumentPid?: string, modelId?: string) => {
+const getProduct = (date: ProductDate, productId: string, instrumentPid?: string | null, modelId?: string | null) => {
   if (modelId) {
     return date.products.instrument.find((p) => p.modelId === modelId);
   }
