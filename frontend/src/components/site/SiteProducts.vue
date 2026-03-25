@@ -150,7 +150,6 @@ const modelOptions = computed(() => {
 });
 
 const currentInstrument = computed(() => {
-  console.log(selectedProductId.value, dataStatus.value);
   if (!dataStatus.value || !selectedProductId.value || !dataStatus.value.allPids[selectedProductId.value]) {
     return null;
   }
