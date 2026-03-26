@@ -23,6 +23,7 @@ jobs:
       packages: write
       attestations: write
       id-token: write
+      artifact-metadata: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -54,7 +55,7 @@ jobs:
 
       - name: Generate artifact attestation
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest@v4
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}-${{ matrix.target }}
           subject-digest: ${{ steps.push.outputs.digest }}
