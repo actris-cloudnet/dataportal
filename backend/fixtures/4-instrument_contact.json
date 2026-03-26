@@ -12,5 +12,12 @@
     "startDate": null,
     "endDate": null,
     "createdAt": "2020-01-01T00:00:00.000Z"
+  },
+  {
+    "instrumentInfoUuid": "028adedd-35a4-4733-ad7b-78fdf9555a02",
+    "personId": 2,
+    "startDate": null,
+    "endDate": null,
+    "createdAt": "2020-01-01T00:00:00.000Z"
   }
 ]

@@ -2,8 +2,6 @@ import { DataSource } from "typeorm";
 
 import { RegularFile, ModelFile } from "../entity/File";
 import { Collection } from "../entity/Collection";
-import { InstrumentContact } from "../entity/InstrumentContact";
-import { SiteContact } from "../entity/SiteContact";
 import { formatList, getCollectionLandingPage, getFileLandingPage, truncateList } from ".";
 import { normalizeOrcid } from "../../../shared/lib/entity/Person";
 import env from "../lib/env";
@@ -78,13 +76,13 @@ export class CitationService {
 
   async getCollectionCitation(collection: Collection): Promise<Citation> {
     const [instrumentPis, usesModelData, nfPis, productNames, sites, dateRange, siteAuthors] = await Promise.all([
-      this.queryInstrumentUuids(collection).then((uuids) => this.fetchInstrumentPis(uuids)),
+      this.queryInstrumentPis(collection),
       this.usesModelData(collection),
       this.queryCollectionActrisIds(collection).then((ids) => fetchNfPis(ids)),
       this.queryCollectionProductNames(collection),
       this.queryCollectionSites(collection),
       this.queryCollectionDateRange(collection),
-      this.queryCollectionSiteData(collection).then((data) => this.fetchSitePis(data)),
+      this.querySitePis(collection),
     ]);
     if (usesModelData || productNames.includes("Model")) {
       instrumentPis.push(MODEL_AUTHOR);
@@ -119,9 +117,9 @@ export class CitationService {
     if (file instanceof RegularFile) {
       const measurementDate = file.measurementDate as unknown as string;
       const [instrumentPis, nfPi, sitePis, usesModelData] = await Promise.all([
-        this.queryInstrumentUuids(file).then((uuids) => this.fetchInstrumentPis(uuids)),
+        this.queryInstrumentPis(file),
         file.site.actrisId ? fetchNfPi(file.site.actrisId, measurementDate) : Promise.resolve([]),
-        this.fetchSitePis([{ siteId: file.site.id, dates: [measurementDate] }]),
+        this.querySitePis(file),
         this.usesModelData(file),
       ]);
       people = [
@@ -181,17 +179,60 @@ export class CitationService {
     return output;
   }
 
-  private queryInstrumentUuids(
-    object: RegularFile | Collection,
-  ): Promise<{ instrumentInfoUuid: string; dates: string[] }[]> {
-    return this.querySourceFiles(
+  private async queryInstrumentPis(object: RegularFile | Collection): Promise<Person[]> {
+    const rows = await this.querySourceFiles(
       object,
-      `SELECT regular_file."instrumentInfoUuid", array_agg(regular_file."measurementDate"::text) AS dates
-       FROM traverse
-       JOIN regular_file ON traverse.uuid = regular_file.uuid
-       WHERE regular_file."instrumentInfoUuid" IS NOT NULL
-       GROUP BY regular_file."instrumentInfoUuid"`,
+      `, uniq_instrument AS (
+         SELECT DISTINCT ON ("instrumentInfoUuid") "instrumentInfoUuid", depth
+         FROM traverse
+         JOIN regular_file ON traverse.uuid = regular_file.uuid
+         WHERE "instrumentInfoUuid" IS NOT NULL
+         ORDER BY "instrumentInfoUuid", depth
+       ), uniq_person AS (
+         SELECT DISTINCT ON ("personId") "personId", depth
+         FROM uniq_instrument
+         JOIN instrument_contact ON instrument_contact."instrumentInfoUuid" = uniq_instrument."instrumentInfoUuid"
+         WHERE CURRENT_DATE <@ daterange("startDate", "endDate", '[]')
+         ORDER BY "personId", depth
+       )
+       SELECT "firstName", "lastName", "orcid"
+       FROM uniq_person
+       JOIN person ON "personId" = person.id
+       ORDER BY depth, "lastName", "firstName"`,
     );
+    return rows.map((row: any) => ({ ...row, role: "instrumentPi" }));
+  }
+
+  private async querySitePis(object: RegularFile | Collection): Promise<Person[]> {
+    const rows =
+      object instanceof RegularFile
+        ? await this.dataSource.query(
+            `SELECT "firstName", "lastName", "orcid"
+             FROM site_contact
+             JOIN person ON "personId" = person.id
+             WHERE "siteId" = $1
+             AND CURRENT_DATE <@ daterange("startDate", "endDate", '[]')
+             ORDER BY "lastName", "firstName"`,
+            [object.site.id],
+          )
+        : await this.querySourceFiles(
+            object,
+            `, uniq_site AS (
+               SELECT DISTINCT "siteId"
+               FROM traverse
+               JOIN regular_file ON traverse.uuid = regular_file.uuid
+             ), uniq_person AS (
+               SELECT DISTINCT "personId"
+               FROM uniq_site
+               JOIN site_contact ON site_contact."siteId" = uniq_site."siteId"
+               WHERE CURRENT_DATE <@ daterange("startDate", "endDate", '[]')
+             )
+             SELECT "firstName", "lastName", "orcid"
+             FROM uniq_person
+             JOIN person ON "personId" = person.id
+             ORDER BY "lastName", "firstName"`,
+          );
+    return rows.map((row: any) => ({ ...row, role: "nfPi" }));
   }
 
   private async usesModelData(object: RegularFile | Collection): Promise<boolean> {
@@ -259,35 +300,6 @@ export class CitationService {
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  private async queryCollectionSiteData(collection: Collection): Promise<{ siteId: string; dates: string[] }[]> {
-    const rows: any[] = await this.dataSource.query(
-      `SELECT "siteId", array_agg(regular_file."measurementDate"::text) AS dates
-       FROM regular_file
-       JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
-       WHERE "collectionUuid" = $1
-       GROUP BY "siteId"`,
-      [collection.uuid],
-    );
-    return rows;
-  }
-
-  private async fetchSitePis(data: { siteId: string; dates: string[] }[]): Promise<Person[]> {
-    if (data.length === 0) return [];
-    const ids = data.map((d) => d.siteId);
-    const contacts = await this.dataSource
-      .getRepository(SiteContact)
-      .createQueryBuilder("c")
-      .innerJoinAndSelect("c.person", "p")
-      .where("c.siteId IN (:...ids)", { ids })
-      .getMany();
-    return filterContactsByDate(
-      data.map((d) => ({ key: d.siteId, dates: d.dates })),
-      contacts,
-      (c) => c.siteId,
-      "nfPi",
-    );
-  }
-
   private async queryCollectionDateRange(collection: Collection): Promise<{ startDate: Date; endDate: Date }> {
     const rows = await this.dataSource.query(
       `SELECT MIN("measurementDate") AS "startDate", MAX("measurementDate") AS "endDate"
@@ -348,33 +360,16 @@ export class CitationService {
         : `WHERE uuid = $1`;
     return await this.dataSource.query(
       `WITH RECURSIVE traverse AS (
-         SELECT uuid
+         SELECT uuid, 0 as depth
          FROM regular_file
          ${filter}
          UNION ALL
-         SELECT "regularFileUuid_2"
+         SELECT "regularFileUuid_2", traverse.depth + 1
          FROM regular_file_source_regular_files_regular_file
          JOIN traverse ON "regularFileUuid_1" = traverse.uuid
        )
        ${query}`,
       [object.uuid],
-    );
-  }
-
-  private async fetchInstrumentPis(data: { instrumentInfoUuid: string; dates: string[] }[]): Promise<Person[]> {
-    if (data.length === 0) return [];
-    const ids = data.map((d) => d.instrumentInfoUuid);
-    const contacts = await this.dataSource
-      .getRepository(InstrumentContact)
-      .createQueryBuilder("c")
-      .innerJoinAndSelect("c.person", "p")
-      .where("c.instrumentInfoUuid IN (:...ids)", { ids })
-      .getMany();
-    return filterContactsByDate(
-      data.map((d) => ({ key: d.instrumentInfoUuid, dates: d.dates })),
-      contacts,
-      (c) => c.instrumentInfoUuid,
-      "instrumentPi",
     );
   }
 }
@@ -383,45 +378,6 @@ interface ContactWithDateRange {
   person: import("../entity/Person").Person;
   startDate: string | null;
   endDate: string | null;
-}
-
-function filterContactsByDate<T extends ContactWithDateRange>(
-  data: { key: string; dates: string[] }[],
-  contacts: T[],
-  getKey: (c: T) => string,
-  role: Person["role"],
-): Person[] {
-  const contactsByKey = new Map<string, T[]>();
-  for (const c of contacts) {
-    const k = getKey(c);
-    if (!contactsByKey.has(k)) contactsByKey.set(k, []);
-    contactsByKey.get(k)!.push(c);
-  }
-  const seen = new Set<string>();
-  const result: Person[] = [];
-  for (const item of data) {
-    const itemContacts = contactsByKey.get(item.key) ?? [];
-    for (const date of item.dates) {
-      for (const contact of itemContacts) {
-        const inRange =
-          (contact.startDate != null ? date >= contact.startDate : true) &&
-          (contact.endDate != null ? date <= contact.endDate : true);
-        if (inRange) {
-          const dedup = contact.person.orcid ?? `${contact.person.firstName}|${contact.person.lastName}`;
-          if (!seen.has(dedup)) {
-            seen.add(dedup);
-            result.push({
-              firstName: contact.person.firstName,
-              lastName: contact.person.lastName,
-              orcid: contact.person.orcid ? normalizeOrcid(contact.person.orcid) : null,
-              role,
-            });
-          }
-        }
-      }
-    }
-  }
-  return result;
 }
 
 async function fetchNfPi(actrisId: number, measurementDate?: string): Promise<NfContact[]> {
@@ -482,11 +438,6 @@ function normalizeText(input: string): string {
 export function removeDuplicateNames(pis: Person[]): Person[] {
   // Order
   const allPis = pis
-    .sort((a, b) =>
-      a.lastName !== b.lastName
-        ? a.lastName.localeCompare(b.lastName, "en-gb")
-        : a.firstName.localeCompare(b.firstName, "en-gb"),
-    )
     .filter((ele) => ele.role == "instrumentPi")
     .concat(pis.filter((ele) => ele.role == "modelPi"))
     .concat(pis.filter((ele) => ele.role == "nfPi"));
