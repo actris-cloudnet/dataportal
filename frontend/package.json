@@ -15,13 +15,15 @@
     "test": "npm run test:unit"
   },
   "dependencies": {
+    "@angelblanco/v-calendar": "^3.1.3",
+    "@types/commonmark": "^0.27.10",
     "axios": "^1.3.2",
+    "commonmark": "^0.31.2",
     "escape-html": "^1.0.3",
     "inter-ui": "^4.0.2",
     "leaflet": "^1.9.3",
     "leaflet-draw": "^1.0.4",
     "uplot": "^1.6.30",
-    "@angelblanco/v-calendar": "^3.1.3",
     "vue": "^3.5.0",
     "vue-matomo": "^4.2.0",
     "vue-multiselect": "^3.0.0",

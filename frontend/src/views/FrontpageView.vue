@@ -33,6 +33,7 @@
       <div style="display: flex; justify-content: center">
         <BaseButton href="https://ccres.aeris-data.fr" type="secondary"> CCRES services &#8594; </BaseButton>
       </div>
+      <NewsList />
     </main>
   </main>
 </template>
@@ -44,6 +45,7 @@ import searchIcon from "@/assets/icons/search-white.png";
 import graphIcon from "@/assets/icons/graph-white.png";
 import docsIcon from "@/assets/icons/docs-white.png";
 import BaseButton from "@/components/BaseButton.vue";
+import NewsList from "@/components/NewsList.vue";
 </script>
 
 <style scoped lang="scss">
