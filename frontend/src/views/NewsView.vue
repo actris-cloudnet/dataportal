@@ -4,7 +4,7 @@
     <div v-else-if="error" class="error">Failed to load news item</div>
     <div v-else-if="newsItem" class="news-item-detail">
       <h1>{{ newsItem.title }}</h1>
-      <p class="date">{{ formatDate(newsItem.date) }}</p>
+      <p class="date">{{ formatDisplayDate(newsItem.date) }}</p>
       <MarkdownViewer :content="newsItem.content" />
     </div>
     <div v-else class="not-found">News item not found</div>
@@ -15,16 +15,9 @@
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import axios from "axios";
-import { backendUrl } from "@/lib";
+import { backendUrl, formatDisplayDate } from "@/lib";
 import MarkdownViewer from "@/components/MarkdownViewer.vue";
-
-interface NewsItem {
-  id: number;
-  title: string;
-  content: string;
-  date: string;
-  slug: string;
-}
+import type { NewsItem } from "@shared/entity/NewsItem";
 
 const route = useRoute();
 const newsItem = ref<NewsItem | null>(null);
@@ -42,11 +35,6 @@ async function fetchNewsItem() {
   } finally {
     loading.value = false;
   }
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
 }
 
 onMounted(fetchNewsItem);

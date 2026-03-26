@@ -73,7 +73,7 @@
             <BaseButton @click="deleteNewsItem(item.slug)" type="danger" size="small"> Delete </BaseButton>
           </div>
         </div>
-        <p class="date">{{ formatDate(item.date) }}</p>
+        <p class="date">{{ formatDisplayDate(item.date) }}</p>
         <MarkdownViewer :content="item.content" />
       </div>
     </div>
@@ -83,21 +83,14 @@
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
-import { backendUrl, dateToString } from "@/lib";
+import { backendUrl, dateToString, formatDisplayDate } from "@/lib";
 import { hasPermission } from "@/lib/auth";
 import BaseModal from "@/components/BaseModal.vue";
 import BaseButton from "@/components/BaseButton.vue";
 import MarkdownViewer from "@/components/MarkdownViewer.vue";
 import CheckBox from "@/components/CheckBox.vue";
 import DatePicker from "@/components/DatePicker.vue";
-
-interface NewsItem {
-  id: number;
-  title: string;
-  content: string;
-  date: string;
-  slug: string;
-}
+import type { NewsItem } from "@shared/entity/NewsItem";
 
 const news = ref<NewsItem[]>([]);
 const loading = ref(true);
@@ -114,7 +107,6 @@ const formData = ref({
 });
 const showPreview = ref(false);
 
-// Check if user has admin permissions
 const canEdit = hasPermission("canManageNews");
 
 async function fetchNews() {
@@ -151,13 +143,9 @@ function cancelForm() {
 
 async function createNewsItem() {
   try {
-    const response = await axios.post(`${backendUrl}news/`, formData.value);
-
-    if (response.status === 201) {
-      // Refresh the list
-      await fetchNews();
-      cancelForm();
-    }
+    await axios.post(`${backendUrl}news/`, formData.value);
+    await fetchNews();
+    cancelForm();
   } catch (err) {
     console.error("Failed to create news item:", err);
     alert("Failed to create news item. Please try again.");
@@ -168,13 +156,9 @@ async function updateNewsItem() {
   if (!editingItem.value) return;
 
   try {
-    const response = await axios.put(`${backendUrl}news/${editingItem.value.slug}`, formData.value);
-
-    if (response.status === 200) {
-      // Successfully updated, refresh the list
-      await fetchNews();
-      cancelForm();
-    }
+    await axios.put(`${backendUrl}news/${editingItem.value.slug}`, formData.value);
+    await fetchNews();
+    cancelForm();
   } catch (err) {
     console.error("Failed to update news item:", err);
     alert("Failed to update news item. Please try again.");
@@ -185,25 +169,12 @@ async function deleteNewsItem(slug: string) {
   if (!confirm("Are you sure you want to delete this news item?")) return;
 
   try {
-    const response = await axios.delete(`${backendUrl}news/${slug}`);
-
-    if (response.status === 204) {
-      // Successfully deleted, refresh the list
-      await fetchNews();
-    }
+    await axios.delete(`${backendUrl}news/${slug}`);
+    await fetchNews();
   } catch (err) {
     console.error("Failed to delete news item:", err);
     alert("Failed to delete news item. Please try again.");
   }
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
 }
 
 onMounted(fetchNews);
@@ -224,21 +195,6 @@ h1 {
 
 .admin-actions {
   margin-bottom: 2rem;
-}
-
-.create-button {
-  background-color: #3498db;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.2s;
-}
-
-.create-button:hover {
-  background-color: #2980b9;
 }
 
 .modal-input {
@@ -324,34 +280,8 @@ h1 {
   gap: 0.5rem;
 }
 
-.edit-button {
-  background-color: #f39c12;
-  color: white;
-  border: none;
-  padding: 0.3rem 0.6rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
-
-.delete-button {
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  padding: 0.3rem 0.6rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
-
 .date {
   color: #7f8c8d;
   margin-bottom: 1rem;
-}
-
-.content {
-  line-height: 1.6;
-  color: #34495e;
-  white-space: pre-line;
 }
 </style>

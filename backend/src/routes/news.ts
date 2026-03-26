@@ -33,7 +33,8 @@ export class NewsRoutes {
   };
 
   getNews: RequestHandler = async (req, res) => {
-    const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+    const parsed = typeof req.query.limit === "string" ? parseInt(req.query.limit, 10) : NaN;
+    const limit = Number.isFinite(parsed) ? parsed : 10;
     const news = await this.newsRepo.find({
       order: { date: "DESC" },
       take: limit,
@@ -42,46 +43,25 @@ export class NewsRoutes {
   };
 
   getNewsItemBySlug: RequestHandler = async (req, res, next) => {
-    const slug = req.params.slug;
-    if (!slug || typeof slug !== "string") {
-      return next({ status: 400, error: "Invalid news slug" });
-    }
-    const news = await this.newsRepo.findOne({ where: { slug } });
-    if (!news) {
-      return next({ status: 404, error: "News item not found" });
-    }
+    const news = await this.findBySlug(req.params.slug, next);
+    if (!news) return;
     res.send(news);
   };
 
   deleteNewsItemBySlug: RequestHandler = async (req, res, next) => {
-    const slug = req.params.slug;
-    if (!slug || typeof slug !== "string") {
-      return next({ status: 400, error: "Invalid news slug" });
-    }
-
-    const news = await this.newsRepo.findOne({ where: { slug } });
-    if (!news) {
-      return next({ status: 404, error: "News item not found" });
-    }
-
+    const news = await this.findBySlug(req.params.slug, next);
+    if (!news) return;
     await this.newsRepo.delete(news.id);
     res.sendStatus(204);
   };
 
   updateNewsItemBySlug: RequestHandler = async (req, res, next) => {
-    const slug = req.params.slug;
-    if (!slug || typeof slug !== "string") {
-      return next({ status: 400, error: "Invalid news slug" });
-    }
+    const news = await this.findBySlug(req.params.slug, next);
+    if (!news) return;
 
     const { title, content, date } = req.body;
     if (typeof title !== "string" || typeof content !== "string" || typeof date !== "string") {
       return next({ status: 400, error: "title, content, and date are required" });
-    }
-
-    const news = await this.newsRepo.findOne({ where: { slug } });
-    if (!news) {
-      return next({ status: 404, error: "News item not found" });
     }
 
     news.title = title;
@@ -92,4 +72,13 @@ export class NewsRoutes {
     await this.newsRepo.save(news);
     res.sendStatus(200);
   };
+
+  private async findBySlug(slug: string, next: Parameters<RequestHandler>[2]): Promise<NewsItem | null> {
+    const news = await this.newsRepo.findOne({ where: { slug } });
+    if (!news) {
+      next({ status: 404, error: "News item not found" });
+      return null;
+    }
+    return news;
+  }
 }

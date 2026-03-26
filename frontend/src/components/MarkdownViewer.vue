@@ -6,21 +6,17 @@
 import { computed } from "vue";
 import * as commonmark from "commonmark";
 
-interface Props {
-  content: string;
-}
+const reader = new commonmark.Parser();
+const writer = new commonmark.HtmlRenderer();
 
-const props = defineProps<Props>();
+const props = defineProps<{ content: string }>();
 
 const renderedHtml = computed(() => {
   try {
-    const reader = new commonmark.Parser();
-    const writer = new commonmark.HtmlRenderer();
     const parsed = reader.parse(props.content);
     return writer.render(parsed);
   } catch (error) {
     console.error("Markdown parsing error:", error);
-    // Fallback to raw text if parsing fails
     return props.content.replace(/\n/g, "<br>");
   }
 });

@@ -106,6 +106,13 @@ export const humanReadableDate = (date: string | Date) =>
     timeZone: "UTC",
   });
 
+export const formatDisplayDate = (date: string | Date) =>
+  new Date(date).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
 export const humanReadableTimestamp = (date: string | Date) => {
   const [timestamp, suffix] = date.toString().replace("T", " ").split(".");
   return suffix.includes("Z") ? `${timestamp} UTC` : timestamp;

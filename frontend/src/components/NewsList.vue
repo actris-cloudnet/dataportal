@@ -5,7 +5,7 @@
     <div v-else-if="error" class="error">Failed to load news</div>
     <div class="news-items" v-else>
       <template v-for="item in news" :key="item.id">
-        <span class="news-date">{{ formatDate(item.date) }}</span>
+        <span class="news-date">{{ formatDisplayDate(item.date) }}</span>
         <router-link :to="{ name: 'NewsItem', params: { slug: item.slug } }" class="news-title">
           {{ item.title }}
         </router-link>
@@ -20,15 +20,8 @@
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
-import { backendUrl } from "@/lib";
-
-interface NewsItem {
-  id: number;
-  title: string;
-  content: string;
-  date: string;
-  slug: string;
-}
+import { backendUrl, formatDisplayDate } from "@/lib";
+import type { NewsItem } from "@shared/entity/NewsItem";
 
 const news = ref<NewsItem[]>([]);
 const loading = ref(true);
@@ -44,11 +37,6 @@ async function fetchNews() {
   } finally {
     loading.value = false;
   }
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
 }
 
 onMounted(fetchNews);
