@@ -391,4 +391,33 @@ describe("/api/search", () => {
       totalPages: 2,
     });
   });
+
+  it("can search more than 20 sites (default limit in extended query parser)", async () => {
+    const allSites = [
+      "bucharest",
+      "mace-head",
+      "hyytiala",
+      "granada",
+      "norunda",
+      "potenza",
+      "new-york",
+      "shanghai",
+      "warsaw",
+      "boaty",
+      "helsinki",
+      "jokioinen",
+      "kuopio",
+      "sodankyla",
+      "oulu",
+      "tampere",
+      "turku",
+      "vaasa",
+      "rovaniemi",
+      "joensuu",
+      "lahti",
+    ];
+    const payload = { params: { site: allSites, developer: "" } };
+    const res = await axios.get(url, payload);
+    expect(res.data.length).toBeGreaterThan(0);
+  });
 });

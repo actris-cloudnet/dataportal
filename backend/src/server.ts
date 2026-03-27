@@ -1,5 +1,6 @@
 import * as express from "express";
 import * as http from "node:http";
+import * as querystring from "node:querystring";
 import { ErrorRequestHandler } from "express";
 import * as passport from "passport";
 import { Strategy as OrcidStrategy } from "passport-orcid";
@@ -141,7 +142,19 @@ async function createServer(): Promise<void> {
     next(err);
   };
 
-  app.set("query parser", "extended");
+  app.set("query parser", (str: string) => {
+    // Custom mix between the builtin "simple" and "extended" functions, because
+    // we don't need complex features of "extended" and qs 6.14.1 used by
+    // "extended" introduced a default limit of 20 items for arrays.
+    const qs = querystring.parse(str);
+    for (const key of Object.keys(qs)) {
+      if (key.endsWith("[]")) {
+        qs[key.slice(0, -2)] = qs[key];
+        delete qs[key];
+      }
+    }
+    return qs;
+  });
   app.set("trust proxy", true);
 
   if (process.env.NODE_ENV !== "production") {

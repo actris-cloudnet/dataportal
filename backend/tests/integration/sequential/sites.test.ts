@@ -90,13 +90,15 @@ describe("GET /api/sites", () => {
   it("responds with citations with showCitations flag", async () => {
     const params = { params: { showCitations: true } };
     const res = await axios.get(url, params);
+    expect(res.data[1].id).toEqual("bucharest");
     expect(res.data[1].citations).toMatchObject([
       {
         id: "bucharest_test",
         acknowledgements: "Bucharest test citation.",
       },
     ]);
-    expect(res.data[2].citations).toMatchObject([
+    expect(res.data[3].id).toEqual("hyytiala");
+    expect(res.data[3].citations).toMatchObject([
       {
         id: "hyytiala_test",
         acknowledgements: "Hyytiälä test citation.",
