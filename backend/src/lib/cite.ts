@@ -367,12 +367,6 @@ export class CitationService {
   }
 }
 
-interface ContactWithDateRange {
-  person: import("../entity/Person").Person;
-  startDate: string | null;
-  endDate: string | null;
-}
-
 async function fetchNfPi(actrisId: number, measurementDate?: string): Promise<NfContact[]> {
   return []; // TODO: Labelling down as of 2025-06-18
   // const response = await axios.get(`${env.LABELLING_URL}/api/facilities/${actrisId}/contacts`, {

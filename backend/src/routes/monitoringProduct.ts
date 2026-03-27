@@ -9,7 +9,7 @@ export class MonitoringProductRoutes {
     this.monitoringProductRepo = dataSource.getRepository(MonitoringProduct);
   }
 
-  allMonitoringProducts: RequestHandler = async (_req, res, next) => {
+  allMonitoringProducts: RequestHandler = async (_req, res) => {
     const products = await this.monitoringProductRepo.find();
     res.json(
       products.map((product) => ({
@@ -19,7 +19,7 @@ export class MonitoringProductRoutes {
     );
   };
 
-  allMonitoringProductsWithVariables: RequestHandler = async (_req, res, next) => {
+  allMonitoringProductsWithVariables: RequestHandler = async (_req, res) => {
     const productsWithVars = await this.monitoringProductRepo.find({
       relations: { monitoringVariables: true },
       order: {
