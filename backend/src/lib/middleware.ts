@@ -172,6 +172,7 @@ export class Middleware {
     query.filenameSuffix = toArray(query.filenameSuffix);
     query.instrument = toArray(query.instrument);
     query.instrumentPid = toArray(query.instrumentPid);
+    if (query.variable) query.variable = toArray(query.variable);
     query.legacy = setLegacy();
     if (query.date) {
       query.dateFrom = query.date;
