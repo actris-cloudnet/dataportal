@@ -60,6 +60,26 @@
     "instrument": "rpg-fmcw-94"
   },
   {
+    "uuid": "8f0d21bb-7238-450a-af9c-f333d13f0bd1",
+    "pid": "",
+    "volatile": true,
+    "measurementDate": "2020-09-01",
+    "product": "radar",
+    "createdAt": "2020-02-20T11:00:00.000Z",
+    "updatedAt": "2020-02-20T11:00:00.000Z",
+    "startTime": "2020-09-01T10:56:19.382Z",
+    "stopTime": "2020-09-01T11:56:19.382Z",
+    "s3key": "20200901_hyytiala_rpg-fmcw-94.nc",
+    "checksum": "a7db13d07cc84a269c15faccdbcacb5b",
+    "size": 16500000,
+    "format": "HDF5 (NetCDF4)",
+    "site": "hyytiala",
+    "version": "123",
+    "errorLevel": null,
+    "software": [{ "id": 1 }],
+    "instrument": "rpg-fmcw-94"
+  },
+  {
     "uuid": "22b32746-faf0-4057-9076-ed2e698dcc34",
     "pid": "http://pidservice.example/pidhandle",
     "volatile": false,

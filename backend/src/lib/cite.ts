@@ -183,7 +183,7 @@ export class CitationService {
     const rows = await this.querySourceFiles(
       object,
       `, uniq_instrument AS (
-         SELECT DISTINCT ON ("instrumentInfoUuid") "instrumentInfoUuid", depth
+         SELECT DISTINCT ON ("instrumentInfoUuid") "instrumentInfoUuid", depth, "measurementDate"
          FROM traverse
          JOIN regular_file ON traverse.uuid = regular_file.uuid
          WHERE "instrumentInfoUuid" IS NOT NULL
@@ -192,7 +192,7 @@ export class CitationService {
          SELECT DISTINCT ON ("personId") "personId", depth
          FROM uniq_instrument
          JOIN instrument_contact ON instrument_contact."instrumentInfoUuid" = uniq_instrument."instrumentInfoUuid"
-         WHERE CURRENT_DATE <@ daterange("startDate", "endDate", '[]')
+         WHERE "measurementDate" <@ daterange("startDate", "endDate", '[]')
          ORDER BY "personId", depth
        )
        SELECT "firstName", "lastName", "orcid"
@@ -211,25 +211,18 @@ export class CitationService {
              FROM site_contact
              JOIN person ON "personId" = person.id
              WHERE "siteId" = $1
-             AND CURRENT_DATE <@ daterange("startDate", "endDate", '[]')
+             AND $2::date <@ daterange("startDate", "endDate", '[]')
              ORDER BY "lastName", "firstName"`,
-            [object.site.id],
+            [object.site.id, object.measurementDate],
           )
         : await this.querySourceFiles(
             object,
-            `, uniq_site AS (
-               SELECT DISTINCT "siteId"
-               FROM traverse
-               JOIN regular_file ON traverse.uuid = regular_file.uuid
-             ), uniq_person AS (
-               SELECT DISTINCT "personId"
-               FROM uniq_site
-               JOIN site_contact ON site_contact."siteId" = uniq_site."siteId"
-               WHERE CURRENT_DATE <@ daterange("startDate", "endDate", '[]')
-             )
-             SELECT "firstName", "lastName", "orcid"
-             FROM uniq_person
-             JOIN person ON "personId" = person.id
+            `SELECT DISTINCT "firstName", "lastName", "orcid"
+             FROM traverse
+             JOIN regular_file ON traverse.uuid = regular_file.uuid
+             JOIN site_contact ON site_contact."siteId" = regular_file."siteId"
+             JOIN person ON site_contact."personId" = person.id
+             WHERE "measurementDate" <@ daterange(site_contact."startDate", site_contact."endDate", '[]')
              ORDER BY "lastName", "firstName"`,
           );
     return rows.map((row: any) => ({ ...row, role: "nfPi" }));

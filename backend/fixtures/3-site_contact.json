@@ -16,7 +16,7 @@
   {
     "siteId": "hyytiala",
     "personId": 5,
-    "startDate": null,
+    "startDate": "2020-01-01",
     "endDate": null,
     "createdAt": "2020-01-01T00:00:00.000Z"
   }
