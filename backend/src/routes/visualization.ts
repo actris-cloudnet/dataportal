@@ -27,7 +27,7 @@ export class VisualizationRoutes {
 
   putVisualization: RequestHandler = async (req, res, next) => {
     const body = req.body;
-    const s3key = (req.params.s3key as unknown as string[]).join("/");
+    const s3key = (req.params.s3key as string[]).join("/");
     try {
       await checkFileExists(getS3pathForImage(s3key));
     } catch (err) {
@@ -89,7 +89,7 @@ export class VisualizationRoutes {
   };
 
   deleteVisualizations: RequestHandler = async (req, res, next) => {
-    const uuid = req.params.uuid;
+    const uuid = req.params.uuid as string;
     const file = await this.fileController.findAnyFile((repo) => repo.findOne({ where: { uuid } }));
     if (!file) return next({ status: 422, errors: ["No file matches the provided uuid"] });
     const visuRepo = file instanceof RegularFile ? this.visualizationRepo : this.modelVisualizationRepo;

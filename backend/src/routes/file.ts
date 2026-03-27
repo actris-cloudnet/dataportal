@@ -158,7 +158,7 @@ export class FileRoutes {
 
   putFile: RequestHandler = async (req, res, next) => {
     const file = req.body;
-    file.s3key = (req.params.s3key as unknown as string[]).join("/");
+    file.s3key = (req.params.s3key as string[]).join("/");
     file.updatedAt = new Date();
     if (!isFile(file))
       return next({ status: 422, errors: ["Request body is missing fields or has invalid values in them"] });
@@ -297,7 +297,7 @@ export class FileRoutes {
     try {
       const query = res.locals;
       const dryRun = query.dryRun;
-      const uuid = req.params.uuid;
+      const uuid = req.params.uuid as string;
       const tombstoneReason = query.tombstoneReason;
 
       const queryRunner = this.dataSource.createQueryRunner();

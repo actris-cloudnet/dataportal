@@ -40,7 +40,7 @@ export class InstrumentRoutes {
 
   instrument: RequestHandler = async (req, res, next) => {
     const instrument = await this.instrumentRepo.findOne({
-      where: { id: req.params.instrumentId },
+      where: { id: req.params.instrumentId as string },
       relations: { derivedProducts: true },
     });
     if (!instrument) {
@@ -106,7 +106,7 @@ export class InstrumentRoutes {
 
   instrumentPid: RequestHandler = async (req, res, next) => {
     const instrument = await this.instrumentInfoRepo.findOne({
-      where: { uuid: req.params.uuid },
+      where: { uuid: req.params.uuid as string },
       relations: { instrument: true },
     });
     if (!instrument) {
@@ -183,7 +183,7 @@ export class InstrumentRoutes {
   };
 
   listContacts: RequestHandler = async (req, res, next) => {
-    const instrumentInfo = await this.instrumentInfoRepo.findOneBy({ uuid: req.params.uuid });
+    const instrumentInfo = await this.instrumentInfoRepo.findOneBy({ uuid: req.params.uuid as string });
     if (!instrumentInfo) {
       return next({ status: 404, errors: ["No instrument PID match this id"] });
     }
@@ -202,7 +202,7 @@ export class InstrumentRoutes {
   };
 
   postContact: RequestHandler = async (req, res, next) => {
-    const instrumentInfo = await this.instrumentInfoRepo.findOneBy({ uuid: req.params.uuid });
+    const instrumentInfo = await this.instrumentInfoRepo.findOneBy({ uuid: req.params.uuid as string });
     if (!instrumentInfo) {
       return next({ status: 404, errors: ["No instrument PID match this id"] });
     }
@@ -225,7 +225,7 @@ export class InstrumentRoutes {
   };
 
   putContact: RequestHandler = async (req, res, next) => {
-    const id = parseInt(req.params.contactId, 10);
+    const id = parseInt(req.params.contactId as string, 10);
     if (isNaN(id)) {
       return next({ status: 400, errors: ["Invalid contact id"] });
     }
@@ -250,11 +250,11 @@ export class InstrumentRoutes {
   };
 
   deleteContact: RequestHandler = async (req, res, next) => {
-    const id = parseInt(req.params.contactId, 10);
+    const id = parseInt(req.params.contactId as string, 10);
     if (isNaN(id)) {
       return next({ status: 400, errors: ["Invalid contact id"] });
     }
-    const result = await this.contactRepo.delete({ id, instrumentInfoUuid: req.params.uuid });
+    const result = await this.contactRepo.delete({ id, instrumentInfoUuid: req.params.uuid as string });
     if (!result.affected) {
       return next({ status: 404, errors: ["Contact not found"] });
     }

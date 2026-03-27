@@ -63,7 +63,7 @@ export class QualityReportRoutes {
       .createQueryBuilder("fileQuality")
       .leftJoinAndSelect("fileQuality.testReports", "testReport")
       .leftJoinAndMapOne("testReport.testInfo", TestInfo, "testInfo", "testReport.testId = testInfo.testId")
-      .where("uuid = :uuid", { uuid: req.params.uuid })
+      .where("uuid = :uuid", { uuid: req.params.uuid as string })
       .addOrderBy(
         `CASE WHEN testReport.result = '${ErrorLevel.ERROR}'   THEN 1
               WHEN testReport.result = '${ErrorLevel.WARNING}' THEN 2
@@ -90,7 +90,7 @@ export class QualityReportRoutes {
   };
 
   putQualityReport: RequestHandler = async (req, res, next) => {
-    const uuid = req.params.uuid;
+    const uuid = req.params.uuid as string;
     const fullReport: Report = req.body;
     // TODO: use transaction
     const existingFile = await this.fileRoutes.findAnyFile((repo, _) =>

@@ -63,7 +63,7 @@ export class CollectionRoutes {
   };
 
   collection: RequestHandler = async (req, res, next) => {
-    const collection = await this.collectionRepo.findOneBy({ uuid: req.params.uuid });
+    const collection = await this.collectionRepo.findOneBy({ uuid: req.params.uuid as string });
     if (!collection) return next({ status: 404, errors: ["Collection not found"] });
     const [files, volatileFiles, tombstonedFiles, size, dateRange, products, sites] = await Promise.all([
       this.countFiles(collection),
@@ -87,7 +87,7 @@ export class CollectionRoutes {
   };
 
   collectionFiles: RequestHandler = async (req, res, next) => {
-    const collection = await this.collectionRepo.findOneBy({ uuid: req.params.uuid });
+    const collection = await this.collectionRepo.findOneBy({ uuid: req.params.uuid as string });
     if (!collection) return next({ status: 404, errors: ["Collection not found"] });
     const currentPage = req.query.page ? parseInt(req.query.page as any) : 1;
     if (isNaN(currentPage)) return next({ status: 400, errors: ["Invalid page parameter"] });

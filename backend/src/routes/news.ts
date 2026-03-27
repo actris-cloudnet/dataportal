@@ -43,20 +43,20 @@ export class NewsRoutes {
   };
 
   getNewsItemBySlug: RequestHandler = async (req, res, next) => {
-    const news = await this.findBySlug(req.params.slug, next);
+    const news = await this.findBySlug(req.params.slug as string, next);
     if (!news) return;
     res.send(news);
   };
 
   deleteNewsItemBySlug: RequestHandler = async (req, res, next) => {
-    const news = await this.findBySlug(req.params.slug, next);
+    const news = await this.findBySlug(req.params.slug as string, next);
     if (!news) return;
     await this.newsRepo.delete(news.id);
     res.sendStatus(204);
   };
 
   updateNewsItemBySlug: RequestHandler = async (req, res, next) => {
-    const news = await this.findBySlug(req.params.slug, next);
+    const news = await this.findBySlug(req.params.slug as string, next);
     if (!news) return;
 
     const { title, content, date } = req.body;

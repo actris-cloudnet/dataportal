@@ -44,13 +44,15 @@ export class Middleware {
       "-" +
       uuid.slice(20);
 
-    const uuid = req.params.uuid.includes("-") ? req.params.uuid : addDashesToUuid(req.params.uuid);
+    const uuid = req.params.uuid.includes("-") ? req.params.uuid : addDashesToUuid(req.params.uuid as string);
     if (!validateUuid(uuid)) return next({ status: 404, errors: ["Not found: invalid UUID"] });
     return next();
   };
 
   validateMD5Param: RequestHandler = (req, _res, next) =>
-    validator.isMD5(req.params.checksum) ? next() : next({ status: 400, error: "Checksum is not an MD5 hash" });
+    validator.isMD5(req.params.checksum as string)
+      ? next()
+      : next({ status: 400, error: "Checksum is not an MD5 hash" });
 
   filesValidator: RequestHandler = (req, _res, next) => {
     const checkFieldNames = (validKeys: string[], query: any) =>
@@ -241,7 +243,7 @@ export class Middleware {
   };
 
   validateCitationType: RequestHandler = async (req, _res, next) => {
-    if (["acknowledgements", "data-availability", "citation"].includes(req.params.type)) return next();
+    if (["acknowledgements", "data-availability", "citation"].includes(req.params.type as string)) return next();
     next({ status: 404, errors: ["Invalid citation type"] });
   };
 

@@ -16,7 +16,7 @@ export class ProductRoutes {
 
   product: RequestHandler = async (req, res, next) => {
     const product = await this.productRepo.findOne({
-      where: { id: req.params.productId },
+      where: { id: req.params.productId as string },
       relations: { sourceInstruments: true, sourceProducts: true, derivedProducts: true },
     });
     if (!product) {
@@ -37,7 +37,7 @@ export class ProductRoutes {
   };
 
   productVariable: RequestHandler = async (req, res, next) => {
-    const productId = req.params.productId;
+    const productId = req.params.productId as string;
     const product = await this.productRepo.findOne({
       where: { id: productId },
       relations: { variables: true },

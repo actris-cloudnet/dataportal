@@ -71,7 +71,7 @@ export class QueueRoutes {
   };
 
   cancelBatch: RequestHandler = async (req, res) => {
-    await this.queueService.cancelBatch(req.params.batchId);
+    await this.queueService.cancelBatch(req.params.batchId as string);
     res.sendStatus(204);
   };
 
@@ -114,12 +114,12 @@ export class QueueRoutes {
   };
 
   fail: RequestHandler = async (req, res) => {
-    await this.queueService.fail(req.params.id);
+    await this.queueService.fail(req.params.id as string);
     res.sendStatus(204);
   };
 
   complete: RequestHandler = async (req, res) => {
-    await this.queueService.complete(req.params.id);
+    await this.queueService.complete(req.params.id as string);
     res.sendStatus(204);
   };
 

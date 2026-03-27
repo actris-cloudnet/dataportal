@@ -117,7 +117,7 @@ export class InstrumentLogRoutes {
   }
 
   private async findLogAndCheckPermission(req: Request, next: NextFunction): Promise<InstrumentLog | null> {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(req.params.id as string, 10);
     if (isNaN(id)) {
       next({ status: 400, errors: "Invalid log entry id" });
       return null;
@@ -319,8 +319,8 @@ export class InstrumentLogRoutes {
   };
 
   getImage: RequestHandler = async (req, res, next) => {
-    const logId = parseInt(req.params.id, 10);
-    const imageId = parseInt(req.params.imageId, 10);
+    const logId = parseInt(req.params.id as string, 10);
+    const imageId = parseInt(req.params.imageId as string, 10);
     if (isNaN(logId) || isNaN(imageId)) {
       return next({ status: 400, errors: "Invalid id" });
     }
@@ -367,7 +367,7 @@ export class InstrumentLogRoutes {
   deleteImage: RequestHandler = async (req, res, next) => {
     const log = await this.findLogAndCheckPermission(req, next);
     if (!log) return;
-    const imageId = parseInt(req.params.imageId, 10);
+    const imageId = parseInt(req.params.imageId as string, 10);
     if (isNaN(imageId)) {
       return next({ status: 400, errors: "Invalid image id" });
     }

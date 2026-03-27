@@ -54,9 +54,9 @@ export class DownloadRoutes {
   readonly httpAgent: http.Agent;
 
   product: RequestHandler = async (req, res, next) => {
-    const s3key = (req.params.s3key as unknown as string[]).join("/");
+    const s3key = (req.params.s3key as string[]).join("/");
     const file = await this.fileController.findAnyFile((repo) =>
-      repo.findOne({ where: { uuid: req.params.uuid, s3key }, relations: { product: true } }),
+      repo.findOne({ where: { uuid: req.params.uuid as string, s3key }, relations: { product: true } }),
     );
     if (!file) return next({ status: 404, errors: ["File not found"] });
     if (!file.product.downloadable && !this.isPrivate(req)) {
@@ -72,7 +72,11 @@ export class DownloadRoutes {
   raw: RequestHandler = async (req, res, next) => {
     const file = await this.uploadController.findAnyUpload((repo) =>
       repo.findOne({
-        where: { uuid: req.params.uuid, filename: req.params.filename, status: Not(Status.CREATED) },
+        where: {
+          uuid: req.params.uuid as string,
+          filename: req.params.filename as string,
+          status: Not(Status.CREATED),
+        },
         relations: { site: true },
       }),
     );
@@ -86,7 +90,7 @@ export class DownloadRoutes {
 
   collection: RequestHandler = async (req, res, next) => {
     const collection = await this.collectionRepo.findOne({
-      where: { uuid: req.params.uuid },
+      where: { uuid: req.params.uuid as string },
       relations: { regularFiles: true, modelFiles: true },
     });
     if (!collection) {
@@ -132,7 +136,7 @@ export class DownloadRoutes {
   };
 
   image: RequestHandler = async (req, res) => {
-    const s3key = (req.params.s3key as unknown as string[]).join("/");
+    const s3key = (req.params.s3key as string[]).join("/");
     const upstreamRes = await this.makeRequest(getS3pathForImage(s3key));
     if (upstreamRes.statusCode != 200) {
       res.status(upstreamRes.statusCode || 500);

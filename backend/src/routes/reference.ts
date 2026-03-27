@@ -20,14 +20,15 @@ export class ReferenceRoutes {
   }
 
   getReference: RequestHandler = async (req, res) => {
+    const uuid = req.params.uuid as string;
     const object = await Promise.any([
-      this.collectionRepo.findOneByOrFail({ uuid: req.params.uuid }),
+      this.collectionRepo.findOneByOrFail({ uuid }),
       this.fileRepo.findOneOrFail({
-        where: { uuid: req.params.uuid },
+        where: { uuid },
         relations: { site: { citations: true }, product: true },
       }),
       this.modelRepo.findOneOrFail({
-        where: { uuid: req.params.uuid },
+        where: { uuid },
         relations: { site: { citations: true }, product: true, model: { citations: true } },
       }),
     ]);

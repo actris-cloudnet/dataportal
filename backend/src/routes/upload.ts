@@ -190,7 +190,7 @@ export class UploadRoutes {
   };
 
   metadata: RequestHandler = async (req, res, next) => {
-    const checksum = req.params.checksum;
+    const checksum = req.params.checksum as string;
     const upload = await this.findAnyUpload((repo, model) =>
       repo.findOne({ where: { checksum }, relations: ["site", model ? "model" : "instrumentInfo"] }),
     );
@@ -236,7 +236,7 @@ export class UploadRoutes {
   };
 
   putData: RequestHandler = async (req, res, next) => {
-    const checksum = req.params.checksum;
+    const checksum = req.params.checksum as string;
     const isInstrument = !req.path.includes("model");
     try {
       const upload = await (isInstrument

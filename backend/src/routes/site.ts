@@ -48,7 +48,9 @@ export class SiteRoutes {
   readonly wigosCache: Record<string, any>;
 
   site: RequestHandler = async (req, res, next) => {
-    const qb = this.siteRepo.createQueryBuilder("site").where("site.id = :siteId", { siteId: req.params.siteId });
+    const qb = this.siteRepo
+      .createQueryBuilder("site")
+      .where("site.id = :siteId", { siteId: req.params.siteId as string });
     const site = await hideTestDataFromNormalUsers(qb, req).getOne();
     if (!site) {
       return next({ status: 404, errors: ["No sites match this id"] });
@@ -68,7 +70,7 @@ export class SiteRoutes {
   };
 
   links: RequestHandler = async (req, res, next) => {
-    const site = await this.siteRepo.findOneBy({ id: req.params.siteId });
+    const site = await this.siteRepo.findOneBy({ id: req.params.siteId as string });
     if (!site) {
       return next({ status: 404, errors: ["No sites match this id"] });
     }
@@ -251,7 +253,7 @@ export class SiteRoutes {
   }
 
   listContacts: RequestHandler = async (req, res, next) => {
-    const site = await this.siteRepo.findOneBy({ id: req.params.siteId });
+    const site = await this.siteRepo.findOneBy({ id: req.params.siteId as string });
     if (!site) {
       return next({ status: 404, errors: ["No sites match this id"] });
     }
@@ -270,7 +272,7 @@ export class SiteRoutes {
   };
 
   postContact: RequestHandler = async (req, res, next) => {
-    const site = await this.siteRepo.findOneBy({ id: req.params.siteId });
+    const site = await this.siteRepo.findOneBy({ id: req.params.siteId as string });
     if (!site) {
       return next({ status: 404, errors: ["No sites match this id"] });
     }
@@ -293,7 +295,7 @@ export class SiteRoutes {
   };
 
   putContact: RequestHandler = async (req, res, next) => {
-    const id = parseInt(req.params.contactId, 10);
+    const id = parseInt(req.params.contactId as string, 10);
     if (isNaN(id)) {
       return next({ status: 400, errors: ["Invalid contact id"] });
     }
@@ -303,7 +305,7 @@ export class SiteRoutes {
       .addSelect("p.email")
       .where("c.id = :id", { id })
       .getOne();
-    if (!contact || contact.siteId !== req.params.siteId) {
+    if (!contact || contact.siteId !== (req.params.siteId as string)) {
       return next({ status: 404, errors: ["Contact not found"] });
     }
     const { startDate, endDate, email, orcid } = req.body;
@@ -318,11 +320,11 @@ export class SiteRoutes {
   };
 
   deleteContact: RequestHandler = async (req, res, next) => {
-    const id = parseInt(req.params.contactId, 10);
+    const id = parseInt(req.params.contactId as string, 10);
     if (isNaN(id)) {
       return next({ status: 400, errors: ["Invalid contact id"] });
     }
-    const result = await this.contactRepo.delete({ id, siteId: req.params.siteId });
+    const result = await this.contactRepo.delete({ id, siteId: req.params.siteId as string });
     if (!result.affected) {
       return next({ status: 404, errors: ["Contact not found"] });
     }
@@ -330,7 +332,7 @@ export class SiteRoutes {
   };
 
   personByOrcid: RequestHandler = async (req, res) => {
-    const person = await findPersonByOrcid(this.personRepo, req.params.orcid);
+    const person = await findPersonByOrcid(this.personRepo, req.params.orcid as string);
     if (!person) {
       res.json(null);
       return;
