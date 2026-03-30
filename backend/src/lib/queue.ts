@@ -113,7 +113,10 @@ export class QueueService {
       return null;
     }
     this.acquireLock(task, now);
-    return { ...(task as any), measurementDate: task.measurementDate.toISOString().slice(0, 10) };
+    return {
+      ...(task as any),
+      measurementDate: task.measurementDate.toISOString().slice(0, 10),
+    };
   }
 
   async complete(id: Task["id"], options?: { now?: Date }) {
@@ -140,7 +143,13 @@ export class QueueService {
   }
 
   count(filter?: { queueId?: string; status?: TaskStatus }) {
-    return this.taskRepo.count({ where: { queueId: filter?.queueId || IsNull(), status: filter?.status } });
+    return this.taskRepo.count({
+      where: { queueId: filter?.queueId || IsNull(), status: filter?.status },
+    });
+  }
+
+  async setPriority(id: Task["id"], priority: number) {
+    await this.taskRepo.update({ id }, { priority, scheduledAt: new Date() });
   }
 
   async cancelBatch(batchId: string) {
@@ -157,6 +166,9 @@ export class QueueService {
       queueId?: string;
       batchId?: string;
       status?: TaskStatus[];
+      type?: string;
+      siteId?: string;
+      productId?: string;
       offset?: number;
       limit?: number;
       doneAfter?: Date;
@@ -168,6 +180,7 @@ export class QueueService {
       .leftJoinAndSelect("task.instrumentInfo", "instrumentInfo")
       .leftJoinAndSelect("task.model", "model")
       .orderBy("task.status", "DESC")
+      .addOrderBy("task.priority", "ASC")
       .addOrderBy("task.scheduledAt", options.reverse ? "DESC" : "ASC");
     if (typeof options.queueId !== "undefined") {
       qb.andWhere("task.queueId = :queueId", options);
@@ -177,6 +190,15 @@ export class QueueService {
     }
     if (typeof options.status !== "undefined") {
       qb.andWhere("task.status IN (:...status)", options);
+    }
+    if (typeof options.type !== "undefined") {
+      qb.andWhere("task.type = :type", options);
+    }
+    if (typeof options.siteId !== "undefined") {
+      qb.andWhere("task.siteId = :siteId", options);
+    }
+    if (typeof options.productId !== "undefined") {
+      qb.andWhere("task.productId = :productId", options);
     }
     if (typeof options.doneAfter !== "undefined") {
       qb.andWhere("task.doneAt >= :doneAfter", options);
@@ -213,7 +235,9 @@ export class QueueService {
 
   /// Initialize locks from database.
   async initializeLocks() {
-    const tasks = await this.taskRepo.findBy({ status: In([TaskStatus.RUNNING, TaskStatus.RESTART]) });
+    const tasks = await this.taskRepo.findBy({
+      status: In([TaskStatus.RUNNING, TaskStatus.RESTART]),
+    });
     for (const task of tasks) {
       this.acquireLock(task);
     }
@@ -234,7 +258,10 @@ export class QueueService {
   async cleanOldTasks(now?: Date) {
     const time = now || new Date();
     const limit = new Date(time.getTime() - 60 * 60 * 1000);
-    await this.taskRepo.delete({ status: TaskStatus.DONE, doneAt: LessThan(limit) });
+    await this.taskRepo.delete({
+      status: TaskStatus.DONE,
+      doneAt: LessThan(limit),
+    });
   }
 
   validateTaskOptions(type: TaskType, options: any): any {

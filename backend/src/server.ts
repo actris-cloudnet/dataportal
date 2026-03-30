@@ -118,7 +118,11 @@ async function createServer(): Promise<void> {
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     console.error(
       JSON.stringify({
-        req: { method: req.method, url: req.url, body: req.is("json") ? req.body : "[Redacted]" },
+        req: {
+          method: req.method,
+          url: req.url,
+          body: req.is("json") ? req.body : "[Redacted]",
+        },
         err,
       }),
     );
@@ -613,6 +617,13 @@ async function createServer(): Promise<void> {
     authorizator.verifyPermission(PermissionType.canPublishTask),
     express.json(),
     queueRoutes.publish,
+  );
+  app.put(
+    "/api/queue/:id/priority",
+    passport.authenticate(["basic", "cookie"], { session: false }),
+    authorizator.verifyPermission(PermissionType.canPublishTask),
+    express.json(),
+    queueRoutes.setPriority,
   );
   app.post("/queue/receive", queueRoutes.receive);
   app.put("/queue/complete/:id", queueRoutes.complete);

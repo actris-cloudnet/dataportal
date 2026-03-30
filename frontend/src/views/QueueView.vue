@@ -32,13 +32,19 @@
             </tr>
           </tbody>
         </table>
-        <CheckBox label="Show failed tasks" v-model="showFailed" />
-        <BaseButton type="secondary" :disabled="!hasPreviousPage" @click="previousPage" style="margin-left: 4rem">
-          Previous
-        </BaseButton>
-        <BaseButton type="secondary" :disabled="!hasNextPage" @click="nextPage" style="margin-left: 1rem">
-          Next
-        </BaseButton>
+        <div class="filters">
+          <MultiSelect id="filter-type" label="Type" :options="typeOptions" v-model="filterType" clearable />
+          <MultiSelect id="filter-site" label="Site" :options="siteOptions" v-model="filterSite" clearable />
+          <MultiSelect
+            id="filter-product"
+            label="Product"
+            :options="productOptions"
+            v-model="filterProduct"
+            clearable
+            class="filter-product"
+          />
+          <CheckBox label="Show failed tasks" v-model="showFailed" />
+        </div>
         <table class="tasks" v-if="queueData.length > 0" style="margin-top: 1rem">
           <thead>
             <tr>
@@ -50,6 +56,7 @@
               <th>Product</th>
               <th>Instrument / model</th>
               <th>Schedule</th>
+              <th></th>
             </tr>
           </thead>
           <tbody is="vue:transition-group" name="list" tag="tbody">
@@ -76,14 +83,36 @@
                 <span :title="humanReadableTimestamp(task.scheduledAt)">{{ timeDifference(task.scheduledAt) }}</span>
                 <img :src="turtleIcon" v-if="task.queueId == 'tortoise'" title="Task in slow queue" class="tortoise" />
               </td>
-              <td v-if="showFailed" class="retry-button">
-                <BaseButton type="danger" size="small" style="display: block" @click="retryTask(task)">
+              <td class="action-button">
+                <BaseButton
+                  v-if="showFailed"
+                  type="danger"
+                  size="small"
+                  style="display: block"
+                  @click="retryTask(task)"
+                >
                   Retry
+                </BaseButton>
+                <span v-else-if="task.priority === 0" class="prioritized">Prioritized</span>
+                <BaseButton
+                  v-else-if="task.status === 'created' || task.status === 'pending'"
+                  type="secondary"
+                  size="small"
+                  @click="prioritizeTask(task)"
+                >
+                  Prioritize
                 </BaseButton>
               </td>
             </tr>
           </tbody>
         </table>
+        <BasePagination
+          v-if="totalPages > 1"
+          v-model="currentPage"
+          :totalPages="totalPages"
+          :disabled="isLoading"
+          style="margin-bottom: 3rem"
+        />
       </template>
     </main>
   </div>
@@ -96,13 +125,19 @@ import axios from "axios";
 import { backendUrl, humanReadableTimestamp } from "@/lib";
 import BaseSpinner from "@/components/BaseSpinner.vue";
 import BaseButton from "@/components/BaseButton.vue";
+import BasePagination from "@/components/BasePagination.vue";
 import type { Task } from "@shared/entity/Task";
 import testPassIcon from "@/assets/icons/test-pass.svg";
 import turtleIcon from "@/assets/icons/icons8-turtle-24.png";
 import CheckBox from "@/components/CheckBox.vue";
+import MultiSelect from "@/components/MultiSelect.vue";
+import type { Site } from "@shared/entity/Site";
+import type { Product } from "@shared/entity/Product";
 import { useRoute } from "vue-router";
 
-type AugmentedTask = Omit<Task, "status"> & { status: Task["status"] | "pending" };
+type AugmentedTask = Omit<Task, "status"> & {
+  status: Task["status"] | "pending";
+};
 
 const route = useRoute();
 const queueData = ref<AugmentedTask[]>([]);
@@ -110,8 +145,23 @@ const showFailed = ref(false);
 const isLoading = ref(true);
 const isCancelled = ref(false);
 const totalTasks = ref(0);
-const limit = 100;
-const offset = ref(0);
+const limit = 50;
+const currentPage = ref(1);
+const offset = computed(() => (currentPage.value - 1) * limit);
+const filterType = ref<string | null>(null);
+const filterSite = ref<string | null>(null);
+const filterProduct = ref<string | null>(null);
+const siteOptions = ref<Site[]>([]);
+const productOptions = ref<Product[]>([]);
+
+const typeOptions = [
+  { id: "process", humanReadableName: "process" },
+  { id: "freeze", humanReadableName: "freeze" },
+  { id: "plot", humanReadableName: "plot" },
+  { id: "qc", humanReadableName: "qc" },
+  { id: "dvas", humanReadableName: "dvas" },
+  { id: "hkd", humanReadableName: "hkd" },
+];
 
 let updateTimeout: NodeJS.Timeout | null = null;
 let lastUpdate = new Date();
@@ -122,20 +172,42 @@ interface TaskResponse {
 }
 
 async function updateQueueData() {
+  const filterParams: Record<string, string> = {};
+  if (filterType.value != null) filterParams.type = filterType.value;
+  if (filterSite.value != null) filterParams.siteId = filterSite.value;
+  if (filterProduct.value != null) filterParams.productId = filterProduct.value;
   try {
     if (showFailed.value) {
       const failedRes = await axios.get<TaskResponse>(`${backendUrl}queue`, {
-        params: { batch: route.query.batch, status: ["failed"], reverse: true, limit, offset: offset.value },
+        params: {
+          batch: route.query.batch,
+          status: ["failed"],
+          reverse: true,
+          limit,
+          offset: offset.value,
+          ...filterParams,
+        },
       });
       totalTasks.value = failedRes.data.totalTasks;
       queueData.value = failedRes.data.tasks;
     } else {
       const [doneRes, otherRes] = await Promise.all([
         axios.get<TaskResponse>(`${backendUrl}queue`, {
-          params: { batch: route.query.batch, status: ["done"], doneAfter: lastUpdate.toISOString() },
+          params: {
+            batch: route.query.batch,
+            status: ["done"],
+            doneAfter: lastUpdate.toISOString(),
+            ...filterParams,
+          },
         }),
         axios.get<TaskResponse>(`${backendUrl}queue`, {
-          params: { batch: route.query.batch, status: ["created", "running", "restart"], limit, offset: offset.value },
+          params: {
+            batch: route.query.batch,
+            status: ["created", "running", "restart"],
+            limit,
+            offset: offset.value,
+            ...filterParams,
+          },
         }),
       ]);
       totalTasks.value = otherRes.data.totalTasks;
@@ -190,6 +262,16 @@ async function retryTask(task: AugmentedTask) {
   }
 }
 
+async function prioritizeTask(task: AugmentedTask) {
+  try {
+    await axios.put(`${backendUrl}queue/${task.id}/priority`, { priority: 0 });
+    task.priority = 0;
+  } catch (err) {
+    alert(`Failed to prioritize task: ${err}`);
+    console.error(err);
+  }
+}
+
 async function cancelBatch() {
   if (!confirm(`Cancel batch ${route.query.batch}?`)) return;
   try {
@@ -205,16 +287,7 @@ async function cancelBatch() {
   }
 }
 
-const hasNextPage = computed(() => offset.value + limit < totalTasks.value);
-const hasPreviousPage = computed(() => offset.value > 0);
-
-function nextPage() {
-  offset.value += limit;
-}
-
-function previousPage() {
-  offset.value -= limit;
-}
+const totalPages = computed(() => Math.max(1, Math.ceil(totalTasks.value / limit)));
 
 async function reloadData() {
   if (updateTimeout) clearTimeout(updateTimeout);
@@ -223,18 +296,29 @@ async function reloadData() {
 }
 
 onMounted(async () => {
-  await updateQueueData();
+  const [, sitesRes, productsRes] = await Promise.all([
+    updateQueueData(),
+    axios.get<Site[]>(`${backendUrl}sites`),
+    axios.get<Product[]>(`${backendUrl}products`),
+  ]);
+  siteOptions.value = sitesRes.data;
+  productOptions.value = productsRes.data;
 });
 
 watch(
   () => showFailed.value,
   async () => {
-    offset.value = 0;
+    currentPage.value = 1;
     await reloadData();
   },
 );
 
-watch(() => offset.value, reloadData);
+watch([filterType, filterSite, filterProduct], async () => {
+  currentPage.value = 1;
+  await reloadData();
+});
+
+watch(currentPage, reloadData);
 
 onUnmounted(() => {
   if (updateTimeout) clearTimeout(updateTimeout);
@@ -291,6 +375,21 @@ function linkToRaw(task: AugmentedTask) {
 <style scoped lang="scss">
 @use "@/sass/variables.scss";
 
+.filters {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+
+  > div {
+    width: 200px;
+  }
+
+  .filter-product {
+    width: 300px;
+  }
+}
+
 .statistics {
   margin-bottom: 20px;
 
@@ -325,8 +424,14 @@ function linkToRaw(task: AugmentedTask) {
     padding-left: 20px;
   }
 
-  .retry-button {
+  .action-button {
     vertical-align: middle;
+  }
+
+  .prioritized {
+    font-size: 0.8rem;
+    color: #666;
+    font-style: italic;
   }
 }
 
