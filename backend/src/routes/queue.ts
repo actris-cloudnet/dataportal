@@ -317,17 +317,11 @@ export class QueueRoutes {
     if (!isStringArray(searchParams[key])) {
       return next({ status: 400, errors: `${key} should be string array` });
     }
-    const objs = await repo.find({
-      where: { [column]: In(searchParams[key]) },
-      select: [column],
-    });
+    const objs = await repo.find({ where: { [column]: In(searchParams[key]) }, select: [column] });
     const validIds = new Set(objs.map((obj: any) => obj[column]));
     const invalidIds = searchParams[key].filter((id: any) => !validIds.has(id));
     if (invalidIds.length > 0) {
-      return next({
-        status: 400,
-        errors: `Invalid ${key}: ${invalidIds.join(", ")}`,
-      });
+      return next({ status: 400, errors: `Invalid ${key}: ${invalidIds.join(", ")}` });
     }
   }
 

@@ -135,9 +135,7 @@ import type { Site } from "@shared/entity/Site";
 import type { Product } from "@shared/entity/Product";
 import { useRoute } from "vue-router";
 
-type AugmentedTask = Omit<Task, "status"> & {
-  status: Task["status"] | "pending";
-};
+type AugmentedTask = Omit<Task, "status"> & { status: Task["status"] | "pending" };
 
 const route = useRoute();
 const queueData = ref<AugmentedTask[]>([]);

@@ -113,10 +113,7 @@ export class QueueService {
       return null;
     }
     this.acquireLock(task, now);
-    return {
-      ...(task as any),
-      measurementDate: task.measurementDate.toISOString().slice(0, 10),
-    };
+    return { ...(task as any), measurementDate: task.measurementDate.toISOString().slice(0, 10) };
   }
 
   async complete(id: Task["id"], options?: { now?: Date }) {
@@ -143,9 +140,7 @@ export class QueueService {
   }
 
   count(filter?: { queueId?: string; status?: TaskStatus }) {
-    return this.taskRepo.count({
-      where: { queueId: filter?.queueId || IsNull(), status: filter?.status },
-    });
+    return this.taskRepo.count({ where: { queueId: filter?.queueId || IsNull(), status: filter?.status } });
   }
 
   async setPriority(id: Task["id"], priority: number) {
@@ -235,9 +230,7 @@ export class QueueService {
 
   /// Initialize locks from database.
   async initializeLocks() {
-    const tasks = await this.taskRepo.findBy({
-      status: In([TaskStatus.RUNNING, TaskStatus.RESTART]),
-    });
+    const tasks = await this.taskRepo.findBy({ status: In([TaskStatus.RUNNING, TaskStatus.RESTART]) });
     for (const task of tasks) {
       this.acquireLock(task);
     }
@@ -258,10 +251,7 @@ export class QueueService {
   async cleanOldTasks(now?: Date) {
     const time = now || new Date();
     const limit = new Date(time.getTime() - 60 * 60 * 1000);
-    await this.taskRepo.delete({
-      status: TaskStatus.DONE,
-      doneAt: LessThan(limit),
-    });
+    await this.taskRepo.delete({ status: TaskStatus.DONE, doneAt: LessThan(limit) });
   }
 
   validateTaskOptions(type: TaskType, options: any): any {
