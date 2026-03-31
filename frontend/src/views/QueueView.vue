@@ -143,7 +143,7 @@ const showFailed = ref(false);
 const isLoading = ref(true);
 const isCancelled = ref(false);
 const totalTasks = ref(0);
-const limit = 50;
+const limit = 30;
 const currentPage = ref(1);
 const offset = computed(() => (currentPage.value - 1) * limit);
 const filterType = ref<string | null>(null);
