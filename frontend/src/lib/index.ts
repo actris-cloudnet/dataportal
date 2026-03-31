@@ -24,6 +24,7 @@ import mwrMultiIcon from "@/assets/icons/mwr-multi.png";
 import radarIcon from "@/assets/icons/radar.png";
 import unknownIcon from "@/assets/icons/unknown.png";
 import weatherStationIcon from "@/assets/icons/weather-station.png";
+import weatherRadarIcon from "@/assets/icons/weather-radar.svg";
 import dopplerLidarIcon from "@/assets/icons/doppler-lidar.svg";
 import dopplerLidarWindIcon from "@/assets/icons/doppler-lidar-wind.svg";
 import epsilonLidarIcon from "@/assets/icons/epsilon.svg";
@@ -75,6 +76,7 @@ const productIcons: Record<string, string> = {
   "mwr-multi": mwrMultiIcon,
   "radar": radarIcon,
   "weather-station": weatherStationIcon,
+  "weather-radar": weatherRadarIcon,
   "doppler-lidar": dopplerLidarIcon,
   "doppler-lidar-wind": dopplerLidarWindIcon,
   "epsilon-lidar": epsilonLidarIcon,
