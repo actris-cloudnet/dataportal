@@ -144,7 +144,13 @@ export class QueueService {
   }
 
   async setPriority(id: Task["id"], priority: number) {
-    await this.taskRepo.update({ id }, { priority, scheduledAt: new Date() });
+    const result = await this.taskRepo.update(
+      { id, status: TaskStatus.CREATED },
+      { priority, scheduledAt: new Date() },
+    );
+    if (result.affected === 0) {
+      throw new Error("Invalid task");
+    }
   }
 
   async cancelBatch(batchId: string) {
