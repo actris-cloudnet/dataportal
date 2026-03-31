@@ -614,6 +614,13 @@ async function createServer(): Promise<void> {
     express.json(),
     queueRoutes.publish,
   );
+  app.put(
+    "/api/queue/:id/priority",
+    passport.authenticate(["basic", "cookie"], { session: false }),
+    authorizator.verifyPermission(PermissionType.canPublishTask),
+    express.json(),
+    queueRoutes.setPriority,
+  );
   app.post("/queue/receive", queueRoutes.receive);
   app.put("/queue/complete/:id", queueRoutes.complete);
   app.put("/queue/fail/:id", queueRoutes.fail);

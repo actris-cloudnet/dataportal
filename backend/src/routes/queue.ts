@@ -100,6 +100,19 @@ export class QueueRoutes {
     res.send(task);
   };
 
+  setPriority: RequestHandler = async (req, res, next) => {
+    const id = req.params.id as string;
+    const priority = req.body.priority;
+    if (typeof priority !== "number" || priority < 0 || priority > 100) {
+      return next({
+        status: 400,
+        errors: ["Priority must be a number between 0 and 100"],
+      });
+    }
+    await this.queueService.setPriority(id, priority);
+    res.sendStatus(204);
+  };
+
   receive: RequestHandler = async (req, res, next) => {
     const queueId = req.query.queue;
     if (typeof queueId !== "undefined" && typeof queueId !== "string") {
@@ -148,11 +161,26 @@ export class QueueRoutes {
     if (typeof doneAfter !== "undefined" && isNaN(doneAfter.getTime())) {
       return next({ status: 400, errors: ["Invalid doneAfter parameter"] });
     }
+    const type = req.query.type;
+    if (typeof type !== "undefined" && typeof type !== "string") {
+      return next({ status: 400, errors: ["Invalid type parameter"] });
+    }
+    const siteId = req.query.siteId;
+    if (typeof siteId !== "undefined" && typeof siteId !== "string") {
+      return next({ status: 400, errors: ["Invalid siteId parameter"] });
+    }
+    const productId = req.query.productId;
+    if (typeof productId !== "undefined" && typeof productId !== "string") {
+      return next({ status: 400, errors: ["Invalid productId parameter"] });
+    }
     const reverse = !!req.query.reverse;
     const queue = await this.queueService.getQueue({
       queueId,
       batchId,
       status: status as TaskStatus[],
+      type,
+      siteId,
+      productId,
       offset,
       limit,
       doneAfter,

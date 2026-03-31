@@ -687,6 +687,139 @@ describe("QueueService", () => {
     expect(await queueService.count()).toBe(2);
   });
 
+  it("sets priority of a created task", async () => {
+    const task = makeTask({
+      siteId: "hyytiala",
+      productId: "lidar",
+      instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+      measurementDate: "2024-01-10",
+      priority: 50,
+      delayMinutes: 60,
+    });
+    await queueService.publish(task);
+    const [tasks] = await queueService.getQueue();
+    const taskId = tasks[0].id;
+
+    await queueService.setPriority(taskId, 0);
+    const [updatedTasks] = await queueService.getQueue();
+    expect(updatedTasks[0].priority).toBe(0);
+    expect(new Date(updatedTasks[0].scheduledAt).getTime()).toBeLessThanOrEqual(Date.now());
+  });
+
+  it("does not set priority of a running task", async () => {
+    const task = makeTask({
+      siteId: "hyytiala",
+      productId: "lidar",
+      instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+      measurementDate: "2024-01-10",
+      priority: 50,
+    });
+    await queueService.publish(task);
+    const taskRes = await queueService.receive({ now });
+    await expect(queueService.setPriority(taskRes!.id, 0)).rejects.toThrow("Invalid task");
+  });
+
+  it("filters getQueue by type", async () => {
+    await queueService.publish(
+      makeTask({
+        type: TaskType.PROCESS,
+        siteId: "hyytiala",
+        productId: "lidar",
+        instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+        measurementDate: "2024-01-10",
+      }),
+    );
+    await queueService.publish(
+      makeTask({
+        type: TaskType.FREEZE,
+        siteId: "hyytiala",
+        productId: "lidar",
+        instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+        measurementDate: "2024-01-10",
+        priority: 1,
+      }),
+    );
+    const [allTasks, allCount] = await queueService.getQueue();
+    expect(allCount).toBe(2);
+    expect(allTasks).toHaveLength(2);
+
+    const [processTasks, processCount] = await queueService.getQueue({ type: "process" });
+    expect(processCount).toBe(1);
+    expect(processTasks[0].type).toBe("process");
+
+    const [freezeTasks, freezeCount] = await queueService.getQueue({ type: "freeze" });
+    expect(freezeCount).toBe(1);
+    expect(freezeTasks[0].type).toBe("freeze");
+  });
+
+  it("filters getQueue by siteId", async () => {
+    await queueService.publish(
+      makeTask({
+        siteId: "hyytiala",
+        productId: "lidar",
+        instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+        measurementDate: "2024-01-10",
+      }),
+    );
+    await queueService.publish(
+      makeTask({
+        siteId: "mace-head",
+        productId: "lidar",
+        instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+        measurementDate: "2024-01-10",
+      }),
+    );
+    const [tasks, count] = await queueService.getQueue({ siteId: "hyytiala" });
+    expect(count).toBe(1);
+    expect(tasks[0].siteId).toBe("hyytiala");
+  });
+
+  it("filters getQueue by productId", async () => {
+    await queueService.publish(
+      makeTask({
+        siteId: "hyytiala",
+        productId: "lidar",
+        instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+        measurementDate: "2024-01-10",
+      }),
+    );
+    await queueService.publish(
+      makeTask({
+        siteId: "hyytiala",
+        productId: "radar",
+        instrumentInfoUuid: "0b3a7fa0-4812-4964-af23-1162e8b3a665",
+        measurementDate: "2024-01-10",
+      }),
+    );
+    const [tasks, count] = await queueService.getQueue({ productId: "radar" });
+    expect(count).toBe(1);
+    expect(tasks[0].productId).toBe("radar");
+  });
+
+  it("sorts getQueue by priority", async () => {
+    await queueService.publish(
+      makeTask({
+        siteId: "hyytiala",
+        productId: "lidar",
+        instrumentInfoUuid: "c43e9f54-c94d-45f7-8596-223b1c2b14c0",
+        measurementDate: "2024-01-10",
+        priority: 50,
+      }),
+    );
+    await queueService.publish(
+      makeTask({
+        siteId: "hyytiala",
+        productId: "radar",
+        instrumentInfoUuid: "0b3a7fa0-4812-4964-af23-1162e8b3a665",
+        measurementDate: "2024-01-10",
+        priority: 0,
+      }),
+    );
+    const [tasks] = await queueService.getQueue();
+    expect(tasks[0].productId).toBe("radar");
+    expect(tasks[1].productId).toBe("lidar");
+  });
+
   it("schedules task in queue", async () => {
     // Add task.
     const task = makeTask({
@@ -997,5 +1130,57 @@ describe("/api/queue/batch", () => {
     expect(await taskRepo.count()).toBe(2);
     expect(await taskRepo.countBy({ queueId: "hare" })).toBe(0);
     expect(await taskRepo.countBy({ queueId: "tortoise" })).toBe(2);
+  });
+
+  it("filters queue by siteId", async () => {
+    await axios.post(batchUrl, { type: "process", productIds: ["radar"], dryRun: false }, { auth });
+    expect(await taskRepo.count()).toBe(2);
+
+    const queueUrl = `${backendPublicUrl}queue/`;
+    const res = await axios.get(queueUrl, { auth, params: { status: "created", siteId: "bucharest" } });
+    expect(res.data.totalTasks).toBe(1);
+    expect(res.data.tasks[0].siteId).toBe("bucharest");
+  });
+
+  it("filters queue by productId", async () => {
+    await axios.post(batchUrl, { type: "process", dryRun: false }, { auth });
+
+    const queueUrl = `${backendPublicUrl}queue/`;
+    const res = await axios.get(queueUrl, { auth, params: { status: "created", productId: "lidar" } });
+    expect(res.data.totalTasks).toBe(2);
+    res.data.tasks.forEach((task: any) => expect(task.productId).toBe("lidar"));
+  });
+
+  it("sets task priority via API", async () => {
+    await axios.post(batchUrl, { type: "process", productIds: ["lidar"], dryRun: false }, { auth });
+    const queueUrl = `${backendPublicUrl}queue/`;
+    const res = await axios.get(queueUrl, { auth, params: { status: "created" } });
+    const taskId = res.data.tasks[0].id;
+
+    await axios.put(`${queueUrl}${taskId}/priority`, { priority: 0 }, { auth });
+
+    const res2 = await axios.get(queueUrl, { auth, params: { status: "created" } });
+    const updatedTask = res2.data.tasks.find((t: any) => t.id === taskId);
+    expect(updatedTask.priority).toBe(0);
+  });
+
+  it("rejects invalid priority", async () => {
+    await axios.post(batchUrl, { type: "process", productIds: ["lidar"], dryRun: false }, { auth });
+    const queueUrl = `${backendPublicUrl}queue/`;
+    const res = await axios.get(queueUrl, { auth, params: { status: "created" } });
+    const taskId = res.data.tasks[0].id;
+
+    await expect(axios.put(`${queueUrl}${taskId}/priority`, { priority: -1 }, { auth })).rejects.toMatchObject({
+      response: { status: 400 },
+    });
+    await expect(axios.put(`${queueUrl}${taskId}/priority`, { priority: 101 }, { auth })).rejects.toMatchObject({
+      response: { status: 400 },
+    });
+  });
+
+  it("requires authentication for priority", async () => {
+    await expect(axios.put(`${backendPublicUrl}queue/1/priority`, { priority: 0 })).rejects.toMatchObject({
+      response: { status: 401 },
+    });
   });
 });

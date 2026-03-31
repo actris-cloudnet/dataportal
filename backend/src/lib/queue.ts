@@ -143,6 +143,16 @@ export class QueueService {
     return this.taskRepo.count({ where: { queueId: filter?.queueId || IsNull(), status: filter?.status } });
   }
 
+  async setPriority(id: Task["id"], priority: number) {
+    const result = await this.taskRepo.update(
+      { id, status: TaskStatus.CREATED },
+      { priority, scheduledAt: new Date() },
+    );
+    if (result.affected === 0) {
+      throw new Error("Invalid task");
+    }
+  }
+
   async cancelBatch(batchId: string) {
     await this.taskRepo.delete({ status: TaskStatus.CREATED, batchId });
   }
@@ -157,6 +167,9 @@ export class QueueService {
       queueId?: string;
       batchId?: string;
       status?: TaskStatus[];
+      type?: string;
+      siteId?: string;
+      productId?: string;
       offset?: number;
       limit?: number;
       doneAfter?: Date;
@@ -168,6 +181,7 @@ export class QueueService {
       .leftJoinAndSelect("task.instrumentInfo", "instrumentInfo")
       .leftJoinAndSelect("task.model", "model")
       .orderBy("task.status", "DESC")
+      .addOrderBy("task.priority", "ASC")
       .addOrderBy("task.scheduledAt", options.reverse ? "DESC" : "ASC");
     if (typeof options.queueId !== "undefined") {
       qb.andWhere("task.queueId = :queueId", options);
@@ -177,6 +191,15 @@ export class QueueService {
     }
     if (typeof options.status !== "undefined") {
       qb.andWhere("task.status IN (:...status)", options);
+    }
+    if (typeof options.type !== "undefined") {
+      qb.andWhere("task.type = :type", options);
+    }
+    if (typeof options.siteId !== "undefined") {
+      qb.andWhere("task.siteId = :siteId", options);
+    }
+    if (typeof options.productId !== "undefined") {
+      qb.andWhere("task.productId = :productId", options);
     }
     if (typeof options.doneAfter !== "undefined") {
       qb.andWhere("task.doneAt >= :doneAfter", options);
