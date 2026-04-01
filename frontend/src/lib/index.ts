@@ -184,6 +184,8 @@ export const markerColors: Record<SiteType, string> = {
   "hidden": markerIconGrey,
   "ri-urbans": markerIconGrey,
   "polarin": markerIconGrey,
+  "weather-radar": markerIconGrey,
+  "fmi-radar": markerIconGrey,
 };
 
 export function getMarkerIcon(site: Site, selected = false) {

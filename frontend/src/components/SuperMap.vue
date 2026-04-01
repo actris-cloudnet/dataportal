@@ -54,17 +54,22 @@ function setMapBounds() {
   return L.latLngBounds(southWest, northEast);
 }
 
-const markerColors: Record<SiteType | "selected", string | undefined> = {
+type Legend = Extract<SiteType, "cloudnet" | "arm" | "campaign" | "weather-radar"> | "selected";
+
+const markerColors: Record<Legend, string | undefined> = {
   "selected": "red",
   "cloudnet": "blue",
   "arm": "violet",
   "campaign": "orange",
-  "ri-urbans": undefined,
-  "polarin": undefined,
-  "mobile": undefined,
-  "test": undefined,
-  "model": undefined,
-  "hidden": undefined,
+  "weather-radar": "gray",
+};
+
+const markerLabel: Record<Legend, string> = {
+  "selected": "Selected",
+  "cloudnet": "Cloudnet",
+  "arm": "ARM",
+  "campaign": "Campaign",
+  "weather-radar": "Weather radar",
 };
 
 function generateLegend() {
@@ -74,7 +79,7 @@ function generateLegend() {
   for (const [type, className] of Object.entries(markerColors)) {
     if (typeof className === "undefined") continue;
     const li = L.DomUtil.create("li", className);
-    li.innerText = type;
+    li.innerText = markerLabel[type as Legend];
     ul.appendChild(li);
   }
   div.appendChild(ul);
@@ -250,15 +255,6 @@ watch(
     margin-bottom: 0;
     line-height: 1.2em;
 
-    li {
-      text-transform: capitalize;
-    }
-
-    li.violet {
-      /* for arm */
-      text-transform: uppercase;
-    }
-
     li:before {
       content: "■ ";
       font-size: 1.4em;
@@ -286,6 +282,10 @@ watch(
 
     li.red:before {
       color: #cc2c47;
+    }
+
+    li.gray:before {
+      color: gray;
     }
   }
 

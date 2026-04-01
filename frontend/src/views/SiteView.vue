@@ -27,6 +27,13 @@
         <BaseTag v-if="response.type.includes('ri-urbans')" type="ri-urbans">RI-URBANS</BaseTag>
         <BaseTag v-if="response.type.includes('campaign')" type="experimental">Campaign</BaseTag>
         <BaseTag v-if="response.type.includes('model')" type="volatile">Model</BaseTag>
+        <BaseTag
+          v-if="response.type.includes('fmi-radar')"
+          type="fmi"
+          title="This station is part of FMI radar network."
+        >
+          FMI
+        </BaseTag>
         <BaseTag v-else-if="response.type.includes('hidden')" type="experimental">Hidden</BaseTag>
       </template>
       <template #tabs>

@@ -47,6 +47,7 @@
                       <BaseTag v-if="site.type.includes('arm')" type="arm" size="small">ARM</BaseTag>
                       <BaseTag v-if="site.type.includes('polarin')" type="polarin" size="small">POLARIN</BaseTag>
                       <BaseTag v-if="site.type.includes('ri-urbans')" type="ri-urbans" size="small">RI-URBANS</BaseTag>
+                      <BaseTag v-if="site.type.includes('fmi-radar')" type="fmi" size="small">FMI</BaseTag>
                     </div>
                   </td>
                 </tr>
@@ -113,6 +114,12 @@ onMounted(async () => {
           description: "Sites part of ARM network with historical data processed using non-standard methods.",
           legend: ["Operational site", "Some data", "Inactive"],
           sites: response.data.filter((site) => !site.type.includes("hidden") && site.type.includes("arm")),
+        },
+        {
+          title: "Weather radar sites",
+          description: "Sites with vertical measurements from weather radar.",
+          legend: ["Operational site", "Some data", "Inactive"],
+          sites: response.data.filter((site) => !site.type.includes("hidden") && site.type.includes("weather-radar")),
         },
         {
           title: "Model sites",

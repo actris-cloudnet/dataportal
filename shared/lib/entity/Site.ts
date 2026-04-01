@@ -9,7 +9,9 @@ export type SiteType =
   | "model"
   | "hidden"
   | "ri-urbans"
-  | "polarin";
+  | "polarin"
+  | "weather-radar"
+  | "fmi-radar";
 
 export interface SiteLink<T> {
   id: T;
