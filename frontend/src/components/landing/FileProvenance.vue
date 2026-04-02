@@ -42,7 +42,7 @@
           </li>
         </ul>
         <router-link
-          v-if="'instrument' in file && file.instrument"
+          v-if="'instrument' in file && file.instrument && file.instrument.downloadable"
           :to="{
             name: 'RawFiles',
             params: { uuid: file.instrument.uuid },
@@ -52,7 +52,10 @@
           <img :alt="`Raw files for ${file.instrument.id}`" :src="folderIcon" class="icon" />
           Raw files
         </router-link>
-        <span v-if="!sourceFiles.length && !('instrument' in file && file.instrument)" class="notAvailable"></span>
+        <span
+          v-if="!sourceFiles.length && !('instrument' in file && file.instrument && file.instrument.downloadable)"
+          class="notAvailable"
+        ></span>
       </dd>
       <dt>Versions</dt>
       <dd>

@@ -25,6 +25,11 @@
     "humanReadableName": "Halo Photonics Doppler lidar"
   },
   {
+    "id": "secret-lidar",
+    "type": "lidar",
+    "humanReadableName": "Secret lidar"
+  },
+  {
     "id": "hatpro",
     "type": "mwr",
     "humanReadableName": "RPG HATPRO microwave radiometer"

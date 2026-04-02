@@ -55,5 +55,13 @@
     "humanReadableName": "Halo Photonics Doppler lidar",
     "allowedTags": ["co", "cross"],
     "derivedProducts": [{ "id": "doppler-lidar" }, { "id": "doppler-lidar-wind" }]
+  },
+  {
+    "id": "secret-lidar",
+    "type": "lidar",
+    "shortName": "Secret lidar",
+    "humanReadableName": "Secret lidar",
+    "downloadable": false,
+    "derivedProducts": [{ "id": "secret-lidar" }]
   }
 ]

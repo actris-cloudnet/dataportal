@@ -17,6 +17,7 @@ export interface Instrument {
   humanReadableName: string;
   shortName: string;
   model: string;
+  downloadable: boolean;
 }
 
 export interface InstrumentPidLocation {

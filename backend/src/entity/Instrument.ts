@@ -39,6 +39,9 @@ export class Instrument {
   @ManyToMany((_) => MonitoringProduct, (monitoringProduct) => monitoringProduct.sourceInstruments)
   @JoinTable()
   derivedMonitoringProducts!: MonitoringProduct[];
+
+  @Column({ default: true })
+  downloadable!: boolean;
 }
 
 @Entity()

@@ -12,6 +12,7 @@ exports[`/api/files/:uuid request succeeds on instrument file 1`] = `
   "filename": "20181115_mace-head_mira.nc",
   "format": "HDF5 (NetCDF4)",
   "instrument": {
+    "downloadable": true,
     "model": "MIRA",
     "modelUrl": null,
     "name": "Bucharest MIRA",
