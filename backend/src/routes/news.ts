@@ -1,6 +1,8 @@
 import { RequestHandler } from "express";
 import { DataSource, Repository } from "typeorm";
 import { NewsItem } from "../entity/NewsItem";
+import { PermissionType } from "../entity/Permission";
+import { Authenticator } from "../lib/auth";
 
 function generateSlug(title: string): string {
   return title
@@ -12,14 +14,16 @@ function generateSlug(title: string): string {
 }
 
 export class NewsRoutes {
-  constructor(dataSource: DataSource) {
+  constructor(dataSource: DataSource, authenticator: Authenticator) {
     this.newsRepo = dataSource.getRepository(NewsItem);
+    this.authenticator = authenticator;
   }
 
   readonly newsRepo: Repository<NewsItem>;
+  readonly authenticator: Authenticator;
 
   postNews: RequestHandler = async (req, res, next) => {
-    const { title, content, date } = req.body;
+    const { title, content, date, draft } = req.body;
     if (typeof title !== "string" || typeof content !== "string" || typeof date !== "string") {
       return next({ status: 400, error: "title, content, and date are required" });
     }
@@ -28,6 +32,7 @@ export class NewsRoutes {
     news.content = content;
     news.date = new Date(date);
     news.slug = generateSlug(title);
+    news.draft = draft === true;
     await this.newsRepo.save(news);
     res.sendStatus(201);
   };
@@ -35,16 +40,31 @@ export class NewsRoutes {
   getNews: RequestHandler = async (req, res) => {
     const parsed = typeof req.query.limit === "string" ? parseInt(req.query.limit, 10) : NaN;
     const limit = Number.isFinite(parsed) ? parsed : 10;
-    const news = await this.newsRepo.find({
-      order: { date: "DESC" },
-      take: limit,
-    });
+
+    const canManageNews = req.user
+      ? await this.authenticator.hasPermission(req.user, PermissionType.canManageNews)
+      : false;
+
+    const query = this.newsRepo.createQueryBuilder("news").orderBy("news.date", "DESC").take(limit);
+    if (!canManageNews) {
+      query.where("news.draft = :draft", { draft: false });
+    }
+
+    const news = await query.getMany();
     res.send(news);
   };
 
   getNewsItemBySlug: RequestHandler = async (req, res, next) => {
     const news = await this.findBySlug(req.params.slug as string, next);
     if (!news) return;
+
+    const canManageNews = req.user
+      ? await this.authenticator.hasPermission(req.user, PermissionType.canManageNews)
+      : false;
+    if (news.draft && !canManageNews) {
+      return next({ status: 404, error: "News item not found" });
+    }
+
     res.send(news);
   };
 
@@ -59,7 +79,7 @@ export class NewsRoutes {
     const news = await this.findBySlug(req.params.slug as string, next);
     if (!news) return;
 
-    const { title, content, date } = req.body;
+    const { title, content, date, draft } = req.body;
     if (typeof title !== "string" || typeof content !== "string" || typeof date !== "string") {
       return next({ status: 400, error: "title, content, and date are required" });
     }
@@ -68,6 +88,7 @@ export class NewsRoutes {
     news.content = content;
     news.date = new Date(date);
     news.slug = generateSlug(title);
+    news.draft = draft === true;
 
     await this.newsRepo.save(news);
     res.sendStatus(200);

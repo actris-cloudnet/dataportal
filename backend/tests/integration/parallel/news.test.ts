@@ -3,13 +3,11 @@ import { backendPublicUrl, genResponse } from "../../lib";
 import axios from "axios";
 import { describe, expect, it } from "@jest/globals";
 
-// Basic auth credentials for admin user
 const auth = {
   username: "admin",
   password: "admin",
 };
 
-// News routes return error (singular) instead of errors (plural)
 interface NewsError {
   status: number;
   error: string;
@@ -23,7 +21,6 @@ describe("/api/news", () => {
       expect(res.data).toBeInstanceOf(Array);
       expect(res.data.length).toBeGreaterThan(0);
 
-      // Check that items are ordered by date descending
       for (let i = 0; i < res.data.length - 1; i++) {
         expect(new Date(res.data[i].date).getTime()).toBeGreaterThanOrEqual(new Date(res.data[i + 1].date).getTime());
       }
@@ -43,21 +40,54 @@ describe("/api/news", () => {
       expect(res.data).toBeInstanceOf(Array);
       expect(res.data.length).toBeLessThanOrEqual(10);
     });
+
+    it("should not show draft news items to unauthenticated users in list", async () => {
+      const draftNewsItem = {
+        title: "Draft News Item",
+        content: "This is a draft news item that should not be visible.",
+        date: "2024-01-01",
+        draft: true,
+      };
+
+      await axios.post(`${backendPublicUrl}news/`, draftNewsItem, { auth });
+
+      const res = await axios.get(`${backendPublicUrl}news/`);
+      expect(res.status).toBe(200);
+
+      const draftInList = res.data.some((item: any) => item.title === draftNewsItem.title);
+      expect(draftInList).toBe(false);
+    });
+
+    it("should show draft news items to authenticated users with permission", async () => {
+      const draftNewsItem = {
+        title: "Draft News Item For Auth Test",
+        content: "This is a draft news item that should be visible to admins.",
+        date: "2024-01-01",
+        draft: true,
+      };
+
+      await axios.post(`${backendPublicUrl}news/`, draftNewsItem, { auth });
+
+      const res = await axios.get(`${backendPublicUrl}news/`, { auth });
+      expect(res.status).toBe(200);
+
+      const draftInList = res.data.some((item: any) => item.title === draftNewsItem.title);
+      expect(draftInList).toBe(true);
+    });
   });
 
   describe("GET /api/news/:slug", () => {
     it("should return a specific news item by slug", async () => {
-      // First create a news item to get its slug
       const newNewsItem = {
         title: "Test News Item For Get",
         content: "This is a test news item for GET testing.",
         date: "2024-01-01",
+        draft: false,
       };
 
       const createRes = await axios.post(`${backendPublicUrl}news/`, newNewsItem, { auth });
       expect(createRes.status).toBe(201);
 
-      // Get the news item by slug
       const slug = "test-news-item-for-get";
       const res = await axios.get(`${backendPublicUrl}news/${slug}`);
       expect(res.status).toBe(200);
@@ -76,6 +106,45 @@ describe("/api/news", () => {
         genResponse(expectedBody.status, expectedBody),
       );
     });
+
+    it("should not show draft news items to unauthenticated users by slug", async () => {
+      const draftNewsItem = {
+        title: "Draft News Item For Slug Test",
+        content: "This is a draft news item that should not be accessible.",
+        date: "2024-01-01",
+        draft: true,
+      };
+
+      await axios.post(`${backendPublicUrl}news/`, draftNewsItem, { auth });
+
+      const slug = "draft-news-item-for-slug-test";
+      const expectedBody: NewsError = {
+        status: 404,
+        error: "News item not found",
+      };
+
+      return expect(axios.get(`${backendPublicUrl}news/${slug}`)).rejects.toMatchObject(
+        genResponse(expectedBody.status, expectedBody),
+      );
+    });
+
+    it("should show draft news items to authenticated users by slug", async () => {
+      const draftNewsItem = {
+        title: "Draft News Item For Auth Slug Test",
+        content: "This is a draft news item that should be accessible to admins.",
+        date: "2024-01-01",
+        draft: true,
+      };
+
+      await axios.post(`${backendPublicUrl}news/`, draftNewsItem, { auth });
+
+      const slug = "draft-news-item-for-auth-slug-test";
+      const res = await axios.get(`${backendPublicUrl}news/${slug}`, { auth });
+      expect(res.status).toBe(200);
+      expect(res.data).toHaveProperty("title", draftNewsItem.title);
+      expect(res.data).toHaveProperty("content", draftNewsItem.content);
+      expect(res.data).toHaveProperty("draft", true);
+    });
   });
 
   describe("POST /api/news/", () => {
@@ -84,6 +153,7 @@ describe("/api/news", () => {
         title: "Test News Item",
         content: "This is a test news item created during testing.",
         date: "2024-01-01",
+        draft: false,
       };
 
       const res = await axios.post(`${backendPublicUrl}news/`, newNewsItem, { auth });
@@ -94,6 +164,7 @@ describe("/api/news", () => {
       const invalidNewsItem = {
         title: "Test News Item",
         content: "This is missing a date",
+        draft: false,
       };
 
       const expectedBody: NewsError = {
@@ -111,6 +182,7 @@ describe("/api/news", () => {
         title: "Test News Item",
         content: "This has an invalid date type",
         date: 123,
+        draft: false,
       };
 
       const expectedBody: NewsError = {
@@ -128,6 +200,7 @@ describe("/api/news", () => {
         title: 123,
         content: "This has an invalid title type",
         date: "2024-01-01",
+        draft: false,
       };
 
       const expectedBody: NewsError = {
@@ -145,6 +218,7 @@ describe("/api/news", () => {
         title: "This has invalid content type",
         content: 123,
         date: "2024-01-01",
+        draft: false,
       };
 
       const expectedBody: NewsError = {

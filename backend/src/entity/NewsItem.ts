@@ -16,4 +16,7 @@ export class NewsItem {
 
   @Column({ unique: true })
   slug!: string;
+
+  @Column({ default: false })
+  draft!: boolean;
 }

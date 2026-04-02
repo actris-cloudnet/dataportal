@@ -50,6 +50,10 @@
             <MarkdownViewer :content="formData.content" />
           </div>
         </div>
+
+        <div class="form-group">
+          <CheckBox v-model="formData.draft" label="Draft" />
+        </div>
       </template>
 
       <template #footer>
@@ -66,7 +70,7 @@
       <div v-for="item in news" :key="item.id" class="news-item-full">
         <div class="news-header">
           <router-link :to="{ name: 'NewsItem', params: { slug: item.slug } }" class="news-title-link">
-            <h2>{{ item.title }}</h2>
+            <h2>{{ item.title }}{{ item.draft ? " (draft)" : "" }}</h2>
           </router-link>
           <div v-if="canEdit" class="news-actions">
             <BaseButton @click="startEditing(item)" type="secondary" size="small"> Edit </BaseButton>
@@ -104,6 +108,7 @@ const formData = ref({
   title: "",
   content: "",
   date: today,
+  draft: false,
 });
 const showPreview = ref(false);
 
@@ -127,6 +132,7 @@ function startEditing(item: NewsItem) {
     title: item.title,
     content: item.content,
     date: item.date.split("T")[0],
+    draft: item.draft || false,
   };
   showCreateForm.value = true;
 }
@@ -138,6 +144,7 @@ function cancelForm() {
     title: "",
     content: "",
     date: today,
+    draft: false,
   };
 }
 

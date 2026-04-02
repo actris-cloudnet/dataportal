@@ -4,4 +4,5 @@ export interface NewsItem {
   content: string;
   date: string;
   slug: string;
+  draft: boolean;
 }

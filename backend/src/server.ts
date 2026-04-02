@@ -113,7 +113,7 @@ async function createServer(): Promise<void> {
   const monitoringFileRoutes = new MonitoringFileRoutes(AppDataSource);
   const monitoringVisualizationRoutes = new MonitoringVisualizationRoutes(AppDataSource);
   const monitoringProductRoutes = new MonitoringProductRoutes(AppDataSource);
-  const newsRoutes = new NewsRoutes(AppDataSource);
+  const newsRoutes = new NewsRoutes(AppDataSource, authenticator);
 
   const errorHandler: ErrorRequestHandler = (err: RequestError, req, res, next) => {
     console.error(
@@ -552,8 +552,8 @@ async function createServer(): Promise<void> {
     express.json(),
     newsRoutes.postNews,
   );
-  app.get("/api/news/", newsRoutes.getNews);
-  app.get("/api/news/:slug", newsRoutes.getNewsItemBySlug);
+  app.get("/api/news/", middleware.optionalAuth, newsRoutes.getNews);
+  app.get("/api/news/:slug", middleware.optionalAuth, newsRoutes.getNewsItemBySlug);
   app.delete(
     "/api/news/:slug",
     passport.authenticate(["basic", "cookie"], { session: false }),

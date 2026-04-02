@@ -30,7 +30,8 @@ const error = ref(false);
 async function fetchNews() {
   try {
     const response = await axios.get<NewsItem[]>(`${backendUrl}news`, { params: { limit: 5 } });
-    news.value = response.data;
+    // Filter out draft items for the frontpage
+    news.value = response.data.filter((item) => !item.draft);
   } catch (err) {
     console.error("Failed to fetch news:", err);
     error.value = true;
