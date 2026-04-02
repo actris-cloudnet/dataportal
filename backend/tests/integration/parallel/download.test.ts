@@ -75,4 +75,12 @@ describe("GET /api/download/raw/:uuid/:filename", () => {
       axios.get(`${url}b8e96ee1-d3e1-49ba-a557-c131d56beeab/file1-dc460da4ad72c48223.LV1`),
     ).rejects.toMatchObject(genResponse(404, { errors: ["File not found"] }));
   });
+
+  it("responds 503 if file is not downloadable", async () => {
+    return expect(
+      axios.get(`${url}592a73d0-92a0-41d4-97c5-9f3e99ce33cb/20190715_shanghai_secret-lidar.bin`, {
+        headers: { "X-Forwarded-For": "217.165.30.43" },
+      }),
+    ).rejects.toMatchObject(genResponse(503, { errors: ["File is not downloadable"] }));
+  });
 });

@@ -63,7 +63,8 @@ export class FileRoutes {
       if (isModel) {
         qb.leftJoinAndSelect("file.model", "model");
       } else {
-        qb.leftJoinAndMapOne("file.instrument", "file.instrumentInfo", "instrument");
+        qb.leftJoinAndSelect("file.instrumentInfo", "instrumentInfo");
+        qb.leftJoinAndSelect("instrumentInfo.instrument", "instrument");
         qb.leftJoinAndSelect("file.sourceRegularFiles", "sourceRegularFiles");
         qb.leftJoinAndSelect("file.sourceModelFiles", "sourceModelFiles");
       }
@@ -393,13 +394,16 @@ export class FileRoutes {
       .addSelect(siteMetadataKeys)
       .leftJoinAndSelect("file.product", "product");
     if (isModel) qb.leftJoinAndSelect("file.model", "model");
-    if (!isModel) qb.leftJoinAndMapOne("file.instrument", "file.instrumentInfo", "instrument");
+    if (!isModel) {
+      qb.leftJoinAndSelect("file.instrumentInfo", "instrumentInfo");
+      qb.leftJoinAndSelect("instrumentInfo.instrument", "instrument");
+    }
 
     // Where clauses
     qb = addCommonFilters(qb, query);
 
     if (isModel && query.model) qb.andWhere("model.id IN (:...model)", query);
-    if (!isModel && query.instrument) qb.andWhere("instrument.instrumentId IN (:...instrument)", query);
+    if (!isModel && query.instrument) qb.andWhere("instrument.id IN (:...instrument)", query);
 
     // Hack to prevent loading of model files when instrument is selected without product
     if (isModel && (query.instrument || query.instrumentPid)) qb.andWhere("1 = 0");
@@ -409,7 +413,7 @@ export class FileRoutes {
     if (query.releasedAfter) qb.andWhere("file.updatedAt > :releasedAfter", query);
     if (query.updatedAtFrom) qb.andWhere("file.updatedAt >= :updatedAtFrom", query);
     if (query.updatedAtTo) qb.andWhere("file.updatedAt <= :updatedAtTo", query);
-    if (!isModel && query.instrumentPid) qb.andWhere("instrument.pid IN (:...instrumentPid)", query);
+    if (!isModel && query.instrumentPid) qb.andWhere("instrumentInfo.pid IN (:...instrumentPid)", query);
     if (query.dvasUpdated) {
       const value = query.dvasUpdated.toLowerCase();
       if (value == "true") qb.andWhere("file.dvasUpdatedAt IS NOT NULL");
@@ -439,7 +443,7 @@ export class FileRoutes {
       if (isModel) {
         qb.addOrderBy("model.optimumOrder", "ASC");
       } else {
-        qb.addOrderBy("instrument.instrumentId", "ASC").addOrderBy("instrument.pid", "ASC");
+        qb.addOrderBy("instrument.id", "ASC").addOrderBy("instrumentInfo.pid", "ASC");
       }
     } else {
       // Legacy order to show version in chronological order.
@@ -459,14 +463,15 @@ export class FileRoutes {
       .createQueryBuilder("file")
       .leftJoinAndSelect("file.site", "site")
       .leftJoinAndSelect("file.product", "product")
-      .leftJoinAndSelect("file.instrumentInfo", "instrumentInfo");
+      .leftJoinAndSelect("file.instrumentInfo", "instrumentInfo")
+      .leftJoinAndSelect("instrumentInfo.instrument", "instrument");
     qb = addCommonFilters(qb, query);
-    if (query.instrument) qb.andWhere("instrumentInfo.instrumentId IN (:...instrument)", query);
+    if (query.instrument) qb.andWhere("instrument.id IN (:...instrument)", query);
     if (query.instrumentPid) qb.andWhere("instrumentInfo.pid IN (:...instrumentPid)", query);
     qb.orderBy("file.measurementDate", "DESC")
       .addOrderBy("file.siteId", "ASC")
       .addOrderBy("product.id", "ASC")
-      .addOrderBy("instrumentInfo.instrumentId", "ASC")
+      .addOrderBy("instrument.id", "ASC")
       .addOrderBy("instrumentInfo.pid", "ASC");
     if ("limit" in query) qb.limit(parseInt(query.limit));
     return qb;

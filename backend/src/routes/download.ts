@@ -6,7 +6,7 @@ import * as http from "node:http";
 import { Collection } from "../entity/Collection";
 import { DataSource, Not, Repository } from "typeorm";
 import { File } from "../entity/File";
-import { Status, Upload } from "../entity/Upload";
+import { InstrumentUpload, Status, Upload } from "../entity/Upload";
 import { Download, ObjectType } from "../entity/Download";
 import {
   getS3pathForFile,
@@ -70,17 +70,20 @@ export class DownloadRoutes {
   };
 
   raw: RequestHandler = async (req, res, next) => {
-    const file = await this.uploadController.findAnyUpload((repo) =>
+    const file = await this.uploadController.findAnyUpload((repo, isModel) =>
       repo.findOne({
         where: {
           uuid: req.params.uuid as string,
           filename: req.params.filename as string,
           status: Not(Status.CREATED),
         },
-        relations: { site: true },
+        relations: isModel ? { site: true } : { site: true, instrumentInfo: { instrument: true } },
       }),
     );
     if (!file) return next({ status: 404, errors: ["File not found"] });
+    if (file instanceof InstrumentUpload && !file.instrumentInfo.instrument.downloadable && !this.isPrivate(req)) {
+      return next({ status: 503, errors: ["File is not downloadable"] });
+    }
     const upstreamRes = await this.makeRawFileRequest(file);
     res.setHeader("Content-Type", "application/octet-stream");
     res.setHeader("Content-Length", file.size);

@@ -6,7 +6,7 @@
           <img :src="getInstrumentIcon(instrumentInfo.value.instrument)" alt="" />
           Overview
         </router-link>
-        <router-link class="tab" :to="{ name: 'RawFiles' }">
+        <router-link class="tab" :to="{ name: 'RawFiles' }" v-if="instrumentInfo.value.instrument.downloadable">
           <img :src="folderIcon" alt="" />
           Raw files
         </router-link>

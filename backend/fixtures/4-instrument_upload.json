@@ -89,5 +89,18 @@
     "size": "50329725",
     "createdAt": "2022-12-06T00:31:17.507Z",
     "updatedAt": "2022-12-06T00:31:22.497Z"
+  },
+  {
+    "uuid": "592a73d0-92a0-41d4-97c5-9f3e99ce33cb",
+    "filename": "20190715_shanghai_secret-lidar.bin",
+    "s3key": "shanghai/20190715_shanghai_secret-lidar.bin",
+    "measurementDate": "2019-07-15",
+    "checksum": "0e57d79bae718fdfb30dbc4e22b47fc0",
+    "site": "shanghai",
+    "instrumentInfo": { "uuid": "82810ee4-d716-40ae-a7b0-4b52d73d7b9e" },
+    "status": "uploaded",
+    "size": "7127282",
+    "createdAt": "2020-02-19T10:59:58.449Z",
+    "updatedAt": "2020-02-19T10:59:58.449Z"
   }
 ]

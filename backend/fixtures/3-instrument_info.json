@@ -58,5 +58,15 @@
     "type": "lidar ceilometer",
     "owners": ["Babeș-Bolyai University (UBB)"],
     "instrument": "chm15k"
+  },
+  {
+    "uuid": "82810ee4-d716-40ae-a7b0-4b52d73d7b9e",
+    "pid": "https://hdl.handle.net/123/secret-lidar",
+    "name": "Secret lidar",
+    "serialNumber": null,
+    "model": "Secret",
+    "type": "secret lidar",
+    "owners": ["Secret University"],
+    "instrument": "secret-lidar"
   }
 ]

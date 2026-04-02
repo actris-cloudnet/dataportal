@@ -965,11 +965,12 @@ describe("/api/queue/batch", () => {
 
   it("creates default tasks", async () => {
     await axios.post(batchUrl, { type: "process", dryRun: false }, { auth });
-    expect(await taskRepo.count()).toBe(8);
+    expect(await taskRepo.count()).toBe(9);
     expect(await taskRepo.countBy({ productId: "model" })).toBe(0);
     expect(await taskRepo.countBy({ productId: "mwr-l1c" })).toBe(1);
     expect(await taskRepo.countBy({ productId: "mwr" })).toBe(1);
     expect(await taskRepo.countBy({ productId: "lidar" })).toBe(2);
+    expect(await taskRepo.countBy({ productId: "secret-lidar" })).toBe(1);
   });
 
   it("creates ECMWF model tasks", async () => {
