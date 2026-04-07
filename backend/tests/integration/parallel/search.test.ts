@@ -56,6 +56,16 @@ describe("/api/files", () => {
     return expect(res.data.map((d: any) => d.instrument.instrumentId)).toEqual(["mira-35", "mira-35"]);
   });
 
+  it("responds with an array of objects when searching for instrumentPid", async () => {
+    const payload = { params: { instrumentPid: "https://hdl.handle.net/123/bucharest-mira" } };
+    const res = await axios.get(url, payload);
+    expect(res.data).toHaveLength(2);
+    expect(res.data.map((d: any) => d.instrument.pid)).toEqual([
+      "https://hdl.handle.net/123/bucharest-mira",
+      "https://hdl.handle.net/123/bucharest-mira",
+    ]);
+  });
+
   it("responds with an array of 3 objects when searching for mace-head and hyytiala", async () => {
     const payload = { params: { site: ["mace-head", "hyytiala"] } };
     const res = await axios.get(url, payload);
@@ -419,5 +429,25 @@ describe("/api/search", () => {
     const payload = { params: { site: allSites, developer: "" } };
     const res = await axios.get(url, payload);
     expect(res.data.length).toBeGreaterThan(0);
+  });
+
+  it("responds with an array of objects when searching for instrumentPid", async () => {
+    const payload = { params: { instrumentPid: "https://hdl.handle.net/123/bucharest-mira" } };
+    const res = await axios.get(url, payload);
+    expect(res.data).toHaveLength(2);
+    expect(res.data.map((d: any) => d.instrumentInfoUuid)).toEqual([
+      "0b3a7fa0-4812-4964-af23-1162e8b3a665",
+      "0b3a7fa0-4812-4964-af23-1162e8b3a665",
+    ]);
+  });
+
+  it("responds with an array of objects when searching for instrumentPid and page", async () => {
+    const payload = { params: { instrumentPid: "https://hdl.handle.net/123/bucharest-mira", page: 1 } };
+    const res = await axios.get(url, payload);
+    expect(res.data.results).toHaveLength(2);
+    expect(res.data.results.map((d: any) => d.instrumentInfo.pid)).toEqual([
+      "https://hdl.handle.net/123/bucharest-mira",
+      "https://hdl.handle.net/123/bucharest-mira",
+    ]);
   });
 });
