@@ -45,7 +45,7 @@ describe("/api/files", () => {
     const res = await axios.get(url, payload);
     expect(res).toHaveProperty("data");
     expect(res.data).toHaveLength(2);
-    return expect(res.data.map((d: any) => d.site.id)).toEqual(["mace-head", "mace-head"]);
+    expect(res.data.map((d: any) => d.site.id)).toEqual(["mace-head", "mace-head"]);
   });
 
   it("responds with an array of 2 objects when searching for mira", async () => {
@@ -53,7 +53,7 @@ describe("/api/files", () => {
     const res = await axios.get(url, payload);
     expect(res).toHaveProperty("data");
     expect(res.data).toHaveLength(2);
-    return expect(res.data.map((d: any) => d.instrument.instrumentId)).toEqual(["mira-35", "mira-35"]);
+    expect(res.data.map((d: any) => d.instrument.instrumentId)).toEqual(["mira-35", "mira-35"]);
   });
 
   it("responds with an array of objects when searching for instrumentPid", async () => {
@@ -71,9 +71,7 @@ describe("/api/files", () => {
     const res = await axios.get(url, payload);
     expect(res).toHaveProperty("data");
     expect(res.data).toHaveLength(3);
-    return expect(new Set(res.data.map((d: any) => d.site.id))).toEqual(
-      new Set(["mace-head", "mace-head", "hyytiala"]),
-    );
+    expect(new Set(res.data.map((d: any) => d.site.id))).toEqual(new Set(["mace-head", "mace-head", "hyytiala"]));
   });
 
   it("responds with 400 if site was not found", () => {
@@ -97,7 +95,7 @@ describe("/api/files", () => {
   it("responds with an array of objects with dates between [ dateFrom, dateTo ], in descending order", async () => {
     const payload = { params: { dateFrom: "2018-06-09", dateTo: "2019-09-01" } };
     const res = await axios.get(url, payload);
-    return expect(res.data.map((d: any) => d.measurementDate)).toEqual([
+    expect(res.data.map((d: any) => d.measurementDate)).toEqual([
       "2019-09-01",
       "2019-07-16",
       "2019-07-16",
@@ -110,7 +108,7 @@ describe("/api/files", () => {
   it("responds with correct objects if product is specified", async () => {
     const payload = { params: { product: "radar" } };
     const res = await axios.get(url, payload);
-    return expect(res.data.map((d: any) => d.product.id)).toEqual(["radar", "radar", "radar"]);
+    expect(res.data.map((d: any) => d.product.id)).toEqual(["radar", "radar", "radar"]);
   });
 
   it("responds with correct objects if dateFrom, dateTo, site, and product are specified", async () => {
@@ -125,7 +123,7 @@ describe("/api/files", () => {
     const res = await axios.get(url, payload);
     expect(res.data.map((d: any) => d.site.id)).toEqual(["mace-head"]);
     expect(res.data.map((d: any) => d.product.id)).toEqual(["classification"]);
-    return expect(res.data.map((d: any) => d.measurementDate)).toEqual(["2018-06-09"]);
+    expect(res.data.map((d: any) => d.measurementDate)).toEqual(["2018-06-09"]);
   });
 
   it("responds with 400 on malformed dateFrom", () => {
@@ -154,7 +152,7 @@ describe("/api/files", () => {
   it("has exactly four stable files", async () => {
     const payload = { params: { volatile: "false" } };
     const res = await axios.get(url, payload);
-    return expect(res.data).toHaveLength(4);
+    expect(res.data).toHaveLength(4);
   });
 
   it("does not show test files in normal mode", async () => {
@@ -238,7 +236,7 @@ describe("/api/files", () => {
       },
     };
     const res = await axios.get(url, payload);
-    return expect(res.data[0]).toMatchObject({
+    expect(res.data[0]).toMatchObject({
       s3path: "/cloudnet-product/legacy/20090716_bucharest_classification.nc",
     });
   });
@@ -247,7 +245,7 @@ describe("/api/files", () => {
     const payload = { params: { date: "2018-11-15" } };
     const res = await axios.get(url, payload);
     expect(res.data).toHaveLength(1);
-    return expect(res.data[0]).toMatchObject({ measurementDate: "2018-11-15" });
+    expect(res.data[0]).toMatchObject({ measurementDate: "2018-11-15" });
   });
 
   it("responds with 400 on malformed date", async () => {
@@ -278,7 +276,7 @@ describe("/api/files", () => {
     const payload = { params: { filename } };
     const res = await axios.get(url, payload);
     expect(res.data).toHaveLength(1);
-    return expect(res.data[0]).toMatchObject({ filename });
+    expect(res.data[0]).toMatchObject({ filename });
   });
 
   it("filters with updatedAt", async () => {
@@ -293,7 +291,7 @@ describe("/api/files", () => {
     const res = await axios.get(url, payload);
     expect(res.data).toHaveLength(2);
     expect(res.data[0]).toMatchObject({ uuid: "62b32746-faf0-4057-9076-ed2e698dcc34" });
-    return expect(res.data[1]).toMatchObject({ uuid: "72b32746-faf0-4057-9076-ed2e698dcc34" });
+    expect(res.data[1]).toMatchObject({ uuid: "72b32746-faf0-4057-9076-ed2e698dcc34" });
   });
 });
 
@@ -304,13 +302,13 @@ describe("/api/model-files", () => {
     const payload = { params: { site: "bucharest", dateFrom: "2020-12-05", dateTo: "2020-12-05" } };
     const res = await axios.get(url, payload);
     expect(res.data).toHaveLength(1);
-    return expect(res.data[0]).toMatchObject({ model: { id: "ecmwf" } });
+    expect(res.data[0]).toMatchObject({ model: { id: "ecmwf" } });
   });
 
   it("includes s3path when requests", async () => {
     const payload = { params: { site: "bucharest", dateFrom: "2020-12-05", dateTo: "2020-12-05", s3path: true } };
     const res = await axios.get(url, payload);
-    return expect(res.data[0]).toMatchObject({ s3path: "/cloudnet-product-volatile/20141205_mace-head_ecmwf.nc" });
+    expect(res.data[0]).toMatchObject({ s3path: "/cloudnet-product-volatile/20141205_mace-head_ecmwf.nc" });
   });
 
   it("responds with the specified model file", async () => {
@@ -319,7 +317,7 @@ describe("/api/model-files", () => {
     };
     const res = await axios.get(url, payload);
     expect(res.data).toHaveLength(1);
-    return expect(res.data[0]).toMatchObject({ model: { id: "icon-iglo-12-23" } });
+    expect(res.data[0]).toMatchObject({ model: { id: "icon-iglo-12-23" } });
   });
 
   it("responds with all model files with allModels flag ordered by model quality", async () => {
@@ -375,13 +373,13 @@ describe("/api/search", () => {
       },
     };
     const res = await axios.get(url, payload);
-    return expect(res.data).toMatchObject(expectedData);
+    expect(res.data).toMatchObject(expectedData);
   });
 
   it("does not return hidden sites", async () => {
     const payload = { params: { date: "2021-01-22" } };
     const { data } = await axios.get(url, payload);
-    return expect(data).toHaveLength(0);
+    expect(data).toHaveLength(0);
   });
 
   it("returns the latest file when limit=1", async () => {
