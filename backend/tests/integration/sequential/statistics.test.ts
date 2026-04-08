@@ -30,6 +30,7 @@ interface Params {
   downloadDateTo?: string;
   cluUnits?: string;
   cluProduct?: string;
+  variable?: string;
 }
 
 function doRequest(params: Params, headers: any = { authorization: `Basic ${str2base64("bob:bobs_pass")}` }) {
@@ -458,5 +459,51 @@ describe("GET /api/statistics", () => {
         site: "mace-head",
         uniqueIps: 2,
       },
+    ]));
+
+  it("can filter by actrisName variable", () =>
+    expect(getStats({ dimensions: "yearMonth,downloads", variable: "radar velocity" })).resolves.toMatchObject([
+      { yearMonth: "2022-01", downloads: expect.closeTo((1 * 31) / 300, 10) },
+      { yearMonth: "2022-02", downloads: expect.closeTo((1 * 28) / 300, 10) },
+      { yearMonth: "2022-03", downloads: expect.closeTo((1 * 31) / 300, 10) },
+      { yearMonth: "2022-04", downloads: expect.closeTo((1 * 30) / 300, 10) },
+      { yearMonth: "2022-05", downloads: expect.closeTo((1 * 31) / 300, 10) },
+      { yearMonth: "2022-06", downloads: expect.closeTo((1 * 30) / 300, 10) },
+      { yearMonth: "2022-07", downloads: expect.closeTo((1 * 31) / 300, 10) },
+      { yearMonth: "2022-08", downloads: expect.closeTo((1 * 31) / 300, 10) },
+      { yearMonth: "2022-09", downloads: expect.closeTo((1 * 30) / 300, 10) },
+      { yearMonth: "2022-10", downloads: expect.closeTo((1 * 31) / 300, 10) },
+      { yearMonth: "2022-11", downloads: expect.closeTo((1 * 30) / 300, 10) },
+      { yearMonth: "2022-12", downloads: expect.closeTo((1 * 31) / 300, 10) },
+    ]));
+
+  it("can filter by actrisName variable in files units", () =>
+    expect(
+      getStats({ dimensions: "yearMonth,downloads", variable: "radar velocity", cluUnits: "files" }),
+    ).resolves.toMatchObject([
+      { yearMonth: "2022-01", downloads: 31 },
+      { yearMonth: "2022-02", downloads: 28 },
+      { yearMonth: "2022-03", downloads: 31 },
+      { yearMonth: "2022-04", downloads: 30 },
+      { yearMonth: "2022-05", downloads: 31 },
+      { yearMonth: "2022-06", downloads: 30 },
+      { yearMonth: "2022-07", downloads: 31 },
+      { yearMonth: "2022-08", downloads: 31 },
+      { yearMonth: "2022-09", downloads: 30 },
+      { yearMonth: "2022-10", downloads: 31 },
+      { yearMonth: "2022-11", downloads: 30 },
+      { yearMonth: "2022-12", downloads: 31 },
+    ]));
+
+  it("can filter by different actrisName variable", () =>
+    expect(
+      getStats({ dimensions: "yearMonth,downloads", variable: "hydrometeor type classification" }),
+    ).resolves.toMatchObject([
+      { yearMonth: "2022-01", downloads: expect.closeTo((1 * 31) / 300, 10) },
+      { yearMonth: "2022-02", downloads: expect.closeTo((1 * 28) / 300, 10) },
+      { yearMonth: "2022-03", downloads: expect.closeTo((1 * 31) / 300, 10) },
+      { yearMonth: "2022-04", downloads: expect.closeTo((1 * 30) / 300, 10) },
+      { yearMonth: "2022-05", downloads: expect.closeTo((1 * 31) / 300, 10) },
+      { yearMonth: "2022-06", downloads: expect.closeTo((1 * 30) / 300, 10) },
     ]));
 });

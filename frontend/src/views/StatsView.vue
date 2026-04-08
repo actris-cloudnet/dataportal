@@ -59,6 +59,16 @@
           :getIcon="getProductIcon"
           v-model="currentProduct"
         />
+        <MultiSelect
+          class="field"
+          id="variable"
+          label="Variable"
+          :options="variables"
+          clearable
+          style="width: 300px"
+          :disabled="visitStatistics"
+          v-model="currentVariable"
+        />
         <fieldset class="field" :disabled="visitStatistics">
           <legend class="label">Product type</legend>
           <CheckBox v-model="productTypes" value="observation" label="Observation" />
@@ -218,6 +228,8 @@ const curatedStatistics = computed(() => selectedDimensions.value.includes("cura
 const products = ref<Product[]>([]);
 const currentProduct = ref<string[]>([]);
 const units = ref<Units>("files");
+const variables = ref<Option[]>([]);
+const currentVariable = ref<string | null>(null);
 
 const currentCountry = ref<string | null>(null);
 const currentSite = ref<string | null>(null);
@@ -256,7 +268,7 @@ onMounted(async () => {
   try {
     const [siteRes, productRes] = await Promise.all([
       axios.get<Site[]>(`${backendUrl}sites`),
-      axios.get<Product[]>(`${backendUrl}products`),
+      axios.get<Product[]>(`${backendUrl}products/variables`),
     ]);
     countries.value = Array.from(new Set(siteRes.data.map((site) => site.countryCode).filter(notEmpty)))
       .map((countryCode) => ({
@@ -267,6 +279,13 @@ onMounted(async () => {
     allSites.value = siteRes.data.sort((a, b) => compareValues(a.humanReadableName, b.humanReadableName));
     sites.value = allSites.value.filter((site) => !site.type.includes("hidden"));
     products.value = productRes.data.sort((a, b) => compareValues(a.humanReadableName, b.humanReadableName));
+    variables.value = [
+      ...new Set(
+        productRes.data.flatMap((product) => product.variables.map((variable) => variable.actrisName).filter(notEmpty)),
+      ),
+    ]
+      .sort()
+      .map((actrisName) => ({ id: actrisName, humanReadableName: actrisName }));
     loadingSites.value = false;
   } catch (e) {
     alert(`Failed to download counties: ${e}`);
@@ -280,6 +299,7 @@ async function onSearch() {
     country: currentCountry.value || undefined,
     site: currentSite.value || undefined,
     productTypes: productTypes.value.join(","),
+    variable: currentVariable.value || undefined,
     downloadDateFrom: !curatedStatistics.value && downloadDateFrom.value ? downloadDateFrom.value : undefined,
     downloadDateTo: !curatedStatistics.value && downloadDateTo.value ? downloadDateTo.value : undefined,
     measurementDateFrom: measurementDateFrom.value ? measurementDateFrom.value : undefined,

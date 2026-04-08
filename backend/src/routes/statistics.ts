@@ -112,12 +112,18 @@ export class StatisticsRoutes {
       qb.andWhere('stats."productId" IN (:...productIds)', { productIds });
     }
 
+    const filterByVariable = typeof req.query.variable === "string";
+    if (units === "variableYear" || filterByVariable) {
+      qb.innerJoin("product_variable", "variable", "stats.productId = variable.productId");
+    }
+    if (filterByVariable) {
+      qb.andWhere("variable.actrisName = :variable", { variable: req.query.variable });
+    }
+
     const dimensions = req.query.dimensions as string;
     if (dimensions.includes("downloads")) {
       if (units === "variableYear") {
-        qb.select("SUM(downloads) / 300", "downloads")
-          .innerJoin("product_variable", "prodvar", "stats.productId = prodvar.productId")
-          .andWhere("prodvar.actrisName IS NOT NULL");
+        qb.select("SUM(downloads) / 300", "downloads").andWhere("variable.actrisName IS NOT NULL");
       } else {
         qb.select("SUM(downloads)", "downloads");
       }
