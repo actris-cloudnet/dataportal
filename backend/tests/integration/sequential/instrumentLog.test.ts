@@ -46,8 +46,8 @@ beforeAll(async () => {
   const instrumentInfoRepo = dataSource.getRepository(InstrumentInfo);
 
   await logRepo.createQueryBuilder().delete().execute();
-  await permRepo.createQueryBuilder().delete().execute();
   await userRepo.createQueryBuilder().delete().execute();
+  await permRepo.createQueryBuilder().delete().execute();
 
   const instrumentInfo = await instrumentInfoRepo.findOneByOrFail({ uuid: instrumentInfoUuid });
   instrumentPid = instrumentInfo.pid;
