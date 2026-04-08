@@ -107,14 +107,20 @@
             <BaseButton v-if="form.time" type="secondary" size="small" @click="form.time = ''">Clear</BaseButton>
           </div>
         </div>
-        <div class="form-group" v-if="requiresTimeRange">
+        <div class="form-group" v-if="showEndDate">
           <label>End date and time (UTC)</label>
           <div class="date-time-row">
             <DatePicker name="event-end-date" v-model="form.endDate" :end="today" />
-            <input id="event-end-time" type="time" v-model="form.endTime" required />
+            <input id="event-end-time" type="time" v-model="form.endTime" :required="requiresTimeRange" />
             <BaseButton type="secondary" size="small" @click="setEndNow">Now</BaseButton>
             <BaseButton v-if="form.endTime" type="secondary" size="small" @click="form.endTime = ''">Clear</BaseButton>
+            <BaseButton v-if="!requiresTimeRange" type="secondary" size="small" @click="removeEndDate"
+              >Remove</BaseButton
+            >
           </div>
+        </div>
+        <div v-else-if="!requiresTimeRange" class="add-end-date">
+          <BaseButton type="secondary" size="small" @click="addEndDate">+ Add end date</BaseButton>
         </div>
         <div class="form-group">
           <label for="event-notes">{{ requiresNotes ? "Notes" : "Notes (optional)" }}</label>
@@ -279,14 +285,19 @@ const defaultForm = () => ({
   result: "",
   date: today as string | null,
   time: "",
-  endDate: today as string | null,
+  endDate: null as string | null,
   endTime: "",
   notes: "",
 });
 
+function extractTime(dateStr: string): string {
+  const t = dateStr.slice(11, 16);
+  return t && t !== "00:00" ? t : "";
+}
+
 function formatDate(dateStr: string): string {
-  const timePart = dateStr.slice(11, 16);
-  if (timePart && timePart !== "00:00") {
+  const timePart = extractTime(dateStr);
+  if (timePart) {
     return `${dateStr.slice(0, 10)} ${timePart}`;
   }
   return dateStr.slice(0, 10);
@@ -295,13 +306,15 @@ function formatDate(dateStr: string): string {
 function formatDateRange(entry: InstrumentLog): string {
   const start = formatDate(entry.date);
   if (!entry.endDate) return start;
+  const end = formatDate(entry.endDate);
+  if (start === end) return start;
   const startDay = entry.date.slice(0, 10);
   const endDay = entry.endDate.slice(0, 10);
-  const endTime = entry.endDate.slice(11, 16);
+  const endTime = extractTime(entry.endDate);
   if (startDay === endDay && endTime) {
     return `${start} – ${endTime}`;
   }
-  return `${start} – ${formatDate(entry.endDate)}`;
+  return `${start} – ${end}`;
 }
 
 function setNow() {
@@ -314,6 +327,15 @@ function setEndNow() {
   const now = new Date();
   form.value.endDate = now.toISOString().slice(0, 10);
   form.value.endTime = now.toISOString().slice(11, 16);
+}
+
+function addEndDate() {
+  form.value.endDate = form.value.date ?? today;
+}
+
+function removeEndDate() {
+  form.value.endDate = null;
+  form.value.endTime = "";
 }
 
 function formatTimestamp(entry: InstrumentLog): string {
@@ -351,6 +373,7 @@ const availableDetails = computed(() => {
 
 const availableResults = computed(() => resultOptions[form.value.eventType] ?? []);
 const requiresTimeRange = computed(() => timeRangeDetails.has(form.value.detail));
+const showEndDate = computed(() => requiresTimeRange.value || form.value.endDate != null);
 const requiresNotes = computed(
   () =>
     notesRequiredEvents.has(form.value.eventType) ||
@@ -369,9 +392,8 @@ watch(
 watch(
   () => form.value.detail,
   () => {
-    if (!requiresTimeRange.value) {
+    if (requiresTimeRange.value && !form.value.endDate) {
       form.value.endDate = today;
-      form.value.endTime = "";
     }
   },
 );
@@ -420,6 +442,10 @@ async function submitEntry() {
       return;
     }
     endDateStr = `${form.value.endDate}T${form.value.endTime}`;
+  } else if (form.value.endDate) {
+    endDateStr = form.value.endTime ? `${form.value.endDate}T${form.value.endTime}` : form.value.endDate;
+  }
+  if (endDateStr) {
     if (new Date(endDateStr + "Z") < new Date(dateStr + "Z")) {
       submitError.value = "End date/time cannot be before start.";
       return;
@@ -484,9 +510,9 @@ async function modifyEntry(entry: InstrumentLog) {
     detail: "",
     result: "",
     date: entry.date.slice(0, 10),
-    time: entry.date.slice(11, 16) || "",
-    endDate: entry.endDate ? entry.endDate.slice(0, 10) : today,
-    endTime: entry.endDate ? entry.endDate.slice(11, 16) : "",
+    time: extractTime(entry.date),
+    endDate: entry.endDate ? entry.endDate.slice(0, 10) : null,
+    endTime: entry.endDate ? extractTime(entry.endDate) : "",
     notes: entry.notes ?? "",
   };
   await nextTick();
@@ -633,6 +659,10 @@ onMounted(fetchEntries);
 
 .pagination {
   margin-top: 1rem;
+}
+
+.add-end-date {
+  margin-bottom: 1rem;
 }
 
 .date-time-row {
