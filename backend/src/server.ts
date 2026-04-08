@@ -1,7 +1,7 @@
 import * as express from "express";
 import * as http from "node:http";
 import * as querystring from "node:querystring";
-import { ErrorRequestHandler } from "express";
+import { ErrorRequestHandler, RequestHandler } from "express";
 import * as passport from "passport";
 import { Strategy as OrcidStrategy } from "passport-orcid";
 import { Strategy as CookieStrategy } from "passport-cookie";
@@ -33,7 +33,7 @@ import { UserActivationRoutes } from "./routes/userActivation";
 import { ReferenceRoutes } from "./routes/reference";
 import { FeedbackRoutes } from "./routes/feedback";
 import { AppDataSource } from "./data-source";
-import { rateLimit } from "express-rate-limit";
+import { Options as RateLimitOptions, rateLimit } from "express-rate-limit";
 import { QueueRoutes } from "./routes/queue";
 import { QueueService } from "./lib/queue";
 import { ProductAvailabilityRoutes } from "./routes/productAvailability";
@@ -68,6 +68,7 @@ async function createServer(): Promise<void> {
   metricsService.start();
 
   await queueService.initializeLocks();
+  let rateLimitMiddleware: (options?: Partial<RateLimitOptions>) => RequestHandler;
   if (process.env.NODE_ENV === "production") {
     setInterval(
       () => {
@@ -88,6 +89,9 @@ async function createServer(): Promise<void> {
       },
       6 * 60 * 60 * 1000,
     );
+    rateLimitMiddleware = rateLimit;
+  } else {
+    rateLimitMiddleware = (_options) => (_req, _res, next) => next();
   }
 
   const fileRoutes = new FileRoutes(AppDataSource);
@@ -222,7 +226,7 @@ async function createServer(): Promise<void> {
   app.post("/api/auth/logout", passport.authenticate("cookie", { session: false }), authenticator.logOut);
   app.post(
     "/api/auth/token",
-    rateLimit({ windowMs: 60 * 60 * 1000, limit: 10 }),
+    rateLimitMiddleware({ windowMs: 60 * 60 * 1000, limit: 10 }),
     passport.authenticate("cookie", { session: false }),
     authenticator.generateToken,
   );
@@ -333,13 +337,18 @@ async function createServer(): Promise<void> {
   app.get("/api/uploaded-metadata", uploadRoutes.listInstrumentsFromMetadata);
   app.post(
     "/api/collection",
-    rateLimit({ windowMs: 60 * 1000, limit: 10 }),
+    rateLimitMiddleware({ windowMs: 60 * 1000, limit: 10 }),
     express.json({ limit: "1mb" }),
     collRoutes.postCollection,
   );
   app.get("/api/collection/:uuid", middleware.validateUuidParam, collRoutes.collection);
   app.get("/api/collection/:uuid/files", middleware.validateUuidParam, collRoutes.collectionFiles);
-  app.post("/api/generate-pid", rateLimit({ windowMs: 60 * 1000, limit: 10 }), express.json(), collRoutes.generatePid);
+  app.post(
+    "/api/generate-pid",
+    rateLimitMiddleware({ windowMs: 60 * 1000, limit: 10 }),
+    express.json(),
+    collRoutes.generatePid,
+  );
   app.get("/api/download/product/:uuid/*s3key", middleware.validateUuidParam, dlRoutes.product);
   app.get("/api/download/raw/:uuid/:filename", middleware.validateUuidParam, dlRoutes.raw);
   app.get("/api/download/collection/:uuid", middleware.validateUuidParam, dlRoutes.collection);
@@ -389,7 +398,12 @@ async function createServer(): Promise<void> {
   );
   app.get("/api/product-availability", productAvailabilityRoutes.productAvailability);
   app.get("/api/upload-amount", productAvailabilityRoutes.uploadAmount);
-  app.post("/api/feedback", rateLimit({ windowMs: 60 * 1000, limit: 10 }), express.json(), feedbackRoutes.postFeedback);
+  app.post(
+    "/api/feedback",
+    rateLimitMiddleware({ windowMs: 60 * 1000, limit: 10 }),
+    express.json(),
+    feedbackRoutes.postFeedback,
+  );
   app.get("/api/instrument-pids", instrRoutes.listInstrumentPids);
   app.get("/api/instrument-pids/:uuid", middleware.validateUuidParam, instrRoutes.instrumentPid);
   app.get(
