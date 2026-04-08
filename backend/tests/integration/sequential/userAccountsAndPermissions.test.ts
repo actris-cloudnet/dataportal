@@ -1,9 +1,10 @@
 import axios from "axios";
 import { readFileSync } from "node:fs";
-import { backendPrivateUrl } from "../../lib";
+import { backendPrivateUrl, cleanRepos, loadFixture } from "../../lib";
 import { DataSource } from "typeorm/";
 import { AppDataSource } from "../../../src/data-source";
 import { UserAccount } from "../../../src/entity/UserAccount";
+import { Token } from "../../../src/entity/Token";
 import { beforeAll, afterAll, describe, it, expect } from "@jest/globals";
 
 const USER_ACCOUNTS_URL = backendPrivateUrl.concat("user-accounts");
@@ -13,19 +14,21 @@ let userAccountRepository: any;
 
 beforeAll(async () => {
   dataSource = await AppDataSource.initialize();
+  await cleanRepos(dataSource);
+  await loadFixture(dataSource, "0-model_citation");
+  await loadFixture(dataSource, "0-regular_citation");
+  await loadFixture(dataSource, "1-site");
+  await loadFixture(dataSource, "1-model");
   userAccountRepository = dataSource.getRepository(UserAccount);
-  await userAccountRepository.createQueryBuilder().delete().execute();
 });
 
-afterAll(async () => {
-  await userAccountRepository.createQueryBuilder().delete().execute();
-  await dataSource.destroy();
-});
+afterAll(async () => await dataSource.destroy());
 
 describe("test user accounts and permissions", () => {
   let userData: any[];
 
   beforeAll(async () => {
+    await dataSource.getRepository(Token).createQueryBuilder().delete().execute();
     await userAccountRepository.createQueryBuilder().delete().execute();
     userData = JSON.parse(readFileSync("tests/data/userAccountsAndPermissions.json", "utf8"));
     expect(userData).toHaveLength(8);

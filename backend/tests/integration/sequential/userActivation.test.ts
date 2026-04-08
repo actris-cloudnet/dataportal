@@ -1,5 +1,5 @@
 import axios from "axios";
-import { backendPrivateUrl } from "../../lib";
+import { backendPrivateUrl, cleanRepos, loadFixture } from "../../lib";
 import { DataSource } from "typeorm/";
 import { AppDataSource } from "../../../src/data-source";
 import { UserAccount } from "../../../src/entity/UserAccount";
@@ -10,14 +10,14 @@ let userAccountRepository: any;
 
 beforeAll(async () => {
   dataSource = await AppDataSource.initialize();
+  await cleanRepos(dataSource);
+  await loadFixture(dataSource, "0-model_citation");
+  await loadFixture(dataSource, "0-regular_citation");
+  await loadFixture(dataSource, "1-site");
   userAccountRepository = dataSource.getRepository(UserAccount);
-  await userAccountRepository.createQueryBuilder().delete().execute();
 });
 
-afterAll(async () => {
-  await userAccountRepository.createQueryBuilder().delete().execute();
-  await dataSource.destroy();
-});
+afterAll(async () => await dataSource.destroy());
 
 describe("test user account activation", () => {
   let activationToken: string;

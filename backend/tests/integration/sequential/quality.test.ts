@@ -1,7 +1,7 @@
 import { DataSource, Repository } from "typeorm";
 import { QualityReport } from "../../../src/entity/QualityReport";
 import axios from "axios";
-import { backendPrivateUrl, backendPublicUrl } from "../../lib";
+import { backendPrivateUrl, backendPublicUrl, cleanRepos, loadFixture } from "../../lib";
 import { promises as fsp } from "node:fs";
 import { ErrorLevel, FileQuality } from "../../../src/entity/FileQuality";
 import { readResources } from "../../../../shared/lib";
@@ -29,6 +29,18 @@ let report: any;
 beforeAll(async () => {
   resources = await readResources();
   dataSource = await AppDataSource.initialize();
+  await cleanRepos(dataSource);
+  await loadFixture(dataSource, "0-model_citation");
+  await loadFixture(dataSource, "0-regular_citation");
+  await loadFixture(dataSource, "0-software");
+  await loadFixture(dataSource, "1-site");
+  await loadFixture(dataSource, "1-product");
+  await loadFixture(dataSource, "1-model");
+  await loadFixture(dataSource, "2-instrument");
+  await loadFixture(dataSource, "3-product_variable");
+  await loadFixture(dataSource, "3-instrument_info");
+  await loadFixture(dataSource, "5-model_file");
+  await loadFixture(dataSource, "5-regular_file");
   testInfoRepo = dataSource.getRepository(TestInfo);
   qualityReportRepo = dataSource.getRepository(QualityReport);
   fileQualityRepo = dataSource.getRepository(FileQuality);
@@ -38,7 +50,13 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  await cleanRepos();
+  await qualityReportRepo.createQueryBuilder().delete().execute();
+  await fileQualityRepo.createQueryBuilder().delete().execute();
+  await dataSource.getRepository(Visualization).createQueryBuilder().delete().execute();
+  await dataSource.getRepository(ModelVisualization).createQueryBuilder().delete().execute();
+  await dataSource.getRepository(RegularFile).createQueryBuilder().delete().execute();
+  await dataSource.getRepository(ModelFile).createQueryBuilder().delete().execute();
+  await dataSource.getRepository(SearchFile).createQueryBuilder().delete().execute();
   await modelFileRepo.save(JSON.parse((await fsp.readFile("fixtures/5-model_file.json")).toString()));
   await regularFileRepo.save(JSON.parse((await fsp.readFile("fixtures/5-regular_file.json")).toString()));
   await searchFileRepo.save(JSON.parse((await fsp.readFile("fixtures/5-search_file.json")).toString()));
@@ -46,7 +64,6 @@ beforeEach(async () => {
 });
 
 afterAll(async () => {
-  await cleanRepos();
   await dataSource.destroy();
 });
 
@@ -124,14 +141,4 @@ async function putReportWithPasses(uuid: string) {
   await expect(axios.put(`${privateUrl}${uuid}`, report)).resolves.toMatchObject({
     status: 201,
   });
-}
-
-async function cleanRepos() {
-  await qualityReportRepo.createQueryBuilder().delete().execute();
-  await fileQualityRepo.createQueryBuilder().delete().execute();
-  await dataSource.getRepository(Visualization).createQueryBuilder().delete().execute();
-  await dataSource.getRepository(ModelVisualization).createQueryBuilder().delete().execute();
-  await dataSource.getRepository(RegularFile).createQueryBuilder().delete().execute();
-  await dataSource.getRepository(ModelFile).createQueryBuilder().delete().execute();
-  await dataSource.getRepository(SearchFile).createQueryBuilder().delete().execute();
 }

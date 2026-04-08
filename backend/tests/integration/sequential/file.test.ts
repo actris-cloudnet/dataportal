@@ -1,7 +1,7 @@
 import { DataSource, Repository } from "typeorm";
 import { ModelFile, RegularFile } from "../../../src/entity/File";
 import { readFileSync } from "node:fs";
-import { backendPrivateUrl, storageServiceUrl, str2base64 } from "../../lib";
+import { backendPrivateUrl, storageServiceUrl, str2base64, cleanRepos, loadFixture } from "../../lib";
 import { Visualization } from "../../../src/entity/Visualization";
 import { SearchFile } from "../../../src/entity/SearchFile";
 import { ModelVisualization } from "../../../src/entity/ModelVisualization";
@@ -35,6 +35,19 @@ const volatileModelFile = {
 
 beforeAll(async () => {
   dataSource = await AppDataSource.initialize();
+  await cleanRepos(dataSource);
+  await loadFixture(dataSource, "0-model_citation");
+  await loadFixture(dataSource, "0-regular_citation");
+  await loadFixture(dataSource, "0-software");
+  await loadFixture(dataSource, "1-site");
+  await loadFixture(dataSource, "1-product");
+  await loadFixture(dataSource, "1-model");
+  await loadFixture(dataSource, "2-instrument");
+  await loadFixture(dataSource, "3-product_variable");
+  await loadFixture(dataSource, "3-instrument_info");
+  await loadFixture(dataSource, "5-model_file");
+  await loadFixture(dataSource, "5-regular_file");
+  await loadFixture(dataSource, "6-visualization");
   fileRepo = dataSource.getRepository(RegularFile);
   modelFileRepo = dataSource.getRepository(ModelFile);
   searchFileRepo = dataSource.getRepository(SearchFile);
@@ -50,11 +63,16 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  await cleanRepos();
+  await vizRepo.createQueryBuilder().delete().execute();
+  await modelVizRepo.createQueryBuilder().delete().execute();
+  await modelFileRepo.createQueryBuilder().delete().execute();
+  await fileRepo.createQueryBuilder().delete().execute();
+  await searchFileRepo.createQueryBuilder().delete().execute();
+  await fileQualityRepo.createQueryBuilder().delete().execute();
+  await qualityReportRepo.createQueryBuilder().delete().execute();
 });
 
 afterAll(async () => {
-  await cleanRepos();
   await dataSource.destroy();
 });
 
@@ -920,14 +938,4 @@ async function deleteFile(
 
 function generateHash() {
   return randomBytes(20).toString("hex");
-}
-
-async function cleanRepos() {
-  await vizRepo.createQueryBuilder().delete().execute();
-  await modelVizRepo.createQueryBuilder().delete().execute();
-  await modelFileRepo.createQueryBuilder().delete().execute();
-  await fileRepo.createQueryBuilder().delete().execute();
-  await searchFileRepo.createQueryBuilder().delete().execute();
-  await fileQualityRepo.createQueryBuilder().delete().execute();
-  await qualityReportRepo.createQueryBuilder().delete().execute();
 }

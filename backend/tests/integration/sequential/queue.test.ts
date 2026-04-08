@@ -3,12 +3,8 @@ import { AppDataSource } from "../../../src/data-source";
 import { QueueService } from "../../../src/lib/queue";
 import { describe, expect, it, beforeAll, afterAll, beforeEach } from "@jest/globals";
 import { Task, TaskStatus, TaskType } from "../../../src/entity/Task";
-import { backendPublicUrl } from "../../lib";
-import { promises as fsp } from "node:fs";
+import { backendPublicUrl, cleanRepos, loadFixture } from "../../lib";
 import axios from "axios";
-import { InstrumentUpload, ModelUpload } from "../../../src/entity/Upload";
-import { Permission } from "../../../src/entity/Permission";
-import { UserAccount } from "../../../src/entity/UserAccount";
 
 let dataSource: DataSource;
 let queueService: QueueService;
@@ -56,6 +52,18 @@ describe("QueueService", () => {
 
   beforeAll(async () => {
     dataSource = await AppDataSource.initialize();
+    await cleanRepos(dataSource);
+    await loadFixture(dataSource, "0-model_citation");
+    await loadFixture(dataSource, "0-regular_citation");
+    await loadFixture(dataSource, "0-software");
+    await loadFixture(dataSource, "1-site");
+    await loadFixture(dataSource, "1-product");
+    await loadFixture(dataSource, "1-model");
+    await loadFixture(dataSource, "2-instrument");
+    await loadFixture(dataSource, "3-product_variable");
+    await loadFixture(dataSource, "3-instrument_info");
+    await loadFixture(dataSource, "5-model_file");
+    await loadFixture(dataSource, "5-regular_file");
     queueService = new QueueService(dataSource);
   });
 
@@ -845,10 +853,6 @@ describe("QueueService", () => {
 
 describe("/api/queue/batch", () => {
   let dataSource: DataSource;
-  let permissionRepo: Repository<Permission>;
-  let userAccountRepo: Repository<UserAccount>;
-  let instrumentUploadRepo: Repository<InstrumentUpload>;
-  let modelUploadRepo: Repository<ModelUpload>;
   let taskRepo: Repository<Task>;
   const batchUrl = `${backendPublicUrl}queue/batch`;
   const auth = { username: "admin", password: "admin" };
@@ -856,30 +860,33 @@ describe("/api/queue/batch", () => {
 
   beforeAll(async () => {
     dataSource = await AppDataSource.initialize();
-    permissionRepo = dataSource.getRepository(Permission);
-    userAccountRepo = dataSource.getRepository(UserAccount);
-    instrumentUploadRepo = dataSource.getRepository(InstrumentUpload);
-    modelUploadRepo = dataSource.getRepository(ModelUpload);
+    await cleanRepos(dataSource);
+    await loadFixture(dataSource, "0-model_citation");
+    await loadFixture(dataSource, "0-regular_citation");
+    await loadFixture(dataSource, "0-software");
+    await loadFixture(dataSource, "1-site");
+    await loadFixture(dataSource, "1-product");
+    await loadFixture(dataSource, "1-model");
+    await loadFixture(dataSource, "2-instrument");
+    await loadFixture(dataSource, "2-permission");
+    await loadFixture(dataSource, "5-instrument_log_permission");
+    await loadFixture(dataSource, "5-user_account");
+    await loadFixture(dataSource, "3-product_variable");
+    await loadFixture(dataSource, "3-instrument_info");
+    await loadFixture(dataSource, "4-instrument_upload");
+    await loadFixture(dataSource, "4-model_upload");
+    await loadFixture(dataSource, "5-model_file");
+    await loadFixture(dataSource, "5-regular_file");
     taskRepo = dataSource.getRepository(Task);
-    await permissionRepo.save(JSON.parse((await fsp.readFile("fixtures/2-permission.json")).toString()));
-    await userAccountRepo.createQueryBuilder().delete().execute();
-    await userAccountRepo.save(JSON.parse((await fsp.readFile("fixtures/5-user_account.json")).toString()));
-    await instrumentUploadRepo.save(JSON.parse((await fsp.readFile("fixtures/4-instrument_upload.json")).toString()));
-    await modelUploadRepo.save(JSON.parse((await fsp.readFile("fixtures/4-model_upload.json")).toString()));
   });
 
   beforeEach(async () => {
-    await cleanRepos();
+    await taskRepo.createQueryBuilder().delete().execute();
   });
 
   afterAll(async () => {
-    await cleanRepos();
     await dataSource.destroy();
   });
-
-  async function cleanRepos() {
-    await taskRepo.createQueryBuilder().delete().execute();
-  }
 
   it("requires authentication", async () => {
     await expect(axios.post(batchUrl, { type: "process", productIds: ["lidar"] })).rejects.toMatchObject({

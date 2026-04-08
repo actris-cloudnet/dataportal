@@ -1,9 +1,8 @@
 import axios from "axios";
 import { randomBytes } from "node:crypto";
 import { DataSource, Repository } from "typeorm";
-import { backendPublicUrl, genResponse } from "../../lib";
+import { backendPublicUrl, genResponse, cleanRepos, loadFixture } from "../../lib";
 import { UserAccount } from "../../../src/entity/UserAccount";
-import { InstrumentLog } from "../../../src/entity/InstrumentLog";
 import { InstrumentLogImage } from "../../../src/entity/InstrumentLogImage";
 import { InstrumentLogPermission, InstrumentLogPermissionType } from "../../../src/entity/InstrumentLogPermission";
 import { InstrumentInfo } from "../../../src/entity/Instrument";
@@ -12,7 +11,6 @@ import { AppDataSource } from "../../../src/data-source";
 import { describe, expect, it, beforeAll, afterAll } from "@jest/globals";
 
 let dataSource: DataSource;
-let logRepo: Repository<InstrumentLog>;
 let imageRepo: Repository<InstrumentLogImage>;
 
 const url = `${backendPublicUrl}instrument-logs`;
@@ -39,15 +37,14 @@ async function createTestToken(user: UserAccount, expiresAt?: Date): Promise<str
 
 beforeAll(async () => {
   dataSource = await AppDataSource.initialize();
-  logRepo = dataSource.getRepository(InstrumentLog);
+  await cleanRepos(dataSource);
+  await loadFixture(dataSource, "1-product");
+  await loadFixture(dataSource, "2-instrument");
+  await loadFixture(dataSource, "3-instrument_info");
   imageRepo = dataSource.getRepository(InstrumentLogImage);
   const userRepo = dataSource.getRepository(UserAccount);
   const permRepo = dataSource.getRepository(InstrumentLogPermission);
   const instrumentInfoRepo = dataSource.getRepository(InstrumentInfo);
-
-  await logRepo.createQueryBuilder().delete().execute();
-  await userRepo.createQueryBuilder().delete().execute();
-  await permRepo.createQueryBuilder().delete().execute();
 
   const instrumentInfo = await instrumentInfoRepo.findOneByOrFail({ uuid: instrumentInfoUuid });
   instrumentPid = instrumentInfo.pid;

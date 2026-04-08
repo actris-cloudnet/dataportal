@@ -1,11 +1,9 @@
 import axios from "axios";
 import { DataSource, Repository } from "typeorm";
-import { backendPrivateUrl, backendPublicUrl, genResponse, str2base64 } from "../../lib";
+import { backendPrivateUrl, backendPublicUrl, cleanRepos, genResponse, loadFixture, str2base64 } from "../../lib";
 import { InstrumentUpload, ModelUpload, Status } from "../../../src/entity/Upload";
-import { promises as fsp } from "node:fs";
 import { initUsersAndPermissions } from "../../lib/userAccountAndPermissions";
 import { AppDataSource } from "../../../src/data-source";
-import { ModelFile, RegularFile } from "../../../src/entity/File";
 import { ArrayEqual } from "../../../src/lib";
 import { beforeAll, beforeEach, afterAll, describe, it, expect, jest } from "@jest/globals";
 import { randomBytes, createHash } from "node:crypto";
@@ -73,19 +71,21 @@ const headers = { authorization: `Basic ${str2base64("granada:PASSWORDFORgranada
 
 beforeAll(async () => {
   dataSource = await AppDataSource.initialize();
+  await cleanRepos(dataSource);
+  await loadFixture(dataSource, "0-model_citation");
+  await loadFixture(dataSource, "0-regular_citation");
+  await loadFixture(dataSource, "0-software");
+  await loadFixture(dataSource, "1-site");
+  await loadFixture(dataSource, "1-product");
+  await loadFixture(dataSource, "1-model");
+  await loadFixture(dataSource, "2-instrument");
+  await loadFixture(dataSource, "3-product_variable");
+  await loadFixture(dataSource, "3-instrument_info");
+  await loadFixture(dataSource, "5-model_file");
+  await loadFixture(dataSource, "5-regular_file");
+  await initUsersAndPermissions();
   instrumentRepo = dataSource.getRepository(InstrumentUpload);
   modelRepo = dataSource.getRepository(ModelUpload);
-  // Make sure these tables are initialized correctly
-  await dataSource
-    .getRepository(ModelFile)
-    .save(JSON.parse((await fsp.readFile("fixtures/5-model_file.json")).toString()));
-  await dataSource
-    .getRepository(RegularFile)
-    .save(JSON.parse((await fsp.readFile("fixtures/5-regular_file.json")).toString()));
-
-  await instrumentRepo.createQueryBuilder().delete().execute();
-  await modelRepo.createQueryBuilder().delete().execute();
-  await initUsersAndPermissions();
 });
 
 afterAll(async () => {

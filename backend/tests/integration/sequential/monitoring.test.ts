@@ -3,11 +3,13 @@ import { AppDataSource } from "../../../src/data-source";
 import { MonitoringProduct } from "../../../src/entity/MonitoringProduct";
 import { MonitoringProductVariable } from "../../../src/entity/MonitoringProductVariable";
 import { InstrumentInfo } from "../../../src/entity/Instrument";
-import { backendPrivateUrl } from "../../lib";
+import { backendPrivateUrl, cleanRepos, loadFixture } from "../../lib";
 import { beforeAll, afterAll, describe, it, expect } from "@jest/globals";
 import { Site } from "../../../src/entity/Site";
 import { v4 as uuidv4 } from "uuid";
+import { DataSource } from "typeorm";
 
+let dataSource: DataSource;
 let monitoringProduct: MonitoringProduct;
 let monitoringVariable: MonitoringProductVariable;
 let instrument: InstrumentInfo;
@@ -16,10 +18,19 @@ let predefinedUuid: string;
 let generatedUuid: string;
 
 beforeAll(async () => {
-  const ds = await AppDataSource.initialize();
-  const instrumentRepo = ds.getRepository(InstrumentInfo);
-  const siteRepo = ds.getRepository(Site);
-  const mpVarRepo = ds.getRepository(MonitoringProductVariable);
+  dataSource = await AppDataSource.initialize();
+  await cleanRepos(dataSource);
+  await loadFixture(dataSource, "0-model_citation");
+  await loadFixture(dataSource, "0-regular_citation");
+  await loadFixture(dataSource, "1-site");
+  await loadFixture(dataSource, "1-product");
+  await loadFixture(dataSource, "2-instrument");
+  await loadFixture(dataSource, "3-instrument_info");
+  await loadFixture(dataSource, "3-monitoring_product");
+  await loadFixture(dataSource, "4-monitoring_product_variable");
+  const instrumentRepo = dataSource.getRepository(InstrumentInfo);
+  const siteRepo = dataSource.getRepository(Site);
+  const mpVarRepo = dataSource.getRepository(MonitoringProductVariable);
 
   site = await siteRepo.findOneByOrFail({ id: "hyytiala" });
 
@@ -36,7 +47,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await AppDataSource.destroy();
+  await dataSource.destroy();
 });
 
 describe("Monitoring file creation and visualization upload", () => {

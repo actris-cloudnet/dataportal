@@ -1,6 +1,6 @@
 import axios from "axios";
 import { DataSource, Repository } from "typeorm";
-import { backendPublicUrl, genResponse } from "../../lib";
+import { backendPublicUrl, genResponse, cleanRepos, loadFixture } from "../../lib";
 import { UserAccount } from "../../../src/entity/UserAccount";
 import { Permission, PermissionType } from "../../../src/entity/Permission";
 import { SiteContact } from "../../../src/entity/SiteContact";
@@ -23,6 +23,16 @@ const nopermCreds = { username: "contact-noperm", password: "hunter2" };
 
 beforeAll(async () => {
   dataSource = await AppDataSource.initialize();
+  await cleanRepos(dataSource);
+  await loadFixture(dataSource, "0-model_citation");
+  await loadFixture(dataSource, "0-regular_citation");
+  await loadFixture(dataSource, "1-product");
+  await loadFixture(dataSource, "1-site");
+  await loadFixture(dataSource, "2-instrument");
+  await loadFixture(dataSource, "2-person");
+  await loadFixture(dataSource, "3-instrument_info");
+  await loadFixture(dataSource, "3-site_contact");
+  await loadFixture(dataSource, "4-instrument_contact");
   contactRepo = dataSource.getRepository(SiteContact);
   instrumentContactRepo = dataSource.getRepository(InstrumentContact);
   personRepo = dataSource.getRepository(Person);

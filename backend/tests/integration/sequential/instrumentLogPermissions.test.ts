@@ -1,9 +1,10 @@
 import axios from "axios";
 import { DataSource } from "typeorm";
-import { backendPublicUrl, backendPrivateUrl, genResponse } from "../../lib";
+import { backendPublicUrl, backendPrivateUrl, genResponse, cleanRepos, loadFixture } from "../../lib";
 import { UserAccount } from "../../../src/entity/UserAccount";
 import { InstrumentLog } from "../../../src/entity/InstrumentLog";
 import { InstrumentLogPermission } from "../../../src/entity/InstrumentLogPermission";
+import { Token } from "../../../src/entity/Token";
 import { AppDataSource } from "../../../src/data-source";
 import { describe, expect, it, beforeAll, afterAll } from "@jest/globals";
 
@@ -20,9 +21,14 @@ const specificReaderCreds = { username: "perm_specificreader", password: "hunter
 
 beforeAll(async () => {
   dataSource = await AppDataSource.initialize();
+  await cleanRepos(dataSource);
+  await loadFixture(dataSource, "1-product");
+  await loadFixture(dataSource, "2-instrument");
+  await loadFixture(dataSource, "3-instrument_info");
 
   await dataSource.getRepository(InstrumentLog).createQueryBuilder().delete().execute();
   await dataSource.getRepository(InstrumentLogPermission).createQueryBuilder().delete().execute();
+  await dataSource.getRepository(Token).createQueryBuilder().delete().execute();
   await dataSource.getRepository(UserAccount).createQueryBuilder().delete().execute();
 
   await axios.post(userAccountsUrl, {

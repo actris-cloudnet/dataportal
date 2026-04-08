@@ -1,15 +1,12 @@
 import axios from "axios";
-import { backendPublicUrl, genResponse } from "../../lib";
+import { backendPublicUrl, genResponse, cleanRepos, loadFixture } from "../../lib";
 import { DataSource, Repository } from "typeorm";
 import { Collection } from "../../../src/entity/Collection";
-import { promises as fsp } from "node:fs";
-import { File, ModelFile, RegularFile } from "../../../src/entity/File";
 import { AppDataSource } from "../../../src/data-source";
 import { describe, expect, it, beforeAll, afterAll, beforeEach } from "@jest/globals";
 
 let dataSource: DataSource;
 let repo: Repository<Collection>;
-let fileRepo: Repository<File>;
 const url = `${backendPublicUrl}collection/`;
 
 const validFileUuids = ["38092c00-161d-4ca2-a29d-628cf8e960f6", "bde7a35f-03aa-4bff-acfb-b4974ea9f217"];
@@ -17,12 +14,18 @@ const validFileUuids = ["38092c00-161d-4ca2-a29d-628cf8e960f6", "bde7a35f-03aa-4
 describe("POST /api/collection", () => {
   beforeAll(async () => {
     dataSource = await AppDataSource.initialize();
+    await cleanRepos(dataSource);
+    await loadFixture(dataSource, "0-model_citation");
+    await loadFixture(dataSource, "0-regular_citation");
+    await loadFixture(dataSource, "0-software");
+    await loadFixture(dataSource, "1-model");
+    await loadFixture(dataSource, "1-product");
+    await loadFixture(dataSource, "1-site");
+    await loadFixture(dataSource, "2-instrument");
+    await loadFixture(dataSource, "3-instrument_info");
+    await loadFixture(dataSource, "5-model_file");
+    await loadFixture(dataSource, "5-regular_file");
     repo = dataSource.getRepository(Collection);
-    fileRepo = dataSource.getRepository(RegularFile);
-    await dataSource
-      .getRepository(ModelFile)
-      .save(JSON.parse((await fsp.readFile("fixtures/5-model_file.json")).toString()));
-    await fileRepo.save(JSON.parse((await fsp.readFile("fixtures/5-regular_file.json")).toString()));
   });
 
   beforeEach(async () => {

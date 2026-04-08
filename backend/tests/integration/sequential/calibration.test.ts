@@ -1,9 +1,8 @@
 import axios from "axios";
 import { DataSource } from "typeorm";
-import { backendPublicUrl, genResponse } from "../../lib";
+import { backendPublicUrl, genResponse, cleanRepos, loadFixture } from "../../lib";
 import { UserAccount } from "../../../src/entity/UserAccount";
 import { Permission, PermissionType } from "../../../src/entity/Permission";
-import { Calibration } from "../../../src/entity/Calibration";
 import { AppDataSource } from "../../../src/data-source";
 import { describe, expect, it, beforeAll, afterAll } from "@jest/globals";
 
@@ -14,12 +13,13 @@ const credentials = { username: "calibrator", password: "hunter2" };
 describe("PUT /api/calibration", () => {
   beforeAll(async () => {
     dataSource = await AppDataSource.initialize();
+    await cleanRepos(dataSource);
+    await loadFixture(dataSource, "1-product");
+    await loadFixture(dataSource, "2-instrument");
+    await loadFixture(dataSource, "3-instrument_info");
+
     const userRepo = dataSource.getRepository(UserAccount);
     const permRepo = dataSource.getRepository(Permission);
-    const calibRepo = dataSource.getRepository(Calibration);
-    await userRepo.createQueryBuilder().delete().execute();
-    await permRepo.createQueryBuilder().delete().execute();
-    await calibRepo.createQueryBuilder().delete().execute();
 
     const user = new UserAccount();
     user.username = credentials.username;

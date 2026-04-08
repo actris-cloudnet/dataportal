@@ -1,4 +1,11 @@
-import { backendPrivateUrl, backendPublicUrl, genResponse, storageServiceUrl } from "../../lib";
+import {
+  backendPrivateUrl,
+  backendPublicUrl,
+  genResponse,
+  storageServiceUrl,
+  cleanRepos,
+  loadFixture,
+} from "../../lib";
 import axios from "axios";
 import { readResources } from "../../../../shared/lib";
 import { DataSource, Repository } from "typeorm";
@@ -21,6 +28,13 @@ beforeAll(async () => {
   resources = await readResources();
   sites = resources["sites"].map((site: any) => site.id);
   dataSource = await AppDataSource.initialize();
+  await cleanRepos(dataSource);
+  await loadFixture(dataSource, "0-model_citation");
+  await loadFixture(dataSource, "0-regular_citation");
+  await loadFixture(dataSource, "0-software");
+  await loadFixture(dataSource, "1-site");
+  await loadFixture(dataSource, "1-product");
+  await loadFixture(dataSource, "2-site_location");
   regularFileRepo = dataSource.getRepository(RegularFile);
   searchFileRepo = dataSource.getRepository(SearchFile);
   vizRepo = dataSource.getRepository(Visualization);

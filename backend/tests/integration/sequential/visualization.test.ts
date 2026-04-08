@@ -1,9 +1,7 @@
-import { backendPrivateUrl, backendPublicUrl, storageServiceUrl } from "../../lib";
+import { backendPrivateUrl, backendPublicUrl, cleanRepos, loadFixture, storageServiceUrl } from "../../lib";
 import axios from "axios";
 import { DataSource, Repository } from "typeorm";
-import { promises as fsp } from "node:fs";
 import { AppDataSource } from "../../../src/data-source";
-import { ModelFile } from "../../../src/entity/File";
 import { ModelVisualization } from "../../../src/entity/ModelVisualization";
 import { beforeAll, afterEach, afterAll, describe, it, expect } from "@jest/globals";
 
@@ -26,11 +24,19 @@ const imgUrl = `${backendPublicUrl}download/image/`;
 describe("PUT /visualizations", () => {
   beforeAll(async () => {
     dataSource = await AppDataSource.initialize();
+    await cleanRepos(dataSource);
+    await loadFixture(dataSource, "0-model_citation");
+    await loadFixture(dataSource, "0-regular_citation");
+    await loadFixture(dataSource, "0-software");
+    await loadFixture(dataSource, "1-site");
+    await loadFixture(dataSource, "1-product");
+    await loadFixture(dataSource, "1-model");
+    await loadFixture(dataSource, "2-instrument");
+    await loadFixture(dataSource, "3-product_variable");
+    await loadFixture(dataSource, "3-instrument_info");
+    await loadFixture(dataSource, "5-model_file");
+    await loadFixture(dataSource, "5-regular_file");
     repo = dataSource.getRepository(ModelVisualization);
-    // File fixtures are needed here
-    await dataSource
-      .getRepository(ModelFile)
-      .save(JSON.parse((await fsp.readFile("fixtures/5-model_file.json")).toString()));
     await axios.put(`${storageServiceUrl}cloudnet-img/${validId}`, "content");
   });
 

@@ -1,23 +1,13 @@
 import axios from "axios";
-import { promises as fsp } from "node:fs";
 
-import { backendPublicUrl, str2base64 } from "../../lib";
+import { backendPublicUrl, cleanRepos, loadFixture, str2base64 } from "../../lib";
 import { DataSource, Repository } from "typeorm";
 import { Download, ObjectType } from "../../../src/entity/Download";
-import { ModelFile, RegularFile } from "../../../src/entity/File";
-import { Collection } from "../../../src/entity/Collection";
-import { InstrumentUpload } from "../../../src/entity/Upload";
 import { initUsersAndPermissions } from "../../lib/userAccountAndPermissions";
 import { AppDataSource } from "../../../src/data-source";
 import { describe, expect, it, beforeAll, afterAll } from "@jest/globals";
-import { SearchFile } from "../../../src/entity/SearchFile";
 
 let dataSource: DataSource;
-let regularFileRepo: Repository<RegularFile>;
-let modelFileRepo: Repository<ModelFile>;
-let searchFileRepo: Repository<SearchFile>;
-let collectionRepo: Repository<Collection>;
-let instrumentUploadRepo: Repository<InstrumentUpload>;
 let downloadRepo: Repository<Download>;
 
 interface Params {
@@ -42,18 +32,22 @@ const getStats = async (params: Params) => (await doRequest(params)).data;
 describe("GET /api/statistics", () => {
   beforeAll(async () => {
     dataSource = await AppDataSource.initialize();
-    downloadRepo = dataSource.getRepository(Download);
-    regularFileRepo = dataSource.getRepository(RegularFile);
-    modelFileRepo = dataSource.getRepository(ModelFile);
-    searchFileRepo = dataSource.getRepository(SearchFile);
-    collectionRepo = dataSource.getRepository(Collection);
-    instrumentUploadRepo = dataSource.getRepository(InstrumentUpload);
-    await downloadRepo.createQueryBuilder().delete().execute();
+    await cleanRepos(dataSource);
+    await loadFixture(dataSource, "0-model_citation");
+    await loadFixture(dataSource, "0-regular_citation");
+    await loadFixture(dataSource, "0-software");
+    await loadFixture(dataSource, "1-site");
+    await loadFixture(dataSource, "1-product");
+    await loadFixture(dataSource, "1-model");
+    await loadFixture(dataSource, "2-instrument");
+    await loadFixture(dataSource, "3-product_variable");
+    await loadFixture(dataSource, "3-instrument_info");
+    await loadFixture(dataSource, "5-model_file");
+    await loadFixture(dataSource, "5-regular_file");
+    await loadFixture(dataSource, "5-search_file");
+    await loadFixture(dataSource, "6-collection");
     await initUsersAndPermissions();
-    await modelFileRepo.save(JSON.parse((await fsp.readFile("fixtures/5-model_file.json")).toString()));
-    await regularFileRepo.save(JSON.parse((await fsp.readFile("fixtures/5-regular_file.json")).toString()));
-    await searchFileRepo.save(JSON.parse((await fsp.readFile("fixtures/5-search_file.json")).toString()));
-    await collectionRepo.save(JSON.parse((await fsp.readFile("fixtures/6-collection.json")).toString()));
+    downloadRepo = dataSource.getRepository(Download);
     // Download half year of Mace Head classification data with one variable
     // (0.5 variable year).
     await downloadRepo.save(
@@ -103,15 +97,7 @@ describe("GET /api/statistics", () => {
     await dataSource.query("REFRESH MATERIALIZED VIEW download_stats");
   });
 
-  afterAll(async () => {
-    await regularFileRepo.createQueryBuilder().delete().execute();
-    await modelFileRepo.createQueryBuilder().delete().execute();
-    await searchFileRepo.createQueryBuilder().delete().execute();
-    await collectionRepo.createQueryBuilder().delete().execute();
-    await instrumentUploadRepo.createQueryBuilder().delete().execute();
-    await downloadRepo.createQueryBuilder().delete().execute();
-    await dataSource.destroy();
-  });
+  afterAll(async () => await dataSource.destroy());
 
   it("fails without authentication", () =>
     expect(doRequest({ dimensions: "yearMonth,downloads" }, null)).rejects.toMatchObject({
