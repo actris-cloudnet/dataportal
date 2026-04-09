@@ -225,16 +225,17 @@ export class QueueService {
     const total = qb.getCount();
     // Workaround issue related to order and pagination:
     // https://github.com/typeorm/typeorm/issues/4270
-    let [query, params] = qb.getQueryAndParameters();
+    const [fullQuery, params] = qb.getQueryAndParameters();
+    let pageQuery = fullQuery;
     if (typeof options.limit !== "undefined") {
       params.push(options.limit);
-      query += ` LIMIT $${params.length}`;
+      pageQuery += ` LIMIT $${params.length}`;
     }
     if (typeof options.offset !== "undefined") {
       params.push(options.offset);
-      query += ` OFFSET $${params.length}`;
+      pageQuery += ` OFFSET $${params.length}`;
     }
-    const tasks = await this.taskRepo.query(query, params);
+    const tasks = await this.taskRepo.query(pageQuery, params);
     return Promise.all([tasks.map(this.formatTask), total]);
   }
 

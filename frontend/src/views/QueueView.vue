@@ -209,7 +209,6 @@ async function updateQueueData() {
         }),
       ]);
       totalTasks.value = otherRes.data.totalTasks;
-      const now = new Date();
       queueData.value = doneRes.data.tasks.concat(otherRes.data.tasks);
     }
   } catch (error) {

@@ -13,7 +13,7 @@ async function main() {
   const sites = await siteRepo.find();
   const products = await productRepo.find();
 
-  queueService.clear();
+  await queueService.clear();
   for (let i = 0; i < 400; i++) {
     const daysAgo = Math.round(Math.random() * 10);
     const task = new Task();
