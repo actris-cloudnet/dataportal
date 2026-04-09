@@ -174,15 +174,33 @@ export class QueueService {
       limit?: number;
       doneAfter?: Date;
       reverse?: boolean;
+      order?: "priority" | "scheduledAt";
     } = {},
   ) {
     const qb = this.taskRepo
       .createQueryBuilder("task")
+      .addSelect(
+        `CASE
+           WHEN task.status = '${TaskStatus.RUNNING}' THEN 0
+           WHEN task.status = '${TaskStatus.RESTART}' THEN 1
+           WHEN task.status = '${TaskStatus.CREATED}' AND task.scheduledAt <= :now THEN 2
+           WHEN task.status = '${TaskStatus.CREATED}' THEN 3
+           WHEN task.status = '${TaskStatus.FAILED}'  THEN 4
+           WHEN task.status = '${TaskStatus.DONE}'    THEN 5
+         END`,
+        "status_number",
+      )
+      .setParameter("now", new Date())
       .leftJoinAndSelect("task.instrumentInfo", "instrumentInfo")
-      .leftJoinAndSelect("task.model", "model")
-      .orderBy("task.status", "DESC")
-      .addOrderBy("task.priority", "ASC")
-      .addOrderBy("task.scheduledAt", options.reverse ? "DESC" : "ASC");
+      .leftJoinAndSelect("task.model", "model");
+    if (options.order == "scheduledAt") {
+      qb.orderBy("task.scheduledAt", options.reverse ? "DESC" : "ASC");
+    } else {
+      qb.orderBy("status_number", "ASC").addOrderBy(
+        "task.priority - 100 * EXTRACT(MINUTE FROM :now - task.scheduledAt) / 1440",
+        options.reverse ? "DESC" : "ASC",
+      );
+    }
     if (typeof options.queueId !== "undefined") {
       qb.andWhere("task.queueId = :queueId", options);
     }
@@ -205,14 +223,60 @@ export class QueueService {
       qb.andWhere("task.doneAt >= :doneAfter", options);
     }
     const total = qb.getCount();
-    if (typeof options.offset !== "undefined") {
-      qb.skip(options.offset);
-    }
+    // Workaround issue related to order and pagination:
+    // https://github.com/typeorm/typeorm/issues/4270
+    let [query, params] = qb.getQueryAndParameters();
     if (typeof options.limit !== "undefined") {
-      qb.take(options.limit);
+      params.push(options.limit);
+      query += ` LIMIT $${params.length}`;
     }
-    const tasks = qb.getMany();
-    return Promise.all([tasks, total]);
+    if (typeof options.offset !== "undefined") {
+      params.push(options.offset);
+      query += ` OFFSET $${params.length}`;
+    }
+    const tasks = await this.taskRepo.query(query, params);
+    return Promise.all([tasks.map(this.formatTask), total]);
+  }
+
+  private formatTask(row: any) {
+    return {
+      id: row.task_id,
+      type: row.task_type,
+      siteId: row.task_siteId,
+      measurementDate: row.task_measurementDate.toISOString().slice(0, 10),
+      productId: row.task_productId,
+      scheduledAt: row.task_scheduledAt,
+      doneAt: row.task_doneAt,
+      priority: row.task_priority,
+      batchId: row.task_batchId,
+      options: row.task_options,
+      queueId: row.task_queueId,
+      status: ["running", "restart", "pending", "created", "failed", "done"][row.status_number],
+      instrumentInfo: row.task_instrumentInfoUuid
+        ? {
+            uuid: row.instrumentInfo_uuid,
+            pid: row.instrumentInfo_pid,
+            name: row.instrumentInfo_name,
+            owners: row.instrumentInfo_owners,
+            model: row.instrumentInfo_model,
+            modelUrl: row.instrumentInfo_modelUrl,
+            type: row.instrumentInfo_type,
+            typeUrl: row.instrumentInfo_typeUrl,
+            serialNumber: row.instrumentInfo_serialNumber,
+            instrumentId: row.instrumentInfo_instrumentId,
+          }
+        : null,
+      model: row.task_modelId
+        ? {
+            id: row.model_id,
+            humanReadableName: row.model_humanReadableName,
+            optimumOrder: row.model_optimumOrder,
+            sourceModelId: row.model_sourceModelId,
+            forecastStart: row.model_forecastStart,
+            forecastEnd: row.model_forecastEnd,
+          }
+        : null,
+    };
   }
 
   private taskToLock(task: Task) {

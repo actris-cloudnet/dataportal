@@ -56,6 +56,7 @@
   "scripts": {
     "update-snapshot": "npm run reset-db && npx jest --update-snapshot tests/integration/parallel && npx jest --runInBand --update-snapshot tests/integration/sequential",
     "reset-db": "ts-node -T src/fixtures.ts fixtures TRUNCATE",
+    "ape-worker": "ts-node src/ape-worker.ts",
     "test": "npm run unit-test && npm run integration-test",
     "unit-test": "jest tests/unit",
     "integration-test": "npm run reset-db && jest tests/integration/parallel && jest --runInBand tests/integration/sequential",

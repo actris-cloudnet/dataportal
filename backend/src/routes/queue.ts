@@ -174,6 +174,10 @@ export class QueueRoutes {
       return next({ status: 400, errors: ["Invalid productId parameter"] });
     }
     const reverse = !!req.query.reverse;
+    const order = req.query.order;
+    if (typeof order !== "undefined" && order !== "priority" && order !== "scheduledAt") {
+      return next({ status: 400, errors: ["Invalid order parameter"] });
+    }
     const queue = await this.queueService.getQueue({
       queueId,
       batchId,
@@ -185,6 +189,7 @@ export class QueueRoutes {
       limit,
       doneAfter,
       reverse,
+      order,
     });
     res.send({ tasks: queue[0], totalTasks: queue[1] });
   };

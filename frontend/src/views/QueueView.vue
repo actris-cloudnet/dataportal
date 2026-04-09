@@ -93,9 +93,8 @@
                 >
                   Retry
                 </BaseButton>
-                <span v-else-if="task.priority === 0" class="prioritized">Prioritized</span>
                 <BaseButton
-                  v-else-if="task.status === 'created' || task.status === 'pending'"
+                  v-else-if="(task.status === 'created' || task.status === 'pending') && task.priority > 0"
                   type="secondary"
                   size="small"
                   @click="prioritizeTask(task)"
@@ -135,10 +134,8 @@ import type { Site } from "@shared/entity/Site";
 import type { Product } from "@shared/entity/Product";
 import { useRoute } from "vue-router";
 
-type AugmentedTask = Omit<Task, "status"> & { status: Task["status"] | "pending" };
-
 const route = useRoute();
-const queueData = ref<AugmentedTask[]>([]);
+const queueData = ref<Task[]>([]);
 const showFailed = ref(false);
 const isLoading = ref(true);
 const isCancelled = ref(false);
@@ -180,6 +177,7 @@ async function updateQueueData() {
         params: {
           batch: route.query.batch,
           status: ["failed"],
+          order: "scheduledAt",
           reverse: true,
           limit,
           offset: offset.value,
@@ -194,6 +192,7 @@ async function updateQueueData() {
           params: {
             batch: route.query.batch,
             status: ["done"],
+            order: "priority",
             doneAfter: lastUpdate.toISOString(),
             ...filterParams,
           },
@@ -202,6 +201,7 @@ async function updateQueueData() {
           params: {
             batch: route.query.batch,
             status: ["created", "running", "restart"],
+            order: "priority",
             limit,
             offset: offset.value,
             ...filterParams,
@@ -210,11 +210,7 @@ async function updateQueueData() {
       ]);
       totalTasks.value = otherRes.data.totalTasks;
       const now = new Date();
-      queueData.value = doneRes.data.tasks
-        .concat(otherRes.data.tasks)
-        .map((task) =>
-          task.status === "created" && new Date(task.scheduledAt) < now ? { ...task, status: "pending" } : task,
-        );
+      queueData.value = doneRes.data.tasks.concat(otherRes.data.tasks);
     }
   } catch (error) {
     console.error(error);
@@ -235,7 +231,7 @@ interface TaskPayload {
   options: object;
 }
 
-async function retryTask(task: AugmentedTask) {
+async function retryTask(task: Task) {
   const newTask: TaskPayload = {
     type: task.type,
     siteId: task.siteId,
@@ -260,7 +256,7 @@ async function retryTask(task: AugmentedTask) {
   }
 }
 
-async function prioritizeTask(task: AugmentedTask) {
+async function prioritizeTask(task: Task) {
   try {
     await axios.put(`${backendUrl}queue/${task.id}/priority`, { priority: 0 });
     task.priority = 0;
@@ -344,7 +340,7 @@ function timeDifference(scheduledAt: string): string {
   return diffMs > 0 ? `${time} ago` : `in ${time}`;
 }
 
-function linkToSearch(task: AugmentedTask) {
+function linkToSearch(task: Task) {
   const query: Record<string, string> = {
     site: task.siteId,
     product: task.productId,
@@ -361,7 +357,7 @@ function linkToSearch(task: AugmentedTask) {
   };
 }
 
-function linkToRaw(task: AugmentedTask) {
+function linkToRaw(task: Task) {
   return {
     name: "RawFiles",
     params: { uuid: task.instrumentInfo.uuid },
