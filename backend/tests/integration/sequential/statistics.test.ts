@@ -21,6 +21,7 @@ interface Params {
   cluUnits?: string;
   cluProduct?: string;
   variable?: string;
+  repository?: string;
 }
 
 function doRequest(params: Params, headers: any = { authorization: `Basic ${str2base64("bob:bobs_pass")}` }) {
@@ -492,4 +493,12 @@ describe("GET /api/statistics", () => {
       { yearMonth: "2022-05", downloads: expect.closeTo((1 * 31) / 300, 10) },
       { yearMonth: "2022-06", downloads: expect.closeTo((1 * 30) / 300, 10) },
     ]));
+
+  it("returns empty array for ARES repository", () =>
+    expect(getStats({ dimensions: "yearMonth,downloads", repository: "ARES" })).resolves.toEqual([]));
+
+  it("returns data for CLU repository", async () => {
+    const stats = await getStats({ dimensions: "yearMonth,downloads", repository: "CLU" });
+    expect(stats.length).toBeGreaterThan(0);
+  });
 });

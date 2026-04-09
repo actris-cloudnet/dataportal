@@ -58,6 +58,12 @@ export class StatisticsRoutes {
         qb.andWhere("stats.\"productId\" != 'model'");
       }
     }
+
+    if (typeof req.query.repository === "string" && req.query.repository !== "CLU") {
+      res.send([]);
+      return;
+    }
+
     if (req.query.downloadDateFrom) {
       if (typeof req.query.downloadDateFrom !== "string" || !isValidDate(req.query.downloadDateFrom)) {
         return next({ status: 400, errors: "invalid downloadDateFrom" });
