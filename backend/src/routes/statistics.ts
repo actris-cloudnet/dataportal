@@ -64,6 +64,15 @@ export class StatisticsRoutes {
       return;
     }
 
+    if (
+      typeof req.query.framework === "string" &&
+      req.query.framework !== "ACTRIS" &&
+      req.query.framework !== "CLOUDNET"
+    ) {
+      res.send([]);
+      return;
+    }
+
     if (req.query.downloadDateFrom) {
       if (typeof req.query.downloadDateFrom !== "string" || !isValidDate(req.query.downloadDateFrom)) {
         return next({ status: 400, errors: "invalid downloadDateFrom" });
