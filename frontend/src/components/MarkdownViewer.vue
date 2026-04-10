@@ -40,4 +40,12 @@ const renderedHtml = computed(() => {
 .markdown-content :deep(ol) {
   list-style: decimal;
 }
+
+.markdown-content :deep(em) {
+  font-style: italic;
+}
+
+.markdown-content :deep(strong) {
+  font-weight: 500;
+}
 </style>
