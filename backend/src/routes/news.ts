@@ -3,6 +3,8 @@ import { DataSource, Repository } from "typeorm";
 import { NewsItem } from "../entity/NewsItem";
 import { PermissionType } from "../entity/Permission";
 import { Authenticator } from "../lib/auth";
+import env from "../lib/env";
+import { Parser as CommonmarkParser, HtmlRenderer as CommonmarkHtmlRenderer } from "commonmark";
 
 function generateSlug(title: string): string {
   return title
@@ -93,6 +95,62 @@ export class NewsRoutes {
     await this.newsRepo.save(news);
     res.sendStatus(200);
   };
+
+  private htmlContent(item: NewsItem) {
+    const reader = new CommonmarkParser();
+    const writer = new CommonmarkHtmlRenderer();
+    try {
+      const parsed = reader.parse(item.content);
+      return writer.render(parsed);
+    } catch (error) {
+      return item.content.replace(/\n/g, "<br>");
+    }
+  }
+
+  getNewsAtomFeed: RequestHandler = async (req, res) => {
+    const newsItems = await this.newsRepo.find({
+      where: { draft: false },
+      order: { date: "DESC" },
+      take: 10,
+    });
+
+    const feed = `<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Cloudnet news</title>
+  <subtitle>Latest news from the Cloudnet data portal</subtitle>
+  <link href="${env.DP_FRONTEND_URL}/news.atom" rel="self" type="application/atom+xml" />
+  <link href="${env.DP_FRONTEND_URL}" rel="alternate" type="text/html" />
+  <id>${env.DP_FRONTEND_URL}/news.atom</id>
+  <updated>${new Date(newsItems[0].date).toISOString()}</updated>
+  <author>
+    <name>CLU</name>
+  </author>${newsItems
+    .map(
+      (item) => `
+  <entry>
+    <title>${this.escapeXml(item.title)}</title>
+    <link href="${env.DP_FRONTEND_URL}/news/${item.slug}" rel="alternate" type="text/html" />
+    <id>urn:uuid:${item.uuid}</id>
+    <published>${new Date(item.date).toISOString()}</published>
+    <updated>${new Date(item.date).toISOString()}</updated>
+    <content type="html">${this.escapeXml(this.htmlContent(item))}</content>
+  </entry>`,
+    )
+    .join("")}
+</feed>`;
+
+    res.set("Content-Type", "application/atom+xml; charset=utf-8");
+    res.send(feed);
+  };
+
+  private escapeXml(text: string): string {
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
 
   private async findBySlug(slug: string, next: Parameters<RequestHandler>[2]): Promise<NewsItem | null> {
     const news = await this.newsRepo.findOne({ where: { slug } });

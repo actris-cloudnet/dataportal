@@ -1,0 +1,66 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`/api/news GET /news.atom should return valid Atom feed 1`] = `
+"<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Cloudnet news</title>
+  <subtitle>Latest news from the Cloudnet data portal</subtitle>
+  <link href="http://localhost:8080/news.atom" rel="self" type="application/atom+xml" />
+  <link href="http://localhost:8080" rel="alternate" type="text/html" />
+  <id>http://localhost:8080/news.atom</id>
+  <updated>2024-04-05T00:00:00.000Z</updated>
+  <author>
+    <name>CLU</name>
+  </author>
+  <entry>
+    <title>Record-breaking data upload</title>
+    <link href="http://localhost:8080/news/record-breaking-data-upload" rel="alternate" type="text/html" />
+    <id>urn:uuid:4a4a785d-19e0-4618-bd5c-0684a5be15e3</id>
+    <published>2024-04-05T00:00:00.000Z</published>
+    <updated>2024-04-05T00:00:00.000Z</updated>
+    <content type="html">&lt;p&gt;Last month, our system handled the largest single data upload in its history: a massive &lt;em&gt;1.2TB dataset&lt;/em&gt; containing high-resolution cloud observations from a network of 50 instruments. The upload took just under 3 days to complete and contained enough cloud data to keep our researchers busy for years.&lt;/p&gt;
+</content>
+  </entry>
+  <entry>
+    <title>Data portal survives solar eclipse</title>
+    <link href="http://localhost:8080/news/data-portal-survives-solar-eclipse" rel="alternate" type="text/html" />
+    <id>urn:uuid:a8634a0f-d1e4-418a-808a-38328e08a37b</id>
+    <published>2024-03-10T00:00:00.000Z</published>
+    <updated>2024-03-10T00:00:00.000Z</updated>
+    <content type="html">&lt;p&gt;In a testament to our robust infrastructure, the &lt;em&gt;Cloudnet Data Portal&lt;/em&gt; remained fully operational during the recent solar eclipse. While many other services experienced downtime due to the sudden darkness, our portal continued to serve data without interruption. &#39;We were a bit worried when the clouds disappeared,&#39; admitted one of our engineers, &#39;but fortunately they came back.&#39;&lt;/p&gt;
+</content>
+  </entry>
+  <entry>
+    <title>New feature: cloud pattern recognition</title>
+    <link href="http://localhost:8080/news/new-feature-cloud-pattern-recognition" rel="alternate" type="text/html" />
+    <id>urn:uuid:0992a488-b822-4f23-bf7c-f4177e18800a</id>
+    <published>2024-02-20T00:00:00.000Z</published>
+    <updated>2024-02-20T00:00:00.000Z</updated>
+    <content type="html">&lt;p&gt;Our team of expert meteorologists and AI researchers have developed a groundbreaking new feature: &lt;em&gt;automatic cloud pattern recognition&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;The system can now identify over 50 different cloud types, including:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Common formations&lt;/strong&gt;: cumulus, stratus, cirrus&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Rare patterns&lt;/strong&gt;: lenticular, mammatus, kelvin-helmholtz&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Special cases&lt;/strong&gt;: &#39;cloud-that-looks-like-a-dragon&#39; formation&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The pattern recognition algorithm uses advanced machine learning techniques:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Image preprocessing and normalization&lt;/li&gt;
+&lt;li&gt;Feature extraction using convolutional neural networks&lt;/li&gt;
+&lt;li&gt;Classification with ensemble methods&lt;/li&gt;
+&lt;li&gt;Continuous learning from user feedback&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Users can expect this feature to be rolled out in the next update.&lt;/p&gt;
+</content>
+  </entry>
+  <entry>
+    <title>Cloudnet data portal wins prestigious award</title>
+    <link href="http://localhost:8080/news/cloudnet-data-portal-wins-prestigious-award" rel="alternate" type="text/html" />
+    <id>urn:uuid:42f3c289-59d1-49ef-b60c-d90df9e1e152</id>
+    <published>2024-01-15T00:00:00.000Z</published>
+    <updated>2024-01-15T00:00:00.000Z</updated>
+    <content type="html">&lt;p&gt;We are thrilled to announce that the &lt;em&gt;Cloudnet Data Portal&lt;/em&gt; has been awarded the &lt;strong&gt;&#39;Most Cloudy Data Portal&#39;&lt;/strong&gt; award at this year&#39;s International Atmospheric Science Conference. The judges were particularly impressed with our ability to make cloud data accessible even on the cloudiest of days.&lt;/p&gt;
+</content>
+  </entry>
+</feed>"
+`;

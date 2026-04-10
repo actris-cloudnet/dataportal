@@ -567,6 +567,7 @@ async function createServer(): Promise<void> {
     newsRoutes.postNews,
   );
   app.get("/api/news/", middleware.optionalAuth, newsRoutes.getNews);
+  app.get("/news.atom", newsRoutes.getNewsAtomFeed);
   app.get("/api/news/:slug", middleware.optionalAuth, newsRoutes.getNewsItemBySlug);
   app.delete(
     "/api/news/:slug",
