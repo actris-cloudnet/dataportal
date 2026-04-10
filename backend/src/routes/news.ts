@@ -71,7 +71,7 @@ export class NewsRoutes {
   deleteNewsItemBySlug: RequestHandler = async (req, res, next) => {
     const news = await this.findBySlug(req.params.slug as string, next);
     if (!news) return;
-    await this.newsRepo.delete(news.id);
+    await this.newsRepo.delete(news.uuid);
     res.sendStatus(204);
   };
 

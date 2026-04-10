@@ -2,8 +2,8 @@ import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class NewsItem {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn("uuid")
+  uuid!: string;
 
   @Column()
   title!: string;
