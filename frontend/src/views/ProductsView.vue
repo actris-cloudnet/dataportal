@@ -79,7 +79,7 @@ const derivedProducts = computed(() =>
 const expProducts = computed(() =>
   products.value.status === "ready"
     ? products.value.value
-        .filter((product) => !product.type.includes("evaluation") && product.experimental === true)
+        .filter((product) => !product.id.startsWith("l3-") && product.experimental === true)
         .sort(alphabeticalSort)
     : [],
 );

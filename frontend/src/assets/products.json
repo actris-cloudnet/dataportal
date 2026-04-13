@@ -1645,6 +1645,437 @@
     ],
     "specific_variables": []
   },
+  "cpr-tc-validation": {
+    "description": "Cloudnet target classification based on ground-based\n        measurements compared to target classification based on CPR\n        measurements from EarthCARE satellite overpass.",
+    "references_html": [],
+    "dimensions": [
+      {
+        "name": "cpr"
+      },
+      {
+        "name": "height",
+        "units": "m",
+        "standard_name": "height_above_mean_sea_level",
+        "long_name": "Height above mean sea level",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "time",
+        "units": "hours since 2026-01-01 00:00:00 +00:00",
+        "standard_name": "time",
+        "long_name": "Time UTC",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      }
+    ],
+    "common_variables": [
+      {
+        "name": "altitude",
+        "units": "m",
+        "standard_name": "altitude",
+        "long_name": "Altitude of site",
+        "comment": "Altitude of the ground-based measurement site.",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "distance",
+        "units": "km",
+        "standard_name": null,
+        "long_name": "Distance between site and CPR ground track",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["cpr"],
+        "dtype": "float32"
+      },
+      {
+        "name": "latitude",
+        "units": "degree_north",
+        "standard_name": "latitude",
+        "long_name": "Latitude of site",
+        "comment": "Latitude of the ground-based measurement site.",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "latitude_cpr",
+        "units": "degree_north",
+        "standard_name": "latitude",
+        "long_name": "Latitude of CPR ground track",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["cpr"],
+        "dtype": "float32"
+      },
+      {
+        "name": "longitude",
+        "units": "degree_east",
+        "standard_name": "longitude",
+        "long_name": "Longitude of site",
+        "comment": "Longitude of the ground-based measurement site.",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "longitude_cpr",
+        "units": "degree_east",
+        "standard_name": "longitude",
+        "long_name": "Longitude of CPR ground track",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["cpr"],
+        "dtype": "float32"
+      },
+      {
+        "name": "target_classification",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Target classification",
+        "comment": "A 27.5-minute segment of Cloudnet data centered on the EarthCARE overpass.",
+        "definition": [
+          {
+            "label": "Value 0",
+            "description": "Clear sky."
+          },
+          {
+            "label": "Value 1",
+            "description": "Cloud liquid droplets only."
+          },
+          {
+            "label": "Value 2",
+            "description": "Drizzle or rain."
+          },
+          {
+            "label": "Value 3",
+            "description": "Drizzle or rain coexisting with cloud liquid droplets."
+          },
+          {
+            "label": "Value 4",
+            "description": "Ice particles."
+          },
+          {
+            "label": "Value 5",
+            "description": "Ice coexisting with supercooled liquid droplets."
+          },
+          {
+            "label": "Value 6",
+            "description": "Melting ice particles."
+          },
+          {
+            "label": "Value 7",
+            "description": "Melting ice particles coexisting with cloud liquid droplets."
+          },
+          {
+            "label": "Value 8",
+            "description": "Aerosol particles, no cloud or precipitation."
+          },
+          {
+            "label": "Value 9",
+            "description": "Insects, no cloud or precipitation."
+          },
+          {
+            "label": "Value 10",
+            "description": "Aerosol coexisting with insects, no cloud or precipitation."
+          }
+        ],
+        "dimensions": ["time", "height"],
+        "dtype": "int32"
+      },
+      {
+        "name": "target_classification_cpr",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "CPR target classification",
+        "comment": "EarthCARE CPR_TC__2A hydrometeor classification data within 30 km from the site.",
+        "definition": [
+          {
+            "label": "Value -1",
+            "description": "No data"
+          },
+          {
+            "label": "Value 0",
+            "description": "Ground and underground levels"
+          },
+          {
+            "label": "Value 1",
+            "description": "Clear"
+          },
+          {
+            "label": "Value 2",
+            "description": "No drizzling liquid cloud"
+          },
+          {
+            "label": "Value 3",
+            "description": "Drizzling liquid clouds"
+          },
+          {
+            "label": "Value 4",
+            "description": "Drizzle or warm rain"
+          },
+          {
+            "label": "Value 5",
+            "description": "Cold rain"
+          },
+          {
+            "label": "Value 6",
+            "description": "Melting snow"
+          },
+          {
+            "label": "Value 7",
+            "description": "Rimed snow"
+          },
+          {
+            "label": "Value 8",
+            "description": "Snow"
+          },
+          {
+            "label": "Value 9",
+            "description": "Ice"
+          },
+          {
+            "label": "Value 10",
+            "description": "Stratospheric cloud"
+          },
+          {
+            "label": "Value 11",
+            "description": "Insects or artifacts"
+          },
+          {
+            "label": "Value 12",
+            "description": "Heavy rain likely present"
+          },
+          {
+            "label": "Value 13",
+            "description": "Heavy mixed-phase precipitation likely present"
+          },
+          {
+            "label": "Value 14",
+            "description": "Heavy rain"
+          },
+          {
+            "label": "Value 15",
+            "description": "Heavy mixed-phase precipitation"
+          },
+          {
+            "label": "Value 16",
+            "description": "Removed ground clutter, possible drizzle/rain in clutter"
+          },
+          {
+            "label": "Value 17",
+            "description": "Removed ground clutter, possible snow/mixed-phase precip in clutter"
+          },
+          {
+            "label": "Value 18",
+            "description": "Removed ground clutter, possible cloud in clutter"
+          },
+          {
+            "label": "Value 19",
+            "description": "Removed ground clutter, cloud/precip unlikely present in this layer"
+          },
+          {
+            "label": "Value 20",
+            "description": "Uncertain"
+          }
+        ],
+        "dimensions": ["cpr", "height"],
+        "dtype": "int32"
+      },
+      {
+        "name": "time_cpr",
+        "units": "hours since 2026-01-01 00:00:00 +00:00",
+        "standard_name": "time",
+        "long_name": "Time UTC",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["cpr"],
+        "dtype": "float64"
+      }
+    ],
+    "specific_variables": []
+  },
+  "cpr-validation": {
+    "description": "Ground-based radar measurements compared to CPR\n        measurements from EarthCARE satellite overpass.",
+    "references_html": [],
+    "dimensions": [
+      {
+        "name": "cpr"
+      },
+      {
+        "name": "height",
+        "units": "m",
+        "standard_name": "height_above_mean_sea_level",
+        "long_name": "Height above mean sea level",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "msi"
+      },
+      {
+        "name": "time",
+        "units": "hours since 2026-01-01 00:00:00 +00:00",
+        "standard_name": "time",
+        "long_name": "Time UTC",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      }
+    ],
+    "common_variables": [
+      {
+        "name": "altitude",
+        "units": "m",
+        "standard_name": "altitude",
+        "long_name": "Altitude of site",
+        "comment": "Altitude of the ground-based measurement site.",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "cloud_top_height",
+        "units": "m",
+        "standard_name": null,
+        "long_name": "Cloud top height",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["msi"],
+        "dtype": "float32"
+      },
+      {
+        "name": "distance",
+        "units": "km",
+        "standard_name": null,
+        "long_name": "Distance between site and CPR ground track",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["cpr"],
+        "dtype": "float32"
+      },
+      {
+        "name": "echo_cpr",
+        "units": "dBZ",
+        "standard_name": null,
+        "long_name": "Radar reflectivity factor",
+        "comment": "Noise-screened EarthCARE CPR_NOM_1B data within 15 km from the site.",
+        "definition": null,
+        "dimensions": ["cpr", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "latitude",
+        "units": "degree_north",
+        "standard_name": "latitude",
+        "long_name": "Latitude of site",
+        "comment": "Latitude of the ground-based measurement site.",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "latitude_cpr",
+        "units": "degree_north",
+        "standard_name": "latitude",
+        "long_name": "Latitude of CPR ground track",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["cpr"],
+        "dtype": "float32"
+      },
+      {
+        "name": "latitude_msi",
+        "units": "degree_north",
+        "standard_name": "latitude",
+        "long_name": "Latitude of MSI ground track",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["msi"],
+        "dtype": "float32"
+      },
+      {
+        "name": "longitude",
+        "units": "degree_east",
+        "standard_name": "longitude",
+        "long_name": "Longitude of site",
+        "comment": "Longitude of the ground-based measurement site.",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "longitude_cpr",
+        "units": "degree_east",
+        "standard_name": "longitude",
+        "long_name": "Longitude of CPR ground track",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["cpr"],
+        "dtype": "float32"
+      },
+      {
+        "name": "longitude_msi",
+        "units": "degree_east",
+        "standard_name": "longitude",
+        "long_name": "Longitude of MSI ground track",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["msi"],
+        "dtype": "float32"
+      },
+      {
+        "name": "time_cpr",
+        "units": "hours since 2026-01-01 00:00:00 +00:00",
+        "standard_name": "time",
+        "long_name": "Time UTC",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["cpr"],
+        "dtype": "float64"
+      },
+      {
+        "name": "v_cpr",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Doppler velocity",
+        "comment": "Noise-screened EarthCARE CPR_NOM_1B data within 15 km from the site.",
+        "definition": null,
+        "dimensions": ["cpr", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "vm_sat_folded",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Doppler velocity with noise, satellite motion error, and folding",
+        "comment": "Cloudnet data convolved to CPR resolution using orbital-radar software.",
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "ze_sat",
+        "units": "dBZ",
+        "standard_name": null,
+        "long_name": "Convolved and integrated radar reflectivity factor",
+        "comment": "Cloudnet data convolved to CPR resolution using orbital-radar software.",
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      }
+    ],
+    "specific_variables": []
+  },
   "der": {
     "description": "Liquid droplet effective radius is derived using the\n        method of Frisch et al. (2002), based on the attenuation-corrected\n        radar reflectivity and liquid water path.",
     "references_html": [
@@ -1872,26 +2303,6 @@
         "definition": null,
         "dimensions": ["time"],
         "dtype": "float32"
-      },
-      {
-        "name": "velocity",
-        "units": "m s-1",
-        "standard_name": null,
-        "long_name": "Center fall velocity of precipitation particles",
-        "comment": "Predefined velocity classes.",
-        "definition": null,
-        "dimensions": ["velocity"],
-        "dtype": "float32"
-      },
-      {
-        "name": "velocity_spread",
-        "units": "m s-1",
-        "standard_name": null,
-        "long_name": "Width of velocity interval",
-        "comment": "Bin size of each velocity interval.",
-        "definition": null,
-        "dimensions": ["velocity"],
-        "dtype": "float32"
       }
     ],
     "specific_variables": [
@@ -1957,6 +2368,71 @@
             "definition": null,
             "dimensions": ["time"],
             "dtype": "int32"
+          },
+          {
+            "name": "velocity",
+            "units": "m s-1",
+            "standard_name": null,
+            "long_name": "Center fall velocity of precipitation particles",
+            "comment": "Predefined velocity classes.",
+            "definition": null,
+            "dimensions": ["velocity"],
+            "dtype": "float32"
+          },
+          {
+            "name": "velocity_spread",
+            "units": "m s-1",
+            "standard_name": null,
+            "long_name": "Width of velocity interval",
+            "comment": "Bin size of each velocity interval.",
+            "definition": null,
+            "dimensions": ["velocity"],
+            "dtype": "float32"
+          }
+        ]
+      },
+      {
+        "type": "rd-80",
+        "variables": [
+          {
+            "name": "diameter_bnds",
+            "units": "m",
+            "standard_name": null,
+            "long_name": "Diameter bounds",
+            "comment": "Upper and lower bounds of diameter interval.",
+            "definition": null,
+            "dimensions": ["diameter", "nv"],
+            "dtype": "float32"
+          },
+          {
+            "name": "interval",
+            "units": "s",
+            "standard_name": null,
+            "long_name": "Length of measurement interval",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "int32"
+          },
+          {
+            "name": "n_particles",
+            "units": "1",
+            "standard_name": null,
+            "long_name": "Number of particles in time interval",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "int32"
+          },
+          {
+            "name": "number_concentration",
+            "units": "m-3 mm-1",
+            "standard_name": null,
+            "long_name": "Number of particles per diameter class",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "diameter"],
+            "dtype": "float32"
           }
         ]
       },
@@ -2054,6 +2530,16 @@
             "dtype": "int32"
           },
           {
+            "name": "velocity",
+            "units": "m s-1",
+            "standard_name": null,
+            "long_name": "Center fall velocity of precipitation particles",
+            "comment": "Predefined velocity classes.",
+            "definition": null,
+            "dimensions": ["velocity"],
+            "dtype": "float32"
+          },
+          {
             "name": "velocity_bnds",
             "units": "m s-1",
             "standard_name": null,
@@ -2061,6 +2547,16 @@
             "comment": "Upper and lower bounds of velocity interval.",
             "definition": null,
             "dimensions": ["velocity", "nv"],
+            "dtype": "float32"
+          },
+          {
+            "name": "velocity_spread",
+            "units": "m s-1",
+            "standard_name": null,
+            "long_name": "Width of velocity interval",
+            "comment": "Bin size of each velocity interval.",
+            "definition": null,
+            "dimensions": ["velocity"],
             "dtype": "float32"
           },
           {
@@ -3437,16 +3933,6 @@
         "dtype": "float32"
       },
       {
-        "name": "omega",
-        "units": "Pa s-1",
-        "standard_name": "omega",
-        "long_name": "Vertical wind in pressure coordinates",
-        "comment": null,
-        "definition": null,
-        "dimensions": ["time", "level"],
-        "dtype": "float32"
-      },
-      {
         "name": "pressure",
         "units": "Pa",
         "standard_name": "air_pressure",
@@ -3560,6 +4046,16 @@
             "definition": null,
             "dimensions": ["level"],
             "dtype": "int32"
+          },
+          {
+            "name": "omega",
+            "units": "Pa s-1",
+            "standard_name": "omega",
+            "long_name": "Vertical wind in pressure coordinates",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
           },
           {
             "name": "qi",
@@ -3715,6 +4211,16 @@
             "definition": null,
             "dimensions": ["level"],
             "dtype": "int32"
+          },
+          {
+            "name": "omega",
+            "units": "Pa s-1",
+            "standard_name": "omega",
+            "long_name": "Vertical wind in pressure coordinates",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
           },
           {
             "name": "qi",
@@ -3932,6 +4438,16 @@
             "dtype": "int16"
           },
           {
+            "name": "omega",
+            "units": "Pa s-1",
+            "standard_name": "omega",
+            "long_name": "Vertical wind in pressure coordinates",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
             "name": "qi",
             "units": "1",
             "standard_name": "mass_fraction_of_cloud_ice_in_air",
@@ -4146,6 +4662,16 @@
       {
         "type": "ecmwf-open",
         "variables": [
+          {
+            "name": "omega",
+            "units": "Pa s-1",
+            "standard_name": "omega",
+            "long_name": "Vertical wind in pressure coordinates",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
           {
             "name": "sfc_albedo_snow",
             "units": "1",
@@ -4386,6 +4912,16 @@
             "units": "1",
             "standard_name": "large_scale_cloud_area_fraction",
             "long_name": "Large scale cloud fraction",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "omega",
+            "units": "Pa s-1",
+            "standard_name": "omega",
+            "long_name": "Vertical wind in pressure coordinates",
             "comment": null,
             "definition": null,
             "dimensions": ["time", "level"],
@@ -5007,6 +5543,16 @@
             "dtype": "int16"
           },
           {
+            "name": "omega",
+            "units": "Pa s-1",
+            "standard_name": "omega",
+            "long_name": "Vertical wind in pressure coordinates",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
             "name": "potential_temperature",
             "units": "K",
             "standard_name": "air_potential_temperature",
@@ -5412,6 +5958,16 @@
             "dtype": "float32"
           },
           {
+            "name": "omega",
+            "units": "Pa s-1",
+            "standard_name": "omega",
+            "long_name": "Vertical wind in pressure coordinates",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
             "name": "qg",
             "units": "1",
             "standard_name": "mass_fraction_of_graupel_in_air",
@@ -5697,6 +6253,221 @@
             "standard_name": "upward_air_velocity",
             "long_name": "Vertical wind",
             "comment": "The vertical wind has been calculated from omega (Pa s-1), height and pressure using: w=omega*dz/dp",
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          }
+        ]
+      },
+      {
+        "type": "icon-d2",
+        "variables": [
+          {
+            "name": "cloud_fraction",
+            "units": "1",
+            "standard_name": "cloud_area_fraction",
+            "long_name": "Cloud fraction",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "model_level",
+            "units": "1",
+            "standard_name": "model_level_number",
+            "long_name": "Model level",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["level"],
+            "dtype": "int32"
+          },
+          {
+            "name": "qg",
+            "units": "1",
+            "standard_name": "mass_fraction_of_graupel_in_air",
+            "long_name": "Gridbox-mean graupel mixing ratio",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "qi",
+            "units": "1",
+            "standard_name": "mass_fraction_of_cloud_ice_in_air",
+            "long_name": "Gridbox-mean ice water mixing ratio",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "ql",
+            "units": "1",
+            "standard_name": "mass_fraction_of_cloud_liquid_water_in_air",
+            "long_name": "Gridbox-mean liquid water mixing ratio",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "qr",
+            "units": "1",
+            "standard_name": "mass_fraction_of_rain_in_air",
+            "long_name": "Gridbox-mean rain mixing ratio",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "qs",
+            "units": "1",
+            "standard_name": "mass_fraction_of_snow_in_air",
+            "long_name": "Gridbox-mean snow mixing ratio",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_cloud_fraction",
+            "units": "1",
+            "standard_name": null,
+            "long_name": "Surface total cloud fraction",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_cloud_fraction_high",
+            "units": "1",
+            "standard_name": null,
+            "long_name": "Surface cloud fraction (high clouds)",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_cloud_fraction_low",
+            "units": "1",
+            "standard_name": null,
+            "long_name": "Surface cloud fraction (low clouds)",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_cloud_fraction_medium",
+            "units": "1",
+            "standard_name": null,
+            "long_name": "Surface cloud fraction (mid-level clouds)",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_dewpoint_temp_2m",
+            "units": "K",
+            "standard_name": null,
+            "long_name": "Dew point temperature at 2m",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_height",
+            "units": "m",
+            "standard_name": "height_above_mean_sea_level",
+            "long_name": "Surface height",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_q",
+            "units": "1",
+            "standard_name": "surface_specific_humidity",
+            "long_name": "Surface specific humidity",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_temp",
+            "units": "K",
+            "standard_name": null,
+            "long_name": "Surface temperature",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_temp_2m",
+            "units": "K",
+            "standard_name": null,
+            "long_name": "Temperature at 2m",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_temp_snow",
+            "units": "K",
+            "standard_name": null,
+            "long_name": "Surface snow temperature",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_visibility",
+            "units": "m",
+            "standard_name": null,
+            "long_name": "Surface visibility",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_weg_snow",
+            "units": "m",
+            "standard_name": null,
+            "long_name": "Surface water equivalent snow depth",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "tke",
+            "units": "m2 s-2",
+            "standard_name": "specific_turbulent_kinetic_energy_of_air",
+            "long_name": "Turbulent kinetic energy",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "wwind",
+            "units": "m s-1",
+            "standard_name": "upward_air_velocity",
+            "long_name": "Vertical wind",
+            "comment": null,
             "definition": null,
             "dimensions": ["time", "level"],
             "dtype": "float32"
@@ -8506,6 +9277,167 @@
         "comment": "Angle to the local vertical. A value of zero is directly overhead.",
         "definition": null,
         "dimensions": ["time"],
+        "dtype": "float32"
+      }
+    ],
+    "specific_variables": []
+  },
+  "weather-radar": {
+    "description": "The weather radar product provides data from\n        vertical-pointing \"birdbath scan\" used to calibrate differential\n        reflectivity (ZDR).",
+    "references_html": [
+      "Frech et al. (2026). Exploring the Untapped Potential of Operational Weather Radars for Vertical Profiling of Precipitation and Clouds. <i>Bulletin of the American Meteorological Society</i>, <i>107</i>(1), E127-E141. <a href=\"https://doi.org/10.1175/BAMS-D-24-0113.1\">https://doi.org/10.1175/BAMS-D-24-0113.1</a>"
+    ],
+    "dimensions": [
+      {
+        "name": "range",
+        "units": "m",
+        "standard_name": null,
+        "long_name": "Range from instrument",
+        "comment": "Distance from instrument to centre of each range bin.",
+        "definition": null,
+        "dimensions": ["range"],
+        "dtype": "float32"
+      },
+      {
+        "name": "time",
+        "units": "hours since 2026-03-16 00:00:00 +00:00",
+        "standard_name": "time",
+        "long_name": "Time UTC",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      }
+    ],
+    "common_variables": [
+      {
+        "name": "SNR",
+        "units": "dB",
+        "standard_name": null,
+        "long_name": "Signal-to-noise ratio",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time", "range"],
+        "dtype": "float32"
+      },
+      {
+        "name": "Zh",
+        "units": "dBZ",
+        "standard_name": null,
+        "long_name": "Radar reflectivity factor",
+        "comment": "Calibrated reflectivity. Calibration convention: in the absence\nof attenuation, a cloud at 273 K containing one million 100-micron droplets\nper cubic metre will have a reflectivity of 0 dBZ at all frequencies.",
+        "definition": null,
+        "dimensions": ["time", "range"],
+        "dtype": "float32"
+      },
+      {
+        "name": "altitude",
+        "units": "m",
+        "standard_name": "altitude",
+        "long_name": "Altitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "calibration_reflectivity_factor",
+        "units": "dBZ",
+        "standard_name": null,
+        "long_name": "Calibration reflectivity factor",
+        "comment": "This parameter is the equivalent radar reflectivity factor at 1 km\nwhen the return signal power is equal to the noise power (SNR=0 dB).",
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "height",
+        "units": "m",
+        "standard_name": "height_above_mean_sea_level",
+        "long_name": "Height above mean sea level",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["range"],
+        "dtype": "float32"
+      },
+      {
+        "name": "latitude",
+        "units": "degree_north",
+        "standard_name": "latitude",
+        "long_name": "Latitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "longitude",
+        "units": "degree_east",
+        "standard_name": "longitude",
+        "long_name": "Longitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "nyquist_velocity",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Nyquist velocity",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time", "range"],
+        "dtype": "float32"
+      },
+      {
+        "name": "radar_frequency",
+        "units": "GHz",
+        "standard_name": null,
+        "long_name": "Radar transmit frequency",
+        "comment": null,
+        "definition": null,
+        "dimensions": [],
+        "dtype": "float32"
+      },
+      {
+        "name": "rho_hv",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Correlation coefficient",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time", "range"],
+        "dtype": "float32"
+      },
+      {
+        "name": "v",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Doppler velocity",
+        "comment": "This parameter is the radial component of the velocity, with positive\nvelocities are away from the radar.",
+        "definition": null,
+        "dimensions": ["time", "range"],
+        "dtype": "float32"
+      },
+      {
+        "name": "width",
+        "units": "m s-1",
+        "standard_name": null,
+        "long_name": "Spectral width",
+        "comment": "This parameter is the standard deviation of the reflectivity-weighted\nvelocities in the radar pulse volume.",
+        "definition": null,
+        "dimensions": ["time", "range"],
+        "dtype": "float32"
+      },
+      {
+        "name": "zdr",
+        "units": "dB",
+        "standard_name": null,
+        "long_name": "Differential reflectivity",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time", "range"],
         "dtype": "float32"
       }
     ],
