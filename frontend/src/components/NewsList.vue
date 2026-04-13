@@ -1,6 +1,5 @@
 <template>
   <div class="news-list" v-if="news.length > 0">
-    <h2>Latest news</h2>
     <div v-if="loading" class="loading">Loading news...</div>
     <div v-else-if="error" class="error">Failed to load news</div>
     <div class="news-items" v-else>
@@ -45,7 +44,6 @@ onMounted(fetchNews);
 
 <style scoped lang="scss">
 .news-list {
-  margin-top: 3rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -86,11 +84,5 @@ h2 {
 .all-news-link {
   margin-top: 1rem;
   text-align: center;
-}
-
-.read-all {
-  color: #3498db;
-  text-decoration: none;
-  font-weight: 500;
 }
 </style>

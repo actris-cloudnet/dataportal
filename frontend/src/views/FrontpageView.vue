@@ -8,13 +8,7 @@
       <h3>Welcome to ACTRIS Cloudnet data portal</h3>
       <p>
         The ACTRIS Cloudnet data portal provides a data processing and curation service for ground-based cloud remote
-        sensing measurements. This includes centralised processing, quality control, provenance, data harmonisation and
-        archiving.
-      </p>
-      <p>
-        The data portal is developed by the Cloud Remote Sensing Data Centre Unit (CLU) as part of the
-        <a href="https://www.actris.eu/">ACTRIS research infrastructure</a>, and is hosted at the
-        <a href="https://en.ilmatieteenlaitos.fi/">Finnish Meteorological Institute</a>.
+        sensing measurements. <router-link :to="{ name: 'About' }">Read more →</router-link>
       </p>
       <div class="buttons">
         <BaseButton to="search/data" type="brand">
@@ -25,14 +19,16 @@
           <img alt="graph" :src="graphIcon" />
           View data visualisations
         </BaseButton>
-        <BaseButton href="https://docs.cloudnet.fmi.fi" type="brand">
-          <img alt="documents" :src="docsIcon" />
-          Read documentation
+        <BaseButton href="https://docs.cloudnet.fmi.fi" type="secondary">
+          <img alt="documents" :src="docsIcon" style="filter: invert()" />
+          Documentation
+        </BaseButton>
+        <BaseButton href="https://ccres.aeris-data.fr" type="secondary" target="_blank">
+          <img alt="documents" :src="contactsIcon" />
+          CCRES services
         </BaseButton>
       </div>
-      <div style="display: flex; justify-content: center">
-        <BaseButton href="https://ccres.aeris-data.fr" type="secondary"> CCRES services &#8594; </BaseButton>
-      </div>
+      <h3>Latest news</h3>
       <NewsList />
     </main>
   </main>
@@ -44,6 +40,7 @@ import cloudnetLogo from "@/assets/logos/cloudnet.svg";
 import searchIcon from "@/assets/icons/search-white.png";
 import graphIcon from "@/assets/icons/graph-white.png";
 import docsIcon from "@/assets/icons/docs-white.png";
+import contactsIcon from "@/assets/icons/contacts.png";
 import BaseButton from "@/components/BaseButton.vue";
 import NewsList from "@/components/NewsList.vue";
 </script>
@@ -74,18 +71,19 @@ main {
 
 h3 {
   text-align: center;
-  margin-bottom: 2em;
-  margin-top: 2.5em;
+  margin-bottom: 1em;
+  margin-top: 2em;
   line-height: 2em;
+  font-size: 115%;
 }
 
-p + p {
-  margin-top: 0.5rem;
+p {
+  hyphens: auto;
 }
 
 .buttons {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 1em;
   justify-content: center;
   text-align: center;
@@ -93,17 +91,27 @@ p + p {
   margin-bottom: 1em;
 
   a {
-    flex-direction: column;
-    padding: 1em;
-    width: 10em;
-    height: 8em;
+    padding: 1rem;
     flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
 
     img {
-      width: 35px;
+      width: 2.5rem;
       height: auto;
-      margin-bottom: 0.5em;
+      margin-bottom: 0.5rem;
     }
+  }
+}
+
+.button.secondary {
+  flex-direction: row;
+
+  img {
+    width: 2rem;
+    height: auto;
+    margin-bottom: 0;
+    margin-right: 0.5rem;
   }
 }
 </style>
