@@ -13,7 +13,6 @@
           by <a href="https://www.flickr.com/photos/theaucitron/">theaucitron</a>,
           <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a>.<br />
           Icons from <a href="https://icons8.com/">icons8.com</a>.<br />
-          <router-link v-if="!loginStore.isAuthenticated" :to="{ name: 'Login' }">Log in</router-link>
         </div>
       </div>
       <div class="item">
@@ -31,8 +30,6 @@
 </template>
 
 <script setup lang="ts">
-import { loginStore } from "@/lib/auth";
-
 const dataportalVersion = import.meta.env.DATAPORTAL_VERSION;
 </script>
 

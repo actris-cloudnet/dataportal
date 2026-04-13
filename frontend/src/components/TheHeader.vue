@@ -122,11 +122,6 @@ function clickEvent(event: MouseEvent) {
           </a>
         </li>
         <li class="nav-item nav-secondary">
-          <a href="https://docs.cloudnet.fmi.fi">
-            <span>Documentation</span>
-          </a>
-        </li>
-        <li class="nav-item">
           <router-link :to="{ name: 'Sites' }" @click="showMenu = false">
             <span>Sites</span>
           </router-link>
@@ -142,19 +137,18 @@ function clickEvent(event: MouseEvent) {
           </router-link>
         </li>
         <li class="nav-item">
+          <a href="https://docs.cloudnet.fmi.fi">
+            <span>Documentation</span>
+          </a>
+        </li>
+        <li class="nav-item">
           <router-link :to="{ name: 'Contact' }" @click="showMenu = false">
             <span>Contact</span>
           </router-link>
         </li>
-        <li>
-          <!--
-          Hide login button for now:
-          <router-link v-if="!loginStore.isAuthenticated" :to="{ name: 'Login' }">
-            Login
-          </router-link>
-          <div v-else class="dropdown">
-          -->
-          <div v-if="loginStore.isAuthenticated" class="nav-item dropdown" ref="$profileMenu">
+        <li class="nav-item">
+          <router-link v-if="!loginStore.isAuthenticated" :to="{ name: 'Login' }"> Login </router-link>
+          <div v-else class="nav-item dropdown" ref="$profileMenu">
             <a @click="toggleProfileMenu">
               <svg class="user-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
                 <!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
