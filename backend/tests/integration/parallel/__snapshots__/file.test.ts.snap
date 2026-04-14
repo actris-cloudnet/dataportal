@@ -38,6 +38,7 @@ exports[`/api/files/:uuid request succeeds on instrument file 1`] = `
       "instrument",
     ],
   },
+  "s3key": null,
   "site": {
     "actrisId": null,
     "altitude": 16,
@@ -108,6 +109,7 @@ exports[`/api/files/:uuid request succeeds on model file 1`] = `
       "model",
     ],
   },
+  "s3key": null,
   "site": {
     "actrisId": 1337,
     "altitude": 93,

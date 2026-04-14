@@ -54,9 +54,11 @@ export class DownloadRoutes {
   readonly httpAgent: http.Agent;
 
   product: RequestHandler = async (req, res, next) => {
-    const s3key = (req.params.s3key as string[]).join("/");
     const file = await this.fileController.findAnyFile((repo) =>
-      repo.findOne({ where: { uuid: req.params.uuid as string, s3key }, relations: { product: true } }),
+      repo.findOne({
+        where: { uuid: req.params.uuid as string, filename: req.params.filename as string },
+        relations: { product: true },
+      }),
     );
     if (!file) return next({ status: 404, errors: ["File not found"] });
     if (!file.product.downloadable && !this.isPrivate(req)) {

@@ -1,5 +1,4 @@
 import { DataSource, FindOperator, Repository } from "typeorm";
-import { basename } from "path";
 import { NextFunction, Request, Response } from "express";
 import { ModelFile, RegularFile } from "../entity/File";
 import { File } from "../entity/File";
@@ -227,8 +226,6 @@ export const convertToReducedResponse = (parameters: (keyof SearchFileResponse)[
 export const augmentFile = (includeS3path: boolean) => (file: RegularFile | ModelFile) => ({
   ...file,
   downloadUrl: `${env.DP_BACKEND_URL}/download/${getDownloadPathForFile(file)}`,
-  filename: basename(file.s3key),
-  s3key: undefined,
   s3path: includeS3path ? getS3pathForFile(file) : undefined,
   model: "model" in file ? file.model : undefined,
   instrument:
@@ -291,14 +288,16 @@ export const generateS3keyForUpload = (upload: Upload) => `${upload.site.id}/${u
 export const getS3pathForUpload = (upload: Upload) => `/${uploadBucket}/${upload.s3key}`;
 
 export const getS3pathForFile = (file: File) =>
-  file.newBucket ? `/cloudnet-product-new/${file.uuid}/${file.s3key}` : `/${getBucketForFile(file)}/${file.s3key}`;
+  file.newBucket
+    ? `/cloudnet-product-new/${file.uuid}/${file.s3key || file.filename}`
+    : `/${getBucketForFile(file)}/${file.s3key || file.filename}`;
 
 export const getS3pathForImage = (s3key: string) => `/cloudnet-img/${s3key}`;
 
 export const getS3pathForLogImage = (s3key: string) =>
   `/cloudnet-img/logbook/${s3key.split("/").map(encodeURIComponent).join("/")}`;
 
-export const getDownloadPathForFile = (file: File) => `product/${file.uuid}/${file.s3key}`;
+export const getDownloadPathForFile = (file: File) => `product/${file.uuid}/${file.filename}`;
 
 export async function checkFileExists(s3path: string) {
   const headers = {

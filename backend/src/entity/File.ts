@@ -15,7 +15,6 @@ import { Site } from "./Site";
 import { Product } from "./Product";
 import { Visualization } from "./Visualization";
 import { isValidDate } from "../lib";
-import { basename } from "path";
 import { Model } from "./Model";
 import { ModelVisualization } from "./ModelVisualization";
 import { ErrorLevel } from "./QualityReport";
@@ -29,7 +28,10 @@ export abstract class File {
   uuid!: string;
 
   @Column()
-  s3key!: string;
+  filename!: string;
+
+  @Column({ type: "varchar", nullable: true })
+  s3key!: string | null;
 
   @Column()
   version!: string;
@@ -99,10 +101,6 @@ export abstract class File {
   @JoinTable()
   software!: Software[];
 
-  get filename() {
-    return basename(this.s3key);
-  }
-
   @BeforeInsert()
   updateDateCreation() {
     this.createdAt = new Date();
@@ -153,6 +151,7 @@ export function isFile(obj: any) {
     "size" in obj &&
     "format" in obj &&
     "s3key" in obj &&
+    "filename" in obj &&
     "version" in obj &&
     (obj.volatile === true || (obj.volatile === false && "pid" in obj))
   );

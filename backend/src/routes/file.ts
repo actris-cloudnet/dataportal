@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { EntityManager, Repository, In, DataSource, Raw, QueryRunner, FindOneOptions, IsNull } from "typeorm";
+import { EntityManager, Repository, In, DataSource, QueryRunner, FindOneOptions, IsNull } from "typeorm";
 import { File, isFile, RegularFile } from "../entity/File";
 import { FileQuality } from "../entity/FileQuality";
 import {
@@ -17,7 +17,6 @@ import {
 import { augmentFile } from "../lib/";
 import { SearchFile } from "../entity/SearchFile";
 import { Model } from "../entity/Model";
-import { basename } from "path";
 import { ModelFile } from "../entity/File";
 import { SearchFileResponse } from "../entity/SearchFileResponse";
 import { Visualization } from "../entity/Visualization";
@@ -108,7 +107,7 @@ export class FileRoutes {
     const repo = file instanceof RegularFile ? this.fileRepo : this.modelFileRepo;
     const versions = await repo.find({
       select,
-      where: { s3key: s3Key(file), tombstoneReason: IsNull() },
+      where: { filename: file.filename, tombstoneReason: IsNull() },
       order: { createdAt: "DESC" },
     });
     res.send(versions);
@@ -159,7 +158,7 @@ export class FileRoutes {
 
   putFile: RequestHandler = async (req, res, next) => {
     const file = req.body;
-    file.s3key = (req.params.s3key as string[]).join("/");
+    file.filename = req.params.filename;
     file.updatedAt = new Date();
     if (!isFile(file))
       return next({ status: 422, errors: ["Request body is missing fields or has invalid values in them"] });
@@ -227,7 +226,7 @@ export class FileRoutes {
         );
       return qb
         .leftJoinAndSelect("file.site", "site")
-        .where("regexp_replace(s3key, '.+/', '') = :filename", { filename: basename(file.s3key) })
+        .where("file.filename = :filename", { filename: file.filename })
         .getOne();
     };
     const existingFile = await findFileByName(isModel);
@@ -377,6 +376,7 @@ export class FileRoutes {
     "file.dvasUpdatedAt",
     "file.startTime",
     "file.stopTime",
+    "file.filename",
     "file.s3key",
     "file.newBucket",
   ];
@@ -408,7 +408,7 @@ export class FileRoutes {
     // Hack to prevent loading of model files when instrument is selected without product
     if (isModel && (query.instrument || query.instrumentPid)) qb.andWhere("1 = 0");
 
-    if (query.filename) qb.andWhere("regexp_replace(s3key, '.+/', '') IN (:...filename)", query);
+    if (query.filename) qb.andWhere("file.filename IN (:...filename)", query);
     if (query.releasedBefore) qb.andWhere("file.updatedAt < :releasedBefore", query);
     if (query.releasedAfter) qb.andWhere("file.updatedAt > :releasedAfter", query);
     if (query.updatedAtFrom) qb.andWhere("file.updatedAt >= :updatedAtFrom", query);
@@ -537,7 +537,7 @@ export class FileRoutes {
 
   async fetchValidVersions(queryRunner: QueryRunner, file: File) {
     return await queryRunner.manager.find(RegularFile, {
-      where: { s3key: s3Key(file), tombstoneReason: IsNull() },
+      where: { filename: file.filename, tombstoneReason: IsNull() },
       relations: { product: true, site: true },
       order: { createdAt: "DESC" },
     });
@@ -613,11 +613,6 @@ function addCommonFilters(qb: any, query: any) {
 }
 
 function isValidFilename(file: any) {
-  const [date, site] = basename(file.s3key).split(".")[0].split("_");
+  const [date, site] = file.filename.split(".")[0].split("_");
   return file.measurementDate.replace(/-/g, "") == date && (file.site == site || typeof file.site == "object");
-}
-
-function s3Key(file: File) {
-  // Handle legacy filenames with 'legacy/' prefix.
-  return Raw((alias) => `regexp_replace(${alias}, '.+/', '') = :filename`, { filename: file.filename });
 }

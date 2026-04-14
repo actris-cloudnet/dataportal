@@ -349,7 +349,7 @@ async function createServer(): Promise<void> {
     express.json(),
     collRoutes.generatePid,
   );
-  app.get("/api/download/product/:uuid/*s3key", middleware.validateUuidParam, dlRoutes.product);
+  app.get("/api/download/product/:uuid/:filename", middleware.validateUuidParam, dlRoutes.product);
   app.get("/api/download/raw/:uuid/:filename", middleware.validateUuidParam, dlRoutes.raw);
   app.get("/api/download/collection/:uuid", middleware.validateUuidParam, dlRoutes.collection);
   app.get("/api/download/image/*s3key", dlRoutes.image);
@@ -500,7 +500,7 @@ async function createServer(): Promise<void> {
   app.post("/credentials/:token", userActivationRoutes.post);
 
   // private
-  app.put("/files/*s3key", express.json(), fileRoutes.putFile);
+  app.put("/files/:filename", express.json(), fileRoutes.putFile);
   app.post("/files/", express.json(), fileRoutes.postFile);
   app.post("/upload-metadata", express.json(), uploadRoutes.updateMetadata);
   app.get(

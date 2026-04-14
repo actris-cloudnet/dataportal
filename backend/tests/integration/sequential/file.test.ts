@@ -57,9 +57,9 @@ beforeAll(async () => {
   qualityReportRepo = dataSource.getRepository(QualityReport);
   await initUsersAndPermissions();
   const prefix = `${storageServiceUrl}cloudnet-product`;
-  await axios.put(`${prefix}-volatile/${volatileFile.s3key}`, "content");
-  await axios.put(`${prefix}/${stableFile.s3key}`, "content");
-  await axios.put(`${prefix}/legacy/${stableFile.s3key}`, "content");
+  await axios.put(`${prefix}-volatile/${volatileFile.filename}`, "content");
+  await axios.put(`${prefix}/${stableFile.filename}`, "content");
+  await axios.put(`${prefix}/legacy/${stableFile.filename}`, "content");
 });
 
 beforeEach(async () => {
@@ -76,7 +76,7 @@ afterAll(async () => {
   await dataSource.destroy();
 });
 
-describe("PUT /files/:s3key", () => {
+describe("PUT /files/:filename", () => {
   it("inserting new volatile file", async () => {
     await expect(putFile(volatileFile)).resolves.toMatchObject({ status: 201 });
     await expect(searchFileRepo.findOneByOrFail({ uuid: volatileFile.uuid })).resolves.toBeTruthy();
@@ -171,7 +171,7 @@ describe("PUT /files/:s3key", () => {
     const tmpfile = { ...stableFile };
     tmpfile.legacy = true;
     tmpfile.uuid = "87EB042E-B247-4AC1-BC03-074DD0D74BDB";
-    tmpfile.s3key = `legacy/${stableFile.s3key}`;
+    tmpfile.s3key = `legacy/${stableFile.filename}`;
     tmpfile.checksum = "610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678";
     await expect(putFile(tmpfile)).resolves.toMatchObject({ status: 200 });
     await expect(searchFileRepo.findOneByOrFail({ uuid: stableFile.uuid })).resolves.toMatchObject({ legacy: false });
@@ -182,7 +182,7 @@ describe("PUT /files/:s3key", () => {
     const tmpfile = { ...stableFile };
     tmpfile.legacy = true;
     tmpfile.uuid = "87EB042E-B247-4AC1-BC03-074DD0D74BDB";
-    tmpfile.s3key = `legacy/${stableFile.s3key}`;
+    tmpfile.s3key = `legacy/${stableFile.filename}`;
     tmpfile.checksum = "610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678";
     await expect(putFile(tmpfile)).resolves.toMatchObject({ status: 201 });
     await expect(putFile(stableFile)).resolves.toMatchObject({ status: 200 });
@@ -194,7 +194,7 @@ describe("PUT /files/:s3key", () => {
     const tmpfile = { ...stableFile };
     tmpfile.legacy = true;
     tmpfile.uuid = "87EB042E-B247-4AC1-BC03-074DD0D74BDB";
-    tmpfile.s3key = `legacy/${stableFile.s3key}`;
+    tmpfile.s3key = `legacy/${stableFile.filename}`;
     tmpfile.checksum = "610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678";
     const tmpfile2 = { ...stableFile };
     tmpfile2.uuid = "97EB042E-B247-4AC1-BC03-074DD0D74BDB";
@@ -213,7 +213,7 @@ describe("PUT /files/:s3key", () => {
       ...tmpfile1,
       model: "ecmwf",
       uuid: "87EB042E-B247-4AC1-BC03-074DD0D74BDB",
-      s3key: "20181115_mace-head_ecmwf.nc",
+      filename: "20181115_mace-head_ecmwf.nc",
       checksum: "610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678",
     };
     await expect(putFile(tmpfile1)).resolves.toMatchObject({ status: 201 });
@@ -223,7 +223,7 @@ describe("PUT /files/:s3key", () => {
       model: { id: tmpfile1.model },
     });
     await expect(searchFileRepo.findOneBy({ uuid: tmpfile1.uuid })).resolves.toBeTruthy();
-    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile2.s3key}`, "content");
+    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile2.filename}`, "content");
     await expect(putFile(tmpfile2)).resolves.toMatchObject({ status: 201 });
     await expect(
       modelFileRepo.findOneOrFail({ where: { uuid: tmpfile2.uuid }, relations: { model: true } }),
@@ -240,12 +240,12 @@ describe("PUT /files/:s3key", () => {
       ...tmpfile1,
       model: "icon-iglo-24-35",
       uuid: "87EB042E-B247-4AC1-BC03-074DD0D74BDB",
-      s3key: "20181115_mace-head_icon-iglo-24-35.nc",
+      filename: "20181115_mace-head_icon-iglo-24-35.nc",
       checksum: "610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678",
     };
     await expect(putFile(tmpfile1)).resolves.toMatchObject({ status: 201 });
     await expect(searchFileRepo.findOneBy({ uuid: tmpfile1.uuid })).resolves.toBeTruthy();
-    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile2.s3key}`, "content");
+    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile2.filename}`, "content");
     await expect(putFile(tmpfile2)).resolves.toMatchObject({ status: 201 });
     await expect(searchFileRepo.findOneBy({ uuid: tmpfile2.uuid })).resolves.toBeFalsy();
     await expect(searchFileRepo.findOneBy({ uuid: tmpfile1.uuid })).resolves.toBeTruthy();
@@ -257,14 +257,14 @@ describe("PUT /files/:s3key", () => {
       ...tmpfile1,
       model: "icon-iglo-36-47",
       uuid: "87EB042E-B247-4AC1-BC03-074DD0D74BDB",
-      s3key: "20181115_mace-head_icon-iglo-36-47.nc",
+      filename: "20181115_mace-head_icon-iglo-36-47.nc",
       checksum: "610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678",
     };
     const tmpfile3 = {
       ...tmpfile1,
       model: "ecmwf",
       uuid: "abde0a2a-40e7-4463-9266-06f50153d974",
-      s3key: "20181115_mace-head_ecmwf.nc",
+      filename: "20181115_mace-head_ecmwf.nc",
       checksum: "deb5a92691553bcac4cfb57f5917d7cbf9ccfae9592c40626d9615bd64ebeffe",
     };
     await expect(putFile(tmpfile1)).resolves.toMatchObject({ status: 201 });
@@ -274,7 +274,7 @@ describe("PUT /files/:s3key", () => {
       model: { id: tmpfile1.model },
     });
     await expect(searchFileRepo.findOneBy({ uuid: tmpfile1.uuid })).resolves.toBeTruthy();
-    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile2.s3key}`, "content");
+    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile2.filename}`, "content");
     await expect(putFile(tmpfile2)).resolves.toMatchObject({ status: 201 });
     await expect(
       modelFileRepo.findOneOrFail({ where: { uuid: tmpfile2.uuid }, relations: { model: true } }),
@@ -283,7 +283,7 @@ describe("PUT /files/:s3key", () => {
     });
     await expect(searchFileRepo.findOneBy({ uuid: tmpfile1.uuid })).resolves.toBeFalsy();
     await expect(searchFileRepo.findOneBy({ uuid: tmpfile2.uuid })).resolves.toBeTruthy();
-    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile3.s3key}`, "content");
+    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile3.filename}`, "content");
     await expect(putFile(tmpfile3)).resolves.toMatchObject({ status: 201 });
     await expect(
       modelFileRepo.findOneOrFail({ where: { uuid: tmpfile3.uuid }, relations: { model: true } }),
@@ -302,14 +302,14 @@ describe("PUT /files/:s3key", () => {
       product: "model",
       model: "gdas1",
       uuid: "abde0a2a-40e7-4463-9266-06f50153d974",
-      s3key: "20181115_mace-head_gdas1.nc",
+      filename: "20181115_mace-head_gdas1.nc",
       checksum: "deb5a92691553bcac4cfb57f5917d7cbf9ccfae9592c40626d9615bd64ebeffe",
     };
     const tmpfile3 = {
       ...tmpfile1,
       model: "icon-iglo-36-47",
       uuid: "87EB042E-B247-4AC1-BC03-074DD0D74BDB",
-      s3key: "20181115_mace-head_icon-iglo-36-47.nc",
+      filename: "20181115_mace-head_icon-iglo-36-47.nc",
       checksum: "610980aa2bfe48b4096101113c2c0a8ba97f158da9d2ba994545edd35ab77678",
     };
     await expect(putFile(tmpfile1)).resolves.toMatchObject({ status: 201 });
@@ -319,7 +319,7 @@ describe("PUT /files/:s3key", () => {
       model: { id: tmpfile1.model },
     });
     await expect(searchFileRepo.findOneBy({ uuid: tmpfile1.uuid })).resolves.toBeTruthy();
-    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile2.s3key}`, "content");
+    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile2.filename}`, "content");
     await expect(putFile(tmpfile2)).resolves.toMatchObject({ status: 201 });
     await expect(
       modelFileRepo.findOneOrFail({ where: { uuid: tmpfile2.uuid }, relations: { model: true } }),
@@ -328,7 +328,7 @@ describe("PUT /files/:s3key", () => {
     });
     await expect(searchFileRepo.findOneBy({ uuid: tmpfile1.uuid })).resolves.toBeTruthy();
     await expect(searchFileRepo.findOneBy({ uuid: tmpfile2.uuid })).resolves.toBeFalsy();
-    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile3.s3key}`, "content");
+    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile3.filename}`, "content");
     await expect(putFile(tmpfile3)).resolves.toMatchObject({ status: 201 });
     await expect(
       modelFileRepo.findOneOrFail({ where: { uuid: tmpfile3.uuid }, relations: { model: true } }),
@@ -346,28 +346,28 @@ describe("PUT /files/:s3key", () => {
       ...tmpfile1,
       model: "icon-iglo-36-47",
       uuid: "abde0a2a-40e7-4463-9266-06f50153d974",
-      s3key: "20181115_mace-head_icon-iglo-36.nc",
+      filename: "20181115_mace-head_icon-iglo-36.nc",
       checksum: "deb5a92691553bcac4cfb57f5917d7cbf9ccfae9592c40626d9615bd64ebeffe",
     };
     const tmpfile3 = {
       ...tmpfile1,
       model: "ecmwf",
       uuid: "abde0a2a-40e7-4463-9266-06f50153d972",
-      s3key: "20181115_mace-head_ecmwf.nc",
+      filename: "20181115_mace-head_ecmwf.nc",
       checksum: "a3d5a47545c4cf41cca176799da13930389925dc5d04ee62a83a494ee0f04c57",
     };
-    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile1.s3key}`, "content");
+    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile1.filename}`, "content");
     await expect(putFile(tmpfile1)).resolves.toMatchObject({ status: 201 });
     await expect(searchFileRepo.findOneBy({ uuid: tmpfile1.uuid })).resolves.toBeTruthy();
     await expect(searchFileRepo.findOneBy({ uuid: tmpfile2.uuid })).resolves.toBeFalsy();
     await expect(searchFileRepo.findOneBy({ uuid: tmpfile3.uuid })).resolves.toBeFalsy();
-    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile2.s3key}`, "content");
+    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile2.filename}`, "content");
     await expect(putFile(tmpfile2)).resolves.toMatchObject({ status: 201 });
     await expect(putFile(tmpfile1)).resolves.toMatchObject({ status: 200 });
     await expect(searchFileRepo.findOneBy({ uuid: tmpfile1.uuid })).resolves.toBeFalsy();
     await expect(searchFileRepo.findOneBy({ uuid: tmpfile2.uuid })).resolves.toBeTruthy();
     await expect(searchFileRepo.findOneBy({ uuid: tmpfile3.uuid })).resolves.toBeFalsy();
-    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile3.s3key}`, "content");
+    await axios.put(`${storageServiceUrl}cloudnet-product-volatile/${tmpfile3.filename}`, "content");
     await expect(putFile(tmpfile3)).resolves.toMatchObject({ status: 201 });
     await expect(searchFileRepo.findOneBy({ uuid: tmpfile1.uuid })).resolves.toBeFalsy();
     await expect(searchFileRepo.findOneBy({ uuid: tmpfile2.uuid })).resolves.toBeFalsy();
@@ -383,8 +383,8 @@ describe("PUT /files/:s3key", () => {
   it("overwrites existing freezed files on test site", async () => {
     const tmpfile = { ...stableFile };
     tmpfile.site = "granada";
-    tmpfile.s3key = "20181115_granada_mira.nc";
-    await axios.put(`${storageServiceUrl}cloudnet-product/${tmpfile.s3key}`, "content");
+    tmpfile.filename = "20181115_granada_mira.nc";
+    await axios.put(`${storageServiceUrl}cloudnet-product/${tmpfile.filename}`, "content");
     await putFile(tmpfile);
     const dbRow1 = await fileRepo.findOneByOrFail({ uuid: stableFile.uuid });
     await expect(putFile(tmpfile)).resolves.toMatchObject({ status: 200 });
@@ -399,9 +399,9 @@ describe("PUT /files/:s3key", () => {
     tmpfile.sourceFileIds = [stableFile.uuid, volatileModelFile.uuid];
     tmpfile.uuid = "62b32746-faf0-4057-9076-ed2e698dcc34";
     tmpfile.checksum = "dc460da4ad72c482231e28e688e01f2778a88ce31a08826899d54ef7183998b5";
-    tmpfile.s3key = "20181115_mace-head_hatpro.nc";
+    tmpfile.filename = "20181115_mace-head_hatpro.nc";
     tmpfile.product = "categorize";
-    await axios.put(`${storageServiceUrl}cloudnet-product/${tmpfile.s3key}`, "content");
+    await axios.put(`${storageServiceUrl}cloudnet-product/${tmpfile.filename}`, "content");
     await expect(putFile(tmpfile)).resolves.toMatchObject({ status: 201 });
     const dbRow1 = await fileRepo.findOneOrFail({
       where: { uuid: tmpfile.uuid },
@@ -881,19 +881,21 @@ describe("DELETE /api/files/", () => {
   ) {
     const statusCode = options.version ? 200 : 201;
     const { product = "radar", volatile = true, pid = null, legacy = false } = options;
-    const fileFix = legacy ? "legacy/" : "";
+    const filename = `20181115_mace-head_${product}.nc`;
+    const s3key = legacy ? `legacy/${filename}` : null;
     const file = {
       ...volatileFile,
       ...options,
       ...{ uuid: uuid.v4(), product, volatile },
-      s3key: `${fileFix}20181115_mace-head_${product}.nc`,
+      s3key,
+      filename,
       checksum: generateHash(),
     };
     if (pid) file.pid = pid;
     if (legacy) file.legacy = true;
     if (product === "model" && !file.model) file.model = "ecmwf";
     const bucketFix = volatile ? "-volatile" : "";
-    await axios.put(`${storageServiceUrl}cloudnet-product${bucketFix}/${file.s3key}`, "content");
+    await axios.put(`${storageServiceUrl}cloudnet-product${bucketFix}/${file.s3key || file.filename}`, "content");
     await expect(putFile(file)).resolves.toMatchObject({ status: statusCode });
     return file;
   }
@@ -911,7 +913,7 @@ describe("DELETE /api/files/", () => {
 });
 
 async function putFile(json: any) {
-  const url = `${backendPrivateUrl}files/${json.s3key}`;
+  const url = `${backendPrivateUrl}files/${json.filename}`;
   return await axios.put(url, json);
 }
 
