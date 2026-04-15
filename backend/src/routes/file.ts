@@ -294,67 +294,62 @@ export class FileRoutes {
   };
 
   deleteFile: RequestHandler = async (req, res, next) => {
-    try {
-      const query = res.locals;
-      const dryRun = query.dryRun;
-      const uuid = req.params.uuid as string;
-      const tombstoneReason = query.tombstoneReason;
+    const query = res.locals;
+    const dryRun = query.dryRun;
+    const uuid = req.params.uuid as string;
+    const tombstoneReason = query.tombstoneReason;
 
-      const queryRunner = this.dataSource.createQueryRunner();
-      await queryRunner.connect();
-      await queryRunner.startTransaction();
-      try {
-        const file = await this.simpleFindAnyFile(queryRunner, {
-          where: { uuid },
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const file = await this.simpleFindAnyFile(queryRunner, {
+        where: { uuid },
+        relations: { product: true, site: true },
+      });
+      if (!file) {
+        await queryRunner.rollbackTransaction();
+        return next({ status: 422, errors: ["No file matches the provided uuid"] });
+      }
+      if (!dryRun && !tombstoneReason && file.pid) {
+        await queryRunner.rollbackTransaction();
+        return next({
+          status: 422,
+          errors: ["Forbidden to delete file with PID without specifying tombstone reason"],
+        });
+      }
+      let derivedFiles: RegularFile[] = [];
+      if (query.deleteHigherProducts) {
+        const uuids = await this.getDerivedProducts(queryRunner, file);
+        derivedFiles = await queryRunner.manager.find(RegularFile, {
+          where: { uuid: In(uuids) },
           relations: { product: true, site: true },
         });
-        if (!file) {
-          await queryRunner.rollbackTransaction();
-          return next({ status: 422, errors: ["No file matches the provided uuid"] });
-        }
-        if (!dryRun && !tombstoneReason && file.pid) {
+      }
+      if (!dryRun) {
+        if (!tombstoneReason && derivedFiles.some((product) => product.pid)) {
           await queryRunner.rollbackTransaction();
           return next({
             status: 422,
-            errors: ["Forbidden to delete file with PID without specifying tombstone reason"],
+            errors: ["Forbidden to delete derived files having PID without specifying tombstone reason"],
           });
         }
-        let derivedFiles: RegularFile[] = [];
-        if (query.deleteHigherProducts) {
-          const uuids = await this.getDerivedProducts(queryRunner, file);
-          derivedFiles = await queryRunner.manager.find(RegularFile, {
-            where: { uuid: In(uuids) },
-            relations: { product: true, site: true },
-          });
+        for (const derivedFile of derivedFiles) {
+          const allVersions = await this.fetchValidVersions(queryRunner, derivedFile);
+          await this.deleteFileEntity(queryRunner, derivedFile, tombstoneReason);
+          await this.updateSearchFile(queryRunner, derivedFile, allVersions);
         }
-        if (!dryRun) {
-          if (!tombstoneReason && derivedFiles.some((product) => product.pid)) {
-            await queryRunner.rollbackTransaction();
-            return next({
-              status: 422,
-              errors: ["Forbidden to delete derived files having PID without specifying tombstone reason"],
-            });
-          }
-          for (const derivedFile of derivedFiles) {
-            const allVersions = await this.fetchValidVersions(queryRunner, derivedFile);
-            await this.deleteFileEntity(queryRunner, derivedFile, tombstoneReason);
-            await this.updateSearchFile(queryRunner, derivedFile, allVersions);
-          }
-          const allVersions = await this.fetchValidVersions(queryRunner, file);
-          await this.deleteFileEntity(queryRunner, file, tombstoneReason);
-          await this.updateSearchFile(queryRunner, file, allVersions);
-        }
-        await queryRunner.commitTransaction();
-        res.send([file, ...derivedFiles]);
-      } catch (e) {
-        await queryRunner.rollbackTransaction();
-        return next({ status: 500, errors: e });
-      } finally {
-        await queryRunner.release();
+        const allVersions = await this.fetchValidVersions(queryRunner, file);
+        await this.deleteFileEntity(queryRunner, file, tombstoneReason);
+        await this.updateSearchFile(queryRunner, file, allVersions);
       }
-    } catch (err) {
-      console.error("FATAL", err);
-      throw err;
+      await queryRunner.commitTransaction();
+      res.send([file, ...derivedFiles]);
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      return next({ status: 500, errors: e });
+    } finally {
+      await queryRunner.release();
     }
   };
 
