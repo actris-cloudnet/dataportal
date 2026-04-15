@@ -319,25 +319,26 @@ export class FileRoutes {
             errors: ["Forbidden to delete file with PID without specifying tombstone reason"],
           });
         }
-        const uuids = await this.getDerivedProducts(queryRunner, file);
-        const derivedFiles = await queryRunner.manager.find(RegularFile, {
-          where: { uuid: In(uuids) },
-          relations: { product: true, site: true },
-        });
+        let derivedFiles: RegularFile[] = [];
+        if (query.deleteHigherProducts) {
+          const uuids = await this.getDerivedProducts(queryRunner, file);
+          derivedFiles = await queryRunner.manager.find(RegularFile, {
+            where: { uuid: In(uuids) },
+            relations: { product: true, site: true },
+          });
+        }
         if (!dryRun) {
-          if (query.deleteHigherProducts && derivedFiles.length > 0) {
-            if (!tombstoneReason && derivedFiles.some((product) => product.pid)) {
-              await queryRunner.rollbackTransaction();
-              return next({
-                status: 422,
-                errors: ["Forbidden to delete derived files having PID without specifying tombstone reason"],
-              });
-            }
-            for (const derivedFile of derivedFiles) {
-              const allVersions = await this.fetchValidVersions(queryRunner, derivedFile);
-              await this.deleteFileEntity(queryRunner, derivedFile, tombstoneReason);
-              await this.updateSearchFile(queryRunner, derivedFile, allVersions);
-            }
+          if (!tombstoneReason && derivedFiles.some((product) => product.pid)) {
+            await queryRunner.rollbackTransaction();
+            return next({
+              status: 422,
+              errors: ["Forbidden to delete derived files having PID without specifying tombstone reason"],
+            });
+          }
+          for (const derivedFile of derivedFiles) {
+            const allVersions = await this.fetchValidVersions(queryRunner, derivedFile);
+            await this.deleteFileEntity(queryRunner, derivedFile, tombstoneReason);
+            await this.updateSearchFile(queryRunner, derivedFile, allVersions);
           }
           const allVersions = await this.fetchValidVersions(queryRunner, file);
           await this.deleteFileEntity(queryRunner, file, tombstoneReason);

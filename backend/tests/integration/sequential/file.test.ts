@@ -620,7 +620,17 @@ describe("DELETE /api/files/", () => {
     await expect(vizRepo.findOneBy({ s3key: "categorize-ldr.png" })).resolves.toBeTruthy();
   });
 
-  it("returns list of deleted products", async () => {
+  it("returns list of products with dryRun=true and deleteHigherProducts=false", async () => {
+    const radarFile = await putDummyFile();
+    await putDummyImage("radar-v.png", radarFile);
+    const categorizeFile = await putDummyFile({ product: "categorize", sourceFileIds: [radarFile.uuid] });
+    await putDummyImage("categorize-ldr.png", categorizeFile);
+    const res = await deleteFile(radarFile.uuid, false, true);
+    expect(res.data).toHaveLength(1);
+    expect(res.data[0].product.id).toEqual("radar");
+  });
+
+  it("returns list of products with dryRun=true and deleteHigherProducts=true", async () => {
     const radarFile = await putDummyFile();
     await putDummyImage("radar-v.png", radarFile);
     const categorizeFile = await putDummyFile({ product: "categorize", sourceFileIds: [radarFile.uuid] });
