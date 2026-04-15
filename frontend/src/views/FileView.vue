@@ -76,7 +76,7 @@
         The following files will be deleted:
         <ul class="file-list">
           <li v-for="file in filesToDelete" :key="file.uuid">
-            {{ file.s3key }}
+            {{ file.filename }}
             ({{ file.volatile ? "volatile" : "stable" }})
           </li>
         </ul>
