@@ -69,7 +69,7 @@ export class VisualizationRoutes {
 
   visualizationForSourceFile: RequestHandler = async (req, res, next) => {
     const params = req.params;
-    const fetchVisualizationsForSourceFile = (repo: any) => {
+    const fetchVisualizationsForSourceFile = (repo: any, isModel: boolean | undefined) => {
       const qb = repo
         .createQueryBuilder("file")
         .leftJoinAndSelect("file.visualizations", "visualizations")
@@ -78,6 +78,11 @@ export class VisualizationRoutes {
         .leftJoinAndSelect("file.product", "product")
         .where("file.uuid = :uuid", params)
         .addOrderBy("product_variable.order", "ASC");
+      if (isModel) qb.leftJoinAndSelect("file.model", "model");
+      if (!isModel) {
+        qb.leftJoinAndSelect("file.instrumentInfo", "instrumentInfo");
+        qb.leftJoinAndSelect("instrumentInfo.instrument", "instrument");
+      }
       return hideTestDataFromNormalUsers(qb, req).getOne();
     };
 

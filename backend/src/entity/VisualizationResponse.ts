@@ -43,9 +43,9 @@ export class VisualizationResponse {
             }
           : null,
     }));
-    if ("instrument" in file && file.instrument !== null) {
-      this.source = file.instrument as InstrumentInfo;
-    } else if (file instanceof ModelFile && file.model !== null) {
+    if (file instanceof RegularFile) {
+      this.source = file.instrumentInfo;
+    } else if (file instanceof ModelFile) {
       this.source = file.model;
     } else {
       this.source = null;
