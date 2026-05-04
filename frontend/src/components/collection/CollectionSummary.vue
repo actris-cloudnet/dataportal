@@ -24,6 +24,8 @@ const downloadUrl = computed(() => {
   return `${backendUrl}download/collection/${props.collection.uuid}`;
 });
 
+const hasEarthCareData = computed(() => props.collection.products.some((product) => product.id.startsWith("cpr-")));
+
 async function generatePid(): Promise<void> {
   citationBusy.value = true;
   try {
@@ -55,11 +57,22 @@ onMounted(() => {
     <HowToCite v-if="pidGenerated" :uuid="collection.uuid" titleClass="title" />
     <h3 class="title">Download</h3>
     <p xmlns:cc="http://creativecommons.org/ns#">
-      ACTRIS Cloudnet data is licensed under
+      ACTRIS Cloudnet data are licensed under
       <a href="http://creativecommons.org/licenses/by/4.0/" target="_blank" rel="license noopener noreferrer">
         CC BY 4.0
         <img :src="ccIcon" /><img :src="byIcon" />
       </a>
+      <template v-if="hasEarthCareData">
+        <br />
+        EarthCARE data are subject to
+        <a
+          href="https://earth.esa.int/eogateway/documents/20142/1564626/Terms-and-Conditions-for-the-use-of-ESA-Data.pdf"
+          target="_blank"
+          rel="license noopener noreferrer"
+        >
+          ESA's Earth Observation Terms and Conditions
+        </a>
+      </template>
     </p>
     <div class="buttons">
       <BaseButton type="primary" :href="downloadUrl" id="downloadCollection">
