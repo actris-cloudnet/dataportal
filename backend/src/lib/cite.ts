@@ -158,7 +158,11 @@ export class CitationService {
   }
 
   async getAcknowledgements(object: RegularFile | ModelFile | Collection): Promise<string> {
-    const [siteAcks, modelAcks] = await Promise.all([this.querySiteAcks(object), this.queryModelAcks(object)]);
+    const [siteAcks, modelAcks, hasEarthCare] = await Promise.all([
+      this.querySiteAcks(object),
+      this.queryModelAcks(object),
+      this.hasEarthCareData(object),
+    ]);
     let output = COMMON_ACK;
     if (siteAcks.length > 0) {
       output += " ";
@@ -172,11 +176,30 @@ export class CitationService {
       );
       output += ".";
     }
-    if (object instanceof RegularFile && object.product.id.startsWith("cpr-")) {
+    if (hasEarthCare) {
       output +=
         " We acknowledge the European Space Agency (ESA) and the Japan Aerospace Exploration Agency (JAXA) for providing the EarthCARE data.";
     }
     return output;
+  }
+
+  private async hasEarthCareData(object: RegularFile | ModelFile | Collection): Promise<boolean> {
+    if (object instanceof RegularFile) {
+      return object.product.id.startsWith("cpr-");
+    }
+    if (object instanceof ModelFile) {
+      return false;
+    }
+    const rows = await this.dataSource.query(
+      `SELECT 1
+       FROM regular_file
+       JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
+       WHERE "collectionUuid" = $1
+       AND "productId" LIKE 'cpr-%'
+       LIMIT 1`,
+      [object.uuid],
+    );
+    return rows.length > 0;
   }
 
   private async queryInstrumentPis(object: RegularFile | Collection): Promise<Person[]> {
