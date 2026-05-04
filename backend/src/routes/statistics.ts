@@ -108,18 +108,12 @@ export class StatisticsRoutes {
       qb.andWhere('"siteId" = :site', { site: req.query.site });
     }
     if (typeof req.query.facility === "string") {
-      const sites = await this.dataSource.manager.find(Site, {
-        select: { id: true },
-        where: { dvasId: req.query.facility },
-      });
-      qb.andWhere('"siteId" IN (:...siteIds)', { siteIds: sites.map((site) => site.id) });
+      qb.andWhere('"siteId" IN (SELECT id FROM site WHERE "dvasId" = :dvasId)', { dvasId: req.query.facility });
     }
     if (typeof req.query.country === "string") {
-      const sites = await this.dataSource.manager.find(Site, {
-        select: { id: true },
-        where: { countryCode: req.query.country },
+      qb.andWhere('"siteId" IN (SELECT id FROM site WHERE "countryCode" = :countryCode)', {
+        countryCode: req.query.country,
       });
-      qb.andWhere('"siteId" IN (:...siteIds)', { siteIds: sites.map((site) => site.id) });
     }
     const units = typeof req.query.cluUnits === "string" ? req.query.cluUnits : "variableYear";
     if (typeof req.query.cluProduct === "string") {

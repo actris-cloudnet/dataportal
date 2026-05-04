@@ -153,6 +153,9 @@ describe("GET /api/statistics", () => {
       response: { status: 400 },
     }));
 
+  it("returns empty array for non-existing country", () =>
+    expect(getStats({ dimensions: "yearMonth,downloads", country: "XX" })).resolves.toEqual([]));
+
   it("can filter by country of files", () =>
     expect(getStats({ dimensions: "yearMonth,downloads", country: "FI" })).resolves.toMatchObject([
       { yearMonth: "2022-01", downloads: expect.closeTo((2 * 31) / 300, 10) },
@@ -200,6 +203,9 @@ describe("GET /api/statistics", () => {
       { yearMonth: "2022-11", downloads: expect.closeTo((1 * 30) / 300, 10) },
       { yearMonth: "2022-12", downloads: expect.closeTo((1 * 31) / 300, 10) },
     ]));
+
+  it("returns empty array for non-existing facility", () =>
+    expect(getStats({ dimensions: "yearMonth,downloads", facility: "nonexistent" })).resolves.toEqual([]));
 
   it("can filter by DVAS facility", () =>
     expect(getStats({ dimensions: "yearMonth,downloads", facility: "mchd" })).resolves.toMatchObject([
@@ -385,6 +391,16 @@ describe("GET /api/statistics", () => {
     ).resolves.toMatchObject([
       { year: "2018", curatedData: expect.closeTo(3 / 300, 10) }, // radar + classification
     ]));
+
+  it("returns empty array for curated data with non-existing country", () =>
+    expect(getStats({ dimensions: "year,curatedData", productTypes: "observation", country: "XX" })).resolves.toEqual(
+      [],
+    ));
+
+  it("returns empty array for curated data with non-existing facility", () =>
+    expect(
+      getStats({ dimensions: "year,curatedData", productTypes: "observation", facility: "nonexistent" }),
+    ).resolves.toEqual([]));
 
   it("filters curated data by DVAS facility", () =>
     expect(
