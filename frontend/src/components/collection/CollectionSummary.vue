@@ -2,9 +2,11 @@
 import { ref, computed, onMounted } from "vue";
 import axios from "axios";
 import type { Collection } from "@shared/entity/Collection";
+import { isEarthCareProduct } from "@shared/entity/Product";
 import HowToCite from "@/components/HowToCite.vue";
 import BaseButton from "@/components/BaseButton.vue";
 import BaseAlert from "@/components/BaseAlert.vue";
+import EarthCareNotice from "@/components/EarthCareNotice.vue";
 import { backendUrl } from "@/lib";
 import BaseSpinner from "../BaseSpinner.vue";
 import ccIcon from "@/assets/icons/cc.svg";
@@ -24,7 +26,7 @@ const downloadUrl = computed(() => {
   return `${backendUrl}download/collection/${props.collection.uuid}`;
 });
 
-const hasEarthCareData = computed(() => props.collection.products.some((product) => product.id.startsWith("cpr-")));
+const hasEarthCareData = computed(() => props.collection.products.some((product) => isEarthCareProduct(product.id)));
 
 async function generatePid(): Promise<void> {
   citationBusy.value = true;
@@ -62,17 +64,7 @@ onMounted(() => {
         CC BY 4.0
         <img :src="ccIcon" /><img :src="byIcon" />
       </a>
-      <template v-if="hasEarthCareData">
-        <br />
-        EarthCARE data are subject to
-        <a
-          href="https://earth.esa.int/eogateway/documents/20142/1564626/Terms-and-Conditions-for-the-use-of-ESA-Data.pdf"
-          target="_blank"
-          rel="license noopener noreferrer"
-        >
-          ESA's Earth Observation Terms and Conditions
-        </a>
-      </template>
+      <EarthCareNotice v-if="hasEarthCareData" />
     </p>
     <div class="buttons">
       <BaseButton type="primary" :href="downloadUrl" id="downloadCollection">

@@ -22,6 +22,7 @@ import { UploadRoutes } from "./upload";
 import { CitationService } from "../lib/cite";
 import { citation2txt } from "./reference";
 import * as ipaddr from "ipaddr.js";
+import { ESA_TERMS_URL } from "../../../shared/lib/entity/Product";
 
 const LICENSE_TEXT = readFileSync("data/CC-BY-4.0.txt");
 
@@ -201,29 +202,23 @@ export class DownloadRoutes {
   }
 
   private async generateReadme(collection: Collection): Promise<string> {
-    let citationText = "";
-    try {
-      const citation = await this.citationService.getCollectionCitation(collection);
-      citationText = citation2txt(citation);
-    } catch {
-      citationText = "Failed to generate citation.";
-    }
-    const hasEarthCare = await this.citationService.hasEarthCareData(collection);
+    const [citationResult, hasEarthCare] = await Promise.all([
+      this.citationService.getCollectionCitation(collection).then(citation2txt, () => "Failed to generate citation."),
+      this.citationService.hasEarthCareData(collection),
+    ]);
     const lines = [
       "# README",
       `These files were downloaded from Cloudnet data portal: <${
         collection.pid ? collection.pid : getCollectionLandingPage(collection)
       }>`,
       "## Citation",
-      citationText,
+      citationResult,
       "## License",
       "ACTRIS Cloudnet data are licensed under a Creative Commons Attribution 4.0 international licence.",
       "You should have received a copy of the license along with this work. If not, see <http://creativecommons.org/licenses/by/4.0/>.",
     ];
     if (hasEarthCare) {
-      lines.push(
-        "EarthCARE data are subject to ESA's Earth Observation Terms and Conditions: <https://earth.esa.int/eogateway/documents/20142/1564626/Terms-and-Conditions-for-the-use-of-ESA-Data.pdf>.",
-      );
+      lines.push(`EarthCARE data are subject to ESA's Earth Observation Terms and Conditions: <${ESA_TERMS_URL}>.`);
     }
     return lines.join("\n\n") + "\n";
   }

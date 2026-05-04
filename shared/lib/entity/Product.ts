@@ -14,3 +14,11 @@ export interface Product {
   sourceProducts: Product[];
   derivedProducts: Product[];
 }
+
+export const EARTHCARE_PRODUCT_PREFIX = "cpr-";
+export const ESA_TERMS_URL =
+  "https://earth.esa.int/eogateway/documents/20142/1564626/Terms-and-Conditions-for-the-use-of-ESA-Data.pdf";
+
+export function isEarthCareProduct(productId: string): boolean {
+  return productId.startsWith(EARTHCARE_PRODUCT_PREFIX);
+}

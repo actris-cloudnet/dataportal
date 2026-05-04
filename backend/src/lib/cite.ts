@@ -4,6 +4,7 @@ import { RegularFile, ModelFile } from "../entity/File";
 import { Collection } from "../entity/Collection";
 import { formatList, getCollectionLandingPage, getFileLandingPage, truncateList } from ".";
 import { normalizeOrcid } from "../../../shared/lib/entity/Person";
+import { EARTHCARE_PRODUCT_PREFIX, isEarthCareProduct } from "../../../shared/lib/entity/Product";
 import env from "../lib/env";
 
 const MODEL_AUTHOR: Person = {
@@ -185,7 +186,7 @@ export class CitationService {
 
   async hasEarthCareData(object: RegularFile | ModelFile | Collection): Promise<boolean> {
     if (object instanceof RegularFile) {
-      return object.product.id.startsWith("cpr-");
+      return isEarthCareProduct(object.product.id);
     }
     if (object instanceof ModelFile) {
       return false;
@@ -195,9 +196,9 @@ export class CitationService {
        FROM regular_file
        JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
        WHERE "collectionUuid" = $1
-       AND "productId" LIKE 'cpr-%'
+       AND "productId" LIKE $2
        LIMIT 1`,
-      [object.uuid],
+      [object.uuid, `${EARTHCARE_PRODUCT_PREFIX}%`],
     );
     return rows.length > 0;
   }
