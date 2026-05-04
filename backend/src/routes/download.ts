@@ -208,6 +208,7 @@ export class DownloadRoutes {
     } catch {
       citationText = "Failed to generate citation.";
     }
+    const hasEarthCare = await this.citationService.hasEarthCareData(collection);
     const lines = [
       "# README",
       `These files were downloaded from Cloudnet data portal: <${
@@ -216,9 +217,14 @@ export class DownloadRoutes {
       "## Citation",
       citationText,
       "## License",
-      "Cloudnet data is licensed under a Creative Commons Attribution 4.0 international licence.",
+      "ACTRIS Cloudnet data are licensed under a Creative Commons Attribution 4.0 international licence.",
       "You should have received a copy of the license along with this work. If not, see <http://creativecommons.org/licenses/by/4.0/>.",
     ];
+    if (hasEarthCare) {
+      lines.push(
+        "EarthCARE data are subject to ESA's Earth Observation Terms and Conditions: <https://earth.esa.int/eogateway/documents/20142/1564626/Terms-and-Conditions-for-the-use-of-ESA-Data.pdf>.",
+      );
+    }
     return lines.join("\n\n") + "\n";
   }
 }

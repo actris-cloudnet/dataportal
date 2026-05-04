@@ -183,7 +183,7 @@ export class CitationService {
     return output;
   }
 
-  private async hasEarthCareData(object: RegularFile | ModelFile | Collection): Promise<boolean> {
+  async hasEarthCareData(object: RegularFile | ModelFile | Collection): Promise<boolean> {
     if (object instanceof RegularFile) {
       return object.product.id.startsWith("cpr-");
     }
