@@ -2,9 +2,11 @@
 import { ref, computed, onMounted } from "vue";
 import axios from "axios";
 import type { Collection } from "@shared/entity/Collection";
+import { isEarthCareProduct } from "@shared/entity/Product";
 import HowToCite from "@/components/HowToCite.vue";
 import BaseButton from "@/components/BaseButton.vue";
 import BaseAlert from "@/components/BaseAlert.vue";
+import EarthCareNotice from "@/components/EarthCareNotice.vue";
 import { backendUrl } from "@/lib";
 import BaseSpinner from "../BaseSpinner.vue";
 import ccIcon from "@/assets/icons/cc.svg";
@@ -23,6 +25,8 @@ const pidServiceError = ref(false);
 const downloadUrl = computed(() => {
   return `${backendUrl}download/collection/${props.collection.uuid}`;
 });
+
+const hasEarthCareData = computed(() => props.collection.products.some((product) => isEarthCareProduct(product.id)));
 
 async function generatePid(): Promise<void> {
   citationBusy.value = true;
@@ -55,11 +59,12 @@ onMounted(() => {
     <HowToCite v-if="pidGenerated" :uuid="collection.uuid" titleClass="title" />
     <h3 class="title">Download</h3>
     <p xmlns:cc="http://creativecommons.org/ns#">
-      ACTRIS Cloudnet data is licensed under
+      ACTRIS Cloudnet data are licensed under
       <a href="http://creativecommons.org/licenses/by/4.0/" target="_blank" rel="license noopener noreferrer">
         CC BY 4.0
         <img :src="ccIcon" /><img :src="byIcon" />
       </a>
+      <EarthCareNotice v-if="hasEarthCareData" />
     </p>
     <div class="buttons">
       <BaseButton type="primary" :href="downloadUrl" id="downloadCollection">

@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import HowToCite from "@/components/HowToCite.vue";
 import BaseAlert from "@/components/BaseAlert.vue";
+import EarthCareNotice from "@/components/EarthCareNotice.vue";
 import type { FileResponse } from "@/views/FileView.vue";
+import { isEarthCareProduct } from "@shared/entity/Product";
 import ccIcon from "@/assets/icons/cc.svg";
 import byIcon from "@/assets/icons/by.svg";
 
@@ -25,17 +27,7 @@ defineProps<Props>();
         CC BY 4.0
         <img :src="ccIcon" /><img :src="byIcon" />
       </a>
-      <template v-if="file.product.id.startsWith('cpr-')">
-        <br />
-        EarthCARE data are subject to
-        <a
-          href="https://earth.esa.int/eogateway/documents/20142/1564626/Terms-and-Conditions-for-the-use-of-ESA-Data.pdf"
-          target="_blank"
-          rel="license noopener noreferrer"
-        >
-          ESA's Earth Observation Terms and Conditions
-        </a>
-      </template>
+      <EarthCareNotice v-if="isEarthCareProduct(file.product.id)" />
     </p>
   </div>
 </template>

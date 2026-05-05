@@ -4,6 +4,7 @@ import { RegularFile, ModelFile } from "../entity/File";
 import { Collection } from "../entity/Collection";
 import { formatList, getCollectionLandingPage, getFileLandingPage, truncateList } from ".";
 import { normalizeOrcid } from "../../../shared/lib/entity/Person";
+import { EARTHCARE_PRODUCT_PREFIX, isEarthCareProduct } from "../../../shared/lib/entity/Product";
 import env from "../lib/env";
 
 const MODEL_AUTHOR: Person = {
@@ -158,7 +159,11 @@ export class CitationService {
   }
 
   async getAcknowledgements(object: RegularFile | ModelFile | Collection): Promise<string> {
-    const [siteAcks, modelAcks] = await Promise.all([this.querySiteAcks(object), this.queryModelAcks(object)]);
+    const [siteAcks, modelAcks, hasEarthCare] = await Promise.all([
+      this.querySiteAcks(object),
+      this.queryModelAcks(object),
+      this.hasEarthCareData(object),
+    ]);
     let output = COMMON_ACK;
     if (siteAcks.length > 0) {
       output += " ";
@@ -172,11 +177,30 @@ export class CitationService {
       );
       output += ".";
     }
-    if (object instanceof RegularFile && object.product.id.startsWith("cpr-")) {
+    if (hasEarthCare) {
       output +=
         " We acknowledge the European Space Agency (ESA) and the Japan Aerospace Exploration Agency (JAXA) for providing the EarthCARE data.";
     }
     return output;
+  }
+
+  async hasEarthCareData(object: RegularFile | ModelFile | Collection): Promise<boolean> {
+    if (object instanceof RegularFile) {
+      return isEarthCareProduct(object.product.id);
+    }
+    if (object instanceof ModelFile) {
+      return false;
+    }
+    const rows = await this.dataSource.query(
+      `SELECT 1
+       FROM regular_file
+       JOIN collection_regular_files_regular_file ON regular_file.uuid = "regularFileUuid"
+       WHERE "collectionUuid" = $1
+       AND "productId" LIKE $2
+       LIMIT 1`,
+      [object.uuid, `${EARTHCARE_PRODUCT_PREFIX}%`],
+    );
+    return rows.length > 0;
   }
 
   private async queryInstrumentPis(object: RegularFile | Collection): Promise<Person[]> {
