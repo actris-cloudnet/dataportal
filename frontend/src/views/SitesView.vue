@@ -119,9 +119,7 @@ onMounted(async () => {
           title: "Weather radar sites",
           description: "Sites with vertical measurements from weather radar.",
           legend: ["Active", "", "Inactive"],
-          sites: response.data
-            .filter((site) => !site.type.includes("hidden") && site.type.includes("weather-radar"))
-            .map((site) => ({ ...site, status: site.status === "active" ? "cloudnet" : site.status })),
+          sites: response.data.filter((site) => !site.type.includes("hidden") && site.type.includes("weather-radar")),
         },
         {
           title: "Model sites",
