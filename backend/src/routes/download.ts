@@ -218,7 +218,7 @@ export class DownloadRoutes {
       "You should have received a copy of the license along with this work. If not, see <http://creativecommons.org/licenses/by/4.0/>.",
     ];
     if (hasEarthCare) {
-      lines.push(`EarthCARE data are subject to ESA's Earth Observation Terms and Conditions: <${ESA_TERMS_URL}>.`);
+      lines.push(`EarthCARE data are subject to ESA's Earth Observation Terms and Conditions:\n<${ESA_TERMS_URL}>`);
     }
     return lines.join("\n\n") + "\n";
   }
