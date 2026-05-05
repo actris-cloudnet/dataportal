@@ -62,7 +62,7 @@
 
     <div v-if="dataStatus && dataStatus.dates.length > 0">
       <div class="viz-options">
-        <div class="viz-option" style="width: 370px">
+        <div class="viz-option" style="width: 370px" v-if="!isSingleProductSite">
           <custom-multiselect
             v-model="selectedProductId"
             label="Product"
@@ -94,7 +94,7 @@
           />
         </div>
       </div>
-      <a @click="reset" id="reset">Reset filter</a>
+      <a @click="reset" id="reset" v-if="!isSingleProductSite">Reset filter</a>
     </div>
   </div>
 </template>
@@ -168,10 +168,15 @@ const modelName = computed(() => {
   return selectedModel ? selectedModel.humanReadableName : null;
 });
 
+const isSingleProductSite = computed(() => dataStatus.value?.availableProducts.length === 1);
+
 onMounted(() => {
   parseDataStatus({ site: props.site.id })
     .then((data) => {
       dataStatus.value = data;
+      if (data.availableProducts.length === 1 && !selectedProductId.value) {
+        selectedProductId.value = data.availableProducts[0].id;
+      }
     })
     .catch((error) => {
       console.error(error);
@@ -188,7 +193,9 @@ const selectedProductName = computed(() => {
 });
 
 function reset() {
-  selectedProductId.value = null;
+  if (!isSingleProductSite.value) {
+    selectedProductId.value = null;
+  }
   selectedYear.value = null;
   selectedInstPid.value = null;
   selectedModelId.value = null;
