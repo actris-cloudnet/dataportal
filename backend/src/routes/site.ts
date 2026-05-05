@@ -91,13 +91,23 @@ export class SiteRoutes {
       qb.where("site.type && :types", { types: toArray(query.type) });
     }
     const sites = await hideTestDataFromNormalUsers(qb, req).addOrderBy("site.id", "ASC").getMany();
-    const cloudnetStatuses = await this.queryCloudnetStatuses();
-    const modelStatuses = await this.queryModelStatuses();
+    const [cloudnetStatuses, weatherRadarStatuses, modelStatuses] = await Promise.all([
+      this.queryCloudnetStatuses(),
+      this.queryWeatherRadarStatuses(),
+      this.queryModelStatuses(),
+    ]);
     res.send(
-      sites.map((site: any) => ({
-        ...site,
-        status: (site.type.includes(SiteType.MODEL) ? modelStatuses[site.id] : cloudnetStatuses[site.id]) || "inactive",
-      })),
+      sites.map((site: any) => {
+        let status: string | undefined;
+        if (site.type.includes(SiteType.MODEL)) {
+          status = modelStatuses[site.id];
+        } else if (site.type.includes(SiteType.WEATHER_RADAR)) {
+          status = weatherRadarStatuses[site.id];
+        } else {
+          status = cloudnetStatuses[site.id];
+        }
+        return { ...site, status: status || "inactive" };
+      }),
     );
   };
 
@@ -124,6 +134,21 @@ export class SiteRoutes {
       return "active";
     }
     return "inactive";
+  }
+
+  private async queryWeatherRadarStatuses(): Promise<Record<string, string>> {
+    const rows = await this.regularFileRepo
+      .createQueryBuilder("file")
+      .select("file.siteId")
+      .where("file.measurementDate > CURRENT_DATE - 3")
+      .andWhere("file.productId = :productId", { productId: "weather-radar" })
+      .groupBy("file.siteId")
+      .getRawMany();
+
+    return rows.reduce((obj, item) => {
+      obj[item.siteId] = "cloudnet";
+      return obj;
+    }, {});
   }
 
   private async queryModelStatuses(): Promise<Record<string, string>> {
