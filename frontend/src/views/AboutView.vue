@@ -21,7 +21,11 @@
         <a href="https://www.actris.eu">ACTRIS research infrastructure</a> supported by EU FP7 project
         <a href="https://cordis.europa.eu/project/id/262254">ACTRIS</a> and Horizon 2020 (FP8) projects
         <a href="https://doi.org/10.3030/654109">ACTRIS-2</a>, <a href="https://doi.org/10.3030/739530">ACTRIS-PPP</a>,
-        and <a href="https://doi.org/10.3030/871115">ACTRIS-IMP</a>.
+        and <a href="https://doi.org/10.3030/871115">ACTRIS-IMP</a>. Cloudnet has also been part of other Horizon 2020
+        projects <a href="https://doi.org/10.3030/824068">ENVRI-FAIR</a> (2019–2023),
+        <a href="https://doi.org/10.3030/101008004">ATMO-ACCESS</a> (2021–2025), and
+        <a href="https://doi.org/10.3030/101036245">RI-URBANS</a> (2021–2025), and Horizon Europe (FP9) project
+        <a href="https://doi.org/10.3030/101130949">POLARIN</a> (2024–2029).
       </p>
       <p>
         The data portal is developed by the Cloud Remote Sensing Data Centre Unit (CLU) as part of the
