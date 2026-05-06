@@ -80,6 +80,7 @@ const productIcons: Record<string, string> = {
   "doppler-lidar": dopplerLidarIcon,
   "doppler-lidar-wind": dopplerLidarWindIcon,
   "epsilon-lidar": epsilonLidarIcon,
+  "epsilon-radar": epsilonLidarIcon,
   "rain-radar": rainRadarIcon,
   "rain-gauge": rainGaugerIcon,
   "cpr-simulation": cprSimulationIcon,
