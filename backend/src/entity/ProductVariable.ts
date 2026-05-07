@@ -10,6 +10,9 @@ export class ProductVariable {
   @Column()
   humanReadableName!: string;
 
+  @Column({ default: "" })
+  shortName!: string;
+
   @Column({ type: "smallint" })
   order!: number;
 
@@ -29,6 +32,7 @@ export class ProductVariable {
     visualizations: Visualization[],
     product: Product,
     actrisName: string | null = null,
+    shortName = "",
   ) {
     this.id = id;
     this.humanReadableName = humanReadableName;
@@ -36,5 +40,6 @@ export class ProductVariable {
     this.visualizations = visualizations;
     this.product = product;
     this.actrisName = actrisName;
+    this.shortName = shortName;
   }
 }
