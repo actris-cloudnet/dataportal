@@ -3199,6 +3199,88 @@
     ],
     "specific_variables": []
   },
+  "epsilon-radar": {
+    "description": "This product contains the dissipation rate of turbulent\n        kinetic energy (TKE) calculated using the pipeline of Griesche et al.\n        (2020) with the inertial-subrange slope-acceptance criterion of Borque\n        et al. (2016). The turbulent energy spectrum is derived as the power\n        spectrum of cloud radar Doppler velocity over 5-minute windows and\n        converted to a wavenumber spectrum using model horizontal wind via\n        Taylor's hypothesis.",
+    "references_html": [
+      "Griesche et al. (2020). Application of the shipborne remote sensing supersite OCEANET for profiling of Arctic aerosols and clouds during <em>Polarstern</em> cruise PS106. <i>Atmos. Meas. Tech.</i>, <i>13</i>(10), 5335-5358. <a href=\"https://doi.org/10.5194/amt-13-5335-2020\">https://doi.org/10.5194/amt-13-5335-2020</a>",
+      "Borque et al. (2016). On the unified estimation of turbulence eddy dissipation rate using Doppler cloud radars and lidars. <i>JGR Atmospheres</i>, <i>121</i>(10), 5972-5989. <a href=\"https://doi.org/10.1002/2015JD024543\">https://doi.org/10.1002/2015JD024543</a>"
+    ],
+    "dimensions": [
+      {
+        "name": "height",
+        "units": "m",
+        "standard_name": "height_above_mean_sea_level",
+        "long_name": "Height above mean sea level",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "time",
+        "units": "hours since 2026-05-01 00:00:00 +00:00",
+        "standard_name": "time",
+        "long_name": "Time UTC",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float64"
+      }
+    ],
+    "common_variables": [
+      {
+        "name": "altitude",
+        "units": "m",
+        "standard_name": "altitude",
+        "long_name": "Altitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "epsilon",
+        "units": "m2 s-3",
+        "standard_name": null,
+        "long_name": "Dissipation rate of turbulent kinetic energy",
+        "comment": "This variable was calculated for profiles where 5 minutes of\ncontinuous cloud radar Doppler velocity was available. With less\nthan 10% missing data, the missing values were filled by cubic\nspline interpolation.\n",
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "epsilon_error",
+        "units": "m2 s-3",
+        "standard_name": null,
+        "long_name": "Absolute error in dissipation rate of turbulent kinetic energy",
+        "comment": "Random uncertainty estimated as the standard deviation of epsilon\nacross the frequency bands accepted by the inertial-subrange\nslope criterion (Griesche et al. 2020). It captures the scatter\nintroduced by the multi-band fit but does not include systematic\ncontributions from horizontal wind uncertainty or the Kolmogorov\nconstant. The variable is masked where only a single band passed\nthe slope filter and no spread can be estimated.\n",
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "latitude",
+        "units": "degree_north",
+        "standard_name": "latitude",
+        "long_name": "Latitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "longitude",
+        "units": "degree_east",
+        "standard_name": "longitude",
+        "long_name": "Longitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      }
+    ],
+    "specific_variables": []
+  },
   "ier": {
     "description": "The ice particle effective radius is derived from\n        attenuation-corrected radar reflectivity and model temperature using\n        the method of Grieche et al. (2020), which incorporates the approach of\n        Hogan et al. (2006) to estimate ice water content and uses the\n        parameterization of alpha from Delano\u00eb et al. (2007).",
     "references_html": [
@@ -4138,7 +4220,7 @@
             "dtype": "float32"
           },
           {
-            "name": "sfc_weg_snow",
+            "name": "sfc_weq_snow",
             "units": "m",
             "standard_name": null,
             "long_name": "Surface water equivalent snow depth",
@@ -4303,7 +4385,7 @@
             "dtype": "float32"
           },
           {
-            "name": "sfc_weg_snow",
+            "name": "sfc_weq_snow",
             "units": "m",
             "standard_name": null,
             "long_name": "Surface water equivalent snow depth",
@@ -6273,6 +6355,26 @@
             "dtype": "float32"
           },
           {
+            "name": "flux_level",
+            "units": "1",
+            "standard_name": null,
+            "long_name": "Model flux level",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["flux_level"],
+            "dtype": "int16"
+          },
+          {
+            "name": "flx_height",
+            "units": "m",
+            "standard_name": null,
+            "long_name": "Height above ground",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "flux_level"],
+            "dtype": "float32"
+          },
+          {
             "name": "model_level",
             "units": "1",
             "standard_name": "model_level_number",
@@ -6280,7 +6382,7 @@
             "comment": null,
             "definition": null,
             "dimensions": ["level"],
-            "dtype": "int32"
+            "dtype": "int16"
           },
           {
             "name": "qg",
@@ -6433,6 +6535,26 @@
             "dtype": "float32"
           },
           {
+            "name": "sfc_turb_mom_u",
+            "units": "kg m-1 s-2",
+            "standard_name": null,
+            "long_name": "Surface zonal turbulent momentum flux",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
+            "name": "sfc_turb_mom_v",
+            "units": "kg m-1 s-2",
+            "standard_name": null,
+            "long_name": "Surface meridional turbulent momentum flux",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time"],
+            "dtype": "float32"
+          },
+          {
             "name": "sfc_visibility",
             "units": "m",
             "standard_name": null,
@@ -6443,7 +6565,7 @@
             "dtype": "float32"
           },
           {
-            "name": "sfc_weg_snow",
+            "name": "sfc_weq_snow",
             "units": "m",
             "standard_name": null,
             "long_name": "Surface water equivalent snow depth",
@@ -6459,7 +6581,27 @@
             "long_name": "Turbulent kinetic energy",
             "comment": null,
             "definition": null,
-            "dimensions": ["time", "level"],
+            "dimensions": ["time", "flux_level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "turb_heat_coeff",
+            "units": "m2 s-1",
+            "standard_name": null,
+            "long_name": "Turbulent diffusion coefficients for heat",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "flux_level"],
+            "dtype": "float32"
+          },
+          {
+            "name": "turb_mom_coeff",
+            "units": "m2 s-1",
+            "standard_name": null,
+            "long_name": "Turbulent diffusion coefficients for momentum",
+            "comment": null,
+            "definition": null,
+            "dimensions": ["time", "flux_level"],
             "dtype": "float32"
           },
           {
@@ -6469,7 +6611,7 @@
             "long_name": "Vertical wind",
             "comment": null,
             "definition": null,
-            "dimensions": ["time", "level"],
+            "dimensions": ["time", "flux_level"],
             "dtype": "float32"
           }
         ]
