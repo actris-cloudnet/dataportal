@@ -32,7 +32,7 @@ export class ProductVariable {
     visualizations: Visualization[],
     product: Product,
     actrisName: string | null = null,
-    shortName: string = "",
+    shortName = "",
   ) {
     this.id = id;
     this.humanReadableName = humanReadableName;
