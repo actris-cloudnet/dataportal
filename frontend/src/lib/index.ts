@@ -27,7 +27,8 @@ import weatherStationIcon from "@/assets/icons/weather-station.png";
 import weatherRadarIcon from "@/assets/icons/weather-radar.svg";
 import dopplerLidarIcon from "@/assets/icons/doppler-lidar.svg";
 import dopplerLidarWindIcon from "@/assets/icons/doppler-lidar-wind.svg";
-import epsilonLidarIcon from "@/assets/icons/epsilon.svg";
+import epsilonLidarIcon from "@/assets/icons/epsilon-lidar.svg";
+import epsilonRadarIcon from "@/assets/icons/epsilon-radar.svg";
 import rainRadarIcon from "@/assets/icons/rain-radar.svg";
 import rainGaugerIcon from "@/assets/icons/rain-gauge.png";
 import cprSimulationIcon from "@/assets/icons/earthcare.png";
@@ -80,7 +81,7 @@ const productIcons: Record<string, string> = {
   "doppler-lidar": dopplerLidarIcon,
   "doppler-lidar-wind": dopplerLidarWindIcon,
   "epsilon-lidar": epsilonLidarIcon,
-  "epsilon-radar": epsilonLidarIcon,
+  "epsilon-radar": epsilonRadarIcon,
   "rain-radar": rainRadarIcon,
   "rain-gauge": rainGaugerIcon,
   "cpr-simulation": cprSimulationIcon,
