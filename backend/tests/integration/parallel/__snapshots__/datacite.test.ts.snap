@@ -77,6 +77,14 @@ exports[`DataCiteService returns DataCite JSON 1`] = `
     },
   ],
   "schemaVersion": "http://datacite.org/schema/kernel-4",
+  "subjects": [
+    {
+      "classificationCode": "1.5",
+      "schemeUri": "https://web-archive.oecd.org/2012-06-15/138575-38235147.pdf",
+      "subject": "FOS: Earth and related environmental sciences",
+      "subjectScheme": "Fields of Science and Technology (FOS)",
+    },
+  ],
   "titles": [
     {
       "lang": "en",

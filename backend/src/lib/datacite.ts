@@ -105,6 +105,14 @@ export class DataCiteService {
         resourceTypeGeneral: "Instrument",
         relatedIdentifierType: "Handle",
       })),
+      subjects: [
+        {
+          subject: "FOS: Earth and related environmental sciences",
+          schemeUri: "https://web-archive.oecd.org/2012-06-15/138575-38235147.pdf",
+          subjectScheme: "Fields of Science and Technology (FOS)",
+          classificationCode: "1.5",
+        },
+      ],
     };
   }
 }
