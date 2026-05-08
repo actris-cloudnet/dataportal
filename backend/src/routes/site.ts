@@ -91,6 +91,10 @@ export class SiteRoutes {
       qb.where("site.type && :types", { types: toArray(query.type) });
     }
     const sites = await hideTestDataFromNormalUsers(qb, req).addOrderBy("site.id", "ASC").getMany();
+    if (query.noStatus) {
+      res.send(sites);
+      return;
+    }
     const [cloudnetStatuses, weatherRadarStatuses, modelStatuses] = await Promise.all([
       this.queryCloudnetStatuses(),
       this.queryWeatherRadarStatuses(),

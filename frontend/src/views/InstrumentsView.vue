@@ -98,7 +98,7 @@ function sortInstrument(a: InstrumentInfo, b: InstrumentInfo) {
 onMounted(async () => {
   try {
     const [siteRes, instruRes] = await Promise.all([
-      axios.get<Site[]>(`${backendUrl}sites`),
+      axios.get<Site[]>(`${backendUrl}sites`, { params: { noStatus: 1 } }),
       axios.get<InstrumentInfo[]>(`${backendUrl}instrument-pids`, { params: { includeSite: 1 } }),
     ]);
     const sites = [
