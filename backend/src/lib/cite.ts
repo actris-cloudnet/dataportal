@@ -203,6 +203,19 @@ export class CitationService {
     return rows.length > 0;
   }
 
+  async getInstrumentPids(object: RegularFile | Collection): Promise<string[]> {
+    const rows = await this.querySourceFiles(
+      object,
+      `SELECT instrument_info.pid AS "instrumentPid"
+       FROM traverse
+       JOIN regular_file ON traverse.uuid = regular_file.uuid
+       JOIN instrument_info ON regular_file."instrumentInfoUuid" = instrument_info.uuid
+       WHERE instrument_info.pid IS NOT NULL
+       GROUP BY instrument_info.pid`,
+    );
+    return rows.map((row: any) => row.instrumentPid);
+  }
+
   private async queryInstrumentPis(object: RegularFile | Collection): Promise<Person[]> {
     const rows = await this.querySourceFiles(
       object,

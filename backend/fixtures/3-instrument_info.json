@@ -68,5 +68,15 @@
     "type": "secret lidar",
     "owners": ["Secret University"],
     "instrument": "secret-lidar"
+  },
+  {
+    "uuid": "a43e9f54-c94d-45f7-8596-223b1c2b14c1",
+    "pid": "https://hdl.handle.net/123/hyytiala-rpg-fmcw-94",
+    "name": "Hyytiala RPG FMCW-94",
+    "serialNumber": null,
+    "model": "RPG-FMCW-94",
+    "type": "cloud radar",
+    "owners": ["University of Helsinki"],
+    "instrument": "rpg-fmcw-94"
   }
 ]

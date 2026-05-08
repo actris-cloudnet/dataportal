@@ -60,7 +60,8 @@
     "version": "123",
     "errorLevel": null,
     "software": [{ "id": 1 }],
-    "instrument": "rpg-fmcw-94"
+    "instrument": "rpg-fmcw-94",
+    "instrumentInfo": { "uuid": "a43e9f54-c94d-45f7-8596-223b1c2b14c1" }
   },
   {
     "uuid": "8f0d21bb-7238-450a-af9c-f333d13f0bd1",
@@ -81,7 +82,8 @@
     "version": "123",
     "errorLevel": null,
     "software": [{ "id": 1 }],
-    "instrument": "rpg-fmcw-94"
+    "instrument": "rpg-fmcw-94",
+    "instrumentInfo": { "uuid": "a43e9f54-c94d-45f7-8596-223b1c2b14c1" }
   },
   {
     "uuid": "22b32746-faf0-4057-9076-ed2e698dcc34",

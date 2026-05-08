@@ -1,0 +1,91 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`DataCiteService returns DataCite JSON 1`] = `
+{
+  "creators": [
+    {
+      "familyName": "O'Connor",
+      "givenName": "E. J.",
+      "name": "O'Connor, E. J.",
+      "nameIdentifiers": [
+        {
+          "nameIdentifier": "https://orcid.org/0000-0001-9834-5100",
+          "nameIdentifierScheme": "ORCID",
+          "schemeUri": "https://orcid.org",
+        },
+      ],
+      "nameType": "Personal",
+    },
+    {
+      "familyName": "Goode",
+      "givenName": "Johnny B.",
+      "name": "Goode, Johnny B.",
+      "nameIdentifiers": undefined,
+      "nameType": "Personal",
+    },
+  ],
+  "dates": [
+    {
+      "date": "2020-09-28",
+      "dateType": "Created",
+    },
+    {
+      "date": "2014-12-05/2019-09-01",
+      "dateType": "Collected",
+    },
+  ],
+  "doi": "XXX/48092c00161d4ca2",
+  "formats": [
+    "application/zip",
+    "application/netcdf",
+  ],
+  "geoLocations": [
+    {
+      "geoLocationPlace": "Hyytiälä",
+      "geoLocationPoint": {
+        "pointLatitude": 61.844,
+        "pointLongitude": 24.288,
+      },
+    },
+    {
+      "geoLocationPlace": "Mace Head",
+      "geoLocationPoint": {
+        "pointLatitude": 53.326,
+        "pointLongitude": -9.9,
+      },
+    },
+  ],
+  "language": "en",
+  "publicationYear": 2020,
+  "publisher": "ACTRIS Cloud remote sensing data centre unit (CLU)",
+  "relatedIdentifiers": [
+    {
+      "relatedIdentifier": "https://hdl.handle.net/123/hyytiala-rpg-fmcw-94",
+      "relatedIdentifierType": "Handle",
+      "relationType": "IsCollectedBy",
+      "resourceTypeGeneral": "Instrument",
+    },
+  ],
+  "rightsList": [
+    {
+      "lang": "en",
+      "rights": "Creative Commons Attribution 4.0 International",
+      "rightsIdentifier": "CC-BY-4.0",
+      "rightsIdentifierScheme": "SPDX",
+      "rightsURI": "https://creativecommons.org/licenses/by/4.0/",
+      "schemeURI": "https://spdx.org/licenses/",
+    },
+  ],
+  "schemaVersion": "http://datacite.org/schema/kernel-4",
+  "titles": [
+    {
+      "lang": "en",
+      "title": "Custom collection of model, and radar data from Hyytiälä, and Mace Head between 5 Dec 2014 and 1 Sep 2019",
+    },
+  ],
+  "types": {
+    "resourceTypeGeneral": "Dataset",
+  },
+  "url": "http://localhost:8080/collection/48092c00-161d-4ca2-a29d-628cf8e960f6",
+}
+`;
