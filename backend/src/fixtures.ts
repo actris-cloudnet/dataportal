@@ -107,6 +107,7 @@ async function importFixture(path: string) {
   if (stat.isDirectory()) await handleDir(dataSource, path);
   else if (stat.isFile() && isJson(path)) await handleFile(dataSource, path);
   else throw "Unknown file type";
+  await dataSource.query("REFRESH MATERIALIZED VIEW instrument_latest_site");
 }
 
 importFixture(process.argv[2])

@@ -89,6 +89,14 @@ async function createServer(): Promise<void> {
       },
       6 * 60 * 60 * 1000,
     );
+    setInterval(
+      () => {
+        AppDataSource.query("REFRESH MATERIALIZED VIEW CONCURRENTLY instrument_latest_site").catch((err) =>
+          console.error("Failed to update instrument_latest_site view:", err),
+        );
+      },
+      60 * 60 * 1000,
+    );
     rateLimitMiddleware = rateLimit;
   } else {
     rateLimitMiddleware = (_options) => (_req, _res, next) => next();

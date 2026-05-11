@@ -2,8 +2,8 @@ import { RequestHandler } from "express";
 import { DataSource, Repository } from "typeorm";
 import { Instrument, InstrumentInfo, NominalInstrument } from "../entity/Instrument";
 import { InstrumentContact } from "../entity/InstrumentContact";
+import { InstrumentLatestSite } from "../entity/InstrumentLatestSite";
 import { Person } from "../entity/Person";
-import { InstrumentUpload } from "../entity/Upload";
 import {
   isValidDate,
   validateDateRange,
@@ -19,7 +19,6 @@ export class InstrumentRoutes {
     this.dataSource = dataSource;
     this.instrumentRepo = dataSource.getRepository(Instrument);
     this.instrumentInfoRepo = dataSource.getRepository(InstrumentInfo);
-    this.instrumentUploadRepo = dataSource.getRepository(InstrumentUpload);
     this.nominalInstrumentRepo = dataSource.getRepository(NominalInstrument);
     this.contactRepo = dataSource.getRepository(InstrumentContact);
     this.personRepo = dataSource.getRepository(Person);
@@ -28,7 +27,6 @@ export class InstrumentRoutes {
   readonly dataSource: DataSource;
   readonly instrumentRepo: Repository<Instrument>;
   readonly instrumentInfoRepo: Repository<InstrumentInfo>;
-  readonly instrumentUploadRepo: Repository<InstrumentUpload>;
   readonly nominalInstrumentRepo: Repository<NominalInstrument>;
   readonly contactRepo: Repository<InstrumentContact>;
   readonly personRepo: Repository<Person>;
@@ -51,32 +49,19 @@ export class InstrumentRoutes {
 
   listInstrumentPids: RequestHandler = async (req, res) => {
     if ("includeSite" in req.query) {
-      const latestSite = this.instrumentUploadRepo
-        .createQueryBuilder("upload")
-        .distinctOn(["upload.instrumentInfoUuid"])
-        .select("upload.instrumentInfoUuid")
-        .addSelect("upload.siteId")
-        .addSelect("MAX(upload.measurementDate)", "latestDate")
-        .addSelect(
-          `CASE
-              WHEN MAX(upload.measurementDate) > CURRENT_DATE - 3 THEN 'active'
-              WHEN MAX(upload.measurementDate) > CURRENT_DATE - 7 THEN 'recent'
-              ELSE 'inactive'
-            END`,
-          "status",
-        )
-        .where("upload.measurementDate > CURRENT_DATE - 182")
-        .groupBy("upload.instrumentInfoUuid")
-        .addGroupBy("upload.siteId")
-        .orderBy("upload.instrumentInfoUuid")
-        .addOrderBy('"latestDate"', "DESC")
-        .getQuery();
       const rawData = await this.instrumentInfoRepo
         .createQueryBuilder("instrument_info")
         .select("instrument_info.*")
         .addSelect('latest_site."siteId"')
-        .addSelect("COALESCE(latest_site.status, 'inactive')", "status")
-        .leftJoin("(" + latestSite + ")", "latest_site", 'instrument_info.uuid = latest_site."instrumentInfoUuid"')
+        .addSelect(
+          `CASE
+              WHEN latest_site."latestMeasurementDate" > CURRENT_DATE - 3 THEN 'active'
+              WHEN latest_site."latestMeasurementDate" > CURRENT_DATE - 7 THEN 'recent'
+              ELSE 'inactive'
+            END`,
+          "status",
+        )
+        .leftJoin(InstrumentLatestSite, "latest_site", 'instrument_info.uuid = latest_site."instrumentInfoUuid"')
         .leftJoinAndSelect(Instrument, "instrument", "instrument_info.instrumentId = instrument.id")
         .getRawMany();
       const data = rawData.map((row) => ({
