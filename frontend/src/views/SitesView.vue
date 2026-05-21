@@ -5,7 +5,7 @@
       <template v-if="sites.status == 'ready'">
         <div v-for="item in sites.items" :key="item.title" class="item">
           <h2>{{ item.title }}</h2>
-          <p>{{ item.description }}</p>
+          <p v-html="item.descriptionHtml"></p>
           <div class="table-wrapper">
             <table class="table table-striped">
               <thead>
@@ -83,7 +83,7 @@ type SitesState =
   | { status: "loading" }
   | {
       status: "ready";
-      items: { title: string; description: string; legend: [string, string, string]; sites: Site[] }[];
+      items: { title: string; descriptionHtml: string; legend: [string, string, string]; sites: Site[] }[];
     }
   | { status: "error" };
 
@@ -97,33 +97,33 @@ onMounted(async () => {
       items: [
         {
           title: "Cloudnet sites",
-          description:
-            "Permanent sites with instrumentation required for the Cloudnet processing scheme. Most of the sites are part of the ACTRIS research infrastructure.",
+          descriptionHtml:
+            'Permanent sites with full Cloudnet instrumentation. Most of the sites are part of the European <a href="https://www.actris.eu">ACTRIS research infrastructure</a>.',
           legend: ["Operational site", "Some data", "Inactive"],
           sites: response.data.filter((site) => !site.type.includes("hidden") && site.type.includes("cloudnet")),
         },
         {
           title: "Campaign sites",
-          description:
-            "Short-term sites compliant with the Cloudnet processing scheme. Most sites contain historical data processed using non-standard methods.",
+          descriptionHtml: "Sites with some Cloudnet-compliant instrumentation.",
           legend: ["Operational site", "Some data", "Inactive"],
           sites: response.data.filter((site) => !site.type.includes("hidden") && site.type.includes("campaign")),
         },
         {
-          title: "ARM sites",
-          description: "Sites part of ARM network with historical data processed using non-standard methods.",
-          legend: ["Operational site", "Some data", "Inactive"],
-          sites: response.data.filter((site) => !site.type.includes("hidden") && site.type.includes("arm")),
-        },
-        {
           title: "Weather radar sites",
-          description: "Sites with vertical measurements from weather radar.",
+          descriptionHtml: "Sites with vertical measurements from weather radar.",
           legend: ["Active", "", "Inactive"],
           sites: response.data.filter((site) => !site.type.includes("hidden") && site.type.includes("weather-radar")),
         },
         {
+          title: "ARM sites",
+          descriptionHtml:
+            'Sites part of the American <a href="https://arm.gov">ARM network</a> with historical data processed using non-standard methods.',
+          legend: ["Operational site", "Some data", "Inactive"],
+          sites: response.data.filter((site) => !site.type.includes("hidden") && site.type.includes("arm")),
+        },
+        {
           title: "Model sites",
-          description: "Sites with only model data.",
+          descriptionHtml: "Sites with only model data.",
           legend: ["Active", "", "Inactive"],
           sites: response.data.filter((site) => site.type.includes("model")),
         },
