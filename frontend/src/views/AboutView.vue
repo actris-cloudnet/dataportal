@@ -35,90 +35,74 @@
         <a href="https://lvm.fi/en/home">Ministry of Transport and Communications</a>. Over the years, Cloudnet has been
         involved in the following projects:
       </p>
-      <table>
-        <thead>
-          <tr>
-            <th>Project name</th>
-            <th>Funding</th>
-            <th>Start year</th>
-            <th>End year</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>CLOUD-NET</td>
-            <td><a href="https://cordis.europa.eu/project/id/EVK2-CT-2000-00065">EU FP5</a></td>
-            <td>2001</td>
-            <td>2005</td>
-          </tr>
-          <tr>
-            <td>ACTRIS</td>
-            <td><a href="https://cordis.europa.eu/project/id/262254">EU FP7</a></td>
-            <td>2011</td>
-            <td>2015</td>
-          </tr>
-          <tr>
-            <td>ACTRIS-2</td>
-            <td><a href="https://doi.org/10.3030/654109">Horizon 2020</a></td>
-            <td>2015</td>
-            <td>2019</td>
-          </tr>
-          <tr>
-            <td>ACTRIS-PPP</td>
-            <td><a href="https://doi.org/10.3030/739530">Horizon 2020</a></td>
-            <td>2017</td>
-            <td>2019</td>
-          </tr>
-          <tr>
-            <td><a href="https://envri.eu/the-envri-fair-project/">ENVRI-FAIR</a></td>
-            <td><a href="https://doi.org/10.3030/824068">Horizon 2020</a></td>
-            <td>2019</td>
-            <td>2023</td>
-          </tr>
-          <tr>
-            <td>ACTRIS-IMP</td>
-            <td><a href="https://doi.org/10.3030/871115">Horizon 2020</a></td>
-            <td>2020</td>
-            <td>2023</td>
-          </tr>
-          <tr>
-            <td><a href="https://www.atmo-access.eu/">ATMO-ACCESS</a></td>
-            <td><a href="https://doi.org/10.3030/101008004">Horizon 2020</a></td>
-            <td>2021</td>
-            <td>2025</td>
-          </tr>
-          <tr>
-            <td><a href="https://riurbans.eu/">RI-URBANS</a></td>
-            <td><a href="https://doi.org/10.3030/101036245">Horizon 2020</a></td>
-            <td>2021</td>
-            <td>2025</td>
-          </tr>
-          <tr>
-            <td><a href="https://certainty-aci.eu/">CERTAINTY</a></td>
-            <td><a href="https://doi.org/10.3030/101137680">Horizon Europe</a></td>
-            <td>2024</td>
-            <td>2027</td>
-          </tr>
-          <tr>
-            <td><a href="https://eu-polarin.eu/">POLARIN</a></td>
-            <td><a href="https://doi.org/10.3030/101130949">Horizon Europe</a></td>
-            <td>2024</td>
-            <td>2029</td>
-          </tr>
-          <tr>
-            <td><a href="https://diva.inoe.ro/">DIVA IV</a></td>
-            <td><a href="https://www.esa.int/">ESA</a></td>
-            <td>2025</td>
-            <td>2026</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="projects">
+        <a class="project cloudnet" href="https://cordis.europa.eu/project/id/EVK2-CT-2000-00065" target="_blank">
+          <img :src="cloudnetOldLogo" class="project-logo" />
+          <h2 class="project-name">CLOUD-NET</h2>
+          <div class="project-date">2001 – 2005</div>
+        </a>
+        <a class="project actris" href="https://www.actris.eu" target="_blank">
+          <img :src="actrisLogo" class="project-logo" />
+          <h2 class="project-name">ACTRIS</h2>
+          <div class="project-date">2011 –</div>
+        </a>
+        <a class="project envri-fair" href="https://envri.eu/the-envri-fair-project/" target="_blank">
+          <img :src="envriFairLogo" class="project-logo" />
+          <h2 class="project-name">ENVRI-FAIR</h2>
+          <div class="project-date">2019 – 2023</div>
+        </a>
+        <a class="project atmo-access" href="https://www.atmo-access.eu/" target="_blank">
+          <img :src="atmoAccessLogo" class="project-logo" />
+          <h2 class="project-name">ATMO-ACCESS</h2>
+          <div class="project-date">2021 – 2025</div>
+        </a>
+        <a class="project ri-urbans" href="https://riurbans.eu/" target="_blank">
+          <img :src="riUrbansLogo" class="project-logo" />
+          <h2 class="project-name">RI-URBANS</h2>
+          <div class="project-date">2021 – 2025</div>
+        </a>
+        <a class="project cargo-act" href="https://cargo-act.eu/" target="_blank">
+          <img :src="cargoActLogo" class="project-logo" />
+          <h2 class="project-name">CARGO-ACT</h2>
+          <div class="project-date">2024 – 2027</div>
+        </a>
+        <a class="project certainty" href="https://certainty-aci.eu/" target="_blank">
+          <img :src="certaintyLogo" class="project-logo" />
+          <h2 class="project-name">CERTAINTY</h2>
+          <div class="project-date">2024 – 2027</div>
+        </a>
+        <a class="project iriscc" href="https://www.iriscc.eu/" target="_blank">
+          <img :src="irisccLogo" class="project-logo" />
+          <h2 class="project-name">IRISCC</h2>
+          <div class="project-date">2024 – 2028</div>
+        </a>
+        <a class="project polarin" href="https://eu-polarin.eu/" target="_blank">
+          <img :src="polarinLogo" class="project-logo" />
+          <h2 class="project-name">POLARIN</h2>
+          <div class="project-date">2024 – 2029</div>
+        </a>
+        <a class="project diva" href="https://diva.inoe.ro/" target="_blank">
+          <img :src="divaLogo" class="project-logo" />
+          <h2 class="project-name">DIVA IV</h2>
+          <div class="project-date">2025 – 2026</div>
+        </a>
+      </div>
     </main>
   </div>
 </template>
 
 <script lang="ts" setup>
 import LandingHeader from "@/components/LandingHeader.vue";
+import actrisLogo from "@/assets/logos/actris.svg";
+import envriFairLogo from "@/assets/logos/envri-fair.png";
+import atmoAccessLogo from "@/assets/logos/atmo-access.png";
+import riUrbansLogo from "@/assets/logos/ri-urbans.png";
+import cloudnetOldLogo from "@/assets/logos/cloudnet-old.png";
+import certaintyLogo from "@/assets/logos/certainty.png";
+import polarinLogo from "@/assets/logos/polarin.png";
+import divaLogo from "@/assets/logos/diva.png";
+import cargoActLogo from "@/assets/logos/cargo-act.png";
+import irisccLogo from "@/assets/logos/iriscc.png";
 </script>
 
 <style scoped lang="scss">
@@ -150,5 +134,47 @@ td {
 td:nth-child(3),
 td:nth-child(4) {
   text-align: center;
+}
+
+.projects {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1.5rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.project {
+  color: inherit;
+
+  &:hover {
+    opacity: 0.75;
+    text-decoration: none;
+  }
+}
+
+.project-logo {
+  object-fit: contain;
+  width: 100%;
+  height: 100px;
+
+  // Adjust size to make logo sizes consistent.
+  .ri-urbans & {
+    padding: 1.5rem;
+  }
+  .envri-fair &,
+  .diva &,
+  .cargo-act & {
+    padding: 0.5rem;
+  }
+}
+
+.project-name {
+  font-weight: 500;
+}
+
+.project-date {
+  color: gray;
+  font-size: 75%;
 }
 </style>
