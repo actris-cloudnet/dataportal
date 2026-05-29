@@ -2106,8 +2106,8 @@
     "common_variables": [
       {
         "name": "N_scaled",
-        "units": "1",
-        "standard_name": null,
+        "units": "m-3",
+        "standard_name": "number_concentration_of_cloud_liquid_water_particles_in_air",
         "long_name": "Cloud droplet number concentration",
         "comment": "From scaled Frisch method the cloud droplet number concentration\ncan be derived.",
         "definition": null,
@@ -2127,9 +2127,9 @@
       {
         "name": "der",
         "units": "m",
-        "standard_name": null,
+        "standard_name": "effective_radius_of_cloud_liquid_water_particles",
         "long_name": "Droplet effective radius",
-        "comment": "This variable was calculated for the profiles where the categorization\ndata has diagnosed that liquid water is present the cloud droplet\neffective radius is calculated after Frisch et al (2002), relating Z\nwith def by assuming a lognormal size distribution its width and the\nnumber concentration of the cloud droplets.",
+        "comment": "This variable was calculated for the profiles where the categorization\ndata has diagnosed that liquid water is present. The cloud droplet\neffective radius is calculated using the method 1 of Frisch et al.\n(2002), relating Z with effective radius by assuming a lognormal size\ndistribution and its width and the number concentration of the cloud\ndroplets.",
         "definition": null,
         "dimensions": ["time", "height"],
         "dtype": "float32"
@@ -2139,7 +2139,7 @@
         "units": "m",
         "standard_name": null,
         "long_name": "Absolute error in droplet effective radius",
-        "comment": "This variable is an estimate of the random error in effective\nradius assuming an error in Z of ddBZ = 2.0 in N of\ndN = 200000000.0 and in the spectral width dsigma_x = 0.1\nand in the LWP Q of 0.005 kg m-3.",
+        "comment": "This variable is an estimate of the random error in effective\nradius assuming an error in Z of dZ = 2.0 dBZ, in N of\ndN = 200000000.0 m-3, and in the spectral width of dsigma_x = 0.1.",
         "definition": null,
         "dimensions": ["time", "height"],
         "dtype": "float32"
@@ -2178,9 +2178,9 @@
       {
         "name": "der_scaled",
         "units": "m",
-        "standard_name": null,
+        "standard_name": "effective_radius_of_cloud_liquid_water_particles",
         "long_name": "Droplet effective radius (scaled to LWP)",
-        "comment": "This variable was calculated for the profiles where the\ncategorization data has diagnosed that liquid water is present\nthe cloud droplet effective radius is calculated after\nFrisch et al. (2002), relating Z with def by assuming a lognormal\nsize distribution and its width. The number concentration required\nto represent the size distribution is derived by scaling the LWP\n measured with microwave radiometer over the observed (single) cloud layer.",
+        "comment": "This variable was calculated for the profiles where the categorization\ndata has diagnosed that liquid water is present. The cloud droplet\neffective radius is calculated using the method 2 of Frisch et al.\n(2002), relating Z with effective radius by assuming a lognormal size\ndistribution and its width. The number concentration required to\nrepresent the size distribution is derived by scaling the LWP measured\nwith microwave radiometer over the observed (single) cloud layer.",
         "definition": null,
         "dimensions": ["time", "height"],
         "dtype": "float32"
@@ -2190,7 +2190,7 @@
         "units": "m",
         "standard_name": null,
         "long_name": "Absolute error in droplet effective radius (scaled to LWP)",
-        "comment": "This variable was calculated for the profiles where the categorization data",
+        "comment": "This variable is an estimate of the random error in scaled effective\nradius assuming an error in Z of dZ = 2.0 dBZ, in the spectral\nwidth of dsigma_x = 0.1, and in the LWP of dQ = 0.005 kg m-2.",
         "definition": null,
         "dimensions": ["time", "height"],
         "dtype": "float32"
