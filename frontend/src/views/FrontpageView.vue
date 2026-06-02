@@ -30,6 +30,8 @@
       </div>
       <h3>Latest news</h3>
       <NewsList />
+      <h3>Recent publications</h3>
+      <PublicationList />
     </main>
   </main>
 </template>
@@ -43,6 +45,7 @@ import docsIcon from "@/assets/icons/docs-white.png";
 import contactsIcon from "@/assets/icons/contacts.png";
 import BaseButton from "@/components/BaseButton.vue";
 import NewsList from "@/components/NewsList.vue";
+import PublicationList from "@/components/PublicationList.vue";
 </script>
 
 <style scoped lang="scss">

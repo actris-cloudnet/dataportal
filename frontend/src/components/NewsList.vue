@@ -10,9 +10,7 @@
         </router-link>
       </template>
     </div>
-    <div class="all-news-link">
-      <router-link :to="{ name: 'NewsList' }" class="read-all">All news →</router-link>
-    </div>
+    <BaseButton type="secondary" :to="{ name: 'NewsList' }" class="read-all">All news →</BaseButton>
   </div>
 </template>
 
@@ -21,6 +19,7 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 import { backendUrl, formatDisplayDate } from "@/lib";
 import type { NewsItem } from "@shared/entity/NewsItem";
+import BaseButton from "@/components/BaseButton.vue";
 
 const news = ref<NewsItem[]>([]);
 const loading = ref(true);
@@ -81,8 +80,7 @@ h2 {
   color: #e74c3c;
 }
 
-.all-news-link {
+.read-all {
   margin-top: 1rem;
-  text-align: center;
 }
 </style>

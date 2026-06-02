@@ -41,7 +41,13 @@ export class PublicationRoutes {
   };
 
   getPublications: RequestHandler = async (req, res) => {
-    const publications = await this.publicationRepo.find({ order: { year: "DESC" } });
+    const parsed = typeof req.query.limit === "string" ? parseInt(req.query.limit, 10) : NaN;
+    const limit = Number.isFinite(parsed) ? parsed : undefined;
+
+    const publications = await this.publicationRepo.find({
+      order: { year: "DESC" },
+      take: limit,
+    });
     res.send(publications);
   };
 }
