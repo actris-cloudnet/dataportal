@@ -409,7 +409,7 @@
   "categorize-voodoo": {
     "description": "The categorize product calculated using VOODOO (Schimmel et al. 2022).",
     "references_html": [
-      "Schimmel et al. (2022). Identifying cloud droplets beyond lidar attenuation from vertically pointing cloud radar observations using artificial neural networks. <i>Atmos. Meas. Tech.</i>, <i>15</i>(18), 5343-5366. <a href=\"https://doi.org/10.5194/amt-15-5343-2022\">https://doi.org/10.5194/amt-15-5343-2022</a>"
+      "Schimmel, W., Kalesse-Los, H., Maahn, M., Vogl, T., Foth, A., Garfias, P. S., &amp; Seifert, P. (2022). Identifying cloud droplets beyond lidar attenuation from vertically pointing cloud radar observations using artificial neural networks. <i>Atmos. Meas. Tech.</i>, <i>15</i>(18), 5343\u20135366. <a href=\"https://doi.org/10.5194/amt-15-5343-2022\">https://doi.org/10.5194/amt-15-5343-2022</a>"
     ],
     "dimensions": [
       {
@@ -1190,7 +1190,7 @@
   "classification-voodoo": {
     "description": "The classification product calculated using VOODOO (Schimmel et al. 2022).",
     "references_html": [
-      "Schimmel et al. (2022). Identifying cloud droplets beyond lidar attenuation from vertically pointing cloud radar observations using artificial neural networks. <i>Atmos. Meas. Tech.</i>, <i>15</i>(18), 5343-5366. <a href=\"https://doi.org/10.5194/amt-15-5343-2022\">https://doi.org/10.5194/amt-15-5343-2022</a>"
+      "Schimmel, W., Kalesse-Los, H., Maahn, M., Vogl, T., Foth, A., Garfias, P. S., &amp; Seifert, P. (2022). Identifying cloud droplets beyond lidar attenuation from vertically pointing cloud radar observations using artificial neural networks. <i>Atmos. Meas. Tech.</i>, <i>15</i>(18), 5343\u20135366. <a href=\"https://doi.org/10.5194/amt-15-5343-2022\">https://doi.org/10.5194/amt-15-5343-2022</a>"
     ],
     "dimensions": [
       {
@@ -1397,7 +1397,7 @@
   "cpr-simulation": {
     "description": "Ground-based radar measurements transformed for\n        comparison with the 94 GHz cloud profiling radar (CPR) aboard the\n        EarthCARE satellite.",
     "references_html": [
-      "Pfitzenmaier et al. (2025). Orbital-Radar v1.0.0: a tool to transform suborbital radar observations to synthetic EarthCARE cloud radar data. <i>Geosci. Model Dev.</i>, <i>18</i>(1), 101-115. <a href=\"https://doi.org/10.5194/gmd-18-101-2025\">https://doi.org/10.5194/gmd-18-101-2025</a>"
+      "Pfitzenmaier, L., Kollias, P., Risse, N., Schirmacher, I., Puigdomenech Treserras, B., &amp; Lamer, K. (2025). Orbital-Radar v1.0.0: a tool to transform suborbital radar observations to synthetic EarthCARE cloud radar data. <i>Geosci. Model Dev.</i>, <i>18</i>(1), 101\u2013115. <a href=\"https://doi.org/10.5194/gmd-18-101-2025\">https://doi.org/10.5194/gmd-18-101-2025</a>"
     ],
     "dimensions": [
       {
@@ -2079,7 +2079,7 @@
   "der": {
     "description": "Liquid droplet effective radius is derived using the\n        method of Frisch et al. (2002), based on the attenuation-corrected\n        radar reflectivity and liquid water path.",
     "references_html": [
-      "Frisch et al. (2002). The Retrieval of Stratus Cloud Droplet Effective Radius with Cloud Radars. <i>J. Atmos. Oceanic Technol.</i>, <i>19</i>(6), 835-842. <a href=\"https://doi.org/10.1175/1520-0426(2002)019%3C0835:TROSCD%3E2.0.CO;2\">https://doi.org/10.1175/1520-0426(2002)019%3C0835:TROSCD%3E2.0.CO;2</a>"
+      "Frisch, S., Shupe, M., Djalalova, I., Feingold, G., &amp; Poellot, M. (2002). The Retrieval of Stratus Cloud Droplet Effective Radius with Cloud Radars. <i>J. Atmos. Oceanic Technol.</i>, <i>19</i>(6), 835\u2013842. <a href=\"https://doi.org/10.1175/1520-0426(2002)019%3C0835:TROSCD%3E2.0.CO;2\">https://doi.org/10.1175/1520-0426(2002)019%3C0835:TROSCD%3E2.0.CO;2</a>"
     ],
     "dimensions": [
       {
@@ -2576,8 +2576,8 @@
   "doppler-lidar": {
     "description": "The Doppler lidar product provides attenuated\n        backscatter coefficient and Doppler velocity profiles measured by a\n        vertical-pointing Doppler wind lidar (DWL).",
     "references_html": [
-      "Manninen et al. (2016). A generalised background correction algorithm for a Halo Doppler lidar and its application to data from Finland. <i>Atmos. Meas. Tech.</i>, <i>9</i>(2), 817-827. <a href=\"https://doi.org/10.5194/amt-9-817-2016\">https://doi.org/10.5194/amt-9-817-2016</a>",
-      "Vakkari et al. (2019). A novel post-processing algorithm for Halo Doppler lidars. <i>Atmos. Meas. Tech.</i>, <i>12</i>(2), 839-852. <a href=\"https://doi.org/10.5194/amt-12-839-2019\">https://doi.org/10.5194/amt-12-839-2019</a>"
+      "Manninen, A. J., O&#x27;Connor, E. J., Vakkari, V., &amp; Pet\u00e4j\u00e4, T. (2016). A generalised background correction algorithm for a Halo Doppler lidar and its application to data from Finland. <i>Atmos. Meas. Tech.</i>, <i>9</i>(2), 817\u2013827. <a href=\"https://doi.org/10.5194/amt-9-817-2016\">https://doi.org/10.5194/amt-9-817-2016</a>",
+      "Vakkari, V., Manninen, A. J., O&#x27;Connor, E. J., Schween, J. H., van Zyl, P. G., &amp; Marinou, E. (2019). A novel post-processing algorithm for Halo Doppler lidars. <i>Atmos. Meas. Tech.</i>, <i>12</i>(2), 839\u2013852. <a href=\"https://doi.org/10.5194/amt-12-839-2019\">https://doi.org/10.5194/amt-12-839-2019</a>"
     ],
     "dimensions": [
       {
@@ -2729,7 +2729,7 @@
   "doppler-lidar-wind": {
     "description": "The Doppler lidar wind product provides wind profiles\n        derived from Doppler wind lidar (DWL) scans.",
     "references_html": [
-      "P\u00e4schke et al. (2015). An assessment of the performance of a 1.5 \u03bcm Doppler lidar for operational vertical wind profiling based on a 1-year trial. <i>Atmos. Meas. Tech.</i>, <i>8</i>(6), 2251-2266. <a href=\"https://doi.org/10.5194/amt-8-2251-2015\">https://doi.org/10.5194/amt-8-2251-2015</a>"
+      "P\u00e4schke, E., Leinweber, R., &amp; Lehmann, V. (2015). An assessment of the performance of a 1.5 \u03bcm Doppler lidar for operational vertical wind profiling based on a 1-year trial. <i>Atmos. Meas. Tech.</i>, <i>8</i>(6), 2251\u20132266. <a href=\"https://doi.org/10.5194/amt-8-2251-2015\">https://doi.org/10.5194/amt-8-2251-2015</a>"
     ],
     "dimensions": [
       {
@@ -2830,7 +2830,7 @@
   "drizzle": {
     "description": "The drizzle product provides parameters such as drizzle flux and\n        median particle size, derived from combined radar and lidar\n        measurements below the cloud base.",
     "references_html": [
-      "O\u2019Connor et al. (2005). Retrieving Stratocumulus Drizzle Parameters Using Doppler Radar and Lidar. <i>Journal of Applied Meteorology</i>, <i>44</i>(1), 14-27. <a href=\"https://doi.org/10.1175/JAM-2181.1\">https://doi.org/10.1175/JAM-2181.1</a>"
+      "O\u2019Connor, E. J., Hogan, R. J., &amp; Illingworth, A. J. (2005). Retrieving Stratocumulus Drizzle Parameters Using Doppler Radar and Lidar. <i>Journal of Applied Meteorology</i>, <i>44</i>(1), 14\u201327. <a href=\"https://doi.org/10.1175/JAM-2181.1\">https://doi.org/10.1175/JAM-2181.1</a>"
     ],
     "dimensions": [
       {
@@ -3111,7 +3111,7 @@
   "epsilon-lidar": {
     "description": "Turbulent kinetic energy (TKE) dissipation rate is\n        estimated using the variance of vertical Doppler velocity and\n        horizontal wind speed measured by a Doppler wind lidar (DWL).",
     "references_html": [
-      "O\u2019Connor et al. (2010). A Method for Estimating the Turbulent Kinetic Energy Dissipation Rate from a Vertically Pointing Doppler Lidar, and Independent Evaluation from Balloon-Borne In Situ Measurements. <i>Journal of Atmospheric and Oceanic Technology</i>, <i>27</i>(10), 1652-1664. <a href=\"https://doi.org/10.1175/2010JTECHA1455.1\">https://doi.org/10.1175/2010JTECHA1455.1</a>"
+      "O\u2019Connor, E. J., Illingworth, A. J., Brooks, I. M., Westbrook, C. D., Hogan, R. J., Davies, F., &amp; Brooks, B. J. (2010). A Method for Estimating the Turbulent Kinetic Energy Dissipation Rate from a Vertically Pointing Doppler Lidar, and Independent Evaluation from Balloon-Borne In Situ Measurements. <i>Journal of Atmospheric and Oceanic Technology</i>, <i>27</i>(10), 1652\u20131664. <a href=\"https://doi.org/10.1175/2010JTECHA1455.1\">https://doi.org/10.1175/2010JTECHA1455.1</a>"
     ],
     "dimensions": [
       {
@@ -3202,8 +3202,8 @@
   "epsilon-radar": {
     "description": "This product contains the dissipation rate of turbulent\n        kinetic energy (TKE) calculated using the pipeline of Griesche et al.\n        (2020) with the inertial-subrange slope-acceptance criterion of Borque\n        et al. (2016). The turbulent energy spectrum is derived as the power\n        spectrum of cloud radar Doppler velocity over 5-minute windows and\n        converted to a wavenumber spectrum using model horizontal wind via\n        Taylor's hypothesis.",
     "references_html": [
-      "Griesche et al. (2020). Application of the shipborne remote sensing supersite OCEANET for profiling of Arctic aerosols and clouds during <em>Polarstern</em> cruise PS106. <i>Atmos. Meas. Tech.</i>, <i>13</i>(10), 5335-5358. <a href=\"https://doi.org/10.5194/amt-13-5335-2020\">https://doi.org/10.5194/amt-13-5335-2020</a>",
-      "Borque et al. (2016). On the unified estimation of turbulence eddy dissipation rate using Doppler cloud radars and lidars. <i>JGR Atmospheres</i>, <i>121</i>(10), 5972-5989. <a href=\"https://doi.org/10.1002/2015JD024543\">https://doi.org/10.1002/2015JD024543</a>"
+      "Griesche, H. J., Seifert, P., Ansmann, A., Baars, H., Barrientos Velasco, C., B\u00fchl, J., Engelmann, R., Radenz, M., Zhenping, Y., &amp; Macke, A. (2020). Application of the shipborne remote sensing supersite OCEANET for profiling of Arctic aerosols and clouds during <em>Polarstern</em> cruise PS106. <i>Atmos. Meas. Tech.</i>, <i>13</i>(10), 5335\u20135358. <a href=\"https://doi.org/10.5194/amt-13-5335-2020\">https://doi.org/10.5194/amt-13-5335-2020</a>",
+      "Borque, P., Luke, E., &amp; Kollias, P. (2016). On the unified estimation of turbulence eddy dissipation rate using Doppler cloud radars and lidars. <i>JGR Atmospheres</i>, <i>121</i>(10), 5972\u20135989. <a href=\"https://doi.org/10.1002/2015JD024543\">https://doi.org/10.1002/2015JD024543</a>"
     ],
     "dimensions": [
       {
@@ -3284,9 +3284,9 @@
   "ier": {
     "description": "The ice particle effective radius is derived from\n        attenuation-corrected radar reflectivity and model temperature using\n        the method of Grieche et al. (2020), which incorporates the approach of\n        Hogan et al. (2006) to estimate ice water content and uses the\n        parameterization of alpha from Delano\u00eb et al. (2007).",
     "references_html": [
-      "Hogan et al. (2006). The Retrieval of Ice Water Content from Radar Reflectivity Factor and Temperature and Its Use in Evaluating a Mesoscale Model. <i>Journal of Applied Meteorology and Climatology</i>, <i>45</i>(2), 301-317. <a href=\"https://doi.org/10.1175/JAM2340.1\">https://doi.org/10.1175/JAM2340.1</a>",
-      "Delano\u00eb et al. (2007). The Characterization of Ice Cloud Properties from Doppler Radar Measurements. <i>Journal of Applied Meteorology and Climatology</i>, <i>46</i>(10), 1682-1698. <a href=\"https://doi.org/10.1175/JAM2543.1\">https://doi.org/10.1175/JAM2543.1</a>",
-      "Griesche et al. (2020). Application of the shipborne remote sensing supersite OCEANET for profiling of Arctic aerosols and clouds during <em>Polarstern</em> cruise PS106. <i>Atmos. Meas. Tech.</i>, <i>13</i>(10), 5335-5358. <a href=\"https://doi.org/10.5194/amt-13-5335-2020\">https://doi.org/10.5194/amt-13-5335-2020</a>"
+      "Hogan, R. J., Mittermaier, M. P., &amp; Illingworth, A. J. (2006). The Retrieval of Ice Water Content from Radar Reflectivity Factor and Temperature and Its Use in Evaluating a Mesoscale Model. <i>Journal of Applied Meteorology and Climatology</i>, <i>45</i>(2), 301\u2013317. <a href=\"https://doi.org/10.1175/JAM2340.1\">https://doi.org/10.1175/JAM2340.1</a>",
+      "Delano\u00eb, J., Protat, A., Bouniol, D., Heymsfield, A., Bansemer, A., &amp; Brown, P. (2007). The Characterization of Ice Cloud Properties from Doppler Radar Measurements. <i>Journal of Applied Meteorology and Climatology</i>, <i>46</i>(10), 1682\u20131698. <a href=\"https://doi.org/10.1175/JAM2543.1\">https://doi.org/10.1175/JAM2543.1</a>",
+      "Griesche, H. J., Seifert, P., Ansmann, A., Baars, H., Barrientos Velasco, C., B\u00fchl, J., Engelmann, R., Radenz, M., Zhenping, Y., &amp; Macke, A. (2020). Application of the shipborne remote sensing supersite OCEANET for profiling of Arctic aerosols and clouds during <em>Polarstern</em> cruise PS106. <i>Atmos. Meas. Tech.</i>, <i>13</i>(10), 5335\u20135358. <a href=\"https://doi.org/10.5194/amt-13-5335-2020\">https://doi.org/10.5194/amt-13-5335-2020</a>"
     ],
     "dimensions": [
       {
@@ -3410,7 +3410,7 @@
   "iwc": {
     "description": "Ice water content is calculated using the so-called Z-T\n        method based on the attenuated-corrected radar reflectivity and model\n        temperature.",
     "references_html": [
-      "Hogan et al. (2006). The Retrieval of Ice Water Content from Radar Reflectivity Factor and Temperature and Its Use in Evaluating a Mesoscale Model. <i>Journal of Applied Meteorology and Climatology</i>, <i>45</i>(2), 301-317. <a href=\"https://doi.org/10.1175/JAM2340.1\">https://doi.org/10.1175/JAM2340.1</a>"
+      "Hogan, R. J., Mittermaier, M. P., &amp; Illingworth, A. J. (2006). The Retrieval of Ice Water Content from Radar Reflectivity Factor and Temperature and Its Use in Evaluating a Mesoscale Model. <i>Journal of Applied Meteorology and Climatology</i>, <i>45</i>(2), 301\u2013317. <a href=\"https://doi.org/10.1175/JAM2340.1\">https://doi.org/10.1175/JAM2340.1</a>"
     ],
     "dimensions": [
       {
@@ -3809,9 +3809,9 @@
   "lwc": {
     "description": "Liquid water content is calculated using the so-called\n        adiabatic-scaled method where microwave radiometer is used to constrain\n        the theoretical liquid water content of observed liquid clouds.",
     "references_html": [
-      "Albrecht et al. (1990). Surface\u2010based remote sensing of the observed and the Adiabatic liquid water content of stratocumulus clouds. <i>Geophysical Research Letters</i>, <i>17</i>(1), 89-92. <a href=\"https://doi.org/10.1029/GL017i001p00089\">https://doi.org/10.1029/GL017i001p00089</a>",
-      "Boers et al. (2000). Ground-Based Remote Sensing of Stratocumulus Properties during CLARA, 1996. <i>J. Appl. Meteor.</i>, <i>39</i>(2), 169-181. <a href=\"https://doi.org/10.1175/1520-0450(2000)039&lt;0169:GBRSOS&gt;2.0.CO;2\">https://doi.org/10.1175/1520-0450(2000)039&lt;0169:GBRSOS&gt;2.0.CO;2</a>",
-      "Brenguier (1991). Parameterization of the Condensation Process: A Theoretical Approach. <i>J. Atmos. Sci.</i>, <i>48</i>(2), 264-282. <a href=\"https://doi.org/10.1175/1520-0469(1991)048&lt;0264:POTCPA&gt;2.0.CO;2\">https://doi.org/10.1175/1520-0469(1991)048&lt;0264:POTCPA&gt;2.0.CO;2</a>"
+      "Albrecht, B. A., Fairall, C. W., Thomson, D. W., White, A. B., Snider, J. B., &amp; Schubert, W. H. (1990). Surface\u2010based remote sensing of the observed and the Adiabatic liquid water content of stratocumulus clouds. <i>Geophysical Research Letters</i>, <i>17</i>(1), 89\u201392. <a href=\"https://doi.org/10.1029/GL017i001p00089\">https://doi.org/10.1029/GL017i001p00089</a>",
+      "Boers, R., Russchenberg, H., Erkelens, J., Venema, V., van Lammeren, A., Apituley, A., &amp; Jongen, S. (2000). Ground-Based Remote Sensing of Stratocumulus Properties during CLARA, 1996. <i>J. Appl. Meteor.</i>, <i>39</i>(2), 169\u2013181. <a href=\"https://doi.org/10.1175/1520-0450(2000)039&lt;0169:GBRSOS&gt;2.0.CO;2\">https://doi.org/10.1175/1520-0450(2000)039&lt;0169:GBRSOS&gt;2.0.CO;2</a>",
+      "Brenguier, J. L. (1991). Parameterization of the Condensation Process: A Theoretical Approach. <i>J. Atmos. Sci.</i>, <i>48</i>(2), 264\u2013282. <a href=\"https://doi.org/10.1175/1520-0469(1991)048&lt;0264:POTCPA&gt;2.0.CO;2\">https://doi.org/10.1175/1520-0469(1991)048&lt;0264:POTCPA&gt;2.0.CO;2</a>"
     ],
     "dimensions": [
       {
@@ -6756,7 +6756,7 @@
   "mwr-l1c": {
     "description": "The MWR brightness temperature product includes\n        microwave radiometer data processed using MWRpy (Marke et al., 2024),\n        providing brightness temperature measurements and optionally\n        measurements from an infrared sensor and an integrated weather station.\n        The product can also use lidar data to detect liquid clouds.",
     "references_html": [
-      "Marke et al. (2024). MWRpy: A Python package for processing microwave radiometer data. <i>JOSS</i>, <i>9</i>(98), 6733. <a href=\"https://doi.org/10.21105/joss.06733\">https://doi.org/10.21105/joss.06733</a>"
+      "Marke, T., L\u00f6hnert, U., Tukiainen, S., Siipola, T., &amp; Pospichal, B. (2024). MWRpy: A Python package for processing microwave radiometer data. <i>JOSS</i>, <i>9</i>(98), 6733. <a href=\"https://doi.org/10.21105/joss.06733\">https://doi.org/10.21105/joss.06733</a>"
     ],
     "dimensions": [
       {
@@ -7180,7 +7180,7 @@
   "mwr-multi": {
     "description": "The MWR multiple pointing product provides microwave\n        radiometer data processed with MWRpy (Marke et al., 2024), providing\n        temperature and humidity profiles with high-quality profile\n        information. This product is only available for HATPRO and LHATPRO\n        instruments.",
     "references_html": [
-      "Marke et al. (2024). MWRpy: A Python package for processing microwave radiometer data. <i>JOSS</i>, <i>9</i>(98), 6733. <a href=\"https://doi.org/10.21105/joss.06733\">https://doi.org/10.21105/joss.06733</a>"
+      "Marke, T., L\u00f6hnert, U., Tukiainen, S., Siipola, T., &amp; Pospichal, B. (2024). MWRpy: A Python package for processing microwave radiometer data. <i>JOSS</i>, <i>9</i>(98), 6733. <a href=\"https://doi.org/10.21105/joss.06733\">https://doi.org/10.21105/joss.06733</a>"
     ],
     "dimensions": [
       {
@@ -7390,7 +7390,7 @@
   "mwr-single": {
     "description": "The MWR single pointing product provides microwave\n        radiometer data processed with MWRpy (Marke et al., 2024), providing\n        temperature/humidity profiles and integrated quantities with high\n        temporal resolution. This product is available for HATPRO, LHATPRO and\n        LHUMPRO instruments.",
     "references_html": [
-      "Marke et al. (2024). MWRpy: A Python package for processing microwave radiometer data. <i>JOSS</i>, <i>9</i>(98), 6733. <a href=\"https://doi.org/10.21105/joss.06733\">https://doi.org/10.21105/joss.06733</a>"
+      "Marke, T., L\u00f6hnert, U., Tukiainen, S., Siipola, T., &amp; Pospichal, B. (2024). MWRpy: A Python package for processing microwave radiometer data. <i>JOSS</i>, <i>9</i>(98), 6733. <a href=\"https://doi.org/10.21105/joss.06733\">https://doi.org/10.21105/joss.06733</a>"
     ],
     "dimensions": [
       {
@@ -9427,7 +9427,7 @@
   "weather-radar": {
     "description": "The weather radar product provides data from\n        vertical-pointing \"birdbath scan\" used to calibrate differential\n        reflectivity (ZDR).",
     "references_html": [
-      "Frech et al. (2026). Exploring the Untapped Potential of Operational Weather Radars for Vertical Profiling of Precipitation and Clouds. <i>Bulletin of the American Meteorological Society</i>, <i>107</i>(1), E127-E141. <a href=\"https://doi.org/10.1175/BAMS-D-24-0113.1\">https://doi.org/10.1175/BAMS-D-24-0113.1</a>"
+      "Frech, M., Kneifel, S., Ockenfuss, P., &amp; Gergely, M. (2026). Exploring the Untapped Potential of Operational Weather Radars for Vertical Profiling of Precipitation and Clouds. <i>Bulletin of the American Meteorological Society</i>, <i>107</i>(1), E127\u2013E141. <a href=\"https://doi.org/10.1175/BAMS-D-24-0113.1\">https://doi.org/10.1175/BAMS-D-24-0113.1</a>"
     ],
     "dimensions": [
       {
