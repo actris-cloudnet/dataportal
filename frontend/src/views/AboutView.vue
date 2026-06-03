@@ -4,7 +4,7 @@
     <main class="pagewidth">
       <p>
         The ACTRIS Cloudnet data portal provides data processing and curation services for ground-based remote sensing
-        measurements of clouds and turbulent atmospheric properties. The portal centralises processing, quality control,
+        measurements of clouds and boundary layer dynamics. The portal centralises processing, quality control,
         provenance tracking, harmonisation, and archiving of data collected from
         <router-link :to="{ name: 'Sites' }">a network of ground-based stations</router-link>, primarily operated by
         European research institutes and universities.
@@ -13,14 +13,14 @@
       <ul>
         <li>
           Curation of continuous, long-term data sets of ground-based remote sensing measurements for studying cloud
-          microphysical processes,
+          microphysics and turbulent processes,
         </li>
         <li>Development and validation of new synergistic remote sensing algorithms,</li>
         <li>
           Evaluation of the representation of clouds and other atmospheric parameters in numerical weather prediction
           (NWP) models, and
         </li>
-        <li>Serving as a reference data set for the validation of satellite-based measurements.</li>
+        <li>Providing a reference data set for the validation of satellite-based measurements.</li>
       </ul>
       <p>
         The data portal is developed by the Cloud Remote Sensing Data Centre Unit (CLU) as part of the
