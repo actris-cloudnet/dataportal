@@ -23,10 +23,15 @@ export class PublicationRoutes {
     if (typeof uri !== "string") {
       return next({ status: 400, error: "uri is missing or invalid" });
     }
+    const citationHtml = (await this.fetchCitation(uri, "text/html")).data;
+    const citationJson = (await this.fetchCitation(uri, "application/json")).data;
+    const year = citationJson.published[0];
+    const month = citationJson.published[1] || 1;
+    const day = citationJson.published[2] || 1;
     const pub = new Publication();
-    pub.pid = uri;
-    pub.year = (await this.fetchCitation(uri, "application/json")).data.year;
-    pub.citation = (await this.fetchCitation(uri, "text/html")).data;
+    pub.pid = citationJson.url;
+    pub.publishedAt = new Date(year, month - 1, day);
+    pub.citation = citationHtml;
     await this.publicationRepo.save(pub);
     res.sendStatus(200);
   };
@@ -40,14 +45,25 @@ export class PublicationRoutes {
     res.sendStatus(200);
   };
 
-  getPublications: RequestHandler = async (req, res) => {
-    const parsed = typeof req.query.limit === "string" ? parseInt(req.query.limit, 10) : NaN;
-    const limit = Number.isFinite(parsed) ? parsed : undefined;
+  getPublications: RequestHandler = async (req, res, next) => {
+    const limit = typeof req.query.limit === "string" ? parseInt(req.query.limit, 10) : undefined;
+    if (typeof limit !== "undefined" && (!Number.isFinite(limit) || limit <= 0)) {
+      return next({ status: 400, error: "limit is invalid" });
+    }
 
     const publications = await this.publicationRepo.find({
-      order: { year: "DESC" },
+      order: { publishedAt: "DESC", citation: "ASC" },
       take: limit,
     });
-    res.send(publications);
+    res.send(publications.map(this.mapPublication));
   };
+
+  private mapPublication(publication: Publication) {
+    return {
+      pid: publication.pid,
+      citation: publication.citation,
+      publishedAt: publication.publishedAt.toISOString().slice(0, 10),
+      updatedAt: publication.updatedAt.toISOString(),
+    };
+  }
 }

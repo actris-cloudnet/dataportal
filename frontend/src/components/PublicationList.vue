@@ -25,7 +25,10 @@ const error = ref(false);
 async function fetchPublications() {
   try {
     const response = await axios.get<Publication[]>(`${backendUrl}publications`, { params: { limit: 3 } });
-    publications.value = response.data;
+    publications.value = response.data.map((pub) => ({
+      ...pub,
+      citation: pub.citation.replace(/,[^(]+/, " et al. "),
+    }));
   } catch (err) {
     console.error("Failed to fetch publications:", err);
     error.value = true;
@@ -46,8 +49,8 @@ onMounted(fetchPublications);
 }
 
 .publication-list {
-  text-indent: -2rem;
-  margin-left: 2rem;
+  text-indent: -1.5rem;
+  margin-left: 1.5rem;
 }
 
 .publication-item + .publication-item {

@@ -9,7 +9,7 @@ export class Publication {
   citation!: string;
 
   @Column()
-  year!: number;
+  publishedAt!: Date;
 
   @Column()
   updatedAt!: Date;

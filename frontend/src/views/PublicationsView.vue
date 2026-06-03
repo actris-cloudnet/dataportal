@@ -3,23 +3,37 @@
     <LandingHeader title="Publications" />
     <main class="pagewidth">
       <p>
-        List of publications that are related to the Cloudnet processing scheme or use data from the Cloudnet data
-        portal.
+        List of publications that use Cloudnet data or describe methods used for Cloudnet data processing, and other
+        relevant publications.
       </p>
       <form v-if="canEdit" @submit.prevent="submitPublication">
         <input type="text" v-model="publicationUri" placeholder="Enter DOI..." />
         <BaseButton type="primary" htmlType="submit" :disabled="addingPublication">Add</BaseButton>
       </form>
       <template v-if="publications.status == 'ready'">
-        <div v-for="[year, pubs] in publications.data" :key="year" class="year">
-          <h2>{{ year }}</h2>
-          <ul>
+        <h2>Publication year</h2>
+        <ul class="toc">
+          <li v-for="[year, _pubs] in publications.data" :key="year">
+            <a :href="`#year-${year}`">{{ year }}</a>
+          </li>
+        </ul>
+        <template v-for="[year, pubs] in publications.data" :key="year">
+          <h2 :id="`year-${year}`">{{ year }}</h2>
+          <ul class="publications">
             <li v-for="pub in pubs" :key="pub.pid">
               <span class="citation-text" v-html="pub.citation"></span>
-              <a v-if="canEdit" class="remove-button" href="#" @click.prevent="removePublication(pub)">(remove)</a>
+              <BaseButton
+                type="danger"
+                size="small"
+                v-if="canEdit"
+                @click="removePublication(pub)"
+                class="remove-button"
+              >
+                Remove
+              </BaseButton>
             </li>
           </ul>
-        </div>
+        </template>
       </template>
       <BaseSpinner v-else-if="publications.status == 'loading'" />
       <div v-else-if="publications.status == 'error'">Failed to load publications.</div>
@@ -37,9 +51,9 @@ import BaseButton from "@/components/BaseButton.vue";
 import { backendUrl } from "@/lib";
 import { hasPermission } from "@/lib/auth";
 
-function groupBySorted<T, K extends keyof T>(items: T[], key: K, order: "asc" | "desc"): [T[K], T[]][] {
+function groupBySorted<T, K>(items: T[], keyFrom: (item: T) => K, order: "asc" | "desc"): [K, T[]][] {
   const grouped = items.reduce((result, item) => {
-    const value = item[key];
+    const value = keyFrom(item);
     if (result.has(value)) result.get(value).push(item);
     else result.set(value, [item]);
     return result;
@@ -56,7 +70,7 @@ function groupBySorted<T, K extends keyof T>(items: T[], key: K, order: "asc" | 
 
 type PublicationState =
   | { status: "loading" }
-  | { status: "ready"; data: [Publication["year"], Publication[]][] }
+  | { status: "ready"; data: [string, Publication[]][] }
   | { status: "error" };
 
 const publications = ref<PublicationState>({ status: "loading" });
@@ -75,7 +89,7 @@ async function updatePublications() {
     const response = await axios.get<Publication[]>(`${backendUrl}publications`);
     publications.value = {
       status: "ready",
-      data: groupBySorted(response.data, "year", "desc"),
+      data: groupBySorted(response.data, (item) => item.publishedAt.slice(0, 4), "desc"),
     };
   } catch (error) {
     console.error(error);
@@ -112,46 +126,35 @@ async function removePublication(pub: Publication) {
 <style scoped lang="scss">
 @use "@/sass/variables.scss";
 
+:deep(.pagewidth) {
+  max-width: 1000px;
+}
+
 main {
   padding-bottom: 1rem;
 }
 
-.year {
-  display: flex;
-  align-items: top;
-  margin-top: 2rem;
-}
-
 h2 {
   font-size: 1.4rem;
-  flex: 0 0 80px;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
 }
 
-ul {
-  margin-left: 2rem;
-}
-
-li {
-  text-indent: -2rem;
-}
-
-li + li {
-  margin-top: 0.5rem;
-}
-
-@media screen and (max-width: variables.$narrow-screen) {
-  h1 {
-    margin-bottom: 2rem;
+.publications {
+  li {
+    margin-left: 1.5rem;
+    text-indent: -1.5rem;
   }
 
-  .year {
-    display: block;
-    margin-top: 3rem;
+  li + li {
+    margin-top: 0.5rem;
   }
+}
 
-  h2 {
-    margin-bottom: 1em;
-  }
+.toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
 }
 
 form {
@@ -169,9 +172,9 @@ input {
   background-color: white;
 }
 
-.remove-button {
+.remove-button.small {
   margin-left: 0.5rem;
-  color: gray;
+  text-indent: 0;
 }
 
 .citation-text :deep(i) {
