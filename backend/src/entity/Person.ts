@@ -1,4 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { InstrumentContact } from "./InstrumentContact";
+import { UserAccount } from "./UserAccount";
 
 @Entity()
 export class Person {
@@ -16,4 +18,10 @@ export class Person {
 
   @Column({ type: "varchar", nullable: true, select: false })
   email?: string | null;
+
+  @OneToOne(() => UserAccount, (user) => user.person, { nullable: true })
+  userAccount!: UserAccount | null;
+
+  @OneToMany(() => InstrumentContact, (contact) => contact.person)
+  instrumentContacts!: InstrumentContact[];
 }

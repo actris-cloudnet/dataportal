@@ -7,6 +7,8 @@ import { InstrumentLogPermission } from "../../../src/entity/InstrumentLogPermis
 import { Token } from "../../../src/entity/Token";
 import { AppDataSource } from "../../../src/data-source";
 import { describe, expect, it, beforeAll, afterAll } from "@jest/globals";
+import { Person } from "../../../src/entity/Person";
+import { InstrumentContact } from "../../../src/entity/InstrumentContact";
 
 let dataSource: DataSource;
 
@@ -18,6 +20,8 @@ const otherInstrumentInfoUuid = "0b3a7fa0-4812-4964-af23-1162e8b3a665";
 const globalReaderCreds = { username: "perm_globalreader", password: "hunter2" };
 const globalWriterCreds = { username: "perm_globalwriter", password: "hunter2" };
 const specificReaderCreds = { username: "perm_specificreader", password: "hunter2" };
+const oldContactCreds = { username: "perm_contact_old", password: "hunter2" };
+const newContactCreds = { username: "perm_contact_new", password: "hunter2" };
 
 beforeAll(async () => {
   dataSource = await AppDataSource.initialize();
@@ -37,14 +41,12 @@ beforeAll(async () => {
     permissions: [],
     instrumentLogPermissions: [{ permission: "canReadLogs", instrumentInfoUuid: null }],
   });
-
   await axios.post(userAccountsUrl, {
     username: globalWriterCreds.username,
     password: globalWriterCreds.password,
     permissions: [],
     instrumentLogPermissions: [{ permission: "canWriteLogs", instrumentInfoUuid: null }],
   });
-
   await axios.post(userAccountsUrl, {
     username: specificReaderCreds.username,
     password: specificReaderCreds.password,
@@ -63,6 +65,38 @@ beforeAll(async () => {
     { instrumentUuid: otherInstrumentInfoUuid, eventType: "maintenance", date: "2020-01-01" },
     { auth: globalWriterCreds },
   );
+
+  // Insert old instrument contact.
+  const oldContactRes = await axios.post(userAccountsUrl, {
+    username: oldContactCreds.username,
+    password: oldContactCreds.password,
+    permissions: [],
+    instrumentLogPermissions: [],
+  });
+  const oldContactPerson = await dataSource.getRepository(Person).save({
+    firstName: "Matti",
+    lastName: "Muukalainen",
+  });
+  await dataSource.getRepository(UserAccount).save({ id: oldContactRes.data.id, person: oldContactPerson });
+  await dataSource
+    .getRepository(InstrumentContact)
+    .save({ instrumentInfoUuid, person: oldContactPerson, endDate: "2025-12-31", createdAt: new Date() });
+
+  // Insert new instrument contact.
+  const newContactRes = await axios.post(userAccountsUrl, {
+    username: newContactCreds.username,
+    password: newContactCreds.password,
+    permissions: [],
+    instrumentLogPermissions: [],
+  });
+  const newContactPerson = await dataSource.getRepository(Person).save({
+    firstName: "Matti",
+    lastName: "Meikäläinen",
+  });
+  await dataSource.getRepository(UserAccount).save({ id: newContactRes.data.id, person: newContactPerson });
+  await dataSource
+    .getRepository(InstrumentContact)
+    .save({ instrumentInfoUuid, person: newContactPerson, startDate: "2026-01-01", createdAt: new Date() });
 });
 
 afterAll(async () => await dataSource.destroy());
@@ -138,6 +172,51 @@ describe("Instrument-specific canReadLogs isolation", () => {
   it("cannot read logs for a different instrument", async () => {
     return expect(
       axios.get(url, { params: { instrumentUuid: otherInstrumentInfoUuid }, auth: specificReaderCreds }),
+    ).rejects.toMatchObject(genResponse(403, { status: 403, errors: "Missing permission" }));
+  });
+});
+
+describe("Previous contact", () => {
+  it("cannot read logs", async () => {
+    return expect(
+      axios.get(url, { params: { instrumentUuid: instrumentInfoUuid }, auth: oldContactCreds }),
+    ).rejects.toMatchObject(genResponse(403, { status: 403, errors: "Missing permission" }));
+  });
+
+  it("cannot write logs", async () => {
+    return expect(
+      axios.post(
+        url,
+        { instrumentUuid: instrumentInfoUuid, eventType: "maintenance", date: "2020-06-01" },
+        { auth: oldContactCreds },
+      ),
+    ).rejects.toMatchObject(genResponse(403, { status: 403, errors: "Missing permission" }));
+  });
+});
+
+describe("Current contact", () => {
+  it("can read logs for the permitted instrument", async () => {
+    const res = await axios.get(url, { params: { instrumentUuid: instrumentInfoUuid }, auth: newContactCreds });
+    expect(res.status).toBe(200);
+  });
+
+  it("can write logs for the primary instrument", async () => {
+    const res = await axios.post(
+      url,
+      {
+        instrumentUuid: instrumentInfoUuid,
+        eventType: "note",
+        date: "2026-01-01",
+        notes: "This is my instrument now!",
+      },
+      { auth: newContactCreds },
+    );
+    expect(res.status).toBe(201);
+  });
+
+  it("cannot read logs for a different instrument", async () => {
+    return expect(
+      axios.get(url, { params: { instrumentUuid: otherInstrumentInfoUuid }, auth: newContactCreds }),
     ).rejects.toMatchObject(genResponse(403, { status: 403, errors: "Missing permission" }));
   });
 });
