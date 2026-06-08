@@ -43,18 +43,7 @@ export class InstrumentLogRoutes {
     permission: InstrumentLogPermissionType,
     instrumentInfoUuid: InstrumentInfo["uuid"],
   ): Promise<boolean> {
-    return (
-      (await this.userRepo
-        .createQueryBuilder("user")
-        .leftJoin("user.instrumentLogPermissions", "ilp")
-        .leftJoin("ilp.instrumentInfo", "instrumentInfo")
-        .where("user.id = :userId", { userId })
-        .andWhere("ilp.permission = :permission", { permission })
-        .andWhere('("ilp"."instrumentInfoUuid" IS NULL OR "instrumentInfo"."uuid" = :uuid)', {
-          uuid: instrumentInfoUuid,
-        })
-        .getExists()) || this.isInstrumentContact(userId, instrumentInfoUuid)
-    );
+    return this.hasAnyLogPermission(userId, [permission], instrumentInfoUuid);
   }
 
   private async hasAnyLogPermission(
@@ -62,18 +51,16 @@ export class InstrumentLogRoutes {
     permissions: InstrumentLogPermissionType[],
     instrumentInfoUuid: InstrumentInfo["uuid"],
   ): Promise<boolean> {
-    return (
-      (await this.userRepo
-        .createQueryBuilder("user")
-        .leftJoin("user.instrumentLogPermissions", "ilp")
-        .leftJoin("ilp.instrumentInfo", "instrumentInfo")
-        .where("user.id = :userId", { userId })
-        .andWhere("ilp.permission IN (:...permissions)", { permissions })
-        .andWhere('("ilp"."instrumentInfoUuid" IS NULL OR "instrumentInfo"."uuid" = :uuid)', {
-          uuid: instrumentInfoUuid,
-        })
-        .getExists()) || this.isInstrumentContact(userId, instrumentInfoUuid)
-    );
+    const hasPerm = await this.userRepo
+      .createQueryBuilder("user")
+      .leftJoin("user.instrumentLogPermissions", "perm")
+      .where("user.id = :userId", { userId })
+      .andWhere("perm.permission IN (:...permissions)", { permissions })
+      .andWhere('(perm."instrumentInfoUuid" IS NULL OR perm."instrumentInfoUuid" = :uuid)', {
+        uuid: instrumentInfoUuid,
+      })
+      .getExists();
+    return hasPerm || this.isInstrumentContact(userId, instrumentInfoUuid);
   }
 
   private async isInstrumentContact(
