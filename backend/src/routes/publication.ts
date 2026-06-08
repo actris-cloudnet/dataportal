@@ -30,7 +30,7 @@ export class PublicationRoutes {
     const day = citationJson.published[2] || 1;
     const pub = new Publication();
     pub.pid = citationJson.url;
-    pub.publishedAt = new Date(year, month - 1, day);
+    pub.publishedAt = `${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
     pub.citation = citationHtml;
     await this.publicationRepo.save(pub);
     res.sendStatus(200);
@@ -62,7 +62,7 @@ export class PublicationRoutes {
     return {
       pid: publication.pid,
       citation: publication.citation,
-      publishedAt: publication.publishedAt.toISOString().slice(0, 10),
+      publishedAt: publication.publishedAt,
       updatedAt: publication.updatedAt.toISOString(),
     };
   }
