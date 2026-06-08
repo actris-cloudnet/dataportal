@@ -8,8 +8,8 @@ export class Publication {
   @Column({ type: "text" })
   citation!: string;
 
-  @Column()
-  publishedAt!: Date;
+  @Column({ type: "date" })
+  publishedAt!: string;
 
   @Column()
   updatedAt!: Date;
