@@ -9,6 +9,8 @@ import { Model } from "../entity/Model";
 import { Person } from "../entity/Person";
 import env from "./env";
 import { hashVerifier, Token } from "../entity/Token";
+import { InstrumentInfo } from "../entity/Instrument";
+import { InstrumentLogPermissionType } from "../entity/InstrumentLogPermission";
 
 const API_TOKEN_LIFETIME_MS = 30 * 24 * 60 * 60 * 1000;
 const SESSION_TOKEN_LIFETIME_MS = 365 * 24 * 60 * 60 * 1000;
@@ -17,11 +19,13 @@ export class Authenticator {
   private userRepo: Repository<UserAccount>;
   private tokenRepo: Repository<Token>;
   private personRepo: Repository<Person>;
+  private instrumentInfoRepo: Repository<InstrumentInfo>;
 
   constructor(dataSource: DataSource) {
     this.userRepo = dataSource.getRepository(UserAccount);
     this.tokenRepo = dataSource.getRepository(Token);
     this.personRepo = dataSource.getRepository(Person);
+    this.instrumentInfoRepo = dataSource.getRepository(InstrumentInfo);
   }
 
   async basicLogin(username: string, password: string) {
@@ -52,7 +56,7 @@ export class Authenticator {
     if (!orcidId) {
       throw new Error("Failed to get ORCID iD");
     }
-    const user = await this.userRepo.findOneBy({ orcidId });
+    let user = await this.userRepo.findOneBy({ orcidId });
     if (user) {
       user.fullName = fullName;
       if (!user.personId) {
@@ -63,9 +67,22 @@ export class Authenticator {
       }
       await this.userRepo.save(user);
     } else {
-      // Allow only existing users for now.
-      // user = await this.userRepo.save({ orcidId, fullName });
-      return false;
+      const person = await this.personRepo
+        .createQueryBuilder("person")
+        .innerJoin("person.instrumentContacts", "contact")
+        .where("person.orcid = :orcidId", { orcidId })
+        .andWhere('CURRENT_DATE <@ daterange(contact."startDate", contact."endDate", \'[]\')')
+        .getOne();
+      if (!person) {
+        return false;
+      }
+      user = await this.userRepo.findOneBy({ person });
+      if (user) {
+        user.fullName = fullName;
+        await this.userRepo.save(user);
+      } else {
+        user = await this.userRepo.save({ orcidId, fullName, person });
+      }
     }
     return user;
   }
@@ -88,7 +105,8 @@ export class Authenticator {
       return next({ status: 401, errors: "Invalid password" });
     }
     await this.createSessionToken(res, user);
-    res.send(this.serializeUser(user));
+    const uuids = await this.getInstrumentUuids(user);
+    res.send(this.serializeUser(user, uuids));
   };
 
   userInfo: RequestHandler = async (req, res, next) => {
@@ -99,18 +117,38 @@ export class Authenticator {
       where: { id: req.user.id },
       relations: { permissions: true, instrumentLogPermissions: { instrumentInfo: true } },
     });
-    res.send(this.serializeUser(user));
+    const uuids = await this.getInstrumentUuids(user);
+    res.send(this.serializeUser(user, uuids));
   };
 
-  private serializeUser = (user: UserAccount) => ({
+  private async getInstrumentUuids(user: UserAccount) {
+    if (!user.orcidId) return [];
+    const instrumentInfos = await this.instrumentInfoRepo
+      .createQueryBuilder("instrumentInfo")
+      .select("instrumentInfo.uuid")
+      .innerJoin("instrumentInfo.contacts", "contact")
+      .innerJoin("contact.person", "person")
+      .where("person.orcid = :orcidId", { orcidId: user.orcidId })
+      .andWhere('CURRENT_DATE <@ daterange(contact."startDate", contact."endDate", \'[]\')')
+      .getMany();
+    return instrumentInfos.map((instrument) => instrument.uuid);
+  }
+
+  private serializeUser = (user: UserAccount, instrumentInfoUuids: string[]) => ({
     ...user,
     passwordHash: undefined,
     activationToken: undefined,
-    instrumentLogPermissions: (user.instrumentLogPermissions ?? []).map((p) => ({
-      id: p.id,
-      permission: p.permission,
-      instrumentInfoUuid: p.instrumentInfo ? p.instrumentInfo.uuid : null,
-    })),
+    instrumentLogPermissions: (user.instrumentLogPermissions ?? [])
+      .map((p) => ({
+        permission: p.permission,
+        instrumentInfoUuid: p.instrumentInfo ? p.instrumentInfo.uuid : null,
+      }))
+      .concat(
+        instrumentInfoUuids.map((instrumentUuid) => ({
+          permission: InstrumentLogPermissionType.canWriteLogs,
+          instrumentInfoUuid: instrumentUuid,
+        })),
+      ),
   });
 
   logOut: RequestHandler = async (req, res) => {

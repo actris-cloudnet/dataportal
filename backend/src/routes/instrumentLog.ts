@@ -16,6 +16,7 @@ import {
 } from "../../../shared/lib/entity/InstrumentLogConfig";
 import { isValidDate, ssAuthString, getS3pathForLogImage } from "../lib";
 import env from "../lib/env";
+import { InstrumentContact } from "../entity/InstrumentContact";
 
 const VALID_EVENT_TYPES = Object.values(InstrumentLogEventType) as string[];
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -25,43 +26,67 @@ const MAX_IMAGES_PER_LOG = 5;
 export class InstrumentLogRoutes {
   private logRepo: Repository<InstrumentLog>;
   private imageRepo: Repository<InstrumentLogImage>;
+  private instrumentContactRepo: Repository<InstrumentContact>;
   private instrumentInfoRepo: Repository<InstrumentInfo>;
   private userRepo: Repository<UserAccount>;
 
   constructor(dataSource: DataSource) {
     this.logRepo = dataSource.getRepository(InstrumentLog);
     this.imageRepo = dataSource.getRepository(InstrumentLogImage);
+    this.instrumentContactRepo = dataSource.getRepository(InstrumentContact);
     this.instrumentInfoRepo = dataSource.getRepository(InstrumentInfo);
     this.userRepo = dataSource.getRepository(UserAccount);
   }
 
   private async hasLogPermission(
-    userId: number,
+    userId: UserAccount["id"],
     permission: InstrumentLogPermissionType,
-    instrumentInfoUuid: string,
+    instrumentInfoUuid: InstrumentInfo["uuid"],
   ): Promise<boolean> {
-    return this.userRepo
-      .createQueryBuilder("user")
-      .leftJoin("user.instrumentLogPermissions", "ilp")
-      .leftJoin("ilp.instrumentInfo", "instrumentInfo")
-      .where("user.id = :userId", { userId })
-      .andWhere("ilp.permission = :permission", { permission })
-      .andWhere('("ilp"."instrumentInfoUuid" IS NULL OR "instrumentInfo"."uuid" = :uuid)', { uuid: instrumentInfoUuid })
-      .getExists();
+    return (
+      (await this.userRepo
+        .createQueryBuilder("user")
+        .leftJoin("user.instrumentLogPermissions", "ilp")
+        .leftJoin("ilp.instrumentInfo", "instrumentInfo")
+        .where("user.id = :userId", { userId })
+        .andWhere("ilp.permission = :permission", { permission })
+        .andWhere('("ilp"."instrumentInfoUuid" IS NULL OR "instrumentInfo"."uuid" = :uuid)', {
+          uuid: instrumentInfoUuid,
+        })
+        .getExists()) || this.isInstrumentContact(userId, instrumentInfoUuid)
+    );
   }
 
   private async hasAnyLogPermission(
-    userId: number,
+    userId: UserAccount["id"],
     permissions: InstrumentLogPermissionType[],
-    instrumentInfoUuid: string,
+    instrumentInfoUuid: InstrumentInfo["uuid"],
   ): Promise<boolean> {
-    return this.userRepo
-      .createQueryBuilder("user")
-      .leftJoin("user.instrumentLogPermissions", "ilp")
-      .leftJoin("ilp.instrumentInfo", "instrumentInfo")
-      .where("user.id = :userId", { userId })
-      .andWhere("ilp.permission IN (:...permissions)", { permissions })
-      .andWhere('("ilp"."instrumentInfoUuid" IS NULL OR "instrumentInfo"."uuid" = :uuid)', { uuid: instrumentInfoUuid })
+    return (
+      (await this.userRepo
+        .createQueryBuilder("user")
+        .leftJoin("user.instrumentLogPermissions", "ilp")
+        .leftJoin("ilp.instrumentInfo", "instrumentInfo")
+        .where("user.id = :userId", { userId })
+        .andWhere("ilp.permission IN (:...permissions)", { permissions })
+        .andWhere('("ilp"."instrumentInfoUuid" IS NULL OR "instrumentInfo"."uuid" = :uuid)', {
+          uuid: instrumentInfoUuid,
+        })
+        .getExists()) || this.isInstrumentContact(userId, instrumentInfoUuid)
+    );
+  }
+
+  private async isInstrumentContact(
+    userId: UserAccount["id"],
+    instrumentInfoUuid: InstrumentInfo["uuid"],
+  ): Promise<boolean> {
+    return this.instrumentContactRepo
+      .createQueryBuilder("contact")
+      .innerJoin("contact.person", "person")
+      .innerJoin("person.userAccount", "user")
+      .where("user.id = :userId", { userId: userId })
+      .andWhere("contact.instrumentInfoUuid = :uuid", { uuid: instrumentInfoUuid })
+      .andWhere('CURRENT_DATE <@ daterange(contact."startDate", contact."endDate", \'[]\')')
       .getExists();
   }
 

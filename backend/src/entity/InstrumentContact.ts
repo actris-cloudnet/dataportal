@@ -18,7 +18,7 @@ export class InstrumentContact {
   @Column()
   personId!: number;
 
-  @ManyToOne(() => Person, { onDelete: "CASCADE" })
+  @ManyToOne(() => Person, (person) => person.instrumentContacts, { onDelete: "CASCADE" })
   @JoinColumn({ name: "personId" })
   person!: Person;
 

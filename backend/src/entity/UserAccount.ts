@@ -1,4 +1,13 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToMany, JoinTable, ManyToOne, RelationId } from "typeorm";
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToMany,
+  JoinTable,
+  OneToOne,
+  RelationId,
+  JoinColumn,
+} from "typeorm";
 import { timingSafeEqual } from "node:crypto";
 const md5 = require("apache-md5"); // eslint-disable-line @typescript-eslint/no-require-imports
 
@@ -26,7 +35,8 @@ export class UserAccount {
   @Column({ type: "varchar", nullable: true, unique: true })
   orcidId!: string | null;
 
-  @ManyToOne(() => Person, { nullable: true, onDelete: "SET NULL" })
+  @OneToOne(() => Person, (person) => person.userAccount, { nullable: true, onDelete: "SET NULL" })
+  @JoinColumn()
   person!: Person | null;
 
   @RelationId((user: UserAccount) => user.person)
