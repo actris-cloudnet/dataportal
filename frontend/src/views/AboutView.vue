@@ -83,8 +83,8 @@
         </a>
         <a class="project diva" href="https://diva.inoe.ro/" target="_blank">
           <img :src="divaLogo" class="project-logo" />
-          <h2 class="project-name">DIVA IV</h2>
-          <div class="project-date">2025 – 2026</div>
+          <h2 class="project-name">DIVA</h2>
+          <div class="project-date">2025 – 2029</div>
         </a>
       </div>
     </main>
