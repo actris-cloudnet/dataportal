@@ -28,13 +28,10 @@ LOG_PERMISSIONS = ["canReadLogs", "canWriteLogs"]
 
 
 def get_instrument_names() -> dict[str, str]:
-    try:
-        req = urllib.request.Request(url=f"{BASE_URL}/api/instrument-pids")
-        with urllib.request.urlopen(req) as f:
-            instruments = json.load(f)
-        return {instr["uuid"]: instr.get("name", "") for instr in instruments}
-    except Exception:
-        return {}
+    req = urllib.request.Request(url=f"{BASE_URL}/api/instrument-pids")
+    with urllib.request.urlopen(req) as f:
+        instruments = json.load(f)
+    return {instr["uuid"]: instr.get("name", "") for instr in instruments}
 
 
 def get_all_users() -> list[dict]:
@@ -52,7 +49,7 @@ def get_user(username: str) -> dict:
 
 def get_user_by_orcid(orcid: str) -> dict:
     for user in get_all_users():
-        if user.get("orcidId") == orcid:
+        if user["person"] is not None and user["person"]["orcid"] == orcid:
             return user
     raise ValueError(f"User with ORCID {orcid} not found")
 
@@ -89,16 +86,47 @@ def post_user(user: dict) -> dict:
         return json.load(f)
 
 
+def get_or_create_person(orcid: str) -> dict | None:
+    req = urllib.request.Request(url=f"{BASE_URL}/persons/orcid/{orcid}")
+    with urllib.request.urlopen(req) as f:
+        person = json.load(f)
+    if person is not None:
+        return person
+
+    req = urllib.request.Request(
+        url=f"https://pub.orcid.org/v3.0/{orcid}/personal-details",
+        headers={"Accept": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(req) as f:
+            res = json.load(f)
+            first_name = res["name"]["given-names"]["value"]
+            last_name = res["name"]["family-name"]["value"]
+    except urllib.error.HTTPError as err:
+        if err.code == 404:
+            return None
+        raise
+    body = {"firstName": first_name, "lastName": last_name, "orcid": orcid}
+    req = urllib.request.Request(
+        method="POST",
+        url=f"{BASE_URL}/persons",
+        headers={"Content-Type": "application/json"},
+        data=json.dumps(body).encode("utf-8"),
+    )
+    with urllib.request.urlopen(req) as f:
+        person = json.load(f)
+    return person
+
+
 def print_user(user: dict, instrument_names: dict[str, str] | None = None) -> None:
-    full_name = user.get("fullName", "")
     if user["username"]:
         print("Username: " + user["username"], end="")
-    elif user.get("orcidId"):
-        print("ORCID: " + user["orcidId"], end="")
+    elif user["person"] is not None and user["person"]["orcid"] is not None:
+        print("ORCID: " + user["person"]["orcid"], end="")
     else:
         print("User ID: " + str(user["id"]), end="")
-    if full_name:
-        print(f" ({full_name})")
+    if user["person"] is not None:
+        print(f" ({user['person']['firstName']} {user['person']['lastName']})")
     else:
         print()
     permissions = user.get("permissions", [])
@@ -161,7 +189,11 @@ def create_user(args: argparse.Namespace) -> None:
     if args.username:
         user["username"] = args.username
     if args.orcid:
-        user["orcidId"] = args.orcid
+        person = get_or_create_person(args.orcid)
+        if person is None:
+            print(f"Didn't find person with ORCID iD {args.orcid}", file=sys.stderr)
+            sys.exit(1)
+        user["personId"] = person["id"]
     if args.password:
         user["password"] = args.password
     user = post_user(user)

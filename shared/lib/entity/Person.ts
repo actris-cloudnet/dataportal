@@ -1,7 +1,7 @@
 export interface Person {
   id: number;
-  firstname: string;
-  surname: string;
+  firstName: string;
+  lastName: string;
   orcid: string | null;
 }
 

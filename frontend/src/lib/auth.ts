@@ -57,7 +57,9 @@ export async function logout() {
 
 function setUserState(user: UserAccount) {
   loginStore.isAuthenticated = true;
-  loginStore.name = user.fullName || user.username || `User ${user.id}`;
+  loginStore.name = user.person
+    ? `${user.person.firstName} ${user.person.lastName}`
+    : user.username || `User #${user.id}`;
   loginStore.permissions = user.permissions;
   loginStore.instrumentLogPermissions = user.instrumentLogPermissions ?? [];
 }
