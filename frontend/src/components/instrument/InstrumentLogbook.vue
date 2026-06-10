@@ -44,7 +44,7 @@
                 </div>
               </td>
               <td :title="formatTimestamp(entry)">
-                {{ entry.createdBy?.fullName ?? entry.createdBy?.username ?? "–" }}
+                {{ formatUser(entry.createdBy) }}
               </td>
               <td v-if="canEdit" class="nowrap">
                 <span class="actions">
@@ -251,6 +251,9 @@ function sortIndicator(key: SortKey): string {
   return sortDir.value === "asc" ? " \u25B2" : " \u25BC";
 }
 
+const formatUser = (user: InstrumentLog["createdBy"]) =>
+  user ? (user.person ? `${user.person.firstName} ${user.person.lastName}` : user.username || `User #${user.id}`) : "–";
+
 const sortedEntries = computed(() => {
   const dir = sortDir.value === "asc" ? 1 : -1;
   return [...entries.value].sort((a, b) => {
@@ -262,8 +265,8 @@ const sortedEntries = computed(() => {
       av = a.eventType;
       bv = b.eventType;
     } else {
-      av = a.createdBy?.fullName ?? a.createdBy?.username ?? "";
-      bv = b.createdBy?.fullName ?? b.createdBy?.username ?? "";
+      av = formatUser(a.createdBy);
+      bv = formatUser(b.createdBy);
     }
     return av < bv ? -dir : av > bv ? dir : 0;
   });
@@ -341,7 +344,7 @@ function removeEndDate() {
 function formatTimestamp(entry: InstrumentLog): string {
   let text = `Added on ${entry.createdAt.slice(0, 10)} ${entry.createdAt.slice(11, 16)} UTC`;
   if (entry.updatedAt) {
-    const updater = entry.updatedBy?.fullName ?? entry.updatedBy?.username;
+    const updater = formatUser(entry.updatedBy);
     text += `\nUpdated on ${entry.updatedAt.slice(0, 10)} ${entry.updatedAt.slice(11, 16)} UTC`;
     if (updater) text += ` by ${updater}`;
   }

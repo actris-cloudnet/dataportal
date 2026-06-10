@@ -67,48 +67,22 @@ describe("ORCID login", () => {
       expect(result).toBe(false);
     });
 
-    it("allows known user and updates full name", async () => {
+    it("allows known user", async () => {
       const orcidId = "0000-0000-0000-KNOWN";
-      const fullName = "Known User";
 
-      await userRepo.save({ orcidId, fullName: "Old Name" });
+      const person = await personRepo.save({ orcid: orcidId, firstName: "Known", lastName: "User" });
+      const user = await userRepo.save({ person });
 
-      const params = { orcid: orcidId, name: fullName };
+      const params = { orcid: orcidId };
       const result = await authenticator.orcidLogin(params);
-
       expect(result).not.toBe(false);
-      const u = result as UserAccount;
-      expect(u.orcidId).toBe(orcidId);
-      expect(u.fullName).toBe(fullName);
-    });
-
-    it("maps existing person to user", async () => {
-      const orcidId = "0000-0000-0000-EXISTING";
-      const fullName = "Existing User";
-
-      const person = await personRepo.save({ firstName: "Old", lastName: "Name", orcid: orcidId });
-      await userRepo.save({ orcidId, fullName: "Old Name" });
-
-      const params = { orcid: orcidId, name: fullName };
-      const result = await authenticator.orcidLogin(params);
-
-      expect(result).not.toBe(false);
-      const u = result as UserAccount;
-      expect(u.orcidId).toBe(orcidId);
-      expect(u.fullName).toBe(fullName);
-      expect(u.person).toMatchObject({
-        id: person.id,
-        orcid: person.orcid,
-        firstName: person.firstName,
-        lastName: person.lastName,
-      });
+      expect((result as UserAccount).id).toBe(user.id);
     });
   });
 
   describe("login by instrument contact", () => {
     it("creates new user for existing instrument contact", async () => {
       const orcidId = "0000-0000-0000-PICARD";
-      const fullName = "Jean-Luc Picard";
 
       const person = await personRepo.save({ firstName: "Jean-Luc", lastName: "Picard", orcid: orcidId });
       await instrumentContactRepo.save({
@@ -119,31 +93,24 @@ describe("ORCID login", () => {
         createdAt: new Date(),
       });
 
-      const params = { orcid: orcidId, name: fullName };
-      const user = await authenticator.orcidLogin(params);
-
-      expect(user).not.toBe(false);
-      const u = user as UserAccount;
-      expect(u.orcidId).toBe(orcidId);
-      expect(u.fullName).toBe(fullName);
-      expect(u.personId).toBe(person.id);
+      const params = { orcid: orcidId };
+      const result = await authenticator.orcidLogin(params);
+      expect(result).not.toBe(false);
+      expect((result as UserAccount).personId).toBe(person.id);
     });
 
     it("returns false for person without active instrument contact", async () => {
       const orcidId = "0000-0000-0000-NOCONTACT";
-      const fullName = "No Contacts";
 
       await personRepo.save({ firstName: "No", lastName: "Contacts", orcid: orcidId });
 
-      const params = { orcid: orcidId, name: fullName };
-      const user = await authenticator.orcidLogin(params);
-
-      expect(user).toBe(false);
+      const params = { orcid: orcidId };
+      const result = await authenticator.orcidLogin(params);
+      expect(result).toBe(false);
     });
 
     it("returns false for expired instrument contact", async () => {
       const orcidId = "0000-0000-0000-EXPIRED";
-      const fullName = "Expired Contact";
 
       const person = await personRepo.save({ firstName: "Expired", lastName: "Contact", orcid: orcidId });
       await instrumentContactRepo.save({
@@ -154,10 +121,9 @@ describe("ORCID login", () => {
         createdAt: new Date(),
       });
 
-      const params = { orcid: orcidId, name: fullName };
-      const user = await authenticator.orcidLogin(params);
-
-      expect(user).toBe(false);
+      const params = { orcid: orcidId };
+      const result = await authenticator.orcidLogin(params);
+      expect(result).toBe(false);
     });
   });
 });

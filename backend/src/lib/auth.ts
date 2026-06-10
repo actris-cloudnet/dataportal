@@ -51,40 +51,29 @@ export class Authenticator {
   }
 
   async orcidLogin(params: Record<string, any>) {
-    const orcidId = params.orcid;
-    const fullName = params.name;
-    if (!orcidId) {
+    const orcid = params.orcid;
+    if (!orcid) {
       throw new Error("Failed to get ORCID iD");
     }
-    let user = await this.userRepo.findOneBy({ orcidId });
+
+    // Allow existing user.
+    const user = await this.userRepo.findOneBy({ person: { orcid } });
     if (user) {
-      user.fullName = fullName;
-      if (!user.personId) {
-        const person = await this.personRepo.findOneBy({ orcid: orcidId });
-        if (person) {
-          user.person = person;
-        }
-      }
-      await this.userRepo.save(user);
-    } else {
-      const person = await this.personRepo
-        .createQueryBuilder("person")
-        .innerJoin("person.instrumentContacts", "contact")
-        .where("person.orcid = :orcidId", { orcidId })
-        .andWhere('CURRENT_DATE <@ daterange(contact."startDate", contact."endDate", \'[]\')')
-        .getOne();
-      if (!person) {
-        return false;
-      }
-      user = await this.userRepo.findOneBy({ person });
-      if (user) {
-        user.fullName = fullName;
-        await this.userRepo.save(user);
-      } else {
-        user = await this.userRepo.save({ orcidId, fullName, person });
-      }
+      return user;
     }
-    return user;
+
+    // Create user for active instrument contact.
+    const person = await this.personRepo
+      .createQueryBuilder("person")
+      .innerJoin("person.instrumentContacts", "contact")
+      .where("person.orcid = :orcid", { orcid })
+      .andWhere('CURRENT_DATE <@ daterange(contact."startDate", contact."endDate", \'[]\')')
+      .getOne();
+    if (!person) {
+      return false;
+    }
+    const newUser = await this.userRepo.save({ person });
+    return newUser;
   }
 
   logIn: RequestHandler = async (req, res, next) => {
@@ -115,20 +104,20 @@ export class Authenticator {
     }
     const user = await this.userRepo.findOneOrFail({
       where: { id: req.user.id },
-      relations: { permissions: true, instrumentLogPermissions: { instrumentInfo: true } },
+      relations: { person: true, permissions: true, instrumentLogPermissions: { instrumentInfo: true } },
     });
     const uuids = await this.getInstrumentUuids(user);
     res.send(this.serializeUser(user, uuids));
   };
 
   private async getInstrumentUuids(user: UserAccount) {
-    if (!user.orcidId) return [];
+    if (!user.person || !user.person.orcid) return [];
     const instrumentInfos = await this.instrumentInfoRepo
       .createQueryBuilder("instrumentInfo")
       .select("instrumentInfo.uuid")
       .innerJoin("instrumentInfo.contacts", "contact")
       .innerJoin("contact.person", "person")
-      .where("person.orcid = :orcidId", { orcidId: user.orcidId })
+      .where("person.orcid = :orcid", { orcid: user.person.orcid })
       .andWhere('CURRENT_DATE <@ daterange(contact."startDate", contact."endDate", \'[]\')')
       .getMany();
     return instrumentInfos.map((instrument) => instrument.uuid);

@@ -1,3 +1,5 @@
+import type { Person } from "./Person";
+
 export type InstrumentLogEventType =
   | "calibration"
   | "check"
@@ -25,6 +27,6 @@ export interface InstrumentLog {
   images: InstrumentLogImage[];
   createdAt: string; // ISO datetime
   updatedAt: string | null; // ISO datetime
-  createdBy: { id: number; username: string | null; fullName: string | null } | null;
-  updatedBy: { id: number; username: string | null; fullName: string | null } | null;
+  createdBy: { id: number; username: string | null; person: Person | null } | null;
+  updatedBy: { id: number; username: string | null; person: Person | null } | null;
 }

@@ -615,12 +615,14 @@ async function createServer(): Promise<void> {
     monitoringVisualizationRoutes.putMonitoringVisualization,
   );
 
-  // Private UserAccount and Permission routes
+  // Private UserAccount and Permission routes used by admin script.
   app.post("/user-accounts", express.json(), userAccountRoutes.validatePost, userAccountRoutes.postUserAccount);
   app.get("/user-accounts/:id", userAccountRoutes.getUserAccount);
   app.delete("/user-accounts/:id", userAccountRoutes.deleteUserAccount);
   app.put("/user-accounts/:id", express.json(), userAccountRoutes.validatePut, userAccountRoutes.putUserAccount);
   app.get("/user-accounts/", userAccountRoutes.getAllUserAccounts);
+  app.post("/persons/", express.json(), siteRoutes.postPerson);
+  app.get("/persons/orcid/:orcid", siteRoutes.personByOrcid);
 
   app.post(
     "/api/queue/publish",

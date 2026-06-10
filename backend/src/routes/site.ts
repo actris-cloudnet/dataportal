@@ -356,13 +356,18 @@ export class SiteRoutes {
     res.sendStatus(204);
   };
 
+  postPerson: RequestHandler = async (req, res) => {
+    const person = await this.personRepo.save(req.body);
+    res.json(person);
+  };
+
   personByOrcid: RequestHandler = async (req, res) => {
     const person = await findPersonByOrcid(this.personRepo, req.params.orcid as string);
     if (!person) {
       res.json(null);
       return;
     }
-    res.json({ firstName: person.firstName, lastName: person.lastName, email: person.email ?? null });
+    res.json(person);
   };
 
   searchPersons: RequestHandler = async (req, res) => {

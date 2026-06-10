@@ -29,12 +29,6 @@ export class UserAccount {
   @Column({ type: "varchar", nullable: true, unique: true })
   activationToken!: string | null;
 
-  @Column({ type: "varchar", nullable: true })
-  fullName!: string | null;
-
-  @Column({ type: "varchar", nullable: true, unique: true })
-  orcidId!: string | null;
-
   @OneToOne(() => Person, (person) => person.userAccount, { nullable: true, onDelete: "SET NULL" })
   @JoinColumn()
   person!: Person | null;

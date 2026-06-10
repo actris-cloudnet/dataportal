@@ -32,8 +32,7 @@ interface InstrumentLogPermissionInterface {
 interface UserAccountInterface {
   id?: number;
   username: string | null;
-  fullName?: string | null;
-  orcidId?: string | null;
+  person: Person | null;
   password?: string;
   passwordHash?: string;
   activationToken?: string;
@@ -70,8 +69,7 @@ export class UserAccountRoutes {
     return {
       id: user.id,
       username: user.username,
-      fullName: user.fullName,
-      orcidId: user.orcidId,
+      person: user.person,
       activationToken: user.activationToken || undefined,
       permissions: user.permissions.map((p) => ({
         id: p.id,
@@ -88,10 +86,14 @@ export class UserAccountRoutes {
   };
 
   postUserAccount: RequestHandler = async (req, res) => {
-    const where = req.body.orcidId ? { orcidId: req.body.orcidId } : { username: req.body.username };
+    const where = req.body.personId ? { person: { id: req.body.personId } } : { username: req.body.username };
     let user = await this.userRepo.findOne({
       where,
-      relations: { permissions: { site: true, model: true }, instrumentLogPermissions: { instrumentInfo: true } },
+      relations: {
+        person: true,
+        permissions: { site: true, model: true },
+        instrumentLogPermissions: { instrumentInfo: true },
+      },
     });
     if (user) {
       res.json(this.userResponse(user));
@@ -100,16 +102,13 @@ export class UserAccountRoutes {
 
     user = new UserAccount();
     user.username = req.body.username ?? null;
-    if (req.body.orcidId) {
-      user.orcidId = req.body.orcidId;
-      const person = await this.personRepo.findOneBy({ orcid: req.body.orcidId });
-      if (person) {
-        user.person = person;
-      }
+    if (req.body.personId) {
+      const person = await this.personRepo.findOneByOrFail({ id: req.body.personId });
+      user.person = person;
     }
     if (req.body.password) {
       user.setPassword(req.body.password);
-    } else if (!req.body.orcidId) {
+    } else if (req.body.username) {
       user.activationToken = randomString(32);
     }
     user.permissions = await this.createPermissions(req.body.permissions);
@@ -200,7 +199,7 @@ export class UserAccountRoutes {
   putUserAccount: RequestHandler = async (req, res, next) => {
     const user = await this.userRepo.findOne({
       where: { id: Number(req.params.id) },
-      relations: { permissions: { site: true }, instrumentLogPermissions: { instrumentInfo: true } },
+      relations: { person: true, permissions: { site: true }, instrumentLogPermissions: { instrumentInfo: true } },
     });
     if (!user) {
       return next({ status: 404, errors: "UserAccount not found" });
@@ -214,8 +213,8 @@ export class UserAccountRoutes {
         }
       }
     }
-    if (hasProperty(req.body, "orcidId")) {
-      user.orcidId = req.body.orcidId;
+    if (hasProperty(req.body, "personId")) {
+      user.personId = req.body.personId;
     }
     if (hasProperty(req.body, "password")) {
       user.setPassword(req.body.password);
@@ -233,7 +232,11 @@ export class UserAccountRoutes {
   getUserAccount: RequestHandler = async (req, res, next) => {
     const user = await this.userRepo.findOne({
       where: { id: Number(req.params.id) },
-      relations: { permissions: { site: true, model: true }, instrumentLogPermissions: { instrumentInfo: true } },
+      relations: {
+        person: true,
+        permissions: { site: true, model: true },
+        instrumentLogPermissions: { instrumentInfo: true },
+      },
     });
     if (!user) return next({ status: 404, errors: "UserAccount not found" });
     res.json(this.userResponse(user));
@@ -250,22 +253,21 @@ export class UserAccountRoutes {
 
   getAllUserAccounts: RequestHandler = async (req, res) => {
     const users = await this.userRepo.find({
-      relations: { permissions: { site: true, model: true }, instrumentLogPermissions: { instrumentInfo: true } },
+      relations: {
+        person: true,
+        permissions: { site: true, model: true },
+        instrumentLogPermissions: { instrumentInfo: true },
+      },
     });
     res.json(users.map((u) => this.userResponse(u)));
   };
 
   validatePost: RequestHandler = async (req, res, next) => {
-    if (!hasProperty(req.body, "username") && !hasProperty(req.body, "orcidId")) {
-      return next({ status: 401, errors: "Missing the username or orcidId" });
+    if (!hasProperty(req.body, "username") && !hasProperty(req.body, "personId")) {
+      return next({ status: 401, errors: "Missing the username or personId" });
     }
     if (hasProperty(req.body, "username")) {
       this.validateUsername(req, next);
-    }
-    if (hasProperty(req.body, "orcidId")) {
-      if (!this.isValidOrcidId(req.body.orcidId)) {
-        return next({ status: 422, errors: "Invalid ORCID iD format" });
-      }
     }
     if (hasProperty(req.body, "password")) {
       this.validatePassword(req, next);
@@ -283,11 +285,6 @@ export class UserAccountRoutes {
   validatePut: RequestHandler = async (req, res, next) => {
     if (hasProperty(req.body, "username") && req.body.username !== null) {
       this.validateUsername(req, next);
-    }
-    if (hasProperty(req.body, "orcidId") && req.body.orcidId !== null) {
-      if (!this.isValidOrcidId(req.body.orcidId)) {
-        return next({ status: 422, errors: "Invalid ORCID iD format" });
-      }
     }
     if (hasProperty(req.body, "password")) {
       this.validatePassword(req, next);
@@ -316,10 +313,6 @@ export class UserAccountRoutes {
     } else if (req.body.password.length === 0) {
       next({ status: 401, errors: "password must be nonempty" });
     }
-  }
-
-  isValidOrcidId(orcidId: unknown): boolean {
-    return typeof orcidId === "string" && /^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/.test(orcidId);
   }
 
   validatePermissions: RequestHandler = async (req, res, next) => {

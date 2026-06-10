@@ -176,7 +176,7 @@ export class InstrumentLogRoutes {
     }
     const logs = await this.logRepo.find({
       where: { instrumentInfoUuid: uuid },
-      relations: { createdBy: true, updatedBy: true },
+      relations: { createdBy: { person: true }, updatedBy: { person: true } },
       order: { date: "DESC", createdAt: "DESC" },
     });
     if (logs.length === 0) return res.json([]);
@@ -191,7 +191,7 @@ export class InstrumentLogRoutes {
       imagesByLogId.set(img.instrumentLogId, list);
     }
     const formatUser = (user: UserAccount | null) =>
-      user ? { id: user.id, username: user.username, fullName: user.fullName } : null;
+      user ? { id: user.id, username: user.username, person: user.person } : null;
     const safeEntries = logs.map(
       ({ createdBy, updatedBy, createdById: _, updatedById: _u, instrumentInfoUuid, ...rest }) => ({
         ...rest,
@@ -244,7 +244,7 @@ export class InstrumentLogRoutes {
       createdBy: req.user,
     });
     const saved = await this.logRepo.save(log);
-    const userInfo = req.user ? { id: req.user.id!, username: req.user.username, fullName: req.user.fullName } : null;
+    const userInfo = req.user ? { id: req.user.id!, username: req.user.username, person: req.user.person } : null;
     res.status(201).json({
       id: saved.id,
       instrumentUuid: saved.instrumentInfoUuid,
