@@ -173,18 +173,16 @@ def user_info(args: argparse.Namespace) -> None:
     print_user(resolve_user(args))
 
 
-def validate_orcid(orcid: str) -> None:
+def validate_orcid(orcid: str) -> str:
     if not re.fullmatch(r"\d{4}-\d{4}-\d{4}-\d{3}[\dX]", orcid):
-        print(f"Invalid ORCID iD format: {orcid}", file=sys.stderr)
-        sys.exit(1)
+        raise ValueError(f"Invalid ORCID iD format: {orcid}")
+    return orcid
 
 
 def create_user(args: argparse.Namespace) -> None:
     if not args.username and not args.orcid:
         print("Either username or --orcid is required", file=sys.stderr)
         sys.exit(1)
-    if args.orcid:
-        validate_orcid(args.orcid)
     user: dict = {"permissions": []}
     if args.username:
         user["username"] = args.username
@@ -355,18 +353,18 @@ def main():
 
     subparser = subparsers.add_parser("user-info")
     subparser.add_argument("username", nargs="?")
-    subparser.add_argument("--orcid")
+    subparser.add_argument("--orcid", type=validate_orcid)
     subparser.set_defaults(func=user_info)
 
     subparser = subparsers.add_parser("create-user")
     subparser.add_argument("username", nargs="?")
-    subparser.add_argument("--orcid")
+    subparser.add_argument("--orcid", type=validate_orcid)
     subparser.add_argument("--password")
     subparser.set_defaults(func=create_user)
 
     subparser = subparsers.add_parser("add-permission")
     subparser.add_argument("username", nargs="?")
-    subparser.add_argument("--orcid")
+    subparser.add_argument("--orcid", type=validate_orcid)
     subparser.add_argument("permission", choices=PERMISSIONS)
     group = subparser.add_mutually_exclusive_group()
     group.add_argument("--site", nargs="+")
@@ -381,7 +379,7 @@ def main():
 
     subparser = subparsers.add_parser("remove-permission")
     subparser.add_argument("username", nargs="?")
-    subparser.add_argument("--orcid")
+    subparser.add_argument("--orcid", type=validate_orcid)
     subparser.add_argument("permission", choices=PERMISSIONS)
     group = subparser.add_mutually_exclusive_group()
     group.add_argument("--site", nargs="+")
