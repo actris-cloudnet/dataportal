@@ -6,7 +6,7 @@
       <template v-for="item in news" :key="item.id">
         <span class="news-date">{{ formatDisplayDate(item.date) }}</span>
         <router-link :to="{ name: 'NewsItem', params: { slug: item.slug } }" class="news-title">
-          {{ item.title }}
+          {{ item.title }}{{ item.draft ? " (draft)" : "" }}
         </router-link>
       </template>
     </div>
@@ -28,8 +28,7 @@ const error = ref(false);
 async function fetchNews() {
   try {
     const response = await axios.get<NewsItem[]>(`${backendUrl}news`, { params: { limit: 5 } });
-    // Filter out draft items for the frontpage
-    news.value = response.data.filter((item) => !item.draft);
+    news.value = response.data;
   } catch (err) {
     console.error("Failed to fetch news:", err);
     error.value = true;

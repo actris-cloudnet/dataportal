@@ -3,7 +3,7 @@
     <div v-if="loading" class="loading">Loading news item...</div>
     <div v-else-if="error" class="error">Failed to load news item</div>
     <div v-else-if="newsItem" class="news-item-detail">
-      <h1>{{ newsItem.title }}</h1>
+      <h1>{{ newsItem.title }}{{ newsItem.draft ? " (draft)" : "" }}</h1>
       <p class="date">{{ formatDisplayDate(newsItem.date) }}</p>
       <MarkdownViewer :content="newsItem.content" />
     </div>
