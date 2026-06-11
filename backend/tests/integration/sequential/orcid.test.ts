@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
+import { afterAll, beforeAll, afterEach, describe, expect, it } from "@jest/globals";
 import { DataSource, Repository } from "typeorm";
 import { AppDataSource } from "../../../src/data-source";
 import { UserAccount } from "../../../src/entity/UserAccount";
@@ -6,7 +6,6 @@ import { Person } from "../../../src/entity/Person";
 import { Authenticator } from "../../../src/lib/auth";
 import { InstrumentContact } from "../../../src/entity/InstrumentContact";
 import { cleanRepos } from "../../lib";
-import { afterEach } from "node:test";
 import { Instrument, InstrumentInfo } from "../../../src/entity/Instrument";
 
 let dataSource: DataSource;

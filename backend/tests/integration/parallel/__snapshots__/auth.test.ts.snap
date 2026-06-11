@@ -55,6 +55,7 @@ exports[`GET /auth/login returns admin permissions 1`] = `
       "permission": "canManageNews",
     },
   ],
+  "person": null,
   "personId": null,
   "username": "admin",
 }
