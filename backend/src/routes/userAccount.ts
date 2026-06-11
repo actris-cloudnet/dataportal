@@ -214,7 +214,8 @@ export class UserAccountRoutes {
       }
     }
     if (hasProperty(req.body, "personId")) {
-      user.personId = req.body.personId;
+      const person = await this.personRepo.findOneByOrFail({ id: req.body.personId });
+      user.person = person;
     }
     if (hasProperty(req.body, "password")) {
       user.setPassword(req.body.password);
