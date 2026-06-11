@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import fnmatch
 import urllib.request
 import json
 import os
@@ -32,6 +33,31 @@ def get_instrument_names() -> dict[str, str]:
     with urllib.request.urlopen(req) as f:
         instruments = json.load(f)
     return {instr["uuid"]: instr.get("name", "") for instr in instruments}
+
+
+def find_instruments_by_name(patterns: list[str]) -> dict[str, str]:
+    instruments = get_instrument_names()
+    matches = {
+        uuid: name
+        for uuid, name in instruments.items()
+        if any(fnmatch.fnmatchcase(name.lower(), p.lower()) for p in patterns)
+    }
+    if not matches:
+        print(f"No instruments match: {', '.join(patterns)}", file=sys.stderr)
+        if not any("*" in p for p in patterns):
+            print(
+                f"Hint: without '*' the full name must match exactly; "
+                f"try e.g. '*{patterns[0]}*'",
+                file=sys.stderr,
+            )
+        sys.exit(1)
+    return matches
+
+
+def confirm(prompt: str) -> None:
+    if input(f"{prompt} [y/N] ").strip().lower() not in ("y", "yes"):
+        print("Aborted", file=sys.stderr)
+        sys.exit(1)
 
 
 def get_all_users() -> list[dict]:
@@ -220,20 +246,26 @@ def _validate_log_args(args: argparse.Namespace) -> None:
             file=sys.stderr,
         )
         sys.exit(1)
-    if args.instrument_uuid is None and not args.all_instruments:
+    if (
+        args.instrument_uuid is None
+        and args.instrument_name is None
+        and not args.all_instruments
+    ):
         print(
-            "--instrument-uuid or --all-instruments is required",
+            "--instrument-uuid, --instrument-name or --all-instruments is required",
             file=sys.stderr,
         )
         sys.exit(1)
 
 
 def _validate_regular_args(args: argparse.Namespace) -> None:
-    if getattr(args, "instrument_uuid", None) or getattr(
-        args, "all_instruments", False
+    if (
+        getattr(args, "instrument_uuid", None)
+        or getattr(args, "instrument_name", None)
+        or getattr(args, "all_instruments", False)
     ):
         print(
-            f"Cannot use --instrument-uuid or --all-instruments with permission {args.permission}",
+            f"Cannot use --instrument-uuid, --instrument-name or --all-instruments with permission {args.permission}",
             file=sys.stderr,
         )
         sys.exit(1)
@@ -255,8 +287,12 @@ def add_permission(args: argparse.Namespace) -> None:
                 and perm["instrumentInfoUuid"] in uuids_to_add
             )
         ]
-        log_perms.extend(perms_to_add)
-        user["instrumentLogPermissions"] = log_perms
+        new_perms = [
+            perm
+            for perm in perms_to_add
+            if not any(log_permission_equal(perm, p) for p in log_perms)
+        ]
+        user["instrumentLogPermissions"] = log_perms + new_perms
     else:
         _validate_regular_args(args)
         permissions_to_add = make_permissions(args)
@@ -338,7 +374,18 @@ def log_permission_equal(a: dict, b: dict) -> bool:
 
 
 def make_log_permissions(args: argparse.Namespace) -> list[dict]:
-    uuids = [None] if args.all_instruments else args.instrument_uuid
+    if args.all_instruments:
+        uuids = [None]
+    elif args.instrument_name:
+        matches = find_instruments_by_name(args.instrument_name)
+        verb = "Add" if args.command == "add-permission" else "Remove"
+        print(f"{verb} {args.permission} for {len(matches)} instrument(s):")
+        for name in sorted(matches.values()):
+            print(f"- {name}")
+        confirm("Proceed?")
+        uuids = list(matches)
+    else:
+        uuids = args.instrument_uuid
     return [
         {"instrumentInfoUuid": uuid, "permission": args.permission} for uuid in uuids
     ]
@@ -374,6 +421,13 @@ def main():
     group.add_argument("--all-models", action="store_true")
     group = subparser.add_mutually_exclusive_group()
     group.add_argument("--instrument-uuid", nargs="+")
+    group.add_argument(
+        "--instrument-name",
+        nargs="+",
+        metavar="PATTERN",
+        help="select instruments by name with glob pattern, e.g. 'TROPOS*' "
+        "(case-insensitive; without '*' the full name must match exactly)",
+    )
     group.add_argument("--all-instruments", action="store_true")
     subparser.set_defaults(func=add_permission)
 
@@ -389,6 +443,13 @@ def main():
     group.add_argument("--all-models", action="store_true")
     group = subparser.add_mutually_exclusive_group()
     group.add_argument("--instrument-uuid", nargs="+")
+    group.add_argument(
+        "--instrument-name",
+        nargs="+",
+        metavar="PATTERN",
+        help="select instruments by name with glob pattern, e.g. 'TROPOS*' "
+        "(case-insensitive; without '*' the full name must match exactly)",
+    )
     group.add_argument("--all-instruments", action="store_true")
     subparser.set_defaults(func=remove_permission)
 
