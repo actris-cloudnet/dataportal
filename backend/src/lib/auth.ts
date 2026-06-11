@@ -111,13 +111,12 @@ export class Authenticator {
   };
 
   private async getInstrumentUuids(user: UserAccount) {
-    if (!user.person || !user.person.orcid) return [];
+    if (!user.person) return [];
     const instrumentInfos = await this.instrumentInfoRepo
       .createQueryBuilder("instrumentInfo")
       .select("instrumentInfo.uuid")
       .innerJoin("instrumentInfo.contacts", "contact")
-      .innerJoin("contact.person", "person")
-      .where("person.orcid = :orcid", { orcid: user.person.orcid })
+      .where("contact.personId = :personId", { personId: user.person.id })
       .andWhere('CURRENT_DATE <@ daterange(contact."startDate", contact."endDate", \'[]\')')
       .getMany();
     return instrumentInfos.map((instrument) => instrument.uuid);
