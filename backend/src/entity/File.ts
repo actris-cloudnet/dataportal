@@ -114,6 +114,7 @@ export abstract class File {
 }
 
 @Index(["instrumentInfo"])
+@Index(["model"])
 @Entity()
 export class RegularFile extends File {
   @ManyToMany(() => RegularFile)
@@ -129,6 +130,11 @@ export class RegularFile extends File {
 
   @ManyToOne(() => InstrumentInfo, { nullable: true })
   instrumentInfo!: InstrumentInfo | null;
+
+  // Set for evaluation products (e.g. L3) that are derived from a specific
+  // model run; null for all other regular files.
+  @ManyToOne((_) => Model, { nullable: true })
+  model!: Model | null;
 }
 
 @Entity()

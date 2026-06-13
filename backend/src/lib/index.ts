@@ -227,7 +227,9 @@ export const augmentFile = (includeS3path: boolean) => (file: RegularFile | Mode
   ...file,
   downloadUrl: `${env.DP_BACKEND_URL}/download/${getDownloadPathForFile(file)}`,
   s3path: includeS3path ? getS3pathForFile(file) : undefined,
-  model: "model" in file ? file.model : undefined,
+  // The raw-row transform builds an all-null model object for files without a
+  // model (joined columns are NULL); collapse that to null like instrument below.
+  model: "model" in file ? (file.model?.id != null ? file.model : null) : undefined,
   instrument:
     "instrumentInfo" in file
       ? file.instrumentInfo?.uuid != null

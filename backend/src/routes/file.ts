@@ -21,7 +21,7 @@ import { ModelFile } from "../entity/File";
 import { SearchFileResponse } from "../entity/SearchFileResponse";
 import { Visualization } from "../entity/Visualization";
 import { ModelVisualization } from "../entity/ModelVisualization";
-import { Product } from "../entity/Product";
+import { Product, ProductType } from "../entity/Product";
 import { SoftwareService } from "../lib/software";
 import { InstrumentInfo } from "../entity/Instrument";
 
@@ -163,7 +163,14 @@ export class FileRoutes {
     if (!isFile(file))
       return next({ status: 422, errors: ["Request body is missing fields or has invalid values in them"] });
     if (!isValidFilename(file)) return next({ status: 400, errors: ["Filename does not match file metadata"] });
-    const isModel = file.model && true;
+    // Whether the file is stored as a ModelFile is decided by the product type,
+    // not by the mere presence of a model: evaluation products (e.g. L3) carry a
+    // model but are regular files. file.product may be a plain id (processing) or
+    // a product object (e.g. when re-submitting fetched metadata).
+    const productId = typeof file.product === "string" ? file.product : file.product?.id;
+    const product = await this.productRepo.findOneBy({ id: productId });
+    if (!product) return next({ status: 422, errors: ["Unknown product"] });
+    const isModel = product.type.includes(ProductType.MODEL);
 
     const sourceFileIds = req.body.sourceFileIds || [];
     if (!Array.isArray(sourceFileIds) || sourceFileIds.some((id) => typeof id !== "string")) {
@@ -389,7 +396,8 @@ export class FileRoutes {
       .leftJoin("file.site", "site")
       .addSelect(siteMetadataKeys)
       .leftJoinAndSelect("file.product", "product");
-    if (isModel) qb.leftJoinAndSelect("file.model", "model");
+    // Both model files and evaluation regular files have a model relation.
+    qb.leftJoinAndSelect("file.model", "model");
     if (!isModel) {
       qb.leftJoinAndSelect("file.instrumentInfo", "instrumentInfo");
       qb.leftJoinAndSelect("instrumentInfo.instrument", "instrument");
@@ -398,7 +406,7 @@ export class FileRoutes {
     // Where clauses
     qb = addCommonFilters(qb, query);
 
-    if (isModel && query.model) qb.andWhere("model.id IN (:...model)", query);
+    if (query.model) qb.andWhere("model.id IN (:...model)", query);
     if (!isModel && query.instrument) qb.andWhere("instrument.id IN (:...instrument)", query);
 
     // Hack to prevent loading of model files when instrument is selected without product
@@ -417,10 +425,13 @@ export class FileRoutes {
     }
 
     // No allVersions, allModels or model/filename params (default)
+    // model/allModels/filename only disable best-version selection on the model
+    // route; on the file route we keep best-version selection even when filtering
+    // by model (evaluation products), so each model still yields one best file.
     if (
       query.allVersions == undefined &&
-      query.model == undefined &&
-      query.allModels == undefined &&
+      !(isModel && query.model != undefined) &&
+      !(isModel && query.allModels != undefined) &&
       !(isModel && query.filename)
     ) {
       // On model route we want to return all models if filename is specified
