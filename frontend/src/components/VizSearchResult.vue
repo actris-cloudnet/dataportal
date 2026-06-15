@@ -77,6 +77,7 @@ export interface Props {
   products?: string[];
   instruments?: string[];
   instrumentPids?: string[];
+  models?: string[];
   variables?: string[];
   defaultProducts?: string[];
   defaultSites?: string[];
@@ -96,7 +97,8 @@ const noSelectionsMade = computed(
       props.sites?.length ||
       props.variables?.length ||
       props.instruments?.length ||
-      props.instrumentPids?.length
+      props.instrumentPids?.length ||
+      props.models?.length
     ),
 );
 
@@ -118,12 +120,16 @@ async function fetchData() {
     variable: props.variables,
     instrument: props.instruments,
     instrumentPid: props.instrumentPids,
+    model: props.models,
     showLegacy: true,
     privateFrontendOrder: true,
   };
 
   try {
-    const res = await axios.get(`${backendUrl}visualizations/`, { params: payload, signal: requestController!.signal });
+    const res = await axios.get(`${backendUrl}visualizations/`, {
+      params: payload,
+      signal: requestController!.signal,
+    });
     apiResponse.value = res.data;
     isBusy.value = false;
   } catch (err) {
@@ -142,6 +148,7 @@ watch(
     props.instrumentPids,
     props.products,
     props.variables,
+    props.models,
     props.defaultProducts,
     props.defaultSites,
   ],

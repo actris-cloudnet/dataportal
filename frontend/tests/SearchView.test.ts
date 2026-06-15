@@ -230,12 +230,23 @@ describe("SearchView.vue", () => {
     it("fetches experimental products when clicking show exp prods checkbox", async () => {
       let calls = vi.mocked(axios.get).mock.calls;
       let lastCall = calls[calls.length - 1][1] as any;
+      expect(lastCall.params.product).not.toContain("doppler-lidar");
+      await findElementById("showExpProductsCheckbox").find("input").setValue();
+      await nextTick(1);
+      calls = vi.mocked(axios.get).mock.calls;
+      lastCall = calls[calls.length - 1][1] as any;
+      expect(lastCall.params.product).toContain("doppler-lidar");
+    });
+
+    it("never includes evaluation (L3) products, which live in the model evaluation view", async () => {
+      let calls = vi.mocked(axios.get).mock.calls;
+      let lastCall = calls[calls.length - 1][1] as any;
       expect(lastCall.params.product).not.toContain("l3-cf");
       await findElementById("showExpProductsCheckbox").find("input").setValue();
       await nextTick(1);
       calls = vi.mocked(axios.get).mock.calls;
       lastCall = calls[calls.length - 1][1] as any;
-      expect(lastCall.params.product).toContain("l3-cf");
+      expect(lastCall.params.product).not.toContain("l3-cf");
     });
   });
 });

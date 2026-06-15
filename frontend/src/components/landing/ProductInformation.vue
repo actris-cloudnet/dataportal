@@ -21,7 +21,7 @@
           </router-link>
         </dd>
       </template>
-      <template v-if="'model' in file">
+      <template v-if="file.model">
         <dt>Model</dt>
         <dd>{{ file.model.humanReadableName }}</dd>
       </template>

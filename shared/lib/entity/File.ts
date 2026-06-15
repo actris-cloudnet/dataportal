@@ -36,6 +36,8 @@ export interface File {
 export interface RegularFile extends File {
   sourceFileIds: string[];
   instrument: Instrument | null;
+  // Set for evaluation products (e.g. L3); null for ordinary regular files.
+  model: Model | null;
 }
 
 export interface ModelFile extends File {

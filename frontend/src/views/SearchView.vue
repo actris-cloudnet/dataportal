@@ -264,7 +264,7 @@ import {
   compareValues,
 } from "@/lib";
 import VizSearchResult from "@/components/VizSearchResult.vue";
-import type { Product } from "@shared/entity/Product";
+import { isEarthCareProduct, type Product } from "@shared/entity/Product";
 import SuperMap from "@/components/SuperMap.vue";
 import { useRoute } from "vue-router";
 import ApiError from "./ApiError.vue";
@@ -285,7 +285,11 @@ const isVizMode = computed(() => props.mode == "visualizations");
 
 // site selector
 const allSites = ref<Site[]>([]);
-const selectedSiteIds = useRouteQuery({ name: "site", defaultValue: [], type: queryStringArray });
+const selectedSiteIds = useRouteQuery({
+  name: "site",
+  defaultValue: [],
+  type: queryStringArray,
+});
 const showAllSites = ref(false);
 const siteOptions = computed(() =>
   showAllSites.value ? allSites.value : allSites.value.filter((site) => site.type.includes("cloudnet")),
@@ -294,38 +298,74 @@ const siteOptions = computed(() =>
 // dates
 const beginningOfHistory = ref("1970-01-01");
 const today = ref(dateToString(new Date()));
-const dateFrom = useRouteQuery({ name: "dateFrom", defaultValue: today.value, type: queryString });
+const dateFrom = useRouteQuery({
+  name: "dateFrom",
+  defaultValue: today.value,
+  type: queryString,
+});
 const dateFromError = ref<DateErrors>();
-const dateTo = useRouteQuery({ name: "dateTo", defaultValue: today.value, type: queryString });
+const dateTo = useRouteQuery({
+  name: "dateTo",
+  defaultValue: today.value,
+  type: queryString,
+});
 const dateToError = ref<DateErrors>();
 const showDateRange = ref(false);
 
 // products
 const allProducts = ref<Product[]>([]);
-const selectedProductIds = useRouteQuery({ name: "product", defaultValue: [], type: queryStringArray });
-const showExpProducts = useRouteQuery({ name: "experimental", defaultValue: false, type: queryBoolean });
+const selectedProductIds = useRouteQuery({
+  name: "product",
+  defaultValue: [],
+  type: queryStringArray,
+});
+const showExpProducts = useRouteQuery({
+  name: "experimental",
+  defaultValue: false,
+  type: queryBoolean,
+});
 const productOptions = computed(() =>
-  allProducts.value.filter((product) => showExpProducts.value || !product.experimental),
+  allProducts.value.filter(
+    // Evaluation (L3) products live in the dedicated model evaluation view, but
+    // EarthCARE products stay here even when tagged as evaluation.
+    (product) =>
+      (!product.type.includes("evaluation") || isEarthCareProduct(product.id)) &&
+      (showExpProducts.value || !product.experimental),
+  ),
 );
 
 // variables
-const selectedVariableIds = useRouteQuery({ name: "variable", defaultValue: [], type: queryStringArray });
+const selectedVariableIds = useRouteQuery({
+  name: "variable",
+  defaultValue: [],
+  type: queryStringArray,
+});
 const variableOptions = computed(() => {
   const formatProduct = (prod: Product) => prod.variables.map((variable) => ({ ...variable, product: prod }));
   if (selectedProductIds.value.length == 0) {
-    return allProducts.value.flatMap(formatProduct);
+    return allProducts.value
+      .filter((prod) => !prod.type.includes("evaluation") || isEarthCareProduct(prod.id))
+      .flatMap(formatProduct);
   }
   return allProducts.value.filter((prod) => selectedProductIds.value.includes(prod.id)).flatMap(formatProduct);
 });
 
 // instruments
 const allInstruments = ref<Instrument[]>([]);
-const selectedInstrumentIds = useRouteQuery({ name: "instrument", defaultValue: [], type: queryStringArray });
+const selectedInstrumentIds = useRouteQuery({
+  name: "instrument",
+  defaultValue: [],
+  type: queryStringArray,
+});
 
 // instrument PIDs
 type InstrumentPidOption = Option & { type: string };
 const allInstrumentPids = ref<InstrumentPidOption[]>([]);
-const selectedInstrumentPids = useRouteQuery({ name: "instrumentPid", defaultValue: [], type: queryStringArray });
+const selectedInstrumentPids = useRouteQuery({
+  name: "instrumentPid",
+  defaultValue: [],
+  type: queryStringArray,
+});
 
 // other
 const renderComplete = ref(false);
@@ -364,7 +404,11 @@ async function initView() {
   allProducts.value = products.data.sort(alphabeticalSort);
   allInstruments.value = instruments.data.sort(instrumentSort);
   allInstrumentPids.value = pids.data
-    .map((obj) => ({ id: obj.pid, humanReadableName: obj.name, type: obj.instrument.type }))
+    .map((obj) => ({
+      id: obj.pid,
+      humanReadableName: obj.name,
+      type: obj.instrument.type,
+    }))
     .sort(alphabeticalSort);
 
   if (

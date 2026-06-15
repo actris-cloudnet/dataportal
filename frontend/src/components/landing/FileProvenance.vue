@@ -31,7 +31,7 @@
                 {{ sourceFile.product.humanReadableName }}:
                 {{ sourceFile.instrument.model }}
               </template>
-              <template v-else-if="'model' in sourceFile">
+              <template v-else-if="sourceFile.model">
                 {{ sourceFile.product.humanReadableName }}:
                 {{ sourceFile.model.humanReadableName }}
               </template>

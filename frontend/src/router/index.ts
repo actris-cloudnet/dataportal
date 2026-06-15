@@ -35,6 +35,10 @@ const routes = [
     redirect: "/search/data",
   },
   {
+    path: "/model-evaluation",
+    redirect: "/model-evaluation/data",
+  },
+  {
     path: "/file/:uuid",
     component: () => import("@/views/FileView.vue"),
     props: true,
@@ -82,6 +86,15 @@ const routes = [
       title: "Search",
     },
     component: () => import("@/views/SearchView.vue"),
+    props: true,
+  },
+  {
+    path: "/model-evaluation/:mode",
+    name: "ModelEvaluation",
+    meta: {
+      title: "Model evaluation",
+    },
+    component: () => import("@/views/ModelEvaluationView.vue"),
     props: true,
   },
   {

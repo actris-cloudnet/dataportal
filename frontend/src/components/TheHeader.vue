@@ -121,6 +121,11 @@ function clickEvent(event: MouseEvent) {
             <span>Visualise data</span>
           </a>
         </li>
+        <li class="nav-item">
+          <a href="/model-evaluation">
+            <span>Model evaluation</span>
+          </a>
+        </li>
         <li class="nav-item nav-secondary">
           <router-link :to="{ name: 'Sites' }" @click="showMenu = false">
             <span>Sites</span>
