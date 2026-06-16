@@ -901,6 +901,7 @@ describe("DELETE /api/files/", () => {
       filename,
       checksum: generateHash(),
     };
+    if (options.version) file.version = "lol";
     if (pid) file.pid = pid;
     if (legacy) file.legacy = true;
     if (product === "model" && !file.model) file.model = "ecmwf";

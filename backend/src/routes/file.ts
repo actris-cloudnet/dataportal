@@ -21,7 +21,7 @@ import { ModelFile } from "../entity/File";
 import { SearchFileResponse } from "../entity/SearchFileResponse";
 import { Visualization } from "../entity/Visualization";
 import { ModelVisualization } from "../entity/ModelVisualization";
-import { Product, ProductType } from "../entity/Product";
+import { Product } from "../entity/Product";
 import { SoftwareService } from "../lib/software";
 import { InstrumentInfo } from "../entity/Instrument";
 
@@ -163,14 +163,10 @@ export class FileRoutes {
     if (!isFile(file))
       return next({ status: 422, errors: ["Request body is missing fields or has invalid values in them"] });
     if (!isValidFilename(file)) return next({ status: 400, errors: ["Filename does not match file metadata"] });
-    // Whether the file is stored as a ModelFile is decided by the product type,
-    // not by the mere presence of a model: evaluation products (e.g. L3) carry a
-    // model but are regular files. file.product may be a plain id (processing) or
-    // a product object (e.g. when re-submitting fetched metadata).
-    const productId = typeof file.product === "string" ? file.product : file.product?.id;
-    const product = await this.productRepo.findOneBy({ id: productId });
-    if (!product) return next({ status: 422, errors: ["Unknown product"] });
-    const isModel = product.type.includes(ProductType.MODEL);
+    const isModel = file.product === "model";
+    if (isModel && typeof file.model !== "string") {
+      return next({ status: 422, errors: ["Invalid model"] });
+    }
 
     const sourceFileIds = req.body.sourceFileIds || [];
     if (!Array.isArray(sourceFileIds) || sourceFileIds.some((id) => typeof id !== "string")) {

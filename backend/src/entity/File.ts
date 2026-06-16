@@ -148,17 +148,17 @@ export class ModelFile extends File {
 
 export function isFile(obj: any) {
   return (
-    "uuid" in obj &&
-    "measurementDate" in obj &&
+    typeof obj.uuid === "string" &&
     isValidDate(obj.measurementDate) &&
-    "site" in obj &&
-    "product" in obj &&
-    "checksum" in obj &&
-    "size" in obj &&
-    "format" in obj &&
-    "s3key" in obj &&
-    "filename" in obj &&
-    "version" in obj &&
-    (obj.volatile === true || (obj.volatile === false && "pid" in obj))
+    typeof obj.site === "string" &&
+    typeof obj.product === "string" &&
+    typeof obj.checksum === "string" &&
+    (typeof obj.size === "number" || (typeof obj.size === "string" && obj.size.match(/^\d+$/))) &&
+    typeof obj.format === "string" &&
+    (obj.s3key === null || typeof obj.s3key === "string") &&
+    typeof obj.filename === "string" &&
+    typeof obj.version === "string" &&
+    typeof obj.volatile === "boolean" &&
+    (obj.volatile === true || (obj.volatile === false && typeof obj.pid === "string"))
   );
 }
