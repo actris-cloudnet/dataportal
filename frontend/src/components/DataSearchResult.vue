@@ -158,7 +158,7 @@
               </router-link>
             </dd>
           </template>
-          <template v-else-if="'model' in previewResponse">
+          <template v-else-if="'model' in previewResponse && previewResponse.model">
             <dt>Model</dt>
             <dd>{{ previewResponse.model.humanReadableName }}</dd>
           </template>

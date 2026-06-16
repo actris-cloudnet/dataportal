@@ -58,10 +58,9 @@ export class FileRoutes {
         .addSelect(siteMetadataKeys)
         .leftJoinAndSelect("file.product", "product")
         .leftJoinAndSelect("file.software", "software")
+        .leftJoinAndSelect("file.model", "model")
         .orderBy('COALESCE(software."humanReadableName", software.code)', "ASC");
-      if (isModel) {
-        qb.leftJoinAndSelect("file.model", "model");
-      } else {
+      if (!isModel) {
         qb.leftJoinAndSelect("file.instrumentInfo", "instrumentInfo");
         qb.leftJoinAndSelect("instrumentInfo.instrument", "instrument");
         qb.leftJoinAndSelect("file.sourceRegularFiles", "sourceRegularFiles");

@@ -27,6 +27,7 @@ exports[`/api/files/:uuid request succeeds on instrument file 1`] = `
   },
   "legacy": false,
   "measurementDate": "2018-11-15",
+  "model": null,
   "newBucket": false,
   "pid": "",
   "product": {
