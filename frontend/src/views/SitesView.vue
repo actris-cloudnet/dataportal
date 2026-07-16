@@ -172,6 +172,8 @@ p {
   td,
   th {
     padding: 9px;
+    white-space: nowrap;
+    overflow-wrap: normal;
 
     &:nth-child(1) {
       padding-right: 0;
