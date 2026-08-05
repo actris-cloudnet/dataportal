@@ -22,6 +22,7 @@ withDefaults(defineProps<Props>(), { size: "normal" });
   color: white;
   font-weight: 600;
   border-radius: 999px;
+  white-space: nowrap;
 }
 
 .normal {

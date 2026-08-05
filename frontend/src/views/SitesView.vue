@@ -10,38 +10,40 @@
             <table class="table table-striped">
               <thead>
                 <tr>
-                  <th></th>
-                  <th>Location</th>
-                  <th>Country</th>
-                  <th>Station</th>
-                  <th>Latitude</th>
-                  <th>Longitude</th>
-                  <th>Altitude</th>
-                  <th>Network</th>
+                  <th class="column-status"></th>
+                  <th class="column-location">Location</th>
+                  <th class="column-country">Country</th>
+                  <th class="column-station">Station</th>
+                  <th class="column-latitude">Latitude</th>
+                  <th class="column-longitude">Longitude</th>
+                  <th class="column-altitude">Altitude</th>
+                  <th class="column-networks">Networks</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="site in item.sites" :key="site.id">
-                  <td>
+                  <td class="column-status">
                     <span :class="{ status: true, [site.status]: true }"></span>
                   </td>
-                  <td>
+                  <td class="column-location">
                     <router-link :to="{ name: 'Site', params: { siteId: site.id } }">
                       {{ site.humanReadableName }}
                     </router-link>
                   </td>
-                  <td>{{ site.country || "-" }}</td>
-                  <td>
+                  <td class="column-country">{{ site.country || "-" }}</td>
+                  <td class="column-station">
                     {{ site.stationName || "" }}
                   </td>
-                  <td>
+                  <td class="column-latitude">
                     {{ site.latitude != null ? formatLatitude(site.latitude) : "-" }}
                   </td>
-                  <td>
+                  <td class="column-longitude">
                     {{ site.longitude != null ? formatLongitude(site.longitude) : "-" }}
                   </td>
-                  <td>{{ site.altitude != null ? `${site.altitude} m` : "-" }}</td>
-                  <td>
+                  <td class="column-altitude">
+                    {{ site.altitude != null ? `${site.altitude} m` : "-" }}
+                  </td>
+                  <td class="column-networks">
                     <div class="tags">
                       <BaseTag v-if="site.actrisId" type="actris" size="small">ACTRIS</BaseTag>
                       <BaseTag v-if="site.type.includes('arm')" type="arm" size="small">ARM</BaseTag>
@@ -162,6 +164,7 @@ p {
 .table {
   width: unset;
   margin-top: 0.5rem;
+  overflow-wrap: normal;
 }
 
 .table-striped {
@@ -235,5 +238,18 @@ p {
 .tags {
   display: flex;
   gap: 0.25rem;
+}
+
+@media screen and (max-width: 600px) {
+  .table {
+    width: 100%;
+  }
+  .column-station,
+  .column-latitude,
+  .column-longitude,
+  .column-altitude,
+  .column-networks {
+    display: none;
+  }
 }
 </style>
