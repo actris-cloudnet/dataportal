@@ -2,6 +2,14 @@
   <div>
     <CalibrationTable :data="telegramChanged" :config="{ title: 'Telegram', label: 'Telegram' }" />
     <CalibrationTable
+      :data="calibrationData.field_separator"
+      :config="{ title: 'Field separator', label: 'Field separator' }"
+    />
+    <CalibrationTable
+      :data="calibrationData.decimal_separator"
+      :config="{ title: 'Decimal separator', label: 'Decimal separator' }"
+    />
+    <CalibrationTable
       :data="calibrationData.missing_timestamps"
       :config="{ title: 'Missing timestamps', label: 'Timestamps missing from raw data' }"
     />
