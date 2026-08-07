@@ -78,7 +78,8 @@ export class VisualizationRoutes {
         .leftJoinAndSelect("file.product", "product")
         .where("file.uuid = :uuid", params)
         .addOrderBy("product_variable.order", "ASC");
-      if (isModel) qb.leftJoinAndSelect("file.model", "model");
+      // Evaluation regular files also have a model relation.
+      qb.leftJoinAndSelect("file.model", "model");
       if (!isModel) {
         qb.leftJoinAndSelect("file.instrumentInfo", "instrumentInfo");
         qb.leftJoinAndSelect("instrumentInfo.instrument", "instrument");
