@@ -339,7 +339,7 @@ export class QueueService {
     const allowedKeys = ["derivedProducts"];
     for (const key in output) {
       if (!allowedKeys.includes(key)) {
-        throw new Error(`Unknown key ${key}`);
+        throw new Error(`Unknown option: ${key}`);
       }
     }
     if (typeof output.derivedProducts !== "undefined") {

@@ -903,7 +903,18 @@ describe("/api/queue/batch", () => {
   it("rejects invalid parameters without creating tasks", async () => {
     await expect(
       axios.post(batchUrl, { type: "process", productIds: ["lidar", "kaboom"], dryRun: false }, { auth }),
-    ).rejects.toMatchObject({ response: { status: 400 } });
+    ).rejects.toMatchObject({ response: { status: 400, data: { errors: "Invalid productIds: kaboom" } } });
+    expect(await taskRepo.count()).toBe(0);
+  });
+
+  it("rejects invalid options without creating tasks", async () => {
+    await expect(
+      axios.post(
+        batchUrl,
+        { type: "process", productIds: ["lidar"], options: { msg: "Hello" }, dryRun: false },
+        { auth },
+      ),
+    ).rejects.toMatchObject({ response: { status: 400, data: { errors: "Unknown option: msg" } } });
     expect(await taskRepo.count()).toBe(0);
   });
 
