@@ -1,4 +1,4 @@
-import { NextFunction, RequestHandler } from "express";
+import { RequestHandler } from "express";
 import { QueueService } from "../lib/queue";
 import { isTaskStatus, Task, TaskStatus } from "../entity/Task";
 import { DataSource, In, Repository } from "typeorm";
@@ -30,13 +30,17 @@ export class QueueRoutes {
 
   submitBatch: RequestHandler = async (req, res, next) => {
     const searchParams = req.body;
-    await Promise.all([
-      this.checkParam(this.siteRepo, "id", searchParams, "siteIds", next),
-      this.checkParam(this.productRepo, "id", searchParams, "productIds", next),
-      this.checkParam(this.instrumentRepo, "id", searchParams, "instrumentIds", next),
-      this.checkParam(this.modelRepo, "id", searchParams, "modelIds", next),
-      this.checkParam(this.instrumentInfoRepo, "uuid", searchParams, "instrumentUuids", next),
+    const paramErrors = await Promise.all([
+      this.checkParam(this.siteRepo, "id", searchParams, "siteIds"),
+      this.checkParam(this.productRepo, "id", searchParams, "productIds"),
+      this.checkParam(this.instrumentRepo, "id", searchParams, "instrumentIds"),
+      this.checkParam(this.modelRepo, "id", searchParams, "modelIds"),
+      this.checkParam(this.instrumentInfoRepo, "uuid", searchParams, "instrumentUuids"),
     ]);
+    const paramError = paramErrors.find((error) => error !== null);
+    if (paramError) {
+      return next({ status: 400, errors: paramError });
+    }
     if (searchParams.modelIds) {
       if (!("productIds" in searchParams)) {
         searchParams.productIds = ["model"];
@@ -332,17 +336,18 @@ export class QueueRoutes {
     }
   }
 
-  private async checkParam(repo: any, column: string, searchParams: any, key: string, next: NextFunction) {
-    if (!(key in searchParams)) return;
+  private async checkParam(repo: any, column: string, searchParams: any, key: string): Promise<string | null> {
+    if (!(key in searchParams)) return null;
     if (!isStringArray(searchParams[key])) {
-      return next({ status: 400, errors: `${key} should be string array` });
+      return `${key} should be string array`;
     }
     const objs = await repo.find({ where: { [column]: In(searchParams[key]) }, select: [column] });
     const validIds = new Set(objs.map((obj: any) => obj[column]));
     const invalidIds = searchParams[key].filter((id: any) => !validIds.has(id));
     if (invalidIds.length > 0) {
-      return next({ status: 400, errors: `Invalid ${key}: ${invalidIds.join(", ")}` });
+      return `Invalid ${key}: ${invalidIds.join(", ")}`;
     }
+    return null;
   }
 
   /// Recursively find all possible source instruments for a given product.
