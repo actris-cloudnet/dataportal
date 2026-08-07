@@ -14,6 +14,7 @@ export interface VisualizationItem {
 export class VisualizationResponse {
   sourceFileId: string;
   locationHumanReadable: string;
+  productId: string;
   productHumanReadable: string;
   volatile: boolean;
   legacy: boolean;
@@ -44,12 +45,13 @@ export class VisualizationResponse {
           : null,
     }));
     if (file instanceof RegularFile) {
-      this.source = file.instrumentInfo;
+      this.source = file.instrumentInfo ?? file.model;
     } else if (file instanceof ModelFile) {
       this.source = file.model;
     } else {
       this.source = null;
     }
+    this.productId = file.product.id;
     this.productHumanReadable = file.product.humanReadableName;
     this.locationHumanReadable = file.site.humanReadableName;
     this.volatile = file.volatile;

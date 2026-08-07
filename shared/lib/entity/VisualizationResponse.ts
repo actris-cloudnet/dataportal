@@ -12,6 +12,7 @@ export interface VisualizationItem {
 export interface VisualizationResponse {
   sourceFileId: string;
   locationHumanReadable: string;
+  productId: string;
   productHumanReadable: string;
   volatile: boolean;
   legacy: boolean;
