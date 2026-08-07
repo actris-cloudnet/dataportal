@@ -62,8 +62,13 @@ export class QueueRoutes {
         relations: { sourceProducts: true },
       });
       for (const product of products) {
-        if (product.sourceProducts.length === 0) continue;
-        batches.push(this.submitProductBatch(searchParams, batchId, product));
+        if (product.id.startsWith("l3-")) {
+          if (!searchParams.instrumentIds && !searchParams.instrumentUuids) {
+            batches.push(this.submitEvaluationBatch(searchParams, batchId, product));
+          }
+        } else if (product.sourceProducts.length > 0) {
+          batches.push(this.submitProductBatch(searchParams, batchId, product));
+        }
       }
     }
     const counts = await Promise.all(batches);
@@ -220,16 +225,22 @@ export class QueueRoutes {
   }
 
   private async submitModelBatch(filters: Record<string, any>, batchId: string) {
-    const where = [];
-    const parameters = [];
-    if (filters.modelIds) {
-      where.push(`upload."modelId" = ANY ($${parameters.length + 1})`);
-      parameters.push(filters.modelIds);
-    }
-    return this.batchQuery(filters, where, parameters, {
+    return this.batchQuery(filters, [], [], {
       table: "model_upload",
       batchId,
       productId: "'model'::text",
+      modelId: `upload."modelId"`,
+    });
+  }
+
+  /// Submit batch for an L3 product: task per model with a processed model file.
+  private async submitEvaluationBatch(filters: Record<string, any>, batchId: string, product: Product) {
+    const where = [`upload."tombstoneReason" IS NULL`];
+    const parameters = [product.id];
+    return this.batchQuery(filters, where, parameters, {
+      table: "model_file",
+      batchId,
+      productId: "$1::text",
       modelId: `upload."modelId"`,
     });
   }
@@ -272,6 +283,10 @@ export class QueueRoutes {
     if (searchParams.siteIds) {
       where.push(`upload."siteId" = ANY ($${parameters.length + 1})`);
       parameters.push(searchParams.siteIds);
+    }
+    if (searchParams.modelIds && options.modelId) {
+      where.push(`${options.modelId} = ANY ($${parameters.length + 1})`);
+      parameters.push(searchParams.modelIds);
     }
     if (searchParams.date) {
       where.push(`upload."measurementDate" = $${parameters.length + 1}`);

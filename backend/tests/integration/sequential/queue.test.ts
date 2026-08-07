@@ -992,6 +992,55 @@ describe("/api/queue/batch", () => {
     expect(await taskRepo.countBy({ modelId: "icon-iglo-12-23" })).toBe(2);
   });
 
+  it("creates L3 tasks", async () => {
+    await axios.post(batchUrl, { type: "process", productIds: ["l3-cf"], dryRun: false }, { auth });
+    expect(await taskRepo.count()).toBe(6);
+    expect(await taskRepo.countBy({ productId: "l3-cf", modelId: "ecmwf" })).toBe(4);
+    expect(await taskRepo.countBy({ productId: "l3-cf", modelId: "icon-iglo-12-23" })).toBe(2);
+    expect(
+      await taskRepo.existsBy({
+        measurementDate: new Date("2020-01-26"),
+        siteId: "granada",
+        productId: "l3-cf",
+        modelId: "ecmwf",
+        instrumentInfoUuid: IsNull(),
+        options: { derivedProducts: true },
+      }),
+    ).toBeTruthy();
+  });
+
+  it("creates L3 tasks filtered by model", async () => {
+    await axios.post(
+      batchUrl,
+      { type: "process", productIds: ["l3-iwc"], modelIds: ["icon-iglo-12-23"], dryRun: false },
+      { auth },
+    );
+    expect(await taskRepo.count()).toBe(2);
+    expect(await taskRepo.countBy({ productId: "l3-iwc", modelId: "icon-iglo-12-23" })).toBe(2);
+    expect(await taskRepo.countBy({ siteId: "bucharest", productId: "l3-iwc" })).toBe(2);
+  });
+
+  it("creates L3 tasks filtered by site and date", async () => {
+    await axios.post(
+      batchUrl,
+      { type: "process", productIds: ["l3-lwc"], siteIds: ["bucharest"], dateFrom: "2020-12-01", dryRun: false },
+      { auth },
+    );
+    expect(await taskRepo.count()).toBe(2);
+    const task = { measurementDate: new Date("2020-12-05"), siteId: "bucharest", productId: "l3-lwc" };
+    expect(await taskRepo.existsBy({ ...task, modelId: "ecmwf" })).toBeTruthy();
+    expect(await taskRepo.existsBy({ ...task, modelId: "icon-iglo-12-23" })).toBeTruthy();
+  });
+
+  it("does not create L3 tasks when filtering by instrument", async () => {
+    await axios.post(
+      batchUrl,
+      { type: "process", productIds: ["l3-cf"], instrumentIds: ["halo-doppler-lidar"], dryRun: false },
+      { auth },
+    );
+    expect(await taskRepo.count()).toBe(0);
+  });
+
   it("creates categorize tasks", async () => {
     await axios.post(batchUrl, { type: "process", productIds: ["categorize"], dryRun: false }, { auth });
     expect(await taskRepo.count()).toBe(5);
