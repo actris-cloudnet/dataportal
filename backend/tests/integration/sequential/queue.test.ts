@@ -900,6 +900,13 @@ describe("/api/queue/batch", () => {
     ).rejects.toMatchObject({ response: { status: 401 } });
   });
 
+  it("rejects invalid parameters without creating tasks", async () => {
+    await expect(
+      axios.post(batchUrl, { type: "process", productIds: ["lidar", "kaboom"], dryRun: false }, { auth }),
+    ).rejects.toMatchObject({ response: { status: 400 } });
+    expect(await taskRepo.count()).toBe(0);
+  });
+
   it("returns task count on dry run", async () => {
     const res = await axios.post(batchUrl, { type: "process", productIds: ["lidar"], dryRun: true }, { auth });
     expect(res.data).toEqual({ taskCount: 2 });
