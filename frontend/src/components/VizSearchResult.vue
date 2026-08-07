@@ -87,7 +87,7 @@ function sourceFileTitle(file: VisualizationResponse): string {
   if (file.source === null) return file.productHumanReadable;
   if (!("humanReadableName" in file.source)) return `${file.source.name} ${file.source.type}`;
   if (file.productId === "model") return file.source.humanReadableName;
-  return `${file.productHumanReadable} (${file.source.humanReadableName})`;
+  return `${file.productHumanReadable}, ${file.source.humanReadableName}`;
 }
 
 const noSelectionsMade = computed(
