@@ -71,8 +71,35 @@ export class QueueRoutes {
         }
       }
     }
-    const counts = await Promise.all(batches);
-    res.send(searchParams.dryRun ? { taskCount: counts.reduce((total, count) => total + count, 0) } : { batchId });
+    const results = await Promise.all(batches);
+    if (searchParams.dryRun) {
+      const total = results
+        .filter((a) => !!a)
+        .reduce(
+          (a, b) => {
+            a.taskCount += b.taskCount;
+            if (a.dateFrom < b.dateFrom) a.dateFrom = b.dateFrom;
+            if (a.dateTo > b.dateTo) a.dateTo = b.dateTo;
+            for (const siteId of b.siteIds) a.siteIds.add(siteId);
+            for (const productId of b.productIds) a.productIds.add(productId);
+            return a;
+          },
+          {
+            taskCount: 0,
+            dateFrom: "0000-00-00",
+            dateTo: "9999-99-99",
+            siteIds: new Set(),
+            productIds: new Set(),
+          },
+        );
+      res.send({
+        ...total,
+        siteIds: [...total.siteIds],
+        productIds: [...total.productIds],
+      });
+    } else {
+      res.send({ batchId });
+    }
   };
 
   cancelBatch: RequestHandler = async (req, res) => {
@@ -304,7 +331,7 @@ export class QueueRoutes {
       `$${parameters.length + 1}::task_type_enum`, // type
       `upload."siteId"`, // siteId
       `upload."measurementDate"`, // measurementDate
-      `${options.productId}`, // productId
+      `${options.productId} AS "productId"`, // productId
       `${options.instrumentInfoUuid || "NULL::uuid"}`, // instrumentInfoUuid
       `${options.modelId || "NULL::text"}`, // modelId
       `'${TaskStatus.CREATED}'::task_status_enum`, // status
@@ -314,8 +341,7 @@ export class QueueRoutes {
       `$${parameters.length + 3}::jsonb`, // options
       `$${parameters.length + 4}::text`, // queueId
     ].join(", ");
-    const select = searchParams.dryRun ? `COUNT(DISTINCT (${columns})) AS "taskCount"` : `DISTINCT ${columns}`;
-    let query = `SELECT ${select} FROM ${options.table} upload`;
+    let query = `SELECT DISTINCT ${columns} FROM ${options.table} upload`;
     if (options.join) {
       query += ` ${options.join}`;
     }
@@ -324,11 +350,24 @@ export class QueueRoutes {
     }
     parameters.push(searchParams.type, options.batchId, searchParams.options, searchParams.queueId || null);
     if (searchParams.dryRun) {
-      const result = await this.dataSource.query(query, parameters);
-      return parseInt(result[0].taskCount);
+      const result = await this.dataSource.query(
+        `SELECT COUNT(*) AS "taskCount",
+                to_char(MIN("measurementDate"), 'YYYY-MM-DD') AS "dateFrom",
+                to_char(MAX("measurementDate"), 'YYYY-MM-DD') AS "dateTo",
+                array_agg(DISTINCT "siteId") AS "siteIds",
+                array_agg(DISTINCT "productId") AS "productIds"
+        FROM (${query}) t`,
+        parameters,
+      );
+      return {
+        taskCount: parseInt(result[0].taskCount),
+        dateFrom: result[0].dateFrom as string,
+        dateTo: result[0].dateTo as string,
+        siteIds: new Set(result[0].siteIds as string[]),
+        productIds: new Set(result[0].productIds as string[]),
+      };
     } else {
       await this.queueService.publishSql(query, parameters);
-      return 0;
     }
   }
 

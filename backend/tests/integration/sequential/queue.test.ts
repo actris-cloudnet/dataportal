@@ -918,9 +918,15 @@ describe("/api/queue/batch", () => {
     expect(await taskRepo.count()).toBe(0);
   });
 
-  it("returns task count on dry run", async () => {
+  it("returns information on dry run", async () => {
     const res = await axios.post(batchUrl, { type: "process", productIds: ["lidar"], dryRun: true }, { auth });
-    expect(res.data).toEqual({ taskCount: 2 });
+    expect(res.data).toEqual({
+      taskCount: 2,
+      dateFrom: "2020-08-12",
+      dateTo: "2025-05-01",
+      productIds: ["lidar"],
+      siteIds: ["bucharest"],
+    });
   });
 
   it("returns batch identifier on non-dry run", async () => {
