@@ -42,12 +42,8 @@ export class QueueRoutes {
     } catch (error: any) {
       return next({ status: 400, errors: error.message || "Unknown error" });
     }
-    if (searchParams.modelIds) {
-      if (!("productIds" in searchParams)) {
-        searchParams.productIds = ["model"];
-      } else if (searchParams.productIds.includes("model")) {
-        searchParams.productIds.push("model");
-      }
+    if (searchParams.modelIds && !searchParams.productIds) {
+      searchParams.productIds = ["model"];
     }
 
     const batchId = randomName();

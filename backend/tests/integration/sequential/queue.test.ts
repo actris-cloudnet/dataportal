@@ -1001,13 +1001,13 @@ describe("/api/queue/batch", () => {
   it("creates ECMWF model tasks", async () => {
     await axios.post(batchUrl, { type: "process", modelIds: ["ecmwf"], dryRun: false }, { auth });
     expect(await taskRepo.count()).toBe(3);
-    expect(await taskRepo.countBy({ modelId: "ecmwf" })).toBe(3);
+    expect(await taskRepo.countBy({ productId: "model", modelId: "ecmwf" })).toBe(3);
   });
 
   it("creates ICON model tasks", async () => {
     await axios.post(batchUrl, { type: "process", modelIds: ["icon-iglo-12-23"], dryRun: false }, { auth });
     expect(await taskRepo.count()).toBe(2);
-    expect(await taskRepo.countBy({ modelId: "icon-iglo-12-23" })).toBe(2);
+    expect(await taskRepo.countBy({ productId: "model", modelId: "icon-iglo-12-23" })).toBe(2);
   });
 
   it("creates L3 tasks", async () => {
