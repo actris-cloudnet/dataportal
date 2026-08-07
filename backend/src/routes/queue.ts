@@ -30,16 +30,17 @@ export class QueueRoutes {
 
   submitBatch: RequestHandler = async (req, res, next) => {
     const searchParams = req.body;
-    const paramErrors = await Promise.all([
-      this.checkParam(this.siteRepo, "id", searchParams, "siteIds"),
-      this.checkParam(this.productRepo, "id", searchParams, "productIds"),
-      this.checkParam(this.instrumentRepo, "id", searchParams, "instrumentIds"),
-      this.checkParam(this.modelRepo, "id", searchParams, "modelIds"),
-      this.checkParam(this.instrumentInfoRepo, "uuid", searchParams, "instrumentUuids"),
-    ]);
-    const paramError = paramErrors.find((error) => error !== null);
-    if (paramError) {
-      return next({ status: 400, errors: paramError });
+    try {
+      await Promise.all([
+        this.checkParam(this.siteRepo, "id", searchParams, "siteIds"),
+        this.checkParam(this.productRepo, "id", searchParams, "productIds"),
+        this.checkParam(this.instrumentRepo, "id", searchParams, "instrumentIds"),
+        this.checkParam(this.modelRepo, "id", searchParams, "modelIds"),
+        this.checkParam(this.instrumentInfoRepo, "uuid", searchParams, "instrumentUuids"),
+      ]);
+      searchParams.options = this.queueService.validateTaskOptions(searchParams.type, searchParams.options);
+    } catch (error: any) {
+      return next({ status: 400, errors: error.message || "Unknown error" });
     }
     if (searchParams.modelIds) {
       if (!("productIds" in searchParams)) {
@@ -49,7 +50,6 @@ export class QueueRoutes {
       }
     }
 
-    searchParams.options = this.queueService.validateTaskOptions(searchParams.type, searchParams.options);
     const batchId = randomName();
     const batches = [];
     batches.push(this.submitInstrumentBatch(searchParams, batchId));
@@ -336,18 +336,17 @@ export class QueueRoutes {
     }
   }
 
-  private async checkParam(repo: any, column: string, searchParams: any, key: string): Promise<string | null> {
+  private async checkParam(repo: any, column: string, searchParams: any, key: string) {
     if (!(key in searchParams)) return null;
     if (!isStringArray(searchParams[key])) {
-      return `${key} should be string array`;
+      throw new Error(`${key} should be string array`);
     }
     const objs = await repo.find({ where: { [column]: In(searchParams[key]) }, select: [column] });
     const validIds = new Set(objs.map((obj: any) => obj[column]));
     const invalidIds = searchParams[key].filter((id: any) => !validIds.has(id));
     if (invalidIds.length > 0) {
-      return `Invalid ${key}: ${invalidIds.join(", ")}`;
+      throw new Error(`Invalid ${key}: ${invalidIds.join(", ")}`);
     }
-    return null;
   }
 
   /// Recursively find all possible source instruments for a given product.
