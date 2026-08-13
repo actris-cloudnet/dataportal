@@ -267,11 +267,14 @@ export class UserAccountRoutes {
     if (!hasProperty(req.body, "username") && !hasProperty(req.body, "personId")) {
       return next({ status: 401, errors: "Missing the username or personId" });
     }
-    if (hasProperty(req.body, "username")) {
-      this.validateUsername(req, next);
+    if (hasProperty(req.body, "username") && !this.validateUsername(req, next)) {
+      return;
     }
-    if (hasProperty(req.body, "password")) {
-      this.validatePassword(req, next);
+    if (hasProperty(req.body, "personId") && !this.validatePersonId(req, next)) {
+      return;
+    }
+    if (hasProperty(req.body, "password") && !this.validatePassword(req, next)) {
+      return;
     }
 
     if (hasProperty(req.body, "permissions")) {
@@ -284,11 +287,14 @@ export class UserAccountRoutes {
   };
 
   validatePut: RequestHandler = async (req, res, next) => {
-    if (hasProperty(req.body, "username") && req.body.username !== null) {
-      this.validateUsername(req, next);
+    if (hasProperty(req.body, "username") && req.body.username !== null && !this.validateUsername(req, next)) {
+      return;
     }
-    if (hasProperty(req.body, "password")) {
-      this.validatePassword(req, next);
+    if (hasProperty(req.body, "personId") && !this.validatePersonId(req, next)) {
+      return;
+    }
+    if (hasProperty(req.body, "password") && !this.validatePassword(req, next)) {
+      return;
     }
 
     if (hasProperty(req.body, "permissions")) {
@@ -300,20 +306,36 @@ export class UserAccountRoutes {
     return next();
   };
 
-  validateUsername(req: Request, next: NextFunction): void {
+  validateUsername(req: Request, next: NextFunction): boolean {
     if (typeof req.body.username !== "string") {
       next({ status: 401, errors: "username must be a string" });
-    } else if (req.body.username.length === 0) {
-      next({ status: 401, errors: "username must be nonempty" });
+      return false;
     }
+    if (req.body.username.length === 0) {
+      next({ status: 401, errors: "username must be nonempty" });
+      return false;
+    }
+    return true;
   }
 
-  validatePassword(req: Request, next: NextFunction): void {
+  validatePersonId(req: Request, next: NextFunction): boolean {
+    if (typeof req.body.personId !== "number") {
+      next({ status: 401, errors: "personId must be a number" });
+      return false;
+    }
+    return true;
+  }
+
+  validatePassword(req: Request, next: NextFunction): boolean {
     if (typeof req.body.password !== "string") {
       next({ status: 401, errors: "password must be a string" });
-    } else if (req.body.password.length === 0) {
-      next({ status: 401, errors: "password must be nonempty" });
+      return false;
     }
+    if (req.body.password.length === 0) {
+      next({ status: 401, errors: "password must be nonempty" });
+      return false;
+    }
+    return true;
   }
 
   validatePermissions: RequestHandler = async (req, res, next) => {
