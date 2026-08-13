@@ -189,6 +189,20 @@ export class UploadRoutes {
     res.sendStatus(200);
   };
 
+  updateStatus: RequestHandler = async (req, res, next) => {
+    const newStatus = req.body.status;
+    if (newStatus !== Status.INVALID && newStatus !== Status.UPLOADED) {
+      return next({ status: 422, errors: 'Status must be "invalid" or "uploaded"' });
+    }
+    const upload = await this.instrumentUploadRepo.findOneBy({ uuid: req.params.uuid as string });
+    if (!upload) return next({ status: 404, errors: "No file matches the provided uuid" });
+    if (upload.status === Status.CREATED) {
+      return next({ status: 422, errors: "Cannot change status of a file without data" });
+    }
+    await this.instrumentUploadRepo.update({ uuid: upload.uuid }, { status: newStatus, updatedAt: new Date() });
+    res.sendStatus(200);
+  };
+
   metadata: RequestHandler = async (req, res, next) => {
     const checksum = req.params.checksum as string;
     const upload = await this.findAnyUpload((repo, model) =>
