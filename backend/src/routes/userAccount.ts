@@ -85,7 +85,7 @@ export class UserAccountRoutes {
     };
   };
 
-  postUserAccount: RequestHandler = async (req, res) => {
+  postUserAccount: RequestHandler = async (req, res, next) => {
     const where = req.body.personId ? { person: { id: req.body.personId } } : { username: req.body.username };
     let user = await this.userRepo.findOne({
       where,
@@ -98,6 +98,9 @@ export class UserAccountRoutes {
     if (user) {
       res.json(this.userResponse(user));
       return;
+    }
+    if (req.body.username != null && !(await this.usernameAvailable(req.body.username))) {
+      return next({ status: 400, errors: "username is already taken" });
     }
 
     user = new UserAccount();
