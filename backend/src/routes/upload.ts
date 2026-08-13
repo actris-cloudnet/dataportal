@@ -182,10 +182,7 @@ export class UploadRoutes {
     const partialUpload = req.body;
     if (!partialUpload.uuid) return next({ status: 422, errors: "Request body is missing uuid" });
     const upload = await this.findAnyUpload((repo, model) =>
-      repo.findOne({
-        where: { uuid: partialUpload.uuid },
-        relations: { site: true, ...(model ? { model: true } : { instrumentInfo: true }) },
-      }),
+      repo.findOne({ where: { uuid: partialUpload.uuid }, relations: this.uploadRelations(model) }),
     );
     if (!upload) return next({ status: 422, errors: "No file matches the provided uuid" });
     await this.findRepoForUpload(upload).update({ uuid: partialUpload.uuid }, partialUpload);
@@ -195,10 +192,7 @@ export class UploadRoutes {
   metadata: RequestHandler = async (req, res, next) => {
     const checksum = req.params.checksum as string;
     const upload = await this.findAnyUpload((repo, model) =>
-      repo.findOne({
-        where: { checksum },
-        relations: { site: true, ...(model ? { model: true } : { instrumentInfo: true }) },
-      }),
+      repo.findOne({ where: { checksum }, relations: this.uploadRelations(model) }),
     );
     if (!upload) return next({ status: 404, errors: "No metadata was found with provided id" });
     const responseData = this.augmentUploadResponse(true)(upload);
@@ -570,6 +564,10 @@ export class UploadRoutes {
       console.log(`Warning: filename contains slashes (site: ${req.params.site}, filename: ${filename})`);
     return next();
   };
+
+  uploadRelations(model?: boolean) {
+    return model ? { site: true, model: true } : { site: true, instrumentInfo: true };
+  }
 
   async findAnyUpload(
     searchFunc: (
