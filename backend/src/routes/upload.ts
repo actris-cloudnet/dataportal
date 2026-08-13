@@ -182,7 +182,10 @@ export class UploadRoutes {
     const partialUpload = req.body;
     if (!partialUpload.uuid) return next({ status: 422, errors: "Request body is missing uuid" });
     const upload = await this.findAnyUpload((repo, model) =>
-      repo.findOne({ where: { uuid: partialUpload.uuid }, relations: ["site", model ? "model" : "instrumentInfo"] }),
+      repo.findOne({
+        where: { uuid: partialUpload.uuid },
+        relations: { site: true, ...(model ? { model: true } : { instrumentInfo: true }) },
+      }),
     );
     if (!upload) return next({ status: 422, errors: "No file matches the provided uuid" });
     await this.findRepoForUpload(upload).update({ uuid: partialUpload.uuid }, partialUpload);
@@ -192,7 +195,10 @@ export class UploadRoutes {
   metadata: RequestHandler = async (req, res, next) => {
     const checksum = req.params.checksum as string;
     const upload = await this.findAnyUpload((repo, model) =>
-      repo.findOne({ where: { checksum }, relations: ["site", model ? "model" : "instrumentInfo"] }),
+      repo.findOne({
+        where: { checksum },
+        relations: { site: true, ...(model ? { model: true } : { instrumentInfo: true }) },
+      }),
     );
     if (!upload) return next({ status: 404, errors: "No metadata was found with provided id" });
     const responseData = this.augmentUploadResponse(true)(upload);

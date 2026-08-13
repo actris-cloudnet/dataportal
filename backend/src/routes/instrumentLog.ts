@@ -1,4 +1,4 @@
-import { DataSource, Repository } from "typeorm";
+import { DataSource, IsNull, Repository } from "typeorm";
 import { NextFunction, Request, RequestHandler } from "express";
 import * as http from "http";
 import { randomBytes, createHash } from "crypto";
@@ -182,7 +182,7 @@ export class InstrumentLogRoutes {
     if (logs.length === 0) return res.json([]);
     const images = await this.imageRepo.find({
       where: logs.map((l) => ({ instrumentLogId: l.id })),
-      select: ["id", "instrumentLogId", "filename", "size"],
+      select: { id: true, instrumentLogId: true, filename: true, size: true },
     });
     const imagesByLogId = new Map<number, { id: number; filename: string; size: number }[]>();
     for (const img of images) {
@@ -234,7 +234,13 @@ export class InstrumentLogRoutes {
       endDate: endDate ?? null,
       notes: notes ?? null,
     };
-    const existing = await this.logRepo.findOneBy(fields);
+    const existing = await this.logRepo.findOneBy({
+      ...fields,
+      detail: fields.detail ?? IsNull(),
+      result: fields.result ?? IsNull(),
+      endDate: fields.endDate ?? IsNull(),
+      notes: fields.notes ?? IsNull(),
+    });
     if (existing) {
       return next({ status: 409, errors: "Duplicate log entry" });
     }

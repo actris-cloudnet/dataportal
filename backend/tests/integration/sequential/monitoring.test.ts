@@ -35,7 +35,7 @@ beforeAll(async () => {
   site = await siteRepo.findOneByOrFail({ id: "hyytiala" });
 
   const variables = await mpVarRepo.find({
-    relations: ["monitoringProduct"],
+    relations: { monitoringProduct: true },
     take: 1,
   });
 

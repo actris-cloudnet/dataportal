@@ -140,7 +140,9 @@ export class QueueService {
   }
 
   count(filter?: { queueId?: string; status?: TaskStatus }) {
-    return this.taskRepo.count({ where: { queueId: filter?.queueId || IsNull(), status: filter?.status } });
+    return this.taskRepo.count({
+      where: { queueId: filter?.queueId || IsNull(), ...(filter?.status && { status: filter.status }) },
+    });
   }
 
   async setPriority(id: Task["id"], priority: number) {

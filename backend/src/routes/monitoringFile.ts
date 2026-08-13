@@ -41,7 +41,7 @@ export class MonitoringFileRoutes {
               uuid: instrumentUuid,
             },
           },
-          relations: ["monitoringVisualizations"],
+          relations: { monitoringVisualizations: true },
         });
 
         if (existing) {

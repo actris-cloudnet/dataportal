@@ -81,13 +81,13 @@ export class FileRoutes {
     const getFileByUuid = (repo: Repository<RegularFile> | Repository<ModelFile>, _isModel: boolean | undefined) =>
       repo.createQueryBuilder("file").where("file.uuid = :uuid", req.params).getOne();
 
-    const select: any = ["uuid", "createdAt"];
+    const select: any = { uuid: true, createdAt: true };
     const allowedProps = ["pid", "dvasId", "legacy", "checksum", "size", "format"];
     const extraProps = toArray(req.query.properties as any) || [];
     const unknownProps = [];
     for (const prop of extraProps) {
       if (allowedProps.includes(prop)) {
-        select.push(prop);
+        select[prop] = true;
       } else {
         unknownProps.push(prop);
       }

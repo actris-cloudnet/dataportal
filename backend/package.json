@@ -26,7 +26,7 @@
     "passport-orcid": "^0.0.4",
     "pg": "^8.8.0",
     "pg-query-stream": "^4.2.4",
-    "typeorm": "^0.3.17",
+    "typeorm": "^1.1.0",
     "uuid": "^11.1.0",
     "validator": "^13.7.0"
   },

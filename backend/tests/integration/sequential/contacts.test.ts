@@ -175,7 +175,6 @@ describe("POST /api/sites/:siteId/contacts", () => {
       { auth: managerCreds },
     );
     expect(res1.status).toBe(201);
-    const personId1 = res1.data.person.id;
 
     const res2 = await axios.post(
       siteUrl,
@@ -183,11 +182,12 @@ describe("POST /api/sites/:siteId/contacts", () => {
       { auth: managerCreds },
     );
     expect(res2.status).toBe(201);
-    expect(res2.data.person.id).toBe(personId1);
+    const persons = await personRepo.findBy({ firstName: "Dedup", lastName: "Test" });
+    expect(persons).toHaveLength(1);
 
     await contactRepo.delete({ id: res1.data.id });
     await contactRepo.delete({ id: res2.data.id });
-    await personRepo.delete({ id: personId1 });
+    await personRepo.delete({ id: persons[0].id });
   });
 
   it("creates separate persons when names match but emails differ", async () => {
