@@ -332,6 +332,14 @@ async function createServer(): Promise<void> {
     middleware.checkParamsExistInDb,
     uploadRoutes.listMetadata(false),
   );
+  app.put(
+    "/api/raw-files/:uuid/status",
+    middleware.validateUuidParam,
+    passport.authenticate(["basic", "cookie"], { session: false }),
+    authorizator.verifyPermission(PermissionType.canDelete),
+    express.json(),
+    uploadRoutes.updateStatus,
+  );
 
   // public/internal
   app.get("/api/uploaded-metadata", uploadRoutes.listInstrumentsFromMetadata);

@@ -781,6 +781,69 @@ describe("POST /upload-metadata/", () => {
   });
 });
 
+describe("PUT /api/raw-files/:uuid/status", () => {
+  const statusUrl = (uuid: string) => `${publicMetadataUrl}${uuid}/status`;
+  const bobHeaders = { authorization: `Basic ${str2base64("bob:bobs_pass")}` };
+  let uuid: string;
+
+  beforeAll(async () => {
+    await initUsersAndPermissions();
+  });
+
+  beforeEach(async () => {
+    await instrumentRepo.createQueryBuilder().delete().execute();
+    await axios.post(metadataUrl, validMetadata, { headers });
+    const upload = await instrumentRepo.findOneByOrFail({ checksum: validMetadata.checksum });
+    uuid = upload.uuid;
+    await instrumentRepo.update({ uuid }, { status: Status.UPLOADED });
+  });
+
+  it("marks uploaded file invalid and back", async () => {
+    await expect(axios.put(statusUrl(uuid), { status: "invalid" }, { headers: bobHeaders })).resolves.toMatchObject({
+      status: 200,
+    });
+    await expect(instrumentRepo.findOneByOrFail({ uuid })).resolves.toMatchObject({ status: Status.INVALID });
+    await expect(axios.put(statusUrl(uuid), { status: "uploaded" }, { headers: bobHeaders })).resolves.toMatchObject({
+      status: 200,
+    });
+    await expect(instrumentRepo.findOneByOrFail({ uuid })).resolves.toMatchObject({ status: Status.UPLOADED });
+  });
+
+  it("rejects unsupported status value", async () => {
+    await expect(axios.put(statusUrl(uuid), { status: "processed" }, { headers: bobHeaders })).rejects.toMatchObject({
+      response: { status: 422 },
+    });
+    await expect(instrumentRepo.findOneByOrFail({ uuid })).resolves.toMatchObject({ status: Status.UPLOADED });
+  });
+
+  it("rejects file without data", async () => {
+    await instrumentRepo.update({ uuid }, { status: Status.CREATED });
+    await expect(axios.put(statusUrl(uuid), { status: "invalid" }, { headers: bobHeaders })).rejects.toMatchObject({
+      response: { status: 422 },
+    });
+  });
+
+  it("responds with 404 for unknown uuid", async () => {
+    await expect(
+      axios.put(statusUrl("22b32746-faf0-4057-9076-ed2e698dcc34"), { status: "invalid" }, { headers: bobHeaders }),
+    ).rejects.toMatchObject({ response: { status: 404 } });
+  });
+
+  it("responds with 401 without authentication", async () => {
+    await expect(axios.put(statusUrl(uuid), { status: "invalid" })).rejects.toMatchObject({
+      response: { status: 401 },
+    });
+  });
+
+  it("responds with 401 without canDelete permission", async () => {
+    const aliceHeaders = { authorization: `Basic ${str2base64("alice:alices_password")}` };
+    await expect(axios.put(statusUrl(uuid), { status: "invalid" }, { headers: aliceHeaders })).rejects.toMatchObject({
+      response: { status: 401 },
+    });
+    await expect(instrumentRepo.findOneByOrFail({ uuid })).resolves.toMatchObject({ status: Status.UPLOADED });
+  });
+});
+
 describe("test content upload", () => {
   const headers = { authorization: `Basic ${str2base64("alice:alices_password")}` };
   const validMetadata = {

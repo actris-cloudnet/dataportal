@@ -28,6 +28,7 @@
               <th>Site</th>
               <th>Created (UTC)</th>
               <th>Updated (UTC)</th>
+              <th v-if="canEditStatus"></th>
             </tr>
           </thead>
           <tbody>
@@ -41,6 +42,17 @@
               <td>{{ file.site.humanReadableName }}</td>
               <td>{{ formatTimestamp(file.createdAt) }}</td>
               <td>{{ formatTimestamp(file.updatedAt) }}</td>
+              <td v-if="canEditStatus">
+                <BaseButton
+                  v-if="file.status !== 'created'"
+                  :type="file.status === 'invalid' ? 'secondary' : 'danger'"
+                  size="small"
+                  :disabled="updatingUuids.has(file.uuid)"
+                  @click="toggleStatus(file)"
+                >
+                  {{ file.status === "invalid" ? "Restore" : "Mark invalid" }}
+                </BaseButton>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -67,9 +79,11 @@ import Donut from "@/components/DonutVisualization.vue";
 import DonutLegend from "@/components/DonutLegend.vue";
 import DatePicker from "@/components/DatePicker.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
+import BaseButton from "@/components/BaseButton.vue";
 import type { Status, Upload } from "@shared/entity/Upload";
 import type { InstrumentInfo } from "@shared/entity/Instrument";
 import { useRouteQuery, queryString } from "@/lib/useRouteQuery";
+import { hasPermission } from "@/lib/auth";
 
 export interface Props {
   instrumentInfo: InstrumentInfo;
@@ -115,6 +129,24 @@ const stats = computed(() => {
     { label: "Invalid", title: "Files marked invalid manually", value: invalid },
   ];
 });
+
+const canEditStatus = hasPermission("canDelete");
+
+const updatingUuids = ref(new Set<string>());
+
+async function toggleStatus(file: Upload) {
+  const newStatus: Status = file.status === "invalid" ? "uploaded" : "invalid";
+  updatingUuids.value.add(file.uuid);
+  try {
+    await axios.put(`${backendUrl}raw-files/${file.uuid}/status`, { status: newStatus });
+    file.status = newStatus;
+  } catch (err) {
+    const error = (axios.isAxiosError(err) && err.response?.data.errors) || "Unknown error";
+    alert("Failed to update status: " + error);
+  } finally {
+    updatingUuids.value.delete(file.uuid);
+  }
+}
 
 const statusOrder: Record<Status, number> = {
   processed: 1,
