@@ -114,7 +114,7 @@ export class UserAccountRoutes {
     } else if (req.body.username) {
       user.activationToken = randomString(32);
     }
-    user.permissions = await this.createPermissions(req.body.permissions);
+    user.permissions = await this.createPermissions(req.body.permissions ?? []);
     user.instrumentLogPermissions = await this.createInstrumentLogPermissions(req.body.instrumentLogPermissions ?? []);
 
     await this.userRepo.save(user);
