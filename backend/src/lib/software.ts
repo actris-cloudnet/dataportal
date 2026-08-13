@@ -52,9 +52,8 @@ export class SoftwareService {
   async getSoftware(code: string, version: string): Promise<Software> {
     const requestId = `${code} ${version}`;
     if (!(requestId in this.pendingRequests)) {
-      this.pendingRequests[requestId] = this.getOrCreateSoftware(code, version).then((software) => {
+      this.pendingRequests[requestId] = this.getOrCreateSoftware(code, version).finally(() => {
         delete this.pendingRequests[requestId];
-        return software;
       });
     }
     return this.pendingRequests[requestId];
