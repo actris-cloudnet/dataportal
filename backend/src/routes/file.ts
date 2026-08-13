@@ -194,10 +194,12 @@ export class FileRoutes {
     }
 
     if (file.software) {
+      const entries = Object.entries(file.software);
+      if (!entries.every(([, version]) => typeof version === "string")) {
+        return next({ status: 422, errors: ["software versions must be strings"] });
+      }
       file.software = await Promise.all(
-        Object.entries(file.software).map(async ([code, version]) =>
-          this.softwareService.getSoftware(code, version as string),
-        ),
+        entries.map(async ([code, version]) => this.softwareService.getSoftware(code, version as string)),
       );
     }
 
