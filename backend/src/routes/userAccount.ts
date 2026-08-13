@@ -206,7 +206,7 @@ export class UserAccountRoutes {
     }
     if (hasProperty(req.body, "username")) {
       if (user.username !== req.body.username) {
-        if (await this.usernameAvailable(req.body.username)) {
+        if (req.body.username === null || (await this.usernameAvailable(req.body.username))) {
           user.username = req.body.username;
         } else {
           return next({ status: 400, errors: "username is already taken" });
