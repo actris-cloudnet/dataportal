@@ -61,6 +61,7 @@ export class MonitoringFileRoutes {
         await manager.save(newFile);
       });
     } catch (error) {
+      console.error("Failed to create or replace MonitoringFile:", error);
       return next({ status: 500, errors: "Failed to create or replace MonitoringFile" });
     }
 
