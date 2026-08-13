@@ -1,4 +1,4 @@
-import { DataSource, IsNull, Repository } from "typeorm";
+import { DataSource, FindOptionsWhere, IsNull, Repository } from "typeorm";
 import { NextFunction, Request, RequestHandler } from "express";
 import * as http from "http";
 import { randomBytes, createHash } from "crypto";
@@ -234,13 +234,10 @@ export class InstrumentLogRoutes {
       endDate: endDate ?? null,
       notes: notes ?? null,
     };
-    const existing = await this.logRepo.findOneBy({
-      ...fields,
-      detail: fields.detail ?? IsNull(),
-      result: fields.result ?? IsNull(),
-      endDate: fields.endDate ?? IsNull(),
-      notes: fields.notes ?? IsNull(),
-    });
+    const where = Object.fromEntries(
+      Object.entries(fields).map(([key, value]) => [key, value ?? IsNull()]),
+    ) as FindOptionsWhere<InstrumentLog>;
+    const existing = await this.logRepo.findOneBy(where);
     if (existing) {
       return next({ status: 409, errors: "Duplicate log entry" });
     }
