@@ -500,6 +500,9 @@ export class UploadRoutes {
 
   validateMetadata: RequestHandler = async (req, res, next) => {
     const body = req.body;
+    if ("site" in body && !body.site) {
+      return next({ status: 422, errors: "Request is missing site" });
+    }
     if (!("filename" in body) || !body.filename) {
       return next({ status: 422, errors: "Request is missing filename" });
     }

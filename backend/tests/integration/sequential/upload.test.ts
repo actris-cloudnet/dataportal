@@ -747,7 +747,7 @@ describe("POST /model-upload/metadata", () => {
   it("responds with 422 on empty site", async () => {
     const payload = { ...validModelMetadata, site: "" }; // site defaults to username
     await expect(axios.post(modelMetadataUrl, payload, { headers })).rejects.toMatchObject({
-      response: { status: 422, data: { status: 422, errors: "Unknown site" } },
+      response: { status: 422, data: { status: 422, errors: "Request is missing site" } },
     });
   });
 
