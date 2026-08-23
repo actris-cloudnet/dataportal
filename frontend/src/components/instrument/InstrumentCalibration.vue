@@ -12,7 +12,7 @@
       <div v-else-if="calibrationDataState === 'success' && !InstrumentComponent" class="no-visualization">
         Calibration visualisation is unavailable. View calibration data via the <a :href="apiUrl">calibration API</a>
       </div>
-      <div v-else-if="calibrationDataState === 'clientError'" class="no-data">No calibration data available</div>
+      <div v-else-if="calibrationDataState === 'clientError'" class="no-data">No calibration data available.</div>
       <div v-else-if="calibrationDataState === 'serverError'">There is a server-side error.</div>
     </div>
   </main>
