@@ -85,7 +85,7 @@ export class Authenticator {
     }
     const user = await this.userRepo.findOne({
       where: { username: req.body.username, passwordHash: Not(IsNull()) },
-      relations: { person: true, permissions: true, instrumentLogPermissions: { instrumentInfo: true } },
+      relations: { person: true, permissions: { site: true }, instrumentLogPermissions: { instrumentInfo: true } },
     });
     if (!user || !(await this.hasPermission(user, PermissionType.canLogin))) {
       return next({ status: 401, errors: "Invalid username" });
@@ -104,7 +104,7 @@ export class Authenticator {
     }
     const user = await this.userRepo.findOneOrFail({
       where: { id: req.user.id },
-      relations: { person: true, permissions: true, instrumentLogPermissions: { instrumentInfo: true } },
+      relations: { person: true, permissions: { site: true }, instrumentLogPermissions: { instrumentInfo: true } },
     });
     const uuids = await this.getInstrumentUuids(user);
     res.send(this.serializeUser(user, uuids));

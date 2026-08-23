@@ -49,6 +49,10 @@
           <img :src="contactsIcon" alt="" />
           Contacts
         </router-link>
+        <router-link class="tab" :to="{ name: 'SiteNominalInstruments' }">
+          <img :src="lidarIcon" alt="" />
+          Instruments
+        </router-link>
       </template>
     </LandingHeader>
     <router-view :site="response" />
@@ -69,6 +73,7 @@ import LandingHeader from "@/components/LandingHeader.vue";
 import folderIcon from "@/assets/icons/icons8-folder-48.png";
 import radarIcon from "@/assets/icons/radar.png";
 import contactsIcon from "@/assets/icons/contacts.png";
+import lidarIcon from "@/assets/icons/lidar.png";
 
 export interface Props {
   siteId: string;

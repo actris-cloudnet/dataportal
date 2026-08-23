@@ -14,6 +14,7 @@ import { randomBytes } from "crypto";
 import { Collection } from "../entity/Collection";
 import { InstrumentInfo } from "../entity/Instrument";
 import { Person } from "../entity/Person";
+import { Product } from "../entity/Product";
 import { UserAccount } from "../entity/UserAccount";
 import { PermissionType } from "../entity/Permission";
 import { normalizeOrcid } from "../../../shared/lib/entity/Person";
@@ -207,6 +208,26 @@ export async function userHasPermission(
     .where("u.id = :userId", { userId })
     .andWhere("p.permission = :permission", { permission })
     .getExists();
+}
+
+// Instruments that can produce the product, walking sourceProducts up to the nearest level that has sourceInstruments.
+export async function getCompatibleInstrumentIds(
+  productRepo: Repository<Product>,
+  productId: string,
+): Promise<string[]> {
+  const visited = new Set<string>();
+  let level = [productId];
+  while (level.length > 0) {
+    const products = await productRepo.find({
+      where: level.map((id) => ({ id })),
+      relations: { sourceInstruments: true, sourceProducts: true },
+    });
+    const ids = products.flatMap((p) => p.sourceInstruments.map((i) => i.id));
+    if (ids.length > 0) return [...new Set(ids)];
+    level.forEach((id) => visited.add(id));
+    level = [...new Set(products.flatMap((p) => p.sourceProducts.map((sp) => sp.id)))].filter((id) => !visited.has(id));
+  }
+  return [];
 }
 
 export const toArray = <T>(obj: T | T[] | undefined): T[] | null => {

@@ -115,6 +115,12 @@ const routes = [
         meta: { title: false },
         component: () => import("@/components/site/SiteContacts.vue"),
       },
+      {
+        path: "nominal-instruments",
+        name: "SiteNominalInstruments",
+        meta: { title: false },
+        component: () => import("@/components/site/SiteNominalInstruments.vue"),
+      },
     ],
   },
   {

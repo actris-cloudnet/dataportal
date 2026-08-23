@@ -97,7 +97,7 @@ async function createServer(): Promise<void> {
   const fileRoutes = new FileRoutes(AppDataSource);
   const siteRoutes = new SiteRoutes(AppDataSource);
   const prodRoutes = new ProductRoutes(AppDataSource);
-  const instrRoutes = new InstrumentRoutes(AppDataSource);
+  const instrRoutes = new InstrumentRoutes(AppDataSource, authenticator);
   const vizRoutes = new VisualizationRoutes(AppDataSource, fileRoutes);
   const uploadRoutes = new UploadRoutes(AppDataSource, queueService, authenticator, metricsService);
   const collRoutes = new CollectionRoutes(AppDataSource, dataCiteService);
@@ -436,6 +436,24 @@ async function createServer(): Promise<void> {
     instrRoutes.deleteContact,
   );
   app.get("/api/nominal-instrument", instrRoutes.nominalInstrument);
+  app.get("/api/sites/:siteId/nominal-instruments", instrRoutes.listNominalInstruments);
+  app.post(
+    "/api/sites/:siteId/nominal-instruments",
+    passport.authenticate(["cookie", "basic"], { session: false }),
+    express.json(),
+    instrRoutes.postNominalInstrument,
+  );
+  app.put(
+    "/api/sites/:siteId/nominal-instruments/:productId/:measurementDate",
+    passport.authenticate(["cookie", "basic"], { session: false }),
+    express.json(),
+    instrRoutes.putNominalInstrument,
+  );
+  app.delete(
+    "/api/sites/:siteId/nominal-instruments/:productId/:measurementDate",
+    passport.authenticate(["cookie", "basic"], { session: false }),
+    instrRoutes.deleteNominalInstrument,
+  );
 
   // TODO: Deprecated. Needed for now, but in the future these should public and
   // properly documented.
