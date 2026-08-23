@@ -1,5 +1,6 @@
 <template>
   <main class="pagewidth">
+    <h2>Contacts</h2>
     <p :class="['description', { 'description-spaced': !canManage }]">
       Persons listed here are included as authors in data product citations.
     </p>
@@ -447,6 +448,12 @@ function cancelDelete() {
 </script>
 
 <style scoped>
+h2 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-size: 125%;
+}
+
 .description {
   color: #444;
 }
