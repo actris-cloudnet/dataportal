@@ -50,4 +50,10 @@ export interface NominalInstrument {
   nominalInstrument: InstrumentInfo;
 }
 
+export interface NominalInstrumentPayload {
+  productId?: string;
+  instrumentInfoUuid?: string;
+  measurementDate?: string;
+}
+
 export type { ContactPerson as InstrumentContactPerson, Contact as InstrumentContact } from "./Contact";

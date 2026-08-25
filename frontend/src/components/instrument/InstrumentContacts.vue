@@ -2,7 +2,7 @@
   <Contacts
     :apiPath="`instrument-pids/${instrumentInfo.uuid}`"
     permissionKey="canManageContacts"
-    emptyMessage="No contacts registered for this instrument"
+    emptyMessage="No contacts registered for this instrument."
   />
 </template>
 

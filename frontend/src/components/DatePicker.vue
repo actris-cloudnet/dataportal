@@ -52,6 +52,7 @@ export interface Props {
   start?: string;
   end?: string;
   disabled?: boolean;
+  allowFuture?: boolean;
 }
 
 export interface DateErrors {
@@ -72,7 +73,7 @@ const emit = defineEmits<(e: "error", error: DateErrors) => void>();
 function validateDate(value: string) {
   const result = {
     isValidDateString: !isNaN(new Date(value).getDate()) && value.split("-")[0].length === 4,
-    isNotInFuture: value <= dateToString(new Date()),
+    isNotInFuture: props.allowFuture || value <= dateToString(new Date()),
     isBeforeEnd: props.end ? value <= props.end : true,
     isAfterStart: props.start ? value >= props.start : true,
   };

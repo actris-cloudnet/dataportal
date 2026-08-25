@@ -209,6 +209,25 @@ export async function userHasPermission(
     .getExists();
 }
 
+/// Recursively find all possible source instruments for a given product.
+export async function findSourceInstrumentIds(dataSource: DataSource, productId: string): Promise<string[]> {
+  const result = await dataSource.query(
+    `WITH RECURSIVE source_products AS (
+         SELECT $1::text AS "productId"
+       UNION ALL
+         SELECT "productId_2" AS "productId"
+         FROM product_source_products_product
+         JOIN source_products ON product_source_products_product."productId_1" = source_products."productId"
+         WHERE NOT ("productId_1" = 'mwr-l1c' AND "productId_2" = 'lidar')
+     )
+     SELECT "instrumentId"
+     FROM source_products
+     JOIN instrument_derived_products_product derived_product ON derived_product."productId" = source_products."productId"`,
+    [productId],
+  );
+  return result.map((row: any) => row.instrumentId);
+}
+
 export const toArray = <T>(obj: T | T[] | undefined): T[] | null => {
   if (!obj) return null;
   else if (!Array.isArray(obj)) return [obj];

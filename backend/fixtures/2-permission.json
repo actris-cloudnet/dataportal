@@ -47,5 +47,9 @@
   {
     "id": 12,
     "permission": "canManageNews"
+  },
+  {
+    "id": 13,
+    "permission": "canManageNominalInstruments"
   }
 ]

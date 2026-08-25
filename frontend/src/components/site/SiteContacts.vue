@@ -2,7 +2,7 @@
   <Contacts
     :apiPath="`sites/${site.id}`"
     permissionKey="canManageContacts"
-    emptyMessage="No contacts registered for this site"
+    emptyMessage="No contacts registered for this site."
   />
 </template>
 

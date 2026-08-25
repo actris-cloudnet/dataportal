@@ -20,7 +20,14 @@
               <router-link :to="instrument.to">{{ instrument.name }}</router-link>
             </span>
             <span v-else>{{ instrument.name }}</span>
-            <BaseTag v-if="nominalUuids.has(instrument.uuid)" type="actris" size="small">Nominal</BaseTag>
+            <router-link
+              v-if="nominalUuids.has(instrument.uuid)"
+              :to="{ name: 'SiteNominalInstruments' }"
+              class="nominal-link"
+              title="Nominal instrument for one or more products"
+            >
+              <BaseTag type="actris" size="small">Nominal</BaseTag>
+            </router-link>
           </div>
         </div>
         <div v-else class="detailslistNotAvailable">
@@ -251,6 +258,10 @@ img.product {
 
     .tag {
       margin-left: 0.25rem;
+    }
+
+    .nominal-link {
+      text-decoration: none;
     }
   }
 }

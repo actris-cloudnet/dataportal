@@ -444,6 +444,27 @@ async function createServer(): Promise<void> {
     instrRoutes.deleteContact,
   );
   app.get("/api/nominal-instrument", instrRoutes.nominalInstrument);
+  app.get("/api/sites/:siteId/nominal-instruments", instrRoutes.listNominalInstruments);
+  app.post(
+    "/api/sites/:siteId/nominal-instruments",
+    passport.authenticate(["cookie", "basic"], { session: false }),
+    authorizator.verifyPermission(PermissionType.canManageNominalInstruments),
+    express.json(),
+    instrRoutes.postNominalInstrument,
+  );
+  app.put(
+    "/api/sites/:siteId/nominal-instruments/:productId/:measurementDate",
+    passport.authenticate(["cookie", "basic"], { session: false }),
+    authorizator.verifyPermission(PermissionType.canManageNominalInstruments),
+    express.json(),
+    instrRoutes.putNominalInstrument,
+  );
+  app.delete(
+    "/api/sites/:siteId/nominal-instruments/:productId/:measurementDate",
+    passport.authenticate(["cookie", "basic"], { session: false }),
+    authorizator.verifyPermission(PermissionType.canManageNominalInstruments),
+    instrRoutes.deleteNominalInstrument,
+  );
 
   // TODO: Deprecated. Needed for now, but in the future these should public and
   // properly documented.
