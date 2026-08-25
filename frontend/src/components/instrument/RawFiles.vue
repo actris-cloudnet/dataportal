@@ -50,7 +50,7 @@
                   :disabled="updatingUuids.has(file.uuid)"
                   @click="toggleStatus(file)"
                 >
-                  {{ file.status === "invalid" ? "Restore" : "Mark invalid" }}
+                  {{ file.status === "invalid" ? "Restore" : "Invalidate" }}
                 </BaseButton>
               </td>
             </tr>
