@@ -143,10 +143,12 @@ const modelOptions = computed(() => {
   if (!dataStatus.value || selectedProductId.value !== "model") {
     return [];
   }
-  return dataStatus.value.allModels.map((model) => ({
-    id: model.id,
-    humanReadableName: model.humanReadableName,
-  }));
+  return dataStatus.value.allModels
+    .filter((model) => !model.humanReadableName.includes("deprecated"))
+    .map((model) => ({
+      id: model.id,
+      humanReadableName: model.humanReadableName,
+    }));
 });
 
 const currentInstrument = computed(() => {
