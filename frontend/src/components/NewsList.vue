@@ -19,6 +19,7 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 import { backendUrl, formatDisplayDate } from "@/lib";
 import type { NewsItem } from "@shared/entity/NewsItem";
+import type { NewsPaginatedResponse } from "@shared/entity/NewsPaginatedResponse";
 import BaseButton from "@/components/BaseButton.vue";
 
 const news = ref<NewsItem[]>([]);
@@ -27,8 +28,10 @@ const error = ref(false);
 
 async function fetchNews() {
   try {
-    const response = await axios.get<NewsItem[]>(`${backendUrl}news`, { params: { limit: 5 } });
-    news.value = response.data;
+    const response = await axios.get<NewsPaginatedResponse>(`${backendUrl}news`, {
+      params: { page: 1, pageSize: 5 },
+    });
+    news.value = response.data.results;
   } catch (err) {
     console.error("Failed to fetch news:", err);
     error.value = true;

@@ -39,21 +39,39 @@ export class NewsRoutes {
     res.sendStatus(201);
   };
 
-  getNews: RequestHandler = async (req, res) => {
-    const parsed = typeof req.query.limit === "string" ? parseInt(req.query.limit, 10) : NaN;
-    const limit = Number.isFinite(parsed) ? parsed : 10;
-
+  getNews: RequestHandler = async (req, res, next) => {
     const canManageNews = req.user
       ? await this.authenticator.hasPermission(req.user, PermissionType.canManageNews)
       : false;
 
-    const query = this.newsRepo.createQueryBuilder("news").orderBy("news.date", "DESC").take(limit);
+    const currentPage = req.query.page ? parseInt(req.query.page as string, 10) : 1;
+    if (isNaN(currentPage) || currentPage < 1) {
+      return next({ status: 400, error: "Invalid page parameter" });
+    }
+    const pageSize = req.query.pageSize ? parseInt(req.query.pageSize as string, 10) : 10;
+    if (isNaN(pageSize) || pageSize < 1 || pageSize > 100) {
+      return next({ status: 400, error: "Invalid pageSize parameter" });
+    }
+    const offset = (currentPage - 1) * pageSize;
+
+    const query = this.newsRepo.createQueryBuilder("news").orderBy("news.date", "DESC");
     if (!canManageNews) {
       query.where("news.draft = :draft", { draft: false });
     }
 
-    const news = await query.getMany();
-    res.send(news);
+    const [totalItems, news] = await Promise.all([query.getCount(), query.limit(pageSize).offset(offset).getMany()]);
+
+    const totalPages = Math.ceil(totalItems / pageSize);
+
+    res.send({
+      results: news,
+      pagination: {
+        totalItems,
+        totalPages,
+        currentPage,
+        pageSize,
+      },
+    });
   };
 
   getNewsItemBySlug: RequestHandler = async (req, res, next) => {
@@ -103,6 +121,7 @@ export class NewsRoutes {
       const parsed = reader.parse(item.content);
       return writer.render(parsed);
     } catch (error) {
+      console.debug("Failed to parse markdown:", error);
       return item.content.replace(/\n/g, "<br>");
     }
   }

@@ -18,37 +18,70 @@ describe("/api/news", () => {
     it("should return list of news items ordered by date descending", async () => {
       const res = await axios.get(`${backendPublicUrl}news/`);
       expect(res.status).toBe(200);
-      expect(res.data).toBeInstanceOf(Array);
-      expect(res.data.length).toBe(4);
+      expect(res.data.results).toBeInstanceOf(Array);
+      expect(res.data.results.length).toBe(4);
+      expect(res.data.pagination.totalItems).toBe(4);
 
-      for (let i = 0; i < res.data.length - 1; i++) {
-        expect(new Date(res.data[i].date).getTime()).toBeGreaterThanOrEqual(new Date(res.data[i + 1].date).getTime());
+      for (let i = 0; i < res.data.results.length - 1; i++) {
+        expect(new Date(res.data.results[i].date).getTime()).toBeGreaterThanOrEqual(
+          new Date(res.data.results[i + 1].date).getTime(),
+        );
       }
     });
 
-    it("should limit the number of news items based on limit parameter", async () => {
-      const limit = 3;
-      const res = await axios.get(`${backendPublicUrl}news/`, { params: { limit } });
+    it("should limit the number of news items based on pageSize parameter", async () => {
+      const pageSize = 3;
+      const res = await axios.get(`${backendPublicUrl}news/`, { params: { pageSize } });
       expect(res.status).toBe(200);
-      expect(res.data).toBeInstanceOf(Array);
-      expect(res.data.length).toBe(limit);
+      expect(res.data.results).toBeInstanceOf(Array);
+      expect(res.data.results.length).toBe(pageSize);
     });
 
-    it("should default to 10 items if limit is not provided", async () => {
+    it("should default to 10 items if pageSize is not provided", async () => {
       const res = await axios.get(`${backendPublicUrl}news/`);
       expect(res.status).toBe(200);
-      expect(res.data).toBeInstanceOf(Array);
-      expect(res.data.length).toBeLessThanOrEqual(10);
+      expect(res.data.results).toBeInstanceOf(Array);
+      expect(res.data.results.length).toBeLessThanOrEqual(10);
+      expect(res.data.pagination.pageSize).toBe(10);
     });
 
     it("should show draft news items to authenticated users with permission", async () => {
       const res = await axios.get(`${backendPublicUrl}news/`, { auth });
       expect(res.status).toBe(200);
-      expect(res.data.length).toBe(5);
-      const draftInList = res.data.some(
+      expect(res.data.results.length).toBe(5);
+      const draftInList = res.data.results.some(
         (item: any) => item.title === "Cloudnet team discovers new cloud type" && item.draft,
       );
       expect(draftInList).toBe(true);
+    });
+
+    it("should support pagination with page parameter", async () => {
+      const pageSize = 2;
+      const res = await axios.get(`${backendPublicUrl}news/`, { params: { page: 1, pageSize } });
+      expect(res.status).toBe(200);
+      expect(res.data.results.length).toBe(pageSize);
+      expect(res.data.pagination.currentPage).toBe(1);
+      expect(res.data.pagination.pageSize).toBe(pageSize);
+    });
+
+    it("should return 400 for invalid page parameter", async () => {
+      const expectedBody: NewsError = {
+        status: 400,
+        error: "Invalid page parameter",
+      };
+      return expect(axios.get(`${backendPublicUrl}news/`, { params: { page: -1 } })).rejects.toMatchObject(
+        genResponse(expectedBody.status, expectedBody),
+      );
+    });
+
+    it("should return 400 for invalid pageSize parameter", async () => {
+      const expectedBody: NewsError = {
+        status: 400,
+        error: "Invalid pageSize parameter",
+      };
+      return expect(axios.get(`${backendPublicUrl}news/`, { params: { pageSize: 0 } })).rejects.toMatchObject(
+        genResponse(expectedBody.status, expectedBody),
+      );
     });
   });
 
