@@ -7,7 +7,7 @@ import { Product, ProductType } from "../entity/Product";
 import { Instrument, InstrumentInfo } from "../entity/Instrument";
 import { Model } from "../entity/Model";
 import { Site } from "../entity/Site";
-import { isStringArray, toArray } from "../lib";
+import { findSourceInstrumentIds, isStringArray, toArray } from "../lib";
 
 export class QueueRoutes {
   readonly queueService: QueueService;
@@ -283,7 +283,7 @@ export class QueueRoutes {
     parameters.push(product.id);
 
     where.push(`instrument_info."instrumentId" = ANY ($${parameters.length + 1})`);
-    parameters.push(await this.findSourceInstrumentIds(product));
+    parameters.push(await findSourceInstrumentIds(this.dataSource, product.id));
 
     return this.batchQuery(filters, where, parameters, {
       table: "instrument_upload",
@@ -382,24 +382,5 @@ export class QueueRoutes {
     if (invalidIds.length > 0) {
       throw new Error(`Invalid ${key}: ${invalidIds.join(", ")}`);
     }
-  }
-
-  /// Recursively find all possible source instruments for a given product.
-  private async findSourceInstrumentIds(product: Product): Promise<string[]> {
-    const result = await this.dataSource.query(
-      `WITH RECURSIVE source_products AS (
-           SELECT $1::text AS "productId"
-         UNION ALL
-           SELECT "productId_2" AS "productId"
-           FROM product_source_products_product
-           JOIN source_products ON product_source_products_product."productId_1" = source_products."productId"
-           WHERE NOT ("productId_1" = 'mwr-l1c' AND "productId_2" = 'lidar')
-       )
-       SELECT "instrumentId"
-       FROM source_products
-       JOIN instrument_derived_products_product derived_product ON derived_product."productId" = source_products."productId"`,
-      [product.id],
-    );
-    return result.map((row: any) => row.instrumentId);
   }
 }

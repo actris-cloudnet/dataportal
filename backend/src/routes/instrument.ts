@@ -13,7 +13,7 @@ import {
   resolveOrCreatePerson,
   updateContactPerson,
   userHasPermission,
-  getCompatibleInstrumentIds,
+  findSourceInstrumentIds,
 } from "../lib";
 import { PermissionType } from "../entity/Permission";
 import { Authenticator } from "../lib/auth";
@@ -131,7 +131,7 @@ export class InstrumentRoutes {
         );
       }
       if (product) {
-        const ids = await getCompatibleInstrumentIds(this.productRepo, product);
+        const ids = await findSourceInstrumentIds(this.dataSource, product);
         if (ids.length === 0) return res.send([]);
         qb.andWhere("instrument.id IN (:...ids)", { ids });
       }
@@ -340,7 +340,7 @@ export class InstrumentRoutes {
       relations: { instrument: true },
     });
     if (!instrumentInfo) throw { status: 400, errors: "Instrument not found" };
-    const compatibleIds = await getCompatibleInstrumentIds(this.productRepo, product.id);
+    const compatibleIds = await findSourceInstrumentIds(this.dataSource, product.id);
     if (!compatibleIds.includes(instrumentInfo.instrument.id)) {
       throw {
         status: 400,

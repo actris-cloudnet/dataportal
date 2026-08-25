@@ -14,7 +14,6 @@ import { randomBytes } from "crypto";
 import { Collection } from "../entity/Collection";
 import { InstrumentInfo } from "../entity/Instrument";
 import { Person } from "../entity/Person";
-import { Product } from "../entity/Product";
 import { UserAccount } from "../entity/UserAccount";
 import { PermissionType } from "../entity/Permission";
 import { normalizeOrcid } from "../../../shared/lib/entity/Person";
@@ -210,24 +209,23 @@ export async function userHasPermission(
     .getExists();
 }
 
-// Instruments that can produce the product, walking sourceProducts up to the nearest level that has sourceInstruments.
-export async function getCompatibleInstrumentIds(
-  productRepo: Repository<Product>,
-  productId: string,
-): Promise<string[]> {
-  const visited = new Set<string>();
-  let level = [productId];
-  while (level.length > 0) {
-    const products = await productRepo.find({
-      where: level.map((id) => ({ id })),
-      relations: { sourceInstruments: true, sourceProducts: true },
-    });
-    const ids = products.flatMap((p) => p.sourceInstruments.map((i) => i.id));
-    if (ids.length > 0) return [...new Set(ids)];
-    level.forEach((id) => visited.add(id));
-    level = [...new Set(products.flatMap((p) => p.sourceProducts.map((sp) => sp.id)))].filter((id) => !visited.has(id));
-  }
-  return [];
+/// Recursively find all possible source instruments for a given product.
+export async function findSourceInstrumentIds(dataSource: DataSource, productId: string): Promise<string[]> {
+  const result = await dataSource.query(
+    `WITH RECURSIVE source_products AS (
+         SELECT $1::text AS "productId"
+       UNION ALL
+         SELECT "productId_2" AS "productId"
+         FROM product_source_products_product
+         JOIN source_products ON product_source_products_product."productId_1" = source_products."productId"
+         WHERE NOT ("productId_1" = 'mwr-l1c' AND "productId_2" = 'lidar')
+     )
+     SELECT "instrumentId"
+     FROM source_products
+     JOIN instrument_derived_products_product derived_product ON derived_product."productId" = source_products."productId"`,
+    [productId],
+  );
+  return result.map((row: any) => row.instrumentId);
 }
 
 export const toArray = <T>(obj: T | T[] | undefined): T[] | null => {
