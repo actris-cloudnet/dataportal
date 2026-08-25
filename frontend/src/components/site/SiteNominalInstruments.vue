@@ -180,7 +180,7 @@ const state = ref<"loading" | "ready" | "error">("loading");
 const entries = ref<NominalInstrument[]>([]);
 const products = ref<Product[]>([]);
 const today = dateToString(new Date());
-const canManage = computed(() => hasPermission("canManageNominalInstruments", props.site.id).value);
+const canManage = hasPermission("canManageNominalInstruments");
 const apiUrl = `${backendUrl}sites/${props.site.id}/nominal-instruments`;
 
 const productName = (id: string) => products.value.find((p) => p.id === id)?.humanReadableName ?? id;

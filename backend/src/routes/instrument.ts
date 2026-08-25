@@ -16,7 +16,6 @@ import {
   findSourceInstrumentIds,
 } from "../lib";
 import { PermissionType } from "../entity/Permission";
-import { Authenticator } from "../lib/auth";
 
 const toNominalInstrumentResponse = (row: Omit<NominalInstrument, "site" | "product">) => ({
   siteId: row.siteId,
@@ -26,9 +25,8 @@ const toNominalInstrumentResponse = (row: Omit<NominalInstrument, "site" | "prod
 });
 
 export class InstrumentRoutes {
-  constructor(dataSource: DataSource, authenticator: Authenticator) {
+  constructor(dataSource: DataSource) {
     this.dataSource = dataSource;
-    this.authenticator = authenticator;
     this.instrumentRepo = dataSource.getRepository(Instrument);
     this.instrumentInfoRepo = dataSource.getRepository(InstrumentInfo);
     this.instrumentUploadRepo = dataSource.getRepository(InstrumentUpload);
@@ -40,7 +38,6 @@ export class InstrumentRoutes {
   }
 
   readonly dataSource: DataSource;
-  readonly authenticator: Authenticator;
   readonly instrumentRepo: Repository<Instrument>;
   readonly instrumentInfoRepo: Repository<InstrumentInfo>;
   readonly instrumentUploadRepo: Repository<InstrumentUpload>;
@@ -232,7 +229,6 @@ export class InstrumentRoutes {
     try {
       const site = await this.siteRepo.findOneBy({ id: req.params.siteId as string });
       if (!site) return next({ status: 404, errors: "Site not found" });
-      await this.authenticator.checkPermission(req, PermissionType.canManageNominalInstruments, { site });
       const { productId, instrumentInfoUuid, measurementDate } = req.body ?? {};
       const product = await this.validateNominalProduct(productId);
       const instrumentInfo = await this.validateNominalInstrument(product, instrumentInfoUuid);
@@ -257,7 +253,6 @@ export class InstrumentRoutes {
     try {
       const site = await this.siteRepo.findOneBy({ id: req.params.siteId as string });
       if (!site) return next({ status: 404, errors: "Site not found" });
-      await this.authenticator.checkPermission(req, PermissionType.canManageNominalInstruments, { site });
       const existing = await this.findNominalInstrument(site.id, req.params);
       const body = req.body ?? {};
       const productId = existing.productId;
@@ -296,7 +291,6 @@ export class InstrumentRoutes {
     try {
       const site = await this.siteRepo.findOneBy({ id: req.params.siteId as string });
       if (!site) return next({ status: 404, errors: "Site not found" });
-      await this.authenticator.checkPermission(req, PermissionType.canManageNominalInstruments, { site });
       const existing = await this.findNominalInstrument(site.id, req.params);
       await this.nominalInstrumentRepo.delete({
         siteId: site.id,

@@ -19,12 +19,8 @@ export const loginStore = reactive<State>({
   instrumentLogPermissions: [],
 });
 
-export const hasPermission = (permission: PermissionType, siteId?: string) =>
-  computed(() =>
-    loginStore.permissions.some(
-      (p) => p.permission === permission && (siteId === undefined || !p.site || p.site.id === siteId),
-    ),
-  );
+export const hasPermission = (permission: PermissionType) =>
+  computed(() => loginStore.permissions.some((p) => p.permission === permission));
 
 export const hasInstrumentLogPermission = (permission: InstrumentLogPermissionType, instrumentInfoUuid: string) =>
   computed(() =>

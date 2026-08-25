@@ -3,7 +3,6 @@ import { DataSource } from "typeorm";
 import { backendPublicUrl, genResponse, cleanRepos, loadFixture } from "../../lib";
 import { UserAccount } from "../../../src/entity/UserAccount";
 import { Permission, PermissionType } from "../../../src/entity/Permission";
-import { Site } from "../../../src/entity/Site";
 import { NominalInstrument } from "../../../src/entity/Instrument";
 import { AppDataSource } from "../../../src/data-source";
 import { describe, expect, it, beforeAll, afterAll } from "@jest/globals";
@@ -11,7 +10,6 @@ import { describe, expect, it, beforeAll, afterAll } from "@jest/globals";
 let dataSource: DataSource;
 
 const bucharestUrl = `${backendPublicUrl}sites/bucharest/nominal-instruments`;
-const hyytialaUrl = `${backendPublicUrl}sites/hyytiala/nominal-instruments`;
 const lookupUrl = `${backendPublicUrl}nominal-instrument`;
 const pidsUrl = `${backendPublicUrl}instrument-pids`;
 
@@ -20,13 +18,11 @@ const warsawHalo = "eb4b39e5-6bc8-40f0-92d2-43d31f224de6";
 const bucharestMira = "0b3a7fa0-4812-4964-af23-1162e8b3a665";
 const ubbChm15k = "d6bf209b-c48b-48a4-bbfb-fed713b27832";
 const ubbHatpro = "028adedd-35a4-4733-ad7b-78fdf9555a02";
-const hyytialaRpg = "a43e9f54-c94d-45f7-8596-223b1c2b14c1";
 
 const managerCreds = { username: "nominal-manager", password: "hunter2" };
-const hyytialaCreds = { username: "nominal-hyytiala", password: "hunter2" };
 const nopermCreds = { username: "nominal-noperm", password: "hunter2" };
 
-async function createUser(creds: { username: string; password: string }, site: Site | null, withPerm = true) {
+async function createUser(creds: { username: string; password: string }, withPerm = true) {
   const user = new UserAccount();
   user.username = creds.username;
   user.setPassword(creds.password);
@@ -34,7 +30,7 @@ async function createUser(creds: { username: string; password: string }, site: S
   if (withPerm) {
     const perm = new Permission();
     perm.permission = PermissionType.canManageNominalInstruments;
-    perm.site = site;
+    perm.site = null;
     perm.model = null;
     perm.userAccounts = [user];
     await dataSource.getRepository(Permission).save(perm);
@@ -52,10 +48,8 @@ beforeAll(async () => {
   await loadFixture(dataSource, "3-instrument_info");
   await loadFixture(dataSource, "4-instrument_upload");
   await loadFixture(dataSource, "4-nominal_instrument");
-  const hyytiala = await dataSource.getRepository(Site).findOneByOrFail({ id: "hyytiala" });
-  await createUser(managerCreds, null);
-  await createUser(hyytialaCreds, hyytiala);
-  await createUser(nopermCreds, null, false);
+  await createUser(managerCreds);
+  await createUser(nopermCreds, false);
 });
 
 afterAll(async () => {
@@ -92,26 +86,6 @@ describe("POST /api/sites/:siteId/nominal-instruments", () => {
   it("rejects without permission", async () => {
     await expect(axios.post(bucharestUrl, payload, { auth: nopermCreds })).rejects.toMatchObject({
       response: { status: 401 },
-    });
-  });
-
-  it("rejects site-scoped permission for another site", async () => {
-    await expect(axios.post(bucharestUrl, payload, { auth: hyytialaCreds })).rejects.toMatchObject({
-      response: { status: 401 },
-    });
-  });
-
-  it("accepts site-scoped permission for own site", async () => {
-    const res = await axios.post(
-      hyytialaUrl,
-      { productId: "radar", instrumentInfoUuid: hyytialaRpg, measurementDate: "2024-01-01" },
-      { auth: hyytialaCreds },
-    );
-    expect(res.status).toBe(201);
-    expect(res.data).toMatchObject({
-      siteId: "hyytiala",
-      productId: "radar",
-      nominalInstrument: { uuid: hyytialaRpg },
     });
   });
 

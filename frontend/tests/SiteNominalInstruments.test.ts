@@ -96,13 +96,7 @@ describe("SiteNominalInstruments.vue", () => {
     expect(wrapper.findAll("button").length).toBe(0);
   });
 
-  it("shows management controls only with permission for the site", async () => {
-    loginStore.permissions = [{ id: 1, permission: "canManageNominalInstruments", site: { id: "hyytiala" } as any }];
-    wrapper = mount(SiteNominalInstruments, { props: { site }, global: { plugins: [router] } });
-    await nextTick(50);
-    expect(wrapper.text()).not.toContain("Add nominal instrument");
-    wrapper.unmount();
-
+  it("shows management controls only with permission", async () => {
     loginStore.permissions = [{ id: 1, permission: "canManageNominalInstruments", site: null }];
     wrapper = mount(SiteNominalInstruments, { props: { site }, global: { plugins: [router] } });
     await nextTick(50);
