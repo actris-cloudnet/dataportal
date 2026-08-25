@@ -226,81 +226,67 @@ export class InstrumentRoutes {
   };
 
   postNominalInstrument: RequestHandler = async (req, res, next) => {
-    try {
-      const site = await this.siteRepo.findOneBy({ id: req.params.siteId as string });
-      if (!site) return next({ status: 404, errors: "Site not found" });
-      const { productId, instrumentInfoUuid, measurementDate } = req.body ?? {};
-      const product = await this.validateNominalProduct(productId);
-      const instrumentInfo = await this.validateNominalInstrument(product, instrumentInfoUuid);
-      if (!isValidDate(measurementDate)) throw { status: 400, errors: "measurementDate must be YYYY-MM-DD" };
-      await this.assertNominalSlotFree(site.id, product.id, measurementDate);
-      await this.assertNominalChangesInstrument(site.id, product.id, measurementDate, instrumentInfo);
-      await this.nominalInstrumentRepo.insert({
-        siteId: site.id,
-        productId: product.id,
-        measurementDate,
-        instrumentInfo,
-      });
-      res
-        .status(201)
-        .send(toNominalInstrumentResponse({ siteId: site.id, productId, measurementDate, instrumentInfo }));
-    } catch (err) {
-      next(err);
-    }
+    const site = await this.siteRepo.findOneBy({ id: req.params.siteId as string });
+    if (!site) return next({ status: 404, errors: "Site not found" });
+    const { productId, instrumentInfoUuid, measurementDate } = req.body ?? {};
+    const product = await this.validateNominalProduct(productId);
+    const instrumentInfo = await this.validateNominalInstrument(product, instrumentInfoUuid);
+    if (!isValidDate(measurementDate)) throw { status: 400, errors: "measurementDate must be YYYY-MM-DD" };
+    await this.assertNominalSlotFree(site.id, product.id, measurementDate);
+    await this.assertNominalChangesInstrument(site.id, product.id, measurementDate, instrumentInfo);
+    await this.nominalInstrumentRepo.insert({
+      siteId: site.id,
+      productId: product.id,
+      measurementDate,
+      instrumentInfo,
+    });
+    res.status(201).send(toNominalInstrumentResponse({ siteId: site.id, productId, measurementDate, instrumentInfo }));
   };
 
   putNominalInstrument: RequestHandler = async (req, res, next) => {
-    try {
-      const site = await this.siteRepo.findOneBy({ id: req.params.siteId as string });
-      if (!site) return next({ status: 404, errors: "Site not found" });
-      const existing = await this.findNominalInstrument(site.id, req.params);
-      const body = req.body ?? {};
-      const productId = existing.productId;
-      const measurementDate = body.measurementDate ?? existing.measurementDate;
-      let instrumentInfo = existing.instrumentInfo;
-      if (body.instrumentInfoUuid && body.instrumentInfoUuid !== existing.instrumentInfo.uuid) {
-        const product = await this.validateNominalProduct(productId);
-        instrumentInfo = await this.validateNominalInstrument(product, body.instrumentInfoUuid);
-      }
-      if (!isValidDate(measurementDate)) throw { status: 400, errors: "measurementDate must be YYYY-MM-DD" };
-      const dateChanged = measurementDate !== existing.measurementDate;
-      if (dateChanged) {
-        await this.assertNominalSlotFree(site.id, productId, measurementDate);
-      }
-      if (dateChanged || instrumentInfo.uuid !== existing.instrumentInfo.uuid) {
-        await this.assertNominalChangesInstrument(
-          site.id,
-          productId,
-          measurementDate,
-          instrumentInfo,
-          existing.measurementDate,
-        );
-      }
-      await this.dataSource.transaction(async (manager) => {
-        const repo = manager.getRepository(NominalInstrument);
-        await repo.delete({ siteId: site.id, productId, measurementDate: existing.measurementDate });
-        await repo.insert({ siteId: site.id, productId, measurementDate, instrumentInfo });
-      });
-      res.send(toNominalInstrumentResponse({ siteId: site.id, productId, measurementDate, instrumentInfo }));
-    } catch (err) {
-      next(err);
+    const site = await this.siteRepo.findOneBy({ id: req.params.siteId as string });
+    if (!site) return next({ status: 404, errors: "Site not found" });
+    const existing = await this.findNominalInstrument(site.id, req.params);
+    const body = req.body ?? {};
+    const productId = existing.productId;
+    const measurementDate = body.measurementDate ?? existing.measurementDate;
+    let instrumentInfo = existing.instrumentInfo;
+    if (body.instrumentInfoUuid && body.instrumentInfoUuid !== existing.instrumentInfo.uuid) {
+      const product = await this.validateNominalProduct(productId);
+      instrumentInfo = await this.validateNominalInstrument(product, body.instrumentInfoUuid);
     }
+    if (!isValidDate(measurementDate)) throw { status: 400, errors: "measurementDate must be YYYY-MM-DD" };
+    const dateChanged = measurementDate !== existing.measurementDate;
+    if (dateChanged) {
+      await this.assertNominalSlotFree(site.id, productId, measurementDate);
+    }
+    if (dateChanged || instrumentInfo.uuid !== existing.instrumentInfo.uuid) {
+      await this.assertNominalChangesInstrument(
+        site.id,
+        productId,
+        measurementDate,
+        instrumentInfo,
+        existing.measurementDate,
+      );
+    }
+    await this.dataSource.transaction(async (manager) => {
+      const repo = manager.getRepository(NominalInstrument);
+      await repo.delete({ siteId: site.id, productId, measurementDate: existing.measurementDate });
+      await repo.insert({ siteId: site.id, productId, measurementDate, instrumentInfo });
+    });
+    res.send(toNominalInstrumentResponse({ siteId: site.id, productId, measurementDate, instrumentInfo }));
   };
 
   deleteNominalInstrument: RequestHandler = async (req, res, next) => {
-    try {
-      const site = await this.siteRepo.findOneBy({ id: req.params.siteId as string });
-      if (!site) return next({ status: 404, errors: "Site not found" });
-      const existing = await this.findNominalInstrument(site.id, req.params);
-      await this.nominalInstrumentRepo.delete({
-        siteId: site.id,
-        productId: existing.productId,
-        measurementDate: existing.measurementDate,
-      });
-      res.sendStatus(204);
-    } catch (err) {
-      next(err);
-    }
+    const site = await this.siteRepo.findOneBy({ id: req.params.siteId as string });
+    if (!site) return next({ status: 404, errors: "Site not found" });
+    const existing = await this.findNominalInstrument(site.id, req.params);
+    await this.nominalInstrumentRepo.delete({
+      siteId: site.id,
+      productId: existing.productId,
+      measurementDate: existing.measurementDate,
+    });
+    res.sendStatus(204);
   };
 
   private async findNominalInstrument(siteId: string, params: Record<string, any>): Promise<NominalInstrument> {
