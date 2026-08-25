@@ -81,7 +81,7 @@
           <h2 class="project-name">POLARIN</h2>
           <div class="project-date">2024 – 2029</div>
         </a>
-        <a class="project diva" href="https://diva.inoe.ro/" target="_blank">
+        <a class="project diva" href="https://www.diva-platform.com/" target="_blank">
           <img :src="divaLogo" class="project-logo" />
           <h2 class="project-name">DIVA</h2>
           <div class="project-date">2025 – 2029</div>
