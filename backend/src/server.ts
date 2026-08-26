@@ -262,6 +262,7 @@ async function createServer(): Promise<void> {
   app.get("/api/instruments", instrRoutes.instruments);
   app.get("/api/instruments/:instrumentId", instrRoutes.instrument);
   app.get("/api/models", modelRoutes.models);
+  app.get("/api/models/:modelId", modelRoutes.model);
   app.get("/api/products/variables", prodRoutes.productVariables);
   app.get("/api/products/:productId", prodRoutes.product);
   app.get("/api/products/:productId/variables", prodRoutes.productVariable);
