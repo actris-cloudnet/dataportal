@@ -14,7 +14,12 @@
         of this data available.
       </div>
     </div>
-    <LandingHeader :title="title" :subtitle="humanReadableDate(file.measurementDate)">
+    <LandingHeader :title="title">
+      <template #subtitle>
+        {{ humanReadableDate(file.measurementDate) }}
+        <template v-if="'model' in file && file.model">&bull; {{ file.model.humanReadableName }}</template>
+        <template v-else-if="'instrument' in file && file.instrument">&bull; {{ file.instrument.model }}</template>
+      </template>
       <template #tags>
         <FileTags :response="file" />
       </template>

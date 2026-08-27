@@ -11,8 +11,8 @@ defineProps<Props>();
   <div>
     <header class="pagewidth">
       <h1 class="title">{{ title }}</h1>
-      <div class="subtitle" v-if="subtitle">
-        {{ subtitle }}
+      <div class="subtitle" v-if="subtitle || $slots.subtitle">
+        <slot name="subtitle">{{ subtitle }}</slot>
       </div>
       <div class="tags" v-if="$slots.tags">
         <slot name="tags"></slot>
