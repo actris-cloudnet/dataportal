@@ -19,6 +19,7 @@ export interface Props {
   showLegend?: boolean;
   fullHeight?: boolean;
   enableBoundingBox?: boolean;
+  polygon?: L.LatLngExpression[];
 }
 
 const props = defineProps<Props>();
@@ -209,8 +210,10 @@ onMounted(() => {
   initLayers();
   setMarkerIcons();
   if (props.enableBoundingBox) initBoundingBoxTool();
+  if (props.polygon && map) L.polygon(props.polygon).addTo(map);
   if (!props.center && map) {
     const bounds = L.latLngBounds(Object.values(allMarkers).map((marker) => marker.getLatLng()));
+    if (props.polygon) bounds.extend(L.latLngBounds(props.polygon));
     map.fitBounds(bounds, { maxZoom: props.zoom });
   }
 });

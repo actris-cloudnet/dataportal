@@ -49,11 +49,22 @@
             query: { date: file.measurementDate },
           }"
         >
-          <img :alt="`Raw files for ${file.instrument.id}`" :src="folderIcon" class="icon" />
+          <img :src="folderIcon" alt="" class="icon" />
+          Raw files
+        </router-link>
+        <router-link
+          v-else-if="'model' in file && file.model"
+          :to="{
+            name: 'ModelRawFiles',
+            params: { modelId: file.model.id },
+            query: { site: file.site.id, date: file.measurementDate },
+          }"
+        >
+          <img :src="folderIcon" alt="" class="icon" />
           Raw files
         </router-link>
         <span
-          v-if="!sourceFiles.length && !('instrument' in file && file.instrument && file.instrument.downloadable)"
+          v-else-if="!sourceFiles.length && !('instrument' in file && file.instrument && file.instrument.downloadable)"
           class="notAvailable"
         ></span>
       </dd>

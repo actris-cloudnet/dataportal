@@ -240,7 +240,7 @@ const routes = [
         path: "raw-files",
         name: "RawFiles",
         meta: { title: false },
-        component: () => import("@/components/instrument/RawFiles.vue"),
+        component: () => import("@/components/RawFiles.vue"),
       },
       {
         path: "calibration",
@@ -281,6 +281,26 @@ const routes = [
     name: "About",
     meta: { title: "About" },
     component: () => import("@/views/AboutView.vue"),
+  },
+  {
+    path: "/models",
+    name: "Models",
+    meta: { title: "Models" },
+    component: () => import("@/views/ModelsView.vue"),
+  },
+  {
+    path: "/model/:modelId",
+    name: "Model",
+    meta: { title: "Model" },
+    component: () => import("@/views/ModelView.vue"),
+    props: true,
+  },
+  {
+    path: "/model/:modelId/raw-files",
+    name: "ModelRawFiles",
+    meta: { title: "Model raw files" },
+    component: () => import("@/views/ModelRawFiles.vue"),
+    props: true,
   },
 ];
 

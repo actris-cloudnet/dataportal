@@ -23,7 +23,11 @@
       </template>
       <template v-if="'model' in file && file.model">
         <dt>Model</dt>
-        <dd>{{ file.model.humanReadableName }}</dd>
+        <dd>
+          <router-link :to="{ name: 'Model', params: { modelId: file.model.id } }">
+            {{ file.model.humanReadableName }}
+          </router-link>
+        </dd>
       </template>
       <dt>Timeliness</dt>
       <dd>

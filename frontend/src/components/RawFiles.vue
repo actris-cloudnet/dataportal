@@ -36,7 +36,7 @@
               <td>
                 <a :href="file.downloadUrl" target="_blank">{{ file.filename }}</a>
               </td>
-              <td v-if="showTags">{{ file.tags.join(", ") }}</td>
+              <td v-if="showTags && 'tags' in file">{{ file.tags.join(", ") }}</td>
               <td>{{ humanReadableSize(file.size) }}</td>
               <td :class="getStatusClass(file.status)">{{ file.status }}</td>
               <td>{{ file.site.humanReadableName }}</td>
@@ -58,6 +58,7 @@
         </table>
       </div>
       <router-link
+        v-if="instrumentInfo"
         :to="{
           name: 'Search',
           params: { mode: 'data' },
@@ -80,14 +81,19 @@ import DonutLegend from "@/components/DonutLegend.vue";
 import DatePicker from "@/components/DatePicker.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
 import BaseButton from "@/components/BaseButton.vue";
-import type { Status, Upload } from "@shared/entity/Upload";
+import type { InstrumentUpload, ModelUpload, Status } from "@shared/entity/Upload";
 import type { InstrumentInfo } from "@shared/entity/Instrument";
 import { useRouteQuery, queryString } from "@/lib/useRouteQuery";
 import { hasPermission } from "@/lib/auth";
 
 export interface Props {
-  instrumentInfo: InstrumentInfo;
+  instrumentInfo?: InstrumentInfo;
+  modelId?: string;
+  siteId?: string;
 }
+
+type AnyUpload = InstrumentUpload | ModelUpload;
+type AnyUploadArray = InstrumentUpload[] | ModelUpload[];
 
 const props = defineProps<Props>();
 
@@ -95,9 +101,9 @@ const formatTimestamp = (date: string | Date) => date.toString().replace("T", " 
 
 const status = ref<"loading" | "error" | "ready">("loading");
 
-const files = ref<Upload[]>([]);
+const files = ref<AnyUploadArray>([]);
 
-const showTags = computed(() => files.value.some((file) => file.tags.length > 0));
+const showTags = computed(() => files.value.some((file) => "tags" in file && file.tags.length > 0));
 
 const today = dateToString(new Date());
 
@@ -134,7 +140,7 @@ const canEditStatus = hasPermission("canDelete");
 
 const updatingUuids = ref(new Set<string>());
 
-async function toggleStatus(file: Upload) {
+async function toggleStatus(file: AnyUpload) {
   const newStatus: Status = file.status === "invalid" ? "uploaded" : "invalid";
   updatingUuids.value.add(file.uuid);
   try {
@@ -158,15 +164,20 @@ const statusOrder: Record<Status, number> = {
 async function fetchData() {
   try {
     status.value = "loading";
-    const fileResponse = await axios.get<Upload[]>(`${backendUrl}raw-files`, {
+    const endpoint = props.instrumentInfo ? "raw-files" : "raw-model-files";
+    const fileResponse = await axios.get<AnyUploadArray>(backendUrl + endpoint, {
       params: {
-        instrumentPid: props.instrumentInfo.pid,
+        instrumentPid: props.instrumentInfo?.pid,
+        site: props.siteId,
+        model: props.modelId,
         date: selectedDate.value,
       },
     });
     files.value = fileResponse.data.sort((a, b) => {
       if (a.status === b.status) {
-        return compareValues(a.filename + a.tags.join(), b.filename + b.tags.join());
+        return "tags" in a && "tags" in b
+          ? compareValues(a.filename + a.tags.join(), b.filename + b.tags.join())
+          : compareValues(a.filename, b.filename);
       }
       return compareValues(statusOrder[a.status], statusOrder[b.status]);
     });
