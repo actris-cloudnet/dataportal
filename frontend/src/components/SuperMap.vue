@@ -97,7 +97,13 @@ function initMap() {
   if (props.center) {
     map.setView(getMapCenter()!, props.zoom);
   }
-  tileLayer = L.tileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png");
+  const key = import.meta.env.VITE_CARTO_BASEMAPS_API_KEY;
+  tileLayer = L.tileLayer(`https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=${key}`, {
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: "abcd",
+    maxZoom: 20,
+  });
   tileLayer.addTo(map);
   if (props.showLegend) legend.addTo(map);
 }

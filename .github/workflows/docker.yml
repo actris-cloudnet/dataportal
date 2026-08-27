@@ -17,6 +17,7 @@ jobs:
               BACKEND_URL=/api/
               MATOMO_HOST=https://cloudnet-matomo.out.ocp.fmi.fi/
               MATOMO_SITE_ID=1
+              CARTO_BASEMAPS_API_KEY=cb1_2bdn_1_65359d8ad5337c4d4ca783fa
     runs-on: ubuntu-latest
     permissions:
       contents: read
