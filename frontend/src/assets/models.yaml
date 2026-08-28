@@ -1,0 +1,240 @@
+ecmwf:
+  description: |
+    Integrated Forecasting System (IFS) is a global numerical weather prediction
+    model provided by the European Centre for Medium-Range Weather Forecasts
+    (ECMWF). ECMWF IFS is used as the primary model for Cloudnet processing
+    across all measurement sites.
+
+    Météo-France runs the same model under the name <a
+    href="/model/arpege">ARPEGE</a> and provides data for select Cloudnet sites.
+    For real-time processing, there is also an <a href="/model/ecmwf-open">ECMWF
+    open data</a> version with reduced resolution and a limited set of parameters.
+
+  domain: Global
+  horizontalResolution: 9 km
+  verticalResolution: 137 model levels
+  timeResolution: 1 hour
+  runs: Every 6 hours
+  forecast: Up to 35 hours
+  links:
+    - <a href="https://www.ecmwf.int/en/forecasts/documentation-and-support/changes-ecmwf-model">ECMWF IFS documentation</a>
+
+ecmwf-open:
+  description: |
+    Open data subset of the Integrated Forecasting System (IFS) is provided by
+    European Centre for Medium-Range Weather Forecasts (ECMWF). Compared to <a
+    href="/model/ecmwf">the full model</a>, the open data subset has reduced
+    resolution and a limited number of parameters, but the forecast data are
+    available up to three days in the future, which is used as a fallback for
+    the real-time Cloudnet processing.
+  domain: Global
+  horizontalResolution: 0.25 degrees
+  verticalResolution: 14 pressure levels from 1000 to 10 hPa
+  timeResolution: 3 hours
+  runs: Every 6 hours
+  forecast: Up to 90 hours
+  links:
+    - <a href="https://www.ecmwf.int/en/forecasts/datasets/open-data">ECMWF open data</a>
+
+arome:
+  description: |
+    AROME (Application of Research to Operations at Mesoscale) is a
+    high-resolution, non-hydrostatic convection-permitting mesoscale numerical
+    weather prediction model. The data are provided by Météo-France.
+  domain: Central Europe
+  horizontalResolution: 1.3 km
+  verticalResolution: 90 model levels
+  timeResolution: 1 hour
+  runs: Every 12 hours
+  forecast: Up to 36 hours
+  links:
+    - <a href="https://meteofrance.com/meteo-a-z/les-modeles-de-prevision-meteo">Météo-France forecast models</a> (in French)
+    - <a href="https://www.umr-cnrm.fr/gmapdoc/spip.php?article29">AROME documentation</a>
+
+arome-arctic:
+  description: |
+    AROME-Arctic is a regional adaptation of the <a href="/model/arome">AROME
+    model</a> specifically configured for the Arctic region. The data are
+    provided by MET Norway.
+  domain: Arctic
+  horizontalResolution: 2.5 km
+  verticalResolution: 90 model levels
+  timeResolution: 1 hour
+  runs: Every 3 hours
+  forecast: Up to 66 hours
+  links:
+    - <a href="https://www.met.no/en/projects/The-weather-model-AROME-Arctic">AROME-Arctic documentation</a>
+  boundary:
+    - [69.299, -17.957]
+    - [69.001, -12.89]
+    - [68.553, -8.0]
+    - [67.963, -3.341]
+    - [67.242, 1.049]
+    - [66.405, 5.148]
+    - [65.463, 8.948]
+    - [64.429, 12.452]
+    - [63.316, 15.671]
+    - [62.134, 18.622]
+    - [62.134, 18.622]
+    - [63.786, 22.17]
+    - [65.339, 26.185]
+    - [66.768, 30.72]
+    - [68.046, 35.818]
+    - [69.143, 41.499]
+    - [70.025, 47.744]
+    - [70.662, 54.48]
+    - [71.029, 61.572]
+    - [71.108, 68.832]
+    - [71.108, 68.832]
+    - [72.944, 69.008]
+    - [74.783, 69.225]
+    - [76.624, 69.502]
+    - [78.466, 69.866]
+    - [80.306, 70.366]
+    - [82.142, 71.093]
+    - [83.97, 72.252]
+    - [85.783, 74.381]
+    - [87.565, 79.552]
+    - [87.565, 79.552]
+    - [87.037, 30.131]
+    - [85.281, 6.566]
+    - [83.161, -3.613]
+    - [80.918, -8.957]
+    - [78.623, -12.199]
+    - [76.301, -14.363]
+    - [73.968, -15.907]
+    - [71.632, -17.061]
+
+arpege:
+  description: |
+    ARPEGE (Action de Recherche Petite Echelle Grande Echelle) is a global
+    spectral numerical weather prediction model with variable horizontal
+    resolution, with the highest resolution (approximately 5 km) focused over
+    Europe and gradually coarsening to about 25 km over more distant regions.
+    Forecast data are provided by Météo-France.
+
+    ECMWF runs the same model under the name <a href="/model/ecmwf">IFS</a> and
+    provides data for most Cloudnet sites.
+  domain: Global
+  horizontalResolution: 5–25 km
+  verticalResolution: 105 model levels
+  timeResolution: 1 hour
+  runs: Every 12 hours
+  forecast: Up to 78 hours
+  links:
+    - <a href="https://meteofrance.com/meteo-a-z/les-modeles-de-prevision-meteo">Météo-France forecast models</a> (in French)
+    - <a href="https://www.umr-cnrm.fr/gmapdoc/spip.php?article29">ARPEGE documentation</a>
+
+icon-d2:
+  description: |
+    ICON-D2 is a short-term, high-resolution forecast model for Germany and the
+    neighboring countries based on the ICON (Icosahedral Nonhydrostatic) model.
+    The data are provided by the German Meteorological Service (DWD).
+  domain: Central Europe
+  horizontalResolution: 2.2 km
+  verticalResolution: 65 model levels
+  timeResolution: 15 minutes
+  runs: Every 3 hours
+  forecast: Up to 24 hours
+  links:
+    - <a href="https://www.dwd.de/EN/ourservices/nwp_forecast_data/nwp_forecast_data.html">DWD forecast data</a>
+    - <a href="https://www.icon-model.org/">ICON model</a>
+  boundary:
+    - [43.044, -0.454]
+    - [57.411, -4.089]
+    - [57.411, -4.089]
+    - [57.421, -4.063]
+    - [57.714, -1.193]
+    - [57.983, 2.885]
+    - [58.119, 6.401]
+    - [58.165, 10.052]
+    - [58.111, 13.819]
+    - [57.96, 17.573]
+    - [57.721, 20.544]
+    - [57.721, 20.544]
+    - [57.721, 20.544]
+    - [43.326, 17.748]
+    - [43.326, 17.748]
+    - [43.261, 17.664]
+    - [43.257, 17.64]
+    - [43.452, 14.049]
+    - [43.536, 9.865]
+    - [43.46, 6.145]
+    - [43.231, 2.103]
+
+meps:
+  description: |
+    MetCoOp Ensemble Prediction System (MEPS) is a convection-permitting
+    limited-area ensemble forecast based on the HARMONIE-AROME model. This
+    product provides the control member (member 0) from the ensemble by MET
+    Norway.
+  domain: Northern Europe
+  horizontalResolution: 2.5 km
+  verticalResolution: 65 model levels
+  timeResolution: 1 hour
+  runs: Every 3 hours
+  forecast: Up to 66 hours
+  links:
+    - <a href="https://www.met.no/en/projects/metcoop">MetCoOp documentation</a>
+    - Eresmaa et al. (2026). <a href="https://doi.org/10.1175/BAMS-D-25-0225.1">The
+      Operational Forecast Process at MetCoOp</a>. <i>Bull. Amer. Meteor. Soc.</i>,
+      <i>107</i>(5), E946–E963.
+  boundary:
+    - [50.32, 0.278]
+    - [50.784, 3.85]
+    - [51.12, 7.494]
+    - [51.325, 11.186]
+    - [51.396, 14.905]
+    - [51.332, 18.623]
+    - [51.134, 22.318]
+    - [50.804, 25.964]
+    - [50.346, 29.541]
+    - [49.765, 33.027]
+    - [49.765, 33.027]
+    - [52.269, 34.217]
+    - [54.777, 35.568]
+    - [57.279, 37.116]
+    - [59.769, 38.905]
+    - [62.236, 40.99]
+    - [64.668, 43.449]
+    - [67.049, 46.379]
+    - [69.36, 49.917]
+    - [71.576, 54.241]
+    - [71.576, 54.241]
+    - [72.821, 47.771]
+    - [73.843, 40.478]
+    - [74.605, 32.42]
+    - [75.075, 23.76]
+    - [75.229, 14.768]
+    - [75.058, 5.785]
+    - [74.573, -2.85]
+    - [73.797, -10.871]
+    - [72.762, -18.122]
+    - [72.762, -18.122]
+    - [70.43, -14.22]
+    - [68.02, -11.094]
+    - [65.554, -8.544]
+    - [63.048, -6.431]
+    - [60.517, -4.655]
+    - [57.97, -3.143]
+    - [55.417, -1.842]
+    - [52.864, -0.712]
+
+gdas1:
+  description: |
+    Global Data Assimilation System (GDAS) incorporates observations for the
+    Global Forecasting System (GFS) of the National Oceanic and Atmospheric
+    Administration (NOAA). GDAS analysis data can be used for Cloudnet
+    processing if no other model data are available.
+
+    This product is based on Air Resources Laboratory's (ARL) data archive where
+    the original GDAS data are interpolated onto pressure levels and gridded to
+    1-degree resolution.
+  domain: Global
+  horizontalResolution: 1 degree
+  verticalResolution: 23 pressure levels from 20 to 1000 hPa
+  timeResolution: 3 hours
+  runs: Every 6 hours
+  forecast: Up to 3 hours
+  links:
+    - <a href="https://www.ready.noaa.gov/gdas1.php">GDAS data archive</a>

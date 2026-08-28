@@ -3,7 +3,7 @@
   <div v-else-if="model">
     <LandingHeader :title="model.humanReadableName" subtitle="Cloudnet model product"></LandingHeader>
     <main class="pagewidth">
-      <p v-if="modelInfo">{{ modelInfo.description }}</p>
+      <div v-html="modelDescription"></div>
       <div class="columns">
         <div v-if="modelInfo" class="info-column">
           <h2>Model configuration</h2>
@@ -36,9 +36,7 @@
           <template v-if="Object.keys(modelInfo.links).length > 0">
             <h2>Links</h2>
             <ul>
-              <li v-for="(url, text) in modelInfo.links" :key="url">
-                <a :href="url" target="_blank">{{ text }}</a>
-              </li>
+              <li v-for="link in modelLinks" :key="link" v-html="link"></li>
             </ul>
           </template>
         </div>
@@ -69,7 +67,7 @@ import { backendUrl } from "@/lib";
 import type { Model } from "@shared/entity/Model";
 import axios from "axios";
 import { computed, onMounted, ref } from "vue";
-import modelsJson from "@/assets/models.json";
+import modelsJson from "@/assets/models.yaml";
 import type { Site } from "@shared/entity/Site";
 import type { ModelFile } from "@shared/entity/File";
 import { useTitle } from "@/router";
@@ -92,7 +90,13 @@ const allSites = ref<Site[]>([]);
 
 const router = useRouter();
 
-const modelInfo = computed(() => (modelsJson as any)[props.modelId]);
+const modelInfo = computed(() => modelsJson[props.modelId]);
+const modelDescription = computed(() =>
+  modelInfo.value ? "<p>" + modelInfo.value.description.split("\n\n").join("</p><p>") + "</p>" : "",
+);
+const modelLinks = computed(() =>
+  modelInfo.value ? modelInfo.value.links.map((link: string) => link.replace("<a", '<a target="_blank"')) : "",
+);
 
 const title = computed(() => [model.value?.humanReadableName, "Models"]);
 
@@ -141,6 +145,14 @@ function onMapMarkerClick(siteIds: Site["id"][]) {
 
 :deep(.pagewidth) {
   max-width: 1000px;
+}
+
+:deep(p) {
+  margin-bottom: 0.5rem;
+}
+
+:deep(i) {
+  font-style: italic;
 }
 
 table {
