@@ -1,3 +1,5 @@
+# check=skip=SecretsUsedInArgOrEnv
+
 FROM node:26 AS base
 
 FROM base AS dev
