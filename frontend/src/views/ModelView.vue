@@ -8,30 +8,32 @@
         <div v-if="modelInfo" class="info-column">
           <h2>Model configuration</h2>
           <table>
-            <tr>
-              <th>Model domain</th>
-              <td>{{ modelInfo.domain }}</td>
-            </tr>
-            <tr>
-              <th>Horizontal resolution</th>
-              <td>{{ modelInfo.horizontalResolution }}</td>
-            </tr>
-            <tr>
-              <th>Vertical resolution</th>
-              <td>{{ modelInfo.verticalResolution }}</td>
-            </tr>
-            <tr>
-              <th>Temporal resolution</th>
-              <td>{{ modelInfo.timeResolution }}</td>
-            </tr>
-            <tr>
-              <th>Forecast availability</th>
-              <td>{{ modelInfo.forecast }}</td>
-            </tr>
-            <tr>
-              <th>Model runs</th>
-              <td>{{ modelInfo.runs }}</td>
-            </tr>
+            <tbody>
+              <tr>
+                <th>Model domain</th>
+                <td>{{ modelInfo.domain }}</td>
+              </tr>
+              <tr>
+                <th>Horizontal resolution</th>
+                <td>{{ modelInfo.horizontalResolution }}</td>
+              </tr>
+              <tr>
+                <th>Vertical resolution</th>
+                <td>{{ modelInfo.verticalResolution }}</td>
+              </tr>
+              <tr>
+                <th>Temporal resolution</th>
+                <td>{{ modelInfo.timeResolution }}</td>
+              </tr>
+              <tr>
+                <th>Forecast availability</th>
+                <td>{{ modelInfo.forecast }}</td>
+              </tr>
+              <tr>
+                <th>Model runs</th>
+                <td>{{ modelInfo.runs }}</td>
+              </tr>
+            </tbody>
           </table>
           <template v-if="Object.keys(modelInfo.links).length > 0">
             <h2>Links</h2>
