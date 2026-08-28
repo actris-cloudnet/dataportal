@@ -75,10 +75,12 @@ const props = defineProps<{
   instruments: Instrument[];
 }>();
 
-const selectedProductIds = defineModel<string[]>("selectedProductIds", { default: [] });
-const selectedVariableIds = defineModel<string[]>("selectedVariableIds", { default: [] });
-const selectedSiteIds = defineModel<string[]>("selectedSiteIds", { default: [] });
-const selectedInstrumentUuids = defineModel<string[]>("selectedInstrumentUuids", { default: [] });
+const selectedProductIds = defineModel<string[]>("selectedProductIds", { default: [] as any /* workaround */ });
+const selectedVariableIds = defineModel<string[]>("selectedVariableIds", { default: [] as any /* workaround */ });
+const selectedSiteIds = defineModel<string[]>("selectedSiteIds", { default: [] as any /* workaround */ });
+const selectedInstrumentUuids = defineModel<string[]>("selectedInstrumentUuids", {
+  default: [] as any /* workaround */,
+});
 const startDate = defineModel<string | undefined>("startDate", { default: undefined });
 const period = defineModel<string>("period", { default: "month" });
 
