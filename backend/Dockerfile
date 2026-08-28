@@ -11,6 +11,8 @@ FROM base AS dev
 COPY backend /app
 COPY shared /shared
 
+ENV NPM_CONFIG_MIN_RELEASE_AGE=3
+
 FROM dev AS build
 
 RUN npm run build

@@ -6,6 +6,8 @@ WORKDIR /app
 
 EXPOSE 8080
 
+ENV NPM_CONFIG_MIN_RELEASE_AGE=3
+
 CMD ["npm", "run", "dev"]
 
 FROM base AS builder
