@@ -7,8 +7,9 @@ ecmwf:
 
     Météo-France runs the same model under the name <a
     href="/model/arpege">ARPEGE</a> and provides data for select Cloudnet sites.
-    For real-time processing, there is also an <a href="/model/ecmwf-open">ECMWF
-    open data</a> version with reduced resolution and a limited set of parameters.
+    For real-time processing, there is also <a href="/model/ecmwf-open">ECMWF
+    IFS (open data)</a> model product with reduced resolution and a limited set
+    of parameters.
 
   domain: Global
   horizontalResolution: 9 km
@@ -107,16 +108,17 @@ arome-arctic:
 
 arpege:
   description: |
-    ARPEGE (Action de Recherche Petite Echelle Grande Echelle) is a global
-    spectral numerical weather prediction model with variable horizontal
-    resolution, with the highest resolution (approximately 5 km) focused over
-    Europe and gradually coarsening to about 25 km over more distant regions.
-    Forecast data are provided by Météo-France.
+    ARPEGE (<span lang="fr">Action de Recherche Petite Echelle Grande
+    Echelle</span>) is a global spectral numerical weather prediction model with
+    variable horizontal resolution, with the highest resolution (approximately 5
+    km) focused over Europe and gradually coarsening to about 25 km over more
+    distant regions.
 
-    ECMWF runs the same model under the name <a href="/model/ecmwf">IFS</a> and
-    provides data for most Cloudnet sites.
+    Forecast data from ARPEGE are provided by Météo-France for some Cloudnet
+    sites. ECMWF runs the same model under the name <a
+    href="/model/ecmwf">IFS</a> and provides data for most Cloudnet sites.
   domain: Global
-  horizontalResolution: 5–25 km
+  horizontalResolution: 5 to 25 km
   verticalResolution: 105 model levels
   timeResolution: 1 hour
   runs: Every 12 hours

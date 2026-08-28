@@ -6,7 +6,7 @@
       <div v-html="modelDescription"></div>
       <div class="columns">
         <div v-if="modelInfo" class="info-column">
-          <h2>Model configuration</h2>
+          <h2>Product overview</h2>
           <table>
             <tbody>
               <tr>
@@ -43,7 +43,7 @@
           </template>
         </div>
         <div class="data-column">
-          <h2>Data availability</h2>
+          <h2>Product availability</h2>
           <template v-if="allSites.length > 0">
             <p>Near real-time model data are available for the following sites:</p>
             <div class="map-container">
