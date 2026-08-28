@@ -160,7 +160,11 @@
           </template>
           <template v-else-if="'model' in previewResponse && previewResponse.model">
             <dt>Model</dt>
-            <dd>{{ previewResponse.model.humanReadableName }}</dd>
+            <dd>
+              <router-link :to="{ name: 'Model', params: { modelId: previewResponse.model.id } }">
+                {{ previewResponse.model.humanReadableName }}
+              </router-link>
+            </dd>
           </template>
           <template v-else>
             <dt>Product</dt>
