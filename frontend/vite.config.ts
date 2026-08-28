@@ -23,4 +23,8 @@ export default defineConfig({
       "/api": "http://dataportal-backend:3000",
     },
   },
+  test: {
+    environment: "jsdom",
+    execArgv: ["--no-webstorage"],
+  },
 });
