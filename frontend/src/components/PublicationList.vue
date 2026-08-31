@@ -29,8 +29,8 @@ async function fetchPublications() {
       ...pub,
       citation: pub.citation
         .replace(/,[^(]+/, " et al. ")
-        .replace(/\<a[^>]+\>[^<]+\<\/a\>/, "")
-        .replace(/(\(\d+\)\.) ([^<]+)\. <i>/, `$1 <a href="${pub.pid}" target="_blank">$2</a>. <i>`),
+        .replace(/\.\s*\<a[^>]+\>[^<]+\<\/a\>/, "")
+        .replace(/(\(\d+\)\.)\s*([^<]+)\.\s*<i>/, `$1 <a href="${pub.pid}" target="_blank">$2</a>. <i>`),
     }));
   } catch (err) {
     console.error("Failed to fetch publications:", err);
