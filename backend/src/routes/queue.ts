@@ -6,7 +6,7 @@ import { randomName } from "../lib/random";
 import { Product, ProductType } from "../entity/Product";
 import { Instrument, InstrumentInfo } from "../entity/Instrument";
 import { Model } from "../entity/Model";
-import { Site } from "../entity/Site";
+import { Site, SiteType } from "../entity/Site";
 import { findSourceInstrumentIds, isStringArray, toArray } from "../lib";
 
 export class QueueRoutes {
@@ -68,6 +68,13 @@ export class QueueRoutes {
           }
         } else if (product.sourceProducts.length > 0) {
           batches.push(this.submitProductBatch(searchParams, batchId, product));
+          if (
+            !searchParams.instrumentIds &&
+            !searchParams.instrumentUuids &&
+            !product.type.includes(ProductType.INSTRUMENT)
+          ) {
+            batches.push(this.submitArmBatch(searchParams, batchId, product));
+          }
         }
       }
     }
@@ -269,6 +276,32 @@ export class QueueRoutes {
       batchId,
       productId: "$1::text",
       modelId: `upload."modelId"`,
+    });
+  }
+
+  /// Submit derived product batch for ARM sites: instrument files from ARM
+  /// sites are not in the data portal, so create categorize tasks for days
+  /// with model data, and other tasks for days with source product files, and
+  /// let processing check if the required input exists.
+  private async submitArmBatch(filters: Record<string, any>, batchId: string, product: Product) {
+    const where = [`upload."tombstoneReason" IS NULL`];
+    const parameters: any[] = [product.id];
+    where.push(`upload."siteId" IN (SELECT id FROM site WHERE $${parameters.length + 1} = ANY (type))`);
+    parameters.push(SiteType.ARM);
+    let table = "model_file";
+    if (product.id !== "categorize") {
+      table = "regular_file";
+      where.push(`upload."productId" = ANY ($${parameters.length + 1})`);
+      parameters.push(product.sourceProducts.map((sourceProduct) => sourceProduct.id));
+    } else if (filters.modelIds) {
+      // Filter by model but keep task modelId NULL: one task per day.
+      where.push(`upload."modelId" = ANY ($${parameters.length + 1})`);
+      parameters.push(filters.modelIds);
+    }
+    return this.batchQuery(filters, where, parameters, {
+      table,
+      batchId,
+      productId: "$1::text",
     });
   }
 

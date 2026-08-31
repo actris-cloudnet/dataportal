@@ -877,6 +877,45 @@ describe("/api/queue/batch", () => {
     await loadFixture(dataSource, "4-model_upload");
     await loadFixture(dataSource, "5-model_file");
     await loadFixture(dataSource, "5-regular_file");
+    // Model file for an ARM site.
+    await dataSource.getRepository("model_file").save({
+      uuid: "f81017e6-c03e-4a1a-93d1-a1a5f5b0caf6",
+      pid: "",
+      volatile: true,
+      measurementDate: "2021-06-01",
+      product: "model",
+      createdAt: "2021-06-02T10:52:59.073Z",
+      updatedAt: "2021-06-02T10:52:59.073Z",
+      s3key: null,
+      filename: "20210601_shanghai_ecmwf.nc",
+      checksum: "89e1ec10b0eae95780bd4a2a2a5b8fc12e0e08b2c1b8f7d3f8f4d5a6b7c8d9e0",
+      size: 501234,
+      format: "NetCDF3",
+      site: "shanghai",
+      version: "124",
+      model: "ecmwf",
+      errorLevel: null,
+    });
+    // Categorize file for an ARM site.
+    await dataSource.getRepository("regular_file").save({
+      uuid: "0ee3c04a-6c33-44a2-b5c8-cbbc3f2d76b7",
+      pid: "",
+      volatile: true,
+      measurementDate: "2021-07-15",
+      product: "categorize",
+      createdAt: "2021-07-16T10:39:58.449Z",
+      updatedAt: "2021-07-16T10:39:58.449Z",
+      startTime: null,
+      stopTime: null,
+      s3key: null,
+      filename: "20210715_shanghai_categorize.nc",
+      checksum: "5a7e0b7c1d2e3f405162738495a6b7c8d9e0f1a2b3c4d5e6f70819a2b3c4d5e6",
+      size: 7127282,
+      format: "HDF5 (NetCDF4)",
+      site: "shanghai",
+      version: "125",
+      errorLevel: null,
+    });
     taskRepo = dataSource.getRepository(Task);
   });
 
@@ -1018,8 +1057,8 @@ describe("/api/queue/batch", () => {
 
   it("creates L3 tasks", async () => {
     await axios.post(batchUrl, { type: "process", productIds: ["l3-cf"], dryRun: false }, { auth });
-    expect(await taskRepo.count()).toBe(6);
-    expect(await taskRepo.countBy({ productId: "l3-cf", modelId: "ecmwf" })).toBe(4);
+    expect(await taskRepo.count()).toBe(7);
+    expect(await taskRepo.countBy({ productId: "l3-cf", modelId: "ecmwf" })).toBe(5);
     expect(await taskRepo.countBy({ productId: "l3-cf", modelId: "icon-iglo-12-23" })).toBe(2);
     expect(
       await taskRepo.existsBy({
@@ -1067,7 +1106,7 @@ describe("/api/queue/batch", () => {
 
   it("creates categorize tasks", async () => {
     await axios.post(batchUrl, { type: "process", productIds: ["categorize"], dryRun: false }, { auth });
-    expect(await taskRepo.count()).toBe(5);
+    expect(await taskRepo.count()).toBe(6);
     expect(await taskRepo.countBy({ siteId: "granada", productId: "categorize", instrumentInfoUuid: IsNull() })).toBe(
       1,
     );
@@ -1075,6 +1114,88 @@ describe("/api/queue/batch", () => {
       3,
     );
     expect(await taskRepo.countBy({ siteId: "warsaw", productId: "categorize", instrumentInfoUuid: IsNull() })).toBe(1);
+    expect(await taskRepo.countBy({ siteId: "shanghai", productId: "categorize", instrumentInfoUuid: IsNull() })).toBe(
+      1,
+    );
+  });
+
+  it("creates categorize tasks for ARM site based on model data", async () => {
+    await axios.post(
+      batchUrl,
+      { type: "process", productIds: ["categorize"], siteIds: ["shanghai"], dryRun: false },
+      { auth },
+    );
+    expect(await taskRepo.count()).toBe(1);
+    expect(
+      await taskRepo.existsBy({
+        measurementDate: new Date("2021-06-01"),
+        siteId: "shanghai",
+        productId: "categorize",
+        instrumentInfoUuid: IsNull(),
+      }),
+    ).toBeTruthy();
+  });
+
+  it("creates classification tasks for ARM site based on categorize data", async () => {
+    await axios.post(
+      batchUrl,
+      { type: "process", productIds: ["classification"], siteIds: ["shanghai"], dryRun: false },
+      { auth },
+    );
+    expect(await taskRepo.count()).toBe(1);
+    expect(
+      await taskRepo.existsBy({
+        measurementDate: new Date("2021-07-15"),
+        siteId: "shanghai",
+        productId: "classification",
+        instrumentInfoUuid: IsNull(),
+      }),
+    ).toBeTruthy();
+  });
+
+  it("does not create ARM categorize tasks outside date range", async () => {
+    await axios.post(
+      batchUrl,
+      { type: "process", productIds: ["categorize"], siteIds: ["shanghai"], dateFrom: "2022-01-01", dryRun: false },
+      { auth },
+    );
+    expect(await taskRepo.count()).toBe(0);
+  });
+
+  it("does not create ARM categorize tasks when filtering by instrument", async () => {
+    await axios.post(
+      batchUrl,
+      {
+        type: "process",
+        productIds: ["categorize"],
+        siteIds: ["shanghai"],
+        instrumentIds: ["rpg-fmcw-94"],
+        dryRun: false,
+      },
+      { auth },
+    );
+    expect(await taskRepo.count()).toBe(0);
+  });
+
+  it("filters ARM categorize tasks by model", async () => {
+    await axios.post(
+      batchUrl,
+      {
+        type: "process",
+        productIds: ["categorize"],
+        siteIds: ["shanghai"],
+        modelIds: ["icon-iglo-12-23"],
+        dryRun: false,
+      },
+      { auth },
+    );
+    expect(await taskRepo.count()).toBe(0);
+    await axios.post(
+      batchUrl,
+      { type: "process", productIds: ["categorize"], siteIds: ["shanghai"], modelIds: ["ecmwf"], dryRun: false },
+      { auth },
+    );
+    expect(await taskRepo.count()).toBe(1);
   });
 
   it("creates epsilon-lidar tasks", async () => {
@@ -1164,7 +1285,7 @@ describe("/api/queue/batch", () => {
 
   it("cancels tasks", async () => {
     const res = await axios.post(batchUrl, { type: "process", productIds: ["categorize"], dryRun: false }, { auth });
-    expect(await taskRepo.count()).toBe(5);
+    expect(await taskRepo.count()).toBe(6);
     await axios.delete(`${batchUrl}/${res.data.batchId}`, { auth });
     expect(await taskRepo.count()).toBe(0);
   });
