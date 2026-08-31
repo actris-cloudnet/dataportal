@@ -3,13 +3,13 @@
 exports[`/api/publications GET /api/publications/ should return list of publications 1`] = `
 [
   {
-    "citation": "Tukiainen et al. (2020). CloudnetPy: A Python package for processing cloud remote sensing data. <i>JOSS</i>, <i>5</i>(53), 2123. <a href="https://doi.org/10.21105/joss.02123">https://doi.org/10.21105/joss.02123</a>",
+    "citation": "Tukiainen, S., O’Connor, E., &amp; Korpinen, A. (2020). CloudnetPy: A Python package for processing cloud remote sensing data. <i>JOSS</i>, <i>5</i>(53), 2123. <a href="https://doi.org/10.21105/joss.02123">https://doi.org/10.21105/joss.02123</a>",
     "pid": "https://doi.org/10.21105/joss.02123",
     "publishedAt": "2020-09-04",
     "updatedAt": "2020-09-28T12:45:21.916Z",
   },
   {
-    "citation": "Illingworth et al. (2007). Cloudnet. <i>Bulletin of the American Meteorological Society</i>, <i>88</i>(6), 883-898. <a href="https://doi.org/10.1175/BAMS-88-6-883">https://doi.org/10.1175/BAMS-88-6-883</a>",
+    "citation": "Illingworth, A. J., Hogan, R. J., O&#x27;Connor, E., Bouniol, D., Brooks, M. E., Delanoé, J., Donovan, D. P., Eastment, J. D., Gaussiat, N., Goddard, J. W. F., Haeffelin, M., Baltink, H. K., Krasnov, O. A., Pelon, J., Piriou, J.-M., Protat, A., Russchenberg, H. W. J., Seifert, A., Tompkins, A. M., van Zadelhoff, G.-J., Vinit, F., Willén, U., Wilson, D. R., &amp; Wrench, C. L. (2007). Cloudnet. <i>Bulletin of the American Meteorological Society</i>, <i>88</i>(6), 883–898. <a href="https://doi.org/10.1175/BAMS-88-6-883">https://doi.org/10.1175/BAMS-88-6-883</a>",
     "pid": "https://doi.org/10.1175/BAMS-88-6-883",
     "publishedAt": "2007-06-01",
     "updatedAt": "2020-09-28T12:45:21.916Z",
