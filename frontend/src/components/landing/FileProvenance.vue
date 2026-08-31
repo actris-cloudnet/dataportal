@@ -95,9 +95,9 @@
       <dd v-else>
         <span class="notAvailable" />
       </dd>
-      <template v-if="file.dvasId">
+      <template v-if="dvasLink">
         <dt>External links</dt>
-        <dd><a :href="`https://data.actris.eu/${file.dvasId}`" target="_blank">ACTRIS data portal</a></dd>
+        <dd><a :href="dvasLink" target="_blank">ACTRIS data portal</a></dd>
       </template>
     </dl>
   </div>
@@ -123,4 +123,8 @@ const currentVersionIndex = computed(() => props.versions.findIndex((uuid) => uu
 const previousVersion = computed(() => props.versions[currentVersionIndex.value + 1]);
 
 const nextVersion = computed(() => props.versions[currentVersionIndex.value - 1]);
+
+const dvasLink = computed(() =>
+  props.file.dvasUpdatedAt ? `https://data.actris.eu/inspect/${props.file.pid.slice(23)}` : null,
+);
 </script>

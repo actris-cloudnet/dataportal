@@ -29,7 +29,7 @@ export interface File {
   filename: string;
   downloadUrl: string;
   software: Software[];
-  dvasId: number | null;
+  dvasUpdatedAt: string | null;
   tombstoneReason: string | null;
 }
 
