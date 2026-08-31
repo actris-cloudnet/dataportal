@@ -2,6 +2,7 @@
   <div>
     <LandingHeader title="Models"></LandingHeader>
     <main class="pagewidth">
+      <p>Data from various numerical weather prediction models are available for different Cloudnet sites.</p>
       <ul>
         <li v-for="model in models" :key="model.id">
           <router-link :to="{ name: 'Model', params: { modelId: model.id } }">
@@ -33,5 +34,14 @@ onMounted(async () => {
 <style scoped lang="scss">
 :deep(.pagewidth) {
   max-width: 1000px;
+}
+
+p {
+  margin-bottom: 1rem;
+}
+
+ul {
+  list-style: disc;
+  padding-left: 1rem;
 }
 </style>
