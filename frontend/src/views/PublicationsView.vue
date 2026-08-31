@@ -21,7 +21,7 @@
           <h2 :id="`year-${year}`">{{ year }}</h2>
           <ul class="publications">
             <li v-for="pub in pubs" :key="pub.pid">
-              <span class="citation-text" v-html="pub.citation"></span>
+              <span class="citation-text" v-html="formatCitation(pub)"></span>
               <BaseButton
                 type="danger"
                 size="small"
@@ -82,6 +82,10 @@ const addingPublication = ref(false);
 onMounted(async () => {
   await updatePublications();
 });
+
+function formatCitation(pub: Publication): string {
+  return pub.citation.replace(/\<a/, '<a target="_blank"');
+}
 
 async function updatePublications() {
   try {

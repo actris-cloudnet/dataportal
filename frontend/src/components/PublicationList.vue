@@ -27,7 +27,10 @@ async function fetchPublications() {
     const response = await axios.get<Publication[]>(`${backendUrl}publications`, { params: { limit: 3 } });
     publications.value = response.data.map((pub) => ({
       ...pub,
-      citation: pub.citation.replace(/,[^(]+/, " et al. "),
+      citation: pub.citation
+        .replace(/,[^(]+/, " et al. ")
+        .replace(/\<a[^>]+\>[^<]+\<\/a\>/, "")
+        .replace(/(\(\d+\)\.) ([^<]+)\. <i>/, `$1 <a href="${pub.pid}" target="_blank">$2</a>. <i>`),
     }));
   } catch (err) {
     console.error("Failed to fetch publications:", err);
