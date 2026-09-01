@@ -68,11 +68,7 @@ export class QueueRoutes {
           }
         } else if (product.sourceProducts.length > 0) {
           batches.push(this.submitProductBatch(searchParams, batchId, product));
-          if (
-            !searchParams.instrumentIds &&
-            !searchParams.instrumentUuids &&
-            !product.type.includes(ProductType.INSTRUMENT)
-          ) {
+          if (!product.type.includes(ProductType.INSTRUMENT)) {
             batches.push(this.submitArmBatch(searchParams, batchId, product));
           }
         }
@@ -281,27 +277,24 @@ export class QueueRoutes {
 
   /// Submit derived product batch for ARM sites: instrument files from ARM
   /// sites are not in the data portal, so create categorize tasks for days
-  /// with model data, and other tasks for days with source product files, and
-  /// let processing check if the required input exists.
+  /// with model data.
   private async submitArmBatch(filters: Record<string, any>, batchId: string, product: Product) {
-    const where = [`upload."tombstoneReason" IS NULL`];
-    const parameters: any[] = [product.id];
-    where.push(`upload."siteId" IN (SELECT id FROM site WHERE $${parameters.length + 1} = ANY (type))`);
+    const where = [];
+    const parameters = [];
+
+    const productId = `$${parameters.length + 1}::text`;
+    parameters.push(product.id);
+
+    where.push(`$${parameters.length + 1} = ANY (site.type)`);
     parameters.push(SiteType.ARM);
-    let table = "model_file";
-    if (product.id !== "categorize") {
-      table = "regular_file";
-      where.push(`upload."productId" = ANY ($${parameters.length + 1})`);
-      parameters.push(product.sourceProducts.map((sourceProduct) => sourceProduct.id));
-    } else if (filters.modelIds) {
-      // Filter by model but keep task modelId NULL: one task per day.
-      where.push(`upload."modelId" = ANY ($${parameters.length + 1})`);
-      parameters.push(filters.modelIds);
-    }
+
+    where.push(`upload."tombstoneReason" IS NULL`);
+
     return this.batchQuery(filters, where, parameters, {
-      table,
+      table: "model_file",
       batchId,
-      productId: "$1::text",
+      join: `JOIN site ON site.id = upload."siteId"`,
+      productId,
     });
   }
 

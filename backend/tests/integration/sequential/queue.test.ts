@@ -896,26 +896,6 @@ describe("/api/queue/batch", () => {
       model: "ecmwf",
       errorLevel: null,
     });
-    // Categorize file for an ARM site.
-    await dataSource.getRepository("regular_file").save({
-      uuid: "0ee3c04a-6c33-44a2-b5c8-cbbc3f2d76b7",
-      pid: "",
-      volatile: true,
-      measurementDate: "2021-07-15",
-      product: "categorize",
-      createdAt: "2021-07-16T10:39:58.449Z",
-      updatedAt: "2021-07-16T10:39:58.449Z",
-      startTime: null,
-      stopTime: null,
-      s3key: null,
-      filename: "20210715_shanghai_categorize.nc",
-      checksum: "5a7e0b7c1d2e3f405162738495a6b7c8d9e0f1a2b3c4d5e6f70819a2b3c4d5e6",
-      size: 7127282,
-      format: "HDF5 (NetCDF4)",
-      site: "shanghai",
-      version: "125",
-      errorLevel: null,
-    });
     taskRepo = dataSource.getRepository(Task);
   });
 
@@ -1145,7 +1125,7 @@ describe("/api/queue/batch", () => {
     expect(await taskRepo.count()).toBe(1);
     expect(
       await taskRepo.existsBy({
-        measurementDate: new Date("2021-07-15"),
+        measurementDate: new Date("2021-06-01"),
         siteId: "shanghai",
         productId: "classification",
         instrumentInfoUuid: IsNull(),
@@ -1160,42 +1140,6 @@ describe("/api/queue/batch", () => {
       { auth },
     );
     expect(await taskRepo.count()).toBe(0);
-  });
-
-  it("does not create ARM categorize tasks when filtering by instrument", async () => {
-    await axios.post(
-      batchUrl,
-      {
-        type: "process",
-        productIds: ["categorize"],
-        siteIds: ["shanghai"],
-        instrumentIds: ["rpg-fmcw-94"],
-        dryRun: false,
-      },
-      { auth },
-    );
-    expect(await taskRepo.count()).toBe(0);
-  });
-
-  it("filters ARM categorize tasks by model", async () => {
-    await axios.post(
-      batchUrl,
-      {
-        type: "process",
-        productIds: ["categorize"],
-        siteIds: ["shanghai"],
-        modelIds: ["icon-iglo-12-23"],
-        dryRun: false,
-      },
-      { auth },
-    );
-    expect(await taskRepo.count()).toBe(0);
-    await axios.post(
-      batchUrl,
-      { type: "process", productIds: ["categorize"], siteIds: ["shanghai"], modelIds: ["ecmwf"], dryRun: false },
-      { auth },
-    );
-    expect(await taskRepo.count()).toBe(1);
   });
 
   it("creates epsilon-lidar tasks", async () => {
