@@ -1,6 +1,7 @@
 import { DataSource, IsNull, MoreThan, Not, Repository } from "typeorm";
 import { RequestHandler, Response, Request } from "express";
 import { randomBytes } from "node:crypto";
+import { Strategy as PassportStrategy } from "passport";
 
 import { UserAccount } from "../entity/UserAccount";
 import { PermissionType } from "../entity/Permission";
@@ -252,4 +253,41 @@ export class Authorizator {
       return next();
     };
   };
+}
+
+type AuthTokenVerifyCallback = (token: string, done: (error: any, user?: any) => void) => void;
+
+export class AuthTokenStrategy extends PassportStrategy {
+  name = "authtoken";
+  private verify: AuthTokenVerifyCallback;
+
+  constructor(verify: AuthTokenVerifyCallback) {
+    super();
+    this.verify = verify;
+  }
+
+  authenticate(req: Request) {
+    const token = req.headers["x-auth-token"];
+    if (typeof token === "undefined") {
+      return this.fail({ message: "No token provided" });
+    } else if (typeof token !== "string") {
+      return this.fail({ message: "Invalid token" });
+    }
+
+    const verified = (err: any, user?: any) => {
+      if (err) {
+        return this.fail(err);
+      }
+      if (!user) {
+        return this.fail({ message: "Invalid token" });
+      }
+      this.success(user);
+    };
+
+    try {
+      this.verify(token, verified);
+    } catch (err) {
+      return this.error(err);
+    }
+  }
 }

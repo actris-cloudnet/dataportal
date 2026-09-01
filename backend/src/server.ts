@@ -6,8 +6,6 @@ import * as passport from "passport";
 import { Strategy as OrcidStrategy } from "passport-orcid";
 import { Strategy as CookieStrategy } from "passport-cookie";
 import { BasicStrategy } from "passport-http";
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-import AuthTokenStrategy = require("passport-auth-token");
 import * as cookieParser from "cookie-parser";
 
 import { RequestError } from "./entity/RequestError";
@@ -27,7 +25,7 @@ import { InstrumentLogRoutes } from "./routes/instrumentLog";
 import { QualityReportRoutes } from "./routes/qualityreport";
 import { UserAccountRoutes } from "./routes/userAccount";
 import { PublicationRoutes } from "./routes/publication";
-import { Authenticator, Authorizator } from "./lib/auth";
+import { Authenticator, Authorizator, AuthTokenStrategy } from "./lib/auth";
 import { PermissionType } from "./entity/Permission";
 import { UserActivationRoutes } from "./routes/userActivation";
 import { ReferenceRoutes } from "./routes/reference";
@@ -217,10 +215,7 @@ async function createServer(): Promise<void> {
         .catch((err) => done(err));
     }),
   );
-  passport.use(
-    "authtoken",
-    new AuthTokenStrategy({ headerFields: ["x-auth-token"], tokenFields: [] }, tokenVerifyCallback),
-  );
+  passport.use("authtoken", new AuthTokenStrategy(tokenVerifyCallback));
   app.post("/api/auth/login", express.json(), authenticator.logIn);
   app.get("/api/auth/me", passport.authenticate("cookie", { session: false }), authenticator.userInfo);
   app.post("/api/auth/logout", passport.authenticate("cookie", { session: false }), authenticator.logOut);
