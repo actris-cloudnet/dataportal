@@ -15,7 +15,7 @@ import {
   ssAuthString,
   getCollectionLandingPage,
 } from "../lib";
-import * as archiver from "archiver";
+import { ZipArchive } from "archiver";
 import { FileRoutes } from "./file";
 import env from "../lib/env";
 import { UploadRoutes } from "./upload";
@@ -106,7 +106,9 @@ export class DownloadRoutes {
     const allFiles = (collection.regularFiles as File[]).concat(collection.modelFiles);
     await this.trackDownload(req, ObjectType.Collection, collection.uuid);
 
-    const archive = archiver("zip", { store: true });
+    const archive = new ZipArchive({
+      store: true, // No compression
+    });
     archive.on("warning", console.error);
     archive.on("error", console.error);
     req.on("close", () => archive.abort());
