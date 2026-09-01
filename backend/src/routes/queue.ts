@@ -6,7 +6,7 @@ import { randomName } from "../lib/random";
 import { Product, ProductType } from "../entity/Product";
 import { Instrument, InstrumentInfo } from "../entity/Instrument";
 import { Model } from "../entity/Model";
-import { Site } from "../entity/Site";
+import { Site, SiteType } from "../entity/Site";
 import { findSourceInstrumentIds, isStringArray, toArray } from "../lib";
 
 export class QueueRoutes {
@@ -68,6 +68,9 @@ export class QueueRoutes {
           }
         } else if (product.sourceProducts.length > 0) {
           batches.push(this.submitProductBatch(searchParams, batchId, product));
+          if (!product.type.includes(ProductType.INSTRUMENT)) {
+            batches.push(this.submitArmBatch(searchParams, batchId, product));
+          }
         }
       }
     }
@@ -269,6 +272,29 @@ export class QueueRoutes {
       batchId,
       productId: "$1::text",
       modelId: `upload."modelId"`,
+    });
+  }
+
+  /// Submit derived product batch for ARM sites: instrument files from ARM
+  /// sites are not in the data portal, so create categorize tasks for days
+  /// with model data.
+  private async submitArmBatch(filters: Record<string, any>, batchId: string, product: Product) {
+    const where = [];
+    const parameters = [];
+
+    const productId = `$${parameters.length + 1}::text`;
+    parameters.push(product.id);
+
+    where.push(`$${parameters.length + 1} = ANY (site.type)`);
+    parameters.push(SiteType.ARM);
+
+    where.push(`upload."tombstoneReason" IS NULL`);
+
+    return this.batchQuery(filters, where, parameters, {
+      table: "model_file",
+      batchId,
+      join: `JOIN site ON site.id = upload."siteId"`,
+      productId,
     });
   }
 
