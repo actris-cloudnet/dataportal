@@ -65,6 +65,7 @@ const productIcons: Record<string, string> = {
   "drizzle": drizzleIcon,
   "ier": ierIcon,
   "iwc": iwcIcon,
+  "iwc-weather-radar": iwcIcon,
   "l3-cf": l3CfIcon,
   "l3-iwc": l3IwcIcon,
   "l3-lwc": l3LwcIcon,
