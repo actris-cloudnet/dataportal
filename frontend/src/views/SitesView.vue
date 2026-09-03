@@ -118,8 +118,7 @@ onMounted(async () => {
         },
         {
           title: "ARM sites",
-          descriptionHtml:
-            'Sites part of the American <a href="https://arm.gov">ARM network</a> with historical data processed using non-standard methods.',
+          descriptionHtml: 'Sites part of the American <a href="https://arm.gov">ARM network</a>.',
           legend: ["Operational site", "Some data", "Inactive"],
           sites: response.data.filter((site) => !site.type.includes("hidden") && site.type.includes("arm")),
         },
