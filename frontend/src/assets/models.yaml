@@ -2,15 +2,14 @@ ecmwf:
   description: |
     Integrated Forecasting System (IFS) is a global numerical weather prediction
     model provided by the European Centre for Medium-Range Weather Forecasts
-    (ECMWF). ECMWF IFS is used as the primary model for Cloudnet processing
-    across all measurement sites.
+    (ECMWF). ECMWF IFS serves as the primary model for Cloudnet processing
+    across all measurement sites. For real-time processing, the full model data
+    may not yet be available, so <a href="/model/ecmwf-open">ECMWF IFS (open
+    data)</a> product, with reduced resolution and a limited set of parameters,
+    is used instead.
 
     Météo-France runs the same model under the name <a
     href="/model/arpege">ARPEGE</a> and provides data for select Cloudnet sites.
-    For real-time processing, there is also <a href="/model/ecmwf-open">ECMWF
-    IFS (open data)</a> model product with reduced resolution and a limited set
-    of parameters.
-
   domain: Global
   horizontalResolution: 9 km
   verticalResolution: 137 model levels
@@ -22,12 +21,13 @@ ecmwf:
 
 ecmwf-open:
   description: |
-    Open data subset of the Integrated Forecasting System (IFS) is provided by
-    European Centre for Medium-Range Weather Forecasts (ECMWF). Compared to <a
-    href="/model/ecmwf">the full model</a>, the open data subset has reduced
-    resolution and a limited number of parameters, but the forecast data are
-    available up to three days in the future, which is used as a fallback for
-    the real-time Cloudnet processing.
+    The open data subset of the Integrated Forecasting System (IFS) is provided
+    by the European Centre for Medium-Range Weather Forecasts (ECMWF). Compared
+    to the full <a href="/model/ecmwf">ECMWF IFS</a> product, this open data
+    subset has reduced resolution and a limited number of parameters, but
+    forecast data are available up to three days in the future. It serves as a
+    fallback for real-time Cloudnet processing when full-resolution data are not
+    yet available.
   domain: Global
   horizontalResolution: 0.25 degrees
   verticalResolution: 14 pressure levels from 1000 to 10 hPa
@@ -40,8 +40,11 @@ ecmwf-open:
 arome:
   description: |
     AROME (Application of Research to Operations at Mesoscale) is a
-    high-resolution, non-hydrostatic convection-permitting mesoscale numerical
-    weather prediction model. The data are provided by Météo-France.
+    high-resolution, non-hydrostatic, convection-permitting mesoscale numerical
+    weather prediction model developed and operated by Météo-France.  Cloudnet
+    also has AROME-based data from other domains, including <a
+    href="/model/meps">MEPS</a> over Northern Europe and <a
+    href="/model/arome-arctic">AROME-Arctic</a> over the Arctic region.
   domain: Central Europe
   horizontalResolution: 1.3 km
   verticalResolution: 90 model levels
@@ -51,6 +54,23 @@ arome:
   links:
     - <a href="https://meteofrance.com/meteo-a-z/les-modeles-de-prevision-meteo">Météo-France forecast models</a> (in French)
     - <a href="https://www.umr-cnrm.fr/gmapdoc/spip.php?article29">AROME documentation</a>
+  boundary:
+    [
+      [37.5, -8.17],
+      [54.68, -12.0],
+      [55.02, -8.19],
+      [55.26, -4.17],
+      [55.38, -0.11],
+      [55.38, 4.11],
+      [55.26, 8.17],
+      [55.02, 12.19],
+      [54.68, 16.0],
+      [37.5, 12.2],
+      [37.78, 8.62],
+      [37.97, 4.43],
+      [37.97, -0.43],
+      [37.78, -4.62],
+    ]
 
 arome-arctic:
   description: |
@@ -108,11 +128,11 @@ arome-arctic:
 
 arpege:
   description: |
-    ARPEGE (<span lang="fr">Action de Recherche Petite Echelle Grande
-    Echelle</span>) is a global spectral numerical weather prediction model with
-    variable horizontal resolution, with the highest resolution (approximately 5
-    km) focused over Europe and gradually coarsening to about 25 km over more
-    distant regions.
+    ARPEGE (<i lang="fr">Action de Recherche Petite Echelle Grande Echelle</i>,
+    meaning Research Project on Small and Large Scales) is a global spectral
+    numerical weather prediction model with variable horizontal resolution. The
+    model has the highest resolution over Europe (approximately 5 km), with the
+    resolution gradually coarsening to about 25 km over more distant regions.
 
     Forecast data from ARPEGE are provided by Météo-France for some Cloudnet
     sites. ECMWF runs the same model under the name <a
@@ -130,8 +150,9 @@ arpege:
 icon-d2:
   description: |
     ICON-D2 is a short-term, high-resolution forecast model for Germany and the
-    neighboring countries based on the ICON (Icosahedral Nonhydrostatic) model.
-    The data are provided by the German Meteorological Service (DWD).
+    neighboring countries. It is based on the ICON (Icosahedral Nonhydrostatic)
+    modelling system developed by the German Meteorological Service (DWD), which
+    also provides the data.
   domain: Central Europe
   horizontalResolution: 2.2 km
   verticalResolution: 65 model levels
@@ -166,10 +187,11 @@ icon-d2:
 
 meps:
   description: |
-    MetCoOp Ensemble Prediction System (MEPS) is a convection-permitting
-    limited-area ensemble forecast based on the HARMONIE-AROME model. This
-    product provides the control member (member 0) from the ensemble by MET
-    Norway.
+    MetCoOp Ensemble Prediction System (MEPS) is a convection-permitting,
+    limited-area ensemble forecast based on the HARMONIE-AROME model. The
+    MetCoOp project is a cooperation between the Nordic and Baltic countries for
+    operational weather forecasting. This product provides the control member
+    (member 0) from the ensemble, with data provided by MET Norway.
   domain: Northern Europe
   horizontalResolution: 2.5 km
   verticalResolution: 65 model levels
@@ -226,12 +248,12 @@ gdas1:
   description: |
     Global Data Assimilation System (GDAS) incorporates observations for the
     Global Forecasting System (GFS) of the National Oceanic and Atmospheric
-    Administration (NOAA). GDAS analysis data can be used for Cloudnet
-    processing if no other model data are available.
+    Administration (NOAA). GDAS provides analysis data (not forecasts) that can
+    be used for Cloudnet processing if no other model data are available.
 
-    This product is based on Air Resources Laboratory's (ARL) data archive where
-    the original GDAS data are interpolated onto pressure levels and gridded to
-    1-degree resolution.
+    This product is based on Air Resources Laboratory's (ARL) data archive,
+    where the original GDAS data are interpolated onto pressure levels and
+    gridded to 1-degree resolution.
   domain: Global
   horizontalResolution: 1 degree
   verticalResolution: 23 pressure levels from 20 to 1000 hPa

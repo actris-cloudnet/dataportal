@@ -44,18 +44,11 @@
         </div>
         <div class="data-column">
           <h2>Product availability</h2>
-          <template v-if="allSites.length > 0">
-            <p>Near real-time model data are available for the following sites:</p>
-            <div class="map-container">
-              <SuperMap
-                v-if="allSites.length > 0"
-                :sites="allSites"
-                :onMapMarkerClick="onMapMarkerClick"
-                :polygon="modelInfo?.boundary"
-              />
-            </div>
-          </template>
+          <p v-if="allSites.length > 0">Near real-time model data are available for the following sites:</p>
           <p v-else style="color: gray">No recent model data available.</p>
+          <div class="map-container" v-if="modelInfo?.boundary">
+            <SuperMap :sites="allSites" :onMapMarkerClick="onMapMarkerClick" :polygon="modelInfo?.boundary" />
+          </div>
         </div>
       </div>
     </main>
