@@ -12,7 +12,7 @@ initLogin()
     app.use(router);
 
     if (import.meta.env.VITE_MATOMO_HOST && import.meta.env.VITE_MATOMO_SITE_ID) {
-      app.use(VueMatomo, {
+      app.use(VueMatomo.default, {
         host: import.meta.env.VITE_MATOMO_HOST,
         siteId: import.meta.env.VITE_MATOMO_SITE_ID,
         router,
