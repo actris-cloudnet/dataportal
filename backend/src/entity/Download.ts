@@ -38,8 +38,8 @@ export class Download {
 @ViewEntity({
   expression: `
     SELECT
-      "createdAt"::date AS "downloadDate",
-      "ip",
+      date_trunc('month', "createdAt")::date AS "downloadDate",
+      "ip"::inet AS "ip",
       "country",
       "measurementDate",
       "productId",
@@ -49,21 +49,21 @@ export class Download {
     JOIN (
       SELECT uuid, "measurementDate", "productId", "siteId", COUNT(*) AS "downloads"
       FROM (
-        SELECT uuid, "measurementDate", "productId", "siteId"
+        SELECT uuid, date_trunc('month', "measurementDate")::date AS "measurementDate", "productId", "siteId"
         FROM regular_file
         UNION ALL
-        SELECT uuid, "measurementDate", "productId", "siteId"
+        SELECT uuid, date_trunc('month', "measurementDate")::date AS "measurementDate", "productId", "siteId"
         FROM model_file
       ) AS file
       GROUP BY uuid, "measurementDate", "productId", "siteId"
       UNION ALL
       SELECT "collectionUuid" AS uuid, "measurementDate", "productId", "siteId", COUNT(*) AS "downloads"
       FROM (
-        SELECT "collectionUuid", "measurementDate", "productId", "siteId"
+        SELECT "collectionUuid", date_trunc('month', "measurementDate")::date AS "measurementDate", "productId", "siteId"
         FROM collection_regular_files_regular_file
         JOIN regular_file ON "regularFileUuid" = regular_file.uuid
         UNION ALL
-        SELECT "collectionUuid", "measurementDate", "productId", "siteId"
+        SELECT "collectionUuid", date_trunc('month', "measurementDate")::date AS "measurementDate", "productId", "siteId"
         FROM collection_model_files_model_file
         JOIN model_file ON "modelFileUuid" = model_file.uuid
       ) AS collection_file

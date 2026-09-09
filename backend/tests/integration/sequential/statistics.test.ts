@@ -275,12 +275,12 @@ describe("GET /api/statistics", () => {
   it("filters until download date", () =>
     expect(getStats({ dimensions: "yearMonth,downloads", downloadDateTo: "2022-02-20" })).resolves.toMatchObject([
       { yearMonth: "2022-01", downloads: expect.closeTo(((1 + 2) * 31) / 300, 10) },
-      { yearMonth: "2022-02", downloads: expect.closeTo(((1 + 2) * 20) / 300, 10) },
+      { yearMonth: "2022-02", downloads: expect.closeTo(((1 + 2) * 28) / 300, 10) },
     ]));
 
   it("filters from download date", () =>
     expect(getStats({ dimensions: "yearMonth,downloads", downloadDateFrom: "2022-11-21" })).resolves.toMatchObject([
-      { yearMonth: "2022-11", downloads: expect.closeTo(((2 + 1) * 10) / 300, 10) },
+      { yearMonth: "2022-11", downloads: expect.closeTo(((2 + 1) * 30) / 300, 10) },
       { yearMonth: "2022-12", downloads: expect.closeTo(((2 + 1) * 31) / 300, 10) },
     ]));
 
@@ -288,14 +288,14 @@ describe("GET /api/statistics", () => {
     expect(
       getStats({ dimensions: "yearMonth,downloads", downloadDateFrom: "2022-03-02", downloadDateTo: "2022-10-15" }),
     ).resolves.toMatchObject([
-      { yearMonth: "2022-03", downloads: expect.closeTo(((1 + 2) * 30) / 300, 10) },
+      { yearMonth: "2022-03", downloads: expect.closeTo(((1 + 2) * 31) / 300, 10) },
       { yearMonth: "2022-04", downloads: expect.closeTo(((1 + 2) * 30) / 300, 10) },
       { yearMonth: "2022-05", downloads: expect.closeTo(((1 + 2) * 31) / 300, 10) },
       { yearMonth: "2022-06", downloads: expect.closeTo(((1 + 2) * 30) / 300, 10) },
       { yearMonth: "2022-07", downloads: expect.closeTo(((2 + 1) * 31) / 300, 10) },
       { yearMonth: "2022-08", downloads: expect.closeTo(((2 + 1) * 31) / 300, 10) },
       { yearMonth: "2022-09", downloads: expect.closeTo(((2 + 1) * 30) / 300, 10) },
-      { yearMonth: "2022-10", downloads: expect.closeTo(((2 + 1) * 15) / 300, 10) },
+      { yearMonth: "2022-10", downloads: expect.closeTo(((2 + 1) * 31) / 300, 10) },
     ]));
 
   it("returns monthly curated total data", () =>

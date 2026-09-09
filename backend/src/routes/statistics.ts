@@ -1,6 +1,6 @@
 import { Request, RequestHandler, Response, NextFunction } from "express";
 
-import { DataSource } from "typeorm";
+import { DataSource, SelectQueryBuilder } from "typeorm";
 import { isValidDate } from "../lib";
 import env from "../lib/env";
 import axios from "axios";
@@ -41,7 +41,7 @@ export class StatisticsRoutes {
   };
 
   downloadStats: RequestHandler = async (req, res, next) => {
-    const qb = this.dataSource.manager.createQueryBuilder(DownloadStats, "stats");
+    let qb: SelectQueryBuilder<any> = this.dataSource.manager.createQueryBuilder(DownloadStats, "stats");
 
     if (typeof req.query.productTypes === "string") {
       const productTypes = req.query.productTypes.split(",");
@@ -77,20 +77,22 @@ export class StatisticsRoutes {
       if (typeof req.query.downloadDateFrom !== "string" || !isValidDate(req.query.downloadDateFrom)) {
         return next({ status: 400, errors: "invalid downloadDateFrom" });
       }
-      qb.andWhere('"downloadDate" >= :downloadDateFrom', { downloadDateFrom: new Date(req.query.downloadDateFrom) });
+      qb.andWhere('"downloadDate" >= :downloadDateFrom', {
+        downloadDateFrom: req.query.downloadDateFrom.slice(0, 8) + "01",
+      });
     }
     if (req.query.downloadDateTo) {
       if (typeof req.query.downloadDateTo !== "string" || !isValidDate(req.query.downloadDateTo)) {
         return next({ status: 400, errors: "invalid downloadDateTo" });
       }
-      qb.andWhere('"downloadDate" <= :downloadDateTo', { downloadDateTo: new Date(req.query.downloadDateTo) });
+      qb.andWhere('"downloadDate" <= :downloadDateTo', { downloadDateTo: req.query.downloadDateTo.slice(0, 8) + "01" });
     }
     if (req.query.measurementDateFrom) {
       if (typeof req.query.measurementDateFrom !== "string" || !isValidDate(req.query.measurementDateFrom)) {
         return next({ status: 400, errors: "invalid measurementDateFrom" });
       }
       qb.andWhere('"measurementDate" >= :measurementDateFrom', {
-        measurementDateFrom: new Date(req.query.measurementDateFrom),
+        measurementDateFrom: req.query.measurementDateFrom.slice(0, 8) + "01",
       });
     }
     if (req.query.measurementDateTo) {
@@ -98,7 +100,7 @@ export class StatisticsRoutes {
         return next({ status: 400, errors: "invalid measurementDateTo" });
       }
       qb.andWhere('"measurementDate" <= :measurementDateTo', {
-        measurementDateTo: new Date(req.query.measurementDateTo),
+        measurementDateTo: req.query.measurementDateTo.slice(0, 8) + "01",
       });
     }
     if ((req.query.site || req.query.facility) && req.query.country) {
@@ -148,25 +150,43 @@ export class StatisticsRoutes {
         qb.addSelect('"siteId"', "site").groupBy('"siteId"').orderBy('"siteId"');
       }
     } else if (dimensions === "yearMonth,uniqueIps") {
-      qb.select("to_char(\"downloadDate\", 'YYYY-MM')", "yearMonth")
-        .addSelect("COUNT(DISTINCT ip)", "uniqueIps")
+      // Running COUNT(*) on DISTINCT subquery is faster than COUNT(DISTINCT ip)
+      // because it uses hash aggregation on few rows instead of sorting many rows.
+      qb.select("to_char(\"downloadDate\", 'YYYY-MM')", "yearMonth").addSelect("ip").distinct(true);
+      qb = this.dataSource.manager
+        .createQueryBuilder()
+        .select('"yearMonth"')
+        .addSelect("COUNT(*)", "uniqueIps")
+        .from("(" + qb.getQuery() + ")", "t")
         .groupBy('"yearMonth"')
         .orderBy('"yearMonth"');
     } else if (dimensions === "year,uniqueIps") {
-      qb.select("to_char(\"downloadDate\", 'YYYY')", "year")
-        .addSelect("COUNT(DISTINCT ip)", "uniqueIps")
+      qb.select("to_char(\"downloadDate\", 'YYYY')", "year").addSelect("ip").distinct(true);
+      qb = this.dataSource.manager
+        .createQueryBuilder()
+        .select("year")
+        .addSelect("COUNT(*)", "uniqueIps")
+        .from("(" + qb.getQuery() + ")", "t")
         .groupBy("year")
         .orderBy("year");
     } else if (dimensions === "product,uniqueIps") {
-      qb.select('stats."productId"', "product")
-        .addSelect("COUNT(DISTINCT ip)", "uniqueIps")
-        .groupBy('stats."productId"')
-        .orderBy('stats."productId"');
+      qb.select('stats."productId"', "product").addSelect("ip").distinct(true);
+      qb = this.dataSource.manager
+        .createQueryBuilder()
+        .select("product")
+        .addSelect("COUNT(*)", "uniqueIps")
+        .from("(" + qb.getQuery() + ")", "t")
+        .groupBy("product")
+        .orderBy("product");
     } else if (dimensions === "site,uniqueIps") {
-      qb.select('"siteId"', "site")
-        .addSelect("COUNT(DISTINCT ip)", "uniqueIps")
-        .groupBy('"siteId"')
-        .orderBy('"siteId"');
+      qb.select('"siteId"', "site").addSelect("ip").distinct(true);
+      qb = this.dataSource.manager
+        .createQueryBuilder()
+        .select("site")
+        .addSelect("COUNT(*)", "uniqueIps")
+        .from("(" + qb.getQuery() + ")", "t")
+        .groupBy("site")
+        .orderBy("site");
     }
 
     const rows = await qb.getRawMany();
