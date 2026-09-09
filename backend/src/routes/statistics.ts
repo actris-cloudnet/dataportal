@@ -159,7 +159,8 @@ export class StatisticsRoutes {
         .addSelect("COUNT(*)", "uniqueIps")
         .from("(" + qb.getQuery() + ")", "t")
         .groupBy('"yearMonth"')
-        .orderBy('"yearMonth"');
+        .orderBy('"yearMonth"')
+        .setParameters(qb.getParameters());
     } else if (dimensions === "year,uniqueIps") {
       qb.select("to_char(\"downloadDate\", 'YYYY')", "year").addSelect("ip").distinct(true);
       qb = this.dataSource.manager
@@ -168,7 +169,8 @@ export class StatisticsRoutes {
         .addSelect("COUNT(*)", "uniqueIps")
         .from("(" + qb.getQuery() + ")", "t")
         .groupBy("year")
-        .orderBy("year");
+        .orderBy("year")
+        .setParameters(qb.getParameters());
     } else if (dimensions === "product,uniqueIps") {
       qb.select('stats."productId"', "product").addSelect("ip").distinct(true);
       qb = this.dataSource.manager
@@ -177,7 +179,8 @@ export class StatisticsRoutes {
         .addSelect("COUNT(*)", "uniqueIps")
         .from("(" + qb.getQuery() + ")", "t")
         .groupBy("product")
-        .orderBy("product");
+        .orderBy("product")
+        .setParameters(qb.getParameters());
     } else if (dimensions === "site,uniqueIps") {
       qb.select('"siteId"', "site").addSelect("ip").distinct(true);
       qb = this.dataSource.manager
@@ -186,7 +189,8 @@ export class StatisticsRoutes {
         .addSelect("COUNT(*)", "uniqueIps")
         .from("(" + qb.getQuery() + ")", "t")
         .groupBy("site")
-        .orderBy("site");
+        .orderBy("site")
+        .setParameters(qb.getParameters());
     }
 
     const rows = await qb.getRawMany();

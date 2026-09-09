@@ -141,6 +141,21 @@ describe("GET /api/statistics", () => {
   it("calculates unique IPs by year", () =>
     expect(getStats({ dimensions: "year,uniqueIps" })).resolves.toMatchObject([{ year: "2022", uniqueIps: 3 }]));
 
+  it("calculates unique IPs filtered by product and download date", () =>
+    expect(
+      getStats({ dimensions: "year,uniqueIps", cluProduct: "radar", downloadDateFrom: "2022-03-01" }),
+    ).resolves.toMatchObject([{ year: "2022", uniqueIps: 2 }]));
+
+  it("calculates unique IPs filtered by variable", () =>
+    expect(getStats({ dimensions: "year,uniqueIps", variable: "radar velocity" })).resolves.toMatchObject([
+      { year: "2022", uniqueIps: 2 },
+    ]));
+
+  it("calculates unique IPs filtered by country and download date", () =>
+    expect(
+      getStats({ dimensions: "product,uniqueIps", country: "IE", downloadDateTo: "2022-06-30" }),
+    ).resolves.toMatchObject([{ product: "classification", uniqueIps: 1 }]));
+
   it("calculates file downloads by country", () =>
     expect(getStats({ dimensions: "country,downloads" })).resolves.toMatchObject([
       { country: "FI", downloads: expect.closeTo(181 / 300, 10) },
