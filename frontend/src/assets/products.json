@@ -1394,6 +1394,244 @@
     ],
     "specific_variables": []
   },
+  "cod": {
+    "description": "Cloud optical depth is the vertical integral of the visible\n        extinction coefficient of liquid and ice clouds. Liquid extinction is\n        derived from the adiabatic-scaled liquid water content and the\n        LWP-scaled droplet effective radius of Frisch et al. (2002), and ice\n        extinction from the ice water content and ice effective radius\n        retrieved with the Hogan et al. (2006) reflectivity-temperature\n        relations.",
+    "references_html": [
+      "Frisch, S., Shupe, M., Djalalova, I., Feingold, G., &amp; Poellot, M. (2002). The Retrieval of Stratus Cloud Droplet Effective Radius with Cloud Radars. <i>J. Atmos. Oceanic Technol.</i>, <i>19</i>(6), 835\u2013842. <a href=\"https://doi.org/10.1175/1520-0426(2002)019%3C0835:TROSCD%3E2.0.CO;2\">https://doi.org/10.1175/1520-0426(2002)019%3C0835:TROSCD%3E2.0.CO;2</a>",
+      "Hogan, R. J., Mittermaier, M. P., &amp; Illingworth, A. J. (2006). The Retrieval of Ice Water Content from Radar Reflectivity Factor and Temperature and Its Use in Evaluating a Mesoscale Model. <i>Journal of Applied Meteorology and Climatology</i>, <i>45</i>(2), 301\u2013317. <a href=\"https://doi.org/10.1175/JAM2340.1\">https://doi.org/10.1175/JAM2340.1</a>",
+      "Delano\u00eb, J., Protat, A., Bouniol, D., Heymsfield, A., Bansemer, A., &amp; Brown, P. (2007). The Characterization of Ice Cloud Properties from Doppler Radar Measurements. <i>Journal of Applied Meteorology and Climatology</i>, <i>46</i>(10), 1682\u20131698. <a href=\"https://doi.org/10.1175/JAM2543.1\">https://doi.org/10.1175/JAM2543.1</a>",
+      "Griesche, H. J., Seifert, P., Ansmann, A., Baars, H., Barrientos Velasco, C., B\u00fchl, J., Engelmann, R., Radenz, M., Zhenping, Y., &amp; Macke, A. (2020). Application of the shipborne remote sensing supersite OCEANET for profiling of Arctic aerosols and clouds during <em>Polarstern</em> cruise PS106. <i>Atmos. Meas. Tech.</i>, <i>13</i>(10), 5335\u20135358. <a href=\"https://doi.org/10.5194/amt-13-5335-2020\">https://doi.org/10.5194/amt-13-5335-2020</a>"
+    ],
+    "dimensions": [
+      {
+        "name": "height",
+        "units": "m",
+        "standard_name": "height_above_mean_sea_level",
+        "long_name": "Height above mean sea level",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "time",
+        "units": "hours since 2025-01-01 00:00:00 +00:00",
+        "standard_name": "time",
+        "long_name": "Time UTC",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      }
+    ],
+    "common_variables": [
+      {
+        "name": "altitude",
+        "units": "m",
+        "standard_name": "altitude",
+        "long_name": "Altitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "extinction_ice",
+        "units": "m-1",
+        "standard_name": null,
+        "long_name": "Visible extinction coefficient of ice cloud",
+        "comment": "This variable was calculated for the pixels where the categorization\ndata has diagnosed that the radar echo is due to ice. Missing values\nindicate that ice was detected only by the lidar, or that the radar\nreflectivity was affected by uncorrected liquid, rain or melting\nattenuation.",
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "extinction_ice_error",
+        "units": "dB",
+        "standard_name": null,
+        "long_name": "Random error in ice extinction coefficient",
+        "comment": "Random error in ice extinction, one standard deviation, expressed as\n10 log10(1 + relative error). The error of the ice water content\nretrieval (see the iwc product) is used, as the empirical\nreflectivity-temperature relation for extinction has a similar\nuncertainty. It includes the additional uncertainty of the liquid\nattenuation correction where applied.",
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "extinction_liquid",
+        "units": "m-1",
+        "standard_name": null,
+        "long_name": "Visible extinction coefficient of liquid cloud",
+        "comment": "This variable was calculated for the pixels where the categorization\ndata has diagnosed liquid droplets and a reliable liquid water path was\navailable from a coincident microwave radiometer. Where the liquid\nlayer was not detected by the radar, or the retrieved droplet\neffective radius was outside the range 2-50 um\n(e.g. due to drizzle), an assumed effective radius of 10 um\nwas used. Missing values indicate that liquid water path was\nunavailable, unreliable or zero, or that rain was present in the\nprofile.\nNote that the liquid water path is distributed over the detected\nliquid layers only. If liquid is present in layers not classified as\ndroplets (e.g. mixed-phase cloud above the lidar-detected liquid\nbase), the extinction of the detected layers is overestimated. Such\nprofiles are flagged in the optical_depth_retrieval_status variable.",
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "extinction_liquid_error",
+        "units": "dB",
+        "standard_name": null,
+        "long_name": "Random error in liquid extinction coefficient",
+        "comment": "Random error in liquid extinction, one standard deviation, expressed\nas 10 log10(1 + relative error). It combines the liquid water content\nerror (liquid water path error and cloud boundary uncertainty, see the\nlwc product) with the droplet effective radius error from the Frisch\nmethod, or an assumed 40 % where the effective radius\nwas assumed.",
+        "definition": null,
+        "dimensions": ["time", "height"],
+        "dtype": "float32"
+      },
+      {
+        "name": "extinction_retrieval_status",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Extinction coefficient retrieval status",
+        "comment": null,
+        "definition": [
+          {
+            "label": "Value 0",
+            "description": "No cloud detected."
+          },
+          {
+            "label": "Value 1",
+            "description": "Liquid: reliable retrieval with radar-based droplet effective radius."
+          },
+          {
+            "label": "Value 2",
+            "description": "Liquid: droplet effective radius not retrieved from radar, assumed value used."
+          },
+          {
+            "label": "Value 3",
+            "description": "Ice: reliable retrieval."
+          },
+          {
+            "label": "Value 4",
+            "description": "Ice: retrieval performed with radar corrected for liquid, rain or melting attenuation."
+          },
+          {
+            "label": "Value 5",
+            "description": "Mixed phase: both liquid and ice extinction retrieved in the same pixel."
+          },
+          {
+            "label": "Value 6",
+            "description": "Cloud detected but no retrieval: rain, missing or non- positive liquid water path, ice detected only by lidar, or uncorrected radar attenuation."
+          }
+        ],
+        "dimensions": ["time", "height"],
+        "dtype": "int32"
+      },
+      {
+        "name": "latitude",
+        "units": "degree_north",
+        "standard_name": "latitude",
+        "long_name": "Latitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "longitude",
+        "units": "degree_east",
+        "standard_name": "longitude",
+        "long_name": "Longitude of site",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "lwp",
+        "units": "kg m-2",
+        "standard_name": "atmosphere_cloud_liquid_water_content",
+        "long_name": "Liquid water path",
+        "comment": null,
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "lwp_error",
+        "units": "kg m-2",
+        "standard_name": null,
+        "long_name": "Error in liquid water path",
+        "comment": "This variable is a rough estimate of the one-standard-deviation\nerror in liquid water path, calculated as a combination of\na 20 g m-2 linear error and a 25 %\nfractional error.",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "optical_depth",
+        "units": "1",
+        "standard_name": "atmosphere_optical_thickness_due_to_cloud",
+        "long_name": "Cloud optical depth",
+        "comment": "Vertical integral of extinction over the profile. The value is zero\nin profiles where no cloud was detected. The retrieval is not\nperformed, and the value is missing, if rain is present, if liquid\ncloud is present but liquid water path is unavailable or unreliable,\nor if ice is present but affected by uncorrected radar attenuation.\nPixels where ice was detected only by the lidar do not contribute,\nso the value may be a lower bound; see the retrieval status.",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "optical_depth_error",
+        "units": "dB",
+        "standard_name": null,
+        "long_name": "Random error in cloud optical depth",
+        "comment": "Random error in cloud optical depth, one standard deviation, expressed\nas 10 log10(1 + relative error). The extinction errors are assumed\nfully correlated within a profile for each phase, as they are\ndominated by the liquid water path, effective radius and\nreflectivity-temperature relation uncertainties, and independent\nbetween liquid and ice. Systematic errors, such as liquid in layers\nnot classified as droplets or ice detected only by the lidar, are\nnot included; see the retrieval status.",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "optical_depth_ice",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Ice cloud optical depth",
+        "comment": "Vertical integral of extinction over the profile. The value is zero\nin profiles where no cloud was detected. The retrieval is not\nperformed, and the value is missing, if rain is present, if liquid\ncloud is present but liquid water path is unavailable or unreliable,\nor if ice is present but affected by uncorrected radar attenuation.\nPixels where ice was detected only by the lidar do not contribute,\nso the value may be a lower bound; see the retrieval status.",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "optical_depth_liquid",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Liquid cloud optical depth",
+        "comment": "Vertical integral of extinction over the profile. The value is zero\nin profiles where no cloud was detected. The retrieval is not\nperformed, and the value is missing, if rain is present, if liquid\ncloud is present but liquid water path is unavailable or unreliable,\nor if ice is present but affected by uncorrected radar attenuation.\nPixels where ice was detected only by the lidar do not contribute,\nso the value may be a lower bound; see the retrieval status.",
+        "definition": null,
+        "dimensions": ["time"],
+        "dtype": "float32"
+      },
+      {
+        "name": "optical_depth_retrieval_status",
+        "units": "1",
+        "standard_name": null,
+        "long_name": "Cloud optical depth retrieval status",
+        "comment": null,
+        "definition": [
+          {
+            "label": "Value 0",
+            "description": "Clear sky: no cloud detected, optical depth is zero."
+          },
+          {
+            "label": "Value 1",
+            "description": "Reliable retrieval."
+          },
+          {
+            "label": "Value 2",
+            "description": "Assumed droplet effective radius used where the radar-based retrieval was unavailable or outside the valid range."
+          },
+          {
+            "label": "Value 3",
+            "description": "Ice detected only by lidar in part of the profile: ice optical depth is a lower bound."
+          },
+          {
+            "label": "Value 4",
+            "description": "Liquid water path exceeds the adiabatic liquid water path of the detected liquid layers by more than a factor of two: liquid is probably present in layers not classified as droplets, and the vertical distribution of liquid extinction is unreliable."
+          },
+          {
+            "label": "Value 5",
+            "description": "No retrieval: rain, missing or unreliable liquid water path, or uncorrected radar attenuation in ice."
+          }
+        ],
+        "dimensions": ["time"],
+        "dtype": "int32"
+      }
+    ],
+    "specific_variables": []
+  },
   "cpr-simulation": {
     "description": "Ground-based radar measurements transformed for\n        comparison with the 94 GHz cloud profiling radar (CPR) aboard the\n        EarthCARE satellite.",
     "references_html": [

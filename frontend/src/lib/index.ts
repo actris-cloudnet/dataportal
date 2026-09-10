@@ -10,6 +10,7 @@ import derIcon from "@/assets/icons/der.png";
 import disdrometerIcon from "@/assets/icons/disdrometer.png";
 import drizzleIcon from "@/assets/icons/drizzle.png";
 import ierIcon from "@/assets/icons/ier.png";
+import codIcon from "@/assets/icons/cod.png";
 import iwcIcon from "@/assets/icons/iwc.png";
 import l3CfIcon from "@/assets/icons/l3-cf.png";
 import l3IwcIcon from "@/assets/icons/l3-iwc.png";
@@ -76,6 +77,7 @@ const productIcons: Record<string, string> = {
   "mwr-l1c": mwrL1cIcon,
   "mwr-single": mwrSingleIcon,
   "mwr-multi": mwrMultiIcon,
+  "cod": codIcon,
   "radar": radarIcon,
   "weather-station": weatherStationIcon,
   "weather-radar": weatherRadarIcon,
