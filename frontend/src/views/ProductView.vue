@@ -103,7 +103,7 @@ import { backendUrl, getProductIcon } from "@/lib";
 import LandingHeader from "@/components/LandingHeader.vue";
 import BaseTag from "@/components/BaseTag.vue";
 import ApiError from "@/views/ApiError.vue";
-import productData from "@/assets/products.json";
+import productData from "@/assets/products.yaml";
 import type { Instrument } from "@shared/entity/Instrument";
 
 export interface Props {
@@ -139,7 +139,7 @@ watch(
     try {
       const product = await axios.get<Product>(`${backendUrl}products/${props.product}`);
       const instruments = await axios.get<Instrument[]>(`${backendUrl}instruments`);
-      const docs = (productData as any)[props.product];
+      const docs = productData[props.product];
       if (!docs) {
         const error = new Error();
         (error as any).response = { status: 404, data: "Not found" };
