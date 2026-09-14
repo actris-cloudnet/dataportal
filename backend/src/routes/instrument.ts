@@ -16,6 +16,7 @@ import {
   findSourceInstrumentIds,
 } from "../lib";
 import { PermissionType } from "../entity/Permission";
+import { InstrumentLatestUpload } from "../entity/InstrumentLatestUpload";
 
 const toNominalInstrumentResponse = (row: Omit<NominalInstrument, "site" | "product">) => ({
   siteId: row.siteId,
@@ -35,6 +36,7 @@ export class InstrumentRoutes {
     this.personRepo = dataSource.getRepository(Person);
     this.siteRepo = dataSource.getRepository(Site);
     this.productRepo = dataSource.getRepository(Product);
+    this.latestUploadRepo = dataSource.getRepository(InstrumentLatestUpload);
   }
 
   readonly dataSource: DataSource;
@@ -46,6 +48,7 @@ export class InstrumentRoutes {
   readonly personRepo: Repository<Person>;
   readonly siteRepo: Repository<Site>;
   readonly productRepo: Repository<Product>;
+  readonly latestUploadRepo: Repository<InstrumentLatestUpload>;
 
   instruments: RequestHandler = async (req, res) => {
     const instruments = await this.instrumentRepo.find({ order: { type: "ASC", id: "ASC" } });
@@ -68,42 +71,39 @@ export class InstrumentRoutes {
       if ("site" in req.query || "product" in req.query) {
         return next({ status: 400, errors: "site and product filters cannot be combined with includeSite" });
       }
-      const latestSite = this.instrumentUploadRepo
-        .createQueryBuilder("upload")
-        .distinctOn(["upload.instrumentInfoUuid"])
-        .select("upload.instrumentInfoUuid")
-        .addSelect("upload.siteId")
-        .addSelect("MAX(upload.measurementDate)", "latestDate")
-        .addSelect(
-          `CASE
-              WHEN MAX(upload.measurementDate) > CURRENT_DATE - 3 THEN 'active'
-              WHEN MAX(upload.measurementDate) > CURRENT_DATE - 7 THEN 'recent'
-              ELSE 'inactive'
-            END`,
-          "status",
-        )
-        .where("upload.measurementDate > CURRENT_DATE - 182")
-        .groupBy("upload.instrumentInfoUuid")
-        .addGroupBy("upload.siteId")
-        .orderBy("upload.instrumentInfoUuid")
-        .addOrderBy('"latestDate"', "DESC")
+      const latestSite = this.latestUploadRepo
+        .createQueryBuilder("latest_upload")
+        .distinctOn(["latest_upload.instrumentInfoUuid"])
+        .select("latest_upload.instrumentInfoUuid", "instrumentInfoUuid")
+        .addSelect("latest_upload.siteId", "siteId")
+        .addSelect("latest_upload.measurementDate", "measurementDate")
+        .where("latest_upload.measurementDate > CURRENT_DATE - 182")
+        .orderBy("latest_upload.instrumentInfoUuid")
+        .addOrderBy("latest_upload.siteId")
+        .addOrderBy("latest_upload.measurementDate", "DESC")
         .getQuery();
       const rawData = await this.instrumentInfoRepo
         .createQueryBuilder("instrument_info")
-        .select("instrument_info.*")
         .addSelect('latest_site."siteId"')
-        .addSelect("COALESCE(latest_site.status, 'inactive')", "status")
+        .addSelect(
+          `CASE
+             WHEN latest_site."measurementDate" > CURRENT_DATE - 3 THEN 'active'
+             WHEN latest_site."measurementDate" > CURRENT_DATE - 7 THEN 'recent'
+             ELSE 'inactive'
+           END`,
+          "status",
+        )
         .leftJoin("(" + latestSite + ")", "latest_site", 'instrument_info.uuid = latest_site."instrumentInfoUuid"')
-        .leftJoinAndSelect(Instrument, "instrument", "instrument_info.instrumentId = instrument.id")
+        .leftJoinAndSelect(Instrument, "instrument", 'instrument_info."instrumentId" = instrument.id')
         .getRawMany();
       const data = rawData.map((row) => ({
-        uuid: row.uuid,
-        pid: row.pid,
-        name: row.name,
-        owners: row.owners,
-        model: row.model,
-        type: row.type,
-        serialNumber: row.serialNumber,
+        uuid: row.instrument_info_uuid,
+        pid: row.instrument_info_pid,
+        name: row.instrument_info_name,
+        owners: row.instrument_info_owners,
+        model: row.instrument_info_model,
+        type: row.instrument_info_type,
+        serialNumber: row.instrument_info_serialNumber,
         siteId: row.siteId,
         status: row.status,
         instrument: {

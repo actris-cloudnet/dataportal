@@ -82,10 +82,18 @@ async function createServer(): Promise<void> {
     setInterval(
       () => {
         AppDataSource.query("REFRESH MATERIALIZED VIEW download_stats").catch((err) =>
-          console.error("Failed to update materialized view:", err),
+          console.error("Failed to update 'download_stats' materialized view:", err),
         );
       },
       6 * 60 * 60 * 1000,
+    );
+    setInterval(
+      () => {
+        AppDataSource.query("REFRESH MATERIALIZED VIEW instrument_latest_upload").catch((err) =>
+          console.error("Failed to update 'instrument_latest_upload' materialized view:", err),
+        );
+      },
+      60 * 60 * 1000,
     );
     rateLimitMiddleware = rateLimit;
   } else {
