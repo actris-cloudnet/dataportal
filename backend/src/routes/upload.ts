@@ -19,7 +19,6 @@ import {
   escapeLikeString,
 } from "../lib";
 import { basename } from "path";
-import { ReducedMetadataResponse } from "../entity/ReducedMetadataResponse";
 import validator from "validator";
 import { Instrument, InstrumentInfo } from "../entity/Instrument";
 import { Model } from "../entity/Model";
@@ -34,6 +33,7 @@ import { fetchCalibration } from "./calibration";
 import { PermissionType } from "../entity/Permission";
 import { Authenticator } from "../lib/auth";
 import { MetricsService } from "../lib/metrics";
+import { InstrumentLatestUpload } from "../entity/InstrumentLatestUpload";
 
 export class UploadRoutes {
   constructor(
@@ -236,16 +236,17 @@ export class UploadRoutes {
   };
 
   listInstrumentsFromMetadata: RequestHandler = async (req, res) => {
-    const instrumentUploads = (await this.metadataMany(
-      this.instrumentUploadRepo,
-      req.query,
-      true,
-    )) as InstrumentUpload[];
-    // Rename instrumentInfo to instrument in the response
-    const responseData = instrumentUploads.map((md) => {
-      const { instrumentInfo, ...rest } = new ReducedMetadataResponse(md);
-      return { ...rest, instrument: instrumentInfo };
+    const repo = this.dataSource.getRepository(InstrumentLatestUpload);
+    const data = await repo.find({
+      where: { site: { id: req.query.site as string } },
+      relations: { instrumentInfo: { instrument: true } },
     });
+    const responseData = data.map((md) => ({
+      ...md,
+      measurementDate: md.measurementDate.toISOString().slice(0, 10),
+      instrumentInfo: undefined,
+      instrument: md.instrumentInfo,
+    }));
     res.send(responseData);
   };
 

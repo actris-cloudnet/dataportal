@@ -9,12 +9,11 @@
         <div v-else-if="instrumentsStatus === 'error'" class="detailslistError">
           Failed to load instrument information.
         </div>
-        <div v-else-if="instruments && instruments.length" class="detailslist">
+        <div v-else-if="activeInstruments && activeInstruments.length" class="detailslist">
           <div>
-            The site has submitted data from the following instruments in the last
-            {{ instrumentsFromLastDays }} days:
+            The following instruments has done measurements at the site in the last {{ instrumentsFromLastDays }} days:
           </div>
-          <div v-for="(instrument, index) in instruments" :key="index" class="detailslistItem">
+          <div v-for="(instrument, index) in activeInstruments" :key="index" class="detailslistItem">
             <img alt="instrument icon" :src="instrument.icon" class="product" />
             <span v-if="instrument.to">
               <router-link :to="instrument.to">{{ instrument.name }}</router-link>
@@ -30,9 +29,25 @@
             </router-link>
           </div>
         </div>
-        <div v-else class="detailslistNotAvailable">
-          No data received in the last {{ instrumentsFromLastDays }} days.
+        <div v-else-if="inactiveInstruments && inactiveInstruments.length" class="detailslist">
+          <div>No recent data but the following instruments have done measurements at the site:</div>
+          <div v-for="(instrument, index) in inactiveInstruments" :key="index" class="detailslistItem">
+            <img alt="instrument icon" :src="instrument.icon" class="product" />
+            <span v-if="instrument.to">
+              <router-link :to="instrument.to">{{ instrument.name }}</router-link>
+            </span>
+            <span v-else>{{ instrument.name }}</span>
+            <router-link
+              v-if="nominalUuids.has(instrument.uuid)"
+              :to="{ name: 'SiteNominalInstruments' }"
+              class="nominal-link"
+              title="Nominal instrument for one or more products"
+            >
+              <BaseTag type="actris" size="small">Nominal</BaseTag>
+            </router-link>
+          </div>
         </div>
+        <div v-else class="detailslistNotAvailable">No data received yet.</div>
         <div v-html="description[1]" v-if="description"></div>
         <BaseSpinner v-if="siteLinks.status === 'loading'" />
         <template v-else-if="siteLinks.status == 'ready'">
@@ -140,7 +155,8 @@ export interface Props {
 
 const props = defineProps<Props>();
 
-const instruments = ref<Instrument[]>([]);
+const activeInstruments = ref<Instrument[]>([]);
+const inactiveInstruments = ref<Instrument[]>([]);
 const nominalUuids = ref(new Set());
 const instrumentsFromLastDays = 30;
 const instrumentsStatus = ref<"loading" | "error" | "ready">("loading");
@@ -194,8 +210,9 @@ onMounted(() => {
       console.error("Failed to load links", error);
     });
   Promise.all([loadInstruments(), loadNominalInstruments()])
-    .then(([inst, nominal]) => {
-      instruments.value = inst;
+    .then(([[inactiveInst, activeInst], nominal]) => {
+      inactiveInstruments.value = inactiveInst;
+      activeInstruments.value = activeInst;
       nominalUuids.value = nominal;
       instrumentsStatus.value = "ready";
     })
@@ -217,14 +234,14 @@ function handleInstrument(response: ReducedMetadataResponse): Instrument {
 async function loadInstruments() {
   const dateFrom = new Date();
   dateFrom.setDate(dateFrom.getDate() - instrumentsFromLastDays);
-  const res = await axios.get(`${backendUrl}uploaded-metadata/`, {
-    params: {
-      site: props.site.id,
-      updatedAtFrom: dateFrom,
-      status: ["uploaded", "processed"],
-    },
+  const isActive = (md: ReducedMetadataResponse) => md.measurementDate >= dateFrom.toISOString().slice(0, 10);
+  const res = await axios.get<ReducedMetadataResponse[]>(`${backendUrl}uploaded-metadata/`, {
+    params: { site: props.site.id },
   });
-  return res.data.map(handleInstrument);
+  return [
+    res.data.filter((md) => !isActive(md)).map(handleInstrument),
+    res.data.filter(isActive).map(handleInstrument),
+  ];
 }
 
 async function loadNominalInstruments() {
@@ -249,11 +266,9 @@ img.product {
 }
 
 .detailslist {
-  margin-bottom: 0.5em;
-
   .detailslistItem {
-    margin-top: 5px;
-    margin-bottom: 0.5em;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
     margin-left: 10px;
 
     .tag {

@@ -1,7 +1,9 @@
+import { DataSource } from "typeorm";
+import { AppDataSource } from "../../../src/data-source";
 import { backendPrivateUrl, backendPublicUrl } from "../../lib";
 import axios from "axios";
 import { readResources } from "../../../../shared/lib";
-import { describe, expect, it, beforeAll } from "@jest/globals";
+import { describe, expect, it, beforeAll, afterAll } from "@jest/globals";
 
 const protectedUrl = `${backendPrivateUrl}upload/metadata/`;
 const privateUrl = `${backendPrivateUrl}upload-metadata/`;
@@ -9,6 +11,7 @@ const privateModelUrl = `${backendPrivateUrl}upload-model-metadata/`;
 const rawFilesUrl = `${backendPublicUrl}raw-files/`;
 const rawModelFilesUrl = `${backendPublicUrl}raw-model-files/`;
 
+let dataSource: DataSource;
 let instResp: any;
 let modelResp: any;
 let expected: any;
@@ -18,7 +21,11 @@ beforeAll(async () => {
   instResp = responses["uploaded-metadata"];
   modelResp = responses["uploaded-model-metadata"];
   expected = instResp[0];
+  dataSource = await AppDataSource.initialize();
+  await dataSource.query("REFRESH MATERIALIZED VIEW instrument_latest_upload");
 });
+
+afterAll(async () => await dataSource.destroy());
 
 describe("GET /upload/metadata/:checksum", () => {
   it("responds with 200 when metadata is found", async () => {
