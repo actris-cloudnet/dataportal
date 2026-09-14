@@ -51,10 +51,19 @@ export class Site {
   wigosId!: string | null;
 
   @Column({ type: "text", nullable: true })
+  wigosName!: string | null;
+
+  @Column({ type: "text", nullable: true })
   dvasId!: string | null;
+
+  @Column({ type: "text", nullable: true })
+  dvasName!: string | null;
 
   @Column({ type: "smallint", nullable: true })
   actrisId!: number | null;
+
+  @Column({ type: "text", nullable: true })
+  actrisName!: number | null;
 
   @Column({ type: "text", nullable: true })
   country!: string | null;

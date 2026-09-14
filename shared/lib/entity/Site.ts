@@ -30,8 +30,11 @@ export interface Site {
   altitude: number | null;
   gaw: string | null;
   wigosId: string | null;
+  wigosName: string | null;
   dvasId: string | null;
+  dvasName: string | null;
   actrisId: number | null;
+  actrisName: string | null;
   country: string | null;
   countryCode: string | null;
   countrySubdivisionCode: string | null;
@@ -40,9 +43,3 @@ export interface Site {
 }
 
 export type { Contact as SiteContact } from "./Contact";
-
-export interface SiteLinks {
-  actris: SiteLink<number> | null;
-  dvas: SiteLink<string> | null;
-  wigos: SiteLink<string> | null;
-}

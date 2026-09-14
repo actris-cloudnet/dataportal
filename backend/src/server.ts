@@ -374,7 +374,6 @@ async function createServer(): Promise<void> {
     referenceRoutes.getReference,
   );
   app.get("/api/sites/:siteId/locations", siteRoutes.location);
-  app.get("/api/sites/:siteId/links", siteRoutes.links);
   app.get("/api/sites/:siteId/contacts", middleware.optionalAuth, siteRoutes.listContacts);
   app.post(
     "/api/sites/:siteId/contacts",

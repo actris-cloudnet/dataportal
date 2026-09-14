@@ -49,28 +49,32 @@
         </div>
         <div v-else class="detailslistNotAvailable">No data received yet.</div>
         <div v-html="description[1]" v-if="description"></div>
-        <BaseSpinner v-if="siteLinks.status === 'loading'" />
-        <template v-else-if="siteLinks.status == 'ready'">
-          <template v-if="links.length > 0 || siteLinks.value.actris || siteLinks.value.dvas || siteLinks.value.wigos">
-            <h2>Links</h2>
-            <ul style="list-style: disc; padding-left: 1rem; margin-bottom: 2rem">
-              <li v-for="link in links" :key="link" v-html="link"></li>
-              <li v-if="siteLinks.value.dvas">
-                <a :href="siteLinks.value.dvas.uri">{{ siteLinks.value.dvas.name }}</a> in ACTRIS data portal
-              </li>
-              <li v-if="siteLinks.value.actris">
-                <a :href="siteLinks.value.actris.uri">{{ siteLinks.value.actris.name }}</a> in ACTRIS labelling database
-              </li>
-              <li v-if="siteLinks.value.wigos">
-                <a :href="siteLinks.value.wigos.uri">{{ siteLinks.value.wigos.name }}</a> in WMO Integrated Global
-                Observing System (WIGOS)
-              </li>
-            </ul>
-          </template>
-        </template>
-        <template v-else-if="siteLinks.status === 'error'">
+        <template v-if="links.length > 0 || site.dvasId || site.actrisId || site.wigosId">
           <h2>Links</h2>
-          <p style="color: red">Failed to load links.</p>
+          <ul style="list-style: disc; padding-left: 1rem; margin-bottom: 2rem">
+            <li v-for="link in links" :key="link" v-html="link"></li>
+            <li v-if="site.dvasId">
+              <a :href="`https://data.actris.eu/facility/${site.dvasId}`" target="_blank">
+                {{ site.dvasName || site.dvasId }}
+              </a>
+              in ACTRIS data portal
+            </li>
+            <li v-if="site.actrisId">
+              <a :href="`https://nflabelling.actris.eu/facility/${site.actrisId}`" target="_blank">
+                {{ site.actrisName || site.actrisId }}
+              </a>
+              in ACTRIS labelling database
+            </li>
+            <li v-if="site.wigosId">
+              <a
+                :href="`https://oscar.wmo.int/surface/#/search/station/stationReportDetails/${site.wigosId}`"
+                target="_blank"
+              >
+                {{ site.wigosName || site.wigosId }}
+              </a>
+              in WMO Integrated Global Observing System (WIGOS)
+            </li>
+          </ul>
         </template>
       </section>
       <aside>
@@ -120,7 +124,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref } from "vue";
 import axios from "axios";
-import type { Site, SiteLinks } from "@shared/entity/Site";
+import type { Site } from "@shared/entity/Site";
 import type { NominalInstrument } from "@shared/entity/Instrument";
 import MyMap from "@/components/SuperMap.vue";
 import { formatCoordinates, getInstrumentIcon, backendUrl } from "@/lib";
@@ -144,11 +148,6 @@ type LocationsResult =
   | { status: "notFound" }
   | { status: "error"; error: Error };
 
-type SiteLinksResult =
-  | { status: "loading" }
-  | { status: "ready"; value: SiteLinks }
-  | { status: "error"; error: Error };
-
 export interface Props {
   site: Site;
 }
@@ -162,7 +161,6 @@ const instrumentsFromLastDays = 30;
 const instrumentsStatus = ref<"loading" | "error" | "ready">("loading");
 const mapKey = ref(0);
 const locations = ref<LocationsResult>({ status: "loading" });
-const siteLinks = ref<SiteLinksResult>({ status: "loading" });
 
 const description = computed(() => {
   if (!props.site.description) return null;
@@ -174,7 +172,10 @@ const description = computed(() => {
 const links = computed(() => {
   if (!props.site.description) return [];
   const i = props.site.description.indexOf("<h2>Links</h2>");
-  const m = props.site.description.slice(i).match(/<a href="[^"]+">[^<]+<\/a>/g);
+  const m = props.site.description
+    .slice(i)
+    .match(/<a href="[^"]+">[^<]+<\/a>/g)
+    ?.map((link) => link.replace("<a", '<a target="_blank"'));
   return m || [];
 });
 
@@ -200,15 +201,6 @@ onMounted(() => {
   } else {
     locations.value = { status: "notFound" };
   }
-  axios
-    .get<SiteLinks>(`${backendUrl}sites/${props.site.id}/links`)
-    .then((res) => {
-      siteLinks.value = { status: "ready", value: res.data };
-    })
-    .catch((error) => {
-      siteLinks.value = { status: "error", error };
-      console.error("Failed to load links", error);
-    });
   Promise.all([loadInstruments(), loadNominalInstruments()])
     .then(([[inactiveInst, activeInst], nominal]) => {
       inactiveInstruments.value = inactiveInst;

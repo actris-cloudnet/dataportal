@@ -18,8 +18,6 @@ import { ModelFile, RegularFile } from "../entity/File";
 import { SearchFile } from "../entity/SearchFile";
 import { Person } from "../entity/Person";
 import { PermissionType } from "../entity/Permission";
-import axios from "axios";
-import env from "../lib/env";
 
 export class SiteRoutes {
   constructor(dataSource: DataSource) {
@@ -31,8 +29,6 @@ export class SiteRoutes {
     this.modelFileRepo = dataSource.getRepository(ModelFile);
     this.siteLocationRepo = dataSource.getRepository(SiteLocation);
     this.searchFileRepo = dataSource.getRepository(SearchFile);
-    this.dvasCache = {};
-    this.wigosCache = {};
   }
 
   readonly dataSource: DataSource;
@@ -43,9 +39,6 @@ export class SiteRoutes {
   readonly modelFileRepo: Repository<ModelFile>;
   readonly siteLocationRepo: Repository<SiteLocation>;
   readonly searchFileRepo: Repository<SearchFile>;
-  readonly dvasCache: Record<string, any>;
-  private actrisCache?: Record<string, any>;
-  readonly wigosCache: Record<string, any>;
 
   site: RequestHandler = async (req, res, next) => {
     const qb = this.siteRepo
@@ -67,18 +60,6 @@ export class SiteRoutes {
     if (includeEmail) contactQb.addSelect("p.email");
     const contacts = await contactQb.getMany();
     res.send({ ...site, contacts: contacts.map((c) => toContactResponse(c, c.person, includeEmail)) });
-  };
-
-  links: RequestHandler = async (req, res, next) => {
-    const site = await this.siteRepo.findOneBy({ id: req.params.siteId as string });
-    if (!site) {
-      return next({ status: 404, errors: ["No sites match this id"] });
-    }
-    res.send({
-      actris: site.actrisId ? await this.fetchActrisFacility(site.actrisId) : null,
-      dvas: site.dvasId ? await this.fetchDvasFacility(site.dvasId) : null,
-      wigos: site.wigosId ? await this.fetchWigosStation(site.wigosId) : null,
-    });
   };
 
   sites: RequestHandler = async (req, res) => {
@@ -211,71 +192,6 @@ export class SiteRoutes {
       res.send(locations);
     }
   };
-
-  private async fetchDvasFacility(dvasId: string) {
-    if (dvasId in this.dvasCache) {
-      return this.dvasCache[dvasId];
-    }
-    try {
-      const res = await axios.get(`${env.DVAS_URL}/facilities/${dvasId}`);
-      const obj = res.data;
-      const result = {
-        id: obj.identifier,
-        name: obj.name,
-        uri: `${env.DC_URL}/facility/${obj.identifier}`,
-      };
-      this.dvasCache[dvasId] = result;
-      return result;
-    } catch (err) {
-      console.error("Failed to fetch DVAS facility", err);
-      return null;
-    }
-  }
-
-  private async fetchActrisFacility(actrisId: number) {
-    if (!this.actrisCache) {
-      try {
-        const res = await axios.get(`${env.LABELLING_URL}/api/facilities.geojson`);
-        this.actrisCache = Object.fromEntries(
-          res.data.features.map((feat: any) => [
-            feat.properties.id,
-            {
-              id: feat.properties.id,
-              name: feat.properties.name,
-              uri: feat.properties.url,
-            },
-          ]),
-        );
-      } catch (err) {
-        console.error("Failed to fetch ACTRIS facilities", err);
-        return null;
-      }
-    }
-    return this.actrisCache[actrisId];
-  }
-
-  private async fetchWigosStation(wigosId: string) {
-    if (wigosId in this.wigosCache) {
-      return this.wigosCache[wigosId];
-    }
-    try {
-      const res = await axios.get("https://oscar.wmo.int/surface/rest/api/search/station", { params: { wigosId } });
-      const obj = res.data;
-      const result =
-        obj.stationSearchResults.length == 1
-          ? {
-              id: wigosId,
-              name: obj.stationSearchResults[0].name,
-              uri: `https://oscar.wmo.int/surface/#/search/station/stationReportDetails/${wigosId}`,
-            }
-          : null;
-      this.wigosCache[wigosId] = result;
-      return result;
-    } catch (err) {
-      console.error("Failed to fetch WIGOS facility", err);
-      return null;
-    }
-  }
 
   listContacts: RequestHandler = async (req, res, next) => {
     const site = await this.siteRepo.findOneBy({ id: req.params.siteId as string });
