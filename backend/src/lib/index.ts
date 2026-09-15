@@ -503,6 +503,7 @@ export const siteMetadataKeys = [
   "site.gaw",
   "site.dvasId",
   "site.actrisId",
+  "site.labellingStatus",
   "site.country",
   "site.countryCode",
   "site.countrySubdivisionCode",
