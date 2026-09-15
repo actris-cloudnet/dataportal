@@ -11,7 +11,7 @@
         </div>
         <div v-else-if="activeInstruments && activeInstruments.length" class="detailslist">
           <div>
-            The following instruments has done measurements at the site in the last {{ instrumentsFromLastDays }} days:
+            The following instruments have done measurements at the site in the last {{ instrumentsFromLastDays }} days:
           </div>
           <div v-for="(instrument, index) in activeInstruments" :key="index" class="detailslistItem">
             <img alt="instrument icon" :src="instrument.icon" class="product" />
