@@ -13,6 +13,8 @@ export type SiteType =
   | "weather-radar"
   | "fmi-radar";
 
+export type LabellingStatus = "planned" | "initially-accepted" | "labelled";
+
 export interface SiteLink<T> {
   id: T;
   name: string;
@@ -35,6 +37,7 @@ export interface Site {
   dvasName: string | null;
   actrisId: number | null;
   actrisName: string | null;
+  labellingStatus: LabellingStatus | null;
   country: string | null;
   countryCode: string | null;
   countrySubdivisionCode: string | null;

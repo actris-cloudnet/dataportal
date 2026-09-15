@@ -18,6 +18,12 @@ export enum SiteType {
   HIDDEN = "hidden",
 }
 
+export enum LabellingStatus {
+  PLANNED = "planned",
+  INITIALLY_ACCEPTED = "initially-accepted",
+  LABELLED = "labelled",
+}
+
 @Entity()
 export class Site {
   @PrimaryColumn()
@@ -64,6 +70,9 @@ export class Site {
 
   @Column({ type: "text", nullable: true })
   actrisName!: number | null;
+
+  @Column({ type: "text", nullable: true })
+  labellingStatus!: LabellingStatus | null;
 
   @Column({ type: "text", nullable: true })
   country!: string | null;

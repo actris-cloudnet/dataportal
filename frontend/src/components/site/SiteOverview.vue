@@ -99,7 +99,14 @@
             </template>
             <template v-if="site.altitude != null">
               <dt>Altitude</dt>
-              <dd>{{ site.altitude }} <abbr title="meters above mean sea level">m a.s.l.</abbr></dd>
+              <dd>
+                {{ site.altitude }}
+                <abbr title="meters above mean sea level">m a.s.l.</abbr>
+              </dd>
+            </template>
+            <template v-if="site.labellingStatus">
+              <dt>Compliance</dt>
+              <dd>{{ labellingStatusText[site.labellingStatus] }}</dd>
             </template>
             <template v-if="site.contacts.length > 0">
               <dt>Contact</dt>
@@ -124,7 +131,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref } from "vue";
 import axios from "axios";
-import type { Site } from "@shared/entity/Site";
+import type { Site, LabellingStatus } from "@shared/entity/Site";
 import type { NominalInstrument } from "@shared/entity/Instrument";
 import MyMap from "@/components/SuperMap.vue";
 import { formatCoordinates, getInstrumentIcon, backendUrl } from "@/lib";
@@ -153,6 +160,12 @@ export interface Props {
 }
 
 const props = defineProps<Props>();
+
+const labellingStatusText: Record<LabellingStatus, string> = {
+  "planned": "ACTRIS labelling planned",
+  "initially-accepted": "Initially accepted for ACTRIS labelling",
+  "labelled": "ACTRIS labelled",
+};
 
 const activeInstruments = ref<Instrument[]>([]);
 const inactiveInstruments = ref<Instrument[]>([]);
