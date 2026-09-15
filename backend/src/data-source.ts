@@ -12,6 +12,7 @@ export const AppDataSource = new DataSource({
   synchronize: env.TYPEORM_SYNCHRONIZE,
   migrations: [env.TYPEORM_MIGRATIONS],
   migrationsRun: env.TYPEORM_MIGRATIONS_RUN,
+  migrationsTransactionMode: "each",
   logging: env.TYPEORM_LOGGING,
   entities: [env.TYPEORM_ENTITIES],
 });

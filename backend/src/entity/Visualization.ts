@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, Index, ManyToOne, PrimaryColumn } from "typeorm";
 import { RegularFile } from "./File";
 import { ProductVariable } from "./ProductVariable";
 
@@ -16,6 +16,7 @@ export class Visualization {
   @PrimaryColumn()
   s3key!: string;
 
+  @Index()
   @ManyToOne((_) => RegularFile, (file) => file.visualizations, { nullable: false })
   sourceFile!: RegularFile;
 
