@@ -11,7 +11,8 @@ export type PermissionType =
   | "canPublishTask"
   | "canManageContacts"
   | "canManageNews"
-  | "canManageNominalInstruments";
+  | "canManageNominalInstruments"
+  | "canManageSiteDescriptions";
 
 export interface Permission {
   id: number;

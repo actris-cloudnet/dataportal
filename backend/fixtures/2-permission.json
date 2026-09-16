@@ -51,5 +51,9 @@
   {
     "id": 13,
     "permission": "canManageNominalInstruments"
+  },
+  {
+    "id": 14,
+    "permission": "canManageSiteDescriptions"
   }
 ]

@@ -395,6 +395,13 @@ async function createServer(): Promise<void> {
     authorizator.verifyPermission(PermissionType.canManageContacts),
     siteRoutes.deleteContact,
   );
+  app.put(
+    "/api/sites/:siteId/description",
+    passport.authenticate(["cookie", "basic"], { session: false }),
+    authorizator.verifyPermission(PermissionType.canManageSiteDescriptions),
+    express.json(),
+    siteRoutes.putDescription,
+  );
   app.get(
     "/api/persons/orcid/:orcid",
     passport.authenticate(["cookie", "basic"], { session: false }),

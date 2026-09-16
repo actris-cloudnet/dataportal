@@ -4,22 +4,11 @@
 
 <script lang="ts" setup>
 import { computed } from "vue";
-import * as commonmark from "commonmark";
-
-const reader = new commonmark.Parser();
-const writer = new commonmark.HtmlRenderer();
+import { renderMarkdown } from "@/lib/markdown";
 
 const props = defineProps<{ content: string }>();
 
-const renderedHtml = computed(() => {
-  try {
-    const parsed = reader.parse(props.content);
-    return writer.render(parsed);
-  } catch (error) {
-    console.error("Markdown parsing error:", error);
-    return props.content.replace(/\n/g, "<br>");
-  }
-});
+const renderedHtml = computed(() => renderMarkdown(props.content));
 </script>
 
 <style scoped>
