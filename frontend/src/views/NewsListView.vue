@@ -59,7 +59,7 @@
       <template #footer>
         <BaseButton @click="cancelForm" type="secondary">Cancel</BaseButton>
         <BaseButton type="primary" htmlType="submit">
-          {{ editingItem ? "Update" : "Create" }}
+          {{ editingItem ? "Save" : "Create" }}
         </BaseButton>
       </template>
     </BaseModal>
