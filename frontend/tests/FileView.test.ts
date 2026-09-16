@@ -1,6 +1,6 @@
 import { VueWrapper, mount } from "@vue/test-utils";
 import App from "../src/App.vue";
-import axios, { AxiosPromise } from "axios";
+import axios, { type AxiosPromise } from "axios";
 import { augmentAxiosResponse, nextTick } from "./lib";
 import { findByUuid, readResources } from "../../shared/lib";
 import { vi, describe, beforeAll, expect, it } from "vitest";
