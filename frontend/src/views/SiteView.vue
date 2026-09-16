@@ -55,7 +55,7 @@
         </router-link>
       </template>
     </LandingHeader>
-    <router-view :site="response" />
+    <router-view :site="response" @update:site="response = $event" />
   </div>
   <!-- prettier-ignore -->
   <ApiError :response="(response as any)" v-else-if="error" />

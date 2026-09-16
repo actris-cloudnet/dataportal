@@ -272,6 +272,20 @@ export class SiteRoutes {
     res.sendStatus(204);
   };
 
+  putDescription: RequestHandler = async (req, res, next) => {
+    const site = await this.siteRepo.findOneBy({ id: req.params.siteId as string });
+    if (!site) {
+      return next({ status: 404, errors: ["No sites match this id"] });
+    }
+    const { description } = req.body;
+    if (description !== null && typeof description !== "string") {
+      return next({ status: 400, errors: ["description must be a string or null"] });
+    }
+    site.description = description && description.trim() ? description : null;
+    await this.siteRepo.save(site);
+    res.json({ description: site.description });
+  };
+
   postPerson: RequestHandler = async (req, res) => {
     const person = await this.personRepo.save(req.body);
     res.json(person);

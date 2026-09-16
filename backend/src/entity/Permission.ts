@@ -17,6 +17,7 @@ export enum PermissionType {
   canManageContacts = "canManageContacts",
   canManageNews = "canManageNews",
   canManageNominalInstruments = "canManageNominalInstruments",
+  canManageSiteDescriptions = "canManageSiteDescriptions",
 }
 
 @Entity()
