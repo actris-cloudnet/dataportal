@@ -2,13 +2,13 @@
   <main class="pagewidth">
     <div class="new-layout">
       <section class="description">
-        <div v-if="canEdit" class="description-actions">
-          <BaseButton @click="startEditing" type="primary">
-            {{ site.description ? "Edit description" : "Add description" }}
-          </BaseButton>
-        </div>
         <div v-if="parsedDescription?.intro" v-html="parsedDescription.intro"></div>
         <div v-else class="detailslistNotAvailable">Site description is missing.</div>
+        <div v-if="canEdit" class="description-actions">
+          <BaseButton @click="startEditing" type="primary" size="small">
+            {{ site.description ? "Edit" : "Add" }}
+          </BaseButton>
+        </div>
         <h2>Instruments</h2>
         <BaseSpinner v-if="instrumentsStatus === 'loading'" />
         <div v-else-if="instrumentsStatus === 'error'" class="detailslistError">
@@ -459,12 +459,6 @@ aside {
 
 .description:deep(p + p) {
   margin-top: 0.5rem;
-}
-
-.description-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 0.5rem;
 }
 
 .form-group {
