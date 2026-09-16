@@ -1,5 +1,5 @@
 import { nextTick as vueNextTick } from "vue";
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosHeaders, type AxiosResponse } from "axios";
 import { vi } from "vitest";
 
 export const dateToISOString = (date: Date) => date.toISOString().substring(0, 10);
@@ -20,7 +20,7 @@ const axiosResponse: AxiosResponse = {
   data: {},
   status: 200,
   statusText: "OK",
-  config: {},
+  config: { headers: new AxiosHeaders() },
   headers: {},
 };
 
@@ -31,11 +31,11 @@ export const augmentAxiosResponse = (data: any) => ({
 
 export const wait = async (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export const getMockedAxiosLastCallSecondArgument = () => {
+export const getMockedAxiosLastCallSecondArgument = (): { params?: Record<string, any> } => {
   const calls = vi.mocked(axios.get).mock.calls;
   const idxLast = calls.length - 1;
   const lastCall = calls[idxLast];
-  const secondArg = lastCall[1];
+  const secondArg = lastCall[1] as { params?: Record<string, any> } | undefined;
   if (!secondArg) return {};
   return secondArg;
 };

@@ -1,5 +1,5 @@
 import { VueWrapper, mount } from "@vue/test-utils";
-import axios, { AxiosPromise } from "axios";
+import axios, { type AxiosPromise } from "axios";
 import { augmentAxiosResponse } from "./lib";
 import { readResources } from "../../shared/lib";
 import ProductAvailabilityVisualization from "../src/components/ProductAvailabilityVisualization.vue";

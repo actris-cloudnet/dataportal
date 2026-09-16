@@ -1,5 +1,5 @@
 import { VueWrapper, mount } from "@vue/test-utils";
-import axios, { AxiosPromise } from "axios";
+import axios, { type AxiosPromise } from "axios";
 import { augmentAxiosResponse, nextTick } from "./lib";
 import { readResources } from "../../shared/lib";
 import SiteView from "../src/views/SiteView.vue";
@@ -92,6 +92,8 @@ describe("SiteView.vue", () => {
     const call = vi.mocked(axios.get).mock.calls.find((call) => call[0].includes("/uploaded-metadata/"));
     expect(call).toBeDefined();
     // Expect to be within 5 seconds
-    expect(new Date(call![1]?.params.updatedAtFrom).getTime() / 1000).toBeCloseTo(date30daysago.getTime() / 1000, -1);
+    expect(
+      new Date((call![1] as { params: { updatedAtFrom: string } }).params.updatedAtFrom).getTime() / 1000,
+    ).toBeCloseTo(date30daysago.getTime() / 1000, -1);
   });
 });

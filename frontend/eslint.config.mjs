@@ -21,7 +21,7 @@ export default defineConfigWithVueTs(
     languageOptions: {
       parserOptions: {
         projectService: {
-          allowDefaultProject: ["eslint.config.mjs", "tests/*.test.ts", "tests/lib/*.ts"],
+          allowDefaultProject: ["eslint.config.mjs"],
         },
       },
     },
