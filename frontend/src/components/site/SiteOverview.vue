@@ -457,8 +457,37 @@ aside {
   flex-grow: 1;
 }
 
-.description:deep(p + p) {
-  margin-top: 0.5rem;
+.description:deep {
+  p + p {
+    margin-top: 0.5rem;
+  }
+
+  ul,
+  ol {
+    padding-left: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  ul {
+    list-style: disc;
+  }
+
+  ol {
+    list-style: decimal;
+  }
+
+  em {
+    font-style: italic;
+  }
+
+  strong {
+    font-weight: 500;
+  }
+
+  abbr {
+    text-decoration: underline dashed silver;
+  }
 }
 
 .form-group {
@@ -541,13 +570,6 @@ aside {
 .save-error {
   color: #e74c3c;
   margin-top: 0.5rem;
-}
-
-.description:deep(ul) {
-  list-style: disc;
-  padding-left: 1rem;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
 }
 
 :deep() {

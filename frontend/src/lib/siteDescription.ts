@@ -29,10 +29,15 @@ export function parseSiteDescription(markdown: string): ParsedSiteDescription {
       node.classList.add("references");
       referencesListPending = false;
     }
-    if (part === "links") {
-      for (const anchor of Array.from(node.querySelectorAll("a"))) {
+    for (const anchor of Array.from(node.querySelectorAll("a"))) {
+      const href = anchor.getAttribute("href");
+      if (href && /^https?:\/\/(?!cloudnet\.fmi\.fi)/.test(href)) {
         anchor.setAttribute("target", "_blank");
-        links.push(anchor.outerHTML);
+      }
+    }
+    if (part === "links") {
+      for (const anchor of Array.from(node.querySelectorAll("li"))) {
+        links.push(anchor.innerHTML);
       }
     } else {
       (part === "intro" ? intro : sections).push(node.outerHTML);

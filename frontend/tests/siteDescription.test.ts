@@ -22,7 +22,7 @@ describe("parseSiteDescription", () => {
     expect(result.intro).toBe("");
     expect(result.links).toEqual([
       '<a href="https://example.com" title="Site home" target="_blank"><strong>Home</strong> page</a>',
-      '<a href="https://data.example.com" target="_blank">portal</a>',
+      'Data at <a href="https://data.example.com" target="_blank">portal</a>',
     ]);
   });
 
@@ -32,7 +32,7 @@ describe("parseSiteDescription", () => {
     );
     expect(result.links).toEqual(['<a href="https://example.com" target="_blank">Home</a>']);
     expect(result.sections).toBe(
-      '<h2>References</h2>\n<ul class="references">\n<li>Author (2020). <a href="https://doi.org/1">doi</a></li>\n</ul>',
+      '<h2>References</h2>\n<ul class="references">\n<li>Author (2020). <a href="https://doi.org/1" target="_blank">doi</a></li>\n</ul>',
     );
   });
 
@@ -49,5 +49,37 @@ describe("parseSiteDescription", () => {
     const result = parseSiteDescription('Hello <b>bold</b>\n\n## Links\n\n- <a href="https://example.com">raw</a>\n');
     expect(result.intro).toBe("<p>Hello <b>bold</b></p>");
     expect(result.links).toEqual(['<a href="https://example.com" target="_blank">raw</a>']);
+  });
+
+  it("adds target=_blank to external links in intro", () => {
+    const result = parseSiteDescription("Check [our site](https://example.com) for more.\n");
+    expect(result.intro).toBe('<p>Check <a href="https://example.com" target="_blank">our site</a> for more.</p>');
+  });
+
+  it("adds target=_blank to external links in sections", () => {
+    const result = parseSiteDescription("Intro.\n\n## History\n\nSee [details](https://example.com) here.\n");
+    expect(result.sections).toBe(
+      '<h2>History</h2>\n<p>See <a href="https://example.com" target="_blank">details</a> here.</p>',
+    );
+  });
+
+  it("does not add target=_blank to cloudnet.fmi.fi links in intro and sections", () => {
+    const result = parseSiteDescription(
+      "See [internal](https://cloudnet.fmi.fi/some-page) link.\n\n## Links\n\n- [Internal](https://cloudnet.fmi.fi)\n",
+    );
+    expect(result.intro).toBe('<p>See <a href="https://cloudnet.fmi.fi/some-page">internal</a> link.</p>');
+    expect(result.links).toEqual(['<a href="https://cloudnet.fmi.fi">Internal</a>']);
+  });
+
+  it("handles http links with target=_blank", () => {
+    const result = parseSiteDescription("Visit [site](http://example.com) for info.\n");
+    expect(result.intro).toBe('<p>Visit <a href="http://example.com" target="_blank">site</a> for info.</p>');
+  });
+
+  it("handles mixed internal and external links", () => {
+    const result = parseSiteDescription("See [internal](https://cloudnet.fmi.fi) and [external](https://other.com).\n");
+    expect(result.intro).toBe(
+      '<p>See <a href="https://cloudnet.fmi.fi">internal</a> and <a href="https://other.com" target="_blank">external</a>.</p>',
+    );
   });
 });
