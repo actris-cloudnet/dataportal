@@ -14,6 +14,7 @@ export enum SiteType {
   MODEL = "model",
   WEATHER_RADAR = "weather-radar",
   FMI_RADAR = "fmi-radar",
+  OTHER = "other",
   TEST = "test",
   HIDDEN = "hidden",
 }

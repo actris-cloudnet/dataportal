@@ -103,7 +103,7 @@ onMounted(async () => {
     model.value = res.data;
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     const siteRes = await axios.get<Site[]>(`${backendUrl}sites`, {
-      params: { type: ["cloudnet", "campaign", "model", "weather-radar", "arm"] },
+      params: { type: ["cloudnet", "campaign", "other", "model", "weather-radar", "arm"] },
     });
     const fileRes = await axios.get<ModelFile[]>(`${backendUrl}model-files`, {
       params: { model: props.modelId, dateFrom: weekAgo, site: siteRes.data.map((site) => site.id) },

@@ -384,7 +384,7 @@ async function initView() {
 
 async function initSites(): Promise<Site[]> {
   const res = await axios.get<Site[]>(`${backendUrl}sites/`, {
-    params: { type: ["cloudnet", "campaign", "arm", "weather-radar"] },
+    params: { type: ["cloudnet", "campaign", "other", "arm", "weather-radar"] },
   });
   return res.data.filter((site) => !site.type.includes("hidden"));
 }

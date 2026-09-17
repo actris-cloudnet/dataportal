@@ -191,6 +191,7 @@ export const markerColors: Record<SiteType, string> = {
   "polarin": markerIconGrey,
   "weather-radar": markerIconGrey,
   "fmi-radar": markerIconGrey,
+  "other": markerIconOrange,
 };
 
 export function getMarkerIcon(site: Site, selected = false) {

@@ -99,14 +99,23 @@ onMounted(async () => {
       items: [
         {
           title: "Cloudnet sites",
-          descriptionHtml:
-            'Permanent sites with full Cloudnet instrumentation. Most of the sites are part of the European <a href="https://www.actris.eu">ACTRIS research infrastructure</a>.',
+          descriptionHtml: `Permanent sites with full Cloudnet instrumentation, including at
+            minimum a lidar, a cloud radar, and a microwave radiometer. Most of
+            the sites are part of the cloud remote sensing component of the <a
+            href="https://www.actris.eu" target="_blank">ACTRIS research
+            infrastructure</a>.`,
           legend: ["Operational site", "Some data", "Inactive"],
           sites: response.data.filter((site) => !site.type.includes("hidden") && site.type.includes("cloudnet")),
         },
         {
+          title: "Associate sites",
+          descriptionHtml: "Long-term sites with some cloud remote sensing instrumentation.",
+          legend: ["Operational site", "Some data", "Inactive"],
+          sites: response.data.filter((site) => !site.type.includes("hidden") && site.type.includes("other")),
+        },
+        {
           title: "Campaign sites",
-          descriptionHtml: "Sites with some Cloudnet-compliant instrumentation.",
+          descriptionHtml: "Short-term measurement campaigns with full Cloudnet instrumentation.",
           legend: ["Operational site", "Some data", "Inactive"],
           sites: response.data.filter((site) => !site.type.includes("hidden") && site.type.includes("campaign")),
         },
@@ -118,13 +127,19 @@ onMounted(async () => {
         },
         {
           title: "ARM sites",
-          descriptionHtml: 'Sites part of the American <a href="https://arm.gov">ARM network</a>.',
+          descriptionHtml: `Cloudnet data based on measurements from
+          fixed-location facilities and campaigns of the <a
+          href="https://arm.gov">Atmospheric Radiation Measurement (ARM) User
+          Facility</a>.`,
           legend: ["Operational site", "Some data", "Inactive"],
           sites: response.data.filter((site) => !site.type.includes("hidden") && site.type.includes("arm")),
         },
         {
           title: "Model sites",
-          descriptionHtml: "Sites with only model data.",
+          descriptionHtml: `Profile data from numerical weather prediction (NWP)
+          models at sites in affiliated networks such as <a
+          href="https://www.earlinet.org/" target="_blank">EARLINET</a> and <a
+          href="https://polly.tropos.de/" target="_blank">PollyNET</a>.`,
           legend: ["Active", "", "Inactive"],
           sites: response.data.filter((site) => site.type.includes("model")),
         },

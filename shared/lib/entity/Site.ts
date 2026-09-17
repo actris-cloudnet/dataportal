@@ -11,7 +11,8 @@ export type SiteType =
   | "ri-urbans"
   | "polarin"
   | "weather-radar"
-  | "fmi-radar";
+  | "fmi-radar"
+  | "other";
 
 export type LabellingStatus = "planned" | "initially-accepted" | "labelled";
 

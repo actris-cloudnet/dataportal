@@ -55,13 +55,14 @@ function setMapBounds() {
   return L.latLngBounds(southWest, northEast);
 }
 
-type Legend = Extract<SiteType, "cloudnet" | "arm" | "campaign" | "weather-radar"> | "selected";
+type Legend = Extract<SiteType, "cloudnet" | "arm" | "campaign" | "other" | "weather-radar"> | "selected";
 
 const markerColors: Record<Legend, string | undefined> = {
   "selected": "red",
   "cloudnet": "blue",
   "arm": "violet",
   "campaign": "orange",
+  "other": "orange",
   "weather-radar": "gray",
 };
 
@@ -70,6 +71,7 @@ const markerLabel: Record<Legend, string> = {
   "cloudnet": "Cloudnet",
   "arm": "ARM",
   "campaign": "Campaign",
+  "other": "Associate",
   "weather-radar": "Weather radar",
 };
 
