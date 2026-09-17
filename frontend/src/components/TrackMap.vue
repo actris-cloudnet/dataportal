@@ -5,6 +5,7 @@
 <script lang="ts" setup>
 import { onMounted, onBeforeUnmount, watch, useTemplateRef } from "vue";
 import L from "leaflet";
+import { createTileLayer } from "./SuperMap.vue";
 
 export interface Point {
   date: string;
@@ -25,9 +26,7 @@ let leafletInstance: L.Map | null = null;
 onMounted(() => {
   if (!mapContainer.value) return;
   leafletInstance = L.map(mapContainer.value).setView([54.0, 14.0], 3);
-  L.tileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png").addTo(
-    leafletInstance,
-  );
+  createTileLayer().addTo(leafletInstance);
   let objects: L.Layer[] = [];
   watch(
     () => props.track,

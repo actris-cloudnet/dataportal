@@ -25,7 +25,6 @@ export interface Props {
 const props = defineProps<Props>();
 
 let map: L.Map | null = null;
-let tileLayer: L.TileLayer | null = null;
 const allMarkers: Record<string, L.Marker> = {};
 const legend = new L.Control({ position: "topright" });
 const mapElement = useTemplateRef("mapElement");
@@ -99,14 +98,7 @@ function initMap() {
   if (props.center) {
     map.setView(getMapCenter()!, props.zoom);
   }
-  const key = import.meta.env.VITE_CARTO_BASEMAPS_API_KEY;
-  tileLayer = L.tileLayer(`https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=${key}`, {
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: "abcd",
-    maxZoom: 20,
-  });
-  tileLayer.addTo(map);
+  createTileLayer().addTo(map);
   if (props.showLegend) legend.addTo(map);
 }
 
@@ -323,3 +315,15 @@ watch(
   }
 }
 </style>
+
+<script lang="ts">
+export function createTileLayer() {
+  const key = import.meta.env.VITE_CARTO_BASEMAPS_API_KEY;
+  return L.tileLayer(`https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=${key}`, {
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: "abcd",
+    maxZoom: 20,
+  });
+}
+</script>
