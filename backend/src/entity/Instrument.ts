@@ -1,6 +1,5 @@
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 import { Product } from "./Product";
-import { MonitoringProduct } from "./MonitoringProduct";
 import { Site } from "./Site";
 import { InstrumentContact } from "./InstrumentContact";
 
@@ -35,10 +34,6 @@ export class Instrument {
   @ManyToMany((_) => Product, (product) => product.sourceInstruments)
   @JoinTable()
   derivedProducts!: Product[];
-
-  @ManyToMany((_) => MonitoringProduct, (monitoringProduct) => monitoringProduct.sourceInstruments)
-  @JoinTable()
-  derivedMonitoringProducts!: MonitoringProduct[];
 
   @Column({ default: true })
   downloadable!: boolean;

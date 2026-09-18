@@ -20,7 +20,6 @@ export async function cleanRepos(dataSource: DataSource) {
   await dataSource.query('TRUNCATE TABLE "task" RESTART IDENTITY CASCADE');
   await dataSource.query('TRUNCATE TABLE "visualization" RESTART IDENTITY CASCADE');
   await dataSource.query('TRUNCATE TABLE "model_visualization" RESTART IDENTITY CASCADE');
-  await dataSource.query('TRUNCATE TABLE "monitoring_visualization" RESTART IDENTITY CASCADE');
   await dataSource.query('TRUNCATE TABLE "quality_report" RESTART IDENTITY CASCADE');
   await dataSource.query('TRUNCATE TABLE "file_quality" RESTART IDENTITY CASCADE');
   await dataSource.query('TRUNCATE TABLE "collection" RESTART IDENTITY CASCADE');
@@ -32,12 +31,10 @@ export async function cleanRepos(dataSource: DataSource) {
   await dataSource.query('TRUNCATE TABLE "regular_file" RESTART IDENTITY CASCADE');
   await dataSource.query('TRUNCATE TABLE "model_file_software_software" RESTART IDENTITY CASCADE');
   await dataSource.query('TRUNCATE TABLE "model_file" RESTART IDENTITY CASCADE');
-  await dataSource.query('TRUNCATE TABLE "monitoring_file" RESTART IDENTITY CASCADE');
   await dataSource.query('TRUNCATE TABLE "publication" RESTART IDENTITY CASCADE');
   await dataSource.query('TRUNCATE TABLE "instrument_log" RESTART IDENTITY CASCADE');
 
   await dataSource.query('TRUNCATE TABLE "nominal_instrument" RESTART IDENTITY CASCADE');
-  await dataSource.query('TRUNCATE TABLE "monitoring_product_variable" RESTART IDENTITY CASCADE');
   await dataSource.query('TRUNCATE TABLE "model_upload" RESTART IDENTITY CASCADE');
   await dataSource.query('TRUNCATE TABLE "instrument_upload" RESTART IDENTITY CASCADE');
   await dataSource.query('TRUNCATE TABLE "instrument_contact" RESTART IDENTITY CASCADE');
@@ -52,7 +49,6 @@ export async function cleanRepos(dataSource: DataSource) {
 
   await dataSource.query('TRUNCATE TABLE "site" RESTART IDENTITY CASCADE');
   await dataSource.query('TRUNCATE TABLE "product" RESTART IDENTITY CASCADE');
-  await dataSource.query('TRUNCATE TABLE "monitoring_product" RESTART IDENTITY CASCADE');
   await dataSource.query('TRUNCATE TABLE "news_item" RESTART IDENTITY CASCADE');
   await dataSource.query('TRUNCATE TABLE "model" RESTART IDENTITY CASCADE');
   await dataSource.query('TRUNCATE TABLE "instrument" RESTART IDENTITY CASCADE');
