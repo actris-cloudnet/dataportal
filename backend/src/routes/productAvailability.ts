@@ -17,7 +17,7 @@ export class ProductAvailabilityRoutes {
 
   uploadAmount: RequestHandler = async (req, res) => {
     const { instrumentPid } = req.query;
-    const rawData = await this.uploadRepo
+    const qb = this.uploadRepo
       .createQueryBuilder("file")
       .leftJoin("file.instrumentInfo", "instrumentInfo")
       .select([
@@ -26,10 +26,11 @@ export class ProductAvailabilityRoutes {
         'SUM(file."size") AS "totalSize"',
       ])
       .where("instrumentInfo.pid = :instrumentPid", { instrumentPid })
-      .andWhere("file.status IN ('uploaded', 'processed')")
-      .groupBy('file."measurementDate"')
-      .orderBy('file."measurementDate"', "ASC")
-      .getRawMany();
+      .andWhere("file.status IN ('uploaded', 'processed')");
+    if ("site" in req.query) {
+      qb.andWhere("file.siteId = :siteId", { siteId: req.query.site });
+    }
+    const rawData = await qb.groupBy('file."measurementDate"').orderBy('file."measurementDate"', "ASC").getRawMany();
     const data = rawData.map((row) => ({
       date: row.date,
       fileCount: parseInt(row.fileCount),

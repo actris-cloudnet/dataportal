@@ -69,7 +69,7 @@
         <h2>Total size of uploaded raw files</h2>
         <UploadVisualization :uploadStatus="uploadStatus" :type="selectedViz" :year="selectedYear" />
       </template>
-      <template v-if="uploadStatus.dates.length > 0">
+      <template v-if="uploadStatus.dates.length > 0 || selectedSiteId">
         <div class="viz-options">
           <div class="viz-option viz-type-select">
             <custom-multiselect
@@ -77,6 +77,15 @@
               label="Visualisation"
               :options="visualisationOptions"
               id="instrumentVizSelect"
+            />
+          </div>
+          <div class="viz-option site-select" v-if="siteOptions.length > 1">
+            <custom-multiselect
+              v-model="selectedSiteId"
+              label="Site"
+              :options="siteOptions"
+              id="siteSelect"
+              clearable
             />
           </div>
           <div
@@ -113,10 +122,10 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 
 import type { InstrumentInfo } from "@shared/entity/Instrument";
-import { dateToString } from "@/lib";
+import { compareValues, dateToString } from "@/lib";
 import { parseDataStatus, parseUploadStatus, type DataStatus, type UploadStatus } from "@/lib/DataStatusParser";
 import InstrumentVisualization from "@/components/InstrumentVisualization.vue";
 import UploadVisualization from "@/components/UploadVisualization.vue";
@@ -152,6 +161,12 @@ const sites = computed(() =>
       }) as Site,
   ),
 );
+const siteOptions = computed(() =>
+  [...new Map(sites.value.map((site) => [site.id, site])).values()].sort((a, b) =>
+    compareValues(a.humanReadableName, b.humanReadableName),
+  ),
+);
+const selectedSiteId = ref<string | null>(null);
 
 const selectedProductId = ref<string | null>(null);
 const selectedProductName = computed(() => {
@@ -177,20 +192,35 @@ const visualisationOptions = computed(() => {
   return dataStatus.value.availableProducts.length > 0 ? a : a.filter((option) => option.id !== "products");
 });
 
-onMounted(async () => {
-  [dataStatus.value, uploadStatus.value] = await Promise.all([
-    parseDataStatus({ instrumentPid: props.instrumentInfo.pid }),
-    parseUploadStatus(props.instrumentInfo.pid),
+let requestId = 0;
+
+async function loadStatus() {
+  const currentRequest = ++requestId;
+  const site = selectedSiteId.value ?? undefined;
+  const [newDataStatus, newUploadStatus] = await Promise.all([
+    parseDataStatus({ instrumentPid: props.instrumentInfo.pid, site }),
+    parseUploadStatus(props.instrumentInfo.pid, site),
   ]);
-  if (dataStatus.value.availableProducts.length > 0) {
-    selectedViz.value = "products";
-  } else if (uploadStatus.value.dates.length > 0) {
-    selectedViz.value = "count";
+  if (currentRequest !== requestId) return; // Ignore stale responses
+  dataStatus.value = newDataStatus;
+  uploadStatus.value = newUploadStatus;
+  const products = newDataStatus.availableProducts;
+  const hasViz = visualisationOptions.value.some((option) => option.id === selectedViz.value);
+  if (!hasViz) {
+    selectedViz.value = products.length > 0 ? "products" : "count";
   }
-  if (dataStatus.value.availableProducts.length === 1) {
-    selectedProductId.value = dataStatus.value.availableProducts[0].id;
+  if (products.length === 1) {
+    selectedProductId.value = products[0].id;
+  } else if (!products.some((product) => product.id === selectedProductId.value)) {
+    selectedProductId.value = null;
   }
-});
+  if (!yearOptions.value.some((option) => option.id === selectedYearOption.value)) {
+    selectedYearOption.value = null;
+  }
+}
+
+onMounted(loadStatus);
+watch(selectedSiteId, loadStatus);
 </script>
 
 <style scoped lang="scss">
@@ -249,6 +279,10 @@ dt {
 .viz-type-select {
   width: 200px;
   padding-top: 30px;
+}
+
+.site-select {
+  width: 200px;
 }
 
 .year-select {

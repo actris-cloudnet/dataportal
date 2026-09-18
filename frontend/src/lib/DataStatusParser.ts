@@ -200,9 +200,9 @@ export interface UploadStatus {
   maxSize: number;
 }
 
-export async function parseUploadStatus(instrumentPid: string): Promise<UploadStatus> {
+export async function parseUploadStatus(instrumentPid: string, site?: string): Promise<UploadStatus> {
   const uploadRes = await axios.get<UploadDate[]>(`${backendUrl}upload-amount/`, {
-    params: { instrumentPid },
+    params: { instrumentPid, site },
   });
   const uploadResponse = uploadRes.data;
 
