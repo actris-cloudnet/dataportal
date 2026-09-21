@@ -394,7 +394,7 @@ def make_log_permissions(args: argparse.Namespace) -> list[dict]:
 
 
 def main():
-    parser = argparse.ArgumentParser(prog="cloudnet-admin")
+    parser = argparse.ArgumentParser(prog="dataportal-admin")
     subparsers = parser.add_subparsers(required=True, dest="command")
 
     subparser = subparsers.add_parser("list-users")
