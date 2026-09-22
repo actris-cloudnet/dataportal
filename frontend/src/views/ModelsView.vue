@@ -2,7 +2,12 @@
   <div>
     <LandingHeader title="Models"></LandingHeader>
     <main class="pagewidth">
-      <p>Data from various numerical weather prediction models are available for different Cloudnet sites.</p>
+      <p>
+        Cloudnet provides profile data from various numerical weather prediction models at fixed locations. Together
+        with ground-based measurements at the same locations, the model data is used to generate
+        <router-link :to="{ name: 'Products' }">geophysical products</router-link>. In the future, we are also planning
+        to evaluate the representation of clouds in the models against the measurements.
+      </p>
       <ul>
         <li v-for="model in models" :key="model.id">
           <router-link :to="{ name: 'Model', params: { modelId: model.id } }">

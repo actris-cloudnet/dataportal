@@ -192,6 +192,10 @@ meps:
     MetCoOp project is a cooperation between the Nordic and Baltic countries for
     operational weather forecasting. This product provides the control member
     (member 0) from the ensemble, with data provided by MET Norway.
+
+    In 2026, the vertical resolution of MEPS is planned to increase from 65 to
+    90 model levels. The horizontal resolution is also planned to increase from
+    2.5 to 1.5 km within 2–3 years.
   domain: Northern Europe
   horizontalResolution: 2.5 km
   verticalResolution: 65 model levels
