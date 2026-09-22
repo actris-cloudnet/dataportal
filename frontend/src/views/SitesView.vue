@@ -110,7 +110,7 @@ onMounted(async () => {
         {
           title: "Associate sites",
           descriptionHtml: "Long-term sites with some cloud remote sensing instrumentation.",
-          legend: ["Operational site", "Some data", "Inactive"],
+          legend: ["Active", "", "Inactive"],
           sites: response.data.filter((site) => !site.type.includes("hidden") && site.type.includes("other")),
         },
         {
@@ -131,7 +131,7 @@ onMounted(async () => {
           fixed-location facilities and campaigns of the <a
           href="https://arm.gov">Atmospheric Radiation Measurement (ARM) User
           Facility</a>.`,
-          legend: ["Operational site", "Some data", "Inactive"],
+          legend: ["Active", "", "Inactive"],
           sites: response.data.filter((site) => !site.type.includes("hidden") && site.type.includes("arm")),
         },
         {

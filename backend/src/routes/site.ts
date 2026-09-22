@@ -72,10 +72,11 @@ export class SiteRoutes {
       qb.where("site.type && :types", { types: toArray(query.type) });
     }
     const sites = await hideTestDataFromNormalUsers(qb, req).addOrderBy("site.id", "ASC").getMany();
-    const [cloudnetStatuses, weatherRadarStatuses, modelStatuses] = await Promise.all([
+    const [cloudnetStatuses, weatherRadarStatuses, modelStatuses, otherStatuses] = await Promise.all([
       this.queryCloudnetStatuses(),
       this.queryWeatherRadarStatuses(),
       this.queryModelStatuses(),
+      this.queryOtherStatuses(),
     ]);
     res.send(
       sites.map((site: any) => {
@@ -84,6 +85,8 @@ export class SiteRoutes {
           status = modelStatuses[site.id];
         } else if (site.type.includes(SiteType.WEATHER_RADAR)) {
           status = weatherRadarStatuses[site.id];
+        } else if (site.type.includes(SiteType.OTHER) || site.type.includes(SiteType.ARM)) {
+          status = otherStatuses[site.id];
         } else {
           status = cloudnetStatuses[site.id];
         }
@@ -121,7 +124,7 @@ export class SiteRoutes {
     const rows = await this.regularFileRepo
       .createQueryBuilder("file")
       .select("file.siteId")
-      .where("file.measurementDate > CURRENT_DATE - 3")
+      .where("file.measurementDate > CURRENT_DATE - 7")
       .andWhere("file.productId = :productId", { productId: "weather-radar" })
       .groupBy("file.siteId")
       .getRawMany();
@@ -149,6 +152,28 @@ export class SiteRoutes {
 
   private getModelStatus(products: string[]) {
     if (products.includes("model")) {
+      return "cloudnet";
+    }
+    return "inactive";
+  }
+
+  private async queryOtherStatuses(): Promise<Record<string, string>> {
+    const rows = await this.regularFileRepo
+      .createQueryBuilder("file")
+      .select("file.siteId")
+      .addSelect("array_agg(distinct file.productId)", "latestProducts")
+      .where("file.measurementDate > CURRENT_DATE - 7")
+      .groupBy("file.siteId")
+      .getRawMany();
+
+    return rows.reduce((obj, item) => {
+      obj[item.siteId] = this.getOtherStatus(item.latestProducts);
+      return obj;
+    }, {});
+  }
+
+  private getOtherStatus(products: string[]) {
+    if (products.length > 0) {
       return "cloudnet";
     }
     return "inactive";
