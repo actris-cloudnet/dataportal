@@ -94,7 +94,10 @@
             </template>
             <template v-if="site.labellingStatus">
               <dt>Compliance</dt>
-              <dd>{{ labellingStatusText[site.labellingStatus] }}</dd>
+              <dd style="display: flex; gap: 2px">
+                <img :src="labellingStatusIcon[site.labellingStatus]" style="height: 1.15em; margin-top: 2px" />
+                <div>{{ labellingStatusText[site.labellingStatus] }}</div>
+              </dd>
             </template>
             <template v-if="site.contacts.length > 0">
               <dt>Contact</dt>
@@ -200,6 +203,9 @@ import BaseModal from "@/components/BaseModal.vue";
 import CheckBox from "@/components/CheckBox.vue";
 import { hasPermission } from "@/lib/auth";
 import { parseSiteDescription } from "@/lib/siteDescription";
+import labelledIcon from "@/assets/icons/labelled.svg";
+import initiallyAcceptedIcon from "@/assets/icons/test-pass.svg";
+import plannedIcon from "@/assets/icons/test-missing.svg";
 
 interface Instrument {
   to: RouteLocationRaw | null;
@@ -225,6 +231,12 @@ const labellingStatusText: Record<LabellingStatus, string> = {
   "planned": "ACTRIS labelling planned",
   "initially-accepted": "Initially accepted for ACTRIS labelling",
   "labelled": "ACTRIS labelled",
+};
+
+const labellingStatusIcon: Record<LabellingStatus, string> = {
+  "planned": plannedIcon,
+  "initially-accepted": initiallyAcceptedIcon,
+  "labelled": labelledIcon,
 };
 
 const activeInstruments = ref<Instrument[]>([]);
