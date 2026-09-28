@@ -78,7 +78,7 @@ export abstract class Upload {
 
 @Entity()
 @Unique(["site", "measurementDate", "filename", "instrumentInfo", "tags"])
-@Index(["instrumentInfo", "site", "measurementDate"])
+@Index(["instrumentInfo", "measurementDate"])
 export class InstrumentUpload extends Upload {
   @ManyToOne(() => InstrumentInfo, { nullable: false })
   instrumentInfo!: InstrumentInfo;
