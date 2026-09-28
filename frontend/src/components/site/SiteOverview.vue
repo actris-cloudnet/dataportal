@@ -275,6 +275,13 @@ const automaticLinks = computed(() => {
       suffix: "in WMO Integrated Global Observing System (WIGOS)",
     });
   }
+  if (props.site.icosId) {
+    result.push({
+      href: `https://meta.icos-cp.eu/resources/stations/${props.site.icosId}`,
+      text: props.site.icosName || props.site.icosId,
+      suffix: "in Integrated Carbon Observation System (ICOS)",
+    });
+  }
   return result;
 });
 

@@ -73,6 +73,12 @@ export class Site {
   actrisName!: number | null;
 
   @Column({ type: "text", nullable: true })
+  icosId!: string | null;
+
+  @Column({ type: "text", nullable: true })
+  icosName!: string | null;
+
+  @Column({ type: "text", nullable: true })
   labellingStatus!: LabellingStatus | null;
 
   @Column({ type: "text", nullable: true })

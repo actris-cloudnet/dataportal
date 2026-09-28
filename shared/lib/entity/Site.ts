@@ -38,6 +38,8 @@ export interface Site {
   dvasName: string | null;
   actrisId: number | null;
   actrisName: string | null;
+  icosId: string | null;
+  icosName: string | null;
   labellingStatus: LabellingStatus | null;
   country: string | null;
   countryCode: string | null;
