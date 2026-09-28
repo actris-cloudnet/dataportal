@@ -79,8 +79,8 @@ export class InstrumentRoutes {
         .addSelect("latest_upload.measurementDate", "measurementDate")
         .where("latest_upload.measurementDate > CURRENT_DATE - 182")
         .orderBy("latest_upload.instrumentInfoUuid")
-        .addOrderBy("latest_upload.siteId")
         .addOrderBy("latest_upload.measurementDate", "DESC")
+        .addOrderBy("latest_upload.siteId")
         .getQuery();
       const rawData = await this.instrumentInfoRepo
         .createQueryBuilder("instrument_info")
