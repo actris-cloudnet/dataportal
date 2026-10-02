@@ -121,7 +121,7 @@
           {{ humanReadableDate(previewResponse.measurementDate) }}
         </div>
         <div class="preview-visualization">
-          <visualization
+          <Visualization
             :data="pendingVisualization"
             @load="changePreview"
             :link-to="{ name: 'File', params: { uuid: previewResponse.uuid } }"
@@ -254,7 +254,6 @@ const pendingVisualization = ref<VisualizationItem | null>(null);
 const currentPage = ref(1);
 const previewBusy = ref(false);
 let previewController: AbortController | null = null;
-let visualizationController: AbortController | null = null;
 
 const hasVolatile = computed(() => apiResponse.value?.results.some((item) => item.volatile));
 const hasLegacy = computed(() => apiResponse.value?.results.some((item) => item.legacy));
@@ -358,29 +357,21 @@ async function loadPreview(file: SearchFile) {
   try {
     if (previewController) previewController.abort();
     previewController = new AbortController();
-    const res = await axios.get(`${backendUrl}files/${file.uuid}`, { signal: previewController.signal });
-    pendingPreviewResponse.value = res.data;
+    previewBusy.value = true;
+    const [fileRes, vizRes] = await Promise.all([
+      axios.get(`${backendUrl}files/${file.uuid}`, { signal: previewController.signal }),
+      axios.get(`${backendUrl}visualizations/${file.uuid}`, { signal: previewController.signal }),
+    ]);
+    pendingPreviewResponse.value = fileRes.data;
     if (!previewResponse.value) {
       previewResponse.value = pendingPreviewResponse.value;
     }
-  } catch (error) {
-    if (axios.isCancel(error)) return;
-    console.error(`Failed to load preview: ${error}`);
-  }
-}
-
-async function loadVisualization(file: SearchFile) {
-  try {
-    if (visualizationController) visualizationController.abort();
-    visualizationController = new AbortController();
-    previewBusy.value = true;
-    const res = await axios.get(`${backendUrl}visualizations/${file.uuid}`, { signal: visualizationController.signal });
-    if (res.data.visualizations.length === 0) {
+    if (vizRes.data.visualizations.length === 0) {
       clearPreview();
       changePreview();
       return;
     }
-    pendingVisualization.value = res.data.visualizations[0];
+    pendingVisualization.value = vizRes.data.visualizations[0];
     // Browser will start loading the visualization and call `changePreview`
     // once it's fully loaded.
   } catch (error) {
@@ -391,9 +382,6 @@ async function loadVisualization(file: SearchFile) {
 
 function rowSelected(item: SearchFile) {
   loadPreview(item).catch(() => {
-    /* skip */
-  });
-  loadVisualization(item).catch(() => {
     /* skip */
   });
 }
