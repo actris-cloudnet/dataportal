@@ -3,7 +3,7 @@
     <div v-if="loading" class="loading">Loading news...</div>
     <div v-else-if="error" class="error">Failed to load news</div>
     <div class="news-items" v-else>
-      <template v-for="item in news" :key="item.id">
+      <template v-for="item in news" :key="item.uuid">
         <span class="news-date">{{ formatDisplayDate(item.date) }}</span>
         <router-link :to="{ name: 'NewsItem', params: { slug: item.slug } }" class="news-title">
           {{ item.title }}{{ item.draft ? " (draft)" : "" }}

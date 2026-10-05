@@ -29,11 +29,15 @@ export class NewsRoutes {
     if (typeof title !== "string" || typeof content !== "string" || typeof date !== "string") {
       return next({ status: 400, error: "title, content, and date are required" });
     }
+    const slug = generateSlug(title);
+    if (!slug) {
+      return next({ status: 400, error: "title must contain letters or numbers" });
+    }
     const news = new NewsItem();
     news.title = title;
     news.content = content;
     news.date = new Date(date);
-    news.slug = generateSlug(title);
+    news.slug = slug;
     news.draft = draft === true;
     await this.newsRepo.save(news);
     res.sendStatus(201);
@@ -103,11 +107,15 @@ export class NewsRoutes {
     if (typeof title !== "string" || typeof content !== "string" || typeof date !== "string") {
       return next({ status: 400, error: "title, content, and date are required" });
     }
+    const slug = generateSlug(title);
+    if (!slug) {
+      return next({ status: 400, error: "title must contain letters or numbers" });
+    }
 
     news.title = title;
     news.content = content;
     news.date = new Date(date);
-    news.slug = generateSlug(title);
+    news.slug = slug;
     news.draft = draft === true;
 
     await this.newsRepo.save(news);

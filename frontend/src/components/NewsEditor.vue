@@ -48,7 +48,7 @@
 
     <template #footer>
       <BaseButton @click="$emit('cancel')" type="secondary">Cancel</BaseButton>
-      <BaseButton type="primary" htmlType="submit">
+      <BaseButton type="primary" htmlType="submit" :disabled="saving">
         {{ item ? "Save" : "Create" }}
       </BaseButton>
     </template>
@@ -87,6 +87,7 @@ const formData = ref({
   draft: false,
 });
 const showPreview = ref(false);
+const saving = ref(false);
 
 watch(
   () => props.open,
@@ -105,6 +106,8 @@ watch(
 );
 
 async function save() {
+  if (saving.value) return;
+  saving.value = true;
   try {
     if (props.item) {
       const response = await axios.put<NewsItem>(`${backendUrl}news/${props.item.slug}`, formData.value);
@@ -116,6 +119,8 @@ async function save() {
   } catch (err) {
     console.error("Failed to save news item:", err);
     alert("Failed to save news item. Please try again.");
+  } finally {
+    saving.value = false;
   }
 }
 </script>

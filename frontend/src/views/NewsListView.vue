@@ -17,7 +17,7 @@
     <div v-else-if="error" class="error">Failed to load news</div>
     <template v-else>
       <div class="news-items">
-        <div v-for="item in apiResponse.results" :key="item.id" class="news-item-full">
+        <div v-for="item in apiResponse.results" :key="item.uuid" class="news-item-full">
           <div class="news-header">
             <router-link :to="{ name: 'NewsItem', params: { slug: item.slug } }" class="news-title-link">
               <h2>{{ item.title }}{{ item.draft ? " (draft)" : "" }}</h2>

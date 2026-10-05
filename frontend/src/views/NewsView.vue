@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import { backendUrl, formatDisplayDate } from "@/lib";
@@ -40,6 +40,7 @@ const canEdit = hasPermission("canManageNews");
 
 async function fetchNewsItem() {
   try {
+    error.value = false;
     const slug = route.params.slug;
     const response = await axios.get<NewsItem>(`${backendUrl}news/${slug}`);
     newsItem.value = response.data;
@@ -53,10 +54,10 @@ async function fetchNewsItem() {
 
 async function onSaved(item?: NewsItem) {
   editing.value = false;
-  if (!item) return;
-  newsItem.value = item;
-  if (item.slug !== route.params.slug) {
+  if (item && item.slug !== route.params.slug) {
     await router.replace({ name: "NewsItem", params: { slug: item.slug } });
+  } else {
+    await fetchNewsItem();
   }
 }
 
@@ -66,12 +67,19 @@ async function deleteNewsItem() {
 
   try {
     await axios.delete(`${backendUrl}news/${newsItem.value.slug}`);
-    await router.push({ name: "NewsList" });
+    await router.replace({ name: "NewsList" });
   } catch (err) {
     console.error("Failed to delete news item:", err);
     alert("Failed to delete news item. Please try again.");
   }
 }
+
+watch(
+  () => route.params.slug,
+  async (slug) => {
+    if (slug) await fetchNewsItem();
+  },
+);
 
 onMounted(fetchNewsItem);
 </script>
