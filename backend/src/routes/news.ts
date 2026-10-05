@@ -111,7 +111,7 @@ export class NewsRoutes {
     news.draft = draft === true;
 
     await this.newsRepo.save(news);
-    res.sendStatus(200);
+    res.send(news);
   };
 
   private htmlContent(item: NewsItem) {

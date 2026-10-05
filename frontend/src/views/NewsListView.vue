@@ -6,63 +6,12 @@
       <BaseButton @click="showCreateForm = true" type="primary">+ Create news</BaseButton>
     </div>
 
-    <BaseModal
+    <NewsEditor
       :open="(showCreateForm || !!editingItem) && canEdit"
-      @submit="editingItem ? updateNewsItem() : createNewsItem()"
-    >
-      <template #header>
-        <h3>{{ editingItem ? "Edit news item" : "Create news" }}</h3>
-      </template>
-
-      <template #body>
-        <div class="form-group">
-          <label for="news-title">Title:</label>
-          <input
-            id="news-title"
-            v-model="formData.title"
-            type="text"
-            required
-            placeholder="Enter title"
-            class="modal-input"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="news-date">Date:</label>
-          <DatePicker name="news-date" v-model="formData.date" :end="today" />
-        </div>
-
-        <div class="form-group">
-          <div class="content-label-container">
-            <label for="news-content">Content:</label>
-            <CheckBox v-model="showPreview" label="Preview" />
-          </div>
-          <textarea
-            v-if="!showPreview"
-            id="news-content"
-            v-model="formData.content"
-            rows="10"
-            required
-            placeholder="Enter content"
-            class="modal-textarea"
-          ></textarea>
-          <div v-else class="preview-container">
-            <MarkdownViewer :content="formData.content" />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <CheckBox v-model="formData.draft" label="Draft" />
-        </div>
-      </template>
-
-      <template #footer>
-        <BaseButton @click="cancelForm" type="secondary">Cancel</BaseButton>
-        <BaseButton type="primary" htmlType="submit">
-          {{ editingItem ? "Save" : "Create" }}
-        </BaseButton>
-      </template>
-    </BaseModal>
+      :item="editingItem"
+      @saved="onSaved"
+      @cancel="cancelForm"
+    />
 
     <div v-if="loading" class="loading">Loading news...</div>
     <div v-else-if="error" class="error">Failed to load news</div>
@@ -96,14 +45,12 @@
 <script lang="ts" setup>
 import { ref, onMounted, watch } from "vue";
 import axios from "axios";
-import { backendUrl, dateToString, formatDisplayDate } from "@/lib";
+import { backendUrl, formatDisplayDate } from "@/lib";
 import { hasPermission } from "@/lib/auth";
-import BaseModal from "@/components/BaseModal.vue";
 import BaseButton from "@/components/BaseButton.vue";
 import BasePagination from "@/components/BasePagination.vue";
 import MarkdownViewer from "@/components/MarkdownViewer.vue";
-import CheckBox from "@/components/CheckBox.vue";
-import DatePicker from "@/components/DatePicker.vue";
+import NewsEditor from "@/components/NewsEditor.vue";
 import type { NewsItem } from "@shared/entity/NewsItem";
 import type { NewsPaginatedResponse } from "@shared/entity/NewsPaginatedResponse";
 
@@ -122,16 +69,6 @@ const showCreateForm = ref(false);
 const editingItem = ref<NewsItem | null>(null);
 const currentPage = ref(1);
 const pageSize = 10;
-
-const today = dateToString(new Date());
-
-const formData = ref({
-  title: "",
-  content: "",
-  date: today,
-  draft: false,
-});
-const showPreview = ref(false);
 
 const canEdit = hasPermission("canManageNews");
 
@@ -156,49 +93,17 @@ watch(currentPage, async (newPage) => {
 
 function startEditing(item: NewsItem) {
   editingItem.value = item;
-  formData.value = {
-    title: item.title,
-    content: item.content,
-    date: item.date.split("T")[0],
-    draft: item.draft || false,
-  };
-  showCreateForm.value = true;
 }
 
 function cancelForm() {
   showCreateForm.value = false;
   editingItem.value = null;
-  formData.value = {
-    title: "",
-    content: "",
-    date: today,
-    draft: false,
-  };
 }
 
-async function createNewsItem() {
-  try {
-    await axios.post(`${backendUrl}news/`, formData.value);
-    currentPage.value = 1;
-    await fetchNews(currentPage.value);
-    cancelForm();
-  } catch (err) {
-    console.error("Failed to create news item:", err);
-    alert("Failed to create news item. Please try again.");
-  }
-}
-
-async function updateNewsItem() {
-  if (!editingItem.value) return;
-
-  try {
-    await axios.put(`${backendUrl}news/${editingItem.value.slug}`, formData.value);
-    await fetchNews(currentPage.value);
-    cancelForm();
-  } catch (err) {
-    console.error("Failed to update news item:", err);
-    alert("Failed to update news item. Please try again.");
-  }
+async function onSaved() {
+  if (!editingItem.value) currentPage.value = 1;
+  await fetchNews(currentPage.value);
+  cancelForm();
 }
 
 async function deleteNewsItem(slug: string) {
@@ -235,50 +140,6 @@ h1 {
 
 .admin-actions {
   margin-bottom: 2rem;
-}
-
-.modal-input {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-family: inherit;
-  font-size: 1rem;
-  margin-top: 0.5rem;
-}
-
-.modal-textarea {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-family: inherit;
-  font-size: 1rem;
-  margin-top: 0.5rem;
-  resize: vertical;
-  min-height: 150px;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #2c3e50;
-}
-
-.content-label-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.content-label-container label {
-  margin-bottom: 0;
 }
 
 .loading,
