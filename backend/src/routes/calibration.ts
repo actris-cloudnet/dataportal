@@ -84,7 +84,7 @@ export class CalibrationRoutes {
             instrumentInfo,
             measurementDate: query.date,
             key,
-            data: data as any,
+            data: data === null ? () => "'null'::jsonb" : data,
             createdAt: now,
             updatedAt: now,
           }),

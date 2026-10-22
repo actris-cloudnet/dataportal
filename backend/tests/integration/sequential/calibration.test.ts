@@ -116,4 +116,24 @@ describe("PUT /api/calibration", () => {
     expect(resAll.data.calibration_factor[1].data).toBe(0.15);
     expect(resAll.data.time_offset).toHaveLength(1);
   });
+
+  it("inserts calibration with data: null", async () => {
+    await axios.put(
+      url,
+      { null_calibration: null },
+      {
+        params: { instrumentPid: "https://hdl.handle.net/123/bucharest-chm15k", date: "2021-01-03" },
+        auth: credentials,
+      },
+    );
+    const resDay = await axios.get(url, {
+      params: { instrumentPid: "https://hdl.handle.net/123/bucharest-chm15k", date: "2021-01-03" },
+    });
+    expect(resDay.data.data).toEqual({ null_calibration: null, calibration_factor: 0.15, time_offset: 120 });
+    const resAll = await axios.get(url, {
+      params: { instrumentPid: "https://hdl.handle.net/123/bucharest-chm15k" },
+    });
+    expect(resAll.data.null_calibration).toHaveLength(1);
+    expect(resAll.data.null_calibration[0].data).toBe(null);
+  });
 });
