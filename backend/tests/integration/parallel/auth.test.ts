@@ -24,17 +24,23 @@ afterAll(async () => {
 });
 
 describe("GET /auth/login", () => {
-  it("returns unauthorized error", async () => {
+  it("rejects login for non-existing user", async () => {
     await expect(axios.post(loginUrl, { username: "hax0r", password: "hax0r" }, { headers })).rejects.toMatchObject({
-      response: { status: 401 },
+      response: { status: 401, data: { errors: "Invalid credentials" } },
     });
   });
 
-  it("rejects login by submitter", async () => {
+  it("rejects user without canLogin permission", async () => {
     await expect(
       axios.post(loginUrl, { username: "submitter", password: "submitter" }, { headers }),
     ).rejects.toMatchObject({
-      response: { status: 401 },
+      response: { status: 401, data: { errors: "Invalid credentials" } },
+    });
+  });
+
+  it("rejects login with incorrect password", async () => {
+    await expect(axios.post(loginUrl, { username: "admin", password: "wrong" }, { headers })).rejects.toMatchObject({
+      response: { status: 401, data: { errors: "Invalid credentials" } },
     });
   });
 
@@ -43,6 +49,42 @@ describe("GET /auth/login", () => {
     expect(res.status).toEqual(200);
     expect(res.data).toMatchSnapshot();
     expect(res.headers).toHaveProperty("set-cookie");
+  });
+
+  it("returns validation error for missing username", async () => {
+    await expect(axios.post(loginUrl, { password: "test123" }, { headers })).rejects.toMatchObject({
+      response: { status: 400, data: { errors: "Username is required" } },
+    });
+  });
+
+  it("returns validation error for missing password", async () => {
+    await expect(axios.post(loginUrl, { username: "test" }, { headers })).rejects.toMatchObject({
+      response: { status: 400, data: { errors: "Password is required" } },
+    });
+  });
+
+  it("returns validation error for empty username", async () => {
+    await expect(axios.post(loginUrl, { username: "", password: "test123" }, { headers })).rejects.toMatchObject({
+      response: { status: 400, data: { errors: "Username is required" } },
+    });
+  });
+
+  it("returns validation error for empty password", async () => {
+    await expect(axios.post(loginUrl, { username: "test", password: "" }, { headers })).rejects.toMatchObject({
+      response: { status: 400, data: { errors: "Password is required" } },
+    });
+  });
+
+  it("returns validation error for whitespace-only username", async () => {
+    await expect(axios.post(loginUrl, { username: "   ", password: "test123" }, { headers })).rejects.toMatchObject({
+      response: { status: 400, data: { errors: "Username is required" } },
+    });
+  });
+
+  it("returns validation error for whitespace-only password", async () => {
+    await expect(axios.post(loginUrl, { username: "test", password: "   " }, { headers })).rejects.toMatchObject({
+      response: { status: 400, data: { errors: "Password is required" } },
+    });
   });
 });
 

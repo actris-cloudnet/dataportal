@@ -78,21 +78,22 @@ export class Authenticator {
   }
 
   logIn: RequestHandler = async (req, res, next) => {
-    if (typeof req.body.username !== "string") {
-      return next({ status: 400, errors: "Invalid username" });
+    if (typeof req.body.username !== "string" || req.body.username.trim() === "") {
+      return next({ status: 400, errors: "Username is required" });
     }
-    if (typeof req.body.password !== "string") {
-      return next({ status: 400, errors: "Invalid password" });
+    if (typeof req.body.password !== "string" || req.body.password.trim() === "") {
+      return next({ status: 400, errors: "Password is required" });
     }
     const user = await this.userRepo.findOne({
       where: { username: req.body.username, passwordHash: Not(IsNull()) },
       relations: { person: true, permissions: true, instrumentLogPermissions: { instrumentInfo: true } },
     });
-    if (!user || !(await this.hasPermission(user, PermissionType.canLogin))) {
-      return next({ status: 401, errors: "Invalid username" });
-    }
-    if (!user.comparePassword(req.body.password)) {
-      return next({ status: 401, errors: "Invalid password" });
+    if (
+      !user ||
+      !(await this.hasPermission(user, PermissionType.canLogin)) ||
+      !user.comparePassword(req.body.password)
+    ) {
+      return next({ status: 401, errors: "Invalid credentials" });
     }
     await this.createSessionToken(res, user);
     const uuids = await this.getInstrumentUuids(user);

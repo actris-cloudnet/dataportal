@@ -218,7 +218,12 @@ async function createServer(): Promise<void> {
     }),
   );
   passport.use("authtoken", new AuthTokenStrategy(tokenVerifyCallback));
-  app.post("/api/auth/login", express.json(), authenticator.logIn);
+  app.post(
+    "/api/auth/login",
+    rateLimitMiddleware({ windowMs: 60 * 60 * 1000, limit: 10 }),
+    express.json(),
+    authenticator.logIn,
+  );
   app.get("/api/auth/me", passport.authenticate("cookie", { session: false }), authenticator.userInfo);
   app.post("/api/auth/logout", passport.authenticate("cookie", { session: false }), authenticator.logOut);
   app.post(
