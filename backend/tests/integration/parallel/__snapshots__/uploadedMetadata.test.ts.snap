@@ -7,6 +7,7 @@ exports[`GET /api/raw-files/:uuid request succeeds on bucharest instrument uploa
   "downloadUrl": "http://localhost:3000/api/download/raw/b4633e6b-a3fc-4d55-b9f4-8033b4896117/file4-ab460da4ad72c48223.LV1",
   "filename": "file4-ab460da4ad72c48223.LV1",
   "instrument": {
+    "instrumentId": "chm15k",
     "model": "CHM 15k",
     "modelUrl": null,
     "name": "Bucharest CHM 15k",
@@ -61,6 +62,7 @@ exports[`GET /api/raw-files/:uuid request succeeds on granada instrument upload 
   "downloadUrl": "http://localhost:3000/api/download/raw/b8e96ee1-d3e1-49ba-a557-c131d56beeab/file1-dc460da4ad72c48223.LV1",
   "filename": "file1-dc460da4ad72c48223.LV1",
   "instrument": {
+    "instrumentId": "mira-35",
     "model": "MIRA",
     "modelUrl": null,
     "name": "Granada MIRA",

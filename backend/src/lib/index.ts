@@ -255,6 +255,10 @@ export const augmentFile = (includeS3path: boolean) => (file: RegularFile | Mode
         ? {
             ...file.instrumentInfo,
             instrument: undefined,
+            instrumentId:
+              "instrument" in file
+                ? (file as any).instrument.id // from query builder
+                : file.instrumentInfo?.instrument.id, // from entity manager
             downloadable:
               "instrument" in file
                 ? (file as any).instrument.downloadable // from query builder

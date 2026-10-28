@@ -227,7 +227,7 @@ export class UploadRoutes {
       where: { uuid },
       relations: {
         site: true,
-        [isModel ? "model" : "instrumentInfo"]: true,
+        ...(isModel ? { model: true } : { instrumentInfo: { instrument: true } }),
       },
     });
     if (!upload) return next({ status: 404, errors: "No metadata was found with provided uuid" });
@@ -235,7 +235,8 @@ export class UploadRoutes {
     // Rename instrumentInfo to instrument in the response
     if ("instrumentInfo" in responseData) {
       const { instrumentInfo, ...rest } = responseData;
-      res.send({ ...rest, instrument: instrumentInfo });
+      const { instrument, ...restInfo } = instrumentInfo;
+      res.send({ ...rest, instrument: { ...restInfo, instrumentId: instrument.id } });
     } else {
       res.send(responseData);
     }

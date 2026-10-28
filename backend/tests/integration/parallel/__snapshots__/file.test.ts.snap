@@ -13,6 +13,7 @@ exports[`/api/files/:uuid request succeeds on instrument file 1`] = `
   "format": "HDF5 (NetCDF4)",
   "instrument": {
     "downloadable": true,
+    "instrumentId": "mira-35",
     "model": "MIRA",
     "modelUrl": null,
     "name": "Bucharest MIRA",
