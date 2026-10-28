@@ -203,12 +203,34 @@ export class UploadRoutes {
     res.sendStatus(200);
   };
 
-  metadata: RequestHandler = async (req, res, next) => {
+  metadataByChecksum: RequestHandler = async (req, res, next) => {
     const checksum = req.params.checksum as string;
     const upload = await this.findAnyUpload((repo, model) =>
       repo.findOne({ where: { checksum }, relations: ["site", model ? "model" : "instrumentInfo"] }),
     );
     if (!upload) return next({ status: 404, errors: "No metadata was found with provided id" });
+    const responseData = this.augmentUploadResponse(true)(upload);
+    // Rename instrumentInfo to instrument in the response
+    if ("instrumentInfo" in responseData) {
+      const { instrumentInfo, ...rest } = responseData;
+      res.send({ ...rest, instrument: instrumentInfo });
+    } else {
+      res.send(responseData);
+    }
+  };
+
+  metadataByUuid: RequestHandler = async (req, res, next) => {
+    const uuid = req.params.uuid as string;
+    const isModel = req.path.includes("model");
+    const repo = isModel ? this.modelUploadRepo : this.instrumentUploadRepo;
+    const upload = await repo.findOne({
+      where: { uuid },
+      relations: {
+        site: true,
+        [isModel ? "model" : "instrumentInfo"]: true,
+      },
+    });
+    if (!upload) return next({ status: 404, errors: "No metadata was found with provided uuid" });
     const responseData = this.augmentUploadResponse(true)(upload);
     // Rename instrumentInfo to instrument in the response
     if ("instrumentInfo" in responseData) {

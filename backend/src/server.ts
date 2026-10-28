@@ -328,6 +328,7 @@ async function createServer(): Promise<void> {
     middleware.checkParamsExistInDb,
     uploadRoutes.listMetadata(false),
   );
+  app.get("/api/raw-files/:uuid", middleware.validateUuidParam, uploadRoutes.metadataByUuid);
   app.get(
     "/api/raw-model-files",
     middleware.filesValidator,
@@ -335,6 +336,7 @@ async function createServer(): Promise<void> {
     middleware.checkParamsExistInDb,
     uploadRoutes.listMetadata(false),
   );
+  app.get("/api/raw-model-files/:uuid", middleware.validateUuidParam, uploadRoutes.metadataByUuid);
   app.put(
     "/api/raw-files/:uuid/status",
     middleware.validateUuidParam,
@@ -496,7 +498,7 @@ async function createServer(): Promise<void> {
     uploadRoutes.listMetadata(true),
   );
 
-  app.get("/upload/metadata/:checksum", middleware.validateMD5Param, uploadRoutes.metadata, errorAsPlaintext);
+  app.get("/upload/metadata/:checksum", middleware.validateMD5Param, uploadRoutes.metadataByChecksum, errorAsPlaintext);
 
   app.post(
     "/upload/metadata",

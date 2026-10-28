@@ -178,6 +178,59 @@ describe("GET /api/raw-model-files", () => {
   });
 });
 
+describe("GET /api/raw-files/:uuid", () => {
+  it("responds with 404 when uuid is not found", async () => {
+    return expect(axios.get(`${rawFilesUrl}00000000-0000-0000-0000-000000000000`)).rejects.toMatchObject({
+      response: { status: 404 },
+    });
+  });
+
+  it("model upload is not found via instrument endpoint", async () => {
+    return expect(axios.get(`${rawFilesUrl}1bb32743-faf0-4057-9076-ed2e698dcf26`)).rejects.toMatchObject({
+      response: { status: 404 },
+    });
+  });
+
+  it("request succeeds on granada instrument upload", async () => {
+    const res = await axios.get(`${rawFilesUrl}b8e96ee1-d3e1-49ba-a557-c131d56beeab`);
+    expect(res.data).toMatchSnapshot();
+  });
+
+  it("request succeeds on bucharest instrument upload", async () => {
+    const res = await axios.get(`${rawFilesUrl}b4633e6b-a3fc-4d55-b9f4-8033b4896117`);
+    expect(res.data).toMatchSnapshot();
+  });
+});
+
+describe("GET /api/raw-model-files/:uuid", () => {
+  it("responds with 404 when uuid is not found", async () => {
+    return expect(axios.get(`${rawModelFilesUrl}00000000-0000-0000-0000-000000000000`)).rejects.toMatchObject({
+      response: { status: 404 },
+    });
+  });
+
+  it("instrument upload is not found via model endpoint", async () => {
+    return expect(axios.get(`${rawModelFilesUrl}b8e96ee1-d3e1-49ba-a557-c131d56beeab`)).rejects.toMatchObject({
+      response: { status: 404 },
+    });
+  });
+
+  it("request succeeds on granada ecmwf model upload", async () => {
+    const res = await axios.get(`${rawModelFilesUrl}1bb32743-faf0-4057-9076-ed2e698dcf26`);
+    expect(res.data).toMatchSnapshot();
+  });
+
+  it("request succeeds on mace-head ecmwf model upload", async () => {
+    const res = await axios.get(`${rawModelFilesUrl}1bb32748-faf0-4057-9076-ed2e698dcf31`);
+    expect(res.data).toMatchSnapshot();
+  });
+
+  it("request succeeds on granada icon-iglo model upload", async () => {
+    const res = await axios.get(`${rawModelFilesUrl}1bb32744-faf0-4057-9076-ed2e698dcf16`);
+    expect(res.data).toMatchSnapshot();
+  });
+});
+
 describe("GET /upload-metadata", () => {
   it("response has s3path", async () => {
     const res = await axios.get(`${privateUrl}`, {
