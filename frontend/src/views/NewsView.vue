@@ -3,29 +3,44 @@
     <div v-if="loading" class="loading">Loading news item...</div>
     <div v-else-if="error" class="error">Failed to load news item</div>
     <div v-else-if="newsItem" class="news-item-detail">
-      <h1>{{ newsItem.title }}{{ newsItem.draft ? " (draft)" : "" }}</h1>
+      <div class="news-header">
+        <h1>{{ newsItem.title }}{{ newsItem.draft ? " (draft)" : "" }}</h1>
+        <div v-if="canEdit" class="news-actions">
+          <BaseButton @click="editing = true" type="secondary" size="small"> Edit </BaseButton>
+          <BaseButton @click="deleteNewsItem" type="danger" size="small"> Delete </BaseButton>
+        </div>
+      </div>
       <p class="date">{{ formatDisplayDate(newsItem.date) }}</p>
       <MarkdownViewer :content="newsItem.content" />
+      <NewsEditor :open="editing && canEdit" :item="newsItem" @saved="onSaved" @cancel="editing = false" />
     </div>
     <div v-else class="not-found">News item not found</div>
   </main>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { ref, onMounted, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import { backendUrl, formatDisplayDate } from "@/lib";
+import { hasPermission } from "@/lib/auth";
+import BaseButton from "@/components/BaseButton.vue";
 import MarkdownViewer from "@/components/MarkdownViewer.vue";
+import NewsEditor from "@/components/NewsEditor.vue";
 import type { NewsItem } from "@shared/entity/NewsItem";
 
 const route = useRoute();
 const newsItem = ref<NewsItem | null>(null);
 const loading = ref(true);
 const error = ref(false);
+const editing = ref(false);
+
+const router = useRouter();
+const canEdit = hasPermission("canManageNews");
 
 async function fetchNewsItem() {
   try {
+    error.value = false;
     const slug = route.params.slug;
     const response = await axios.get<NewsItem>(`${backendUrl}news/${slug}`);
     newsItem.value = response.data;
@@ -36,6 +51,35 @@ async function fetchNewsItem() {
     loading.value = false;
   }
 }
+
+async function onSaved(item?: NewsItem) {
+  editing.value = false;
+  if (item && item.slug !== route.params.slug) {
+    await router.replace({ name: "NewsItem", params: { slug: item.slug } });
+  } else {
+    await fetchNewsItem();
+  }
+}
+
+async function deleteNewsItem() {
+  if (!newsItem.value) return;
+  if (!confirm("Are you sure you want to delete this news item?")) return;
+
+  try {
+    await axios.delete(`${backendUrl}news/${newsItem.value.slug}`);
+    await router.replace({ name: "NewsList" });
+  } catch (err) {
+    console.error("Failed to delete news item:", err);
+    alert("Failed to delete news item. Please try again.");
+  }
+}
+
+watch(
+  () => route.params.slug,
+  async (slug) => {
+    if (slug) await fetchNewsItem();
+  },
+);
 
 onMounted(fetchNewsItem);
 </script>
@@ -67,6 +111,18 @@ h1 {
 .news-item-detail {
   background: white;
   border-radius: 8px;
+}
+
+.news-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.news-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 
 .news-item-detail h1 {

@@ -118,5 +118,67 @@ describe("/api/news", () => {
         genResponse(expectedBody.status, expectedBody),
       );
     });
+
+    it("should return 400 if title produces an empty slug", async () => {
+      const invalidNewsItem = {
+        title: "!!!",
+        content: "Content",
+        date: "2024-01-01",
+        draft: false,
+      };
+
+      const expectedBody: NewsError = {
+        status: 400,
+        error: "title must contain letters or numbers",
+      };
+
+      return expect(axios.post(`${backendPublicUrl}news/`, invalidNewsItem, { auth })).rejects.toMatchObject(
+        genResponse(expectedBody.status, expectedBody),
+      );
+    });
+  });
+
+  describe("PUT /api/news/:slug", () => {
+    it("should update a news item and return it with the new slug", async () => {
+      const updatedNewsItem = {
+        title: "Renamed News Item",
+        content: "Updated content.",
+        date: "2024-01-02",
+        draft: true,
+      };
+
+      const res = await axios.put(`${backendPublicUrl}news/test-news-item`, updatedNewsItem, { auth });
+      expect(res.status).toBe(200);
+      expect(res.data).toMatchObject({
+        title: "Renamed News Item",
+        content: "Updated content.",
+        slug: "renamed-news-item",
+        draft: true,
+      });
+
+      const item = await axios.get(`${backendPublicUrl}news/renamed-news-item`, { auth });
+      expect(item.data.uuid).toBe(res.data.uuid);
+      await expect(axios.get(`${backendPublicUrl}news/test-news-item`, { auth })).rejects.toMatchObject({
+        response: { status: 404 },
+      });
+    });
+
+    it("should return 400 if title produces an empty slug", async () => {
+      const invalidNewsItem = {
+        title: "!!!",
+        content: "Content",
+        date: "2024-01-01",
+        draft: false,
+      };
+
+      const expectedBody: NewsError = {
+        status: 400,
+        error: "title must contain letters or numbers",
+      };
+
+      return expect(
+        axios.put(`${backendPublicUrl}news/renamed-news-item`, invalidNewsItem, { auth }),
+      ).rejects.toMatchObject(genResponse(expectedBody.status, expectedBody));
+    });
   });
 });
