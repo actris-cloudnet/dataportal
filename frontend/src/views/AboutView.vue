@@ -37,54 +37,48 @@
       </p>
       <div class="projects">
         <a class="project cloudnet" href="https://cordis.europa.eu/project/id/EVK2-CT-2000-00065" target="_blank">
-          <img :src="cloudnetOldLogo" class="project-logo" />
-          <h2 class="project-name">CLOUD-NET</h2>
+          <img :src="cloudnetOldLogo" alt="CLOUD-NET" class="project-logo" />
           <div class="project-date">2001 – 2005</div>
         </a>
         <a class="project actris" href="https://www.actris.eu" target="_blank">
-          <img :src="actrisLogo" class="project-logo" />
-          <h2 class="project-name">ACTRIS</h2>
+          <img :src="actrisLogo" alt="ACTRIS" class="project-logo" />
           <div class="project-date">2011 –</div>
         </a>
         <a class="project envri-fair" href="https://envri.eu/the-envri-fair-project/" target="_blank">
-          <img :src="envriFairLogo" class="project-logo" />
-          <h2 class="project-name">ENVRI-FAIR</h2>
+          <img :src="envriFairLogo" alt="ENVRI-FAIR" class="project-logo" />
           <div class="project-date">2019 – 2023</div>
         </a>
         <a class="project atmo-access" href="https://www.atmo-access.eu/" target="_blank">
-          <img :src="atmoAccessLogo" class="project-logo" />
-          <h2 class="project-name">ATMO-ACCESS</h2>
+          <img :src="atmoAccessLogo" alt="ATMO-ACCESS" class="project-logo" />
           <div class="project-date">2021 – 2025</div>
         </a>
         <a class="project ri-urbans" href="https://riurbans.eu/" target="_blank">
-          <img :src="riUrbansLogo" class="project-logo" />
-          <h2 class="project-name">RI-URBANS</h2>
+          <img :src="riUrbansLogo" alt="RI-URBANS" class="project-logo" />
           <div class="project-date">2021 – 2025</div>
         </a>
         <a class="project cargo-act" href="https://cargo-act.eu/" target="_blank">
-          <img :src="cargoActLogo" class="project-logo" />
-          <h2 class="project-name">CARGO-ACT</h2>
+          <img :src="cargoActLogo" alt="CARGO-ACT" class="project-logo" />
           <div class="project-date">2024 – 2027</div>
         </a>
         <a class="project certainty" href="https://certainty-aci.eu/" target="_blank">
-          <img :src="certaintyLogo" class="project-logo" />
-          <h2 class="project-name">CERTAINTY</h2>
+          <img :src="certaintyLogo" alt="CERTAINTY" class="project-logo" />
           <div class="project-date">2024 – 2027</div>
         </a>
         <a class="project iriscc" href="https://www.iriscc.eu/" target="_blank">
-          <img :src="irisccLogo" class="project-logo" />
-          <h2 class="project-name">IRISCC</h2>
+          <img :src="irisccLogo" alt="IRISCC" class="project-logo" />
           <div class="project-date">2024 – 2028</div>
         </a>
         <a class="project polarin" href="https://eu-polarin.eu/" target="_blank">
-          <img :src="polarinLogo" class="project-logo" />
-          <h2 class="project-name">POLARIN</h2>
+          <img :src="polarinLogo" alt="POLARIN" class="project-logo" />
           <div class="project-date">2024 – 2029</div>
         </a>
         <a class="project diva" href="https://www.diva-platform.com/" target="_blank">
-          <img :src="divaLogo" class="project-logo" />
-          <h2 class="project-name">DIVA</h2>
+          <img :src="divaLogo" alt="DIVA" class="project-logo" />
           <div class="project-date">2025 – 2029</div>
+        </a>
+        <a class="project armo-serv" href="https://atmo-serv.eu/" target="_blank">
+          <img :src="atmoServLogo" alt="ATMO-SERV" class="project-logo" />
+          <div class="project-date">2026 – 2030</div>
         </a>
       </div>
     </main>
@@ -103,6 +97,7 @@ import polarinLogo from "@/assets/logos/polarin.png";
 import divaLogo from "@/assets/logos/diva.png";
 import cargoActLogo from "@/assets/logos/cargo-act.png";
 import irisccLogo from "@/assets/logos/iriscc.png";
+import atmoServLogo from "@/assets/logos/atmo-serv.png";
 </script>
 
 <style scoped lang="scss">
@@ -169,12 +164,8 @@ td:nth-child(4) {
   }
 }
 
-.project-name {
-  font-weight: 500;
-}
-
 .project-date {
-  color: gray;
-  font-size: 75%;
+  color: #777;
+  font-size: 90%;
 }
 </style>
