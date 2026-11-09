@@ -6,7 +6,7 @@
       <div v-html="modelDescription"></div>
       <div class="columns">
         <div v-if="modelInfo" class="info-column">
-          <h2>Product overview</h2>
+          <h2>Model overview</h2>
           <table>
             <tbody>
               <tr>

@@ -75,8 +75,8 @@ arome:
 arome-arctic:
   description: |
     AROME-Arctic is a regional adaptation of the <a href="/model/arome">AROME
-    model</a> specifically configured for the Arctic region. The data are
-    provided by MET Norway.
+    model</a> specifically configured for the Arctic region. The model has been
+    run operationally by MET Norway since November 2015.
   domain: Arctic
   horizontalResolution: 2.5 km
   verticalResolution: 90 model levels
@@ -84,7 +84,9 @@ arome-arctic:
   runs: Every 3 hours
   forecast: Up to 66 hours
   links:
-    - <a href="https://www.met.no/en/projects/The-weather-model-AROME-Arctic">AROME-Arctic documentation</a>
+    - <a href="https://www.met.no/en/projects/The-weather-model-AROME-Arctic">AROME-Arctic weather model</a>, MET Norway Projects and activities
+    - <a href="https://github.com/metno/NWPdocs/wiki/AROME-Arctic-dataset">AROME-Arctic dataset</a>, MET Norway NWP documentation
+    - Müller et al. (2017). <a href="https://doi.org/10.1175/MWR-D-17-0194.1">Characteristics of a Convective-Scale Weather Forecasting System for the European Arctic</a>. <i>Monthly Weather Review</i>, <i>145</i>(12), 4771–4787.
   boundary:
     - [69.299, -17.957]
     - [69.001, -12.89]
@@ -203,7 +205,8 @@ meps:
   runs: Every 3 hours
   forecast: Up to 66 hours
   links:
-    - <a href="https://www.met.no/en/projects/metcoop">MetCoOp documentation</a>
+    - <a href="https://www.met.no/en/projects/metcoop">MetCoOp</a>, MET Norway Projects and activities
+    - <a href="https://github.com/metno/NWPdocs/wiki/MEPS-dataset">MEPS dataset</a>, MET Norway NWP documentation
     - Eresmaa et al. (2026). <a href="https://doi.org/10.1175/BAMS-D-25-0225.1">The
       Operational Forecast Process at MetCoOp</a>. <i>Bull. Amer. Meteor. Soc.</i>,
       <i>107</i>(5), E946–E963.
