@@ -35,6 +35,8 @@
           </ul>
         </div>
         <p class="legend">
+          <span class="status live"></span>
+          Data within 3 hours
           <span class="status active"></span>
           Data within 3 days
           <span class="status recent"></span>
@@ -91,7 +93,7 @@ function sortInstrument(a: InstrumentInfo, b: InstrumentInfo) {
   if (a.status == b.status) {
     return compareValues(a.name, b.name);
   }
-  const statusOrder = ["active", "recent", "inactive"];
+  const statusOrder = ["live", "active", "recent", "inactive"];
   return compareValues(statusOrder.indexOf(a.status), statusOrder.indexOf(b.status));
 }
 
@@ -161,8 +163,12 @@ ul {
   border-radius: 50%;
   align-self: center;
 
-  &.active {
+  &.live {
     background: #25910f;
+  }
+
+  &.active {
+    background: #93d383;
   }
 
   &.recent {
