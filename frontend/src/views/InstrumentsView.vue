@@ -107,7 +107,7 @@ onMounted(async () => {
       ...siteRes.data,
       {
         id: "null",
-        humanReadableName: "Graveyard",
+        humanReadableName: "Inactive",
       },
     ];
     const instruBySite = instruRes.data
