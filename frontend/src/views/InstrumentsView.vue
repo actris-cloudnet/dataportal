@@ -22,6 +22,7 @@
         </section>
         <div class="site" v-for="site in instruments.value" :key="site.id">
           <h2>{{ site.humanReadableName }}</h2>
+          <p v-if="site.id === 'null'" class="site-note">No data in the last 6 months</p>
           <ul>
             <li v-for="instrument in site.instruments" :key="instrument.uuid" class="instrument">
               <span :class="{ status: true, [instrument.status]: true }"></span>
@@ -138,6 +139,13 @@ h2 {
 
 .site {
   margin-bottom: 2rem;
+}
+
+.site-note {
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+  font-size: 85%;
+  color: #666;
 }
 
 ul {
