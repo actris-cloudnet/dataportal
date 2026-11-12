@@ -21,8 +21,15 @@
           </div>
         </section>
         <div class="site" v-for="site in instruments.value" :key="site.id">
-          <h2>{{ site.humanReadableName }}</h2>
-          <p v-if="site.id === 'null'" class="site-note">No data in the last 6 months</p>
+          <template v-if="site.id === 'null'">
+            <h2>{{ site.humanReadableName }}</h2>
+            <p class="site-note">No data in the last 6 months</p>
+          </template>
+          <h2 v-else>
+            <router-link :to="{ name: 'Site', params: { siteId: site.id } }">
+              {{ site.humanReadableName }}
+            </router-link>
+          </h2>
           <ul>
             <li v-for="instrument in site.instruments" :key="instrument.uuid" class="instrument">
               <span :class="{ status: true, [instrument.status]: true }"></span>
@@ -135,6 +142,15 @@ h2 {
   font-size: 150%;
   margin-top: 1rem;
   margin-bottom: 1rem;
+
+  a {
+    text-decoration: inherit;
+    color: inherit;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 }
 
 .site {
