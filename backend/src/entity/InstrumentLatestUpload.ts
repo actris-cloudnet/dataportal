@@ -6,7 +6,8 @@ import { Site } from "./Site";
   expression: `
     SELECT instrument_info.uuid AS "instrumentInfoUuid",
       "siteId",
-      MAX(instrument_upload."measurementDate") AS "measurementDate"
+      MAX(instrument_upload."measurementDate") AS "measurementDate",
+      MAX(instrument_upload."updatedAt") AS "updatedAt"
     FROM instrument_info
     JOIN instrument_upload ON instrument_upload."instrumentInfoUuid" = instrument_info.uuid
     WHERE instrument_upload.status IN ('uploaded', 'processed')
@@ -29,4 +30,7 @@ export class InstrumentLatestUpload {
 
   @ViewColumn()
   measurementDate!: Date;
+
+  @ViewColumn()
+  updatedAt!: Date;
 }

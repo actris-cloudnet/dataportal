@@ -268,6 +268,7 @@ export class UploadRoutes {
       ...md,
       measurementDate: md.measurementDate.toISOString().slice(0, 10),
       instrumentInfo: undefined,
+      updatedAt: undefined,
       instrument: md.instrumentInfo,
     }));
     res.send(responseData);

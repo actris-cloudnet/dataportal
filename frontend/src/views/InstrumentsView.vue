@@ -22,6 +22,7 @@
         </section>
         <div class="site" v-for="site in instruments.value" :key="site.id">
           <h2>{{ site.humanReadableName }}</h2>
+          <p v-if="site.id === 'null'" class="site-note">No data in the last 6 months</p>
           <ul>
             <li v-for="instrument in site.instruments" :key="instrument.uuid" class="instrument">
               <span :class="{ status: true, [instrument.status]: true }"></span>
@@ -35,6 +36,8 @@
           </ul>
         </div>
         <p class="legend">
+          <span class="status live"></span>
+          Data within 3 hours
           <span class="status active"></span>
           Data within 3 days
           <span class="status recent"></span>
@@ -91,7 +94,7 @@ function sortInstrument(a: InstrumentInfo, b: InstrumentInfo) {
   if (a.status == b.status) {
     return compareValues(a.name, b.name);
   }
-  const statusOrder = ["active", "recent", "inactive"];
+  const statusOrder = ["live", "active", "recent", "inactive"];
   return compareValues(statusOrder.indexOf(a.status), statusOrder.indexOf(b.status));
 }
 
@@ -105,7 +108,7 @@ onMounted(async () => {
       ...siteRes.data,
       {
         id: "null",
-        humanReadableName: "Graveyard",
+        humanReadableName: "Inactive",
       },
     ];
     const instruBySite = instruRes.data
@@ -138,6 +141,13 @@ h2 {
   margin-bottom: 2rem;
 }
 
+.site-note {
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+  font-size: 85%;
+  color: #666;
+}
+
 ul {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
@@ -161,8 +171,12 @@ ul {
   border-radius: 50%;
   align-self: center;
 
-  &.active {
+  &.live {
     background: #25910f;
+  }
+
+  &.active {
+    background: #93d383;
   }
 
   &.recent {

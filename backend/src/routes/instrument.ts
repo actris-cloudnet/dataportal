@@ -77,6 +77,7 @@ export class InstrumentRoutes {
         .select("latest_upload.instrumentInfoUuid", "instrumentInfoUuid")
         .addSelect("latest_upload.siteId", "siteId")
         .addSelect("latest_upload.measurementDate", "measurementDate")
+        .addSelect("latest_upload.updatedAt", "updatedAt")
         .where("latest_upload.measurementDate > CURRENT_DATE - 182")
         .orderBy("latest_upload.instrumentInfoUuid")
         .addOrderBy("latest_upload.measurementDate", "DESC")
@@ -87,6 +88,8 @@ export class InstrumentRoutes {
         .addSelect('latest_site."siteId"')
         .addSelect(
           `CASE
+             WHEN latest_site."measurementDate" >= CURRENT_DATE - 1
+               AND latest_site."updatedAt" > now() - interval '3 hours' THEN 'live'
              WHEN latest_site."measurementDate" > CURRENT_DATE - 3 THEN 'active'
              WHEN latest_site."measurementDate" > CURRENT_DATE - 7 THEN 'recent'
              ELSE 'inactive'

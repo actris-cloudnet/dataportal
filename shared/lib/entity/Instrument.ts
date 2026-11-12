@@ -38,7 +38,7 @@ export interface InstrumentInfo {
   owners: string[];
   type: string;
   siteId: string;
-  status: "active" | "recent" | "inactive";
+  status: "live" | "active" | "recent" | "inactive";
   modelUrl: string | null;
   typeUrl: string | null;
 }
