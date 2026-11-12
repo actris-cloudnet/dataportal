@@ -19,6 +19,7 @@ export class AddUpdatedAtToInstrumentLatestUpload1794491003596 implements Migrat
     JOIN instrument_upload ON instrument_upload."instrumentInfoUuid" = instrument_info.uuid
     WHERE instrument_upload.status IN ('uploaded', 'processed')
     GROUP BY "siteId", instrument_info.uuid
+    WITH NO DATA
   `);
     await queryRunner.query(
       `INSERT INTO "typeorm_metadata"("database", "schema", "table", "type", "name", "value") VALUES (DEFAULT, $1, DEFAULT, $2, $3, $4)`,
@@ -44,7 +45,9 @@ export class AddUpdatedAtToInstrumentLatestUpload1794491003596 implements Migrat
     FROM instrument_info
     JOIN instrument_upload ON instrument_upload."instrumentInfoUuid" = instrument_info.uuid
     WHERE instrument_upload.status IN ('uploaded', 'processed')
-    GROUP BY "siteId", instrument_info.uuid`);
+    GROUP BY "siteId", instrument_info.uuid
+    WITH NO DATA
+    `);
     await queryRunner.query(
       `INSERT INTO "typeorm_metadata"("database", "schema", "table", "type", "name", "value") VALUES (DEFAULT, $1, DEFAULT, $2, $3, $4)`,
       [
