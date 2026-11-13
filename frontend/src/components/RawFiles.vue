@@ -221,6 +221,7 @@ function getStatusClass(status: string) {
 
 .file-table {
   margin-bottom: 2rem;
+  white-space: nowrap;
 }
 
 .status-processed {

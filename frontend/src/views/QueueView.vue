@@ -45,66 +45,73 @@
           />
           <CheckBox label="Show failed tasks" v-model="showFailed" />
         </div>
-        <table class="tasks" v-if="queueData.length > 0" style="margin-top: 1rem">
-          <thead>
-            <tr>
-              <th>Type</th>
-              <th></th>
-              <th class="status">Status</th>
-              <th>Site</th>
-              <th>Date</th>
-              <th>Product</th>
-              <th>Instrument / model</th>
-              <th>Schedule</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody is="vue:transition-group" name="list" tag="tbody">
-            <tr v-for="task in queueData" :key="task.id" :class="`status-${task.status}`">
-              <td>{{ task.type }}</td>
-              <td class="spinner-cell">
-                <img :src="testPassIcon" alt="" v-if="task.status === 'done'" />
-                <BaseSpinner size="small" v-else-if="task.status === 'running' || task.status === 'restart'" />
-              </td>
-              <td class="status">{{ task.status }}</td>
-              <td>{{ task.siteId }}</td>
-              <td>{{ task.measurementDate }}</td>
-              <td>
-                <router-link v-if="task.status === 'done'" :to="linkToSearch(task)">{{ task.productId }}</router-link>
-                <span v-else>{{ task.productId }}</span>
-              </td>
-              <td>
-                <router-link v-if="task.instrumentInfo?.name" :to="linkToRaw(task)">{{
-                  task.instrumentInfo.name
-                }}</router-link>
-                <span v-else-if="task.model?.id">{{ task.model.id }}</span>
-              </td>
-              <td>
-                <span :title="humanReadableTimestamp(task.scheduledAt)">{{ timeDifference(task.scheduledAt) }}</span>
-                <img :src="turtleIcon" v-if="task.queueId == 'tortoise'" title="Task in slow queue" class="tortoise" />
-              </td>
-              <td class="action-button">
-                <BaseButton
-                  v-if="showFailed"
-                  type="danger"
-                  size="small"
-                  style="display: block"
-                  @click="retryTask(task)"
-                >
-                  Retry
-                </BaseButton>
-                <BaseButton
-                  v-else-if="(task.status === 'created' || task.status === 'pending') && task.priority > 0"
-                  type="secondary"
-                  size="small"
-                  @click="prioritizeTask(task)"
-                >
-                  Prioritize
-                </BaseButton>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="table-wrapper" v-if="queueData.length > 0">
+          <table class="tasks">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th></th>
+                <th class="status">Status</th>
+                <th>Site</th>
+                <th>Date</th>
+                <th>Product</th>
+                <th>Instrument / model</th>
+                <th>Schedule</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody is="vue:transition-group" name="list" tag="tbody">
+              <tr v-for="task in queueData" :key="task.id" :class="`status-${task.status}`">
+                <td>{{ task.type }}</td>
+                <td class="spinner-cell">
+                  <img :src="testPassIcon" alt="" v-if="task.status === 'done'" />
+                  <BaseSpinner size="small" v-else-if="task.status === 'running' || task.status === 'restart'" />
+                </td>
+                <td class="status">{{ task.status }}</td>
+                <td>{{ task.siteId }}</td>
+                <td>{{ task.measurementDate }}</td>
+                <td>
+                  <router-link v-if="task.status === 'done'" :to="linkToSearch(task)">{{ task.productId }}</router-link>
+                  <span v-else>{{ task.productId }}</span>
+                </td>
+                <td>
+                  <router-link v-if="task.instrumentInfo?.name" :to="linkToRaw(task)">{{
+                    task.instrumentInfo.name
+                  }}</router-link>
+                  <span v-else-if="task.model?.id">{{ task.model.id }}</span>
+                </td>
+                <td>
+                  <span :title="humanReadableTimestamp(task.scheduledAt)">{{ timeDifference(task.scheduledAt) }}</span>
+                  <img
+                    :src="turtleIcon"
+                    v-if="task.queueId == 'tortoise'"
+                    title="Task in slow queue"
+                    class="tortoise"
+                  />
+                </td>
+                <td class="action-button">
+                  <BaseButton
+                    v-if="showFailed"
+                    type="danger"
+                    size="small"
+                    style="display: block"
+                    @click="retryTask(task)"
+                  >
+                    Retry
+                  </BaseButton>
+                  <BaseButton
+                    v-else-if="(task.status === 'created' || task.status === 'pending') && task.priority > 0"
+                    type="secondary"
+                    size="small"
+                    @click="prioritizeTask(task)"
+                  >
+                    Prioritize
+                  </BaseButton>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <BasePagination
           v-if="totalPages > 1"
           v-model="currentPage"
@@ -370,6 +377,7 @@ function linkToRaw(task: Task) {
 
 .filters {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
   gap: 1.5rem;
   margin-bottom: 1rem;
@@ -383,6 +391,11 @@ function linkToRaw(task: Task) {
   }
 }
 
+.table-wrapper {
+  margin-top: 1rem;
+  overflow-x: auto;
+}
+
 .statistics {
   margin-bottom: 20px;
 
@@ -393,6 +406,8 @@ function linkToRaw(task: Task) {
 }
 
 .tasks {
+  white-space: nowrap;
+
   tr {
     border-bottom: 1px solid lightblue;
     margin-left: 10px;
