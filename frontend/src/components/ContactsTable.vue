@@ -11,42 +11,44 @@
     <div v-if="state === 'loading'">Loading...</div>
     <div v-else-if="state === 'error'" class="load-error">Failed to load contacts.</div>
     <template v-else>
-      <table v-if="contacts.length > 0" class="contacts-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>ORCID</th>
-            <th v-if="canManage">Email</th>
-            <th>Start date</th>
-            <th>End date</th>
-            <th v-if="canManage"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="contact in contacts" :key="contact.id">
-            <td>{{ contact.person.firstName }} {{ contact.person.lastName }}</td>
-            <td>
-              <a
-                v-if="contact.person.orcid"
-                :href="`https://orcid.org/${contact.person.orcid}`"
-                target="_blank"
-                rel="noopener noreferrer"
-                >{{ contact.person.orcid }}</a
-              >
-              <template v-else>–</template>
-            </td>
-            <td v-if="canManage">{{ contact.person.email ?? "–" }}</td>
-            <td>{{ contact.startDate ?? "–" }}</td>
-            <td>{{ contact.endDate ?? "–" }}</td>
-            <td v-if="canManage" class="nowrap">
-              <span class="actions">
-                <BaseButton type="secondary" size="small" @click="openEditModal(contact)">Edit</BaseButton>
-                <BaseButton type="danger" size="small" @click="deleteContact(contact.id)">Delete</BaseButton>
-              </span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div v-if="contacts.length > 0" class="table-wrapper">
+        <table class="contacts-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>ORCID</th>
+              <th v-if="canManage">Email</th>
+              <th>Start date</th>
+              <th>End date</th>
+              <th v-if="canManage"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="contact in contacts" :key="contact.id">
+              <td>{{ contact.person.firstName }} {{ contact.person.lastName }}</td>
+              <td>
+                <a
+                  v-if="contact.person.orcid"
+                  :href="`https://orcid.org/${contact.person.orcid}`"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >{{ contact.person.orcid }}</a
+                >
+                <template v-else>–</template>
+              </td>
+              <td v-if="canManage">{{ contact.person.email ?? "–" }}</td>
+              <td>{{ contact.startDate ?? "–" }}</td>
+              <td>{{ contact.endDate ?? "–" }}</td>
+              <td v-if="canManage">
+                <span class="actions">
+                  <BaseButton type="secondary" size="small" @click="openEditModal(contact)">Edit</BaseButton>
+                  <BaseButton type="danger" size="small" @click="deleteContact(contact.id)">Delete</BaseButton>
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <div v-else class="no-data">{{ emptyMessage }}</div>
     </template>
 
@@ -468,9 +470,14 @@ h2 {
   margin-bottom: 1rem;
 }
 
+.table-wrapper {
+  overflow-x: auto;
+}
+
 .contacts-table {
   width: 100%;
   border-collapse: collapse;
+  white-space: nowrap;
 }
 
 .contacts-table th,
@@ -483,10 +490,6 @@ h2 {
 .contacts-table th {
   font-weight: 600;
   background: #f5f5f5;
-}
-
-.nowrap {
-  white-space: nowrap;
 }
 
 .actions {
