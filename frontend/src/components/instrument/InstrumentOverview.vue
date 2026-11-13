@@ -241,6 +241,18 @@ dl {
   row-gap: 0.4rem;
 }
 
+@media screen and (max-width: 600px) {
+  dl {
+    display: flex;
+    flex-direction: column;
+    row-gap: 0;
+
+    dd + dt {
+      margin-top: 0.5rem;
+    }
+  }
+}
+
 dt {
   font-weight: 500;
 }
