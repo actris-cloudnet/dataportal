@@ -1,6 +1,6 @@
 import type { Product } from "@shared/entity/Product";
 import type { Site, SiteType } from "@shared/entity/Site";
-import type { Instrument } from "@shared/entity/Instrument";
+import type { Instrument, InstrumentStatus } from "@shared/entity/Instrument";
 
 import categorizeIcon from "@/assets/icons/categorize.png";
 import categorizeVoodooIcon from "@/assets/icons/categorize-voodoo.png";
@@ -166,6 +166,19 @@ export function compareValues(a: any, b: any): number {
   if (a < b) return -1;
   if (a > b) return 1;
   return 0;
+}
+
+const statusOrder: InstrumentStatus[] = ["live", "active", "recent", "inactive"];
+
+// Sort instruments by status, then by name
+export function compareInstrumentStatus(
+  a: { status: InstrumentStatus; name: string },
+  b: { status: InstrumentStatus; name: string },
+): number {
+  if (a.status == b.status) {
+    return compareValues(a.name, b.name);
+  }
+  return compareValues(statusOrder.indexOf(a.status), statusOrder.indexOf(b.status));
 }
 
 export function getQcIcon(errorLevel: string) {

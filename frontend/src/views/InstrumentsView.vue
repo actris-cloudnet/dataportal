@@ -64,7 +64,7 @@ import axios from "axios";
 
 import type { InstrumentInfo } from "@shared/entity/Instrument";
 import type { Site } from "@shared/entity/Site";
-import { backendUrl, compareValues } from "@/lib";
+import { backendUrl, compareInstrumentStatus } from "@/lib";
 import { loginStore } from "@/lib/auth";
 import LandingHeader from "@/components/LandingHeader.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
@@ -98,14 +98,6 @@ const myInstruments = computed(() => {
     .filter((site) => site.instruments.length > 0);
 });
 
-function sortInstrument(a: InstrumentInfo, b: InstrumentInfo) {
-  if (a.status == b.status) {
-    return compareValues(a.name, b.name);
-  }
-  const statusOrder = ["live", "active", "recent", "inactive"];
-  return compareValues(statusOrder.indexOf(a.status), statusOrder.indexOf(b.status));
-}
-
 onMounted(async () => {
   try {
     const [siteRes, instruRes] = await Promise.all([
@@ -120,7 +112,7 @@ onMounted(async () => {
       },
     ];
     const instruBySite = instruRes.data
-      .sort(sortInstrument)
+      .sort(compareInstrumentStatus)
       .reduce((obj: Record<InstrumentInfo["siteId"], InstrumentInfo[]>, instrument) => {
         if (!(instrument.siteId in obj)) {
           obj[instrument.siteId] = [];
