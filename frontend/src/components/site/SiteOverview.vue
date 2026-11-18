@@ -191,7 +191,7 @@ import axios from "axios";
 import type { Site, LabellingStatus } from "@shared/entity/Site";
 import type { NominalInstrument } from "@shared/entity/Instrument";
 import MyMap from "@/components/SuperMap.vue";
-import { formatCoordinates, backendUrl } from "@/lib";
+import { formatCoordinates, backendUrl, compareInstrumentStatus } from "@/lib";
 import type { ReducedMetadataResponse } from "@shared/entity/ReducedMetadataResponse";
 import TrackMap, { type Point } from "@/components/TrackMap.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
@@ -374,8 +374,11 @@ async function loadInstruments() {
     params: { site: props.site.id },
   });
   return [
-    res.data.filter((md) => !isActive(md)).map(handleInstrument),
-    res.data.filter(isActive).map(handleInstrument),
+    res.data
+      .filter((md) => !isActive(md))
+      .map(handleInstrument)
+      .sort(compareInstrumentStatus),
+    res.data.filter(isActive).map(handleInstrument).sort(compareInstrumentStatus),
   ];
 }
 
