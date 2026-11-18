@@ -14,6 +14,7 @@ import {
   updateContactPerson,
   userHasPermission,
   findSourceInstrumentIds,
+  instrumentStatus,
 } from "../lib";
 import { PermissionType } from "../entity/Permission";
 import { InstrumentLatestUpload } from "../entity/InstrumentLatestUpload";
@@ -86,16 +87,8 @@ export class InstrumentRoutes {
       const rawData = await this.instrumentInfoRepo
         .createQueryBuilder("instrument_info")
         .addSelect('latest_site."siteId"')
-        .addSelect(
-          `CASE
-             WHEN latest_site."measurementDate" >= CURRENT_DATE - 1
-               AND latest_site."updatedAt" > now() - interval '3 hours' THEN 'live'
-             WHEN latest_site."measurementDate" > CURRENT_DATE - 3 THEN 'active'
-             WHEN latest_site."measurementDate" > CURRENT_DATE - 7 THEN 'recent'
-             ELSE 'inactive'
-           END`,
-          "status",
-        )
+        .addSelect('latest_site."measurementDate"', "measurementDate")
+        .addSelect('latest_site."updatedAt"', "updatedAt")
         .leftJoin("(" + latestSite + ")", "latest_site", 'instrument_info.uuid = latest_site."instrumentInfoUuid"')
         .leftJoinAndSelect(Instrument, "instrument", 'instrument_info."instrumentId" = instrument.id')
         .getRawMany();
@@ -108,7 +101,7 @@ export class InstrumentRoutes {
         type: row.instrument_info_type,
         serialNumber: row.instrument_info_serialNumber,
         siteId: row.siteId,
-        status: row.status,
+        status: instrumentStatus(row.measurementDate, row.updatedAt),
         instrument: {
           id: row.instrument_id,
           type: row.instrument_type,

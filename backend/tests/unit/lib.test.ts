@@ -1,4 +1,4 @@
-import { isValidDate, truncateList } from "../../src/lib";
+import { instrumentStatus, isValidDate, truncateList } from "../../src/lib";
 import { normalizeOrcid } from "../../../shared/lib/entity/Person";
 import { describe, it, expect } from "@jest/globals";
 
@@ -137,5 +137,31 @@ describe("truncateList", () => {
     expect(truncateList(elements, 7, "elements")).toEqual(["Hydrogen", "Helium", "Lithium", "Beryllium", "Boron"]);
     expect(truncateList(elements, 8, "elements")).toEqual(["Hydrogen", "Helium", "Lithium", "Beryllium", "Boron"]);
     expect(truncateList(elements, 9, "elements")).toEqual(["Hydrogen", "Helium", "Lithium", "Beryllium", "Boron"]);
+  });
+});
+
+describe("instrumentStatus", () => {
+  const now = new Date("2024-05-10T12:00:00Z");
+  const status = (measurementDate: string, updatedAt: string) =>
+    instrumentStatus(new Date(measurementDate), new Date(updatedAt), now);
+
+  it("is live when data is from today or yesterday and uploaded within 3 hours", () => {
+    expect(status("2024-05-10", "2024-05-10T09:30:00Z")).toBe("live");
+    expect(status("2024-05-09", "2024-05-10T09:30:00Z")).toBe("live");
+  });
+
+  it("is active when data is within 3 days", () => {
+    expect(status("2024-05-10", "2024-05-10T08:30:00Z")).toBe("active");
+    expect(status("2024-05-08", "2024-05-10T11:00:00Z")).toBe("active");
+  });
+
+  it("is recent when data is within 7 days", () => {
+    expect(status("2024-05-07", "2024-05-10T11:00:00Z")).toBe("recent");
+    expect(status("2024-05-04", "2024-05-04T11:00:00Z")).toBe("recent");
+  });
+
+  it("is inactive when data is older or missing", () => {
+    expect(status("2024-05-03", "2024-05-10T11:00:00Z")).toBe("inactive");
+    expect(instrumentStatus(null, null, now)).toBe("inactive");
   });
 });

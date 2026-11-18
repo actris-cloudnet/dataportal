@@ -11,7 +11,7 @@
               <h3>{{ site.humanReadableName }}</h3>
               <ul class="my-instruments-list">
                 <li v-for="instr in site.instruments" :key="instr.uuid">
-                  <span :class="{ status: true, [instr.status]: true }"></span>
+                  <InstrumentStatus :status="instr.status" />
                   <router-link :to="{ name: 'InstrumentLogbook', params: { uuid: instr.uuid } }">
                     {{ instr.name }}
                   </router-link>
@@ -32,7 +32,7 @@
           </h2>
           <ul>
             <li v-for="instrument in site.instruments" :key="instrument.uuid" class="instrument">
-              <span :class="{ status: true, [instrument.status]: true }"></span>
+              <InstrumentStatus :status="instrument.status" />
               <router-link :to="{ name: 'Instrument', params: { uuid: instrument.uuid } }" class="name">
                 {{ instrument.name }}
               </router-link>
@@ -43,13 +43,13 @@
           </ul>
         </div>
         <p class="legend">
-          <span class="status live"></span>
+          <InstrumentStatus status="live" />
           Data within 3 hours
-          <span class="status active"></span>
+          <InstrumentStatus status="active" />
           Data within 3 days
-          <span class="status recent"></span>
+          <InstrumentStatus status="recent" />
           Data within 7 days
-          <span class="status inactive"></span>
+          <InstrumentStatus status="inactive" />
           No recent data
         </p>
       </template>
@@ -68,6 +68,7 @@ import { backendUrl, compareValues } from "@/lib";
 import { loginStore } from "@/lib/auth";
 import LandingHeader from "@/components/LandingHeader.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
+import InstrumentStatus from "@/components/InstrumentStatus.vue";
 import ApiError from "@/views/ApiError.vue";
 
 interface SiteWithInstruments {
@@ -177,30 +178,6 @@ ul {
 
   .type {
     grid-column: 2 / 3;
-  }
-}
-
-.status {
-  display: inline-block;
-  width: 0.6rem;
-  height: 0.6rem;
-  border-radius: 50%;
-  align-self: center;
-
-  &.live {
-    background: #25910f;
-  }
-
-  &.active {
-    background: #93d383;
-  }
-
-  &.recent {
-    background: #eed679;
-  }
-
-  &.inactive {
-    background: #ddd;
   }
 }
 

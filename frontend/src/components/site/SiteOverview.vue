@@ -19,7 +19,7 @@
             The following instruments have done measurements at the site in the last {{ instrumentsFromLastDays }} days:
           </div>
           <div v-for="(instrument, index) in activeInstruments" :key="index" class="detailslistItem">
-            <img alt="instrument icon" :src="instrument.icon" class="product" />
+            <InstrumentStatus :status="instrument.status" />
             <span v-if="instrument.to">
               <router-link :to="instrument.to">{{ instrument.name }}</router-link>
             </span>
@@ -37,7 +37,7 @@
         <div v-else-if="inactiveInstruments && inactiveInstruments.length" class="detailslist">
           <div>No recent data but the following instruments have done measurements at the site:</div>
           <div v-for="(instrument, index) in inactiveInstruments" :key="index" class="detailslistItem">
-            <img alt="instrument icon" :src="instrument.icon" class="product" />
+            <InstrumentStatus :status="instrument.status" />
             <span v-if="instrument.to">
               <router-link :to="instrument.to">{{ instrument.name }}</router-link>
             </span>
@@ -191,13 +191,14 @@ import axios from "axios";
 import type { Site, LabellingStatus } from "@shared/entity/Site";
 import type { NominalInstrument } from "@shared/entity/Instrument";
 import MyMap from "@/components/SuperMap.vue";
-import { formatCoordinates, getInstrumentIcon, backendUrl } from "@/lib";
+import { formatCoordinates, backendUrl } from "@/lib";
 import type { ReducedMetadataResponse } from "@shared/entity/ReducedMetadataResponse";
 import TrackMap, { type Point } from "@/components/TrackMap.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
 import type { RouteLocationRaw } from "vue-router";
 import orcidLogo from "@/assets/icons/orcid.png";
 import BaseTag from "@/components/BaseTag.vue";
+import InstrumentStatus from "@/components/InstrumentStatus.vue";
 import BaseButton from "@/components/BaseButton.vue";
 import BaseModal from "@/components/BaseModal.vue";
 import CheckBox from "@/components/CheckBox.vue";
@@ -210,7 +211,7 @@ import plannedIcon from "@/assets/icons/test-missing.svg";
 interface Instrument {
   to: RouteLocationRaw | null;
   name: string;
-  icon: string;
+  status: ReducedMetadataResponse["status"];
   uuid: string;
 }
 
@@ -360,7 +361,7 @@ function handleInstrument(response: ReducedMetadataResponse): Instrument {
   return {
     to: { name: "Instrument", params: { uuid: response.instrument.uuid } },
     name: `${response.instrument.name} ${response.instrument.type}`,
-    icon: getInstrumentIcon(response.instrument.instrument),
+    status: response.status,
     uuid: response.instrument.uuid,
   };
 }
@@ -393,10 +394,8 @@ async function loadNominalInstruments() {
 <style scoped lang="scss">
 @use "@/sass/variables.scss";
 
-img.product {
-  height: auto;
-  width: 1em;
-  margin-right: 0.3em;
+.status {
+  margin-right: 0.4em;
 }
 
 .detailslist {

@@ -17,6 +17,7 @@ import { Person } from "../entity/Person";
 import { UserAccount } from "../entity/UserAccount";
 import { PermissionType } from "../entity/Permission";
 import { normalizeOrcid } from "../../../shared/lib/entity/Person";
+import type { InstrumentStatus } from "../../../shared/lib/entity/Instrument";
 
 export const stringify = (obj: any): string => JSON.stringify(obj, null, 2);
 
@@ -467,6 +468,24 @@ export function daysBetweenDates(a: Date, b: Date): number {
   a.setHours(0, 0, 0, 0);
   b.setHours(0, 0, 0, 0);
   return Math.floor(Math.abs(a.getTime() - b.getTime()) / (24 * 60 * 60 * 1000));
+}
+
+const HOUR_MS = 60 * 60 * 1000;
+const DAY_MS = 24 * HOUR_MS;
+
+// Status of an instrument based on its latest upload
+export function instrumentStatus(
+  measurementDate: Date | null,
+  updatedAt: Date | null,
+  now = new Date(),
+): InstrumentStatus {
+  if (!measurementDate || !updatedAt) return "inactive";
+  const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  const daysAgo = (today - measurementDate.getTime()) / DAY_MS;
+  if (daysAgo <= 1 && now.getTime() - updatedAt.getTime() < 3 * HOUR_MS) return "live";
+  if (daysAgo < 3) return "active";
+  if (daysAgo < 7) return "recent";
+  return "inactive";
 }
 
 export function fixInstrument(instrument: string, instrumentInfo: InstrumentInfo) {
