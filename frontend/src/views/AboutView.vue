@@ -80,6 +80,10 @@
           <img :src="atmoServLogo" alt="ATMO-SERV" class="project-logo" />
           <div class="project-date">2026 – 2030</div>
         </a>
+        <a class="project renai" href="https://www.eosc-renai.eu/" target="_blank">
+          <img :src="renaiLogo" alt="RenAI" class="project-logo" />
+          <div class="project-date">2026 – 2029</div>
+        </a>
       </div>
     </main>
   </div>
@@ -98,6 +102,7 @@ import divaLogo from "@/assets/logos/diva.png";
 import cargoActLogo from "@/assets/logos/cargo-act.png";
 import irisccLogo from "@/assets/logos/iriscc.png";
 import atmoServLogo from "@/assets/logos/atmo-serv.png";
+import renaiLogo from "@/assets/logos/renai.png";
 </script>
 
 <style scoped lang="scss">
