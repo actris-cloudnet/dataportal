@@ -27,6 +27,8 @@ export interface InstrumentPidLocation {
   endDate: string;
 }
 
+export type InstrumentStatus = "live" | "active" | "recent" | "inactive";
+
 export interface InstrumentInfo {
   uuid: string;
   pid: string;
@@ -38,7 +40,7 @@ export interface InstrumentInfo {
   owners: string[];
   type: string;
   siteId: string;
-  status: "live" | "active" | "recent" | "inactive";
+  status: InstrumentStatus;
   modelUrl: string | null;
   typeUrl: string | null;
 }

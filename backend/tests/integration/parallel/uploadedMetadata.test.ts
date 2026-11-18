@@ -262,6 +262,7 @@ describe("GET /api/uploaded-metadata", () => {
     ];
     const receivedPids = res.data.map((item: any) => item.instrument.pid);
     expect(receivedPids.sort()).toEqual(expectedPids.sort());
+    res.data.forEach((item: any) => expect(item.status).toBe("inactive"));
   });
 });
 

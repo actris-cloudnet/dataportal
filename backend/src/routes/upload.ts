@@ -17,6 +17,7 @@ import {
   fixInstrument,
   siteMetadataKeys,
   escapeLikeString,
+  instrumentStatus,
 } from "../lib";
 import { basename } from "path";
 import validator from "validator";
@@ -267,6 +268,7 @@ export class UploadRoutes {
     const responseData = data.map((md) => ({
       ...md,
       measurementDate: md.measurementDate.toISOString().slice(0, 10),
+      status: instrumentStatus(md.measurementDate, md.updatedAt),
       instrumentInfo: undefined,
       updatedAt: undefined,
       instrument: md.instrumentInfo,
