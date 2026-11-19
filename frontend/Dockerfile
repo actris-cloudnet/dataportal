@@ -38,7 +38,7 @@ ENV VITE_CARTO_BASEMAPS_API_KEY=$CARTO_BASEMAPS_API_KEY
 ENV NODE_ENV=production
 RUN npm run build
 
-FROM nginxinc/nginx-unprivileged AS prod
+FROM nginx/nginx-unprivileged AS prod
 WORKDIR /app
 COPY --from=builder /app/dist /app
 COPY frontend/nginx.conf.template /etc/nginx/templates/default.conf.template
