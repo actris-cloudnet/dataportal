@@ -10,7 +10,7 @@
         </router-link>
       </template>
     </div>
-    <BaseButton type="secondary" :to="{ name: 'NewsList' }" class="read-all">All news →</BaseButton>
+    <BaseButton type="secondary" :to="{ name: 'NewsList' }" class="read-all">All news&thinsp;&rarr;</BaseButton>
   </div>
 </template>
 

@@ -38,51 +38,51 @@
       <div class="projects">
         <a class="project cloudnet" href="https://cordis.europa.eu/project/id/EVK2-CT-2000-00065" target="_blank">
           <img :src="cloudnetOldLogo" alt="CLOUD-NET" class="project-logo" />
-          <div class="project-date">2001 – 2005</div>
+          <div class="project-date">2001&thinsp;&ndash;&thinsp;2005</div>
         </a>
         <a class="project actris" href="https://www.actris.eu" target="_blank">
           <img :src="actrisLogo" alt="ACTRIS" class="project-logo" />
-          <div class="project-date">2011 –</div>
+          <div class="project-date">2011&thinsp;&rarr;</div>
         </a>
         <a class="project envri-fair" href="https://envri.eu/the-envri-fair-project/" target="_blank">
           <img :src="envriFairLogo" alt="ENVRI-FAIR" class="project-logo" />
-          <div class="project-date">2019 – 2023</div>
+          <div class="project-date">2019&thinsp;&ndash;&thinsp;2023</div>
         </a>
         <a class="project atmo-access" href="https://www.atmo-access.eu/" target="_blank">
           <img :src="atmoAccessLogo" alt="ATMO-ACCESS" class="project-logo" />
-          <div class="project-date">2021 – 2025</div>
+          <div class="project-date">2021&thinsp;&ndash;&thinsp;2025</div>
         </a>
         <a class="project ri-urbans" href="https://riurbans.eu/" target="_blank">
           <img :src="riUrbansLogo" alt="RI-URBANS" class="project-logo" />
-          <div class="project-date">2021 – 2025</div>
+          <div class="project-date">2021&thinsp;&ndash;&thinsp;2025</div>
         </a>
         <a class="project cargo-act" href="https://cargo-act.eu/" target="_blank">
           <img :src="cargoActLogo" alt="CARGO-ACT" class="project-logo" />
-          <div class="project-date">2024 – 2027</div>
+          <div class="project-date">2024&thinsp;&ndash;&thinsp;2027</div>
         </a>
         <a class="project certainty" href="https://certainty-aci.eu/" target="_blank">
           <img :src="certaintyLogo" alt="CERTAINTY" class="project-logo" />
-          <div class="project-date">2024 – 2027</div>
+          <div class="project-date">2024&thinsp;&ndash;&thinsp;2027</div>
         </a>
         <a class="project iriscc" href="https://www.iriscc.eu/" target="_blank">
           <img :src="irisccLogo" alt="IRISCC" class="project-logo" />
-          <div class="project-date">2024 – 2028</div>
+          <div class="project-date">2024&thinsp;&ndash;&thinsp;2028</div>
         </a>
         <a class="project polarin" href="https://eu-polarin.eu/" target="_blank">
           <img :src="polarinLogo" alt="POLARIN" class="project-logo" />
-          <div class="project-date">2024 – 2029</div>
+          <div class="project-date">2024&thinsp;&ndash;&thinsp;2029</div>
         </a>
         <a class="project diva" href="https://www.diva-platform.com/" target="_blank">
           <img :src="divaLogo" alt="DIVA" class="project-logo" />
-          <div class="project-date">2025 – 2029</div>
+          <div class="project-date">2025&thinsp;&ndash;&thinsp;2029</div>
         </a>
         <a class="project armo-serv" href="https://atmo-serv.eu/" target="_blank">
           <img :src="atmoServLogo" alt="ATMO-SERV" class="project-logo" />
-          <div class="project-date">2026 – 2030</div>
+          <div class="project-date">2026&thinsp;&ndash;&thinsp;2030</div>
         </a>
         <a class="project renai" href="https://www.eosc-renai.eu/" target="_blank">
           <img :src="renaiLogo" alt="RenAI" class="project-logo" />
-          <div class="project-date">2026 – 2029</div>
+          <div class="project-date">2026&thinsp;&ndash;&thinsp;2029</div>
         </a>
       </div>
     </main>

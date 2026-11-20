@@ -8,7 +8,7 @@
       <h3>Welcome to ACTRIS Cloudnet data portal</h3>
       <p>
         The ACTRIS Cloudnet data portal provides a data processing and curation service for ground-based cloud remote
-        sensing measurements. <router-link :to="{ name: 'About' }">Read more →</router-link>
+        sensing measurements. <router-link :to="{ name: 'About' }">Read more&thinsp;&rarr;</router-link>
       </p>
       <div class="buttons">
         <BaseButton to="search/data" type="brand">

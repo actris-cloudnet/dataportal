@@ -6,7 +6,9 @@
       <ul class="publication-list">
         <li v-for="item in publications" :key="item.pid" class="publication-item" v-html="item.citation"></li>
       </ul>
-      <BaseButton type="secondary" :to="{ name: 'Publications' }" class="read-all">All publications →</BaseButton>
+      <BaseButton type="secondary" :to="{ name: 'Publications' }" class="read-all">
+        All publications&thinsp;&rarr;
+      </BaseButton>
     </div>
   </div>
 </template>
