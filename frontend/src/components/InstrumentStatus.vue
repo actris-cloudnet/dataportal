@@ -1,18 +1,17 @@
 <template>
-  <span :class="['status', status]" :title="labels[status]"></span>
+  <span
+    :class="['status', status]"
+    role="img"
+    :title="instrumentStatusLabels[status]"
+    :aria-label="instrumentStatusLabels[status]"
+  ></span>
 </template>
 
 <script lang="ts" setup>
 import type { InstrumentStatus } from "@shared/entity/Instrument";
+import { instrumentStatusLabels } from "@/lib";
 
 defineProps<{ status: InstrumentStatus }>();
-
-const labels: Record<InstrumentStatus, string> = {
-  live: "Data within 3 hours",
-  active: "Data within 3 days",
-  recent: "Data within 7 days",
-  inactive: "No recent data",
-};
 </script>
 
 <style scoped lang="scss">

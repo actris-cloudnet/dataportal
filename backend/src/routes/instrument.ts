@@ -92,6 +92,7 @@ export class InstrumentRoutes {
         .leftJoin("(" + latestSite + ")", "latest_site", 'instrument_info.uuid = latest_site."instrumentInfoUuid"')
         .leftJoinAndSelect(Instrument, "instrument", 'instrument_info."instrumentId" = instrument.id')
         .getRawMany();
+      const now = new Date();
       const data = rawData.map((row) => ({
         uuid: row.instrument_info_uuid,
         pid: row.instrument_info_pid,
@@ -101,7 +102,7 @@ export class InstrumentRoutes {
         type: row.instrument_info_type,
         serialNumber: row.instrument_info_serialNumber,
         siteId: row.siteId,
-        status: instrumentStatus(row.measurementDate, row.updatedAt),
+        status: instrumentStatus(row.measurementDate, row.updatedAt, now),
         instrument: {
           id: row.instrument_id,
           type: row.instrument_type,

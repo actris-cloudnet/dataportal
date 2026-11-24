@@ -163,5 +163,27 @@ describe("instrumentStatus", () => {
   it("is inactive when data is older or missing", () => {
     expect(status("2024-05-03", "2024-05-10T11:00:00Z")).toBe("inactive");
     expect(instrumentStatus(null, null, now)).toBe("inactive");
+    expect(instrumentStatus(new Date("2024-05-10"), null, now)).toBe("inactive");
+    expect(instrumentStatus(null, new Date("2024-05-10T11:00:00Z"), now)).toBe("inactive");
+  });
+
+  it("is not live when uploaded exactly 3 hours ago", () => {
+    expect(status("2024-05-10", "2024-05-10T09:00:00.001Z")).toBe("live");
+    expect(status("2024-05-10", "2024-05-10T09:00:00Z")).toBe("active");
+  });
+
+  it("uses day boundaries in UTC", () => {
+    expect(status("2024-05-08", "2024-05-08T11:00:00Z")).toBe("active");
+    expect(status("2024-05-07", "2024-05-07T11:00:00Z")).toBe("recent");
+    expect(status("2024-05-04", "2024-05-04T11:00:00Z")).toBe("recent");
+    expect(status("2024-05-03", "2024-05-03T11:00:00Z")).toBe("inactive");
+    const lateEvening = new Date("2024-05-10T23:59:00Z");
+    expect(instrumentStatus(new Date("2024-05-09"), new Date("2024-05-10T22:00:00Z"), lateEvening)).toBe("live");
+    expect(instrumentStatus(new Date("2024-05-08"), new Date("2024-05-10T22:00:00Z"), lateEvening)).toBe("active");
+  });
+
+  it("treats future measurement dates like today", () => {
+    expect(status("2024-05-11", "2024-05-10T11:00:00Z")).toBe("live");
+    expect(status("2024-05-11", "2024-05-10T08:00:00Z")).toBe("active");
   });
 });

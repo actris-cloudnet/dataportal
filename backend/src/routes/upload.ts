@@ -265,10 +265,11 @@ export class UploadRoutes {
       where: { site: { id: req.query.site as string } },
       relations: { instrumentInfo: { instrument: true } },
     });
+    const now = new Date();
     const responseData = data.map((md) => ({
       ...md,
       measurementDate: md.measurementDate.toISOString().slice(0, 10),
-      status: instrumentStatus(md.measurementDate, md.updatedAt),
+      status: instrumentStatus(md.measurementDate, md.updatedAt, now),
       instrumentInfo: undefined,
       updatedAt: undefined,
       instrument: md.instrumentInfo,

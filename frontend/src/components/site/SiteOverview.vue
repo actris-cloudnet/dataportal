@@ -19,7 +19,7 @@
             The following instruments have done measurements at the site in the last {{ instrumentsFromLastDays }} days:
           </div>
           <div v-for="(instrument, index) in activeInstruments" :key="index" class="detailslistItem">
-            <InstrumentStatus :status="instrument.status" />
+            <InstrumentStatus :status="instrument.status" class="status-dot" />
             <span v-if="instrument.to">
               <router-link :to="instrument.to">{{ instrument.name }}</router-link>
             </span>
@@ -37,7 +37,6 @@
         <div v-else-if="inactiveInstruments && inactiveInstruments.length" class="detailslist">
           <div>No recent data but the following instruments have done measurements at the site:</div>
           <div v-for="(instrument, index) in inactiveInstruments" :key="index" class="detailslistItem">
-            <InstrumentStatus :status="instrument.status" />
             <span v-if="instrument.to">
               <router-link :to="instrument.to">{{ instrument.name }}</router-link>
             </span>
@@ -191,7 +190,7 @@ import axios from "axios";
 import type { Site, LabellingStatus } from "@shared/entity/Site";
 import type { NominalInstrument } from "@shared/entity/Instrument";
 import MyMap from "@/components/SuperMap.vue";
-import { formatCoordinates, backendUrl, compareInstrumentStatus } from "@/lib";
+import { formatCoordinates, backendUrl, compareInstrumentStatus, compareValues } from "@/lib";
 import type { ReducedMetadataResponse } from "@shared/entity/ReducedMetadataResponse";
 import TrackMap, { type Point } from "@/components/TrackMap.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
@@ -377,7 +376,7 @@ async function loadInstruments() {
     res.data
       .filter((md) => !isActive(md))
       .map(handleInstrument)
-      .sort(compareInstrumentStatus),
+      .sort((a, b) => compareValues(a.name, b.name)),
     res.data.filter(isActive).map(handleInstrument).sort(compareInstrumentStatus),
   ];
 }
@@ -397,7 +396,7 @@ async function loadNominalInstruments() {
 <style scoped lang="scss">
 @use "@/sass/variables.scss";
 
-.status {
+.status-dot {
   margin-right: 0.4em;
 }
 

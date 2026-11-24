@@ -168,7 +168,14 @@ export function compareValues(a: any, b: any): number {
   return 0;
 }
 
-const statusOrder: InstrumentStatus[] = ["live", "active", "recent", "inactive"];
+export const instrumentStatuses: InstrumentStatus[] = ["live", "active", "recent", "inactive"];
+
+export const instrumentStatusLabels: Record<InstrumentStatus, string> = {
+  live: "Data within 3 hours",
+  active: "Data within 3 days",
+  recent: "Data within 7 days",
+  inactive: "No data within 7 days",
+};
 
 // Sort instruments by status, then by name
 export function compareInstrumentStatus(
@@ -178,7 +185,7 @@ export function compareInstrumentStatus(
   if (a.status == b.status) {
     return compareValues(a.name, b.name);
   }
-  return compareValues(statusOrder.indexOf(a.status), statusOrder.indexOf(b.status));
+  return compareValues(instrumentStatuses.indexOf(a.status), instrumentStatuses.indexOf(b.status));
 }
 
 export function getQcIcon(errorLevel: string) {

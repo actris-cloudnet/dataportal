@@ -43,14 +43,10 @@
           </ul>
         </div>
         <p class="legend">
-          <InstrumentStatus status="live" />
-          Data within 3 hours
-          <InstrumentStatus status="active" />
-          Data within 3 days
-          <InstrumentStatus status="recent" />
-          Data within 7 days
-          <InstrumentStatus status="inactive" />
-          No recent data
+          <span v-for="status in instrumentStatuses" :key="status" class="legend-item">
+            <InstrumentStatus :status="status" />
+            {{ instrumentStatusLabels[status] }}
+          </span>
         </p>
       </template>
       <BaseSpinner v-else />
@@ -64,7 +60,7 @@ import axios from "axios";
 
 import type { InstrumentInfo } from "@shared/entity/Instrument";
 import type { Site } from "@shared/entity/Site";
-import { backendUrl, compareInstrumentStatus } from "@/lib";
+import { backendUrl, compareInstrumentStatus, instrumentStatuses, instrumentStatusLabels } from "@/lib";
 import { loginStore } from "@/lib/auth";
 import LandingHeader from "@/components/LandingHeader.vue";
 import BaseSpinner from "@/components/BaseSpinner.vue";
@@ -216,9 +212,14 @@ ul {
   padding-top: 0.5rem;
   padding-bottom: 1rem;
   display: inline-block;
+}
 
-  .status:not(:first-child) {
-    margin-left: 8px;
+.legend-item {
+  display: inline-block;
+  white-space: nowrap;
+
+  &:not(:last-child) {
+    margin-right: 0.7rem;
   }
 }
 </style>
